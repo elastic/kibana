@@ -131,14 +131,22 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
 
       // Build agentless config with cloud connectors if provided
       let agentlessConfig = baseAgentlessConfig;
-      if (data.cloud_connector?.target_csp) {
+      if (data.cloud_connector?.enabled) {
+        const inputsArray = data.inputs ? Object.entries(data.inputs) : [];
+        const input = inputsArray.find(([, pinput]) => pinput.enabled !== false);
+        const targetCsp = input?.[0].match(/aws|azure|gcp/)?.[0] as
+          | 'aws'
+          | 'azure'
+          | 'gcp'
+          | undefined;
+
         this.logger.debug(
-          `Configuring cloud connectors for cloud provider: ${data.cloud_connector.target_csp} from cloud_connector object`
+          `Configuring cloud connectors for cloud provider: ${targetCsp} from cloud_connector object`
         );
         agentlessConfig = {
           ...baseAgentlessConfig,
           cloud_connectors: {
-            target_csp: data.cloud_connector.target_csp,
+            target_csp: targetCsp,
             enabled: true,
           },
         };
@@ -172,12 +180,13 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         policy_ids: [agentPolicy.id],
         supports_agentless: true,
         // Extract cloud connector fields from cloud_connector object
-        ...(data.cloud_connector && {
-          supports_cloud_connector: true,
-          ...(data.cloud_connector.cloud_connector_id && {
-            cloud_connector_id: data.cloud_connector.cloud_connector_id,
+        ...(data.cloud_connector &&
+          data.cloud_connector.enabled && {
+            supports_cloud_connector: true,
+            ...(data.cloud_connector.cloud_connector_id && {
+              cloud_connector_id: data.cloud_connector.cloud_connector_id,
+            }),
           }),
-        }),
       };
 
       let newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo);
@@ -194,6 +203,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         soClient: this.soClient,
         esClient: this.esClient,
         logger: this.logger,
+        cloudConnectorName: data.cloud_connector?.name,
       });
 
       newPackagePolicy = updatedPackagePolicy;

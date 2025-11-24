@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { CloudProvider } from '../../../common/types';
 import type { AgentPolicy, NewPackagePolicy } from '../../types';
 import { CloudConnectorCreateError } from '../../errors';
 import { cloudConnectorService } from '../cloud_connector';
@@ -53,11 +52,20 @@ export async function createAndIntegrateCloudConnector(params: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   logger: Logger;
+  cloudConnectorName?: string;
 }): Promise<CloudConnectorIntegrationResult> {
-  const { packagePolicy, agentPolicy, policyName, soClient, esClient, logger } = params;
+  const {
+    packagePolicy,
+    agentPolicy,
+    policyName,
+    soClient,
+    esClient,
+    logger,
+    cloudConnectorName: providedCloudConnectorName,
+  } = params;
 
   // Check if cloud connectors are enabled for this agentless policy
-  const cloudProvider = agentPolicy.agentless?.cloud_connectors?.target_csp as CloudProvider;
+  const cloudProvider = agentPolicy.agentless?.cloud_connectors?.target_csp;
   const cloudConnectorsEnabled = agentPolicy.agentless?.cloud_connectors?.enabled;
 
   if (!cloudConnectorsEnabled || !cloudProvider) {
@@ -127,12 +135,11 @@ export async function createAndIntegrateCloudConnector(params: {
 
   logger.debug('Creating new cloud connector for agentless policy with secret references');
 
-  // Extract cloud connector name from package policy if provided
-  const cloudConnectorName = getCloudConnectorNameFromPackagePolicy(
-    updatedPackagePolicy,
-    cloudProvider,
-    `${cloudProvider}-cloud-connector: ${policyName}`
-  );
+  // Use provided cloud connector name from API request if available,
+  // otherwise extract from package policy or generate default
+  const cloudConnectorName =
+    providedCloudConnectorName ||
+    getCloudConnectorNameFromPackagePolicy(updatedPackagePolicy, cloudProvider, policyName);
 
   try {
     const cloudConnector = await cloudConnectorService.create(soClient, {

@@ -30,16 +30,23 @@ export const CreateAgentlessPolicyRequestSchema = {
     // Cloud connector configuration - all connector settings go here
     cloud_connector: schema.maybe(
       schema.object({
-        target_csp: schema.oneOf([
-          schema.literal('aws'),
-          schema.literal('azure'),
-          schema.literal('gcp'),
-        ]),
+        enabled: schema.boolean({
+          defaultValue: false,
+          meta: { description: 'Whether cloud connectors are enabled for this policy.' },
+        }),
         cloud_connector_id: schema.maybe(
           schema.string({
             meta: {
               description:
                 'ID of an existing cloud connector to reuse. If not provided, a new connector will be created.',
+            },
+          })
+        ),
+        name: schema.maybe(
+          schema.string({
+            meta: {
+              description:
+                'Optional name for the cloud connector. If not provided, will be auto-generated from credentials.',
             },
           })
         ),

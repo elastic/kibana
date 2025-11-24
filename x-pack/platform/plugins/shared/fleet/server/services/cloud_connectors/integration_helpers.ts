@@ -88,15 +88,16 @@ export function updatePackagePolicyWithCloudConnectorSecrets(
  *
  * @param packagePolicy - The package policy containing the cloud connector variables
  * @param targetCsp - The target cloud service provider
- * @param defaultName - Default name to use if name cannot be extracted from variables
+ * @param policyName - The agentless policy name to use for generating default name
  * @returns The cloud connector name
  */
 export function getCloudConnectorNameFromPackagePolicy(
   packagePolicy: NewPackagePolicy,
   targetCsp: CloudProvider,
-  defaultName: string
+  policyName: string
 ): string {
   const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+  const defaultName = `${targetCsp}-cloud-connector: ${policyName}`;
 
   if (!vars) {
     return defaultName;

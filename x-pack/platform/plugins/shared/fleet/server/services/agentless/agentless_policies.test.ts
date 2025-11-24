@@ -23,16 +23,6 @@ jest.mock('../epm/packages/get');
 
 jest.mock('../agent_policy');
 
-jest.mock('../app_context', () => ({
-  ...jest.requireActual('../app_context'),
-  cloudConnectorService: {
-    create: jest.fn(),
-    delete: jest.fn(),
-    getById: jest.fn(),
-    update: jest.fn(),
-  },
-}));
-
 describe('AgentlessPoliciesService', () => {
   describe('createAgentlessPolicy', () => {
     let packagePolicyService: ReturnType<typeof createPackagePolicyServiceMock>;
@@ -361,6 +351,65 @@ describe('AgentlessPoliciesService', () => {
   describe('createAgentlessPolicy with cloud connectors', () => {
     let packagePolicyService: ReturnType<typeof createPackagePolicyServiceMock>;
 
+    const createMockPackageInfo = (
+      inputType: string,
+      vars: Array<{ name: string; type: string; default?: any }>
+    ) =>
+      ({
+        name: 'cloud_security_posture',
+        title: 'Cloud Security Posture',
+        version: '3.1.1',
+        description: 'Cloud Security Posture Management',
+        type: 'integration',
+        categories: [],
+        conditions: { kibana: { version: '' } },
+        format_version: '',
+        download: '',
+        path: '',
+        release: 'ga',
+        owner: { github: '' },
+        assets: {} as any,
+        status: 'not_installed',
+        latestVersion: '3.1.1',
+        keepPoliciesUpToDate: false,
+        data_streams: [
+          {
+            dataset: 'cloud_security_posture.findings',
+            type: 'logs',
+            title: 'Cloud Security Posture Findings',
+            release: 'ga',
+            package: 'cloud_security_posture',
+            path: 'findings',
+            streams: [
+              {
+                input: inputType,
+                enabled: true,
+                template_path: 'findings.yml.hbs',
+                title: 'Cloud Security Posture Findings',
+                vars,
+              },
+            ],
+          },
+        ],
+        policy_templates: [
+          {
+            name: 'cspm',
+            deployment_modes: {
+              agentless: {
+                enabled: true,
+                resources: {},
+              },
+            },
+            inputs: [
+              {
+                type: inputType,
+                title: inputType.includes('aws') ? 'CIS AWS' : 'CIS Azure',
+              },
+            ],
+          },
+        ],
+      } as any);
+
     beforeEach(() => {
       const cloudSetup = cloudMock.createSetup();
       cloudSetup.isCloudEnabled = true;
@@ -372,7 +421,25 @@ describe('AgentlessPoliciesService', () => {
         cloud: cloudSetup,
       });
 
-      jest.resetAllMocks();
+      jest.clearAllMocks();
+
+      // Reset getPackageInfo mock to allow mockResolvedValueOnce to work
+      jest.mocked(getPackageInfo).mockReset();
+
+      // Set up cloud connector service mocks - use mockReset to ensure clean state
+      const createSpy = jest.spyOn(cloudConnectorService, 'create');
+      createSpy.mockReset();
+
+      const deleteSpy = jest.spyOn(cloudConnectorService, 'delete');
+      deleteSpy.mockReset();
+      deleteSpy.mockResolvedValue(undefined as any);
+
+      const getByIdSpy = jest.spyOn(cloudConnectorService, 'getById');
+      getByIdSpy.mockReset();
+
+      const updateSpy = jest.spyOn(cloudConnectorService, 'update');
+      updateSpy.mockReset();
+
       packagePolicyService = createPackagePolicyServiceMock();
       packagePolicyService.create.mockImplementation(async (_, __, policy, opts) => {
         return {
@@ -423,20 +490,12 @@ describe('AgentlessPoliciesService', () => {
         };
       });
 
-      jest.mocked(getPackageInfo).mockResolvedValueOnce({
-        name: 'cloud_security_posture',
-        version: '3.1.1',
-        policy_templates: [
-          {
-            name: 'cspm',
-            deployment_modes: {
-              agentless: {
-                resources: {},
-              },
-            },
-          },
-        ],
-      } as any);
+      jest.mocked(getPackageInfo).mockResolvedValueOnce(
+        createMockPackageInfo('cloudbeat/cis_aws', [
+          { name: 'role_arn', type: 'text', default: '' },
+          { name: 'external_id', type: 'text', default: '' },
+        ])
+      );
 
       jest.mocked(cloudConnectorService.create).mockResolvedValueOnce({
         id: 'aws-cloud-connector-123',
@@ -469,6 +528,9 @@ describe('AgentlessPoliciesService', () => {
           name: 'cloud_security_posture',
           version: '3.1.1',
         },
+        cloud_connector: {
+          enabled: true,
+        },
         inputs: {
           'cspm-cloudbeat/cis_aws': {
             enabled: true,
@@ -494,7 +556,7 @@ describe('AgentlessPoliciesService', () => {
         soClient,
         expect.objectContaining({
           cloudProvider: 'aws',
-          name: expect.stringContaining('cloud-connector'),
+          name: 'arn:aws:iam::123456789012:role/TestRole',
           vars: expect.objectContaining({
             role_arn: expect.objectContaining({ value: 'arn:aws:iam::123456789012:role/TestRole' }),
           }),
@@ -524,20 +586,13 @@ describe('AgentlessPoliciesService', () => {
         };
       });
 
-      jest.mocked(getPackageInfo).mockResolvedValueOnce({
-        name: 'cloud_security_posture',
-        version: '3.1.1',
-        policy_templates: [
-          {
-            name: 'cspm',
-            deployment_modes: {
-              agentless: {
-                resources: {},
-              },
-            },
-          },
-        ],
-      } as any);
+      jest.mocked(getPackageInfo).mockResolvedValueOnce(
+        createMockPackageInfo('cloudbeat/cis_azure', [
+          { name: 'tenant_id', type: 'text', default: '' },
+          { name: 'client_id', type: 'text', default: '' },
+          { name: 'azure_credentials_cloud_connector_id', type: 'text', default: '' },
+        ])
+      );
 
       jest.mocked(cloudConnectorService.create).mockResolvedValueOnce({
         id: 'azure-cloud-connector-123',
@@ -571,6 +626,9 @@ describe('AgentlessPoliciesService', () => {
           name: 'cloud_security_posture',
           version: '3.1.1',
         },
+        cloud_connector: {
+          enabled: true,
+        },
         inputs: {
           'cspm-cloudbeat/cis_azure': {
             enabled: true,
@@ -586,10 +644,7 @@ describe('AgentlessPoliciesService', () => {
                     id: 'client-secret-id',
                     isSecretRef: true,
                   },
-                  azure_credentials_cloud_connector_id: {
-                    value: 'azure-creds-connector',
-                    type: 'text',
-                  },
+                  azure_credentials_cloud_connector_id: 'azure-creds-connector',
                 },
               },
             },
@@ -603,7 +658,14 @@ describe('AgentlessPoliciesService', () => {
         soClient,
         expect.objectContaining({
           cloudProvider: 'azure',
-          name: expect.stringContaining('cloud-connector'),
+          name: 'azure-creds-connector',
+          vars: expect.objectContaining({
+            tenant_id: expect.any(Object),
+            client_id: expect.any(Object),
+            azure_credentials_cloud_connector_id: expect.objectContaining({
+              value: 'azure-creds-connector',
+            }),
+          }),
         })
       );
     });
@@ -630,20 +692,12 @@ describe('AgentlessPoliciesService', () => {
         };
       });
 
-      jest.mocked(getPackageInfo).mockResolvedValueOnce({
-        name: 'cloud_security_posture',
-        version: '3.1.1',
-        policy_templates: [
-          {
-            name: 'cspm',
-            deployment_modes: {
-              agentless: {
-                resources: {},
-              },
-            },
-          },
-        ],
-      } as any);
+      jest.mocked(getPackageInfo).mockResolvedValueOnce(
+        createMockPackageInfo('cloudbeat/cis_aws', [
+          { name: 'role_arn', type: 'text', default: '' },
+          { name: 'external_id', type: 'text', default: '' },
+        ])
+      );
 
       jest.mocked(cloudConnectorService.create).mockResolvedValueOnce({
         id: 'aws-cloud-connector-123',
@@ -682,6 +736,9 @@ describe('AgentlessPoliciesService', () => {
             name: 'cloud_security_posture',
             version: '3.1.1',
           },
+          cloud_connector: {
+            enabled: true,
+          },
           inputs: {
             'cspm-cloudbeat/cis_aws': {
               enabled: true,
@@ -719,6 +776,202 @@ describe('AgentlessPoliciesService', () => {
         'test-agentless-policy-id',
         expect.objectContaining({
           force: true,
+        })
+      );
+    });
+
+    it('should create AWS cloud connector with custom name from API request', async () => {
+      jest.mocked(agentPolicyService.create).mockImplementationOnce(async (_, __, policy, opts) => {
+        return {
+          id: opts?.id || 'new-agentless-policy-id',
+          status: 'active',
+          name: policy.name,
+          namespace: policy.namespace,
+          is_managed: policy.is_managed || false,
+          revision: 1,
+          created_at: new Date().toISOString(),
+          is_protected: false,
+          updated_at: new Date().toISOString(),
+          updated_by: 'system',
+          agentless: {
+            cloud_connectors: {
+              enabled: true,
+              target_csp: 'aws',
+            },
+          },
+        };
+      });
+
+      jest.mocked(getPackageInfo).mockResolvedValueOnce(
+        createMockPackageInfo('cloudbeat/cis_aws', [
+          { name: 'role_arn', type: 'text', default: '' },
+          { name: 'external_id', type: 'text', default: '' },
+        ])
+      );
+
+      jest.mocked(cloudConnectorService.create).mockResolvedValueOnce({
+        id: 'aws-cloud-connector-123',
+        name: 'my-custom-connector-name',
+        cloudProvider: 'aws',
+        vars: {
+          role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/TestRole' },
+          external_id: { id: 'ABCDEFGHIJKLMNOPQRST', isSecretRef: true },
+        },
+        packagePolicyCount: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as any);
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      const result = await agentlessPoliciesService.createAgentlessPolicy({
+        name: 'cspm-aws-policy',
+        namespace: 'default',
+        package: {
+          name: 'cloud_security_posture',
+          version: '3.1.1',
+        },
+        cloud_connector: {
+          enabled: true,
+          name: 'my-custom-connector-name',
+        },
+        inputs: {
+          'cspm-cloudbeat/cis_aws': {
+            enabled: true,
+            streams: {
+              'cloud_security_posture.findings': {
+                enabled: true,
+                vars: {
+                  role_arn: 'arn:aws:iam::123456789012:role/TestRole',
+                  external_id: {
+                    id: 'ABCDEFGHIJKLMNOPQRST',
+                    isSecretRef: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      expect(result).toBeDefined();
+      expect(result.cloud_connector_id).toBe('aws-cloud-connector-123');
+      // Verify that the custom name from API request is used
+      expect(jest.mocked(cloudConnectorService.create)).toHaveBeenCalledWith(
+        soClient,
+        expect.objectContaining({
+          cloudProvider: 'aws',
+          name: 'my-custom-connector-name',
+          vars: expect.objectContaining({
+            role_arn: expect.objectContaining({ value: 'arn:aws:iam::123456789012:role/TestRole' }),
+          }),
+        })
+      );
+    });
+
+    it('should fallback to auto-generated name when no custom name is provided', async () => {
+      jest.mocked(agentPolicyService.create).mockImplementationOnce(async (_, __, policy, opts) => {
+        return {
+          id: opts?.id || 'new-agentless-policy-id',
+          status: 'active',
+          name: policy.name,
+          namespace: policy.namespace,
+          is_managed: policy.is_managed || false,
+          revision: 1,
+          created_at: new Date().toISOString(),
+          is_protected: false,
+          updated_at: new Date().toISOString(),
+          updated_by: 'system',
+          agentless: {
+            cloud_connectors: {
+              enabled: true,
+              target_csp: 'aws',
+            },
+          },
+        };
+      });
+
+      jest.mocked(getPackageInfo).mockResolvedValueOnce(
+        createMockPackageInfo('cloudbeat/cis_aws', [
+          { name: 'role_arn', type: 'text', default: '' },
+          { name: 'external_id', type: 'text', default: '' },
+        ])
+      );
+
+      jest.mocked(cloudConnectorService.create).mockResolvedValueOnce({
+        id: 'aws-cloud-connector-123',
+        name: 'arn:aws:iam::123456789012:role/TestRole',
+        cloudProvider: 'aws',
+        vars: {
+          role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/TestRole' },
+          external_id: { id: 'ABCDEFGHIJKLMNOPQRST', isSecretRef: true },
+        },
+        packagePolicyCount: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as any);
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      const result = await agentlessPoliciesService.createAgentlessPolicy({
+        name: 'cspm-aws-policy',
+        namespace: 'default',
+        package: {
+          name: 'cloud_security_posture',
+          version: '3.1.1',
+        },
+        cloud_connector: {
+          enabled: true,
+          // No custom name provided - should use role_arn as fallback
+        },
+        inputs: {
+          'cspm-cloudbeat/cis_aws': {
+            enabled: true,
+            streams: {
+              'cloud_security_posture.findings': {
+                enabled: true,
+                vars: {
+                  role_arn: 'arn:aws:iam::123456789012:role/TestRole',
+                  external_id: {
+                    id: 'ABCDEFGHIJKLMNOPQRST',
+                    isSecretRef: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      expect(result).toBeDefined();
+      expect(result.cloud_connector_id).toBe('aws-cloud-connector-123');
+      // Verify that the fallback name (role_arn) is used when no custom name is provided
+      expect(jest.mocked(cloudConnectorService.create)).toHaveBeenCalledWith(
+        soClient,
+        expect.objectContaining({
+          cloudProvider: 'aws',
+          name: 'arn:aws:iam::123456789012:role/TestRole',
+          vars: expect.objectContaining({
+            role_arn: expect.objectContaining({ value: 'arn:aws:iam::123456789012:role/TestRole' }),
+          }),
         })
       );
     });

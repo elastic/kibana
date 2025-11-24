@@ -61,7 +61,7 @@ async function extractAwsCloudConnectorSecrets(
   const externalIdVar = vars.external_id || vars['aws.credentials.external_id'];
 
   if (roleArn && externalIdVar) {
-    let externalIdWithSecretRef = externalIdVar;
+    let externalIdWithSecretRef: { type: 'password'; value: any };
 
     // If external_id is not already a secret reference, create a secret for it
     if (externalIdVar.value && !externalIdVar.value.isSecretRef) {
@@ -71,12 +71,23 @@ async function extractAwsCloudConnectorSecrets(
         values: [externalIdVar.value],
       });
 
+      const firstSecret = secrets[0];
+      if (Array.isArray(firstSecret)) {
+        throw new CloudConnectorInvalidVarsError('Unexpected array of secrets for external_id');
+      }
+
       externalIdWithSecretRef = {
-        ...externalIdVar,
+        type: 'password' as const,
         value: {
-          id: secrets[0].id,
+          id: firstSecret.id,
           isSecretRef: true,
         },
+      };
+    } else {
+      // Already a secret reference, ensure it has the correct type
+      externalIdWithSecretRef = {
+        type: 'password' as const,
+        value: externalIdVar.value,
       };
     }
 
@@ -137,20 +148,28 @@ async function extractAzureCloudConnectorSecrets(
 
       let secretIndex = 0;
       if (tenantIdVar.value && !tenantIdVar.value.isSecretRef) {
+        const tenantSecret = secrets[secretIndex];
+        if (Array.isArray(tenantSecret)) {
+          throw new CloudConnectorInvalidVarsError('Unexpected array of secrets for tenant_id');
+        }
         tenantIdWithSecretRef = {
           ...tenantIdVar,
           value: {
-            id: secrets[secretIndex].id,
+            id: tenantSecret.id,
             isSecretRef: true,
           },
         };
         secretIndex++;
       }
       if (clientIdVar.value && !clientIdVar.value.isSecretRef) {
+        const clientSecret = secrets[secretIndex];
+        if (Array.isArray(clientSecret)) {
+          throw new CloudConnectorInvalidVarsError('Unexpected array of secrets for client_id');
+        }
         clientIdWithSecretRef = {
           ...clientIdVar,
           value: {
-            id: secrets[secretIndex].id,
+            id: clientSecret.id,
             isSecretRef: true,
           },
         };
