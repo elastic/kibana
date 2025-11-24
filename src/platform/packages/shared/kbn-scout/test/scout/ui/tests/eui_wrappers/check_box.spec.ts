@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test, expect } from '../../../../src/playwright';
-import { EuiCheckBoxWrapper } from '../../../../src/playwright/eui_components';
-import { navigateToEuiTestPage } from '../../fixtures/eui_helpers';
+// TODO: 'toBeChecked' is not available in playwright version we are using. Remove after Playwright upgrade
+
+import { test, expect } from '../../../../../src/playwright';
+import { EuiCheckBoxWrapper } from '../../../../../src/playwright/eui_components';
+import { navigateToEuiTestPage } from '../../../fixtures/eui_helpers';
 
 test.describe('EUI testing wrapper: EuiCheckBox', { tag: ['@svlSecurity', '@ess'] }, () => {
   test(`checkbox`, async ({ page, log }) => {
