@@ -434,6 +434,40 @@ describe('extractSchemaCore', () => {
       const meta = getMeta(result.schema);
       expect(meta.disabled).toBe(true);
     });
+
+    it('should not loose meta information correctly even if before default', () => {
+      const schema = z
+        .discriminatedUnion('authType', [
+          z.object({ authType: z.literal('none') }).meta({
+            label: 'None',
+          }),
+        ])
+        .meta({ disabled: true })
+        .default({ authType: 'none' });
+
+      const result = extractSchemaCore(schema);
+      expect(result.schema).toBeInstanceOf(z.ZodDiscriminatedUnion);
+      expect(result.defaultValue).toEqual({ authType: 'none' });
+      const meta = getMeta(result.schema);
+      expect(meta.disabled).toBe(true);
+    });
+
+    it('should not loose meta information correctly even if after default', () => {
+      const schema = z
+        .discriminatedUnion('authType', [
+          z.object({ authType: z.literal('none') }).meta({
+            label: 'None',
+          }),
+        ])
+        .default({ authType: 'none' })
+        .meta({ disabled: true });
+
+      const result = extractSchemaCore(schema);
+      expect(result.schema).toBeInstanceOf(z.ZodDiscriminatedUnion);
+      expect(result.defaultValue).toEqual({ authType: 'none' });
+      const meta = getMeta(result.schema);
+      expect(meta.disabled).toBe(true);
+    });
   });
 
   describe('edge cases', () => {

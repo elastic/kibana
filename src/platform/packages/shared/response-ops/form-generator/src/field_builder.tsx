@@ -10,12 +10,12 @@
 import React from 'react';
 import type { z } from '@kbn/zod/v4';
 import { ZodError } from '@kbn/zod/v4';
-import { getMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiSpacer } from '@elastic/eui';
 import type { FormConfig } from './form';
 import { getWidgetComponent } from './widgets';
 import { extractSchemaCore } from './schema_extract_core';
+import { addMeta, getMeta } from './schema_connector_metadata';
 
 export type FieldValidationFunc = (
   ...args: Parameters<ValidationFunc>
@@ -89,8 +89,14 @@ export const getFieldsFromSchema = <T extends z.ZodRawShape>({
 }) => {
   const fields: FieldDefinition[] = [];
 
+  const isFormOrParentDisabled = formConfig.disabled || getMeta(schema).disabled;
+
   Object.keys(schema.shape).forEach((key) => {
     const fieldSchema = schema.shape[key] as z.ZodType;
+    // If the form or parent schema is disabled, propagate that to the field schema
+    if (isFormOrParentDisabled && getMeta(fieldSchema).disabled !== false) {
+      addMeta(fieldSchema, { disabled: true });
+    }
     const path = rootPath ? `${rootPath}.${key}` : key;
     const field = getFieldFromSchema({ schema: fieldSchema, path, formConfig });
     fields.push(field);

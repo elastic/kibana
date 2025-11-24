@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { getMeta } from '../../../schema_connector_metadata';
+import { addMeta, getMeta } from '../../../schema_connector_metadata';
 import {
   getDiscriminatorFieldValue,
   type DiscriminatedUnionWidgetProps,
@@ -86,6 +86,8 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
     getDiscriminatorFieldValue(defaultOption, discriminatorKey)
   );
 
+  const isFieldsetDisabled = formConfig.disabled || getMeta(schema).disabled;
+
   return (
     <EuiFormFieldset
       legend={{
@@ -99,8 +101,15 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
       {options.map((option) => {
         const discriminatorValue = getDiscriminatorFieldValue(option, discriminatorKey) as string;
         const onChange = () => setSelectedOption(discriminatorValue);
-        const label = getMeta(option).label;
+        const optionMeta = getMeta(option);
+        const label = optionMeta.label;
         const isChecked = selectedOption === discriminatorValue;
+
+        // if the entire fieldset is disabled, ensure each option is also marked as disabled
+        if (isFieldsetDisabled && !optionMeta.disabled) {
+          addMeta(option, { disabled: true });
+        }
+        const isDisabled = getMeta(option).disabled;
 
         return (
           <React.Fragment key={discriminatorValue}>
@@ -110,6 +119,7 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
               id={discriminatorValue}
               checked={isChecked}
               data-test-subj={`form-generator-field-${rootPath}-${discriminatorValue}`}
+              disabled={isDisabled}
             >
               {isChecked && (
                 <SingleOptionUnionWidget

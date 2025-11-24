@@ -16,10 +16,13 @@ const HEADER_FIELD_DEFAULT = 'Api-Key';
 const authSchema = z.object({
   headerField: z
     .string()
-    .meta({ sensitive: true })
-    .describe('API Key header field')
-    .default(HEADER_FIELD_DEFAULT),
-  apiKey: z.string().meta({ sensitive: true }).describe('API Key'),
+    .min(1, { message: 'API key is required' })
+    .default(HEADER_FIELD_DEFAULT)
+    .meta({ label: 'API key header field', sensitive: true }),
+  apiKey: z
+    .string()
+    .min(1, { message: 'API key is required' })
+    .meta({ label: 'API key', sensitive: true }),
 });
 
 type AuthSchemaType = z.infer<typeof authSchema>;

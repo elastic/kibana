@@ -47,14 +47,16 @@ export const extractSchemaCore = (schema: z.ZodType) => {
       continue;
     }
 
-    const actualMeta = getMeta(current);
+    const wrapperMeta = getMeta(current);
     current = current.unwrap();
-    setMeta(current, actualMeta);
+    const innerMeta = getMeta(current);
+
+    // Merge: inner meta takes precedence over wrapper meta
+    const mergedMeta = { ...wrapperMeta, ...innerMeta };
+    setMeta(current, mergedMeta);
   }
 
-  // If the schema is a literal, we need it as defaultValue.
-  // Works for fields that are literally a non editable value, but also
-  // for hidden fields like the discriminator value in a discriminated union.
+  // If the schema is a literal, we need it as defaultValue
   if (current instanceof z.ZodLiteral) {
     defaultValue = current.value;
   }
