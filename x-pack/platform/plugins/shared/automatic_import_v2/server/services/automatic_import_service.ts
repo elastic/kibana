@@ -42,7 +42,7 @@ export class AutomaticImportService {
   private logger: LoggerFactory;
   private savedObjectsServiceSetup: SavedObjectsServiceSetup;
   private taskManagerSetup: TaskManagerSetupContract;
-  private taskManagerService: TaskManagerService | null = null;
+  private taskManagerService: TaskManagerService;
 
   constructor(
     logger: LoggerFactory,
@@ -59,6 +59,7 @@ export class AutomaticImportService {
     this.savedObjectsServiceSetup.registerType(dataStreamSavedObjectType);
 
     this.taskManagerSetup = taskManagerSetup;
+    this.taskManagerService = new TaskManagerService(this.logger, this.taskManagerSetup);
   }
 
   private processDataStreamWorkflow = async (params: DataStreamTaskParams): Promise<void> => {
@@ -79,7 +80,6 @@ export class AutomaticImportService {
       savedObjectsClient,
       this.security
     );
-    this.taskManagerService = new TaskManagerService(this.logger, this.taskManagerSetup);
     this.taskManagerService.initialize(taskManagerStart, {
       taskWorkflow: this.processDataStreamWorkflow,
     });
