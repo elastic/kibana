@@ -18,7 +18,7 @@ import {
 import { createInternalStateAsyncThunk } from '../utils';
 import { setDataView } from './data_views';
 import { updateTabs } from './tabs';
-import { getInitialAppState } from '../../discover_app_state_container';
+import { getInitialAppState } from '../../utils/get_initial_app_state';
 import type { DiscoverAppState } from '../types';
 
 export const resetDiscoverSession = createInternalStateAsyncThunk(

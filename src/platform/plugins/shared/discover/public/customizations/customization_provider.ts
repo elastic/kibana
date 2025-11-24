@@ -18,7 +18,7 @@ import type {
   DiscoverCustomizationService,
 } from './customization_service';
 import { createCustomizationService } from './customization_service';
-import { getInitialAppState } from '../application/main/state_management/discover_app_state_container';
+import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
 import type { DiscoverServices } from '../build_services';
 
 const customizationContext = createContext(createCustomizationService());

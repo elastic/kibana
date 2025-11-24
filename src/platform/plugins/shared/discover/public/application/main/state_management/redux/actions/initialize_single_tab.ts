@@ -16,7 +16,8 @@ import {
   type TabActionPayload,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
-import { getInitialAppState, type AppStateUrl } from '../../discover_app_state_container';
+import { type AppStateUrl } from '../../discover_app_state_container';
+import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { type DiscoverAppState } from '..';
 import type { DiscoverStateContainer } from '../../discover_state';
 import { appendAdHocDataViews, setDataView } from './data_views';

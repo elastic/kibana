@@ -38,10 +38,8 @@ import { DiscoverSearchSessionManager } from '../application/main/state_manageme
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { omit } from 'lodash';
-import {
-  getCurrentUrlState,
-  getInitialAppState,
-} from '../application/main/state_management/discover_app_state_container';
+import { getCurrentUrlState } from '../application/main/state_management/discover_app_state_container';
+import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
 
 interface CreateInternalStateStoreMockOptions {
   runtimeStateManager?: RuntimeStateManager;
