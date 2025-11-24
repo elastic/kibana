@@ -80,8 +80,6 @@ export const createActionHandler = async (
     );
   }
 
-  const config = osqueryContext.config();
-  console.log({ config });
   const osqueryAction = {
     action_id: uuidv4(),
     '@timestamp': moment().toISOString(),
