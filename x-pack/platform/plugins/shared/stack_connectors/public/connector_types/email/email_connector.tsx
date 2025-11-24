@@ -116,7 +116,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
     [docLinks.links.alerting.emailActionConfig, validateEmailAddresses]
   );
 
-  const { service, hasAuth = false } = config ?? {};
+  const { service = null, hasAuth = false } = config ?? {};
 
   const disableServiceConfig = shouldDisableEmailConfiguration(service);
   const { isLoading, getEmailServiceConfig } = useEmailConfig({ http, toasts });

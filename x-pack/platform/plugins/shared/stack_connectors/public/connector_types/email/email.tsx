@@ -20,7 +20,6 @@ import {
 } from '@kbn/connector-schemas/email/constants';
 import type { EmailActionParams, EmailConfig, EmailSecrets } from '../types';
 import type { RegistrationServices } from '..';
-import { AdditionalEmailServices } from '../../../common';
 
 export const emailServices: Array<EuiSelectOption & { 'kbn-setting-value': string }> = [
   {
@@ -162,18 +161,6 @@ export function getConnectorType(
     },
     actionConnectorFields: lazy(() => import('./email_connector')),
     actionParamsFields: lazy(() => import('./email_params')),
-    connectorForm: {
-      deserializer: (data) => {
-        return data;
-        return {
-          ...data,
-          config: {
-            ...data?.config,
-            service: data?.config?.service ?? AdditionalEmailServices.OTHER,
-          },
-        };
-      },
-    },
   };
 }
 
