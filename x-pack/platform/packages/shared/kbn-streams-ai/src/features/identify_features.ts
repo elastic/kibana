@@ -93,7 +93,7 @@ export async function identifySystemFeatures({
     prompt: IdentifySystemsPrompt,
     inferenceClient,
     finalToolChoice: {
-      function: 'finalize_systems',
+      function: 'finalize_features',
     },
     toolCallbacks: {
       validate_systems: async (toolCall) => {
@@ -123,7 +123,7 @@ export async function identifySystemFeatures({
           },
         };
       },
-      finalize_systems: async (toolCall) => {
+      finalize_features: async (toolCall) => {
         return {
           response: {},
         };
@@ -171,13 +171,10 @@ export async function identifyInfrastructureFeatures({
   signal,
   analysis,
   dropUnmapped = false,
-  maxSteps: initialMaxSteps,
 }: IdentifyFeaturesOptions & {
   dropUnmapped?: boolean;
-  maxSteps?: number;
 }): Promise<{ features: InfrastructureFeature[] }> {
-  const response = await executeAsReasoningAgent({
-    maxSteps: initialMaxSteps,
+  const response = await inferenceClient.prompt({
     input: {
       stream: {
         name: stream.name,
@@ -190,14 +187,7 @@ export async function identifyInfrastructureFeatures({
     prompt: IdentifyInfrastructurePrompt,
     inferenceClient,
     finalToolChoice: {
-      function: 'finalize_infrastructure',
-    },
-    toolCallbacks: {
-      finalize_infrastructure: async (toolCall) => {
-        return {
-          response: {},
-        };
-      },
+      function: 'finalize_features',
     },
     abortSignal: signal,
   });
@@ -205,7 +195,7 @@ export async function identifyInfrastructureFeatures({
   return {
     features: await Promise.all(
       response.toolCalls.flatMap((toolCall) =>
-        toolCall.function.arguments.infrastructure.map((args) => {
+        toolCall.function.arguments.features.map((args) => {
           const feature = {
             ...args,
             type: 'infrastructure' as const,
@@ -223,13 +213,10 @@ export async function identifyTechnologyFeatures({
   signal,
   analysis,
   dropUnmapped = false,
-  maxSteps: initialMaxSteps,
 }: IdentifyFeaturesOptions & {
   dropUnmapped?: boolean;
-  maxSteps?: number;
 }): Promise<{ features: TechnologyFeature[] }> {
-  const response = await executeAsReasoningAgent({
-    maxSteps: initialMaxSteps,
+  const response = await inferenceClient.prompt({
     input: {
       stream: {
         name: stream.name,
@@ -242,14 +229,7 @@ export async function identifyTechnologyFeatures({
     prompt: IdentifyTechnologyPrompt,
     inferenceClient,
     finalToolChoice: {
-      function: 'finalize_technology',
-    },
-    toolCallbacks: {
-      finalize_technology: async (toolCall) => {
-        return {
-          response: {},
-        };
-      },
+      function: 'finalize_features',
     },
     abortSignal: signal,
   });
@@ -257,7 +237,7 @@ export async function identifyTechnologyFeatures({
   return {
     features: await Promise.all(
       response.toolCalls.flatMap((toolCall) =>
-        toolCall.function.arguments.technology.map((args) => {
+        toolCall.function.arguments.features.map((args) => {
           const feature = {
             ...args,
             type: 'technology' as const,

@@ -6,13 +6,21 @@
  */
 import { createPrompt } from '@kbn/inference-common';
 import { z } from '@kbn/zod';
-import { merge } from 'lodash';
 import systemPromptTemplate from './system_prompt.text';
 import infrastructurePromptTemplate from './infrastructure_prompt.text';
 import technologyPromptTemplate from './technology_prompt.text';
-import userPromptTemplate from './user_prompt.text';
+import systemUserPromptTemplate from './system_user_prompt.text';
+import basicFeatureUserPromptTemplate from './basic_feature_user_prompt.text';
 
-const systemsSchemaBase = {
+const baseInputSchema = z.object({
+  stream: z.object({
+    name: z.string(),
+    description: z.string(),
+  }),
+  dataset_analysis: z.string(),
+});
+
+const systemsSchema = {
   type: 'object',
   properties: {
     systems: {
@@ -28,28 +36,17 @@ const systemsSchemaBase = {
             properties: {},
           },
         },
+        required: ['name', 'filter'],
       },
     },
   },
   required: ['systems'],
 } as const;
 
-const systemsSchema = merge({}, systemsSchemaBase, {
-  properties: {
-    systems: {
-      items: {
-        required: ['name', 'filter'],
-      },
-    },
-  },
-} as const);
-
-const finalSystemsSchema = merge({}, systemsSchema);
-
-const infrastructureSchema = {
+const commonFeatureSchema = {
   type: 'object',
   properties: {
-    infrastructure: {
+    features: {
       type: 'array',
       items: {
         required: ['name', 'description'],
@@ -65,57 +62,17 @@ const infrastructureSchema = {
       },
     },
   },
-  required: ['infrastructure'],
+  required: ['features'],
 } as const;
-
-const technologySchema = {
-  type: 'object',
-  properties: {
-    technology: {
-      type: 'array',
-      items: {
-        required: ['name', 'description'],
-        type: 'object',
-        properties: {
-          name: {
-            type: 'string',
-          },
-          description: {
-            type: 'string',
-          },
-        },
-      },
-    },
-  },
-  required: ['technology'],
-} as const;
-
-export interface ValidateSystemsResponse {
-  systems: Array<{
-    name: string;
-    filter: string;
-  }>;
-}
-
-export interface FinalizeSystemsResponse {
-  systems: Array<{
-    name: string;
-    filter: string;
-    description: string;
-  }>;
-}
 
 export const IdentifySystemsPrompt = createPrompt({
   name: 'identify_systems',
-  input: z.object({
-    stream: z.object({
-      name: z.string(),
-      description: z.string(),
-    }),
-    dataset_analysis: z.string(),
-    initial_clustering: z.string(),
-    condition_schema: z.string(),
-  }),
+  input: baseInputSchema.and(
+    z.object({
+      initial_clustering: z.string(),
+      condition_schema: z.string(),
+    })
+  ),
 })
   .version({
     system: {
@@ -125,7 +82,7 @@ export const IdentifySystemsPrompt = createPrompt({
     },
     template: {
       mustache: {
-        template: userPromptTemplate,
+        template: systemUserPromptTemplate,
       },
     },
     tools: {
@@ -133,9 +90,9 @@ export const IdentifySystemsPrompt = createPrompt({
         description: `Validate systems before finalizing`,
         schema: systemsSchema,
       },
-      finalize_systems: {
-        description: 'Finalize system identification',
-        schema: finalSystemsSchema,
+      finalize_features: {
+        description: 'Finalize system features identification',
+        schema: systemsSchema,
       },
     },
   })
@@ -143,13 +100,7 @@ export const IdentifySystemsPrompt = createPrompt({
 
 export const IdentifyInfrastructurePrompt = createPrompt({
   name: 'identify_infrastructure',
-  input: z.object({
-    stream: z.object({
-      name: z.string(),
-      description: z.string(),
-    }),
-    dataset_analysis: z.string(),
-  }),
+  input: baseInputSchema,
 })
   .version({
     system: {
@@ -159,13 +110,13 @@ export const IdentifyInfrastructurePrompt = createPrompt({
     },
     template: {
       mustache: {
-        template: userPromptTemplate,
+        template: basicFeatureUserPromptTemplate,
       },
     },
     tools: {
-      finalize_infrastructure: {
-        description: 'Finalize infrastructure identification',
-        schema: infrastructureSchema,
+      finalize_features: {
+        description: 'Finalize infrastructure features identification',
+        schema: commonFeatureSchema,
       },
     },
   })
@@ -173,13 +124,7 @@ export const IdentifyInfrastructurePrompt = createPrompt({
 
 export const IdentifyTechnologyPrompt = createPrompt({
   name: 'identify_technology',
-  input: z.object({
-    stream: z.object({
-      name: z.string(),
-      description: z.string(),
-    }),
-    dataset_analysis: z.string(),
-  }),
+  input: baseInputSchema,
 })
   .version({
     system: {
@@ -189,13 +134,13 @@ export const IdentifyTechnologyPrompt = createPrompt({
     },
     template: {
       mustache: {
-        template: userPromptTemplate,
+        template: basicFeatureUserPromptTemplate,
       },
     },
     tools: {
-      finalize_technology: {
-        description: 'Finalize technology identification',
-        schema: technologySchema,
+      finalize_features: {
+        description: 'Finalize technology features identification',
+        schema: commonFeatureSchema,
       },
     },
   })
