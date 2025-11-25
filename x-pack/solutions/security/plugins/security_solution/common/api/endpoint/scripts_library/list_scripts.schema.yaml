@@ -1,0 +1,21 @@
+openapi: 3.0.0
+info:
+  title: List scripts schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/scripts_library:
+    get:
+      summary: Create script
+      operationId: EndpointScriptLibraryListScripts
+      description: Retrieve a list of scripts
+      x-codegen-enabled: false
+      x-labels: []
+#      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
+#      x-labels: [ ess, serverless ]
+      responses:
+        '200':
+          description: List of scripts response
+          content:
+            application/json:
+              schema:
+                $ref: './common.yaml#/components/schemas/ScriptsApiResponse'
