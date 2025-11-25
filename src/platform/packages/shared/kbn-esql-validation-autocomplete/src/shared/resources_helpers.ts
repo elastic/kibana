@@ -145,7 +145,7 @@ export class QueryColumns {
   };
 
   /**
-   * Get fields from previous commands, building up the chain if needed for validation consistency
+   * Get fields from previous commands, building up the chain
    */
   private async getFieldsFromPreviousCommands(
     query: ESQLAstQueryExpression,
