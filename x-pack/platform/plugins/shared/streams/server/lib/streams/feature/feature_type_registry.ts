@@ -8,6 +8,7 @@
 import type { Feature } from '@kbn/streams-schema';
 import { describeDataset } from '@kbn/ai-tools';
 import type { IdentifyFeaturesOptions } from '@kbn/streams-ai';
+import { withSpan } from '@kbn/apm-utils';
 import type { FeatureTypeHandler } from './feature_type_handler';
 import type { StoredFeature } from './stored_feature';
 import { SystemFeatureHandler } from './handlers/system';
@@ -57,23 +58,34 @@ export class FeatureTypeRegistry {
   async identifyFeatures(
     options: Omit<IdentifyFeaturesOptions, 'analysis'>
   ): Promise<{ features: Feature[] }> {
-    const analysis = await describeDataset({
-      start: options.start,
-      end: options.end,
-      esClient: options.esClient,
-      index: options.stream.name,
-    });
+    options.logger.debug(`Identifying features for stream ${options.stream.name}`);
+
+    options.logger.trace('Describing dataset for feature identification');
+    const analysis = await withSpan('describe_dataset_for_feature_identification', () =>
+      describeDataset({
+        start: options.start,
+        end: options.end,
+        esClient: options.esClient,
+        index: options.stream.name,
+      })
+    );
 
     const features: Feature[] = [];
     for (const handler of this.handlers.values()) {
-      const result = await handler.identifyFeatures({
-        ...options,
-        analysis,
-      });
+      options.logger.trace(`Identifying features of type ${handler.type}`);
+      const result = await withSpan(`identify_${handler.type}_features`, () =>
+        handler.identifyFeatures({
+          ...options,
+          analysis,
+        })
+      );
 
       features.push(...result.features);
     }
 
+    options.logger.debug(
+      `Identified ${features.length} features for stream ${options.stream.name}`
+    );
     return { features };
   }
 }

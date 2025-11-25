@@ -12,6 +12,7 @@ import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { fromKueryExpression } from '@kbn/es-query';
+import { withSpan } from '@kbn/apm-utils';
 import { GenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
 
@@ -34,6 +35,7 @@ export async function generateSignificantEvents({
   esClient,
   inferenceClient,
   signal,
+  logger,
 }: {
   stream: Streams.all.Definition;
   feature?: Feature;
@@ -46,51 +48,59 @@ export async function generateSignificantEvents({
 }): Promise<{
   queries: Query[];
 }> {
-  const analysis = await describeDataset({
-    start,
-    end,
-    esClient,
-    index: stream.name,
-    filter: feature?.filter ? conditionToQueryDsl(feature.filter) : undefined,
-  });
+  logger.debug('Starting significant event generation');
 
-  const response = await executeAsReasoningAgent({
-    input: {
-      name: feature?.name || stream.name,
-      dataset_analysis: JSON.stringify(formatDocumentAnalysis(analysis, { dropEmpty: true })),
-      description: feature?.description || stream.description,
-    },
-    maxSteps: 4,
-    prompt: GenerateSignificantEventsPrompt,
-    inferenceClient,
-    toolCallbacks: {
-      add_queries: async (toolCall) => {
-        const queries = toolCall.function.arguments.queries;
+  logger.trace('Describing dataset for significant event generation');
+  const analysis = await withSpan('describe_dataset_for_significant_event_generation', () =>
+    describeDataset({
+      start,
+      end,
+      esClient,
+      index: stream.name,
+      filter: feature?.filter ? conditionToQueryDsl(feature.filter) : undefined,
+    })
+  );
 
-        const queryValidationResults = queries.map((query) => {
-          let validation: { valid: true } | { valid: false; error: Error } = { valid: true };
-          try {
-            fromKueryExpression(query.kql);
-          } catch (error) {
-            validation = { valid: false, error };
-          }
-          return {
-            query,
-            valid: validation.valid,
-            status: validation.valid ? 'Added' : 'Failed to add',
-            error: 'error' in validation ? validation.error.message : undefined,
-          };
-        });
-
-        return {
-          response: {
-            queries: queryValidationResults,
-          },
-        };
+  logger.trace('Generating significant events via reasoning agent');
+  const response = await withSpan('generate_significant_events', () =>
+    executeAsReasoningAgent({
+      input: {
+        name: feature?.name || stream.name,
+        dataset_analysis: JSON.stringify(formatDocumentAnalysis(analysis, { dropEmpty: true })),
+        description: feature?.description || stream.description,
       },
-    },
-    abortSignal: signal,
-  });
+      maxSteps: 4,
+      prompt: GenerateSignificantEventsPrompt,
+      inferenceClient,
+      toolCallbacks: {
+        add_queries: async (toolCall) => {
+          const queries = toolCall.function.arguments.queries;
+
+          const queryValidationResults = queries.map((query) => {
+            let validation: { valid: true } | { valid: false; error: Error } = { valid: true };
+            try {
+              fromKueryExpression(query.kql);
+            } catch (error) {
+              validation = { valid: false, error };
+            }
+            return {
+              query,
+              valid: validation.valid,
+              status: validation.valid ? 'Added' : 'Failed to add',
+              error: 'error' in validation ? validation.error.message : undefined,
+            };
+          });
+
+          return {
+            response: {
+              queries: queryValidationResults,
+            },
+          };
+        },
+      },
+      abortSignal: signal,
+    })
+  );
 
   const queries = response.input.flatMap((message) => {
     if (message.role === MessageRole.Tool) {
@@ -103,6 +113,8 @@ export async function generateSignificantEvents({
     }
     return [];
   });
+
+  logger.debug(`Generated ${queries.length} significant event queries`);
 
   return { queries };
 }

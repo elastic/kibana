@@ -201,7 +201,7 @@ const generateSignificantEventsRoute = createServerRoute({
         {
           inferenceClient,
           esClient: scopedClusterClient.asCurrentUser,
-          logger,
+          logger: logger.get('significant_events'),
           signal: getRequestAbortSignal(request),
         }
       )

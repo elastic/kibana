@@ -97,6 +97,7 @@ export const deleteFeatureRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<StorageClientDeleteResponse> => {
     const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
@@ -113,6 +114,9 @@ export const deleteFeatureRoute = createServerRoute({
       throw new SecurityError(`Cannot delete feature for stream ${name}, insufficient privileges`);
     }
 
+    logger
+      .get('feature_identification')
+      .debug(`Deleting feature ${featureType}/${featureName} for stream ${name}`);
     return await featureClient.deleteFeature(name, { type: featureType, name: featureName });
   },
 });
@@ -248,6 +252,7 @@ export const bulkFeaturesRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<StorageClientBulkResponse> => {
     const { featureClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
@@ -267,6 +272,11 @@ export const bulkFeaturesRoute = createServerRoute({
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
 
+    logger
+      .get('feature_identification')
+      .debug(
+        `Performing bulk feature operation with ${operations.length} operations for stream ${name}`
+      );
     return await featureClient.bulk(name, operations);
   },
 });
@@ -339,7 +349,7 @@ export const identifyFeaturesRoute = createServerRoute({
         end: end.getTime(),
         esClient,
         inferenceClient: boundInferenceClient,
-        logger,
+        logger: logger.get('feature_identification'),
         stream,
         features: hits,
         signal,
@@ -380,6 +390,7 @@ export const describeStreamRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<Observable<StreamDescriptionEvent>> => {
     const { scopedClusterClient, licensing, uiSettingsClient, streamsClient, inferenceClient } =
       await getScopedClients({
@@ -411,6 +422,7 @@ export const describeStreamRoute = createServerRoute({
         start: start.valueOf(),
         end: end.valueOf(),
         signal: getRequestAbortSignal(request),
+        logger: logger.get('stream_description'),
       })
     ).pipe(
       map((description) => {
