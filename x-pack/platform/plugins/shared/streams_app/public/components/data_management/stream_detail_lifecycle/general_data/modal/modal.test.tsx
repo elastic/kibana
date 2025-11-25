@@ -38,6 +38,7 @@ describe('EditLifecycleModal', () => {
           processing: { steps: [] },
           settings: {},
           wired: { fields: {}, routing: [] },
+          failure_store: { inherit: {} },
         },
       },
       effective_lifecycle: effectiveLifecycle,
@@ -55,6 +56,10 @@ describe('EditLifecycleModal', () => {
         read_failure_store: true,
         manage_failure_store: true,
         view_index_metadata: true,
+      },
+      effective_failure_store: {
+        lifecycle: { enabled: {} },
+        from: streamName,
       },
     };
 

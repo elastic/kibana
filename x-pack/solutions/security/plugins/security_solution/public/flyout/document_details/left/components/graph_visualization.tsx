@@ -13,23 +13,23 @@ import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
-  GraphGroupedNodePreviewPanelKey,
-  GROUP_PREVIEW_BANNER,
+  type EntityOrEventItem,
   getNodeDocumentMode,
   getSingleDocumentData,
-  type NodeViewModel,
+  GraphGroupedNodePreviewPanelKey,
+  GROUP_PREVIEW_BANNER,
   groupedItemClick$,
-  type EntityOrEventItem,
   NETWORK_PREVIEW_BANNER,
+  type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import {
-  DOCUMENT_TYPE_ENTITY,
   DOCUMENT_TYPE_ALERT,
+  DOCUMENT_TYPE_ENTITY,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
@@ -62,10 +62,10 @@ const MAX_DOCUMENTS_TO_LOAD = 50;
 export const GraphVisualization: React.FC = memo(() => {
   const toasts = useToasts();
   const oldDataView = useGetScopedSourcererDataView({
-    sourcererScope: SourcererScopeName.default,
+    sourcererScope: PageScope.default,
   });
 
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.default);
+  const { dataView: experimentalDataView } = useDataView(PageScope.default);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;

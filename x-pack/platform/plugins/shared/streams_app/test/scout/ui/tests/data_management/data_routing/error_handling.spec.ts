@@ -54,11 +54,7 @@ test.describe(
       await pageObjects.streams.expectRoutingRuleVisible('logs.network-test');
     });
 
-    test('should recover from API errors during rule updates', async ({
-      context,
-      page,
-      pageObjects,
-    }) => {
+    test('should recover from API errors during rule updates', async ({ context, pageObjects }) => {
       // Create a rule first
       await pageObjects.streams.clickCreateRoutingRule();
       await pageObjects.streams.fillRoutingRuleName('error-test');

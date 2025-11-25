@@ -807,10 +807,7 @@ describe('validation logic', () => {
           excludeErrorsByContent(excludedCallbacks).every((regexp) => regexp?.test(message))
         )
       )) {
-        const { errors } = await validateQuery(
-          testCase.query,
-          {} // ignoreOnMissingCallbacks is now automatic
-        );
+        const { errors } = await validateQuery(testCase.query, {});
         // Verify no callback-dependent errors are present
         const errorCodes = errors.map((e) => e.code);
         expect(
