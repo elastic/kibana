@@ -13,13 +13,15 @@ import { isString } from 'lodash';
 import type { AuthTypeSpec } from '../connector_spec';
 
 const HEADER_FIELD_DEFAULT = 'Api-Key';
-const authSchema = z.object({
-  headerField: z.string().describe('API Key header field').default(HEADER_FIELD_DEFAULT),
-  apiKey: z.string().min(1, { message: 'API Key cannot be empty' }).meta({
-    widget: 'password',
-    label: 'API Key',
-  }),
-});
+const authSchema = z
+  .object({
+    headerField: z.string().describe('API Key header field').default(HEADER_FIELD_DEFAULT),
+    apiKey: z.string().min(1, { message: 'API Key cannot be empty' }).meta({
+      sensitive: true,
+      label: 'API Key',
+    }),
+  })
+  .meta({ label: 'API Key Header Authentication' });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 type NormalizedAuthSchemaType = Record<string, string>;
@@ -32,6 +34,7 @@ export const ApiKeyHeaderAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'api_key_header',
   schema: authSchema,
   normalizeSchema: (defaults?: Record<string, unknown>) => {
+    const existingMeta = authSchema.meta() ?? {};
     const schemaToUse = z.object({
       ...authSchema.shape,
     });
@@ -47,7 +50,7 @@ export const ApiKeyHeaderAuth: AuthTypeSpec<AuthSchemaType> = {
       });
     }
 
-    return schemaToUse;
+    return schemaToUse.meta(existingMeta);
   },
   configure: (axiosInstance: AxiosInstance, secret: NormalizedAuthSchemaType): AxiosInstance => {
     // set global defaults

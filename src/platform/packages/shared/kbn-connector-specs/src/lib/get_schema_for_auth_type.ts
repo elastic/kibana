@@ -44,6 +44,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
 
   const authType = getAuthType(authTypeId);
 
+  const existingMeta = authType.schema.meta() ?? {};
   let schemaToUse = z.object({
     ...authType.schema.shape,
   });
@@ -72,7 +73,9 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
   }
 
   // add the authType discriminator key
-  return schemaToUse.extend({
-    [AUTH_TYPE_DISCRIMINATOR]: z.literal(authTypeId),
-  });
+  return schemaToUse
+    .extend({
+      [AUTH_TYPE_DISCRIMINATOR]: z.literal(authTypeId),
+    })
+    .meta(existingMeta);
 };
