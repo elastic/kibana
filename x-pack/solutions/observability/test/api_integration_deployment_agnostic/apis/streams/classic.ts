@@ -223,7 +223,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(classicStream).to.eql(undefined);
     });
 
-    describe('Classic streams sharing template/pipeline', () => {
+    // Failing test on ES Promotion: https://github.com/elastic/kibana/issues/235001
+    describe.skip('Classic streams sharing template/pipeline', () => {
       const TEMPLATE_NAME = 'my-shared-template';
       const FIRST_STREAM_NAME = 'mytest-first';
       const SECOND_STREAM_NAME = 'mytest-second';
