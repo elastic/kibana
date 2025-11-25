@@ -102,7 +102,7 @@ const BaseComponent = () => {
           size="s"
           aria-label={EXPORT_REPORT}
           onClick={toggleContextMenu}
-          isDisabled={!isExportEnabled}
+          isLoading={!isExportEnabled}
         >
           {EXPORT_REPORT}
         </EuiButtonEmpty>
