@@ -61,6 +61,7 @@ export const getAddRowControl = (
                 }, 100);
               }
             }}
+            data-test-subj="indexEditorAddRowButton"
           />
         </EuiToolTip>
       </div>

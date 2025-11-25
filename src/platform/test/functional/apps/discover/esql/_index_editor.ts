@@ -15,6 +15,7 @@ const INDEX_NAME_MANUAL = 'test-lookup-index-manual';
 const INDEX_NAME_FILE = 'test-lookup-index-file';
 const INDEX_NAME_EDITION = 'test-lookup-index-edition';
 const INITIAL_COLUMN_PLACEHOLDERS = 4;
+const NUMBER_OF_CONTROL_COLUMNS = 2;
 const IMPORT_FILE_PATH = path.join(__dirname, 'imports', 'customers.csv');
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -157,25 +158,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
 
       // Add a new column
-      await indexEditor.addColumn();
-      await indexEditor.setColumn(`extra-column`, 'keyword', 4);
+      await indexEditor.addColumn('extra-column', 'keyword');
       expect((await indexEditor.getColumnNames()).length).to.be(INITIAL_COLUMN_PLACEHOLDERS + 1);
 
       // Add another column and then delete it
-      await indexEditor.addColumn();
-      await indexEditor.setColumn(`column-to-be-deleted`, 'text', 5);
+      await indexEditor.addColumn('column-to-be-deleted', 'text');
       await indexEditor.deleteColumn('column-to-be-deleted');
       expect((await indexEditor.getColumnNames()).length).to.be(INITIAL_COLUMN_PLACEHOLDERS + 1);
 
       // Add cell values for the first row
-      for (let colIndex = 1; colIndex <= 5; colIndex++) {
-        await indexEditor.setCellValue(0, colIndex, `value-1-${colIndex}`);
+      for (
+        let colIndex = NUMBER_OF_CONTROL_COLUMNS;
+        colIndex <= INITIAL_COLUMN_PLACEHOLDERS + NUMBER_OF_CONTROL_COLUMNS;
+        colIndex++
+      ) {
+        await indexEditor.setCellValue(0, colIndex, `value-1-${colIndex - 1}`);
       }
 
       // Add new row with values
-      await indexEditor.addRow();
-      for (let colIndex = 1; colIndex <= 5; colIndex++) {
-        await indexEditor.setCellValue(0, colIndex, `value-2-${colIndex}`);
+      await indexEditor.addRow(0);
+      for (
+        let colIndex = NUMBER_OF_CONTROL_COLUMNS;
+        colIndex <= INITIAL_COLUMN_PLACEHOLDERS + NUMBER_OF_CONTROL_COLUMNS;
+        colIndex++
+      ) {
+        await indexEditor.setCellValue(1, colIndex, `value-2-${colIndex - 1}`);
       }
 
       // Edit column name
@@ -287,7 +294,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await indexEditor.setCellValue(1, 2, 'Philip Tompsoon');
 
       // Add a new row with some values and delete it
-      await indexEditor.addRow();
+      await indexEditor.addRow(0);
       await indexEditor.setCellValue(0, 1, 'New Name');
       await indexEditor.setCellValue(0, 2, 'New Name Surname');
       expect((await dataGrid.getDocTableRows()).length).to.be(3);
@@ -296,14 +303,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect((await dataGrid.getDocTableRows()).length).to.be(2);
 
       // Add a new row with some values
-      await indexEditor.addRow();
-      await indexEditor.setCellValue(0, 1, 'Pedro');
-      await indexEditor.setCellValue(0, 2, 'Pedro Fernandez');
+      await indexEditor.addRow(1);
+      await indexEditor.setCellValue(1, 1, 'Pedro');
+      await indexEditor.setCellValue(1, 2, 'Pedro Fernandez');
       expect((await dataGrid.getDocTableRows()).length).to.be(3);
 
       // Add a new column
-      await indexEditor.addColumn();
-      await indexEditor.setColumn('age', 'integer', 0); // it's cero because there is only one editable column
+      await indexEditor.addColumn('age', 'integer');
       await indexEditor.setCellValue(0, 7, '30');
       await indexEditor.setCellValue(1, 7, '40');
       await indexEditor.setCellValue(2, 7, '25');

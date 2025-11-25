@@ -48,6 +48,7 @@ const AddColumnControl: React.FC<AddColumnControlProps> = ({ telemetryService })
             iconType="plus"
             size="xs"
             aria-label={addColumnText}
+            data-test-subj="indexEditorAddColumnButton"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           />
         </EuiToolTip>
