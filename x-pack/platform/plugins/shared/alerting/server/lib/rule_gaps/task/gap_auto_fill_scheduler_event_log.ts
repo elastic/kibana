@@ -7,7 +7,10 @@
 
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS } from '../../../plugin';
-import type { SchedulerSoAttributes, GapAutoFillStatus } from '../types/scheduler';
+import type {
+  SchedulerSoAttributes,
+  GapAutoFillStatus,
+} from '../../../application/gaps/types/scheduler';
 
 export interface GapAutoFillExecutionResult {
   ruleId: string;

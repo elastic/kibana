@@ -10,7 +10,7 @@ import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { RulesClientContext } from '../../../rules_client/types';
 import { cleanupStuckInProgressGaps } from './cleanup_stuck_in_progress_gaps';
 import { Gap } from '../gap';
-import { getRuleIdsWithGaps } from '../../../application/rule/methods/get_rule_ids_with_gaps/get_rule_ids_with_gaps';
+import { getRuleIdsWithGaps } from '../../../application/gaps/methods/get_rule_ids_with_gaps/get_rule_ids_with_gaps';
 import { findGapsSearchAfter } from '../find_gaps';
 import { updateGapsInEventLog } from './update_gaps_in_event_log';
 import type { Logger } from '@kbn/core/server';
@@ -19,7 +19,7 @@ jest.mock('../find_gaps', () => ({
 }));
 
 jest.mock(
-  '../../../application/rule/methods/get_rule_ids_with_gaps/get_rule_ids_with_gaps',
+  '../../../application/gaps/methods/get_rule_ids_with_gaps/get_rule_ids_with_gaps',
   () => ({
     getRuleIdsWithGaps: jest.fn(),
   })

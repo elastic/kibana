@@ -6,7 +6,7 @@
  */
 
 import { Gap } from '../../../../lib/rule_gaps/gap';
-import type { StringInterval } from '../../../../lib/rule_gaps/types';
+import type { StringInterval } from '../../types/intervals';
 import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { rulesClientContextMock } from '../../../../rules_client/rules_client.mock';
 import { processGapsBatch } from './process_gaps_batch';
