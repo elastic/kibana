@@ -104,7 +104,10 @@ export const streamEnrichmentMachine = setup({
 
       // Only run validation for wired streams
       if (!isWiredStream) {
-        return { validationErrors: new Map() };
+        return {
+          validationErrors: new Map(),
+          fieldTypesByProcessor: new Map(),
+        };
       }
 
       const allStepsWithUI = context.stepRefs.map(
@@ -124,7 +127,10 @@ export const streamEnrichmentMachine = setup({
         }
       });
 
-      return { validationErrors: errorsByStep };
+      return {
+        validationErrors: errorsByStep,
+        fieldTypesByProcessor: validationResult.fieldTypesByProcessor,
+      };
     }),
     /* URL state actions */
     storeUrlState: assign((_, params: { urlState: EnrichmentUrlState }) => ({
@@ -363,6 +369,7 @@ export const streamEnrichmentMachine = setup({
     stepRefs: [],
     urlState: defaultEnrichmentUrlState,
     validationErrors: new Map(),
+    fieldTypesByProcessor: new Map(),
     simulatorRef: spawn('simulationMachine', {
       id: 'simulator',
       input: {

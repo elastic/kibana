@@ -52,6 +52,7 @@ import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './pro
 import { ConvertProcessorForm } from './convert';
 import { ReplaceProcessorForm } from './replace';
 import { DropProcessorForm } from './drop_document';
+import { ProcessorContextProvider } from './processor_context';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
@@ -183,22 +184,24 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
 
         <EuiFlexItem>
           <FormProvider {...methods}>
-            <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
-              <ProcessorTypeSelector disabled={isConfigured} />
-              <EuiSpacer size="m" />
-              {type === 'convert' && <ConvertProcessorForm />}
-              {type === 'replace' && <ReplaceProcessorForm />}
-              {type === 'date' && <DateProcessorForm />}
-              {type === 'grok' && <GrokProcessorForm />}
-              {type === 'dissect' && <DissectProcessorForm />}
-              {type === 'manual_ingest_pipeline' && <ManualIngestPipelineProcessorForm />}
-              {type === 'set' && <SetProcessorForm />}
-              {type === 'drop_document' && <DropProcessorForm />}
-              {!SPECIALISED_TYPES.includes(type) && (
-                <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
-              )}
-            </EuiForm>
-            {canDelete && (
+            <ProcessorContextProvider processorId={step.customIdentifier}>
+              <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
+                <ProcessorTypeSelector disabled={isConfigured} />
+                <EuiSpacer size="m" />
+                {type === 'convert' && <ConvertProcessorForm />}
+                {type === 'replace' && <ReplaceProcessorForm />}
+                {type === 'date' && <DateProcessorForm />}
+                {type === 'grok' && <GrokProcessorForm />}
+                {type === 'dissect' && <DissectProcessorForm />}
+                {type === 'manual_ingest_pipeline' && <ManualIngestPipelineProcessorForm />}
+                {type === 'set' && <SetProcessorForm />}
+                {type === 'drop_document' && <DropProcessorForm />}
+                {!SPECIALISED_TYPES.includes(type) && (
+                  <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
+                )}
+              </EuiForm>
+            </ProcessorContextProvider>
+            {isConfigured && (
               <>
                 <EuiHorizontalRule margin="m" />
                 <EuiFlexGroup>

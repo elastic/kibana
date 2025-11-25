@@ -52,6 +52,12 @@ export interface StreamlangValidationOptions {
 export interface StreamlangValidationResult {
   isValid: boolean;
   errors: StreamlangValidationError[];
+  /**
+   * Field types available at each processor (indexed by processorId).
+   * This represents the field types that exist BEFORE the processor runs,
+   * which is useful for field selection in the UI.
+   */
+  fieldTypesByProcessor: Map<string, FieldTypeMap>;
 }
 
 /**
@@ -406,7 +412,11 @@ function getExpectedInputType(
 function trackFieldTypesAndValidate(
   flattenedSteps: StreamlangProcessorDefinition[],
   initialTypes: FieldTypeMap = new Map()
-): { fieldTypes: FieldTypeMap; errors: StreamlangValidationError[] } {
+): {
+  fieldTypes: FieldTypeMap;
+  errors: StreamlangValidationError[];
+  fieldTypesByProcessor: Map<string, FieldTypeMap>;
+} {
   const fieldTypes = new Map(initialTypes);
   // Track all possible types a field can have (across different execution paths)
   const potentialFieldTypes = new Map<string, Set<FieldType>>();
@@ -415,12 +425,17 @@ function trackFieldTypesAndValidate(
     potentialFieldTypes.set(field, new Set([type]));
   }
   const errors: StreamlangValidationError[] = [];
+  // Track field types available at each processor (BEFORE the processor runs)
+  const fieldTypesByProcessor = new Map<string, FieldTypeMap>();
 
   for (let i = 0; i < flattenedSteps.length; i++) {
     const step = flattenedSteps[i];
     if (!step) continue;
 
     const processorId = step.customIdentifier || `${step.action}_${i}`;
+
+    // Capture field types BEFORE this processor runs
+    fieldTypesByProcessor.set(processorId, new Map(fieldTypes));
 
     // FIRST: Validate field usage against CURRENT types (before this processor runs)
     const fieldsUsed: string[] = [];
@@ -531,7 +546,7 @@ function trackFieldTypesAndValidate(
     }
   }
 
-  return { fieldTypes, errors };
+  return { fieldTypes, errors, fieldTypesByProcessor };
 }
 
 /**
@@ -590,6 +605,7 @@ export function validateStreamlang(
     initialFieldTypes = new Map(),
   } = options;
   const errors: StreamlangValidationError[] = [];
+  let fieldTypesByProcessor = new Map<string, FieldTypeMap>();
 
   // Flatten the steps to get all processors with their conditions resolved
   const flattenedSteps = flattenSteps(streamlangDSL.steps);
@@ -599,6 +615,8 @@ export function validateStreamlang(
     const typeResult = trackFieldTypesAndValidate(flattenedSteps, initialFieldTypes);
     // Add type validation errors
     errors.push(...typeResult.errors);
+    // Capture field types at each processor
+    fieldTypesByProcessor = typeResult.fieldTypesByProcessor;
   }
 
   // Check each processor
@@ -656,5 +674,6 @@ export function validateStreamlang(
   return {
     isValid: errors.length === 0,
     errors,
+    fieldTypesByProcessor,
   };
 }

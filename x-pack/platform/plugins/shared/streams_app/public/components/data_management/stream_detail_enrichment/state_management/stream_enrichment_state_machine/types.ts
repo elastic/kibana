@@ -50,6 +50,7 @@ export interface StreamEnrichmentContextType {
   simulatorRef: SimulationActorRef;
   urlState: EnrichmentUrlState;
   validationErrors: Map<string, StreamlangValidationError[]>;
+  fieldTypesByProcessor: Map<string, Map<string, import('@kbn/streamlang').FieldType>>;
 }
 
 export type StreamEnrichmentEvent =
