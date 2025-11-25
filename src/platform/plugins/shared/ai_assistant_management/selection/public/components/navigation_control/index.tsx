@@ -29,7 +29,10 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AIChatExperience } from '../../../common/ai_chat_experience';
-import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../../../common/ui_setting_keys';
+import {
+  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
+} from '../../../common/ui_setting_keys';
 import { AIAssistantType } from '../../../common/ai_assistant_type';
 import { AssistantIcon } from '../../icons/assistant_icon/assistant_icon';
 
@@ -82,6 +85,10 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
     await coreStart.settings.client.set(
       PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
       selectedType.assistant
+    );
+    await coreStart.settings.client.set(
+      PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
+      selectedType.chatExperience
     );
     triggerOpenChat({
       chatExperience: selectedType.chatExperience,
