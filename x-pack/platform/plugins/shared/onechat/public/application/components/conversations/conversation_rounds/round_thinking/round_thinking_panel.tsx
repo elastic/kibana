@@ -13,6 +13,7 @@ import {
   EuiTitle,
   useEuiTheme,
   useEuiShadow,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/onechat-common';
@@ -23,7 +24,7 @@ import { RoundSteps } from './steps/round_steps';
 import { ThinkingTimeDisplay } from './thinking_time_display';
 
 const rawResponseButtonLabel = i18n.translate('xpack.onechat.conversation.rawResponseButton', {
-  defaultMessage: 'View raw response',
+  defaultMessage: 'View JSON',
 });
 
 const closePanelLabel = i18n.translate('xpack.onechat.conversation.closePanel', {
@@ -57,7 +58,7 @@ export const RoundThinkingPanel = ({
     background-color: ${euiTheme.colors.backgroundBasePlain};
     border-radius: ${euiTheme.border.radius.medium};
     border: 1px solid ${euiTheme.colors.borderStrongPrimary};
-    padding: ${euiTheme.size.l};
+    padding: ${euiTheme.size.base};
     ${useEuiShadow('l')};
   `;
 
@@ -91,15 +92,20 @@ export const RoundThinkingPanel = ({
         <RoundSteps steps={steps} isLoading={isLoading} />
 
         {!isLoading && (
-          <EuiFlexItem grow={false}>
-            <EuiButton iconType={'code'} color="primary" iconSide="left" onClick={toggleFlyout}>
-              {rawResponseButtonLabel}
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+            <EuiHorizontalRule margin="none" />
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <ThinkingTimeDisplay timeToFirstToken={rawRound.time_to_first_token} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton iconType={'code'} color="text" iconSide="left" onClick={toggleFlyout}>
+                  {rawResponseButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexGroup>
         )}
-        <EuiFlexItem>
-          <ThinkingTimeDisplay timeToFirstToken={rawRound.time_to_first_token} />
-        </EuiFlexItem>
       </EuiFlexGroup>
       <RoundFlyout isOpen={showFlyout} onClose={toggleFlyout} rawRound={rawRound} />
     </>

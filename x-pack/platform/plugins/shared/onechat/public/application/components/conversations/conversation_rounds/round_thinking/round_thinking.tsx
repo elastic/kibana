@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/onechat-common';
 import { isReasoningStep } from '@kbn/onechat-common';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 import { RoundThinkingTitle } from './round_thinking_title';
 import { RoundThinkingPanel } from './round_thinking_panel';
@@ -43,14 +43,16 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
   // TODO: Implement error logic to show an error round here
   if (showThinkingPanel) {
     return (
-      <div css={fadeInStyles}>
-        <RoundThinkingPanel
-          steps={steps}
-          isLoading={isLoading}
-          rawRound={rawRound}
-          onClose={toggleThinkingPanel}
-        />
-      </div>
+      <EuiFlexGroup css={fadeInStyles} responsive={false}>
+        <EuiFlexItem>
+          <RoundThinkingPanel
+            steps={steps}
+            isLoading={isLoading}
+            rawRound={rawRound}
+            onClose={toggleThinkingPanel}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
