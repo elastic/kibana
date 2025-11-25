@@ -32,7 +32,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.spaces).to.eql(['default']);
       expect(response.body.data).to.eql({
         panels: [],
-        references: [],
         title,
       });
     });
