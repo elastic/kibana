@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getPrivilegedMonitorUsersJoin } from './helpers';
 import { RiskScoreFields } from '../../../../../common/search_strategy';
+import { getPrivilegedMonitorUsersJoin } from './helpers';
 
 export const getRiskLevelsPrivilegedUsersQueryBody = (namespace: string) => `
 | WHERE ${RiskScoreFields.userName} IS NOT NULL
