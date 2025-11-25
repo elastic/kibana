@@ -14,6 +14,7 @@ set -euo pipefail
 #   PERF_COUNT - number of uploads (default: 10)
 #   PERF_SAMPLING_INTERVAL - sampling interval in seconds (default: 1)
 #   PERF_DATA_FILE - data file name (default: "big")
+#   PERF_NO_TRANSFORMS - if set to "true", adds --noTransforms flag (default: false)
 #
 # Exports:
 #   TEST_EXIT_CODE - exit code from test execution
@@ -40,6 +41,7 @@ run_performance_tests() {
   PERF_COUNT="${PERF_COUNT:-10}"
   PERF_SAMPLING_INTERVAL="${PERF_SAMPLING_INTERVAL:-1}"
   PERF_DATA_FILE="${PERF_DATA_FILE:-standard}"
+  PERF_NO_TRANSFORMS="${PERF_NO_TRANSFORMS:-false}"
   PERF_ENTITY_COUNT=100000
   PERF_LOGS_PER_ENTITY=10
   PERF_TOTAL_ROWS=$((PERF_ENTITY_COUNT * PERF_LOGS_PER_ENTITY))
@@ -50,6 +52,9 @@ run_performance_tests() {
   echo "Interval: ${PERF_INTERVAL}s"
   echo "Count: $PERF_COUNT"
   echo "Sampling Interval: ${PERF_SAMPLING_INTERVAL}s"
+  if [ "${PERF_NO_TRANSFORMS}" = "true" ]; then
+    echo "No Transforms: enabled"
+  fi
 
   # Change to repository directory
   cd "$SECURITY_DOCS_GEN_DIR"
@@ -85,11 +90,17 @@ run_performance_tests() {
   # Run the performance test
   TEST_START_TIME=$(date +%s)
   set +e
-  yarn start upload-perf-data-interval "$PERF_DATA_FILE" \
+  YARN_CMD="yarn start upload-perf-data-interval \"$PERF_DATA_FILE\" \
     --deleteData \
-    --interval "$PERF_INTERVAL" \
-    --count "$PERF_COUNT" \
-    --samplingInterval "$PERF_SAMPLING_INTERVAL"
+    --interval \"$PERF_INTERVAL\" \
+    --count \"$PERF_COUNT\" \
+    --samplingInterval \"$PERF_SAMPLING_INTERVAL\""
+  
+  if [ "${PERF_NO_TRANSFORMS}" = "true" ]; then
+    YARN_CMD="$YARN_CMD --noTransforms"
+  fi
+  
+  eval "$YARN_CMD"
   TEST_EXIT_CODE=$?
   set -e
   TEST_END_TIME=$(date +%s)

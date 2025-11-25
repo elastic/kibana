@@ -80,6 +80,7 @@ steps:
           PERF_COUNT: 1
           PERF_SAMPLING_INTERVAL: 1
           PERF_DATA_FILE: standard
+          # PERF_NO_TRANSFORMS: true # Optional: set to "true" to disable transforms (default: false)
           # Optional: Baseline comparison configuration
           PERF_BASELINE_FILE: baselines/baseline-v1_0 # Optional: specific baseline file to use
           PERF_DEGRADATION_THRESHOLD: 35 # Optional: degradation threshold % (default: 25)
