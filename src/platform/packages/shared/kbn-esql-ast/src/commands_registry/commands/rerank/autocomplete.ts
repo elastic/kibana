@@ -9,6 +9,7 @@
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLAstRerankCommand, ESQLSingleAstItem, ESQLAstAllCommands } from '../../../types';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../../types';
+import { SuggestionCategory } from '../../../sorting/types';
 import { Location } from '../../types';
 import { getPosition, CaretPosition } from './utils';
 import {
@@ -60,7 +61,14 @@ export async function autocomplete(
       return [
         targetField,
         {
-          ...buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '', '1')[0],
+          ...buildConstantsDefinitions(
+            [QUERY_TEXT_SNIPPET],
+            '',
+            '1',
+            undefined,
+            undefined,
+            SuggestionCategory.CONSTANT_VALUE
+          )[0],
           label: QUERY_TEXT,
           asSnippet: true,
         },
@@ -74,7 +82,14 @@ export async function autocomplete(
     case CaretPosition.RERANK_AFTER_TARGET_ASSIGNMENT: {
       return [
         {
-          ...buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '', '1')[0],
+          ...buildConstantsDefinitions(
+            [QUERY_TEXT_SNIPPET],
+            '',
+            '1',
+            undefined,
+            undefined,
+            SuggestionCategory.CONSTANT_VALUE
+          )[0],
           label: QUERY_TEXT,
           asSnippet: true,
         },
