@@ -46,7 +46,9 @@ export const createAttackDiscoveryAttachmentType = (): AttachmentTypeDefinition 
     format: (attachment: Attachment<string, unknown>) => {
       // Extract data to allow proper type narrowing
       const data = attachment.data;
-      // Type narrowing: validation ensures data matches AttackDiscoveryAttachmentData
+
+      // Necessary because we cannot currently use AttachmentType type as agent is not
+      // registered with enum AttachmentType in onechat attachment_types.ts
       if (!isAttackDiscoveryAttachmentData(data)) {
         throw new Error(`Invalid attack discovery attachment data for attachment ${attachment.id}`);
       }

@@ -50,7 +50,8 @@ export const createAlertAttachmentType = (): AttachmentTypeDefinition => {
     format: (attachment: Attachment<string, unknown>) => {
       // Extract data to allow proper type narrowing
       const data = attachment.data;
-      // Type narrowing: validation ensures data matches AlertAttachmentData
+      // Necessary because we cannot currently use the AttachmentType type as agent is not
+      // registered with enum AttachmentType in onechat attachment_types.ts
       if (!isAlertAttachmentData(data)) {
         throw new Error(`Invalid alert attachment data for attachment ${attachment.id}`);
       }

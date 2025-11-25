@@ -47,7 +47,8 @@ export const createRiskEntityAttachmentType = (): AttachmentTypeDefinition => {
     format: (attachment: Attachment<string, unknown>) => {
       // Extract data to allow proper type narrowing
       const data = attachment.data;
-      // Type narrowing: validation ensures data is a formatted string
+      // Necessary because we cannot currently use the AttachmentType type as agent is not
+      // registered with enum AttachmentType in onechat attachment_types.ts
       if (!isRiskEntityFormattedData(data)) {
         throw new Error(`Invalid risk entity attachment data for attachment ${attachment.id}`);
       }

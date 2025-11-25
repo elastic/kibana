@@ -8,4 +8,5 @@
 export { createAlertAttachmentType } from './alert';
 export { createAttackDiscoveryAttachmentType } from './attack_discovery';
 export { createRiskEntityAttachmentType } from './risk_entity';
+export { createQueryHelpAttachmentType } from './query_help';
 // export { createAlertAttachmentType } from './core-alert';

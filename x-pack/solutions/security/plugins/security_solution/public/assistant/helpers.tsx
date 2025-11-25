@@ -28,13 +28,12 @@ export const getRawData = (data: TimelineEventsDetailsItem[]): Record<string, st
  * This reduces context window usage by keeping only the most relevant information.
  */
 export const filterAndStringifyAlertData = (rawData: Record<string, string[]>): string => {
-  const essentialFieldsSet = new Set(ESSENTIAL_ALERT_FIELDS);
-  const filteredData = Object.keys(rawData)
-    .filter((key) => essentialFieldsSet.has(key))
-    .reduce((acc, key) => {
+  const filteredData = ESSENTIAL_ALERT_FIELDS.reduce((acc, key) => {
+    if (key in rawData) {
       acc[key] = rawData[key];
-      return acc;
-    }, {} as Record<string, string[]>);
+    }
+    return acc;
+  }, {} as Record<string, string[]>);
 
   return JSON.stringify(filteredData);
 };

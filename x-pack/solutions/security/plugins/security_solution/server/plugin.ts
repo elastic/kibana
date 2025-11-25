@@ -150,6 +150,7 @@ import {
   createAlertAttachmentType,
   createAttackDiscoveryAttachmentType,
   createRiskEntityAttachmentType,
+  createQueryHelpAttachmentType,
 } from './agent_builder/attachments';
 import {
   entityRiskScoreTool,
@@ -246,6 +247,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     onechat.attachments.registerType(createAlertAttachmentType());
     onechat.attachments.registerType(createAttackDiscoveryAttachmentType());
     onechat.attachments.registerType(createRiskEntityAttachmentType());
+    onechat.attachments.registerType(createQueryHelpAttachmentType());
 
     // Register tools
     try {

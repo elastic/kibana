@@ -566,7 +566,7 @@ export const PROMOTION_RULE_TAGS = [
  * Essential fields to return for security alerts to reduce context window usage.
  * These fields contain the most relevant information for security analysis.
  */
-export const ESSENTIAL_ALERT_FIELDS = [
+export const ESSENTIAL_ALERT_FIELDS: string[] = [
   '_id',
   '@timestamp',
   'message',
@@ -708,4 +708,5 @@ export enum SecurityAgentBuilderAttachments {
   attack_discovery = 'security.attack_discovery',
   alert = 'security.alert',
   risk_entity = 'security.risk_entity',
+  query_help = 'security.query_help',
 }
