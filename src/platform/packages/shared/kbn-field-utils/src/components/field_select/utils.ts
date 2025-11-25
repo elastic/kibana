@@ -56,8 +56,8 @@ export const TYPE_GROUPS: { label: string; types: string[] }[] = [
     types: ['ip', 'geo_point', 'geo_shape'],
   },
   {
-    label: i18n.translate('fieldUtils.fieldTypeSelect.group.structured', {
-      defaultMessage: 'Structured',
+    label: i18n.translate('fieldUtils.fieldTypeSelect.group.object', {
+      defaultMessage: 'Object',
     }),
     types: ['flattened'],
   },

@@ -189,13 +189,13 @@ export const ColumnHeaderPopover = ({
         }
       }}
     >
-      <EuiForm component="form" onSubmit={onSubmit}>
+      <EuiForm component="form" onSubmit={onSubmit} css={{ width: 300 }}>
         <EuiFormRow
           label={i18n.translate('indexEditor.columnHeaderEdit.fieldType', {
             defaultMessage: 'Select a field type',
           })}
           helpText={i18n.translate('indexEditor.columnHeaderEdit.fieldTypeHelpText', {
-            defaultMessage: `You won't be able to change the type after saving it.`,
+            defaultMessage: `You won't be able to change the type after saving the lookup index.`,
           })}
         >
           <FieldSelect
