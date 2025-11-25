@@ -5,33 +5,76 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { screen, within, waitFor, fireEvent } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
-import { setupEnvironment } from '../../helpers';
+import { setupEnvironment } from '../../helpers/setup_environment';
+import { renderEditPolicy } from '../../helpers/render_edit_policy';
+import { createTogglePhaseAction } from '../../helpers/actions/toggle_phase_action';
+import { createRolloverActions } from '../../helpers/actions/rollover_actions';
+import { createSearchableSnapshotActions } from '../../helpers/actions/searchable_snapshot_actions';
+import { createForceMergeActions } from '../../helpers/actions/forcemerge_actions';
+import { createShrinkActions } from '../../helpers/actions/shrink_actions';
+import { createDownsampleActions } from '../../helpers/actions/downsample_actions';
+import { createMinAgeActions } from '../../helpers/actions/min_age_actions';
+import { createReadonlyActions } from '../../helpers/actions/readonly_actions';
 import { getDefaultHotPhasePolicy } from '../constants';
 import { API_BASE_PATH } from '../../../common/constants';
-import type { SearchableSnapshotsTestBed } from './searchable_snapshots.helpers';
-import { setupSearchableSnapshotsTestBed } from './searchable_snapshots.helpers';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 describe('<EditPolicy /> searchable snapshots', () => {
-  let testBed: SearchableSnapshotsTestBed;
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
-  beforeEach(async () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  const setup = async (args?: { appServicesContext?: any }) => {
+    renderEditPolicy(httpSetup, args);
+    await screen.findByTestId('hot-phase');
+  };
+
+  const createActions = () => ({
+    togglePhase: createTogglePhaseAction(),
+    savePolicy: () => fireEvent.click(screen.getByTestId('savePolicyButton')),
+    ...createRolloverActions(),
+    hot: {
+      ...createSearchableSnapshotActions('hot'),
+      ...createForceMergeActions('hot'),
+      ...createShrinkActions('hot'),
+      ...createDownsampleActions('hot'),
+    },
+    warm: {
+      ...createForceMergeActions('warm'),
+      ...createShrinkActions('warm'),
+      ...createReadonlyActions('warm'),
+      ...createDownsampleActions('warm'),
+    },
+    cold: {
+      ...createMinAgeActions('cold'),
+      ...createSearchableSnapshotActions('cold'),
+      ...createReadonlyActions('cold'),
+      ...createDownsampleActions('cold'),
+    },
+    frozen: {
+      ...createMinAgeActions('frozen'),
+      ...createSearchableSnapshotActions('frozen'),
+    },
+  });
+
+  beforeEach(() => {
+    ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
     httpRequestsMockHelpers.setDefaultResponses();
-
-    await act(async () => {
-      testBed = await setupSearchableSnapshotsTestBed(httpSetup);
-    });
-
-    const { component } = testBed;
-    component.update();
   });
 
   test('enabling searchable snapshot should hide force merge, readonly and shrink in subsequent phases', async () => {
-    const { actions } = testBed;
+    await setup();
+    const actions = createActions();
 
     await actions.togglePhase('warm');
     await actions.togglePhase('cold');
@@ -54,13 +97,14 @@ describe('<EditPolicy /> searchable snapshots', () => {
     expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
     expect(actions.cold.readonlyExists()).toBeFalsy();
     expect(actions.cold.downsample.exists()).toBeFalsy();
-  });
+  }, 10000);
 
   test('disabling rollover toggle, but enabling default rollover', async () => {
-    const { actions } = testBed;
-    await actions.rollover.toggleDefault();
-    await actions.rollover.toggle();
-    await actions.rollover.toggleDefault();
+    await setup();
+    const actions = createActions();
+    actions.rollover.toggleDefault();
+    actions.rollover.toggle();
+    actions.rollover.toggleDefault();
 
     expect(actions.hot.forceMergeExists()).toBeTruthy();
     expect(actions.hot.shrinkExists()).toBeTruthy();
@@ -68,7 +112,8 @@ describe('<EditPolicy /> searchable snapshots', () => {
   });
 
   test('should set the repository from previously defined repository', async () => {
-    const { actions } = testBed;
+    await setup();
+    const actions = createActions();
 
     const repository = 'myRepo';
     await actions.hot.setSearchableSnapshot(repository);
@@ -79,6 +124,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
     await actions.frozen.setMinAgeValue('15');
 
     await actions.savePolicy();
+    await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
     const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
     const [requestUrl, requestBody] = lastReq;
@@ -94,10 +140,11 @@ describe('<EditPolicy /> searchable snapshots', () => {
     expect(parsedReqBody.phases.frozen.actions.searchable_snapshot.snapshot_repository).toBe(
       repository
     );
-  });
+  }, 10000);
 
   test('should update the repository in all searchable snapshot actions', async () => {
-    const { actions } = testBed;
+    await setup();
+    const actions = createActions();
 
     await actions.hot.setSearchableSnapshot('myRepo');
     await actions.togglePhase('cold');
@@ -109,6 +156,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
     // We update the repository in one phase
     await actions.frozen.setSearchableSnapshot('changed');
     await actions.savePolicy();
+    await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
     const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
     const [requestUrl, requestBody] = lastReq;
@@ -125,7 +173,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
     expect(parsedReqBody.phases.frozen.actions.searchable_snapshot.snapshot_repository).toBe(
       'changed'
     );
-  });
+  }, 15000);
 
   describe('on cloud', () => {
     describe('new policy', () => {
@@ -139,22 +187,18 @@ describe('<EditPolicy /> searchable snapshots', () => {
         });
         httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
-        await act(async () => {
-          testBed = await setupSearchableSnapshotsTestBed(httpSetup, {
-            appServicesContext: { cloud: { ...cloudMock.createSetup(), isCloudEnabled: true } },
-          });
+        // Re-render with new context
+        await setup({
+          appServicesContext: { cloud: { ...cloudMock.createSetup(), isCloudEnabled: true } },
         });
-
-        const { component } = testBed;
-        component.update();
       });
 
       test('defaults searchable snapshot to true on cloud', async () => {
-        const { find, actions } = testBed;
+        const actions = createActions();
         await actions.togglePhase('cold');
-        expect(
-          find('searchableSnapshotField-cold.searchableSnapshotToggle').props()['aria-checked']
-        ).toBe(true);
+        const container = screen.getByTestId('searchableSnapshotField-cold');
+        const toggle = within(container).getByTestId('searchableSnapshotToggle');
+        expect(toggle).toHaveAttribute('aria-checked', 'true');
       });
     });
 
@@ -168,23 +212,20 @@ describe('<EditPolicy /> searchable snapshots', () => {
         });
         httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
-        await act(async () => {
-          testBed = await setupSearchableSnapshotsTestBed(httpSetup, {
-            appServicesContext: { cloud: { ...cloudMock.createSetup(), isCloudEnabled: true } },
-          });
+        // Re-render with new context
+        await setup({
+          appServicesContext: { cloud: { ...cloudMock.createSetup(), isCloudEnabled: true } },
         });
-
-        const { component } = testBed;
-        component.update();
       });
 
       test('correctly sets snapshot repository default to "found-snapshots"', async () => {
-        const { actions } = testBed;
+        const actions = createActions();
         await actions.togglePhase('cold');
         await actions.cold.setMinAgeValue('10');
         await actions.cold.toggleSearchableSnapshot();
 
         await actions.savePolicy();
+        await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
         const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
         const [requestUrl, requestBody] = lastReq;
@@ -208,20 +249,16 @@ describe('<EditPolicy /> searchable snapshots', () => {
       });
       httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['my-repo'] });
 
-      await act(async () => {
-        testBed = await setupSearchableSnapshotsTestBed(httpSetup, {
-          appServicesContext: {
-            license: licensingMock.createLicense({ license: { type: 'basic' } }),
-          },
-        });
+      // Setup with basic license context
+      await setup({
+        appServicesContext: {
+          license: licensingMock.createLicense({ license: { type: 'basic' } }),
+        },
       });
-
-      const { component } = testBed;
-      component.update();
     });
 
     test('disable setting searchable snapshots', async () => {
-      const { actions } = testBed;
+      const actions = createActions();
 
       expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
       expect(actions.cold.searchableSnapshotsExists()).toBeFalsy();

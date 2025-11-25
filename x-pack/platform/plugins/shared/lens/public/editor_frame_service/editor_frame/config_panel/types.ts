@@ -83,7 +83,6 @@ export interface LayerPanelProps extends LensConfigPanelBaseProps {
   onRemoveLayer: (layerId: string) => void;
   onCloneLayer: () => void;
   onRemoveDimension: (props: { columnId: string; layerId: string }) => void;
-  registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
   toggleFullscreen: () => void;
   onEmptyDimensionAdd: (columnId: string, group: { groupId: string }) => void;
   onChangeIndexPattern: (args: {

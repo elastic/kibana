@@ -7,6 +7,8 @@ steps:
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 90
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '-1'
@@ -20,6 +22,8 @@ steps:
       diskSizeGb: 115
     key: quick_checks
     timeout_in_minutes: 60
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '-1'
@@ -33,6 +37,8 @@ steps:
       preemptible: true
       diskSizeGb: 115
     timeout_in_minutes: 60
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '-1'
@@ -46,6 +52,8 @@ steps:
       diskSizeGb: 115
     key: linting
     timeout_in_minutes: 60
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '-1'
@@ -59,6 +67,8 @@ steps:
       diskSizeGb: 115
     key: linting_with_types
     timeout_in_minutes: 60
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '-1'
@@ -71,6 +81,8 @@ steps:
       preemptible: true
     key: check_oas_snapshot
     timeout_in_minutes: 60
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '-1'
@@ -86,6 +98,8 @@ steps:
       diskSizeGb: 115
     key: check_types
     timeout_in_minutes: 60
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '-1'
@@ -103,6 +117,7 @@ steps:
       JEST_CONFIGS_DEPS: 'check_types'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       FTR_CONFIGS_DEPS: 'build,check_types'
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '*'
@@ -114,6 +129,8 @@ steps:
       machineType: n2-standard-2
       diskSizeGb: 115
     timeout_in_minutes: 10
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     depends_on:
       - build
       - build_api_docs
@@ -137,6 +154,8 @@ steps:
       - quick_checks
       - check_oas_snapshot
     timeout_in_minutes: 90
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '-1'

@@ -87,16 +87,16 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'advanced');
   }
 
-  async clickGoBackToStreams() {
-    await this.page.getByTestId('backToStreamsButton').click();
-  }
-
   async clickStreamNameLink(streamName: string) {
     await this.page.getByTestId(`streamsNameLink-${streamName}`).click();
   }
 
   async clickDataQualityTab() {
     await this.page.getByTestId('dataQualityTab').click();
+  }
+
+  async clickRootBreadcrumb() {
+    await this.page.getByTestId('breadcrumb first').click();
   }
 
   // Streams table utility methods
@@ -224,6 +224,10 @@ export class StreamsApp {
 
   async clickEditRoutingRule(streamName: string) {
     await this.page.getByTestId(`routingRuleEditButton-${streamName}`).click();
+  }
+
+  async switchToColumnsView() {
+    await this.page.getByTestId('columns').click();
   }
 
   async saveRoutingRule() {
@@ -789,5 +793,9 @@ export class StreamsApp {
   async closeFlyout() {
     await this.page.getByTestId('euiFlyoutCloseButton').click();
     await expect(this.page.getByTestId('euiFlyoutCloseButton')).toBeHidden();
+  }
+
+  async clickProcessorPreviewTab(label: string) {
+    await this.page.getByText(label).click();
   }
 }
