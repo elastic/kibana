@@ -36,11 +36,17 @@ import {
   bucketFiltersOperationSchema,
 } from '../bucket_ops';
 import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import {
+  legendTruncateAfterLinesSchema,
+  legendVisibleSchema,
+  legendSizeSchema,
+  valueDisplaySchema,
+} from './partition_shared';
 
 /**
- * Shared visualization options for waffle charts including legend and value display
+ * Shared visualization options for partition charts including legend and value display
  */
-const partitionStateSharedOptionsSchema = {
+export const waffleStateSharedSchema = {
   legend: schema.maybe(
     schema.object(
       {
@@ -55,54 +61,14 @@ const partitionStateSharedOptionsSchema = {
             { minSize: 1, maxSize: 1 }
           )
         ),
-        truncate_after_lines: schema.maybe(
-          schema.number({
-            defaultValue: 1,
-            min: 1,
-            max: 10,
-            meta: { description: 'Maximum lines before truncating legend items (1-10)' },
-          })
-        ),
-        visible: schema.maybe(
-          schema.oneOf([schema.literal('auto'), schema.literal('show'), schema.literal('hide')], {
-            meta: { description: 'Legend visibility: auto, show, or hide' },
-          })
-        ),
-        size: schema.maybe(
-          schema.oneOf(
-            [
-              schema.literal('auto'),
-              schema.literal('small'),
-              schema.literal('medium'),
-              schema.literal('large'),
-              schema.literal('xlarge'),
-            ],
-            { meta: { description: 'Legend size: auto, small, medium, large, or xlarge' } }
-          )
-        ),
+        truncate_after_lines: legendTruncateAfterLinesSchema,
+        visible: legendVisibleSchema,
+        size: legendSizeSchema,
       },
       { meta: { description: 'Legend configuration for waffle chart' } }
     )
   ),
-  value_display: schema.maybe(
-    schema.object(
-      {
-        mode: schema.oneOf(
-          [schema.literal('hidden'), schema.literal('absolute'), schema.literal('percentage')],
-          { meta: { description: 'Value display mode: hidden, absolute, or percentage' } }
-        ),
-        percent_decimals: schema.maybe(
-          schema.number({
-            defaultValue: 2,
-            min: 0,
-            max: 10,
-            meta: { description: 'Decimal places for percentage display (0-10)' },
-          })
-        ),
-      },
-      { meta: { description: 'Configuration for displaying values in chart cells' } }
-    )
-  ),
+  value_display: valueDisplaySchema,
 };
 
 /**
@@ -141,7 +107,7 @@ export const waffleStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetSchema,
-    ...partitionStateSharedOptionsSchema,
+    ...waffleStateSharedSchema,
     metrics: schema.arrayOf(
       schema.oneOf(
         [
@@ -247,7 +213,7 @@ const waffleStateSchemaESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
-    ...partitionStateSharedOptionsSchema,
+    ...waffleStateSharedSchema,
     metrics: schema.allOf(
       [
         schema.object(genericOperationOptionsSchema),

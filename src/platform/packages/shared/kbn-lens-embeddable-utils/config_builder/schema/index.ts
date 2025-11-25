@@ -13,14 +13,26 @@ import { metricStateSchema } from './charts/metric';
 import { legacyMetricStateSchema } from './charts/legacy_metric';
 import { gaugeStateSchema } from './charts/gauge';
 import { tagcloudStateSchema } from './charts/tagcloud';
+import { mosaicStateSchema } from './charts/mosaic';
+import { pieStateSchema } from './charts/pie';
+import { treemapStateSchema } from './charts/treemap';
+import { waffleStateSchema } from './charts/waffle';
 import type { LensApiAllMetricOperations } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
+
+export const partitionStateSchema = schema.oneOf([
+  mosaicStateSchema,
+  pieStateSchema,
+  treemapStateSchema,
+  waffleStateSchema,
+]);
 
 export const lensApiStateSchema = schema.oneOf([
   metricStateSchema,
   legacyMetricStateSchema,
   gaugeStateSchema,
   tagcloudStateSchema,
+  partitionStateSchema,
 ]);
 
 export type LensApiState = TypeOf<typeof lensApiStateSchema>;

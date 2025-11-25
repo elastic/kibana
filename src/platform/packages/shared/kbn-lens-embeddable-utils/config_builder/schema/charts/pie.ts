@@ -17,52 +17,24 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import {
+  legendNestedSchema,
+  legendSizeSchema,
+  legendTruncateAfterLinesSchema,
+  legendVisibleSchema,
+  valueDisplaySchema,
+} from './partition_shared';
 
-const partitionStateSharedOptionsSchema = {
+const pieStateSharedSchema = {
   legend: schema.maybe(
     schema.object({
-      nested: schema.maybe(
-        schema.boolean({
-          defaultValue: false,
-        })
-      ),
-      truncate_after_lines: schema.maybe(
-        schema.number({
-          defaultValue: 1,
-          min: 1,
-          max: 10,
-        })
-      ),
-      visible: schema.maybe(
-        schema.oneOf([schema.literal('auto'), schema.literal('show'), schema.literal('hide')])
-      ),
-      size: schema.maybe(
-        schema.oneOf([
-          schema.literal('auto'),
-          schema.literal('small'),
-          schema.literal('medium'),
-          schema.literal('large'),
-          schema.literal('xlarge'),
-        ])
-      ),
+      nested: legendNestedSchema,
+      truncate_after_lines: legendTruncateAfterLinesSchema,
+      visible: legendVisibleSchema,
+      size: legendSizeSchema,
     })
   ),
-  value_display: schema.maybe(
-    schema.object({
-      mode: schema.oneOf([
-        schema.literal('hidden'),
-        schema.literal('absolute'),
-        schema.literal('percentage'),
-      ]),
-      percent_decimals: schema.maybe(
-        schema.number({
-          defaultValue: 2,
-          min: 0,
-          max: 10,
-        })
-      ),
-    })
-  ),
+  value_display: valueDisplaySchema,
   /**
    * Position of the labels
    */
@@ -108,12 +80,14 @@ const partitionStateBreakdownByOptionsSchema = schema.object({
   collapse_by: schema.maybe(collapseBySchema),
 });
 
+const pieTypeSchema = schema.oneOf([schema.literal('pie'), schema.literal('donut')]);
+
 export const pieStateSchemaNoESQL = schema.object({
-  type: schema.oneOf([schema.literal('pie'), schema.literal('donut')]),
+  type: pieTypeSchema,
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
   ...datasetSchema,
-  ...partitionStateSharedOptionsSchema,
+  ...pieStateSharedSchema,
   /**
    * Primary value configuration, must define operation.
    */
@@ -133,11 +107,11 @@ export const pieStateSchemaNoESQL = schema.object({
 });
 
 const pieStateSchemaESQL = schema.object({
-  type: schema.oneOf([schema.literal('pie'), schema.literal('donut')]),
+  type: pieTypeSchema,
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
   ...datasetEsqlTableSchema,
-  ...partitionStateSharedOptionsSchema,
+  ...pieStateSharedSchema,
   /**
    * Primary value configuration, must define operation.
    */

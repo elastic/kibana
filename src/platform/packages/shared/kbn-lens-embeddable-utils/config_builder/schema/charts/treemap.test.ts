@@ -12,10 +12,10 @@ import { treemapStateSchema } from './treemap';
 
 describe('Treemap Schema', () => {
   const baseTreemapConfig = {
-    type: 'treemap' as const,
+    type: 'treemap',
     dataset: {
-      type: 'dataView' as const,
-      name: 'test-data-view',
+      type: 'dataView',
+      id: 'test-data-view',
     },
   };
 
@@ -29,14 +29,14 @@ describe('Treemap Schema', () => {
       ...baseTreemapConfig,
       metrics: [
         {
-          operation: 'count' as const,
+          operation: 'count',
           field: 'test_field',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
       ],
       group_by: [
         {
-          operation: 'terms' as const,
+          operation: 'terms',
           fields: ['category'],
         },
       ],
@@ -56,26 +56,26 @@ describe('Treemap Schema', () => {
       title: 'Sales Treemap',
       metrics: [
         {
-          operation: 'sum' as const,
+          operation: 'sum',
           field: 'sales',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
       ],
       group_by: [
         {
-          operation: 'terms' as const,
+          operation: 'terms',
           fields: ['category'],
         },
       ],
       legend: {
         nested: true,
         truncate_after_lines: 3,
-        visible: 'auto' as const,
-        size: 'large' as const,
+        visible: 'auto',
+        size: 'large',
       },
-      label_position: 'visible' as const,
+      label_position: 'visible',
       value_display: {
-        mode: 'absolute' as const,
+        mode: 'absolute',
       },
     };
 
@@ -92,14 +92,14 @@ describe('Treemap Schema', () => {
       ...baseTreemapConfig,
       metrics: [
         {
-          operation: 'count' as const,
+          operation: 'count',
           field: 'test_field',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
       ],
       group_by: [
         {
-          operation: 'terms' as const,
+          operation: 'terms',
           fields: ['category'],
         },
       ],
@@ -115,17 +115,17 @@ describe('Treemap Schema', () => {
       ...baseTreemapConfig,
       metrics: [
         {
-          operation: 'count' as const,
+          operation: 'count',
           field: 'test_field',
         },
       ],
       group_by: [
         {
-          operation: 'terms' as const,
+          operation: 'terms',
           fields: ['category'],
         },
       ],
-      label_position: 'invalid' as const,
+      label_position: 'invalid',
     };
 
     expect(() => treemapStateSchema.validate(input)).toThrow();

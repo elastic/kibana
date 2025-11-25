@@ -10,163 +10,161 @@
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import { pieStateSchema } from './pie';
 
-describe('Pie Schema', () => {
-  const basePieConfig = {
-    type: 'pie' as const,
-    dataset: {
-      type: 'dataView' as const,
-      id: 'test-data-view',
-    },
-  };
-
+describe('Pie/Donut Schema', () => {
   const defaultValues = {
     sampling: 1,
     ignore_global_filters: false,
   };
 
-  it('validates minimal pie configuration', () => {
-    const input = {
-      ...basePieConfig,
-      metrics: [
-        {
-          operation: 'count' as const,
-          field: 'test_field',
-          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-        },
-      ],
-      group_by: [
-        {
-          operation: 'terms' as const,
-          fields: ['category'],
-        },
-      ],
-    };
-
-    const validated = pieStateSchema.validate(input);
-    expect(validated).toEqual({
-      ...defaultValues,
-      ...input,
-      group_by: [{ ...input.group_by[0], size: 5 }],
-    });
-  });
-
-  it('validates donut configuration', () => {
-    const input = {
-      type: 'donut' as const,
+  describe.each(['pie', 'donut'] as const)('%s chart type', (chartType) => {
+    const basePieConfig = {
+      type: chartType,
       dataset: {
-        type: 'dataView' as const,
+        type: 'dataView',
         id: 'test-data-view',
       },
-      metrics: [
-        {
-          operation: 'sum' as const,
-          field: 'sales',
-          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-        },
-      ],
-      group_by: [
-        {
-          operation: 'terms' as const,
-          fields: ['category'],
-        },
-      ],
-      donut_hole: 'medium' as const,
     };
 
-    const validated = pieStateSchema.validate(input);
-    expect(validated).toEqual({
-      ...defaultValues,
-      ...input,
-      group_by: [{ ...input.group_by[0], size: 5 }],
+    it('validates minimal configuration', () => {
+      const input = {
+        ...basePieConfig,
+        metrics: [
+          {
+            operation: 'count',
+            field: 'test_field',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+        ],
+        group_by: [
+          {
+            operation: 'terms',
+            fields: ['category'],
+          },
+        ],
+      };
+
+      const validated = pieStateSchema.validate(input);
+      expect(validated).toEqual({
+        ...defaultValues,
+        ...input,
+        group_by: [{ ...input.group_by[0], size: 5 }],
+      });
     });
-  });
 
-  it('validates full configuration with pie-specific options', () => {
-    const input = {
-      ...basePieConfig,
-      title: 'Sales Pie Chart',
-      metrics: [
-        {
-          operation: 'sum' as const,
-          field: 'sales',
-          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-        },
-      ],
-      group_by: [
-        {
-          operation: 'terms' as const,
-          fields: ['category'],
-        },
-      ],
-      legend: {
-        nested: false,
-        truncate_after_lines: 2,
-        visible: 'show' as const,
-        size: 'xlarge' as const,
-      },
-      label_position: 'inside' as const,
-      donut_hole: 'small' as const,
-      value_display: {
-        mode: 'percentage' as const,
-        percent_decimals: 0,
-      },
-    };
+    it('validates configuration with donut_hole', () => {
+      const input = {
+        ...basePieConfig,
+        metrics: [
+          {
+            operation: 'sum',
+            field: 'sales',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+        ],
+        group_by: [
+          {
+            operation: 'terms',
+            fields: ['category'],
+          },
+        ],
+        donut_hole: 'medium',
+      };
 
-    const validated = pieStateSchema.validate(input);
-    expect(validated).toEqual({
-      ...defaultValues,
-      ...input,
-      group_by: [{ ...input.group_by[0], size: 5 }],
+      const validated = pieStateSchema.validate(input);
+      expect(validated).toEqual({
+        ...defaultValues,
+        ...input,
+        group_by: [{ ...input.group_by[0], size: 5 }],
+      });
     });
-  });
 
-  it('validates default values are applied', () => {
-    const input = {
-      ...basePieConfig,
-      metrics: [
-        {
-          operation: 'count' as const,
-          field: 'test_field',
-          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+    it('validates full configuration with specific options', () => {
+      const input = {
+        ...basePieConfig,
+        title: 'Sales Chart',
+        metrics: [
+          {
+            operation: 'sum',
+            field: 'sales',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+        ],
+        group_by: [
+          {
+            operation: 'terms',
+            fields: ['category'],
+          },
+        ],
+        legend: {
+          nested: false,
+          truncate_after_lines: 2,
+          visible: 'show',
+          size: 'xlarge',
         },
-      ],
-      group_by: [
-        {
-          operation: 'terms' as const,
-          fields: ['category'],
+        label_position: 'inside',
+        donut_hole: 'small',
+        value_display: {
+          mode: 'percentage',
+          percent_decimals: 0,
         },
-      ],
-      legend: {},
-      value_display: {
-        mode: 'percentage' as const,
-      },
-    };
+      };
 
-    const validated = pieStateSchema.validate(input);
-    expect(validated.legend).toEqual({});
-    expect(validated.value_display).toEqual({
-      mode: 'percentage',
+      const validated = pieStateSchema.validate(input);
+      expect(validated).toEqual({
+        ...defaultValues,
+        ...input,
+        group_by: [{ ...input.group_by[0], size: 5 }],
+      });
     });
-  });
 
-  it('throws on invalid donut hole size', () => {
-    const input = {
-      ...basePieConfig,
-      metrics: [
-        {
-          operation: 'count' as const,
-          field: 'test_field',
+    it('validates default values are applied', () => {
+      const input = {
+        ...basePieConfig,
+        metrics: [
+          {
+            operation: 'count',
+            field: 'test_field',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+        ],
+        group_by: [
+          {
+            operation: 'terms',
+            fields: ['category'],
+          },
+        ],
+        legend: {},
+        value_display: {
+          mode: 'percentage',
         },
-      ],
-      group_by: [
-        {
-          operation: 'terms' as const,
-          fields: ['category'],
-        },
-      ],
-      donut_hole: 'invalid' as const,
-    };
+      };
 
-    expect(() => pieStateSchema.validate(input)).toThrow();
+      const validated = pieStateSchema.validate(input);
+      expect(validated.legend).toEqual({});
+      expect(validated.value_display).toEqual({
+        mode: 'percentage',
+      });
+    });
+
+    it('throws on invalid donut hole size', () => {
+      const input = {
+        ...basePieConfig,
+        metrics: [
+          {
+            operation: 'count',
+            field: 'test_field',
+          },
+        ],
+        group_by: [
+          {
+            operation: 'terms',
+            fields: ['category'],
+          },
+        ],
+        donut_hole: 'invalid',
+      };
+
+      expect(() => pieStateSchema.validate(input)).toThrow();
+    });
   });
 });

@@ -36,52 +36,25 @@ import {
   bucketFiltersOperationSchema,
 } from '../bucket_ops';
 import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import {
+  legendNestedSchema,
+  legendSizeSchema,
+  legendTruncateAfterLinesSchema,
+  legendVisibleSchema,
+  valueDisplaySchema,
+} from './partition_shared';
 
-const partitionStateSharedOptionsSchema = {
+const treemapSharedStateSchema = {
   legend: schema.maybe(
     schema.object({
-      nested: schema.maybe(
-        schema.boolean({
-          defaultValue: false,
-        })
-      ),
-      truncate_after_lines: schema.maybe(
-        schema.number({
-          defaultValue: 1,
-          min: 1,
-          max: 10,
-        })
-      ),
-      visible: schema.maybe(
-        schema.oneOf([schema.literal('auto'), schema.literal('show'), schema.literal('hide')])
-      ),
-      size: schema.maybe(
-        schema.oneOf([
-          schema.literal('auto'),
-          schema.literal('small'),
-          schema.literal('medium'),
-          schema.literal('large'),
-          schema.literal('xlarge'),
-        ])
-      ),
+      nested: legendNestedSchema,
+      truncate_after_lines: legendTruncateAfterLinesSchema,
+      visible: legendVisibleSchema,
+      size: legendSizeSchema,
     })
   ),
-  value_display: schema.maybe(
-    schema.object({
-      mode: schema.oneOf([
-        schema.literal('hidden'),
-        schema.literal('absolute'),
-        schema.literal('percentage'),
-      ]),
-      percent_decimals: schema.maybe(
-        schema.number({
-          defaultValue: 2,
-          min: 0,
-          max: 10,
-        })
-      ),
-    })
-  ),
+  value_display: valueDisplaySchema,
+
   /**
    * Position of the labels
    */
@@ -119,7 +92,7 @@ export const treemapStateSchemaNoESQL = schema.object({
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
   ...datasetSchema,
-  ...partitionStateSharedOptionsSchema,
+  ...treemapSharedStateSchema,
   /**
    * Primary value configuration, must define operation.
    */
@@ -171,7 +144,7 @@ const treemapStateSchemaESQL = schema.object({
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
   ...datasetEsqlTableSchema,
-  ...partitionStateSharedOptionsSchema,
+  ...treemapSharedStateSchema,
   /**
    * Primary value configuration, must define operation.
    */

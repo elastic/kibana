@@ -15,7 +15,7 @@ describe('Mosaic Schema', () => {
     type: 'mosaic' as const,
     dataset: {
       type: 'dataView' as const,
-      name: 'test-data-view',
+      id: 'test-data-view',
     },
   };
 
