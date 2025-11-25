@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
 import { test } from '../../fixtures';
 import { generateLogsData } from '../../fixtures/generators';
 
@@ -15,7 +14,7 @@ const GOOD_QUALITY_STREAM = 'logs-good-quality';
 const DEGRADED_QUALITY_STREAM = 'logs-degraded-quality';
 const POOR_QUALITY_STREAM = 'logs-poor-quality';
 
-test.describe('Stream list view', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Stream list view - table values', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
     const currentTime = Date.now();
     // Stream 1: Good quality stream - no failed or degraded docs, 50 docs total
@@ -104,50 +103,44 @@ test.describe('Stream list view', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.streams.expectStreamsTableVisible();
   });
 
-  test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+  test.afterAll(async ({ apiServices }) => {
     await apiServices.streams.deleteStream(GOOD_QUALITY_STREAM);
     await apiServices.streams.deleteStream(DEGRADED_QUALITY_STREAM);
     await apiServices.streams.deleteStream(POOR_QUALITY_STREAM);
-    await logsSynthtraceEsClient.clean();
   });
 
-  test('check table values', async ({ pageObjects, page, config }) => {
-    await test.step('should display correct doc count in the table', async () => {
-      // // In serverless, indexing the failed docs takes longer, so we need to wait to ensure the doc counts are correct
-      await expect(async () => {
-        await page.reload();
-        // Verify the document count for each stream in the default time range - last 15 minutes
-        await pageObjects.streams.verifyDocCount(GOOD_QUALITY_STREAM, 50);
-        await pageObjects.streams.verifyDocCount(DEGRADED_QUALITY_STREAM, 52);
-        await pageObjects.streams.verifyDocCount(POOR_QUALITY_STREAM, 60);
-      }).toPass({
-        intervals: [3_000],
-        timeout: 60_000,
-      });
-    });
+  test('should display correct doc count in the table', async ({ pageObjects, page }) => {
+    // In serverless, indexing the failed docs takes longer, so we need to wait to ensure the doc counts are correct
+    await page.waitForTimeout(30000);
+    await page.reload();
 
-    await test.step('should display correct data quality badge', async () => {
-      await pageObjects.streams.verifyDataQuality(GOOD_QUALITY_STREAM, 'Good');
-      await pageObjects.streams.verifyDataQuality(DEGRADED_QUALITY_STREAM, 'Degraded');
-      await pageObjects.streams.verifyDataQuality(POOR_QUALITY_STREAM, 'Poor');
-    });
+    // Verify the document count for each stream in the default time range - last 15 minutes
+    await pageObjects.streams.verifyDocCount(GOOD_QUALITY_STREAM, 50);
+    await pageObjects.streams.verifyDocCount(DEGRADED_QUALITY_STREAM, 52);
+    await pageObjects.streams.verifyDocCount(POOR_QUALITY_STREAM, 60);
+  });
 
-    await test.step('should display correct retention in the table', async () => {
-      const isServerless = config.serverless ?? false;
-      // Verify the retention for each log stream is the 'logs' ILM policy
-      const streamNames = [GOOD_QUALITY_STREAM, DEGRADED_QUALITY_STREAM, POOR_QUALITY_STREAM];
+  test('should display correct data quality badge', async ({ pageObjects }) => {
+    await pageObjects.streams.verifyDataQuality(GOOD_QUALITY_STREAM, 'Good');
+    await pageObjects.streams.verifyDataQuality(DEGRADED_QUALITY_STREAM, 'Degraded');
+    await pageObjects.streams.verifyDataQuality(POOR_QUALITY_STREAM, 'Poor');
+  });
 
-      for (const name of streamNames) {
-        await pageObjects.streams.verifyRetention(name, isServerless ? 'Indefinite' : 'logs');
-      }
-    });
+  test('should display correct retention in the table', async ({ pageObjects, config }) => {
+    const isServerless = config.serverless ?? false;
+    // Verify the retention for each log stream is the 'logs' ILM policy
+    const streamNames = [GOOD_QUALITY_STREAM, DEGRADED_QUALITY_STREAM, POOR_QUALITY_STREAM];
 
-    await test.step('should provide Discover actions with correct ESQL queries', async () => {
-      const streamNames = [GOOD_QUALITY_STREAM, DEGRADED_QUALITY_STREAM, POOR_QUALITY_STREAM];
+    for (const name of streamNames) {
+      await pageObjects.streams.verifyRetention(name, isServerless ? 'Indefinite' : 'logs');
+    }
+  });
 
-      for (const name of streamNames) {
-        await pageObjects.streams.verifyDiscoverButtonLink(name);
-      }
-    });
+  test('should provide Discover actions with correct ESQL queries', async ({ pageObjects }) => {
+    const streamNames = [GOOD_QUALITY_STREAM, DEGRADED_QUALITY_STREAM, POOR_QUALITY_STREAM];
+
+    for (const name of streamNames) {
+      await pageObjects.streams.verifyDiscoverButtonLink(name);
+    }
   });
 });
