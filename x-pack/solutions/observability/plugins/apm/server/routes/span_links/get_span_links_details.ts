@@ -48,7 +48,7 @@ async function fetchSpanLinksDetails({
   spanLinks: SpanLink[];
   start: number;
   end: number;
-}) {
+}): Promise<SpanLinkDetails[]> {
   const { startWithBuffer, endWithBuffer } = getBufferedTimerange({
     start,
     end,
@@ -137,7 +137,7 @@ async function fetchSpanLinksDetails({
     return acc;
   }, {});
 
-  return compactMap(response.hits.hits, (hit): SpanLinkDetails | null => {
+  return compactMap(response.hits.hits, (hit) => {
     const commonEvent = accessKnownApmEventFields(hit.fields).requireFields(requiredFields);
 
     const commonDetails = {
