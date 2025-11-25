@@ -12,7 +12,13 @@ import { filter, firstValueFrom } from 'rxjs';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { ALERT_MUTED, ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_MUTED,
+  ALERT_INSTANCE_ID,
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+} from '@kbn/rule-data-utils';
 import {
   DEFAULT_ALERTS_ILM_POLICY_NAME,
   DEFAULT_ALERTS_ILM_POLICY,
@@ -527,12 +533,26 @@ export class AlertsService implements IAlertsService {
   }) {
     const esClient = await this.options.elasticsearchClientPromise;
 
+    const queryWithStatusFilter = {
+      bool: {
+        must: [
+          query,
+          {
+            term: {
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+            },
+          },
+        ],
+      },
+    };
+
     try {
       await esClient.updateByQuery({
         index: indices,
         conflicts: 'proceed',
         refresh: true,
-        query,
+        ignore_unavailable: true,
+        query: queryWithStatusFilter,
         script: {
           source: `ctx._source['${ALERT_MUTED}'] = ${muted};`,
           lang: 'painless',

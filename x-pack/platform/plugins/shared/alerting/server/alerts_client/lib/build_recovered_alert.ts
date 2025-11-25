@@ -14,6 +14,7 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MUTED,
   ALERT_STATUS,
   EVENT_ACTION,
   TAGS,
@@ -35,7 +36,7 @@ import type { DeepPartial } from '@kbn/utility-types';
 import { get } from 'lodash';
 import type { Alert as LegacyAlert } from '../../alert/alert';
 import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
-import type { AlertRule } from '../types';
+import type { AlertRule, AlertRuleData } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 import { nanosToMicros } from './nanos_to_micros';
 import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
@@ -51,6 +52,7 @@ interface BuildRecoveredAlertOpts<
   alert: Alert & AlertData;
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
+  ruleData?: AlertRuleData;
   runTimestamp?: string;
   recoveryActionGroup: string;
   payload?: DeepPartial<AlertData>;
@@ -74,6 +76,7 @@ export const buildRecoveredAlert = <
   alert,
   legacyAlert,
   rule,
+  ruleData,
   timestamp,
   payload,
   runTimestamp,
@@ -94,6 +97,10 @@ export const buildRecoveredAlert = <
   const alertState = legacyAlert.getState();
   const filteredAlertState = filterAlertState(alertState);
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
+  const alertInstanceId = legacyAlert.getId();
+  const isMuted = ruleData
+    ? ruleData.muteAll || ruleData.mutedInstanceIds.includes(alertInstanceId)
+    : false;
 
   const alertUpdates = {
     // Update the timestamp to reflect latest update time
@@ -115,6 +122,8 @@ export const buildRecoveredAlert = <
     // Set latest match count, should be 0
     [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
+    // Set muted state
+    [ALERT_MUTED]: isMuted,
     // Set status to 'recovered'
     [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
     // Set latest duration as recovered alerts should have updated duration

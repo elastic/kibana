@@ -93,13 +93,11 @@ async function muteInstanceWithOCC(
       }),
     });
 
-    if (indices && indices.length > 0) {
-      await context.alertsService?.muteAlertInstance({
-        ruleId,
-        alertInstanceId,
-        indices,
-        logger: context.logger,
-      });
-    }
+    await context.alertsService?.muteAlertInstance({
+      ruleId,
+      alertInstanceId,
+      indices,
+      logger: context.logger,
+    });
   }
 }

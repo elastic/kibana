@@ -6,6 +6,7 @@
  */
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { buildRecoveredAlert } from './build_recovered_alert';
+import type { AlertRuleData } from '../types';
 import {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -80,6 +81,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -106,7 +108,6 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
-                  muted: false,
                   rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
@@ -155,6 +156,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -181,7 +183,6 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
-                  muted: false,
                   rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
@@ -224,6 +225,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -251,7 +253,6 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
-                  muted: false,
                   rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
@@ -330,6 +331,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -356,7 +358,6 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
-                  muted: false,
                   rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
@@ -399,6 +400,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -425,7 +427,6 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
-                  muted: false,
                   rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
@@ -512,6 +513,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -538,7 +540,6 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
-                  muted: false,
                   rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
@@ -623,6 +624,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -649,7 +651,6 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
-                  muted: false,
                   rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
@@ -733,6 +734,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'custom_status',
@@ -759,12 +761,100 @@ for (const flattened of [true, false]) {
               kibana: {
                 alert: {
                   instance: { id: 'alert-A' },
-                  muted: false,
                   rule: omit(rule, 'execution'),
                   uuid: 'abcdefg',
                 },
               },
             }),
+      });
+    });
+
+    describe('ALERT_MUTED field', () => {
+      const ruleData: AlertRuleData = {
+        consumer: 'bar',
+        executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+        id: '1',
+        name: 'rule-name',
+        parameters: { bar: true },
+        revision: 0,
+        spaceId: 'default',
+        tags: ['rule-', '-tags'],
+        alertDelay: 0,
+        muteAll: false,
+        mutedInstanceIds: [],
+      };
+
+      test('should set ALERT_MUTED to false when alert is not muted', () => {
+        const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+        legacyAlert.scheduleActions('default');
+
+        const result = buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
+          alert: existingAlert,
+          legacyAlert,
+          rule: alertRule,
+          ruleData,
+          recoveryActionGroup: 'recovered',
+          timestamp: '2023-03-28T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+        });
+
+        expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(false);
+      });
+
+      test('should set ALERT_MUTED to true when muteAll is true', () => {
+        const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+        legacyAlert.scheduleActions('default');
+
+        const result = buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
+          alert: existingAlert,
+          legacyAlert,
+          rule: alertRule,
+          ruleData: {
+            ...ruleData,
+            muteAll: true,
+          },
+          recoveryActionGroup: 'recovered',
+          timestamp: '2023-03-28T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+        });
+
+        expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+      });
+
+      test('should set ALERT_MUTED to true when alert instance ID is in mutedInstanceIds', () => {
+        const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+        legacyAlert.scheduleActions('default');
+
+        const result = buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
+          alert: existingAlert,
+          legacyAlert,
+          rule: alertRule,
+          ruleData: {
+            ...ruleData,
+            mutedInstanceIds: ['alert-A', 'alert-B'],
+          },
+          recoveryActionGroup: 'recovered',
+          timestamp: '2023-03-28T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+        });
+
+        expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+      });
+
+      test('should set ALERT_MUTED to false when ruleData is not provided', () => {
+        const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+        legacyAlert.scheduleActions('default');
+
+        const result = buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
+          alert: existingAlert,
+          legacyAlert,
+          rule: alertRule,
+          recoveryActionGroup: 'recovered',
+          timestamp: '2023-03-28T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+        });
+
+        expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(false);
       });
     });
   });
