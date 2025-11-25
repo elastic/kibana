@@ -16,15 +16,15 @@ import unified from 'unified';
 import remarkParse from 'remark-parse-no-trim';
 import { createVisualizationRenderer, visualizationTagParser } from './markdown_plugins';
 import { ChatMessageText } from './chat_message_text';
-import { useOnechatServices } from '../../../hooks/use_onechat_service';
-import { useStepsFromPrevRounds } from '../../../hooks/use_conversation';
-import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { VisualizeESQL } from '../../tools/esql/visualize_esql';
-import type { OnechatStartDependencies } from '../../../../types';
+import { useOnechatServices } from '../../../../hooks/use_onechat_service';
+import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
+import { useConversationContext } from '../../../../context/conversation/conversation_context';
+import { VisualizeESQL } from '../../../tools/esql/visualize_esql';
+import type { OnechatStartDependencies } from '../../../../../types';
 import { setWith } from '@kbn/safer-lodash-set';
 import { ChartType } from '@kbn/visualization-utils';
 
-jest.mock('../../tools/esql/visualize_esql', () => {
+jest.mock('../../../tools/esql/visualize_esql', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const _React = require('react'); // Use require to avoid hoisting issues with jest.mock
   return {
@@ -34,15 +34,15 @@ jest.mock('../../tools/esql/visualize_esql', () => {
   };
 });
 
-jest.mock('../../../hooks/use_onechat_service', () => ({
+jest.mock('../../../../hooks/use_onechat_service', () => ({
   useOnechatServices: jest.fn(),
 }));
 
-jest.mock('../../../hooks/use_conversation', () => ({
+jest.mock('../../../../hooks/use_conversation', () => ({
   useStepsFromPrevRounds: jest.fn(),
 }));
 
-jest.mock('../../../context/conversation/conversation_context', () => ({
+jest.mock('../../../../context/conversation/conversation_context', () => ({
   useConversationContext: jest.fn(),
 }));
 

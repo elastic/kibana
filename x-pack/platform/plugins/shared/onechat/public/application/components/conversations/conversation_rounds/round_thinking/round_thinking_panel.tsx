@@ -19,7 +19,7 @@ import React, { useState } from 'react';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/onechat-common';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { RoundFlyout } from '../round_flyout';
+import { RoundFlyout } from './round_flyout';
 import { RoundSteps } from './steps/round_steps';
 import { ThinkingTimeDisplay } from './thinking_time_display';
 

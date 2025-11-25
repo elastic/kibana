@@ -14,7 +14,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiIcon } from '@elastic/eui';
 import { EuiLoadingElastic } from '@elastic/eui';
-import { ToolResponseFlyout } from '../../tool_response_flyout';
+import { ToolResponseFlyout } from './tool_response_flyout';
 import { useToolResultsFlyout } from '../../../../../hooks/thinking/use_tool_results_flyout';
 import { ThinkingItemLayout } from './thinking_item_layout';
 import { ToolCallDisplay } from './tool_call_display';
