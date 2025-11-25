@@ -107,7 +107,7 @@ export class VisitorContext<
     const args: ESQLAstExpressionNode[] = [];
 
     for (const arg of children(node)) {
-      args.push(arg);
+      args.push(arg as ESQLAstExpression);
     }
 
     return args;

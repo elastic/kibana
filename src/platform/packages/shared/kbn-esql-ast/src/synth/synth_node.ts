@@ -10,6 +10,7 @@
 import { Walker } from '../walker';
 import { Builder } from '../builder';
 import { BasicPrettyPrinter } from '../pretty_print';
+import { printAst, type PrintAstOptions } from '../debug';
 import type { ESQLProperNode } from '../types';
 
 /**
@@ -39,5 +40,9 @@ export class SynthNode {
 
   toString(this: ESQLProperNode) {
     return BasicPrettyPrinter.print(this);
+  }
+
+  dump(this: ESQLProperNode, options?: PrintAstOptions) {
+    return printAst(this, { location: false, ...options });
   }
 }

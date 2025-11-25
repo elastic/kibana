@@ -399,6 +399,20 @@ export interface ESQLColumn extends ESQLAstBaseItem {
   type: 'column';
 
   /**
+   * Optional qualifier for the column, e.g. index name or alias.
+   *
+   * @example
+   *
+   * ```esql
+   * [index].[column]
+   * [index].[nested.column.part]
+   * ```
+   *
+   * `index` is the qualifier.
+   */
+  qualifier?: ESQLIdentifier;
+
+  /**
    * A ES|QL column name can be composed of multiple parts,
    * e.g: part1.part2.`part``3️⃣`.?param. Where parts can be quoted, or not
    * quoted, or even be a parameter.
