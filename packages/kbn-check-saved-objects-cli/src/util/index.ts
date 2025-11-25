@@ -7,4 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getPreviousVersionType } from './previous_version_type';
+export { downloadFile } from './download_file';
+export { getFileFromKibanaRepo } from './git';
+export { startElasticsearch, setupKibana, stopElasticsearch, stopKibana } from './servers';
+export { fileToJson, jsonToFile } from './json';
