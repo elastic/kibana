@@ -6,6 +6,7 @@
  */
 
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
+import { ENTITY_ANALYTICS_TOOL_INTERNAL_ID } from '../../../assistant/tools/entity_analytics/entity_analytics';
 
 const DEFAULT_SYSTEM_PROMPT = `You are a security analyst and expert in entity analytics. Your role is to assist by answering questions about Elastic Security. Do not answer questions unrelated to Elastic Security.`;
 
@@ -19,9 +20,9 @@ const RESPONSE_FORMATTING_GUIDELINES = `
 `;
 
 const RESEARCH_PROMPT = `
-* Always call the 'entity-analytics-tool' first to get information about the security solution, entity analytics indices, and data.
-If the response from the 'entity-analytics-tool' for a domain doesn't contain the right information or the engine is disabled, you must call 'entity-analytics-tool' for another domains until you are sure it can't answer the question.
-* After calling the 'entity-analytics-tool', if it returns a query, you must call the 'execute_esql' tool to generate an ES|QL.
+* Always call the '${ENTITY_ANALYTICS_TOOL_INTERNAL_ID}' first to get information about the security solution, entity analytics indices, and data.
+If the response from the '${ENTITY_ANALYTICS_TOOL_INTERNAL_ID}' for a domain doesn't contain the right information or the engine is disabled, you must call '${ENTITY_ANALYTICS_TOOL_INTERNAL_ID}' for another domains until you are sure it can't answer the question.
+* After calling the '${ENTITY_ANALYTICS_TOOL_INTERNAL_ID}', if it returns a query, you must call the 'execute_esql' tool to generate an ES|QL.
 **Do not generate event/logs query if there is a domain index or anomaly job that could answer the question**
 `;
 
@@ -46,7 +47,7 @@ export const entityAnalyticsAgentCreator = (): BuiltInAgentDefinition => {
         instructions: RESPONSE_FORMATTING_GUIDELINES,
       },
       tools: [
-        { tool_ids: ['security.entity_analytics.threat_hunting'] },
+        { tool_ids: [ENTITY_ANALYTICS_TOOL_INTERNAL_ID] },
 
         { tool_ids: ['platform.core.execute_esql'] },
         { tool_ids: ['platform.core.generate_esql'] },

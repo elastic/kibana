@@ -214,8 +214,7 @@ evaluate.describe(
                 output: {
                   criteria: [
                     'Return that the required anomaly detection jobs are not enabled in this environment.',
-                    'Prompt the user to enable anomaly detection jobs',
-                    `Mention at least 1 job id from the list: ${dedJobIds.join(', ')}`,
+                    'Prompt the user to enable anomaly detection jobs and list the job ids',
                   ],
                 },
                 metadata: { query_intent: 'Factual' },
@@ -421,7 +420,7 @@ evaluate.describe(
               //     ],
               //     toolCalls: [
               //       {
-              //         id: 'entity-analytics-tool',
+              //         id: 'security.entity_analytics.threat_hunting',
               //       },
               //     ],
               //   },
@@ -441,7 +440,7 @@ evaluate.describe(
               //     ],
               //     toolCalls: [
               //       {
-              //         id: 'entity-analytics-tool',
+              //         id: 'security.entity_analytics.threat_hunting',
               //       },
               //     ],
               //   },
@@ -458,7 +457,7 @@ evaluate.describe(
                   ],
                   toolCalls: [
                     {
-                      id: 'entity-analytics-tool',
+                      id: 'security.entity_analytics.threat_hunting',
                       criteria: [`returns an ESQL query for the ".ml-anomalies-*" index`],
                     },
                   ],
@@ -476,7 +475,7 @@ evaluate.describe(
                   ],
                   toolCalls: [
                     {
-                      id: 'entity-analytics-tool',
+                      id: 'security.entity_analytics.threat_hunting',
                     },
                   ],
                 },
@@ -493,7 +492,7 @@ evaluate.describe(
                   ],
                   toolCalls: [
                     {
-                      id: 'entity-analytics-tool',
+                      id: 'security.entity_analytics.threat_hunting',
                     },
                   ],
                 },
@@ -510,7 +509,7 @@ evaluate.describe(
                   ],
                   toolCalls: [
                     {
-                      id: 'entity-analytics-tool',
+                      id: 'security.entity_analytics.threat_hunting',
                     },
                   ],
                 },
@@ -527,7 +526,7 @@ evaluate.describe(
                   ],
                   toolCalls: [
                     {
-                      id: 'entity-analytics-tool',
+                      id: 'security.entity_analytics.threat_hunting',
                     },
                   ],
                 },
@@ -544,7 +543,7 @@ evaluate.describe(
                   ],
                   toolCalls: [
                     {
-                      id: 'entity-analytics-tool',
+                      id: 'security.entity_analytics.threat_hunting',
                     },
                   ],
                 },
@@ -561,7 +560,7 @@ evaluate.describe(
                   ],
                   toolCalls: [
                     {
-                      id: 'entity-analytics-tool',
+                      id: 'security.entity_analytics.threat_hunting',
                     },
                   ],
                 },
@@ -578,7 +577,7 @@ evaluate.describe(
                   ],
                   toolCalls: [
                     {
-                      id: 'entity-analytics-tool',
+                      id: 'security.entity_analytics.threat_hunting',
                     },
                   ],
                 },

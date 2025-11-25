@@ -57,7 +57,7 @@ evaluate.describe('SIEM Entity Analytics Agent - Risk Score Tests', { tag: '@svl
                 ],
                 toolCalls: [
                   {
-                    id: 'entity-analytics-tool',
+                    id: 'security.entity_analytics.threat_hunting',
                   },
                 ],
               },
@@ -75,7 +75,7 @@ evaluate.describe('SIEM Entity Analytics Agent - Risk Score Tests', { tag: '@svl
                 ],
                 toolCalls: [
                   {
-                    id: 'entity-analytics-tool',
+                    id: 'security.entity_analytics.threat_hunting',
                   },
                 ],
               },
@@ -93,7 +93,7 @@ evaluate.describe('SIEM Entity Analytics Agent - Risk Score Tests', { tag: '@svl
                 ],
                 toolCalls: [
                   {
-                    id: 'entity-analytics-tool',
+                    id: 'security.entity_analytics.threat_hunting',
                   },
                 ],
               },
@@ -152,7 +152,7 @@ evaluate.describe('SIEM Entity Analytics Agent - Risk Score Tests', { tag: '@svl
                 criteria: ['Return at least 5 users with the highest risk scores.'],
                 toolCalls: [
                   {
-                    id: 'entity-analytics-tool',
+                    id: 'security.entity_analytics.threat_hunting',
                     criteria: [
                       `The tool should return the following ESQL query:
                       FROM risk-score.risk-score-latest-default
@@ -176,7 +176,7 @@ evaluate.describe('SIEM Entity Analytics Agent - Risk Score Tests', { tag: '@svl
                 criteria: ['Return the risk score of user-1 over the last 90 days.'],
                 toolCalls: [
                   {
-                    id: 'entity-analytics-tool',
+                    id: 'security.entity_analytics.threat_hunting',
                     criteria: [
                       `The tool should return an ESQL query with the following structure:
                       * FROM index: risk-score.risk-score-default
@@ -197,7 +197,7 @@ evaluate.describe('SIEM Entity Analytics Agent - Risk Score Tests', { tag: '@svl
                 criteria: ['Return the 10 users with the highest risk scores right now.'],
                 toolCalls: [
                   {
-                    id: 'entity-analytics-tool',
+                    id: 'security.entity_analytics.threat_hunting',
                     criteria: [
                       `The tool should return the following ESQL query:
                       FROM risk-score.risk-score-latest-default
