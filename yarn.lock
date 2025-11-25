@@ -7839,6 +7839,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/react-env@link:src/platform/packages/shared/react/env":
+  version "0.0.0"
+  uid ""
+
 "@kbn/react-field@link:src/platform/packages/shared/kbn-react-field":
   version "0.0.0"
   uid ""
@@ -7848,6 +7852,10 @@
   uid ""
 
 "@kbn/react-kibana-context-common@link:src/platform/packages/shared/react/kibana_context/common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-kibana-context-env@link:src/platform/packages/shared/react/kibana_context/env":
   version "0.0.0"
   uid ""
 
