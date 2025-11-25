@@ -16,3 +16,4 @@ export * from './src/conditions/helpers';
 export * from './src/conditions/condition_to_query_dsl';
 export * from './src/conditions/condition_to_painless';
 export * from './src/transpilers/shared/convert_for_ui';
+export * from './src/validation/validate_streamlang';

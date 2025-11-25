@@ -6,7 +6,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { isActionBlock } from '@kbn/streamlang';
+import { isActionBlock, validateStreamlang, convertUIStepsToDSL } from '@kbn/streamlang';
 import type { StreamEnrichmentContextType } from './types';
 import { isStepUnderEdit } from '../steps_state_machine';
 
@@ -53,5 +53,34 @@ export const selectWhetherAnyProcessorBeforePersisted = createSelector(
 
         return hasPersistedAfter;
       });
+  }
+);
+
+/**
+ * Selects validation errors for all processors.
+ * Returns a Map of step customIdentifier to validation errors.
+ */
+export const selectValidationErrors = createSelector(
+  [(context: StreamEnrichmentContextType) => context.stepRefs],
+  (stepRefs) => {
+    // Get all steps with UI attributes (flat structure with parentId)
+    const allStepsWithUI = stepRefs.map((stepActorRef) => stepActorRef.getSnapshot().context.step);
+
+    // Convert to proper nested streamlang DSL structure
+    const streamlangDSL = convertUIStepsToDSL(allStepsWithUI, false);
+
+    // Validate the properly structured DSL
+    const validationResult = validateStreamlang(streamlangDSL, { validateTypes: true });
+
+    // Group errors by step customIdentifier
+    const errorsByStep = new Map<string, typeof validationResult.errors>();
+    validationResult.errors.forEach((error) => {
+      if (error.processorId) {
+        const existing = errorsByStep.get(error.processorId) || [];
+        errorsByStep.set(error.processorId, [...existing, error]);
+      }
+    });
+
+    return errorsByStep;
   }
 );

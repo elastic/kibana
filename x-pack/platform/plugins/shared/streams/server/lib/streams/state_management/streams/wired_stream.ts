@@ -14,6 +14,7 @@ import {
   getInheritedSettings,
   getSegments,
   isInheritLifecycle,
+  getInheritedFieldsFromAncestors,
 } from '@kbn/streams-schema';
 import {
   getAncestors,
@@ -31,6 +32,7 @@ import {
   isDisabledLifecycleFailureStore,
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import { validateStreamlang } from '@kbn/streamlang';
 import { generateLayer } from '../../component_templates/generate_layer';
 import { getComponentTemplateName } from '../../component_templates/name';
 import { isDefinitionNotFoundError } from '../../errors/definition_not_found_error';
@@ -450,6 +452,35 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     validateSystemFields(this._definition);
     validateBracketsInFieldNames(this._definition);
+
+    // Validate Streamlang processing
+    if (this._definition.ingest.processing.steps.length > 0) {
+      // Collect all fields (own fields + inherited fields from ancestors)
+      const allFields = {
+        ...this._definition.ingest.wired.fields,
+        ...getInheritedFieldsFromAncestors(ancestors),
+      };
+
+      // Extract reserved field names (fields marked as 'system')
+      const reservedFields = Object.entries(allFields)
+        .filter(([, { type }]) => type === 'system')
+        .map(([name]) => name);
+
+      // Validate the Streamlang DSL
+      const validationResult = validateStreamlang(this._definition.ingest.processing, {
+        isWiredStream: true,
+        reservedFields,
+      });
+
+      if (!validationResult.isValid) {
+        return {
+          isValid: false,
+          errors: validationResult.errors.map(
+            (error) => new Error(`${error.message} (field: ${error.field})`)
+          ),
+        };
+      }
+    }
 
     if (this.dependencies.isServerless) {
       if (isIlmLifecycle(this.getLifecycle())) {

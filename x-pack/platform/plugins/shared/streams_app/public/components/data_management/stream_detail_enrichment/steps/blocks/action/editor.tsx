@@ -13,6 +13,7 @@ import {
   EuiForm,
   EuiHorizontalRule,
   EuiFlexItem,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
@@ -30,6 +31,7 @@ import {
   useGetStreamEnrichmentState,
   useStreamEnrichmentSelector,
 } from '../../../state_management/stream_enrichment_state_machine';
+import { selectValidationErrors } from '../../../state_management/stream_enrichment_state_machine/selectors';
 import type { ProcessorFormState } from '../../../types';
 import {
   convertFormStateToProcessor,
@@ -68,6 +70,11 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
       step as StreamlangProcessorDefinitionWithUIAttributes
     )
   );
+
+  const typeValidationErrors = useStreamEnrichmentSelector((snapshot) => {
+    const errors = selectValidationErrors(snapshot.context);
+    return errors.get(step.customIdentifier) || [];
+  });
 
   const methods = useForm<ProcessorFormState>({
     // TODO: See if this can be stricter, DeepPartial<ProcessorFormState> doesn't work
@@ -209,6 +216,27 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
+              </>
+            )}
+            {typeValidationErrors.length > 0 && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiCallOut
+                  announceOnMount
+                  title={i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.typeValidationErrors.title',
+                    { defaultMessage: 'Type validation errors' }
+                  )}
+                  color="danger"
+                  iconType="warning"
+                  size="s"
+                >
+                  <ul>
+                    {typeValidationErrors.map((error, index: number) => (
+                      <li key={index}>{error.message}</li>
+                    ))}
+                  </ul>
+                </EuiCallOut>
               </>
             )}
             {processorMetrics && !isEmpty(processorMetrics.errors) && (
