@@ -43,6 +43,7 @@ describe('useFilteredMetricFields', () => {
   ) => {
     const defaults = {
       allFields: [],
+      isFieldsLoading: false,
       searchTerm: '',
       dimensions: [],
       valueFilters: [],
