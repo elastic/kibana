@@ -5,43 +5,26 @@
  * 2.0.
  */
 
-import type {
-  ConversationRoundStep,
-  ToolCallProgress,
-  ToolCallStep,
-} from '@kbn/onechat-common/chat/conversation';
+import type { ConversationRoundStep } from '@kbn/onechat-common/chat/conversation';
 import { isReasoningStep, isToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiIcon } from '@elastic/eui';
 import { EuiLoadingElastic } from '@elastic/eui';
-import { useNavigation } from '../../../../../hooks/use_navigation';
-import { appPaths } from '../../../../../utils/app_paths';
-import { TabularDataResultStep } from './tabular_data_result_step';
-import { OtherResultStep } from './other_result_step';
-import { QueryResultStep } from './query_result_step';
 import { ToolResponseFlyout } from '../../tool_response_flyout';
 import { useToolResultsFlyout } from '../../../../../hooks/thinking/use_tool_results_flyout';
+import { ThinkingItemLayout } from './thinking_item_layout';
+import { ToolCallDisplay } from './tool_call_display';
+import { ToolProgressDisplay } from './tool_progress_display';
+import { ToolResultDisplay } from './tool_result_display';
+import { FlyoutResultItem } from './flyout_result_item';
 
 const labels = {
   roundThinkingSteps: i18n.translate('xpack.onechat.conversation.thinking.stepsList', {
     defaultMessage: 'Round thinking steps',
-  }),
-  toolCall: i18n.translate('xpack.onechat.thinking.toolCallLabel', {
-    defaultMessage: 'Tool call',
-  }),
-  toolResponse: i18n.translate('xpack.onechat.thinking.toolResponseLabel', {
-    defaultMessage: 'Tool response',
-  }),
-  inspectResponse: i18n.translate('xpack.onechat.thinking.inspectResponseLabel', {
-    defaultMessage: 'Inspect tool response details',
-  }),
-  toolLink: i18n.translate('xpack.onechat.thinking.toolLinkLabel', {
-    defaultMessage: 'View tool details',
   }),
   agentReasoning: i18n.translate('xpack.onechat.thinking.agentReasoningLabel', {
     defaultMessage: 'Agent reasoning',
@@ -64,93 +47,11 @@ const flyoutResultTypes = [
   ToolResultType.resource,
 ];
 
-interface ToolResultDisplayProps {
-  toolResult: ToolResult;
-}
-const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolResult }) => {
-  switch (toolResult.type) {
-    // TODO: Add resource result step once we can reliably access the reference ID
-    // case ToolResultType.resource:
-    //   return <ResourceResultStep result={toolResult} />;
-    case ToolResultType.query:
-      return <QueryResultStep result={toolResult} />;
-    case ToolResultType.tabularData:
-      return <TabularDataResultStep result={toolResult} />;
-    default:
-      // Other results
-      // Also showing Resource results as Other results for now as JSON blobs
-      return <OtherResultStep result={toolResult} />;
+const getItemIcon = (isLastItem: boolean, isLoading: boolean): ReactNode => {
+  if (isLastItem && isLoading) {
+    return <EuiLoadingElastic size="m" aria-label={'Loading...'} />;
   }
-};
-
-interface ThinkingItemLayoutProps {
-  children: ReactNode;
-  icon?: ReactNode;
-}
-const ThinkingItemLayout: React.FC<ThinkingItemLayoutProps> = ({ children, icon }) => {
-  return (
-    <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
-      {icon && <EuiFlexItem grow={false}>{icon}</EuiFlexItem>}
-      <EuiFlexItem>
-        <EuiFlexGroup direction="column" gutterSize="l">
-          <EuiFlexItem grow={false}>{children}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
-interface ToolCallDisplayProps {
-  step: ToolCallStep;
-  icon?: ReactNode;
-}
-const ToolCallDisplay: React.FC<ToolCallDisplayProps> = ({ step, icon }) => {
-  const { tool_id: toolId } = step;
-  const { createOnechatUrl } = useNavigation();
-  const toolHref = createOnechatUrl(appPaths.tools.details({ toolId }));
-  const toolLinkId = `tool-link-${toolId}`;
-
-  return (
-    <ThinkingItemLayout icon={icon}>
-      <EuiText size="s">
-        <p role="status" aria-label={labels.toolCall}>
-          <FormattedMessage
-            id="xpack.onechat.thinking.toolCallThinkingItem"
-            defaultMessage="Calling tool {tool}"
-            values={{
-              tool: (
-                <code>
-                  <EuiLink
-                    href={toolHref}
-                    target="_blank"
-                    id={toolLinkId}
-                    aria-label={`${labels.toolLink} ${toolId}`}
-                    rel="noopener noreferrer"
-                  >
-                    {toolId}
-                  </EuiLink>
-                </code>
-              ),
-            }}
-          />
-        </p>
-      </EuiText>
-    </ThinkingItemLayout>
-  );
-};
-
-interface ToolProgressDisplayProps {
-  progress: ToolCallProgress;
-  icon?: ReactNode;
-}
-const ToolProgressDisplay: React.FC<ToolProgressDisplayProps> = ({ progress, icon }) => {
-  return (
-    <ThinkingItemLayout icon={icon}>
-      <div role="status" aria-live="polite">
-        {progress.message}
-      </div>
-    </ThinkingItemLayout>
-  );
+  return <EuiIcon type="check" color="success" />;
 };
 
 interface RoundStepsProps {
@@ -223,49 +124,17 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
           flyoutResultTypes.includes(result.type)
         );
         if (flyoutResultItems.length > 0) {
-          const responseId = `tool-response-${stepIndex}-${step.tool_id}`;
-          const inspectButtonId = `inspect-response-${stepIndex}-${step.tool_id}`;
           itemFactories.push({
             key: `step-${stepIndex}-${step.tool_id}-result-flyout`,
             factory: (icon) => (
-              <ThinkingItemLayout
+              <FlyoutResultItem
                 key={`step-${stepIndex}-${step.tool_id}-result-flyout`}
+                step={step}
+                stepIndex={stepIndex}
+                flyoutResultItems={flyoutResultItems}
+                onOpenFlyout={openFlyout}
                 icon={icon}
-              >
-                <EuiText size="s">
-                  <p id={responseId} role="status" aria-label={labels.toolResponse}>
-                    <FormattedMessage
-                      id="xpack.onechat.thinking.toolCallThinkingItem"
-                      defaultMessage="Tool {tool} returned response. {inspectResponse}"
-                      values={{
-                        tool: (
-                          <EuiCode
-                            aria-label={i18n.translate('xpack.onechat.thinking.toolName', {
-                              defaultMessage: 'Tool {toolId}',
-                              values: { toolId: step.tool_id },
-                            })}
-                          >
-                            {step.tool_id}
-                          </EuiCode>
-                        ),
-                        inspectResponse: (
-                          <EuiLink
-                            onClick={() => openFlyout(flyoutResultItems)}
-                            id={inspectButtonId}
-                            aria-describedby={responseId}
-                            aria-label={labels.inspectResponse}
-                            role="button"
-                          >
-                            {i18n.translate('xpack.onechat.conversation.roundResultsButton', {
-                              defaultMessage: 'Inspect response',
-                            })}
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </p>
-                </EuiText>
-              </ThinkingItemLayout>
+              />
             ),
           });
         }
@@ -288,12 +157,7 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
     // Second pass: map over factories and create items with icons based on flat position
     return itemFactories.map((itemFactory, flatIndex) => {
       const isLastItem = flatIndex === totalItems - 1;
-      const itemIcon =
-        isLastItem && isLoading ? (
-          <EuiLoadingElastic size="m" aria-label={'Loading...'} />
-        ) : (
-          <EuiIcon type="check" color="success" />
-        );
+      const itemIcon = getItemIcon(isLastItem, isLoading);
 
       return itemFactory.factory(itemIcon);
     });
