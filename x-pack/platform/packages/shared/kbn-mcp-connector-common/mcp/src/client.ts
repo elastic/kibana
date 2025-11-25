@@ -41,7 +41,7 @@ export class McpClient {
   async connect(): Promise<boolean> {
     if (!this.connected) {
       try {
-        await this.client.connect(this.transport)
+        await this.client.connect(this.transport);
         this.connected = true;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -101,29 +101,31 @@ export class McpClient {
   }
 
   async callTool(params: CallToolParams): Promise<CallToolResponse> {
-    if (this.connected) {
-      const response = await this.client.callTool({
-        name: params.name,
-        _meta: {},
-        arguments: params.arguments ?? {}
-      })
+    if (!this.connected) {
+      throw new Error('MCP client not connected');
+    }
+    const response = await this.client.callTool({
+      name: params.name,
+      _meta: {},
+      arguments: params.arguments ?? {},
+    });
 
-      if (response.isError) {
-        throw new Error(`Error calling tool ${params.name}: ${response.error}`);
-      }
-
-      if (
-        typeof response.content === 'object' &&
-        response.content !== null &&
-        'type' in response.content &&
-        (response.content as { type: unknown }).type === 'text'
-      ) {
-        return {
-          content: response.content as ContentPart[],
-        };
-      }
+    if (response.isError) {
+      throw new Error(`Error calling tool ${params.name}: ${response.error}`);
     }
 
-    throw new Error('MCP client not connected');
+    const content = response.content as Array<{ type: string; text?: string; [key: string]: unknown }>;
+    const textParts = content
+      .filter((part): part is { type: 'text'; text: string } =>
+        part.type === 'text' && typeof part.text === 'string'
+      )
+      .map((part): ContentPart => ({
+        type: 'text',
+        text: part.text,
+      }));
+
+    return {
+      content: textParts,
+    };
   }
 }
