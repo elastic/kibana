@@ -9512,7 +9512,10 @@
         "controls": {
           "properties": {
             "total": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The total number of pinned controls"
+              }
             },
             "by_type": {
               "properties": {
@@ -9521,7 +9524,7 @@
                     "total": {
                       "type": "long",
                       "_meta": {
-                        "description": "The number of this type of control in all Control Groups"
+                        "description": "The number of pinned controls of this specific type"
                       }
                     }
                   }
