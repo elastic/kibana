@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.hasChartSwitchWarning('line')).to.eql(false);
 
-      await PageObjects.lens.switchToVisualization('line');
+      await PageObjects.lens.switchToVisualization('line', undefined, 1);
       await PageObjects.lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
@@ -141,9 +141,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
-      expect(await PageObjects.lens.getLayerCount()).to.eql(2);
+      await PageObjects.lens.assertLayerCount(2);
       await PageObjects.lens.removeLayer();
       await PageObjects.lens.removeLayer();
+      await PageObjects.lens.ensureLayerTabIsActive();
       await testSubjects.existOrFail('workspace-drag-drop-prompt');
     });
 
@@ -302,7 +303,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.createLayer('data', undefined, 'bar');
-      expect(await PageObjects.lens.getLayerType(1)).to.eql('Bar');
+      expect(await PageObjects.lens.getLayerType()).to.eql('Bar');
 
       await PageObjects.lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -319,7 +320,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.save('twolayerchart');
       await testSubjects.click('lnsSuggestion-treemap > lnsSuggestion');
 
-      expect(await PageObjects.lens.getLayerCount()).to.eql(1);
+      await PageObjects.lens.assertLayerCount(1);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel')).to.eql(
         'Top 5 values of geo.dest'
       );

@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useSelectedPatterns } from './use_selected_patterns';
 import { useDataView } from './use_data_view';
-import type { DataViewManagerScopeName } from '../constants';
+import type { PageScope } from '../constants';
 
 // Mock the useDataView hook
 jest.mock('./use_data_view');
@@ -27,9 +27,7 @@ describe('useSelectedPatterns', () => {
     });
 
     // Execute
-    const { result } = renderHook(() =>
-      useSelectedPatterns('mockScope' as DataViewManagerScopeName)
-    );
+    const { result } = renderHook(() => useSelectedPatterns('mockScope' as PageScope));
 
     // Verify
     expect(result.current).toEqual(['pattern1', 'pattern2', 'pattern3']);
@@ -45,9 +43,7 @@ describe('useSelectedPatterns', () => {
     });
 
     // Execute
-    const { result } = renderHook(() =>
-      useSelectedPatterns('mockScope' as DataViewManagerScopeName)
-    );
+    const { result } = renderHook(() => useSelectedPatterns('mockScope' as PageScope));
 
     // Verify
     expect(result.current).toEqual([]);
@@ -60,9 +56,7 @@ describe('useSelectedPatterns', () => {
     });
 
     // Execute
-    const { result } = renderHook(() =>
-      useSelectedPatterns('mockScope' as DataViewManagerScopeName)
-    );
+    const { result } = renderHook(() => useSelectedPatterns('mockScope' as PageScope));
 
     // Verify
     expect(result.current).toEqual([]);

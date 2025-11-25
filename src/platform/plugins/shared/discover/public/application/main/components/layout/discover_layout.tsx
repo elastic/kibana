@@ -410,27 +410,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         styles.dscPage,
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            ${kbnFullBodyHeightCss(tabsEnabled ? '32px' : undefined)}
+            ${kbnFullBodyHeightCss(tabsEnabled ? '40px' : undefined)}
           }
         `,
       ]}
     >
-      <h1
-        id="savedSearchTitle"
-        className="euiScreenReaderOnly"
-        data-test-subj="discoverSavedSearchTitle"
-      >
-        {discoverSession?.title
-          ? i18n.translate('discover.pageTitleWithSavedSearch', {
-              defaultMessage: 'Discover - {savedSearchTitle}',
-              values: {
-                savedSearchTitle: discoverSession.title,
-              },
-            })
-          : i18n.translate('discover.pageTitleWithoutSavedSearch', {
-              defaultMessage: 'Discover - Search not yet saved',
-            })}
-      </h1>
       <TopNavMemoized
         savedQuery={savedQuery}
         stateContainer={stateContainer}
@@ -440,7 +424,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         isLoading={isLoading}
         onCancelClick={onCancelClick}
       />
-      <EuiPageBody aria-describedby="savedSearchTitle" css={styles.savedSearchTitle}>
+      <EuiPageBody css={styles.pageBody}>
         <div css={styles.sidebarContainer}>
           {dataViewLoading && (
             <EuiDelayRender delay={300}>
@@ -550,7 +534,7 @@ const componentStyles = {
       padding: 0,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
     }),
-  savedSearchTitle: css({
+  pageBody: css({
     overflow: 'hidden',
   }),
   sidebarContainer: css({

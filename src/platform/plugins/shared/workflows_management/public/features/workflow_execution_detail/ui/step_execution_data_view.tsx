@@ -46,11 +46,28 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
     }, [mode, stepExecution]);
 
     const fieldPathActionsPrefix: string | undefined = useMemo(() => {
-      if (mode !== 'output' || stepExecution.error) {
-        return undefined; // Make field path actions available only for output data and not error.
+      const isTriggerStep = stepExecution.stepType?.startsWith('trigger_');
+      const triggerType = isTriggerStep
+        ? stepExecution.stepType?.replace('trigger_', '')
+        : undefined;
+
+      if (!isTriggerStep) {
+        if (mode !== 'output' || stepExecution.error) {
+          return undefined; // Make field path actions available only for non-error output data.
+        }
+        return `steps.${stepExecution.stepId}.${mode}`;
       }
-      return `steps.${stepExecution.stepId}.${mode}`;
-    }, [mode, stepExecution.stepId, stepExecution.error]);
+
+      if (mode === 'output') {
+        return ''; // trigger context: paths like "<fieldPath>"
+      }
+
+      if (triggerType === 'manual') {
+        return 'inputs'; // manual input: "inputs.<fieldPath>"
+      }
+
+      return 'event'; // alert/scheduled input: "event.<fieldPath>"
+    }, [mode, stepExecution.stepId, stepExecution.error, stepExecution.stepType]);
 
     if (data === undefined) {
       return (

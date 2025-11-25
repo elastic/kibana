@@ -9,7 +9,7 @@
 
 import { join } from 'path';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { fileToJson } from '../../util/json';
+import { fileToJson } from '../../util';
 import type { ModelVersionFixtures } from './types';
 import { FIXTURES_BASE_PATH } from './constants';
 import { createFixtureFile } from './create_fixture_file';
