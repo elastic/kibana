@@ -52,8 +52,8 @@ describe('ExitForeachNodeImpl', () => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue(undefined);
     });
 
-    it('should throw an error', async () => {
-      await expect(underTest.run()).rejects.toThrow(
+    it('should throw an error', () => {
+      expect(() => underTest.run()).toThrow(
         new Error(`Foreach state for step ${node.stepId} not found`)
       );
     });
