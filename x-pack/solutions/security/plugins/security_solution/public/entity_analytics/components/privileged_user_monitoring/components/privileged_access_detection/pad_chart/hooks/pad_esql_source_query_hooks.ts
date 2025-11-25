@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getPrivilegedMonitorUsersJoin } from '../../../../../../../../common/entity_analytics/privileged_user_monitoring/utils';
+import { getPrivilegedMonitorUsersJoin } from '../../../../queries/helpers';
 import { ML_ANOMALIES_INDEX } from '../../../../../../../../common/constants';
 import { useIntervalForHeatmap } from './pad_heatmap_interval_hooks';
 import type { AnomalyBand } from '../pad_anomaly_bands';

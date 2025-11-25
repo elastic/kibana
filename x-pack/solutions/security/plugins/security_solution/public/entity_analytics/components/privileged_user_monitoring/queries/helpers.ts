@@ -15,6 +15,13 @@ import { isAsExpression, isFieldExpression } from '@kbn/esql-ast/src/ast/is';
 import * as E from 'fp-ts/Either';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 
+export const getPrivilegedMonitorUsersJoin = (
+  namespace: string
+) => `| RENAME @timestamp AS event_timestamp
+  | LOOKUP JOIN ${getPrivilegedMonitorUsersIndex(namespace)} ON user.name
+  | RENAME event_timestamp AS @timestamp
+  | WHERE user.is_privileged == true`;
+
 export type EsqlQueryOrInvalidFields = E.Either<
   { invalidFields: string[]; error?: undefined } | { error: string; invalidFields?: undefined },
   string

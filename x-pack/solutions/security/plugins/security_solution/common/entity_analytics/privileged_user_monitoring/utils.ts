@@ -26,10 +26,3 @@ export const getPrivilegeUserMonitoringRequiredEsIndexPrivileges = (namespace: s
   [getAlertsIndex(namespace)]: ['read'],
   [ML_ANOMALIES_INDEX]: ['read'],
 });
-
-export const getPrivilegedMonitorUsersJoin = (
-  namespace: string
-) => `| RENAME @timestamp AS event_timestamp
-  | LOOKUP JOIN ${getPrivilegedMonitorUsersIndex(namespace)} ON user.name
-  | RENAME event_timestamp AS @timestamp
-  | WHERE user.is_privileged == true`;

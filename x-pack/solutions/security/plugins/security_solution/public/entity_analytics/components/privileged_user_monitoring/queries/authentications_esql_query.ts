@@ -6,8 +6,7 @@
  */
 
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
-import { getPrivilegedMonitorUsersJoin } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
-import { removeInvalidForkBranchesFromESQL } from './helpers';
+import { getPrivilegedMonitorUsersJoin, removeInvalidForkBranchesFromESQL } from './helpers';
 
 // TODO add test cases for okta type column logic
 // '/api/v1/authn/something' ===> Direct

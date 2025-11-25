@@ -7,9 +7,8 @@
 
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import type { EsqlQueryOrInvalidFields } from './helpers';
-import { removeInvalidForkBranchesFromESQL } from './helpers';
+import { getPrivilegedMonitorUsersJoin, removeInvalidForkBranchesFromESQL } from './helpers';
 import { isLeft, left, right } from 'fp-ts/Either';
-import { getPrivilegedMonitorUsersJoin } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 
 describe('getPrivilegedMonitorUsersJoin', () => {
   it('should return the correct ESQL join string with the given namespace', () => {

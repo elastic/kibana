@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getPrivilegedMonitorUsersJoin } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
+import { getPrivilegedMonitorUsersJoin } from './helpers';
 import { RiskScoreFields } from '../../../../../common/search_strategy';
 
 export const getRiskLevelsPrivilegedUsersQueryBody = (namespace: string) => `
