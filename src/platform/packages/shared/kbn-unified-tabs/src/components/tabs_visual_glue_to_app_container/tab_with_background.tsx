@@ -64,7 +64,9 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
             content: '';
             position: absolute;
             right: ${euiTheme.size.xs};
-            top: 50%;
+            top: calc(
+              50% - ${euiTheme.size.xs} / 2
+            ); // 50% is the tab height midpoint, we want it centered in the middle of the whole tab bar
             transform: translateY(-50%);
             width: 1px;
             height: ${euiTheme.size.base};
