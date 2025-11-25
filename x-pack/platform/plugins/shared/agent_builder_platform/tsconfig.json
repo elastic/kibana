@@ -18,6 +18,5 @@
     "@kbn/logging",
     "@kbn/config-schema",
     "@kbn/workflows-management-plugin",
-    "@kbn/spaces-plugin",
   ]
 }
