@@ -46,6 +46,8 @@ const flyoutResultTypes = [
   ToolResultType.other,
   ToolResultType.resource,
 ];
+// Tool result types that should not have an icon displayed in the thinking steps list
+const disabledToolResultIconTypes = [ToolResultType.error, ToolResultType.query];
 
 const getItemIcon = (isLastItem: boolean, isLoading: boolean): ReactNode => {
   if (isLastItem && isLoading) {
@@ -108,14 +110,17 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
           .forEach((result: ToolResult, resultIndex) => {
             itemFactories.push({
               key: `step-${stepIndex}-${step.tool_id}-result-${resultIndex}`,
-              factory: (icon) => (
-                <ThinkingItemLayout
-                  key={`step-${stepIndex}-${step.tool_id}-result-${resultIndex}`}
-                  icon={icon}
-                >
-                  <ToolResultDisplay toolResult={result} />
-                </ThinkingItemLayout>
-              ),
+              factory: (icon) => {
+                const shouldDisableIcon = disabledToolResultIconTypes.includes(result.type);
+                return (
+                  <ThinkingItemLayout
+                    key={`step-${stepIndex}-${step.tool_id}-result-${resultIndex}`}
+                    icon={shouldDisableIcon ? undefined : icon}
+                  >
+                    <ToolResultDisplay toolResult={result} />
+                  </ThinkingItemLayout>
+                );
+              },
             });
           });
 

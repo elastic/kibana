@@ -15,13 +15,7 @@ interface OtherResultStepProps {
 
 export const OtherResultStep: React.FC<OtherResultStepProps> = ({ result }) => {
   return (
-    <EuiCodeBlock
-      language="json"
-      fontSize="s"
-      paddingSize="s"
-      isCopyable={false}
-      transparentBackground
-    >
+    <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable={false} color="subdued">
       {JSON.stringify(result.data, null, 2)}
     </EuiCodeBlock>
   );

@@ -11,6 +11,7 @@ import React from 'react';
 import { TabularDataResultStep } from './tabular_data_result_step';
 import { OtherResultStep } from './other_result_step';
 import { QueryResultStep } from './query_result_step';
+import { ErrorResultStep } from './error_result_step';
 
 interface ToolResultDisplayProps {
   toolResult: ToolResult;
@@ -25,6 +26,8 @@ export const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolResult
       return <QueryResultStep result={toolResult} />;
     case ToolResultType.tabularData:
       return <TabularDataResultStep result={toolResult} />;
+    case ToolResultType.error:
+      return <ErrorResultStep result={toolResult} />;
     default:
       // Other results
       // Also showing Resource results as Other results for now as JSON blobs
