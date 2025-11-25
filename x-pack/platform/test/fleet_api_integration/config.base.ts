@@ -89,6 +89,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         `--xpack.fleet.experimentalFeatures=${JSON.stringify({
           enablePackageRollback: true,
           enableAgentPrivilegeLevelChange: true,
+          enableFleetPolicyRevisionsCleanupTask: false,
         })}`,
         `--xpack.fleet.agentless.enabled=true`,
         `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,
