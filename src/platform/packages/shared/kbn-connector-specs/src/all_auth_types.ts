@@ -13,3 +13,4 @@ export * from './auth_types/basic';
 export * from './auth_types/none';
 export * from './auth_types/pfx';
 export * from './auth_types/crt';
+export * from './auth_types/oauth';

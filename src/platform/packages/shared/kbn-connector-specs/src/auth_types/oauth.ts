@@ -9,14 +9,14 @@
 
 import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
-import type { AuthTypeSpec } from '../connector_spec';
+import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 
 const authSchema = z.object({
   tokenUrl: z.string().meta({ sensitive: true }).url(),
   clientId: z.string().meta({ sensitive: true }),
   clientSecret: z.string().meta({ sensitive: true }),
   scope: z.string().meta({ sensitive: true }).optional(),
-  additionalFields: z.string().meta({ sensitive: true }).optional(),
+  additionalFields: z.string().nullish(),
 });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
@@ -27,11 +27,39 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const OAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'oauth_client_credentials',
   schema: authSchema,
-  configure: (axiosInstance: AxiosInstance /* , secret: AuthSchemaType*/): AxiosInstance => {
-    // need a token management system here to handle token retrieval/refreshing
-    // get token using client credentials flow
+  configure: async (
+    ctx: AuthContext,
+    axiosInstance: AxiosInstance,
+    secret: AuthSchemaType
+  ): Promise<AxiosInstance> => {
+    let parsedAdditionalFields;
+    try {
+      parsedAdditionalFields = secret.additionalFields
+        ? JSON.parse(secret.additionalFields)
+        : undefined;
+    } catch (error) {
+      ctx.logger.error(`error parsing additional fields - ${error.message}`);
+    }
 
-    // set Authorization header with token once retrieved
+    let token;
+    try {
+      token = await ctx.getToken({
+        tokenUrl: secret.tokenUrl,
+        scope: secret.scope,
+        clientId: secret.clientId,
+        clientSecret: secret.clientSecret,
+        ...(parsedAdditionalFields ? { additionalFields: parsedAdditionalFields } : {}),
+      });
+    } catch (error) {
+      throw new Error(`Unable to retrieve/refresh the access token: ${error.message}`);
+    }
+
+    if (!token) {
+      throw new Error(`Unable to retrieve new access token`);
+    }
+
+    // set global defaults
+    axiosInstance.defaults.headers.common.Authorization = token;
 
     return axiosInstance;
   },

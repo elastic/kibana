@@ -24,11 +24,11 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const BearerAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'bearer',
   schema: authSchema,
-  configure: (
+  configure: async (
     _: AuthContext,
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
-  ): AxiosInstance => {
+  ): Promise<AxiosInstance> => {
     // set global defaults
     axiosInstance.defaults.headers.common.Authorization = `Bearer ${secret.token}`;
 

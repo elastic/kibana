@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
 import type { AxiosError, AxiosResponse } from 'axios';
+import type { ConnectorTokenClientContract } from '../types';
 
-interface GetOauth2DeleteTokenAxiosInterceptorParams {
+interface GetDeleteTokenAxiosInterceptorParams {
   connectorTokenClient: ConnectorTokenClientContract;
   connectorId: string;
 }
-export const getOauth2DeleteTokenAxiosInterceptor = ({
+export const getDeleteTokenAxiosInterceptor = ({
   connectorTokenClient,
   connectorId,
-}: GetOauth2DeleteTokenAxiosInterceptorParams) => {
+}: GetDeleteTokenAxiosInterceptorParams) => {
   return {
     onFulfilled: async (response: AxiosResponse) => {
       // Look for 4xx errors that indicate something is wrong with the request

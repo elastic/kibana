@@ -25,11 +25,11 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const BasicAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'basic',
   schema: authSchema,
-  configure: (
+  configure: async (
     _: AuthContext,
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
-  ): AxiosInstance => {
+  ): Promise<AxiosInstance> => {
     // set global defaults
     axiosInstance.defaults.auth = {
       username: secret.username,

@@ -29,11 +29,11 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const CRT: AuthTypeSpec<AuthSchemaType> = {
   id: 'crt_certificate',
   schema: authSchema,
-  configure: (
+  configure: async (
     ctx: AuthContext,
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
-  ): AxiosInstance => {
+  ): Promise<AxiosInstance> => {
     const sslOverrides: SSLSettings = {
       cert: Buffer.from(secret.crt, 'base64'),
       key: Buffer.from(secret.key, 'base64'),
