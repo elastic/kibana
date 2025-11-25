@@ -58,7 +58,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
 
         // open Infrastructure popover and navigate to some link inside the panel
-        await solutionNavigation.sidenav.expandMore();
         await solutionNavigation.sidenav.clickLink({ navId: 'metrics' });
         // open first link in popover to open a panel
         await solutionNavigation.sidenav.clickLink({ navId: 'metrics:inventory' });
