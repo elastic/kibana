@@ -32,7 +32,7 @@ export interface VariableItem {
 
 export interface StepNameInfo {
   name: string;
-  node: any;
+  node: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   startLineNumber: number;
   startColumn: number;
   endLineNumber: number;

@@ -1,11 +1,12 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
   "include": [
     "index.ts",
     "server/**/*.ts",
+    "common/**/*.ts",
     "../../../../typings/**/*"
   ],
   "exclude": [
@@ -19,6 +20,15 @@
     "@kbn/spaces-plugin",
     "@kbn/security-plugin",
     "@kbn/core-saved-objects-utils-server",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/zod",
+    "@kbn/zod-helpers",
+    "@kbn/core-lifecycle-server-internal",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/logging-mocks",
+    "@kbn/core-security-common",
+    "@kbn/storage-adapter",
+    "@kbn/core-saved-objects-server-mocks",
+    "@kbn/inference-langchain"
   ]
 }

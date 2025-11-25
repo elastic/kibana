@@ -9,16 +9,25 @@
 
 import { withAutoSuggest } from '../../..';
 import type { ISuggestionItem } from '../../commands_registry/types';
+import { SuggestionCategory } from '../../sorting/types';
 import { settings } from '../generated/settings';
 
-export function getSettingsCompletionItems(): ISuggestionItem[] {
-  return settings.map((setting) =>
-    withAutoSuggest({
-      label: setting.name,
-      text: `${setting.name} = `,
-      kind: 'Reference',
-      detail: setting.description,
-      sortText: '1',
-    })
+export function getSettingsCompletionItems(isServerless?: boolean): ISuggestionItem[] {
+  return (
+    settings
+      // Filter out serverless-only settings if not in serverless mode, if not flavour is provided don't return serverlessOnly settings.
+      .filter((setting) => (isServerless ? setting.serverlessOnly : !setting.serverlessOnly))
+      // Filter out settings we don't want as suggestions
+      .filter((setting) => !setting.ignoreAsSuggestion)
+      .map((setting) =>
+        withAutoSuggest({
+          label: setting.name,
+          text: `${setting.name} = `,
+          kind: 'Reference',
+          detail: setting.description,
+          sortText: '1',
+          category: SuggestionCategory.VALUE,
+        })
+      )
   );
 }

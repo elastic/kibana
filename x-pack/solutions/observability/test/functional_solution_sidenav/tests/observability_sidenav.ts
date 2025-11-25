@@ -11,6 +11,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { common, solutionNavigation } = getPageObjects(['common', 'solutionNavigation']);
   const spaces = getService('spaces');
+  const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
   describe('observability solution', () => {
@@ -57,7 +58,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
 
         // open Infrastructure popover and navigate to some link inside the panel
-        await solutionNavigation.sidenav.expandMore();
         await solutionNavigation.sidenav.clickLink({ navId: 'metrics' });
         // open first link in popover to open a panel
         await solutionNavigation.sidenav.clickLink({ navId: 'metrics:inventory' });
@@ -116,6 +116,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.tour.expectHidden();
         await browser.refresh();
         await solutionNavigation.sidenav.tour.expectHidden();
+      });
+
+      it('opens panel on legacy management landing page', async () => {
+        await common.navigateToApp('management', { basePath: `/s/${spaceCreated.id}` });
+        await testSubjects.existOrFail('managementHomeSolution');
+        await solutionNavigation.sidenav.expectPanelExists('stack_management');
       });
     });
   });

@@ -170,7 +170,7 @@ export const NotificationsList: FC = () => {
         sortable: true,
         truncateText: false,
         'data-test-subj': 'mlNotificationTime',
-        width: '250px',
+        width: '220px',
         render: (v: number) => dateFormatter(v),
       },
       {
@@ -182,7 +182,7 @@ export const NotificationsList: FC = () => {
         render: (value: MlNotificationMessageLevel) => {
           return <EuiBadge color={levelBadgeMap[value]}>{value}</EuiBadge>;
         },
-        width: '100px',
+        width: '11%',
       },
       {
         field: 'job_type',
@@ -193,7 +193,7 @@ export const NotificationsList: FC = () => {
         render: (value: string) => {
           return <EuiBadge color={'hollow'}>{value}</EuiBadge>;
         },
-        width: '200px',
+        width: '14%',
       },
       {
         field: 'job_id',
@@ -203,7 +203,7 @@ export const NotificationsList: FC = () => {
         sortable: true,
         truncateText: true,
         'data-test-subj': 'mlNotificationEntity',
-        width: '15%',
+        width: '22%',
       },
       {
         field: 'message',
@@ -215,6 +215,7 @@ export const NotificationsList: FC = () => {
           lines: 8,
         },
         'data-test-subj': 'mlNotificationMessage',
+        width: '25%',
       },
     ];
   }, [dateFormatter]);
@@ -316,6 +317,7 @@ export const NotificationsList: FC = () => {
       {newNotificationsCount && !isLoading ? (
         <>
           <EuiCallOut
+            announceOnMount
             size="s"
             title={
               <FormattedMessage
@@ -381,6 +383,7 @@ export const NotificationsList: FC = () => {
       {queryError ? (
         <>
           <EuiCallOut
+            announceOnMount
             size={'s'}
             title={
               <FormattedMessage

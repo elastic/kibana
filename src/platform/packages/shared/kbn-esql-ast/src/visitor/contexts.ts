@@ -35,6 +35,7 @@ import type {
   ESQLMap,
   ESQLMapEntry,
   ESQLOrderExpression,
+  ESQLParens,
   ESQLSource,
   ESQLStringLiteral,
 } from '../types';
@@ -516,7 +517,7 @@ export class DissectCommandVisitorContext<
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
-// GROK <column> <string>
+// GROK <column> <string> [ , <string> ... ]
 export class GrokCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
@@ -723,5 +724,22 @@ export class MapEntryExpressionVisitorContext<
     this.ctx.assertMethodExists('visitExpression');
 
     return this.visitExpression(this.value(), input as any);
+  }
+}
+
+export class ParensExpressionVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends VisitorContext<Methods, Data, ESQLParens> {
+  public child(): ESQLAstExpression {
+    return this.node.child;
+  }
+
+  public visitChild(
+    input: VisitorInput<Methods, 'visitExpression'>
+  ): VisitorOutput<Methods, 'visitExpression'> {
+    this.ctx.assertMethodExists('visitExpression');
+
+    return this.visitExpression(this.child(), input as any);
   }
 }

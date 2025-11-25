@@ -7,29 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import type { UseEuiTheme } from '@elastic/eui';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiText,
-  EuiTabs,
-  EuiTab,
-  EuiSkeletonText,
-  EuiStat,
+  EuiLoadingSpinner,
   EuiPanel,
-  EuiHorizontalRule,
+  EuiSkeletonText,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import React, { useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { StatusBadge } from '../../../shared/ui';
-import { StepExecutionTimelineStateful } from './step_execution_timeline_stateful';
+import { isTerminalStatus } from '@kbn/workflows';
+
 import { StepExecutionDataView } from './step_execution_data_view';
-import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
-import { formatDuration } from '../../../shared/lib/format_duration';
+import { StepExecutionTimelineStateful } from './step_execution_timeline_stateful';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
@@ -39,13 +35,33 @@ interface WorkflowStepExecutionDetailsProps {
 
 export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDetailsProps>(
   ({ workflowExecutionId, stepExecution, isLoading }) => {
-    const styles = useMemoCss(componentStyles);
-    const getFormattedDateTime = useGetFormattedDateTime();
+    const isFinished = useMemo(
+      () => Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)),
+      [stepExecution?.status]
+    );
 
-    const complicatedFlyoutTitleId = `Step ${stepExecution?.stepId} Execution Details`;
+    const isTriggerPseudoStep = stepExecution?.stepType?.startsWith('trigger_');
+    const triggerType = isTriggerPseudoStep
+      ? stepExecution?.stepType?.replace('trigger_', '')
+      : undefined;
 
-    const tabs = useMemo(
-      () => [
+    const tabs = useMemo(() => {
+      if (isTriggerPseudoStep) {
+        const pseudoTabs = [];
+        if (stepExecution?.input) {
+          const isManualTrigger = triggerType === 'manual';
+          pseudoTabs.push({
+            id: 'input',
+            name: isManualTrigger ? 'Inputs' : 'Event',
+          });
+        }
+        pseudoTabs.push({
+          id: 'output',
+          name: 'Context',
+        });
+        return pseudoTabs;
+      }
+      return [
         {
           id: 'output',
           name: stepExecution?.error ? 'Error' : 'Output',
@@ -58,9 +74,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           id: 'timeline',
           name: 'Timeline',
         },
-      ],
-      [stepExecution]
-    );
+      ];
+    }, [stepExecution, isTriggerPseudoStep, triggerType]);
 
     const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
 
@@ -73,7 +88,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     if (isLoading || !stepExecution) {
       return (
         <EuiPanel hasShadow={false} paddingSize="m">
-          <EuiSkeletonText lines={2} />
+          <EuiSkeletonText lines={1} />
           <EuiSpacer size="l" />
           <EuiSkeletonText lines={4} />
         </EuiPanel>
@@ -81,110 +96,109 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     }
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="s" style={{ height: '100%' }}>
-        <EuiFlexItem grow={false}>
-          <EuiPanel hasShadow={false} paddingSize="m">
-            <EuiFlexGroup direction="column" gutterSize="m">
-              <EuiFlexItem grow={false}>
-                <p>{getFormattedDateTime(new Date(stepExecution.startedAt))}</p>
-                <EuiTitle size="m">
-                  <h2 id={complicatedFlyoutTitleId} css={styles.title}>
-                    {stepExecution.stepId}
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  {stepExecution && (
-                    <EuiFlexGroup gutterSize="s">
-                      <EuiFlexItem>
-                        <EuiPanel hasBorder={true} paddingSize="s">
-                          <EuiStat
-                            css={styles.stat}
-                            title={
-                              <StatusBadge
-                                textProps={{ css: styles.statusBadge }}
-                                status={stepExecution.status}
-                              />
-                            }
-                            titleSize="xxs"
-                            textAlign="left"
-                            isLoading={isLoading}
-                            description="Status"
-                          />
-                        </EuiPanel>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiPanel hasBorder={true} paddingSize="s">
-                          <EuiStat
-                            css={styles.stat}
-                            title={formatDuration(stepExecution.executionTimeMs ?? 0)}
-                            titleSize="xxs"
-                            textAlign="left"
-                            isLoading={isLoading || stepExecution.executionTimeMs === undefined}
-                            description="Execution time"
-                          />
-                        </EuiPanel>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+      <EuiPanel
+        hasShadow={false}
+        paddingSize="m"
+        css={{ height: '100%', paddingTop: '13px' /* overrides EuiPanel's paddingTop */ }}
+      >
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="m"
+          css={{ height: '100%', overflow: 'hidden' }}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTabs expand>
+              {tabs.map((tab) => (
+                <EuiTab
+                  onClick={() => setSelectedTabId(tab.id)}
+                  isSelected={tab.id === selectedTabId}
+                  key={tab.id}
+                  css={{ lineHeight: 'normal' }}
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+          </EuiFlexItem>
+          {isFinished ? (
+            <EuiFlexItem css={{ overflowY: 'auto' }}>
+              {selectedTabId === 'output' && (
+                <>
+                  {isTriggerPseudoStep && (
+                    <>
+                      <EuiCallOut
+                        size="s"
+                        title={i18n.translate(
+                          'workflowsManagement.stepExecutionDetails.contextAccessTitle',
+                          {
+                            defaultMessage: 'Access this data in your workflow',
+                          }
+                        )}
+                        iconType="info"
+                        announceOnMount={false}
+                      >
+                        <FormattedMessage
+                          id="workflowsManagement.stepExecutionDetails.contextAccessDescription"
+                          defaultMessage="You can reference these values using {code}"
+                          values={{
+                            code: <strong>{`{{ <field> }}`}</strong>,
+                          }}
+                        />
+                      </EuiCallOut>
+                      <EuiSpacer size="m" />
+                    </>
                   )}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={true}>
-          <EuiTabs bottomBorder={false} css={styles.tabs}>
-            {tabs.map((tab) => (
-              <EuiTab
-                onClick={() => setSelectedTabId(tab.id)}
-                isSelected={tab.id === selectedTabId}
-                key={tab.id}
-              >
-                {tab.name}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-          <EuiHorizontalRule margin="none" />
-          <EuiPanel hasShadow={false} paddingSize="m">
-            {selectedTabId === 'output' && (
-              <StepExecutionDataView stepExecution={stepExecution} mode="output" />
-            )}
-            {selectedTabId === 'input' && (
-              <StepExecutionDataView stepExecution={stepExecution} mode="input" />
-            )}
-            {selectedTabId === 'timeline' && (
-              <StepExecutionTimelineStateful
-                executionId={workflowExecutionId}
-                stepExecutionId={stepExecution.id}
-              />
-            )}
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+                  <StepExecutionDataView stepExecution={stepExecution} mode="output" />
+                </>
+              )}
+              {selectedTabId === 'input' && (
+                <>
+                  {isTriggerPseudoStep && (
+                    <>
+                      <EuiCallOut
+                        size="s"
+                        title={i18n.translate(
+                          'workflowsManagement.stepExecutionDetails.inputAccessTitle',
+                          {
+                            defaultMessage: 'Access this data in your workflow',
+                          }
+                        )}
+                        iconType="info"
+                        announceOnMount={false}
+                      >
+                        <FormattedMessage
+                          id="workflowsManagement.stepExecutionDetails.inputAccessDescription"
+                          defaultMessage="You can reference these values using {code}"
+                          values={{
+                            code: (
+                              <strong>
+                                {triggerType === 'manual'
+                                  ? `{{ inputs.<field> }}`
+                                  : `{{ event.<field> }}`}
+                              </strong>
+                            ),
+                          }}
+                        />
+                      </EuiCallOut>
+                      <EuiSpacer size="m" />
+                    </>
+                  )}
+                  <StepExecutionDataView stepExecution={stepExecution} mode="input" />
+                </>
+              )}
+              {selectedTabId === 'timeline' && (
+                <StepExecutionTimelineStateful
+                  executionId={workflowExecutionId}
+                  stepExecutionId={stepExecution.id}
+                />
+              )}
+            </EuiFlexItem>
+          ) : (
+            <EuiLoadingSpinner size="m" />
+          )}
+        </EuiFlexGroup>
+      </EuiPanel>
     );
   }
 );
-
-const componentStyles = {
-  title: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'flex',
-      alignItems: 'center',
-      gap: euiTheme.size.xs,
-    }),
-  stat: css`
-    & .euiStat__title {
-      margin-block-end: 0;
-    }
-  `,
-  statusBadge: css`
-    font-weight: 600;
-  `,
-  tabs: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: `0 ${euiTheme.size.m}`,
-    }),
-};
+WorkflowStepExecutionDetails.displayName = 'WorkflowStepExecutionDetails';

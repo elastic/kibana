@@ -77,6 +77,7 @@ export const ContextMenu = ({
   // Get default language from local storage
   const {
     services: { storage, esHostService },
+    config: { isPackagedEnvironment },
   } = useServicesContext();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -232,62 +233,70 @@ export const ContextMenu = ({
   );
 
   const items = [
-    <EuiContextMenuItem
-      key="Copy as"
-      data-test-subj="consoleMenuCopyAsButton"
-      id="copyAs"
-      disabled={!window.navigator?.clipboard}
-      onClick={(e: React.MouseEvent) => {
-        e.preventDefault();
-        const target = e.target as HTMLButtonElement;
+    ...(!isPackagedEnvironment
+      ? [
+          <EuiContextMenuItem
+            key="Copy as"
+            data-test-subj="consoleMenuCopyAsButton"
+            id="copyAs"
+            disabled={!window.navigator?.clipboard}
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              const target = e.target as HTMLButtonElement;
 
-        if (target.dataset.name === 'changeLanguage') {
-          setLanguageSelectorVisibility(true);
-          return;
-        }
+              if (target.dataset.name === 'changeLanguage') {
+                setLanguageSelectorVisibility(true);
+                return;
+              }
 
-        onCopyAsSubmit();
-      }}
-      icon="copyClipboard"
-      css={styles.button}
-    >
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <EuiFlexGroup
-            gutterSize="xs"
-            alignItems="center"
-            className="consoleEditorContextMenu__languageSelector"
-            data-test-subj="language-selector"
+              onCopyAsSubmit();
+            }}
+            icon="copyClipboard"
+            css={styles.button}
           >
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                tagName="span"
-                id="console.monaco.requestOptions.copyAsUrlButtonLabel"
-                defaultMessage="Copy as"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <strong>{getLanguageLabelByValue(currentLanguage)}</strong>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {!isKbnRequestSelected && (
-          <EuiFlexItem grow={false}>
-            {isRequestConverterLoading ? (
-              <EuiLoadingSpinner size="s" />
-            ) : (
-              // The EuiContextMenuItem renders itself as a button already, so we need to
-              // force the link to not be a button in order to prevent A11Y issues.
-              <EuiLink href="" data-name="changeLanguage" data-test-subj="changeLanguageButton">
-                {i18n.translate('console.consoleMenu.changeLanguageButtonLabel', {
-                  defaultMessage: 'Change',
-                })}
-              </EuiLink>
-            )}
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiContextMenuItem>,
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem>
+                <EuiFlexGroup
+                  gutterSize="xs"
+                  alignItems="center"
+                  className="consoleEditorContextMenu__languageSelector"
+                  data-test-subj="language-selector"
+                >
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      tagName="span"
+                      id="console.monaco.requestOptions.copyAsUrlButtonLabel"
+                      defaultMessage="Copy as"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <strong>{getLanguageLabelByValue(currentLanguage)}</strong>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              {!isKbnRequestSelected && (
+                <EuiFlexItem grow={false}>
+                  {isRequestConverterLoading ? (
+                    <EuiLoadingSpinner size="s" />
+                  ) : (
+                    // The EuiContextMenuItem renders itself as a button already, so we need to
+                    // force the link to not be a button in order to prevent A11Y issues.
+                    <EuiLink
+                      href=""
+                      data-name="changeLanguage"
+                      data-test-subj="changeLanguageButton"
+                    >
+                      {i18n.translate('console.consoleMenu.changeLanguageButtonLabel', {
+                        defaultMessage: 'Change',
+                      })}
+                    </EuiLink>
+                  )}
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiContextMenuItem>,
+        ]
+      : []),
     <EuiContextMenuItem
       data-test-subj="consoleMenuAutoIndent"
       key="Auto indent"

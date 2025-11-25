@@ -8,6 +8,13 @@
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
+import {
+  scrollToTop,
+  scrollToBottom,
+  scrollTo,
+  getViewportBoundaries,
+  getScrollPosition,
+} from '@kbn/core-chrome-layout-utils';
 
 export const highlightAnimationDuration = 2000;
 
@@ -42,7 +49,7 @@ export function initializeTrackPanel(
       }
 
       setExpandedPanelId(panelId);
-      scrollPosition$.next(window.scrollY);
+      scrollPosition$.next(getScrollPosition());
     },
     focusedPanelId$,
     highlightPanelId$,
@@ -68,15 +75,14 @@ export function initializeTrackPanel(
 
       untilLoaded(id).then(() => {
         if (scrollPosition$.value !== undefined) {
-          window.scrollTo({ top: scrollPosition$.value, behavior: 'smooth' });
+          scrollTo({ top: scrollPosition$.value, behavior: 'smooth' });
           scrollPosition$.next(undefined);
         } else {
-          const dashboardTop = dashboardContainerRef$.value?.getBoundingClientRect().top || 0;
-          const clientBottom = window.innerHeight;
+          const { top: viewportTop, bottom: viewportBottom } = getViewportBoundaries();
           const { top: panelTop, bottom: panelBottom } = panelRef.getBoundingClientRect();
 
           // only scroll if panel is not fully visible within the current viewport
-          if (panelTop < dashboardTop || panelBottom > clientBottom) {
+          if (panelTop < viewportTop || panelBottom > viewportBottom) {
             panelRef.scrollIntoView({ block: 'start', behavior: 'smooth' });
           }
         }
@@ -86,11 +92,11 @@ export function initializeTrackPanel(
     },
     scrollPosition$,
     scrollToTop: () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToTop({ behavior: 'smooth' });
     },
     scrollToBottom$,
     scrollToBottom: () => {
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      scrollToBottom({ behavior: 'smooth' });
     },
     setFocusedPanelId: (id: string | undefined) => {
       if (focusedPanelId$.value !== id) focusedPanelId$.next(id);

@@ -9,7 +9,7 @@
 
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@kbn/react-query';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { SetOptional } from 'type-fest';
 import type { GetRuleTagsParams, GetRuleTagsResponse } from '../apis/get_rule_tags';

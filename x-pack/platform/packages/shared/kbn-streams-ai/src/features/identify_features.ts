@@ -4,19 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
+import type { DocumentAnalysis } from '@kbn/ai-tools';
+import { formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import type { Streams, Feature } from '@kbn/streams-schema';
+import {
+  isFeatureWithFilter,
+  type Feature,
+  type Streams,
+  type SystemFeature,
+} from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
-import pLimit from 'p-limit';
 import { IdentifySystemsPrompt } from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
 import conditionSchemaText from '../shared/condition_schema.text';
 import { generateStreamDescription } from '../description/generate_description';
 
-const CONCURRENT_DESCRIPTION_REQUESTS = 5;
+export interface IdentifyFeaturesOptions {
+  stream: Streams.all.Definition;
+  features?: Feature[];
+  start: number;
+  end: number;
+  esClient: ElasticsearchClient;
+  inferenceClient: BoundInferenceClient;
+  logger: Logger;
+  signal: AbortSignal;
+  analysis: DocumentAnalysis;
+}
 
 /**
  * Identifies features in a stream, by:
@@ -25,61 +40,47 @@ const CONCURRENT_DESCRIPTION_REQUESTS = 5;
  * - asking the LLM to identify features by creating
  * queries and validating the resulting clusters
  */
-export async function identifyFeatures({
+export async function identifySystemFeatures({
   stream,
   features,
   start,
   end,
   esClient,
-  kql,
   inferenceClient,
   logger,
+  signal,
+  analysis,
   dropUnmapped = false,
-}: {
-  stream: Streams.all.Definition;
-  features?: Feature[];
-  start: number;
-  end: number;
-  esClient: ElasticsearchClient;
-  kql?: string;
-  inferenceClient: BoundInferenceClient;
-  logger: Logger;
+  maxSteps: initialMaxSteps,
+}: IdentifyFeaturesOptions & {
   dropUnmapped?: boolean;
-}): Promise<{ features: Feature[] }> {
-  const [analysis, initialClustering] = await Promise.all([
-    describeDataset({
-      start,
-      end,
-      esClient,
-      index: stream.name,
-      kql: kql || undefined,
-    }),
-    clusterLogs({
-      start,
-      end,
-      esClient,
-      index: stream.name,
-      partitions:
-        features?.map((feature) => {
-          return {
-            name: feature.name,
-            condition: feature.filter,
-          };
-        }) ?? [],
-      logger,
-      dropUnmapped,
-    }),
-  ]);
+  maxSteps?: number;
+}): Promise<{ features: SystemFeature[] }> {
+  const initialClustering = await clusterLogs({
+    start,
+    end,
+    esClient,
+    index: stream.name,
+    partitions:
+      features?.filter(isFeatureWithFilter).map((feature) => {
+        return {
+          name: feature.name,
+          condition: feature.filter,
+        };
+      }) ?? [],
+    logger,
+    dropUnmapped,
+  });
 
   const response = await executeAsReasoningAgent({
-    maxSteps: 3,
+    maxSteps: initialMaxSteps,
     input: {
       stream: {
         name: stream.name,
         description: stream.description || 'This stream has no description.',
       },
       dataset_analysis: JSON.stringify(
-        sortAndTruncateAnalyzedFields(analysis, { dropEmpty: true, dropUnmapped })
+        formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped })
       ),
       initial_clustering: JSON.stringify(initialClustering),
       condition_schema: conditionSchemaText,
@@ -123,29 +124,31 @@ export async function identifyFeatures({
         };
       },
     },
+    abortSignal: signal,
   });
-
-  const limiter = pLimit(CONCURRENT_DESCRIPTION_REQUESTS);
 
   return {
     features: await Promise.all(
-      response.toolCalls.flatMap((toolCall) =>
-        toolCall.function.arguments.systems.map(async (args) => {
-          const feature = {
-            ...args,
-            filter: args.filter as Condition,
-            description: '',
-          };
-
-          const description = await limiter(async () => {
-            return await generateStreamDescription({
-              stream,
-              start,
-              end,
-              esClient,
-              inferenceClient,
-              feature,
-            });
+      response.toolCalls
+        .flatMap((toolCall) =>
+          toolCall.function.arguments.systems.map((args) => {
+            const feature = {
+              ...args,
+              filter: args.filter as Condition,
+              type: 'system' as const,
+            };
+            return feature;
+          })
+        )
+        .map(async (feature) => {
+          const description = await generateStreamDescription({
+            stream,
+            start,
+            end,
+            esClient,
+            inferenceClient,
+            feature: { ...feature, description: '' },
+            signal,
           });
 
           return {
@@ -153,7 +156,6 @@ export async function identifyFeatures({
             description,
           };
         })
-      )
     ),
   };
 }

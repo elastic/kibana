@@ -8,8 +8,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { IfStepSchema } from '../../../spec/schema';
 import { GraphNodeSchema } from './base';
+import { IfStepSchema } from '../../../spec/schema';
 
 export const EnterIfNodeConfigurationSchema = IfStepSchema.omit({
   steps: true,

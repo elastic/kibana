@@ -66,8 +66,20 @@ RUN_MODES["observability"]="--stateful --serverless=oblt --serverless=oblt-logs-
 RUN_MODES["search"]="--stateful --serverless=es"
 RUN_MODES["security"]="--stateful --serverless=security"
 
+# Define serverless-only run modes based on group
+declare -A RUN_MODES_SERVERLESS_ONLY
+RUN_MODES_SERVERLESS_ONLY["platform"]="--serverless=es --serverless=oblt --serverless=security"
+RUN_MODES_SERVERLESS_ONLY["observability"]="--serverless=oblt --serverless=oblt-logs-essentials"
+RUN_MODES_SERVERLESS_ONLY["search"]="--serverless=es"
+RUN_MODES_SERVERLESS_ONLY["security"]="--serverless=security"
+
 # Determine valid run modes for the group
-RUN_MODE_LIST=${RUN_MODES[$group]}
+if [[ -n "${SERVERLESS_TESTS_ONLY:-}" ]]; then
+  echo "--- Using serverless-only test modes (SERVERLESS_TESTS_ONLY is set)"
+  RUN_MODE_LIST=${RUN_MODES_SERVERLESS_ONLY[$group]}
+else
+  RUN_MODE_LIST=${RUN_MODES[$group]}
+fi
 
 if [[ -z "$RUN_MODE_LIST" ]]; then
   echo "Unknown group: $group"
@@ -100,9 +112,17 @@ upload_events_if_available() {
         echo "⚠️ Upload failed for $config_path ($mode) with exit code $UPLOAD_EXIT_CODE"
       fi
 
-      # Clean up reports directory after upload attempt
-      echo "🧹 Cleaning up Scout reports directory"
-      rm -rf .scout/reports
+      # Clean up events reports to avoid double ingestion, but preserve failure reports
+      echo "🧹 Cleaning up Scout events reports (preserving failure reports for annotations)"
+      # Only remove events reports, not failure reports
+      if [ -d ".scout/reports" ]; then
+        for dir in .scout/reports/scout-playwright-*; do
+          if [ -d "$dir" ] && [[ "$dir" != *"scout-playwright-test-failures-"* ]]; then
+            rm -rf "$dir"
+          fi
+        done
+      fi
+      # Keep .scout/reports/scout-playwright-test-failures-* and .scout/test-artifacts/ for failed test reporter
     else
       echo "❌ No Scout reports found for $config_path ($mode)"
     fi

@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiPageHeader,
-  useEuiTheme,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiPageHeader, useEuiTheme, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import useAsync from 'react-use/lib/useAsync';
@@ -106,29 +99,6 @@ export function Wrapper({
       <EuiPageHeader
         paddingSize="l"
         bottomBorder="extended"
-        breadcrumbs={[
-          {
-            href: router.link('/'),
-            text: (
-              <EuiButtonEmpty
-                iconType="arrowLeft"
-                size="s"
-                flush="left"
-                aria-label={i18n.translate(
-                  'xpack.streams.entityDetailViewWithoutParams.breadcrumb',
-                  {
-                    defaultMessage: 'Back to Streams',
-                  }
-                )}
-                data-test-subj="backToStreamsButton"
-              >
-                {i18n.translate('xpack.streams.entityDetailViewWithoutParams.breadcrumb', {
-                  defaultMessage: 'Streams',
-                })}
-              </EuiButtonEmpty>
-            ),
-          },
-        ]}
         css={css`
           background: ${euiTheme.colors.backgroundBasePlain};
         `}
@@ -136,10 +106,11 @@ export function Wrapper({
           <EuiFlexGroup
             direction="row"
             gutterSize="s"
-            alignItems="center"
+            alignItems="baseline"
             justifyContent="spaceBetween"
+            wrap
           >
-            <EuiFlexGroup gutterSize="s" alignItems="baseline">
+            <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap>
               {streamId}
               <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
                 <EuiFlexItem grow={true}>

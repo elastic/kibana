@@ -9,10 +9,10 @@
 
 import type { DynamicStepContextSchema } from '@kbn/workflows/spec/schema';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
+import { getSchemaAtPath, getZodTypeName } from '../../../../common/lib/zod';
 import { getDetailedTypeDescription } from '../../../../common/lib/zod/zod_type_description';
-import { getZodTypeName, getSchemaAtPath } from '../../../../common/lib/zod';
-import type { VariableItem, YamlValidationResult } from '../model/types';
 import { getForeachItemSchema } from '../../workflow_context/lib/get_foreach_state_schema';
+import type { VariableItem, YamlValidationResult } from '../model/types';
 
 export function validateVariable(
   variableItem: VariableItem,
@@ -93,7 +93,7 @@ export function validateVariable(
     };
   }
 
-  const refSchema = getSchemaAtPath(context, parsedPath.propertyPath);
+  const { schema: refSchema } = getSchemaAtPath(context, parsedPath.propertyPath);
 
   if (!refSchema) {
     return {

@@ -17,13 +17,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const listingTable = getService('listingTable');
 
-  // https://github.com/elastic/kibana/issues/220515
-  describe.skip('Dashboard', () => {
+  describe('Dashboard', () => {
     const dashboardName = 'Dashboard Listing A11y';
     const clonedDashboardName = 'Dashboard Listing A11y (1)';
 
-    // https://github.com/elastic/kibana/issues/220515
-    it.skip('navigate to dashboard app', async () => {
+    it('navigate to dashboard app', async () => {
       await common.navigateToApp('dashboard');
       await a11y.testAppSnapshot();
     });
@@ -118,14 +116,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // https://github.com/elastic/kibana/issues/153597
-    it.skip('Test full screen', async () => {
+    it('Test full screen', async () => {
       await dashboard.clickFullScreenMode();
       await a11y.testAppSnapshot();
     });
 
-    // https://github.com/elastic/kibana/issues/153597
-    it.skip('Exit out of full screen mode', async () => {
+    it('Exit out of full screen mode', async () => {
       await dashboard.exitFullScreenMode();
       await a11y.testAppSnapshot();
     });

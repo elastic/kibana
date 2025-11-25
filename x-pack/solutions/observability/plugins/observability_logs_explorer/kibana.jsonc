@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-logs-explorer-plugin",
-  "owner": ["@elastic/obs-ux-logs-team"],
+  "owner": ["@elastic/obs-exploration-team"],
   "group": "observability",
   "visibility": "private",
   "description": "This plugin exposes and registers observability log consumption features.",

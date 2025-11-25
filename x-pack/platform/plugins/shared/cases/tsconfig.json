@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -12,9 +12,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    {
-      "path": "../../../../../src/setup_node_env/tsconfig.json"
-    },
     // optionalPlugins from ./kibana.json
     "@kbn/lens-plugin",
     "@kbn/security-plugin",
@@ -97,6 +94,10 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/licensing-types",
     "@kbn/lazy-object",
+    "@kbn/setup-node-env",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/react-query",
+    "@kbn/zod"
   ],
   "exclude": [
     "target/**/*"

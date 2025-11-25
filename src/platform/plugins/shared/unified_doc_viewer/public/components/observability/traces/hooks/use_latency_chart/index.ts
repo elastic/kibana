@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useEffect } from 'react';
 
@@ -45,43 +44,6 @@ export function getTransactionDistributionChartData({
   return transactionDistributionChartData;
 }
 
-interface GetLatencyChartParams {
-  core: CoreStart;
-  signal: AbortSignal;
-  transactionName: string;
-  transactionType: string;
-  serviceName: string;
-}
-
-const getTransactionLatencyChart = ({
-  core,
-  signal,
-  transactionName,
-  transactionType,
-  serviceName,
-}: GetLatencyChartParams): Promise<{
-  overallHistogram?: HistogramItem[];
-  percentileThresholdValue?: number;
-}> => {
-  const { data } = getUnifiedDocViewerServices();
-  const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
-
-  return core.http.post('/internal/apm/latency/overall_distribution/transactions', {
-    body: JSON.stringify({
-      transactionName,
-      transactionType,
-      serviceName,
-      chartType: 'transactionLatency',
-      end: timeFilter.to,
-      environment: 'ENVIRONMENT_ALL',
-      kuery: '',
-      percentileThreshold: 95,
-      start: timeFilter.from,
-    }),
-    signal,
-  });
-};
-
 export interface LatencyChartData {
   distributionChartData: DurationDistributionChartData[];
   percentileThresholdValue?: number;
@@ -111,43 +73,6 @@ export const getSpanDistributionChartData = ({
       ]
     : [];
 
-interface GetSpanLatencyChartParams {
-  core: CoreStart;
-  signal: AbortSignal;
-  spanName: string;
-  serviceName: string;
-  isOtelSpan: boolean;
-}
-
-const getSpanLatencyChart = ({
-  core,
-  signal,
-  spanName,
-  serviceName,
-  isOtelSpan,
-}: GetSpanLatencyChartParams): Promise<{
-  overallHistogram?: HistogramItem[];
-  percentileThresholdValue?: number;
-}> => {
-  const { data } = getUnifiedDocViewerServices();
-  const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
-
-  return core.http.post('/internal/apm/latency/overall_distribution/spans', {
-    body: JSON.stringify({
-      spanName,
-      serviceName,
-      chartType: 'spanLatency',
-      isOtel: isOtelSpan,
-      end: timeFilter.to,
-      environment: 'ENVIRONMENT_ALL',
-      kuery: '',
-      percentileThreshold: 95,
-      start: timeFilter.from,
-    }),
-    signal,
-  });
-};
-
 interface UseLatencyChartParams {
   spanName?: string;
   serviceName?: string;
@@ -163,8 +88,18 @@ export const useLatencyChart = ({
   transactionType,
   isOtelSpan = false,
 }: UseLatencyChartParams) => {
-  const { core } = getUnifiedDocViewerServices();
+  const { core, data, discoverShared } = getUnifiedDocViewerServices();
   const { euiTheme } = useEuiTheme();
+  const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
+
+  const fetchLatencyOverallTransactionDistributionFeature =
+    discoverShared.features.registry.getById(
+      'observability-traces-fetch-latency-overall-transaction-distribution'
+    );
+
+  const fetchLatencyOverallSpanDistributionFeature = discoverShared.features.registry.getById(
+    'observability-traces-fetch-latency-overall-span-distribution'
+  );
 
   const { loading, value, error } = useAbortableAsync<LatencyChartData | undefined>(
     async ({ signal }) => {
@@ -172,39 +107,62 @@ export const useLatencyChart = ({
         return undefined;
       }
 
-      if (transactionName && transactionType) {
-        const result = await getTransactionLatencyChart({
-          core,
-          signal,
-          transactionName,
-          transactionType,
-          serviceName,
-        });
+      if (
+        transactionName &&
+        transactionType &&
+        fetchLatencyOverallTransactionDistributionFeature?.fetchLatencyOverallTransactionDistribution
+      ) {
+        const result =
+          await fetchLatencyOverallTransactionDistributionFeature.fetchLatencyOverallTransactionDistribution(
+            {
+              transactionName,
+              transactionType,
+              serviceName,
+              start: timeFilter.from,
+              end: timeFilter.to,
+            },
+            signal
+          );
+
+        if (!result) {
+          return undefined;
+        }
 
         return {
           distributionChartData: getTransactionDistributionChartData({
             euiTheme,
             transactionHistogram: result.overallHistogram,
           }),
-          percentileThresholdValue: result.percentileThresholdValue,
+          percentileThresholdValue: result.percentileThresholdValue ?? undefined,
         };
       }
 
-      if (spanName) {
-        const result = await getSpanLatencyChart({
-          core,
-          signal,
-          spanName,
-          serviceName,
-          isOtelSpan,
-        });
+      if (
+        spanName &&
+        fetchLatencyOverallSpanDistributionFeature?.fetchLatencyOverallSpanDistribution
+      ) {
+        const result =
+          await fetchLatencyOverallSpanDistributionFeature.fetchLatencyOverallSpanDistribution(
+            {
+              spanName,
+              serviceName,
+              isOtel: isOtelSpan,
+              start: timeFilter.from,
+              end: timeFilter.to,
+            },
+            signal
+          );
+
+        if (!result) {
+          return undefined;
+        }
 
         return {
           distributionChartData: getSpanDistributionChartData({
             euiTheme,
             spanHistogram: result.overallHistogram,
           }),
-          percentileThresholdValue: result.percentileThresholdValue,
+          percentileThresholdValue: result.percentileThresholdValue ?? undefined,
         };
       }
     },

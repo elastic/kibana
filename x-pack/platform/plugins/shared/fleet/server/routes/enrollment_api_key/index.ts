@@ -58,9 +58,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetOneEnrollmentAPIKeyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => EnrollmentAPIKeyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -90,9 +92,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: DeleteEnrollmentAPIKeyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => DeleteEnrollmentAPIKeyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -125,12 +129,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetEnrollmentAPIKeysRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () =>
                 ListResponseSchema(EnrollmentAPIKeySchema).extends({
                   list: schema.arrayOf(EnrollmentAPIKeySchema, { meta: { deprecated: true } }),
                 }),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -159,12 +165,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: PostEnrollmentAPIKeyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () =>
                 EnrollmentAPIKeyResponseSchema.extends({
                   action: schema.literal('created'),
                 }),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },

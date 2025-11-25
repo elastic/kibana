@@ -8,3 +8,4 @@
 import './breadcrumbs.mock';
 import './track_ui_metric.mock';
 import './search_box.mock';
+import './notifications.mock';

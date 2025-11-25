@@ -21,6 +21,7 @@ import {
   assignCompletionItem,
   getNewUserDefinedColumnSuggestion,
   withCompleteItem,
+  withMapCompleteItem,
 } from '../../complete_items';
 import {
   getFieldsSuggestions,
@@ -44,12 +45,14 @@ import {
 import { ESQL_VARIABLES_PREFIX } from '../../constants';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
+import { SuggestionCategory } from '../../../sorting/types';
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',
   AFTER_TARGET_ID = 'after_target_id',
   AFTER_PROMPT_OR_TARGET = 'after_prompt_or_target',
   AFTER_PROMPT = 'after_prompt',
+  AFTER_WITH_KEYWORD = 'after_with_keyword',
   WITHIN_MAP_EXPRESSION = 'within_map_expression',
   AFTER_COMMAND = 'after_command',
 }
@@ -62,7 +65,16 @@ function getPosition(
 ): CompletionPosition | undefined {
   const { prompt, targetField } = command as ESQLAstCompletionCommand;
 
-  const paramsMap = command.args[1] as ast.ESQLMap | undefined;
+  const arg1 = command.args[1];
+  let paramsMap: ast.ESQLMap | undefined;
+
+  if (arg1 && 'type' in arg1 && arg1.type === 'option') {
+    paramsMap = (arg1 as ast.ESQLCommandOption).args[0] as ast.ESQLMap;
+
+    if (paramsMap && paramsMap.incomplete && !paramsMap.text) {
+      return CompletionPosition.AFTER_WITH_KEYWORD;
+    }
+  }
 
   if (paramsMap?.text && paramsMap.incomplete) {
     return CompletionPosition.WITHIN_MAP_EXPRESSION;
@@ -196,7 +208,14 @@ export async function autocomplete(
 
       if (!lastWord) {
         suggestions.push({
-          ...buildConstantsDefinitions([promptSnippetText], '', '1')[0],
+          ...buildConstantsDefinitions(
+            [promptSnippetText],
+            '',
+            '1',
+            undefined,
+            undefined,
+            SuggestionCategory.CONSTANT_VALUE
+          )[0],
           label: promptText,
           asSnippet: true,
         });
@@ -241,6 +260,9 @@ export async function autocomplete(
         },
       ];
     }
+
+    case CompletionPosition.AFTER_WITH_KEYWORD:
+      return [withMapCompleteItem];
 
     case CompletionPosition.WITHIN_MAP_EXPRESSION:
       const availableParameters: MapParameters = {

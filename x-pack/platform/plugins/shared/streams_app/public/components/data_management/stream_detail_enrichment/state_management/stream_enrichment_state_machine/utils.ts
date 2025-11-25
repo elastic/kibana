@@ -7,10 +7,11 @@
 
 import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
-import { i18n } from '@kbn/i18n';
 import type { AssignArgs } from 'xstate5';
 import { isActionBlock, isWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import { v4 as uuidv4 } from 'uuid';
+import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../../../../../common/url_schema/common';
 import type { StreamEnrichmentContextType } from './types';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine';
 import {
@@ -21,25 +22,25 @@ import {
 import type {
   EnrichmentUrlState,
   KqlSamplesDataSource,
-  RandomSamplesDataSource,
+  LatestSamplesDataSource,
   CustomSamplesDataSource,
   EnrichmentDataSource,
 } from '../../../../../../common/url_schema';
 import { dataSourceConverter } from '../../utils';
 import type { StepActorRef } from '../steps_state_machine';
 import { isStepUnderEdit } from '../steps_state_machine';
+import type { DataSourceActorRef, DataSourceSimulationMode } from '../data_source_state_machine';
+import { DATA_SOURCES_I18N } from '../../data_sources_flyout/translations';
 
-export const defaultRandomSamplesDataSource: RandomSamplesDataSource = {
-  type: 'random-samples',
-  name: i18n.translate('xpack.streams.enrichment.dataSources.randomSamples.defaultName', {
-    defaultMessage: 'Random samples',
-  }),
+export const defaultLatestSamplesDataSource: LatestSamplesDataSource = {
+  type: 'latest-samples',
+  name: DATA_SOURCES_I18N.latestSamples.defaultName,
   enabled: true,
 };
 
 export const defaultKqlSamplesDataSource: KqlSamplesDataSource = {
   type: 'kql-samples',
-  name: '',
+  name: DATA_SOURCES_I18N.kqlDataSource.defaultName,
   enabled: true,
   timeRange: {
     from: 'now-15m',
@@ -52,16 +53,19 @@ export const defaultKqlSamplesDataSource: KqlSamplesDataSource = {
   },
 };
 
-export const defaultCustomSamplesDataSource: CustomSamplesDataSource = {
+export const createDefaultCustomSamplesDataSource = (
+  streamName: string
+): CustomSamplesDataSource => ({
   type: 'custom-samples',
-  name: '',
+  name: DATA_SOURCES_I18N.customSamples.defaultName,
   enabled: true,
   documents: [],
-};
+  storageKey: `${CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX}${streamName}__${uuidv4()}`,
+});
 
 export const defaultEnrichmentUrlState: EnrichmentUrlState = {
   v: 1,
-  dataSources: [defaultRandomSamplesDataSource],
+  dataSources: [defaultLatestSamplesDataSource],
 };
 
 export function getDataSourcesUrlState(context: StreamEnrichmentContextType) {
@@ -70,23 +74,26 @@ export function getDataSourcesUrlState(context: StreamEnrichmentContextType) {
   );
 
   return dataSources
-    .filter((dataSource) => dataSource.type !== 'custom-samples') // Custom samples are not stored in the URL
+    .map((dataSource) =>
+      // Don't persist custom samples documents
+      dataSource.type === 'custom-samples' ? { ...dataSource, documents: [] } : dataSource
+    )
     .map(dataSourceConverter.toUrlSchema);
 }
 
-export function getDataSourcesSamples(
+export function getActiveDataSourceSamples(
   context: StreamEnrichmentContextType
 ): SampleDocumentWithUIAttributes[] {
-  const dataSourcesSnapshots = context.dataSourcesRefs
+  const dataSourceSnapshot = context.dataSourcesRefs
     .map((dataSourceRef) => dataSourceRef.getSnapshot())
-    .filter((snapshot) => snapshot.matches('enabled'));
+    .find((snapshot) => snapshot.matches('enabled'));
 
-  return dataSourcesSnapshots.flatMap((snapshot) => {
-    return snapshot.context.data.map((doc) => ({
-      dataSourceId: snapshot.context.dataSource.id,
-      document: doc,
-    }));
-  });
+  if (!dataSourceSnapshot) return [];
+
+  return dataSourceSnapshot.context.data.map((doc) => ({
+    dataSourceId: dataSourceSnapshot.context.dataSource.id,
+    document: doc,
+  }));
 }
 
 /**
@@ -94,14 +101,20 @@ export function getDataSourcesSamples(
  * - If no processor is being edited: returns all new processors
  * - If a processor is being edited: returns new processors up to and including the one being edited
  */
-export function getStepsForSimulation({ stepRefs }: Pick<StreamEnrichmentContextType, 'stepRefs'>) {
+export function getStepsForSimulation({
+  stepRefs,
+  isPartialSimulation,
+}: Pick<StreamEnrichmentContextType, 'stepRefs'> & { isPartialSimulation: boolean }) {
   let newStepSnapshots = stepRefs
     .map((procRef) => procRef.getSnapshot())
-    .filter((snapshot) => isWhereBlock(snapshot.context.step) || snapshot.context.isNew);
+    .filter(
+      (snapshot) =>
+        isWhereBlock(snapshot.context.step) || (isPartialSimulation ? snapshot.context.isNew : true)
+    );
 
   // Find if any processor is currently being edited
   const editingProcessorIndex = newStepSnapshots.findIndex(
-    (snapshot) => isActionBlock(snapshot.context) && isStepUnderEdit(snapshot)
+    (snapshot) => isActionBlock(snapshot.context.step) && isStepUnderEdit(snapshot)
   );
 
   // If a processor is being edited, set new processors up to and including the one being edited
@@ -150,7 +163,7 @@ export const spawnStep = <
   TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
 >(
   step: StreamlangStepWithUIAttributes,
-  assignArgs: Pick<TAssignArgs, 'self' | 'spawn'>,
+  assignArgs: TAssignArgs,
   options?: { isNew: boolean }
 ) => {
   const { spawn, self } = assignArgs;
@@ -332,4 +345,31 @@ export function getRootLevelStepsMap(stepRefs: StepActorRef[]): Map<string, stri
   }
 
   return result;
+}
+
+export function getActiveDataSourceRef(
+  dataSourcesRefs: DataSourceActorRef[]
+): DataSourceActorRef | undefined {
+  return dataSourcesRefs.find((dataSourceRef) => dataSourceRef.getSnapshot().matches('enabled'));
+}
+
+export function getActiveSimulationMode(
+  context: StreamEnrichmentContextType
+): DataSourceSimulationMode {
+  const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
+  if (!activeDataSourceRef) return 'partial';
+  return activeDataSourceRef.getSnapshot().context.simulationMode;
+}
+
+export function selectDataSource(
+  dataSourcesRefs: StreamEnrichmentContextType['dataSourcesRefs'],
+  id: string
+) {
+  dataSourcesRefs.forEach((dataSourceRef) => {
+    if (dataSourceRef.id === id) {
+      dataSourceRef.send({ type: 'dataSource.enable' });
+    } else {
+      dataSourceRef.send({ type: 'dataSource.disable' });
+    }
+  });
 }

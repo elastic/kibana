@@ -47,6 +47,9 @@ import { ProcessorTypeSelector } from './processor_type_selector';
 import { SetProcessorForm } from './set';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { deleteProcessorPromptOptions, discardChangesPromptOptions } from './prompt_options';
+import { ConvertProcessorForm } from './convert';
+import { ReplaceProcessorForm } from './replace';
+import { DropProcessorForm } from './drop_document';
 
 export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((props, ref) => {
   const { processorMetrics, stepRef } = props;
@@ -176,11 +179,14 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
             <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
               <ProcessorTypeSelector disabled={isConfigured} />
               <EuiSpacer size="m" />
+              {type === 'convert' && <ConvertProcessorForm />}
+              {type === 'replace' && <ReplaceProcessorForm />}
               {type === 'date' && <DateProcessorForm />}
               {type === 'grok' && <GrokProcessorForm />}
               {type === 'dissect' && <DissectProcessorForm />}
               {type === 'manual_ingest_pipeline' && <ManualIngestPipelineProcessorForm />}
               {type === 'set' && <SetProcessorForm />}
+              {type === 'drop_document' && <DropProcessorForm />}
               {!SPECIALISED_TYPES.includes(type) && (
                 <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
               )}

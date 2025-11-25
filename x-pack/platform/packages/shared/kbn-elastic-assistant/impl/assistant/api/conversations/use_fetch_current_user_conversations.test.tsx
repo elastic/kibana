@@ -7,7 +7,7 @@
 
 import { waitFor, renderHook } from '@testing-library/react';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { UseFetchCurrentUserConversationsParams } from './use_fetch_current_user_conversations';

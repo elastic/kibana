@@ -9,32 +9,32 @@
 
 import type { EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
 import {
-  EuiSelectable,
-  EuiHighlight,
-  EuiText,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiButtonEmpty,
-  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
   euiFontSize,
-  useEuiTheme,
+  EuiHighlight,
   EuiIcon,
+  EuiSelectable,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useMemo, useState } from 'react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { getBaseConnectorType } from '../../../shared/ui/step_icons/get_base_connector_type';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+import { flattenOptions, getActionOptions } from '../lib/get_action_options';
 import {
+  type ActionOptionData,
   isActionConnectorGroup,
   isActionConnectorOption,
   isActionGroup,
   isActionOption,
-  type ActionOptionData,
 } from '../types';
-import { flattenOptions, getActionOptions } from '../lib/get_action_options';
 
 export interface ActionsMenuProps {
   onActionSelected: (action: ActionOptionData) => void;
@@ -63,7 +63,7 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
             {isActionConnectorGroup(option) || isActionConnectorOption(option) ? (
               <StepIcon
                 stepType={getBaseConnectorType(option.connectorType)}
-                executionStatus={null}
+                executionStatus={undefined}
               />
             ) : isActionGroup(option) || isActionOption(option) ? (
               <EuiIcon type={option.iconType} size="m" color={option.iconColor} />
@@ -93,6 +93,7 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
     );
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChange = (_: Array<ActionOptionData>, __: any, selectedOption: ActionOptionData) => {
     if (isActionGroup(selectedOption)) {
       setCurrentPath([...currentPath, selectedOption.id]);
