@@ -1226,25 +1226,25 @@ The following validations are performed to ensure changes to Saved Object types 
 
 #### Versioning requirements
 
-* **Model Version Sequence:** Defined model versions must be consecutive integers, starting at 1. You cannot skip any version number.
+* **Model version sequence:** Defined model versions must be consecutive integers, starting at 1. You cannot skip any version number.
 
-* **Single Model Version per PR:** A given *Pull Request* cannot define more than one model version for the same Saved Object type.
+* **Single model version per PR:** A given *Pull Request* cannot define more than one model version for the same Saved Object type.
 
   * Rationale: If the changes are part of a 2-step rollout, they must be shipped in separate Serverless releases. The `on-merge` pipeline will compare changes against current serverless release.
 
-* **Legacy Migrations:** Types cannot define new versions using the legacy `migrations:` property, as it is deprecated.
+* **Legacy migrations:** Types cannot define new versions using the legacy `migrations:` property, as it is deprecated.
 
-#### Mapping and Schema Compatibility
+#### Mapping and schema compatibility
 
-* **Mapping Changes Require New Version:** If you update the mappings, you must also provide a new model version that accounts for those mapping changes.
+* **Mapping changes require a new version:** If you update the mappings, you must also provide a new model version that accounts for those mapping changes.
 
-* **Backward Compatible Mappings:** To satisfy migration constraints, updates to mappings must be performed in place and without requiring a reindex. Therefore, all mapping updates must be compatible.
+* **Backward compatible mappings:** To satisfy migration constraints, updates to mappings must be performed in place and without requiring a reindex. Therefore, all mapping updates must be compatible.
 
   * Note: {{es}} has limitations preventing certain breaking changes, such as removing fields or updating the data types of fields (e.g., changing an `integer` to a `text`).
 
-* **Mandatory Schemas:** New model versions must include the `create` and `forwardCompatibility` schemas, as these are now mandatory.
+* **Mandatory schemas:** New model versions must include the `create` and `forwardCompatibility` schemas, as these are now mandatory.
 
-### Ensuring Robust Serverless Rollbacks
+### Ensuring robust serverless rollbacks
 
 To provide guarantees for Serverless rollbacks, the validation script requires type owners to supply data fixtures for any updated Saved Object types.
 
