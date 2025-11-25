@@ -8,6 +8,7 @@ exports[`DetailPanelCopy component When DetailPanelCopy is mounted renders Detai
   >
     <span
       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      id="generated-id-wrapper"
     >
       <span>
         copy component test
