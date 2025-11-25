@@ -11,12 +11,15 @@ import type { UiAttachment } from '@kbn/onechat-plugin/public/embeddable/types';
 import { OpenAgentChatButton } from '@kbn/contextual-insights-button';
 
 const OBSERVABILITY_AGENT_ID = 'observability.agent';
+const OBSERVABILITY_ALERT_ATTACHMENT_TYPE = 'observability.alert';
 import { useKibana } from '../../utils/kibana_react';
 import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 
+const OBSERVABILITY_AGENT_FEATURE_FLAG = 'observabilityAgent.enabled';
+
 export function AlertDetailContextualInsights({ alert }: { alert: AlertData | null }) {
   const {
-    services: { onechat },
+    services: { onechat, featureFlags },
   } = useKibana();
 
   const attachments: UiAttachment[] = useMemo(() => {
@@ -24,61 +27,24 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
       return [];
     }
 
-    const fields = alert.formatted.fields as unknown as
-      | Record<string, string | string[]>
-      | undefined;
-    if (!fields) {
+    const alertId =
+      (alert.formatted?.fields?.['kibana.alert.uuid'] as string | undefined) ||
+      (alert.raw?._id as string | undefined) ||
+      '';
+
+    if (!alertId) {
       return [];
     }
 
-    const attachmentList: UiAttachment[] = [];
-
-    const alertStartTime = new Date(alert.formatted.start).toISOString();
-    const alertLastUpdate = new Date(alert.formatted.lastUpdated).toISOString();
-    const currentTime = new Date().toISOString();
-    const timeRangeStart = new Date(Date.now() - 15 * 60 * 1000).toISOString();
-    const timeRangeEnd = currentTime;
-
-    const screenDescription = `The user is looking at ${window.location.href}. The current time range is ${timeRangeStart} - ${timeRangeEnd}.
-
-The user is looking at an active alert. It started at ${alertStartTime}, and was last updated at ${alertLastUpdate}.
-
-The reason given for the alert is ${alert.formatted.reason}.
-
-Use the following alert fields as background information for generating a response. Do not list them as bullet points in the response.`;
-
-    // Add screen description attachment
-    attachmentList.push({
-      id: 'alert-screen-description',
-      type: 'text',
-      getContent: async () => ({
-        content: screenDescription,
-      }),
-    });
-
-    // Build alert fields content
-    const alertFieldsContent = Object.entries(fields)
-      .map(([key, value]) => {
-        const formattedValue =
-          typeof value === 'object' && value !== null && !Array.isArray(value)
-            ? JSON.stringify(value)
-            : Array.isArray(value)
-            ? JSON.stringify(value)
-            : value;
-        return `${key}: ${formattedValue}`;
-      })
-      .join('\n');
-
-    // Add alert fields attachment
-    attachmentList.push({
-      id: 'alert-fields-data',
-      type: 'text',
-      getContent: async () => ({
-        content: `Alert Fields:\n\n${alertFieldsContent}`,
-      }),
-    });
-
-    return attachmentList;
+    return [
+      {
+        id: 'alert',
+        type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+        getContent: async () => ({
+          alertId,
+        }),
+      },
+    ];
   }, [alert]);
   const uniqueSessionTagRef = useRef<string | null>(null);
   if (!uniqueSessionTagRef.current) {
@@ -86,8 +52,12 @@ Use the following alert fields as background information for generating a respon
   }
   const uniqueSessionTag = uniqueSessionTagRef.current;
 
-  // Don't render the button if onechat service is not available
-  if (!onechat) {
+  const isObservabilityAgentEnabled = featureFlags?.getBooleanValue(
+    OBSERVABILITY_AGENT_FEATURE_FLAG,
+    false
+  );
+
+  if (!isObservabilityAgentEnabled || !onechat) {
     return null;
   }
 

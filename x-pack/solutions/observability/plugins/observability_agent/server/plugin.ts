@@ -12,10 +12,12 @@ import type {
   PluginInitializerContext,
   Logger,
 } from '@kbn/core/server';
+import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import { registerObservabilityAgent } from './agent/register_observability_agent';
 import { registerTools } from './tools/register_tools';
 import { getIsObservabilityAgentEnabled } from './utils/get_is_obs_agent_enabled';
 import { OBSERVABILITY_AGENT_FEATURE_FLAG } from '../common/constants';
+import { createAlertAttachmentType } from './attachments/alert_attachment_type';
 import type {
   ObservabilityAgentPluginSetup,
   ObservabilityAgentPluginSetupDependencies,
@@ -58,6 +60,16 @@ export class ObservabilityAgentPlugin
         registerObservabilityAgent({ plugins, logger: this.logger }).catch((error) => {
           this.logger.error(`Error registering observability agent: ${error}`);
         });
+
+        try {
+          const alertAttachmentType = createAlertAttachmentType();
+          plugins.onechat.attachments.registerType(alertAttachmentType as AttachmentTypeDefinition);
+          this.logger.info(
+            `Successfully registered observability alert attachment type: ${alertAttachmentType.id}`
+          );
+        } catch (error) {
+          this.logger.error(`Error registering alert attachment type: ${error}`, error);
+        }
       })
       .catch((error) => {
         this.logger.error(`Error checking whether the observability agent is enabled: ${error}`);
