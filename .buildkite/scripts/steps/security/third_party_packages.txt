@@ -20,3 +20,4 @@ xml-formatter
 dompurify
 magic-bytes.js
 @axe-core/playwright
+@opentelemetry/exporter-trace-otlp-grpc
