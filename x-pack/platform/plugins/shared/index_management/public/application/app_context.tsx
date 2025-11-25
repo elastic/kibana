@@ -9,17 +9,17 @@ import React, { createContext, useContext } from 'react';
 import type SemVer from 'semver/classes/semver';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type {
-    ApplicationStart,
-    I18nStart,
-    ThemeServiceStart,
-    FatalErrorsStart,
-    ScopedHistory,
-    DocLinksStart,
-    ExecutionContextStart,
-    HttpSetup,
-    IUiSettingsClient,
-    OverlayStart,
-    ChromeStart,
+  ApplicationStart,
+  I18nStart,
+  ThemeServiceStart,
+  FatalErrorsStart,
+  ScopedHistory,
+  DocLinksStart,
+  ExecutionContextStart,
+  HttpSetup,
+  IUiSettingsClient,
+  OverlayStart,
+  ChromeStart,
 } from '@kbn/core/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';

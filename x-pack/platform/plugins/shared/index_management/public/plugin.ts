@@ -10,25 +10,25 @@ import { Subject } from 'rxjs';
 import SemVer from 'semver/classes/semver';
 
 import type {
-    CoreSetup,
-    CoreStart,
-    Plugin,
-    PluginInitializerContext,
-    ScopedHistory,
-    Capabilities,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  ScopedHistory,
+  Capabilities,
 } from '@kbn/core/public';
 import type {
-    ComponentTemplateFlyoutProps,
-    DatastreamFlyoutProps,
-    IndexManagementPluginSetup,
-    IndexManagementPluginStart,
-    IndexMappingProps,
-    IndexSettingProps,
-    IndexTemplateFlyoutProps,
+  ComponentTemplateFlyoutProps,
+  DatastreamFlyoutProps,
+  IndexManagementPluginSetup,
+  IndexManagementPluginStart,
+  IndexMappingProps,
+  IndexSettingProps,
+  IndexTemplateFlyoutProps,
 } from '@kbn/index-management-shared-types';
 import type {
-    IndexManagementLocator,
-    IndexManagementAppMountParams,
+  IndexManagementLocator,
+  IndexManagementAppMountParams,
 } from '@kbn/index-management-shared-types';
 import type { Subscription } from 'rxjs';
 import React from 'react';
