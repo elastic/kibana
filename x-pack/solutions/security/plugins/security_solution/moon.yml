@@ -262,6 +262,7 @@ dependsOn:
   - '@kbn/core-lifecycle-browser-mocks'
   - '@kbn/connector-schemas'
   - '@kbn/tour-queue'
+  - '@kbn/shared-ux-file-types'
 tags:
   - plugin
   - prod
