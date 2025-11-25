@@ -98,6 +98,7 @@ export const MetricsExperienceGridContent = ({
     isLoading: isFilteredFieldsLoading,
   } = useFilteredMetricFields({
     allFields,
+    isFieldsLoading,
     dimensions,
     searchTerm,
     valueFilters,

@@ -35,6 +35,7 @@ export const useToolbarActions = ({
   isLoading = false,
 }: UseToolbarActionsProps) => {
   const [timeRange, setTimeRange] = useState<TimeRange>(requestParams.getTimeRange());
+  const [indices, setIndices] = useState<string[]>([]);
   const {
     dimensions,
     valueFilters,
@@ -57,9 +58,11 @@ export const useToolbarActions = ({
     [isFullscreen, renderToggleActions]
   );
 
-  const indices = useMemo(() => {
-    return [...new Set(fields.map((field) => field.index))];
-  }, [fields]);
+  useEffect(() => {
+    if (!isLoading) {
+      setIndices([...new Set(fields.map((field) => field.index))]);
+    }
+  }, [isLoading, fields]);
 
   useEffect(() => {
     if (!isLoading) {

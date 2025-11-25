@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo, useRef, useEffect } from 'react';
+import { useMemo, useRef, useEffect, useState } from 'react';
 import type { TimeRange } from '@kbn/es-query';
 import type {
   MetricField,
@@ -19,6 +19,7 @@ import { useMetricFieldsSearchQuery } from './use_metric_fields_search_query';
 
 export const useFilteredMetricFields = ({
   allFields,
+  isFieldsLoading,
   dimensions,
   searchTerm,
   valueFilters,
@@ -26,67 +27,78 @@ export const useFilteredMetricFields = ({
   onFilterComplete,
 }: {
   allFields: MetricField[];
+  isFieldsLoading: boolean;
   dimensions: Dimension[];
   searchTerm: string;
   valueFilters: string[];
   timeRange: TimeRange | undefined;
   onFilterComplete?: () => void;
 }) => {
-  const { filters } = useDimensionFilters(valueFilters);
+  const { filters: dimensionFilters } = useDimensionFilters(valueFilters);
+  const [filteredFields, setFilteredFields] = useState<MetricField[]>(allFields);
 
   // Client-side filtering by dimensions and search term
-  const dimensionsSet = useMemo(
-    () => (dimensions.length > 0 ? new Set(dimensions.map((d) => d.name)) : null),
+  const dimensionFieldNamesSet = useMemo(
+    () => (dimensions.length > 0 ? new Set(dimensions.map((d) => d.name)) : new Set<string>()),
     [dimensions]
   );
   const searchTermLower = useMemo(() => searchTerm?.toLowerCase(), [searchTerm]);
 
-  const filteredFields = useMemo(() => {
-    return allFields.filter((field) => {
-      if (searchTermLower && !field.name.toLowerCase().includes(searchTermLower)) {
-        return false;
-      }
+  useEffect(() => {
+    if (isFieldsLoading) {
+      return;
+    }
 
-      if (dimensionsSet && dimensionsSet.size > 0) {
-        const hasMatchingDimension = field.dimensions.some((d) => dimensionsSet.has(d.name));
-        if (!hasMatchingDimension) {
+    const hasClientFilters = dimensionFieldNamesSet.size > 0 || searchTermLower?.length > 0;
+
+    if (!hasClientFilters) {
+      setFilteredFields(allFields);
+      return;
+    }
+
+    setFilteredFields(
+      allFields.filter((field) => {
+        if (searchTermLower && !field.name.toLowerCase().includes(searchTermLower)) {
           return false;
         }
-      }
+        if (dimensionFieldNamesSet.size > 0) {
+          return field.dimensions.some((d) => dimensionFieldNamesSet.has(d.name));
+        }
 
-      return true;
-    });
-  }, [allFields, searchTermLower, dimensionsSet]);
+        return true;
+      })
+    );
+  }, [isFieldsLoading, allFields, searchTermLower, dimensionFieldNamesSet]);
 
-  const { fiedNamesSearch, indicesSearch } = useMemo(() => {
-    if (!filters || Object.keys(filters).length === 0) {
-      return { fiedNamesSearch: new Set<string>(), indicesSearch: new Set<string>() };
+  const { fieldNamesSearch, indicesSearch } = useMemo(() => {
+    if (!dimensionFilters || Object.keys(dimensionFilters).length === 0) {
+      return { fieldNamesSearch: new Set<string>(), indicesSearch: new Set<string>() };
     }
 
     return filteredFields.reduce(
       (acc, field) => {
-        acc.fiedNamesSearch.add(field.name);
+        acc.fieldNamesSearch.add(field.name);
         acc.indicesSearch.add(field.index);
         return acc;
       },
-      { fiedNamesSearch: new Set<string>(), indicesSearch: new Set<string>() }
+      { fieldNamesSearch: new Set<string>(), indicesSearch: new Set<string>() }
     );
-  }, [filteredFields, filters]);
+  }, [filteredFields, dimensionFilters]);
 
-  const shouldSearch = fiedNamesSearch.size > 0;
+  const shouldSearch = fieldNamesSearch.size > 0;
 
-  const { data: fieldsFilteredByValue = [], isFetching } = useMetricFieldsSearchQuery({
-    fields: Array.from(fiedNamesSearch),
+  const { data: searchResult = [], isFetching } = useMetricFieldsSearchQuery({
+    fields: Array.from(fieldNamesSearch),
     index: Array.from(indicesSearch).join(','),
     timeRange,
-    filters,
+    filters: dimensionFilters,
     enabled: shouldSearch,
   });
 
   const lastValueRef = useRef<{
     fields: MetricField[];
     filters?: DimensionFilters;
-  }>({ fields: filteredFields, filters });
+  }>({ fields: filteredFields, filters: dimensionFilters });
 
   const shouldUpdate = useMemo(
     () => (shouldSearch && !isFetching) || !shouldSearch,
@@ -95,8 +107,8 @@ export const useFilteredMetricFields = ({
 
   if (shouldUpdate) {
     lastValueRef.current = {
-      fields: shouldSearch && !isFetching ? fieldsFilteredByValue : filteredFields,
-      filters,
+      fields: shouldSearch && !isFetching ? searchResult : filteredFields,
+      filters: dimensionFilters,
     };
   }
 
