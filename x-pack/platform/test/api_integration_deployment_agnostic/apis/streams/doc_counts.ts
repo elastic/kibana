@@ -55,7 +55,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const rootStream = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
           params: { path: { name: 'logs' } },
         });
-        
+
         await putStream(apiClient, 'logs', {
           ...emptyAssets,
           stream: {
@@ -80,7 +80,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         });
-        
+
         await putStream(apiClient, 'logs.test-stream-1', {
           ...emptyAssets,
           stream: {
@@ -118,7 +118,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Index documents to parent 'logs' stream and let routing handle it
         const now = Date.now();
         const timestamp = new Date(now).toISOString();
-        
+
         await esClient.index({
           index: 'logs',
           document: {
@@ -132,7 +132,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           refresh: 'wait_for',
         });
-        
+
         await esClient.index({
           index: 'logs',
           document: {
@@ -146,7 +146,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           refresh: 'wait_for',
         });
-        
+
         await esClient.index({
           index: 'logs',
           document: {
@@ -230,57 +230,57 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('GET /internal/streams/doc_counts/degraded', () => {
       // TODO: Fix this test
       it.skip('returns degraded document counts (documents with _ignored field)', async () => {
-       // Get the root logs stream and update it with routing rules
-       const rootStream = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
-        params: { path: { name: 'logs' } },
-      });
-      
-      await putStream(apiClient, 'logs', {
-        ...emptyAssets,
-        stream: {
-          description: '',
-          ingest: {
-            ...(rootStream.body as any).stream.ingest,
-            wired: {
-              ...(rootStream.body as any).stream.ingest.wired,
-              routing: [
-                {
-                  destination: 'logs.test-stream-1',
-                  where: { field: 'attributes.log.logger', eq: 'test-stream-1' },
-                  status: 'enabled',
-                },
-                {
-                  destination: 'logs.test-stream-2',
-                  where: { field: 'attributes.log.logger', eq: 'test-stream-2' },
-                  status: 'enabled',
-                },
-              ],
-            },
-          },
-        },
-      });
-      
-      await putStream(apiClient, 'logs.test-stream-1', {
-        ...emptyAssets,
-        stream: {
-          description: '',
-          ingest: {
-            lifecycle: { inherit: {} },
-            processing: { steps: [] },
-            settings: {},
-            wired: {
-              fields: {
-                'attributes.log.level': {
-                  type: 'keyword',
-                  ignore_above: 1024,
-                },
+        // Get the root logs stream and update it with routing rules
+        const rootStream = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
+          params: { path: { name: 'logs' } },
+        });
+
+        await putStream(apiClient, 'logs', {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              ...(rootStream.body as any).stream.ingest,
+              wired: {
+                ...(rootStream.body as any).stream.ingest.wired,
+                routing: [
+                  {
+                    destination: 'logs.test-stream-1',
+                    where: { field: 'attributes.log.logger', eq: 'test-stream-1' },
+                    status: 'enabled',
+                  },
+                  {
+                    destination: 'logs.test-stream-2',
+                    where: { field: 'attributes.log.logger', eq: 'test-stream-2' },
+                    status: 'enabled',
+                  },
+                ],
               },
-              routing: [],
             },
-            failure_store: { disabled: {} },
           },
-        },
-      });
+        });
+
+        await putStream(apiClient, 'logs.test-stream-1', {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: { steps: [] },
+              settings: {},
+              wired: {
+                fields: {
+                  'attributes.log.level': {
+                    type: 'keyword',
+                    ignore_above: 1024,
+                  },
+                },
+                routing: [],
+              },
+              failure_store: { disabled: {} },
+            },
+          },
+        });
 
         const timestamp = new Date().toISOString();
 
@@ -335,52 +335,52 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns empty array when no degraded documents exist', async () => {
-               // Get the root logs stream and update it with routing rules
-       const rootStream = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
-        params: { path: { name: 'logs' } },
-      });
-      
-      await putStream(apiClient, 'logs', {
-        ...emptyAssets,
-        stream: {
-          description: '',
-          ingest: {
-            ...(rootStream.body as any).stream.ingest,
-            wired: {
-              ...(rootStream.body as any).stream.ingest.wired,
-              routing: [
-                {
-                  destination: 'logs.test-stream-1',
-                  where: { field: 'attributes.log.logger', eq: 'test-stream-1' },
-                  status: 'enabled',
-                },
-                {
-                  destination: 'logs.test-stream-2',
-                  where: { field: 'attributes.log.logger', eq: 'test-stream-2' },
-                  status: 'enabled',
-                },
-              ],
+        // Get the root logs stream and update it with routing rules
+        const rootStream = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
+          params: { path: { name: 'logs' } },
+        });
+
+        await putStream(apiClient, 'logs', {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              ...(rootStream.body as any).stream.ingest,
+              wired: {
+                ...(rootStream.body as any).stream.ingest.wired,
+                routing: [
+                  {
+                    destination: 'logs.test-stream-1',
+                    where: { field: 'attributes.log.logger', eq: 'test-stream-1' },
+                    status: 'enabled',
+                  },
+                  {
+                    destination: 'logs.test-stream-2',
+                    where: { field: 'attributes.log.logger', eq: 'test-stream-2' },
+                    status: 'enabled',
+                  },
+                ],
+              },
             },
           },
-        },
-      });
-      
-      await putStream(apiClient, 'logs.test-stream-1', {
-        ...emptyAssets,
-        stream: {
-          description: '',
-          ingest: {
-            lifecycle: { inherit: {} },
-            processing: { steps: [] },
-            settings: {},
-            wired: {
-              fields: {},
-              routing: [],
+        });
+
+        await putStream(apiClient, 'logs.test-stream-1', {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: { steps: [] },
+              settings: {},
+              wired: {
+                fields: {},
+                routing: [],
+              },
+              failure_store: { disabled: {} },
             },
-            failure_store: { disabled: {} },
           },
-        },
-      });
+        });
 
         const timestamp = new Date().toISOString();
         await esClient.index({
