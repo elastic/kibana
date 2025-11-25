@@ -9,7 +9,7 @@
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { isEqualState } from './utils/state_comparators';
@@ -41,7 +41,7 @@ describe('Test discover app state', () => {
     stateStorage = createKbnUrlStateStorage({
       useHash: storeInSessionStorage,
       history,
-      ...(toasts && withNotifyOnErrors(toasts)),
+      ...toasts,
     });
     tabsStorageManager = createTabsStorageManager({
       urlStateStorage: stateStorage,
