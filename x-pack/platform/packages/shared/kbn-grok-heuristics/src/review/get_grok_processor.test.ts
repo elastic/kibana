@@ -143,7 +143,7 @@ describe('getGrokProcessor', () => {
     };
 
     const grokProcessor = getGrokProcessor(grokPatternNodes, reviewResult);
-    
+
     // Should collapse to GREEDYDATA, not create a complex custom pattern
     expect(grokProcessor).toEqual({
       description: 'Application Error Log',

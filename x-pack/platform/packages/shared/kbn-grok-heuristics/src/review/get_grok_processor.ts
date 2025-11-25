@@ -53,11 +53,11 @@ export function getGrokProcessor(
   let rootPattern = '';
   const patternDefinitions: Record<string, string> = {};
   let targetDefinition: string | undefined;
-  
+
   // Build skip ranges for collapsible multi-column groups
   // Map from field entry to range of node indices to skip
   const skipRanges: Array<{ start: number; end: number }> = [];
-  
+
   reviewResult.fields.forEach((field) => {
     if (field.columns.length >= 2) {
       const lastComponent = field.grok_components[field.grok_components.length - 1];
@@ -67,7 +67,7 @@ export function getGrokProcessor(
         const lastColIndex = nodes.findIndex(
           (n) => isNamedField(n) && n.id === field.columns[field.columns.length - 1]
         );
-        
+
         if (firstColIndex >= 0 && lastColIndex >= 0 && lastColIndex > firstColIndex) {
           // Skip everything from firstColIndex+1 to lastColIndex (inclusive)
           skipRanges.push({ start: firstColIndex + 1, end: lastColIndex });
@@ -119,7 +119,7 @@ export function getGrokProcessor(
     if (shouldSkip) {
       return;
     }
-    
+
     if (isNamedField(node)) {
       const match = reviewResult.fields.find(
         (field) => field.columns.includes(node.id) || field.name === node.id
