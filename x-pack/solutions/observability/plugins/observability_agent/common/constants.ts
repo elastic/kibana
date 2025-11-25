@@ -10,9 +10,13 @@ export const OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT = false;
 
 // Duplicate of the tool IDs defined in @kbn/apm-plugin/common/observability_agent/agent_tool_ids.ts
 // Re-defined here to avoid cross-plugin dependency cycles
+
+// The below tools are registered in the APM plugin for the Observability Agent to use
 export const OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID =
   'observability.get_downstream_dependencies';
 export const OBSERVABILITY_GET_SERVICES_TOOL_ID = 'observability.get_services';
+
+// The below tools are registered in the APM plugin to be used in attachments
 export const OBSERVABILITY_GET_ERROR_BY_ID_TOOL_ID = 'observability.get_error_by_id';
 export const OBSERVABILITY_GET_TRANSACTION_BY_ID_TOOL_ID = 'observability.get_transaction_by_id';
 export const OBSERVABILITY_GET_TRACE_OVERVIEW_BY_ID_TOOL_ID =

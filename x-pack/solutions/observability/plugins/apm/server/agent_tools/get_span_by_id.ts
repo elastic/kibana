@@ -76,7 +76,7 @@ export function createGetSpanByIdTool({
           ],
         };
       } catch (error) {
-        logger.error(`Error fetching span by id: ${error.message}`);
+        logger.error(`Error fetching span: ${error.message}`);
         logger.debug(error);
 
         return {

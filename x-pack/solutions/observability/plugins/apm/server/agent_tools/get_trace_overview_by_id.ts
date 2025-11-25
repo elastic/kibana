@@ -91,7 +91,7 @@ export function createGetTraceOverviewByIdTool({
                 summary,
                 errors: {
                   total: apmErrors.length,
-                  apmErrors: apmErrors.slice(0, 5),
+                  apmErrorSamples: apmErrors.slice(0, 5),
                 },
               },
             },

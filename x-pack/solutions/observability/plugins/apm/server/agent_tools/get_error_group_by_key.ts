@@ -76,11 +76,19 @@ export function createGetErrorGroupByKeyTool({
           end: parseDatemath(end),
         });
 
+        // Sending only the first 10 error sample ids to the agent
+        const maxIds = 10;
+        const sampleIds =
+          errorSampleIds.length > maxIds ? errorSampleIds.slice(0, maxIds) : errorSampleIds;
+
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: { errorSampleIds, occurrencesCount },
+              data: {
+                total: occurrencesCount,
+                errorSampleIds: sampleIds,
+              },
             },
           ],
         };

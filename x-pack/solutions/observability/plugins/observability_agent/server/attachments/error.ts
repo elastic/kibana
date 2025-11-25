@@ -31,7 +31,6 @@ const errorSchema = z
         runtime_name: z.string().optional(),
         runtime_version: z.string().optional(),
       })
-      .partial({ environment: true, language: true, runtime_name: true, runtime_version: true })
       .optional(),
     transaction_name: z.string().optional(),
     transaction_id: z.string().optional(),
@@ -88,6 +87,7 @@ export const createErrorAttachmentType = (): AttachmentTypeDefinition => {
           if (transactionId) providedIds.push(`transaction_id=${transactionId}`);
           if (traceId) providedIds.push(`trace_id=${traceId}`);
           if (spanId) providedIds.push(`span_id=${spanId}`);
+
           if (providedIds.length > 0) {
             representationParts.push(`Provided identifiers: ${providedIds.join(', ')}`);
           }
@@ -135,13 +135,13 @@ export const createErrorAttachmentType = (): AttachmentTypeDefinition => {
     getAgentDescription: () => {
       return dedent(`
         The error attachment contains data about an error that occurred in an application. It must include at least one identifier:
-        - error_id, or
-        - error_grouping_key
+        - error_id OR error_grouping_key
 
         Use identifiers to fetch any missing context necessary to analyze the error.
+
         Preferred workflow:
-        1) If error_id is present: fetch the error document if needed; derive missing fields from it.
-        2) If only error_grouping_key is present: fetch recent samples for that group (service.name is required) and choose a representative error_id and continue with step 1.
+          1) If error_id is present: fetch the error document if needed; derive missing fields from it.
+          2) If only error_grouping_key is present: fetch recent samples for that group (service.name is required) and choose a representative error_id and continue with step 1.
 
         Identifiers that may be present and what they allow you to fetch:
         - error_id: fetch the specific error document.
@@ -157,7 +157,7 @@ export const createErrorAttachmentType = (): AttachmentTypeDefinition => {
         - ${OBSERVABILITY_GET_TRACE_OVERVIEW_BY_ID_TOOL_ID}: fetch the overview of a trace by trace_id.
         - ${OBSERVABILITY_GET_SPAN_BY_ID_TOOL_ID}: fetch a span by span_id and trace_id.
         - ${OBSERVABILITY_GET_SERVICES_TOOL_ID}: verify service and environment metadata.
-        - ${OBSERVABILITY_GET_ALERTS_TOOL_ID}: retrieve related alerts in the recent time window.
+        - ${OBSERVABILITY_GET_ALERTS_TOOL_ID}: retrieve related alerts in the relevant time window.
         - ${OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID}: inspect downstream dependencies and propagation paths.
       `);
     },
