@@ -30,6 +30,8 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/shared-ux-error-boundary'
+  - '@kbn/core-base-browser-internal'
+  - '@kbn/react-kibana-context-env'
 tags:
   - shared-common
   - package
