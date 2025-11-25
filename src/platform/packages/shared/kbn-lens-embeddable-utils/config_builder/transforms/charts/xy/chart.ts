@@ -11,6 +11,7 @@ import type { XYState as XYLensState } from '@kbn/lens-common';
 import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { Writable } from '@kbn/utility-types';
+import { capitalize } from 'lodash';
 import type { XYState } from '../../../schema';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
@@ -25,9 +26,9 @@ import {
 
 function convertFittingToStateFormat(fitting: XYState['fitting']) {
   return {
-    ...(fitting?.type ? { fittingFunction: fitting?.type } : {}),
-    ...(fitting?.dotted ? { emphasizeFitting: fitting?.dotted } : {}),
-    ...(fitting?.endValue ? { endValue: fitting?.endValue } : {}),
+    ...(fitting?.type ? { fittingFunction: capitalize(fitting.type) } : {}),
+    ...(fitting?.dotted ? { emphasizeFitting: fitting.dotted } : {}),
+    ...(fitting?.end_value ? { endValue: capitalize(fitting.end_value) } : {}),
   };
 }
 
@@ -178,17 +179,13 @@ function convertAppearanceToStateFormat(
 
 type LayerToDataView = Record<string, string>;
 
-function buildLayers(layers: XYState['layers'], dataViews: LayerToDataView): XYLensState['layers'] {
-  return layers
-    .map((layer, index) => buildXYLayer(layer, index, dataViews[getIdForLayer(layer, index)]))
-    .filter(nonNullable);
-}
-
 export function buildVisualizationState(
   config: XYState,
   usedDataViews: LayerToDataView
 ): XYLensState {
-  const layers = buildLayers(config.layers, usedDataViews);
+  const layers = config.layers
+    .map((layer, index) => buildXYLayer(layer, index, usedDataViews[getIdForLayer(layer, index)]))
+    .filter(nonNullable);
   return {
     preferredSeriesType: layers.filter(isLensStateDataLayer)[0]?.seriesType ?? 'bar_stacked',
     ...convertLegendToStateFormat(config.legend),
@@ -227,9 +224,9 @@ export function buildVisualizationAPI(
 
 function convertFittingToAPIFormat(config: XYLensState): Pick<XYState, 'fitting'> | {} {
   const fittingOptions = {
-    ...(config.fittingFunction ? { type: config.fittingFunction } : {}),
+    ...(config.fittingFunction ? { type: config.fittingFunction.toLowerCase() } : {}),
     ...(config.emphasizeFitting ? { dotted: config.emphasizeFitting } : {}),
-    ...(config.endValue ? { endValue: config.endValue } : {}),
+    ...(config.endValue ? { end_value: config.endValue.toLowerCase() } : {}),
   };
 
   if (Object.keys(fittingOptions).length === 0) {
@@ -239,9 +236,7 @@ function convertFittingToAPIFormat(config: XYLensState): Pick<XYState, 'fitting'
   return { fitting: fittingOptions };
 }
 
-function convertExtendsToAPIFormat(
-  extent: AxisExtentConfig | undefined
-): { extent: ExtentsType } | {} {
+function convertExtendsToAPIFormat(extent: AxisExtentConfig | undefined): { extent?: ExtentsType } {
   if (extent) {
     if (extent.mode === 'full') {
       return {
@@ -271,6 +266,19 @@ function convertExtendsToAPIFormat(
   return {};
 }
 
+function convertXExtent(extent: AxisExtentConfig | undefined): {
+  extent?: Exclude<ExtentsType, { type: 'focus' }>;
+} {
+  const xExtent = convertExtendsToAPIFormat(extent);
+  // focus mode is not compatible with X axis extent
+  if (xExtent.extent?.type !== 'focus') {
+    // for some reasons TS is not able to infer that here xExtent.extent can't be 'focus'
+    // so we need to rewrap it to avoid explicit casting
+    return { extent: xExtent.extent };
+  }
+  return {};
+}
+
 function convertAxisSettingsToAPIFormat(config: XYLensState): Pick<XYState, 'axis'> | {} {
   const axis: EditableAxisType = {};
 
@@ -291,7 +299,7 @@ function convertAxisSettingsToAPIFormat(config: XYLensState): Pick<XYState, 'axi
     ...(config.gridlinesVisibilitySettings?.x != null
       ? { grid: config.gridlinesVisibilitySettings.x }
       : {}),
-    ...(convertExtendsToAPIFormat(config.xExtent) as { extent?: XAxisType['extent'] }),
+    ...convertXExtent(config.xExtent),
     ...(config.labelsOrientation?.x != null
       ? {
           label_orientation: Object.entries(orientationDictionary).find(
@@ -322,7 +330,7 @@ function convertAxisSettingsToAPIFormat(config: XYLensState): Pick<XYState, 'axi
     ...(config.gridlinesVisibilitySettings?.yLeft != null
       ? { grid: config.gridlinesVisibilitySettings.yLeft }
       : {}),
-    ...(convertExtendsToAPIFormat(config.yLeftExtent) as { extent?: YAxisType['extent'] }),
+    ...convertExtendsToAPIFormat(config.yLeftExtent),
     ...(config.labelsOrientation?.yLeft != null
       ? {
           label_orientation: Object.entries(orientationDictionary).find(
@@ -353,7 +361,7 @@ function convertAxisSettingsToAPIFormat(config: XYLensState): Pick<XYState, 'axi
     ...(config.gridlinesVisibilitySettings?.yRight != null
       ? { grid: config.gridlinesVisibilitySettings.yRight }
       : {}),
-    ...(convertExtendsToAPIFormat(config.yRightExtent) as { extent?: YAxisType['extent'] }),
+    ...convertExtendsToAPIFormat(config.yRightExtent),
     ...(config.labelsOrientation?.yRight != null
       ? {
           label_orientation: Object.entries(orientationDictionary).find(

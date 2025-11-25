@@ -6,11 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type {
-  FormBasedLayer,
-  GaugeVisualizationState,
-  MetricVisualizationState,
-} from '@kbn/lens-common';
+import type { GaugeVisualizationState, MetricVisualizationState } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
 import type { LensApiState } from '../../schema';
 
@@ -41,17 +37,13 @@ export function getMetricAccessor(
 
 export function getDatasourceLayers(state: LensAttributes['state']) {
   const formBasedLayers = state.datasourceStates.formBased?.layers;
-  if (formBasedLayers && Object.keys(formBasedLayers).length) {
-    return formBasedLayers;
-  }
   const textBasedLayers = state.datasourceStates.textBased?.layers;
-  if (textBasedLayers && Object.keys(textBasedLayers).length) {
-    return textBasedLayers;
-  }
   // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
   const indexPatternLayers = state.datasourceStates.indexpattern?.layers;
-  if (indexPatternLayers && Object.keys(indexPatternLayers).length) {
-    return indexPatternLayers as Record<string, Omit<FormBasedLayer, 'indexPatternId'>>;
-  }
-  return {};
+  // Charts can have mixed layer types, so collect them all together
+  return {
+    ...(formBasedLayers && Object.keys(formBasedLayers).length ? formBasedLayers : {}),
+    ...(textBasedLayers && Object.keys(textBasedLayers).length ? textBasedLayers : {}),
+    ...(indexPatternLayers && Object.keys(indexPatternLayers).length ? indexPatternLayers : {}),
+  };
 }

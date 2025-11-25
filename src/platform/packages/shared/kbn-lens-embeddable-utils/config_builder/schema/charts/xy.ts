@@ -234,21 +234,21 @@ const xySharedSettings = {
       {
         type: schema.oneOf(
           [
-            schema.literal('None'),
-            schema.literal('Zero'),
-            schema.literal('Linear'),
-            schema.literal('Carry'),
-            schema.literal('Lookahead'),
-            schema.literal('Average'),
-            schema.literal('Nearest'),
+            schema.literal('none'),
+            schema.literal('zero'),
+            schema.literal('linear'),
+            schema.literal('carry'),
+            schema.literal('lookahead'),
+            schema.literal('average'),
+            schema.literal('nearest'),
           ],
           { meta: { description: 'Fitting function type for missing data' } }
         ),
         dotted: schema.maybe(
           schema.boolean({ meta: { description: 'Show fitted values as dotted lines' } })
         ),
-        endValue: schema.maybe(
-          schema.oneOf([schema.literal('None'), schema.literal('Zero'), schema.literal('Nearest')])
+        end_value: schema.maybe(
+          schema.oneOf([schema.literal('none'), schema.literal('zero'), schema.literal('nearest')])
         ),
       },
       {
@@ -406,16 +406,32 @@ const xyDataLayerSchemaESQL = schema.object(
   { meta: { description: 'Data layer for ES|QL queries with column references' } }
 );
 
-/**
- * Text label configuration for reference lines
- */
-const referenceLineTextLabelOption = schema.object(
-  {
-    type: schema.literal('label'),
-    text: schema.string({ meta: { description: 'Label text to display' } }),
-  },
-  { meta: { description: 'Text label for reference line' } }
-);
+const getListOfAvailableIcons = (description: string) =>
+  schema.oneOf([
+    schema.oneOf([
+      schema.literal('empty'),
+      schema.literal('asterisk'),
+      schema.literal('alert'),
+      schema.literal('bell'),
+      schema.literal('bolt'),
+      schema.literal('bug'),
+      schema.literal('circle'),
+      schema.literal('editorComment'),
+      schema.literal('flag'),
+      schema.literal('heart'),
+    ]),
+    schema.oneOf([
+      schema.literal('mapMarker'),
+      schema.literal('pinFilled'),
+      schema.literal('starEmpty'),
+      schema.literal('starFilled'),
+      schema.literal('tag'),
+      schema.literal('triangle'),
+    ]),
+  ]);
+
+const STROKE_WIDTH_MIN = 1;
+const STROKE_WIDTH_MAX = 10;
 
 /**
  * Common visual configuration for reference lines
@@ -426,13 +442,21 @@ const referenceLineLayerShared = {
       meta: { description: 'Fill direction for reference line' },
     })
   ),
-  text: schema.maybe(referenceLineTextLabelOption),
-  icon: schema.maybe(
-    schema.string({ meta: { description: 'Icon to display on the reference line' } })
+  text: schema.maybe(
+    schema.oneOf([schema.literal('none'), schema.literal('label')], {
+      meta: { description: 'Text display option for the reference line' },
+    })
   ),
-  stroke_width: schema.maybe(schema.number({ meta: { description: 'Line width in pixels' } })),
+  icon: schema.maybe(getListOfAvailableIcons('Icon to display on the reference line')),
+  stroke_width: schema.maybe(
+    schema.number({
+      meta: { description: 'Line width in pixels' },
+      min: STROKE_WIDTH_MIN,
+      max: STROKE_WIDTH_MAX,
+    })
+  ),
   stroke_dash: schema.maybe(
-    schema.oneOf([schema.literal('straight'), schema.literal('dashed'), schema.literal('dotted')], {
+    schema.oneOf([schema.literal('solid'), schema.literal('dashed'), schema.literal('dotted')], {
       meta: { description: 'Line style' },
     })
   ),
@@ -457,7 +481,7 @@ const referenceLineLayerSchemaNoESQL = schema.object(
           meta: { description: 'Reference line threshold configuration' },
         })
       ),
-      { meta: { description: 'Array of reference line thresholds' } }
+      { meta: { description: 'Array of reference line thresholds' }, minSize: 1 }
     ),
   },
   { meta: { description: 'Reference line layer for standard queries' } }
@@ -478,7 +502,7 @@ const referenceLineLayerSchemaESQL = schema.object(
           meta: { description: 'ES|QL reference line threshold' },
         }),
       ]),
-      { meta: { description: 'Array of ES|QL-based reference line thresholds' } }
+      { meta: { description: 'Array of ES|QL-based reference line thresholds' }, minSize: 1 }
     ),
   },
   { meta: { description: 'Reference line layer for ES|QL queries' } }
@@ -488,7 +512,6 @@ const referenceLineLayerSchemaESQL = schema.object(
  * Common properties for all annotation types
  */
 const annotationEventShared = {
-  name: schema.maybe(schema.string({ meta: { description: 'Display name for the annotation' } })),
   color: schema.maybe(staticColorSchema),
   hidden: schema.maybe(schema.boolean({ meta: { description: 'Whether to hide the annotation' } })),
 };
@@ -498,15 +521,17 @@ const annotationEventShared = {
  */
 const annotationPointShared = {
   ...annotationEventShared,
-  icon: schema.maybe(
-    schema.string({ meta: { description: 'Icon to display at the annotation point' } })
-  ),
+  icon: schema.maybe(getListOfAvailableIcons('Icon to display at the annotation point')),
   line: schema.maybe(
     schema.object(
       {
-        stroke_width: schema.number({ meta: { description: 'Vertical line width in pixels' } }),
+        stroke_width: schema.number({
+          meta: { description: 'Vertical line width in pixels' },
+          min: STROKE_WIDTH_MIN,
+          max: STROKE_WIDTH_MAX,
+        }),
         stroke_dash: schema.oneOf(
-          [schema.literal('straight'), schema.literal('dashed'), schema.literal('dotted')],
+          [schema.literal('solid'), schema.literal('dashed'), schema.literal('dotted')],
           { meta: { description: 'Vertical line style' } }
         ),
       },
@@ -514,17 +539,6 @@ const annotationPointShared = {
     )
   ),
 };
-
-/**
- * Text label configuration for annotations
- */
-const annotationTextLabelOption = schema.object(
-  {
-    type: schema.literal('label'),
-    text: schema.string({ meta: { description: 'Label text to display' } }),
-  },
-  { meta: { description: 'Text label for annotation' } }
-);
 
 /**
  * Timestamp format for annotations (Unix timestamp or ISO date string)
@@ -543,7 +557,25 @@ const annotationQuery = schema.object(
     type: schema.literal('query'),
     query: filterSchema,
     time_field: schema.string({ meta: { description: 'Field containing the timestamp' } }),
-    text: schema.maybe(annotationTextLabelOption),
+    label: schema.maybe(schema.string({ meta: { description: 'Label text for the annotation' } })),
+    text: schema.maybe(
+      schema.oneOf(
+        [
+          schema.literal('none'),
+          schema.literal('label'),
+          schema.object(
+            {
+              type: schema.literal('field'),
+              field: schema.string({ meta: { description: 'Field name containing label text' } }),
+            },
+            { meta: { description: 'Text from document field' } }
+          ),
+        ],
+        {
+          meta: { description: 'Text display option for the annotation' },
+        }
+      )
+    ),
     extra_fields: schema.maybe(
       schema.arrayOf(
         schema.string({ meta: { description: 'Additional field to include in tooltip' } }),
@@ -562,17 +594,11 @@ const annotationManualEvent = schema.object(
     ...annotationPointShared,
     type: schema.literal('point'),
     timestamp: annotationTimestampSchema,
+    label: schema.maybe(schema.string({ meta: { description: 'Label text for the annotation' } })),
     text: schema.maybe(
-      schema.oneOf([
-        annotationTextLabelOption,
-        schema.object(
-          {
-            type: schema.literal('field'),
-            field: schema.string({ meta: { description: 'Field name containing label text' } }),
-          },
-          { meta: { description: 'Text from document field' } }
-        ),
-      ])
+      schema.oneOf([schema.literal('none'), schema.literal('label')], {
+        meta: { description: 'Text display option for the annotation' },
+      })
     ),
   },
   { meta: { description: 'Manual point annotation at specific timestamp' } }
@@ -592,6 +618,7 @@ const annotationManualRange = schema.object(
       },
       { meta: { description: 'Time range for annotation' } }
     ),
+    label: schema.maybe(schema.string({ meta: { description: 'Label text for the annotation' } })),
     fill: schema.maybe(
       schema.oneOf([schema.literal('inside'), schema.literal('outside')], {
         defaultValue: 'inside',
@@ -612,22 +639,11 @@ const annotationLayerSchema = schema.object(
     type: schema.literal('annotations'),
     events: schema.arrayOf(
       schema.oneOf([annotationQuery, annotationManualEvent, annotationManualRange]),
-      { meta: { description: 'Array of annotation configurations' } }
+      { meta: { description: 'Array of annotation configurations' }, minSize: 1 }
     ),
   },
   { meta: { description: 'Layer containing annotations (query-based, points, and ranges)' } }
 );
-
-/**
- * Any valid XY chart layer type (data, reference line, or annotation)
- */
-const xyLayerSchema = schema.oneOf([
-  xyDataLayerSchemaNoESQL,
-  xyDataLayerSchemaESQL,
-  referenceLineLayerSchemaNoESQL,
-  referenceLineLayerSchemaESQL,
-  annotationLayerSchema,
-]);
 
 /**
  * Complete XY chart state configuration with layers and visualization settings
@@ -638,10 +654,22 @@ export const xyStateSchema = schema.object(
     ...sharedPanelInfoSchema,
     ...xySharedSettings,
     ...dslOnlyPanelInfoSchema,
-    layers: schema.arrayOf(xyLayerSchema, {
-      minSize: 1,
-      meta: { description: 'Chart layers (minimum 1 required)' },
-    }),
+    layers: schema.arrayOf(
+      /**
+       * Any valid XY chart layer type (data, reference line, or annotation)
+       */
+      schema.oneOf([
+        xyDataLayerSchemaNoESQL,
+        xyDataLayerSchemaESQL,
+        referenceLineLayerSchemaNoESQL,
+        referenceLineLayerSchemaESQL,
+        annotationLayerSchema,
+      ]),
+      {
+        minSize: 1,
+        meta: { description: 'Chart layers (minimum 1 required)' },
+      }
+    ),
   },
   { meta: { description: 'Complete XY chart configuration' } }
 );

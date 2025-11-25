@@ -17,6 +17,8 @@ import type {
   YConfig,
 } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/server';
+import { AvailableReferenceLineIcons } from '@kbn/expression-xy-plugin/common';
+import type { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
 import type { DatasetType } from '../../../schema/dataset';
 import { LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE } from '../../../schema/constants';
 import type { LensApiBucketOperations } from '../../../schema/bucket_ops';
@@ -32,6 +34,7 @@ import {
   generateApiLayer,
   isDataViewSpec,
   isFormBasedLayer,
+  nonNullable,
   operationFromColumn,
 } from '../../utils';
 import { getValueApiColumn } from '../../columns/esql_column';
@@ -51,20 +54,28 @@ function convertDataLayerToAPI(
       ? (operationFromColumn(visualization.splitAccessor, layer) as LensApiBucketOperations)
       : undefined;
 
-    const y = visualization.accessors?.map((accessor) => {
-      const apiOperation = operationFromColumn(accessor, layer) as LensApiAllMetricOperations;
-      const yConfig = yConfigMap.get(accessor);
-      return {
-        ...apiOperation,
-        ...(visualization.colorMapping
-          ? {}
-          : yConfig?.color
-          ? {
-              color: fromStaticColorLensStateToAPI(yConfig.color),
-            }
-          : {}),
-      } as DataLayerTypeNoESQL['y'][number];
-    });
+    const y =
+      visualization.accessors
+        ?.map((accessor) => {
+          const apiOperation = operationFromColumn(accessor, layer) as
+            | LensApiAllMetricOperations
+            | undefined;
+          if (!apiOperation) {
+            return undefined;
+          }
+          const yConfig = yConfigMap.get(accessor);
+          return {
+            ...apiOperation,
+            ...(visualization.colorMapping
+              ? {}
+              : yConfig?.color
+              ? {
+                  color: fromStaticColorLensStateToAPI(yConfig.color),
+                }
+              : {}),
+          } as DataLayerTypeNoESQL['y'][number];
+        })
+        .filter(nonNullable) ?? [];
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const aggregate_first =
       visualization.splitAccessor &&
@@ -73,7 +84,7 @@ function convertDataLayerToAPI(
     return {
       ...generateApiLayer(layer),
       ...(x ? { x } : {}),
-      y: y || [],
+      y,
       ...(breakdown_by
         ? {
             breakdown_by: {
@@ -147,23 +158,23 @@ export function buildAPIDataLayer(
 
 type ReferenceLineDef = ReferenceLineLayerType['thresholds'][number];
 
+const referenceLinesAvailableIconsSet = new Set(Object.values(AvailableReferenceLineIcons));
+
+function isReferenceLineValidIcon(icon: string | undefined): icon is AvailableReferenceLineIcon {
+  return Boolean(icon && referenceLinesAvailableIconsSet.has(icon as AvailableReferenceLineIcon));
+}
+
 function convertReferenceLinesDecorationsToAPIFormat(
   yConfig: Omit<YConfig, 'forAccessor'>
 ): Pick<ReferenceLineDef, 'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'fill'> {
   return {
     ...(yConfig.color ? { color: fromStaticColorLensStateToAPI(yConfig.color) } : {}),
-    ...(yConfig.lineStyle
-      ? {
-          stroke_dash:
-            yConfig.lineStyle === 'solid'
-              ? 'straight'
-              : (yConfig.lineStyle satisfies ReferenceLineDef['stroke_dash']),
-        }
-      : {}),
+    ...(yConfig.lineStyle ? { stroke_dash: yConfig.lineStyle } : {}),
     ...(yConfig.lineWidth ? { stroke_width: yConfig.lineWidth } : {}),
-    ...(yConfig.icon ? { icon: yConfig.icon } : {}),
+    ...(isReferenceLineValidIcon(yConfig.icon) ? { icon: yConfig.icon } : {}),
     ...(yConfig.fill && yConfig.fill !== 'none' ? { fill: yConfig.fill } : {}),
     ...(yConfig.axisMode ? { axis: yConfig.axisMode } : {}),
+    ...(yConfig.textVisibility != null ? { text: yConfig.textVisibility ? 'label' : 'none' } : {}),
   };
 }
 
@@ -192,7 +203,7 @@ function convertReferenceLineLayerToAPI(
       const { forAccessor, ...yConfigRest } = yConfigMap.get(accessor) || {};
       return {
         ...op,
-        ...(label != null ? { text: { type: 'label', text: label } } : {}),
+        ...(label != null ? { label } : {}),
         ...convertReferenceLinesDecorationsToAPIFormat(yConfigRest),
       } as ReferenceLineLayerType['thresholds'][number];
     }) ?? [];
@@ -229,6 +240,27 @@ function findAnnotationDataView(layerId: string, references: SavedObjectReferenc
   return ref?.id;
 }
 
+function getTextConfigurationForQueryAnnotation(
+  annotation: XYAnnotationLayerConfig['annotations'][number]
+): Pick<Extract<AnnotationLayerType['events'][number], { type: 'query' }>, 'text' | 'label'> {
+  const textConfig = {
+    ...('label' in annotation && annotation.label ? { label: annotation.label } : {}),
+  };
+  if ('textVisibility' in annotation && annotation.textVisibility != null) {
+    if ('textField' in annotation && annotation.textField) {
+      return {
+        ...textConfig,
+        text: { type: 'field', field: annotation.textField },
+      };
+    }
+    return {
+      ...textConfig,
+      text: annotation.textVisibility ? 'label' : 'none',
+    };
+  }
+  return textConfig;
+}
+
 export function buildAPIAnnotationsLayer(
   visualization: XYAnnotationLayerConfig,
   adHocDataViews: Record<string, unknown>,
@@ -260,40 +292,45 @@ export function buildAPIAnnotationsLayer(
       if (annotation.type === 'query') {
         return {
           type: 'query',
-          name: annotation.label,
-          ...(annotation.filter
+          label: annotation.label,
+          query: annotation.filter
             ? {
-                query: {
-                  language: annotation.filter.language as 'kuery' | 'lucene',
-                  query: annotation.filter.query as string,
-                },
+                language: annotation.filter.language as 'kuery' | 'lucene',
+                query: annotation.filter.query as string,
               }
-            : { query: { language: 'kuery', query: '' } }),
+            : { language: 'kuery', query: '' },
+
           time_field: annotation.timeField!,
-          extra_fields: annotation.extraFields,
+          ...(annotation.extraFields ? { extra_fields: annotation.extraFields } : {}),
           color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
-          hidden: annotation.isHidden,
+          ...(annotation.isHidden != null ? { hidden: annotation.isHidden } : {}),
+          ...getTextConfigurationForQueryAnnotation(annotation),
         };
       }
       if (annotation.key.type === 'range') {
         return {
           type: 'range',
-          name: annotation.label,
           interval: {
             from: annotation.key.timestamp,
             to: annotation.key.endTimestamp,
           },
           color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
           fill: 'outside' in annotation && annotation.outside ? 'outside' : 'inside',
-          hidden: annotation.isHidden,
+          ...(annotation.isHidden != null ? { hidden: annotation.isHidden } : {}),
+          ...('label' in annotation && annotation.label ? { label: annotation.label } : {}),
         };
       }
       return {
         type: 'point',
-        name: annotation.label,
         timestamp: annotation.key.timestamp,
         color: annotation.color ? fromStaticColorLensStateToAPI(annotation.color) : undefined,
-        hidden: annotation.isHidden,
+        ...(annotation.isHidden != null ? { hidden: annotation.isHidden } : {}),
+        ...('textVisibility' in annotation && annotation.textVisibility != null
+          ? {
+              text: annotation.textVisibility ? 'label' : 'none',
+            }
+          : {}),
+        ...('label' in annotation && annotation.label ? { label: annotation.label } : {}),
       };
     }),
   };

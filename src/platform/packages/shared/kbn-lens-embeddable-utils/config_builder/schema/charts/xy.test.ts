@@ -123,8 +123,9 @@ describe('XY', () => {
                 {
                   operation: 'median',
                   field: 'price',
+                  label: 'Median line',
                   color: { type: 'static', color: 'red' },
-                  text: { type: 'label', text: 'Median line' },
+                  text: 'label',
                 },
               ],
             },
@@ -155,9 +156,9 @@ describe('XY', () => {
               events: [
                 {
                   type: 'point',
-                  name: 'Event',
+                  label: 'New Year',
                   timestamp: '2023-01-01T00:00:00Z',
-                  text: { type: 'label', text: 'New Year' },
+                  text: 'label',
                   color: {
                     type: 'static',
                     color: '#ff0000',
@@ -232,14 +233,16 @@ describe('XY', () => {
                   {
                     operation: 'median',
                     field: 'price',
+                    label: 'Median Price',
                     color: { type: 'static', color: 'red' },
-                    text: { type: 'label', text: 'Median Price' },
+                    text: 'label',
                   },
                   {
                     operation: 'average',
                     field: 'price',
+                    label: 'Average Price',
                     color: { type: 'static', color: 'blue' },
-                    text: { type: 'label', text: 'Average Price' },
+                    text: 'label',
                   },
                 ],
               },
@@ -252,9 +255,9 @@ describe('XY', () => {
                 events: [
                   {
                     type: 'point',
-                    name: 'Event',
+                    label: 'New Year',
                     timestamp: '2023-01-01T00:00:00Z',
-                    text: { type: 'label', text: 'New Year' },
+                    text: 'label',
                     color: {
                       type: 'static',
                       color: '#ff0000',
@@ -262,9 +265,9 @@ describe('XY', () => {
                   },
                   {
                     type: 'point',
-                    name: 'Event',
+                    label: 'Christmas',
                     timestamp: '2023-12-25T00:00:00Z',
-                    text: { type: 'label', text: 'Christmas' },
+                    text: 'label',
                     color: {
                       type: 'static',
                       color: '#ff0000',
@@ -272,7 +275,7 @@ describe('XY', () => {
                   },
                   {
                     type: 'range',
-                    name: 'Promotion',
+                    label: 'Promotion',
                     interval: {
                       from: '2023-12-20T00:00:00Z',
                       to: '2023-12-27T23:59:59Z',
@@ -285,10 +288,10 @@ describe('XY', () => {
                   },
                   {
                     type: 'query',
-                    name: 'Great Sale!',
+                    label: 'Bingo!',
                     query: { language: 'kuery', query: 'order_amount > 1000' },
                     time_field: 'order_date',
-                    text: { type: 'label', text: 'Bingo!' },
+                    text: 'label',
                     color: {
                       type: 'static',
                       color: '#0000ff',
@@ -313,13 +316,36 @@ describe('XY', () => {
               {
                 dataset: { type: 'dataView', id: 'companyAIndex' },
                 type: type1,
-                x: { operation: 'date_histogram', field: 'order_date' },
-                y: [{ operation: 'count' }, { operation: 'average', field: 'price' }],
-                breakdown_by: { operation: 'terms', fields: ['product', 'category'] },
+                ignore_global_filters: false,
+                sampling: 1,
+                x: {
+                  operation: 'date_histogram',
+                  field: 'order_date',
+                  include_empty_rows: false,
+                  suggested_interval: 'auto',
+                  use_original_time_range: true,
+                  drop_partial_intervals: false,
+                },
+                y: [
+                  { operation: 'count', empty_as_null: false },
+                  { operation: 'average', field: 'price' },
+                ],
+                breakdown_by: {
+                  operation: 'terms',
+                  fields: ['product', 'category'],
+                  size: 5,
+                  rank_by: {
+                    direction: 'desc',
+                    metric: 0,
+                    type: 'column',
+                  },
+                },
               },
               {
                 dataset: { type: 'esql', query: 'FROM company_index' },
                 type: type2,
+                ignore_global_filters: false,
+                sampling: 1,
                 x: { operation: 'value', column: 'order_date' },
                 y: [
                   { operation: 'value', column: 'value' },
@@ -330,23 +356,30 @@ describe('XY', () => {
               {
                 dataset: { type: 'index', index: 'companyIndex', time_field: '@timestamp' },
                 type: 'referenceLines',
+                ignore_global_filters: false,
+                sampling: 1,
                 thresholds: [
                   {
                     operation: 'median',
                     field: 'price',
+                    label: 'Median Price',
                     color: { type: 'static', color: 'red' },
-                    text: { type: 'label', text: 'Median Price' },
+                    text: 'label',
+                    axis: 'left',
                   },
                   {
                     operation: 'average',
                     field: 'price',
+                    label: 'Average Price',
                     color: { type: 'static', color: 'blue' },
-                    text: { type: 'label', text: 'Average Price' },
+                    text: 'none',
+                    axis: 'left',
                   },
                 ],
               },
               {
                 type: 'annotations',
+                ignore_global_filters: false,
                 dataset: {
                   type: 'dataView',
                   id: 'metrics-*',
@@ -354,9 +387,9 @@ describe('XY', () => {
                 events: [
                   {
                     type: 'point',
-                    name: 'Event',
+                    label: 'New Year',
                     timestamp: '2023-01-01T00:00:00Z',
-                    text: { type: 'label', text: 'New Year' },
+                    text: 'label',
                     color: {
                       type: 'static',
                       color: '#ff0000',
@@ -364,9 +397,9 @@ describe('XY', () => {
                   },
                   {
                     type: 'point',
-                    name: 'Event',
+                    label: 'Christmas',
                     timestamp: '2023-12-25T00:00:00Z',
-                    text: { type: 'label', text: 'Christmas' },
+                    text: 'label',
                     color: {
                       type: 'static',
                       color: '#ff0000',
@@ -374,7 +407,7 @@ describe('XY', () => {
                   },
                   {
                     type: 'range',
-                    name: 'Promotion',
+                    label: 'Promotion',
                     interval: {
                       from: '2023-12-20T00:00:00Z',
                       to: '2023-12-27T23:59:59Z',
@@ -387,10 +420,10 @@ describe('XY', () => {
                   },
                   {
                     type: 'query',
-                    name: 'Great Sale!',
+                    label: 'Bingo!',
                     query: { language: 'kuery', query: 'order_amount > 1000' },
                     time_field: 'order_date',
-                    text: { type: 'label', text: 'Bingo!' },
+                    text: { type: 'field', field: 'order_id' },
                     color: {
                       type: 'static',
                       color: '#0000ff',

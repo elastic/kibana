@@ -118,8 +118,8 @@ function buildAnnotationLayer(
           },
           outside: annotation.fill === 'outside',
           color: annotation.color?.color,
-          label: annotation.name ?? 'Event',
-          isHidden: annotation.hidden,
+          label: annotation.label ?? 'Event',
+          ...(annotation.hidden != null ? { hidden: annotation.hidden } : {}),
           indexPatternId: dataViewId,
         };
       }
@@ -132,19 +132,24 @@ function buildAnnotationLayer(
             timestamp: String(annotation.timestamp),
           },
           color: annotation.color?.color,
-          label: annotation.name ?? 'Event',
-          isHidden: annotation.hidden,
+          label: annotation.label ?? 'Event',
+          ...(annotation.hidden != null ? { hidden: annotation.hidden } : {}),
+          ...(annotation.text != null ? { textVisibility: annotation.text === 'label' } : {}),
         };
       }
       return {
         type: 'query',
         id: `${layer.type}_event_${index}`,
         filter: { type: 'kibana_query', ...annotation.query },
-        label: annotation.name ?? 'Event',
+        label: annotation.label ?? 'Event',
         color: annotation.color?.color,
-        isHidden: annotation.hidden,
+        ...(annotation.hidden != null ? { hidden: annotation.hidden } : {}),
         timeField: annotation.time_field,
-        extraFields: annotation.extra_fields,
+        ...(annotation.extra_fields ? { extraFields: annotation.extra_fields } : {}),
+        ...(annotation.text != null ? { textVisibility: annotation.text === 'label' } : {}),
+        ...(typeof annotation.text !== 'string' && annotation.text?.type === 'field'
+          ? { textField: annotation.text.field }
+          : {}),
         key: {
           type: 'point_in_time',
         },
@@ -160,10 +165,8 @@ function buildReferenceLineLayer(
   const yConfig = layer.thresholds.map<YConfig>((threshold, index) => ({
     icon: threshold.icon,
     lineWidth: threshold.stroke_width,
-    lineStyle: (threshold.stroke_dash === 'straight'
-      ? 'solid'
-      : threshold.stroke_dash) satisfies YConfig['lineStyle'],
-    textVisibility: Boolean(threshold.text),
+    lineStyle: threshold.stroke_dash,
+    textVisibility: threshold.text ? threshold.text === 'label' : undefined,
     fill: threshold.fill,
     color: threshold.color?.color,
     axisMode: threshold.axis,
