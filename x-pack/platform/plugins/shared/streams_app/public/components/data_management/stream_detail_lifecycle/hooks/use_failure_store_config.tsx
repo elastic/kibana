@@ -55,7 +55,9 @@ export function useFailureStoreConfig(definition: Streams.ingest.all.GetResponse
   const failureStoreEnabled = isEnabledFailureStore(failureStore);
   const retentionDisabled = isDisabledLifecycleFailureStore(failureStore);
   const isDefaultRetention =
-    failureStoreEnabled && !retentionDisabled && failureStore.lifecycle.enabled.is_default;
+    failureStoreEnabled &&
+    !retentionDisabled &&
+    failureStore.lifecycle.enabled.is_default_retention;
   const retentionPeriod =
     failureStoreEnabled && !retentionDisabled
       ? failureStore.lifecycle.enabled.data_retention

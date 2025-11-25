@@ -101,7 +101,7 @@ describe('useFailureStoreConfig', () => {
         lifecycle: {
           enabled: {
             data_retention: '7d',
-            is_default: false,
+            is_default_retention: false,
           },
         },
       });
@@ -124,7 +124,7 @@ describe('useFailureStoreConfig', () => {
     it('should return config for enabled failure store without custom retention', () => {
       const definition = createClassicDefinition('logs-test', {
         lifecycle: {
-          enabled: { is_default: true },
+          enabled: { is_default_retention: true },
         },
       });
 
@@ -190,7 +190,7 @@ describe('useFailureStoreConfig', () => {
         lifecycle: {
           enabled: {
             data_retention: '14d',
-            is_default: false,
+            is_default_retention: false,
           },
         },
       });
@@ -210,7 +210,7 @@ describe('useFailureStoreConfig', () => {
         lifecycle: {
           enabled: {
             data_retention: '5d',
-            is_default: false,
+            is_default_retention: false,
           },
         },
       });
@@ -235,7 +235,7 @@ describe('useFailureStoreConfig', () => {
         lifecycle: {
           enabled: {
             data_retention: '30d',
-            is_default: true,
+            is_default_retention: true,
           },
         },
       });
@@ -251,7 +251,7 @@ describe('useFailureStoreConfig', () => {
         lifecycle: {
           enabled: {
             data_retention: '10d',
-            is_default: false,
+            is_default_retention: false,
           },
         },
       });
@@ -274,7 +274,7 @@ describe('useFailureStoreConfig', () => {
           lifecycle: {
             enabled: {
               data_retention: '30d',
-              is_default: true,
+              is_default_retention: true,
             },
           },
         },
@@ -307,7 +307,7 @@ describe('useFailureStoreConfig', () => {
           lifecycle: {
             enabled: {
               data_retention: '60d',
-              is_default: false,
+              is_default_retention: false,
             },
           },
         },

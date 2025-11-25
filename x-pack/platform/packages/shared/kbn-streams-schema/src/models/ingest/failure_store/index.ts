@@ -32,9 +32,13 @@ export interface FailureStoreEnabledWithoutLifecycle {
   lifecycle: { disabled: {} };
 }
 
-interface EffectiveFailureStoreEnabledWithLifecycle {
-  lifecycle: { enabled: { data_retention?: string; is_default: boolean } };
-}
+type EffectiveFailureStoreEnabledWithLifecycle = FailureStoreEnabledWithLifecycle & {
+  lifecycle: {
+    enabled: {
+      is_default_retention: boolean;
+    };
+  };
+};
 
 export type FailureStoreEnabled =
   | FailureStoreEnabledWithLifecycle
@@ -71,7 +75,7 @@ const effectiveWithLifecycleFailureStoreSchema: z.Schema<EffectiveFailureStoreEn
     lifecycle: z.object({
       enabled: z.object({
         data_retention: NonEmptyString.optional(),
-        is_default: z.boolean(),
+        is_default_retention: z.boolean(),
       }),
     }),
   });

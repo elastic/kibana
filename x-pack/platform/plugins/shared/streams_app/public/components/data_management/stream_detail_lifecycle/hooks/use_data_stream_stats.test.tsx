@@ -42,7 +42,7 @@ const mockDefinition = {
     lifecycle: {
       enabled: {
         data_retention: '30d',
-        is_default: false,
+        is_default_retention: false,
       },
     },
   },

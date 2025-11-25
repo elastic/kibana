@@ -306,7 +306,7 @@ export function getFailureStore({
         lifecycle: {
           enabled: {
             ...(dataRetention ? { data_retention: dataRetention } : {}),
-            is_default: isDefaultRetention,
+            is_default_retention: isDefaultRetention,
           },
         },
       };
