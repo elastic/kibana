@@ -130,7 +130,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
     // The recovery logic at the end will handle this, but we need to ensure it runs
     // even if we return early. However, when shouldProceed = true, we continue to the end
     // where recovery logic is handled.
-    
+
     if (!shouldProceed) {
       // No-data alert was triggered, return early without burn rate evaluation
       // Note: Recovery will be handled in the main recovery logic when SLI data exists again (shouldProceed = true)
@@ -361,7 +361,8 @@ async function checkSliAndSourceData(
 
   // No SLI data, check if source data exists
   try {
-    const sourceQuery = await buildSourceDataQuery(
+    // Check source data in past 1 hour
+    const sourceQuery1h = await buildSourceDataQuery(
       slo,
       timeRange,
       dataViews,
@@ -369,58 +370,88 @@ async function checkSliAndSourceData(
       false // isServerless - could be made configurable if needed
     );
 
-    const sourceDataCount = await esClient.count({
-      index: sourceQuery.index,
-      query: sourceQuery.query,
+    // Get the earliest timestamp of source data in the past 1 hour
+    // This tells us when source data first appeared, allowing us to verify it's been present for at least 30 minutes
+    const timestampField = slo.indicator.params.timestampField || '@timestamp';
+    const sourceDataResponse = await esClient.search({
+      index: sourceQuery1h.index,
+      size: 0,
+      query: sourceQuery1h.query,
+      aggs: {
+        earliest_timestamp: {
+          min: {
+            field: timestampField,
+          },
+        },
+      },
     });
 
-    if (sourceDataCount.count > 0) {
-      // Source data exists but no SLI data, trigger "no data" alert
-      const reason = i18n.translate('xpack.slo.alerting.burnRate.noSliDataReason', {
-        defaultMessage:
-          'No SLI data generated for SLO {sloName} in the past hour. Source data exists but transform may not be running correctly.',
-        values: { sloName: slo.name },
-      });
+    const earliestTimestampValue = sourceDataResponse.aggregations?.earliest_timestamp?.value;
 
-      const alertId = `${slo.id}-no-sli-data`;
-      const urlQuery = '';
-      const viewInAppUrl = addSpaceIdToPath(
-        basePath.publicBaseUrl,
-        spaceId,
-        `/app/observability/slos/${slo.id}${urlQuery}`
-      );
+    if (earliestTimestampValue) {
+      // Check if the earliest source data is at least 30 minutes old
+      // This ensures data has been consistently present for at least 30 minutes
+      // We also account for transform lag by checking if earliest data is at least 30+10 minutes old
+      // (30 min minimum presence + 10 min transform lag buffer)
+      const earliestTimestamp = new Date(earliestTimestampValue);
+      const now = new Date(dateEnd);
+      const dataAgeMinutes = (now.getTime() - earliestTimestamp.getTime()) / (1000 * 60);
+      const minimumAgeMinutes = 30 + 10; // 30 min minimum presence + 10 min transform lag buffer
 
-      const { uuid } = alertsClient.report({
-        id: alertId,
-        actionGroup: NO_SLI_DATA_ACTIONS_ID,
-        state: {
-          alertState: AlertStates.NO_DATA,
-        },
-        payload: {
-          [ALERT_REASON]: reason,
-          [SLO_ID_FIELD]: slo.id,
-          [SLO_REVISION_FIELD]: slo.revision,
-          [SLO_INSTANCE_ID_FIELD]: ALL_VALUE,
-          [SLO_DATA_VIEW_ID_FIELD]: slo.indicator.params.dataViewId || '',
-        },
-      });
+      if (dataAgeMinutes >= minimumAgeMinutes) {
+        // Source data has been consistently present for at least 30 minutes but no SLI data, trigger "no data" alert
+        const reason = i18n.translate('xpack.slo.alerting.burnRate.noSliDataReason', {
+          defaultMessage:
+            'No SLI data generated for SLO {sloName} in the past hour. Source data exists but transform may not be running correctly.',
+          values: { sloName: slo.name },
+        });
 
-      const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, uuid);
+        const alertId = `${slo.id}-no-sli-data`;
+        const urlQuery = '';
+        const viewInAppUrl = addSpaceIdToPath(
+          basePath.publicBaseUrl,
+          spaceId,
+          `/app/observability/slos/${slo.id}${urlQuery}`
+        );
 
-      const context = {
-        alertDetailsUrl,
-        reason,
-        timestamp: startedAt.toISOString(),
-        viewInAppUrl,
-        sloId: slo.id,
-        sloName: slo.name,
-        sloInstanceId: ALL_VALUE,
-        slo,
-      };
+        const { uuid } = alertsClient.report({
+          id: alertId,
+          actionGroup: NO_SLI_DATA_ACTIONS_ID,
+          state: {
+            alertState: AlertStates.NO_DATA,
+          },
+          payload: {
+            [ALERT_REASON]: reason,
+            [SLO_ID_FIELD]: slo.id,
+            [SLO_REVISION_FIELD]: slo.revision,
+            [SLO_INSTANCE_ID_FIELD]: ALL_VALUE,
+            [SLO_DATA_VIEW_ID_FIELD]: slo.indicator.params.dataViewId || '',
+          },
+        });
 
-      alertsClient.setAlertData({ id: alertId, context });
+        const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, uuid);
 
-      return false; // No SLI data, "no data" alert triggered
+        const context = {
+          alertDetailsUrl,
+          reason,
+          timestamp: startedAt.toISOString(),
+          viewInAppUrl,
+          sloId: slo.id,
+          sloName: slo.name,
+          sloInstanceId: ALL_VALUE,
+          slo,
+        };
+
+        alertsClient.setAlertData({ id: alertId, context });
+
+        return false; // No SLI data, "no data" alert triggered
+      } else {
+        // Source data exists but the earliest document is less than 40 minutes old
+        // (30 min minimum presence + 10 min transform lag buffer)
+        // This means source data just started coming, give transform time to catch up
+        // Proceed with evaluation without alerting to avoid false positives
+        return true;
+      }
     }
   } catch (error) {
     logger.warn(`Failed to check source data for SLO ${slo.id}: ${error.message}`);
