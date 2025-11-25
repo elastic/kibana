@@ -269,6 +269,42 @@
           },
           {
             "parentPluginId": "ruleRegistry",
+            "id": "def-server.AlertsClient.bulkUpdateTags",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkUpdateTags",
+            "description": [],
+            "signature": [
+              "({ alertIds, query, index, add, remove, }: ",
+              "BulkUpdateTagArgs",
+              ") => Promise<",
+              "BulkUpdateApiResponse",
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.AlertsClient.bulkUpdateTags.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    alertIds,\n    query,\n    index,\n    add,\n    remove,\n  }",
+                "description": [],
+                "signature": [
+                  "BulkUpdateTagArgs"
+                ],
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
             "id": "def-server.AlertsClient.bulkUpdateCases",
             "type": "Function",
             "tags": [],
