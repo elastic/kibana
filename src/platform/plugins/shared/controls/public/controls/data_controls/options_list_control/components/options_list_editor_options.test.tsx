@@ -197,7 +197,7 @@ describe('Options list sorting button', () => {
               field={{ type: 'ip' } as DataViewField} // initial search technique IS valid
               updateState={jest.fn()}
               setControlEditorValid={jest.fn()}
-            />{' '}
+            />
           </OptionsListControlContext.Provider>
         );
 
@@ -241,7 +241,7 @@ describe('Options list sorting button', () => {
               field={{ type: 'number' } as DataViewField} // current selected search technique IS valid, initial state is not
               updateState={jest.fn()}
               setControlEditorValid={jest.fn()}
-            />{' '}
+            />
           </OptionsListControlContext.Provider>
         );
 
@@ -257,7 +257,7 @@ describe('Options list sorting button', () => {
               field={{ type: 'string' } as DataViewField}
               updateState={updateState}
               setControlEditorValid={jest.fn()}
-            />{' '}
+            />
           </OptionsListControlContext.Provider>
         );
 
@@ -274,7 +274,7 @@ describe('Options list sorting button', () => {
               field={{ type: 'number' } as DataViewField} // neither initial nor current search technique is valid
               updateState={jest.fn()}
               setControlEditorValid={jest.fn()}
-            />{' '}
+            />
           </OptionsListControlContext.Provider>
         );
 

@@ -17,6 +17,7 @@ export const useMenuItemGroups = (api: HasAppContext & TracksOverlays) => {
   const { value, loading, error } = useAsync(async () => {
     return await getMenuItemGroups(api);
   }, [api]);
+
   const { groups$, cleanup } = value ?? { groups$: undefined };
   const [groups, setGroups] = useState(groups$?.getValue());
 
