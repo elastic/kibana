@@ -179,6 +179,26 @@ describe('validateStreamlang', () => {
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
+
+    it('should detect non-namespaced field in simple grok pattern like %{WORD:abc}', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'grok',
+            from: 'message',
+            patterns: ['%{WORD:abc}'],
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { isWiredStream: true });
+
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0].type).toBe('non_namespaced_field');
+      expect(result.errors[0].field).toBe('abc');
+      expect(result.errors[0].message).toContain('does not match the streams recommended schema');
+    });
   });
 
   describe('dissect processor field extraction', () => {
@@ -320,7 +340,7 @@ describe('validateStreamlang', () => {
   });
 
   describe('custom identifier tracking', () => {
-    it('should include custom identifier in error messages', () => {
+    it('should track custom identifier in error but show processor index and type in message', () => {
       const dsl: StreamlangDSL = {
         steps: [
           {
@@ -336,7 +356,8 @@ describe('validateStreamlang', () => {
 
       expect(result.isValid).toBe(false);
       expect(result.errors[0].processorId).toBe('my-custom-processor');
-      expect(result.errors[0].message).toContain('my-custom-processor');
+      expect(result.errors[0].message).toContain('processor #1 (set)');
+      expect(result.errors[0].message).not.toContain('my-custom-processor');
     });
   });
 
