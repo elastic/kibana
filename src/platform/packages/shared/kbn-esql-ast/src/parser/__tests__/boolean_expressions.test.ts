@@ -334,52 +334,6 @@ describe('Column Identifier Expressions', () => {
     });
   });
 
-  it('NOT LIKE operator', () => {
-    const text = 'ROW name NOT LIKE "test*"';
-    const { root, errors } = Parser.parse(text);
-    const expression = root.commands[0].args[0];
-
-    expect(errors.length).toBe(0);
-    expect(expression).toMatchObject({
-      type: 'function',
-      name: 'not like',
-    });
-  });
-
-  it('RLIKE operator', () => {
-    const text = 'ROW name RLIKE "test.*"';
-    const { root, errors } = Parser.parse(text);
-    const expression = root.commands[0].args[0];
-
-    expect(errors.length).toBe(0);
-    expect(expression).toMatchObject({
-      type: 'function',
-      name: 'rlike',
-      args: [
-        {
-          type: 'column',
-          name: 'name',
-        },
-        {
-          type: 'literal',
-          literalType: 'keyword',
-        },
-      ],
-    });
-  });
-
-  it('NOT RLIKE operator', () => {
-    const text = 'ROW name NOT RLIKE "test.*"';
-    const { root, errors } = Parser.parse(text);
-    const expression = root.commands[0].args[0];
-
-    expect(errors.length).toBe(0);
-    expect(expression).toMatchObject({
-      type: 'function',
-      name: 'not rlike',
-    });
-  });
-
   it('complex nested boolean expression', () => {
     const text = 'ROW (col1 > 5 AND col2 < 10) OR (col3 == "value" AND NOT col4)';
     const { root, errors } = Parser.parse(text);

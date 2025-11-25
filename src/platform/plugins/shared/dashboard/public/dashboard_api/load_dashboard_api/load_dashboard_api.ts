@@ -30,7 +30,7 @@ export async function loadDashboardApi({
   const creationStartTime = performance.now();
   const creationOptions = await getCreationOptions?.();
   const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
-  const [savedObjectResult, user, isAccessControlEnabled] = savedObjectId
+  const [readResult, user, isAccessControlEnabled] = savedObjectId
     ? await Promise.all([
         dashboardClient.get(savedObjectId),
         getUserAccessControlData(),
@@ -38,8 +38,7 @@ export async function loadDashboardApi({
       ])
     : [undefined, undefined, undefined];
 
-  const validationResult =
-    savedObjectResult && creationOptions?.validateLoadedSavedObject?.(savedObjectResult);
+  const validationResult = readResult && creationOptions?.validateLoadedSavedObject?.(readResult);
   if (validationResult === 'invalid') {
     // throw error to stop the rest of Dashboard loading and make the factory throw an Error
     throw new Error('Dashboard failed saved object result validation');
@@ -66,11 +65,11 @@ export async function loadDashboardApi({
     incomingEmbeddables,
     initialState: {
       ...DEFAULT_DASHBOARD_STATE,
-      ...savedObjectResult?.data,
+      ...readResult?.data,
       ...unsavedChanges,
       ...overrideState,
     },
-    savedObjectResult,
+    readResult,
     savedObjectId,
     user,
     isAccessControlEnabled,

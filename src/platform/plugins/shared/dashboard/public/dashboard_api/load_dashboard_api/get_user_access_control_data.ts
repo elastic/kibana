@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CONTENT_ID } from '../../../common/content_management';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { getAccessControlClient } from '../../services/access_control_service';
 import { coreServices } from '../../services/kibana_services';
 
@@ -15,7 +15,9 @@ export const getUserAccessControlData = async () => {
   try {
     const accessControlClient = getAccessControlClient();
     const currentUser = await coreServices?.userProfile.getCurrent();
-    const { isGloballyAuthorized } = await accessControlClient.checkGlobalPrivilege(CONTENT_ID);
+    const { isGloballyAuthorized } = await accessControlClient.checkGlobalPrivilege(
+      DASHBOARD_SAVED_OBJECT_TYPE
+    );
 
     if (!currentUser) {
       return;

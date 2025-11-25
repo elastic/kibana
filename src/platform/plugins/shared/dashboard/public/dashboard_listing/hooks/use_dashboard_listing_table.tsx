@@ -17,19 +17,23 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { asyncMap } from '@kbn/std';
-import { CONTENT_ID } from '../../../common/content_management';
-import { getAccessControlClient } from '../../services/access_control_service';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { contentEditorFlyoutStrings } from '../../dashboard_app/_dashboard_app_strings';
 import {
-  DASHBOARD_CONTENT_ID,
-  SAVED_OBJECT_DELETE_TIME,
-  SAVED_OBJECT_LOADED_TIME,
-} from '../../utils/telemetry_constants';
+  checkForDuplicateDashboardTitle,
+  dashboardClient,
+  findService,
+} from '../../dashboard_client';
+import { getAccessControlClient } from '../../services/access_control_service';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
 import { coreServices, savedObjectsTaggingService } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
+import {
+  SAVED_OBJECT_DELETE_TIME,
+  SAVED_OBJECT_LOADED_TIME,
+} from '../../utils/telemetry_constants';
 import {
   dashboardListingErrorStrings,
   dashboardListingTableStrings,
@@ -37,11 +41,6 @@ import {
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import type { DashboardSavedObjectUserContent } from '../types';
-import {
-  checkForDuplicateDashboardTitle,
-  dashboardClient,
-  findService,
-} from '../../dashboard_client';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
@@ -119,13 +118,12 @@ export const useDashboardListingTable = ({
       if (dashboard.status === 'error') {
         return;
       }
-      const { references, spaces, namespaces, ...currentState } = dashboard.attributes;
+      const { references, ...currentState } = dashboard.attributes;
       await dashboardClient.update(
         id,
         {
           ...currentState,
           ...updatedState,
-          accessControl: undefined, // updating access control via update is not supported
         },
         dashboard.references
       );
@@ -204,7 +202,7 @@ export const useDashboardListingTable = ({
 
       const [userResponse, globalPrivilegeResponse] = await Promise.allSettled([
         coreServices.userProfile.getCurrent(),
-        accessControlClient.checkGlobalPrivilege(CONTENT_ID),
+        accessControlClient.checkGlobalPrivilege(DASHBOARD_SAVED_OBJECT_TYPE),
       ]);
 
       const userId = userResponse.status === 'fulfilled' ? userResponse.value.uid : undefined;
@@ -229,7 +227,7 @@ export const useDashboardListingTable = ({
             eventName: SAVED_OBJECT_LOADED_TIME,
             duration: searchDuration,
             meta: {
-              saved_object_type: DASHBOARD_CONTENT_ID,
+              saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
             },
           });
           const tagApi = savedObjectsTaggingService?.getTaggingApi();
@@ -284,7 +282,7 @@ export const useDashboardListingTable = ({
           eventName: SAVED_OBJECT_DELETE_TIME,
           duration: deleteDuration,
           meta: {
-            saved_object_type: DASHBOARD_CONTENT_ID,
+            saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
             total: dashboardsToDelete.length,
           },
         });

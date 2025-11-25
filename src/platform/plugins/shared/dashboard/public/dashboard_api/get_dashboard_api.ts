@@ -12,7 +12,7 @@ import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { v4 } from 'uuid';
 import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
-import { DASHBOARD_APP_ID } from '../../common/constants';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { getReferencesForControls, getReferencesForPanelId } from '../../common';
 import type { DashboardState } from '../../common/types';
 import {
@@ -41,14 +41,14 @@ import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import { mergeControlGroupStates } from './merge_control_group_states';
-import type { DashboardAPIGetOut } from '../../server/content_management';
+import type { DashboardReadResponseBody } from '../../server';
 import { saveDashboard } from './save_modal/save_dashboard';
 
 export function getDashboardApi({
   creationOptions,
   incomingEmbeddables,
   initialState,
-  savedObjectResult,
+  readResult,
   savedObjectId,
   user,
   isAccessControlEnabled,
@@ -56,24 +56,24 @@ export function getDashboardApi({
   creationOptions?: DashboardCreationOptions;
   incomingEmbeddables?: EmbeddablePackageState[] | undefined;
   initialState: DashboardState;
-  savedObjectResult?: DashboardAPIGetOut;
+  readResult?: DashboardReadResponseBody;
   savedObjectId?: string;
   user?: DashboardUser;
   isAccessControlEnabled?: boolean;
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
-  const isManaged = savedObjectResult?.meta.managed ?? false;
+  const isManaged = readResult?.meta.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
 
-  const accessControlManager = initializeAccessControlManager(savedObjectResult, savedObjectId$);
+  const accessControlManager = initializeAccessControlManager(readResult, savedObjectId$);
 
   const viewModeManager = initializeViewModeManager({
     incomingEmbeddables,
     isManaged,
     savedObjectId,
-    accessControl: savedObjectResult?.data?.accessControl,
-    createdBy: savedObjectResult?.meta?.createdBy,
+    accessControl: readResult?.meta?.accessControl,
+    createdBy: readResult?.meta?.createdBy,
     user,
   });
   const trackPanel = initializeTrackPanel(async (id: string) => {
@@ -106,7 +106,11 @@ export function getDashboardApi({
     incomingControlGroup
   );
 
-  const controlGroupManager = initializeControlGroupManager(mergedControlGroupState, getReferences);
+  const controlGroupManager = initializeControlGroupManager(
+    mergedControlGroupState,
+    getReferences,
+    viewModeManager.api.viewMode$.value
+  );
 
   const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(
@@ -126,7 +130,7 @@ export function getDashboardApi({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
     controlGroupManager,
-    lastSavedState: savedObjectResult?.data ?? DEFAULT_DASHBOARD_STATE,
+    lastSavedState: readResult?.data ?? DEFAULT_DASHBOARD_STATE,
     layoutManager,
     savedObjectId$,
     settingsManager,
@@ -253,7 +257,7 @@ export function getDashboardApi({
     type: DASHBOARD_API_TYPE as 'dashboard',
     uuid: v4(),
     getPassThroughContext: () => creationOptions?.getPassThroughContext?.(),
-    createdBy: savedObjectResult?.meta?.createdBy,
+    createdBy: readResult?.meta?.createdBy,
     user,
     // TODO: accessControl$ and changeAccessMode should be moved to internalApi
     accessControl$: accessControlManager.api.accessControl$,

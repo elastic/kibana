@@ -13,6 +13,7 @@ import { useAIFeatures } from '../stream_detail_significant_events_view/add_sign
 import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { StreamFeaturesFlyout } from './stream_features/stream_features_flyout';
 import { StreamFeaturesAccordion } from './stream_features/stream_features_accordion';
+import { Row } from '../data_management/stream_detail_management/advanced_view/row';
 
 interface StreamConfigurationProps {
   definition: Streams.all.Definition;
@@ -42,63 +43,78 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
           </h3>
         </EuiText>
       </EuiPanel>
-      <EuiFlexGroup direction="column" gutterSize="s" css={{ padding: '24px' }}>
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <EuiFlexItem grow={false} css={{ maxWidth: '40%' }}>
-            <EuiText size="s" color="subdued">
-              {i18n.translate('xpack.streams.streamDetailView.configurationDescription', {
-                defaultMessage:
-                  'Use AI to generate logical subsets of the data in this stream. You will find useful insights like programming language, operating system, cloud provider etc. This is useful for generating better significant events.',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              disabled={!aiFeatures?.genAiConnectors.selectedConnector}
-              iconType="sparkles"
-              onClick={() => {
-                setIsLoading(true);
-                setIsFlyoutVisible(!isFlyoutVisible);
-                identifyFeatures(aiFeatures?.genAiConnectors.selectedConnector!, 'now', 'now-24h')
-                  .then((data) => {
-                    setFeatures(data.features);
-                  })
-                  .finally(() => {
-                    setIsLoading(false);
-                  });
-              }}
-            >
-              {i18n.translate('xpack.streams.streamDetailView.featureIdentificationButtonLabel', {
-                defaultMessage: 'Identify features',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {existingFeatures.length > 0 && (
-          <>
-            <EuiSpacer size="m" />
-            <StreamFeaturesAccordion
-              definition={definition}
-              features={existingFeatures}
-              loading={featuresLoading}
-              refresh={refreshFeatures}
-            />
-          </>
-        )}
-        {isFlyoutVisible && (
-          <StreamFeaturesFlyout
-            definition={definition}
-            features={features}
-            isLoading={isLoading}
-            closeFlyout={() => {
-              abort();
-              refreshFeatures();
-              setIsFlyoutVisible(false);
-            }}
-            setFeatures={setFeatures}
+
+      <EuiPanel hasShadow={false} hasBorder={false}>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <Row
+            left={
+              <EuiText size="s" color="subdued">
+                {i18n.translate('xpack.streams.streamDetailView.configurationDescription', {
+                  defaultMessage:
+                    'Use AI to generate logical subsets of the data in this stream. You will find useful insights like programming language, operating system, cloud provider etc. This is useful for generating better significant events.',
+                })}
+              </EuiText>
+            }
+            right={
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="m"
+                    disabled={!aiFeatures?.genAiConnectors.selectedConnector}
+                    iconType="sparkles"
+                    onClick={() => {
+                      setIsLoading(true);
+                      setIsFlyoutVisible(!isFlyoutVisible);
+                      identifyFeatures(
+                        aiFeatures?.genAiConnectors.selectedConnector!,
+                        'now',
+                        'now-24h'
+                      )
+                        .then((data) => {
+                          setFeatures(data.features);
+                        })
+                        .finally(() => {
+                          setIsLoading(false);
+                        });
+                    }}
+                  >
+                    {i18n.translate(
+                      'xpack.streams.streamDetailView.featureIdentificationButtonLabel',
+                      {
+                        defaultMessage: 'Identify features',
+                      }
+                    )}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
           />
-        )}
-      </EuiFlexGroup>
+          {existingFeatures.length > 0 && (
+            <>
+              <EuiSpacer size="m" />
+              <StreamFeaturesAccordion
+                definition={definition}
+                features={existingFeatures}
+                loading={featuresLoading}
+                refresh={refreshFeatures}
+              />
+            </>
+          )}
+          {isFlyoutVisible && (
+            <StreamFeaturesFlyout
+              definition={definition}
+              features={features}
+              isLoading={isLoading}
+              closeFlyout={() => {
+                abort();
+                refreshFeatures();
+                setIsFlyoutVisible(false);
+              }}
+              setFeatures={setFeatures}
+            />
+          )}
+        </EuiFlexGroup>
+      </EuiPanel>
     </EuiPanel>
   );
 }

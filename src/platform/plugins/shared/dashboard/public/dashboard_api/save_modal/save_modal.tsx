@@ -23,7 +23,7 @@ import type { SaveResult } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectSaveModalWithSaveResult } from '@kbn/saved-objects-plugin/public';
 import { AccessModeContainer } from '@kbn/content-management-access-control-public';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import { CONTENT_ID } from '../../../common/content_management';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
 import { getAccessControlClient } from '../../services/access_control_service';
 import {
   coreServices,
@@ -159,7 +159,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
               getActiveSpace={spacesService?.getActiveSpace}
               getCurrentUser={coreServices.userProfile.getCurrent}
               accessControlClient={getAccessControlClient()}
-              contentTypeId={CONTENT_ID}
+              contentTypeId={DASHBOARD_SAVED_OBJECT_TYPE}
             />
           </>
         )}

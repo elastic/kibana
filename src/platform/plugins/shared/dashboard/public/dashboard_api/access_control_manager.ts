@@ -9,17 +9,17 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import type { DashboardAPIGetOut } from '../../server/content_management';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
+import type { DashboardReadResponseBody } from '../../server';
 import { getAccessControlClient } from '../services/access_control_service';
-import { CONTENT_ID } from '../../common/content_management';
 
 export function initializeAccessControlManager(
-  savedObjectResult?: DashboardAPIGetOut,
+  savedObjectResult?: DashboardReadResponseBody,
   savedObjectId$?: BehaviorSubject<string | undefined>
 ) {
   const accessControl$ = new BehaviorSubject<Partial<SavedObjectAccessControl>>({
-    owner: savedObjectResult?.data?.accessControl?.owner,
-    accessMode: savedObjectResult?.data?.accessControl?.accessMode,
+    owner: savedObjectResult?.meta?.accessControl?.owner,
+    accessMode: savedObjectResult?.meta?.accessControl?.accessMode,
   });
 
   async function changeAccessMode(accessMode: SavedObjectAccessControl['accessMode']) {
@@ -32,7 +32,7 @@ export function initializeAccessControlManager(
       const client = getAccessControlClient();
 
       await client.changeAccessMode({
-        objects: [{ id: dashboardId, type: CONTENT_ID }],
+        objects: [{ id: dashboardId, type: DASHBOARD_SAVED_OBJECT_TYPE }],
         accessMode: accessMode as SavedObjectAccessControl['accessMode'],
       });
 
