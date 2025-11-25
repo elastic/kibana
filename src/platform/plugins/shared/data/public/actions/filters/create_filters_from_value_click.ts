@@ -23,6 +23,7 @@ import {
   buildSimpleExistFilter,
   buildSimpleNumberRangeFilter,
   buildPhraseFilter,
+  buildPhrasesFilter,
 } from '@kbn/es-query/src/filters/build_filters';
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -138,7 +139,7 @@ export const createFilter = async (
   return filter;
 };
 
-export const createFilterFromRawColumnsESQL = async (
+const createFilterFromRawColumnsESQL = async (
   column: DatatableColumn,
   value: string | number | boolean
 ) => {
@@ -151,14 +152,26 @@ export const createFilterFromRawColumnsESQL = async (
     query: 'FROM ' + indexPattern,
     dataViewsService: getIndexPatterns() as DataViewsPublicPluginStart,
   });
+  const field = dataView.getFieldByName(column.name);
 
-  // Field should be present in the data view
-  if (dataView.fields.getByName(column.name) == null) {
+  // Field should be present in the data view and filterable
+  if (!field || !field.filterable) {
     return [];
   }
-
   const filters: Filter[] = [];
-  filters.push(buildPhraseFilter({ name: column.name, type: column.meta?.type }, value, dataView));
+
+  // Match phrase or phrases filter based on whether value is an array
+  // The advantage of match_phrase is that you get a term query when it's not a text and
+  // match phrase if it is a text. So you don't have to worry about the field type.
+  if (Array.isArray(value)) {
+    filters.push(
+      buildPhrasesFilter({ name: column.name, type: column.meta?.type }, value, dataView)
+    );
+  } else {
+    filters.push(
+      buildPhraseFilter({ name: column.name, type: column.meta?.type }, value, dataView)
+    );
+  }
 
   return filters;
 };
