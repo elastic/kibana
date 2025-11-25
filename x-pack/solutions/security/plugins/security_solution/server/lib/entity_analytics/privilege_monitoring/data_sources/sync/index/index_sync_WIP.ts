@@ -11,11 +11,10 @@ import type { PrivilegeMonitoringDataClient } from '../../../engine/data_client'
 import { createSourcesSyncService } from '../sources_sync';
 import { createIndexUpdateDetectionService } from './update_detection/update_detection';
 
-export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
+export type IndexSyncService = ReturnType<typeof createIndexSyncServiceWiP>;
 
-export const createIndexSyncService = (
+export const createIndexSyncServiceWiP = (
   dataClient: PrivilegeMonitoringDataClient,
-  maxUsersAllowed: number,
   soClient: SavedObjectsClientContract
 ) => {
   const updateDetectionService = createIndexUpdateDetectionService(dataClient, soClient);
@@ -23,7 +22,7 @@ export const createIndexSyncService = (
   /**
    * Pattern matcher service to find privileged users based on matchers defined in saved objects
    */
-  const indexSync = async () => {
+  const plainIndexSync = async () => {
     await sourcesSyncService.syncBySourceType({
       soClient,
       sourceType: 'index',
@@ -34,5 +33,5 @@ export const createIndexSyncService = (
     });
   };
 
-  return { indexSync };
+  return { plainIndexSync };
 };
