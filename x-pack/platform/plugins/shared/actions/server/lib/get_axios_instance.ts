@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AxiosInstance } from 'axios';
+import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type { ActionInfo } from './action_executor';
@@ -13,6 +13,7 @@ import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorTokenClientContract } from '../types';
+import { getBeforeRedirectFn } from './before_redirect';
 
 export type ConnectorInfo = Omit<ActionInfo, 'rawAction'>;
 
@@ -52,10 +53,11 @@ export const getAxiosInstanceWithAuth = ({
         maxContentLength,
         // should we allow a way for a connector type to specify a timeout override?
         timeout: settingsTimeout,
+        beforeRedirect: getBeforeRedirectFn(configurationUtilities),
       });
 
       // create a request interceptor to inject custom http/https agents based on the URL
-      axiosInstance.interceptors.request.use((config) => {
+      axiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
         if (config.url) {
           const { httpAgent, httpsAgent } = getCustomAgents(
             configurationUtilities,
