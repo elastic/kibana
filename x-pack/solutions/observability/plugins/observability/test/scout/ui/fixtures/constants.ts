@@ -12,6 +12,10 @@ export const RULES_SETTINGS_TEST_SUBJECTS = {
   // Rules List Page
   RULE_PAGE_TAB: 'ruleLogsTab',
   RULES_SETTINGS_LINK: 'rulesSettingsLink',
+  RULES_TABLE_CONTAINER: 'rulesListSection',
+  RULES_TABLE: 'rulesList',
+  RULE_ROW: 'rule-row',
+  RULE_ROW_NON_EDITABLE: 'rule-row-isNotEditable',
 
   // Rules Settings Flyout
   RULES_SETTINGS_FLYOUT: 'rulesSettingsFlyout',
