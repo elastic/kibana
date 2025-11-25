@@ -31,7 +31,7 @@ If the response from the 'entity-analytics-tool' for a domain doesn't contain th
  */
 export const entityAnalyticsAgentCreator = (): BuiltInAgentDefinition => {
   return {
-    id: 'siem-entity-analytics',
+    id: 'security.entity_analytics.agent',
     name: 'Entity Analytics Agent',
     description: DEFAULT_SYSTEM_PROMPT,
     labels: ['security', 'entity-analytics'],
@@ -46,7 +46,7 @@ export const entityAnalyticsAgentCreator = (): BuiltInAgentDefinition => {
         instructions: RESPONSE_FORMATTING_GUIDELINES,
       },
       tools: [
-        { tool_ids: ['entity-analytics-tool'] },
+        { tool_ids: ['security.entity_analytics.threat_hunting'] },
 
         { tool_ids: ['platform.core.execute_esql'] },
         { tool_ids: ['platform.core.generate_esql'] },

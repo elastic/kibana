@@ -45,7 +45,7 @@ const entityRiskScoreInternalSchema = z.object({
     .describe('If true, only provide information without generating ESQL queries.'),
 });
 
-export const ENTITY_ANALYTICS_TOOL_INTERNAL_ID = 'entity-analytics-tool';
+export const ENTITY_ANALYTICS_TOOL_INTERNAL_ID = 'security.entity_analytics.threat_hunting';
 
 export const ENTITY_RISK_SCORE_TOOL_INTERNAL_DESCRIPTION = `
   Call this for knowledge and generate queries for Security Solutions and Entity Analytics indices. If no 'domain' is provided, only general security solution knowledge will be returned.

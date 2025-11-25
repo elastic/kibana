@@ -48,9 +48,9 @@ export class SiemEntityAnalyticsEvaluationChatClient {
   ) {}
 
   converse: ConverseFunction = async ({ messages, conversationId, options = {} }) => {
-    this.log.info('Calling converse for siem-entity-analytics agent');
+    this.log.info('Calling converse for security.entity_analytics.agent');
 
-    const { agentId = 'siem-entity-analytics' } = options;
+    const { agentId = 'security.entity_analytics.agent' } = options;
 
     const callConverseApi = async (): Promise<{
       conversationId?: string;

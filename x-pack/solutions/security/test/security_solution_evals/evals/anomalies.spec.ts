@@ -115,7 +115,7 @@ evaluate.describe(
         async ({ evaluateDataset }) => {
           await evaluateDataset({
             dataset: {
-              name: 'siem-entity-analytics: privileged-accounts-unusual-command-patterns-without-data',
+              name: 'entity-analytics: privileged-accounts-unusual-command-patterns-without-data',
               description:
                 'Questions to test the SIEM Entity Analytics agent - privileged accounts unusual command patterns without data',
               examples: [
@@ -141,7 +141,7 @@ evaluate.describe(
       evaluate('users multiple locations without data', async ({ evaluateDataset }) => {
         await evaluateDataset({
           dataset: {
-            name: 'siem-entity-analytics: users-multiple-locations-without-data',
+            name: 'entity-analytics: users-multiple-locations-without-data',
             description:
               'Questions to test the SIEM Entity Analytics agent - users logged in from multiple locations without data',
             examples: [
@@ -166,7 +166,7 @@ evaluate.describe(
       evaluate('lateral movement without data', async ({ evaluateDataset }) => {
         await evaluateDataset({
           dataset: {
-            name: 'siem-entity-analytics: lateral-movement-without-data',
+            name: 'entity-analytics: lateral-movement-without-data',
             description:
               'Questions to test the SIEM Entity Analytics agent - lateral movement without data',
             examples: [
@@ -191,7 +191,7 @@ evaluate.describe(
       evaluate('entity analytics anomalies questions', async ({ evaluateDataset }) => {
         await evaluateDataset({
           dataset: {
-            name: 'siem-entity-analytics:anomalies without data',
+            name: 'entity-analytics:anomalies without data',
             description:
               'Questions to test the SIEM Entity Analytics agent - anomalies without data',
             examples: [

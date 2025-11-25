@@ -227,6 +227,36 @@ describe('parseWorkflowYamlToJSON', () => {
       expect(result.success).toBe(true);
     });
 
+    it('should also suppress errors for Liquid tag syntax {% ... %}', () => {
+      const schema = z.object({
+        steps: z.array(
+          z.object({
+            name: z.string(),
+            type: z.string(),
+            with: z.object({
+              severity: z.enum(['low', 'medium', 'high', 'critical']),
+            }),
+          })
+        ),
+      });
+
+      const yaml = `steps:
+        - name: step1
+          type: noop
+          with:
+            severity: |
+              {%- if steps.get_source_version.output.severity == "critical" -%}
+              critical
+              {%- elsif steps.get_source_version.output.severity == "high" -%}
+              high
+              {%- else -%}
+              low
+              {%- endif -%}
+      `;
+      const result = parseWorkflowYamlToJSON(yaml, schema);
+      expect(result.success).toBe(true);
+    });
+
     it('should not suppress errors if the variable is inside a string and field should be a number', () => {
       const schema = z.object({
         steps: z.array(

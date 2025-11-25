@@ -4,7 +4,7 @@ Evaluation test suites for the SIEM Entity Analytics agent, built on top of [`@k
 
 ## Overview
 
-This test suite contains evaluation tests specifically for the SIEM Entity Analytics agent (`siem-entity-analytics`), which provides security analysis capabilities through the Agent Builder API.
+This test suite contains evaluation tests specifically for the SIEM Entity Analytics agent (`security.entity_analytics.agent`), which provides security analysis capabilities through the Agent Builder API.
 
 For general information about writing evaluation tests, configuration, and usage, see the main [`@kbn/evals` documentation](../../../../platform/packages/shared/kbn-evals/README.md).
 
