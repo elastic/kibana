@@ -1253,7 +1253,7 @@ To provide guarantees for Serverless rollbacks, the validation script requires t
 
 When a Saved Object type is updated, the script performs the following sequence using internal tools:
 
-* Simulate Upgrade $\rightarrow$ Simulate Rollback $\rightarrow$ Simulate Second Upgrade.
+* Simulate Upgrade → Simulate Rollback → Simulate Second Upgrade.
 * At each step, it queries the stored documents via the `SavedObjectsRepository`.
 * The script then validates that the documents' shape precisely matches the corresponding fixture.
 
