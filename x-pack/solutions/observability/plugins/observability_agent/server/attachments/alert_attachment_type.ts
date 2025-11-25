@@ -11,10 +11,14 @@ import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE } from '../../common/constants';
 
 export const alertAttachmentDataSchema = z.object({
   alertId: z.string(),
+  screenDescription: z.string().optional(),
+  alertFieldsContent: z.string().optional(),
 });
 
 export interface AlertAttachmentData {
   alertId: string;
+  screenDescription?: string;
+  alertFieldsContent?: string;
 }
 
 export const createAlertAttachmentType = (): AttachmentTypeDefinition<
@@ -30,41 +34,33 @@ export const createAlertAttachmentType = (): AttachmentTypeDefinition<
       if (!parseResult.success) {
         return { valid: false, error: parseResult.error.message };
       }
-      const alertId = parseResult.data.alertId;
-      if (!alertId) {
-        return { valid: false, error: 'Invalid alert ID' };
+
+      if (!parseResult.data.alertId) {
+        return { valid: false, error: 'alertId must be a non-empty string' };
       }
 
-      return {
-        valid: true,
-        attachment: { mode: 'inline', data: { alertId } },
-      };
+      return { valid: true, data: parseResult.data };
     },
     format: (attachment) => {
       return {
         getRepresentation: () => {
-          return { type: 'text', value: `Alert ID: ${attachment.data.alertId}` };
-        },
-      };
-    },
-    getAttachment: async (attachment) => {
-      return {
-        getLlmRepresentation: () => {
-          return {
-            type: 'text',
-            value: `${attachment.data.alertId}`,
-          };
-        },
-        getTools: () => {
-          // exposes the alert tool to the agent
-          return [];
-        },
-        getMetadata: () => {
-          return {};
-        },
-      };
-    },
+          const data = attachment.data || {};
+          const alertId = data.alertId || 'unknown';
+          const screenDescription = data.screenDescription || '';
+          const alertFieldsContent = data.alertFieldsContent || '';
 
+          let content = '';
+          if (screenDescription) {
+            content += `${screenDescription}\n\n`;
+          }
+          if (alertFieldsContent) {
+            content += `${alertFieldsContent}`;
+          }
+
+          return { type: 'text', value: content || `Alert ID: ${alertId}` };
+        },
+      };
+    },
     getTools: () => {
       return [];
     },

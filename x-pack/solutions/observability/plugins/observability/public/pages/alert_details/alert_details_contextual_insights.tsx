@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { UiAttachment } from '@kbn/onechat-plugin/public/embeddable/types';
 import { OpenAgentChatButton } from '@kbn/contextual-insights-button';
@@ -27,6 +27,13 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
       return [];
     }
 
+    const fields = alert.formatted.fields as unknown as
+      | Record<string, string | string[]>
+      | undefined;
+    if (!fields) {
+      return [];
+    }
+
     const alertId =
       (alert.formatted?.fields?.['kibana.alert.uuid'] as string | undefined) ||
       (alert.raw?._id as string | undefined) ||
@@ -36,21 +43,51 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
       return [];
     }
 
+    const alertStartTime = new Date(alert.formatted.start).toISOString();
+    const alertLastUpdate = new Date(alert.formatted.lastUpdated).toISOString();
+    const currentTime = new Date().toISOString();
+    const timeRangeStart = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+    const timeRangeEnd = currentTime;
+
+    const screenDescription = `The user is looking at ${window.location.href}. The current time range is ${timeRangeStart} - ${timeRangeEnd}.
+
+The user is looking at an active alert. It started at ${alertStartTime}, and was last updated at ${alertLastUpdate}.
+
+The reason given for the alert is ${alert.formatted.reason}.
+
+Use the following alert fields as background information for generating a response. Do not list them as bullet points in the response.`;
+
+    const alertFieldsContent = Object.entries(fields)
+      .map(([key, value]) => {
+        const formattedValue =
+          typeof value === 'object' && value !== null && !Array.isArray(value)
+            ? JSON.stringify(value)
+            : Array.isArray(value)
+            ? JSON.stringify(value)
+            : value;
+        return `${key}: ${formattedValue}`;
+      })
+      .join('\n');
+
     return [
       {
         id: 'alert',
         type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
         getContent: async () => ({
           alertId,
+          screenDescription,
+          alertFieldsContent: `Alert Fields:\n\n${alertFieldsContent}`,
         }),
       },
     ];
   }, [alert]);
-  const uniqueSessionTagRef = useRef<string | null>(null);
-  if (!uniqueSessionTagRef.current) {
-    uniqueSessionTagRef.current = `observability-alert-details-${Date.now()}`;
-  }
-  const uniqueSessionTag = uniqueSessionTagRef.current;
+
+  // Use alert ID in session tag so the same alert restores the same conversation
+  const alertId =
+    (alert?.formatted?.fields?.['kibana.alert.uuid'] as string | undefined) ||
+    (alert?.raw?._id as string | undefined) ||
+    '';
+  const uniqueSessionTag = alertId ? `observability-alert-details-${alertId}` : undefined;
 
   const isObservabilityAgentEnabled = featureFlags?.getBooleanValue(
     OBSERVABILITY_AGENT_FEATURE_FLAG,
