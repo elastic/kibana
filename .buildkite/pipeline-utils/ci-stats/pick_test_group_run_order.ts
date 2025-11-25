@@ -295,6 +295,13 @@ export async function pickTestGroupRunOrder() {
           .filter(Boolean)
       : ['build'];
 
+  const JEST_CONFIGS_DEPS =
+    process.env.JEST_CONFIGS_DEPS !== undefined
+      ? process.env.JEST_CONFIGS_DEPS.split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : ['build'];
+
   const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
     ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
     : {};
@@ -510,6 +517,7 @@ export async function pickTestGroupRunOrder() {
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
+            depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -531,6 +539,7 @@ export async function pickTestGroupRunOrder() {
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
+            depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
