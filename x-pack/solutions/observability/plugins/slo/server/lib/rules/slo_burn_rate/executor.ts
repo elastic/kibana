@@ -114,7 +114,9 @@ export const getRuleExecutor = (basePath: IBasePath) =>
     }
 
     // Check for SLI data and source data before burn rate evaluation
-    const shouldProceed = await checkSliAndSourceData(
+    // Note: We still proceed with burn rate evaluation even if "no SLI data" alert is triggered,
+    // because burn rate evaluation uses longer lookback windows and might find issues based on older SLI data
+    await checkSliAndSourceData(
       esClient.asCurrentUser,
       slo,
       alertsClient,
@@ -126,16 +128,10 @@ export const getRuleExecutor = (basePath: IBasePath) =>
       await services.getDataViews()
     );
 
-    // Handle recovery for no-data alert if SLI data exists (shouldProceed = true)
-    // The recovery logic at the end will handle this, but we need to ensure it runs
-    // even if we return early. However, when shouldProceed = true, we continue to the end
-    // where recovery logic is handled.
-
-    if (!shouldProceed) {
-      // No-data alert was triggered, return early without burn rate evaluation
-      // Note: Recovery will be handled in the main recovery logic when SLI data exists again (shouldProceed = true)
-      return { state: {} };
-    }
+    // Note: We don't return early - we always proceed with burn rate evaluation
+    // This allows both "no SLI data" alerts and burn rate alerts to fire concurrently:
+    // - "No SLI data" alert: indicates a transform issue (no recent SLI data but source data exists)
+    // - Burn rate alerts: indicate SLO violations (based on SLI data in the lookback window, which might be older)
 
     // We only need the end timestamp to base all of queries on. The length of the time range
     // doesn't matter for our use case since we allow the user to customize the window sizes,
