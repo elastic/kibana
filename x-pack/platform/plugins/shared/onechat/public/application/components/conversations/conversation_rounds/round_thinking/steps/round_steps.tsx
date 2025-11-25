@@ -56,6 +56,8 @@ const getItemIcon = (isLastItem: boolean, isLoading: boolean): ReactNode => {
   return <EuiIcon type="check" color="success" />;
 };
 
+type ItemFactory = (icon?: ReactNode) => ReactNode;
+
 interface RoundStepsProps {
   steps: ConversationRoundStep[];
   isLoading: boolean;
@@ -73,14 +75,9 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
   } = useToolResultsFlyout();
 
   const renderedSteps = useMemo(() => {
+    const itemFactories: { key: string; factory: ItemFactory }[] = [];
+
     // First pass: build all item factories to determine total count
-    type ItemFactory = (icon?: ReactNode) => ReactNode;
-
-    const itemFactories: Array<{
-      factory: ItemFactory;
-      key: string;
-    }> = [];
-
     steps.forEach((step, stepIndex) => {
       if (isToolCallStep(step)) {
         itemFactories.push({
@@ -160,6 +157,7 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
     const totalItems = itemFactories.length;
 
     // Second pass: map over factories and create items with icons based on flat position
+    // The last item should always be loading unless the round has completed
     return itemFactories.map((itemFactory, flatIndex) => {
       const isLastItem = flatIndex === totalItems - 1;
       const itemIcon = getItemIcon(isLastItem, isLoading);
