@@ -88,6 +88,8 @@ export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
             })}
           </p>
         </EuiScreenReaderOnly>
+        {/* The footer itself is not interactive but the children are */}
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
         <nav
           aria-label={i18n.translate('core.ui.chrome.sideNavigation.primaryMenuAriaLabel', {
             defaultMessage: 'Main',
@@ -97,9 +99,6 @@ export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
           data-test-subj={PRIMARY_NAVIGATION_ID}
           onKeyDown={handleRovingIndex}
           ref={handleRef}
-          // The nav itself is not interactive but the children are
-          // eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
-          role="menu"
         >
           {renderChildren()}
         </nav>

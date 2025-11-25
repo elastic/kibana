@@ -18,9 +18,10 @@ import { useNestedMenu } from './use_nested_menu';
 
 export interface HeaderProps {
   title?: string;
+  'aria-describedby'?: string;
 }
 
-export const Header: FC<HeaderProps> = ({ title }) => {
+export const Header: FC<HeaderProps> = ({ title, 'aria-describedby': ariaDescribedBy }) => {
   const { goBack } = useNestedMenu();
   const { euiTheme } = useEuiTheme();
   const headerStyle = useMenuHeaderStyle();
@@ -37,13 +38,13 @@ export const Header: FC<HeaderProps> = ({ title }) => {
   return (
     <div css={titleStyle}>
       <EuiButtonIcon
+        aria-describedby={ariaDescribedBy}
         aria-label={i18n.translate('core.ui.chrome.sideNavigation.goBackButtonIconAriaLabel', {
           defaultMessage: 'Go back',
         })}
         color="text"
         iconType="arrowLeft"
         onClick={goBack}
-        role="menuitem"
       />
       {title && (
         <EuiTitle size="xs">

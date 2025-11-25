@@ -54,7 +54,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         class="css-1d7jr1a-getPrimaryMenuStyles"
         data-test-subj="kbnChromeNav-primaryNavigation"
         id="kbnChromeNav-primaryNavigation"
-        role="menu"
       >
         <div
           class="css-1y7bpvk-wrapperStyles"
@@ -75,7 +74,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                 href="/dashboards"
                 id="dashboards"
                 label="Dashboards"
-                role="menuitem"
                 tabindex="0"
               >
                 <div
@@ -115,7 +113,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                 href="/discover"
                 id="discover"
                 label="Discover"
-                role="menuitem"
                 tabindex="-1"
               >
                 <div
@@ -160,7 +157,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
               href="/apps_overview"
               id="apps_overview"
               label="Apps"
-              role="menuitem"
               tabindex="-1"
             >
               <div
@@ -212,7 +208,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                 data-test-subj="kbnChromeNav-footerItem-getting_started"
                 href="/getting-started"
                 rel="noreferrer"
-                role="menuitem"
                 tabindex="0"
               >
                 <span
@@ -244,7 +239,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                 data-test-subj="kbnChromeNav-footerItem-developer_tools"
                 href="/developer-tools"
                 rel="noreferrer"
-                role="menuitem"
                 tabindex="-1"
               >
                 <span
@@ -284,7 +278,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                 data-test-subj="kbnChromeNav-footerItem-integrations"
                 href="/integrations"
                 rel="noreferrer"
-                role="menuitem"
                 tabindex="-1"
               >
                 <span
@@ -316,7 +309,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                 data-test-subj="kbnChromeNav-footerItem-fourth_item"
                 href="/fourth-item"
                 rel="noreferrer"
-                role="menuitem"
                 tabindex="-1"
               >
                 <span
@@ -348,7 +340,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                 data-test-subj="kbnChromeNav-footerItem-fifth_item"
                 href="/fourth-item"
                 rel="noreferrer"
-                role="menuitem"
                 tabindex="-1"
               >
                 <span

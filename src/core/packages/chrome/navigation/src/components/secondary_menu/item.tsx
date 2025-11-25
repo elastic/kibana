@@ -103,7 +103,6 @@ export const SecondaryMenuItemComponent = ({
           data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
           fullWidth
           href={hasSubmenu ? undefined : href}
-          role="menuitem"
           size="s"
           textProps={false}
           {...iconProps}
@@ -120,7 +119,6 @@ export const SecondaryMenuItemComponent = ({
           data-highlighted="false"
           data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
           href={hasSubmenu ? undefined : href}
-          role="menuitem"
           size="s"
           textProps={false}
           {...iconProps}

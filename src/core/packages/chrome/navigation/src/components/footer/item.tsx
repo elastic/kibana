@@ -82,7 +82,6 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
       display: isHighlighted ? 'base' : 'empty',
       iconType: 'empty', // `iconType` is passed in Suspense below
       onKeyDown: handleFooterItemKeyDown,
-      role: 'menuitem',
       size: 's',
       css: buttonStyles,
       ...props,

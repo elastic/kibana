@@ -108,7 +108,6 @@ export const PrimaryMenuItem = forwardRef<
         isHighlighted={isHighlighted}
         isLabelVisible={!isCollapsed}
         ref={ref}
-        role="menuitem"
         {...props}
       >
         {children}

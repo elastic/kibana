@@ -234,55 +234,73 @@ export const Navigation = ({
                           { defaultMessage: 'More' }
                         )}
                       >
-                        <SideNav.NestedSecondaryMenu.Section>
-                          {overflowMenuItems.map((item) => {
-                            const hasSubmenu = getHasSubmenu(item);
-                            const { sections, ...itemProps } = item;
-                            return (
-                              <SideNav.NestedSecondaryMenu.PrimaryMenuItem
-                                key={item.id}
-                                isHighlighted={item.id === visuallyActivePageId}
-                                hasSubmenu={hasSubmenu}
-                                onClick={() => {
-                                  onItemClick?.(item);
-                                  if (!hasSubmenu) {
-                                    closePopover();
-                                    focusMainContent();
-                                  }
-                                }}
-                                {...itemProps}
-                              >
-                                {item.label}
-                              </SideNav.NestedSecondaryMenu.PrimaryMenuItem>
-                            );
-                          })}
-                        </SideNav.NestedSecondaryMenu.Section>
+                        {({ panelNavigationInstructionsId, panelEnterSubmenuInstructionsId }) => (
+                          <SideNav.NestedSecondaryMenu.Section>
+                            {overflowMenuItems.map((item, index) => {
+                              const hasSubmenu = getHasSubmenu(item);
+                              const { sections, ...itemProps } = item;
+                              const isFirstItem = index === 0;
+                              const ariaDescribedBy =
+                                [
+                                  isFirstItem && panelNavigationInstructionsId,
+                                  hasSubmenu && panelEnterSubmenuInstructionsId,
+                                ]
+                                  .filter(Boolean)
+                                  .join(' ') || undefined;
+                              return (
+                                <SideNav.NestedSecondaryMenu.PrimaryMenuItem
+                                  key={item.id}
+                                  aria-describedby={ariaDescribedBy}
+                                  isHighlighted={item.id === visuallyActivePageId}
+                                  hasSubmenu={hasSubmenu}
+                                  onClick={() => {
+                                    onItemClick?.(item);
+                                    if (!hasSubmenu) {
+                                      closePopover();
+                                      focusMainContent();
+                                    }
+                                  }}
+                                  {...itemProps}
+                                >
+                                  {item.label}
+                                </SideNav.NestedSecondaryMenu.PrimaryMenuItem>
+                              );
+                            })}
+                          </SideNav.NestedSecondaryMenu.Section>
+                        )}
                       </SideNav.NestedSecondaryMenu.Panel>
                       {overflowMenuItems.filter(getHasSubmenu).map((item) => (
                         <SideNav.NestedSecondaryMenu.Panel key={`submenu-${item.id}`} id={item.id}>
-                          <SideNav.NestedSecondaryMenu.Header title={item.label} />
-                          {item.sections?.map((section) => (
-                            <SideNav.NestedSecondaryMenu.Section
-                              key={section.id}
-                              label={section.label}
-                            >
-                              {section.items.map((subItem) => (
-                                <SideNav.NestedSecondaryMenu.Item
-                                  key={subItem.id}
-                                  isHighlighted={subItem.id === visuallyActiveSubpageId}
-                                  isCurrent={actualActiveItemId === subItem.id}
-                                  onClick={() => {
-                                    onItemClick?.(subItem);
-                                    closePopover();
-                                    focusMainContent();
-                                  }}
-                                  {...subItem}
+                          {({ panelNavigationInstructionsId }) => (
+                            <>
+                              <SideNav.NestedSecondaryMenu.Header
+                                title={item.label}
+                                aria-describedby={panelNavigationInstructionsId}
+                              />
+                              {item.sections?.map((section) => (
+                                <SideNav.NestedSecondaryMenu.Section
+                                  key={section.id}
+                                  label={section.label}
                                 >
-                                  {subItem.label}
-                                </SideNav.NestedSecondaryMenu.Item>
+                                  {section.items.map((subItem) => (
+                                    <SideNav.NestedSecondaryMenu.Item
+                                      key={subItem.id}
+                                      isHighlighted={subItem.id === visuallyActiveSubpageId}
+                                      isCurrent={actualActiveItemId === subItem.id}
+                                      onClick={() => {
+                                        onItemClick?.(subItem);
+                                        closePopover();
+                                        focusMainContent();
+                                      }}
+                                      {...subItem}
+                                    >
+                                      {subItem.label}
+                                    </SideNav.NestedSecondaryMenu.Item>
+                                  ))}
+                                </SideNav.NestedSecondaryMenu.Section>
                               ))}
-                            </SideNav.NestedSecondaryMenu.Section>
-                          ))}
+                            </>
+                          )}
                         </SideNav.NestedSecondaryMenu.Panel>
                       ))}
                     </SideNav.NestedSecondaryMenu>

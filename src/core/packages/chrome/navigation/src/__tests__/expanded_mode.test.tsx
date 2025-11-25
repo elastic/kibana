@@ -368,7 +368,7 @@ describe('Expanded mode', () => {
 
         const popover = await screen.findByTestId(popoverId('More'));
 
-        await within(popover).findAllByRole('menuitem');
+        await within(popover).findAllByRole('link');
 
         expect(popover).toBeInTheDocument();
       });
@@ -428,7 +428,7 @@ describe('Expanded mode', () => {
 
         expect(sidePanel).toBeInTheDocument();
 
-        anomalyExplorerLink = await within(sidePanel).findByRole('menuitem', {
+        anomalyExplorerLink = await within(sidePanel).findByRole('link', {
           name: 'Anomaly explorer',
         });
 
@@ -504,7 +504,7 @@ describe('Expanded mode', () => {
 
         expect(popover).toBeInTheDocument();
 
-        const mlButton = await within(popover).findByRole('menuitem', {
+        const mlButton = await within(popover).findByRole('button', {
           name: 'Machine learning',
         });
 
