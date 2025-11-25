@@ -8596,7 +8596,8 @@
         "description": [],
         "signature": [
           "(node: unknown) => node is ",
-          "ESQLUnaryExpression"
+          "ESQLUnaryExpression",
+          "<string>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
         "deprecated": false,
