@@ -30,7 +30,9 @@ export class DataViewsService extends FtrService {
     changeTimestampField, // optionally override default timestamp field
   }: DataViewOptions) {
     await this.testSubjects.existOrFail('indexPatternEditorFlyout');
-    await this.testSubjects.existOrFail('createIndexPatternStep1IndicesList');
+    await this.retry.waitFor('data view list loaded', async () => {
+      return await this.testSubjects.exists('createIndexPatternStep1IndicesList');
+    });
     await this.testSubjects.setValue('createIndexPatternTitleInput', name, {
       clearWithKeyboard: true,
       typeCharByChar: true,
