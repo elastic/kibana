@@ -173,7 +173,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
         buttonColor="danger"
         data-test-subj="invalidateApiKeyConfirmationModal"
       >
-        {managedRuleKeys.length && (
+        {Boolean(managedRuleKeys.length) && (
           <>
             <EuiCallOut
               announceOnMount
