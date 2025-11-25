@@ -1738,7 +1738,7 @@
     "@storybook/addon-essentials": "^8.6.14",
     "@storybook/addon-jest": "8.6.14",
     "@storybook/addon-styling-webpack": "^2.0.0",
-    "@storybook/addon-webpack5-compiler-babel": "^3.0.6",
+    "@storybook/addon-webpack5-compiler-babel": "^4.0.0",
     "@storybook/blocks": "^8.6.14",
     "@storybook/components": "^8.6.14",
     "@storybook/core-events": "^8.6.14",
