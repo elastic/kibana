@@ -11,6 +11,7 @@ import { createConsoleInspector } from '@kbn/xstate-utils';
 import { waitFor } from 'xstate5';
 import type { RoutingDefinition } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-plugin/public';
 import {
   streamRoutingMachine,
   createStreamRoutingMachineImplementations,
@@ -150,4 +151,23 @@ export const useStreamSamplesSelector = <T,>(
   }
 
   return useSelector(routingSamplesRef, selector);
+};
+
+const isStreamNameValid = (streamName: string, parentStreamName: string): boolean => {
+  const prefix = parentStreamName + '.';
+  const partitionName = streamName.replace(prefix, '');
+
+  const isStreamNameEmpty = streamName.length <= prefix.length;
+  const isStreamNameTooLong = streamName.length > MAX_STREAM_NAME_LENGTH;
+  const isLengthValid = !isStreamNameEmpty && !isStreamNameTooLong;
+  const isDotPresent = partitionName.includes('.');
+
+  return isLengthValid && !isDotPresent;
+};
+
+export const useAreStreamRoutesValid = (): boolean => {
+  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  return routingSnapshot.context.routing.every((route) =>
+    isStreamNameValid(route.destination, routingSnapshot.context.definition.stream.name)
+  );
 };

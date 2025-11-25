@@ -113,7 +113,6 @@ export function StreamNameFormRow({
         autoFocus={autoFocus}
         onChange={handleChange}
         minLength={MIN_NAME_LENGTH}
-        maxLength={MAX_STREAM_NAME_LENGTH - prefix.length}
         prepend={[
           <EuiIcon type="streamsWired" />,
           <EuiFormLabel
