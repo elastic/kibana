@@ -8,9 +8,9 @@
 import type { ToolProviderMetadata } from './types';
 
 /**
- * Create provider metadata for an MCP connector tool.
+ * Create provider metadata for an MCP client.
  *
- * @param uniqueId - The unique ID of the MCP connector (from config.uniqueId)
+ * @param uniqueId - The unique ID of the MCP client (from config.uniqueId)
  * @param connectorName - The human-readable name of the connector
  * @param description - Optional description of when to use this MCP server (for LLM context)
  * @returns ToolProviderMetadata object

@@ -207,9 +207,9 @@ describe('McpClient', () => {
       mockClient.connect.mockRejectedValue(error);
 
       // The SDK formats the message as "Streamable HTTP error: Connection failed"
-      // Our client adds "StreamableHTTP error: " prefix, so the final message is:
+      // Our client adds "Streamable HTTP error: " prefix, so the final message is:
       // "StreamableHTTP error: Streamable HTTP error: Connection failed"
-      await expect(client.connect()).rejects.toThrow('StreamableHTTP error: Streamable HTTP error: Connection failed');
+      await expect(client.connect()).rejects.toThrow('Streamable HTTP error: Connection failed');
     });
 
     it('throws UnauthorizedError with formatted message', async () => {

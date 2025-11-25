@@ -46,7 +46,7 @@ export class McpClient {
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         if (error instanceof StreamableHTTPError) {
-          throw new Error(`StreamableHTTP error: ${message}`);
+          throw new Error(`${message}`);
         } else if (error instanceof UnauthorizedError) {
           throw new Error(`Unauthorized error: ${message}`);
         } else {
