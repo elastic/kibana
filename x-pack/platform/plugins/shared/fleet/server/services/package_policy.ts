@@ -35,7 +35,7 @@ import pMap from 'p-map';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import { catchAndSetErrorStackTrace } from '../errors/utils';
+import { catchAndSetErrorStackTrace, rethrowIfInstanceOrWrap } from '../errors/utils';
 
 import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
@@ -3056,11 +3056,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           return cloudConnector;
         } catch (error) {
           logger.error(`Error creating cloud connector: ${error}`);
-          // If it's already a CloudConnectorCreateError, just rethrow it to preserve the original message
-          if (error instanceof CloudConnectorCreateError) {
-            throw error;
-          }
-          throw new CloudConnectorCreateError(`${error}`);
+          rethrowIfInstanceOrWrap(error, CloudConnectorCreateError);
         }
       }
     }
