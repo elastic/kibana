@@ -23,7 +23,7 @@ import { FileUploadContext, useFileUpload } from '@kbn/file-upload';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';
-import React, { lazy } from 'react';
+import React, { lazy, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -50,6 +50,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
   const dataViewColumns = useObservable(deps.indexUpdateService.dataTableColumns$);
 
   const totalHits = useObservable(deps.indexUpdateService.totalHits$);
+  const searchQuery = useObservable(deps.indexUpdateService.qstr$, '');
 
   const rows = useObservable(deps.indexUpdateService.rows$, []);
   const isLoading = useObservable(deps.indexUpdateService.isFetching$, false);
@@ -71,9 +72,10 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     }
   );
 
-  const rowsWithValues = rows?.some((row) => Object.keys(row.flattened).length > 0);
-
-  const noResults = !isLoading && !rowsWithValues;
+  const noResults = useMemo(() => {
+    const rowsWithValues = rows?.some((row) => Object.keys(row.flattened).length > 0);
+    return !isLoading && !rowsWithValues && searchQuery.length === 0;
+  }, [isLoading, rows, searchQuery.length]);
 
   return (
     <KibanaContextProvider
