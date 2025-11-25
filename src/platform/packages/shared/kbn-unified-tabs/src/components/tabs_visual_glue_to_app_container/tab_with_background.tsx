@@ -68,7 +68,7 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
             transform: translateY(-50%);
             width: 1px;
             height: ${euiTheme.size.base};
-            background: ${euiTheme.colors.borderBaseProminent};
+            background: ${euiTheme.colors.borderBasePlain};
             transition: opacity ${euiTheme.animation.fast};
             opacity: ${hideRightSeparator ? '0' : '1'};
             pointer-events: none;
