@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -33,6 +33,7 @@
     "@kbn/core-feature-flags-browser",
     "@kbn/core-chrome-layout-feature-flags",
     "@kbn/core-chrome-navigation-tour",
+    "@kbn/tour-queue"
   ],
   "exclude": [
     "target/**/*",
