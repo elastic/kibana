@@ -10,10 +10,10 @@ import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { NewChat } from '@kbn/elastic-assistant';
-import { AttachmentType } from '@kbn/onechat-common/attachments';
 
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { css } from '@emotion/react';
+import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { DefineStepRule } from '../../../common/types';
@@ -104,11 +104,11 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
   const attachmentData = useMemo(() => {
     const queryField = getFields().queryBar;
     const { query } = (queryField.value as DefineStepRule['queryBar']).query;
-    return { query: query ?? '' };
-  }, [getFields]);
+    return { query: query ?? '', queryLanguage: language };
+  }, [getFields, language]);
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: AttachmentType.esql,
+    attachmentType: SecurityAgentBuilderAttachments.query_help,
     attachmentData,
     attachmentPrompt: i18n.ASK_ASSISTANT_USER_PROMPT(languageName),
   });

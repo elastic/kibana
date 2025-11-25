@@ -50,12 +50,10 @@ export const createQueryHelpAttachmentType = (): AttachmentTypeDefinition => {
     },
     getTools: () => {
       const tools: string[] = [
+        platformCoreTools.generateEsql,
         // TODO use real tool once product_documentation tool is merged, same in description below
         'platformCoreTools.productDocumentation',
       ];
-      // Note: generateEsql is conditionally available based on queryLanguage
-      // We include it in the tools list, but the agent should only use it when queryLanguage is 'esql'
-      tools.push(platformCoreTools.generateEsql);
       return tools;
     },
     getAgentDescription: () => {
@@ -77,7 +75,7 @@ MANDATORY WORKFLOW:
    // TODO use real tool once product_documentation tool is merged
    Tool: ${sanitizeToolId('platformCoreTools.productDocumentation')}
    Parameters: {
-     query: "[query about ESQL syntax, query language, or related documentation]",
+     query: "[query about KQL query language, Elasticsearch Query DSL, Lucene]",
      product: "[optional: 'kibana' | 'elasticsearch' | 'observability' | 'security']",
      max: 3
    }
