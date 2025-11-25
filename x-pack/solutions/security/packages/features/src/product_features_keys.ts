@@ -170,13 +170,6 @@ export enum ProductFeatureRulesKey {
   exceptions = 'exceptions',
 }
 
-export enum ProductFeatureExceptionsFeatureKey {
-  /**
-   * Enables Exceptions
-   */
-  exceptions = 'exceptions',
-}
-
 // Merges the two enums.
 export const ProductFeatureKey = {
   ...ProductFeatureSecurityKey,
@@ -187,7 +180,6 @@ export const ProductFeatureKey = {
   ...ProductFeatureTimelineKey,
   ...ProductFeatureNotesKey,
   ...ProductFeatureRulesKey,
-  ...ProductFeatureExceptionsFeatureKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
@@ -198,8 +190,7 @@ export type ProductFeatureKeyType =
   | ProductFeatureSiemMigrationsKey
   | ProductFeatureTimelineKey
   | ProductFeatureNotesKey
-  | ProductFeatureRulesKey
-  | ProductFeatureExceptionsFeatureKey;
+  | ProductFeatureRulesKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 
@@ -242,4 +233,9 @@ export enum AssistantSubFeatureId {
 /** Sub-features IDs for Security Attack Discovery */
 export enum AttackDiscoverySubFeatureId {
   updateSchedule = 'updateScheduleSubFeature',
+}
+
+/** Sub-features IDs for Security Rules */
+export enum RulesSubFeatureId {
+  exceptions = 'exceptionsSubFeature',
 }
