@@ -23,11 +23,10 @@ export const EditTagsAction = typedMemo(
     refresh,
     onActionExecuted,
   }: AlertActionsProps<AC>) => {
+    const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
     const {
       services: { http, notifications },
     } = useAlertsTableContext();
-    const { mutateAsync: updateAlertTags } = useBulkUpdateAlertTags({ http, notifications });
-    const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
     const handleOpenFlyout = useCallback(() => {
       setIsFlyoutVisible(true);
@@ -37,21 +36,33 @@ export const EditTagsAction = typedMemo(
       setIsFlyoutVisible(false);
     }, []);
 
+    const onActionSuccess = useCallback(() => {
+      handleCloseFlyout();
+      onActionExecuted?.();
+      refresh();
+    }, [handleCloseFlyout, onActionExecuted, refresh]);
+
+    const onActionError = useCallback(() => {
+      refresh();
+    }, [refresh]);
+
+    const { mutateAsync: updateAlertTags } = useBulkUpdateAlertTags({
+      http,
+      notifications,
+      onSuccess: onActionSuccess,
+      onError: onActionError,
+    });
+
     const handleSaveTags = useCallback(
       async (tagsSelection: ItemsSelectionState) => {
-        // TODO: Implement the actual API call to save tags
-
         await updateAlertTags({
           index: alert._index,
           alertIds: [alert._id],
           add: tagsSelection.selectedItems?.length ? tagsSelection.selectedItems : undefined,
           remove: tagsSelection.unSelectedItems?.length ? tagsSelection.unSelectedItems : undefined,
         });
-        handleCloseFlyout();
-        onActionExecuted?.();
-        refresh();
       },
-      [alert, updateAlertTags, handleCloseFlyout, onActionExecuted, refresh]
+      [alert, updateAlertTags]
     );
 
     return (

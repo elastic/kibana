@@ -18,11 +18,15 @@ import { mutationKeys } from '../constants';
 export interface UseBulkUpdateAlertTagsParams {
   http: HttpStart;
   notifications: NotificationsStart;
+  onSuccess?: () => void;
+  onError?: () => void;
 }
 
 export const useBulkUpdateAlertTags = ({
   http,
   notifications: { toasts },
+  onSuccess,
+  onError,
 }: UseBulkUpdateAlertTagsParams) => {
   return useMutation<
     string,
@@ -45,6 +49,18 @@ export const useBulkUpdateAlertTags = ({
     },
     {
       context: AlertsQueryContext,
+      onSuccess: (_, params) => {
+        toasts.addSuccess(
+          i18n.translate(
+            'xpack.triggersActionsUI.rules.updateTagsConfirmationModal.successNotification.descriptionText',
+            {
+              defaultMessage: 'Updated tags for {uuidsCount, plural, one {alert} other {alerts}}',
+              values: { uuidsCount: params.alertIds.length },
+            }
+          )
+        );
+        onSuccess?.();
+      },
       onError: (_err, params) => {
         toasts.addDanger(
           i18n.translate(
@@ -56,18 +72,7 @@ export const useBulkUpdateAlertTags = ({
             }
           )
         );
-      },
-
-      onSuccess: (_, params) => {
-        toasts.addSuccess(
-          i18n.translate(
-            'xpack.triggersActionsUI.rules.updateTagsConfirmationModal.successNotification.descriptionText',
-            {
-              defaultMessage: 'Updated tags for {uuidsCount, plural, one {alert} other {alerts}}',
-              values: { uuidsCount: params.alertIds.length },
-            }
-          )
-        );
+        onError?.();
       },
     }
   );

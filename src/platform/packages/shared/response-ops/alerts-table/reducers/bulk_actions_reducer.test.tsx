@@ -180,7 +180,7 @@ describe('AlertsDataGrid bulk actions', () => {
     });
 
     it('should not show the bulk actions column', () => {
-      render(<TestComponent {...dataGridProps} />);
+      render(<TestComponent {...dataGridProps} ruleTypeIds={['siem.esqlRule']} />);
       expect(screen.queryByTestId('bulk-actions-header')).not.toBeInTheDocument();
     });
   });
@@ -209,7 +209,7 @@ describe('AlertsDataGrid bulk actions', () => {
     it('should not show the bulk actions column when the case service is defined and the user does not have write access', () => {
       mockCaseService.helpers.canUseCases.mockReturnValue({ create: false, read: true });
 
-      render(<TestComponent {...dataGridProps} />);
+      render(<TestComponent {...dataGridProps} ruleTypeIds={['siem.esqlRule']} />);
 
       expect(screen.queryByTestId('bulk-actions-header')).not.toBeInTheDocument();
     });
@@ -217,7 +217,7 @@ describe('AlertsDataGrid bulk actions', () => {
     it('should not show the bulk actions column when the case service is defined and the user does not have read access', () => {
       mockCaseService.helpers.canUseCases.mockReturnValue({ create: true, read: false });
 
-      render(<TestComponent {...dataGridProps} />);
+      render(<TestComponent {...dataGridProps} ruleTypeIds={['siem.esqlRule']} />);
 
       expect(screen.queryByTestId('bulk-actions-header')).not.toBeInTheDocument();
     });
@@ -225,7 +225,7 @@ describe('AlertsDataGrid bulk actions', () => {
     it('should not show the bulk actions when the cases context is missing', () => {
       mockCaseService.ui.getCasesContext.mockReturnValue(() => null);
 
-      render(<TestComponent {...dataGridProps} />);
+      render(<TestComponent {...dataGridProps} ruleTypeIds={['siem.esqlRule']} />);
       expect(screen.queryByTestId('bulk-actions-header')).not.toBeInTheDocument();
     });
 

@@ -13,8 +13,10 @@ import { render, screen } from '@testing-library/react';
 import type { AdditionalContext, AlertActionsProps, RenderContext } from '../types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { createPartialObjectMock } from '../utils/test';
+import { createPartialObjectMock, testQueryClientConfig } from '../utils/test';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions');
 
@@ -61,10 +63,14 @@ const context = createPartialObjectMock<RenderContext<AdditionalContext>>({
   },
 });
 
+const queryClient = new QueryClient(testQueryClientConfig);
+
 const TestComponent = (_props: AlertActionsProps) => (
-  <AlertsTableContextProvider value={context}>
-    <DefaultAlertActions<AdditionalContext> {..._props} />
-  </AlertsTableContextProvider>
+  <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+    <AlertsTableContextProvider value={context}>
+      <DefaultAlertActions<AdditionalContext> {..._props} />
+    </AlertsTableContextProvider>
+  </QueryClientProvider>
 );
 
 describe('DefaultAlertActions', () => {

@@ -9,11 +9,15 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import type { Alert } from '@kbn/alerting-types';
 import type { ItemsSelectionState, UseActionProps } from './items/types';
 import * as i18n from './translations';
 import { useBulkUpdateAlertTags } from '../../hooks/use_bulk_update_alert_tags';
 import { useAlertsTableContext } from '../../contexts/alerts_table_context';
+
+interface AlertIdentifier {
+  _id: string;
+  _index: string;
+}
 
 export const useTagsAction = ({
   onAction,
@@ -23,14 +27,15 @@ export const useTagsAction = ({
 }: UseActionProps) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
   const onFlyoutClosed = useCallback(() => setIsFlyoutOpen(false), []);
-  const [selectedAlertsToEdit, setSelectedAlertsToEdit] = useState<Alert[]>([]);
+  const [selectedAlertsToEdit, setSelectedAlertsToEdit] = useState<AlertIdentifier[]>([]);
   const {
     services: { http, notifications },
   } = useAlertsTableContext();
+
   const { mutateAsync: bulkUpdateAlertTags } = useBulkUpdateAlertTags({ http, notifications });
 
   const openFlyout = useCallback(
-    (selectedAlerts: Alert[]) => {
+    (selectedAlerts: AlertIdentifier[]) => {
       onAction();
       setIsFlyoutOpen(true);
       setSelectedAlertsToEdit(selectedAlerts);
@@ -46,37 +51,31 @@ export const useTagsAction = ({
         }
         acc[alert._index].push(alert);
         return acc;
-      }, {} as Record<string, Alert[]>);
+      }, {} as Record<string, AlertIdentifier[]>);
 
-      await Promise.all(
-        Object.entries(alertsByIndex).map(([index, alerts]) =>
-          bulkUpdateAlertTags({
-            index,
-            alertIds: alerts.map((alert) => alert._id),
-            add: tagsSelection.selectedItems?.length ? tagsSelection.selectedItems : undefined,
-            remove: tagsSelection.unSelectedItems?.length
-              ? tagsSelection.unSelectedItems
-              : undefined,
-          })
-        )
-      )
-        .then(() => {
-          onFlyoutClosed();
-          onActionSuccess();
-        })
-        .catch(() => {
-          onActionError();
-        });
+      try {
+        await Promise.all(
+          Object.entries(alertsByIndex).map(([index, alerts]) =>
+            bulkUpdateAlertTags({
+              index,
+              alertIds: alerts.map((alert) => alert._id),
+              add: tagsSelection.selectedItems?.length ? tagsSelection.selectedItems : undefined,
+              remove: tagsSelection.unSelectedItems?.length
+                ? tagsSelection.unSelectedItems
+                : undefined,
+            })
+          )
+        );
+        onFlyoutClosed();
+        onActionSuccess();
+      } catch {
+        onActionError();
+      }
     },
-    [bulkUpdateAlertTags, onActionSuccess, onFlyoutClosed, onActionError, selectedAlertsToEdit]
+    [bulkUpdateAlertTags, onFlyoutClosed, onActionSuccess, onActionError, selectedAlertsToEdit]
   );
 
-  const getAction = (
-    selectedAlerts: Array<{
-      _id: string;
-      _index: string;
-    }>
-  ) => {
+  const getAction = (selectedAlerts: AlertIdentifier[]) => {
     return {
       name: i18n.EDIT_TAGS,
       onClick: () => openFlyout(selectedAlerts),

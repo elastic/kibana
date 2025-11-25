@@ -24,15 +24,18 @@ import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 
 jest.mock('../apis/bulk_get_cases');
 jest.mock('../contexts/alerts_table_context');
-jest.mocked(useAlertsTableContext).mockReturnValue(
-  createPartialObjectMock<RenderContext<AdditionalContext>>({
-    bulkActionsStore: [{}, jest.fn()],
-  })
-);
-
 const mockCasesService = createCasesServiceMock();
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
+jest.mocked(useAlertsTableContext).mockReturnValue(
+  createPartialObjectMock<RenderContext<AdditionalContext>>({
+    bulkActionsStore: [{}, jest.fn()],
+    services: {
+      http,
+      notifications,
+    },
+  })
+);
 const application = applicationServiceMock.createStartContract();
 application.capabilities = { ...application.capabilities, infrastructure: { show: true } };
 const queryClient = new QueryClient(testQueryClientConfig);
@@ -512,6 +515,14 @@ describe('bulk action hooks', () => {
                 "disabledLabel": "Mark as untracked",
                 "key": "mark-as-untracked",
                 "label": "Mark as untracked",
+                "onClick": [Function],
+              },
+              Object {
+                "data-test-subj": "edit-tags",
+                "disableOnQuery": true,
+                "disabledLabel": "Edit tags",
+                "key": "edit-tags",
+                "label": "Edit tags",
                 "onClick": [Function],
               },
             ],
