@@ -30,8 +30,8 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       },
       access: 'public',
       summary: 'MCP server',
-      description:
-        'WARNING: This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.',
+      description: `> warn
+> This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.`,
       options: {
         tags: ['mcp', 'oas-tag:agent builder'],
         xsrfRequired: false,

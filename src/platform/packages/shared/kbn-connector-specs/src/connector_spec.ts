@@ -171,11 +171,11 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
 }
 
 export interface ActionContext {
-  auth: { method: string; headers: Record<string, string>; [key: string]: unknown };
-  log: Logger;
   client: AxiosInstance;
   config?: Record<string, unknown>;
   connectorUsageCollector?: unknown;
+  log: Logger;
+  secrets?: Record<string, unknown>;
 }
 
 // ============================================================================
