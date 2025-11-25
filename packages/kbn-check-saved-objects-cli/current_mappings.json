@@ -1025,6 +1025,11 @@
         "index": false,
         "type": "text"
       },
+      "projectRouting": {
+        "doc_values": false,
+        "index": false,
+        "type": "keyword"
+      },
       "refreshInterval": {
         "properties": {
           "display": {
