@@ -24,6 +24,7 @@ export const platformCoreTools = {
   generateEsql: platformCoreTool('generate_esql'),
   executeEsql: platformCoreTool('execute_esql'),
   createVisualization: platformCoreTool('create_visualization'),
+  task: platformCoreTool('task'),
 } as const;
 
 /**
