@@ -7,7 +7,12 @@
 
 import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, ALERT_STATUS } from '@kbn/rule-data-utils';
+import {
+  ALERT_INSTANCE_ID,
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  ALERT_MUTED,
+} from '@kbn/rule-data-utils';
 import { nodeBuilder } from '@kbn/es-query';
 import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -54,6 +59,28 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
 
       return alerts;
+    };
+
+    const getAlertsByRuleId = async (ruleId: string): Promise<any[]> => {
+      const {
+        hits: { hits: alerts },
+      } = await es.search({
+        index: alertAsDataIndex,
+        query: {
+          bool: {
+            must: [{ term: { [ALERT_RULE_UUID]: ruleId } }, { term: { [ALERT_STATUS]: 'active' } }],
+          },
+        },
+      });
+
+      return alerts;
+    };
+
+    const runRuleNow = async (ruleId: string) => {
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+        .set('kbn-xsrf', 'foo')
+        .expect(204);
     };
 
     afterEach(async () => {
@@ -116,6 +143,248 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       expect(rules.data.length).to.be(2);
       const mutedRule = rules.data.find((rule: { id: string }) => rule.id === createdRule1);
       expect(mutedRule.muted_alert_ids).to.contain(alertFromRule1._source[ALERT_INSTANCE_ID]);
+    });
+
+    it('should set ALERT_MUTED field to true when muting an alert instance', async () => {
+      const ruleId = await createRule();
+
+      // Wait for alerts to be created
+      let alerts: any[] = [];
+      await retry.try(async () => {
+        alerts = await getAlertsByRuleId(ruleId);
+        expect(alerts.length).greaterThan(0);
+      });
+
+      const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
+
+      expect(alerts[0]._source[ALERT_MUTED]).to.be(false);
+
+      // Mute the alert instance
+      await supertest
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${encodeURIComponent(
+            ruleId
+          )}/alert/${encodeURIComponent(alertInstanceId)}/_mute`
+        )
+        .set('kbn-xsrf', 'foo')
+        .expect(204);
+
+      // Run the rule to trigger reconciliation
+      await runRuleNow(ruleId);
+
+      // Wait for alert document to be updated
+      await retry.try(async () => {
+        const updatedAlerts = await getAlertsByRuleId(ruleId);
+        const mutedAlert: any = updatedAlerts.find(
+          (alert: any) => alert._source[ALERT_INSTANCE_ID] === alertInstanceId
+        );
+        expect(mutedAlert).to.not.be(undefined);
+        expect(mutedAlert._source[ALERT_MUTED]).to.be(true);
+      });
+    });
+
+    it('should set ALERT_MUTED field to false when unmuting an alert instance', async () => {
+      const ruleId = await createRule();
+
+      // Wait for alerts to be created
+      let alerts: any[] = [];
+      await retry.try(async () => {
+        alerts = await getAlertsByRuleId(ruleId);
+        expect(alerts.length).greaterThan(0);
+      });
+
+      const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
+
+      // Mute the alert instance first
+      await supertest
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${encodeURIComponent(
+            ruleId
+          )}/alert/${encodeURIComponent(alertInstanceId)}/_mute`
+        )
+        .set('kbn-xsrf', 'foo')
+        .expect(204);
+
+      // Run the rule to trigger reconciliation
+      await runRuleNow(ruleId);
+
+      // Wait for alert to be muted
+      await retry.try(async () => {
+        const mutedAlerts = await getAlertsByRuleId(ruleId);
+        const mutedAlert: any = mutedAlerts.find(
+          (alert: any) => alert._source[ALERT_INSTANCE_ID] === alertInstanceId
+        );
+        expect(mutedAlert._source[ALERT_MUTED]).to.be(true);
+      });
+
+      // Now unmute the alert instance
+      await supertest
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${encodeURIComponent(
+            ruleId
+          )}/alert/${encodeURIComponent(alertInstanceId)}/_unmute`
+        )
+        .set('kbn-xsrf', 'foo')
+        .expect(204);
+
+      // Run the rule to trigger reconciliation
+      await runRuleNow(ruleId);
+
+      // Wait for alert document to be updated
+      await retry.try(async () => {
+        const unmutedAlerts = await getAlertsByRuleId(ruleId);
+        const unmutedAlert: any = unmutedAlerts.find(
+          (alert: any) => alert._source[ALERT_INSTANCE_ID] === alertInstanceId
+        );
+        expect(unmutedAlert).to.not.be(undefined);
+        expect(unmutedAlert._source[ALERT_MUTED]).to.be(false);
+      });
+    });
+
+    it('should set ALERT_MUTED field to true for all alerts when muteAll is called', async () => {
+      const ruleId = await createRule();
+
+      // Wait for alerts to be created
+      await retry.try(async () => {
+        const alerts = await getAlertsByRuleId(ruleId);
+        expect(alerts.length).greaterThan(0);
+      });
+
+      // Mute all alerts for the rule
+      await supertest
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${encodeURIComponent(
+            ruleId
+          )}/_mute_all`
+        )
+        .set('kbn-xsrf', 'foo')
+        .expect(204);
+
+      // Run the rule to trigger reconciliation
+      await runRuleNow(ruleId);
+
+      // Wait for all alert documents to be updated
+      await retry.try(async () => {
+        const alerts = await getAlertsByRuleId(ruleId);
+        expect(alerts.length).greaterThan(0);
+        alerts.forEach((alert: any) => {
+          expect(alert._source[ALERT_MUTED]).to.be(true);
+        });
+      });
+    });
+
+    it('should set ALERT_MUTED field to false for all alerts when unmuteAll is called', async () => {
+      const ruleId = await createRule();
+
+      // Wait for alerts to be created
+      await retry.try(async () => {
+        const alerts = await getAlertsByRuleId(ruleId);
+        expect(alerts.length).greaterThan(0);
+      });
+
+      // Mute all alerts first
+      await supertest
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${encodeURIComponent(
+            ruleId
+          )}/_mute_all`
+        )
+        .set('kbn-xsrf', 'foo')
+        .expect(204);
+
+      // Run the rule to trigger reconciliation
+      await runRuleNow(ruleId);
+
+      // Wait for alerts to be muted
+      await retry.try(async () => {
+        const alerts = await getAlertsByRuleId(ruleId);
+        alerts.forEach((alert: any) => {
+          expect(alert._source[ALERT_MUTED]).to.be(true);
+        });
+      });
+
+      // Now unmute all alerts
+      await supertest
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${encodeURIComponent(
+            ruleId
+          )}/_unmute_all`
+        )
+        .set('kbn-xsrf', 'foo')
+        .expect(204);
+
+      // Run the rule to trigger reconciliation
+      await runRuleNow(ruleId);
+
+      // Wait for all alert documents to be updated
+      await retry.try(async () => {
+        const alerts = await getAlertsByRuleId(ruleId);
+        expect(alerts.length).greaterThan(0);
+        alerts.forEach((alert: any) => {
+          expect(alert._source[ALERT_MUTED]).to.be(false);
+        });
+      });
+    });
+
+    it('should reconcile ALERT_MUTED field on rule execution if out of sync', async () => {
+      const ruleId = await createRule();
+
+      // Wait for alerts to be created
+      let alerts: any[] = [];
+      await retry.try(async () => {
+        alerts = await getAlertsByRuleId(ruleId);
+        expect(alerts.length).greaterThan(0);
+      });
+
+      const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
+
+      // Mute the alert instance via API
+      await supertest
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${encodeURIComponent(
+            ruleId
+          )}/alert/${encodeURIComponent(alertInstanceId)}/_mute`
+        )
+        .set('kbn-xsrf', 'foo')
+        .expect(204);
+
+      // Manually set the alert document to have incorrect muted state
+      await es.updateByQuery({
+        index: alertAsDataIndex,
+        query: {
+          bool: {
+            must: [
+              { term: { [ALERT_RULE_UUID]: ruleId } },
+              { term: { [ALERT_INSTANCE_ID]: alertInstanceId } },
+            ],
+          },
+        },
+        script: {
+          source: `ctx._source['${ALERT_MUTED}'] = false;`,
+          lang: 'painless',
+        },
+        refresh: true,
+      });
+
+      // Verify the alert document is out of sync
+      const outOfSyncAlerts = await getAlertsByRuleId(ruleId);
+      const outOfSyncAlert: any = outOfSyncAlerts.find(
+        (alert: any) => alert._source[ALERT_INSTANCE_ID] === alertInstanceId
+      );
+      expect(outOfSyncAlert._source[ALERT_MUTED]).to.be(false);
+
+      // Run the rule to trigger reconciliation
+      await runRuleNow(ruleId);
+
+      // Wait for reconciliation to fix the muted state
+      await retry.try(async () => {
+        const reconciledAlerts = await getAlertsByRuleId(ruleId);
+        const reconciledAlert: any = reconciledAlerts.find(
+          (alert: any) => alert._source[ALERT_INSTANCE_ID] === alertInstanceId
+        );
+        expect(reconciledAlert).to.not.be(undefined);
+        expect(reconciledAlert._source[ALERT_MUTED]).to.be(true);
+      });
     });
   });
 }
