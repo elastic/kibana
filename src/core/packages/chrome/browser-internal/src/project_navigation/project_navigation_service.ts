@@ -47,7 +47,6 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { Logger } from '@kbn/logging';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { getSideNavVersion } from '@kbn/core-chrome-layout-feature-flags';
 import { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
@@ -77,10 +76,6 @@ export class ProjectNavigationService {
   // The navigation tree for the Side nav UI that still contains layout information (body, footer, etc.)
   private navigationTreeUi$ = new BehaviorSubject<NavigationTreeDefinitionUI | null>(null);
   private activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
-  // Keep a reference to the nav node selected when the navigation panel is opened
-  private readonly panelSelectedNode$ = new BehaviorSubject<ChromeProjectNavigationNode | null>(
-    null
-  );
 
   private projectBreadcrumbs$ = new BehaviorSubject<{
     breadcrumbs: ChromeBreadcrumb[];
@@ -98,7 +93,6 @@ export class ProjectNavigationService {
   private deepLinksMap$: Observable<Record<string, ChromeNavLink>> = of({});
   private cloudLinks$ = new BehaviorSubject<CloudLinks>({});
   private application?: InternalApplicationStart;
-  private featureFlags?: FeatureFlagsStart;
   private navLinksService?: ChromeNavLinks;
   private _http?: InternalHttpStart;
   private uiSettings?: IUiSettingsClient;
@@ -113,11 +107,9 @@ export class ProjectNavigationService {
     http,
     chromeBreadcrumbs$,
     logger,
-    featureFlags,
     uiSettings,
   }: StartDeps) {
     this.application = application;
-    this.featureFlags = featureFlags;
     this.navLinksService = navLinksService;
     this._http = http;
     this.logger = logger;
@@ -208,8 +200,6 @@ export class ProjectNavigationService {
       getActiveSolutionNavDefinition$: this.getActiveSolutionNavDefinition$.bind(this),
       /** In stateful Kibana, get the id of the active solution navigation */
       getActiveSolutionNavId$: () => this.activeSolutionNavDefinitionId$.asObservable(),
-      getPanelSelectedNode$: () => this.panelSelectedNode$.asObservable(),
-      setPanelSelectedNode: this.setPanelSelectedNode.bind(this),
       getActiveDataTestSubj$: () => this.activeDataTestSubj$.asObservable(),
       tourManager: new NavigationTourManager(),
     };
@@ -252,7 +242,6 @@ export class ProjectNavigationService {
           return parseNavigationTree(id, def, {
             deepLinks: deepLinksMap,
             cloudLinks,
-            sideNavVersion: getSideNavVersion(this.featureFlags!),
           });
         })
       )
@@ -440,34 +429,6 @@ export class ProjectNavigationService {
         ...solutionNavs,
       });
     }
-  }
-
-  private setPanelSelectedNode = (_node: string | ChromeProjectNavigationNode | null) => {
-    const node = typeof _node === 'string' ? this.findNodeById(_node) : _node;
-    this.panelSelectedNode$.next(node);
-  };
-
-  private findNodeById(id: string): ChromeProjectNavigationNode | null {
-    const allNodes = this.navigationTree$.getValue();
-    if (!allNodes) return null;
-
-    const find = (nodes: ChromeProjectNavigationNode[]): ChromeProjectNavigationNode | null => {
-      // Recursively search for the node with the given id
-      for (const node of nodes) {
-        if (node.id === id) {
-          return node;
-        }
-        if (node.children) {
-          const found = find(node.children);
-          if (found) {
-            return found;
-          }
-        }
-      }
-      return null;
-    };
-
-    return find(allNodes);
   }
 
   private get http() {

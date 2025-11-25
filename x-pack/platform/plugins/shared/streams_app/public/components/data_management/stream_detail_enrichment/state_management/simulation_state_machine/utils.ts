@@ -100,6 +100,8 @@ export function getFilterSimulationDocumentsFn(filter: PreviewDocsFilterOption) 
       return (doc: SimulationDocReport) => doc.status === 'skipped';
     case 'outcome_filter_failed':
       return (doc: SimulationDocReport) => doc.status === 'failed';
+    case 'outcome_filter_dropped':
+      return (doc: SimulationDocReport) => doc.status === 'dropped';
     case 'outcome_filter_all':
     default:
       return (_doc: SimulationDocReport) => true;
@@ -178,8 +180,9 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext): {
       // └─────────────────────────────────────────────────────────────────────────────────┘
       // Detected field already inherited
       if ('from' in field) {
+        const { from, alias_for: _, ...rest } = field;
         fieldSchema = {
-          ...field,
+          ...rest,
           status: 'inherited',
           parent: field.from,
         };
@@ -237,8 +240,8 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext): {
             }
             // All other metadata fields are ignored for classic streams
           } else if (streamType === 'wired') {
-            // Wired streams: Only handle OTEL fields, ignore everything else
-            if (isOtelField) {
+            // Wired streams: Handle OTEL and ECS fields (ECS fields might be detected in their namespaced form)
+            if (isOtelField || isEcsField) {
               fieldSchema = {
                 ...fieldSchema,
                 status: 'mapped',

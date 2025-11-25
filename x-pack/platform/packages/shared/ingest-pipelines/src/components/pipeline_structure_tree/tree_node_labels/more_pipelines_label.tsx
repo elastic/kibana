@@ -15,7 +15,7 @@ interface MorePipelinesLabelProps {
 
 export const MorePipelinesLabel = ({ count }: MorePipelinesLabelProps) => {
   return (
-    <EuiText data-test-subj="morePipelinesNodeLabel">
+    <EuiText data-test-subj="morePipelinesNodeLabel" size="s">
       {i18n.translate('ingestPipelines.pipelineStructureTree.morePipelinesTreeNodeLabel', {
         defaultMessage: '+{count} more {count, plural,one {pipeline} other {pipelines}}',
         values: { count },

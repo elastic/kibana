@@ -159,4 +159,36 @@ If no relevant information is found, inform the user you could not locate the re
         'Call this for knowledge from Fleet-installed integrations, which contains information on how to configure and use integrations for data ingestion.',
     },
   },
+  {
+    promptId: 'AssetMisconfigurationsTool',
+    promptGroupId,
+    prompt: {
+      default: `Call this tool to retrieve security misconfigurations and compliance violations for a specific cloud asset or resource.
+
+**When to use this tool:**
+- When the user asks about misconfigurations, compliance failures, or security findings for a specific asset
+- When viewing an entity and the user wants to know about security issues
+- When the user provides an ARN (Amazon Resource Name), Azure Resource ID, or GCP Resource Name
+
+**Important - Resource ID format:**
+The resource_id parameter must be the full cloud resource identifier (eg. ARN, Azure Resource ID, or GCP Resource Name), NOT an Elasticsearch document ID.
+
+Examples of CORRECT resource IDs:
+- AWS: "arn:aws:ec2:us-east-1:123456789:security-group/sg-abc123"
+- Azure: "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.Compute/virtualMachines/vm-name"
+- GCP: "//compute.googleapis.com/projects/project-id/zones/zone/instances/instance-name"
+
+**How to extract the resource ID:**
+- From entity data: Use the \`entity.id\` field
+- From event data: Use the \`cloud.instance.id\`, \`resource.id\`, or similar cloud resource identifier fields
+- From user input: If the user provides an ARN, Azure Resource ID, or GCP Resource Name directly
+
+**Do NOT use:**
+- Kibana document IDs (like "82a224ff-3db6-4f94-8fd8-4c6661599cb6")
+- Entity store document IDs
+- Elasticsearch document _id values
+
+The tool returns only FAILED findings from the last 26 hours, including rule details, benchmark information, and evidence.`,
+    },
+  },
 ];

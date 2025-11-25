@@ -21,6 +21,7 @@ import type {
   HostsViewQueryHostsCountRetrievedParams,
   HostsViewQuerySubmittedParams,
   ITelemetryClient,
+  MetricsExplorerCalloutViewInDiscoverClickedParams,
   PerformanceMetricInnerEvents,
   SchemaSelectorParams,
 } from './types';
@@ -153,5 +154,14 @@ export class TelemetryClient implements ITelemetryClient {
 
   public reportSchemaSelectorInteraction = (params: SchemaSelectorParams) => {
     this.analytics.reportEvent(InfraTelemetryEventTypes.SCHEMA_SELECTOR_INTERACTION, params);
+  };
+
+  public reportMetricsExplorerCalloutViewInDiscoverClicked = (
+    params: MetricsExplorerCalloutViewInDiscoverClickedParams
+  ) => {
+    this.analytics.reportEvent(
+      InfraTelemetryEventTypes.METRICS_EXPLORER_CALLOUT_VIEW_IN_DISCOVER_CLICKED,
+      params
+    );
   };
 }

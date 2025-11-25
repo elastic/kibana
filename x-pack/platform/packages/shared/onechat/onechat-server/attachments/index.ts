@@ -7,8 +7,8 @@
 
 export type {
   AttachmentTypeDefinition,
-  InlineAttachmentTypeDefinition,
   AttachmentRepresentation,
   TextAttachmentRepresentation,
-  AttachmentParseResult,
+  AttachmentValidationResult,
+  AgentFormattedAttachment,
 } from './type_definition';

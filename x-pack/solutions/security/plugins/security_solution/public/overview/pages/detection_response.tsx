@@ -42,7 +42,7 @@ const DetectionResponseComponent = () => {
   const {
     indicesExist: oldIndicesExist,
     loading: oldIsSourcererLoading,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -75,10 +75,9 @@ const DetectionResponseComponent = () => {
         <>
           <FiltersGlobal>
             <SiemSearchBar
+              dataView={experimentalDataView}
               id={InputsModelId.global}
-              sourcererDataView={
-                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
-              }
+              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
             />
           </FiltersGlobal>
           <SecuritySolutionPageWrapper data-test-subj="detectionResponsePage">

@@ -872,15 +872,7 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating action type config: [
-  {
-    \"code\": \"invalid_type\",
-    \"expected\": \"object\",
-    \"received\": \"undefined\",
-    \"path\": [],
-    \"message\": \"Required\"
-  }
-]`,
+        message: `error validating connector type config: Required`,
         errorSource: TaskErrorSource.FRAMEWORK,
       });
     });
@@ -938,15 +930,7 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating action type config: [
-  {
-    \"code\": \"invalid_type\",
-    \"expected\": \"object\",
-    \"received\": \"undefined\",
-    \"path\": [],
-    \"message\": \"Required\"
-  }
-]`,
+        message: `error validating connector type config: Required`,
 
         errorSource: TaskErrorSource.FRAMEWORK,
       });
@@ -981,17 +965,7 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating action params: [
-  {
-    \"code\": \"invalid_type\",
-    \"expected\": \"string\",
-    \"received\": \"undefined\",
-    \"path\": [
-      \"param1\"
-    ],
-    \"message\": \"Required\"
-  }
-]`,
+        message: `error validating action params: Field \"param1\": Required`,
         errorSource: TaskErrorSource.USER,
       });
     });

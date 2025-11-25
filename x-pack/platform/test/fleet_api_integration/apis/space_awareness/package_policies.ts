@@ -42,12 +42,13 @@ export default function (providerContext: FtrProviderContext) {
       await cleanFleetIndices(esClient);
 
       await apiClient.postEnableSpaceAwareness();
+      await apiClient.setup();
 
       await createTestSpace(providerContext, TEST_SPACE_1);
-      multiSpacePolicy = await apiClient.createAgentPolicy(undefined, {
+      multiSpacePolicy = await apiClient.createAgentPolicy('default', {
         space_ids: ['default', TEST_SPACE_1],
       });
-      defaultSpacePolicy = await apiClient.createAgentPolicy(undefined, {
+      defaultSpacePolicy = await apiClient.createAgentPolicy('default', {
         space_ids: ['default'],
       });
       allSpacePolicy = await apiClient.createAgentPolicy(undefined, {
@@ -150,6 +151,34 @@ export default function (providerContext: FtrProviderContext) {
               inputs: {},
             }),
           /400 "Bad Request" Reusable integration policies cannot be used with agent policies belonging to multiple spaces./
+        );
+      });
+
+      it('should not allow to add a package policy to a multispace policy that has name conflict with another policy in a different space', async () => {
+        const packagePolicyResInDefaultSpace = await apiClient.createPackagePolicy(undefined, {
+          policy_ids: [defaultSpacePolicy.item.id],
+          name: `test-nginx-${Date.now()}`,
+          description: 'test',
+          package: {
+            name: 'nginx',
+            version: '1.20.0',
+          },
+          inputs: {},
+        });
+
+        await expectToRejectWithError(
+          () =>
+            apiClient.createPackagePolicy(TEST_SPACE_1, {
+              policy_ids: [multiSpacePolicy.item.id],
+              name: packagePolicyResInDefaultSpace.item.name,
+              description: 'test',
+              package: {
+                name: 'nginx',
+                version: '1.20.0',
+              },
+              inputs: {},
+            }),
+          /409 "Conflict" An integration policy with the name test-nginx-.* already exists. Please rename it or choose a different name./
         );
       });
     });
@@ -266,6 +295,42 @@ export default function (providerContext: FtrProviderContext) {
               inputs: {},
             }),
           /400 "Bad Request" Reusable integration policies cannot be used with agent policies belonging to multiple spaces./
+        );
+      });
+
+      it('should prevent updating package policy name already in multiple spaces when name conflicts exist', async () => {
+        const packagePolicyResInMultispace = await apiClient.createPackagePolicy(undefined, {
+          policy_ids: [multiSpacePolicy.item.id],
+          name: `test-nginx-${Date.now()}`,
+          description: 'test',
+          package: {
+            name: 'nginx',
+            version: '1.20.0',
+          },
+          inputs: {},
+        });
+
+        const packagePolicyResInDefaultSpace = await apiClient.createPackagePolicy(undefined, {
+          policy_ids: [defaultSpacePolicy.item.id],
+          name: `test-nginx-${Date.now()}`,
+          description: 'test',
+          package: {
+            name: 'nginx',
+            version: '1.20.0',
+          },
+          inputs: {},
+        });
+
+        await expectToRejectWithError(
+          () =>
+            apiClient.updatePackagePolicy(
+              packagePolicyResInMultispace.item.id,
+              {
+                name: packagePolicyResInDefaultSpace.item.name,
+              },
+              TEST_SPACE_1
+            ),
+          /409 "Conflict" An integration policy with the name test-nginx-.* already exists. Please rename it or choose a different name./
         );
       });
     });

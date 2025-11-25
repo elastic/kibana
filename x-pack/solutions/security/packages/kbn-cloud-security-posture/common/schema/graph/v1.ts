@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ApiMessageCode } from '../../types/graph/v1';
 
 export const INDEX_PATTERN_REGEX = /^[^A-Z^\\/?"<>|\s#,]+$/;
 
@@ -82,15 +81,15 @@ export const nodeDocumentDataSchema = schema.object({
   entity: schema.maybe(entitySchema),
 });
 
+export const REACHED_NODES_LIMIT = 'REACHED_NODES_LIMIT';
+
 export const graphResponseSchema = () =>
   schema.object({
     nodes: schema.arrayOf(
       schema.oneOf([entityNodeDataSchema, groupNodeDataSchema, labelNodeDataSchema])
     ),
     edges: schema.arrayOf(edgeDataSchema),
-    messages: schema.maybe(
-      schema.arrayOf(schema.oneOf([schema.literal(ApiMessageCode.ReachedNodesLimit)]))
-    ),
+    messages: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal(REACHED_NODES_LIMIT)]))),
   });
 
 export const nodeColorSchema = schema.oneOf([

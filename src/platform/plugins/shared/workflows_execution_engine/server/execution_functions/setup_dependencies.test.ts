@@ -16,7 +16,7 @@ import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { ConnectorExecutor } from '../connector_executor';
 import { UrlValidator } from '../lib/url_validator';
-import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
+import type { LogsRepository } from '../repositories/logs_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
@@ -70,11 +70,6 @@ describe('setupDependencies', () => {
 
   const mockTaskManager = {} as TaskManagerStartContract;
 
-  const mockEsClient = {
-    search: jest.fn(),
-    index: jest.fn(),
-  } as unknown as ElasticsearchClient;
-
   const mockLogger = {
     debug: jest.fn(),
     info: jest.fn(),
@@ -124,26 +119,7 @@ describe('setupDependencies', () => {
     }));
   });
 
-  it('should use original esClient when fakeRequest is not provided', async () => {
-    const result = await setupDependencies(
-      workflowRunId,
-      spaceId,
-      mockActionsPlugin,
-      mockTaskManager,
-      mockEsClient,
-      mockLogger,
-      mockConfig,
-      mockWorkflowExecutionRepository,
-      mockStepExecutionRepository,
-      mockLogsRepository,
-      {} as CoreStart,
-      mockDependencies
-    );
-
-    expect(result.clientToUse).toBe(mockEsClient);
-  });
-
-  it('should use user-scoped ES client when fakeRequest and coreStart are provided', async () => {
+  it('should use user-scoped ES client from coreStart', async () => {
     const mockScopedClient = {
       search: jest.fn(),
       index: jest.fn(),
@@ -171,7 +147,6 @@ describe('setupDependencies', () => {
       spaceId,
       mockActionsPlugin,
       mockTaskManager,
-      mockEsClient,
       mockLogger,
       mockConfig,
       mockWorkflowExecutionRepository,
@@ -183,32 +158,10 @@ describe('setupDependencies', () => {
     );
 
     expect(mockAsScoped).toHaveBeenCalledWith(mockFakeRequest);
-    expect(result.clientToUse).toBe(mockAsCurrentUser);
-    expect(result.clientToUse).not.toBe(mockEsClient);
+    expect(result.esClient).toBe(mockAsCurrentUser);
   });
 
-  it('should use unsecured actions client when fakeRequest is not provided', async () => {
-    await setupDependencies(
-      workflowRunId,
-      spaceId,
-      mockActionsPlugin,
-      mockTaskManager,
-      mockEsClient,
-      mockLogger,
-      mockConfig,
-      mockWorkflowExecutionRepository,
-      mockStepExecutionRepository,
-      mockLogsRepository,
-      {} as CoreStart,
-      mockDependencies
-    );
-
-    expect(mockActionsPlugin.getUnsecuredActionsClient).toHaveBeenCalled();
-    expect(mockActionsPlugin.getActionsClientWithRequest).not.toHaveBeenCalled();
-    expect(ConnectorExecutor).toHaveBeenCalledWith(mockUnsecuredActionsClient, false);
-  });
-
-  it('should use scoped actions client when fakeRequest is provided', async () => {
+  it('should use scoped actions client with fakeRequest', async () => {
     const mockScopedClient = {
       search: jest.fn(),
       index: jest.fn(),
@@ -236,7 +189,6 @@ describe('setupDependencies', () => {
       spaceId,
       mockActionsPlugin,
       mockTaskManager,
-      mockEsClient,
       mockLogger,
       mockConfig,
       mockWorkflowExecutionRepository,
@@ -249,24 +201,46 @@ describe('setupDependencies', () => {
 
     expect(mockActionsPlugin.getActionsClientWithRequest).toHaveBeenCalledWith(mockFakeRequest);
     expect(mockActionsPlugin.getUnsecuredActionsClient).not.toHaveBeenCalled();
-    expect(ConnectorExecutor).toHaveBeenCalledWith(mockScopedActionsClient, true);
+    expect(ConnectorExecutor).toHaveBeenCalledWith(mockScopedActionsClient);
   });
 
   describe('WorkflowGraph', () => {
     it('should call fromWorkflowDefinition with correct workflow definition', async () => {
+      const mockScopedClient = {
+        search: jest.fn(),
+        index: jest.fn(),
+      } as unknown as ElasticsearchClient;
+
+      const mockAsCurrentUser = mockScopedClient;
+      const mockAsScoped = jest.fn().mockReturnValue({
+        asCurrentUser: mockAsCurrentUser,
+      });
+
+      const mockCoreStart = {
+        elasticsearch: {
+          client: {
+            asScoped: mockAsScoped,
+          },
+        },
+      } as unknown as CoreStart;
+
+      const mockFakeRequest = {
+        headers: {},
+      } as KibanaRequest;
+
       await setupDependencies(
         workflowRunId,
         spaceId,
         mockActionsPlugin,
         mockTaskManager,
-        mockEsClient,
         mockLogger,
         mockConfig,
         mockWorkflowExecutionRepository,
         mockStepExecutionRepository,
         mockLogsRepository,
-        {} as CoreStart,
-        mockDependencies
+        mockCoreStart,
+        mockDependencies,
+        mockFakeRequest
       );
 
       expect(WorkflowGraph.fromWorkflowDefinition).toHaveBeenCalledWith(
@@ -276,19 +250,41 @@ describe('setupDependencies', () => {
     });
 
     it('should call fromWorkflowDefinition with correct default settings', async () => {
+      const mockScopedClient = {
+        search: jest.fn(),
+        index: jest.fn(),
+      } as unknown as ElasticsearchClient;
+
+      const mockAsCurrentUser = mockScopedClient;
+      const mockAsScoped = jest.fn().mockReturnValue({
+        asCurrentUser: mockAsCurrentUser,
+      });
+
+      const mockCoreStart = {
+        elasticsearch: {
+          client: {
+            asScoped: mockAsScoped,
+          },
+        },
+      } as unknown as CoreStart;
+
+      const mockFakeRequest = {
+        headers: {},
+      } as KibanaRequest;
+
       await setupDependencies(
         workflowRunId,
         spaceId,
         mockActionsPlugin,
         mockTaskManager,
-        mockEsClient,
         mockLogger,
         mockConfig,
         mockWorkflowExecutionRepository,
         mockStepExecutionRepository,
         mockLogsRepository,
-        {} as CoreStart,
-        mockDependencies
+        mockCoreStart,
+        mockDependencies,
+        mockFakeRequest
       );
 
       expect(WorkflowGraph.fromWorkflowDefinition).toHaveBeenCalledWith(expect.anything(), {
