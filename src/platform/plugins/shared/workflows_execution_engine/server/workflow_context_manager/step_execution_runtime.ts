@@ -134,7 +134,6 @@ export class StepExecutionRuntime {
     this.workflowExecutionState.upsertStep(stepExecution);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.logStepStart(stepId, stepExecution.id!);
-    await this.stepLogger?.flushEvents();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -163,7 +162,6 @@ export class StepExecutionRuntime {
 
     this.workflowExecutionState.upsertStep(stepExecutionUpdate);
     this.logStepComplete(stepExecutionUpdate);
-    await this.stepLogger?.flushEvents();
   }
 
   public failStep(error: Error | string): void {
@@ -190,6 +188,9 @@ export class StepExecutionRuntime {
     this.workflowExecutionState.upsertStep(stepExecutionUpdate);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.logStepFail(stepExecutionUpdate.id!, error);
+  }
+
+  public async flushEventLogs(): Promise<void> {
     await this.stepLogger?.flushEvents();
   }
 

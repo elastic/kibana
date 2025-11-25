@@ -63,6 +63,7 @@ describe('HttpStepImpl', () => {
       setCurrentStepState: jest.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
       abortController: stepContextAbortController,
+      flushEventLogs: jest.fn().mockResolvedValue(undefined),
     } as any;
 
     mockWorkflowRuntime = {

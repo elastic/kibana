@@ -215,7 +215,6 @@ describe('StepExecutionRuntime', () => {
           id: 'fake_step_execution_id',
         } as Partial<EsWorkflowStepExecution>)
       );
-      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
     it('should create a step execution with "RUNNING" status', () => {
@@ -229,7 +228,6 @@ describe('StepExecutionRuntime', () => {
           startedAt: mockDateNow.toISOString(),
         })
       );
-      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
     it('should log the start of step execution', () => {
@@ -248,7 +246,6 @@ describe('StepExecutionRuntime', () => {
           step_type: 'fakeStepType1',
         },
       });
-      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
     it('should save step path from the workflow execution stack', () => {
@@ -261,7 +258,6 @@ describe('StepExecutionRuntime', () => {
           ] as StackFrame[],
         })
       );
-      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
     it('should save step type', () => {
@@ -271,7 +267,6 @@ describe('StepExecutionRuntime', () => {
           stepType: 'fakeStepType1',
         })
       );
-      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -309,7 +304,6 @@ describe('StepExecutionRuntime', () => {
           executionTimeMs: 2000,
         })
       );
-      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
     describe('step execution succeeds', () => {
@@ -336,7 +330,6 @@ describe('StepExecutionRuntime', () => {
             id: 'fake_step_execution_id',
           } as Partial<EsWorkflowStepExecution>)
         );
-        expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
       });
 
       it('should finish a step execution with "COMPLETED" status', () => {
@@ -347,7 +340,6 @@ describe('StepExecutionRuntime', () => {
             status: ExecutionStatus.COMPLETED,
           })
         );
-        expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
       });
 
       it('should finish a step execution executionTime', () => {
@@ -358,7 +350,6 @@ describe('StepExecutionRuntime', () => {
             executionTimeMs: 86400000,
           })
         );
-        expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
       });
 
       it('should log successful step execution', () => {
@@ -382,7 +373,6 @@ describe('StepExecutionRuntime', () => {
             step_type: 'fakeStepType1',
           },
         });
-        expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -408,7 +398,6 @@ describe('StepExecutionRuntime', () => {
           id: 'fake_step_execution_id',
         } as Partial<EsWorkflowStepExecution>)
       );
-      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
     it('should mark the step as failed', () => {
@@ -421,7 +410,6 @@ describe('StepExecutionRuntime', () => {
           error: String(error),
         })
       );
-      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
     it('should log the failure of the step', () => {
@@ -446,7 +434,6 @@ describe('StepExecutionRuntime', () => {
           },
         }
       );
-      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
   });
 });
