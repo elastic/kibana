@@ -1218,11 +1218,11 @@ The following validations are performed to ensure changes to Saved Object types 
 
 #### Immutability constraints
 
-* **Existing Model Versions/Migrations:** Once defined, existing model versions and migrations cannot be mutated (changed or deleted).
+* **Existing model versions/migrations:** Once defined, existing model versions and migrations cannot be mutated (changed or deleted).
 
   * Rationale: This prevents discrepancies between environments that have already upgraded and those that have not.
 
-* **Deleting Model Versions/Migrations:** You cannot delete existing model versions; you can only define new ones.
+* **Deleting model versions/migrations:** You cannot delete existing model versions; you can only define new ones.
 
 #### Versioning requirements
 
