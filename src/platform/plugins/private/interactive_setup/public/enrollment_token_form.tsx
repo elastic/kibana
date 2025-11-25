@@ -56,7 +56,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
   onCancel,
   onSuccess,
 }) => {
-  const { http, docLinks } = useKibana();
+  const { http } = useKibana();
   const { status, getCode } = useVerification();
   const [form, eventHandlers] = useForm({
     defaultValues,
