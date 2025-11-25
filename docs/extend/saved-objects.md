@@ -1216,7 +1216,7 @@ Please refer to the [Troubleshooting](#troubleshooting) section if you encounter
 
 The following validations are performed to ensure changes to Saved Object types adhere to necessary constraints and maintain compatibility across environments.
 
-#### Immutability Constraints
+#### Immutability constraints
 
 * **Existing Model Versions/Migrations:** Once defined, existing model versions and migrations cannot be mutated (changed or deleted).
 
