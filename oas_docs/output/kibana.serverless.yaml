@@ -74887,6 +74887,10 @@ components:
               type: string
               example: m
     params_property_synthetics_uptime_tls:
+      title: Synthetics TLS certificate
+      description: |
+        The parameters for the synthetics TLS certificate rule. These parameters are appropriate when `rule_type_id` is `xpack.uptime.alerts.tls`.
+      type: object
       properties:
         search:
           type: string
@@ -74895,6 +74899,10 @@ components:
         certAgeThreshold:
           type: number
     params_property_synthetics_monitor_status:
+      title: Synthetics monitor status
+      description: |
+        The parameters for the Synthetics monitor status rule. These parameters are appropriate when `rule_type_id` is `xpack.uptime.alerts.monitorStatus`.
+      type: object
       required:
         - numTimes
         - shouldCheckStatus
