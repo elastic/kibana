@@ -31,7 +31,9 @@ async function getTestProps(
   appState?: Partial<DiscoverAppState>,
   defaultFetchStatus: FetchStatus = FetchStatus.PARTIAL
 ) {
-  const replaceUrlState = jest.spyOn(internalStateActions, 'replaceAppState').mockClear();
+  const replaceUrlState = jest
+    .spyOn(internalStateActions, 'updateAppStateAndReplaceUrl')
+    .mockClear();
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.internalState.dispatch(
     stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
