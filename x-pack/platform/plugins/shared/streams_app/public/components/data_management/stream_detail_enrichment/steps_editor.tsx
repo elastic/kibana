@@ -14,7 +14,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useAbortController } from '@kbn/react-hooks';
 import {
   useSimulatorSelector,
-  useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import { NoStepsEmptyPrompt } from './empty_prompts';
@@ -28,7 +27,6 @@ import { SuggestPipelineLoadingPrompt } from './pipeline_suggestions/suggest_pip
 import { SuggestPipelinePanel } from './pipeline_suggestions/suggest_pipeline_panel';
 
 export const StepsEditor = React.memo(() => {
-  const { resetSteps: reassignSteps } = useStreamEnrichmentEvents();
   const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
 
