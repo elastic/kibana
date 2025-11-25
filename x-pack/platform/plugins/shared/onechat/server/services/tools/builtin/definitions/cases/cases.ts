@@ -11,19 +11,21 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { Case, RelatedCase } from '@kbn/cases-plugin/common/types/domain';
 import type { CasesSearchRequest } from '@kbn/cases-plugin/common/types/api';
+import type { CasesClient } from '@kbn/cases-plugin/server/client';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/logging';
 import type { OnechatStartDependencies, OnechatPluginStart } from '../../../../../types';
 import {
   normalizeTimeRange,
-  createEmptyResults,
   createCommentSummariesFromArray,
-  fetchCommentsForCases,
   enhanceCaseData,
-  createToolResult,
-  enhanceCasesWithComments,
+  createResult,
   createErrorResponse,
   getCasesClient,
   deduplicateCases,
+  fetchAllPages,
   type CoreServices,
+  type EnhancedCaseData,
 } from './helpers';
 
 const casesSchema = z.object({
@@ -123,6 +125,103 @@ const casesSchema = z.object({
     ),
 });
 
+/**
+ * Fetches and enhances a single case by ID.
+ */
+async function fetchCaseById(
+  caseId: string,
+  casesClient: CasesClient,
+  includeComments: boolean,
+  request: KibanaRequest,
+  coreServices: CoreServices,
+  logger: Logger
+): Promise<EnhancedCaseData> {
+  const theCase = await casesClient.cases.get({
+    id: caseId,
+    includeComments,
+  });
+
+  const commentsSummary =
+    includeComments && theCase.comments
+      ? createCommentSummariesFromArray(theCase.comments)
+      : undefined;
+
+  return enhanceCaseData(theCase, commentsSummary, request, coreServices, logger);
+}
+
+/**
+ * Fetches cases by alert IDs.
+ */
+async function fetchCasesByAlertIds(
+  alertIds: string[],
+  casesClient: CasesClient,
+  owner: string | undefined,
+  includeComments: boolean,
+  logger: Logger
+): Promise<Case[]> {
+  // Query each alert ID in parallel
+  const allRelatedCasesArrays = await Promise.all(
+    alertIds.map(async (alertId) => {
+      try {
+        return await casesClient.cases.getCasesByAlertID({
+          alertID: alertId,
+          options: owner ? { owner } : {},
+        });
+      } catch (error) {
+        logger.warn(`[Cases Tool] Failed to fetch cases for alert ID ${alertId}: ${error}`);
+        return [];
+      }
+    })
+  );
+
+  // Flatten and deduplicate cases by case ID
+  const relatedCases: RelatedCase[] = deduplicateCases(allRelatedCasesArrays);
+
+  if (relatedCases.length === 0) {
+    return [];
+  }
+
+  // Fetch full case details for each related case
+  const caseFetchResults = await Promise.allSettled(
+    relatedCases.map((relatedCase) =>
+      casesClient.cases.get({
+        id: relatedCase.id,
+        includeComments,
+      })
+    )
+  );
+
+  return caseFetchResults.flatMap((result, index) => {
+    if (result.status === 'fulfilled') {
+      return [result.value];
+    }
+    logger.warn(
+      `[Cases Tool] Failed to fetch full details for case ${relatedCases[index].id}: ${result.reason}`
+    );
+    return [];
+  });
+}
+
+/**
+ * Enhances an array of cases with comments and formatting.
+ */
+function enhanceCases(
+  cases: Case[],
+  includeComments: boolean,
+  request: KibanaRequest,
+  coreServices: CoreServices,
+  logger: Logger
+): EnhancedCaseData[] {
+  return cases.map((theCase) => {
+    const commentsSummary =
+      includeComments && theCase.comments
+        ? createCommentSummariesFromArray(theCase.comments)
+        : undefined;
+
+    return enhanceCaseData(theCase, commentsSummary, request, coreServices, logger);
+  });
+}
+
 export const casesTool = (
   coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>
 ): BuiltinToolDefinition<typeof casesSchema> => {
@@ -191,144 +290,70 @@ Returns case details (id, title, description, status, severity, tags, assignees,
       { request, logger }
     ) => {
       try {
-        // Get start services once at the beginning
         const [coreStart, pluginsStart] = await coreSetup.getStartServices();
         const coreServices: CoreServices = {
           coreStart,
           spacesPlugin: pluginsStart.spaces,
         };
 
-        // Normalize and adjust time range using provided start/end parameters
-        // Returns null if no time range is provided
         const timeRange = normalizeTimeRange(start, end, logger);
-
-        // Get cases client
         const casesClientResult = await getCasesClient(pluginsStart, request, logger, timeRange);
         if ('error' in casesClientResult) {
           return casesClientResult.error;
         }
         const { casesClient } = casesClientResult;
+        const shouldIncludeComments = includeComments ?? false;
 
         // Operation mode 1: Get case by ID
         if (caseId) {
-          try {
-            logger.info(`[Cases Tool] Getting case by ID: ${caseId}`);
-            const theCase = await casesClient.cases.get({
-              id: caseId,
-              includeComments: includeComments ?? false,
-            });
-
-            const commentsSummary =
-              includeComments && theCase.comments
-                ? createCommentSummariesFromArray(theCase.comments)
-                : [];
-
-            const caseData = enhanceCaseData(
-              theCase,
-              commentsSummary,
-              theCase.totalComment || 0,
-              request,
-              coreServices,
-              logger
-            );
-
-            return createToolResult([caseData], null, `Retrieved case: ${theCase.title}`);
-          } catch (error) {
-            return createErrorResponse(
-              error,
-              `[Cases Tool] Error fetching case by ID ${caseId}`,
-              `Error fetching case ${caseId}`,
-              logger
-            );
-          }
+          logger.info(`[Cases Tool] Getting case by ID: ${caseId}`);
+          const caseData = await fetchCaseById(
+            caseId,
+            casesClient,
+            shouldIncludeComments,
+            request,
+            coreServices,
+            logger
+          );
+          return createResult([caseData], null, `Retrieved case: ${caseData.title}`);
         }
 
-        // Operation mode 2: Find cases by alert ID(s)
-        const finalAlertIds = alertIds && alertIds.length > 0 ? alertIds : undefined;
-        if (finalAlertIds && finalAlertIds.length > 0) {
-          try {
-            logger.info(`[Cases Tool] Querying cases by alert IDs: ${finalAlertIds.join(', ')}`);
-            // Query each alert ID in parallel
-            const allRelatedCasesArrays = await Promise.all(
-              finalAlertIds.map(async (alertId) => {
-                try {
-                  return await casesClient.cases.getCasesByAlertID({
-                    alertID: alertId,
-                    options: owner ? { owner } : {},
-                  });
-                } catch (error) {
-                  logger.warn(
-                    `[Cases Tool] Failed to fetch cases for alert ID ${alertId}: ${error}`
-                  );
-                  return [];
-                }
-              })
-            );
+        // Operation mode 2: Find cases by alert IDs
+        if (alertIds && alertIds.length > 0) {
+          logger.info(`[Cases Tool] Querying cases by alert IDs: ${alertIds.join(', ')}`);
+          const cases = await fetchCasesByAlertIds(
+            alertIds,
+            casesClient,
+            owner,
+            shouldIncludeComments,
+            logger
+          );
 
-            // Flatten and deduplicate cases by case ID
-            const relatedCases: RelatedCase[] = deduplicateCases(allRelatedCasesArrays);
-
-            if (relatedCases.length === 0) {
-              return createEmptyResults(
-                timeRange?.start || null,
-                timeRange?.end || null,
-                `No cases found containing alert IDs: ${finalAlertIds.join(', ')}`
-              );
-            }
-
-            // Fetch full case details for each related case
-            const caseFetchResults = await Promise.allSettled(
-              relatedCases.map((relatedCase) =>
-                casesClient.cases.get({
-                  id: relatedCase.id,
-                  includeComments: false,
-                })
-              )
-            );
-
-            const casesWithDetails = caseFetchResults.flatMap((result, index) => {
-              if (result.status === 'fulfilled') {
-                return [result.value];
-              }
-              logger.warn(
-                `[Cases Tool] Failed to fetch full details for case ${relatedCases[index].id}: ${result.reason}`
-              );
-              return [];
-            });
-
-            const casesWithComments = await fetchCommentsForCases(
-              casesWithDetails,
-              casesClient,
-              includeComments,
-              logger
-            );
-
-            const casesData = enhanceCasesWithComments(
-              casesWithComments,
-              coreServices,
-              request,
-              logger
-            );
-
-            return createToolResult(
-              casesData,
+          if (cases.length === 0) {
+            return createResult(
+              [],
               timeRange,
-              `Found ${
-                casesData.length
-              } unique case(s) containing alert ID(s): ${finalAlertIds.join(', ')}`
-            );
-          } catch (error) {
-            return createErrorResponse(
-              error,
-              `[Cases Tool] Error fetching cases by alert IDs ${finalAlertIds.join(', ')}`,
-              `Error fetching cases for alert IDs ${finalAlertIds.join(', ')}`,
-              logger
+              `No cases found containing alert IDs: ${alertIds.join(', ')}`
             );
           }
+
+          const casesData = enhanceCases(
+            cases,
+            shouldIncludeComments,
+            request,
+            coreServices,
+            logger
+          );
+          return createResult(
+            casesData,
+            timeRange,
+            `Found ${casesData.length} unique case(s) containing alert ID(s): ${alertIds.join(
+              ', '
+            )}`
+          );
         }
 
-        // Operation mode 3: Search cases using Cases API
-        // Build search parameters from schema parameters
+        // Operation mode 3: Search cases
         const searchParams: CasesSearchRequest = {
           sortField: 'updatedAt',
           sortOrder: 'desc',
@@ -347,46 +372,15 @@ Returns case details (id, title, description, status, severity, tags, assignees,
           ...(timeRange?.end && { to: timeRange.end }),
         };
 
-        // Fetch cases with pagination
-        const allCases: Case[] = [];
-        let currentPage = 1;
-        const maxPages = 10;
-        let hasMorePages = true;
-
-        while (hasMorePages && currentPage <= maxPages) {
-          searchParams.page = currentPage;
-          const searchResult = await casesClient.cases.search(searchParams);
-
-          if (searchResult.cases.length === 0) {
-            hasMorePages = false;
-            break;
-          }
-
-          allCases.push(...searchResult.cases);
-
-          // Check if we should continue fetching
-          if (searchResult.cases.length < (searchParams.perPage ?? 100)) {
-            hasMorePages = false;
-          }
-
-          currentPage++;
-        }
-
-        const casesWithComments = await fetchCommentsForCases(
+        const allCases = await fetchAllPages(casesClient, searchParams);
+        const casesData = enhanceCases(
           allCases,
-          casesClient,
-          includeComments,
-          logger
-        );
-
-        const casesData = enhanceCasesWithComments(
-          casesWithComments,
-          coreServices,
+          shouldIncludeComments,
           request,
+          coreServices,
           logger
         );
-
-        return createToolResult(casesData, timeRange);
+        return createResult(casesData, timeRange);
       } catch (error) {
         return createErrorResponse(
           error,

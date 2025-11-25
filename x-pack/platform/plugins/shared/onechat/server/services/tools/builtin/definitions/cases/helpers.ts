@@ -18,6 +18,7 @@ import type {
   RelatedCase,
   UserCommentAttachment,
 } from '@kbn/cases-plugin/common/types/domain';
+import type { CasesSearchRequest } from '@kbn/cases-plugin/common/types/api';
 import type { OnechatStartDependencies } from '../../../../../types';
 import { getCaseUrl } from '../../../../../utils/case_urls';
 
@@ -28,38 +29,20 @@ export interface CommentSummary {
   created_at: string | null;
 }
 
-export interface CommentFetchResult {
-  case: Case;
-  comments: CommentSummary[];
-  totalComments: number;
-}
-
 export interface CoreServices {
   coreStart: CoreStart;
   spacesPlugin: SpacesPluginStart | undefined;
 }
 
-export interface EnhancedCaseData
-  extends Omit<
-    Case,
-    'assignees' | 'observables' | 'totalAlerts' | 'totalComment' | 'created_by' | 'updated_by'
-  > {
+export interface EnhancedCaseData extends Case {
   url: string | null;
   markdown_link: string;
-  assignees: string[];
-  observables_count: number;
-  observables: Array<{ type: string | null; value: string | null }>;
-  total_alerts: number;
-  total_comments: number;
-  created_by: string | null;
-  updated_by: string | null;
-  comments_summary: CommentSummary[];
+  comments_summary?: CommentSummary[];
 }
 
 /**
  * Normalizes and validates time range parameters for case queries.
- * Handles date strings that may or may not include a year (assumes current year if missing).
- * Validates dates and logs warnings for invalid dates.
+ * Validates ISO date strings and logs warnings for invalid dates.
  *
  * @param start - ISO datetime string for start time (inclusive), optional
  * @param end - ISO datetime string for end time (exclusive), optional
@@ -76,20 +59,13 @@ export const normalizeTimeRange = (
   startDate: Date | null;
   endDate: Date | null;
 } | null => {
-  // If neither start nor end is provided, return null to indicate no time range filtering
   if (!start && !end) {
     return null;
   }
 
-  const now = new Date();
-  const currentYear = now.getFullYear();
-
   let startDate: Date | null = null;
   if (start) {
-    // If no year is specified, assume current year
-    const startStr =
-      start.includes('T') && !start.match(/^\d{4}/) ? `${currentYear}-${start}` : start;
-    startDate = new Date(startStr);
+    startDate = new Date(start);
     if (isNaN(startDate.getTime())) {
       logger.warn(`Invalid start date: ${start}`);
       startDate = null;
@@ -98,8 +74,7 @@ export const normalizeTimeRange = (
 
   let endDate: Date | null = null;
   if (end) {
-    const endStr = end.includes('T') && !end.match(/^\d{4}/) ? `${currentYear}-${end}` : end;
-    endDate = new Date(endStr);
+    endDate = new Date(end);
     if (isNaN(endDate.getTime())) {
       logger.warn(`Invalid end date: ${end}`);
       endDate = null;
@@ -115,43 +90,32 @@ export const normalizeTimeRange = (
 };
 
 /**
- * Creates an empty results response for the cases tool.
- * Used when no cases are found or when the cases plugin is unavailable.
+ * Creates a standardized tool result response for the cases tool.
+ * Handles success, empty, and error cases.
  *
- * @param normalizedStart - Normalized start time ISO string, or null
- * @param normalizedEnd - Normalized end time ISO string, or null
- * @param message - Message explaining why results are empty
- * @returns Tool result object with empty cases array and the provided message
+ * @param cases - Array of enhanced case data objects (empty array for empty results)
+ * @param timeRange - Normalized time range object or null if no time filtering
+ * @param message - Optional message to include in the response
+ * @returns Tool result object conforming to ToolResultType.other format
  */
-export const createEmptyResults = (
-  normalizedStart: string | null,
-  normalizedEnd: string | null,
-  message: string
+export const createResult = (
+  cases: EnhancedCaseData[],
+  timeRange: ReturnType<typeof normalizeTimeRange> | null,
+  message?: string
 ) => ({
   results: [
     {
       type: ToolResultType.other,
       data: {
-        cases: [],
-        total: 0,
-        start: normalizedStart || null,
-        end: normalizedEnd || null,
-        message,
+        total: cases.length,
+        cases,
+        start: timeRange?.start || null,
+        end: timeRange?.end || null,
+        ...(message && { message }),
       },
     },
   ],
 });
-
-/**
- * Extracts a human-readable error message from an error object.
- * Handles both Error instances and other error types.
- *
- * @param error - The error object of unknown type
- * @returns The error message string
- */
-export const extractErrorMessage = (error: unknown): string => {
-  return error instanceof Error ? error.message : String(error);
-};
 
 /**
  * Creates a summary object from a case attachment/comment.
@@ -189,95 +153,57 @@ export const createCommentSummariesFromArray = (comments: Attachment[]): Comment
 };
 
 /**
- * Fetches comments for a single case using the cases client.
- * Retrieves up to 10 comments sorted by creation date (descending).
- * Returns empty comments array if fetch fails, but still includes the case.
+ * Fetches all pages of cases from a search query.
+ * Handles pagination automatically up to a maximum number of pages.
  *
- * @param caseItem - The case object to fetch comments for
  * @param casesClient - The cases client instance for API calls
- * @param logger - Logger instance for error logging
- * @returns Promise resolving to CommentFetchResult with case, comments, and total count
+ * @param searchParams - Search parameters for the query
+ * @param maxPages - Maximum number of pages to fetch (default: 10)
+ * @returns Promise resolving to array of all cases from all pages
  */
-export const fetchCommentsForCase = async (
-  caseItem: Case,
+export const fetchAllPages = async (
   casesClient: CasesClient,
-  logger: Logger
-): Promise<CommentFetchResult> => {
-  try {
-    const commentsResponse = await casesClient.attachments.find({
-      caseID: caseItem.id,
-      findQueryParams: {
-        page: 1,
-        perPage: 10,
-        sortOrder: 'desc',
-      },
-    });
+  searchParams: CasesSearchRequest,
+  maxPages: number = 10
+): Promise<Case[]> => {
+  const allCases: Case[] = [];
+  let currentPage = 1;
+  let hasMorePages = true;
 
-    const commentSummaries = createCommentSummariesFromArray(commentsResponse.comments || []);
+  while (hasMorePages && currentPage <= maxPages) {
+    searchParams.page = currentPage;
+    const searchResult = await casesClient.cases.search(searchParams);
 
-    return {
-      case: caseItem,
-      comments: commentSummaries,
-      totalComments: commentsResponse.total || 0,
-    };
-  } catch (error) {
-    logger.warn(`[Cases Tool] Failed to fetch comments for case ${caseItem.id}: ${error}`);
-    return {
-      case: caseItem,
-      comments: [],
-      totalComments: caseItem.totalComment || 0,
-    };
+    if (searchResult.cases.length === 0) {
+      break;
+    }
+
+    allCases.push(...searchResult.cases);
+
+    // Stop if we got fewer results than requested (last page)
+    if (searchResult.cases.length < (searchParams.perPage ?? 100)) {
+      hasMorePages = false;
+    }
+
+    currentPage++;
   }
+
+  return allCases;
 };
 
 /**
- * Fetches comments for multiple cases in parallel.
- * If shouldFetch is false, returns cases with empty comment arrays.
- * Otherwise, fetches comments for each case concurrently.
- *
- * @param cases - Array of case objects to fetch comments for
- * @param casesClient - The cases client instance for API calls
- * @param shouldFetch - Whether to actually fetch comments (false returns empty arrays)
- * @param logger - Logger instance for error logging
- * @returns Promise resolving to array of CommentFetchResult objects
- */
-export const fetchCommentsForCases = async (
-  cases: Case[],
-  casesClient: CasesClient,
-  shouldFetch: boolean,
-  logger: Logger
-): Promise<CommentFetchResult[]> => {
-  return Promise.all(
-    cases.map(async (caseItem) => {
-      if (!shouldFetch) {
-        return {
-          case: caseItem,
-          comments: [],
-          totalComments: caseItem.totalComment || 0,
-        };
-      }
-      return fetchCommentsForCase(caseItem, casesClient, logger);
-    })
-  );
-};
-
-/**
- * Enhances a case object with additional computed fields and formatting.
- * Adds URL generation, markdown links, normalized assignees, observables summary,
- * and comment summaries. Transforms user objects to usernames for display.
+ * Enhances a case object with URL and markdown link fields.
  *
  * @param caseItem - The base case object from the API
- * @param comments - Array of comment summaries to include
- * @param totalComments - Total number of comments for the case
+ * @param comments - Optional array of comment summaries to include
  * @param request - Kibana request object for URL generation
  * @param coreServices - Core services including CoreStart and SpacesPlugin
  * @param logger - Logger instance for warning messages
- * @returns Enhanced case data object with all computed fields
+ * @returns Enhanced case data object with url and markdown_link fields
  */
 export const enhanceCaseData = (
   caseItem: Case,
-  comments: CommentSummary[],
-  totalComments: number,
+  comments: CommentSummary[] | undefined,
   request: KibanaRequest,
   coreServices: CoreServices,
   logger: Logger
@@ -300,70 +226,10 @@ export const enhanceCaseData = (
 
   return {
     ...caseItem,
-    assignees: caseItem.assignees?.map((a) => a.uid || String(a)) || [],
-    observables_count: caseItem.total_observables ?? caseItem.observables?.length ?? 0,
-    observables: (caseItem.observables || []).slice(0, 5).map((obs) => ({
-      type: obs.typeKey || null,
-      value: obs.value || null,
-    })),
-    created_by: caseItem.created_by.username ?? caseItem.created_by.email ?? null,
-    updated_by: caseItem.updated_by?.username ?? caseItem.updated_by?.email ?? null,
-    total_alerts: caseItem.totalAlerts || 0,
-    total_comments: totalComments,
-    comments_summary: comments,
     url: caseUrl,
     markdown_link: markdownLink,
+    ...(comments && comments.length > 0 && { comments_summary: comments }),
   };
-};
-
-/**
- * Creates a standardized tool result response for the cases tool.
- * Formats the response according to the onechat tool result specification.
- *
- * @param cases - Array of enhanced case data objects
- * @param timeRange - Normalized time range object or null if no time filtering
- * @param message - Optional message to include in the response
- * @returns Tool result object conforming to ToolResultType.other format
- */
-export const createToolResult = (
-  cases: EnhancedCaseData[],
-  timeRange: ReturnType<typeof normalizeTimeRange> | null,
-  message?: string
-) => ({
-  results: [
-    {
-      type: ToolResultType.other,
-      data: {
-        total: cases.length,
-        cases,
-        start: timeRange?.start || null,
-        end: timeRange?.end || null,
-        ...(message && { message }),
-      },
-    },
-  ],
-});
-
-/**
- * Enhances multiple cases with comments by applying enhanceCaseData to each.
- * Processes all cases in the array and returns enhanced versions with URLs,
- * markdown links, and formatted fields.
- *
- * @param casesWithComments - Array of CommentFetchResult objects containing cases and their comments
- * @param coreServices - Core services including CoreStart and SpacesPlugin
- * @param request - Kibana request object for URL generation
- * @param logger - Logger instance for warning messages
- * @returns Array of enhanced case data objects
- */
-export const enhanceCasesWithComments = (
-  casesWithComments: CommentFetchResult[],
-  coreServices: CoreServices,
-  request: KibanaRequest,
-  logger: Logger
-): EnhancedCaseData[] => {
-  return casesWithComments.map(({ case: caseItem, comments, totalComments }) =>
-    enhanceCaseData(caseItem, comments, totalComments, request, coreServices, logger)
-  );
 };
 
 /**
@@ -383,7 +249,7 @@ export const createErrorResponse = (
   userMessage: string,
   logger: Logger
 ) => {
-  const errorMessage = extractErrorMessage(error);
+  const errorMessage = error instanceof Error ? error.message : String(error);
   logger.error(`${logPrefix}: ${errorMessage}`);
   return {
     results: [createErrorResult(`${userMessage}: ${errorMessage}`)],
@@ -406,17 +272,13 @@ export const getCasesClient = async (
   request: KibanaRequest,
   logger: Logger,
   timeRange: ReturnType<typeof normalizeTimeRange> | null
-): Promise<{ casesClient: CasesClient } | { error: ReturnType<typeof createEmptyResults> }> => {
+): Promise<{ casesClient: CasesClient } | { error: ReturnType<typeof createResult> }> => {
   const casesPlugin = pluginsStart.cases;
 
   if (!casesPlugin) {
     logger.warn('[Cases Tool] Cases plugin not available, returning empty results');
     return {
-      error: createEmptyResults(
-        timeRange?.start || null,
-        timeRange?.end || null,
-        'Cases plugin not available'
-      ),
+      error: createResult([], timeRange, 'Cases plugin not available'),
     };
   }
 
