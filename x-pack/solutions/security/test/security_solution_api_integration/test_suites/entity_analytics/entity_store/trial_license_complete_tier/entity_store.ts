@@ -62,6 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
           {
             params: { entityType: 'host' },
             body: {},
+            query: {},
           },
           'default'
         );
