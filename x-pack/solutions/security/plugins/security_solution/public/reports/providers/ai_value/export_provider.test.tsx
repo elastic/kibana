@@ -13,13 +13,24 @@ import { useHistory } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
 import { webcrypto } from 'crypto';
 import { AIValueExportProvider, useAIValueExportContext } from './export_provider';
+import { useKibana } from '../../../common/lib/kibana';
+import { AIValueReportEventTypes } from '../../../common/lib/telemetry/events/ai_value_report/types';
 
 jest.mock('react-router', () => {
   return {
     useHistory: jest.fn(),
   };
 });
+
+jest.mock('../../../common/lib/kibana', () => {
+  return {
+    useKibana: jest.fn(),
+  };
+});
 const useHistoryMock = useHistory as jest.Mock;
+const useKibanaMock = useKibana as jest.Mock;
+const reportEventMock = jest.fn();
+
 type ContextValue = ReturnType<typeof useAIValueExportContext>;
 
 const reportInput = {
@@ -59,6 +70,7 @@ const TestComponent = ({ contextValueFn }: { contextValueFn: (context: ContextVa
   return (
     <>
       <span>{context?.isInsightVerified ? 'Insight verified' : ''}</span>
+      <span>{context?.shouldRegenerateInsight ? 'Insight should regenerate' : ''}</span>
       <span>
         {context?.buildForwardedState({ timeRange }) ? 'buildForwardedState available' : ''}
       </span>
@@ -86,6 +98,8 @@ describe('AIValueExportContext', () => {
   };
 
   const verifyInsight = () => waitFor(() => screen.getByText('Insight verified'));
+  const verifyInsightShouldRegenerate = () =>
+    waitFor(() => screen.getByText('Insight should regenerate'));
   const verifyBuildForwardedStateFnAvailable = () =>
     waitFor(() => screen.getByText('buildForwardedState available'));
 
@@ -93,8 +107,17 @@ describe('AIValueExportContext', () => {
   const setInsight = (insight: string) => act(() => context?.setInsight(insight));
 
   beforeEach(() => {
+    jest.clearAllMocks()
     Object.defineProperties(global, {
       crypto: { value: webcrypto, writable: true },
+    });
+
+    useKibanaMock.mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent: reportEventMock,
+        },
+      },
     });
   });
 
@@ -122,6 +145,22 @@ describe('AIValueExportContext', () => {
       it('should indicate that the insight should NOT be regenerated', () => {
         expect(context?.shouldRegenerateInsight).toBe(false);
       });
+
+      it('should report a telemetry event indicating that the report is being exported', () => {
+        expect(reportEventMock).toHaveBeenCalledWith(
+          AIValueReportEventTypes.AIValueReportExportExecution,
+          {}
+        );
+      });
+
+      it('should report a telemetry event indicating that the insight should not be regenerated', () => {
+        expect(reportEventMock).toHaveBeenCalledWith(
+          AIValueReportEventTypes.AIValueReportExportInsightVerified,
+          {
+            shouldRegenerate: false,
+          }
+        );
+      });
     });
 
     describe('when there is a forwarded state is valid and the report input is different', () => {
@@ -130,12 +169,22 @@ describe('AIValueExportContext', () => {
         setReportInput({ ...reportInput, minutesPerAlert: 12345 });
         await verifyInsight();
       });
+
       it('should verify the insight', () => {
         expect(context?.isInsightVerified).toBe(true);
       });
 
       it('should indicate that the insight should be regenerated', () => {
         expect(context?.shouldRegenerateInsight).toBe(true);
+      });
+
+      it('should report a telemetry event indicating that the insight should be regenerated', () => {
+        expect(reportEventMock).toHaveBeenCalledWith(
+          AIValueReportEventTypes.AIValueReportExportInsightVerified,
+          {
+            shouldRegenerate: true,
+          }
+        );
       });
     });
 
@@ -147,25 +196,94 @@ describe('AIValueExportContext', () => {
         expect(context?.forwardedState).toBe(undefined);
       });
     });
+
+    describe('when hashing returns an error', () => {
+      const errorMessage = 'Boom while hashing!';
+      beforeEach(async () => {
+        Object.defineProperties(global, {
+          crypto: {
+            value: {
+              subtle: {
+                digest: () => {
+                  throw Error(errorMessage);
+                },
+              },
+            },
+            writable: true,
+          },
+        });
+        doRender(forwardedState);
+        setReportInput(reportInput);
+        await verifyInsight();
+      });
+
+      it('should report a telemetry event with the error', () => {
+        expect(reportEventMock).toHaveBeenCalledWith(
+          AIValueReportEventTypes.AIValueReportExportError,
+          {
+            errorMessage,
+            isExportMode: true,
+          }
+        );
+      });
+
+      it('should indicate that the insight should be regenerated', async () => {
+        await verifyInsightShouldRegenerate();
+      });
+    });
   });
 
   describe("normal mode: the page is rendered in the user's browser", () => {
-    beforeEach(() => {
-      doRender(undefined);
+    describe('happy path', () => {
+      beforeEach(() => {
+        doRender(undefined);
+      });
+
+      it('should expose a buildForwardedState that is defined only when the insight and the report input has loaded', async () => {
+        const buildState = () => context?.buildForwardedState({ timeRange });
+        expect(buildState()).toBeUndefined();
+        setInsight('Some valuable insight');
+        expect(buildState()).toBeUndefined();
+        setReportInput(reportInput);
+        await verifyBuildForwardedStateFnAvailable();
+
+        expect(buildState()).toEqual({
+          timeRange,
+          insight: 'Some valuable insight',
+          reportDataHash,
+        });
+      });
     });
 
-    it('should expose a buildForwardedState that is defined only when the insight and the report input has loaded', async () => {
-      const buildState = () => context?.buildForwardedState({ timeRange });
-      expect(buildState()).toBeUndefined();
-      setInsight('Some valuable insight');
-      expect(buildState()).toBeUndefined();
-      setReportInput(reportInput);
-      await verifyBuildForwardedStateFnAvailable();
+    describe('when hashing returns an error', () => {
+      const errorMessage = 'Boom while hashing!';
+      beforeEach(async () => {
+        Object.defineProperties(global, {
+          crypto: {
+            value: {
+              subtle: {
+                digest: () => {
+                  throw Error(errorMessage);
+                },
+              },
+            },
+            writable: true,
+          },
+        });
+        doRender(undefined);
+        setReportInput(reportInput);
+      });
 
-      expect(buildState()).toEqual({
-        timeRange,
-        insight: 'Some valuable insight',
-        reportDataHash,
+      it('should report a telemetry event with the error', async () => {
+        waitFor(() => {
+          expect(reportEventMock).toHaveBeenCalledWith(
+            AIValueReportEventTypes.AIValueReportExportError,
+            {
+              errorMessage,
+              isExportMode: false,
+            }
+          );
+        })
       });
     });
   });

@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useHistory } from 'react-router-dom';
 import type { ForwardedAIValueReportState } from '../../../../common/locators/ai_value_report/locator';
 import { parseLocationState } from '../../../../common/locators/ai_value_report/locator';
+import { useKibana } from '../../../common/lib/kibana';
+import { AIValueReportEventTypes } from '../../../common/lib/telemetry/events/ai_value_report/types';
 
 interface AIValueExportContext {
   forwardedState?: ForwardedAIValueReportState;
@@ -67,6 +77,10 @@ export function AIValueExportProvider({ children }: AIValueExportProviderProps) 
   const [reportDataHash, setReportDataHash] = useState<string | undefined>();
 
   const [insight, setInsight] = useState<string | undefined>();
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const [hashReportErrorMessage, setHashReportErrorMessage] = useState<string>('');
+  const { telemetry } = useKibana().services;
+  const isExportMode = forwardedState !== undefined;
 
   useEffect(() => {
     if (history.location.state) {
@@ -77,8 +91,25 @@ export function AIValueExportProvider({ children }: AIValueExportProviderProps) 
   useEffect(() => {
     if (reportInput) {
       setReportDataHash(undefined);
+      if (abortControllerRef.current !== null) {
+        abortControllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
       const generateReportDataHash = async () => {
-        setReportDataHash(await hashReportData(reportInput));
+        let hash: string;
+        try {
+          hash = await hashReportData(reportInput);
+        } catch (e) {
+          // Fallback to the date string which will force the regeneration of the insight
+          hash = new Date().toISOString();
+          setHashReportErrorMessage(e?.message ?? 'error during the hash generation');
+        }
+
+        if (controller.signal.aborted) {
+          return;
+        }
+        setReportDataHash(hash);
       };
 
       generateReportDataHash();
@@ -91,6 +122,30 @@ export function AIValueExportProvider({ children }: AIValueExportProviderProps) 
       setIsInsightVerified(true);
     }
   }, [forwardedState, reportDataHash]);
+
+  // Telemetry reporting
+  useEffect(() => {
+    if (isInsightVerified && shouldRegenerateInsight !== undefined) {
+      telemetry.reportEvent(AIValueReportEventTypes.AIValueReportExportInsightVerified, {
+        shouldRegenerate: shouldRegenerateInsight,
+      });
+    }
+  }, [telemetry, isInsightVerified, shouldRegenerateInsight]);
+
+  useEffect(() => {
+    if (isExportMode) {
+      telemetry.reportEvent(AIValueReportEventTypes.AIValueReportExportExecution, {});
+    }
+  }, [isExportMode, telemetry]);
+
+  useEffect(() => {
+    if (hashReportErrorMessage) {
+      telemetry.reportEvent(AIValueReportEventTypes.AIValueReportExportError, {
+        errorMessage: hashReportErrorMessage,
+        isExportMode,
+      });
+    }
+  }, [hashReportErrorMessage, isExportMode, telemetry]);
 
   const buildForwardedState = useCallback(
     ({
