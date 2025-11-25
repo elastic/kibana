@@ -36,7 +36,7 @@ import { type KibanaContextExtra } from '../types';
 import { getCellValueRenderer } from './grid_custom_renderers/cell_value_renderer';
 import { getValueInputPopover } from './grid_custom_renderers/value_input_popover';
 import { getAddRowControl } from './grid_custom_renderers/add_row_control';
-import { getCustomToolbar } from './grid_custom_renderers/custom_toolbar';
+import { getGridToolbar } from './grid_custom_renderers/grid_toolbar';
 import { getAddColumnControl } from './grid_custom_renderers/add_column_control';
 
 interface ESQLDataGridProps {
@@ -227,12 +227,12 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     [indexUpdateService]
   );
 
-  const customToolbar = useMemo(() => {
-    return getCustomToolbar({
-      rowsCount: rows.length,
+  const gridToolbar = useMemo(() => {
+    return getGridToolbar({
+      rowsCount: props.totalHits,
       onOpenIndexInDiscover: props.onOpenIndexInDiscover,
     });
-  }, [props.onOpenIndexInDiscover, rows]);
+  }, [props.onOpenIndexInDiscover, props.totalHits]);
 
   const trailingControlColumns = useMemo(() => {
     return [getAddColumnControl(indexUpdateService)];
@@ -281,7 +281,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       controlColumnIds={props.controlColumnIds}
       customBulkActions={bulkActions}
       rowLineHeightOverride={euiTheme.size.xl}
-      renderCustomToolbar={customToolbar}
+      renderCustomToolbar={gridToolbar}
       css={css`
         height: '100%';
 

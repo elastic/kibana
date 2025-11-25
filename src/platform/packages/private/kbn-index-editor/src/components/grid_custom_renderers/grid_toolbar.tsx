@@ -19,7 +19,7 @@ interface CustomToolBarProps {
   onOpenIndexInDiscover?: EditLookupIndexContentContext['onOpenIndexInDiscover'];
 }
 
-export const getCustomToolbar =
+export const getGridToolbar =
   ({ rowsCount, onOpenIndexInDiscover }: CustomToolBarProps) =>
   ({ gridProps: { additionalControls } }: UnifiedDataTableRenderCustomToolbarProps) => {
     const { euiTheme } = useEuiTheme();
