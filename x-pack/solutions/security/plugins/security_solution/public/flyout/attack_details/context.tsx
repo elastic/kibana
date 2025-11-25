@@ -11,6 +11,7 @@ import type { AttackDetailsProps } from './types';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { FlyoutError } from '../shared/components/flyout_error';
 import { useAttackDetails } from './hooks/use_attack_details';
+import type { GetFieldsData } from '../document_details/shared/hooks/use_get_fields_data';
 
 export interface AttackDetailsContext {
   /**
@@ -29,7 +30,10 @@ export interface AttackDetailsContext {
    * Browser fields for the data view (for field browser / flyout sections)
    */
   browserFields: BrowserFields;
-
+  /**
+   * Retrieves searchHit values for the provided field
+   */
+  getFieldsData: GetFieldsData;
   /**
    * Field-browser-friendly representation of the event
    */
@@ -51,10 +55,11 @@ export type AttackDetailsProviderProps = {
 export const AttackDetailsProvider = memo(
   ({ attackId, indexName, children }: AttackDetailsProviderProps) => {
     // data view side: browserFields + field-browser data
-    const { browserFields, dataFormattedForFieldBrowser, searchHit, loading } = useAttackDetails({
-      attackId,
-      indexName,
-    });
+    const { browserFields, dataFormattedForFieldBrowser, searchHit, getFieldsData, loading } =
+      useAttackDetails({
+        attackId,
+        indexName,
+      });
 
     const contextValue = useMemo<AttackDetailsContext | undefined>(
       () =>
@@ -64,10 +69,11 @@ export const AttackDetailsProvider = memo(
               browserFields,
               indexName,
               searchHit,
+              getFieldsData,
               dataFormattedForFieldBrowser,
             }
           : undefined,
-      [attackId, browserFields, indexName, dataFormattedForFieldBrowser, searchHit]
+      [attackId, browserFields, indexName, dataFormattedForFieldBrowser, searchHit, getFieldsData]
     );
 
     if (loading) {

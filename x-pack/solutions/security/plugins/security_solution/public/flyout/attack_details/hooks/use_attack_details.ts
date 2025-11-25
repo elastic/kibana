@@ -13,6 +13,8 @@ import { PageScope } from '../../../data_view_manager/constants';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
+import type { GetFieldsData } from '../../document_details/shared/hooks/use_get_fields_data';
+import { useGetFieldsData } from '../../document_details/shared/hooks/use_get_fields_data';
 
 export interface UseAttackEventDetailsParams {
   /**
@@ -39,6 +41,10 @@ export interface UseAttackEventDetailsResult {
    */
   searchHit: SearchHit | undefined;
   /**
+   * Retrieves searchHit values for the provided field
+   */
+  getFieldsData: GetFieldsData;
+  /**
    * Whether the data is loading
    */
   loading: boolean;
@@ -62,10 +68,13 @@ export const useAttackDetails = ({
     skip: !attackId,
   });
 
+  const { getFieldsData } = useGetFieldsData({ fieldsData: searchHit?.fields });
+
   return {
     browserFields,
     dataFormattedForFieldBrowser,
     searchHit,
+    getFieldsData,
     loading,
   };
 };
