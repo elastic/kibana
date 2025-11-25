@@ -8,7 +8,7 @@
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import type { TransformGetTransformStatsTransformStats } from 'elasticsearch-8.x/lib/api/types';
-import { keyBy, type Dictionary } from 'lodash';
+import { keyBy, uniqBy, type Dictionary } from 'lodash';
 import {
   getSLOSummaryTransformId,
   getSLOTransformId,
@@ -59,11 +59,13 @@ async function getTransformStatsById(
   list: Item[],
   deps: Dependencies
 ): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
+  const dedupedList = uniqBy(list, (i) => `${i.id}-${i.revision}`);
+
   const stats = await deps.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
     {
-      transform_id: list.map((item) => getWildcardTransformId(item.id, item.revision)),
+      transform_id: dedupedList.map((item) => getWildcardTransformId(item.id, item.revision)),
       allow_no_match: true,
-      size: list.length * 2,
+      size: dedupedList.length * 2,
     },
     { ignore: [404] }
   );
