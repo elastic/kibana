@@ -329,8 +329,6 @@ export class IndexUpdateService {
             this.newRowsVirtualIndexes.updateVirtualIndexesAfterDeletion(index);
           });
 
-          const newTotalHits = this._totalHits$.getValue() - idsToDelete.size;
-          this._totalHits$.next(newTotalHits > 1 ? newTotalHits : 1);
           return updatedAcc;
         case 'saved':
           // Clear the buffer and new rows virtual indexes after save
@@ -552,6 +550,7 @@ export class IndexUpdateService {
           resultRows.push(newRow);
           this.newRowsVirtualIndexes.addRowVirtualIndex(newRow.id, 0);
         }
+        this._totalHits$.next(resultRows.length);
         this._rows$.next(resultRows);
       })
     );
@@ -782,7 +781,6 @@ export class IndexUpdateService {
             }
 
             this._docs$.next(resultRows);
-            this._totalHits$.next(total ?? 0);
             this._isFetching$.next(false);
           },
           error: (error) => {
@@ -960,7 +958,6 @@ export class IndexUpdateService {
       // Clean all unsaved changes that might be in memory
       this.discardUnsavedChanges();
       this._docs$.next([]);
-      this._totalHits$.next(0);
     } else {
       this.discardUnsavedChanges();
     }
