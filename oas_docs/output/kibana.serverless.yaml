@@ -18759,19 +18759,32 @@ paths:
                       type: object
                       properties:
                         agents:
+                          description: Number of agents that upgraded to this version
                           type: number
                         failedUpgradeActionIds:
+                          description: List of action IDs related to failed upgrades
                           items:
                             type: string
                           type: array
                         failedUpgradeAgents:
+                          description: Number of agents that failed to upgrade to this version
+                          type: number
+                        inProgressUpgradeActionIds:
+                          description: List of action IDs related to in-progress upgrades
+                          items:
+                            type: string
+                          type: array
+                        inProgressUpgradeAgents:
+                          description: Number of agents that are upgrading to this version
                           type: number
                         version:
+                          description: Agent version
                           type: string
                       required:
                         - version
                         - agents
                         - failedUpgradeAgents
+                        - inProgressUpgradeAgents
                     type: array
                   totalAgents:
                     type: number
