@@ -106,7 +106,6 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
             <WorkflowStepExecutionDetails
               workflowExecutionId={executionId}
               stepExecution={selectedStepExecution}
-              isLoading={isLoading}
             />
           }
           minFlexPanelSize={200}

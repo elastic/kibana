@@ -30,11 +30,10 @@ import { StepExecutionTimelineStateful } from './step_execution_timeline_statefu
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
   stepExecution?: WorkflowStepExecutionDto;
-  isLoading: boolean;
 }
 
 export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDetailsProps>(
-  ({ workflowExecutionId, stepExecution, isLoading }) => {
+  ({ workflowExecutionId, stepExecution }) => {
     const isFinished = useMemo(
       () => Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)),
       [stepExecution?.status]
@@ -85,7 +84,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [stepExecution?.stepId, tabs[0].id]);
 
-    if (isLoading || !stepExecution) {
+    if (!stepExecution) {
       return (
         <EuiPanel hasShadow={false} paddingSize="m">
           <EuiSkeletonText lines={1} />
