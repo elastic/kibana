@@ -20,7 +20,7 @@ import {
   gapAutoFillSchedulerAuditEvent,
   GapAutoFillSchedulerAuditAction,
 } from '../../../../rules_client/common/audit_events';
-import { GAP_AUTO_FILL_SCHEDULER_TASK_TYPE } from '../../../../lib/rule_gaps/types/scheduler';
+import { GAP_AUTO_FILL_SCHEDULER_TASK_TYPE } from '../../../gaps/types/scheduler';
 
 export async function createGapAutoFillScheduler(
   context: RulesClientContext,

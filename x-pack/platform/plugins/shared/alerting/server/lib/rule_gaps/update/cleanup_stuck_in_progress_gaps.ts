@@ -13,7 +13,7 @@ import type { Gap } from '../gap';
 import { findGapsSearchAfter } from '../find_gaps';
 import { updateGapsInEventLog } from './update_gaps_in_event_log';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
-import { getRuleIdsWithGaps } from '../../../application/rule/methods/get_rule_ids_with_gaps/get_rule_ids_with_gaps';
+import { getRuleIdsWithGaps } from '../../../application/gaps/methods/get_rule_ids_with_gaps/get_rule_ids_with_gaps';
 import { filterGapsWithOverlappingBackfills } from '../task/utils';
 import { prepareGapsForUpdate } from './utils';
 

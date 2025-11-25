@@ -12,8 +12,8 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import dateMath from '@kbn/datemath';
 import { findGapsSearchAfter } from '../find_gaps';
-import { processGapsBatch } from '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch';
-import { GapFillSchedulePerRuleStatus } from '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
+import { processGapsBatch } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch';
+import { GapFillSchedulePerRuleStatus } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
 
 import type { RulesClientApi } from '../../../types';
 import { gapStatus } from '../../../../common/constants';
@@ -24,7 +24,7 @@ import {
   DEFAULT_GAPS_PER_PAGE,
   DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
   GAP_AUTO_FILL_STATUS,
-} from '../types/scheduler';
+} from '../../../application/gaps/types/scheduler';
 import { backfillInitiator } from '../../../../common/constants';
 import type { RulesClientContext } from '../../../rules_client/types';
 import type { AggregatedByRuleEntry } from './utils';
