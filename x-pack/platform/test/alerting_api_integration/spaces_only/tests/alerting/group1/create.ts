@@ -682,6 +682,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 flapping: {
+                  enabled: false,
                   look_back_window: 5,
                   status_change_threshold: 5,
                 },
@@ -692,12 +693,13 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
 
           expect(response.body.flapping).to.eql({
+            enabled: false,
             look_back_window: 5,
             status_change_threshold: 5,
           });
         });
 
-        it('should throw if flapping is created when global flapping is off', async () => {
+        it('should not throw if flapping is created when global flapping is off', async () => {
           await supertest
             .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
             .set('kbn-xsrf', 'foo')
@@ -713,16 +715,21 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 flapping: {
+                  enabled: true,
                   look_back_window: 5,
                   status_change_threshold: 5,
                 },
               })
             );
 
-          expect(response.statusCode).eql(400);
-          expect(response.body.message).eql(
-            'Error creating rule: can not create rule with flapping if global flapping is disabled'
-          );
+          expect(response.status).to.eql(200);
+          objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+          expect(response.body.flapping).to.eql({
+            enabled: true,
+            look_back_window: 5,
+            status_change_threshold: 5,
+          });
         });
 
         it('should throw if flapping is invalid', async () => {
