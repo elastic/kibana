@@ -109,10 +109,9 @@ describe('groupResourceNodes', () => {
       );
 
       expect(groupedNode).toBeDefined();
-      expect(groupedNode?.data.id).toBe(`resourceGroup{opbeans-node|external}`);
+      expect(groupedNode?.data.id).toBe(`resourceGroup{opbeans-node}`);
       expect(groupedNode?.data.groupedConnections.length).toBe(4);
-      expect(groupedNode?.data.label).toBe('external (4 resources)');
-      expect(groupedNode?.data['span.subtype']).toBe('external');
+      expect(groupedNode?.data.label).toBe('4 resources');
 
       expect(result.elements.length).toBeLessThan(elements.length);
       expect(result.nodesCount).toBe(1);
@@ -205,10 +204,9 @@ describe('groupResourceNodes', () => {
       );
 
       expect(groupedNode).toBeDefined();
-      expect(groupedNode?.data.id).toBe(`resourceGroup{kafka-consumer|kafka}`);
+      expect(groupedNode?.data.id).toBe(`resourceGroup{kafka-consumer}`);
       expect(groupedNode?.data.groupedConnections.length).toBe(5);
-      expect(groupedNode?.data.label).toBe('kafka (5 resources)');
-      expect(groupedNode?.data['span.subtype']).toBe('kafka');
+      expect(groupedNode?.data.label).toBe('5 resources');
 
       expect(result.elements.length).toBeLessThan(elements.length);
       expect(result.nodesCount).toBe(1);
@@ -354,38 +352,20 @@ describe('groupResourceNodes', () => {
         (p): p is GroupedNode => 'groupedConnections' in p.data
       );
 
-      // Should have 3 separate groups (kafka, rabbitmq, sqs) - each with 4 resources
-      expect(groupedNodes.length).toBe(3);
+      // Should have 1 group containing all 12 resources (4 kafka + 4 rabbitmq + 4 sqs)
+      expect(groupedNodes.length).toBe(1);
 
-      // Find each group by spanSubtype
-      const kafkaGroup = groupedNodes.find((node) => node.data['span.subtype'] === 'kafka');
-      const rabbitmqGroup = groupedNodes.find((node) => node.data['span.subtype'] === 'rabbitmq');
-      const sqsGroup = groupedNodes.find((node) => node.data['span.subtype'] === 'sqs');
+      const groupedNode = groupedNodes[0];
+      expect(groupedNode).toBeDefined();
+      expect(groupedNode.data.id).toBe(`resourceGroup{messaging-producer}`);
+      expect(groupedNode.data.groupedConnections.length).toBe(12);
+      expect(groupedNode.data.label).toBe('12 resources');
 
-      // Verify kafka group
-      expect(kafkaGroup).toBeDefined();
-      expect(kafkaGroup?.data.id).toBe(`resourceGroup{messaging-producer|kafka}`);
-      expect(kafkaGroup?.data.groupedConnections.length).toBe(4);
-      expect(kafkaGroup?.data.label).toBe('kafka (4 resources)');
-
-      // Verify rabbitmq group
-      expect(rabbitmqGroup).toBeDefined();
-      expect(rabbitmqGroup?.data.id).toBe(`resourceGroup{messaging-producer|rabbitmq}`);
-      expect(rabbitmqGroup?.data.groupedConnections.length).toBe(4);
-      expect(rabbitmqGroup?.data.label).toBe('rabbitmq (4 resources)');
-
-      // Verify sqs group
-      expect(sqsGroup).toBeDefined();
-      expect(sqsGroup?.data.id).toBe(`resourceGroup{messaging-producer|sqs}`);
-      expect(sqsGroup?.data.groupedConnections.length).toBe(4);
-      expect(sqsGroup?.data.label).toBe('sqs (4 resources)');
-
-      // Each group should only contain connections of the same subtype
-      for (const group of groupedNodes) {
-        const subtypes = group.data.groupedConnections.map((conn: any) => conn['span.subtype']);
-        const uniqueSubtypes = new Set(subtypes);
-        expect(uniqueSubtypes.size).toBe(1);
-      }
+      // Verify the group contains mixed subtypes
+      const subtypes = groupedNode.data.groupedConnections.map((conn: any) => conn['span.subtype']);
+      const uniqueSubtypes = new Set(subtypes);
+      expect(uniqueSubtypes.size).toBe(3); // kafka, rabbitmq, sqs
+      expect(uniqueSubtypes).toEqual(new Set(['kafka', 'rabbitmq', 'sqs']));
     });
   });
 
