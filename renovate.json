@@ -3416,7 +3416,7 @@
         "blocked"
       ],
       "minimumReleaseAge": "14 days",
-      "enabled": true
+      "enabled": false
     },
     {
       "groupName": "p-retry - ESM Required",
@@ -3438,7 +3438,7 @@
         "effort:low"
       ],
       "minimumReleaseAge": "14 days",
-      "enabled": true
+      "enabled": false
     },
     {
       "groupName": "redux-actions",
