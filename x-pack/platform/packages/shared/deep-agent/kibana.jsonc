@@ -4,6 +4,6 @@
   "owner": [
     "@elastic/security-generative-ai"
   ],
-  "group": "security",
+  "group": "platform",
   "visibility": "private"
 }

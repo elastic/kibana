@@ -8296,7 +8296,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-deep-agent@link:x-pack/solutions/security/packages/deep-agent":
+"@kbn/securitysolution-deep-agent@link:x-pack/platform/packages/shared/deep-agent":
   version "0.0.0"
   uid ""
 
