@@ -10,7 +10,12 @@ import { getMockQRadarXml } from './mock/data';
 
 const RULE_NAME = 'BB:CategoryDefinition: Authentication Success';
 
-const { mockQradarXml, mockRuleDataBase64s: _, mockRuleDataXmls } = getMockQRadarXml([RULE_NAME]);
+const {
+  mockQradarXml,
+  mockRuleDataBase64s: _,
+  mockRuleDataXmls,
+  mockRuleDataXmlsSanitized,
+} = getMockQRadarXml([RULE_NAME]);
 
 describe('QradarRulesXmlParser', () => {
   describe('getRules', () => {
@@ -24,7 +29,7 @@ describe('QradarRulesXmlParser', () => {
         'Edit this BB to include all events that indicate successful attempts to access the network.'
       );
       expect(rules[0].rule_type).toBe('building_block');
-      expect(rules[0].rule_data).toBe(mockRuleDataXmls[0]);
+      expect(rules[0].rule_data).toBe(mockRuleDataXmlsSanitized[0]);
     });
 
     it('should return an empty array if no custom rules are found', async () => {
@@ -60,6 +65,31 @@ describe('QradarRulesXmlParser', () => {
       const parser = new QradarRulesXmlParser(xml);
       const rules = await parser.getRules();
       expect(rules).toHaveLength(0);
+    });
+
+    it('should sanitize HTML content within text tags in rule_data', async () => {
+      const ruleDataWithHtml = `<rule buildingBlock="false">
+  <name>Test Rule</name>
+  <notes>Test notes</notes>
+  <testDefinitions>
+    <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+      <text>when &lt;a href='javascript:editParameter("1", "1")'&gt;any&lt;/a&gt; of &lt;a&gt;Source IP&lt;/a&gt; are contained in &lt;a&gt;any&lt;/a&gt; of &lt;a&gt;Blocked IPs - IP&lt;/a&gt;</text>
+    </test>
+  </testDefinitions>
+</rule>`;
+      const ruleDataBase64 = Buffer.from(ruleDataWithHtml).toString('base64');
+      const xml = `<content><custom_rule><rule_data>${ruleDataBase64}</rule_data></custom_rule></content>`;
+      const parser = new QradarRulesXmlParser(xml);
+      const rules = await parser.getRules();
+
+      expect(rules).toHaveLength(1);
+      // The rule_data should have sanitized text content (HTML entities decoded, tags removed)
+      expect(rules[0].rule_data).toContain(
+        '<text>when any of Source IP are contained in any of Blocked IPs - IP</text>'
+      );
+      // Should NOT contain the original HTML entities
+      expect(rules[0].rule_data).not.toContain('&lt;');
+      expect(rules[0].rule_data).not.toContain('&gt;');
     });
   });
 

@@ -193,6 +193,45 @@ export const defaultSplunkLookupResource = {
   updated_at: '2025-05-21T15:23:15.505Z',
 };
 
+/**
+ * QRadar rule XML with reference sets for testing.
+ * The rule_data contains base64-encoded XML with ReferenceSetTest tests.
+ */
+const qradarRuleDataWithReferenceSets = `<rule buildingBlock="false" enabled="true" id="100001">
+  <name>Test Rule with Reference Sets</name>
+  <notes>This rule checks IPs against blocked and suspicious lists</notes>
+  <testDefinitions>
+    <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest" id="1">
+      <text>when the event IP is contained in any of Blocked IPs, Suspicious IPs</text>
+    </test>
+    <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest" id="2">
+      <text>when the event IP is contained in all of Malicious Hosts</text>
+    </test>
+  </testDefinitions>
+</rule>`;
+
+const qradarRuleDataBase64 = Buffer.from(qradarRuleDataWithReferenceSets).toString('base64');
+
+/**
+ * QRadar XML export containing a rule with reference sets.
+ * Used for testing QRadar rule ingestion and reference set identification.
+ */
+export const qradarXmlWithReferenceSets = `<?xml version="1.0" encoding="UTF-8"?>
+<content>
+  <custom_rule>
+    <rule_data>${qradarRuleDataBase64}</rule_data>
+  </custom_rule>
+</content>`;
+
+/**
+ * Expected reference sets that should be identified from qradarXmlWithReferenceSets.
+ */
+export const expectedQradarReferenceSets = [
+  { type: 'lookup', name: 'Blocked IPs' },
+  { type: 'lookup', name: 'Suspicious IPs' },
+  { type: 'lookup', name: 'Malicious Hosts' },
+];
+
 export const executeTaskInBatches = async <T>({
   items,
   batchSize,
