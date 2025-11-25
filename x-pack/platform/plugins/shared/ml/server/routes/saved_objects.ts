@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import path from 'node:path';
 import { ML_EXTERNAL_BASE_PATH, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization, SavedObjectsRouteDeps } from '../types';
@@ -88,9 +87,6 @@ export function savedObjectsRoutes(
           request: {
             query: syncJobObjects,
           },
-        },
-        options: {
-          oasOperationObject: () => path.resolve(__dirname, './schemas/sync_saved_objects.yml'),
         },
       },
       routeGuard.fullLicenseAPIGuard(
@@ -263,9 +259,6 @@ export function savedObjectsRoutes(
             body: updateJobsSpaces,
           },
         },
-        options: {
-          oasOperationObject: () => path.resolve(__dirname, './schemas/update_job_spaces.yml'),
-        },
       },
       routeGuard.fullLicenseAPIGuard(async ({ request, response, mlSavedObjectService }) => {
         try {
@@ -353,43 +346,6 @@ export function savedObjectsRoutes(
           request: {
             body: updateTrainedModelsSpaces,
           },
-        },
-        options: {
-          oasOperationObject: () => ({
-            requestBody: {
-              content: {
-                'application/json': {
-                  examples: {
-                    updateModelSpacesRequest: {
-                      value: {
-                        modelIds: ['test-model'],
-                        spacesToAdd: ['default'],
-                        spacesToRemove: ['*'],
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            responses: {
-              200: {
-                content: {
-                  'application/json': {
-                    examples: {
-                      successADResponse: {
-                        value: {
-                          'test-model': {
-                            success: true,
-                            type: 'trained-model',
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          }),
         },
       },
       routeGuard.fullLicenseAPIGuard(async ({ request, response, mlSavedObjectService }) => {
