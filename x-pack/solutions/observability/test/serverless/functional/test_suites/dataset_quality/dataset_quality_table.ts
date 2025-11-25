@@ -241,10 +241,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.existOrFail(editFailureStoreModal);
 
-        const saveModalButton = await testSubjects.find(failureStoreModalSaveButton);
         await testSubjects.click(enableFailureStoreToggle);
-        expect(await saveModalButton.isEnabled()).to.be(true);
-        await testSubjects.click(failureStoreModalSaveButton);
+        await testSubjects.clickWhenNotDisabled(failureStoreModalSaveButton);
         await testSubjects.missingOrFail(editFailureStoreModal);
 
         const updatedLinks = await testSubjects.findAll(enableFailureStoreFromTableButton);

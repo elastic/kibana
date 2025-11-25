@@ -17,12 +17,14 @@ project:
   owner: '@elastic/kibana-operations'
   metadata:
     sourceRoot: src/platform/packages/private/kbn-ui-shared-deps-npm
-dependsOn: []
+dependsOn:
+  - '@kbn/repo-info'
 tags:
   - is-webpack-built
-  - platform
-  - private
+  - package
   - prod
+  - group-platform
+  - private
 fileGroups:
   src:
     - '**/*.ts'
