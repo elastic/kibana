@@ -10,13 +10,13 @@
 import {
   BehaviorSubject,
   filter,
-  connect,
+  share,
+  mergeMap,
   merge,
   bufferToggle,
   windowToggle,
   tap,
   finalize,
-  mergeMap,
   type Observable,
 } from 'rxjs';
 import { i18n } from '@kbn/i18n';
@@ -73,18 +73,12 @@ export class Coordinator {
     const on$ = this.coordinationLock$.pipe(filter((state) => cond(state)));
     // signal used to determine when to buffer values from the source observable based on the provided opt-in condition
     const off$ = this.coordinationLock$.pipe(filter((state) => !cond(state)));
+    const multicast$ = $.pipe(share());
 
-    // notification stream that will emit values from the source observable based on the provided opt-in condition
-    const notificationStream$ = $.pipe(
-      connect((shared$) =>
-        merge(
-          shared$.pipe(bufferToggle(off$, () => on$)),
-          shared$.pipe(windowToggle(on$, () => off$))
-        )
-      )
-    );
-
-    return notificationStream$.pipe(
+    return merge(
+      multicast$.pipe(bufferToggle(off$, () => on$)),
+      multicast$.pipe(windowToggle(on$, () => off$))
+    ).pipe(
       mergeMap((x) => x),
       tap((value) => {
         const lock = this.coordinationLock$.getValue();

@@ -140,7 +140,6 @@ export class InterceptDialogService {
   stop() {
     if (this.targetDomElement) {
       unmountComponentAtNode(this.targetDomElement);
-      this.targetDomElement.remove();
     }
   }
 }

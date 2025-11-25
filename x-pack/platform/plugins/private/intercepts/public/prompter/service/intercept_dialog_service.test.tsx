@@ -282,8 +282,10 @@ describe('InterceptDialogService', () => {
         startContract = interceptDialogService.start(startDeps);
       });
 
-      // acquire lock for ancillary notifications coordinator to prevent intercepts from being displayed
-      ancillaryNotificationsCoordinator.acquireLock();
+      act(() => {
+        // acquire lock for ancillary notifications coordinator to prevent intercepts from being displayed
+        ancillaryNotificationsCoordinator.acquireLock();
+      });
 
       act(() => {
         startContract.add({
@@ -303,8 +305,10 @@ describe('InterceptDialogService', () => {
 
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
-      // release lock for ancillary notifications coordinator to allow intercepts to be displayed
-      ancillaryNotificationsCoordinator.releaseLock();
+      act(() => {
+        // release lock for ancillary notifications coordinator to allow intercepts to be displayed
+        ancillaryNotificationsCoordinator.releaseLock();
+      });
 
       // Verify the intercept is rendered after lock is released
       await waitFor(() => {
