@@ -13,7 +13,7 @@ import type { NodeImplementation } from '../../node_implementation';
 export class EnterNormalPathNodeImpl implements NodeImplementation {
   constructor(private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager) {}
 
-  public async run(): Promise<void> {
+  public run(): void {
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }
