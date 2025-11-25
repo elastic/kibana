@@ -197,6 +197,7 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     await pageObjects.discover.navigateToLensEditor();
     // Verify we're now on the Lens page
     expect(page.url()).toContain('/app/lens');
+    await expect(page.testSubj.locator('lnsApp')).toBeVisible();
   });
 
   test('drag and drop fields to grid', async ({ page, pageObjects }) => {
@@ -237,6 +238,7 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     await viewLensButton.click();
     // Verify we're now on the Lens page
     expect(page.url()).toContain('/app/lens');
+    await expect(page.testSubj.locator('lnsApp')).toBeVisible();
   });
 
   test('download CSV report and validate row length', async ({ pageObjects }) => {
