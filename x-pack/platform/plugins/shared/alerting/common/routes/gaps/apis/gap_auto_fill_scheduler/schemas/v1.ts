@@ -6,7 +6,10 @@
  */
 import { schema } from '@kbn/config-schema';
 import dateMath from '@kbn/datemath';
-import { gapAutoFillSchedulerLimits } from '../../../../../constants';
+import {
+  MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS,
+  gapAutoFillSchedulerLimits,
+} from '../../../../../constants';
 import { parseDuration } from '../../../../../parse_duration';
 
 const { maxBackfills, numRetries, minScheduleIntervalInMs } = gapAutoFillSchedulerLimits;
@@ -32,9 +35,20 @@ export const gapAutoFillSchedulerBodySchema = schema.object(
   },
   {
     validate({ gap_fill_range: gapFillRange, schedule }) {
-      const parsed = dateMath.parse(gapFillRange);
+      const now = new Date();
+      const parsed = dateMath.parse(gapFillRange, { forceNow: now });
       if (!parsed || !parsed.isValid()) {
         return 'gap_fill_range is invalid';
+      }
+
+      const maxLookbackExpression = `now-${MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS}d`;
+      const lookbackLimit = dateMath.parse(maxLookbackExpression, { forceNow: now });
+      if (!lookbackLimit || !lookbackLimit.isValid()) {
+        return 'gap_fill_range is invalid';
+      }
+
+      if (parsed.isBefore(lookbackLimit)) {
+        return `gap_fill_range cannot look back more than ${MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS} days`;
       }
 
       try {
