@@ -64,13 +64,18 @@ export function registerDashboardUsageCollector(
         },
       },
       controls: {
-        total: { type: 'long' },
+        total: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of pinned controls',
+          },
+        },
         by_type: {
           DYNAMIC_KEY: {
             total: {
               type: 'long',
               _meta: {
-                description: 'The number of this type of control in all Control Groups',
+                description: 'The number of pinned controls of this specific type',
               },
             },
           },
