@@ -13,7 +13,7 @@ import type { NodeImplementation } from '../../node_implementation';
 export class ExitContinueNodeImpl implements NodeImplementation {
   constructor(private workflowRuntime: WorkflowExecutionRuntimeManager) {}
 
-  public async run(): Promise<void> {
+  public run(): void {
     this.workflowRuntime.navigateToNextNode();
   }
 }
