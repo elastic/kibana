@@ -20,6 +20,7 @@ import { bayesianUpdate } from '../../asset_criticality/helpers';
 import type { PrivmonUserCrudService } from '../../privilege_monitoring/users/privileged_users_crud';
 
 import type { ExperimentalFeatures } from '../../../../../common';
+import type { Modifier } from './types';
 
 export interface PrivmonRiskFields {
   category_3_score: number;
@@ -55,16 +56,13 @@ export const applyPrivmonModifier = async ({
   deps,
   globalWeight,
   experimentalFeatures,
-}: ApplyCriticalityModifierParams): Promise<PrivmonRiskFields[]> => {
+}: ApplyCriticalityModifierParams) => {
   if (buckets.length === 0) {
     return [];
   }
 
   if (!experimentalFeatures.enableRiskScorePrivmonModifier) {
-    return buckets.map(() => ({
-      category_3_score: 0,
-      category_3_count: 0,
-    }));
+    return [];
   }
 
   const lower = bounds?.lower ? `${identifierField} > ${bounds.lower}` : undefined;
@@ -98,12 +96,9 @@ const calculateScoreAndContributions = (
   normalizedBaseScore: number,
   isPrivilegedUser: boolean,
   globalWeight?: number
-): PrivmonRiskFields => {
+): Modifier<'watchlist'> | undefined => {
   if (!isPrivilegedUser) {
-    return {
-      category_3_score: 0,
-      category_3_count: 0,
-    };
+    return;
   }
 
   const weightedNormalizedScore =
@@ -117,9 +112,12 @@ const calculateScoreAndContributions = (
   const contribution = updatedNormalizedScore - weightedNormalizedScore;
 
   return {
-    category_3_score: max10DecimalPlaces(contribution),
-    category_3_count: 1, // modifier exists, so count as 1
-    is_privileged_user: true,
-    privileged_user_modifier: PRIVILEGED_USER_MODIFIER,
+    type: 'watchlist',
+    subtype: 'privmon',
+    modifier_value: PRIVILEGED_USER_MODIFIER,
+    contribution: max10DecimalPlaces(contribution),
+    metadata: {
+      is_privileged_user: true,
+    },
   };
 };

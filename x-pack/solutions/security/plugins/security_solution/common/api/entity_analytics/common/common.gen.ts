@@ -165,6 +165,20 @@ export const EntityRiskScoreRecord = z.object({
   category_3_count: z.number().int().optional(),
   is_privileged_user: z.boolean().optional(),
   privileged_user_modifier: z.number().optional(),
+  /**
+   * A list of modifiers that were applied to the risk score calculation.
+   */
+  modifiers: z
+    .array(
+      z.object({
+        type: z.string(),
+        subtype: z.string().optional(),
+        modifier_value: z.number().optional(),
+        contribution: z.number(),
+        metadata: z.object({}).catchall(z.unknown()).optional(),
+      })
+    )
+    .optional(),
 });
 
 export type RiskScoreEntityIdentifierWeights = z.infer<typeof RiskScoreEntityIdentifierWeights>;

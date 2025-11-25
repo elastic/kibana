@@ -7,6 +7,7 @@
 import type { Logger } from '@kbn/core/server';
 import _ from 'lodash';
 
+import { isDefined } from '../../../../common/utils/nullable';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 
 import type {
@@ -21,11 +22,12 @@ import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privi
 import type { RiskScoreBucket } from '../types';
 import { RIEMANN_ZETA_VALUE } from './constants';
 import { getGlobalWeightForIdentifierType, max10DecimalPlaces } from './helpers';
-import type { AssetCriticalityRiskFields } from './modifiers/asset_criticality';
+
 import { applyCriticalityModifier } from './modifiers/asset_criticality';
-import type { PrivmonRiskFields } from './modifiers/privileged_users';
+
 import { applyPrivmonModifier } from './modifiers/privileged_users';
 import type { ExperimentalFeatures } from '../../../../common';
+import type { Modifier } from './modifiers/types';
 interface ModifiersUpdateParams {
   now: string;
   deps: {
@@ -94,8 +96,8 @@ export const riskScoreDocFactory =
   ({ now, identifierField, globalWeight = 1 }: RiskScoreDocFactoryParams) =>
   (
     bucket: RiskScoreBucket,
-    criticalityFields: AssetCriticalityRiskFields,
-    privmonFields: PrivmonRiskFields
+    criticalityModifierFields: Modifier<'asset_criticality'> | undefined,
+    privmonWatchlistModifierFields: Modifier<'watchlist'> | undefined
   ): EntityRiskScoreRecord => {
     const risk = bucket.top_inputs.risk_details;
 
@@ -106,8 +108,8 @@ export const riskScoreDocFactory =
 
     const totalScoreWithModifiers =
       risk.value.normalized_score * globalWeight +
-      criticalityFields.category_2_score +
-      privmonFields.category_3_score;
+      (criticalityModifierFields?.contribution ?? 0) +
+      (privmonWatchlistModifierFields?.contribution ?? 0);
 
     const weightedScore =
       globalWeight !== undefined ? risk.value.score * globalWeight : risk.value.score;
@@ -117,14 +119,17 @@ export const riskScoreDocFactory =
       calculated_score_norm: max10DecimalPlaces(totalScoreWithModifiers),
     };
 
+    const modifiers = [criticalityModifierFields, privmonWatchlistModifierFields].filter(isDefined);
+
     return {
       '@timestamp': now,
       id_field: identifierField,
       id_value: bucket.key[identifierField],
       ...finalRiskScoreFields,
       ...alertsRiskScoreFields,
-      ...criticalityFields,
-      ...privmonFields,
+      ...criticalityModifierFields,
+      ...privmonWatchlistModifierFields,
+      modifiers,
       notes: risk.value.notes,
       inputs: risk.value.risk_inputs.map((riskInput) => ({
         id: riskInput.id,

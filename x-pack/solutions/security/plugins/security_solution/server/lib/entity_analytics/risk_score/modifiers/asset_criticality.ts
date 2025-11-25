@@ -13,6 +13,7 @@ import type { RiskScoreBucket } from '../../types';
 import type { AssetCriticalityService } from '../../asset_criticality';
 import { max10DecimalPlaces } from '../helpers';
 import { bayesianUpdate, getCriticalityModifier } from '../../asset_criticality/helpers';
+import type { Modifier } from './types';
 
 export interface AssetCriticalityRiskFields {
   category_2_score: number;
@@ -72,13 +73,10 @@ const calculateScoreAndContributions = (
   normalizedBaseScore: number,
   criticality?: AssetCriticalityRecord,
   globalWeight?: number
-): AssetCriticalityRiskFields => {
+): Modifier<'asset_criticality'> | undefined => {
   const criticalityModifier = getCriticalityModifier(criticality?.criticality_level);
   if (!criticalityModifier) {
-    return {
-      category_2_score: 0,
-      category_2_count: 0,
-    };
+    return;
   }
 
   const weightedNormalizedScore =
@@ -92,9 +90,11 @@ const calculateScoreAndContributions = (
   const contribution = updatedNormalizedScore - weightedNormalizedScore;
 
   return {
-    category_2_score: max10DecimalPlaces(contribution),
-    category_2_count: 1, // modifier exists, so count as 1
-    criticality_level: criticality?.criticality_level,
-    criticality_modifier: criticalityModifier,
+    type: 'asset_criticality',
+    modifier_value: criticalityModifier,
+    contribution: max10DecimalPlaces(contribution),
+    metadata: {
+      criticality_level: criticality?.criticality_level,
+    },
   };
 };
