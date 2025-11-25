@@ -76,9 +76,9 @@ import { locators } from './apps/locators';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
 import {
   SYNTHETICS_MONITORS_EMBEDDABLE,
-  SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
 } from './apps/embeddables/constants';
 import { registerSyntheticsUiActions } from './apps/embeddables/ui_actions/register_ui_actions';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
