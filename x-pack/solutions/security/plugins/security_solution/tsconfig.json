@@ -39,6 +39,7 @@
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/features-plugin",
     "@kbn/fleet-plugin",
+    "@kbn/kubernetes-security-plugin",
     "@kbn/licensing-plugin",
     "@kbn/lists-plugin",
     "@kbn/maps-plugin",
@@ -262,5 +263,6 @@
     "@kbn/response-ops-rule-form",
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/connector-schemas",
+    "@kbn/tour-queue"
   ]
 }
