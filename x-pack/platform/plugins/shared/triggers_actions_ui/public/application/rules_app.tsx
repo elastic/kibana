@@ -36,7 +36,7 @@ import {
   editRuleRoute,
   createRuleFromTemplateRoute,
 } from '@kbn/rule-data-utils';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';

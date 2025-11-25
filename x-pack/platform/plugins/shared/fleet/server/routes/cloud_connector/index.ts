@@ -66,11 +66,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           response: {
             200: {
               body: () => CreateCloudConnectorResponseSchema,
-              description: 'Indicates a successful call.',
+              description: 'OK: A successful request.',
             },
             400: {
               body: genericErrorResponse,
-              description: 'Indicates a bad request call.',
+              description: 'A bad request.',
             },
           },
         },
@@ -111,11 +111,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           response: {
             200: {
               body: () => GetCloudConnectorsResponseSchema,
-              description: 'Indicates a successful call.',
+              description: 'OK: A successful request.',
             },
             400: {
               body: genericErrorResponse,
-              description: 'Indicates a bad request call.',
+              description: 'A bad request.',
             },
           },
         },
@@ -156,11 +156,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           response: {
             200: {
               body: () => GetCloudConnectorResponseSchema,
-              description: 'Indicates a successful call.',
+              description: 'OK: A successful request.',
             },
             400: {
               body: genericErrorResponse,
-              description: 'Indicates a bad request call.',
+              description: 'A bad request.',
             },
           },
         },
@@ -201,11 +201,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           response: {
             200: {
               body: () => UpdateCloudConnectorResponseSchema,
-              description: 'Indicates a successful call.',
+              description: 'OK: A successful request.',
             },
             400: {
               body: genericErrorResponse,
-              description: 'Indicates a bad request call.',
+              description: 'A bad request.',
             },
           },
         },
@@ -246,11 +246,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           response: {
             200: {
               body: () => DeleteCloudConnectorResponseSchema,
-              description: 'Indicates a successful call.',
+              description: 'OK: A successful request.',
             },
             400: {
               body: genericErrorResponse,
-              description: 'Indicates a bad request call.',
+              description: 'A bad request.',
             },
           },
         },

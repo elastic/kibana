@@ -10,7 +10,8 @@
 import React, { useState } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { TabbedContent, type TabbedContentProps } from './tabbed_content';
+import type { TabbedContentProps } from './tabbed_content';
+import { TabbedContent } from './tabbed_content';
 import { getPreviewDataMock } from '../../../__mocks__/get_preview_data';
 import { servicesMock } from '../../../__mocks__/services';
 
@@ -20,18 +21,18 @@ const NEW_TAB = {
 };
 
 describe('TabbedContent', () => {
-  const user = userEvent.setup();
-
   const TabsWrapper = ({
     initialItems,
     initialSelectedItemId,
     onChanged,
     onEBTEvent,
+    disableRenderContent = false,
   }: {
     initialItems: TabbedContentProps['items'];
     initialSelectedItemId?: TabbedContentProps['selectedItemId'];
     onChanged: TabbedContentProps['onChanged'];
     onEBTEvent: TabbedContentProps['onEBTEvent'];
+    disableRenderContent?: boolean;
   }) => {
     const [{ managedItems, managedSelectedItemId }, setState] = useState<{
       managedItems: TabbedContentProps['items'];
@@ -57,9 +58,11 @@ describe('TabbedContent', () => {
         }}
         onEBTEvent={onEBTEvent}
         onClearRecentlyClosed={jest.fn()}
-        renderContent={(item) => (
-          <div style={{ paddingTop: '16px' }}>Content for tab: {item.label}</div>
-        )}
+        renderContent={
+          !disableRenderContent
+            ? (item) => <div style={{ paddingTop: '16px' }}>Content for tab: {item.label}</div>
+            : undefined
+        }
       />
     );
   };
@@ -198,6 +201,12 @@ describe('TabbedContent', () => {
   });
 
   it('correctly numbers duplicate tabs when multiple copies exist', async () => {
+    const user = userEvent.setup({
+      delay: null,
+      advanceTimers: jest.advanceTimersByTime,
+      pointerEventsCheck: 0,
+    });
+
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 1 (copy)' },
@@ -237,6 +246,8 @@ describe('TabbedContent', () => {
   });
 
   it('correctly duplicates tabs with regex special characters in the label', async () => {
+    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
+
     const tabWithSpecialChars = { id: 'tab1', label: 'Tab (1+2)*.?' };
     const initialItems = [tabWithSpecialChars, { id: 'tab2', label: 'Regular Tab' }];
     const onChanged = jest.fn();
@@ -252,8 +263,10 @@ describe('TabbedContent', () => {
     );
 
     await user.click(screen.getByTestId(`unifiedTabs_tabMenuBtn_${tabWithSpecialChars.id}`));
-    expect(screen.getByTestId('unifiedTabs_tabMenuItem_duplicate')).toBeInTheDocument();
-    await user.click(screen.getByTestId('unifiedTabs_tabMenuItem_duplicate'));
+
+    const duplicateMenuItem = await screen.findByTestId('unifiedTabs_tabMenuItem_duplicate');
+    await waitFor(() => expect(duplicateMenuItem).toBeEnabled());
+    await user.click(duplicateMenuItem);
 
     const duplicatedTab = { ...NEW_TAB, label: 'Tab (1+2)*.? (copy)' };
 
@@ -270,6 +283,8 @@ describe('TabbedContent', () => {
   });
 
   it('can switch to a different tab and sends tabSwitched event', async () => {
+    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
+
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
@@ -287,7 +302,7 @@ describe('TabbedContent', () => {
       />
     );
 
-    await userEvent.click(screen.getByTestId(`unifiedTabs_selectTabBtn_${secondTab.id}`));
+    await user.click(screen.getByTestId(`unifiedTabs_selectTabBtn_${secondTab.id}`));
     await waitFor(() => {
       expect(onEBTEvent).toHaveBeenCalledWith({
         eventName: 'tabSwitched',
@@ -303,6 +318,8 @@ describe('TabbedContent', () => {
   });
 
   it('can close other tabs and sends tabClosedOthers event', async () => {
+    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
+
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
@@ -347,6 +364,8 @@ describe('TabbedContent', () => {
   });
 
   it('can close tabs to the right and sends tabClosedToTheRight event', async () => {
+    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
+
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
@@ -386,5 +405,53 @@ describe('TabbedContent', () => {
         remainingTabsCount: 2,
       });
     });
+  });
+
+  it('renders tab content when renderContent is provided', () => {
+    const initialItems = [
+      { id: 'tab1', label: 'Tab 1' },
+      { id: 'tab2', label: 'Tab 2' },
+    ];
+    const onChanged = jest.fn();
+    const onEBTEvent = jest.fn();
+
+    render(
+      <TabsWrapper
+        initialItems={initialItems}
+        initialSelectedItemId={initialItems[0].id}
+        onChanged={onChanged}
+        onEBTEvent={onEBTEvent}
+      />
+    );
+
+    // The tabs bar should be rendered
+    expect(screen.queryByTestId('unifiedTabs_tabsBar')).toBeInTheDocument();
+    // When renderContent is provided, the tab content area should be rendered
+    expect(screen.getByTestId('unifiedTabs_selectedTabContent')).toBeInTheDocument();
+    expect(screen.getByText('Content for tab: Tab 1')).toBeInTheDocument();
+  });
+
+  it('does not render tab content when renderContent is not provided', () => {
+    const initialItems = [
+      { id: 'tab1', label: 'Tab 1' },
+      { id: 'tab2', label: 'Tab 2' },
+    ];
+    const onChanged = jest.fn();
+    const onEBTEvent = jest.fn();
+
+    render(
+      <TabsWrapper
+        initialItems={initialItems}
+        initialSelectedItemId={initialItems[0].id}
+        onChanged={onChanged}
+        onEBTEvent={onEBTEvent}
+        disableRenderContent={true}
+      />
+    );
+
+    // The tabs bar should still be rendered
+    expect(screen.queryByTestId('unifiedTabs_tabsBar')).toBeInTheDocument();
+    // When renderContent is not provided, the tab content area should NOT be rendered
+    expect(screen.queryByTestId('unifiedTabs_selectedTabContent')).not.toBeInTheDocument();
   });
 });

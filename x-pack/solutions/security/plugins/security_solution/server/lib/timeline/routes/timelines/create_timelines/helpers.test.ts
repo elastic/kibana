@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as module from './helpers';
+import { createTimelines } from './helpers';
 import { savePinnedEvents } from '../../../saved_object/pinned_events';
 import { getNote } from '../../../saved_object/notes';
 import type { FrameworkRequest } from '../../../../framework';
@@ -76,7 +76,7 @@ describe('createTimelines', () => {
 
   describe('create timelines', () => {
     beforeAll(async () => {
-      await module.createTimelines({
+      await createTimelines({
         frameworkRequest,
         timeline,
         timelineSavedObjectId,
@@ -127,7 +127,7 @@ describe('createTimelines', () => {
       (getNote as jest.Mock).mockReturnValue({
         ...notes[0],
       });
-      await module.createTimelines({
+      await createTimelines({
         frameworkRequest,
         timeline: template,
         timelineSavedObjectId,
@@ -158,7 +158,7 @@ describe('createTimelines', () => {
 
   describe('create custom templates', () => {
     beforeAll(async () => {
-      await module.createTimelines({
+      await createTimelines({
         frameworkRequest,
         timeline: template,
         timelineSavedObjectId,

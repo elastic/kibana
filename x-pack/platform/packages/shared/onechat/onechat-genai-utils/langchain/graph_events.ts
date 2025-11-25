@@ -10,7 +10,9 @@ import type {
   MessageChunkEvent,
   MessageCompleteEvent,
   ReasoningEvent,
+  ThinkingCompleteEvent,
   ToolCallEvent,
+  BrowserToolCallEvent,
   ToolResultEvent,
 } from '@kbn/onechat-common';
 import { ChatEventType } from '@kbn/onechat-common';
@@ -55,6 +57,21 @@ export const createToolCallEvent = (data: {
   };
 };
 
+export const createBrowserToolCallEvent = (data: {
+  toolCallId: string;
+  toolId: string;
+  params: Record<string, unknown>;
+}): BrowserToolCallEvent => {
+  return {
+    type: ChatEventType.browserToolCall,
+    data: {
+      tool_call_id: data.toolCallId,
+      tool_id: data.toolId,
+      params: data.params,
+    },
+  };
+};
+
 export const createToolResultEvent = (data: {
   toolCallId: string;
   toolId: string;
@@ -84,14 +101,15 @@ export const createTextChunkEvent = (
 };
 
 export const createMessageEvent = (
-  content: string,
+  content: string | object,
   { messageId = 'unknown' }: { messageId?: string } = {}
 ): MessageCompleteEvent => {
   return {
     type: ChatEventType.messageComplete,
     data: {
       message_id: messageId,
-      message_content: content,
+      message_content: typeof content === 'string' ? content : '',
+      ...(typeof content === 'object' ? { structured_output: content } : {}),
     },
   };
 };
@@ -105,6 +123,15 @@ export const createReasoningEvent = (
     data: {
       reasoning,
       transient,
+    },
+  };
+};
+
+export const createThinkingCompleteEvent = (timeToFirstToken: number): ThinkingCompleteEvent => {
+  return {
+    type: ChatEventType.thinkingComplete,
+    data: {
+      time_to_first_token: timeToFirstToken,
     },
   };
 };

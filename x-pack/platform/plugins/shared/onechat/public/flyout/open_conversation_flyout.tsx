@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { ConversationFlyout } from './conversation_flyout';
+import { EuiLoadingSpinner, htmlIdGenerator } from '@elastic/eui';
 import type { OpenConversationFlyoutOptions } from './types';
 import type { OnechatInternalService } from '../services';
-import type { OnechatStartDependencies, ConversationFlyoutRef } from '../types';
-import { OnechatServicesContext } from '../application/context/onechat_services_context';
+import type { ConversationFlyoutRef } from '../types';
+
+const htmlId = htmlIdGenerator('onechat-conversation-flyout');
 
 interface OpenConversationFlyoutParams {
   coreStart: CoreStart;
   services: OnechatInternalService;
-  startDependencies: OnechatStartDependencies;
 }
 
 /**
@@ -30,33 +29,48 @@ interface OpenConversationFlyoutParams {
  */
 export function openConversationFlyout(
   options: OpenConversationFlyoutOptions,
-  { coreStart, services, startDependencies }: OpenConversationFlyoutParams
+  { coreStart, services }: OpenConversationFlyoutParams
 ): { flyoutRef: ConversationFlyoutRef } {
   const { overlays, application, ...startServices } = coreStart;
 
-  // Prepare Kibana services context
-  const kibanaServices = {
-    ...coreStart,
-    plugins: startDependencies,
+  const LazyEmbeddableConversationComponent = lazy(async () => {
+    const { createEmbeddableConversation } = await import(
+      '../embeddable/create_embeddable_conversation'
+    );
+    const ConversationComponent = createEmbeddableConversation({
+      services,
+      coreStart,
+    });
+    return {
+      default: ConversationComponent,
+    };
+  });
+
+  const handleOnClose = () => {
+    flyoutRef.close();
+    options.onClose?.();
   };
+
+  const ariaLabelledBy = htmlId();
 
   const flyoutRef = overlays.openFlyout(
     toMountPoint(
-      <KibanaContextProvider services={kibanaServices}>
-        <OnechatServicesContext.Provider value={services}>
-          <ConversationFlyout {...options} onClose={() => flyoutRef.close()} />
-        </OnechatServicesContext.Provider>
-      </KibanaContextProvider>,
+      <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+        <LazyEmbeddableConversationComponent
+          onClose={handleOnClose}
+          ariaLabelledBy={ariaLabelledBy}
+          {...options}
+        />
+      </Suspense>,
       startServices
     ),
     {
       'data-test-subj': 'onechat-conversation-flyout-wrapper',
-      ownFocus: true,
-      onClose: () => {
-        flyoutRef.close();
-        options.onClose?.();
-      },
+      ownFocus: false,
       isResizable: true,
+      type: 'push',
+      hideCloseButton: true,
+      'aria-labelledby': ariaLabelledBy,
     }
   );
 

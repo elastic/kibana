@@ -13,9 +13,9 @@ import { apiHasAppContext } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import type { LensApi } from '@kbn/lens-common-2';
 import { ACTION_CREATE_ESQL_CHART } from './constants';
 import { generateId } from '../../id_generator';
-import type { LensApi } from '../../react_embeddable/types';
 import { mountInlinePanel } from '../../react_embeddable/mount';
 
 export class AddESQLPanelAction implements Action<EmbeddableApiContext> {

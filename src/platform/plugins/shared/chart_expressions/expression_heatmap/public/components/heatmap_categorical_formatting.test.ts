@@ -21,7 +21,7 @@ import { type CoreSetup } from '@kbn/core/public';
 import type { HeatmapArguments, HeatmapRenderProps } from '../../common/types';
 import { getAggsFormats } from '@kbn/data-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { LegendSize } from '@kbn/chart-expressions-common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import HeatmapComponent from './heatmap_component';

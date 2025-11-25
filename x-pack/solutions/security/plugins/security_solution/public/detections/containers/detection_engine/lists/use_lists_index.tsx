@@ -6,20 +6,11 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useReadListIndex, useCreateListIndex } from '@kbn/securitysolution-list-hooks';
 import { useHttp, useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useListsPrivileges } from './use_lists_privileges';
-
-/**
- * Determines whether an error response from the `readListIndex`
- * API call indicates that the index is not yet created.
- */
-const isIndexNotCreatedError = (err: unknown) => {
-  return isSecurityAppError(err) && err.body.status_code === 404;
-};
 
 export interface UseListsIndexReturn {
   createIndex: () => void;
@@ -54,10 +45,6 @@ export const useListsIndex = (): UseListsIndexReturn => {
     http,
     isEnabled: Boolean(lists && canReadIndex && canManageIndex && !createLoading),
     onError: (err) => {
-      if (isIndexNotCreatedError(err)) {
-        return;
-      }
-
       addError(err, { title: i18n.LISTS_INDEX_FETCH_FAILURE });
     },
   });
@@ -71,16 +58,12 @@ export const useListsIndex = (): UseListsIndexReturn => {
   }, [createListIndex, lists, canManageIndex, canWriteIndex]);
 
   const indexExists = useMemo(() => {
-    if (isIndexNotCreatedError(readError)) {
-      return false;
-    }
-
     return readResult != null ? readResult.list_index && readResult.list_item_index : null;
-  }, [readError, readResult]);
+  }, [readResult]);
 
   return {
     createIndex,
-    error: createListError || isIndexNotCreatedError(readError) ? undefined : readError,
+    error: createListError || readError,
     indexExists,
     loading,
   };

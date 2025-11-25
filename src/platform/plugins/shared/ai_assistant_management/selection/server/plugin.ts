@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -41,66 +38,6 @@ export class AIAssistantManagementSelectionPlugin
     core: CoreSetup,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
-    core.capabilities.registerProvider(() => {
-      return {
-        management: {
-          ai: {
-            aiAssistantManagementSelection: true,
-            observabilityAiAssistantManagement: true,
-            securityAiAssistantManagement: true,
-          },
-        },
-      };
-    });
-
-    plugins.features?.registerKibanaFeature({
-      id: 'aiAssistantManagementSelection',
-      name: i18n.translate('aiAssistantManagementSelection.featureRegistry.featureName', {
-        defaultMessage: 'AI Assistant Settings',
-      }),
-      order: 8600,
-      app: [],
-      category: DEFAULT_APP_CATEGORIES.management,
-      management: {
-        ai: [
-          'aiAssistantManagementSelection',
-          'securityAiAssistantManagement',
-          'observabilityAiAssistantManagement',
-        ],
-      },
-      minimumLicense: 'enterprise',
-      privileges: {
-        all: {
-          management: {
-            ai: [
-              'aiAssistantManagementSelection',
-              'securityAiAssistantManagement',
-              'observabilityAiAssistantManagement',
-            ],
-          },
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        },
-        read: {
-          management: {
-            ai: [
-              'aiAssistantManagementSelection',
-              'securityAiAssistantManagement',
-              'observabilityAiAssistantManagement',
-            ],
-          },
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        },
-      },
-    });
-
     this.registerUiSettings(core, plugins);
 
     return {};

@@ -9,12 +9,12 @@
 
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
 import type { Reference } from '@kbn/content-management-utils';
+import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
 import type {
   VisualizeByReferenceState,
   VisualizeByValueState,
   VisualizeEmbeddableState,
 } from '../types';
-import { VISUALIZE_SAVED_OBJECT_TYPE } from '../../constants';
 import { extractVisReferences } from '../../references/extract_vis_references';
 import type {
   StoredVisualizeByReferenceState,

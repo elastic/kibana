@@ -27,16 +27,18 @@ disabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/configs/serverless/rules_management.essentials.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/configs/serverless/rules_management.complete.config.ts
 
+  # Empty configs
+  - x-pack/solutions/security/test/serverless/api_integration/configs/config.feature_flags.ts
+  - x-pack/solutions/security/test/serverless/functional/configs/config.feature_flags.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/solutions/security/test/serverless/api_integration/configs/config.ts
-  - x-pack/solutions/security/test/serverless/api_integration/configs/config.feature_flags.ts
   - x-pack/platform/test/serverless/api_integration/configs/security/config.group1.ts
   - x-pack/solutions/security/test/serverless/api_integration/test_suites/fleet/config.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.screenshots.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.examples.ts
-  - x-pack/solutions/security/test/serverless/functional/configs/config.feature_flags.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.basic.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.essentials.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.agentless.ts
@@ -107,6 +109,7 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/user_roles/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/nlp_cleanup_task/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/nlp_cleanup_task/basic_license_essentials_tier/configs/serverless.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/startup/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/knowledge_base/entries/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/knowledge_base/entries/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/attack_discovery/schedules/trial_license_complete_tier/configs/ess.config.ts
@@ -119,6 +122,7 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/monitoring/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_details/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists_items/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/lists_and_exception_lists/authorization/exceptions/lists/essentials_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/lists_and_exception_lists/authorization/exceptions/common/essentials_tier/configs/serverless.config.ts

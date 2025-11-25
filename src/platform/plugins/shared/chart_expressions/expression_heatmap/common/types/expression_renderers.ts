@@ -16,7 +16,7 @@ import type {
   ValueClickContext,
   MultiValueClickContext,
 } from '@kbn/embeddable-plugin/public';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-common';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import type { HeatmapExpressionProps } from './expression_functions';
 

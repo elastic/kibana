@@ -13,7 +13,6 @@ import {
   EuiTitle,
   EuiAccordion,
   useEuiTheme,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   euiScrollBarStyles,
@@ -21,7 +20,7 @@ import {
   keys,
 } from '@elastic/eui';
 import { getLanguageDisplayName, isOfAggregateQueryType } from '@kbn/es-query';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { useLensSelector, selectFramePublicAPI, useLensDispatch } from '../../../state_management';
 import { EXPRESSION_BUILD_ERROR_ID, getAbsoluteDateRange } from '../../../utils';
@@ -29,11 +28,14 @@ import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
+import { VisualizationToolbarWrapper } from '../../../editor_frame_service/editor_frame/visualization_toolbar';
 import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { useCurrentAttributes } from './use_current_attributes';
 import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
+import { LayerTabsWrapper } from './layer_tabs';
+import { useAddLayerButton } from './use_add_layer_button';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -267,6 +269,14 @@ export function LensEditConfigurationFlyout({
     getUserMessages,
   ]);
 
+  const addLayerButton = useAddLayerButton(
+    framePublicAPI,
+    coreStart,
+    startDependencies.dataViews,
+    startDependencies.uiActions,
+    setIsInlineFlyoutVisible
+  );
+
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === keys.ESCAPE) {
       closeFlyout?.();
@@ -277,6 +287,25 @@ export function LensEditConfigurationFlyout({
   };
 
   if (isLoading) return null;
+
+  const toolbar = (
+    <>
+      <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
+        <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} isInlineEditing={true} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
+    </>
+  );
+
+  const layerTabs = (
+    <LayerTabsWrapper
+      attributes={attributes}
+      coreStart={coreStart}
+      uiActions={startDependencies.uiActions}
+      framePublicAPI={framePublicAPI}
+    />
+  );
+
   // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
   if (!canEditTextBasedQuery && hidesSuggestions) {
     return (
@@ -293,6 +322,8 @@ export function LensEditConfigurationFlyout({
           isSaveable={isSaveable}
           isReadOnly={isReadOnly}
           applyButtonLabel={applyButtonLabel}
+          toolbar={toolbar}
+          layerTabs={layerTabs}
         >
           <LayerConfiguration
             // TODO: remove this once we support switching to any chart in Discover
@@ -332,6 +363,8 @@ export function LensEditConfigurationFlyout({
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
         applyButtonLabel={applyButtonLabel}
+        toolbar={toolbar}
+        layerTabs={layerTabs}
       >
         <EuiFlexGroup
           css={css`
@@ -446,7 +479,6 @@ export function LensEditConfigurationFlyout({
                   canEditTextBasedQuery={canEditTextBasedQuery}
                   editorContainer={editorContainer.current || undefined}
                 />
-                <EuiSpacer />
               </>
             </EuiAccordion>
           </EuiFlexItem>

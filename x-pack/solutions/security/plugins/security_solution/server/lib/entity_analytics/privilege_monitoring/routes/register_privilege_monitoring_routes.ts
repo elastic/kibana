@@ -48,5 +48,5 @@ export const registerPrivilegeMonitoringRoutes = ({
   updateUserRoute(router, logger);
   uploadUsersCSVRoute(router, logger, config);
   disablePrivilegeMonitoringEngineRoute(router, logger);
-  registerMonitoringEntitySourceRoutes({ router, logger, config, getStartServices });
+  registerMonitoringEntitySourceRoutes(router, logger, config);
 };

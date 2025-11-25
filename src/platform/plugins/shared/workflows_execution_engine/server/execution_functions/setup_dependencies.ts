@@ -7,42 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { EsWorkflowExecution } from '@kbn/workflows';
-
-import type { Client } from '@elastic/elasticsearch';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
 import { UrlValidator } from '../lib/url_validator';
+import type { LogsRepository } from '../repositories/logs_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
+import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import type { ContextDependencies } from '../workflow_context_manager/types';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
-import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
-import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
-import type { ContextDependencies } from '../workflow_context_manager/types';
+
+const defaultWorkflowSettings: WorkflowSettings = {
+  timeout: '6h',
+};
 
 export async function setupDependencies(
   workflowRunId: string,
   spaceId: string,
   actionsPlugin: ActionsPluginStartContract,
   taskManagerPlugin: TaskManagerStartContract,
-  esClient: Client,
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
   workflowExecutionRepository: WorkflowExecutionRepository,
   stepExecutionRepository: StepExecutionRepository,
   logsRepository: LogsRepository,
+  coreStart: CoreStart, // CoreStart for creating esClientAsUser
   dependencies: ContextDependencies,
-  fakeRequest?: any, // KibanaRequest from task manager
-  coreStart?: any // CoreStart for creating esClientAsUser
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  fakeRequest?: any // KibanaRequest from task manager
 ) {
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowRunId,
@@ -53,8 +55,16 @@ export async function setupDependencies(
     throw new Error(`Workflow execution with ID ${workflowRunId} not found`);
   }
 
+  if (!fakeRequest) {
+    logger.error('Cannot execute a workflow without Kibana Request');
+    throw new Error(
+      `Workflow execution id ${workflowRunId} cannot execute a workflow without Kibana Request`
+    );
+  }
+
   let workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
-    workflowExecution.workflowDefinition
+    workflowExecution.workflowDefinition,
+    defaultWorkflowSettings
   );
 
   // If the execution is for a specific step, narrow the graph to that step
@@ -62,8 +72,8 @@ export async function setupDependencies(
     workflowExecutionGraph = workflowExecutionGraph.getStepGraph(workflowExecution.stepId);
   }
 
-  const unsecuredActionsClient = await actionsPlugin.getUnsecuredActionsClient();
-  const connectorExecutor = new ConnectorExecutor(unsecuredActionsClient);
+  const scopedActionsClient = await actionsPlugin.getActionsClientWithRequest(fakeRequest);
+  const connectorExecutor = new ConnectorExecutor(scopedActionsClient);
 
   const workflowLogger = new WorkflowEventLogger(
     logsRepository,
@@ -91,13 +101,12 @@ export async function setupDependencies(
     workflowExecutionGraph,
     workflowLogger,
     workflowExecutionState,
+    coreStart,
+    dependencies,
   });
 
-  // Use user-scoped ES client if fakeRequest is available, otherwise fallback to regular client
-  let clientToUse = esClient; // fallback
-  if (fakeRequest && coreStart) {
-    clientToUse = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
-  }
+  const esClient: ElasticsearchClient =
+    coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
 
   const workflowTaskManager = new WorkflowTaskManager(taskManagerPlugin);
 
@@ -119,7 +128,6 @@ export async function setupDependencies(
     connectorExecutor,
     workflowRuntime,
     workflowLogger,
-    workflowTaskManager,
     urlValidator,
     workflowExecutionGraph,
     stepExecutionRuntimeFactory
@@ -137,7 +145,7 @@ export async function setupDependencies(
     workflowTaskManager,
     nodesFactory,
     fakeRequest,
-    clientToUse,
+    esClient,
     coreStart,
   };
 }

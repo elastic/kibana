@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import {
   DATASET_VAR_NAME,

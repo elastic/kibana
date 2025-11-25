@@ -222,8 +222,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: Field \"apiUrl\": Required`,
             });
           });
       });
@@ -245,8 +244,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: Field \"apiUrl\": Required`,
             });
           });
       });
@@ -269,7 +267,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring connector action: target url "http://servicenow.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: error configuring connector action: target url "http://servicenow.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -291,7 +289,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Either basic auth or OAuth credentials must be specified',
+                'error validating connector type secrets: Either basic auth or OAuth credentials must be specified',
             });
           });
       });
@@ -314,7 +312,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: Either basic auth or OAuth credentials must be specified',
+                'error validating connector type secrets: Either basic auth or OAuth credentials must be specified',
             });
           });
       });
@@ -328,7 +326,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
               clientId: null,
             },
             secrets: mockServiceNowOAuth.secrets,
-            errorMessage: `error validating action type config: clientId must be provided when isOAuth = true`,
+            errorMessage: `error validating connector type config: clientId must be provided when isOAuth = true`,
           },
           {
             config: {
@@ -337,7 +335,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
               userIdentifierValue: null,
             },
             secrets: mockServiceNowOAuth.secrets,
-            errorMessage: `error validating action type config: userIdentifierValue must be provided when isOAuth = true`,
+            errorMessage: `error validating connector type config: userIdentifierValue must be provided when isOAuth = true`,
           },
           {
             config: {
@@ -346,7 +344,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
               jwtKeyId: null,
             },
             secrets: mockServiceNowOAuth.secrets,
-            errorMessage: `error validating action type config: jwtKeyId must be provided when isOAuth = true`,
+            errorMessage: `error validating connector type config: jwtKeyId must be provided when isOAuth = true`,
           },
           {
             config: {
@@ -357,7 +355,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
               ...mockServiceNowOAuth.secrets,
               clientSecret: null,
             },
-            errorMessage: `error validating action type secrets: clientSecret and privateKey must both be specified`,
+            errorMessage: `error validating connector type secrets: clientSecret and privateKey must both be specified`,
           },
           {
             config: {
@@ -368,7 +366,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
               ...mockServiceNowOAuth.secrets,
               privateKey: null,
             },
-            errorMessage: `error validating action type secrets: clientSecret and privateKey must both be specified`,
+            errorMessage: `error validating connector type secrets: clientSecret and privateKey must both be specified`,
           },
         ];
 
@@ -444,8 +442,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [addEvent]\n- [1.subAction]: expected value to equal [getChoices]',
+                message: `error validating action params: Field \"subAction\": Invalid discriminator value. Expected 'addEvent' | 'getChoices'`,
               });
             });
         });
@@ -463,8 +460,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [addEvent]\n- [1.subAction]: expected value to equal [getChoices]',
+                message: `error validating action params: Field \"subAction\": Invalid discriminator value. Expected 'addEvent' | 'getChoices'`,
               });
             });
         });
@@ -486,8 +482,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                   status: 'error',
                   retry: false,
                   errorSource: TaskErrorSource.USER,
-                  message:
-                    'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [addEvent]\n- [1.subActionParams.fields]: expected value of type [array] but got [undefined]',
+                  message: `error validating action params: Field \"subActionParams.fields\": Required`,
                 });
               });
           });

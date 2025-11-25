@@ -11,9 +11,9 @@ import { useCallback, useMemo, useState } from 'react';
 
 import type { DashboardCreationOptions } from '../..';
 import { createDashboardEditUrl } from '../../utils/urls';
-import type { LoadDashboardReturn } from '../../services/dashboard_content_management_service/types';
 import { screenshotModeService, spacesService } from '../../services/kibana_services';
 import { useDashboardMountContext } from './dashboard_mount_context';
+import type { DashboardReadResponseBody } from '../../../server';
 
 export const useDashboardOutcomeValidation = () => {
   const [aliasId, setAliasId] = useState<string>();
@@ -24,29 +24,19 @@ export const useDashboardOutcomeValidation = () => {
   const scopedHistory = getScopedHistory?.();
 
   const validateOutcome: DashboardCreationOptions['validateLoadedSavedObject'] = useCallback(
-    ({ dashboardFound, resolveMeta, dashboardId }: LoadDashboardReturn) => {
-      if (!dashboardFound) {
-        return 'invalid';
-      }
-
-      if (resolveMeta && dashboardId) {
-        const { outcome: loadOutcome, aliasTargetId: alias, aliasPurpose } = resolveMeta;
-        /**
-         * Handle saved object resolve alias outcome by redirecting.
-         */
-        if (loadOutcome === 'aliasMatch' && dashboardId && alias) {
-          const path = scopedHistory.location.hash.replace(dashboardId, alias);
-          if (screenshotModeService.isScreenshotMode()) {
-            scopedHistory.replace(path); // redirect without the toast when in screenshot mode.
-          } else {
-            spacesService?.ui.redirectLegacyUrl({ path, aliasPurpose });
-          }
-          return 'redirected'; // redirected. Stop loading dashboard.
+    (result: DashboardReadResponseBody) => {
+      if (result.meta.outcome === 'aliasMatch' && result.meta.aliasTargetId) {
+        const path = scopedHistory.location.hash.replace(result.id, result.meta.aliasTargetId);
+        if (screenshotModeService.isScreenshotMode()) {
+          scopedHistory.replace(path); // redirect without the toast when in screenshot mode.
+        } else {
+          spacesService?.ui.redirectLegacyUrl({ path, aliasPurpose: result.meta.aliasPurpose });
         }
-        setAliasId(alias);
-        setOutcome(loadOutcome);
-        setSavedObjectId(dashboardId);
+        return 'redirected'; // redirected. Stop loading dashboard.
       }
+      setAliasId(result.meta.aliasTargetId);
+      setOutcome(result.meta.outcome);
+      setSavedObjectId(result.id);
       return 'valid';
     },
     [scopedHistory]

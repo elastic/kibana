@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import type { Client } from '@elastic/elasticsearch';
+import YAML from 'yaml';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import type {
   CoreStart,
   ElasticsearchServiceStart,
@@ -14,23 +20,19 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import type { Client } from '@elastic/elasticsearch';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import YAML from 'yaml';
 import type { EsWorkflowExecution, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import type { WorkflowsExecutionEngineConfig } from '../server/config';
-import { UnsecuredActionsClientMock } from './mocks/actions_plugin_mock';
 import {
   LogsRepositoryMock,
   StepExecutionRepositoryMock,
   WorkflowExecutionRepositoryMock,
 } from './mocks';
-import { runWorkflow } from '../server/execution_functions/run_workflow';
-import { TaskManagerMock } from './mocks/task_manager_mock';
+import { ScopedActionsClientMock, UnsecuredActionsClientMock } from './mocks/actions_plugin.mock';
+import { TaskManagerMock } from './mocks/task_manager.mock';
+import type { WorkflowsExecutionEngineConfig } from '../server/config';
 import { resumeWorkflow } from '../server/execution_functions';
+import { runWorkflow } from '../server/execution_functions/run_workflow';
 import type { ContextDependencies } from '../server/workflow_context_manager/types';
 
 export class WorkflowRunFixture {
@@ -55,10 +57,29 @@ export class WorkflowRunFixture {
     debug: jest.fn(),
     trace: jest.fn(),
   } as unknown as Logger;
+  // Create shared execute mock so tests can verify calls regardless of which client is used
+  private readonly sharedExecuteMock = jest.fn();
   public readonly unsecuredActionsClientMock = new UnsecuredActionsClientMock();
+  public readonly scopedActionsClientMock = new ScopedActionsClientMock();
   public readonly actionsClientMock = {
     getUnsecuredActionsClient: jest.fn().mockReturnValue(this.unsecuredActionsClientMock),
+    getActionsClientWithRequest: jest.fn().mockResolvedValue(this.scopedActionsClientMock),
   } as unknown as ActionsPluginStartContract;
+
+  constructor() {
+    // Wire both clients to use the same shared execute mock with normalized parameters
+    this.unsecuredActionsClientMock.execute = this.sharedExecuteMock.mockImplementation((options) =>
+      this.unsecuredActionsClientMock.returnMockedConnectorResult(options)
+    );
+    this.scopedActionsClientMock.execute = this.sharedExecuteMock.mockImplementation((options) => {
+      // Normalize scoped client parameters to match unsecured client for test assertions
+      // Convert actionId -> id so tests can check using 'id' parameter
+      const normalizedOptions = { ...options, id: options.actionId };
+      this.sharedExecuteMock.mock.calls[this.sharedExecuteMock.mock.calls.length - 1][0] =
+        normalizedOptions;
+      return this.scopedActionsClientMock.returnMockedConnectorResult(options);
+    });
+  }
   public readonly configMock = {
     logging: {
       console: true,
@@ -106,13 +127,13 @@ export class WorkflowRunFixture {
     return runWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      workflowExecutionRepository: this.workflowExecutionRepositoryMock as unknown as any,
-      stepExecutionRepository: this.stepExecutionRepositoryMock as unknown as any,
-      logsRepository: this.logsRepositoryMock as unknown as any,
+      workflowExecutionRepository: this.workflowExecutionRepositoryMock as any,
+      stepExecutionRepository: this.stepExecutionRepositoryMock as any,
+      logsRepository: this.logsRepositoryMock as any,
       taskAbortController: this.taskAbortController,
       coreStart: this.coreStartMock,
       dependencies: this.dependencies,
-      esClient: this.esClientMock,
+      unscopedEsClient: this.esClientMock,
       actions: this.actionsClientMock,
       taskManager: this.taskManagerMock,
       logger: this.loggerMock,
@@ -125,12 +146,11 @@ export class WorkflowRunFixture {
     return resumeWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      workflowExecutionRepository: this.workflowExecutionRepositoryMock as unknown as any,
-      stepExecutionRepository: this.stepExecutionRepositoryMock as unknown as any,
-      logsRepository: this.logsRepositoryMock as unknown as any,
+      workflowExecutionRepository: this.workflowExecutionRepositoryMock as any,
+      stepExecutionRepository: this.stepExecutionRepositoryMock as any,
+      logsRepository: this.logsRepositoryMock as any,
       taskAbortController: this.taskAbortController,
       coreStart: this.coreStartMock,
-      esClient: this.esClientMock,
       actions: this.actionsClientMock,
       taskManager: this.taskManagerMock,
       logger: this.loggerMock,
@@ -174,13 +194,13 @@ export class WorkflowRunFixture {
     return runWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      workflowExecutionRepository: this.workflowExecutionRepositoryMock as unknown as any,
-      stepExecutionRepository: this.stepExecutionRepositoryMock as unknown as any,
-      logsRepository: this.logsRepositoryMock as unknown as any,
+      workflowExecutionRepository: this.workflowExecutionRepositoryMock as any,
+      stepExecutionRepository: this.stepExecutionRepositoryMock as any,
+      logsRepository: this.logsRepositoryMock as any,
       taskAbortController: this.taskAbortController,
       coreStart: this.coreStartMock,
       dependencies: this.dependencies,
-      esClient: this.esClientMock,
+      unscopedEsClient: this.esClientMock,
       actions: this.actionsClientMock,
       taskManager: this.taskManagerMock,
       logger: this.loggerMock,

@@ -16,7 +16,13 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { isEqual } from 'lodash';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
+import type {
+  DatasourceMap,
+  VisualizationMap,
+  LensStoreDeps,
+  LensDocument,
+} from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { LensRootStore } from '../../../state_management';
 import { saveUserChartTypeToSessionStorage } from '../../../chart_type_session_storage';
@@ -25,13 +31,12 @@ import {
   loadInitial,
   initExisting,
   initEmpty,
-  type LensStoreDeps,
+  setSelectedLayerId,
 } from '../../../state_management';
 import { generateId } from '../../../id_generator';
-import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
-import { LensDocumentService, type LensDocument } from '../../../persistence';
+import { LensDocumentService } from '../../../persistence';
 import { DOC_TYPE } from '../../../../common/constants';
 import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
 
@@ -78,7 +83,12 @@ export const updatingMiddleware =
       !isEqual(prevVisualization, visualization)
     ) {
       // ignore the actions that initialize the store with the state from the attributes
-      if (initExisting.match(action) || initEmpty.match(action)) {
+      // selectedLayerId is UI runtime state only and shouldn't trigger the updater
+      if (
+        initExisting.match(action) ||
+        initEmpty.match(action) ||
+        setSelectedLayerId.match(action)
+      ) {
         return;
       }
       // The user is updating the Visualization parameters,

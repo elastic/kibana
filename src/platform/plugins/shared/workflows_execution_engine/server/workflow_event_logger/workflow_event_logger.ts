@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
 import { merge } from 'lodash';
-import type {
-  LogsRepository,
-  WorkflowLogEvent,
-} from '../repositories/logs_repository/logs_repository';
+import type { Logger } from '@kbn/core/server';
+import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
 
 export interface WorkflowEventLoggerContext {
   workflowId?: string;
@@ -229,6 +226,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     const message = event.message || '';
 
     // Format workflow context metadata
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const meta: Record<string, any> = {
       workflow: {
         name: event.workflow?.name,

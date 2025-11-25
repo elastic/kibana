@@ -32,6 +32,7 @@ export class SuggestionBuilder {
     promoteToTop?: boolean;
     openSuggestions?: boolean;
     values?: boolean;
+    canBeMultiValue?: boolean;
   }): Promise<this> {
     const types = options?.types ?? ['any'];
     const addComma = options?.addComma ?? false;
@@ -40,6 +41,7 @@ export class SuggestionBuilder {
     const ignoredColumns = options?.ignoredColumns ?? [];
     const openSuggestions = options?.openSuggestions ?? (addSpaceAfterField || addComma);
     const values = options?.values;
+    const canBeMultiValue = options?.canBeMultiValue ?? false;
 
     const getByType = this.context.callbacks?.getByType ?? (() => Promise.resolve([]));
 
@@ -50,6 +52,7 @@ export class SuggestionBuilder {
       addComma,
       promoteToTop,
       values,
+      canBeMultiValue,
     });
 
     this.suggestions.push(...fieldSuggestions);
@@ -62,11 +65,13 @@ export class SuggestionBuilder {
     addComma?: boolean;
     addSpaceAfterFunction?: boolean;
     openSuggestions?: boolean;
+    constantGeneratingOnly?: boolean;
   }): this {
     const types = options?.types ?? ['any'];
     const ignored = options?.ignoredFunctions ?? [];
     const addSpaceAfterFunction = options?.addSpaceAfterFunction;
     const openSuggestions = options?.openSuggestions;
+    const constantGeneratingOnly = options?.constantGeneratingOnly ?? false;
 
     const functionSuggestions = getFunctionsSuggestions({
       location: this.context.location,
@@ -76,6 +81,7 @@ export class SuggestionBuilder {
         addComma: options?.addComma,
         addSpaceAfterFunction,
         openSuggestions,
+        constantGeneratingOnly,
       },
       context: this.context.context,
       callbacks: {
@@ -104,6 +110,8 @@ export class SuggestionBuilder {
       includeCompatibleLiterals,
       addComma: options?.addComma,
       advanceCursorAndOpenSuggestions,
+      supportsControls: this.context.context?.supportsControls,
+      variables: this.context.context?.variables,
     });
 
     this.suggestions.push(...literals);

@@ -14,7 +14,6 @@ import type { ExpressionContext } from '../types';
 import { isLiteral, isFunctionExpression } from '../../../../../ast/is';
 import { isNumericType, FunctionDefinitionTypes } from '../../../../types';
 import { commaCompleteItem } from '../../../../../commands_registry/complete_items';
-import { shouldSuggestComma } from '../comma_decision_engine';
 import { getExpressionType } from '../../../expressions';
 import { SignatureAnalyzer } from '../signature_analyzer';
 import { getLogicalContinuationSuggestions } from '../operators/utils';
@@ -56,21 +55,14 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
       return suggestions;
     }
 
-    // We're inside a function - try shouldSuggestComma for precise decision
-    let includeComma = shouldSuggestComma({
-      position: 'after_complete',
-      hasMoreMandatoryArgs: functionParameterContext.hasMoreMandatoryArgs,
-      functionSignatures: functionParameterContext.validSignatures,
-      isCursorFollowedByComma: false, // Already checked above
-    });
+    const validSignatures = functionParameterContext.validSignatures ?? [];
+    const currentParamIndex = functionParameterContext.currentParameterIndex ?? 0;
 
-    // Fallback: If shouldSuggestComma said no due to missing context info,
-    // optimistically suggest comma (better to over-suggest inside functions)
-    if (!includeComma) {
-      includeComma = true;
-    }
+    const hasMoreParams = validSignatures.some(
+      (sig) => (sig.params && sig.params.length > currentParamIndex + 1) || sig.minParams != null
+    );
 
-    if (includeComma) {
+    if (hasMoreParams) {
       return [...suggestions, commaCompleteItem];
     }
 
@@ -174,7 +166,7 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
     builder.addOperators({
       leftParamType: expressionType === 'param' ? undefined : expressionType,
       allowed: allowedOperators,
-      ignored: ['='],
+      ignored: ['=', ':'],
     });
   }
 

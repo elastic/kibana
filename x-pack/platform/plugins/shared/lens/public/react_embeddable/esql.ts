@@ -12,12 +12,13 @@ import {
   getESQLQueryColumns,
 } from '@kbn/esql-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
+import type { LensSerializedState } from '@kbn/lens-common';
 import { isESQLModeEnabled } from './initializers/utils';
-import type { LensEmbeddableStartServices, LensSerializedState } from './types';
+import type { LensEmbeddableStartServices } from './types';
 
 export type ESQLStartServices = Pick<
   LensEmbeddableStartServices,
-  'dataViews' | 'data' | 'visualizationMap' | 'datasourceMap' | 'uiSettings'
+  'dataViews' | 'data' | 'visualizationMap' | 'datasourceMap' | 'uiSettings' | 'coreStart'
 >;
 
 export async function loadESQLAttributes({
@@ -26,6 +27,7 @@ export async function loadESQLAttributes({
   visualizationMap,
   datasourceMap,
   uiSettings,
+  coreStart,
 }: ESQLStartServices): Promise<LensSerializedState['attributes'] | undefined> {
   // Early exit if ESQL is not supported
   if (!isESQLModeEnabled({ uiSettings })) {
@@ -40,7 +42,11 @@ export async function loadESQLAttributes({
   // From this moment on there are no longer early exists before suggestions
   // so make sure to load async modules while doing other async stuff to save some time
   const [dataView, { suggestionsApi }] = await Promise.all([
-    getESQLAdHocDataview(`from ${indexName}`, dataViews),
+    getESQLAdHocDataview({
+      dataViewsService: dataViews,
+      query: `FROM ${indexName}`,
+      http: coreStart.http,
+    }),
     import('../async_services'),
   ]);
 

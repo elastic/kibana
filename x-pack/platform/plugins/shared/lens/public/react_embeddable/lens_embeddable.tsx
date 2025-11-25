@@ -10,13 +10,9 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { merge } from 'rxjs';
+import type { LensRuntimeState } from '@kbn/lens-common';
+import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { DOC_TYPE } from '../../common/constants';
-import type {
-  LensApi,
-  LensEmbeddableStartServices,
-  LensRuntimeState,
-  LensSerializedState,
-} from './types';
 
 import { loadEmbeddableData } from './data_loader';
 import { isTextBasedLanguage, deserializeState } from './helper';
@@ -36,19 +32,20 @@ import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
+import type { LensEmbeddableStartServices } from './types';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
-): EmbeddableFactory<LensSerializedState, LensApi> => {
+): EmbeddableFactory<LensSerializedAPIConfig, LensApi> => {
   return {
     type: DOC_TYPE,
     /**
      * This is called after the deserialize, so some assumptions can be made about its arguments:
+     * @param uuid      a unique identifier for the embeddable panel
      * @param state     the Lens "runtime" state, which means that 'attributes' is always present.
      *                  The difference for a by-value and a by-ref can be determined by the presence of 'savedObjectId' in the state
      * @param buildApi  a utility function to build the Lens API together to instrument the embeddable container on how to detect
      *                  significative changes in the state (i.e. worth a save or not)
-     * @param uuid      a unique identifier for the embeddable panel
      * @param parentApi a set of props passed down from the embeddable container. Note: no assumptions can be made about its content
      *                  so the usage of type-guards is recommended before extracting data from it.
      *                  Due to the new embeddable being rendered by a <ReactEmbeddableRenderer /> wrapper, this is the only way
@@ -66,11 +63,7 @@ export const createLensEmbeddableFactory = (
         initialState
       );
 
-      const initialRuntimeState = await deserializeState(
-        services,
-        initialState.rawState,
-        initialState.references
-      );
+      const initialRuntimeState = await deserializeState(services, initialState.rawState);
 
       /**
        * Observables and functions declared here are used internally to store mutating state values
@@ -120,11 +113,7 @@ export const createLensEmbeddableFactory = (
         parentApi
       );
 
-      const integrationsConfig = initializeIntegrations(
-        getLatestState,
-        dynamicActionsManager?.serializeState,
-        services
-      );
+      const integrationsConfig = initializeIntegrations(getLatestState);
       const actionsConfig = initializeActionApi(
         uuid,
         initialRuntimeState,
@@ -149,7 +138,7 @@ export const createLensEmbeddableFactory = (
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges<LensSerializedState>({
+      const unsavedChangesApi = initializeUnsavedChanges<LensSerializedAPIConfig>({
         uuid,
         parentApi,
         serializeState: integrationsConfig.api.serializeState,
@@ -174,11 +163,7 @@ export const createLensEmbeddableFactory = (
           dashboardConfig.reinitializeState(lastSaved?.rawState);
           searchContextConfig.reinitializeState(lastSaved?.rawState);
           if (!lastSaved) return;
-          const lastSavedRuntimeState = await deserializeState(
-            services,
-            lastSaved.rawState,
-            lastSaved.references
-          );
+          const lastSavedRuntimeState = await deserializeState(services, lastSaved.rawState);
           stateConfig.reinitializeRuntimeState(lastSavedRuntimeState);
         },
       });

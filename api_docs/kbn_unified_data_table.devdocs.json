@@ -1303,8 +1303,7 @@
             "label": "rowHeight",
             "description": [],
             "signature": [
-              "RowHeightMode",
-              " | undefined"
+              "\"custom\" | \"auto\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
             "deprecated": false,
@@ -1343,9 +1342,7 @@
             "label": "onChangeRowHeight",
             "description": [],
             "signature": [
-              "(newHeightMode: ",
-              "RowHeightMode",
-              " | undefined) => void"
+              "(newHeightMode: \"custom\" | \"auto\" | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
             "deprecated": false,
@@ -1359,8 +1356,7 @@
                 "label": "newHeightMode",
                 "description": [],
                 "signature": [
-                  "RowHeightMode",
-                  " | undefined"
+                  "\"custom\" | \"auto\" | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-data-table/src/components/row_height_settings.tsx",
                 "deprecated": false,

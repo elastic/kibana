@@ -20,7 +20,12 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { partition } from 'lodash';
 import type { ReportingCore } from '../..';
-import type { ListScheduledReportApiJSON, ReportingUser, ScheduledReportType } from '../../types';
+import type {
+  ListScheduledReportApiJSON,
+  ReportingUser,
+  ScheduledReportApiJson,
+  ScheduledReportType,
+} from '../../types';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { ScheduledReportAuditEventParams } from '../audit_events/audit_events';
 import {
@@ -30,6 +35,9 @@ import {
 import { DEFAULT_SCHEDULED_REPORT_LIST_SIZE } from './constants';
 import { transformBulkDeleteResponse, transformListResponse } from './transforms';
 import type { BulkOperationError } from './types';
+import { transformSingleResponse } from './transforms';
+import type { UpdateScheduledReportParams } from './types/update';
+import { updateScheduledReportSchema } from './schemas/update';
 
 const SCHEDULED_REPORT_ID_FIELD = 'scheduled_report_id';
 const CREATED_AT_FIELD = 'created_at';
@@ -94,6 +102,53 @@ export class ScheduledReportsService {
     );
   }
 
+  public async update({
+    user,
+    id,
+    updateParams,
+  }: {
+    user: ReportingUser;
+    id: string;
+    updateParams: UpdateScheduledReportParams;
+  }): Promise<ScheduledReportApiJson> {
+    try {
+      updateScheduledReportSchema.validate(updateParams);
+    } catch (error) {
+      throw this.responseFactory.badRequest({
+        body: `Error validating params for update scheduled report - ${error.message}`,
+      });
+    }
+
+    if (!(await this._canUpdateReport({ id, user }))) {
+      this._throw404({ user, id, action: ScheduledReportAuditAction.UPDATE });
+    }
+
+    try {
+      const { title, schedule } = updateParams;
+
+      await this._updateScheduledReportSavedObject({ id, title, schedule });
+      await this._updateScheduledReportTaskSchedule({ id, schedule });
+
+      const updatedReport = await this.savedObjectsClient.get<ScheduledReportType>(
+        SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+        id
+      );
+
+      this._auditLog({
+        action: ScheduledReportAuditAction.UPDATE,
+        id,
+        name: updatedReport.attributes.title,
+      });
+
+      return transformSingleResponse(this.logger, updatedReport);
+    } catch (error) {
+      throw this.responseFactory.customError({
+        statusCode: 500,
+        body: `Error updating scheduled reports: ${error.message}`,
+      });
+    }
+  }
+
   public async list({
     user,
     page = 1,
@@ -104,7 +159,7 @@ export class ScheduledReportsService {
     size: number;
   }): Promise<ListScheduledReportsApiResponse> {
     try {
-      const username = this.getUsername(user);
+      const username = this._getUsername(user);
 
       const response = await this.savedObjectsClient.find<ScheduledReportType>({
         type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
@@ -116,7 +171,7 @@ export class ScheduledReportsService {
       });
 
       if (!response) {
-        return this.getEmptyListApiResponse(page, size);
+        return this._getEmptyListApiResponse(page, size);
       }
 
       const scheduledReportIdsAndName = response?.saved_objects.map((so) => ({
@@ -125,11 +180,11 @@ export class ScheduledReportsService {
       }));
 
       if (!scheduledReportIdsAndName || scheduledReportIdsAndName.length === 0) {
-        return this.getEmptyListApiResponse(page, size);
+        return this._getEmptyListApiResponse(page, size);
       }
 
       scheduledReportIdsAndName.forEach(({ id, name }) =>
-        this.auditLog({ action: ScheduledReportAuditAction.LIST, id, name })
+        this._auditLog({ action: ScheduledReportAuditAction.LIST, id, name })
       );
 
       const scheduledReportIds = scheduledReportIdsAndName.map(({ id }) => id);
@@ -188,7 +243,7 @@ export class ScheduledReportsService {
       let taskIdsToDisable: string[] = [];
       const bulkErrors: BulkOperationError[] = [];
       const disabledScheduledReportIds: Set<string> = new Set();
-      const username = this.getUsername(user);
+      const username = this._getUsername(user);
 
       const bulkGetResult = await this.savedObjectsClient.bulkGet<ScheduledReportType>(
         ids.map((id) => ({ id, type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE }))
@@ -213,7 +268,7 @@ export class ScheduledReportsService {
             this.logger.warn(
               `User "${username}" attempted to disable scheduled report "${so.id}" created by "${so.attributes.createdBy}" without sufficient privileges.`
             );
-            this.auditLog({
+            this._auditLog({
               action: ScheduledReportAuditAction.DISABLE,
               id: so.id,
               name: so?.attributes?.title,
@@ -223,7 +278,7 @@ export class ScheduledReportsService {
             this.logger.debug(`Scheduled report ${so.id} is already disabled`);
             disabledScheduledReportIds.add(so.id);
           } else {
-            this.auditLog({
+            this._auditLog({
               action: ScheduledReportAuditAction.DISABLE,
               id: so.id,
               name: so.attributes.title,
@@ -253,7 +308,7 @@ export class ScheduledReportsService {
               status: so.error.statusCode,
               id: so.id,
             });
-            this.auditLog({
+            this._auditLog({
               action: ScheduledReportAuditAction.DISABLE,
               id: so.id,
               name: so?.attributes?.title,
@@ -310,7 +365,7 @@ export class ScheduledReportsService {
     user: ReportingUser;
   }): Promise<BulkDeleteResult> {
     try {
-      const username = this.getUsername(user);
+      const username = this._getUsername(user);
 
       const bulkGetResult = await this.savedObjectsClient.bulkGet<ScheduledReportType>(
         ids.map((id) => ({ id, type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE }))
@@ -325,12 +380,12 @@ export class ScheduledReportsService {
         (so) => so.attributes.createdBy === username || this.userCanManageReporting
       );
 
-      const authErrors = this.formatAndAuditBulkDeleteAuthErrors({
+      const authErrors = this._formatAndAuditBulkDeleteAuthErrors({
         bulkGetErrors,
         unauthorizedSchedules,
         username,
       });
-      this.auditBulkGetAuthorized({
+      this._auditBulkGetAuthorized({
         action: ScheduledReportAuditAction.DELETE,
         authorizedSchedules,
       });
@@ -352,7 +407,7 @@ export class ScheduledReportsService {
         bulkDeleteResult.statuses,
         (status) => status.error === undefined
       );
-      const executionErrors = this.formatAndAuditBulkDeleteSchedulesErrors({
+      const executionErrors = this._formatAndAuditBulkDeleteSchedulesErrors({
         errorStatuses: bulkDeleteErrors,
       });
 
@@ -362,7 +417,7 @@ export class ScheduledReportsService {
       const [removedTasks, erroredTasks] = partition(removeTasksResult.statuses, (status) =>
         Boolean(status.success)
       );
-      const taskErrors = this.formatBulkDeleteTaskErrors({
+      const taskErrors = this._formatBulkDeleteTaskErrors({
         errorStatuses: erroredTasks,
       });
 
@@ -378,7 +433,7 @@ export class ScheduledReportsService {
     }
   }
 
-  private auditBulkGetAuthorized({
+  private _auditBulkGetAuthorized({
     action,
     authorizedSchedules,
   }: {
@@ -386,7 +441,7 @@ export class ScheduledReportsService {
     authorizedSchedules: SavedObject<ScheduledReportType>[];
   }) {
     authorizedSchedules.forEach((so) => {
-      this.auditLog({
+      this._auditLog({
         action,
         id: so.id,
         name: so.attributes.title,
@@ -395,7 +450,7 @@ export class ScheduledReportsService {
     });
   }
 
-  private formatAndAuditBulkDeleteAuthErrors({
+  private _formatAndAuditBulkDeleteAuthErrors({
     bulkGetErrors,
     unauthorizedSchedules,
     username,
@@ -424,7 +479,7 @@ export class ScheduledReportsService {
       this.logger.warn(
         `User "${username}" attempted to delete scheduled report "${so.id}" created by "${so.attributes.createdBy}" without sufficient privileges.`
       );
-      this.auditLog({
+      this._auditLog({
         action: ScheduledReportAuditAction.DELETE,
         id: so.id,
         name: so?.attributes?.title,
@@ -435,7 +490,7 @@ export class ScheduledReportsService {
     return bulkErrors;
   }
 
-  private formatAndAuditBulkDeleteSchedulesErrors({
+  private _formatAndAuditBulkDeleteSchedulesErrors({
     errorStatuses,
   }: {
     errorStatuses: SavedObjectsBulkDeleteStatus[];
@@ -450,7 +505,7 @@ export class ScheduledReportsService {
         status: status.error.statusCode,
         id: status.id,
       });
-      this.auditLog({
+      this._auditLog({
         action: ScheduledReportAuditAction.DELETE,
         id: status.id,
         error: new Error(status.error.message),
@@ -459,7 +514,7 @@ export class ScheduledReportsService {
     return bulkErrors;
   }
 
-  private formatBulkDeleteTaskErrors({
+  private _formatBulkDeleteTaskErrors({
     errorStatuses,
   }: {
     errorStatuses: SavedObjectsBulkDeleteStatus[];
@@ -478,11 +533,11 @@ export class ScheduledReportsService {
     return bulkErrors;
   }
 
-  private getUsername(user: ReportingUser): string | boolean {
+  private _getUsername(user: ReportingUser): string | boolean {
     return user ? user.username : false;
   }
 
-  private getEmptyListApiResponse(page: number, perPage: number): ListScheduledReportsApiResponse {
+  private _getEmptyListApiResponse(page: number, perPage: number): ListScheduledReportsApiResponse {
     return {
       page,
       per_page: perPage,
@@ -491,7 +546,7 @@ export class ScheduledReportsService {
     };
   }
 
-  private auditLog({
+  private _auditLog({
     action,
     id,
     name,
@@ -510,5 +565,69 @@ export class ScheduledReportsService {
         error,
       })
     );
+  }
+
+  private async _updateScheduledReportSavedObject({
+    id,
+    title,
+    schedule,
+  }: { id: string } & UpdateScheduledReportParams) {
+    await this.savedObjectsClient.update<ScheduledReportType>(
+      SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+      id,
+      {
+        title,
+        schedule,
+      }
+    );
+  }
+
+  private async _updateScheduledReportTaskSchedule({
+    id,
+    schedule,
+  }: { id: string } & UpdateScheduledReportParams) {
+    if (schedule) await this.taskManager.bulkUpdateSchedules([id], schedule);
+  }
+
+  private async _canUpdateReport({
+    user,
+    id,
+  }: {
+    user: ReportingUser;
+    id: string;
+  }): Promise<Boolean> {
+    if (this.userCanManageReporting) return true;
+
+    const username = this._getUsername(user);
+    const reportToUpdate = await this.savedObjectsClient.get<ScheduledReportType>(
+      SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+      id
+    );
+
+    return reportToUpdate.attributes.createdBy === username;
+  }
+
+  private _throw404({
+    user,
+    id,
+    action,
+  }: {
+    user: ReportingUser;
+    id: string;
+    action: ScheduledReportAuditAction;
+  }) {
+    const username = this._getUsername(user);
+    this.logger.warn(
+      `User "${username}" attempted to update scheduled report "${id}" without sufficient privileges.`
+    );
+    this._auditLog({
+      action,
+      id,
+      error: new Error('Not found.'),
+    });
+    throw this.responseFactory.customError({
+      statusCode: 404,
+      body: 'Not found.',
+    });
   }
 }

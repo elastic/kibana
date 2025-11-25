@@ -5,17 +5,32 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { DEFAULT_SPACE_ID, addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 
-export function getKibanaUrl(coreSetup: CoreSetup, cloudSetup?: CloudSetup) {
-  return (
-    // falls back to local network binding
-    // then cloud id
-    coreSetup.http.basePath.publicBaseUrl ?? // priority given to server.publicBaseUrl
+export function getKibanaUrl(
+  coreSetup: CoreSetup,
+  cloudSetup?: CloudSetup,
+  request?: KibanaRequest,
+  spaces?: SpacesPluginStart
+) {
+  const baseUrl =
+    coreSetup.http.basePath.publicBaseUrl ??
     cloudSetup?.kibanaUrl ??
-    getFallbackKibanaUrl(coreSetup)
-  );
+    getFallbackKibanaUrl(coreSetup);
+
+  const pathname = new URL(baseUrl).pathname;
+  const serverBasePath = coreSetup.http.basePath.serverBasePath;
+  const { pathHasExplicitSpaceIdentifier } = getSpaceIdFromPath(pathname, serverBasePath);
+
+  if (!pathHasExplicitSpaceIdentifier && request && spaces) {
+    const spaceId = spaces.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
+    return addSpaceIdToPath(baseUrl, spaceId);
+  }
+
+  return baseUrl;
 }
 
 export function getFallbackKibanaUrl({ http }: CoreSetup) {

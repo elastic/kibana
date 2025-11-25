@@ -49,8 +49,8 @@ describe('Infrastructure page', () => {
     it('has no detectable a11y violations on load', () => {
       cy.visitKibana(goServiceInfraPageHref);
       cy.contains('Infrastructure');
-      // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y({ skipFailures: true });
+
+      checkA11y();
     });
 
     describe('when container ids, pod names and host names are returned by the api call', () => {

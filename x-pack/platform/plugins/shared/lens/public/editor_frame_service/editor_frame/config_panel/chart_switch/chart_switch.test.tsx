@@ -18,13 +18,13 @@ import {
 } from '../../../../mocks';
 
 import type {
+  LensAppState,
   DatasourcePublicAPI,
   SuggestionRequest,
   DatasourceSuggestion,
-} from '../../../../types';
+} from '@kbn/lens-common';
 import type { ChartSwitchProps } from './chart_switch';
 import { ChartSwitchPopover } from './chart_switch_popover';
-import type { LensAppState } from '../../../../state_management';
 import { applyChanges } from '../../../../state_management';
 import { faker } from '@faker-js/faker';
 import { EditorFrameServiceProvider } from '../../../editor_frame_service_context';
@@ -249,6 +249,7 @@ describe('chart_switch', () => {
           visualization: {
             activeId: 'testVis',
             state: 'state from a',
+            selectedLayerId: null,
           },
           datasourceStates,
           activeDatasourceId: 'testDatasource',
@@ -361,6 +362,7 @@ describe('chart_switch', () => {
           visualization: {
             activeId: 'testVis3',
             state: { type: 'subvisC2' },
+            selectedLayerId: null,
           },
         },
       });
@@ -383,6 +385,7 @@ describe('chart_switch', () => {
           visualization: {
             activeId: 'testVis3',
             state: { type: 'subvisC2' },
+            selectedLayerId: null,
           },
         },
       });
@@ -541,6 +544,7 @@ describe('chart_switch', () => {
         visualization: {
           activeId: 'testVis3',
           state: { type: 'subvisC3' },
+          selectedLayerId: null,
         },
       },
     });
@@ -600,6 +604,7 @@ describe('chart_switch', () => {
           visualization: {
             activeId: 'testVis3',
             state: { type: 'subvisC1' },
+            selectedLayerId: null,
           },
         },
       });
@@ -641,6 +646,7 @@ describe('chart_switch', () => {
           visualization: {
             activeId: 'testVis3',
             state: { type: 'subvisC1' },
+            selectedLayerId: null,
           },
         },
       });

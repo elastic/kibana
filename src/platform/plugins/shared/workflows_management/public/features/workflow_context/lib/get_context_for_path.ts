@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import _ from 'lodash';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
 import type { z } from '@kbn/zod';
-import _ from 'lodash';
-import { getWorkflowContextSchema } from './get_workflow_context_schema';
 import { getForeachStateSchema } from './get_foreach_state_schema';
-import { getStepsCollectionSchema } from './get_steps_collection_schema';
 import { getNearestStepPath } from './get_nearest_step_path';
+import { getStepsCollectionSchema } from './get_steps_collection_schema';
+import { getWorkflowContextSchema } from './get_workflow_context_schema';
 
 // Implementation should be the same as in the 'WorkflowContextManager.getContext' function
 // src/platform/plugins/shared/workflows_execution_engine/server/workflow_context_manager/workflow_context_manager.ts

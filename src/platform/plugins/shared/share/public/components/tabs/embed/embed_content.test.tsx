@@ -14,6 +14,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { EmbedContent } from './embed_content';
 import type { BrowserUrlService } from '../../../types';
 import { urlServiceTestSetup } from '../../../../common/url_service/__tests__/setup';
+import type { IShareContext } from '../../context';
+import { ShareProvider } from '../../context';
 
 let urlService: BrowserUrlService;
 
@@ -40,10 +42,26 @@ const defaultProps: Pick<
   anonymousAccess: { getState: jest.fn(), getCapabilities: jest.fn() },
 };
 
-const renderComponent = (props: ComponentProps<typeof EmbedContent>) => {
+const mockShareContext: IShareContext = {
+  ...defaultProps,
+  onClose: jest.fn(),
+  shareMenuItems: [],
+  objectTypeMeta: {
+    title: 'title',
+    config: {},
+  },
+  sharingData: { title: 'title', url: 'url' },
+};
+
+const renderComponent = (
+  props: ComponentProps<typeof EmbedContent>,
+  shareContext: IShareContext = mockShareContext
+) => {
   return render(
     <IntlProvider locale="en">
-      <EmbedContent {...props} />
+      <ShareProvider shareContext={shareContext}>
+        <EmbedContent {...props} />
+      </ShareProvider>
     </IntlProvider>
   );
 };
@@ -91,5 +109,52 @@ describe('Share modal embed content tab', () => {
         );
       });
     });
+  });
+
+  it('renders a draft mode callout when dirty and triggers its save button', async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    const shareContext: IShareContext = {
+      ...mockShareContext,
+      onSave,
+      isDirty: true,
+    };
+    renderComponent(
+      {
+        ...defaultProps,
+        isDirty: true,
+        objectConfig: {
+          draftModeCallOut: true,
+        },
+      },
+      shareContext
+    );
+    const draftModeCallout = screen.getByTestId('unsavedChangesDraftModeCallOut');
+    expect(draftModeCallout).toBeInTheDocument();
+    const saveButton = screen.getByRole('button', { name: 'Save changes' });
+    expect(saveButton).toBeInTheDocument();
+    await user.click(saveButton);
+    expect(onSave).toHaveBeenCalled();
+  });
+
+  it('renders a draft mode callout when dirty and does not render a save button when onSave is not provided', () => {
+    const shareContext: IShareContext = {
+      ...mockShareContext,
+      isDirty: true,
+    };
+    renderComponent(
+      {
+        ...defaultProps,
+        isDirty: true,
+        objectConfig: {
+          draftModeCallOut: true,
+        },
+      },
+      shareContext
+    );
+    const draftModeCallout = screen.getByTestId('unsavedChangesDraftModeCallOut');
+    expect(draftModeCallout).toBeInTheDocument();
+    const saveButton = screen.queryByRole('button', { name: 'Save changes' });
+    expect(saveButton).not.toBeInTheDocument();
   });
 });

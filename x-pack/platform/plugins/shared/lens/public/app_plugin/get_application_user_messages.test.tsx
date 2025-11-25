@@ -9,8 +9,12 @@ import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 import type { Visualization } from '..';
-import type { DataViewsState } from '../state_management';
-import type { Datasource, UserMessage } from '../types';
+import type {
+  DataViewsState,
+  Datasource,
+  UserMessage,
+  LensPublicCallbacks,
+} from '@kbn/lens-common';
 import type { UserMessageGetterProps } from './get_application_user_messages';
 import {
   filterAndSortUserMessages,
@@ -20,7 +24,6 @@ import {
 import { cleanup, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../user_messages_ids';
-import type { LensPublicCallbacks } from '../react_embeddable/types';
 import { getLongMessage } from '../user_messages_utils';
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => {
@@ -38,7 +41,7 @@ describe('application-level user messages', () => {
         visualizationType: undefined,
 
         visualization: undefined,
-        visualizationState: { activeId: '', state: {} },
+        visualizationState: { activeId: '', state: {}, selectedLayerId: null },
         activeDatasource: {} as Datasource,
         activeDatasourceState: null,
         dataViews: {} as DataViewsState,
@@ -67,7 +70,11 @@ describe('application-level user messages', () => {
       getApplicationUserMessages({
         visualizationType: '123',
         visualization: undefined,
-        visualizationState: { activeId: 'id_for_type_that_doesnt_exist', state: {} },
+        visualizationState: {
+          activeId: 'id_for_type_that_doesnt_exist',
+          state: {},
+          selectedLayerId: null,
+        },
 
         activeDatasource: {} as Datasource,
         activeDatasourceState: null,
@@ -99,7 +106,7 @@ describe('application-level user messages', () => {
 
         visualizationType: '123',
         visualization: {} as Visualization,
-        visualizationState: { activeId: 'some-id', state: {} },
+        visualizationState: { activeId: 'some-id', state: {}, selectedLayerId: null },
         activeDatasourceState: null,
         dataViews: {} as DataViewsState,
         core: {} as CoreStart,
@@ -166,7 +173,7 @@ describe('application-level user messages', () => {
         // irrelevantProps
         dataViews: {} as DataViewsState,
         visualization: {} as Visualization,
-        visualizationState: { activeId: 'foo', state: {} },
+        visualizationState: { activeId: 'foo', state: {}, selectedLayerId: null },
       };
       const firstMessage = getApplicationUserMessages({ ...props, ...propsOverrides }).at(0);
       const rtlRender = render(

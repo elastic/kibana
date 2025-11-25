@@ -6,14 +6,19 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type {
+  TypedLensSerializedState,
+  FramePublicAPI,
+  UserMessagesGetter,
+  LensDocument,
+  LensInspector,
+} from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import type { FramePublicAPI, UserMessagesGetter } from '../../../types';
-import type { LensInspector } from '../../../lens_inspector_service';
-import type { LensDocument } from '../../../persistence';
 
 export interface FlyoutWrapperProps {
   children: JSX.Element;
+  toolbar?: JSX.Element;
+  layerTabs?: JSX.Element;
   isInlineFlyoutVisible: boolean;
   isScrollable: boolean;
   displayFlyoutHeader?: boolean;
@@ -112,4 +117,11 @@ export interface LayerConfigurationProps {
   closeFlyout?: () => void;
   canEditTextBasedQuery?: boolean;
   editorContainer?: HTMLElement;
+}
+
+export interface LayerTabsProps {
+  attributes?: TypedLensSerializedState['attributes'];
+  coreStart: CoreStart;
+  framePublicAPI: FramePublicAPI;
+  uiActions: LensPluginStartDependencies['uiActions'];
 }

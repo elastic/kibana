@@ -127,21 +127,6 @@
       },
       {
         "parentPluginId": "workflowsManagement",
-        "id": "def-common.UNSUPPORTED_CONNECTOR_TYPES",
-        "type": "Array",
-        "tags": [],
-        "label": "UNSUPPORTED_CONNECTOR_TYPES",
-        "description": [],
-        "signature": [
-          "string[]"
-        ],
-        "path": "src/platform/plugins/shared/workflows_management/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "workflowsManagement",
         "id": "def-common.WORKFLOWS_EXECUTION_LOGS_INDEX",
         "type": "string",
         "tags": [],

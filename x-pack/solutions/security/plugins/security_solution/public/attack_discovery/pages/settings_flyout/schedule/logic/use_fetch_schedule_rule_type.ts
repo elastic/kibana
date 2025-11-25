@@ -6,7 +6,7 @@
  */
 
 import { camelCase, mapKeys } from 'lodash';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
 
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
