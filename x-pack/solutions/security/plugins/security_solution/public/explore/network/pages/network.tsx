@@ -12,7 +12,7 @@ import { useParams } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
@@ -95,8 +95,8 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-    const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
-    const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
+    const { dataView, status } = useDataView(PageScope.explore);
+    const experimentalSelectedPatterns = useSelectedPatterns(PageScope.explore);
 
     const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
     const selectedPatterns = newDataViewPickerEnabled

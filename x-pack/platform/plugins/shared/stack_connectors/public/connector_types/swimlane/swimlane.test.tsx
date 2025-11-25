@@ -39,7 +39,7 @@ describe('swimlane action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.ruleName': [],
         'subActionParams.incident.alertId': [],
@@ -52,7 +52,7 @@ describe('swimlane action params validation', () => {
       subActionParams: { incident: {} },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.ruleName': ['Rule name is required.'],
         'subActionParams.incident.alertId': ['Alert ID is required.'],
@@ -65,7 +65,7 @@ describe('swimlane action params validation', () => {
       subActionParams: {},
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.incident.ruleName': [],
         'subActionParams.incident.alertId': [],

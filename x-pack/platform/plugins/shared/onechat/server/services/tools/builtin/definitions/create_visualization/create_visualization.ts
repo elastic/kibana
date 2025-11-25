@@ -12,11 +12,16 @@ import { ToolResultType, SupportedChartType } from '@kbn/onechat-common/tools/to
 import parse from 'joi-to-json';
 
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
+import { gaugeStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/gauge';
+import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/tagcloud';
 import { getToolResultId } from '@kbn/onechat-server';
+import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import { guessChartType } from './guess_chart_type';
 import { createVisualizationGraph } from './graph_lens';
 
 const metricSchema = parse(esqlMetricState.getSchema()) as object;
+const gaugeSchema = parse(gaugeStateSchemaESQL.getSchema()) as object;
+const tagcloudSchema = parse(tagcloudStateSchemaESQL.getSchema()) as object;
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
@@ -25,7 +30,7 @@ const createVisualizationSchema = z.object({
     .optional()
     .describe('An existing visualization configuration to modify.'),
   chartType: z
-    .enum([SupportedChartType.Metric, SupportedChartType.Map])
+    .enum([SupportedChartType.Metric, SupportedChartType.Gauge, SupportedChartType.Tagcloud])
     .optional()
     .describe(
       '(optional) The type of chart to create as indicated by the user. If not provided, the LLM will suggest the best chart type.'
@@ -53,6 +58,13 @@ This tool will:
 2. Generate an ES|QL query if not provided
 3. Generate a valid visualization configuration`,
     schema: createVisualizationSchema,
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ uiSettings }) => {
+        const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID);
+        return { status: enabled ? 'available' : 'unavailable' };
+      },
+    },
     tags: [],
     handler: async (
       { query: nlQuery, chartType, esql, existingConfig },
@@ -74,7 +86,15 @@ This tool will:
 
         // Step 2: Generate visualization configuration using langgraph with validation retry
         const model = await modelProvider.getDefaultModel();
-        const schema = metricSchema;
+        // Select appropriate schema based on chart type
+        let schema: object;
+        if (selectedChartType === SupportedChartType.Gauge) {
+          schema = gaugeSchema;
+        } else if (selectedChartType === SupportedChartType.Tagcloud) {
+          schema = tagcloudSchema;
+        } else {
+          schema = metricSchema;
+        }
 
         // Create and invoke the validation retry graph
         const graph = createVisualizationGraph(model, logger, events, esClient);
