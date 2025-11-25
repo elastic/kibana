@@ -77,6 +77,11 @@ export const FeatureDetailExpanded = ({
                   defaultMessage: 'Edit filter',
                 }
               )}
+              data-test-subj={
+                isEditingCondition
+                  ? 'feature_identification_edit_filter_button'
+                  : 'feature_identification_save_filter_button'
+              }
             />
           </EuiFlexGroup>
           <EditableConditionPanel

@@ -71,6 +71,7 @@ export const EditSignificantEventFlyout = ({
                 });
                 telemetryClient.trackSignificantEventsCreated({
                   count: 1,
+                  stream_name: definition.stream.name,
                   stream_type: streamType,
                 });
                 setIsEditFlyoutOpen(false);
@@ -98,6 +99,7 @@ export const EditSignificantEventFlyout = ({
                 });
                 telemetryClient.trackSignificantEventsCreated({
                   count: data.queries.length,
+                  stream_name: definition.stream.name,
                   stream_type: streamType,
                 });
                 setIsEditFlyoutOpen(false);

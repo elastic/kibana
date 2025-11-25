@@ -60,6 +60,7 @@ export function NoSignificantEventsEmptyState({
             selectedFeatures.length === 0 || !aiFeatures?.genAiConnectors?.selectedConnector
           }
           onClick={() => onGenerateSuggestionsClick()}
+          data-test-subj="significant_events_generate_suggestions_button"
         >
           {i18n.translate(
             'xpack.streams.significantEvents.emptyState.generateSuggestionsButtonLabel',
@@ -68,7 +69,10 @@ export function NoSignificantEventsEmptyState({
             }
           )}
         </EuiButton>
-        <EuiButtonEmpty onClick={onManualEntryClick}>
+        <EuiButtonEmpty
+          onClick={onManualEntryClick}
+          data-test-subj="significant_events_manual_entry_button"
+        >
           {i18n.translate('xpack.streams.significantEvents.emptyState.manualEntryButtonLabel', {
             defaultMessage: 'Manual entry',
           })}

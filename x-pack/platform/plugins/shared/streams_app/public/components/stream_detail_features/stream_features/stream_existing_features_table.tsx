@@ -104,12 +104,14 @@ export function StreamExistingFeaturesTable({
           onClick: (feature) => {
             goToGenerateSignificantEvents([feature]);
           },
+          'data-test-subj': 'feature_identification_single_goto_significant_events_button',
         },
         {
           name: EDIT_ACTION_NAME_LABEL,
           description: EDIT_ACTION_DESCRIPTION_LABEL,
           type: 'icon',
           icon: 'pencil',
+          'data-test-subj': 'feature_identification_existing_start_edit_button',
           onClick: (feature) => {
             setSelectedFeature(feature);
           },
@@ -187,6 +189,7 @@ export function StreamExistingFeaturesTable({
               iconType="crosshairs"
               size="xs"
               aria-label={GENERATE_SIGNIFICANT_EVENTS}
+              data-test-subj="feature_identification_selection_goto_significant_events_button"
             >
               {GENERATE_SIGNIFICANT_EVENTS}
             </EuiButtonEmpty>

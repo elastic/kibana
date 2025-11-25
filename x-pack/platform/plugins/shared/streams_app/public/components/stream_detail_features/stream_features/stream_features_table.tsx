@@ -127,6 +127,7 @@ export function StreamFeaturesTable({
               prev.concat({ ...feature, name: generateCopyName(feature.name, features) })
             );
           },
+          'data-test-subj': 'feature_identification_clone_feature_button',
         },
         {
           name: i18n.translate('xpack.streams.streamFeaturesTable.columns.actions.editActionName', {
@@ -220,6 +221,11 @@ export function StreamFeaturesTable({
                   })
             }
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            data-test-subj={
+              isExpanded
+                ? 'feature_identification_collapse_details_button'
+                : 'feature_identification_expand_details_button'
+            }
           />
         );
       },

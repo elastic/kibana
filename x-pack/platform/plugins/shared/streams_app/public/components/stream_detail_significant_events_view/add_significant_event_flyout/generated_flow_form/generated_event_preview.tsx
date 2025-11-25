@@ -109,6 +109,7 @@ export function GeneratedEventPreview({
                           kql: false,
                         });
                       }}
+                      data-test-subj="significant_events_generated_event_cancel_button"
                     >
                       {i18n.translate(
                         'xpack.streams.addSignificantEventFlyout.generatedEventPreview.cancelButtonLabel',
@@ -130,6 +131,7 @@ export function GeneratedEventPreview({
                           kql: false,
                         });
                       }}
+                      data-test-subj="significant_events_generated_event_save_button"
                     >
                       {i18n.translate(
                         'xpack.streams.addSignificantEventFlyout.generatedEventPreview.saveButtonLabel',
@@ -145,6 +147,7 @@ export function GeneratedEventPreview({
                 onClick={() => {
                   setIsEditing(true);
                 }}
+                data-test-subj="significant_events_generated_event_edit_button"
               >
                 {i18n.translate(
                   'xpack.streams.addSignificantEventFlyout.generatedEventPreview.editButtonLabel',

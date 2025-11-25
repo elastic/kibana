@@ -183,6 +183,7 @@ export function PreviewDataSparkPlot({
                 iconType="discoverApp"
                 href={discoverLink}
                 target="_blank"
+                data-test-subj="significant_events_preview_open_in_discover_button"
               >
                 {openInDiscoverLabel}
               </EuiButtonEmpty>

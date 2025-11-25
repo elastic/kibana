@@ -114,6 +114,7 @@ export function AddSignificantEventFlyout({
   }, [selectedFlow]);
 
   const generateQueries = useCallback(() => {
+    let numberOfGeneratedQueries = 0;
     const connector = aiFeatures?.genAiConnectors.selectedConnector;
     if (!connector || selectedFeatures.length === 0) {
       return;
@@ -134,6 +135,7 @@ export function AddSignificantEventFlyout({
               });
 
               if (!validation.kql.isInvalid) {
+                numberOfGeneratedQueries++;
                 setGeneratedQueries((prev) => [
                   ...prev,
                   {
@@ -174,12 +176,24 @@ export function AddSignificantEventFlyout({
           });
           telemetryClient.trackSignificantEventsSuggestionsGenerate({
             duration_ms: Date.now() - startTime,
+            count: numberOfGeneratedQueries,
+            features_selected: selectedFeatures.length,
+            features_total: features.length,
+            stream_name: definition.name,
             stream_type: getStreamTypeFromDefinition(definition),
           });
           setIsGenerating(false);
         },
       });
-  }, [aiFeatures, definition, generate, notifications, telemetryClient, selectedFeatures]);
+  }, [
+    aiFeatures?.genAiConnectors.selectedConnector,
+    selectedFeatures,
+    generate,
+    notifications,
+    telemetryClient,
+    features.length,
+    definition,
+  ]);
 
   useEffect(() => {
     if (initialFlow === 'ai' && initialSelectedFeatures.length > 0) {
@@ -266,6 +280,7 @@ export function AddSignificantEventFlyout({
                         !aiFeatures?.genAiConnectors?.selectedConnector
                       }
                       onClick={generateQueries}
+                      data-test-subj="significant_events_flyout_generate_suggestions_button"
                     >
                       {i18n.translate(
                         'xpack.streams.streamDetailView.addSignificantEventFlyout.generateSuggestionsButtonLabel',
@@ -353,7 +368,16 @@ export function AddSignificantEventFlyout({
                 }}
               >
                 <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
-                  <EuiButtonEmpty color="primary" onClick={() => onClose()} disabled={isSubmitting}>
+                  <EuiButtonEmpty
+                    color="primary"
+                    onClick={() => onClose()}
+                    disabled={isSubmitting}
+                    data-test-subj={
+                      selectedFlow === 'manual'
+                        ? 'significant_events_manual_entry_cancel_button'
+                        : 'significant_events_ai_generate_cancel_button'
+                    }
+                  >
                     {i18n.translate(
                       'xpack.streams.streamDetailView.addSignificantEventFlyout.cancelButtonLabel',
                       { defaultMessage: 'Cancel' }
@@ -382,6 +406,13 @@ export function AddSignificantEventFlyout({
                           break;
                       }
                     }}
+                    data-test-subj={
+                      isEditMode
+                        ? 'significant_events_edit_save_button'
+                        : selectedFlow === 'manual'
+                        ? 'significant_events_manual_entry_save_button'
+                        : 'significant_events_ai_generate_save_button'
+                    }
                   >
                     {selectedFlow === 'manual'
                       ? isEditMode

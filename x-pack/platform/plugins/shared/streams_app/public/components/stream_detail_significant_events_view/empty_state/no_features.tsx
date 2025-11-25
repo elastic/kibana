@@ -49,6 +49,7 @@ export function NoFeaturesEmptyState({
           fill
           onClick={onFeatureIdentificationClick}
           disabled={!aiFeatures?.genAiConnectors?.selectedConnector}
+          data-test-subj="significant_events_identify_features_button"
         >
           {i18n.translate(
             'xpack.streams.significantEvents.noFeatures.featureIdentificationButtonLabel',
@@ -57,7 +58,10 @@ export function NoFeaturesEmptyState({
             }
           )}
         </EuiButton>
-        <EuiButtonEmpty onClick={onManualEntryClick}>
+        <EuiButtonEmpty
+          onClick={onManualEntryClick}
+          data-test-subj="significant_events_manual_entry_no_features_button"
+        >
           {i18n.translate('xpack.streams.significantEvents.noFeatures.manualEntryButtonLabel', {
             defaultMessage: 'Manual entry',
           })}

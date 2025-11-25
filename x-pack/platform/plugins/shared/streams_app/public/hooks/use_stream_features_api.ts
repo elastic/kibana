@@ -11,6 +11,7 @@ import type { Streams, Feature } from '@kbn/streams-schema';
 import type { IdentifiedFeaturesEvent } from '@kbn/streams-plugin/server/routes/internal/streams/features/types';
 import type { StorageClientBulkResponse } from '@kbn/storage-adapter';
 import { useKibana } from './use_kibana';
+import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
 
 interface StreamFeaturesApi {
   upsertQuery: (feature: Feature) => Promise<void>;
@@ -33,6 +34,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         streams: { streamsRepositoryClient },
       },
     },
+    services: { telemetryClient },
   } = useKibana();
 
   const { signal, abort, refresh } = useAbortController();
@@ -54,9 +56,23 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         }
       );
 
-      return firstValueFrom(events$);
+      const identifiedFeatures = await firstValueFrom(events$);
+
+      telemetryClient.trackFeaturesIdentified({
+        count: identifiedFeatures.features.length,
+        stream_name: definition.name,
+        stream_type: getStreamTypeFromDefinition(definition),
+      });
+
+      return identifiedFeatures;
     },
     addFeaturesToStream: async (features: Feature[]) => {
+      telemetryClient.trackFeaturesSaved({
+        count: features.length,
+        stream_name: definition.name,
+        stream_type: getStreamTypeFromDefinition(definition),
+      });
+
       return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
         signal,
         params: {
@@ -74,6 +90,12 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
       });
     },
     removeFeaturesFromStream: async (features: Pick<Feature, 'type' | 'name'>[]) => {
+      telemetryClient.trackFeaturesDeleted({
+        count: features.length,
+        stream_name: definition.name,
+        stream_type: getStreamTypeFromDefinition(definition),
+      });
+
       return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
         signal,
         params: {

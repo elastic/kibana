@@ -32,7 +32,10 @@ export function AiFlowWaitingForGeneration({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{label}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={stopGeneration}>
+        <EuiButtonEmpty
+          onClick={stopGeneration}
+          data-test-subj="significant_events_ai_generate_stop_button"
+        >
           {i18n.translate(
             'xpack.streams.aiFlowWaitingForGeneration.button.stopGenerationButtonLabel',
             { defaultMessage: 'Stop' }
