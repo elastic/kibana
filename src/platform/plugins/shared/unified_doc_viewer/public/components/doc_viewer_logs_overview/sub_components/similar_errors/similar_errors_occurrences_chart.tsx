@@ -16,7 +16,7 @@ import {
   type LensSeriesLayer,
 } from '@kbn/lens-embeddable-utils/config_builder';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
-import { EuiLoadingChart, EuiFlexGroup, EuiCallOut } from '@elastic/eui';
+import { EuiLoadingChart, EuiFlexGroup, EuiCallOut, EuiFlexItem } from '@elastic/eui';
 import { useDataSourcesContext } from '../../../observability/traces/hooks/use_data_sources';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { ContentFrameworkChart } from '../../../content_framework/chart';
@@ -135,7 +135,13 @@ export function SimilarErrorsOccurrencesChart({
 
   const content = useMemo(() => {
     if (!lensAttributes || !EmbeddableComponent) {
-      return <EuiLoadingChart size="l" />; // TODO Place loading in the center of the area
+      return (
+        <EuiFlexGroup style={{ height: 120 }} justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingChart size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
     }
 
     return (
@@ -156,18 +162,11 @@ export function SimilarErrorsOccurrencesChart({
   }
 
   return (
-    <EuiFlexGroup
+    <ContentFrameworkChart
       data-test-subj="docViewerSimilarErrorsOccurrencesChart"
-      justifyContent="center"
-      alignItems="center"
-      style={{ height: 132 }}
+      title={chartTitle}
     >
-      <ContentFrameworkChart
-        data-test-subj="docViewerSimilarErrorsOccurrencesChart"
-        title={chartTitle}
-      >
-        {content}
-      </ContentFrameworkChart>
-    </EuiFlexGroup>
+      {content}
+    </ContentFrameworkChart>
   );
 }
