@@ -26,7 +26,6 @@ dependsOn:
   - '@kbn/logs-data-access-plugin'
   - '@kbn/zod'
   - '@kbn/onechat-server'
-  - '@kbn/spaces-plugin'
   - '@kbn/security-plugin'
   - '@kbn/es-query'
   - '@kbn/core-elasticsearch-server'
