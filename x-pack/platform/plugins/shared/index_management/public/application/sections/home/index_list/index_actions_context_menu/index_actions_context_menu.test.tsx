@@ -103,7 +103,7 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
       enableProjectLevelRetentionChecks: true,
       enableSemanticText: false,
       enforceAdaptiveAllocations: false,
-      enableTogglingFailureStoreRetention: true,
+      enableFailureStoreRetentionDisabling: true,
     },
     history: { push: jest.fn() } as unknown as AppDependencies['history'],
     setBreadcrumbs: jest.fn(),

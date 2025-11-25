@@ -68,7 +68,6 @@ export function deserializeDataStream(
   if (failureStore?.enabled === true) {
     failureStoreEnabled = true;
   }
-  // @ts-expect-error failure store lifecycle is well not typed
   const failureStoreLifecycle = failureStore?.lifecycle;
 
   return {

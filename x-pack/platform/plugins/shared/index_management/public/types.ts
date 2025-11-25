@@ -6,11 +6,11 @@
  */
 
 import type {
-  AnalyticsServiceStart,
-  I18nStart,
-  OverlayStart,
-  ThemeServiceStart,
-  UserProfileService,
+    AnalyticsServiceStart,
+    I18nStart,
+    OverlayStart,
+    ThemeServiceStart,
+    UserProfileService,
 } from '@kbn/core/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
@@ -21,8 +21,8 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type {
-  ReindexServicePublicSetup,
-  ReindexServicePublicStart,
+    ReindexServicePublicSetup,
+    ReindexServicePublicStart,
 } from '@kbn/reindex-service-plugin/public';
 
 export interface IndexManagementStartServices {
@@ -68,7 +68,7 @@ export interface ClientConfigType {
   enableMappingsSourceFieldSection?: boolean;
   enableTogglingDataRetention?: boolean;
   enableProjectLevelRetentionChecks?: boolean;
-  enableTogglingFailureStoreRetention?: boolean;
+  enableFailureStoreRetentionDisabling?: boolean;
   dev: {
     enableSemanticText?: boolean;
   };

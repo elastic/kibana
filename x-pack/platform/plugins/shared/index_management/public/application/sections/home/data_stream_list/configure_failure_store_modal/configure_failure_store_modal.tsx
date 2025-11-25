@@ -30,7 +30,7 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
 
   const {
     services: { notificationService },
-    config: { enableTogglingFailureStoreRetention },
+    config: { enableFailureStoreRetentionDisabling },
   } = useAppContext();
 
   const handleSaveModal = async (data: FailureStoreFormData) => {
@@ -87,7 +87,7 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
         defaultRetentionPeriod: dataStream?.failureStoreRetention?.defaultRetentionPeriod,
         retentionDisabled: dataStream?.failureStoreRetention?.retentionDisabled ?? false,
       }}
-      canShowDisableLifecycle={enableTogglingFailureStoreRetention}
+      canShowDisableLifecycle={enableFailureStoreRetentionDisabling}
     />
   );
 };

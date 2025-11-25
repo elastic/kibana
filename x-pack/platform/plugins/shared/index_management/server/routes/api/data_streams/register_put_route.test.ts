@@ -249,8 +249,8 @@ describe('registerPutDataStreamFailureStore', () => {
     expect(res).toEqual({ body: { success: true } });
   });
 
-  it('should not disable failure store retention if enableTogglingFailureStoreRetention is false', async () => {
-    setupRouter({ enableTogglingFailureStoreRetention: false });
+  it('should not disable failure store retention if enableFailureStoreRetentionDisabling is false', async () => {
+    setupRouter({ enableFailureStoreRetentionDisabling: false });
 
     const mockRequest: RequestMock = {
       method: 'put',

@@ -10,25 +10,25 @@ import { Subject } from 'rxjs';
 import SemVer from 'semver/classes/semver';
 
 import type {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-  ScopedHistory,
-  Capabilities,
+    CoreSetup,
+    CoreStart,
+    Plugin,
+    PluginInitializerContext,
+    ScopedHistory,
+    Capabilities,
 } from '@kbn/core/public';
 import type {
-  ComponentTemplateFlyoutProps,
-  DatastreamFlyoutProps,
-  IndexManagementPluginSetup,
-  IndexManagementPluginStart,
-  IndexMappingProps,
-  IndexSettingProps,
-  IndexTemplateFlyoutProps,
+    ComponentTemplateFlyoutProps,
+    DatastreamFlyoutProps,
+    IndexManagementPluginSetup,
+    IndexManagementPluginStart,
+    IndexMappingProps,
+    IndexSettingProps,
+    IndexTemplateFlyoutProps,
 } from '@kbn/index-management-shared-types';
 import type {
-  IndexManagementLocator,
-  IndexManagementAppMountParams,
+    IndexManagementLocator,
+    IndexManagementAppMountParams,
 } from '@kbn/index-management-shared-types';
 import type { Subscription } from 'rxjs';
 import React from 'react';
@@ -72,7 +72,7 @@ export class IndexMgmtUIPlugin
     enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
     enforceAdaptiveAllocations: boolean;
-    enableTogglingFailureStoreRetention: boolean;
+    enableFailureStoreRetentionDisabling: boolean;
   };
   private canUseSyntheticSource: boolean = false;
   private licensingSubscription?: Subscription;
@@ -95,7 +95,7 @@ export class IndexMgmtUIPlugin
       enableMappingsSourceFieldSection,
       enableTogglingDataRetention,
       enableProjectLevelRetentionChecks,
-      enableTogglingFailureStoreRetention,
+      enableFailureStoreRetentionDisabling,
       dev: { enableSemanticText },
     } = ctx.config.get<ClientConfigType>();
     this.config = {
@@ -111,7 +111,7 @@ export class IndexMgmtUIPlugin
       enableProjectLevelRetentionChecks: enableProjectLevelRetentionChecks ?? false,
       enableSemanticText: enableSemanticText ?? true,
       enforceAdaptiveAllocations: ctx.env.packageInfo.buildFlavor === 'serverless',
-      enableTogglingFailureStoreRetention: enableTogglingFailureStoreRetention ?? true,
+      enableFailureStoreRetentionDisabling: enableFailureStoreRetentionDisabling ?? true,
     };
   }
 
