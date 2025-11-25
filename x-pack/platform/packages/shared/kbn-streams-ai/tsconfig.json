@@ -25,5 +25,6 @@
     "@kbn/inference-prompt-utils",
     "@kbn/es-query",
     "@kbn/zod-helpers",
+    "@kbn/apm-utils",
   ]
 }
