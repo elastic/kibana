@@ -10,7 +10,7 @@
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { History } from 'history';
 import { discoverServiceMock } from '../../../__mocks__/services';
@@ -48,7 +48,7 @@ describe('Test discover app state container', () => {
       useHash: storeInSessionStorage,
       // @ts-expect-error upgrade typescript v5.9.3
       history,
-      ...(toasts && withNotifyOnErrors(toasts)),
+      ...toasts,
     });
     tabsStorageManager = createTabsStorageManager({
       urlStateStorage: stateStorage,
