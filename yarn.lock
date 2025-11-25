@@ -6263,22 +6263,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/default-nav-analytics@link:src/platform/packages/private/default-nav/analytics":
-  version "0.0.0"
-  uid ""
-
-"@kbn/default-nav-devtools@link:src/platform/packages/private/default-nav/devtools":
-  version "0.0.0"
-  uid ""
-
-"@kbn/default-nav-management@link:src/platform/packages/private/default-nav/management":
-  version "0.0.0"
-  uid ""
-
-"@kbn/default-nav-ml@link:src/platform/packages/private/default-nav/ml":
-  version "0.0.0"
-  uid ""
-
 "@kbn/default-tracer@link:src/platform/packages/shared/kbn-default-tracer":
   version "0.0.0"
   uid ""
@@ -7144,6 +7128,10 @@
   uid ""
 
 "@kbn/kibana-utils-plugin@link:src/platform/plugins/shared/kibana_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/kubernetes-security-plugin@link:x-pack/solutions/security/plugins/kubernetes_security":
   version "0.0.0"
   uid ""
 
