@@ -19,12 +19,12 @@ const riskEntityAttachmentDataSchema = z.object({
  * Data for a risk entity attachment.
  * Note: After validation, the data is stored as a formatted string.
  */
-type RiskEntityAttachmentData = z.infer<typeof riskEntityAttachmentDataSchema>;
+type EntityRiskAttachmentData = z.infer<typeof riskEntityAttachmentDataSchema>;
 
 /**
  * Type guard to check if data is a formatted risk entity string
  */
-const isRiskEntityFormattedData = (data: unknown): data is string => {
+const isEntityRiskFormattedData = (data: unknown): data is string => {
   return (
     typeof data === 'string' && data.includes('identifier:') && data.includes('identifierType:')
   );
@@ -33,13 +33,13 @@ const isRiskEntityFormattedData = (data: unknown): data is string => {
 /**
  * Creates the definition for the `risk_entity` attachment type.
  */
-export const createRiskEntityAttachmentType = (): AttachmentTypeDefinition => {
+export const createEntityRiskAttachmentType = (): AttachmentTypeDefinition => {
   return {
     id: SecurityAgentBuilderAttachments.risk_entity,
     validate: (input) => {
       const parseResult = riskEntityAttachmentDataSchema.safeParse(input);
       if (parseResult.success) {
-        return { valid: true, data: formatRiskEntityData(parseResult.data) };
+        return { valid: true, data: formatEntityRiskData(parseResult.data) };
       } else {
         return { valid: false, error: parseResult.error.message };
       }
@@ -49,7 +49,7 @@ export const createRiskEntityAttachmentType = (): AttachmentTypeDefinition => {
       const data = attachment.data;
       // Necessary because we cannot currently use the AttachmentType type as agent is not
       // registered with enum AttachmentType in onechat attachment_types.ts
-      if (!isRiskEntityFormattedData(data)) {
+      if (!isEntityRiskFormattedData(data)) {
         throw new Error(`Invalid risk entity attachment data for attachment ${attachment.id}`);
       }
       return {
@@ -82,6 +82,6 @@ CRITICAL: You MUST call ${sanitizeToolId(
   };
 };
 
-const formatRiskEntityData = (data: RiskEntityAttachmentData): string => {
+const formatEntityRiskData = (data: EntityRiskAttachmentData): string => {
   return `identifier: ${data.identifier}, identifierType: ${data.identifierType}`;
 };

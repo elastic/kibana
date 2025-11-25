@@ -149,7 +149,7 @@ import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
 import {
   createAlertAttachmentType,
   createAttackDiscoveryAttachmentType,
-  createRiskEntityAttachmentType,
+  createEntityRiskAttachmentType,
   createQueryHelpAttachmentType,
 } from './agent_builder/attachments';
 import {
@@ -246,7 +246,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     onechat.attachments.registerType(createAlertAttachmentType());
     onechat.attachments.registerType(createAttackDiscoveryAttachmentType());
-    onechat.attachments.registerType(createRiskEntityAttachmentType());
+    onechat.attachments.registerType(createEntityRiskAttachmentType());
     onechat.attachments.registerType(createQueryHelpAttachmentType());
 
     // Register tools
