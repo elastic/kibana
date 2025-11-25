@@ -172,6 +172,6 @@ export function getDashboardStateSchema() {
       )
     ),
     timeRange: schema.maybe(timeRangeSchema),
-    title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } })
+    title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
   });
 }
