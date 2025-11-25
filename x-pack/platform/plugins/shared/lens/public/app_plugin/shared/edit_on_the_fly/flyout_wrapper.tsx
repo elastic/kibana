@@ -177,6 +177,7 @@ export const FlyoutWrapper = ({
             }
           }
           .euiFlyoutBody__overflowContent {
+            background-color: ${euiTheme.colors.emptyShade};
             padding: 0;
           }
         `}
