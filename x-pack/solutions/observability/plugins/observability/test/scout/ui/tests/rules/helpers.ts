@@ -83,7 +83,6 @@ export const LogsSpecialist = {
     });
   },
 
-  /** Logs Specialist login method */
   async login(browserAuth: BrowserAuthFixture, samlAuth: SamlAuth) {
     await browserAuth.loginAs(samlAuth.customRoleName);
   },
