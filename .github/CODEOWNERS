@@ -329,10 +329,6 @@ src/core/packages/user-settings/server-mocks @elastic/kibana-security
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
-src/platform/packages/private/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
-src/platform/packages/private/default-nav/devtools @elastic/kibana-management
-src/platform/packages/private/default-nav/management @elastic/kibana-management
-src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/private/kbn-ambient-common-types @elastic/kibana-operations
 src/platform/packages/private/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
@@ -646,7 +642,9 @@ src/platform/packages/shared/presentation/presentation_containers @elastic/kiban
 src/platform/packages/shared/presentation/presentation_publishing @elastic/kibana-presentation
 src/platform/packages/shared/presentation/presentation_publishing_schemas @elastic/kibana-presentation
 src/platform/packages/shared/presentation/presentation_util @elastic/kibana-presentation
+src/platform/packages/shared/react/env @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/common @elastic/appex-sharedux
+src/platform/packages/shared/react/kibana_context/env @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/render @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/root @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/styled @elastic/appex-sharedux
@@ -2387,14 +2385,15 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/api_integration/apis/searchprofiler @elastic/kibana-management
 /x-pack/platform/test/api_integration/apis/console @elastic/kibana-management
 /x-pack/platform/test/serverless/**/test_suites/index_management/ @elastic/kibana-management
-/x-pack/platform/test/serverless/functional/test_suites/management/ @elastic/kibana-management
 /x-pack/platform/test/serverless/**/test_suites/painless_lab/ @elastic/kibana-management
 /x-pack/platform/test/serverless/**/test_suites/console/ @elastic/kibana-management
 /x-pack/platform/test/serverless/api_integration/test_suites/management/ @elastic/kibana-management
 /x-pack/platform/test/serverless/api_integration/test_suites/search_profiler/ @elastic/kibana-management
+/x-pack/platform/test/serverless/functional/test_suites/management/advanced_settings.ts @elastic/kibana-management
 /x-pack/platform/test/serverless/functional/test_suites/management/disabled_uis.ts @elastic/kibana-management
 /x-pack/platform/test/serverless/functional/test_suites/management/ingest_pipelines.ts @elastic/kibana-management
 /x-pack/platform/test/serverless/functional/test_suites/management/landing_page.ts @elastic/kibana-management
+/x-pack/platform/test/serverless/functional/test_suites/management/index_management/ @elastic/kibana-management
 /x-pack/platform/test/serverless/functional/test_suites/dev_tools/ @elastic/kibana-management
 /x-pack/platform/test/serverless/**/test_suites/grok_debugger/ @elastic/kibana-management
 /x-pack/platform/test/api_integration/apis/management/ @elastic/kibana-management

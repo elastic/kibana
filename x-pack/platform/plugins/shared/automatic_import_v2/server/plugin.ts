@@ -65,7 +65,8 @@ export class AutomaticImportV2Plugin
     this.automaticImportService = new AutomaticImportService(
       this.logger,
       esClientPromise,
-      core.savedObjects
+      core.savedObjects,
+      plugins.taskManager
     );
 
     const requestContextFactory = new RequestContextFactory({
@@ -97,24 +98,32 @@ export class AutomaticImportV2Plugin
   ): AutomaticImportV2PluginStart {
     this.logger.debug('automaticImportV2: Started');
 
-    if (this.automaticImportService) {
-      if (!plugins.security) {
-        throw new Error('Security service not initialized.');
-      }
-
-      if (!core.savedObjects) {
-        throw new Error('SavedObjects service not initialized.');
-      }
-
-      this.automaticImportService
-        .initialize(core.security, core.savedObjects)
-        .then(() => {
-          this.logger.debug('AutomaticImportService initialized successfully');
-        })
-        .catch((error) => {
-          this.logger.error('Failed to initialize AutomaticImportService', error);
-        });
+    if (!plugins.security) {
+      throw new Error('Security service not initialized.');
     }
+
+    if (!core.savedObjects) {
+      throw new Error('SavedObjects service not initialized.');
+    }
+
+    if (!plugins.taskManager) {
+      throw new Error('TaskManager service not initialized.');
+    }
+
+    if (!this.automaticImportService) {
+      throw new Error('AutomaticImportService not initialized during setup');
+    }
+
+    this.automaticImportService
+      .initialize(core.security, core.savedObjects, plugins.taskManager)
+      .then(() => {
+        this.logger.debug('AutomaticImportService initialized successfully');
+      })
+      .catch((error) => {
+        this.logger.error('Failed to initialize AutomaticImportService', error);
+      });
+
+    this.logger.info('TaskManagerService initialized successfully');
 
     return {
       actions: plugins.actions,

@@ -108,7 +108,7 @@ export class StepExecutionRuntime {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async setCurrentStepState(state: Record<string, any> | undefined): Promise<void> {
+  public setCurrentStepState(state: Record<string, any> | undefined): void {
     const stepId = this.node.stepId;
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
@@ -117,7 +117,7 @@ export class StepExecutionRuntime {
     });
   }
 
-  public async startStep(): Promise<void> {
+  public startStep(): void {
     const stepId = this.node.stepId;
     const stepStartedAt = new Date();
 
@@ -138,7 +138,7 @@ export class StepExecutionRuntime {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async setInput(input: Record<string, any>): Promise<void> {
+  public setInput(input: Record<string, any>): void {
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
       input,
@@ -146,7 +146,7 @@ export class StepExecutionRuntime {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async finishStep(stepOutput?: Record<string, any>): Promise<void> {
+  public finishStep(stepOutput?: Record<string, any>): void {
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
@@ -166,7 +166,7 @@ export class StepExecutionRuntime {
     await this.stepLogger?.flushEvents();
   }
 
-  public async failStep(error: Error | string): Promise<void> {
+  public failStep(error: Error | string): void {
     // if there is a last step execution, fail it
     // if not, create a new step execution with fail
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);

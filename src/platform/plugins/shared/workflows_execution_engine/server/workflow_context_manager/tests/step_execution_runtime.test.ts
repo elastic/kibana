@@ -155,8 +155,8 @@ describe('StepExecutionRuntime', () => {
       });
     });
 
-    it('should upsertStep with the fake step execution id', async () => {
-      await underTest.setCurrentStepState({});
+    it('should upsertStep with the fake step execution id', () => {
+      underTest.setCurrentStepState({});
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'fake_step_execution_id',
@@ -164,13 +164,13 @@ describe('StepExecutionRuntime', () => {
       );
     });
 
-    it('should update the step execution with the state and be able to retrieve it', async () => {
+    it('should update the step execution with the state and be able to retrieve it', () => {
       (workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
         stepId: 'node1',
         state: { success: true, data: {} },
       } as Partial<EsWorkflowStepExecution>);
       const fakeState = { success: true, data: {} };
-      await underTest.setCurrentStepState(fakeState);
+      underTest.setCurrentStepState(fakeState);
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -207,8 +207,8 @@ describe('StepExecutionRuntime', () => {
       mockDateNow = new Date('2023-01-01T00:00:00.000Z');
     });
 
-    it('should upsertStep with the fake step execution id', async () => {
-      await underTest.startStep();
+    it('should upsertStep with the fake step execution id', () => {
+      underTest.startStep();
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -218,8 +218,8 @@ describe('StepExecutionRuntime', () => {
       expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
-    it('should create a step execution with "RUNNING" status', async () => {
-      await underTest.startStep();
+    it('should create a step execution with "RUNNING" status', () => {
+      underTest.startStep();
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -232,8 +232,8 @@ describe('StepExecutionRuntime', () => {
       expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
-    it('should log the start of step execution', async () => {
-      await underTest.startStep();
+    it('should log the start of step execution', () => {
+      underTest.startStep();
       expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Step 'fakeStepId1' started`, {
         event: { action: 'step-start', category: ['workflow', 'step'] },
         tags: ['workflow', 'step', 'start'],
@@ -251,8 +251,8 @@ describe('StepExecutionRuntime', () => {
       expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
-    it('should save step path from the workflow execution stack', async () => {
-      await underTest.startStep();
+    it('should save step path from the workflow execution stack', () => {
+      underTest.startStep();
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
           scopeStack: [
@@ -264,8 +264,8 @@ describe('StepExecutionRuntime', () => {
       expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
-    it('should save step type', async () => {
-      await underTest.startStep();
+    it('should save step type', () => {
+      underTest.startStep();
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
           stepType: 'fakeStepType1',
@@ -298,10 +298,10 @@ describe('StepExecutionRuntime', () => {
       });
     });
 
-    it('should correctly calculate step completedAt and executionTimeMs', async () => {
+    it('should correctly calculate step completedAt and executionTimeMs', () => {
       const expectedCompletedAt = new Date('2025-08-06T00:00:02.000Z');
       mockDateNow = expectedCompletedAt;
-      await underTest.finishStep();
+      underTest.finishStep();
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -313,7 +313,7 @@ describe('StepExecutionRuntime', () => {
     });
 
     describe('step execution succeeds', () => {
-      beforeEach(async () => {
+      beforeEach(() => {
         (workflowExecutionState.getStepExecution as jest.Mock).mockImplementation(
           (stepExecutionId) => {
             if (stepExecutionId === 'fake_step_execution_id') {
@@ -328,8 +328,8 @@ describe('StepExecutionRuntime', () => {
         );
       });
 
-      it('should upsert step with the fake step execution id', async () => {
-        await underTest.finishStep();
+      it('should upsert step with the fake step execution id', () => {
+        underTest.finishStep();
 
         expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -339,8 +339,8 @@ describe('StepExecutionRuntime', () => {
         expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
       });
 
-      it('should finish a step execution with "COMPLETED" status', async () => {
-        await underTest.finishStep();
+      it('should finish a step execution with "COMPLETED" status', () => {
+        underTest.finishStep();
 
         expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -350,8 +350,8 @@ describe('StepExecutionRuntime', () => {
         expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
       });
 
-      it('should finish a step execution executionTime', async () => {
-        await underTest.finishStep();
+      it('should finish a step execution executionTime', () => {
+        underTest.finishStep();
 
         expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -361,8 +361,8 @@ describe('StepExecutionRuntime', () => {
         expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
       });
 
-      it('should log successful step execution', async () => {
-        await underTest.finishStep();
+      it('should log successful step execution', () => {
+        underTest.finishStep();
         expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Step 'fakeStepId1' completed`, {
           event: {
             action: 'step-complete',
@@ -399,9 +399,9 @@ describe('StepExecutionRuntime', () => {
       });
     });
 
-    it('should upsert step with the fake step execution id', async () => {
+    it('should upsert step with the fake step execution id', () => {
       const error = new Error('Step execution failed');
-      await underTest.failStep(error);
+      underTest.failStep(error);
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -411,9 +411,9 @@ describe('StepExecutionRuntime', () => {
       expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
-    it('should mark the step as failed', async () => {
+    it('should mark the step as failed', () => {
       const error = new Error('Step execution failed');
-      await underTest.failStep(error);
+      underTest.failStep(error);
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -424,9 +424,9 @@ describe('StepExecutionRuntime', () => {
       expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
-    it('should log the failure of the step', async () => {
+    it('should log the failure of the step', () => {
       const error = new Error('Step execution failed');
-      await underTest.failStep(error);
+      underTest.failStep(error);
 
       expect(workflowLogger.logError).toHaveBeenCalledWith(
         `Step 'fakeStepId1' failed: Step execution failed`,
