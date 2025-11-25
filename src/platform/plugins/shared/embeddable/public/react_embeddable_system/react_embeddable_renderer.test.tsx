@@ -191,7 +191,6 @@ describe('embeddable renderer', () => {
   });
 
   it('catches error when thrown in buildEmbeddable', async () => {
-    const buildEmbeddable = jest.fn();
     const errorInInitializeFactory: EmbeddableFactory<{ name: string; bork: string }> = {
       ...testEmbeddableFactory,
       type: 'errorInBuildEmbeddable',
@@ -221,14 +220,11 @@ describe('embeddable renderer', () => {
       </EuiThemeProvider>
     );
 
-    await waitFor(() =>
-      expect(embeddable.getAllByTestId('errorMessageMarkdown').length).not.toBe(0)
-    );
+    await waitFor(() => expect(embeddable.getByTestId('errorMessageMarkdown')).toBeInTheDocument());
     expect(onApiAvailable).not.toBeCalled();
-    expect(buildEmbeddable).not.toBeCalled();
-    embeddable
-      .getAllByTestId('errorMessageMarkdown')
-      .forEach((element) => expect(element).toHaveTextContent('error in buildEmbeddable'));
+    expect(embeddable.getByTestId('errorMessageMarkdown')).toHaveTextContent(
+      'error in buildEmbeddable'
+    );
   });
 });
 
