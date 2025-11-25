@@ -25,7 +25,6 @@ import {
   isIlmLifecycle,
 } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
-import { findInheritedFailureStore } from '@kbn/streams-schema/src/helpers/lifecycle';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import {
   isDisabledLifecycleFailureStore,
@@ -455,7 +454,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       if (isIlmLifecycle(this.getLifecycle())) {
         return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
       }
-      if (isDisabledLifecycleFailureStore(this.getFailureStore())) {
+      const effectiveFailureStore = this.getInheritedFailureStoreFromAncestors(desiredState);
+      if (isDisabledLifecycleFailureStore(effectiveFailureStore)) {
         return {
           isValid: false,
           errors: [new Error('Disabling failure store lifecycle is not supported in Serverless')],
@@ -555,10 +555,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     );
     const { existsAsManagedDataStream } = await this.getMatchingDataStream();
     const settings = getInheritedSettings(ancestors);
-    const { from: _fsOrigin, ...failureStore } = findInheritedFailureStore(
-      this._definition,
-      ancestors
-    );
+    const failureStore = this.getInheritedFailureStoreFromAncestors(desiredState);
 
     return [
       {
@@ -651,6 +648,18 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     return this._definition.ingest.failure_store;
   }
 
+  private getInheritedFailureStoreFromAncestors(desiredState: State): FailureStore {
+    const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).reverse();
+    for (const ancestor of ancestorsAndSelf) {
+      const ancestorStream = desiredState.get(ancestor)! as WiredStream;
+      const ancestorFailureStore = ancestorStream.getFailureStore();
+      if (!isInheritFailureStore(ancestorFailureStore)) {
+        return ancestorFailureStore;
+      }
+    }
+    return { inherit: {} };
+  }
+
   protected async doDetermineUpdateActions(
     desiredState: State,
     startingState: State,
@@ -729,11 +738,12 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       const ancestorFailureStore = ancestorStream.getFailureStore();
       if (!isInheritFailureStore(ancestorFailureStore)) {
         if (hasAncestorWithChangedFailureStore) {
+          const effectiveFailureStore = this.getInheritedFailureStoreFromAncestors(desiredState);
           actions.push({
             type: 'update_failure_store',
             request: {
               name: this._definition.name,
-              failure_store: ancestorFailureStore,
+              failure_store: effectiveFailureStore,
               definition: this._definition,
             },
           });
