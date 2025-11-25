@@ -9,38 +9,46 @@
 
 import React from 'react';
 import { SplitButton } from '@kbn/split-button';
-import { isFunction, upperFirst } from 'lodash';
+import { upperFirst } from 'lodash';
 import type { MouseEvent } from 'react';
-import { EuiButton } from '@elastic/eui';
-import type { TopNavMenuActionItemBeta } from '../top_nav_menu/top_nav_menu_data';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { getTooltip, isDisabled } from './utils';
+import type {
+  TopNavMenuPrimaryActionItemBeta,
+  TopNavMenuSecondaryActionItemBeta,
+  TopNavMenuSplitButtonProps,
+} from './types';
 
-interface TopNavMenuActionButtonProps extends TopNavMenuActionItemBeta {
+type TopNavMenuActionButtonProps = (
+  | TopNavMenuPrimaryActionItemBeta
+  | TopNavMenuSecondaryActionItemBeta
+) & {
   closePopover: () => void;
   isMobileMenu?: boolean;
-}
+};
 
-export const TopNavMenuActionButton = ({
-  run,
-  htmlId,
-  label,
-  testId,
-  iconType,
-  disableButton,
-  href,
-  target,
-  isLoading,
-  color,
-  splitButtonProps,
-  isMobileMenu,
-  closePopover,
-}: TopNavMenuActionButtonProps) => {
+export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
+  const {
+    run,
+    htmlId,
+    label,
+    testId,
+    iconType,
+    disableButton,
+    href,
+    target,
+    isLoading,
+    isMobileMenu,
+    tooltip,
+    closePopover,
+  } = props;
   const itemText = upperFirst(label);
-  const { run: splitButtonRun, ...otherSplitButtonProps } = splitButtonProps ?? {};
 
-  const isDisabled = () => Boolean(isFunction(disableButton) ? disableButton() : disableButton);
+  const splitButtonProps = 'splitButtonProps' in props ? props.splitButtonProps : undefined;
+  const colorProp = 'color' in props ? props.color : undefined;
 
   const handleClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
-    if (isDisabled()) return;
+    if (isDisabled(disableButton)) return;
 
     run(e.currentTarget);
 
@@ -52,7 +60,7 @@ export const TopNavMenuActionButton = ({
   const handleSecondaryButtonClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (splitButtonProps?.isSecondaryButtonDisabled) return;
 
-    splitButtonRun?.(event.currentTarget);
+    splitButtonProps?.run?.(event.currentTarget);
 
     if (isMobileMenu) {
       closePopover();
@@ -64,33 +72,36 @@ export const TopNavMenuActionButton = ({
     id: htmlId,
     'data-test-subj': testId,
     iconType,
-    isDisabled: isDisabled(),
+    isDisabled: isDisabled(disableButton),
     href,
     target: href ? target : undefined,
     isLoading,
-    color,
     size: 's' as const,
     iconSize: 'm' as const,
-    fill: false,
+    fullWidth: isMobileMenu,
   };
 
-  if (splitButtonProps) {
-    return (
-      <SplitButton
-        {...otherSplitButtonProps}
-        {...commonProps}
-        secondaryButtonFill={false}
-        onSecondaryButtonClick={handleSecondaryButtonClick}
-        secondaryButtonIcon="arrowDown"
-      >
-        {itemText}
-      </SplitButton>
-    );
-  }
-
-  return (
-    <EuiButton {...commonProps} iconSide="left">
+  const button = splitButtonProps ? (
+    <SplitButton
+      {...(splitButtonProps as TopNavMenuSplitButtonProps)}
+      {...commonProps}
+      secondaryButtonFill={false}
+      onSecondaryButtonClick={handleSecondaryButtonClick}
+      color="text"
+    >
+      {itemText}
+    </SplitButton>
+  ) : (
+    <EuiButton {...commonProps} iconSide="left" color={colorProp}>
       {itemText}
     </EuiButton>
   );
+
+  const tooltipContent = getTooltip(tooltip);
+
+  if (tooltipContent) {
+    return <EuiToolTip content={tooltipContent}>{button}</EuiToolTip>;
+  }
+
+  return button;
 };

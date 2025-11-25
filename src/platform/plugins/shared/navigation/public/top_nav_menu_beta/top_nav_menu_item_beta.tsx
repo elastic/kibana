@@ -8,11 +8,12 @@
  */
 
 import React, { type MouseEvent } from 'react';
-import { EuiHeaderLink } from '@elastic/eui';
-import { upperFirst, isFunction } from 'lodash';
-import type { TopNavMenuItemBeta as TopNavMenuItemBetaInterface } from '../top_nav_menu/top_nav_menu_data';
+import { EuiHeaderLink, EuiToolTip } from '@elastic/eui';
+import { upperFirst } from 'lodash';
+import { getTooltip, isDisabled } from './utils';
+import type { TopNavMenuItemBetaType } from './types';
 
-export interface TopNavMenuItemBetaProps extends TopNavMenuItemBetaInterface {
+export interface TopNavMenuItemBetaProps extends TopNavMenuItemBetaType {
   closePopover: () => void;
   isMobileMenu?: boolean;
 }
@@ -28,14 +29,13 @@ export const TopNavMenuItemBeta = ({
   target,
   isLoading,
   isMobileMenu,
+  tooltip,
   closePopover,
 }: TopNavMenuItemBetaProps) => {
   const itemText = upperFirst(label);
 
-  const isDisabled = () => Boolean(isFunction(disableButton) ? disableButton() : disableButton);
-
   const handleClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
-    if (isDisabled()) return;
+    if (isDisabled(disableButton)) return;
 
     run(e.currentTarget);
 
@@ -44,21 +44,30 @@ export const TopNavMenuItemBeta = ({
     }
   };
 
-  return (
+  const tooltipContent = getTooltip(tooltip);
+
+  const button = (
     <EuiHeaderLink
       onClick={href ? undefined : handleClick}
       id={htmlId}
       data-test-subj={testId}
       iconType={iconType}
-      isDisabled={isDisabled()}
+      isDisabled={isDisabled(disableButton)}
       href={href}
       target={href ? target : undefined}
       isLoading={isLoading}
       size="s"
       iconSide="left"
       iconSize="m"
+      color="text"
     >
       {itemText}
     </EuiHeaderLink>
   );
+
+  if (tooltipContent) {
+    return <EuiToolTip content={tooltipContent}>{button}</EuiToolTip>;
+  }
+
+  return button;
 };

@@ -12,7 +12,7 @@ import type { ReactElement } from 'react';
 import React from 'react';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import type { TopNavMenuDataBeta } from '../top_nav_menu/top_nav_menu_data';
+import type { TopNavMenuConfigBeta } from './types';
 import type { TopNavMenuProps } from '../top_nav_menu/top_nav_menu';
 import { TopNavMenuBadges } from '../top_nav_menu/top_nav_menu_badges';
 import { TopNavMenuItemsBeta } from './top_nav_menu_items_beta';
@@ -21,7 +21,7 @@ export type TopNavMenuPropsBeta<QT extends Query | AggregateQuery = Query> = Omi
   TopNavMenuProps<QT>,
   'config'
 > & {
-  config?: TopNavMenuDataBeta;
+  config?: TopNavMenuConfigBeta;
 };
 
 const styles = {

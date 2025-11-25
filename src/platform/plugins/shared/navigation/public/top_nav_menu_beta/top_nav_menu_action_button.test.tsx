@@ -17,11 +17,13 @@ describe('TopNavMenuActionButton', () => {
     label: 'save',
     run: jest.fn(),
     closePopover: jest.fn(),
+    iconType: 'save',
   };
 
   const splitButtonProps = {
     run: jest.fn(),
     secondaryButtonAriaLabel: 'More options',
+    secondaryButtonIcon: 'arrowDown',
   };
 
   beforeEach(() => {

@@ -10,14 +10,17 @@
 import type { EuiBreakpointSize } from '@elastic/eui';
 import { EuiHeaderLinks, useIsWithinBreakpoints, type EuiHeaderLinksProps } from '@elastic/eui';
 import React from 'react';
-import type { TopNavMenuDataBeta } from '../top_nav_menu/top_nav_menu_data';
+
+import { getTopNavItems } from './utils';
+import type { TopNavMenuConfigBeta } from './types';
 import { TopNavMenuActionButton } from './top_nav_menu_action_button';
 import { TopNavMenuItemBeta } from './top_nav_menu_item_beta';
+import { TopNavMenuShowMoreButton } from './top_nav_menu_show_more_button';
 
 const POPOVER_BREAKPOINTS: EuiBreakpointSize[] = ['xs', 's'];
 
 interface TopNavMenuItemsProps {
-  config: TopNavMenuDataBeta | undefined;
+  config: TopNavMenuConfigBeta | undefined;
   className?: string;
   popoverBreakpoints?: EuiBreakpointSize[];
   gutterSize?: EuiHeaderLinksProps['gutterSize'];
@@ -33,6 +36,11 @@ export const TopNavMenuItemsBeta = ({
 
   if (!config || config.items.length === 0) return null;
 
+  const { displayedItems, overflowItems, shouldOverflow } = getTopNavItems({
+    config,
+    isMobileMenu,
+  });
+
   return (
     <EuiHeaderLinks
       data-test-subj="top-nav"
@@ -42,7 +50,7 @@ export const TopNavMenuItemsBeta = ({
     >
       {(closePopover) => (
         <>
-          {config.items.map((menuItem, i) => {
+          {displayedItems.map((menuItem, i) => {
             return (
               <TopNavMenuItemBeta
                 key={`nav-menu-${i}`}
@@ -52,6 +60,9 @@ export const TopNavMenuItemsBeta = ({
               />
             );
           })}
+          {shouldOverflow && (
+            <TopNavMenuShowMoreButton items={overflowItems} closePopover={closePopover} />
+          )}
           {config.secondaryActionItem && (
             <TopNavMenuActionButton
               {...config.secondaryActionItem}

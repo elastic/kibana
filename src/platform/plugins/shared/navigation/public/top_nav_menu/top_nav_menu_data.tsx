@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiButtonProps, EuiBetaBadgeProps, IconType, EuiButtonColor } from '@elastic/eui';
+import type { EuiButtonProps, EuiBetaBadgeProps, IconType } from '@elastic/eui';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import type { SplitButtonProps } from '@kbn/split-button';
 
@@ -40,49 +40,5 @@ export interface TopNavMenuData {
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {
-  appName?: string;
-}
-
-export type TopNavMenuSplitButtonProps = Pick<
-  SplitButtonProps,
-  | 'isMainButtonLoading'
-  | 'isMainButtonDisabled'
-  | 'isSecondaryButtonLoading'
-  | 'isSecondaryButtonDisabled'
-  | 'secondaryButtonAriaLabel'
-  | 'secondaryButtonTitle'
-  | 'iconType'
-> & {
-  run: TopNavMenuAction;
-};
-
-export interface TopNavMenuItemCommonBeta {
-  id?: string;
-  htmlId?: string;
-  label: string;
-  run: TopNavMenuAction;
-  testId?: string;
-  disableButton?: boolean | (() => boolean);
-  isLoading?: boolean;
-  target?: string;
-  href?: string;
-  iconType?: IconType;
-}
-
-export type TopNavMenuItemBeta = TopNavMenuItemCommonBeta;
-
-export interface TopNavMenuActionItemBeta extends TopNavMenuItemCommonBeta {
-  splitButtonProps?: TopNavMenuSplitButtonProps;
-  color?: EuiButtonColor;
-}
-
-export interface TopNavMenuDataBeta {
-  items: TopNavMenuItemBeta[];
-  enableShowMoreButton?: boolean;
-  secondaryActionItem?: TopNavMenuActionItemBeta;
-  primaryActionItem?: TopNavMenuActionItemBeta;
-}
-
-export interface RegisteredTopNavMenuDataBeta extends TopNavMenuItemBeta {
   appName?: string;
 }
