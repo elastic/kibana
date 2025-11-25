@@ -16,7 +16,7 @@ import {
   DEFAULT_RULES_BATCH_SIZE,
   DEFAULT_GAPS_PER_PAGE,
   DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
-} from '../types/scheduler';
+} from '../../../application/gaps/types/scheduler';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { backfillInitiator } from '../../../../common/constants';
 import { gapStatus } from '../../../../common/constants';
@@ -27,12 +27,12 @@ import { backfillClientMock } from '../../../backfill_client/backfill_client.moc
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 import * as findGapsModule from '../find_gaps';
-import * as processGapsBatchModule from '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch';
+import * as processGapsBatchModule from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch';
 import { Gap } from '../gap';
-import { GapFillSchedulePerRuleStatus } from '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
+import { GapFillSchedulePerRuleStatus } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
 
 jest.mock('../find_gaps');
-jest.mock('../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch');
+jest.mock('../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch');
 jest.mock('./gap_auto_fill_scheduler_event_log');
 
 const mockedFindGaps = jest.mocked(findGapsModule);
