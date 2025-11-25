@@ -16,12 +16,12 @@ export const STEP_1_TITLE = i18n.translate('xpack.cloudConnect.wizard.step1.titl
 
 export const STEP_1_DESCRIPTION_1 = i18n.translate('xpack.cloudConnect.wizard.step1.description', {
   defaultMessage:
-    'If you have an existing Elastic Cloud account with Admin privileges, log in below to generate the Cloud Connect API key.',
+    'If you already have an Elastic Cloud account with admin privileges, log in to generate the Cloud Connect API key.',
 });
 
 export const STEP_1_DESCRIPTION_2 = i18n.translate('xpack.cloudConnect.wizard.step1.description', {
   defaultMessage:
-    'Otherwise, sign up for an account below and follow the prompts to create your account and generate the Cloud Connect API key.',
+    'If you don’t have an account yet, sign up and follow the prompts to create your account and start a free trial, and then generate the Cloud Connect API key.',
 });
 
 export const STEP_2_TITLE = i18n.translate('xpack.cloudConnect.wizard.step2.title', {
