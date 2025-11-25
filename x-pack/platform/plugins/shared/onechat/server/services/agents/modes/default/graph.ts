@@ -140,14 +140,12 @@ export const createAgentGraph = ({
   };
 
   const prepareToAnswer = async (state: StateType) => {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
     const lastAction = state.mainActions[state.mainActions.length - 1];
     const maxCycleReached = state.currentCycle > state.cycleLimit;
 
     if (maxCycleReached && !isHandoverAction(lastAction)) {
       return {
-        actions: [handoverAction('', true)],
+        mainActions: [handoverAction('', true)],
       };
     } else {
       return {};

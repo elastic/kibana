@@ -13,6 +13,7 @@ import {
   createToolCallMessage,
   generateFakeToolCallId,
 } from '@kbn/onechat-genai-utils/langchain/messages';
+import { cleanPrompt } from '@kbn/onechat-genai-utils/prompts';
 import { AgentExecutionErrorCode } from '@kbn/onechat-common/agents';
 import type { OnechatAgentExecutionError } from '@kbn/onechat-common/base/errors';
 import type {
@@ -89,23 +90,31 @@ const formatHandoverAction = ({ message, forceful }: HandoverAction): BaseMessag
   if (forceful) {
     return [
       createAIMessage(
-        `[researcher agent] The research process was interrupted because it exceeded the maximum allowed steps, I cannot perform any more actions.
-        Handing over to the answering agent for a final answer based on the information gathered so far`
+        cleanPrompt(
+          `[researcher agent] The research process was interrupted because it exceeded the maximum allowed steps, I cannot perform any more actions.
+        Handing over to the answering agent for a final answer based on the information gathered so far.`
+        )
       ),
       createUserMessage(
-        'Ack. forwarding to answering agent: Proceed to answer as best as you can with the collected information.'
+        cleanPrompt(
+          '[dispatcher] Ack. Forwarding to answering agent: Proceed to answer as best as you can with the collected information.'
+        )
       ),
     ];
   } else {
     return [
       createAIMessage(
-        `[researcher agent] Finished the research step. Handover for the answering agent:
+        cleanPrompt(
+          `[researcher agent] Finished the research step. Handover notes for the answering agent:
         """
         ${message}
         """`
+        )
       ),
       createUserMessage(
-        'Ack. forwarding to answering agent: Proceed to answer as best as you can with the collected information.'
+        cleanPrompt(
+          '[dispatcher] Ack. Forwarding to answering agent: Proceed to answer as best as you can with the collected information.'
+        )
       ),
     ];
   }
