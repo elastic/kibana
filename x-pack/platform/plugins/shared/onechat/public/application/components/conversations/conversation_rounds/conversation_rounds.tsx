@@ -8,7 +8,6 @@
 import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useConversationRounds } from '../../../hooks/use_conversation';
 import { RoundLayout } from './round_layout';
 
@@ -21,8 +20,6 @@ interface ConversationRoundsProps {
 export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
   scrollContainerHeight,
 }) => {
-  const { isResponseLoading, error } = useSendMessage();
-
   const conversationRounds = useConversationRounds();
 
   return (
@@ -40,9 +37,7 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
         return (
           <RoundLayout
             key={index}
-            hasError={Boolean(error) && isCurrentRound}
             scrollContainerHeight={scrollContainerHeight}
-            isResponseLoading={isResponseLoading}
             isCurrentRound={isCurrentRound}
             rawRound={round}
           />

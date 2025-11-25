@@ -40,7 +40,6 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
     animation: ${fadeIn} ${euiTheme.animation.normal} ease-in;
   `;
 
-  // TODO: Implement error logic to show an error round here
   if (showThinkingPanel) {
     return (
       <EuiFlexGroup css={fadeInStyles} responsive={false}>
@@ -60,11 +59,6 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
     steps.length > 0 && steps.some((step) => !isReasoningStep(step) || step.transient !== true);
 
   return (
-    <RoundThinkingTitle
-      isLoading={isLoading}
-      isError={false}
-      hasSteps={hasSteps}
-      onShow={toggleThinkingPanel}
-    />
+    <RoundThinkingTitle isLoading={isLoading} hasSteps={hasSteps} onShow={toggleThinkingPanel} />
   );
 };

@@ -19,9 +19,6 @@ interface ToolResultDisplayProps {
 
 export const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolResult }) => {
   switch (toolResult.type) {
-    // TODO: Add resource result step once we can reliably access the reference ID
-    // case ToolResultType.resource:
-    //   return <ResourceResultStep result={toolResult} />;
     case ToolResultType.query:
       return <QueryResultStep result={toolResult} />;
     case ToolResultType.tabularData:

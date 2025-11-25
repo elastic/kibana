@@ -31,7 +31,6 @@ const showButtonLabel = i18n.translate('xpack.onechat.conversation.thinking.show
 
 interface RoundThinkingTitleProps {
   isLoading: boolean;
-  isError: boolean;
   hasSteps: boolean;
   onShow: () => void;
 }
@@ -39,12 +38,7 @@ interface RoundThinkingTitleProps {
 // We use a min-height to stop the title growing in height to match the height of the button when it's shown.
 const MIN_HEIGHT = '40px';
 
-export const RoundThinkingTitle = ({
-  isLoading,
-  isError,
-  hasSteps,
-  onShow,
-}: RoundThinkingTitleProps) => {
+export const RoundThinkingTitle = ({ isLoading, hasSteps, onShow }: RoundThinkingTitleProps) => {
   const { agentReasoning } = useSendMessage();
 
   let thinkingButtonLabel = thinkingCompletedLabel;
@@ -54,8 +48,6 @@ export const RoundThinkingTitle = ({
     // Agent reasoning can be reasoning directly from the agent or individual tool call progression
     thinkingButtonLabel = agentReasoning ?? defaultThinkingLabel;
   }
-
-  // TODO: if thinkingCompleted and hasSteps === false, maybe don't render anything. TBC with Julian
 
   return (
     <EuiFlexGroup
