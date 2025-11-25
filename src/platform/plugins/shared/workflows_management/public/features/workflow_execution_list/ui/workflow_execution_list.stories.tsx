@@ -47,6 +47,7 @@ export const Default: Story = {
           status: ExecutionStatus.RUNNING,
           startedAt: new Date().toISOString(),
           finishedAt: new Date().toISOString(),
+          isTestRun: false,
           spaceId: 'default',
           duration: parseDuration('1m28s'),
           stepId: 'my_first_step',
@@ -54,6 +55,7 @@ export const Default: Story = {
         {
           id: '1',
           status: ExecutionStatus.COMPLETED,
+          isTestRun: true,
           startedAt: new Date().toISOString(),
           finishedAt: new Date().toISOString(),
           spaceId: 'default',
@@ -63,6 +65,7 @@ export const Default: Story = {
         {
           id: '2',
           status: ExecutionStatus.FAILED,
+          isTestRun: false,
           startedAt: new Date().toISOString(),
           finishedAt: new Date().toISOString(),
           spaceId: 'default',
@@ -72,6 +75,7 @@ export const Default: Story = {
         {
           id: '4',
           status: ExecutionStatus.PENDING,
+          isTestRun: false,
           startedAt: new Date().toISOString(),
           finishedAt: new Date().toISOString(),
           duration: parseDuration('1w2d'),
@@ -81,6 +85,7 @@ export const Default: Story = {
         {
           id: '5',
           status: ExecutionStatus.WAITING_FOR_INPUT,
+          isTestRun: false,
           startedAt: new Date().toISOString(),
           finishedAt: new Date().toISOString(),
           duration: parseDuration('1m28s'),
@@ -90,6 +95,7 @@ export const Default: Story = {
         {
           id: '6',
           status: ExecutionStatus.CANCELLED,
+          isTestRun: true,
           startedAt: new Date().toISOString(),
           finishedAt: new Date().toISOString(),
           duration: parseDuration('280ms'),
@@ -99,6 +105,7 @@ export const Default: Story = {
         {
           id: '7',
           status: ExecutionStatus.SKIPPED,
+          isTestRun: true,
           startedAt: new Date().toISOString(),
           finishedAt: new Date().toISOString(),
           duration: parseDuration('28s'),
@@ -106,11 +113,9 @@ export const Default: Story = {
           stepId: 'my_first_step',
         },
       ],
-      _pagination: {
-        page: 1,
-        limit: 10,
-        total: 8,
-      },
+      page: 1,
+      size: 10,
+      total: 8,
     },
     isInitialLoading: false,
     isLoadingMore: false,
@@ -124,11 +129,9 @@ export const Empty: Story = {
   args: {
     executions: {
       results: [],
-      _pagination: {
-        page: 1,
-        limit: 10,
-        total: 0,
-      },
+      page: 1,
+      size: 10,
+      total: 0,
     },
     isInitialLoading: false,
     isLoadingMore: false,
@@ -173,6 +176,7 @@ export const LoadingMore: Story = {
         {
           id: '1',
           status: ExecutionStatus.COMPLETED,
+          isTestRun: false,
           startedAt: new Date().toISOString(),
           finishedAt: new Date().toISOString(),
           spaceId: 'default',
@@ -182,6 +186,7 @@ export const LoadingMore: Story = {
         {
           id: '2',
           status: ExecutionStatus.FAILED,
+          isTestRun: false,
           startedAt: new Date().toISOString(),
           finishedAt: new Date().toISOString(),
           spaceId: 'default',
@@ -189,11 +194,9 @@ export const LoadingMore: Story = {
           stepId: 'my_first_step',
         },
       ],
-      _pagination: {
-        page: 1,
-        limit: 10,
-        total: 20,
-      },
+      page: 1,
+      size: 10,
+      total: 20,
     },
     isInitialLoading: false,
     isLoadingMore: true,

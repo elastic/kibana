@@ -50,6 +50,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointMemoryDump: false,
 
   /**
+   * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
+   * Release: 9.4
+   */
+  responseActionsScriptLibraryManagement: false,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -184,6 +190,10 @@ export const allowedExperimentalValues = Object.freeze({
    * Protects all the work related to the attacks and alerts alignment effort
    */
   attacksAlertsAlignment: false,
+  /**
+   *  Enables the QRadar rules import feature
+   */
+  qradarRulesMigration: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

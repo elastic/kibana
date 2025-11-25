@@ -10,7 +10,7 @@
 import { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import { combineLatest, distinctUntilChanged, map, of, startWith, switchMap } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import type { TabItem, TabPreviewData } from '@kbn/unified-tabs';
 import { TabStatus } from '@kbn/unified-tabs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -36,13 +36,7 @@ export const usePreviewData = (runtimeStateManager: RuntimeStateManager) => {
           const tabId = tabState.id;
           return {
             ...acc,
-            [tabId]: getPreviewDataObservable(
-              runtimeStateManager,
-              tabId,
-              tabState.initialAppState,
-              tabState.initialInternalState,
-              savedDataViews
-            ),
+            [tabId]: getPreviewDataObservable(runtimeStateManager, tabState, savedDataViews),
           };
         }, {})
       ),
@@ -141,54 +135,46 @@ const getPreviewTitle = (
 
 const getPreviewDataObservable = (
   runtimeStateManager: RuntimeStateManager,
-  tabId: string,
-  initialAppState: TabState['initialAppState'] | undefined,
-  initialInternalState: TabState['initialInternalState'] | undefined,
+  tabState: TabState,
   savedDataViews: DataViewListItem[]
 ) => {
-  return selectTabRuntimeState(runtimeStateManager, tabId).stateContainer$.pipe(
+  return selectTabRuntimeState(runtimeStateManager, tabState.id).stateContainer$.pipe(
     switchMap((tabStateContainer) => {
       if (!tabStateContainer) {
         const derivedDataViewName = getDataViewNameFromInitialInternalState(
-          initialInternalState,
+          tabState.initialInternalState,
           savedDataViews
         );
         return of({
           status: TabStatus.DEFAULT,
-          query: getPreviewQuery(initialAppState?.query, derivedDataViewName),
-          title: getPreviewTitle(initialAppState?.query, derivedDataViewName),
+          query: getPreviewQuery(tabState.appState.query, derivedDataViewName),
+          title: getPreviewTitle(tabState.appState.query, derivedDataViewName),
         });
       }
 
-      const { appState } = tabStateContainer;
-
       return combineLatest([
         tabStateContainer.dataState.data$.main$,
-        appState.state$.pipe(startWith(appState.get())),
-        tabStateContainer.savedSearchState
-          .getCurrent$()
-          .pipe(startWith(tabStateContainer.savedSearchState.getState())),
+        tabStateContainer.savedSearchState.getCurrent$(),
       ]).pipe(
-        map(([{ fetchStatus }, { query }, { searchSource }]) => ({
+        map(([{ fetchStatus }, { searchSource }]) => ({
           fetchStatus,
-          query,
           dataViewName: searchSource?.getField('index')?.name,
         })),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
-        map(({ fetchStatus, query, dataViewName }) => {
+        map(({ fetchStatus, dataViewName }) => {
           let derivedDataViewName = dataViewName;
 
-          if (!derivedDataViewName && initialInternalState?.serializedSearchSource) {
+          if (!derivedDataViewName && tabState.initialInternalState?.serializedSearchSource) {
             derivedDataViewName = getDataViewNameFromInitialInternalState(
-              initialInternalState,
+              tabState.initialInternalState,
               savedDataViews
             );
           }
 
           return {
             status: getPreviewStatus(fetchStatus),
-            query: getPreviewQuery(query, derivedDataViewName),
-            title: getPreviewTitle(query, derivedDataViewName),
+            query: getPreviewQuery(tabState.appState.query, derivedDataViewName),
+            title: getPreviewTitle(tabState.appState.query, derivedDataViewName),
           };
         })
       );

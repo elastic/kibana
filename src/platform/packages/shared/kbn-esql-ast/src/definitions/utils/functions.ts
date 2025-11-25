@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLControlVariable, RecommendedField } from '@kbn/esql-types';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import {
   type FunctionDefinition,
@@ -32,6 +32,7 @@ import { removeFinalUnknownIdentiferArg } from './shared';
 import { getTestFunctions } from './test_functions';
 import { getMatchingSignatures } from './expressions';
 import { isLiteral } from '../../ast/is';
+import { SuggestionCategory } from '../../sorting/types';
 
 const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
   defaultMessage: `Technical Preview`,
@@ -76,6 +77,7 @@ export const buildFieldsDefinitions = (
         defaultMessage: `Field specified by the input table`,
       }),
       sortText: 'D',
+      category: SuggestionCategory.FIELD,
     };
     return openSuggestions ? withAutoSuggest(suggestion) : suggestion;
   });
@@ -279,6 +281,17 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
   if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
     functionsPriority = '1A';
   }
+
+  // Determine function category explicitly
+  let category: SuggestionCategory;
+  if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
+    category = SuggestionCategory.FUNCTION_TIME_SERIES_AGG;
+  } else if (fn.type === FunctionDefinitionTypes.AGG) {
+    category = SuggestionCategory.FUNCTION_AGG;
+  } else {
+    category = SuggestionCategory.FUNCTION_SCALAR;
+  }
+
   return withAutoSuggest({
     label: fn.name.toUpperCase(),
     text,
@@ -299,6 +312,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     },
     // time_series_agg functions have priority over everything else
     sortText: functionsPriority,
+    category,
   });
 }
 
@@ -384,6 +398,29 @@ const getVariablePrefix = (variableType: ESQLVariableType) =>
     ? '??'
     : '?';
 
+function getColumnSuggestionCategory(
+  column: ESQLColumnData,
+  fieldIsRecommended: boolean
+): SuggestionCategory {
+  if (column.userDefined) {
+    return SuggestionCategory.USER_DEFINED_COLUMN;
+  }
+
+  if (fieldIsRecommended) {
+    return SuggestionCategory.RECOMMENDED_FIELD;
+  }
+
+  if (column.type === 'date' || column.type === 'date_nanos') {
+    return SuggestionCategory.TIME_FIELD;
+  }
+
+  if (column.isEcs) {
+    return SuggestionCategory.ECS_FIELD;
+  }
+
+  return SuggestionCategory.FIELD;
+}
+
 export const buildColumnSuggestions = (
   columns: ESQLColumnData[],
   recommendedFieldsFromExtensions: RecommendedField[] = [],
@@ -410,6 +447,9 @@ export const buildColumnSuggestions = (
       !column.userDefined && Boolean(column.isEcs),
       Boolean(fieldIsRecommended)
     );
+
+    const category = getColumnSuggestionCategory(column, fieldIsRecommended);
+
     const suggestion: ISuggestionItem = {
       label: column.name,
       text:
@@ -419,6 +459,7 @@ export const buildColumnSuggestions = (
       kind: 'Variable',
       detail: titleCaseType,
       sortText,
+      category,
     };
 
     return options?.openSuggestions ? withAutoSuggest(suggestion) : suggestion;
@@ -433,6 +474,7 @@ export const buildColumnSuggestions = (
     const controlSuggestions = columns.length
       ? getControlSuggestion(
           variableType,
+          ControlTriggerSource.SMART_SUGGESTION,
           userDefinedColumns?.map((v) => `${getVariablePrefix(variableType)}${v.key}`)
         )
       : [];

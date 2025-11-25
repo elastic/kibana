@@ -11,7 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
-import { DataViewManagerScopeName } from '../../constants';
+import { PageScope } from '../../constants';
 import { selectDataViewAsync } from '../actions';
 import { createDefaultDataView } from '../../utils/create_default_data_view';
 import { createExploreDataView } from '../../utils/create_explore_data_view';
@@ -52,7 +52,7 @@ export const createInitListener = (
     ) => {
       try {
         // Initialize default data views first
-        const { defaultDataView, alertDataView } = await createDefaultDataView({
+        const { defaultDataView, alertDataView, attackDataView } = await createDefaultDataView({
           dataViewService: dependencies.dataViews,
           uiSettings: dependencies.uiSettings,
           spaces: dependencies.spaces,
@@ -92,19 +92,29 @@ export const createInitListener = (
         // preventing race conditions
         // Whats more, portions of the state that already have selections applied to them will not be reset in the init listener.
         [
-          DataViewManagerScopeName.detections,
-          DataViewManagerScopeName.analyzer,
-          DataViewManagerScopeName.timeline,
-          DataViewManagerScopeName.default,
-          DataViewManagerScopeName.explore,
+          PageScope.alerts,
+          PageScope.attacks,
+          PageScope.analyzer,
+          PageScope.timeline,
+          PageScope.default,
+          PageScope.explore,
         ]
           // NOTE: only init default data view for slices that are not initialized yet
           .filter((scope) => !listenerApi.getState().dataViewManager[scope].dataViewId)
           .forEach((scope) => {
-            if (scope === DataViewManagerScopeName.explore) {
+            if (scope === PageScope.explore) {
               return listenerApi.dispatch(
                 selectDataViewAsync({
                   id: exploreDataView.id,
+                  scope,
+                })
+              );
+            }
+
+            if (scope === PageScope.attacks) {
+              return listenerApi.dispatch(
+                selectDataViewAsync({
+                  id: attackDataView.id,
                   scope,
                 })
               );
