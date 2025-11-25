@@ -2,7 +2,7 @@
 
 exports[`Authentication Host Table Component rendering it renders the host authentication table 1`] = `
 .c1 .siemSubtitle__item {
-  color: #7a7f89;
+  color: #98A8C3;
   font-size: 12px;
   line-height: 1.5;
 }

@@ -6,6 +6,7 @@
  */
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type {
@@ -35,6 +36,7 @@ export interface StreamsServer {
   config: StreamsConfig;
   logger: Logger;
   security: SecurityPluginStart;
+  actions: ActionsPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
@@ -56,6 +58,7 @@ export interface StreamsPluginSetupDependencies {
 }
 
 export interface StreamsPluginStartDependencies {
+  actions: ActionsPluginStart;
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;

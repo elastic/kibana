@@ -26,25 +26,22 @@ export const EntitiesOverview: React.FC = () => {
   const hostName = getField(getFieldsData('host.name'));
   const userName = getField(getFieldsData('user.name'));
 
-  const { navigateToLeftPanel, isEnabled: isLinkEnabled } = useNavigateToLeftPanel({
+  const navigateToLeftPanel = useNavigateToLeftPanel({
     tab: LeftPanelInsightsTab,
     subTab: ENTITIES_TAB_ID,
   });
 
   const link = useMemo(
-    () =>
-      isLinkEnabled
-        ? {
-            callback: navigateToLeftPanel,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.entities.entitiesTooltip"
-                defaultMessage="Show all entities"
-              />
-            ),
-          }
-        : undefined,
-    [navigateToLeftPanel, isLinkEnabled]
+    () => ({
+      callback: navigateToLeftPanel,
+      tooltip: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.insights.entities.entitiesTooltip"
+          defaultMessage="Show all entities"
+        />
+      ),
+    }),
+    [navigateToLeftPanel]
   );
 
   return (

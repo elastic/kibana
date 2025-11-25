@@ -20,6 +20,8 @@
       "actions",
       "stackConnectors",
       "inference",
+      "security",
+      "taskManager"
     ],
   }
 }

@@ -174,6 +174,7 @@ export const TemplateDeleteModal = ({
         </ul>
         {hasSystemTemplate && (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.idxMgmt.deleteTemplatesModal.proceedWithCautionCallOutTitle"

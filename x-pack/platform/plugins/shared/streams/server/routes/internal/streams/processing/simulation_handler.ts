@@ -42,6 +42,7 @@ import { transpileIngestPipeline } from '@kbn/streamlang';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
+import type { RecursiveRecord } from '@kbn/streams-schema/src/shared/record_types';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import type { StreamsClient } from '../../../../lib/streams/client';
 
@@ -94,7 +95,7 @@ export type SimulationError = BaseSimulationError &
       }
   );
 
-export type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'skipped' | 'failed';
+export type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'skipped' | 'failed' | 'dropped';
 
 export interface SimulationDocReport {
   detected_fields: Array<{ processor_id: string; name: string }>;
@@ -109,6 +110,7 @@ export interface ProcessorMetrics {
   failed_rate: number;
   skipped_rate: number;
   parsed_rate: number;
+  dropped_rate: number;
 }
 
 // Narrow down the type to only successful processor results
@@ -151,6 +153,53 @@ export type WithNameAndEsType<TObj = {}> = TObj & {
   suggestedType?: string;
 };
 export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
+
+/**
+ * Detects and groups flattened geo_point fields (*.lat and *.lon) back into a single object.
+ * Elasticsearch's geo_point mapper requires coordinates as a single object: { lat: number, lon: number }
+ *
+ * This function automatically detects any field pairs ending in .lat and .lon and groups them together.
+ *
+ * @param flattenedDoc - A flattened document with separate lat/lon fields
+ * @returns Document with geo_point fields grouped as objects
+ *
+ * @example
+ * Input: { "source.geo.location.lat": 41.9, "source.geo.location.lon": 42.0, "other": "value" }
+ * Output: { "source.geo.location": { lat: 41.9, lon: 42.0 }, "other": "value" }
+ */
+const regroupGeoPointFields = (flattenedDoc: FlattenRecord): RecursiveRecord => {
+  const result: RecursiveRecord = {};
+  const processedGeoFields = new Set<string>();
+
+  for (const [key, value] of Object.entries(flattenedDoc)) {
+    // Check if this is a .lat field
+    if (key.endsWith('.lat')) {
+      const baseField = key.slice(0, -4); // Remove '.lat'
+      const lonKey = `${baseField}.lon`;
+
+      // Check if we have a corresponding .lon field with numeric values
+      if (
+        lonKey in flattenedDoc &&
+        !processedGeoFields.has(baseField) &&
+        typeof flattenedDoc[lonKey] === 'number' &&
+        typeof value === 'number'
+      ) {
+        // Group lat/lon into single object
+        result[baseField] = { lat: value, lon: flattenedDoc[lonKey] };
+        processedGeoFields.add(baseField);
+        processedGeoFields.add(lonKey);
+        continue;
+      }
+    }
+
+    // Check if this field was already processed as part of a geo_point
+    if (!processedGeoFields.has(key)) {
+      result[key] = value;
+    }
+  }
+
+  return result;
+};
 
 export const simulateProcessing = async ({
   params,
@@ -223,7 +272,7 @@ const prepareSimulationDocs = (
   return documents.map((doc, id) => ({
     _index: streamName,
     _id: id.toString(),
-    _source: doc,
+    _source: regroupGeoPointFields(doc),
   }));
 };
 
@@ -552,6 +601,10 @@ const computePipelineSimulationResult = (
       if (procId && isSkippedProcessor(processor)) {
         processorsMap[procId].skipped_rate++;
       }
+
+      if (procId && isDroppedProcessor(processor)) {
+        processorsMap[procId].dropped_rate++;
+      }
     });
 
     diff.detected_fields.forEach(({ processor_id, name }) => {
@@ -612,6 +665,7 @@ const initProcessorMetricsMap = (
       failed_rate: 0,
       skipped_rate: 0,
       parsed_rate: 1,
+      dropped_rate: 0,
     },
   ]);
 
@@ -629,6 +683,7 @@ const extractProcessorMetrics = ({
     const failureRate = metrics.failed_rate / sampleSize;
     const skippedRate = metrics.skipped_rate / sampleSize;
     const parsedRate = 1 - skippedRate - failureRate;
+    const droppedRate = metrics.dropped_rate / sampleSize;
     const detected_fields = uniq(metrics.detected_fields);
     const errors = uniqBy(metrics.errors, (error) => error.message);
 
@@ -638,6 +693,7 @@ const extractProcessorMetrics = ({
       failed_rate: parseFloat(failureRate.toFixed(3)),
       skipped_rate: parseFloat(skippedRate.toFixed(3)),
       parsed_rate: parseFloat(parsedRate.toFixed(3)),
+      dropped_rate: parseFloat(droppedRate.toFixed(3)),
     };
   });
 };
@@ -654,6 +710,10 @@ const getDocumentStatus = (
 
   if (processorResults.every(isSkippedProcessor)) {
     return 'skipped';
+  }
+
+  if (processorResults.every(isDroppedProcessor)) {
+    return 'dropped';
   }
 
   if (processorResults.every((proc) => isSuccessfulProcessor(proc) || isSkippedProcessor(proc))) {
@@ -793,6 +853,7 @@ const prepareSimulationResponse = async (
   const partiallyParsedRate = calculateRateByStatus('partially_parsed');
   const skippedRate = calculateRateByStatus('skipped');
   const failureRate = calculateRateByStatus('failed');
+  const droppedRate = calculateRateByStatus('dropped');
 
   return {
     detected_fields: detectedFields,
@@ -804,6 +865,7 @@ const prepareSimulationResponse = async (
       partially_parsed_rate: parseFloat(partiallyParsedRate.toFixed(3)),
       skipped_rate: parseFloat(skippedRate.toFixed(3)),
       parsed_rate: parseFloat(parsedRate.toFixed(3)),
+      dropped_rate: parseFloat(droppedRate.toFixed(3)),
     },
   };
 };
@@ -822,6 +884,7 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
             failed_rate: 1,
             skipped_rate: 0,
             parsed_rate: 0,
+            dropped_rate: 0,
           },
         }),
     },
@@ -833,6 +896,7 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
       partially_parsed_rate: 0,
       skipped_rate: 0,
       parsed_rate: 0,
+      dropped_rate: 0,
     },
   };
 };
@@ -984,6 +1048,11 @@ const isSkippedProcessor = (
   processor: IngestPipelineProcessorResult
 ): processor is WithRequired<IngestPipelineProcessorResult, 'tag'> =>
   processor.status === 'skipped';
+
+const isDroppedProcessor = (
+  processor: IngestPipelineProcessorResult
+): processor is WithRequired<IngestPipelineProcessorResult, 'tag'> =>
+  processor.status === 'dropped';
 
 const isMappingFailure = (entry: SimulateIngestSimulateIngestDocumentResult) =>
   entry.doc?.error?.type === 'document_parsing_exception';

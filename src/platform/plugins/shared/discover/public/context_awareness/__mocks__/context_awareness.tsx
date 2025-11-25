@@ -23,16 +23,8 @@ import {
   RootProfileService,
   SolutionType,
 } from '../profiles';
-import type { ProfileProviderServices } from '../profile_providers/profile_provider_services';
 import { ProfilesManager } from '../profiles_manager';
 import { DiscoverEBTManager } from '../../ebt_manager';
-import {
-  createApmContextServiceMock,
-  createLogsContextServiceMock,
-  createMetricsContextServiceMock,
-} from '@kbn/discover-utils/src/__mocks__';
-import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
-import { pricingServiceMock } from '@kbn/core-pricing-browser-mocks';
 
 export const FEATURE_ID_1 = 'discover:feature1';
 export const FEATURE_ID_2 = 'discover:feature2';
@@ -182,8 +174,6 @@ export const createContextAwarenessMocks = ({
     documentProfileServiceMock
   );
 
-  const profileProviderServices = createProfileProviderServicesMock();
-
   return {
     rootProfileProviderMock,
     dataSourceProfileProviderMock,
@@ -194,24 +184,6 @@ export const createContextAwarenessMocks = ({
     contextRecordMock,
     contextRecordMock2,
     profilesManagerMock,
-    profileProviderServices,
     scopedEbtManagerMock,
   };
-};
-
-const createProfileProviderServicesMock = () => {
-  return {
-    logsContextService: createLogsContextServiceMock(),
-    discoverShared: discoverSharedPluginMock.createStartContract(),
-    apmContextService: createApmContextServiceMock(),
-    metricsContextService: createMetricsContextServiceMock(),
-    core: {
-      pricing: pricingServiceMock.createStartContract() as ReturnType<
-        typeof pricingServiceMock.createStartContract
-      >,
-      featureFlags: {
-        getBooleanValue: jest.fn().mockReturnValue(true),
-      },
-    },
-  } as unknown as ProfileProviderServices;
 };

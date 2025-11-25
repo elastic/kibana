@@ -28,19 +28,7 @@ import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-pl
 import type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 import type {
-  HasEditCapabilities,
-  HasLibraryTransforms,
-  HasSupportedTriggers,
-  PublishesBlockingError,
-  PublishesDataLoading,
   PublishesDataViews,
-  PublishesDisabledActionIds,
-  PublishesRendered,
-  PublishesSavedObjectId,
-  PublishesUnifiedSearch,
-  PublishesViewMode,
-  PublishesWritableDescription,
-  PublishesWritableTitle,
   PublishingSubject,
   SerializedTitles,
   ViewMode,
@@ -55,8 +43,6 @@ import type { PaletteOutput } from '@kbn/coloring';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { InspectorOptions } from '@kbn/inspector-plugin/public';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import type { CanAddNewPanel } from '@kbn/presentation-containers';
@@ -126,9 +112,9 @@ export interface PreventableEvent {
   preventDefault(): void;
 }
 
-interface LensByValue {
-  // by-value
-  attributes?: Simplify<LensSavedObjectAttributes>;
+export interface LensByValueBase {
+  savedObjectId?: string; // really should be never but creates type issues
+  attributes?: LensSavedObjectAttributes;
 }
 
 export interface LensOverrides {
@@ -150,10 +136,9 @@ export interface LensOverrides {
 /**
  * Lens embeddable props broken down by type
  */
-
-export interface LensByReference {
-  // by-reference
+interface LensByReferenceBase {
   savedObjectId?: string;
+  attributes?: never;
 }
 
 interface ContentManagementProps {
@@ -161,9 +146,12 @@ interface ContentManagementProps {
   managed?: boolean;
 }
 
-export type LensPropsVariants = (LensByValue & LensByReference) & {
+interface LensWithReferences {
+  /**
+   * @deprecated use `state.attributes.references`
+   */
   references?: Reference[];
-};
+}
 
 export interface ViewInDiscoverCallbacks extends LensApiProps {
   canViewUnderlyingData$: PublishingSubject<boolean>;
@@ -243,7 +231,7 @@ export interface LensSharedProps {
   esqlVariables?: ESQLControlVariable[];
 }
 
-interface LensRequestHandlersProps {
+export interface LensRequestHandlersProps {
   /**
    * Custom abort controller to be used for the ES client
    */
@@ -259,15 +247,28 @@ interface LensRequestHandlersProps {
  * * Panel settings
  * * other props from the embeddable
  */
-export type LensSerializedState = Simplify<
-  LensPropsVariants &
-    LensOverrides &
+export type LensSerializedSharedState = Simplify<
+  LensOverrides &
+    LensWithReferences &
     LensUnifiedSearchContext &
     LensPanelProps &
     SerializedTitles &
     Omit<LensSharedProps, 'noPadding'> &
     Partial<DynamicActionsSerializedState> & { isNewPanel?: boolean }
 >;
+
+export type LensByValueSerializedState = Simplify<LensSerializedSharedState & LensByValueBase>;
+export type LensByRefSerializedState = Simplify<LensSerializedSharedState & LensByReferenceBase>;
+
+/**
+ * Combined properties of serialized state stored on dashboard panel
+ *
+ *  Includes:
+ * - Lens document state (for by-value)
+ * - Panel settings
+ * - other props from the embeddable
+ */
+export type LensSerializedState = LensByRefSerializedState | LensByValueSerializedState;
 
 /**
  * Custom props exposed on the Lens exported component
@@ -357,42 +358,6 @@ export interface LensInspectorAdapters {
   // needs to be updated on data changes
   adapters$: PublishingSubject<Adapters>;
 }
-
-export type LensApi = Simplify<
-  DefaultEmbeddableApi<LensSerializedState> &
-    // This is used by actions to operate the edit action
-    HasEditCapabilities &
-    // for blocking errors leverage the embeddable panel UI
-    PublishesBlockingError &
-    // This is used by dashboard/container to show filters/queries on the panel
-    PublishesUnifiedSearch &
-    // Forward the search session id
-    PublishesSearchSession &
-    // Let the container know the loading state
-    PublishesDataLoading &
-    // Let the container know when the rendering has completed rendering
-    PublishesRendered &
-    // Let the container know the used data views
-    PublishesDataViews &
-    // Let the container operate on panel title/description
-    PublishesWritableTitle &
-    PublishesWritableDescription &
-    // This embeddable can narrow down specific triggers usage
-    HasSupportedTriggers &
-    PublishesDisabledActionIds &
-    // Offers methods to operate from/on the linked saved object
-    HasLibraryTransforms<LensSerializedState, LensSerializedState> &
-    // Let the container know the view mode
-    PublishesViewMode &
-    // Let the container know the saved object id
-    PublishesSavedObjectId &
-    // Lens specific API methods:
-    // Let the container know when the data has been loaded/updated
-    LensInspectorAdapters &
-    LensRequestHandlersProps &
-    LensApiCallbacks &
-    LensHasEditPanel
->;
 
 // This is an API only used internally to the embeddable but not exported elsewhere
 // there's some overlapping between this and the LensApi but they are shared references
@@ -509,7 +474,6 @@ export type LensByValueInput = Omit<LensRendererPrivateProps, 'savedObjectId'>;
 export type LensByReferenceInput = Omit<LensRendererPrivateProps, 'attributes'>;
 export type TypedLensByValueInput = Omit<LensRendererProps, 'savedObjectId'>;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
-export type LensEmbeddableOutput = LensApi;
 
 export interface ESQLVariablesCompatibleDashboardApi {
   esqlVariables$: PublishingSubject<ESQLControlVariable[]>;

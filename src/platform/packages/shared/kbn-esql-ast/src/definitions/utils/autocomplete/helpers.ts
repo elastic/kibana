@@ -6,7 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLControlVariable, InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import type {
+  ESQLControlVariable,
+  InferenceEndpointAutocompleteItem,
+  ControlTriggerSource,
+} from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
@@ -24,6 +28,7 @@ import type { FunctionDefinition } from '../../types';
 import type { SupportedDataType } from '../../types';
 import { argMatchesParamType, getExpressionType, getParamAtPosition } from '../expressions';
 import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../functions';
+import { SuggestionCategory } from '../../../sorting/types';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getColumnByName } from '../shared';
 
@@ -49,6 +54,7 @@ export const buildUserDefinedColumnsDefinitions = (
       defaultMessage: `Column specified by the user within the ES|QL query`,
     }),
     sortText: 'D',
+    category: SuggestionCategory.USER_DEFINED_COLUMN,
   }));
 
 export function pushItUpInTheList(suggestions: ISuggestionItem[], shouldPromote: boolean) {
@@ -142,6 +148,7 @@ interface FieldSuggestionsOptions {
   openSuggestions?: boolean;
   addComma?: boolean;
   promoteToTop?: boolean;
+  canBeMultiValue?: boolean;
 }
 
 export async function getFieldsSuggestions(
@@ -156,13 +163,20 @@ export async function getFieldsSuggestions(
     openSuggestions = false,
     addComma = false,
     promoteToTop = true,
+    canBeMultiValue = false,
   } = options;
+
+  const variableType = (() => {
+    if (canBeMultiValue) return ESQLVariableType.MULTI_VALUES;
+    if (values) return ESQLVariableType.VALUES;
+    return ESQLVariableType.FIELDS;
+  })();
 
   const suggestions = await getFieldsByType(types, ignoreColumns, {
     advanceCursor: addSpaceAfterField,
     openSuggestions,
     addComma,
-    variableType: values ? ESQLVariableType.VALUES : ESQLVariableType.FIELDS,
+    variableType,
   });
 
   return pushItUpInTheList(suggestions as ISuggestionItem[], promoteToTop);
@@ -173,6 +187,7 @@ interface FunctionSuggestionOptions {
   addComma?: boolean;
   addSpaceAfterFunction?: boolean;
   openSuggestions?: boolean;
+  constantGeneratingOnly?: boolean;
 }
 
 interface GetFunctionsSuggestionsParams {
@@ -195,6 +210,7 @@ export function getFunctionsSuggestions({
     addComma = false,
     addSpaceAfterFunction = false,
     openSuggestions = false,
+    constantGeneratingOnly = false,
   } = options;
 
   const predicates = {
@@ -206,12 +222,20 @@ export function getFunctionsSuggestions({
   const hasMinimumLicenseRequired = callbacks?.hasMinimumLicenseRequired;
   const activeProduct = context?.activeProduct;
 
-  const filteredFunctions = filterFunctionDefinitions(
+  let filteredFunctions = filterFunctionDefinitions(
     getAllFunctions({ includeOperators: false }),
     predicates,
     hasMinimumLicenseRequired,
     activeProduct
   );
+
+  // Filter for constant-generating functions (functions without parameters)
+  if (constantGeneratingOnly) {
+    const typeSet = new Set(types);
+    filteredFunctions = filteredFunctions.filter((fn) =>
+      fn.signatures.some((sig) => sig.params.length === 0 && typeSet.has(sig.returnType))
+    );
+  }
 
   const textSuffix = (addComma ? ',' : '') + (addSpaceAfterFunction ? ' ' : '');
 
@@ -236,6 +260,8 @@ interface LiteralSuggestionsOptions {
   // Pass-through options for literal builders
   addComma?: boolean;
   advanceCursorAndOpenSuggestions?: boolean;
+  supportsControls?: boolean;
+  variables?: ESQLControlVariable[];
 }
 
 export function getLiteralsSuggestions(
@@ -265,10 +291,15 @@ export function getLiteralsSuggestions(
 
   if (includeCompatibleLiterals) {
     suggestions.push(
-      ...getCompatibleLiterals(types, {
-        addComma: options.addComma,
-        advanceCursorAndOpenSuggestions: options.advanceCursorAndOpenSuggestions,
-      })
+      ...getCompatibleLiterals(
+        types,
+        {
+          addComma: options.addComma,
+          advanceCursorAndOpenSuggestions: options.advanceCursorAndOpenSuggestions,
+          supportsControls: options.supportsControls,
+        },
+        options.variables
+      )
     );
   }
 
@@ -284,6 +315,7 @@ export const columnExists = (col: string, context?: ICommandContext) =>
 
 export function getControlSuggestion(
   type: ESQLVariableType,
+  triggerSource: ControlTriggerSource,
   variables?: string[]
 ): ISuggestionItem[] {
   return [
@@ -297,11 +329,13 @@ export function getControlSuggestion(
         defaultMessage: 'Click to create',
       }),
       sortText: '1',
+      category: SuggestionCategory.CUSTOM_ACTION,
       command: {
         id: `esql.control.${type}.create`,
         title: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
           defaultMessage: 'Click to create',
         }),
+        arguments: [{ triggerSource }],
       },
     } as ISuggestionItem,
     ...(variables?.length
@@ -310,7 +344,10 @@ export function getControlSuggestion(
           i18n.translate('kbn-esql-ast.esql.autocomplete.namedParamDefinition', {
             defaultMessage: 'Named parameter',
           }),
-          '1A'
+          '1A',
+          undefined,
+          undefined,
+          SuggestionCategory.USER_DEFINED_COLUMN
         )
       : []),
   ];
@@ -324,6 +361,7 @@ export const getVariablePrefix = (variableType: ESQLVariableType) =>
 export function getControlSuggestionIfSupported(
   supportsControls: boolean,
   type: ESQLVariableType,
+  triggerSource: ControlTriggerSource,
   variables?: ESQLControlVariable[],
   shouldBePrefixed = true
 ) {
@@ -336,6 +374,7 @@ export function getControlSuggestionIfSupported(
 
   const controlSuggestion = getControlSuggestion(
     type,
+    triggerSource,
     filteredVariables?.map((v) => `${prefix}${v.key}`)
   );
 
@@ -443,10 +482,18 @@ export function getValidSignaturesAndTypesToSuggestNext(
     argIndex -= 1;
   }
 
+  // For signature filtering: check ALL arguments to eliminate incompatible signatures
+  // BUT only for functions with multiple signatures (overloaded functions like BUCKET)
+  // For single-signature or variadic functions, use the original behavior
+  const isVariadic = fnDefinition.signatures.some((sig) => sig.minParams != null);
+  const hasMultipleSignatures = fnDefinition.signatures.length > 1;
+  const argsToCheckForFiltering =
+    isVariadic || shouldGetNextArgument || !hasMultipleSignatures ? argIndex : enrichedArgs.length;
+
   const validSignatures = getValidFunctionSignaturesForPreviousArgs(
     fnDefinition,
     enrichedArgs,
-    argIndex
+    argsToCheckForFiltering
   );
   // Retrieve unique of types that are compatiable for the current arg
   const compatibleParamDefs = getCompatibleParamDefs(fnDefinition, enrichedArgs, argIndex);
@@ -478,6 +525,7 @@ export function createInferenceEndpointToCompletionItem(
     label: inferenceEndpoint.inference_id,
     sortText: '1',
     text: inferenceEndpoint.inference_id,
+    category: SuggestionCategory.VALUE,
   };
 }
 
@@ -540,7 +588,7 @@ export function getLookupIndexCreateSuggestion(
       }
     ),
 
-    sortText: '1A',
+    sortText: '0',
 
     command: {
       id: `esql.lookup_index.create`,

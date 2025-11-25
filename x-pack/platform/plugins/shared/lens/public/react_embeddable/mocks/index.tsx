@@ -29,12 +29,12 @@ import type {
   Visualization,
   VisualizationMap,
   ExpressionWrapperProps,
-  LensApi,
   LensInternalApi,
   LensRendererProps,
   LensRuntimeState,
   LensSerializedState,
 } from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
@@ -79,6 +79,7 @@ function getDefaultLensApiMock() {
     checkForDuplicateTitle: jest.fn().mockResolvedValue(false),
     /** New embeddable api inherited methods */
     serializeState: jest.fn(),
+    getLegacySerializedState: jest.fn(),
     saveToLibrary: jest.fn(async () => 'saved-id'),
     onEdit: jest.fn(),
     getEditPanel: jest.fn(async () => <div data-test-subj="editLensFlyout" />),

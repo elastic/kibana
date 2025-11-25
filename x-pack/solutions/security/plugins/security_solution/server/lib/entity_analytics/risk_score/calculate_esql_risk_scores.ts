@@ -8,6 +8,7 @@
 import { isEmpty } from 'lodash';
 import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
   ALERT_RISK_SCORE,
   ALERT_WORKFLOW_STATUS,
@@ -28,20 +29,13 @@ import type {
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 
-import type {
-  CalculateResults,
-  CalculateScoresParams,
-  RiskScoreBucket,
-  RiskScoreCompositeBuckets,
-} from '../types';
+import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
+import type { CalculateScoresParams, RiskScoreBucket, RiskScoreCompositeBuckets } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
-import {
-  filterFromRange,
-  getGlobalWeightForIdentifierType,
-  processScores,
-} from './calculate_risk_scores';
+import { filterFromRange, processScores } from './calculate_risk_scores';
+
 type ESQLResults = Array<
-  [EntityType, { scores: EntityRiskScoreRecord[]; afterKey: EntityAfterKey }, string[]]
+  [EntityType, { scores: EntityRiskScoreRecord[]; afterKey: EntityAfterKey }]
 >;
 
 export const calculateScoresWithESQL = async (
@@ -50,98 +44,160 @@ export const calculateScoresWithESQL = async (
     esClient: ElasticsearchClient;
     logger: Logger;
     experimentalFeatures: ExperimentalFeatures;
-  } & CalculateScoresParams
-): Promise<CalculateResults> =>
+  } & CalculateScoresParams & {
+      filters?: Array<{ entity_types: string[]; filter: string }>;
+    }
+): Promise<RiskScoresPreviewResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
-    const {
-      afterKeys,
-      alertSampleSizePerShard,
-      assetCriticalityService,
-      esClient,
-      identifierType,
-      index,
-      logger,
-      pageSize,
-      weights,
-    } = params;
+    const { identifierType, logger, esClient } = params;
     const now = new Date().toISOString();
-
-    const filter = getFilters(params);
 
     const identifierTypes: EntityType[] = identifierType
       ? [identifierType]
       : getEntityAnalyticsEntityTypes();
 
-    const compositeQuery = getCompositeQuery(identifierTypes, filter, params);
-    logger.trace(
-      `STEP ONE: Executing ESQL Risk Score composite query:\n${JSON.stringify(compositeQuery)}`
-    );
-    const response = await esClient
-      .search<never, RiskScoreCompositeBuckets>(compositeQuery)
-      .catch((e) => {
-        logger.error(`Error executing composite query: ${e.message}`);
-      });
-
-    if (!response?.aggregations) {
+    // Create separate queries for each entity type with entity-specific filters
+    const entityQueries = identifierTypes.map((entityType) => {
+      const filter = getFilters(params, entityType);
       return {
-        after_keys: {},
-        scores: {
-          host: [],
-          user: [],
-          service: [],
-        },
-        entities: {
-          user: [],
-          service: [],
-          host: [],
-          generic: [],
-        },
+        entityType,
+        query: getCompositeQuery([entityType], filter, params),
       };
+    });
+
+    logger.trace(
+      `STEP ONE: Executing ESQL Risk Score queries for entity types: ${identifierTypes.join(', ')}`
+    );
+
+    // Execute queries for each entity type
+    const responses = await Promise.all(
+      entityQueries.map(async ({ entityType, query }) => {
+        logger.trace(
+          `Executing ESQL Risk Score query for ${entityType}:\n${JSON.stringify(query)}`
+        );
+
+        let error: unknown = null;
+        const response = await esClient
+          .search<never, RiskScoreCompositeBuckets>(query)
+          .catch((e) => {
+            logger.error(`Error executing composite query for ${entityType}: ${e.message}`);
+            error = e;
+            return null;
+          });
+
+        return {
+          entityType,
+          response,
+          query,
+          error,
+        };
+      })
+    );
+
+    // Combine results from all entity queries
+    const combinedAggregations: Partial<RiskScoreCompositeBuckets> = {};
+    responses.forEach(({ entityType, response }) => {
+      if (
+        response?.aggregations &&
+        (response.aggregations as unknown as Record<string, unknown>)[entityType]
+      ) {
+        (combinedAggregations as Record<string, unknown>)[entityType] = (
+          response.aggregations as unknown as Record<string, unknown>
+        )[entityType];
+      }
+    });
+
+    // Check if all queries that had errors failed due to index_not_found_exception
+    const errorsPresent = responses.filter(({ error }) => error).length;
+    const indexNotFoundErrors = responses.filter(({ error }) => {
+      if (!error) return false;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return (
+        errorMessage.includes('index_not_found_exception') ||
+        errorMessage.includes('no such index') ||
+        errorMessage.includes('NoShardAvailableActionException')
+      );
+    }).length;
+
+    // If we have no aggregations, return empty scores if:
+    // 1. All queries that had errors were index-not-found errors
+    // 2. OR there were no errors at all (valid index pattern with no data)
+    const shouldReturnEmptyScores =
+      errorsPresent === 0 || (errorsPresent > 0 && errorsPresent === indexNotFoundErrors);
+
+    if (Object.keys(combinedAggregations).length === 0) {
+      if (shouldReturnEmptyScores) {
+        return {
+          after_keys: {},
+          scores: {
+            host: [],
+            user: [],
+            service: [],
+          },
+        };
+      }
+      // Log the actual errors for debugging
+      responses.forEach(({ entityType, error }) => {
+        if (error) {
+          logger.error(
+            `Query failed for ${entityType}: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      });
+      // Otherwise, throw an error as before
+      throw new Error('No aggregations in any composite response');
     }
 
-    const promises = toEntries(response.aggregations).map<Promise<ESQLResults[number]>>(
-      ([entityType, { buckets, after_key: afterKey }]) => {
-        const entities = buckets.map(({ key }) => key[EntityTypeToIdentifierField[entityType]]);
+    const promises = toEntries(combinedAggregations as Record<string, unknown>).map(
+      async ([entityType, aggregationData]: [string, unknown]) => {
+        const { buckets, after_key: afterKey } = aggregationData as {
+          buckets: Array<{ key: Record<string, string> }>;
+          after_key?: Record<string, string>;
+        };
+        const entities = buckets.map(
+          ({ key }) => key[(EntityTypeToIdentifierField as Record<string, string>)[entityType]]
+        );
 
         if (entities.length === 0) {
           return Promise.resolve([
             entityType as EntityType,
-            { afterKey: afterKey as EntityAfterKey, scores: [] },
-            entities,
+            { afterKey: afterKey || {}, scores: [] },
           ] satisfies ESQLResults[number]);
         }
         const bounds = {
-          lower: afterKeys[entityType]?.[EntityTypeToIdentifierField[entityType]],
-          upper: afterKey?.[EntityTypeToIdentifierField[entityType]],
+          lower: (params.afterKeys as Record<string, Record<string, string>>)[entityType]?.[
+            (EntityTypeToIdentifierField as Record<string, string>)[entityType]
+          ],
+          upper: afterKey?.[(EntityTypeToIdentifierField as Record<string, string>)[entityType]],
         };
 
-        const weight = getGlobalWeightForIdentifierType(entityType as EntityType, weights) || 1;
-
-        const query = getESQL({
-          entityType: entityType as EntityType,
+        const query = getESQL(
+          entityType as EntityType,
           bounds,
-          sampleSize: alertSampleSizePerShard || 10000,
-          pageSize,
-          index,
-          weight,
-        });
+          params.alertSampleSizePerShard || 10000,
+          params.pageSize,
+          params.index
+        );
 
+        const entityFilter = getFilters(params, entityType as EntityType);
         return esClient.esql
           .query({
             query,
-            filter: { bool: { filter } },
+            filter: { bool: { filter: entityFilter } },
           })
-          .then((rs) =>
-            rs.values.map(buildRiskScoreBucket(entityType as EntityType, index, weight))
-          )
+          .then((rs) => rs.values.map(buildRiskScoreBucket(entityType as EntityType, params.index)))
 
           .then((riskScoreBuckets) => {
             return processScores({
-              assetCriticalityService,
+              assetCriticalityService: params.assetCriticalityService,
               buckets: riskScoreBuckets,
-              identifierField: EntityTypeToIdentifierField[entityType],
+              identifierField: (EntityTypeToIdentifierField as Record<string, string>)[entityType],
               logger,
               now,
+              identifierType: entityType as EntityType,
+              weights: params.weights,
             });
           })
           .then((scores: EntityRiskScoreRecord[]): ESQLResults[number] => {
@@ -151,7 +207,6 @@ export const calculateScoresWithESQL = async (
                 scores,
                 afterKey: afterKey as EntityAfterKey,
               },
-              entities,
             ];
           })
 
@@ -162,33 +217,33 @@ export const calculateScoresWithESQL = async (
             logger.error(`Query: ${query}`);
             return [
               entityType as EntityType,
-              { afterKey: afterKey as EntityAfterKey, scores: [] },
-              entities,
-            ];
+              { afterKey: afterKey || {}, scores: [] },
+            ] satisfies ESQLResults[number];
           });
       }
     );
     const esqlResults = await Promise.all(promises);
 
-    const results: CalculateResults = esqlResults.reduce<{
-      after_keys: Record<string, EntityAfterKey>;
-      scores: Record<string, EntityRiskScoreRecord[]>;
-      entities: Record<EntityType, string[]>;
-    }>(
-      (res, [entityType, { afterKey, scores }, entities]) => {
-        res.after_keys[entityType] = afterKey;
+    const results: RiskScoresPreviewResponse = esqlResults.reduce<RiskScoresPreviewResponse>(
+      (res, [entityType, { afterKey, scores }]) => {
+        res.after_keys[entityType] = afterKey || {};
         res.scores[entityType] = scores;
-        res.entities[entityType] = entities;
         return res;
       },
-      { after_keys: {}, scores: {}, entities: { user: [], service: [], host: [], generic: [] } }
+      { after_keys: {}, scores: {} }
     );
 
     return results;
   });
 
-const getFilters = (options: CalculateScoresParams) => {
-  const { excludeAlertStatuses = [], excludeAlertTags = [], range, filter: userFilter } = options;
+const getFilters = (options: CalculateScoresParams, entityType?: EntityType) => {
+  const {
+    excludeAlertStatuses = [],
+    excludeAlertTags = [],
+    range,
+    filter: userFilter,
+    filters: customFilters,
+  } = options;
   const filters = [filterFromRange(range), { exists: { field: ALERT_RISK_SCORE } }];
   if (excludeAlertStatuses.length > 0) {
     filters.push({
@@ -204,6 +259,25 @@ const getFilters = (options: CalculateScoresParams) => {
     });
   }
 
+  // Apply entity-specific custom filters (EXCLUSIVE - exclude matching alerts)
+  if (customFilters && customFilters.length > 0 && entityType) {
+    customFilters
+      .filter((customFilter) => customFilter.entity_types.includes(entityType))
+      .forEach((customFilter) => {
+        try {
+          const kqlQuery = fromKueryExpression(customFilter.filter);
+          const esQuery = toElasticsearchQuery(kqlQuery);
+          if (esQuery) {
+            filters.push({
+              bool: { must: esQuery },
+            });
+          }
+        } catch (error) {
+          // Silently ignore invalid KQL filters to prevent query failures
+        }
+      });
+  }
+
   return filters;
 };
 
@@ -212,12 +286,11 @@ export const getCompositeQuery = (
   filter: QueryDslQueryContainer[],
   params: CalculateScoresParams
 ) => {
-  const { index, pageSize, runtimeMappings, afterKeys } = params;
   return {
     size: 0,
-    index,
+    index: params.index,
     ignore_unavailable: true,
-    runtime_mappings: runtimeMappings,
+    runtime_mappings: params.runtimeMappings,
     query: {
       function_score: {
         query: {
@@ -241,9 +314,9 @@ export const getCompositeQuery = (
         ...aggs,
         [entityType]: {
           composite: {
-            size: pageSize,
+            size: params.pageSize,
             sources: [{ [idField]: { terms: { field: idField } } }],
-            after: afterKeys[entityType],
+            after: params.afterKeys[entityType],
           },
         },
       };
@@ -251,36 +324,26 @@ export const getCompositeQuery = (
   };
 };
 
-export interface GetESQLParams {
-  bounds: {
+export const getESQL = (
+  entityType: EntityType,
+  afterKeys: {
     lower?: string;
     upper?: string;
-  };
-  entityType: EntityType;
-  index: string;
-  pageSize: number;
-  sampleSize: number;
-  weight: number;
-}
-
-export const getESQL = ({
-  entityType,
-  bounds,
-  sampleSize,
-  pageSize,
-  index,
-  weight,
-}: GetESQLParams) => {
+  },
+  sampleSize: number,
+  pageSize: number,
+  index: string = '.alerts-security.alerts-default'
+) => {
   const identifierField = EntityTypeToIdentifierField[entityType];
 
-  const lower = bounds.lower ? `${identifierField} > ${bounds.lower}` : undefined;
-  const upper = bounds.upper ? `${identifierField} <= ${bounds.upper}` : undefined;
+  const lower = afterKeys.lower ? `${identifierField} > ${afterKeys.lower}` : undefined;
+  const upper = afterKeys.upper ? `${identifierField} <= ${afterKeys.upper}` : undefined;
   if (!lower && !upper) {
     throw new Error('Either lower or upper after key must be provided for pagination');
   }
   const rangeClause = [lower, upper].filter(Boolean).join(' and ');
 
-  const query = /* ESQL */ `
+  const query = /* SQL */ `
   FROM ${index} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND KQL("${rangeClause}")
     | RENAME kibana.alert.risk_score as risk_score,
@@ -289,13 +352,13 @@ export const getESQL = ({
              kibana.alert.uuid as alert_id,
              event.kind as category,
              @timestamp as time
-    | EVAL input = CONCAT(""" {"score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name": """", rule_name, """\", "category": """", category, """\", "id": \"""", alert_id, """\" } """)
+    | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name": """", rule_name, """\", "category": """", category, """\", "id": \"""", alert_id, """\" } """)
     | STATS
         alert_count = count(risk_score),
-        scores = ${weight} * MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), ${RIEMANN_ZETA_S_VALUE}),
+        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), ${RIEMANN_ZETA_S_VALUE}),
         risk_inputs = TOP(input, 10, "desc")
     BY ${identifierField}
-    | SORT scores DESC, ${identifierField} ASC
+    | SORT scores DESC
     | LIMIT ${pageSize}
   `;
 
@@ -303,7 +366,7 @@ export const getESQL = ({
 };
 
 export const buildRiskScoreBucket =
-  (entityType: EntityType, index: string, weight: number = 1) =>
+  (entityType: EntityType, index: string) =>
   (row: FieldValue[]): RiskScoreBucket => {
     const [count, score, _inputs, entity] = row as [
       number,
@@ -314,10 +377,11 @@ export const buildRiskScoreBucket =
 
     const inputs = (Array.isArray(_inputs) ? _inputs : [_inputs]).map((input, i) => {
       const parsedRiskInputData = JSON.parse(input);
-      const value = parseFloat(parsedRiskInputData.score);
+      const value = parseFloat(parsedRiskInputData.risk_score);
       const currentScore = value / Math.pow(i + 1, RIEMANN_ZETA_S_VALUE);
+      const { risk_score: _, ...otherFields } = parsedRiskInputData;
       return {
-        ...parsedRiskInputData,
+        ...otherFields,
         score: value,
         contribution: currentScore / RIEMANN_ZETA_VALUE,
         index,
@@ -334,7 +398,7 @@ export const buildRiskScoreBucket =
             score,
             normalized_score: score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
             notes: [],
-            category_1_score: score / weight, // category score before global weight applied and normalization
+            category_1_score: score, // Don't normalize here - will be normalized in calculate_risk_scores.ts
             category_1_count: count,
             risk_inputs: inputs,
           },

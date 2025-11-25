@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
-import { ADMIN_SECURITY } from './route_security';
+import { WORKFLOW_EXECUTION_READ_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
 
 export function registerGetWorkflowExecutionLogsRoute({
@@ -23,15 +23,15 @@ export function registerGetWorkflowExecutionLogsRoute({
     {
       path: '/api/workflowExecutions/{workflowExecutionId}/logs',
       options: WORKFLOW_ROUTE_OPTIONS,
-      security: ADMIN_SECURITY,
+      security: WORKFLOW_EXECUTION_READ_SECURITY,
       validate: {
         params: schema.object({
           workflowExecutionId: schema.string(),
         }),
         query: schema.object({
           stepExecutionId: schema.maybe(schema.string()),
-          limit: schema.maybe(schema.number({ min: 1, max: 1000 })),
-          offset: schema.maybe(schema.number({ min: 0 })),
+          size: schema.maybe(schema.number({ min: 1, max: 1000 })),
+          page: schema.maybe(schema.number({ min: 1 })),
           sortField: schema.maybe(schema.string()),
           sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
         }),
@@ -40,14 +40,14 @@ export function registerGetWorkflowExecutionLogsRoute({
     async (context, request, response) => {
       try {
         const { workflowExecutionId } = request.params;
-        const { limit, offset, sortField, sortOrder, stepExecutionId } = request.query;
+        const { size, page, sortField, sortOrder, stepExecutionId } = request.query;
         const spaceId = spaces.getSpaceId(request);
 
         const logs = await api.getWorkflowExecutionLogs(
           {
             executionId: workflowExecutionId,
-            limit,
-            offset,
+            size,
+            page,
             sortField,
             sortOrder,
             stepExecutionId,

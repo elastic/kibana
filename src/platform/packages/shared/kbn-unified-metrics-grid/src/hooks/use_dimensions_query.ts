@@ -8,7 +8,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { useMetricsExperience } from './use_metrics_experience';
+import { useMetricsExperienceClient } from '../context/metrics_experience_client_provider';
 
 export const useDimensionsQuery = (params: {
   dimensions: string[];
@@ -16,15 +16,16 @@ export const useDimensionsQuery = (params: {
   from?: string;
   to?: string;
 }) => {
-  const { client } = useMetricsExperience();
+  const { client } = useMetricsExperienceClient();
 
   return useQuery({
     queryKey: ['dimensionValues', params],
     queryFn: async ({ signal }) => {
-      const { dimensions, ...rest } = params;
+      const { dimensions, indices, ...rest } = params;
       const response = await client.getDimensions(
         {
           dimensions: JSON.stringify(dimensions),
+          indices: JSON.stringify(indices),
           ...rest,
         },
         signal

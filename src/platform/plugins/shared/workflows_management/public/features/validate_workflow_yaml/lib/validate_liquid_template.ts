@@ -24,14 +24,6 @@ function getLiquidInstance(): Liquid {
     liquidInstance.registerFilter('json_parse', (value: unknown): unknown => {
       return value;
     });
-
-    liquidInstance.registerFilter('base64_encode', (value: unknown): string => {
-      return value as string;
-    });
-
-    liquidInstance.registerFilter('base64_decode', (value: unknown): string => {
-      return value as string;
-    });
   }
   return liquidInstance;
 }

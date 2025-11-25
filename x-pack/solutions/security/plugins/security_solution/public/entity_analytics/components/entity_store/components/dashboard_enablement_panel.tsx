@@ -96,6 +96,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
   if (storeEnablement.error) {
     return (
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.entityStore.enablement.mutation.errorTitle"

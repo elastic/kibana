@@ -225,6 +225,7 @@ describe.skip('When using `upload` response action', () => {
     'ra_upload_error_too-big',
     'ra_upload_error_queue-timeout',
     'ra_upload_error_download-failed',
+    'ra_upload_error_not-enough-free-space',
   ])('should show detailed error if upload failure returned code: %s', async (outputCode) => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/a.b.c',

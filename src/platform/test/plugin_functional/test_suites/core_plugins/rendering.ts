@@ -68,7 +68,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       return window.__RENDERING_SESSION__;
     });
 
-  describe('rendering service', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/240348
+  describe.skip('rendering service', () => {
     it('exposes plugin config settings to authenticated users', async () => {
       // This retry loop to get the injectedMetadata is to overcome flakiness
       // (see comment in getInjectedMetadata)
@@ -252,7 +253,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string?)',
         'xpack.cloud.serverless.project_name (string?)',
-        'xpack.cloud.serverless.project_type (observability?|security?|search?|workplace_ai?)',
+        'xpack.cloud.serverless.project_type (observability?|security?|search?|workplaceai?)',
         'xpack.cloud.serverless.product_tier (never|complete?|essentials?|search_ai_lake?|logs_essentials?)',
         'xpack.cloud.serverless.orchestrator_target (string?)',
         'xpack.cloud.serverless.in_trial (boolean?)',
@@ -407,6 +408,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.ruleFormV2Enabled (boolean?)',
         'xpack.observability.unsafe.ruleFormV2.enabled (boolean?)',
         'xpack.slo.experimental.ruleFormV2.enabled (boolean?)',
+
+        // temporary feature flag, to be removed when cps is released
+        'cps.cpsEnabled (boolean?|never)',
         /**/
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large

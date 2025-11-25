@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from './autocomplete/helpers';
 import type { ISuggestionItem } from '../../commands_registry/types';
@@ -14,6 +14,7 @@ import { timeUnitsToSuggest } from '../constants';
 import { getControlSuggestion } from './autocomplete/helpers';
 import type { FunctionParameterType, SupportedDataType } from '../types';
 import { commaCompleteItem } from '../../commands_registry/complete_items';
+import { SuggestionCategory } from '../../sorting/types';
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
 
@@ -36,7 +37,8 @@ export const buildConstantsDefinitions = (
    * Whether or not to advance the cursor and open the suggestions dialog after inserting the constant.
    */
   options?: BuildConstantsOptions,
-  documentationValue?: string
+  documentationValue?: string,
+  category?: SuggestionCategory
 ): ISuggestionItem[] =>
   userConstants.map((label) => {
     const suggestion: ISuggestionItem = {
@@ -53,6 +55,7 @@ export const buildConstantsDefinitions = (
         }),
       ...(documentationValue ? { documentation: { value: documentationValue } } : {}),
       sortText: sortText ?? 'A',
+      ...(category && { category }),
     };
 
     return options?.advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;
@@ -70,7 +73,8 @@ export function getDateLiterals(options?: DateLiteralsOptions) {
       // appears when the user opens the second level popover
       i18n.translate('kbn-esql-ast.esql.autocomplete.timeNamedParamDoc', {
         defaultMessage: `Use the \`?_tstart\` and \`?_tend\` parameters to bind a custom timestamp field to Kibana's time filter.`,
-      })
+      }),
+      SuggestionCategory.TIME_PARAM
     ),
     {
       label: i18n.translate('kbn-esql-ast.esql.autocomplete.chooseFromTimePickerLabel', {
@@ -82,6 +86,7 @@ export function getDateLiterals(options?: DateLiteralsOptions) {
         defaultMessage: 'Click to choose',
       }),
       sortText: '1A',
+      category: SuggestionCategory.CUSTOM_ACTION,
       command: {
         id: 'esql.timepicker.choose',
         title: i18n.translate('kbn-esql-ast.esql.autocomplete.chooseFromTimePicker', {
@@ -152,6 +157,7 @@ export function getCompatibleLiterals(
       timeLiteralSuggestions.push(
         ...getControlSuggestion(
           ESQLVariableType.TIME_LITERAL,
+          ControlTriggerSource.SMART_SUGGESTION,
           userDefinedColumns.map((v) => `?${v.key}`)
         )
       );

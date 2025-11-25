@@ -38,6 +38,7 @@ import type {
   PostPackagePolicyPostCreateCallback,
   PostPackagePolicyDeleteCallback,
   UpdatePackagePolicy,
+  AssetsMap,
 } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
 
@@ -58,6 +59,7 @@ import type {
   DeletePackagePoliciesResponse,
   PackagePolicyAssetsMap,
   PreconfiguredInputs,
+  ArchiveEntry,
 } from '../../common/types';
 import { packageToPackagePolicy, packageToPackagePolicyInputs } from '../../common/services';
 
@@ -73,6 +75,7 @@ import {
   _compilePackagePolicyInputs,
   _validateRestrictedFieldsNotModifiedOrThrow,
   _normalizePackagePolicyKuery,
+  _getAssetForTemplatePath,
 } from './package_policy';
 import { appContextService } from '.';
 
@@ -1938,6 +1941,9 @@ describe('Package policy service', () => {
   });
 
   describe('update', () => {
+    beforeEach(() => {
+      mockAgentPolicyGet();
+    });
     it('should fail to update on version conflict', async () => {
       const savedObjectsClient = createSavedObjectClientMock();
 
@@ -7746,6 +7752,8 @@ describe('Package policy service', () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const updateSpy = jest.spyOn(packagePolicyService, 'update');
+
+      mockAgentPolicyGet();
       soClient.find.mockResolvedValue({
         saved_objects: [
           {
@@ -8806,5 +8814,56 @@ describe('_normalizePackagePolicyKuery', () => {
       `fleet-package-policies.name:test`
     );
     expect(res).toEqual('ingest-package-policies.attributes.name:test');
+  });
+});
+
+describe('_getAssetForTemplatePath()', () => {
+  it('should return the asset for the given template path', () => {
+    const pkgInfo: PackageInfo = {
+      name: 'test_package',
+      version: '1.0.0',
+      type: 'integration',
+    } as any;
+    const datasetPath = 'test_data_stream';
+    const templatePath = 'log.yml.hbs';
+    const assetsMap: AssetsMap = new Map();
+    assetsMap.set(
+      `test_package-1.0.0/data_stream/${datasetPath}/agent/stream/syslog.yml.hbs`,
+      Buffer.from('wrong match asset')
+    );
+    assetsMap.set(
+      `test_package-1.0.0/data_stream/${datasetPath}/agent/stream/log.yml.hbs`,
+      Buffer.from('exact match asset')
+    );
+
+    const expectedAsset: ArchiveEntry = {
+      path: 'test_package-1.0.0/data_stream/test_data_stream/agent/stream/log.yml.hbs',
+      buffer: Buffer.from('exact match asset'),
+    };
+    const asset = _getAssetForTemplatePath(pkgInfo, assetsMap, datasetPath, templatePath);
+    expect(asset).toEqual(expectedAsset);
+  });
+  it('should return fallback asset it exact match is not found', () => {
+    // representing the scenario where the templatePath has the default value 'stream.yml.hbs'
+    // but the actual asset uses a prefixed name like 'filestream.yml.hbs'
+    const pkgInfo: PackageInfo = {
+      name: 'test_package',
+      version: '1.0.0',
+      type: 'integration',
+    } as any;
+    const datasetPath = 'test_data_stream';
+    const templatePath = 'stream.yml.hbs';
+    const assetsMap: AssetsMap = new Map();
+    assetsMap.set(
+      `test_package-1.0.0/data_stream/${datasetPath}/agent/stream/filestream.yml.hbs`,
+      Buffer.from('ends with match asset')
+    );
+
+    const expectedFallbackAsset: ArchiveEntry = {
+      path: 'test_package-1.0.0/data_stream/test_data_stream/agent/stream/filestream.yml.hbs',
+      buffer: Buffer.from('ends with match asset'),
+    };
+    const asset = _getAssetForTemplatePath(pkgInfo, assetsMap, datasetPath, templatePath);
+    expect(asset).toEqual(expectedFallbackAsset);
   });
 });

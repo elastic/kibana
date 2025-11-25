@@ -18,7 +18,8 @@ export type ESQLAstCommand =
   | ESQLAstChangePointCommand
   | ESQLAstRerankCommand
   | ESQLAstCompletionCommand
-  | ESQLAstFuseCommand;
+  | ESQLAstFuseCommand
+  | ESQLAstForkCommand;
 
 export type ESQLAstAllCommands = ESQLAstCommand | ESQLAstHeaderCommand;
 
@@ -34,6 +35,7 @@ export type ESQLSingleAstItem =
   | ESQLFunction
   | ESQLCommandOption
   | ESQLSource
+  | ESQLParens
   | ESQLColumn
   | ESQLDatePeriodLiteral
   | ESQLTimeDurationLiteral
@@ -143,6 +145,10 @@ export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
   inferenceId: ESQLLiteral | undefined;
 }
 
+export interface ESQLAstForkCommand extends ESQLCommand<'fork'> {
+  args: ESQLForkParens[];
+}
+
 /**
  * Represents a header pseudo-command, such as SET.
  *
@@ -241,7 +247,8 @@ export interface ESQLFunctionCallExpression extends ESQLFunction<'variadic-call'
   args: ESQLAstItem[];
 }
 
-export interface ESQLUnaryExpression extends ESQLFunction<'unary-expression'> {
+export interface ESQLUnaryExpression<Name extends string = string>
+  extends ESQLFunction<'unary-expression', Name> {
   subtype: 'unary-expression';
   args: [ESQLAstItem];
 }
@@ -370,6 +377,22 @@ export interface ESQLSource extends ESQLAstBaseItem {
    * ```
    */
   selector?: ESQLStringLiteral | undefined;
+}
+
+/**
+ * Represents any expression wrapped in parentheses.
+ *
+ * ```
+ * FROM ( <query> )
+ * ```
+ */
+export interface ESQLParens extends ESQLAstBaseItem {
+  type: 'parens';
+  child: ESQLAstExpression;
+}
+
+export interface ESQLForkParens extends ESQLParens {
+  child: ESQLAstQueryExpression;
 }
 
 export interface ESQLColumn extends ESQLAstBaseItem {

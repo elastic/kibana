@@ -288,5 +288,44 @@ describe('POST risk_engine/preview route', () => {
         );
       });
     });
+
+    describe('filters', () => {
+      it('respects the provided filters', async () => {
+        const filters = [
+          { entity_types: ['host'], filter: 'agent.type: filebeat' },
+          { entity_types: ['user'], filter: 'user.name: ubuntu' },
+        ];
+        const request = buildRequest({ filters });
+
+        const response = await server.inject(request, requestContextMock.convertContext(context));
+
+        expect(response.status).toEqual(200);
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
+          expect.objectContaining({ filters })
+        );
+      });
+
+      it('handles empty filters array', async () => {
+        const request = buildRequest({ filters: [] });
+
+        const response = await server.inject(request, requestContextMock.convertContext(context));
+
+        expect(response.status).toEqual(200);
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
+          expect.objectContaining({ filters: [] })
+        );
+      });
+
+      it('handles undefined filters', async () => {
+        const request = buildRequest();
+
+        const response = await server.inject(request, requestContextMock.convertContext(context));
+
+        expect(response.status).toEqual(200);
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
+          expect.objectContaining({ filters: [] })
+        );
+      });
+    });
   });
 });

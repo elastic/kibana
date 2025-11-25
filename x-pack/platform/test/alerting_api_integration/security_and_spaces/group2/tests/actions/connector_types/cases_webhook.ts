@@ -206,7 +206,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 expect(resp.body).to.eql({
                   statusCode: 400,
                   error: 'Bad Request',
-                  message: `error validating action type config: [${field}]: expected value of type [string] but got [undefined]`,
+                  message: `error validating connector type config: Field \"${field}\": Required`,
                 });
               });
           });
@@ -237,7 +237,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring cases webhook action: target url "http://casesWebhook.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: error configuring cases webhook action: target url "http://casesWebhook.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -322,8 +322,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: [subAction]: expected value to equal [pushToService]',
+                message: `error validating action params: Field \"subAction\": Invalid discriminator value. Expected 'pushToService'`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -341,8 +340,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: [subActionParams.incident.title]: expected value of type [string] but got [undefined]',
+                message: `error validating action params: Field \"subActionParams\": Required`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -368,8 +366,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: [subActionParams.incident.title]: expected value of type [string] but got [undefined]',
+                message: `error validating action params: Field \"subActionParams.incident.title\": Required`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -397,8 +394,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
+                message: `error validating action params: Field \"subActionParams.comments.0.commentId\": Required`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -425,8 +421,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
+                message: `error validating action params: Field \"subActionParams.comments.0.comment\": Required`,
                 errorSource: TaskErrorSource.USER,
               });
             });

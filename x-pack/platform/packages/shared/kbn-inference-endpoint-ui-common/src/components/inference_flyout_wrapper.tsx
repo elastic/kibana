@@ -31,23 +31,24 @@ const DEFAULT_NUM_THREADS = 1;
 
 const formDeserializer = (data: InferenceEndpoint) => {
   if (
-    data?.config?.providerConfig &&
-    data?.config?.providerConfig['adaptive_allocations.max_number_of_allocations']
+    data.config?.providerConfig?.adaptive_allocations?.max_number_of_allocations ||
+    data.config?.headers
   ) {
-    // remove num_allocations and num_threads from the data as form does not expect it
-    const {
-      num_allocations: numAllocations,
-      num_threads: numThreads,
-      ...restOfProviderConfig
-    } = data.config.providerConfig;
+    const { headers, ...restConfig } = data.config;
+    const maxAllocations =
+      data.config.providerConfig?.adaptive_allocations?.max_number_of_allocations;
+
     return {
       ...data,
       config: {
-        ...data.config,
+        ...restConfig,
         providerConfig: {
-          ...restOfProviderConfig,
-          max_number_of_allocations:
-            restOfProviderConfig['adaptive_allocations.max_number_of_allocations'],
+          ...(data.config.providerConfig as InferenceEndpoint['config']['providerConfig']),
+          ...(headers ? { headers } : {}),
+          ...(maxAllocations
+            ? // remove the adaptive_allocations from the data config as form does not expect it
+              { max_number_of_allocations: maxAllocations, adaptive_allocations: undefined }
+            : {}),
         },
       },
     };
@@ -57,14 +58,16 @@ const formDeserializer = (data: InferenceEndpoint) => {
 };
 
 // This serializer is used to transform the form data before sending it to the server
-const formSerializer = (formData: InferenceEndpoint) => {
-  if (
-    // explicit check to see if this field exists as it only exists in serverless
-    formData.config?.providerConfig?.max_number_of_allocations !== undefined
-  ) {
-    const providerConfig = formData.config?.providerConfig;
-    const { max_number_of_allocations: maxAllocations, ...restProviderConfig } =
-      providerConfig || {};
+export const formSerializer = (formData: InferenceEndpoint) => {
+  const providerConfig = formData.config?.providerConfig as
+    | InferenceEndpoint['config']['providerConfig']
+    | undefined;
+  if (formData && providerConfig) {
+    const {
+      max_number_of_allocations: maxAllocations,
+      headers,
+      ...restProviderConfig
+    } = providerConfig || {};
 
     return {
       ...formData,
@@ -72,18 +75,22 @@ const formSerializer = (formData: InferenceEndpoint) => {
         ...formData.config,
         providerConfig: {
           ...restProviderConfig,
-          adaptive_allocations: {
-            enabled: true,
-            min_number_of_allocations: MIN_ALLOCATIONS,
-            ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
-          },
-          // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
-          num_threads: DEFAULT_NUM_THREADS,
+          ...(maxAllocations
+            ? {
+                adaptive_allocations: {
+                  enabled: true,
+                  min_number_of_allocations: MIN_ALLOCATIONS,
+                  ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+                },
+                // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
+                num_threads: DEFAULT_NUM_THREADS,
+              }
+            : {}),
         },
+        ...(headers ? { headers } : {}),
       },
     };
   }
-
   return formData;
 };
 
@@ -126,6 +133,8 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
         provider: inferenceEndpoint?.config.provider ?? '',
         providerConfig: inferenceEndpoint?.config.providerConfig,
         contextWindowLength: inferenceEndpoint?.config.contextWindowLength ?? undefined,
+        headers: inferenceEndpoint?.config?.headers,
+        temperature: inferenceEndpoint?.config.temperature ?? undefined,
       },
       secrets: {
         providerSecrets: {},

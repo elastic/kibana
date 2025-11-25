@@ -13,12 +13,16 @@ const _allowedExperimentalValues = {
   enableSSLSecrets: false,
   installedIntegrationsTabularUI: true,
   enabledUpgradeAgentlessDeploymentsTask: true,
-  enablePackageRollback: false,
+  enablePackageRollback: true,
   enableAutoInstallContentPackages: true,
   enableOtelIntegrations: true,
   enableAgentStatusAlerting: true,
   enableAgentPrivilegeLevelChange: false,
   installIntegrationsKnowledge: false,
+  enableFleetPolicyRevisionsCleanupTask: true,
+  agentlessPoliciesAPI: true,
+  useAgentlessAPIInUI: false,
+  disabledAgentlessLegacyAPI: false,
 };
 
 /**

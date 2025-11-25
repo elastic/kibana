@@ -39,7 +39,7 @@ const machineLearningItemId = observabilityMock.navItems.primaryItems[10].id;
 describe('Both modes', () => {
   let user: ReturnType<typeof userEvent.setup>;
 
-  let restoreWindowSize: () => void;
+  let restoreWindowSize: (() => void) | undefined;
 
   beforeAll(() => {
     mockClientHeight(mockMenuItemHeight);
@@ -404,6 +404,49 @@ describe('Both modes', () => {
         expect(overviewLink).toHaveAttribute('aria-current', 'page');
         expect(overviewLink).toHaveAttribute('data-highlighted', 'true');
       });
+
+      it('should switch popover when hovering from one item to another', async () => {
+        const customNavItems = {
+          ...basicMock.navItems,
+          primaryItems: [
+            ...basicMock.navItems.primaryItems,
+            {
+              id: 'analytics',
+              label: 'Analytics',
+              href: '/analytics',
+              iconType: 'visVisualBuilder',
+              sections: [
+                {
+                  id: 'analytics_section',
+                  label: 'Analytics Section',
+                  items: [{ id: 'analytics_sub', label: 'Sub Item', href: '/sub' }],
+                },
+              ],
+            },
+          ],
+        };
+
+        render(<TestComponent items={customNavItems} logo={basicMock.logo} />);
+
+        const appsLink = screen.getByRole('link', { name: 'Apps' });
+        const analyticsLink = screen.getByRole('link', { name: 'Analytics' });
+
+        await user.hover(appsLink);
+        flushPopoverTimers();
+
+        const appsPopover = await screen.findByRole('dialog', { name: 'Apps' });
+        expect(appsPopover).toBeInTheDocument();
+
+        await user.hover(analyticsLink);
+        flushPopoverTimers();
+
+        await waitFor(() => {
+          expect(screen.queryByRole('dialog', { name: 'Apps' })).not.toBeInTheDocument();
+        });
+
+        const analyticsPopover = await screen.findByRole('dialog', { name: 'Analytics' });
+        expect(analyticsPopover).toBeInTheDocument();
+      });
     });
 
     describe('Primary menu item limit', () => {
@@ -510,11 +553,13 @@ describe('Both modes', () => {
           expect(link).toBeInTheDocument();
         });
 
-        const twelfthLink = screen.queryByRole('link', {
-          name: securityMock.navItems.primaryItems[11].label,
-        });
+        await waitFor(() => {
+          const twelfthLink = screen.queryByRole('link', {
+            name: securityMock.navItems.primaryItems[11].label,
+          });
 
-        expect(twelfthLink).not.toBeInTheDocument();
+          expect(twelfthLink).not.toBeInTheDocument();
+        });
 
         const moreButton = screen.getByRole('button', {
           name: 'More',
@@ -559,7 +604,7 @@ describe('Both modes', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
@@ -602,7 +647,7 @@ describe('Both modes', () => {
         // Security mock has exactly 13 primary menu items
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
@@ -644,7 +689,7 @@ describe('Both modes', () => {
           />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
@@ -847,6 +892,61 @@ describe('Both modes', () => {
         await waitFor(() => {
           expect(tooltip).not.toBeInTheDocument();
         });
+      });
+
+      it('should switch popover when hovering from one item to another', async () => {
+        const customNavItems = {
+          ...basicMock.navItems,
+          footerItems: [
+            {
+              id: 'footer1',
+              label: 'Footer 1',
+              href: '/footer1',
+              iconType: 'user',
+              sections: [
+                {
+                  id: 'section1',
+                  label: 'Section 1',
+                  items: [{ id: 'sub1', label: 'Sub 1', href: '/sub1' }],
+                },
+              ],
+            },
+            {
+              id: 'footer2',
+              label: 'Footer 2',
+              href: '/footer2',
+              iconType: 'gear',
+              sections: [
+                {
+                  id: 'section2',
+                  label: 'Section 2',
+                  items: [{ id: 'sub2', label: 'Sub 2', href: '/sub2' }],
+                },
+              ],
+            },
+          ],
+        };
+
+        render(<TestComponent items={customNavItems} logo={basicMock.logo} />);
+
+        const footer1Link = screen.getByRole('link', { name: 'Footer 1' });
+        const footer2Link = screen.getByRole('link', { name: 'Footer 2' });
+
+        await user.hover(footer1Link);
+        flushPopoverTimers();
+
+        const popover1 = await screen.findByRole('dialog', { name: 'Footer 1' });
+        expect(popover1).toBeInTheDocument();
+
+        await user.hover(footer2Link);
+        flushPopoverTimers();
+
+        await waitFor(() => {
+          expect(screen.queryByRole('dialog', { name: 'Footer 1' })).not.toBeInTheDocument();
+        });
+
+        const popover2 = await screen.findByRole('dialog', { name: 'Footer 2' });
+        expect(popover2).toBeInTheDocument();
       });
     });
 
@@ -1294,7 +1394,7 @@ describe('Both modes', () => {
       it('should move focus to the first or last item in the popover when pressing Home or End', async () => {
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', { name: 'More' });
+        const moreButton = await screen.findByRole('button', { name: 'More' });
 
         act(() => {
           moreButton.focus();
@@ -1335,7 +1435,7 @@ describe('Both modes', () => {
       it('should return focus to the menu item that opened the popover when it is closed', async () => {
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', { name: 'More' });
+        const moreButton = await screen.findByRole('button', { name: 'More' });
 
         await user.click(moreButton);
 
@@ -1365,7 +1465,7 @@ describe('Both modes', () => {
       it('should move focus to the next primary menu or footer menu item when pressing Tab', async () => {
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', { name: 'More' });
+        const moreButton = await screen.findByRole('button', { name: 'More' });
 
         act(() => {
           moreButton.focus();
@@ -1399,7 +1499,7 @@ describe('Both modes', () => {
       it('should move focus to the previous primary menu or footer menu item when pressing Shift + Tab', async () => {
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', { name: 'More' });
+        const moreButton = await screen.findByRole('button', { name: 'More' });
 
         act(() => {
           moreButton.focus();
@@ -1435,7 +1535,7 @@ describe('Both modes', () => {
       it('should focus the "Go back" button when opening a nested panel with Enter', async () => {
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', { name: 'More' });
+        const moreButton = await screen.findByRole('button', { name: 'More' });
 
         act(() => {
           moreButton.focus();
@@ -1471,7 +1571,7 @@ describe('Both modes', () => {
       it('should keep focus within nested submenu items when using arrow keys', async () => {
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', { name: 'More' });
+        const moreButton = await screen.findByRole('button', { name: 'More' });
 
         act(() => {
           moreButton.focus();
@@ -1538,7 +1638,7 @@ describe('Both modes', () => {
       it('should return focus to the trigger that opened the nested panel when activating the "Go back" button', async () => {
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', { name: 'More' });
+        const moreButton = await screen.findByRole('button', { name: 'More' });
 
         act(() => {
           moreButton.focus();
@@ -1574,7 +1674,7 @@ describe('Both modes', () => {
       it('does NOT close the popover when onBlur has relatedTarget === null (Safari quirk)', async () => {
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', { name: 'More' });
+        const moreButton = await screen.findByRole('button', { name: 'More' });
         act(() => {
           moreButton.focus();
         });

@@ -11,11 +11,9 @@ import { css } from '@emotion/react';
 import { useFetch } from '@kbn/unified-histogram';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import React, { useMemo } from 'react';
-import { Provider } from 'react-redux';
 import { Subject } from 'rxjs';
 import { TraceMetricsProvider } from '../../context/trace_metrics_context';
 import { useEsqlQueryInfo } from '../../hooks';
-import { store } from '../../store';
 import { ErrorRateChart } from './error_rate';
 import { LatencyChart } from './latency';
 import { ThroughputChart } from './throughput';
@@ -57,6 +55,13 @@ function TraceMetricsGrid({
     return [...esqlQuery.filters, ...kqlFilters];
   }, [esqlQuery.filters, kqlFilters]);
 
+  const toolbar = useMemo(
+    () => ({
+      toggleActions: renderToggleActions(),
+    }),
+    [renderToggleActions]
+  );
+
   const { updateTimeRange } = requestParams;
 
   const input$ = useMemo(
@@ -76,54 +81,48 @@ function TraceMetricsGrid({
   }
 
   return (
-    <Provider store={store}>
-      <MetricsGridWrapper
-        indexPattern={indexPattern}
-        renderToggleActions={renderToggleActions}
-        chartToolbarCss={chartToolbarCss}
-        requestParams={requestParams}
-        fields={[]}
-        isComponentVisible={isComponentVisible}
-        hideRightSideActions
-        hideDimensionsSelector
+    <MetricsGridWrapper
+      id="tracesGrid"
+      toolbarCss={chartToolbarCss}
+      toolbar={toolbar}
+      isComponentVisible={isComponentVisible}
+    >
+      <TraceMetricsProvider
+        value={{
+          dataSource,
+          indexes: indexPattern,
+          filters,
+          requestParams,
+          services,
+          searchSessionId,
+          abortController,
+          onBrushEnd,
+          onFilter,
+          discoverFetch$,
+        }}
       >
-        <TraceMetricsProvider
-          value={{
-            dataSource,
-            indexes: indexPattern,
-            filters,
-            requestParams,
-            services,
-            searchSessionId,
-            abortController,
-            onBrushEnd,
-            onFilter,
-            discoverFetch$,
-          }}
+        <EuiPanel
+          hasBorder={false}
+          hasShadow={false}
+          css={css`
+            height: 100%;
+            align-content: center;
+          `}
         >
-          <EuiPanel
-            hasBorder={false}
-            hasShadow={false}
-            css={css`
-              height: 100%;
-              align-content: center;
-            `}
-          >
-            <EuiFlexGrid columns={3} gutterSize="s">
-              <EuiFlexItem>
-                <LatencyChart />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ErrorRateChart />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ThroughputChart />
-              </EuiFlexItem>
-            </EuiFlexGrid>
-          </EuiPanel>
-        </TraceMetricsProvider>
-      </MetricsGridWrapper>
-    </Provider>
+          <EuiFlexGrid columns={3} gutterSize="s">
+            <EuiFlexItem>
+              <LatencyChart />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ErrorRateChart />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ThroughputChart />
+            </EuiFlexItem>
+          </EuiFlexGrid>
+        </EuiPanel>
+      </TraceMetricsProvider>
+    </MetricsGridWrapper>
   );
 }
 

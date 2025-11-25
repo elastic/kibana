@@ -64,6 +64,9 @@ export const GRAPH_ENTITY_NODE_DETAILS_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}EntityNodeDetails` as const;
 
 export const GRAPH_IPS_TEXT_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsText` as const;
+export const GRAPH_IPS_BUTTON_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsButton` as const;
+export const GRAPH_IPS_VALUE_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsValue` as const;
+
 export const GRAPH_IPS_PLUS_COUNT_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsPlusCount` as const;
 export const GRAPH_IPS_PLUS_COUNT_BUTTON_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}IpsPlusCountButton` as const;

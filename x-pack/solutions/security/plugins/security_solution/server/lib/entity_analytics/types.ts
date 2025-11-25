@@ -85,6 +85,10 @@ export interface RiskEngineConfiguration {
   excludeAlertStatuses?: string[];
   excludeAlertTags?: string[];
   enableResetToZero: boolean;
+  filters?: Array<{
+    entity_types: string[];
+    filter: string;
+  }>;
 }
 
 export interface CalculateScoresParams {
@@ -100,6 +104,7 @@ export interface CalculateScoresParams {
   alertSampleSizePerShard?: number;
   excludeAlertStatuses?: string[];
   excludeAlertTags?: string[];
+  filters?: Array<{ entity_types: string[]; filter: string }>;
 }
 
 export interface CalculateAndPersistScoresParams {

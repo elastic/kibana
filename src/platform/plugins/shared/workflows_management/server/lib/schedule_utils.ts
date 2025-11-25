@@ -15,7 +15,6 @@ import { Frequency } from '@kbn/rrule';
 export interface WorkflowTrigger {
   type: 'alert' | 'scheduled' | 'manual';
   with?: Record<string, any>;
-  enabled?: boolean;
 }
 
 /**
@@ -114,14 +113,14 @@ export function convertWorkflowScheduleToTaskSchedule(trigger: WorkflowTrigger) 
  * Checks if a workflow has any scheduled triggers
  */
 export function hasScheduledTriggers(triggers: WorkflowTrigger[]): boolean {
-  return triggers.some((trigger) => trigger.type === 'scheduled' && trigger.enabled);
+  return triggers.some((trigger) => trigger.type === 'scheduled');
 }
 
 /**
  * Gets all scheduled triggers from a workflow
  */
 export function getScheduledTriggers(triggers: WorkflowTrigger[]): WorkflowTrigger[] {
-  return triggers.filter((trigger) => trigger.type === 'scheduled' && trigger.enabled);
+  return triggers.filter((trigger) => trigger.type === 'scheduled');
 }
 
 /**

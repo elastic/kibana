@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type PropsWithChildren, useEffect, useRef, useMemo } from 'react';
+import React, { type PropsWithChildren, useEffect, useRef, useMemo, useCallback } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
 import type {
   ChartSectionConfiguration,
@@ -16,7 +16,11 @@ import type {
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
-import { useProfileAccessor } from '../../../../context_awareness';
+import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
+import {
+  type ChartSectionConfigurationExtensionParams,
+  useProfileAccessor,
+} from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
   CurrentTabProvider,
@@ -25,6 +29,10 @@ import {
   selectTabRuntimeState,
   useInternalStateSelector,
   useRuntimeState,
+  useCurrentTabSelector,
+  useInternalStateDispatch,
+  useCurrentTabAction,
+  internalStateActions,
 } from '../../state_management/redux';
 import type { DiscoverMainContentProps } from '../layout/discover_main_content';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
@@ -133,13 +141,25 @@ type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle
 };
 
 const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
+  const dispatch = useInternalStateDispatch();
   const getChartConfigAccessor = useProfileAccessor('getChartSectionConfiguration');
+  const chartSectionConfigurationExtParams: ChartSectionConfigurationExtensionParams =
+    useMemo(() => {
+      return {
+        actions: {
+          openInNewTab: (params) =>
+            dispatch(internalStateActions.openInNewTabExtPointAction(params)),
+          updateESQLQuery: stateContainer.actions.updateESQLQuery,
+        },
+      };
+    }, [dispatch, stateContainer.actions.updateESQLQuery]);
+
   const chartSectionConfig = useMemo(
     () =>
       getChartConfigAccessor(() => ({
         replaceDefaultChart: false,
-      }))(),
-    [getChartConfigAccessor]
+      }))(chartSectionConfigurationExtParams),
+    [getChartConfigAccessor, chartSectionConfigurationExtParams]
   );
 
   useEffect(() => {
@@ -205,6 +225,7 @@ const CustomChartSectionWrapper = ({
 }: UnifiedHistogramChartProps & {
   chartSectionConfig: Extract<ChartSectionConfiguration, { replaceDefaultChart: true }>;
 }) => {
+  const dispatch = useInternalStateDispatch();
   const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(
     stateContainer,
     chartSectionConfig.localStorageKeyPrefix
@@ -218,6 +239,18 @@ const CustomChartSectionWrapper = ({
     initialState: unifiedHistogramProps.initialState,
     localStorageKeyPrefix,
   });
+
+  const metricsGridState = useCurrentTabSelector((state) => state.uiState.metricsGrid);
+  const setMetricsGridState = useCurrentTabAction(internalStateActions.setMetricsGridState);
+  const onInitialStateChange = useCallback(
+    (newMetricsGridState: Partial<UnifiedMetricsGridRestorableState>) => {
+      // Defer dispatch to next tick - ensures React render cycle is complete
+      // setTimeout(() => {
+      dispatch(setMetricsGridState({ metricsGridState: newMetricsGridState }));
+      // }, 0);
+    },
+    [setMetricsGridState, dispatch]
+  );
 
   useEffect(() => {
     if (api) {
@@ -270,6 +303,8 @@ const CustomChartSectionWrapper = ({
       requestParams={requestParams}
       isComponentVisible={isComponentVisible}
       {...unifiedHistogramProps}
+      initialState={metricsGridState}
+      onInitialStateChange={onInitialStateChange}
     />
   );
 };

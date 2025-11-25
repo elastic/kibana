@@ -38,15 +38,13 @@ export function getServiceHealthStatusColor(
   euiTheme: EuiThemeComputed,
   status: ServiceHealthStatus
 ) {
-  const isAmsterdam = euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
-
   switch (status) {
     case ServiceHealthStatus.healthy:
-      return isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.severity.success;
+      return euiTheme.colors.severity.success;
     case ServiceHealthStatus.warning:
-      return isAmsterdam ? euiTheme.colors.vis.euiColorVis5 : euiTheme.colors.severity.warning;
+      return euiTheme.colors.severity.warning;
     case ServiceHealthStatus.critical:
-      return isAmsterdam ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.severity.danger;
+      return euiTheme.colors.severity.danger;
     case ServiceHealthStatus.unknown:
       return euiTheme.colors.mediumShade;
   }
@@ -56,21 +54,13 @@ export function getServiceHealthStatusBadgeColor(
   euiTheme: EuiThemeComputed,
   status: ServiceHealthStatus
 ) {
-  const isAmsterdam = euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
-
   switch (status) {
     case ServiceHealthStatus.healthy:
-      return isAmsterdam
-        ? euiTheme.colors.vis.euiColorVisBehindText0
-        : euiTheme.colors.severity.success;
+      return euiTheme.colors.severity.success;
     case ServiceHealthStatus.warning:
-      return isAmsterdam
-        ? euiTheme.colors.vis.euiColorVisBehindText5
-        : euiTheme.colors.severity.warning;
+      return euiTheme.colors.severity.warning;
     case ServiceHealthStatus.critical:
-      return isAmsterdam
-        ? euiTheme.colors.vis.euiColorVisBehindText9
-        : euiTheme.colors.severity.risk;
+      return euiTheme.colors.severity.risk;
     case ServiceHealthStatus.unknown:
       return euiTheme.colors.mediumShade;
   }

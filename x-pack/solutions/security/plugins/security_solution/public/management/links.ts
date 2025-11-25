@@ -15,6 +15,7 @@ import {
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
+  ENDPOINT_EXCEPTIONS_PATH,
   ENDPOINTS_PATH,
   ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
@@ -23,15 +24,17 @@ import {
   MANAGE_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
-  SecurityPageName,
   SECURITY_FEATURE_ID,
+  SecurityPageName,
   TRUSTED_APPS_PATH,
-  ENDPOINT_EXCEPTIONS_PATH,
   TRUSTED_DEVICES_PATH,
 } from '../../common/constants';
 import {
   BLOCKLIST,
+  ENDPOINT_EXCEPTIONS,
   ENDPOINTS,
+  ENTITY_ANALYTICS_RISK_SCORE,
+  ENTITY_STORE,
   EVENT_FILTERS,
   HOST_ISOLATION_EXCEPTIONS,
   MANAGE,
@@ -39,9 +42,6 @@ import {
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
   TRUSTED_DEVICES,
-  ENTITY_ANALYTICS_RISK_SCORE,
-  ENTITY_STORE,
-  ENDPOINT_EXCEPTIONS,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -76,14 +76,20 @@ const categories = [
     linkIds: [
       SecurityPageName.endpoints,
       SecurityPageName.policies,
-      SecurityPageName.endpointExceptions,
       SecurityPageName.trustedApps,
       SecurityPageName.trustedDevices,
       SecurityPageName.eventFilters,
       SecurityPageName.hostIsolationExceptions,
       SecurityPageName.blocklist,
+      SecurityPageName.endpointExceptions,
       SecurityPageName.responseActionsHistory,
     ],
+  },
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurity', {
+      defaultMessage: 'Cloud Security',
+    }),
+    linkIds: [SecurityPageName.cloudDefendPolicies],
   },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.investigations', {
@@ -130,19 +136,6 @@ export const links: LinkItem = {
       path: POLICIES_PATH,
       skipUrlState: true,
       hideTimeline: true,
-    },
-    {
-      id: SecurityPageName.endpointExceptions,
-      title: ENDPOINT_EXCEPTIONS,
-      description: i18n.translate('xpack.securitySolution.appLinks.endpointExceptionsDescription', {
-        defaultMessage: 'Add exceptions to your hosts.',
-      }),
-      landingIcon: IconTool,
-      path: ENDPOINT_EXCEPTIONS_PATH,
-      skipUrlState: true,
-      hideTimeline: true,
-
-      experimentalKey: 'endpointExceptionsMovedUnderManagement',
     },
     {
       id: SecurityPageName.trustedApps,
@@ -208,6 +201,19 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     {
+      id: SecurityPageName.endpointExceptions,
+      title: ENDPOINT_EXCEPTIONS,
+      description: i18n.translate('xpack.securitySolution.appLinks.endpointExceptionsDescription', {
+        defaultMessage: 'Add exceptions to your hosts.',
+      }),
+      landingIcon: IconTool,
+      path: ENDPOINT_EXCEPTIONS_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+
+      experimentalKey: 'endpointExceptionsMovedUnderManagement',
+    },
+    {
       id: SecurityPageName.entityAnalyticsManagement,
       title: ENTITY_ANALYTICS_RISK_SCORE,
       description: i18n.translate('xpack.securitySolution.appLinks.entityRiskScoringDescription', {
@@ -218,7 +224,6 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
       capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
-      experimentalKey: 'riskScoringRoutesEnabled',
       licenseType: 'platinum',
     },
     {
@@ -290,6 +295,7 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadPolicyManagement) {
     linksToExclude.push(SecurityPageName.policies);
+    linksToExclude.push(SecurityPageName.cloudDefendPolicies);
   }
 
   if (!canReadEndpointExceptions) {
