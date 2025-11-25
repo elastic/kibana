@@ -190,6 +190,10 @@ export const allowedExperimentalValues = Object.freeze({
    */
   qradarRulesMigration: false,
   /**
+   * Enables the Kubernetes Dashboard in Security Solution
+   */
+  kubernetesEnabled: false,
+  /**
    * Enables dynamic registration of security attachments and tools from agent_builder with the onechat plugin
    */
   agentBuilderEnabled: false,

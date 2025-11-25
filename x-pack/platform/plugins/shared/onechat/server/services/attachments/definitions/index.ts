@@ -6,13 +6,13 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import type { AttachmentTypeRegistry } from '../attachment_type_registry';
 import { createTextAttachmentType } from './text';
 import { createEsqlAttachmentType } from './esql';
 import { createScreenContextAttachmentType } from './screen_context';
+import type { AttachmentServiceSetup } from '../types';
 import { createProductReferenceAttachmentType } from './product_reference';
 
-export const registerAttachmentTypes = ({ registry }: { registry: AttachmentTypeRegistry }) => {
+export const registerAttachmentTypes = ({ registry }: { registry: AttachmentServiceSetup }) => {
   const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
     createTextAttachmentType(),
     createScreenContextAttachmentType(),
@@ -21,6 +21,6 @@ export const registerAttachmentTypes = ({ registry }: { registry: AttachmentType
   ];
 
   attachmentTypes.forEach((attachmentType) => {
-    registry.register(attachmentType);
+    registry.registerType(attachmentType);
   });
 };
