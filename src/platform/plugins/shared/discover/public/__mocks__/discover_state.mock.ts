@@ -200,6 +200,7 @@ export function getDiscoverInternalStateMock({
             stateContainer,
             customizationService,
             dataViewSpec: undefined,
+            esqlControls: undefined,
             defaultUrlState: undefined,
           },
         })
