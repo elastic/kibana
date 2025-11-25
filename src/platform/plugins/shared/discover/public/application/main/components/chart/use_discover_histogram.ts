@@ -25,7 +25,6 @@ import {
   debounceTime,
   distinctUntilChanged,
   filter,
-  from,
   map,
   merge,
   pairwise,
@@ -124,7 +123,7 @@ export const useDiscoverHistogram = (
    */
 
   useEffect(() => {
-    const subscription = createAppStateObservable(stateContainer).subscribe((changes) => {
+    const subscription = createAppStateObservable(stateContainer.appState$).subscribe((changes) => {
       if ('timeInterval' in changes && changes.timeInterval) {
         unifiedHistogramApi?.setTimeInterval(changes.timeInterval);
       }
@@ -137,7 +136,7 @@ export const useDiscoverHistogram = (
     return () => {
       subscription?.unsubscribe();
     };
-  }, [stateContainer, unifiedHistogramApi]);
+  }, [stateContainer.appState$, unifiedHistogramApi]);
 
   /**
    * Total hits
@@ -455,10 +454,8 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
   );
 };
 
-const createAppStateObservable = (stateContainer: DiscoverStateContainer) => {
-  return from(stateContainer.internalState).pipe(
-    map(() => stateContainer.getCurrentTab().appState),
-    distinctUntilChanged((a, b) => isEqual(a, b)),
+const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
+  return state$.pipe(
     startWith(undefined),
     pairwise(),
     map(([prev, curr]) => {

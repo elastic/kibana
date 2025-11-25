@@ -26,6 +26,7 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
+import type { Observable } from 'rxjs';
 import { distinctUntilChanged, from, map, merge, skip } from 'rxjs';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
@@ -104,6 +105,10 @@ export interface DiscoverStateContainerParams {
 }
 
 export interface DiscoverStateContainer {
+  /**
+   * An observable of the current tab's app state
+   */
+  appState$: Observable<DiscoverAppState>;
   /**
    * Data fetching related state
    **/
@@ -436,6 +441,12 @@ export function getDiscoverStateContainer({
     return selectTab(state, tabId).appState;
   };
 
+  const appState$ = from(internalState).pipe(
+    map(getAppState),
+    distinctUntilChanged(isEqual),
+    skip(1)
+  );
+
   const appStateContainer: INullableBaseStateContainer<DiscoverAppState> = {
     get: () => getAppState(internalState.getState()),
     set: (appState) => {
@@ -445,7 +456,7 @@ export function getDiscoverStateContainer({
 
       internalState.dispatch(injectCurrentTab(internalStateActions.setAppState)({ appState }));
     },
-    state$: from(internalState).pipe(map(getAppState), distinctUntilChanged(isEqual), skip(1)),
+    state$: appState$,
   };
 
   const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
@@ -454,6 +465,12 @@ export function getDiscoverStateContainer({
 
     return { time, refreshInterval, filters };
   };
+
+  const globalState$ = from(internalState).pipe(
+    map(getGlobalState),
+    distinctUntilChanged(isEqual),
+    skip(1)
+  );
 
   const globalStateContainer: INullableBaseStateContainer<GlobalQueryStateFromUrl> = {
     get: () => getGlobalState(internalState.getState()),
@@ -474,7 +491,7 @@ export function getDiscoverStateContainer({
         })
       );
     },
-    state$: from(internalState).pipe(map(getGlobalState), distinctUntilChanged(isEqual), skip(1)),
+    state$: globalState$,
   };
 
   const initializeAndSyncUrlState = () => {
@@ -742,6 +759,7 @@ export function getDiscoverStateContainer({
   };
 
   return {
+    appState$,
     internalState,
     internalStateActions,
     injectCurrentTab,

@@ -11,9 +11,9 @@ import { useHistory } from 'react-router-dom';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
 import { createGlobalStyle } from 'styled-components';
 import type { ScopedHistory } from '@kbn/core/public';
-import { distinctUntilChanged, from, map, type Subscription } from 'rxjs';
+import { from, type Subscription } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
-import { isEqual, isEqualWith } from 'lodash';
+import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
@@ -235,18 +235,11 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         );
       }
 
-      const internalState$ = from(stateContainer.internalState);
+      const unsubscribeState = stateContainer.appState$.subscribe({
+        next: setDiscoverAppState,
+      });
 
-      const unsubscribeState = internalState$
-        .pipe(
-          map(() => stateContainer.getCurrentTab().appState),
-          distinctUntilChanged((a, b) => isEqual(a, b))
-        )
-        .subscribe({
-          next: setDiscoverAppState,
-        });
-
-      const internalStateSubscription = internalState$.subscribe({
+      const internalStateSubscription = from(stateContainer.internalState).subscribe({
         next: setDiscoverInternalState,
       });
 
