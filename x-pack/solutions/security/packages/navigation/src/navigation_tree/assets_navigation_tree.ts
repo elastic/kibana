@@ -69,10 +69,6 @@ export const createAssetsNavigationTree = (
           link: securityLink(SecurityPageName.policies),
         },
         {
-          id: SecurityPageName.endpointExceptions,
-          link: securityLink(SecurityPageName.endpointExceptions),
-        },
-        {
           id: SecurityPageName.trustedApps,
           link: securityLink(SecurityPageName.trustedApps),
         },
@@ -91,6 +87,10 @@ export const createAssetsNavigationTree = (
         {
           id: SecurityPageName.blocklist,
           link: securityLink(SecurityPageName.blocklist),
+        },
+        {
+          id: SecurityPageName.endpointExceptions,
+          link: securityLink(SecurityPageName.endpointExceptions),
         },
         {
           id: SecurityPageName.responseActionsHistory,
