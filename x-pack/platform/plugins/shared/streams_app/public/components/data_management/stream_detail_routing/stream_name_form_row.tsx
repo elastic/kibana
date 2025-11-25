@@ -10,6 +10,7 @@ import {
   EuiFormLabel,
   EuiFormRow,
   EuiIcon,
+  EuiLink,
   EuiScreenReaderOnly,
   EuiTextTruncate,
   useGeneratedHtmlId,
@@ -18,6 +19,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-plugin/public';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
 
 interface StreamNameFormRowProps {
@@ -61,6 +64,7 @@ export function StreamNameFormRow({
   error,
   isInvalid = false,
 }: StreamNameFormRowProps) {
+  const router = useStreamsAppRouter();
   const descriptionId = useGeneratedHtmlId();
 
   const parentStreamName = useStreamsRoutingSelector((snapshot) => snapshot.context.definition)
@@ -68,6 +72,7 @@ export function StreamNameFormRow({
 
   const prefix = parentStreamName + '.';
   const partitionName = value.replace(prefix, '');
+  const rootChild = partitionName.split('.')[0];
 
   const isStreamNameEmpty = value.length <= prefix.length;
   const isStreamNameTooLong = value.length > MAX_STREAM_NAME_LENGTH;
@@ -76,11 +81,24 @@ export function StreamNameFormRow({
   const helpText = getHelpText(isStreamNameEmpty, isStreamNameTooLong, readOnly);
 
   const isDotPresent = !readOnly && partitionName.includes('.');
-  const dotErrorMessage = isDotPresent
-    ? i18n.translate('xpack.streams.streamDetailRouting.nameContainsDotErrorMessage', {
-        defaultMessage: `Stream name cannot contain the "." character.`,
-      })
-    : undefined;
+  const dotErrorMessage = isDotPresent ? (
+    <FormattedMessage
+      id="xpack.streams.streamDetailRouting.nameContainsDotErrorMessage"
+      defaultMessage={`Stream name cannot contain the "." character. Open the stream {childStreamLink} and create the child there.`}
+      values={{
+        childStreamLink: (
+          <EuiLink
+            data-test-subj="streamsAppChildStreamLink"
+            external
+            target="_blank"
+            href={router.link('/{key}', { path: { key: prefix + rootChild } })}
+          >
+            {prefix + rootChild}
+          </EuiLink>
+        ),
+      }}
+    />
+  ) : undefined;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPartitionName = e.target.value;
