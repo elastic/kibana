@@ -4580,6 +4580,10 @@ Object {
             "spaceId": Object {
               "type": "string",
             },
+            "summary": Object {
+              "default": true,
+              "type": "boolean",
+            },
             "workflowId": Object {
               "type": "string",
             },
