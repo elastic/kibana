@@ -16,13 +16,10 @@ import type { CoreStart } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
-import type { CapabilitiesLevel, MissingCapability } from './capabilities';
-import { getMissingCapabilitiesChecker, requiredSiemMigrationCapabilities } from './capabilities';
+import { getMissingCapabilitiesChecker } from './capabilities';
 import { SiemMigrationsServiceBase } from './migrations_service_base';
 import type { MigrationTaskStats } from '../../../../common/siem_migrations/model/common.gen';
 import { TASK_STATS_POLLING_SLEEP_SECONDS } from '../constants';
-import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
-import { licenseService } from '../../../common/hooks/use_license';
 
 // --- Mocks for external modules ---
 
