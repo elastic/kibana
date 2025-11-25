@@ -79,7 +79,7 @@ export const NotionGetDataSourceActionResponseSchema = z.record(z.any()); // Per
 // Query data source action schema
 export const NotionQueryActionParamsSchema = z.object({
   dataSourceId: z.string(),
-  filter: z.string(),
+  filter: z.string().optional(),
   startCursor: z.string().optional(),
   pageSize: z.number().optional(),
 });
