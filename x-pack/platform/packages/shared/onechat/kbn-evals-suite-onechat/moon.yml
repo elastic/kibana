@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/onechat-common'
   - '@kbn/tooling-log'
   - '@kbn/core'
-  - '@kbn/scout'
 tags:
   - functional-tests
   - package
