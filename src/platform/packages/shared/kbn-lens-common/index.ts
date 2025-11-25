@@ -374,6 +374,7 @@ export {
   SeriesTypes,
   visualizationSubtypes,
   visualizationTypes,
+  AvailableReferenceLineIcons,
 } from './visualizations/xy/constants';
 export { LENS_SHARE_STATE_ACTION } from './locator_types';
 export { defaultSeriesType } from './visualizations/xy/types';

@@ -16,7 +16,6 @@ export {
   FillStyles,
   FittingFunctions,
   PointVisibilityOptions,
-  AvailableReferenceLineIcons,
 } from './constants';
 
 export type {

@@ -16,8 +16,8 @@ import type {
   XYReferenceLineLayerConfig,
   YConfig,
 } from '@kbn/lens-common';
+import { AvailableReferenceLineIcons } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { AvailableReferenceLineIcons } from '@kbn/expression-xy-plugin/common';
 import type { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
 import { isEsqlTableTypeDataset } from '../../../utils';
 import type { DatasetType } from '../../../schema/dataset';
