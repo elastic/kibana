@@ -10,6 +10,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { RulesClientContext } from '../../../rules_client/types';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import {
   GAP_AUTO_FILL_SCHEDULER_TASK_TYPE,
@@ -20,7 +21,7 @@ import {
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { backfillInitiator } from '../../../../common/constants';
 import { gapStatus } from '../../../../common/constants';
-import { registerGapAutoFillSchedulerTask } from './gap_auto_fill_scheduler_task';
+import * as gapAutoFillSchedulerTask from './gap_auto_fill_scheduler_task';
 import { createGapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
 import { rulesClientMock } from '../../../rules_client.mock';
 import { backfillClientMock } from '../../../backfill_client/backfill_client.mock';
@@ -29,6 +30,7 @@ import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 import * as findGapsModule from '../find_gaps';
 import * as processGapsBatchModule from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch';
 import { Gap } from '../gap';
+import type { AggregatedByRuleEntry } from './utils';
 import { GapFillSchedulePerRuleStatus } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
 
 jest.mock('../find_gaps');
@@ -41,6 +43,38 @@ const mockedCreateGapAutoFillSchedulerEventLogger = jest.mocked(
   createGapAutoFillSchedulerEventLogger
 );
 
+const buildGap = (
+  ruleId: string,
+  gte: string,
+  lte: string,
+  status: typeof gapStatus.UNFILLED | typeof gapStatus.PARTIALLY_FILLED | typeof gapStatus.FILLED
+): Gap => {
+  if (status === gapStatus.FILLED) {
+    return new Gap({
+      ruleId,
+      range: { gte, lte },
+      filledIntervals: [{ gte, lte }],
+      inProgressIntervals: [],
+    });
+  }
+  if (status === gapStatus.PARTIALLY_FILLED) {
+    const midStart = new Date(gte).toISOString();
+    return new Gap({
+      ruleId,
+      range: { gte, lte },
+      filledIntervals: [],
+      inProgressIntervals: [{ gte: midStart, lte }],
+    });
+  }
+  return new Gap({ ruleId, range: { gte, lte } });
+};
+const {
+  registerGapAutoFillSchedulerTask,
+  processRuleBatches,
+  processGapsForRules,
+  SchedulerLoopState,
+} = gapAutoFillSchedulerTask;
+
 describe('Gap Auto Fill Scheduler Task', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let taskManager: ReturnType<typeof taskManagerMock.createSetup>;
@@ -52,6 +86,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
   let mockActionsClient: ReturnType<typeof actionsClientMock.create>;
   let mockEventLogClient: ReturnType<typeof eventLogClientMock.create>;
   let logEventMock: jest.Mock;
+  let rulesClientContextMock: RulesClientContext;
 
   const mockConfigId = 'test-config-id';
   const mockTaskInstance = {
@@ -114,14 +149,16 @@ describe('Gap Auto Fill Scheduler Task', () => {
     logEventMock = jest.fn();
     mockedCreateGapAutoFillSchedulerEventLogger.mockReturnValue(logEventMock);
 
-    (rulesClient as unknown as { getContext: jest.Mock }).getContext = jest.fn().mockReturnValue({
+    rulesClientContextMock = {
       unsecuredSavedObjectsClient: mockSavedObjectsRepository,
       internalSavedObjectsRepository: mockSavedObjectsRepository,
       getEventLogClient: jest.fn().mockResolvedValue(mockEventLogClient),
       getActionsClient: jest.fn().mockResolvedValue(mockActionsClient),
       backfillClient: mockBackfillClient,
       spaceId: 'default',
-    });
+    } as unknown as RulesClientContext;
+
+    rulesClient.getContext = jest.fn().mockReturnValue(rulesClientContextMock);
 
     // By default, no overlapping backfills so we actually process gaps
     mockBackfillClient.findOverlappingBackfills.mockResolvedValue([]);
@@ -280,36 +317,6 @@ describe('Gap Auto Fill Scheduler Task', () => {
         page: 1,
         perPage: ruleIds.length,
       });
-    };
-
-    const buildGap = (
-      ruleId: string,
-      gte: string,
-      lte: string,
-      status:
-        | typeof gapStatus.UNFILLED
-        | typeof gapStatus.PARTIALLY_FILLED
-        | typeof gapStatus.FILLED
-    ): Gap => {
-      if (status === gapStatus.FILLED) {
-        return new Gap({
-          ruleId,
-          range: { gte, lte },
-          filledIntervals: [{ gte, lte }],
-          inProgressIntervals: [],
-        });
-      }
-      if (status === gapStatus.PARTIALLY_FILLED) {
-        const midStart = new Date(gte).toISOString();
-        return new Gap({
-          ruleId,
-          range: { gte, lte },
-          filledIntervals: [],
-          inProgressIntervals: [{ gte: midStart, lte }],
-        });
-      }
-      // UNFILLED
-      return new Gap({ ruleId, range: { gte, lte } });
     };
 
     const stubFindGapsPageOnce = (gaps: Gap[], nextEmpty = true) => {
@@ -526,11 +533,11 @@ describe('Gap Auto Fill Scheduler Task', () => {
           expectMessage: 'Skipped execution: gap auto-fill capacity limit reached',
         },
         {
-          name: 'stops when capacity is reached mid-execution',
+          name: 'Stopped early: gap auto-fill capacity limit reached. ',
           capacity: 99,
           setupGaps: true,
           expectedProcessCalls: 1,
-          expectMessage: 'no backfill capacity',
+          expectMessage: 'gap auto-fill capacity limit reached',
         },
       ])(
         'capacity handling: $name',
@@ -972,6 +979,344 @@ describe('Gap Auto Fill Scheduler Task', () => {
         expect(result).toEqual({ state: {}, shouldDeleteTask: true });
         expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('initialization failed'));
       });
+    });
+  });
+
+  describe('processRuleBatches', () => {
+    const startISO = '2024-01-01T00:00:00.000Z';
+    const endISO = '2024-01-02T00:00:00.000Z';
+    const loggerMessage = (message: string) => `[test] ${message}`;
+    let abortController: AbortController;
+    let logEvent: jest.Mock;
+
+    beforeEach(() => {
+      abortController = new AbortController();
+      logEvent = jest.fn().mockResolvedValue(undefined);
+      mockedFindGaps.findGapsSearchAfter.mockReset();
+      mockedProcessGapsBatch.processGapsBatch.mockReset();
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('processes rule ids batch by batch until completion', async () => {
+      const gap1 = buildGap(
+        'rule-1',
+        '2024-01-01T00:00:00.000Z',
+        '2024-01-01T01:00:00.000Z',
+        gapStatus.UNFILLED
+      );
+      const gap2 = buildGap(
+        'rule-3',
+        '2024-01-02T00:00:00.000Z',
+        '2024-01-02T01:00:00.000Z',
+        gapStatus.UNFILLED
+      );
+
+      mockedFindGaps.findGapsSearchAfter
+        .mockResolvedValueOnce({
+          total: 1,
+          data: [gap1],
+          searchAfter: undefined,
+          pitId: 'pit-1',
+        })
+        .mockResolvedValueOnce({
+          total: 1,
+          data: [gap2],
+          searchAfter: undefined,
+          pitId: 'pit-2',
+        });
+
+      mockedProcessGapsBatch.processGapsBatch
+        .mockResolvedValueOnce({
+          processedGapsCount: 2,
+          hasErrors: false,
+          results: [
+            {
+              ruleId: 'rule-1',
+              processedGaps: 2,
+              status: GapFillSchedulePerRuleStatus.SUCCESS,
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          processedGapsCount: 1,
+          hasErrors: false,
+          results: [
+            {
+              ruleId: 'rule-3',
+              processedGaps: 1,
+              status: GapFillSchedulePerRuleStatus.SUCCESS,
+            },
+          ],
+        });
+
+      const result = await processRuleBatches({
+        abortController,
+        gapsPerPage: DEFAULT_GAPS_PER_PAGE,
+        gapFetchMaxIterations: 10,
+        logger,
+        loggerMessage,
+        logEvent,
+        remainingBackfills: 5,
+        ruleIds: ['rule-1', 'rule-2', 'rule-3'],
+        rulesBatchSize: 2,
+        rulesClient,
+        rulesClientContext: rulesClientContextMock,
+        sortOrder: 'desc',
+        startISO,
+        endISO,
+        taskInstanceId: 'test-task',
+      });
+
+      expect(result.state).toBe(SchedulerLoopState.COMPLETED);
+      expect(Array.from(result.aggregatedByRule.entries())).toEqual(
+        expect.arrayContaining([
+          [
+            'rule-1',
+            expect.objectContaining({
+              ruleId: 'rule-1',
+              processedGaps: 2,
+              status: GapFillSchedulePerRuleStatus.SUCCESS,
+            }),
+          ],
+          [
+            'rule-3',
+            expect.objectContaining({
+              ruleId: 'rule-3',
+              processedGaps: 1,
+              status: GapFillSchedulePerRuleStatus.SUCCESS,
+            }),
+          ],
+        ])
+      );
+      expect(mockedProcessGapsBatch.processGapsBatch).toHaveBeenCalledTimes(2);
+      expect(mockedFindGaps.findGapsSearchAfter).toHaveBeenCalledTimes(2);
+    });
+
+    it('stops processing when capacity is exhausted', async () => {
+      const aggregatedMap = new Map<string, AggregatedByRuleEntry>([
+        [
+          'rule-1',
+          {
+            ruleId: 'rule-1',
+            processedGaps: 1,
+            status: GapFillSchedulePerRuleStatus.SUCCESS,
+          },
+        ],
+      ]);
+
+      const gap = buildGap(
+        'rule-1',
+        '2024-01-01T00:00:00.000Z',
+        '2024-01-01T01:00:00.000Z',
+        gapStatus.UNFILLED
+      );
+
+      mockedFindGaps.findGapsSearchAfter.mockResolvedValueOnce({
+        total: 1,
+        data: [gap],
+        searchAfter: undefined,
+        pitId: 'pit-1',
+      });
+
+      mockedProcessGapsBatch.processGapsBatch.mockResolvedValueOnce({
+        processedGapsCount: 1,
+        hasErrors: false,
+        results: [
+          {
+            ruleId: 'rule-1',
+            processedGaps: 1,
+            status: GapFillSchedulePerRuleStatus.SUCCESS,
+          },
+        ],
+      });
+
+      const result = await processRuleBatches({
+        abortController,
+        gapsPerPage: DEFAULT_GAPS_PER_PAGE,
+        gapFetchMaxIterations: 10,
+        logger,
+        loggerMessage,
+        logEvent,
+        remainingBackfills: 1,
+        ruleIds: ['rule-1'],
+        rulesBatchSize: DEFAULT_RULES_BATCH_SIZE,
+        rulesClient,
+        rulesClientContext: rulesClientContextMock,
+        sortOrder: 'desc',
+        startISO,
+        endISO,
+        taskInstanceId: 'test-task',
+      });
+
+      expect(result.state).toBe(SchedulerLoopState.CAPACITY_EXHAUSTED);
+      expect(result.aggregatedByRule).toEqual(aggregatedMap);
+    });
+
+    it('honors cancellation before processing any batch', async () => {
+      abortController.abort();
+      const result = await processRuleBatches({
+        abortController,
+        gapsPerPage: DEFAULT_GAPS_PER_PAGE,
+        gapFetchMaxIterations: 10,
+        logger,
+        loggerMessage,
+        logEvent,
+        remainingBackfills: 5,
+        ruleIds: ['rule-1', 'rule-2'],
+        rulesBatchSize: 2,
+        rulesClient,
+        rulesClientContext: rulesClientContextMock,
+        sortOrder: 'desc',
+        startISO,
+        endISO,
+        taskInstanceId: 'test-task',
+      });
+
+      expect(result.state).toBe(SchedulerLoopState.CANCELLED);
+      expect(result.aggregatedByRule.size).toBe(0);
+      expect(logEvent).toHaveBeenCalledTimes(1);
+      expect(mockedFindGaps.findGapsSearchAfter).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('processGapsForRules', () => {
+    const startISO = '2024-01-01T00:00:00.000Z';
+    const endISO = '2024-01-02T00:00:00.000Z';
+    const loggerMessage = (message: string) => `[test] ${message}`;
+    let abortController: AbortController;
+    let logEvent: jest.Mock;
+
+    beforeEach(() => {
+      abortController = new AbortController();
+      logEvent = jest.fn().mockResolvedValue(undefined);
+      mockedFindGaps.findGapsSearchAfter.mockReset();
+      mockedProcessGapsBatch.processGapsBatch.mockReset();
+    });
+
+    it('returns completed state when no gaps are found', async () => {
+      mockedFindGaps.findGapsSearchAfter.mockResolvedValueOnce({
+        total: 0,
+        data: [],
+        searchAfter: undefined,
+        pitId: undefined,
+      });
+
+      const result = await processGapsForRules({
+        abortController,
+        aggregatedByRule: new Map(),
+        endISO,
+        gapsPerPage: DEFAULT_GAPS_PER_PAGE,
+        gapFetchMaxIterations: 5,
+        logger,
+        loggerMessage,
+        logEvent,
+        remainingBackfills: 5,
+        rulesClientContext: rulesClientContextMock,
+        sortOrder: 'desc',
+        startISO,
+        taskInstanceId: 'test-task',
+        toProcessRuleIds: ['rule-1'],
+      });
+
+      expect(result.state).toBe(SchedulerLoopState.COMPLETED);
+      expect(result.remainingBackfills).toBe(5);
+      expect(result.aggregatedByRule.size).toBe(0);
+      expect(mockedProcessGapsBatch.processGapsBatch).not.toHaveBeenCalled();
+    });
+
+    it('returns capacity exhausted when remaining backfills reach zero', async () => {
+      const gap = buildGap(
+        'rule-1',
+        '2024-01-01T00:00:00.000Z',
+        '2024-01-01T00:59:59.000Z',
+        gapStatus.UNFILLED
+      );
+
+      mockedFindGaps.findGapsSearchAfter.mockResolvedValueOnce({
+        total: 1,
+        data: [gap],
+        searchAfter: undefined,
+        pitId: 'pit-1',
+      });
+
+      mockedProcessGapsBatch.processGapsBatch.mockResolvedValueOnce({
+        processedGapsCount: 1,
+        hasErrors: false,
+        results: [
+          {
+            ruleId: 'rule-1',
+            processedGaps: 1,
+            status: GapFillSchedulePerRuleStatus.SUCCESS,
+          },
+        ],
+      });
+
+      const result = await processGapsForRules({
+        abortController,
+        aggregatedByRule: new Map(),
+        endISO,
+        gapsPerPage: DEFAULT_GAPS_PER_PAGE,
+        gapFetchMaxIterations: 5,
+        logger,
+        loggerMessage,
+        logEvent,
+        remainingBackfills: 1,
+        rulesClientContext: rulesClientContextMock,
+        sortOrder: 'desc',
+        startISO,
+        taskInstanceId: 'test-task',
+        toProcessRuleIds: ['rule-1'],
+      });
+
+      expect(result.state).toBe(SchedulerLoopState.CAPACITY_EXHAUSTED);
+      expect(result.remainingBackfills).toBe(0);
+      expect(result.aggregatedByRule.get('rule-1')).toEqual({
+        ruleId: 'rule-1',
+        processedGaps: 1,
+        status: GapFillSchedulePerRuleStatus.SUCCESS,
+        error: undefined,
+      });
+      expect(mockedProcessGapsBatch.processGapsBatch).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns cancelled state when abort signal is set', async () => {
+      abortController.abort();
+      const aggregatedEntry: AggregatedByRuleEntry = {
+        ruleId: 'rule-5',
+        processedGaps: 3,
+        status: GapFillSchedulePerRuleStatus.ERROR,
+        error: 'boom',
+      };
+      const aggregatedByRule = new Map<string, AggregatedByRuleEntry>([
+        ['rule-5', aggregatedEntry],
+      ]);
+
+      const result = await processGapsForRules({
+        abortController,
+        aggregatedByRule,
+        endISO,
+        gapsPerPage: DEFAULT_GAPS_PER_PAGE,
+        gapFetchMaxIterations: 5,
+        logger,
+        loggerMessage,
+        logEvent,
+        remainingBackfills: 3,
+        rulesClientContext: rulesClientContextMock,
+        sortOrder: 'desc',
+        startISO,
+        taskInstanceId: 'test-task',
+        toProcessRuleIds: ['rule-1'],
+      });
+
+      expect(result.state).toBe(SchedulerLoopState.CANCELLED);
+      expect(Array.from(result.aggregatedByRule.entries())).toEqual(
+        Array.from(aggregatedByRule.entries())
+      );
+      expect(mockedFindGaps.findGapsSearchAfter).not.toHaveBeenCalled();
+      expect(logEvent).toHaveBeenCalledTimes(1);
     });
   });
 });
