@@ -37,7 +37,7 @@ import {
   MONITORING_HISTORY_LIMIT,
 } from '@kbn/alerting-plugin/common';
 
-import { getRouterLinkProps } from '@kbn/router-utils';
+// import { getRouterLinkProps } from '@kbn/router-utils';
 
 import {
   SELECT_ALL_RULES,
@@ -414,17 +414,21 @@ export const RulesListTable = (props: RulesListTableProps) => {
           const checkEnabledResult = checkRuleTypeEnabled(ruleType);
           const pathToRuleDetails = `${triggersActionsRoute}${getRuleDetailsRoute(rule.id)}`;
 
-          const linkProps = getRouterLinkProps({
-            href: pathToRuleDetails,
-            onClick: () => onRuleClick(rule),
-          });
+          // const linkProps = getRouterLinkProps({
+          //   href: pathToRuleDetails,
+          //   onClick: () => onRuleClick(rule),
+          // });
           const link = (
             <>
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      <EuiLink title={name} {...linkProps}>
+                      <EuiLink
+                        title={name}
+                        href={pathToRuleDetails}
+                        onClick={() => onRuleClick(rule)}
+                      >
                         {name}
                       </EuiLink>
                     </EuiFlexItem>
