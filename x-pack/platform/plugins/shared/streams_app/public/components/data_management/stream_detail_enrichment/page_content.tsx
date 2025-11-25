@@ -26,6 +26,7 @@ import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_
 import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
 import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 import { StepsEditor } from './steps_editor';
+import { useSuggestPipeline } from './pipeline_suggestions/use_suggest_pipeline';
 import { selectFieldsInSamples } from './state_management/simulation_state_machine/selectors';
 import type { SchemaEditorField } from '../schema_editor/types';
 import { isFieldUncommitted } from '../schema_editor/utils';
@@ -78,6 +79,9 @@ export function StreamDetailEnrichmentContentImpl() {
   const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
   const fieldsInSamples = useSimulatorSelector((state) => selectFieldsInSamples(state.context));
+
+  // Lift suggestion state to page level
+  const suggestionState = useSuggestPipeline();
 
   // Calculate schemaEditorFields with result property
   const schemaEditorFields = React.useMemo(() => {
@@ -144,6 +148,9 @@ export function StreamDetailEnrichmentContentImpl() {
   );
 
   const hasChanges = canUpdate && !isSimulating;
+  const isSuggestionVisible =
+    suggestionState.state.loading ||
+    (suggestionState.state.value && suggestionState.showSuggestion);
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
@@ -198,7 +205,7 @@ export function StreamDetailEnrichmentContentImpl() {
                 paddingSize="l"
                 css={verticalFlexCss}
               >
-                <StepsEditor />
+                <StepsEditor suggestionState={suggestionState} />
               </EuiResizablePanel>
               <EuiResizableButton indicator="border" />
               <EuiResizablePanel
@@ -214,7 +221,7 @@ export function StreamDetailEnrichmentContentImpl() {
           )}
         </EuiResizableContainer>
       </EuiSplitPanel.Inner>
-      {hasChanges && (
+      {hasChanges && !isSuggestionVisible && (
         <ManagementBottomBar
           onCancel={resetChanges}
           onConfirm={

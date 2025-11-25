@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { EuiAccordion, EuiCode, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useAbortController } from '@kbn/react-hooks';
 import {
   useSimulatorSelector,
   useStreamEnrichmentSelector,
@@ -19,14 +18,18 @@ import {
 import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
-import { useSuggestPipeline } from './pipeline_suggestions/use_suggest_pipeline';
+import type { useSuggestPipeline } from './pipeline_suggestions/use_suggest_pipeline';
 import { GenerateSuggestionButton } from '../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { PipelineSuggestion } from './pipeline_suggestions/pipeline_suggestion';
 import { SuggestPipelineLoadingPrompt } from './pipeline_suggestions/suggest_pipeline_loading_prompt';
 import { SuggestPipelinePanel } from './pipeline_suggestions/suggest_pipeline_panel';
 
-export const StepsEditor = React.memo(() => {
+export interface StepsEditorProps {
+  suggestionState: ReturnType<typeof useSuggestPipeline>;
+}
+
+export const StepsEditor = React.memo(({ suggestionState }: StepsEditorProps) => {
   const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
 
@@ -61,55 +64,41 @@ export const StepsEditor = React.memo(() => {
 
   const hasSteps = !isEmpty(stepRefs);
 
-  const abortController = useAbortController();
   const aiFeatures = useAIFeatures();
-  const [suggestionsState, suggestPipeline, clearSuggestedSteps] =
-    useSuggestPipeline(abortController);
   const {
     definition: { stream },
   } = useStreamDetail();
 
-  const [showSuggestion, setShowSuggestion] = useState(true);
-
-  // Reset showSuggestion when a new suggestion request starts
-  useEffect(() => {
-    if (suggestionsState.loading) {
-      setShowSuggestion(true);
-    }
-  }, [suggestionsState.loading]);
-
   if (aiFeatures && aiFeatures.enabled) {
-    if (suggestionsState.loading) {
+    if (suggestionState.state.loading) {
       return (
         <SuggestPipelineLoadingPrompt
           onCancel={() => {
-            abortController.abort();
-            abortController.refresh();
-            clearSuggestedSteps();
+            suggestionState.abortController.abort();
+            suggestionState.abortController.refresh();
+            suggestionState.clearSuggestedSteps();
           }}
         />
       );
     }
 
-    if (suggestionsState.value && showSuggestion) {
+    if (suggestionState.state.value && suggestionState.showSuggestion) {
       return (
         <PipelineSuggestion
           aiFeatures={aiFeatures}
-          pipeline={suggestionsState.value}
+          pipeline={suggestionState.state.value}
           onAccept={() => {
             // Just hide the suggestion panel, keep the steps
-            setShowSuggestion(false);
+            suggestionState.setShowSuggestion(false);
           }}
           onDismiss={() => {
             // Remove suggested steps and hide panel
-            clearSuggestedSteps();
-            setShowSuggestion(false);
+            suggestionState.clearSuggestedSteps();
           }}
           onRegenerate={(connectorId) => {
             // Remove current suggested steps before regenerating
-            clearSuggestedSteps();
-            setShowSuggestion(true);
-            suggestPipeline({ connectorId, streamName: stream.name });
+            suggestionState.clearSuggestedSteps();
+            suggestionState.suggestPipeline({ connectorId, streamName: stream.name });
           }}
         />
       );
@@ -126,8 +115,10 @@ export const StepsEditor = React.memo(() => {
             <SuggestPipelinePanel>
               <GenerateSuggestionButton
                 aiFeatures={aiFeatures}
-                isLoading={suggestionsState.loading}
-                onClick={(connectorId) => suggestPipeline({ connectorId, streamName: stream.name })}
+                isLoading={suggestionState.state.loading}
+                onClick={(connectorId) =>
+                  suggestionState.suggestPipeline({ connectorId, streamName: stream.name })
+                }
               >
                 {i18n.translate('xpack.streams.stepsEditor.suggestPipelineButtonLabel', {
                   defaultMessage: 'Suggest a pipeline',

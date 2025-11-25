@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { useAbortController } from '@kbn/react-hooks';
+import { useAbortController } from '@kbn/react-hooks';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { lastValueFrom, map } from 'rxjs';
 import { streamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -26,7 +26,7 @@ export interface SuggestPipelineParams {
   connectorId: string;
 }
 
-export function useSuggestPipeline(abortController: ReturnType<typeof useAbortController>) {
+export function useSuggestPipeline() {
   const {
     dependencies: {
       start: {
@@ -35,12 +35,14 @@ export function useSuggestPipeline(abortController: ReturnType<typeof useAbortCo
     },
   } = useKibana();
 
+  const abortController = useAbortController();
   const previewDocuments = useSimulatorSelector((snapshot) =>
     selectPreviewRecords(snapshot.context)
   );
 
   const { resetSteps } = useStreamEnrichmentEvents();
   const [, suggestGrokPattern] = useGrokPatternSuggestion(abortController);
+  const [showSuggestion, setShowSuggestion] = useState(true);
 
   async function suggestPipeline(params: SuggestPipelineParams): Promise<StreamlangDSL>;
   async function suggestPipeline(params: SuggestPipelineParams) {
@@ -89,7 +91,15 @@ export function useSuggestPipeline(abortController: ReturnType<typeof useAbortCo
   // Function to clear suggested steps from simulation
   const clearSuggestedSteps = () => {
     resetSteps([]);
+    setShowSuggestion(false);
   };
+
+  // Reset showSuggestion when a new suggestion request starts
+  useEffect(() => {
+    if (state.loading) {
+      setShowSuggestion(true);
+    }
+  }, [state.loading]);
 
   // Clean up steps when component unmounts
   useEffect(() => {
@@ -101,5 +111,12 @@ export function useSuggestPipeline(abortController: ReturnType<typeof useAbortCo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return [state, execute, clearSuggestedSteps] as const;
+  return {
+    state,
+    showSuggestion,
+    setShowSuggestion,
+    suggestPipeline: execute,
+    clearSuggestedSteps,
+    abortController,
+  };
 }
