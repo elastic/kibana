@@ -83,6 +83,7 @@ export const DEGRADED_DOCS_FIELDS = [IGNORED_FIELD, IGNORED_FIELD_VALUES_FIELD] 
 
 // Error
 export const ERROR_CULPRIT_FIELD = 'error.culprit';
+export const ERROR_GROUPING_NAME_FIELD = 'error.grouping_name';
 
 // Error Exception
 export const ERROR_EXCEPTION_MESSAGE = 'error.exception.message';

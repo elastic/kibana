@@ -99,6 +99,7 @@ export interface ApmErrorLogFields {
   'error.exception.type'?: string;
   'error.exception.message'?: string;
   'error.culprit'?: string;
+  'error.grouping_name'?: string;
 }
 
 export interface OtelExceptionLogFields {
