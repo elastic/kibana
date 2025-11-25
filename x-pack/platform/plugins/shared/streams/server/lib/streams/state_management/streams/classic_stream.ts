@@ -9,12 +9,20 @@ import type {
   IndicesDataStream,
   IngestProcessorContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IngestStreamLifecycle, IngestStreamSettings } from '@kbn/streams-schema';
+import type {
+  FailureStore,
+  IngestStreamLifecycle,
+  IngestStreamSettings,
+} from '@kbn/streams-schema';
 import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
 import { isNotFoundError } from '@kbn/es-errors';
 import { isMappingProperties } from '@kbn/streams-schema/src/fields';
 import { validateStreamlang, StreamlangValidationError } from '@kbn/streamlang';
+import {
+  isDisabledLifecycleFailureStore,
+  isInheritFailureStore,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { StatusError } from '../../errors/status_error';
 import { generateClassicIngestPipelineBody } from '../../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../../ingest_pipelines/name';
@@ -37,6 +45,7 @@ import { MalformedStreamError } from '../../errors/malformed_stream_error';
 interface ClassicStreamChanges extends StreamChanges {
   processing: boolean;
   field_overrides: boolean;
+  failure_store: boolean;
   lifecycle: boolean;
   settings: boolean;
 }
@@ -46,6 +55,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     processing: false,
     field_overrides: false,
     lifecycle: false,
+    failure_store: false,
     settings: false,
   };
 
@@ -105,6 +115,13 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         startingStateStreamDefinition.ingest.classic.field_overrides
       );
 
+    this._changes.failure_store =
+      !startingStateStreamDefinition ||
+      !_.isEqual(
+        this._definition.ingest.failure_store,
+        startingStateStreamDefinition.ingest.failure_store
+      );
+
     return { cascadingChanges: [], changeStatus: 'upserted' };
   }
 
@@ -124,8 +141,17 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     desiredState: State,
     startingState: State
   ): Promise<ValidationResult> {
-    if (this.dependencies.isServerless && isIlmLifecycle(this.getLifecycle())) {
-      return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
+    if (this.dependencies.isServerless) {
+      if (isIlmLifecycle(this.getLifecycle())) {
+        return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
+      }
+
+      if (isDisabledLifecycleFailureStore(this.getFailureStore())) {
+        return {
+          isValid: false,
+          errors: [new Error('Disabling failure store lifecycle is not supported in Serverless')],
+        };
+      }
     }
 
     // Check for conflicts
@@ -265,6 +291,17 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       });
     }
 
+    if (!isInheritFailureStore(this._definition.ingest.failure_store)) {
+      actions.push({
+        type: 'update_failure_store',
+        request: {
+          name: this._definition.name,
+          failure_store: this._definition.ingest.failure_store,
+          definition: this._definition,
+        },
+      });
+    }
+
     if (
       this._definition.ingest.classic.field_overrides &&
       isMappingProperties(this._definition.ingest.classic.field_overrides)
@@ -291,6 +328,10 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
   public getLifecycle(): IngestStreamLifecycle {
     return this._definition.ingest.lifecycle;
+  }
+
+  public getFailureStore(): FailureStore {
+    return this._definition.ingest.failure_store;
   }
 
   protected async doDetermineUpdateActions(
@@ -332,6 +373,17 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         request: {
           name: this._definition.name,
           lifecycle: this.getLifecycle(),
+        },
+      });
+    }
+
+    if (this._changes.failure_store) {
+      actions.push({
+        type: 'update_failure_store',
+        request: {
+          name: this._definition.name,
+          failure_store: this._definition.ingest.failure_store,
+          definition: this._definition,
         },
       });
     }

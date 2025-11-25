@@ -18,6 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'apiKeys',
     'searchGettingStarted',
+    'solutionNavigation',
   ]);
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
@@ -27,75 +28,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('as viewer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginAsViewer();
+        await pageObjects.solutionNavigation.sidenav.tour.ensureHidden();
       });
 
-      describe('Getting Started page', function () {
+      describe('Getting Started page is not accessible for viewer role', function () {
         beforeEach(async () => {
           await pageObjects.common.navigateToApp('searchGettingStarted');
         });
-
-        it('load search getting started', async () => {
-          await pageObjects.searchGettingStarted.expectSearchGettingStartedIsLoaded();
-        });
-        it('should have embedded dev console', async () => {
-          await testHasEmbeddedConsole(pageObjects);
-        });
-      });
-
-      describe('Getting Started page interactions', function () {
-        beforeEach(async () => {
-          await pageObjects.common.navigateToApp('searchGettingStarted');
-        });
-
-        describe('Add data button', function () {
-          it('navigates to the sample data page when option is selected', async () => {
-            await pageObjects.searchGettingStarted.selectAddDataOption(
-              'gettingStartedSampleDataMenuItem'
-            );
-            await retry.tryWithRetries(
-              'wait for URL to change',
-              async () => {
-                expect(await browser.getCurrentUrl()).to.contain('/tutorial_directory/sampleData');
-              },
-              { initialDelay: 200, retryCount: 5, retryDelay: 500 }
-            );
-          });
-        });
-
-        describe('Elasticsearch endpoint and API Keys', function () {
-          it('renders endpoint field and copy button', async () => {
-            await testSubjects.existOrFail('endpointValueField');
-            await testSubjects.existOrFail('copyEndpointButton');
-            const endpointValue = await testSubjects.getVisibleText('endpointValueField');
-            expect(endpointValue).to.contain('https://');
-            await testSubjects.existOrFail('apiKeyFormNoUserPrivileges');
-          });
-        });
-
-        describe('View connection details', function () {
-          it('renders the view connection details button', async () => {
-            await testSubjects.existOrFail('viewConnectionDetailsLink');
-          });
-          it('opens the connection flyout when the button is clicked', async () => {
-            await testSubjects.click('viewConnectionDetailsLink');
-            await testSubjects.existOrFail('connectionDetailsModalTitle');
-          });
-        });
-
-        describe('Connect to your application', function () {
-          it('renders the JavaScript code example when selected in Language Selector', async () => {
-            await pageObjects.searchGettingStarted.selectCodingLanguage('javascript');
-            await pageObjects.searchGettingStarted.expectCodeSampleContainsValue(
-              'import { Client } from'
-            );
-          });
-        });
-
-        describe('Footer content', function () {
-          it('renders Python Notebooks callout and navigates correctly', async () => {
-            const href = await testSubjects.getAttribute('gettingStartedOpenNotebooks-btn', 'href');
-            expect(href).to.contain('search-labs/tutorials/examples');
-          });
+        it('Should display not found error page', async () => {
+          const bodyText = await pageObjects.common.getBodyText();
+          expect(bodyText).to.contain('No application was found at this URL');
         });
       });
     });
@@ -108,6 +50,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe('Getting Started page interactions', function () {
         beforeEach(async () => {
           await pageObjects.common.navigateToApp('searchGettingStarted');
+        });
+
+        it('load search getting started', async () => {
+          await pageObjects.searchGettingStarted.expectSearchGettingStartedIsLoaded();
+        });
+
+        it('should have embedded dev console', async () => {
+          await testHasEmbeddedConsole(pageObjects);
         });
 
         describe('Add data button', function () {
@@ -220,9 +170,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             const href = await testSubjects.getAttribute('gettingStartedSearchLabs-btn', 'href');
             expect(href).to.contain('search-labs');
           });
-          it('renders Python Notebooks callout and navigates correctly', async () => {
-            const href = await testSubjects.getAttribute('gettingStartedOpenNotebooks-btn', 'href');
-            expect(href).to.contain('search-labs/tutorials/examples');
+          it('renders Elastic Training callout and navigates correctly', async () => {
+            const href = await testSubjects.getAttribute(
+              'gettingStartedElasticTraining-btn',
+              'href'
+            );
+            expect(href).to.contain('elastic.co/training');
           });
           it('renders Elasticsearch Documentation callout and navigates correctly', async () => {
             const href = await testSubjects.getAttribute(
@@ -230,6 +183,53 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'href'
             );
             expect(href).to.contain('docs/solutions/search/get-started');
+          });
+        });
+
+        describe('Getting Started navigation', function () {
+          it('renders Getting Started side nav item', async () => {
+            await pageObjects.common.navigateToApp('searchGettingStarted');
+            await pageObjects.solutionNavigation.sidenav.expectLinkActive({
+              deepLinkId: 'searchGettingStarted',
+            });
+          });
+
+          it('navigate to Getting Started using search', async () => {
+            await pageObjects.svlCommonNavigation.search.showSearch();
+            // TODO: test something search project specific instead of generic discover
+            await pageObjects.svlCommonNavigation.search.searchFor('getting started');
+            await pageObjects.svlCommonNavigation.search.clickOnOption(0);
+            await pageObjects.svlCommonNavigation.search.hideSearch();
+
+            expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/getting_started');
+          });
+
+          it('Getting Started nav item shows correct breadcrumbs', async () => {
+            await pageObjects.common.navigateToApp('searchGettingStarted');
+            await testSubjects.existOrFail('gettingStartedHeader');
+            await pageObjects.solutionNavigation.sidenav.expectLinkActive({
+              deepLinkId: 'searchGettingStarted',
+            });
+            await pageObjects.solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+              text: 'Getting started',
+            });
+          });
+
+          it('renders tour for Getting Started', async () => {
+            await pageObjects.solutionNavigation.sidenav.tour.reset();
+            await pageObjects.solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
+            await pageObjects.solutionNavigation.sidenav.tour.nextStep();
+            await pageObjects.solutionNavigation.sidenav.tour.expectTourStepVisible(
+              'sidenav-manage-data'
+            );
+            await pageObjects.solutionNavigation.sidenav.tour.nextStep();
+            await pageObjects.solutionNavigation.sidenav.tour.expectTourStepVisible(
+              'sidenav-search-getting-started'
+            );
+            await pageObjects.solutionNavigation.sidenav.tour.nextStep();
+            await pageObjects.solutionNavigation.sidenav.tour.expectHidden();
+            await browser.refresh();
+            await pageObjects.solutionNavigation.sidenav.tour.expectHidden();
           });
         });
       });

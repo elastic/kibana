@@ -95,5 +95,6 @@
     "@kbn/es-types",
     "@kbn/esql-utils",
     "@kbn/streamlang-yaml-editor",
+    "@kbn/core-chrome-navigation",
   ]
 }

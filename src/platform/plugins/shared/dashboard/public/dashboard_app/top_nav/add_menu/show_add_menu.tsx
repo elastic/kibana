@@ -20,7 +20,12 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { DefaultControlApi } from '@kbn/controls-plugin/public';
-import { ESQLVariableType, EsqlControlType, apiPublishesESQLVariables } from '@kbn/esql-types';
+import {
+  ControlTriggerSource,
+  ESQLVariableType,
+  EsqlControlType,
+  apiPublishesESQLVariables,
+} from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { apiHasType, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
@@ -211,6 +216,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
                   closePopover();
                 },
                 onCancelControl: closePopover,
+                triggerSource: ControlTriggerSource.ADD_CONTROL_BTN,
               });
             } catch (e) {
               // eslint-disable-next-line no-console

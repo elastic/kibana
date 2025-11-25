@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ConversationInputForm } from './conversation_input/conversation_input_form';
+import { ConversationInput } from './conversation_input/conversation_input';
 import { conversationElementWidthStyles } from './conversation.styles';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { TechPreviewBadge } from '../common/tech_preview';
@@ -48,7 +48,7 @@ export const NewConversationPrompt: React.FC<{}> = () => {
           </h2>
         </EuiTitle>
       </EuiFlexItem>
-      <ConversationInputForm />
+      <ConversationInput />
     </EuiFlexGroup>
   );
 };
