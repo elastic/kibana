@@ -15,8 +15,6 @@ import {
   SLO_LIST_SEARCH_URL_STORAGE_KEY,
 } from '../pages/slos/hooks/use_url_search_state';
 
-export type { SloListLocatorParams };
-
 export class SloListLocatorDefinition implements LocatorDefinition<SloListLocatorParams> {
   public readonly id = sloListLocatorID;
 

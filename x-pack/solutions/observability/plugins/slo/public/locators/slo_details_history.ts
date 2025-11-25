@@ -12,8 +12,6 @@ import {
 } from '@kbn/deeplinks-observability';
 import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
 
-export type { SloDetailsHistoryLocatorParams };
-
 export class SloDetailsHistoryLocatorDefinition
   implements LocatorDefinition<SloDetailsHistoryLocatorParams>
 {

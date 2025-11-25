@@ -18,8 +18,7 @@ import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared/src/maintenance_
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
-import { rulesLocatorID } from '@kbn/deeplinks-observability';
-import type { RulesLocatorParams } from '@kbn/deeplinks-observability';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
 import { renderGroupPanel } from '../../components/alerts_table/grouping/render_group_panel';
 import { getGroupStats } from '../../components/alerts_table/grouping/get_group_stats';
 import { getAggregationsByGroupingField } from '../../components/alerts_table/grouping/get_aggregations_by_grouping_field';

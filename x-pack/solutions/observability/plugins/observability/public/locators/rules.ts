@@ -10,8 +10,6 @@ import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
 import { RULES_PATH } from '../../common/locators/paths';
 
-export type { RulesLocatorParams };
-
 export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorParams> {
   public readonly id = rulesLocatorID;
 
