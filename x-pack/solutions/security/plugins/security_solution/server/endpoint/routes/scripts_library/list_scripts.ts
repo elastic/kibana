@@ -6,6 +6,8 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { errorHandler } from '../error_handler';
+import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
 import { ListScriptsRequestSchema } from '../../../../common/api/endpoint/scripts_library/list_scripts';
 import { stringify } from '../../utils/stringify';
 import { withEndpointAuthz } from '../with_endpoint_authz';
@@ -16,16 +18,37 @@ import type {
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
 import { SCRIPTS_LIBRARY_ROUTE } from '../../../../common/endpoint/constants';
+import type { EndpointScriptListApiResponse } from '../../../../common/endpoint/types';
 
 export const getListScriptsRequestHandler = (
   endpointAppServices: EndpointAppContextService
-): RequestHandler<unknown, unknown, unknown, SecuritySolutionRequestHandlerContext> => {
+): RequestHandler<
+  unknown,
+  ListScriptsRequestQuery,
+  unknown,
+  SecuritySolutionRequestHandlerContext
+> => {
   const logger = endpointAppServices.createLogger('listScriptsRouteHandler');
 
   return async (context, req, res) => {
     logger.debug(() => `Get list of script: ${stringify(req.query)}`);
 
-    return res.noContent();
+    try {
+      const spaceId = (await context.securitySolution).getSpaceId();
+      const user = (await context.core).security.authc.getCurrentUser();
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const scriptsClient = endpointAppServices.getScriptsLibraryClient(
+        spaceId,
+        user?.username || 'unknown',
+        esClient
+      );
+
+      const responseBody: EndpointScriptListApiResponse = await scriptsClient.list(req.query);
+
+      return res.ok({ body: responseBody });
+    } catch (err) {
+      return errorHandler(logger, res, err);
+    }
   };
 };
 

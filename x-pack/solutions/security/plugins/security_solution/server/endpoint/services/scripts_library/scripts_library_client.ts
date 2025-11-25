@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
 import assert from 'assert';
+import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
 import { SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import type { HapiReadableStream } from '../../../types';
 import {
@@ -25,7 +26,10 @@ import {
 import { ScriptLibraryError } from './common';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
-import type { EndpointScript } from '../../../../common/endpoint/types';
+import type {
+  EndpointScript,
+  EndpointScriptListApiResponse,
+} from '../../../../common/endpoint/types';
 import type {
   ScriptDownloadResponse,
   ScriptsLibraryClientInterface,
@@ -224,7 +228,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     throw new ScriptLibraryError('Not implemented', 501);
   }
 
-  public async list(): Promise<void> {
+  public async list(options: ListScriptsRequestQuery = {}): Promise<EndpointScriptListApiResponse> {
     throw new ScriptLibraryError('Not implemented', 501);
   }
 
