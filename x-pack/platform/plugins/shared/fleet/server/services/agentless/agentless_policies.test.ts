@@ -252,6 +252,13 @@ describe('AgentlessPoliciesService', () => {
         supports_agentless: true,
       } as any);
 
+      packagePolicyService.list.mockResolvedValueOnce({
+        items: [],
+        total: 0,
+        page: 1,
+        perPage: 1,
+      });
+
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const logger = loggingSystemMock.createLogger();
@@ -278,6 +285,13 @@ describe('AgentlessPoliciesService', () => {
       jest.mocked(agentPolicyService.get).mockResolvedValueOnce({
         supports_agentless: false,
       } as any);
+
+      packagePolicyService.list.mockResolvedValueOnce({
+        items: [],
+        total: 0,
+        page: 1,
+        perPage: 1,
+      });
 
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -315,12 +329,14 @@ describe('AgentlessPoliciesService', () => {
         perPage: 1,
       });
 
-      jest.mocked(cloudConnectorService.getById).mockResolvedValueOnce({
+      const getByIdSpy = jest.spyOn(cloudConnectorService, 'getById');
+      getByIdSpy.mockResolvedValueOnce({
         id: 'cloud-connector-123',
         packagePolicyCount: 2,
       } as any);
 
-      jest.mocked(cloudConnectorService.update).mockResolvedValueOnce({} as any);
+      const updateSpy = jest.spyOn(cloudConnectorService, 'update');
+      updateSpy.mockResolvedValueOnce({} as any);
 
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -335,15 +351,10 @@ describe('AgentlessPoliciesService', () => {
 
       await agentlessPoliciesService.deleteAgentlessPolicy('agentless-policy-with-connector');
 
-      expect(jest.mocked(cloudConnectorService.getById)).toHaveBeenCalledWith(
-        soClient,
-        'cloud-connector-123'
-      );
-      expect(jest.mocked(cloudConnectorService.update)).toHaveBeenCalledWith(
-        soClient,
-        'cloud-connector-123',
-        { packagePolicyCount: 1 }
-      );
+      expect(getByIdSpy).toHaveBeenCalledWith(soClient, 'cloud-connector-123');
+      expect(updateSpy).toHaveBeenCalledWith(soClient, 'cloud-connector-123', {
+        packagePolicyCount: 1,
+      });
       expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledTimes(1);
     });
   });
@@ -497,7 +508,8 @@ describe('AgentlessPoliciesService', () => {
         ])
       );
 
-      jest.mocked(cloudConnectorService.create).mockResolvedValueOnce({
+      const createSpy = jest.spyOn(cloudConnectorService, 'create');
+      createSpy.mockResolvedValueOnce({
         id: 'aws-cloud-connector-123',
         name: 'aws-cloud-connector: cspm-aws-policy',
         cloudProvider: 'aws',
@@ -552,7 +564,7 @@ describe('AgentlessPoliciesService', () => {
 
       expect(result).toBeDefined();
       expect(result.cloud_connector_id).toBe('aws-cloud-connector-123');
-      expect(jest.mocked(cloudConnectorService.create)).toHaveBeenCalledWith(
+      expect(createSpy).toHaveBeenCalledWith(
         soClient,
         expect.objectContaining({
           cloudProvider: 'aws',
@@ -594,7 +606,8 @@ describe('AgentlessPoliciesService', () => {
         ])
       );
 
-      jest.mocked(cloudConnectorService.create).mockResolvedValueOnce({
+      const createSpy = jest.spyOn(cloudConnectorService, 'create');
+      createSpy.mockResolvedValueOnce({
         id: 'azure-cloud-connector-123',
         name: 'azure-cloud-connector: cspm-azure-policy',
         cloudProvider: 'azure',
@@ -654,7 +667,7 @@ describe('AgentlessPoliciesService', () => {
 
       expect(result).toBeDefined();
       expect(result.cloud_connector_id).toBe('azure-cloud-connector-123');
-      expect(jest.mocked(cloudConnectorService.create)).toHaveBeenCalledWith(
+      expect(createSpy).toHaveBeenCalledWith(
         soClient,
         expect.objectContaining({
           cloudProvider: 'azure',
@@ -699,7 +712,8 @@ describe('AgentlessPoliciesService', () => {
         ])
       );
 
-      jest.mocked(cloudConnectorService.create).mockResolvedValueOnce({
+      const createSpy = jest.spyOn(cloudConnectorService, 'create');
+      createSpy.mockResolvedValueOnce({
         id: 'aws-cloud-connector-123',
         name: 'aws-cloud-connector: cspm-aws-policy',
         cloudProvider: 'aws',
@@ -711,6 +725,9 @@ describe('AgentlessPoliciesService', () => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       } as any);
+
+      const deleteSpy = jest.spyOn(cloudConnectorService, 'delete');
+      deleteSpy.mockResolvedValueOnce({ id: 'aws-cloud-connector-123' } as any);
 
       packagePolicyService.create.mockImplementationOnce(async () => {
         throw new Error('Error creating package policy');
@@ -760,14 +777,10 @@ describe('AgentlessPoliciesService', () => {
       ).rejects.toThrow('Error creating package policy');
 
       // Verify cloud connector was created
-      expect(jest.mocked(cloudConnectorService.create)).toHaveBeenCalledTimes(1);
+      expect(createSpy).toHaveBeenCalledTimes(1);
 
       // Verify rollback: cloud connector should be deleted
-      expect(jest.mocked(cloudConnectorService.delete)).toHaveBeenCalledWith(
-        soClient,
-        'aws-cloud-connector-123',
-        true
-      );
+      expect(deleteSpy).toHaveBeenCalledWith(soClient, 'aws-cloud-connector-123', true);
 
       // Verify rollback: agent policy should be deleted
       expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
@@ -809,7 +822,8 @@ describe('AgentlessPoliciesService', () => {
         ])
       );
 
-      jest.mocked(cloudConnectorService.create).mockResolvedValueOnce({
+      const createSpy = jest.spyOn(cloudConnectorService, 'create');
+      createSpy.mockResolvedValueOnce({
         id: 'aws-cloud-connector-123',
         name: 'my-custom-connector-name',
         cloudProvider: 'aws',
@@ -866,7 +880,7 @@ describe('AgentlessPoliciesService', () => {
       expect(result).toBeDefined();
       expect(result.cloud_connector_id).toBe('aws-cloud-connector-123');
       // Verify that the custom name from API request is used
-      expect(jest.mocked(cloudConnectorService.create)).toHaveBeenCalledWith(
+      expect(createSpy).toHaveBeenCalledWith(
         soClient,
         expect.objectContaining({
           cloudProvider: 'aws',
@@ -907,7 +921,8 @@ describe('AgentlessPoliciesService', () => {
         ])
       );
 
-      jest.mocked(cloudConnectorService.create).mockResolvedValueOnce({
+      const createSpy = jest.spyOn(cloudConnectorService, 'create');
+      createSpy.mockResolvedValueOnce({
         id: 'aws-cloud-connector-123',
         name: 'arn:aws:iam::123456789012:role/TestRole',
         cloudProvider: 'aws',
@@ -964,7 +979,7 @@ describe('AgentlessPoliciesService', () => {
       expect(result).toBeDefined();
       expect(result.cloud_connector_id).toBe('aws-cloud-connector-123');
       // Verify that the fallback name (role_arn) is used when no custom name is provided
-      expect(jest.mocked(cloudConnectorService.create)).toHaveBeenCalledWith(
+      expect(createSpy).toHaveBeenCalledWith(
         soClient,
         expect.objectContaining({
           cloudProvider: 'aws',
