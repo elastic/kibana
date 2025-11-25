@@ -9,15 +9,26 @@ paths:
       operationId: EndpointScriptLibraryCreateScript
       description: Create a new script entry by uploading a script file
       x-codegen-enabled: false
-#      x-labels: []
+      x-labels: []
 #      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
-      x-labels: [ ess, serverless ]
+#      x-labels: [ ess, serverless ]
       requestBody:
         required: true
         content:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/CreateScriptRouteRequestBody'
+            examples:
+              CreateScriptEntry:
+                summary: Create a script entry
+                value:
+                  name: Collect host data
+                  platform: [ linux, macos ]
+                  file: ./collect_host_data.sh
+                  description: Collects host data for investigation
+                  instructions: Collects host data for investigation
+                  example: ./collect_host_data.sh --help
+                  requiresInput: false
 
       responses:
         '200':
