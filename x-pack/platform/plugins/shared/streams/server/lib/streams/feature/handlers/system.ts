@@ -9,6 +9,7 @@ import type { SystemFeature } from '@kbn/streams-schema';
 import objectHash from 'object-hash';
 import type { IdentifyFeaturesOptions } from '@kbn/streams-ai';
 import { identifySystemFeatures } from '@kbn/streams-ai';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { FeatureTypeHandler } from '../feature_type_handler';
 import type { StoredFeature } from '../stored_feature';
 import {
@@ -43,7 +44,9 @@ export class SystemFeatureHandler extends FeatureTypeHandler<SystemFeature> {
     };
   }
 
-  identifyFeatures(options: IdentifyFeaturesOptions): Promise<{ features: SystemFeature[] }> {
+  identifyFeatures(
+    options: IdentifyFeaturesOptions
+  ): Promise<{ features: SystemFeature[]; tokensUsed: ChatCompletionTokenCount }> {
     return identifySystemFeatures({ ...options, dropUnmapped: true });
   }
 

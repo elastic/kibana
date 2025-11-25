@@ -9,6 +9,8 @@ import type { Feature } from '@kbn/streams-schema';
 import { describeDataset } from '@kbn/ai-tools';
 import type { IdentifyFeaturesOptions } from '@kbn/streams-ai';
 import { withSpan } from '@kbn/apm-utils';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
+import { sumTokens } from '@kbn/streams-ai/src/helpers/sum_tokens';
 import type { FeatureTypeHandler } from './feature_type_handler';
 import type { StoredFeature } from './stored_feature';
 import { SystemFeatureHandler } from './handlers/system';
@@ -57,7 +59,7 @@ export class FeatureTypeRegistry {
 
   async identifyFeatures(
     options: Omit<IdentifyFeaturesOptions, 'analysis'>
-  ): Promise<{ features: Feature[] }> {
+  ): Promise<{ features: Feature[]; tokensUsed: ChatCompletionTokenCount }> {
     options.logger.debug(`Identifying features for stream ${options.stream.name}`);
 
     options.logger.trace('Describing dataset for feature identification');
@@ -71,6 +73,12 @@ export class FeatureTypeRegistry {
     );
 
     const features: Feature[] = [];
+    let tokensUsed: ChatCompletionTokenCount = {
+      prompt: 0,
+      completion: 0,
+      total: 0,
+      cached: 0,
+    };
     for (const handler of this.handlers.values()) {
       options.logger.trace(`Identifying features of type ${handler.type}`);
       const result = await withSpan(`identify_${handler.type}_features`, () =>
@@ -81,12 +89,13 @@ export class FeatureTypeRegistry {
       );
 
       features.push(...result.features);
+      tokensUsed = sumTokens(tokensUsed, result.tokensUsed);
     }
 
     options.logger.debug(
       `Identified ${features.length} features for stream ${options.stream.name}`
     );
-    return { features };
+    return { features, tokensUsed };
   }
 }
 

@@ -23,6 +23,7 @@ import type {
   StreamsFeatureIdentificationIdentifiedProps,
   StreamsFeatureIdentificationSavedProps,
   StreamsFeatureIdentificationDeletedProps,
+  StreamsDescriptionGeneratedProps,
 } from './types';
 
 const streamsAttachmentCountSchema: RootSchema<StreamsAttachmentCountProps> = {
@@ -297,6 +298,18 @@ const streamsSignificantEventsSuggestionsGeneratedSchema: RootSchema<StreamsSign
           'The time (in milliseconds) it took to generate significant events suggestions',
       },
     },
+    input_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of input tokens used for the generation request',
+      },
+    },
+    output_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of output tokens used for the generation request',
+      },
+    },
     count: {
       type: 'long',
       _meta: {
@@ -358,6 +371,18 @@ const streamsFeatureIdentificationIdentifiedSchema: RootSchema<StreamsFeatureIde
         description: 'The number of features identified',
       },
     },
+    input_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of input tokens used for the generation request',
+      },
+    },
+    output_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of output tokens used for the generation request',
+      },
+    },
     stream_type: {
       type: 'keyword',
       _meta: {
@@ -416,6 +441,33 @@ const streamsFeatureIdentificationDeletedSchema: RootSchema<StreamsFeatureIdenti
     },
   };
 
+const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedProps> = {
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
+  input_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of input tokens used for the generation request',
+    },
+  },
+  output_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of output tokens used for the generation request',
+    },
+  },
+};
+
 export {
   streamsAttachmentCountSchema,
   streamsAttachmentClickEventSchema,
@@ -433,4 +485,5 @@ export {
   streamsFeatureIdentificationIdentifiedSchema,
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,
+  streamsDescriptionGeneratedSchema,
 };

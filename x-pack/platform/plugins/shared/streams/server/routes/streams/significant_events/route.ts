@@ -206,10 +206,10 @@ const generateSignificantEventsRoute = createServerRoute({
         }
       )
     ).pipe(
-      mergeMap((queries) => fromRxjs(queries)),
-      map((query) => ({
-        query,
-        type: 'generated_query' as const,
+      map(({ queries, tokensUsed }) => ({
+        type: 'generated_queries' as const,
+        queries,
+        tokensUsed,
       }))
     );
   },

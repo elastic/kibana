@@ -79,6 +79,8 @@ interface StreamsSchemaUpdatedProps {
 
 interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
   duration_ms: number;
+  input_tokens_used: number;
+  output_tokens_used: number;
   count: number;
   features_selected: number;
   features_total: number;
@@ -94,6 +96,8 @@ interface StreamsSignificantEventsCreatedProps {
 
 interface StreamsFeatureIdentificationIdentifiedProps {
   count: number;
+  input_tokens_used: number;
+  output_tokens_used: number;
   stream_name: string;
   stream_type: StreamType;
 }
@@ -108,6 +112,13 @@ interface StreamsFeatureIdentificationDeletedProps {
   count: number;
   stream_name: string;
   stream_type: StreamType;
+}
+
+interface StreamsDescriptionGeneratedProps {
+  stream_name: string;
+  stream_type: StreamType;
+  input_tokens_used: number;
+  output_tokens_used: number;
 }
 
 export {
@@ -127,4 +138,5 @@ export {
   type StreamsFeatureIdentificationSavedProps,
   type StreamsFeatureIdentificationIdentifiedProps,
   type StreamsFeatureIdentificationDeletedProps,
+  type StreamsDescriptionGeneratedProps,
 };

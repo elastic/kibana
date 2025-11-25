@@ -8,6 +8,7 @@
 import type { Observable } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Condition } from '@kbn/streamlang';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { StreamQueryKql } from '../../queries';
 
 /**
@@ -53,7 +54,10 @@ interface GeneratedSignificantEventQuery {
 }
 
 type SignificantEventsGenerateResponse = Observable<
-  ServerSentEventBase<'generated_query', { query: GeneratedSignificantEventQuery }>
+  ServerSentEventBase<
+    'generated_queries',
+    { queries: GeneratedSignificantEventQuery[]; tokensUsed: ChatCompletionTokenCount }
+  >
 >;
 
 export type {

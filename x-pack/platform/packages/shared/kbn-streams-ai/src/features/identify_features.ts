@@ -7,7 +7,7 @@
 import type { DocumentAnalysis } from '@kbn/ai-tools';
 import { formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import {
   isFeatureWithFilter,
@@ -21,6 +21,7 @@ import { IdentifySystemsPrompt } from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
 import conditionSchemaText from '../shared/condition_schema.text';
 import { generateStreamDescription } from '../description/generate_description';
+import { sumTokens } from '../helpers/sum_tokens';
 
 export interface IdentifyFeaturesOptions {
   stream: Streams.all.Definition;
@@ -56,7 +57,7 @@ export async function identifySystemFeatures({
 }: IdentifyFeaturesOptions & {
   dropUnmapped?: boolean;
   maxSteps?: number;
-}): Promise<{ features: SystemFeature[] }> {
+}): Promise<{ features: SystemFeature[]; tokensUsed: ChatCompletionTokenCount }> {
   logger.debug(`Identifying system features for stream ${stream.name}`);
 
   logger.trace('Performing initial clustering of logs for system feature identification');
@@ -137,6 +138,12 @@ export async function identifySystemFeatures({
   );
 
   logger.trace('Generating descriptions for identified system features');
+  let tokensUsed: ChatCompletionTokenCount = {
+    prompt: 0,
+    completion: 0,
+    total: 0,
+    cached: 0,
+  };
   const systems: SystemFeature[] = await withSpan('generate_system_feature_descriptions', () =>
     Promise.all(
       response.toolCalls
@@ -151,16 +158,19 @@ export async function identifySystemFeatures({
           })
         )
         .map(async (feature) => {
-          const description = await generateStreamDescription({
-            stream,
-            start,
-            end,
-            esClient,
-            inferenceClient,
-            feature: { ...feature, description: '' },
-            signal,
-            logger,
-          });
+          const { description, tokensUsed: descriptionTokensUsed } =
+            await generateStreamDescription({
+              stream,
+              start,
+              end,
+              esClient,
+              inferenceClient,
+              feature: { ...feature, description: '' },
+              signal,
+              logger,
+            });
+
+          tokensUsed = sumTokens(tokensUsed, descriptionTokensUsed);
 
           return {
             ...feature,
@@ -174,5 +184,6 @@ export async function identifySystemFeatures({
 
   return {
     features: systems,
+    tokensUsed: sumTokens(tokensUsed, response.tokens),
   };
 }

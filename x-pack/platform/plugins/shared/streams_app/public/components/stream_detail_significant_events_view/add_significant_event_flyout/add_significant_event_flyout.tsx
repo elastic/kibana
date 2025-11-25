@@ -115,6 +115,8 @@ export function AddSignificantEventFlyout({
 
   const generateQueries = useCallback(() => {
     let numberOfGeneratedQueries = 0;
+    let inputTokensUsed = 0;
+    let outputTokensUsed = 0;
     const connector = aiFeatures?.genAiConnectors.selectedConnector;
     if (!connector || selectedFeatures.length === 0) {
       return;
@@ -128,24 +130,30 @@ export function AddSignificantEventFlyout({
       .pipe(
         concatMap((feature) =>
           generate(connector, feature).pipe(
-            concatMap((result) => {
-              const validation = validateQuery({
-                title: result.query.title,
-                kql: { query: result.query.kql },
-              });
+            concatMap(({ queries: nextQueries, tokensUsed }) => {
+              numberOfGeneratedQueries += nextQueries.length;
+              inputTokensUsed += tokensUsed.prompt;
+              outputTokensUsed += tokensUsed.completion;
 
-              if (!validation.kql.isInvalid) {
-                numberOfGeneratedQueries++;
-                setGeneratedQueries((prev) => [
-                  ...prev,
-                  {
+              setGeneratedQueries((prev) => [
+                ...prev,
+                ...nextQueries
+                  .filter((nextQuery) => {
+                    const validation = validateQuery({
+                      title: nextQuery.title,
+                      kql: { query: nextQuery.kql },
+                    });
+
+                    return validation.kql.isInvalid === false;
+                  })
+                  .map((nextQuery) => ({
                     id: v4(),
-                    kql: { query: result.query.kql },
-                    title: result.query.title,
-                    feature: result.query.feature,
-                  },
-                ]);
-              }
+                    kql: { query: nextQuery.kql },
+                    title: nextQuery.title,
+                    feature: nextQuery.feature,
+                  })),
+              ]);
+
               return [];
             })
           )
@@ -176,6 +184,8 @@ export function AddSignificantEventFlyout({
           });
           telemetryClient.trackSignificantEventsSuggestionsGenerate({
             duration_ms: Date.now() - startTime,
+            input_tokens_used: inputTokensUsed,
+            output_tokens_used: outputTokensUsed,
             count: numberOfGeneratedQueries,
             features_selected: selectedFeatures.length,
             features_total: features.length,

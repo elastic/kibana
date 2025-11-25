@@ -6,7 +6,7 @@
  */
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { type BoundInferenceClient } from '@kbn/inference-common';
+import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import type { Streams, SystemFeature } from '@kbn/streams-schema';
 import { withSpan } from '@kbn/apm-utils';
@@ -33,10 +33,10 @@ export async function generateStreamDescription({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
-}): Promise<string> {
+}): Promise<{ description: string; tokensUsed?: ChatCompletionTokenCount }> {
   logger.debug(
     `Generating stream description for stream ${stream.name}${
-      feature ? ` with feature ${feature.name}` : ''
+      feature ? ` using feature ${feature.name}` : ''
     }`
   );
 
@@ -74,5 +74,9 @@ export async function generateStreamDescription({
   );
 
   logger.debug('Stream description generated');
-  return response.content;
+
+  return {
+    description: response.content,
+    tokensUsed: response.tokens,
+  };
 }

@@ -62,6 +62,8 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         count: identifiedFeatures.features.length,
         stream_name: definition.name,
         stream_type: getStreamTypeFromDefinition(definition),
+        input_tokens_used: identifiedFeatures.tokensUsed.prompt,
+        output_tokens_used: identifiedFeatures.tokensUsed.completion,
       });
 
       return identifiedFeatures;

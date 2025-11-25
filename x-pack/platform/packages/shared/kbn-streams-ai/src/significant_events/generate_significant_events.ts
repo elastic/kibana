@@ -7,7 +7,8 @@
 
 import type { Streams, Feature } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { MessageRole, type BoundInferenceClient } from '@kbn/inference-common';
+import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
@@ -15,6 +16,7 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { withSpan } from '@kbn/apm-utils';
 import { GenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
+import { sumTokens } from '../helpers/sum_tokens';
 
 interface Query {
   kql: string;
@@ -47,6 +49,7 @@ export async function generateSignificantEvents({
   logger: Logger;
 }): Promise<{
   queries: Query[];
+  tokensUsed: ChatCompletionTokenCount;
 }> {
   logger.debug('Starting significant event generation');
 
@@ -116,5 +119,16 @@ export async function generateSignificantEvents({
 
   logger.debug(`Generated ${queries.length} significant event queries`);
 
-  return { queries };
+  return {
+    queries,
+    tokensUsed: sumTokens(
+      {
+        prompt: 0,
+        completion: 0,
+        total: 0,
+        cached: 0,
+      },
+      response.tokens
+    ),
+  };
 }

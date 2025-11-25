@@ -23,6 +23,7 @@ import {
   streamsFeatureIdentificationIdentifiedEventType,
   streamsFeatureIdentificationSavedEventType,
   streamsFeatureIdentificationDeletedEventType,
+  streamsDescriptionGeneratedEventType,
 } from './events';
 import { StreamsTelemetryClient } from './client';
 
@@ -49,6 +50,7 @@ export class StreamsTelemetryService {
     this.analytics.registerEventType(streamsFeatureIdentificationIdentifiedEventType);
     this.analytics.registerEventType(streamsFeatureIdentificationSavedEventType);
     this.analytics.registerEventType(streamsFeatureIdentificationDeletedEventType);
+    this.analytics.registerEventType(streamsDescriptionGeneratedEventType);
   }
 
   public getClient() {

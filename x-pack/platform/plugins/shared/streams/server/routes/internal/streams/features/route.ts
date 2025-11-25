@@ -20,6 +20,7 @@ import type {
 import { generateStreamDescription } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
 import { from, map } from 'rxjs';
+import { sumTokens } from '@kbn/streams-ai/src/helpers/sum_tokens';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { getDefaultFeatureRegistry } from '../../../../lib/streams/feature/feature_type_registry';
 import { createServerRoute } from '../../../create_server_route';
@@ -355,10 +356,11 @@ export const identifyFeaturesRoute = createServerRoute({
         signal,
       })
     ).pipe(
-      map(({ features }) => {
+      map(({ features, tokensUsed }) => {
         return {
           type: 'identified_features',
           features,
+          tokensUsed,
         };
       })
     );
@@ -425,10 +427,19 @@ export const describeStreamRoute = createServerRoute({
         logger: logger.get('stream_description'),
       })
     ).pipe(
-      map((description) => {
+      map((result) => {
         return {
           type: 'stream_description',
-          description,
+          description: result.description,
+          tokensUsed: sumTokens(
+            {
+              prompt: 0,
+              completion: 0,
+              total: 0,
+              cached: 0,
+            },
+            result.tokensUsed
+          ),
         };
       })
     );
