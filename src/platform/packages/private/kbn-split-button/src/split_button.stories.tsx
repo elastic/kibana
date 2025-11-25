@@ -185,3 +185,39 @@ export const SecondaryButtonLoading = {
     </SplitButton>
   ),
 };
+
+export const WithNotificationIndicator = {
+  name: 'With notification indicator',
+  args: {
+    showNotificationIndicator: true,
+    notifcationIndicatorTooltipContent: 'You have new notifications',
+  },
+  render: (args: {
+    showNotificationIndicator: boolean;
+    notifcationIndicatorTooltipContent: string;
+  }) => (
+    <SplitButton secondaryButtonIcon={DEFAULT_SECONDARY_ICON} {...args}>
+      Notifications
+    </SplitButton>
+  ),
+};
+
+export const WithCustomColorIndicator = {
+  name: 'With custom color indicator',
+  args: {
+    showNotificationIndicator: true,
+    notificationIndicatorColor: 'success',
+    notifcationIndicatorTooltipContent: 'Everything is up to date',
+  },
+  render: (args: {
+    showNotificationIndicator: boolean;
+    notificationIndicatorColor: React.ComponentProps<
+      typeof SplitButton
+    >['notificationIndicatorColor'];
+    notifcationIndicatorTooltipContent: string;
+  }) => (
+    <SplitButton secondaryButtonIcon={DEFAULT_SECONDARY_ICON} {...args}>
+      Status
+    </SplitButton>
+  ),
+};
