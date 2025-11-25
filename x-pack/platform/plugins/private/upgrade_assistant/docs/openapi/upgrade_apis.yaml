@@ -8,7 +8,11 @@ info:
     url: https://www.elastic.co/licensing/elastic-license
 tags:
   - name: upgrade
-    description: The assistant helps you prepare for the next major version of Elasticsearch.
+    description: |
+      The Upgrade Assistant helps you prepare for the next major Elasticsearch release via the Kibana REST API.
+      :::
+      WARNING: This is a Kibana REST API. Send requests to the Kibana endpoint (port 5601).
+      :::
     x-displayName: Upgrade assistant
 servers:
   - url: /
