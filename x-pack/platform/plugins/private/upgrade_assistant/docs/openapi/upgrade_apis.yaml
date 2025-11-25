@@ -10,9 +10,10 @@ tags:
   - name: upgrade
     description: |
       The Upgrade Assistant helps you prepare for the next major Elasticsearch release via the Kibana REST API.
-      :::
-      WARNING: This is a Kibana REST API. Send requests to the Kibana endpoint (port 5601).
-      :::
+      > warn
+      > This is a Kibana REST API (not an Elasticsearch API) and must target your Kibana URL:
+      > * Self-managed URL pattern: `https://localhost:5601`
+      > * Elastic Cloud URL pattern: `https://your-deployment.kb.us-east-1.aws.elastic.cloud:9243`
     x-displayName: Upgrade assistant
 servers:
   - url: /
