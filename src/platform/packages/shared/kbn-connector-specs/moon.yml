@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/logging'
   - '@kbn/licensing-types'
+  - '@kbn/i18n'
 tags:
   - shared-common
   - package
