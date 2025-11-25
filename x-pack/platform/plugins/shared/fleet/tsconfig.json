@@ -126,5 +126,6 @@
     "@kbn/alerting-plugin",
     "@kbn/spaces-utils",
     "@kbn/react-query",
+    "@kbn/fs"
   ]
 }
