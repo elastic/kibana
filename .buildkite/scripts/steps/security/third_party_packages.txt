@@ -19,3 +19,4 @@ xml-formatter
 @storybook/addon-docs
 dompurify
 magic-bytes.js
+@opentelemetry/exporter-trace-otlp-grpc

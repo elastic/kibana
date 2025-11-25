@@ -168,8 +168,7 @@ export class ESQLService extends FtrService {
       await this.typeEsqlEditorQuery(query);
       // Wait until suggestions are loaded
       await this.common.sleep(1000);
-      // Create control is the first suggestion
-      await this.browser.pressKeys(this.browser.keys.ENTER);
+      await this.selectEsqlSuggestionByLabel('Create control');
 
       return await this.testSubjects.exists('create_esql_control_flyout');
     });
