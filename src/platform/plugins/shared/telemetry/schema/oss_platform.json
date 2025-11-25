@@ -9509,6 +9509,30 @@
             }
           }
         },
+        "controls": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of pinned controls"
+              }
+            },
+            "by_type": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of pinned controls of this specific type"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "sections": {
           "properties": {
             "total": {
