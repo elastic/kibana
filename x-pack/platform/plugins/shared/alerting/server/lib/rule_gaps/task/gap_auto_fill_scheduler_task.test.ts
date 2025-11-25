@@ -523,7 +523,7 @@ describe('Gap Auto Fill Scheduler Task', () => {
           capacity: 100,
           setupGaps: false,
           expectedProcessCalls: 0,
-          expectMessage: 'no capacity remaining to schedule gap fills',
+          expectMessage: 'Skipped execution: gap auto-fill capacity limit reached',
         },
         {
           name: 'stops when capacity is reached mid-execution',
