@@ -17284,7 +17284,7 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^142.0.0:
+chromedriver@^142.0.1:
   version "142.0.2"
   resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-142.0.2.tgz#bea4e241ea694aba14ab79e5f085adaff03780c6"
   integrity sha512-FmItmTE56bg2DVSbAC4SEuSzaOpqM7Mv3Kfha+EC7ecT67r4xHZErp+apESfOXkFeo7ry8Z7SG4KWaETFWxMNQ==
