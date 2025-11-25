@@ -134,7 +134,6 @@ export class StepExecutionRuntime {
     this.workflowExecutionState.upsertStep(stepExecution);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.logStepStart(stepId, stepExecution.id!);
-    await this.workflowExecutionState.flushStepChanges();
     await this.stepLogger?.flushEvents();
   }
 
