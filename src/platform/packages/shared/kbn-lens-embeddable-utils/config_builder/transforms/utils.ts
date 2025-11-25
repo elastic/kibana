@@ -32,7 +32,7 @@ import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from '../schema/constants';
 import type { DatasetType } from '../schema/dataset';
-import type { LayerSettingsSchemaType } from '../schema/shared';
+import type { LayerSettingsSchema } from '../schema/shared';
 import type { LensApiFilterType, UnifiedSearchFilterType } from '../schema/filter';
 import type { LayerTypeESQL } from '../schema/charts/xy';
 
@@ -444,7 +444,7 @@ export const addLayerColumn = (
  */
 export const generateLayer = (
   id: string,
-  options: LayerSettingsSchemaType
+  options: LayerSettingsSchema
 ): Record<string, PersistedIndexPatternLayer> => {
   return {
     [id]: {

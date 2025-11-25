@@ -13,7 +13,7 @@ import { LENS_TAGCLOUD_DEFAULT_STATE } from '@kbn/lens-common';
 import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-import { dslOnlyPanelInfoSchema, layerSettingsSchemaRaw, sharedPanelInfoSchema } from '../shared';
+import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
@@ -71,7 +71,7 @@ export const tagcloudStateSchemaNoESQL = schema.object({
   type: schema.literal('tagcloud'),
   ...sharedPanelInfoSchema,
   ...dslOnlyPanelInfoSchema,
-  ...layerSettingsSchemaRaw,
+  ...layerSettingsSchema,
   ...datasetSchema,
   ...tagcloudStateSharedOptionsSchema,
   /**
@@ -87,7 +87,7 @@ export const tagcloudStateSchemaNoESQL = schema.object({
 export const tagcloudStateSchemaESQL = schema.object({
   type: schema.literal('tagcloud'),
   ...sharedPanelInfoSchema,
-  ...layerSettingsSchemaRaw,
+  ...layerSettingsSchema,
   ...datasetEsqlTableSchema,
   ...tagcloudStateSharedOptionsSchema,
   /**

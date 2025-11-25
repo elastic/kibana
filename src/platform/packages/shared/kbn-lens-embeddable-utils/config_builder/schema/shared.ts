@@ -74,7 +74,7 @@ export const ignoringGlobalFiltersSchemaRaw = {
   }),
 };
 
-export const layerSettingsSchemaRaw = {
+export const layerSettingsSchema = {
   /**
    * The sampling factor for the dataset.
    *
@@ -119,6 +119,6 @@ export const collapseBySchema = schema.oneOf(
   { meta: { description: 'Collapse by function description' } }
 );
 
-const layerSettingsSchema = schema.object(layerSettingsSchemaRaw);
+const layerSettingsSchemaWrapped = schema.object(layerSettingsSchema);
 
-export type LayerSettingsSchemaType = TypeOf<typeof layerSettingsSchema>;
+export type LayerSettingsSchema = TypeOf<typeof layerSettingsSchemaWrapped>;

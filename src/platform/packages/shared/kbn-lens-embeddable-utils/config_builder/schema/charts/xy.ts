@@ -13,7 +13,7 @@ import {
   collapseBySchema,
   dslOnlyPanelInfoSchema,
   ignoringGlobalFiltersSchemaRaw,
-  layerSettingsSchemaRaw,
+  layerSettingsSchema,
   sharedPanelInfoSchema,
 } from '../shared';
 import { datasetEsqlTableSchema, datasetSchema } from '../dataset';
@@ -342,7 +342,7 @@ const xySharedSettings = {
  */
 const xyDataLayerSchemaNoESQL = schema.object(
   {
-    ...layerSettingsSchemaRaw,
+    ...layerSettingsSchema,
     ...datasetSchema,
     ...xyDataLayerSharedSchema,
     breakdown_by: schema.maybe(
@@ -387,7 +387,7 @@ const xyDataLayerSchemaNoESQL = schema.object(
  */
 const xyDataLayerSchemaESQL = schema.object(
   {
-    ...layerSettingsSchemaRaw,
+    ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
     ...xyDataLayerSharedSchema,
     breakdown_by: schema.maybe(esqlColumnSchema),
@@ -474,7 +474,7 @@ const referenceLineLayerShared = {
  */
 const referenceLineLayerSchemaNoESQL = schema.object(
   {
-    ...layerSettingsSchemaRaw,
+    ...layerSettingsSchema,
     ...datasetSchema,
     type: schema.literal('referenceLines'),
     thresholds: schema.arrayOf(
@@ -494,7 +494,7 @@ const referenceLineLayerSchemaNoESQL = schema.object(
  */
 const referenceLineLayerSchemaESQL = schema.object(
   {
-    ...layerSettingsSchemaRaw,
+    ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
     type: schema.literal('referenceLines'),
     thresholds: schema.arrayOf(
