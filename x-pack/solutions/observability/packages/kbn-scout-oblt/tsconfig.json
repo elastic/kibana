@@ -18,7 +18,6 @@
     "@kbn/data-forge",
     "@kbn/test",
     "@kbn/server-route-repository",
-    "@kbn/profiling-data-access-plugin",
     "@kbn/fleet-plugin",
   ]
 }

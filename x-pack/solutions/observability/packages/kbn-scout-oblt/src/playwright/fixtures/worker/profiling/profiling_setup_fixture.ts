@@ -8,10 +8,6 @@
 import { test as base } from '@kbn/scout';
 import path from 'path';
 import fs from 'fs';
-import {
-  COLLECTOR_PACKAGE_POLICY_NAME,
-  SYMBOLIZER_PACKAGE_POLICY_NAME,
-} from '@kbn/profiling-data-access-plugin/common';
 
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 
@@ -110,8 +106,12 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
           const res = await apiServices.fleet.package_policies.get();
           const policies: PackagePolicy[] = res.data.items;
 
-          const collector = policies.find((item) => item.name === COLLECTOR_PACKAGE_POLICY_NAME);
-          const symbolizer = policies.find((item) => item.name === SYMBOLIZER_PACKAGE_POLICY_NAME);
+          const collector = policies.find(
+            (item) => item.name === 'elastic-universal-profiling-collector'
+          );
+          const symbolizer = policies.find(
+            (item) => item.name === 'elastic-universal-profiling-symbolizer'
+          );
 
           return {
             collectorId: collector?.id,
