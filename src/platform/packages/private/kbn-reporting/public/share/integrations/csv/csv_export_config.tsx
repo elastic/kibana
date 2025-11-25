@@ -169,23 +169,32 @@ export const getShareMenuItems =
         contentType: 'text',
         generateAssetURIValue: () => absoluteUrl,
       },
-      renderTotalHitsSizeWarning: (totalHits: number = 0) => totalHits >= (csvConfig?.maxRows || 0),
-      totalHitsSizeWarning: (
-        <EuiCallOut
-          size="s"
-          color="warning"
-          title={i18n.translate('reporting.share.csv.reporting.totalHitsSizeWarning.title', {
-            defaultMessage: 'You have exceeded the recommended row limit.',
-          })}
-          iconType="warning"
-        >
-          <EuiText component="p" size="s">
-            {i18n.translate('reporting.share.csv.reporting.totalHitsSizeWarning.message', {
-              defaultMessage:
-                'This limit can be configured in kibana.yml, but increasing it may impact performance.',
-            })}
-          </EuiText>
-        </EuiCallOut>
-      ),
+      renderTotalHitsSizeWarning: (totalHits: number = 0): React.ReactNode => {
+        const maxRows = csvConfig?.maxRows || 0;
+        if (totalHits >= maxRows) {
+          return (
+            <EuiCallOut
+              size="s"
+              color="warning"
+              title={i18n.translate('reporting.share.csv.reporting.totalHitsSizeWarning.title', {
+                defaultMessage:
+                  'Your requested export includes {totalHits} rows, which exceeds the max of {maxRows}.',
+                values: {
+                  totalHits,
+                  maxRows,
+                },
+              })}
+              iconType="warning"
+            >
+              <EuiText component="p" size="s">
+                {i18n.translate('reporting.share.csv.reporting.totalHitsSizeWarning.message', {
+                  defaultMessage:
+                    'This limit can be configured in kibana.yml, but increasing it may impact performance.',
+                })}
+              </EuiText>
+            </EuiCallOut>
+          );
+        }
+      },
     };
   };

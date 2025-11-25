@@ -157,8 +157,7 @@ export interface ExportShare
       requiresSavedState?: boolean;
       supportedLayoutOptions?: Array<'print'>;
       renderLayoutOptionSwitch?: boolean;
-      renderTotalHitsSizeWarning?: (totalHits?: number) => boolean;
-      totalHitsSizeWarning?: ReactNode;
+      renderTotalHitsSizeWarning?: (totalHits?: number) => ReactNode | undefined;
     } & (
       | {
           generateAssetComponent?: never;

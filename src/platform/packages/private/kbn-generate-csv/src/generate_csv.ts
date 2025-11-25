@@ -56,6 +56,7 @@ interface Dependencies {
 export class CsvGenerator {
   private csvContainsFormulas = false;
   private maxSizeReached = false;
+  private maxRowsReached = false;
   private csvRowCount = 0;
 
   constructor(
@@ -435,6 +436,7 @@ export class CsvGenerator {
           this.logger.warn(
             `This search has exceeded the recommended row limit (${maxRows}). This limit can be configured in kibana.yml, but increasing it may impact performance.`
           );
+          this.maxRowsReached = true;
           break;
         }
       } while (totalRecords != null && currentRecord < totalRecords - 1);
@@ -466,7 +468,10 @@ export class CsvGenerator {
 
     logger.info(`Finished generating. Row count: ${this.csvRowCount}.`);
 
-    if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
+    if (this.maxRowsReached) {
+      warnings.push(i18nTexts.csvMaxRowsWarning({ maxRows }));
+      userError = true;
+    } else if (!this.maxSizeReached && !this.maxRowsReached && this.csvRowCount !== totalRecords) {
       logger.warn(
         `ES scroll returned ` +
           `${this.csvRowCount > (totalRecords ?? 0) ? 'more' : 'fewer'} total hits than expected!`

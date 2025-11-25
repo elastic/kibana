@@ -141,12 +141,14 @@ function ManagedFlyout({
 }: ManagedFlyoutProps) {
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
-  const renderTotalHitsSizeWarning = useMemo<boolean | undefined>(
-    () =>
-      exportIntegration.config.renderTotalHitsSizeWarning &&
-      exportIntegration.config.renderTotalHitsSizeWarning(totalHits),
-    [exportIntegration.config, totalHits]
-  );
+
+  const totalHitsSizeWarning = useMemo(() => {
+    if (exportIntegration.config.renderTotalHitsSizeWarning) {
+      const warning = exportIntegration.config.renderTotalHitsSizeWarning(totalHits);
+      return warning ? <EuiFlexItem>{warning}</EuiFlexItem> : null;
+    }
+    return null;
+  }, [exportIntegration.config, totalHits]);
 
   const getReport = useCallback(async () => {
     try {
@@ -247,11 +249,7 @@ function ManagedFlyout({
               </EuiFlexItem>
             )}
           </Fragment>
-          <Fragment>
-            {publicAPIEnabled && renderTotalHitsSizeWarning && (
-              <EuiFlexItem>{exportIntegration.config.totalHitsSizeWarning}</EuiFlexItem>
-            )}
-          </Fragment>
+          <Fragment>{publicAPIEnabled && totalHitsSizeWarning}</Fragment>
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

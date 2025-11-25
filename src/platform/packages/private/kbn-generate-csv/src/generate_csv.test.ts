@@ -1606,7 +1606,7 @@ describe('CsvGenerator', () => {
         },
         "user_error": true,
         "warnings": Array [
-          "Encountered an error with the number of CSV rows generated from the search: expected 100, received 5.",
+          "This search has exceeded the recommended row limit (5). This limit can be configured in kibana.yml, but increasing it may impact performance.",
         ],
       }
     `);
