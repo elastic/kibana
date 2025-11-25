@@ -7,7 +7,7 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiNotificationBadge, useEuiTheme } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -151,13 +151,19 @@ const EventsBadge = ({
 
 EventsBadge.displayName = 'EventsBadge';
 
+export interface CaseViewTab {
+  badge?: ReactNode;
+  id: CASE_VIEW_PAGE_TABS;
+  name: string;
+}
+
 export const useCaseAttachmentTabs = ({
   caseData,
   activeTab,
 }: {
   caseData: CaseUI;
   activeTab: CASE_VIEW_PAGE_TABS;
-}) => {
+}): CaseViewTab[] => {
   const { features } = useCasesContext();
   const { euiTheme } = useEuiTheme();
   const { data: fileStatsData, isLoading: isLoadingFiles } = useGetCaseFileStats({
