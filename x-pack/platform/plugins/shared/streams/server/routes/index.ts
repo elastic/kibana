@@ -25,6 +25,8 @@ import { ruleRoutes } from './rules/route';
 import { failureStoreRoutes } from './internal/streams/failure_store/route';
 import { internalIngestRoutes } from './internal/streams/ingest/route';
 import { connectorRoutes } from './internal/connectors/route';
+import { attachmentRoutes } from './attachments/route';
+import { internalAttachmentRoutes } from './internal/attachments/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -38,6 +40,7 @@ export const streamsRouteRepository = {
   ...internalFeaturesRoutes,
   ...internalIngestRoutes,
   ...connectorRoutes,
+  ...internalAttachmentRoutes,
   // public APIs
   ...dashboardRoutes,
   ...crudRoutes,
@@ -49,6 +52,7 @@ export const streamsRouteRepository = {
   ...significantEventsRoutes,
   ...queryRoutes,
   ...ruleRoutes,
+  ...attachmentRoutes,
 };
 
 export type StreamsRouteRepository = typeof streamsRouteRepository;
