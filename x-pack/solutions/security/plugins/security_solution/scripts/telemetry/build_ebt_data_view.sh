@@ -68,10 +68,7 @@ if [ "$telemetry_type" != "browser" ] && [ "$telemetry_type" != "server" ]; then
   exit 1
 fi
 
-SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../../../.." && pwd)"
-
-cd "${REPO_ROOT}" && npx ts-node --project "${SCRIPT_DIR}/tsconfig.json" "${SCRIPT_DIR}/build_ebt_data_view.ts" \
+node -r "@kbn/setup-node-env" "$(dirname "${0}")/build_ebt_data_view.ts" \
   --api_key="$api_key" \
   --kibana_url="$kibana_url" \
   --space_id="$space_id" \
