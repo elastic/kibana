@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
 import { NewChatByTitle } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
@@ -13,6 +13,12 @@ import { TakeActionButton } from './components/take_action_button';
 import { useEaseDetailsContext } from './context';
 import { useBasicDataFromDetailsData } from '../document_details/shared/hooks/use_basic_data_from_details_data';
 import { useAssistant } from '../document_details/right/hooks/use_assistant';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { NewAgentBuilderAttachment } from '../../agent_builder/components/new_agent_builder_attachment';
+import { useAgentBuilderAttachment } from '../../agent_builder/hooks/use_agent_builder_attachment';
+import { getRawData, filterAndStringifyAlertData } from '../../assistant/helpers';
+import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { ALERT_ATTACHMENT_PROMPT } from '../../agent_builder/components/prompts';
 
 export const ASK_AI_ASSISTANT = i18n.translate(
   'xpack.securitySolution.flyout.right.footer.askAIAssistant',
@@ -33,6 +39,18 @@ export const PanelFooter = memo(() => {
     dataFormattedForFieldBrowser,
     isAlert,
   });
+  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+
+  const alertData = useMemo(() => {
+    const rawData = getRawData(dataFormattedForFieldBrowser ?? []);
+    return filterAndStringifyAlertData(rawData);
+  }, [dataFormattedForFieldBrowser]);
+  // This will not work until we add permissions to EASE roles for read_onechat
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
+    attachmentType: SecurityAgentBuilderAttachments.alert,
+    attachmentData: { alert: alertData },
+    attachmentPrompt: ALERT_ATTACHMENT_PROMPT,
+  });
 
   return (
     <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
@@ -40,7 +58,14 @@ export const PanelFooter = memo(() => {
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           {showAssistant && (
             <EuiFlexItem grow={false}>
-              <NewChatByTitle showAssistantOverlay={showAssistantOverlay} text={ASK_AI_ASSISTANT} />
+              {isAgentBuilderEnabled ? (
+                <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+              ) : (
+                <NewChatByTitle
+                  showAssistantOverlay={showAssistantOverlay}
+                  text={ASK_AI_ASSISTANT}
+                />
+              )}
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
