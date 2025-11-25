@@ -113,7 +113,7 @@ describe('IndexUpdateService', () => {
       const initial = await firstValueFrom(service.hasUnsavedChanges$);
       expect(initial).toBe(false);
 
-      service.addNewColumn();
+      service.addNewColumn('column1', 'keyword');
 
       const afterAdd = await firstValueFrom(service.hasUnsavedChanges$);
       expect(afterAdd).toBe(false);
@@ -226,7 +226,7 @@ describe('IndexUpdateService', () => {
       service.updateDoc(placeholderRow.id, { field: 'value' });
 
       // Adding a column and editing its name counts as 1 col added
-      service.addNewColumn();
+      service.addNewColumn('column1', 'keyword');
       const newColumn = (await firstValueFrom(service.pendingColumnsToBeSaved$))[0];
       service.editColumn('newColumn', newColumn.name, 'keyword');
 

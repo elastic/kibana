@@ -7,14 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiDataGridColumn } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiIconTip,
+  useEuiTheme,
+  type EuiDataGridColumn,
+} from '@elastic/eui';
 import type { CustomGridColumnProps } from '@kbn/unified-data-table';
 import type { HTMLAttributes } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { IndexUpdateService } from '../../index_update_service';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
-import { ColumnHeaderPopover, COLUMN_INDEX_PROP } from './column_header_popover';
+import { AddColumnPopover, COLUMN_INDEX_PROP } from './add_column_popover';
+import { isPlaceholderColumn } from '../../utils';
 
 export const getColumnHeaderRenderer = (
   columnName: string,
@@ -30,7 +38,7 @@ export const getColumnHeaderRenderer = (
   return ({ column }) => ({
     ...column,
     display: (
-      <ColumnHeaderPopover
+      <ColumnHeader
         isColumnInEditMode={isColumnInEditMode}
         setEditingColumnIndex={setEditingColumnIndex}
         isSavedColumn={isSavedColumn}
@@ -83,4 +91,99 @@ export const getColumnHeaderRenderer = (
         : [],
     },
   });
+};
+
+interface ColumnHeaderProps {
+  isColumnInEditMode: boolean;
+  setEditingColumnIndex: (columnIndex: number | null) => void;
+  isSavedColumn: boolean;
+  isUnsupportedESQLType: boolean;
+  initialColumnName: string;
+  initialColumnType: string | undefined;
+  columnIndex: number;
+  telemetryService: IndexEditorTelemetryService;
+  originalColumnDisplay: React.ReactNode;
+}
+
+const ColumnHeader = ({
+  isColumnInEditMode,
+  setEditingColumnIndex,
+  isSavedColumn,
+  isUnsupportedESQLType,
+  initialColumnName,
+  initialColumnType,
+  columnIndex,
+  telemetryService,
+  originalColumnDisplay,
+}: ColumnHeaderProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  const columnLabel = isPlaceholderColumn(initialColumnName) ? (
+    <FormattedMessage
+      id="indexEditor.flyout.grid.columnHeader.add"
+      defaultMessage="Add a column…"
+    />
+  ) : (
+    // The default column header display comming from UnifiedDataTable, the type icon + column name
+    <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} css={{ cursor: 'pointer' }}>
+      {isUnsupportedESQLType && (
+        <EuiIconTip
+          type="warning"
+          color="warning"
+          size="m"
+          content={i18n.translate('indexEditor.columnHeader.unsupportedWarning', {
+            defaultMessage: `ES|QL doesn't support the {unsupportedType} data type yet. You can still set columns of this index to this type and save them, but Discover won't display them and they will be hidden from this view if you open it again later.`,
+            values: { unsupportedType: initialColumnType },
+          })}
+          className="fieldWarningTip"
+          anchorProps={{
+            css: { display: 'flex', marginLeft: euiTheme.size.xxs },
+          }}
+        />
+      )}
+      {originalColumnDisplay}
+    </EuiFlexGroup>
+  );
+
+  if (isSavedColumn) {
+    return columnLabel;
+  }
+
+  const triggerButton = (
+    // This button is keyboard accesible via the column actions menu.
+    // eslint-disable-next-line @elastic/eui/accessible-interactive-element
+    <EuiButtonEmpty
+      data-test-subj="indexEditorColumnNameButton"
+      aria-label={i18n.translate('indexEditor.columnHeaderEdit.ariaLabel', {
+        defaultMessage: 'Edit column',
+      })}
+      css={{
+        color: euiTheme.colors.textSubdued,
+        width: '100%',
+        height: euiTheme.size.xl,
+      }}
+      tabIndex={-1}
+      flush="left"
+      contentProps={{
+        css: {
+          justifyContent: 'left',
+        },
+      }}
+      onClick={() => setEditingColumnIndex(columnIndex)}
+    >
+      {columnLabel}
+    </EuiButtonEmpty>
+  );
+
+  return (
+    <AddColumnPopover
+      isPopoverOpen={isColumnInEditMode}
+      closePopover={() => setEditingColumnIndex(null)}
+      initialColumnName={initialColumnName}
+      initialColumnType={initialColumnType}
+      columnIndex={columnIndex}
+      telemetryService={telemetryService}
+      triggerButton={triggerButton}
+    />
+  );
 };

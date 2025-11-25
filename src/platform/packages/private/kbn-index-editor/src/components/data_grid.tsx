@@ -233,8 +233,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [props.onOpenIndexInDiscover, props.totalHits]);
 
   const trailingControlColumns = useMemo(() => {
-    return [getAddColumnControl(indexUpdateService)];
-  }, [indexUpdateService]);
+    return [getAddColumnControl(indexEditorTelemetryService)];
+  }, [indexEditorTelemetryService]);
 
   const externalControlColumns = useMemo(() => {
     return [getAddRowControl(indexUpdateService, dataTableRef)];

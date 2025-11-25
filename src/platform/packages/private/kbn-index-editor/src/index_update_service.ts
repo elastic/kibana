@@ -116,7 +116,7 @@ type Action =
   | { type: 'add-doc'; payload: DocUpdate }
   | DeleteDocAction
   | { type: 'saved'; payload: { response: any; updates: DocUpdate[] } }
-  | { type: 'add-column' }
+  | { type: 'add-column'; payload: ColumnAddition }
   | { type: 'edit-column'; payload: ColumnUpdate }
   | { type: 'delete-column'; payload: ColumnUpdate }
   | { type: 'recalculate-column-placeholders' }
@@ -800,7 +800,7 @@ export class IndexUpdateService {
         )
         .subscribe({
           next: (response) => {
-            const { documents_found: total, values, columns } = response.rawResponse;
+            const { values, columns } = response.rawResponse;
 
             // Populate unsupported ES|QL field types
             columns.forEach((col) => {
@@ -847,7 +847,8 @@ export class IndexUpdateService {
               return [
                 ...acc,
                 {
-                  name: `${COLUMN_PLACEHOLDER_PREFIX}${this.placeholderIndex++}`,
+                  name: action.payload.name,
+                  fieldType: action.payload.fieldType,
                 },
               ];
             }
@@ -1116,8 +1117,8 @@ export class IndexUpdateService {
     }
   }
 
-  public addNewColumn() {
-    this.addAction('add-column');
+  public addNewColumn(name: string, fieldType: string) {
+    this.addAction('add-column', { name, fieldType });
 
     this.telemetry.trackEditInteraction({ actionType: 'add_column' });
   }

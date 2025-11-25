@@ -10,7 +10,6 @@
 import {
   useEuiTheme,
   findElementBySelectorOrRef,
-  EuiButtonEmpty,
   EuiPopover,
   EuiForm,
   EuiFormRow,
@@ -19,7 +18,6 @@ import {
   EuiFlexGroup,
   EuiButton,
   EuiText,
-  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
@@ -27,36 +25,31 @@ import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldSelect } from '@kbn/field-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useAddColumnName, errorMessages } from '../../hooks/use_add_column_name';
+import { useAddColumn, errorMessages } from '../../hooks/use_add_column';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
-import { isPlaceholderColumn } from '../../utils';
 import type { KibanaContextExtra } from '../../types';
 
-interface ColumnHeaderPopoverProps {
-  isColumnInEditMode: boolean;
-  setEditingColumnIndex: (columnIndex: number | null) => void;
-  isSavedColumn: boolean;
-  isUnsupportedESQLType: boolean;
-  initialColumnName: string;
-  initialColumnType: string | undefined;
-  columnIndex: number;
+interface AddColumnPopoverProps {
+  isPopoverOpen: boolean;
+  closePopover: () => void;
+  initialColumnName?: string;
+  initialColumnType?: string;
+  columnIndex?: number;
   telemetryService: IndexEditorTelemetryService;
-  originalColumnDisplay: React.ReactNode;
+  triggerButton: React.ReactElement;
 }
 
 export const COLUMN_INDEX_PROP = 'data-column-index';
 
-export const ColumnHeaderPopover = ({
-  isColumnInEditMode,
-  setEditingColumnIndex,
-  isSavedColumn,
+export const AddColumnPopover = ({
+  isPopoverOpen,
+  closePopover,
   initialColumnName,
   initialColumnType,
-  isUnsupportedESQLType,
   columnIndex,
   telemetryService,
-  originalColumnDisplay,
-}: PropsWithChildren<ColumnHeaderPopoverProps>) => {
+  triggerButton,
+}: PropsWithChildren<AddColumnPopoverProps>) => {
   const { euiTheme } = useEuiTheme();
 
   const {
@@ -64,7 +57,7 @@ export const ColumnHeaderPopover = ({
   } = useKibana<KibanaContextExtra>();
 
   const { columnType, setColumnType, columnName, setColumnName, saveColumn, validationError } =
-    useAddColumnName(initialColumnName, initialColumnType);
+    useAddColumn(initialColumnName, initialColumnType);
 
   const canSubmit = useMemo(
     () => columnType && columnName.length > 0 && !validationError,
@@ -77,7 +70,7 @@ export const ColumnHeaderPopover = ({
       event.stopPropagation();
 
       if (columnName && !validationError) {
-        setEditingColumnIndex(null);
+        closePopover();
         saveColumn();
       } else {
         telemetryService.trackEditInteraction({
@@ -86,34 +79,7 @@ export const ColumnHeaderPopover = ({
         });
       }
     },
-    [columnName, validationError, setEditingColumnIndex, saveColumn, telemetryService]
-  );
-
-  const columnLabel = isPlaceholderColumn(initialColumnName) ? (
-    <FormattedMessage
-      id="indexEditor.flyout.grid.columnHeader.add"
-      defaultMessage="Add a column…"
-    />
-  ) : (
-    // The default column header display comming from UnifiedDataTable, the type icon + column name
-    <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} css={{ cursor: 'pointer' }}>
-      {isUnsupportedESQLType && (
-        <EuiIconTip
-          type="warning"
-          color="warning"
-          size="m"
-          content={i18n.translate('indexEditor.columnHeader.unsupportedWarning', {
-            defaultMessage: `ES|QL doesn't support the {unsupportedType} data type yet. You can still set columns of this index to this type and save them, but Discover won't display them and they will be hidden from this view if you open it again later.`,
-            values: { unsupportedType: initialColumnType },
-          })}
-          className="fieldWarningTip"
-          anchorProps={{
-            css: { display: 'flex', marginLeft: euiTheme.size.xxs },
-          }}
-        />
-      )}
-      {originalColumnDisplay}
-    </EuiFlexGroup>
+    [columnName, validationError, closePopover, saveColumn, telemetryService]
   );
 
   const errorMessage = useMemo(() => {
@@ -124,59 +90,32 @@ export const ColumnHeaderPopover = ({
   }, [validationError, columnName]);
 
   const returnFocus = useCallback(() => {
-    requestAnimationFrame(() => {
-      const headerWrapper = findElementBySelectorOrRef(`[${COLUMN_INDEX_PROP}="${columnIndex}"]`);
+    if (columnIndex !== undefined) {
+      requestAnimationFrame(() => {
+        const headerWrapper = findElementBySelectorOrRef(`[${COLUMN_INDEX_PROP}="${columnIndex}"]`);
 
-      if (headerWrapper) {
-        headerWrapper.focus();
-      }
-    });
-
-    return false;
+        if (headerWrapper) {
+          headerWrapper.focus();
+        }
+      });
+      return false;
+    } else {
+      return true;
+    }
   }, [columnIndex]);
-
-  if (isSavedColumn) {
-    return columnLabel;
-  }
-
-  const triggerButton = (
-    // This button is keyboard accesible via the column actions menu.
-    // eslint-disable-next-line @elastic/eui/accessible-interactive-element
-    <EuiButtonEmpty
-      data-test-subj="indexEditorColumnNameButton"
-      aria-label={i18n.translate('indexEditor.columnHeaderEdit.ariaLabel', {
-        defaultMessage: 'Edit column',
-      })}
-      css={{
-        color: euiTheme.colors.textSubdued,
-        width: '100%',
-        height: euiTheme.size.xl,
-      }}
-      tabIndex={-1}
-      flush="left"
-      contentProps={{
-        css: {
-          justifyContent: 'left',
-        },
-      }}
-      onClick={() => setEditingColumnIndex(columnIndex)}
-    >
-      {columnLabel}
-    </EuiButtonEmpty>
-  );
 
   return (
     <EuiPopover
       button={triggerButton}
-      isOpen={isColumnInEditMode}
-      closePopover={() => setEditingColumnIndex(null)}
+      isOpen={isPopoverOpen}
+      closePopover={() => closePopover()}
       focusTrapProps={{
         noIsolation: false,
         clickOutsideDisables: false,
         onClickOutside: (e) => {
           // This prevents closing the popover when clicking on the EuiSelect options
           if (e.isTrusted) {
-            setEditingColumnIndex(null);
+            closePopover();
           }
         },
         returnFocus,
@@ -234,7 +173,7 @@ export const ColumnHeaderPopover = ({
               gutterSize="m"
               css={{ marginTop: euiTheme.size.l }}
             >
-              <EuiButton color="text" size="s" onClick={() => setEditingColumnIndex(null)}>
+              <EuiButton color="text" size="s" onClick={() => closePopover()}>
                 <EuiText size="xs">
                   <FormattedMessage
                     id="indexEditor.flyout.grid.columnHeader.cancelButton"
