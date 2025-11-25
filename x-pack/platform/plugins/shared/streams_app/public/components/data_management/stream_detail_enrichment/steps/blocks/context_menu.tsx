@@ -168,45 +168,45 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
     ...(!isWhere
       ? hasCustomDescription
         ? [
-          <EuiContextMenuItem
-            data-test-subj="stepContextMenuEditDescriptionItem"
-            key="editDescription"
-            icon="editorComment"
-            disabled={!canEdit}
-            onClick={() => {
-              togglePopover(false);
-              toggleEditDescriptionModal(true);
-            }}
-          >
-            {EDIT_DESCRIPTION_MENU_LABEL}
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            data-test-subj="stepContextMenuRemoveDescriptionItem"
-            key="removeDescription"
-            icon="minusInCircle"
-            disabled={!canEdit}
-            onClick={() => {
-              togglePopover(false);
-              stepRef.send({ type: 'step.changeDescription', description: '' });
-            }}
-          >
-            {REMOVE_DESCRIPTION_MENU_LABEL}
-          </EuiContextMenuItem>,
-        ]
+            <EuiContextMenuItem
+              data-test-subj="stepContextMenuEditDescriptionItem"
+              key="editDescription"
+              icon="editorComment"
+              disabled={!canEdit}
+              onClick={() => {
+                togglePopover(false);
+                toggleEditDescriptionModal(true);
+              }}
+            >
+              {EDIT_DESCRIPTION_MENU_LABEL}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              data-test-subj="stepContextMenuRemoveDescriptionItem"
+              key="removeDescription"
+              icon="minusInCircle"
+              disabled={!canEdit}
+              onClick={() => {
+                togglePopover(false);
+                stepRef.send({ type: 'step.changeDescription', description: '' });
+              }}
+            >
+              {REMOVE_DESCRIPTION_MENU_LABEL}
+            </EuiContextMenuItem>,
+          ]
         : [
-          <EuiContextMenuItem
-            data-test-subj="stepContextMenuEditDescriptionItem"
-            key="editDescription"
-            icon="editorComment"
-            disabled={!canEdit}
-            onClick={() => {
-              togglePopover(false);
-              toggleEditDescriptionModal(true);
-            }}
-          >
-            {ADD_DESCRIPTION_MENU_LABEL}
-          </EuiContextMenuItem>,
-        ]
+            <EuiContextMenuItem
+              data-test-subj="stepContextMenuEditDescriptionItem"
+              key="editDescription"
+              icon="editorComment"
+              disabled={!canEdit}
+              onClick={() => {
+                togglePopover(false);
+                toggleEditDescriptionModal(true);
+              }}
+            >
+              {ADD_DESCRIPTION_MENU_LABEL}
+            </EuiContextMenuItem>,
+          ]
       : []),
     <EuiContextMenuItem
       data-test-subj="stepContextMenuEditItem"
