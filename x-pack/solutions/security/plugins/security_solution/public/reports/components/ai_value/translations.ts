@@ -210,7 +210,7 @@ export const CHANGE_RATE = i18n.translate('xpack.securitySolution.reports.aiValu
 export const CHANGE_RATE_EXPORT_MODE = i18n.translate(
   'xpack.securitySolution.reports.aiValue.exportMode.changeRate',
   {
-    defaultMessage: 'You can change the rate in advanced settings.',
+    defaultMessage: 'Value report rates configured in advanced settings.',
   }
 );
 
