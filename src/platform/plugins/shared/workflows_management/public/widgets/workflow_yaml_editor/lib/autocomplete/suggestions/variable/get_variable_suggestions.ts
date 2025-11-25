@@ -26,6 +26,51 @@ function isInsideCurlyBraces(lineUpToCursor: string): boolean {
   return openBraces > closeBraces;
 }
 
+/**
+ * Validates if the path being accessed exists in the schema
+ * Returns true if the path is valid, false if it doesn't exist
+ */
+function isValidPath(
+  fullKey: string,
+  contextScopedToPath: string | null,
+  lastPathSegment: string | null
+): boolean {
+  if (!fullKey || contextScopedToPath === null) {
+    return true;
+  }
+
+  const fullKeySegments = fullKey.split('.');
+  const scopedPathSegments = contextScopedToPath.split('.');
+
+  // If scopedToPath is empty string, it means we're at the root
+  const scopedSegmentCount = contextScopedToPath === '' ? 0 : scopedPathSegments.length;
+
+  // Check if we're accessing a path that doesn't exist
+  // This happens when the fullKey has more segments than the scoped path,
+  // and we're not just typing the next valid segment
+  const segmentDiff = fullKeySegments.length - scopedSegmentCount;
+
+  // If fullKey exactly matches contextScopedToPath (segmentDiff === 0),
+  // we're already at that level and should show its properties
+  // If the difference is > 1, we're definitely in a non-existent path
+  // e.g., consts.docs.a where docs doesn't exist (diff would be 2)
+  // If the difference is 1 and we're not currently typing (lastPathSegment is null),
+  // it means we just typed a dot after a non-existent path
+  // e.g., consts.docs. where docs doesn't exist
+  return !(segmentDiff > 1 || (segmentDiff === 1 && lastPathSegment === null));
+}
+
+/**
+ * Validates if the schema is a valid ZodObject with shape
+ */
+function isValidSchema(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
+  return (
+    schema instanceof z.ZodObject &&
+    schema.shape !== undefined &&
+    Object.keys(schema.shape).length > 0
+  );
+}
+
 export function getVariableSuggestions(autocompleteContext: AutocompleteContext) {
   const {
     triggerCharacter,
@@ -64,36 +109,11 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
   // done that for us.
 
   // Check if we're trying to access a non-existent path
-  if (lineParseResult.fullKey && contextScopedToPath !== null) {
-    const fullKeySegments = lineParseResult.fullKey.split('.');
-    const scopedPathSegments = contextScopedToPath.split('.');
-
-    // If scopedToPath is empty string, it means we're at the root
-    const scopedSegmentCount = contextScopedToPath === '' ? 0 : scopedPathSegments.length;
-
-    // Check if we're accessing a path that doesn't exist
-    // This happens when the fullKey has more segments than the scoped path,
-    // and we're not just typing the next valid segment
-    const segmentDiff = fullKeySegments.length - scopedSegmentCount;
-
-    // If fullKey exactly matches contextScopedToPath (segmentDiff === 0),
-    // we're already at that level and should show its properties
-    // If the difference is > 1, we're definitely in a non-existent path
-    // e.g., consts.docs.a where docs doesn't exist (diff would be 2)
-    // If the difference is 1 and we're not currently typing (lastPathSegment is null),
-    // it means we just typed a dot after a non-existent path
-    // e.g., consts.docs. where docs doesn't exist
-    if (segmentDiff > 1 || (segmentDiff === 1 && lineParseResult.lastPathSegment === null)) {
-      return [];
-    }
-    // If segmentDiff === 0, we're at the correct level and should proceed
+  if (!isValidPath(lineParseResult.fullKey, contextScopedToPath, lineParseResult.lastPathSegment)) {
+    return [];
   }
 
-  if (
-    !(contextSchema instanceof z.ZodObject) ||
-    !contextSchema.shape ||
-    Object.keys(contextSchema.shape).length === 0
-  ) {
+  if (!isValidSchema(contextSchema)) {
     return [];
   }
 

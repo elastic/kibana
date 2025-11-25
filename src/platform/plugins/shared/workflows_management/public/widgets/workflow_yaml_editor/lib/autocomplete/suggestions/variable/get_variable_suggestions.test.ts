@@ -285,6 +285,54 @@ describe('getVariableSuggestions', () => {
       expect(suggestions).toHaveLength(3);
       expect(suggestions.map((s) => s.label)).toEqual(['apiUrl', 'apiKey', 'timeout']);
     });
+
+    it('should handle empty fullKey string', () => {
+      const context = createMockAutocompleteContext({
+        lineParseResult: createMockVariableLineParseResult({
+          fullKey: '',
+        }),
+        contextScopedToPath: 'consts',
+      });
+
+      const suggestions = getVariableSuggestions(context);
+      // When fullKey is empty, path validation should pass and show all properties
+      expect(suggestions).toHaveLength(3);
+      expect(suggestions.map((s) => s.label)).toEqual(['apiUrl', 'apiKey', 'timeout']);
+    });
+
+    it('should allow suggestions when fullKey exactly matches contextScopedToPath', () => {
+      const context = createMockAutocompleteContext({
+        lineParseResult: createMockVariableLineParseResult({
+          fullKey: 'consts',
+          pathSegments: ['consts'],
+          lastPathSegment: null,
+        }),
+        contextScopedToPath: 'consts',
+      });
+
+      const suggestions = getVariableSuggestions(context);
+      // When fullKey exactly matches contextScopedToPath (segmentDiff === 0),
+      // we should show all properties of that level
+      expect(suggestions).toHaveLength(3);
+      expect(suggestions.map((s) => s.label)).toEqual(['apiUrl', 'apiKey', 'timeout']);
+    });
+
+    it('should allow suggestions when typing next valid segment (segmentDiff === 1 with lastPathSegment)', () => {
+      const context = createMockAutocompleteContext({
+        lineParseResult: createMockVariableLineParseResult({
+          fullKey: 'consts.api',
+          pathSegments: ['consts', 'api'],
+          lastPathSegment: 'api',
+        }),
+        contextScopedToPath: 'consts',
+      });
+
+      const suggestions = getVariableSuggestions(context);
+      // When segmentDiff === 1 and lastPathSegment is not null,
+      // we're typing the next valid segment, so suggestions should be filtered
+      expect(suggestions).toHaveLength(2);
+      expect(suggestions.map((s) => s.label)).toEqual(['apiUrl', 'apiKey']);
+    });
   });
 
   describe('different variable match types', () => {

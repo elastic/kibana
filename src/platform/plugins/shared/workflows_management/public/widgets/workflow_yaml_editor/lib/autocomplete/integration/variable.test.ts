@@ -579,7 +579,8 @@ name: "test"
 consts:
   apiUrl: "https://api.example.com"
 inputs:
-  threshold: 100
+  - name: threshold
+    type: number
 steps:
   - name: step1
     type: console
