@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NewChatByTitle } from '@kbn/elastic-assistant';
+import { AttachmentType } from '@kbn/onechat-common/attachments';
 import { ALERT_ATTACHMENT_PROMPT } from '../../../agent_builder/components/prompts';
 import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
 import { useDocumentDetailsContext } from '../shared/context';
@@ -53,7 +54,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
   }, [dataFormattedForFieldBrowser]);
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: 'alert',
+    attachmentType: AttachmentType.alert,
     attachmentData: { alert: alertData },
     attachmentPrompt: ALERT_ATTACHMENT_PROMPT,
   });

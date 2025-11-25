@@ -23,7 +23,7 @@ export const createRiskEntityAttachmentType = (): AttachmentTypeDefinition<
     validate: (input) => {
       const parseResult = riskEntityAttachmentDataSchema.safeParse(input);
       if (parseResult.success) {
-        return { valid: true, data: parseResult.data };
+        return { valid: true, data: formatRiskEntityData(parseResult.data) };
       } else {
         return { valid: false, error: parseResult.error.message };
       }
@@ -57,4 +57,8 @@ CRITICAL: You MUST call ${sanitizeToolId(
       return description;
     },
   };
+};
+
+const formatRiskEntityData = (data: RiskEntityAttachmentData): string => {
+  return `identifier: ${data.identifier}, identifierType: ${data.identifierType}`;
 };
