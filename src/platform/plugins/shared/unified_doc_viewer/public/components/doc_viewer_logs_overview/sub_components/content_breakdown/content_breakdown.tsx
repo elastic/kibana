@@ -21,14 +21,17 @@ import {
   type LogDocumentOverview,
 } from '@kbn/discover-utils';
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { Badges } from '../badges/badges';
 import { HoverActionPopover } from '../hover_popover_action';
 
 export const ContentBreakdown = ({
+  dataView,
   formattedDoc,
   hit,
   renderFlyoutStreamProcessingLink,
 }: {
+  dataView: DataView;
   formattedDoc: LogDocumentOverview;
   hit: DataTableRecord;
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
@@ -63,6 +66,7 @@ export const ContentBreakdown = ({
             </EuiText>
             <EuiFlexItem grow={false}>
               <Badges
+                dataView={dataView}
                 hasMessageField={Boolean(hasMessageField)}
                 hit={hit}
                 formattedDoc={formattedDoc}
