@@ -13,6 +13,7 @@ import { extractTabs, extractTabsBackfillFn } from './extract_tabs';
 import { SavedSearchType, VIEW_MODE } from '..';
 
 jest.mock('uuid', () => ({
+  ...jest.requireActual('uuid'),
   v4: jest.fn(() => 'mock-uuid'),
 }));
 
@@ -122,6 +123,30 @@ describe('extractTabs', () => {
 
       expect(result.tabs).toBeInstanceOf(Array);
       expect(result.tabs![0].attributes).not.toHaveProperty('tabs');
+    });
+
+    it('should generate deterministic default tab IDs when discoverSessionId is provided', () => {
+      const attributes: TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_5> = {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON:
+            '{"query":{"language":"kuery","query":"service.type: \\"elasticsearch\\""},"highlightAll":true,"fields":[{"field":"*","include_unmapped":true}],"sort":[{"@timestamp":{"order":"desc","format":"strict_date_optional_time"}},{"_doc":"desc"}],"filter":[{"meta":{"disabled":false,"negate":false,"alias":null,"key":"service.type","field":"service.type","params":{"query":"elasticsearch"},"type":"phrase","indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"},"query":{"match_phrase":{"service.type":"elasticsearch"}},"$state":{"store":"appState"}}],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+        },
+        title: 'my_title',
+        sort: [['@timestamp', 'desc']],
+        columns: ['message'],
+        description: 'my description',
+        grid: {},
+        hideChart: false,
+        viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+        isTextBasedQuery: false,
+        timeRestore: false,
+      };
+
+      const result1 = extractTabs(attributes, 'discover-session-1');
+      const result2 = extractTabs(attributes, 'discover-session-2');
+
+      expect(result1.tabs![0].id).toBe('98c4f9c1-2bc8-5f64-9ee3-da83aa13f64e');
+      expect(result2.tabs![0].id).toBe('fda26650-50d3-5913-a9b9-89f281d0b046');
     });
   });
 

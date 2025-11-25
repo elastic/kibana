@@ -139,7 +139,9 @@ export const useLookupIndexCommand = (
   editorModel: React.MutableRefObject<monaco.editor.ITextModel | undefined>,
   getLookupIndices: (() => Promise<{ indices: IndexAutocompleteItem[] }>) | undefined,
   query: AggregateQuery,
-  onIndexCreated: (resultQuery: string) => Promise<void>
+  onIndexCreated: (resultQuery: string) => Promise<void>,
+  onNewFieldsAddedToIndex?: (indexName: string) => void,
+  onOpenIndexInDiscover?: EditLookupIndexContentContext['onOpenIndexInDiscover']
 ) => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -234,8 +236,13 @@ export const useLookupIndexCommand = (
     async (
       initialIndexName: string | undefined,
       resultIndexName: string | null,
-      indexCreated: boolean
+      indexCreated: boolean,
+      indexHasNewFields: boolean
     ) => {
+      if (indexHasNewFields && resultIndexName) {
+        onNewFieldsAddedToIndex?.(resultIndexName);
+      }
+
       if (!indexCreated || resultIndexName === null) return;
 
       const cursorPosition = editorRef.current?.getPosition();
@@ -263,7 +270,7 @@ export const useLookupIndexCommand = (
         await addLookupIndicesDecorator();
       }
     },
-    [editorRef, query.esql, onIndexCreated, addLookupIndicesDecorator]
+    [editorRef, onIndexCreated, query.esql, onNewFieldsAddedToIndex, addLookupIndicesDecorator]
   );
 
   const openFlyout = useCallback(
@@ -278,12 +285,22 @@ export const useLookupIndexCommand = (
         doesIndexExist,
         canEditIndex,
         triggerSource,
-        onClose: async ({ indexName: resultIndexName, indexCreatedDuringFlyout }) => {
-          await onFlyoutClose(indexName, resultIndexName, indexCreatedDuringFlyout);
+        onClose: async ({
+          indexName: resultIndexName,
+          indexCreatedDuringFlyout,
+          indexHasNewFields,
+        }) => {
+          await onFlyoutClose(
+            indexName,
+            resultIndexName,
+            indexCreatedDuringFlyout,
+            indexHasNewFields
+          );
         },
+        onOpenIndexInDiscover,
       } as EditLookupIndexContentContext);
     },
-    [onFlyoutClose, uiActions]
+    [onFlyoutClose, onOpenIndexInDiscover, uiActions]
   );
 
   const openFlyoutRef = useRef(openFlyout);

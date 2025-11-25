@@ -79,8 +79,8 @@ describe('toString()', () => {
     expect(new Platform('linux', 'x64', 'test', 'serverless', null).toString()).toBe(
       'linux-x64-serverless'
     );
-    expect(new Platform('linux', 'x64', 'test', 'serverless', 'chat').toString()).toBe(
-      'linux-x64-serverless-chat'
+    expect(new Platform('linux', 'x64', 'test', 'serverless', 'workplaceai').toString()).toBe(
+      'linux-x64-serverless-workplaceai'
     );
     expect(new Platform('linux', 'x64', 'test', null, 'observability').toString()).toBe(
       'linux-x64-observability'

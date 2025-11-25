@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient, ToolChoice } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 import type { Evaluator } from '../../types';
@@ -16,6 +16,29 @@ import {
   calculateProceduralFidelityScore,
 } from './scoring';
 import type { CorrectnessAnalysis } from './types';
+import { parseSelectedEvaluators } from '../filter';
+
+const QUALITATIVE_EVALUATOR_NAME = 'Correctness Analysis';
+const FACTUALITY_EVALUATOR_NAME = 'Factuality';
+const RELEVANCE_EVALUATOR_NAME = 'Relevance';
+const SEQUENCE_ACCURACY_EVALUATOR_NAME = 'Sequence Accuracy';
+
+/**
+ * Avoiding cost and lantecy by running qualitative analysis only when either qualitative or one of the quantitative evaluators for correctness are selected,
+ */
+function shouldRunCorrectnessAnalysis() {
+  const evaluatorSelection = parseSelectedEvaluators();
+
+  return (
+    evaluatorSelection.length === 0 ||
+    [
+      QUALITATIVE_EVALUATOR_NAME,
+      FACTUALITY_EVALUATOR_NAME,
+      RELEVANCE_EVALUATOR_NAME,
+      SEQUENCE_ACCURACY_EVALUATOR_NAME,
+    ].some((evaluator) => evaluatorSelection.includes(evaluator))
+  );
+}
 
 export function createCorrectnessAnalysisEvaluator({
   inferenceClient,
@@ -26,6 +49,10 @@ export function createCorrectnessAnalysisEvaluator({
 }): Evaluator {
   return {
     evaluate: async ({ input, output, expected }) => {
+      if (!shouldRunCorrectnessAnalysis()) {
+        return {};
+      }
+
       async function runCorrectnessAnalysis(): Promise<CorrectnessAnalysis> {
         const userQuery = input.question;
         const messages = (output as any)?.messages ?? [];
@@ -39,6 +66,10 @@ export function createCorrectnessAnalysisEvaluator({
             agent_response: `${latestMessage}`,
             ground_truth_response: `${groundTruthResponse}`,
           },
+          // toolChoice must be specified in the API call, as `createPrompt` currently discards it from the prompt definition
+          toolChoice: {
+            function: 'analyze',
+          } as ToolChoice,
         });
 
         // Extract the correctness evaluation from the tool call
@@ -112,7 +143,7 @@ export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
           score: null,
           label: 'unavailable',
           explanation: 'No correctness analysis available',
-          metadata,
+          metadata: metadata ?? undefined,
         };
       }
 
@@ -123,7 +154,7 @@ export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
         score,
         label: summaryText,
         explanation: summaryText,
-        metadata,
+        metadata: metadata ?? undefined,
       };
     },
     kind: 'LLM',

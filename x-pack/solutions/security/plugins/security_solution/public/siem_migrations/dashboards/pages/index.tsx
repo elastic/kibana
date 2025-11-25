@@ -125,12 +125,13 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
           />
         </HeaderPage>
         <EuiSkeletonLoading
+          key={migrationId}
           data-test-subj="migrationDashboardsPageLoading"
           isLoading={isLoading}
           loadingContent={
             <>
-              <EuiSkeletonTitle />
-              <EuiSkeletonText />
+              <EuiSkeletonTitle data-test-subj="loadingSkeletonTitle" />
+              <EuiSkeletonText data-test-subj="loadingSkeletonText" />
             </>
           }
           loadedContent={content}

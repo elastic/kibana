@@ -9,7 +9,7 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
-import type { GridData } from '../../server/content_management';
+import type { GridData } from '../../server';
 import type { PanelPlacementStrategy } from '../plugin_constants';
 import type { DashboardLayout } from '../dashboard_api/layout_manager';
 
@@ -20,7 +20,7 @@ export interface PanelPlacementSettings {
 }
 
 export interface PanelPlacementReturn {
-  newPanelPlacement: Omit<GridData, 'i'>;
+  newPanelPlacement: GridData;
   otherPanels: DashboardLayout['panels'];
 }
 

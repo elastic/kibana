@@ -88,7 +88,11 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
     };
     const { api, Component } = await factory.buildEmbeddable({
       initialState: {
-        rawState: { jobIds: ['my-job'], viewBy: 'overall' } as AnomalySwimLaneEmbeddableState,
+        rawState: {
+          swimlaneType: 'viewBy',
+          jobIds: ['my-job'],
+          viewBy: 'overall',
+        } as AnomalySwimLaneEmbeddableState,
       },
       finalizeApi: (preFinalizeApi) => {
         return {

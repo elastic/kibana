@@ -45,8 +45,6 @@ export const AVAILABLE_FIELD_COUNT = getDataTestSubjectSelector(
 
 export const TIMELINE_DISCOVER_TAB = getDataTestSubjectSelector('timeline-tab-content-esql');
 
-export const DISCOVER_FIELD_LIST_PANEL = 'dscFieldListPanelField';
-
 export const GET_DISCOVER_FIELD_BROWSER_FIELD_DETAILS_BUTTON = (fieldId: string) =>
   getDataTestSubjectSelector(`field-${fieldId}-showDetails`);
 

@@ -12,7 +12,7 @@ import chalk from 'chalk';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 
-import { prAutomatedChecks } from '../tools/tasks/pr_automated_checks';
+import { validateSchemaChanges } from '../tools/tasks/validate_schema_changes';
 import type { TaskContext } from '../tools/tasks';
 import {
   createTaskContext,
@@ -27,7 +27,14 @@ import {
 
 export function runTelemetryCheck() {
   run(
-    async ({ flags: { fix = false, 'ignore-stored-json': ignoreStoredJson, path }, log }) => {
+    async ({ flags: { baselineSha, fix, 'ignore-stored-json': ignoreStoredJson, path }, log }) => {
+      if (typeof baselineSha !== 'undefined' && typeof baselineSha !== 'string') {
+        throw createFailError(
+          `${chalk.white.bgRed(
+            ' TELEMETRY ERROR '
+          )} The provided --baseline argument must be a string`
+        );
+      }
       if (typeof fix !== 'boolean') {
         throw createFailError(`${chalk.white.bgRed(' TELEMETRY ERROR ')} --fix can't have a value`);
       }
@@ -112,9 +119,11 @@ export function runTelemetryCheck() {
             task: (context, task) => task.newListr(writeToFileTask(context), { exitOnError: true }),
           },
           {
-            title: 'Automated PR review checks',
+            title: 'Validating changes in telemetry schemas',
             task: (context, task) =>
-              task.newListr(prAutomatedChecks(context), { exitOnError: true }),
+              task.newListr(validateSchemaChanges(context), { exitOnError: true }),
+            // only run if on a PR branch
+            enabled: (_) => Boolean(baselineSha),
           },
         ],
         {
@@ -123,7 +132,7 @@ export function runTelemetryCheck() {
       );
 
       try {
-        const context = createTaskContext();
+        const context = createTaskContext(baselineSha);
         await list.run(context);
       } catch (error) {
         process.exitCode = 1;
@@ -138,6 +147,14 @@ export function runTelemetryCheck() {
     },
     {
       flags: {
+        alias: {
+          baseline: 'baselineSha',
+        },
+        boolean: ['fix'],
+        string: ['baselineSha'],
+        default: {
+          fix: false,
+        },
         allowUnexpected: true,
         guessTypesForUnexpectedFlags: true,
       },

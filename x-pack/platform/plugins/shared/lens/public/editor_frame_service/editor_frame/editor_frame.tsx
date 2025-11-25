@@ -6,20 +6,26 @@
  */
 
 import React, { useCallback, useRef } from 'react';
+import { css } from '@emotion/react';
+
+import { EuiSpacer } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { type DragDropAction, RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { getAbsoluteDateRange } from '../../utils';
-import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import type {
-  DatasourceMap,
   FramePublicAPI,
-  VisualizationMap,
   Suggestion,
   UserMessagesGetter,
   AddUserMessages,
-} from '../../types';
+  LensInspector,
+} from '@kbn/lens-common';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { getAbsoluteDateRange } from '../../utils';
+import { trackUiCounterEvents } from '../../lens_ui_telemetry';
+import { useAddLayerButton } from '../../app_plugin/shared/edit_on_the_fly/use_add_layer_button';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { BannerWrapper } from './banner_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
@@ -37,14 +43,14 @@ import {
   selectDatasourceStates,
   selectVisualization,
 } from '../../state_management';
-import type { LensInspector } from '../../lens_inspector_service';
 import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
 import type { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { getLongMessage } from '../../user_messages_utils';
+import { useEditorFrameService } from '../editor_frame_service_context';
+import { VisualizationToolbarWrapper } from './visualization_toolbar';
+import { LayerTabsWrapper } from '../../app_plugin/shared/edit_on_the_fly/layer_tabs';
 
 export interface EditorFrameProps {
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart;
   plugins: EditorFrameStartPlugins;
@@ -56,15 +62,18 @@ export interface EditorFrameProps {
 }
 
 export function EditorFrame(props: EditorFrameProps) {
-  const { datasourceMap, visualizationMap } = props;
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const visualization = useLensSelector(selectVisualization);
   const areDatasourcesLoaded = useLensSelector(selectAreDatasourcesLoaded);
+
+  const styles = useMemoCss(componentStyles);
+
   const isVisualizationLoaded = !!visualization.state;
   const visualizationTypeIsKnown = Boolean(
-    visualization.activeId && props.visualizationMap[visualization.activeId]
+    visualization.activeId && visualizationMap[visualization.activeId]
   );
 
   const framePublicAPI: FramePublicAPI = useLensSelector((state) =>
@@ -121,6 +130,14 @@ export function EditorFrame(props: EditorFrameProps) {
     }
   }, []);
 
+  const addLayerButton = useAddLayerButton(
+    framePublicAPI,
+    props.core,
+    props.plugins.dataViews,
+    props.plugins.uiActions,
+    () => {}
+  );
+
   return (
     <RootDragDropProvider
       initialState={{ dataTestSubjPrefix: 'lnsDragDrop' }}
@@ -139,8 +156,6 @@ export function EditorFrame(props: EditorFrameProps) {
             <DataPanelWrapper
               core={props.core}
               plugins={props.plugins}
-              datasourceMap={datasourceMap}
-              visualizationMap={visualizationMap}
               showNoDataPopover={props.showNoDataPopover}
               dropOntoWorkspace={dropOntoWorkspace}
               hasSuggestionForField={hasSuggestionForField}
@@ -152,17 +167,38 @@ export function EditorFrame(props: EditorFrameProps) {
         configPanel={
           areDatasourcesLoaded && (
             <ErrorBoundary onError={onError}>
-              <ConfigPanelWrapper
-                core={props.core}
-                datasourceMap={datasourceMap}
-                visualizationMap={visualizationMap}
-                framePublicAPI={framePublicAPI}
-                uiActions={props.plugins.uiActions}
-                dataViews={props.plugins.dataViews}
-                data={props.plugins.data}
-                indexPatternService={props.indexPatternService}
-                getUserMessages={props.getUserMessages}
-              />
+              <>
+                <EuiFlexGroup
+                  gutterSize="s"
+                  css={styles.visualizationToolbar}
+                  justifyContent="flexEnd"
+                  responsive={false}
+                  wrap={true}
+                >
+                  <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
+                    <VisualizationToolbarWrapper
+                      framePublicAPI={framePublicAPI}
+                      isInlineEditing={true}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                <LayerTabsWrapper
+                  coreStart={props.core}
+                  framePublicAPI={framePublicAPI}
+                  uiActions={props.plugins.uiActions}
+                />
+                <ConfigPanelWrapper
+                  core={props.core}
+                  framePublicAPI={framePublicAPI}
+                  uiActions={props.plugins.uiActions}
+                  dataViews={props.plugins.dataViews}
+                  data={props.plugins.data}
+                  indexPatternService={props.indexPatternService}
+                  getUserMessages={props.getUserMessages}
+                />
+              </>
             </ErrorBoundary>
           )
         }
@@ -175,8 +211,6 @@ export function EditorFrame(props: EditorFrameProps) {
                 plugins={props.plugins}
                 ExpressionRenderer={props.ExpressionRenderer}
                 lensInspector={props.lensInspector}
-                datasourceMap={datasourceMap}
-                visualizationMap={visualizationMap}
                 framePublicAPI={framePublicAPI}
                 getSuggestionForField={getSuggestionForField.current}
                 getUserMessages={props.getUserMessages}
@@ -191,8 +225,6 @@ export function EditorFrame(props: EditorFrameProps) {
             <ErrorBoundary onError={onError}>
               <SuggestionPanelWrapper
                 ExpressionRenderer={props.ExpressionRenderer}
-                datasourceMap={datasourceMap}
-                visualizationMap={visualizationMap}
                 frame={framePublicAPI}
                 getUserMessages={props.getUserMessages}
                 nowProvider={props.plugins.data.nowProvider}
@@ -206,3 +238,10 @@ export function EditorFrame(props: EditorFrameProps) {
     </RootDragDropProvider>
   );
 }
+
+const componentStyles = {
+  visualizationToolbar: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      margin: `${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.s} ${euiTheme.size.base}`,
+    }),
+};

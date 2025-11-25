@@ -62,7 +62,7 @@ export function PassiveMap(props: Props) {
               rawState: {
                 attributes: {
                   title: '',
-                  layerListJSON: JSON.stringify([...intialLayers, props.passiveLayer]),
+                  layers: [...intialLayers, props.passiveLayer],
                 },
                 filters: [],
                 hidePanelTitles: true,

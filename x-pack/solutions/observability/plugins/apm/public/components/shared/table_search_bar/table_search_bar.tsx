@@ -48,6 +48,7 @@ export function TableSearchBar({
           placeholder={placeholder}
           fullWidth={true}
           defaultValue={searchQuery}
+          compressed
           isLoading={isLoading}
           onChange={(e) => {
             debouncedSearchQuery(e.target.value);

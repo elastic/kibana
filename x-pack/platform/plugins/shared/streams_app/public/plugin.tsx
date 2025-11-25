@@ -158,7 +158,7 @@ export class StreamsAppPlugin
     return {};
   }
 
-  start(coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
+  start(_coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
     const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());
     pluginsStart.streams.navigationStatus$.subscribe((status) => {
       if (status.status !== 'enabled') return;
@@ -167,12 +167,11 @@ export class StreamsAppPlugin
         renderFlyoutStreamField: createDiscoverFlyoutStreamFieldLink({
           streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
           locator,
-          coreApplication: coreStart.application,
         }),
         renderFlyoutStreamProcessingLink: createDiscoverFlyoutStreamProcessingLink({
+          fieldFormats: pluginsStart.fieldFormats,
           streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
           locator,
-          coreApplication: coreStart.application,
         }),
       });
     });

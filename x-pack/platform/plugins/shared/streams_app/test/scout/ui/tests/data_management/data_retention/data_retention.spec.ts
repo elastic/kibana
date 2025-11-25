@@ -33,10 +33,7 @@ test.describe(
       await apiServices.streams.disable();
     });
 
-    test('should update a stream data retention policy successfully', async ({
-      page,
-      pageObjects,
-    }) => {
+    test('should update a stream data retention policy successfully', async ({ page }) => {
       // Update to a specific retention policy first
       await page.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton').click();
 
@@ -48,7 +45,6 @@ test.describe(
       await page.getByTestId('streamsAppDslModalDaysField').fill('7');
       await page.getByRole('button', { name: 'Save' }).click();
       await expect(page.getByTestId('retention-metric').getByText('7 days')).toBeVisible();
-      await pageObjects.streams.closeToasts();
     });
 
     test('should reset a stream data retention policy successfully', async ({
@@ -65,7 +61,7 @@ test.describe(
       await page.getByTestId('streamsAppDslModalDaysField').fill('7');
       await page.getByRole('button', { name: 'Save' }).click();
       await expect(page.getByTestId('retention-metric').getByText('7 days')).toBeVisible();
-      await pageObjects.streams.closeToasts();
+      await pageObjects.toasts.closeAll();
 
       // Reset the retention policy
       await page.getByTestId('streamsAppRetentionMetadataEditDataRetentionButton').click();
@@ -76,7 +72,6 @@ test.describe(
       await page.getByRole('button', { name: 'Save' }).click();
 
       await expect(page.getByTestId('retention-metric').getByText('∞')).toBeVisible();
-      await pageObjects.streams.closeToasts();
     });
   }
 );

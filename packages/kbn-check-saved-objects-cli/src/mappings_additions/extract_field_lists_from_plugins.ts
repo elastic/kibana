@@ -32,7 +32,7 @@ export async function extractFieldListsFromPlugins(log: SomeDevLog): Promise<Res
     msg$.pipe(
       Rx.map((outcome) => {
         log.debug('message received from worker', outcome);
-        proc.kill('SIGILL');
+        proc.kill('SIGKILL');
         return outcome;
       }),
       Rx.defaultIfEmpty(undefined)

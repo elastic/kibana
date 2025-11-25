@@ -14,8 +14,9 @@ import type { TracingConfig } from '@kbn/tracing-config';
 import { context, propagation, trace } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { castArray } from 'lodash';
+import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
 import { LateBindingSpanProcessor } from '..';
-import { installShutdownHandlers } from './on_exit_cleanup';
+import { OTLPSpanProcessor } from './otlp_span_processor';
 
 /**
  * Initialize the OpenTelemetry tracing provider
@@ -66,6 +67,14 @@ export function initTracing({
       case 'phoenix':
         LateBindingSpanProcessor.get().register(new PhoenixSpanProcessor(variant.value));
         break;
+
+      case 'grpc':
+        LateBindingSpanProcessor.get().register(new OTLPSpanProcessor(variant.value, 'grpc'));
+        break;
+
+      case 'http':
+        LateBindingSpanProcessor.get().register(new OTLPSpanProcessor(variant.value, 'http'));
+        break;
     }
   });
 
@@ -81,5 +90,5 @@ export function initTracing({
     await Promise.all(allSpanProcessors.map((processor) => processor.shutdown()));
   };
 
-  installShutdownHandlers(shutdown);
+  cleanupBeforeExit(() => shutdown(), { blockExit: true, timeout: 30_000 });
 }

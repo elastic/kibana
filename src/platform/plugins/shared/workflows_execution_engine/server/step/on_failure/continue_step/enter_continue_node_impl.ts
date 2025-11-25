@@ -8,23 +8,22 @@
  */
 
 import type { EnterContinueNode } from '@kbn/workflows/graph';
-import type { StepErrorCatcher, NodeImplementation } from '../../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import type { NodeImplementation, NodeWithErrorCatching } from '../../node_implementation';
 
-export class EnterContinueNodeImpl implements NodeImplementation, StepErrorCatcher {
+export class EnterContinueNodeImpl implements NodeImplementation, NodeWithErrorCatching {
   constructor(
     private node: EnterContinueNode,
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
-  public async run(): Promise<void> {
-    this.workflowRuntime.enterScope();
+  public run(): void {
     this.workflowRuntime.navigateToNextNode();
   }
 
-  public async catchError(): Promise<void> {
+  public catchError(): void {
     this.workflowLogger.logDebug(`Error caught, continuing execution.`);
 
     // Continue step should always go to exit continue node to continue execution

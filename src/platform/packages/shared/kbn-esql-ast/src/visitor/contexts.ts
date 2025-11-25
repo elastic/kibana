@@ -18,6 +18,7 @@ import type {
   ESQLAstChangePointCommand,
   ESQLAstCommand,
   ESQLAstExpression,
+  ESQLAstHeaderCommand,
   ESQLAstItem,
   ESQLAstJoinCommand,
   ESQLAstQueryExpression,
@@ -34,6 +35,7 @@ import type {
   ESQLMap,
   ESQLMapEntry,
   ESQLOrderExpression,
+  ESQLParens,
   ESQLSource,
   ESQLStringLiteral,
 } from '../types';
@@ -147,12 +149,37 @@ export class VisitorContext<
   ): ExpressionVisitorOutput<Methods> {
     return this.ctx.visitCommand(this, commandNode, input);
   }
+
+  public visitHeaderCommand(
+    headerCommandNode: ESQLAstHeaderCommand,
+    input: UndefinedToVoid<Parameters<NonNullable<Methods['visitHeaderCommand']>>[1]>
+  ): ReturnType<NonNullable<Methods['visitHeaderCommand']>> {
+    return this.ctx.visitHeaderCommand(this, headerCommandNode, input);
+  }
 }
 
 export class QueryVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends VisitorContext<Methods, Data, ESQLAstQueryNode> {
+  public *headerCommands(): Iterable<ESQLAstHeaderCommand> {
+    if (this.node.header) {
+      yield* this.node.header;
+    }
+  }
+
+  public *visitHeaderCommands(
+    input: UndefinedToVoid<Parameters<NonNullable<Methods['visitHeaderCommand']>>[1]>
+  ): Iterable<ReturnType<NonNullable<Methods['visitHeaderCommand']>>> {
+    this.ctx.assertMethodExists('visitHeaderCommand');
+
+    if (this.node.header) {
+      for (const headerCmd of this.node.header) {
+        yield this.visitHeaderCommand(headerCmd, input as any);
+      }
+    }
+  }
+
   public *commands(): Iterable<ESQLAstCommand> {
     yield* this.node.commands;
   }
@@ -282,6 +309,37 @@ export class CommandVisitorContext<
         const result = this.visitSubQuery(arg);
         yield result;
       }
+    }
+  }
+}
+
+export class HeaderCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData,
+  Node extends ESQLAstHeaderCommand = ESQLAstHeaderCommand
+> extends VisitorContext<Methods, Data, Node> {
+  public name(): string {
+    return this.node.name.toUpperCase();
+  }
+
+  public *args(): Iterable<ESQLAstExpression> {
+    yield* this.node.args;
+  }
+
+  public *visitArgs(
+    input:
+      | VisitorInput<Methods, 'visitExpression'>
+      | (() => VisitorInput<Methods, 'visitExpression'>)
+  ): Iterable<ExpressionVisitorOutput<Methods>> {
+    this.ctx.assertMethodExists('visitExpression');
+
+    for (const arg of this.args()) {
+      yield this.visitExpression(
+        arg,
+        typeof input === 'function'
+          ? (input as () => VisitorInput<Methods, 'visitExpression'>)()
+          : (input as VisitorInput<Methods, 'visitExpression'>)
+      );
     }
   }
 }
@@ -459,7 +517,7 @@ export class DissectCommandVisitorContext<
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
-// GROK <column> <string>
+// GROK <column> <string> [ , <string> ... ]
 export class GrokCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
@@ -666,5 +724,22 @@ export class MapEntryExpressionVisitorContext<
     this.ctx.assertMethodExists('visitExpression');
 
     return this.visitExpression(this.value(), input as any);
+  }
+}
+
+export class ParensExpressionVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends VisitorContext<Methods, Data, ESQLParens> {
+  public child(): ESQLAstExpression {
+    return this.node.child;
+  }
+
+  public visitChild(
+    input: VisitorInput<Methods, 'visitExpression'>
+  ): VisitorOutput<Methods, 'visitExpression'> {
+    this.ctx.assertMethodExists('visitExpression');
+
+    return this.visitExpression(this.child(), input as any);
   }
 }

@@ -12,6 +12,7 @@ import type {
   ESQLAstChangePointCommand,
   ESQLAstCommand,
   ESQLAstCompletionCommand,
+  ESQLAstHeaderCommand,
   ESQLAstJoinCommand,
   ESQLAstQueryExpression,
   ESQLAstRerankCommand,
@@ -24,6 +25,7 @@ import type {
   ESQLMap,
   ESQLMapEntry,
   ESQLOrderExpression,
+  ESQLParens,
   ESQLSource,
 } from '../types';
 import type * as types from './types';
@@ -214,6 +216,19 @@ export class GlobalVisitorContext<
       }
     }
     return this.visitCommandGeneric(parent, commandNode, input as any);
+  }
+
+  public visitHeaderCommand(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstHeaderCommand,
+    input: types.VisitorInput<Methods, 'visitHeaderCommand'>
+  ): types.VisitorOutput<Methods, 'visitHeaderCommand'> {
+    this.assertMethodExists('visitHeaderCommand');
+
+    const context = new contexts.HeaderCommandVisitorContext(this, node, parent);
+    const output = this.methods.visitHeaderCommand!(context, input);
+
+    return output;
   }
 
   public visitFromCommand(
@@ -529,6 +544,14 @@ export class GlobalVisitorContext<
         if (!this.methods.visitQuery || expressionNode.type !== 'query') break;
         return this.visitQuery(parent, expressionNode, input as any);
       }
+      case 'parens': {
+        if (this.methods.visitParensExpression) {
+          const result = this.visitParensExpression(parent, expressionNode, input as any);
+          if (result) return result;
+        }
+        // Parens wraps subqueries: can return null to let comments attach to nodes inside the subquery
+        break;
+      }
     }
     return this.visitExpressionGeneric(parent, expressionNode, input as any);
   }
@@ -630,6 +653,15 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitMapEntryExpression'> {
     const context = new contexts.MapEntryExpressionVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitMapEntryExpression', context, input);
+  }
+
+  public visitParensExpression(
+    parent: contexts.VisitorContext | null,
+    node: ESQLParens,
+    input: types.VisitorInput<Methods, 'visitParensExpression'>
+  ): types.VisitorOutput<Methods, 'visitParensExpression'> {
+    const context = new contexts.ParensExpressionVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitParensExpression', context, input);
   }
 }
 

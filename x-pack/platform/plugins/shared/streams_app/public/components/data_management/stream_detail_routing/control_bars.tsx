@@ -30,7 +30,11 @@ export const AddRoutingRuleControls = () => {
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center" wrap responsive={false}>
       <CancelButton isDisabled={isForking} onClick={cancelChanges} />
       <PrivilegesTooltip hasPrivileges={hasPrivileges}>
-        <SaveButton isLoading={isForking} isDisabled={!canForkRouting} onClick={forkStream} />
+        <SaveButton
+          isLoading={isForking}
+          isDisabled={!canForkRouting}
+          onClick={() => forkStream()}
+        />
       </PrivilegesTooltip>
     </EuiFlexGroup>
   );
@@ -70,6 +74,51 @@ export const EditRoutingRuleControls = ({
             />
           </PrivilegesTooltip>
         </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+export const EditSuggestedRuleControls = ({
+  onSave,
+  onAccept,
+  nameError,
+  conditionError,
+}: {
+  onSave?: () => void;
+  onAccept: () => void;
+  nameError?: string;
+  conditionError?: string;
+}) => {
+  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const { cancelChanges } = useStreamRoutingEvents();
+
+  const canSave = routingSnapshot.can({ type: 'suggestion.saveSuggestion' });
+  const hasPrivileges = routingSnapshot.context.definition.privileges.manage;
+
+  const hasValidationErrors = !!nameError || !!conditionError;
+  const isUpdateDisabled = hasValidationErrors || !canSave;
+
+  const handleAccept = () => {
+    if (onSave) {
+      onSave();
+    }
+    onAccept();
+  };
+
+  return (
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
+      <EuiFlexItem grow={false}>
+        <CancelButton onClick={cancelChanges} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <PrivilegesTooltip hasPrivileges={hasPrivileges}>
+          <UpdateAndAcceptButton
+            isLoading={false}
+            isDisabled={isUpdateDisabled}
+            onClick={handleAccept}
+          />
+        </PrivilegesTooltip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -121,8 +170,21 @@ const SaveButton = (props: EuiButtonPropsForButton) => (
 
 const UpdateButton = (props: EuiButtonPropsForButton) => (
   <EuiButton data-test-subj="streamsAppStreamDetailRoutingUpdateButton" size="s" fill {...props}>
-    {i18n.translate('xpack.streams.streamDetailRouting.change', {
-      defaultMessage: 'Change routing',
+    {i18n.translate('xpack.streams.streamDetailRouting.update', {
+      defaultMessage: 'Update',
+    })}
+  </EuiButton>
+);
+
+const UpdateAndAcceptButton = (props: EuiButtonPropsForButton) => (
+  <EuiButton
+    data-test-subj="streamsAppStreamDetailRoutingUpdateAndAcceptButton"
+    size="s"
+    fill
+    {...props}
+  >
+    {i18n.translate('xpack.streams.streamDetailRouting.updateAndAccept', {
+      defaultMessage: 'Update & Accept',
     })}
   </EuiButton>
 );

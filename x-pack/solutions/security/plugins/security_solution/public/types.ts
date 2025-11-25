@@ -31,6 +31,7 @@ import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/publi
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
+import type { KubernetesSecurityStart } from '@kbn/kubernetes-security-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
 import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/public';
@@ -38,6 +39,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { CloudDefendPluginStart } from '@kbn/cloud-defend-plugin/public';
 import type { CspClientPluginStart } from '@kbn/cloud-security-posture-plugin/public';
 import type { ApmBase } from '@elastic/apm-rum';
 import type {
@@ -68,6 +70,7 @@ import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
 import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
+import type { Kubernetes } from './kubernetes';
 import type { Onboarding } from './onboarding';
 import type { Overview } from './overview';
 import type { Reports } from './reports';
@@ -75,6 +78,7 @@ import type { Rules } from './rules';
 import type { Timelines } from './timelines';
 import type { Management } from './management';
 import type { CloudSecurityPosture } from './cloud_security_posture';
+import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { AssetInventory } from './asset_inventory';
@@ -91,6 +95,7 @@ import type { TopValuesPopoverService } from './app/components/top_values_popove
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
+import type { SecuritySolutionUiConfigType } from './common/types';
 import type { OnboardingService } from './onboarding/service';
 import type { TelemetryServiceStart } from './common/lib/telemetry';
 import type { SiemMigrationsService } from './siem_migrations/service';
@@ -126,6 +131,7 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
+  kubernetesSecurity: KubernetesSecurityStart;
   lens: LensPublicStart;
   lists?: ListsPluginStart;
   licensing: LicensingPluginStart;
@@ -141,6 +147,7 @@ export interface StartPlugins {
   osquery: OsqueryPluginStart;
   security: SecurityPluginStart;
   cloud?: CloudStart;
+  cloudDefend: CloudDefendPluginStart;
   cloudSecurityPosture: CspClientPluginStart;
   dataViews: DataViewsServicePublic;
   fieldFormats: FieldFormatsStartCommon;
@@ -173,6 +180,7 @@ export interface ContractStartServices {
 export type StartServices = CoreStart &
   StartPlugins &
   ContractStartServices & {
+    config: SecuritySolutionUiConfigType;
     configSettings: ConfigSettings;
     storage: Storage;
     sessionStorage: Storage;
@@ -230,10 +238,12 @@ export interface SubPlugins {
   alerts: Detections;
   assetInventory: AssetInventory;
   attackDiscovery: AttackDiscovery;
+  cloudDefend: CloudDefend;
   cloudSecurityPosture: CloudSecurityPosture;
   dashboards: Dashboards;
   exceptions: Exceptions;
   explore: Explore;
+  kubernetes: Kubernetes;
   management: Management;
   onboarding: Onboarding;
   overview: Overview;
@@ -253,10 +263,12 @@ export interface StartedSubPlugins {
   alerts: Awaited<ReturnType<Detections['start']>>;
   assetInventory: Awaited<ReturnType<AssetInventory['start']>>;
   attackDiscovery: ReturnType<AttackDiscovery['start']>;
+  cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
   dashboards: ReturnType<Dashboards['start']>;
   exceptions: ReturnType<Exceptions['start']>;
   explore: ReturnType<Explore['start']>;
+  kubernetes: ReturnType<Kubernetes['start']>;
   management: ReturnType<Management['start']>;
   onboarding: ReturnType<Onboarding['start']>;
   overview: ReturnType<Overview['start']>;

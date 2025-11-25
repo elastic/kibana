@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/serverless-workplace-ai-settings",
+  "owner": "@elastic/search-kibana",
+  "group": "platform",
+  "visibility": "shared"
+}

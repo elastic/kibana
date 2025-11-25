@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiText, EuiLink, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiText, EuiLink, useEuiTheme, EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ToolType } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -19,27 +19,29 @@ import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
 import { OnechatToolsTable } from './table/tools_table';
 import { McpConnectionButton } from './mcp_server/mcp_connection_button';
+import { TechPreviewTitle } from '../common/tech_preview';
+import { useUiPrivileges } from '../../hooks/use_ui_privileges';
+
+const manageAgentsLabel = i18n.translate('xpack.onechat.tools.manageAgentsLabel', {
+  defaultMessage: 'Manage agents',
+});
+
 export const OnechatTools = () => {
   const { euiTheme } = useEuiTheme();
   const { createTool } = useToolsActions();
   const { createOnechatUrl } = useNavigation();
 
+  const { manageTools } = useUiPrivileges();
+
   return (
-    <KibanaPageTemplate>
+    <KibanaPageTemplate data-test-subj="agentBuilderToolsPage">
       <KibanaPageTemplate.Header
-        pageTitle={labels.tools.title}
+        pageTitle={<TechPreviewTitle title={labels.tools.title} />}
         description={
           <FormattedMessage
             id="xpack.onechat.tools.toolsDescription"
-            defaultMessage="Tools are modular, reusable Elasticsearch operations. {agentsLink} use them to search, retrieve, and analyze your data. Use our built-in tools for common operations, and create your own for custom use cases. {learnMoreLink}"
+            defaultMessage="Tools are modular, reusable Elasticsearch operations. Agents use them to search, retrieve, and analyze your data. Use our built-in tools for common operations, and create your own for custom use cases. {learnMoreLink}"
             values={{
-              agentsLink: (
-                <EuiLink href={createOnechatUrl(appPaths.agents.list)}>
-                  {i18n.translate('xpack.onechat.tools.agentsLinkText', {
-                    defaultMessage: 'Agents',
-                  })}
-                </EuiLink>
-              ),
               learnMoreLink: (
                 <EuiLink
                   href={docLinks.tools}
@@ -61,14 +63,23 @@ export const OnechatTools = () => {
           border-block-end: none;
         `}
         rightSideItems={[
-          <EuiButton
-            key="new-esql-tool-button"
-            fill
-            iconType="plus"
-            onClick={() => createTool(ToolType.esql)}
+          manageTools && (
+            <EuiButton
+              key="new-esql-tool-button"
+              fill
+              iconType="plus"
+              onClick={() => createTool(ToolType.esql)}
+            >
+              <EuiText size="s">{labels.tools.newToolButton}</EuiText>
+            </EuiButton>
+          ),
+          <EuiButtonEmpty
+            key="agents-button"
+            href={createOnechatUrl(appPaths.agents.list)}
+            aria-label={manageAgentsLabel}
           >
-            <EuiText size="s">{labels.tools.newToolButton}</EuiText>
-          </EuiButton>,
+            <EuiText size="s">{manageAgentsLabel}</EuiText>
+          </EuiButtonEmpty>,
           <McpConnectionButton key="mcp-server-connection-button" />,
         ]}
       />

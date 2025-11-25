@@ -37,7 +37,6 @@ export const NETWORK_URL = '/app/security/network/events';
 export const OVERVIEW_URL = '/app/security/overview';
 
 export const ENTITY_ANALYTICS_URL = '/app/security/entity_analytics';
-export const KUBERNETES_URL = '/app/security/kubernetes';
 
 export const THREAT_INTELLIGENCE_URL = '/app/security/threat_intelligence';
 export const INDICATORS_URL = '/app/security/threat_intelligence/indicators';
@@ -113,5 +112,3 @@ export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
 // Alerting
 export const STACK_RULES_URL = 'app/management/insightsAndAlerting/triggersActions/rules';
 export const MAINTENANCE_WINDOW_URL = 'app/management/insightsAndAlerting/maintenanceWindows';
-
-export const SIEM_MIGRATIONS_TRANSLATED_RULES_URL = 'app/security/siem_migrations/rules';

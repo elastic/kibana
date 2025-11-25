@@ -69,7 +69,7 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
         <EuiFlexItem>
           <EuiFormRow
             helpText={
-              <EuiText color="danger" size="xs">
+              <EuiText color="danger" size="xs" data-test-subj="macrosFileUploadError">
                 {error}
               </EuiText>
             }
@@ -99,7 +99,7 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj="macrosUploadFileButton">
               <UploadFileButton
                 onClick={createMacros}
                 isLoading={showLoader}

@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as antlr from 'antlr4';
+import type * as antlr from 'antlr4';
 import * as cst from '../antlr/esql_parser';
 import type * as ast from '../types';
 import { isCommand } from '../ast/is';
 import { LeafPrinter } from '../pretty_print';
 import { getPosition } from './tokens';
-import { nonNullable } from './helpers';
-import { firstItem, lastItem, resolveItem } from '../visitor/utils';
+import { nonNullable, unescapeColumn } from './helpers';
+import { firstItem, lastItem, resolveItem, singleItems } from '../visitor/utils';
 import { type AstNodeParserFields, Builder } from '../builder';
 import { type ArithmeticUnaryContext } from '../antlr/esql_parser';
+import type { AstNodeTemplate } from '../builder';
 import type { Parser } from './parser';
 
 const textExistsAndIsValid = (text: string | undefined): text is string =>
@@ -58,6 +59,18 @@ export class CstToAstConverter {
     return fields;
   }
 
+  private createParserFieldsFromTerminalNode(node: antlr.TerminalNode): AstNodeParserFields {
+    const text = node.getText();
+    const symbol = node.symbol;
+    const fields: AstNodeParserFields = {
+      text,
+      location: getPosition(symbol, symbol),
+      incomplete: false,
+    };
+
+    return fields;
+  }
+
   private toIdentifierFromTerminalNode(node: antlr.TerminalNode): ast.ESQLIdentifier {
     return this.toIdentifierFromToken(node.symbol);
   }
@@ -78,8 +91,13 @@ export class CstToAstConverter {
     };
   }
 
-  // TODO: Rename this.
-  private computeLocationExtends(fn: ast.ESQLFunction) {
+  /**
+   * Extends `fn.location` to cover all its arguments.
+   *
+   * @deprecated This should never have been necessary. Function location should be
+   *     accurately set during parsing or initial AST construction.
+   */
+  private extendLocationToArgs(fn: ast.ESQLFunction) {
     const location = fn.location;
     if (fn.args) {
       // get min location navigating in depth keeping the left/first arg
@@ -103,7 +121,8 @@ export class CstToAstConverter {
   }
 
   /**
-   * @todo Replace this by `Walker`, if necessary, or remove completely.
+   * @deprecated Do not use. This method will be removed once
+   *     `extendLocationToArgs` is removed.
    */
   private walkFunctionStructure(
     args: ast.ESQLAstItem[],
@@ -128,24 +147,34 @@ export class CstToAstConverter {
     return location[prop];
   }
 
-  /**
-   * Follow a similar logic to the ES one:
-   * * remove backticks at the beginning and at the end
-   * * remove double backticks
-   */
-  private safeBackticksRemoval(text: string | undefined) {
-    return text?.replace(/^`{1}|`{1}$/g, '').replace(/``/g, '`') || '';
-  }
-
-  private sanitizeIdentifierString(ctx: antlr.ParserRuleContext) {
-    const result = this.safeBackticksRemoval(ctx.getText());
-    // TODO - understand why <missing null> is now returned as the match text for the FROM command
-    return result === '<missing null>' ? '' : result;
-  }
-
   // -------------------------------------------------------------------- query
 
+  fromStatements(ctx: cst.StatementsContext): ast.ESQLAstQueryExpression | undefined {
+    const setCommandCtxs = ctx.setCommand_list();
+    const singleStatement = ctx.singleStatement();
+
+    let header: ast.ESQLAstSetHeaderCommand[] | undefined;
+    // Process SET instructions and create header if they exist
+    if (setCommandCtxs && setCommandCtxs.length > 0) {
+      header = this.fromSetCommands(setCommandCtxs);
+    }
+
+    // Get the main query from singleStatement
+    const query = this.fromSingleStatement(singleStatement);
+
+    if (!query) {
+      const emptyQuery = Builder.expression.query([], this.getParserFields(ctx), header);
+      emptyQuery.incomplete = true;
+      return emptyQuery;
+    }
+
+    query.header = header;
+
+    return query;
+  }
+
   fromSingleStatement(ctx: cst.SingleStatementContext): ast.ESQLAstQueryExpression | undefined {
+    if (!ctx) return undefined;
     return this.fromAnyQuery(ctx.query());
   }
 
@@ -232,6 +261,57 @@ export class CstToAstConverter {
     } else {
       return undefined;
     }
+  }
+
+  // ------------------------------------------------------------- query header
+
+  private fromSetCommands(setCommandCtxs: cst.SetCommandContext[]): ast.ESQLAstSetHeaderCommand[] {
+    const setCommands: ast.ESQLAstSetHeaderCommand[] = setCommandCtxs
+      .map((setCommandCtx) => this.fromSetCommand(setCommandCtx))
+      .filter(nonNullable);
+    return setCommands;
+  }
+
+  // ---------------------------------------------------------------------- SET
+
+  private fromSetCommand(ctx: cst.SetCommandContext): ast.ESQLAstSetHeaderCommand {
+    const setFieldCtx = ctx.setField();
+    const binaryExpression = this.fromSetFieldContext(setFieldCtx);
+
+    const args = binaryExpression ? [binaryExpression] : [];
+    const command = Builder.header.command.set(args, {}, this.getParserFields(ctx));
+
+    return command;
+  }
+
+  private fromSetFieldContext(ctx: cst.SetFieldContext): ast.ESQLBinaryExpression<'='> | null {
+    const leftCtx = ctx.identifier();
+    const rightCtx = ctx.constant();
+
+    if (!leftCtx || !rightCtx) {
+      return null;
+    }
+
+    const left = this.toIdentifierFromContext(leftCtx);
+    const right = this.fromConstantToArray(rightCtx) as ast.ESQLLiteral;
+    const expression = this.toBinaryExpression('=', ctx, [left, right]);
+
+    if (left.incomplete || right.incomplete) {
+      expression.incomplete = true;
+    }
+
+    return expression;
+  }
+
+  private toIdentifierFromContext(ctx: cst.IdentifierContext): ast.ESQLIdentifier {
+    const identifierToken = ctx.UNQUOTED_IDENTIFIER() || ctx.QUOTED_IDENTIFIER();
+
+    if (identifierToken) {
+      return this.toIdentifierFromTerminalNode(identifierToken);
+    }
+
+    // Fallback: create identifier from the full context text
+    return Builder.identifier({ name: ctx.getText() }, this.getParserFields(ctx));
   }
 
   // ----------------------------------------------------------------- commands
@@ -407,22 +487,21 @@ export class CstToAstConverter {
     return command;
   }
 
-  private toOption(name: string, ctx: antlr.ParserRuleContext): ast.ESQLCommandOption {
+  private toOption(
+    name: string,
+    ctx: antlr.ParserRuleContext,
+    args: ast.ESQLAstItem[] = [],
+    incomplete?: boolean
+  ): ast.ESQLCommandOption {
     return {
       type: 'option',
       name,
       text: ctx.getText(),
       location: getPosition(ctx.start, ctx.stop),
-      args: [],
-      incomplete: Boolean(
-        ctx.exception ||
-          ctx.children?.some((c) => {
-            // TODO: 1. Remove this expect error comment
-            // TODO: 2. .isErrorNode is function: .isErrorNode()
-            // @ts-expect-error not exposed in type but exists see https://github.com/antlr/antlr4/blob/v4.11.1/runtime/JavaScript/src/antlr4/tree/ErrorNodeImpl.js#L19
-            return Boolean(c.isErrorNode);
-          })
-      ),
+      args,
+      incomplete:
+        incomplete ??
+        (Boolean(ctx.exception) || [...singleItems(args)].some((arg) => arg.incomplete)),
     };
   }
 
@@ -441,13 +520,48 @@ export class CstToAstConverter {
 
   // --------------------------------------------------------------------- FROM
 
-  private fromFromCommand(ctx: cst.FromCommandContext): ast.ESQLCommand<'from'> {
-    const command = this.createCommand('from', ctx);
-    const indexPatternCtx = ctx.indexPatternAndMetadataFields();
-    const metadataCtx = indexPatternCtx.metadata();
-    const sources = indexPatternCtx
-      .getTypedRuleContexts(cst.IndexPatternContext as any)
-      .map((sourceCtx) => this.toSource(sourceCtx));
+  private fromFromCommand(ctx: cst.FromCommandContext): ast.ESQLCommand<'from'> | undefined {
+    // When parsing queries with nested empty subqueries like "FROM a, (FROM b, ())",
+    // ANTLR incorrectly identifies the empty parentheses "()" as a fromCommand context.
+    // This phantom context contains only closing parentheses (e.g., ")" or "))")
+    // without any actual FROM keyword, which would lead to malformed AST nodes.
+    if (!ctx.FROM()) {
+      return undefined;
+    }
+
+    const command = this.fromFromCompatibleCommand('from', ctx);
+    const hasValidText = textExistsAndIsValid(ctx.getText());
+
+    if (!hasValidText) {
+      command.incomplete = true;
+    }
+
+    return command;
+  }
+
+  private fromFromCompatibleCommand<Name extends string>(
+    commandName: Name,
+    ctx: antlr.ParserRuleContext & Pick<cst.FromCommandContext, 'indexPatternAndMetadataFields'>
+  ): ast.ESQLCommand<Name> {
+    const command = this.createCommand(commandName, ctx);
+    const indexPatternAndMetadataCtx = ctx.indexPatternAndMetadataFields();
+    const metadataCtx = indexPatternAndMetadataCtx.metadata();
+    const indexPatternOrSubqueryCtxs = indexPatternAndMetadataCtx.indexPatternOrSubquery_list();
+    const sources = indexPatternOrSubqueryCtxs
+      .map((indexPatternOrSubqueryCtx) => {
+        const indexPatternCtx = indexPatternOrSubqueryCtx.indexPattern();
+        if (indexPatternCtx) {
+          return this.toSource(indexPatternCtx);
+        }
+
+        const subqueryCtx = indexPatternOrSubqueryCtx.subquery();
+        if (subqueryCtx) {
+          return this.fromSubquery(subqueryCtx);
+        }
+
+        return null;
+      })
+      .filter((source): source is ast.ESQLSource => source !== null);
 
     command.args.push(...sources);
 
@@ -461,6 +575,49 @@ export class CstToAstConverter {
     }
 
     return command;
+  }
+
+  private fromSubquery(ctx: cst.SubqueryContext): ast.ESQLParens {
+    const fromCommandCtx = ctx.fromCommand();
+    const processingCommandCtxs = ctx.processingCommand_list();
+    const commands: ast.ESQLCommand[] = [];
+
+    if (fromCommandCtx) {
+      const fromCommand = this.fromFromCommand(fromCommandCtx);
+
+      if (fromCommand) {
+        commands.push(fromCommand);
+      }
+    }
+
+    for (const procCmdCtx of processingCommandCtxs) {
+      const procCommand = this.fromProcessingCommand(procCmdCtx);
+
+      if (procCommand) {
+        commands.push(procCommand);
+      }
+    }
+
+    const openParen = ctx.LP();
+    const closeParen = ctx.RP();
+
+    // ANTLR inserts tokens with text like "<missing ')'>" when they're missing
+    const closeParenText = closeParen?.getText() ?? '';
+    const hasCloseParen = closeParen && !/<missing /.test(closeParenText);
+    const incomplete = Boolean(ctx.exception) || !hasCloseParen;
+
+    const query = Builder.expression.query(commands, {
+      ...this.getParserFields(ctx),
+      incomplete,
+    });
+
+    return Builder.expression.parens(query, {
+      incomplete: incomplete || query.incomplete,
+      location: getPosition(
+        openParen?.symbol ?? ctx.start,
+        hasCloseParen ? closeParen.symbol : ctx.stop
+      ),
+    });
   }
 
   // ---------------------------------------------------------------------- ROW
@@ -477,25 +634,7 @@ export class CstToAstConverter {
   // ----------------------------------------------------------------------- TS
 
   private fromTimeseriesCommand(ctx: cst.TimeSeriesCommandContext): ast.ESQLCommand<'ts'> {
-    const command = this.createCommand('ts', ctx);
-    const indexPatternCtx = ctx.indexPatternAndMetadataFields();
-    const metadataCtx = indexPatternCtx.metadata();
-    const sources = indexPatternCtx
-      .getTypedRuleContexts(cst.IndexPatternContext as any)
-      .map((sourceCtx) => this.toSource(sourceCtx));
-
-    command.args.push(...sources);
-
-    if (metadataCtx && metadataCtx.METADATA()) {
-      const name = metadataCtx.METADATA().getText().toLowerCase();
-      const option = this.toOption(name, metadataCtx);
-      const optionArgs = this.toColumnsFromCommand(metadataCtx);
-
-      option.args.push(...optionArgs);
-      command.args.push(option);
-    }
-
-    return command;
+    return this.fromFromCompatibleCommand('ts', ctx);
   }
 
   // --------------------------------------------------------------------- SHOW
@@ -520,7 +659,7 @@ export class CstToAstConverter {
   private fromLimitCommand(ctx: cst.LimitCommandContext): ast.ESQLCommand<'limit'> {
     const command = this.createCommand('limit', ctx);
     if (ctx.constant()) {
-      const limitValue = this.fromConstant(ctx.constant());
+      const limitValue = this.fromConstantToArray(ctx.constant());
       if (limitValue != null) {
         command.args.push(limitValue);
       }
@@ -544,10 +683,9 @@ export class CstToAstConverter {
 
   private fromWhereCommand(ctx: cst.WhereCommandContext): ast.ESQLCommand<'where'> {
     const command = this.createCommand('where', ctx);
+    const expression = this.fromBooleanExpressionToExpressionOrUnknown(ctx.booleanExpression());
 
-    const expressions = this.collectBooleanExpression(ctx.booleanExpression());
-
-    command.args.push(expressions[0]);
+    command.args.push(expression);
 
     return command;
   }
@@ -594,9 +732,11 @@ export class CstToAstConverter {
     }
 
     if (ctx._grouping) {
-      const options = this.toByOption(ctx, ctx.fields());
+      const option = this.toByOption(ctx, ctx.fields());
 
-      command.args.push(...options);
+      if (option) {
+        command.args.push(option);
+      }
     }
 
     return command;
@@ -616,7 +756,7 @@ export class CstToAstConverter {
       return field;
     }
 
-    const condition = this.collectBooleanExpression(booleanExpression)[0];
+    const condition = this.fromBooleanExpressionToExpressionOrUnknown(booleanExpression);
     const aggField = Builder.expression.where(
       [field, condition],
       {},
@@ -631,17 +771,14 @@ export class CstToAstConverter {
     return aggField;
   }
 
-  /**
-   * @todo Do not return array here.
-   */
   private toByOption(
     ctx: antlr.ParserRuleContext & Pick<cst.StatsCommandContext, 'BY'>,
     expr: cst.FieldsContext | undefined
-  ): ast.ESQLCommandOption[] {
+  ): ast.ESQLCommandOption | undefined {
     const byCtx = ctx.BY();
 
     if (!byCtx || !expr) {
-      return [];
+      return;
     }
 
     const option = this.toOption(byCtx.getText().toLowerCase(), ctx);
@@ -653,7 +790,7 @@ export class CstToAstConverter {
 
     if (lastArg) option.location.max = lastArg.location.max;
 
-    return [option];
+    return option;
   }
 
   // --------------------------------------------------------------------- SORT
@@ -681,7 +818,7 @@ export class CstToAstConverter {
   private fromOrderExpression(
     ctx: cst.OrderExpressionContext
   ): ast.ESQLOrderExpression | ast.ESQLAstItem {
-    const arg = this.collectBooleanExpression(ctx.booleanExpression())[0];
+    const arg = this.fromBooleanExpressionToExpressionOrUnknown(ctx.booleanExpression());
 
     let order: ast.ESQLOrderExpression['order'] = '';
     let nulls: ast.ESQLOrderExpression['nulls'] = '';
@@ -776,7 +913,7 @@ export class CstToAstConverter {
 
   private fromDissectCommand(ctx: cst.DissectCommandContext): ast.ESQLCommand<'dissect'> {
     const command = this.createCommand('dissect', ctx);
-    const primaryExpression = this.visitPrimaryExpression(ctx.primaryExpression());
+    const primaryExpression = this.fromPrimaryExpressionStrict(ctx.primaryExpression());
     const stringContext = ctx.string_();
     const pattern = stringContext.getToken(cst.default.QUOTED_STRING, 0);
     const doParseStringAndOptions = pattern && textExistsAndIsValid(pattern.getText());
@@ -803,14 +940,11 @@ export class CstToAstConverter {
     const options: ast.ESQLCommandOption[] = [];
 
     for (const optionCtx of ctx.dissectCommandOption_list()) {
-      const option = this.toOption(
-        this.sanitizeIdentifierString(optionCtx.identifier()).toLowerCase(),
-        optionCtx
-      );
+      const option = this.toOption(optionCtx.identifier().getText().toLowerCase(), optionCtx);
       options.push(option);
       // it can throw while accessing constant for incomplete commands, so try catch it
       try {
-        const optionValue = this.fromConstant(optionCtx.constant());
+        const optionValue = this.fromConstantToArray(optionCtx.constant());
         if (optionValue != null) {
           option.args.push(optionValue);
         }
@@ -826,22 +960,25 @@ export class CstToAstConverter {
 
   private fromGrokCommand(ctx: cst.GrokCommandContext): ast.ESQLCommand<'grok'> {
     const command = this.createCommand('grok', ctx);
-    const primaryExpression = this.visitPrimaryExpression(ctx.primaryExpression());
-    const stringContext = ctx.string_();
-    const pattern = stringContext.getToken(cst.default.QUOTED_STRING, 0);
-    const doParseStringAndOptions = pattern && textExistsAndIsValid(pattern.getText());
+    const primaryExpression = this.fromPrimaryExpressionStrict(ctx.primaryExpression());
 
     command.args.push(primaryExpression);
 
-    if (doParseStringAndOptions) {
-      const stringNode = this.toStringLiteral(stringContext);
+    const stringContexts = ctx.string__list();
 
-      command.args.push(stringNode);
+    for (let i = 0; i < stringContexts.length; i++) {
+      const stringContext = stringContexts[i];
+      const pattern = stringContext.getToken(cst.default.QUOTED_STRING, 0);
+      const doParseStringAndOptions = pattern && textExistsAndIsValid(pattern.getText());
+
+      if (doParseStringAndOptions) {
+        const stringNode = this.toStringLiteral(stringContext);
+        command.args.push(stringNode);
+      }
     }
 
     return command;
   }
-
   // ------------------------------------------------------------------- ENRICH
 
   private fromEnrichCommand(ctx: cst.EnrichCommandContext): ast.ESQLCommand<'enrich'> {
@@ -1063,10 +1200,14 @@ export class CstToAstConverter {
     const joinPredicates: ast.ESQLAstItem[] = onOption.args;
 
     for (const joinPredicateCtx of joinCondition.booleanExpression_list()) {
-      const expression = this.fromBooleanExpression(joinPredicateCtx);
+      const expression = this.fromBooleanExpressionToExpressionOrUnknown(joinPredicateCtx);
 
       if (expression) {
         joinPredicates.push(expression);
+
+        if (resolveItem(expression).incomplete) {
+          onOption.incomplete = true;
+        }
       }
     }
 
@@ -1074,6 +1215,10 @@ export class CstToAstConverter {
 
     if (onOption.args.length) {
       command.args.push(onOption);
+
+      if (onOption.incomplete) {
+        command.incomplete = true;
+      }
     }
 
     return command;
@@ -1163,7 +1308,7 @@ export class CstToAstConverter {
     if (ctx._targetField && ctx.ASSIGN()) {
       const targetField = this.toColumn(ctx._targetField);
 
-      const prompt = this.visitPrimaryExpression(ctx._prompt) as ast.ESQLSingleAstItem;
+      const prompt = this.fromPrimaryExpressionStrict(ctx._prompt) as ast.ESQLSingleAstItem;
       command.prompt = prompt;
 
       const assignment = this.toFunction(
@@ -1174,12 +1319,13 @@ export class CstToAstConverter {
       );
       assignment.args.push(targetField, prompt);
       // update the location of the assign based on arguments
-      assignment.location = this.computeLocationExtends(assignment);
+      assignment.location = this.extendLocationToArgs(assignment);
 
       command.targetField = targetField;
       command.args.push(assignment);
     } else if (ctx._prompt) {
-      const prompt = this.visitPrimaryExpression(ctx._prompt) as ast.ESQLSingleAstItem;
+      const prompt = this.fromPrimaryExpressionStrict(ctx._prompt);
+
       command.prompt = prompt;
       command.args.push(prompt);
     } else {
@@ -1228,7 +1374,7 @@ export class CstToAstConverter {
     const command = this.createCommand('sample', ctx);
 
     if (ctx.constant()) {
-      const probability = this.fromConstant(ctx.constant());
+      const probability = this.fromConstantToArray(ctx.constant());
       if (probability != null) {
         command.args.push(probability);
       }
@@ -1271,7 +1417,7 @@ export class CstToAstConverter {
       return;
     }
 
-    const queryText = this.fromConstant(ctx._queryText);
+    const queryText = this.fromConstantToArray(ctx._queryText);
     if (!queryText) {
       return;
     }
@@ -1289,7 +1435,7 @@ export class CstToAstConverter {
       ) as ast.ESQLBinaryExpression;
 
       assignment.args.push(targetField, queryText);
-      assignment.location = this.computeLocationExtends(assignment);
+      assignment.location = this.extendLocationToArgs(assignment);
 
       command.targetField = targetField;
       command.args.push(assignment);
@@ -1425,20 +1571,21 @@ export class CstToAstConverter {
         ) as ast.ESQLBinaryExpression;
 
         if (ctx.booleanExpression()) {
-          const right = this.collectBooleanExpression(ctx.booleanExpression());
-          // Mark as incomplete if RHS is empty, contains incomplete items, or the parser raised an exception
-          const hasItems = right.length > 0;
-          const hasIncompleteItem = right.some((item) =>
-            Array.isArray(item) ? false : !!item?.incomplete
-          );
+          const right = this.fromBooleanExpression(ctx.booleanExpression());
+          const hasIncompleteItem = !!right?.incomplete;
           const hasException = !!ctx.booleanExpression()?.exception;
 
-          if (!hasItems || hasIncompleteItem || hasException) {
+          if (!right || hasIncompleteItem || hasException) {
             assignment.incomplete = true;
           }
 
-          assignment.args.push(left, right);
-          assignment.location = this.computeLocationExtends(assignment);
+          assignment.args.push(left);
+
+          if (right) {
+            assignment.args.push(right);
+          }
+
+          assignment.location = this.extendLocationToArgs(assignment);
         } else {
           // User typed something like `ON col0 =` and stopped.
           // Build an assignment with only the left operand, mark it as incomplete,
@@ -1464,10 +1611,98 @@ export class CstToAstConverter {
 
   // --------------------------------------------------------------------- FUSE
 
-  private fromFuseCommand(ctx: cst.FuseCommandContext): ast.ESQLCommand<'fuse'> {
-    const command = this.createCommand('fuse', ctx);
+  private fromFuseCommand(ctx: cst.FuseCommandContext): ast.ESQLAstFuseCommand {
+    const fuseTypeCtx = ctx.identifier();
 
-    return command;
+    const args: ast.ESQLAstItem[] = [];
+    let incomplete = false;
+
+    const fuseType = fuseTypeCtx ? this.fromIdentifier(fuseTypeCtx) : undefined;
+
+    // FUSE <fuse_method>
+    if (fuseType) {
+      args.push(fuseType);
+    }
+
+    // FUSE SCORE BY <score_column> GROUP BY <group_column> KEY BY <key_columns> WITH <options>
+    for (const config of ctx.fuseConfiguration_list()) {
+      const configurationItemCommandOption = this.fromFuseConfigurationItem(config);
+      if (configurationItemCommandOption) {
+        args.push(configurationItemCommandOption);
+      }
+      incomplete ||= configurationItemCommandOption?.incomplete ?? true;
+    }
+
+    const fuseCommand = this.createCommand<'fuse', ast.ESQLAstFuseCommand>('fuse', ctx, {
+      args,
+      incomplete,
+    });
+
+    if (fuseType) {
+      fuseCommand.fuseType = fuseType;
+    }
+
+    return fuseCommand;
+  }
+
+  private fromFuseConfigurationItem(
+    configCtx: cst.FuseConfigurationContext
+  ): ast.ESQLCommandOption | null {
+    const byContext = configCtx.BY();
+
+    // SCORE BY <score_column>
+    const scoreCtx = configCtx.SCORE();
+    if (scoreCtx && byContext) {
+      const args: ast.ESQLAstItem[] = [];
+
+      const scoreColumnCtx = configCtx.qualifiedName();
+      if (textExistsAndIsValid(scoreColumnCtx.getText())) {
+        args.push(this.toColumn(scoreColumnCtx));
+      }
+
+      const incomplete = args.length === 0;
+      return this.toOption('score by', configCtx, args, incomplete);
+    }
+
+    // KEY BY <key_columns>
+    const keyCtx = configCtx.KEY();
+    if (keyCtx && byContext) {
+      const args = this.fromFields(configCtx.fields());
+      const incomplete = args.length === 0 || args.some((arg) => arg.incomplete);
+      return this.toOption('key by', configCtx, args, incomplete);
+    }
+
+    // GROUP BY <group_column>
+    const groupCtx = configCtx.GROUP();
+    if (groupCtx && byContext) {
+      const args: ast.ESQLAstItem[] = [];
+      const groupColumnCtx = configCtx.qualifiedName();
+
+      if (textExistsAndIsValid(groupColumnCtx.getText())) {
+        args.push(this.toColumn(groupColumnCtx));
+      }
+
+      const incomplete = args.length === 0;
+      return this.toOption('group by', configCtx, args, incomplete);
+    }
+
+    // WITH <map_expression>
+    const withCtx = configCtx.WITH();
+    if (withCtx) {
+      const args: ast.ESQLAstItem[] = [];
+      const mapExpressionCtx = configCtx.mapExpression();
+
+      const map = this.fromMapExpression(mapExpressionCtx);
+      if (map && textExistsAndIsValid(map.text)) {
+        args.push(map);
+      }
+
+      const incomplete =
+        args.length === 0 || map.incomplete || !textExistsAndIsValid(configCtx.getText());
+      return this.toOption('with', configCtx, args, incomplete);
+    }
+
+    return null;
   }
 
   // --------------------------------------------------------------------- FORK
@@ -1481,7 +1716,7 @@ export class CstToAstConverter {
     return command;
   }
 
-  private fromForkSubQuery(ctx: cst.ForkSubQueryContext): ast.ESQLAstQueryExpression {
+  private fromForkSubQuery(ctx: cst.ForkSubQueryContext): ast.ESQLParens {
     const commands: ast.ESQLCommand[] = [];
     const collectCommand = (cmdCtx: cst.ForkSubQueryProcessingCommandContext) => {
       const processingCommandCtx = cmdCtx.processingCommand();
@@ -1509,10 +1744,25 @@ export class CstToAstConverter {
 
     commands.reverse();
 
-    const parserFields = this.getParserFields(ctx);
-    const query = Builder.expression.query(commands, parserFields);
+    const openParen = ctx.LP();
+    const closeParen = ctx.RP();
 
-    return query;
+    const closeParenText = closeParen?.getText() ?? '';
+    const hasCloseParen = closeParen && !/<missing /.test(closeParenText);
+    const incomplete = Boolean(ctx.exception) || !hasCloseParen;
+
+    const query = Builder.expression.query(commands, {
+      ...this.getParserFields(ctx),
+      incomplete,
+    });
+
+    return Builder.expression.parens(query, {
+      incomplete: incomplete || query.incomplete,
+      location: getPosition(
+        openParen?.symbol ?? ctx.start,
+        hasCloseParen ? closeParen.symbol : ctx.stop
+      ),
+    });
   }
 
   // -------------------------------------------------------------- expressions
@@ -1524,27 +1774,19 @@ export class CstToAstConverter {
       | cst.MvExpandCommandContext
       | cst.MetadataContext
   ): ast.ESQLColumn[] {
-    const identifiers = this.extractIdentifiers(ctx);
-
-    return this.makeColumnsOutOfIdentifiers(identifiers);
-  }
-
-  private extractIdentifiers(
-    ctx:
-      | cst.KeepCommandContext
-      | cst.DropCommandContext
-      | cst.MvExpandCommandContext
-      | cst.MetadataContext
-  ) {
     if (ctx instanceof cst.MetadataContext) {
       return ctx
         .UNQUOTED_SOURCE_list()
-        .map((node) => {
-          // TODO: Parse this without wrapping into ParserRuleContext
-          return this.terminalNodeToParserRuleContext(node);
-        })
-        .flat();
+        .map((terminalNode) => this.toColumnFromTerminalNode(terminalNode));
     }
+
+    const identifiers = this.extractIdentifiers(ctx);
+    return this.toColumns(identifiers);
+  }
+
+  private extractIdentifiers(
+    ctx: cst.KeepCommandContext | cst.DropCommandContext | cst.MvExpandCommandContext
+  ) {
     if (ctx instanceof cst.MvExpandCommandContext) {
       return this.wrapIdentifierAsArray(ctx.qualifiedName());
     }
@@ -1557,18 +1799,28 @@ export class CstToAstConverter {
   }
 
   /**
-   * @deprecated
-   * @todo Parse without constructing this ANTLR internal class instance.
+   * Converts a terminal node directly to a column AST node.
+   * Used for metadata fields where we have terminal nodes instead of parser
+   * rule contexts.
    */
-  private terminalNodeToParserRuleContext(node: antlr.TerminalNode): antlr.ParserRuleContext {
-    const context = new antlr.ParserRuleContext();
-    context.start = node.symbol;
-    context.stop = node.symbol;
-    context.children = [node];
-    return context;
+  private toColumnFromTerminalNode(node: antlr.TerminalNode): ast.ESQLColumn {
+    const text = node.getText();
+    const column = Builder.expression.column(
+      {
+        args: [Builder.identifier({ name: text }, this.createParserFieldsFromToken(node.symbol))],
+      },
+      {
+        text,
+        location: getPosition(node.symbol),
+        incomplete: false,
+      }
+    );
+    column.name = text;
+    column.quoted = false;
+    return column;
   }
 
-  private makeColumnsOutOfIdentifiers(identifiers: antlr.ParserRuleContext[]): ast.ESQLColumn[] {
+  private toColumns(identifiers: antlr.ParserRuleContext[]): ast.ESQLColumn[] {
     const args: ast.ESQLColumn[] =
       identifiers
         .filter((child) => textExistsAndIsValid(child.getText()))
@@ -1579,107 +1831,6 @@ export class CstToAstConverter {
     return args;
   }
 
-  private visitLogicalNot(ctx: cst.LogicalNotContext) {
-    const fn = this.toFunction('not', ctx, undefined, 'unary-expression');
-    fn.args.push(...this.collectBooleanExpression(ctx.booleanExpression()));
-    // update the location of the assign based on arguments
-    const argsLocationExtends = this.computeLocationExtends(fn);
-    fn.location = argsLocationExtends;
-    return fn;
-  }
-
-  private visitLogicalAndsOrs(ctx: cst.LogicalBinaryContext) {
-    const fn = this.toFunction(ctx.AND() ? 'and' : 'or', ctx, undefined, 'binary-expression');
-    fn.args.push(
-      ...this.collectBooleanExpression(ctx._left),
-      ...this.collectBooleanExpression(ctx._right)
-    );
-    // update the location of the assign based on arguments
-    const argsLocationExtends = this.computeLocationExtends(fn);
-    fn.location = argsLocationExtends;
-    return fn;
-  }
-
-  /**
-   * Constructs a tuple list (round parens):
-   *
-   * ```
-   * (1, 2, 3)
-   * ```
-   *
-   * Can be used in IN-expression:
-   *
-   * ```
-   * WHERE x IN (1, 2, 3)
-   * ```
-   *
-   * @todo Rename this method.
-   * @todo Move to "list"
-   */
-  private visitTuple(
-    ctxs: cst.ValueExpressionContext[],
-    leftParen?: antlr.TerminalNode,
-    rightParen?: antlr.TerminalNode
-  ): ast.ESQLList {
-    const values: ast.ESQLAstExpression[] = [];
-    let incomplete = false;
-
-    for (const elementCtx of ctxs) {
-      const element = this.visitValueExpression(elementCtx);
-
-      if (!element) {
-        continue;
-      }
-
-      const resolved = resolveItem(element) as ast.ESQLAstExpression;
-
-      if (!resolved) {
-        continue;
-      }
-
-      values.push(resolved);
-
-      if (resolved.incomplete) {
-        incomplete = true;
-      }
-    }
-
-    if (!values.length) {
-      incomplete = true;
-    }
-
-    const node = Builder.expression.list.tuple(
-      { values },
-      {
-        incomplete,
-        location: getPosition(
-          leftParen?.symbol ?? ctxs[0]?.start,
-          rightParen?.symbol ?? ctxs[ctxs.length - 1]?.stop
-        ),
-      }
-    );
-
-    return node;
-  }
-
-  private visitLogicalIns(ctx: cst.LogicalInContext) {
-    const [leftCtx, ...rightCtxs] = ctx.valueExpression_list();
-    const left = resolveItem(
-      this.visitValueExpression(leftCtx) ?? this.fromParserRuleToUnknown(leftCtx)
-    ) as ast.ESQLAstExpression;
-    const right = this.visitTuple(rightCtxs, ctx.LP(), ctx.RP());
-    const expression = this.toFunction(
-      ctx.NOT() ? 'not in' : 'in',
-      ctx,
-      { min: ctx.start.start, max: ctx.stop?.stop ?? ctx.RP().symbol.stop },
-      'binary-expression',
-      [left, right],
-      left.incomplete || right.incomplete
-    );
-
-    return expression;
-  }
-
   private getMathOperation(ctx: cst.ArithmeticBinaryContext) {
     return (
       (ctx.PLUS() || ctx.MINUS() || ctx.ASTERISK() || ctx.SLASH() || ctx.PERCENT()).getText() || ''
@@ -1687,58 +1838,67 @@ export class CstToAstConverter {
   }
 
   /**
-   * @todo Inline this method.
+   * @todo Make it return a single value, not an array.
    */
-  private getComparisonName(ctx: cst.ComparisonOperatorContext) {
-    return (
-      (ctx.EQ() || ctx.NEQ() || ctx.LT() || ctx.LTE() || ctx.GT() || ctx.GTE()).getText() || ''
-    );
-  }
-
   private visitValueExpression(ctx: cst.ValueExpressionContext) {
     if (!textExistsAndIsValid(ctx.getText())) {
       return [];
     }
+
     if (ctx instanceof cst.ValueExpressionDefaultContext) {
-      return this.visitOperatorExpression(ctx.operatorExpression());
+      return this.fromOperatorExpression(ctx.operatorExpression());
     }
+
     if (ctx instanceof cst.ComparisonContext) {
-      const comparisonNode = ctx.comparisonOperator();
+      const operatorCtx = ctx.comparisonOperator();
+      const comparisonOperatorText =
+        (
+          operatorCtx.EQ() ||
+          operatorCtx.NEQ() ||
+          operatorCtx.LT() ||
+          operatorCtx.LTE() ||
+          operatorCtx.GT() ||
+          operatorCtx.GTE()
+        ).getText() || '';
       const comparisonFn = this.toFunction(
-        this.getComparisonName(comparisonNode),
-        comparisonNode,
+        comparisonOperatorText,
+        operatorCtx,
         undefined,
         'binary-expression'
       );
       comparisonFn.args.push(
-        this.visitOperatorExpression(ctx._left)!,
-        this.visitOperatorExpression(ctx._right)!
+        this.fromOperatorExpression(ctx._left)!,
+        this.fromOperatorExpression(ctx._right)!
       );
       // update the location of the comparisonFn based on arguments
-      const argsLocationExtends = this.computeLocationExtends(comparisonFn);
+      const argsLocationExtends = this.extendLocationToArgs(comparisonFn);
       comparisonFn.location = argsLocationExtends;
 
       return comparisonFn;
     }
   }
 
-  private visitOperatorExpression(
+  private fromOperatorExpression(
     ctx: cst.OperatorExpressionContext
-  ): ast.ESQLAstItem | ast.ESQLAstItem[] | undefined {
+  ): ast.ESQLBinaryExpression | ast.ESQLAstExpression | undefined {
     if (ctx instanceof cst.ArithmeticUnaryContext) {
-      const arg = this.visitOperatorExpression(ctx.operatorExpression());
-      // this is a number sign thing
+      const arg = this.fromOperatorExpression(ctx.operatorExpression());
       const fn = this.toFunction('*', ctx, undefined, 'binary-expression');
+
       fn.args.push(this.createFakeMultiplyLiteral(ctx, 'integer'));
+
       if (arg) {
         fn.args.push(arg);
       }
-      return fn;
-    } else if (ctx instanceof cst.ArithmeticBinaryContext) {
+
+      return fn as ast.ESQLBinaryExpression;
+    }
+
+    if (ctx instanceof cst.ArithmeticBinaryContext) {
       const fn = this.toFunction(this.getMathOperation(ctx), ctx, undefined, 'binary-expression');
       const args = [
-        this.visitOperatorExpression(ctx._left),
-        this.visitOperatorExpression(ctx._right),
+        this.fromOperatorExpression(ctx._left),
+        this.fromOperatorExpression(ctx._right),
       ];
       for (const arg of args) {
         if (arg) {
@@ -1746,12 +1906,18 @@ export class CstToAstConverter {
         }
       }
       // update the location of the assign based on arguments
-      const argsLocationExtends = this.computeLocationExtends(fn);
+      const argsLocationExtends = this.extendLocationToArgs(fn);
+
       fn.location = argsLocationExtends;
-      return fn;
-    } else if (ctx instanceof cst.OperatorExpressionDefaultContext) {
-      return this.visitPrimaryExpression(ctx.primaryExpression());
+
+      return fn as ast.ESQLBinaryExpression;
     }
+
+    if (ctx instanceof cst.OperatorExpressionDefaultContext) {
+      return this.fromPrimaryExpression(ctx.primaryExpression());
+    }
+
+    return undefined;
   }
 
   private createFakeMultiplyLiteral(
@@ -1775,22 +1941,26 @@ export class CstToAstConverter {
     return this.toLiteral('boolean', booleanTerminalNode!);
   }
 
-  private visitPrimaryExpression(
+  private fromPrimaryExpression(
     ctx: cst.PrimaryExpressionContext
-  ): ast.ESQLAstItem | ast.ESQLAstItem[] {
-    if (ctx instanceof cst.ConstantDefaultContext) {
-      return this.fromConstant(ctx.constant());
-    } else if (ctx instanceof cst.DereferenceContext) {
+  ): ast.ESQLAstExpression | undefined {
+    if (ctx instanceof cst.DereferenceContext) {
       return this.toColumn(ctx.qualifiedName());
-    } else if (ctx instanceof cst.ParenthesizedExpressionContext) {
-      return this.collectBooleanExpression(ctx.booleanExpression());
     } else if (ctx instanceof cst.FunctionContext) {
       return this.fromFunction(ctx);
+    } else if (ctx instanceof cst.ParenthesizedExpressionContext) {
+      return this.fromBooleanExpressionToExpressionOrUnknown(ctx.booleanExpression());
     } else if (ctx instanceof cst.InlineCastContext) {
       return this.collectInlineCast(ctx);
-    } else {
-      return this.fromParserRuleToUnknown(ctx);
+    } else if (ctx instanceof cst.ConstantDefaultContext) {
+      return this.fromConstantStrict(ctx.constant());
     }
+
+    return undefined;
+  }
+
+  private fromPrimaryExpressionStrict(ctx: cst.PrimaryExpressionContext): ast.ESQLAstExpression {
+    return this.fromPrimaryExpression(ctx) ?? this.fromParserRuleToUnknown(ctx);
   }
 
   private fromCommandNamedParameters(
@@ -1823,101 +1993,12 @@ export class CstToAstConverter {
   }
 
   private collectInlineCast(ctx: cst.InlineCastContext): ast.ESQLInlineCast {
-    const value = this.visitPrimaryExpression(ctx.primaryExpression());
+    const value = this.fromPrimaryExpressionStrict(ctx.primaryExpression());
 
     return Builder.expression.inlineCast(
       { castType: ctx.dataType().getText().toLowerCase() as ast.InlineCastingType, value },
       this.getParserFields(ctx)
     );
-  }
-
-  private collectLogicalExpression(ctx: cst.BooleanExpressionContext) {
-    if (ctx instanceof cst.LogicalNotContext) {
-      return [this.visitLogicalNot(ctx)];
-    }
-    if (ctx instanceof cst.LogicalBinaryContext) {
-      return [this.visitLogicalAndsOrs(ctx)];
-    }
-    if (ctx instanceof cst.LogicalInContext) {
-      return [this.visitLogicalIns(ctx)];
-    }
-    return [];
-  }
-
-  private collectRegexExpression(ctx: cst.BooleanExpressionContext): ast.ESQLFunction[] {
-    const regexes = ctx.getTypedRuleContexts(cst.RegexBooleanExpressionContext);
-    const ret: ast.ESQLFunction[] = [];
-    return ret.concat(
-      regexes
-        .map((regex) => {
-          if (
-            regex instanceof cst.RlikeExpressionContext ||
-            regex instanceof cst.LikeExpressionContext
-          ) {
-            const negate = regex.NOT();
-            const likeType = regex instanceof cst.RlikeExpressionContext ? 'rlike' : 'like';
-            const fnName = `${negate ? 'not ' : ''}${likeType}`;
-            const fn = this.toFunction(fnName, regex, undefined, 'binary-expression');
-            const arg = this.visitValueExpression(regex.valueExpression());
-            if (arg) {
-              fn.args.push(arg);
-
-              const literal = this.toStringLiteral(regex.string_());
-
-              fn.args.push(literal);
-            }
-            return fn;
-          }
-          return undefined;
-        })
-        .filter(nonNullable)
-    );
-  }
-
-  private collectIsNullExpression(ctx: cst.BooleanExpressionContext) {
-    if (!(ctx instanceof cst.IsNullContext)) {
-      return [];
-    }
-    const negate = ctx.NOT();
-    const fnName = `is${negate ? ' not ' : ' '}null`;
-    const fn = this.toFunction(fnName, ctx, undefined, 'postfix-unary-expression');
-    const arg = this.visitValueExpression(ctx.valueExpression());
-    if (arg) {
-      fn.args.push(arg);
-    }
-    return [fn];
-  }
-
-  private collectDefaultExpression(ctx: cst.BooleanExpressionContext) {
-    if (!(ctx instanceof cst.BooleanDefaultContext)) {
-      return [];
-    }
-    const arg = this.visitValueExpression(ctx.valueExpression());
-    return arg ? [arg] : [];
-  }
-
-  private collectBooleanExpression(
-    ctx: cst.BooleanExpressionContext | undefined
-  ): ast.ESQLAstItem[] {
-    const list: ast.ESQLAstItem[] = [];
-
-    if (!ctx) {
-      return list;
-    }
-
-    if (ctx instanceof cst.MatchExpressionContext) {
-      return [this.visitMatchExpression(ctx)];
-    }
-
-    // TODO: Remove these list traversals and concatenations.
-    return list
-      .concat(
-        this.collectLogicalExpression(ctx),
-        this.collectRegexExpression(ctx),
-        this.collectIsNullExpression(ctx),
-        this.collectDefaultExpression(ctx)
-      )
-      .flat();
   }
 
   private fromBooleanExpressions(
@@ -1930,13 +2011,227 @@ export class CstToAstConverter {
     }
 
     for (const expr of ctx) {
-      list.push(...this.collectBooleanExpression(expr));
+      const node = this.fromBooleanExpressionToExpressionOrUnknown(expr);
+
+      if (node) {
+        list.push(node);
+      }
     }
     return list;
   }
 
-  public fromBooleanExpression(ctx: cst.BooleanExpressionContext): ast.ESQLAstItem {
-    return this.collectBooleanExpression(ctx)[0] || this.fromParserRuleToUnknown(ctx);
+  public fromBooleanExpression(
+    ctx: cst.BooleanExpressionContext
+  ): ast.ESQLAstExpression | undefined {
+    if (!ctx) {
+      return undefined;
+    }
+
+    if (ctx instanceof cst.MatchExpressionContext) {
+      return this.visitMatchExpression(ctx);
+    }
+
+    if (ctx instanceof cst.LogicalNotContext) {
+      return this.fromLogicalNot(ctx);
+    }
+
+    if (ctx instanceof cst.LogicalBinaryContext) {
+      return this.fromLogicalBinary(ctx);
+    }
+
+    if (ctx instanceof cst.LogicalInContext) {
+      return this.fromLogicalIn(ctx);
+    }
+
+    if (ctx instanceof cst.RegexExpressionContext) {
+      return this.fromRegexExpression(ctx);
+    }
+
+    if (ctx instanceof cst.IsNullContext) {
+      return this.fromIsNull(ctx);
+    }
+
+    if (ctx instanceof cst.BooleanDefaultContext) {
+      const node = this.fromBooleanDefault(ctx);
+
+      if (Array.isArray(node)) {
+        return resolveItem(node);
+      }
+
+      return node;
+    }
+
+    return undefined;
+  }
+
+  public fromBooleanExpressionToExpressionOrUnknown(
+    ctx: cst.BooleanExpressionContext
+  ): ast.ESQLAstExpression {
+    return this.fromBooleanExpression(ctx) || this.fromParserRuleToUnknown(ctx);
+  }
+
+  private fromLogicalNot(ctx: cst.LogicalNotContext): ast.ESQLUnaryExpression {
+    const child = this.fromBooleanExpressionToExpressionOrUnknown(ctx.booleanExpression());
+    const args = [child];
+    const fn = this.toFunction(
+      'not',
+      ctx,
+      undefined,
+      'unary-expression',
+      args
+    ) as ast.ESQLUnaryExpression;
+
+    return fn;
+  }
+
+  private fromLogicalBinary(ctx: cst.LogicalBinaryContext) {
+    const leftNode = this.fromBooleanExpressionToExpressionOrUnknown(ctx._left);
+    const rightNode = this.fromBooleanExpressionToExpressionOrUnknown(ctx._right);
+    const args: [ast.ESQLAstExpression, ast.ESQLAstExpression] = [leftNode, rightNode];
+    const operator = this.toIdentifierFromTerminalNode(ctx.AND() || ctx.OR());
+    const operatorName = ctx.AND() ? 'and' : 'or';
+    const fn = this.toBinaryExpression(operatorName, ctx, args, { operator });
+
+    return fn;
+  }
+
+  private fromLogicalIn(ctx: cst.LogicalInContext) {
+    const [leftCtx, ...rightCtxs] = ctx.valueExpression_list();
+    const left = resolveItem(
+      this.visitValueExpression(leftCtx) ?? this.fromParserRuleToUnknown(leftCtx)
+    ) as ast.ESQLAstExpression;
+    const right = this.toTuple(rightCtxs, ctx.LP(), ctx.RP());
+    const expression = this.toFunction(
+      ctx.NOT() ? 'not in' : 'in',
+      ctx,
+      { min: ctx.start.start, max: ctx.stop?.stop ?? ctx.RP().symbol.stop },
+      'binary-expression',
+      [left, right],
+      left.incomplete || right.incomplete
+    );
+
+    return expression;
+  }
+
+  private fromRegexExpression(ctx: cst.RegexExpressionContext): ast.ESQLFunction | undefined {
+    return this.fromRegexBooleanExpression(ctx.regexBooleanExpression());
+  }
+
+  private fromRegexBooleanExpression(
+    ctx: cst.RegexBooleanExpressionContext
+  ): ast.ESQLFunction | undefined {
+    if (ctx instanceof cst.LikeExpressionContext || ctx instanceof cst.RlikeExpressionContext) {
+      return this.toRegexBinaryExpression(ctx);
+    }
+
+    if (
+      ctx instanceof cst.LikeListExpressionContext ||
+      ctx instanceof cst.RlikeListExpressionContext
+    ) {
+      return this.toRegexListExpression(ctx);
+    }
+
+    return undefined;
+  }
+
+  private toRegexBinaryExpression(
+    ctx: cst.LikeExpressionContext | cst.RlikeExpressionContext
+  ): ast.ESQLBinaryExpression | undefined {
+    const left = this.visitValueExpression(ctx.valueExpression());
+
+    if (!left) {
+      return undefined;
+    }
+
+    const right = this.toStringLiteral(ctx.string_());
+    const notCtx = ctx.NOT();
+    const likeType = ctx instanceof cst.RlikeExpressionContext ? 'rlike' : 'like';
+    const operator = `${notCtx ? 'not ' : ''}${likeType}` as ast.BinaryExpressionOperator;
+    const operatorNode = this.toIdentifierFromTerminalNode(
+      ctx instanceof cst.LikeExpressionContext ? ctx.LIKE() : ctx.RLIKE()
+    );
+
+    if (notCtx) {
+      operatorNode.name = `NOT ${operatorNode.name}`;
+      operatorNode.location.min = notCtx.symbol.start;
+      operatorNode.text = `not${operatorNode.text}`;
+    }
+
+    const args: [ast.ESQLAstExpression, ast.ESQLStringLiteral] = [
+      left as ast.ESQLAstExpression,
+      right,
+    ];
+
+    return this.toBinaryExpression(operator, ctx, args, {
+      operator: operatorNode,
+    });
+  }
+
+  private toRegexListExpression(
+    ctx: cst.LikeListExpressionContext | cst.RlikeListExpressionContext
+  ): ast.ESQLBinaryExpression | undefined {
+    const left = this.visitValueExpression(ctx.valueExpression());
+
+    if (!left) {
+      return undefined;
+    }
+
+    const notCtx = ctx.NOT();
+    const likeType = ctx instanceof cst.RlikeListExpressionContext ? 'rlike' : 'like';
+    const operator = `${notCtx ? 'not ' : ''}${likeType}` as ast.BinaryExpressionOperator;
+    const operatorNode = this.toIdentifierFromTerminalNode(
+      ctx instanceof cst.LikeListExpressionContext ? ctx.LIKE() : ctx.RLIKE()
+    );
+
+    if (notCtx) {
+      operatorNode.name = `NOT ${operatorNode.name}`;
+      operatorNode.location.min = notCtx.symbol.start;
+      operatorNode.text = `not${operatorNode.text}`;
+    }
+
+    // Convert the list of string patterns into a tuple list AST node
+    const stringCtxs = ctx.string__list();
+    const values: ast.ESQLStringLiteral[] = stringCtxs.map((stringCtx) =>
+      this.toStringLiteral(stringCtx)
+    );
+
+    const list = Builder.expression.list.tuple(
+      { values },
+      {
+        incomplete: values.some((v) => v.incomplete),
+        location: getPosition(ctx.LP().symbol, ctx.RP().symbol),
+      }
+    );
+
+    const args: [ast.ESQLAstExpression, ast.ESQLList] = [left as ast.ESQLAstExpression, list];
+
+    return this.toBinaryExpression(operator, ctx, args, {
+      operator: operatorNode,
+    });
+  }
+
+  private fromIsNull(
+    ctx: cst.IsNullContext
+  ): ast.ESQLUnaryExpression<'is null' | 'is not null'> | undefined {
+    const negate = ctx.NOT();
+    const fnName = `is${negate ? ' not ' : ' '}null`;
+    const fn = this.toFunction(
+      fnName,
+      ctx,
+      undefined,
+      'postfix-unary-expression'
+    ) as unknown as ast.ESQLUnaryExpression<'is null' | 'is not null'>;
+    const arg = this.visitValueExpression(ctx.valueExpression());
+
+    if (arg) {
+      fn.args.push(Array.isArray(arg) ? resolveItem(arg) : arg);
+    }
+
+    return fn;
+  }
+
+  private fromBooleanDefault(ctx: cst.BooleanDefaultContext) {
+    return this.visitValueExpression(ctx.valueExpression());
   }
 
   private visitMatchExpression(ctx: cst.MatchExpressionContext): ESQLAstMatchBooleanExpression {
@@ -1964,7 +2259,7 @@ export class CstToAstConverter {
     }
 
     if (constantCtx) {
-      const constantExpression = this.fromConstant(constantCtx);
+      const constantExpression = this.fromConstantToArray(constantCtx);
 
       expression = this.toBinaryExpression(':', ctx, [expression, constantExpression]);
     }
@@ -1978,7 +2273,15 @@ export class CstToAstConverter {
     ctx: antlr.ParserRuleContext,
     type: 'index' | 'policy' = 'index'
   ): ast.ESQLSource {
-    const text = this.sanitizeSourceString(ctx);
+    let text = ctx.getText();
+
+    if (text.startsWith(`"""`) && text.endsWith(`"""`)) {
+      // If wrapped by triple quote, remove
+      text = text.replace(/\"\"\"/g, '');
+    } else if (text.startsWith(`"`) && text.endsWith(`"`)) {
+      // If wrapped by single quote, remove
+      text = text.slice(1, -1);
+    }
 
     let prefix: ast.ESQLStringLiteral | undefined;
     let index: ast.ESQLStringLiteral | undefined;
@@ -1991,16 +2294,16 @@ export class CstToAstConverter {
       const selectorStringCtx = ctx.selectorString();
 
       if (clusterStringCtx) {
-        prefix = this.visitQuotedString(clusterStringCtx);
+        prefix = this.toSelectorString(clusterStringCtx);
       }
       if (unquotedIndexString) {
-        index = this.visitQuotedString(unquotedIndexString);
+        index = this.toSelectorString(unquotedIndexString);
       }
       if (indexStringCtx) {
-        index = this.visitUnquotedOrQuotedString(indexStringCtx);
+        index = this.toIndexString(indexStringCtx);
       }
       if (selectorStringCtx) {
-        selector = this.visitQuotedString(selectorStringCtx);
+        selector = this.toSelectorString(selectorStringCtx);
       }
     }
 
@@ -2020,34 +2323,10 @@ export class CstToAstConverter {
     );
   }
 
-  // TODO: clean up "source" node helpers.
-
-  private createParserFieldsFromTerminalNode(node: antlr.TerminalNode): AstNodeParserFields {
-    const text = node.getText();
-    const symbol = node.symbol;
-    const fields: AstNodeParserFields = {
-      text,
-      location: getPosition(symbol, symbol),
-      incomplete: false,
-    };
-
-    return fields;
-  }
-
-  private sanitizeSourceString(ctx: antlr.ParserRuleContext) {
-    const contextText = ctx.getText();
-    // If wrapped by triple quote, remove
-    if (contextText.startsWith(`"""`) && contextText.endsWith(`"""`)) {
-      return contextText.replace(/\"\"\"/g, '');
-    }
-    // If wrapped by single quote, remove
-    if (contextText.startsWith(`"`) && contextText.endsWith(`"`)) {
-      return contextText.slice(1, -1);
-    }
-    return contextText;
-  }
-
-  private visitQuotedString(ctx: cst.SelectorStringContext): ast.ESQLStringLiteral {
+  /**
+   * Converts selector string context to string literal
+   */
+  private toSelectorString(ctx: cst.SelectorStringContext): ast.ESQLStringLiteral {
     const unquotedCtx = ctx.UNQUOTED_SOURCE();
 
     const valueUnquoted = unquotedCtx.getText();
@@ -2063,7 +2342,10 @@ export class CstToAstConverter {
     );
   }
 
-  private visitUnquotedOrQuotedString(ctx: cst.IndexStringContext): ast.ESQLStringLiteral {
+  /**
+   * Converts index string (quoted or unquoted) to string literal
+   */
+  private toIndexString(ctx: cst.IndexStringContext): ast.ESQLStringLiteral {
     const unquotedCtx = ctx.UNQUOTED_SOURCE();
 
     if (unquotedCtx) {
@@ -2120,13 +2402,13 @@ export class CstToAstConverter {
       // a context is created. For example, as of this writing, the FROM ... METADATA
       // uses `UNQUOTED_SOURCE` lexer tokens directly for column names, without
       // wrapping them into a context.
-      const name = this.sanitizeIdentifierString(ctx);
+      const name = ctx.getText();
       const node = Builder.identifier({ name }, this.getParserFields(ctx));
 
       args.push(node);
     }
 
-    const text = this.sanitizeIdentifierString(ctx);
+    const text = unescapeColumn(ctx.getText());
     const hasQuotes = Boolean(this.isQuoted(ctx.getText()));
     const column = Builder.expression.column(
       { args },
@@ -2185,7 +2467,7 @@ export class CstToAstConverter {
       }
     }
 
-    const text = this.sanitizeIdentifierString(ctx);
+    const text = unescapeColumn(ctx.getText());
     const hasQuotes = Boolean(this.isQuoted(ctx.getText()));
     const column = Builder.expression.column(
       { args },
@@ -2271,35 +2553,31 @@ export class CstToAstConverter {
   }
 
   private fromField(ctx: cst.FieldContext): ast.ESQLAstField | undefined {
-    // TODO: Just checking on `ctx.qualifiedName()` should be enough and we
-    //     should dereference `ctx.qualifiedName()` only once.
-    if (ctx.qualifiedName() && ctx.ASSIGN()) {
-      // TODO: use binary expression construction method.
+    const qualifiedNameCtx = ctx.qualifiedName();
+    if (qualifiedNameCtx) {
+      const left = this.toColumn(qualifiedNameCtx!);
+      const right = this.fromBooleanExpressionToExpressionOrUnknown(ctx.booleanExpression());
+      const args = [
+        left,
+        // TODO: Remove array boxing here. This fails many autocomplete tests,
+        //       should be probably fixed in a standalone PR.
+        [right],
+      ] as ast.ESQLBinaryExpression['args'];
       const assignment = this.toFunction(
-        ctx.ASSIGN()!.getText(),
+        '=',
         ctx,
         undefined,
-        'binary-expression'
+        'binary-expression',
+        args
       ) as ast.ESQLBinaryExpression;
-
-      assignment.args.push(
-        this.toColumn(ctx.qualifiedName()!),
-        // TODO: The second argument here is an array, should be a single item.
-        this.collectBooleanExpression(ctx.booleanExpression())
-      );
-
-      // TODO: Avoid using `computeLocationExtends` here. Location should be computed
-      //       without that function, and we should eventually remove it.
-      assignment.location = this.computeLocationExtends(assignment);
 
       return assignment;
     }
 
     // The boolean expression parsing might result into no fields, this
     // happens when ANTLR continues to try to parse an invalid query.
-    return this.collectBooleanExpression(ctx.booleanExpression())[0]! as
-      | ast.ESQLAstField
-      | undefined;
+    const node = this.fromBooleanExpression(ctx.booleanExpression());
+    return node as ast.ESQLAstField | undefined;
   }
 
   // --------------------------------------------------- expression: "function"
@@ -2382,30 +2660,33 @@ export class CstToAstConverter {
     return node;
   }
 
-  private toBinaryExpression(
-    operator: ast.BinaryExpressionOperator,
+  private toBinaryExpression<
+    Operator extends ast.BinaryExpressionOperator = ast.BinaryExpressionOperator
+  >(
+    operator: Operator,
     ctx: antlr.ParserRuleContext,
-    args: ast.ESQLBinaryExpression['args']
-  ): ast.ESQLBinaryExpression {
-    return Builder.expression.func.binary(
-      operator,
-      args,
-      {},
-      {
-        text: ctx.getText(),
-        location: getPosition(ctx.start, ctx.stop),
-        incomplete: Boolean(ctx.exception),
-      }
-    ) as ast.ESQLBinaryExpression;
+    args: ast.ESQLBinaryExpression['args'],
+    template?: Omit<
+      AstNodeTemplate<ast.ESQLBinaryExpression<Operator>>,
+      'subtype' | 'name' | 'args'
+    >
+  ): ast.ESQLBinaryExpression<Operator> {
+    return Builder.expression.func.binary(operator, args, template, {
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception),
+    }) as ast.ESQLBinaryExpression<Operator>;
   }
 
   // -------------------------------------------------------- expression: "map"
 
   private fromMapExpression(ctx: cst.MapExpressionContext): ast.ESQLMap {
+    const location = getPosition(ctx.start, ctx.stop);
     const map = Builder.expression.map(
       {},
       {
-        location: getPosition(ctx.start, ctx.stop),
+        text: this.parser.src.slice(location.min, location.max + 1),
+        location,
         incomplete: Boolean(ctx.exception),
       }
     );
@@ -2443,7 +2724,7 @@ export class CstToAstConverter {
       const constantCtx = valueCtx.constant();
 
       if (constantCtx) {
-        value = this.fromConstant(constantCtx) as ast.ESQLAstExpression;
+        value = this.fromConstantToArray(constantCtx) as ast.ESQLAstExpression;
       }
 
       const mapExpressionCtx = valueCtx.mapExpression();
@@ -2458,8 +2739,10 @@ export class CstToAstConverter {
       }
 
       if (value) {
+        const location = getPosition(ctx.start, ctx.stop);
         const entry = Builder.expression.entry(key, value, {
-          location: getPosition(ctx.start, ctx.stop),
+          text: this.parser.src.slice(location.min, location.max + 1),
+          location,
           incomplete: Boolean(ctx.exception) || key.incomplete || value.incomplete,
         });
 
@@ -2471,10 +2754,25 @@ export class CstToAstConverter {
 
   // ----------------------------------------------------- constant expressions
 
+  private fromConstant(ctx: cst.ConstantContext): ast.ESQLAstExpression | undefined {
+    const node = this.fromConstantToArray(ctx);
+
+    if (Array.isArray(node)) {
+      return resolveItem(node);
+    }
+
+    return node;
+  }
+
+  private fromConstantStrict(ctx: cst.ConstantContext): ast.ESQLAstExpression {
+    return this.fromConstant(ctx) ?? this.fromParserRuleToUnknown(ctx);
+  }
+
   /**
    * @todo Make return type more specific.
+   * @todo Make it not return arrays.
    */
-  private fromConstant(ctx: cst.ConstantContext): ast.ESQLAstItem {
+  private fromConstantToArray(ctx: cst.ConstantContext): ast.ESQLAstItem {
     if (ctx instanceof cst.NullLiteralContext) {
       return this.toLiteral('null', ctx.NULL());
     } else if (ctx instanceof cst.QualifiedIntegerLiteralContext) {
@@ -2659,6 +2957,65 @@ export class CstToAstConverter {
     const parserFields = this.getParserFields(ctx);
 
     return Builder.expression.list.literal({ values }, parserFields);
+  }
+
+  /**
+   * Constructs a *tuple* `list` AST node (round parens):
+   *
+   * ```
+   * (1, 2, 3)
+   * ```
+   *
+   * Can be used in IN-expression:
+   *
+   * ```
+   * WHERE x IN (1, 2, 3)
+   * ```
+   */
+  private toTuple(
+    ctxs: cst.ValueExpressionContext[],
+    leftParen?: antlr.TerminalNode,
+    rightParen?: antlr.TerminalNode
+  ): ast.ESQLList {
+    const values: ast.ESQLAstExpression[] = [];
+    let incomplete = false;
+
+    for (const elementCtx of ctxs) {
+      const element = this.visitValueExpression(elementCtx);
+
+      if (!element) {
+        continue;
+      }
+
+      const resolved = resolveItem(element) as ast.ESQLAstExpression;
+
+      if (!resolved) {
+        continue;
+      }
+
+      values.push(resolved);
+
+      if (resolved.incomplete) {
+        incomplete = true;
+      }
+    }
+
+    if (!values.length) {
+      incomplete = true;
+    }
+
+    const node = Builder.expression.list.tuple(
+      { values },
+      {
+        incomplete,
+        location: getPosition(
+          leftParen?.symbol ?? ctxs[0]?.start,
+          rightParen?.symbol ?? ctxs[ctxs.length - 1]?.stop
+        ),
+      }
+    );
+
+    return node;
   }
 
   // -------------------------------------- constant expression: "timeInterval"

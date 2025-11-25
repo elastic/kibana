@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import kbnRison from '@kbn/rison';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -126,8 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         expect(await testSubjects.exists('ESQLEditor')).to.be(true);
         // I am not rendering the histogram for indices with no @timestamp field
@@ -143,8 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(testQuery);
 
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const fromTime = 'Apr 10, 2018 @ 00:00:00.000';
         const toTime = 'Nov 15, 2018 @ 00:00:00.000';
@@ -156,17 +155,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should perform test query correctly', async function () {
         await timePicker.setDefaultAbsoluteRange();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const testQuery = `from logstash-* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         // here Lens suggests a XY so it is rendered
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
         expect(await testSubjects.exists('xyVisChart')).to.be(true);
@@ -176,34 +172,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render when switching to a time range with no data, then back to a time range with data', async () => {
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const testQuery = `from logstash-* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         let cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
         await timePicker.setAbsoluteRange(
           'Sep 19, 2015 @ 06:31:44.000',
           'Sep 19, 2015 @ 06:31:44.000'
         );
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         expect(await testSubjects.exists('discoverNoResults')).to.be(true);
         await timePicker.setDefaultAbsoluteRange();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await cell.getVisibleText()).to.be('1');
       });
 
       it('should query an index pattern that doesnt translate to a dataview correctly', async function () {
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const testQuery = `from logstash* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
@@ -216,16 +207,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render correctly if there are empty fields', async function () {
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         const testQuery = `from logstash-* | limit 10 | keep machine.ram_range, bytes`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
-        expect(await cell.getVisibleText()).to.be(' - ');
+        expect(await cell.getVisibleText()).to.be(NULL_LABEL);
         expect((await dataGrid.getHeaders()).slice(-2)).to.eql([
           'Numberbytes',
           'machine.ram_range',
@@ -248,16 +237,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should allow brushing time series', async () => {
         await timePicker.setDefaultAbsoluteRange();
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         const testQuery = `from logstash-* | limit 100`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const initialTimeConfig = await timePicker.getTimeConfigAsAbsoluteTimes();
         expect(initialTimeConfig.start).to.equal(timePicker.defaultStartTime);
@@ -288,8 +275,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         for (const testQuery of brokenQueries) {
           await monacoEditor.setCodeEditorValue(testQuery);
           await testSubjects.click('querySubmitButton');
-          await header.waitUntilLoadingHasFinished();
-          await discover.waitUntilSearchingHasFinished();
+          await discover.waitUntilTabIsLoaded();
           // error in fetching documents because of the invalid query
           await discover.showsErrorCallout();
           const message = await testSubjects.getVisibleText('discoverErrorCalloutMessage');
@@ -312,8 +298,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show switch modal when switching to a data view', async () => {
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
@@ -322,13 +307,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should not show switch modal when switching to a data view while a saved search is open', async () => {
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
@@ -346,16 +329,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show switch modal when switching to a data view while a saved search with unsaved changes is open', async () => {
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await discover.saveSearch('esql_test2');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
@@ -364,20 +344,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show available data views and search results after switching to classic mode', async () => {
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await browser.refresh();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedSearch.switchToDataViewMode();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await discover.assertHitCount('14,004');
         const availableDataViews = await unifiedSearch.getDataViewList(
           'discover-dataView-switch-link'
         );
-        expect(availableDataViews).to.eql(['All logs', 'kibana_sample_data_flights', 'logstash-*']);
+        ['All logs', 'kibana_sample_data_flights', 'logstash-*'].forEach((item) => {
+          expect(availableDataViews).to.contain(item);
+        });
         await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
     });
@@ -386,21 +365,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await common.navigateToApp('discover');
         await timePicker.setDefaultAbsoluteRange();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
       });
 
       it('shows Discover and Lens requests in Inspector', async () => {
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         let retries = 0;
         await retry.try(async () => {
           if (retries > 0) {
             await inspector.close();
             await testSubjects.click('querySubmitButton');
-            await header.waitUntilLoadingHasFinished();
-            await discover.waitUntilSearchingHasFinished();
+            await discover.waitUntilTabIsLoaded();
           }
           await inspector.open();
           retries = retries + 1;
@@ -456,8 +432,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should see my current query in the history', async () => {
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
@@ -467,15 +442,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('updating the query should add this to the history', async () => {
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
@@ -487,8 +460,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should select a query from the history and submit it', async () => {
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
@@ -504,15 +476,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should add a failed query to the history', async () => {
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         const testQuery = 'from logstash-* | limit 100 | woof and meow';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItem = await esql.getHistoryItem(0);
@@ -530,20 +500,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const savedSearchName = 'testSorting';
 
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const testQuery = 'from logstash-* | sort @timestamp | limit 100';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         await unifiedFieldList.clickFieldListItemAdd('bytes');
 
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains an initial value', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
@@ -571,8 +538,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await discover.saveSearch(savedSearchName);
 
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the same highest value', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
@@ -582,8 +548,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await browser.refresh();
 
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the same highest value after reload', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
@@ -593,13 +558,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await discover.clickNewSearchButton();
 
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await discover.loadSavedSearch(savedSearchName);
 
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor(
           'first cell contains the same highest value after reopening',
@@ -626,8 +589,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await unifiedFieldList.clickFieldListItemAdd('extension');
 
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await dataGrid.clickDocSortDesc('extension', 'Sort A-Z');
 
@@ -643,8 +605,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await browser.refresh();
 
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the same lowest value after reload', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
@@ -697,15 +658,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const savedSearchName = 'testSortingForCustomVars';
 
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const testQuery =
           'from logstash-* | sort @timestamp | limit 100 | keep bytes | eval var0 = abs(bytes) + 1';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains an initial value', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
@@ -733,8 +692,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await discover.saveSearch(savedSearchName);
 
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the same highest value', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
@@ -744,8 +702,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await browser.refresh();
 
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the same highest value after reload', async () => {
           const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
@@ -755,13 +712,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await discover.clickNewSearchButton();
 
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await discover.loadSavedSearch(savedSearchName);
 
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor(
           'first cell contains the same highest value after reopening',
@@ -800,29 +755,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(testQuery);
 
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         await dataGrid.clickCellFilterForButtonExcludingControlColumns(0, 1);
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`=="BT"`
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\` == "BT"`
         );
 
         // negate
         await dataGrid.clickCellFilterOutButtonExcludingControlColumns(0, 1);
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         const newValue = await monacoEditor.getCodeEditorValue();
         expect(newValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`!="BT"`
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`!= "BT"`
         );
       });
 
@@ -832,18 +784,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(testQuery);
 
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         await dataGrid.clickCellFilterForButtonExcludingControlColumns(0, 1);
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0\nAND \`geo.dest\`=="BT"`
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0\nAND \`geo.dest\` == "BT"`
         );
       });
 
@@ -853,8 +803,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(testQuery);
 
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         // change the type to line
@@ -866,13 +815,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('applyFlyoutButton');
 
         await dataGrid.clickCellFilterForButtonExcludingControlColumns(0, 1);
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`=="BT"`
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\` == "BT"`
         );
 
         // check that the type is still line
@@ -889,8 +837,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(testQuery);
 
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         // change the type to line
@@ -911,13 +858,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('applyFlyoutButton');
 
         await dataGrid.clickCellFilterForButtonExcludingControlColumns(0, 1);
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`=="BT"`
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\` == "BT"`
         );
 
         // check that the type is still line
@@ -940,20 +886,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await common.navigateToApp('discover');
         await timePicker.setDefaultAbsoluteRange();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
       });
 
       it('should choose breakdown field', async () => {
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const testQuery = 'from logstash-*';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await discover.chooseBreakdownField('extension');
         await header.waitUntilLoadingHasFinished();
@@ -963,13 +906,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should add filter using histogram legend values', async () => {
         await discover.clickLegendFilter('png', '+');
-        await header.waitUntilLoadingHasFinished();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         const editorValue = await monacoEditor.getCodeEditorValue();
-        expect(editorValue).to.eql(`from logstash-*\n| WHERE \`extension\`=="png"`);
+        expect(editorValue).to.eql(`from logstash-*\n| WHERE \`extension\` == "png"`);
       });
 
       it('should save breakdown field in saved search', async () => {
@@ -977,8 +918,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const testQuery = 'from logstash-*';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await discover.saveSearch('esql view with breakdown');
 
@@ -995,14 +935,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should choose breakdown field when selected from field stats', async () => {
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const testQuery = 'from logstash-*';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await unifiedFieldList.clickFieldListAddBreakdownField('extension');
         await header.waitUntilLoadingHasFinished();

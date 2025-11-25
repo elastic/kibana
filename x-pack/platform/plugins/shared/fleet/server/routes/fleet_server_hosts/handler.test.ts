@@ -134,6 +134,30 @@ describe('fleet server hosts handler', () => {
     });
   });
 
+  it('should return error if both ssl.agent_key and secrets.ssl.agent_key are provided', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+
+    const res = await postFleetServerHostWithErrorHandler(
+      mockContext,
+      {
+        body: {
+          id: 'host1',
+          host_urls: ['http://localhost:8080'],
+          ssl: { agent_key: 'token1' },
+          secrets: { ssl: { agent_key: 'token1' } },
+        },
+      } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({
+      body: { message: 'Cannot specify both ssl.agent_key and secrets.ssl.agent_key' },
+      statusCode: 400,
+    });
+  });
+
   it('should return error on put in serverless if host url is different from default', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 

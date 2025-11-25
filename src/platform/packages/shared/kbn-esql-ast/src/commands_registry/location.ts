@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isOptionNode } from '../ast/is';
+import { isFunctionExpression, isOptionNode } from '../ast/is';
 import { within } from '../ast/location';
-import type { ESQLAst, ESQLCommand, ESQLSingleAstItem } from '../types';
+import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '../types';
 import { Walker } from '../walker';
 import { Location } from './types';
 
@@ -23,14 +23,31 @@ const commandOptionNameToLocation: Record<string, Location> = {
   by: Location.STATS_BY,
   enrich: Location.ENRICH,
   with: Location.ENRICH_WITH,
-  // Rerank is a special case, because it is the only command that requrire a boolen validation inside the ON Clause
-  on: Location.RERANK,
   dissect: Location.DISSECT,
   rename: Location.RENAME,
   join: Location.JOIN,
   show: Location.SHOW,
   completion: Location.COMPLETION,
   rerank: Location.RERANK,
+  'join:on': Location.JOIN,
+  'rerank:on': Location.RERANK,
+};
+
+/**
+ * Configuration for function-based locations.
+ * Maps command name -> function name -> location config.
+ * If argIndex is specified, the position must be within that specific argument.
+ */
+const functionBasedLocations: Record<
+  string,
+  Record<string, { location: Location; displayName: string; argIndex?: number }>
+> = {
+  stats: {
+    where: { location: Location.STATS_WHERE, displayName: 'stats_where', argIndex: 1 },
+  },
+  'inline stats': {
+    where: { location: Location.STATS_WHERE, displayName: 'inline stats_where', argIndex: 1 },
+  },
 };
 
 /**
@@ -45,7 +62,7 @@ const getLocationFromCommandOrOptionName = (name: string) => commandOptionNameTo
  */
 export function getLocationInfo(
   position: ESQLSingleAstItem | number,
-  parentCommand: ESQLCommand,
+  parentCommand: ESQLAstAllCommands,
   ast: ESQLAst,
   withinAggFunction: boolean
 ): { id: Location; displayName: string } {
@@ -57,6 +74,46 @@ export function getLocationInfo(
   }
 
   const option = Walker.find(parentCommand, (node) => isOptionNode(node) && within(position, node));
+
+  if (option) {
+    const displayName = option.name;
+    const parentCommandName = parentCommand.name;
+    const contextualKey = `${parentCommandName}:${displayName}`;
+    const id =
+      commandOptionNameToLocation[contextualKey] ?? getLocationFromCommandOrOptionName(displayName);
+    return { id, displayName };
+  }
+
+  // If not in an option node, try to find a function that defines a location
+  // We need to find ALL functions containing the position, then check if any have a location config
+  const funcs = Walker.findAll(
+    parentCommand,
+    (node) => isFunctionExpression(node) && within(position, node)
+  );
+
+  // Iterate through all matching functions to find one with a location config
+  for (const func of funcs) {
+    if (!isFunctionExpression(func)) {
+      continue;
+    }
+
+    const locationConfig = functionBasedLocations[parentCommand.name]?.[func.name];
+
+    if (locationConfig) {
+      // If argIndex is specified, position must be within that specific argument
+      if (locationConfig.argIndex !== undefined) {
+        const targetArg = func.args[locationConfig.argIndex];
+        const arg = Array.isArray(targetArg) ? targetArg[0] : targetArg;
+
+        if (arg && !Array.isArray(arg) && 'location' in arg && within(position, arg)) {
+          return { id: locationConfig.location, displayName: locationConfig.displayName };
+        }
+      } else {
+        // No argIndex constraint, return immediately
+        return { id: locationConfig.location, displayName: locationConfig.displayName };
+      }
+    }
+  }
 
   const displayName = (option ?? parentCommand).name;
 

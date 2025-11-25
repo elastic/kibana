@@ -20,6 +20,7 @@ import {
   MAX_OBSERVABLES_PER_CASE,
 } from '../../../common/constants';
 import type { ObservablePost } from '../../../common/types/api';
+import { UserActionTypes } from '../../../common/types/domain/user_action/v1';
 
 const caseSO = mockCases[0];
 
@@ -28,6 +29,7 @@ const mockClientArgs = createCasesClientMockArgs();
 
 const mockLicensingService = mockClientArgs.services.licensingService;
 const mockCaseService = mockClientArgs.services.caseService;
+const mockUserActionService = mockClientArgs.services.userActionService;
 
 const mockObservablePost = {
   value: '127.0.0.1',
@@ -150,6 +152,26 @@ describe('addObservable', () => {
       )
     ).rejects.toThrow();
   });
+
+  it('should create a user action with the correct payload', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    await addObservable(
+      caseSO.id,
+      { observable: { typeKey: OBSERVABLE_TYPE_IPV4.key, value: '127.0.0.1', description: '' } },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledWith({
+      userAction: {
+        type: UserActionTypes.observables,
+        caseId: caseSO.id,
+        owner: 'securitySolution',
+        user: mockClientArgs.user,
+        payload: { observables: { count: 1, actionType: 'add' } },
+      },
+    });
+  });
 });
 
 describe('updateObservable', () => {
@@ -239,6 +261,27 @@ describe('updateObservable', () => {
       )
     ).rejects.toThrow();
   });
+
+  it('should create a user action with the correct payload', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    await updateObservable(
+      caseSO.id,
+      mockObservable.id,
+      { observable: { value: '192.168.0.1', description: 'Updated description' } },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledWith({
+      userAction: {
+        type: UserActionTypes.observables,
+        caseId: caseSO.id,
+        owner: 'securitySolution',
+        user: mockClientArgs.user,
+        payload: { observables: { count: 1, actionType: 'update' } },
+      },
+    });
+  });
 });
 
 describe('deleteObservable', () => {
@@ -276,6 +319,21 @@ describe('deleteObservable', () => {
     await expect(
       deleteObservable('case-id', 'observable-id', mockClientArgs, mockCasesClient)
     ).rejects.toThrow();
+  });
+
+  it('should create a user action with the correct payload', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    await deleteObservable(caseSO.id, mockObservable.id, mockClientArgs, mockCasesClient);
+
+    expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledWith({
+      userAction: {
+        type: UserActionTypes.observables,
+        caseId: caseSO.id,
+        owner: 'securitySolution',
+        user: mockClientArgs.user,
+        payload: { observables: { count: 1, actionType: 'delete' } },
+      },
+    });
   });
 });
 
@@ -379,5 +437,30 @@ describe('bulkAddObservables', () => {
         }),
       })
     );
+  });
+
+  it('should create a user action with the correct payload', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    await bulkAddObservables(
+      {
+        caseId: caseSO.id,
+        observables: [
+          { ...mockObservablePost, value: 'ip2' },
+          { ...mockObservablePost, value: 'ip3' },
+        ],
+      },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledWith({
+      userAction: {
+        type: UserActionTypes.observables,
+        caseId: caseSO.id,
+        owner: 'securitySolution',
+        user: mockClientArgs.user,
+        payload: { observables: { count: 2, actionType: 'add' } },
+      },
+    });
   });
 });

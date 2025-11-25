@@ -447,6 +447,102 @@
           },
           {
             "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.getFeatureUsageName",
+            "type": "Function",
+            "tags": [],
+            "label": "getFeatureUsageName",
+            "description": [],
+            "signature": [
+              "(type: string) => string"
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.getFeatureUsageName.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.shouldNotifyUsage",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldNotifyUsage",
+            "description": [],
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.shouldNotifyUsage.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.ExportType.notifyUsage",
+            "type": "Function",
+            "tags": [],
+            "label": "notifyUsage",
+            "description": [],
+            "signature": [
+              "(type: string) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.notifyUsage.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
             "id": "def-server.ExportType.getUiSettingsServiceFactory",
             "type": "Function",
             "tags": [],
@@ -985,6 +1081,26 @@
         "children": [
           {
             "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.BaseExportTypeStartDeps.licensing",
+            "type": "Object",
+            "tags": [],
+            "label": "licensing",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "server",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-server.LicensingPluginStart",
+                "text": "LicensingPluginStart"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/server/export_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
             "id": "def-server.BaseExportTypeStartDeps.savedObjects",
             "type": "Object",
             "tags": [],
@@ -1495,6 +1611,21 @@
       },
       {
         "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_DATA_STREAM_INDEX_TEMPLATE",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_DATA_STREAM_INDEX_TEMPLATE",
+        "description": [],
+        "signature": [
+          "\".kibana-reporting\""
+        ],
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
         "id": "def-server.REPORTING_DATA_STREAM_WILDCARD",
         "type": "string",
         "tags": [],
@@ -1517,6 +1648,21 @@
         "description": [],
         "signature": [
           "\".reporting-*,.kibana-reporting*\""
+        ],
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_INDEX_TEMPLATE_MAPPING_META_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_INDEX_TEMPLATE_MAPPING_META_FIELD",
+        "description": [],
+        "signature": [
+          "\"template_version\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
         "deprecated": false,

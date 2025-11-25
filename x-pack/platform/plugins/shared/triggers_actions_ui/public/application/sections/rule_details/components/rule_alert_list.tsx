@@ -153,7 +153,7 @@ export const RuleAlertList = (props: RuleAlertListProps) => {
         render: (value: string) => {
           return (
             <EuiToolTip anchorClassName={'eui-textTruncate'} content={value}>
-              <span>{value}</span>
+              <span tabIndex={0}>{value}</span>
             </EuiToolTip>
           );
         },

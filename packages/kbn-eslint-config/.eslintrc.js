@@ -34,7 +34,6 @@ module.exports = {
     '@kbn/eslint-plugin-imports',
     '@kbn/eslint-plugin-telemetry',
     '@kbn/eslint-plugin-i18n',
-    '@kbn/eslint-plugin-eui-a11y',
     '@elastic/eui',
     'eslint-plugin-depend',
     'prettier',
@@ -178,6 +177,13 @@ module.exports = {
           exact: true,
           disallowedMessage:
             'Use `react-dom` instead of `react-dom/client` until upgraded to React 18',
+        },
+        {
+          from: '@tanstack/react-query',
+          to: '@kbn/react-query',
+          exact: true,
+          disallowedMessage:
+            'Use `@kbn/react-query` instead of `@tanstack/react-query`, as it defaults to networkMode="always"',
         },
       ],
     ],

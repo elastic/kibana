@@ -288,6 +288,7 @@ export const KibanaDeprecationsList = ({
       {(!hasPrivileges || kibanaDeprecationErrors.length > 0) && (
         <>
           <EuiCallOut
+            announceOnMount={false}
             title={i18nTexts.kibanaDeprecationErrorTitle}
             color="warning"
             iconType="warning"

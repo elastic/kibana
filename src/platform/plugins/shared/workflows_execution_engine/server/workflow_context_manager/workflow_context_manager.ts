@@ -7,42 +7,59 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StepContext, WorkflowContext } from '@kbn/workflows';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest, CoreStart } from '@kbn/core/server';
-import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
+import type { StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
+import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
+import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import { buildWorkflowContext } from './build_workflow_context';
+import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import type { RunStepResult } from '../step/node_implementation';
-import { buildStepExecutionId } from '../utils';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import type { RunStepResult } from '../step/node_implementation';
+import type { WorkflowTemplatingEngine } from '../templating_engine';
+import { buildStepExecutionId } from '../utils';
 
 export interface ContextManagerInit {
   // New properties for logging
+  templateEngine: WorkflowTemplatingEngine;
   workflowExecutionGraph: WorkflowGraph;
-  workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
   workflowExecutionState: WorkflowExecutionState;
+  node: GraphNodeUnion;
+  stackFrames: StackFrame[];
   // New properties for internal actions
   esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
   fakeRequest?: KibanaRequest;
   coreStart?: CoreStart; // For using Kibana's internal HTTP client
+  dependencies: ContextDependencies;
 }
 
 export class WorkflowContextManager {
   private workflowExecutionGraph: WorkflowGraph;
-  private workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
   private workflowExecutionState: WorkflowExecutionState;
   private esClient: ElasticsearchClient;
+  private templateEngine: WorkflowTemplatingEngine;
   private fakeRequest?: KibanaRequest;
   private coreStart?: CoreStart;
+  private dependencies: ContextDependencies;
+
+  private stackFrames: StackFrame[];
+  public readonly node: GraphNodeUnion;
+
+  public get scopeStack(): WorkflowScopeStack {
+    return WorkflowScopeStack.fromStackFrames(this.stackFrames);
+  }
 
   constructor(init: ContextManagerInit) {
     this.workflowExecutionGraph = init.workflowExecutionGraph;
-    this.workflowExecutionRuntime = init.workflowExecutionRuntime;
     this.workflowExecutionState = init.workflowExecutionState;
     this.esClient = init.esClient;
     this.fakeRequest = init.fakeRequest;
     this.coreStart = init.coreStart;
+    this.node = init.node;
+    this.stackFrames = init.stackFrames;
+    this.templateEngine = init.templateEngine;
+    this.dependencies = init.dependencies;
   }
 
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work
@@ -53,7 +70,7 @@ export class WorkflowContextManager {
       steps: {},
     };
 
-    const currentNode = this.workflowExecutionRuntime.getCurrentNode()!;
+    const currentNode = this.node;
     const currentNodeId = currentNode.id;
 
     const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(currentNodeId);
@@ -79,21 +96,65 @@ export class WorkflowContextManager {
       }
     });
 
-    this.enrichStepContextWithMockedData(stepContext);
     this.enrichStepContextAccordingToStepScope(stepContext);
+    this.enrichStepContextWithMockedData(stepContext);
     return stepContext;
   }
 
-  public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {
-    const propertyPathSegments = propertyPath.split('.');
-    let result: any = this.getContext();
+  /**
+   * Recursively resolves template expressions in any value (string, object, array, or primitive).
+   *
+   * This method traverses the input value and replaces all template expressions (e.g., `{{workflow.id}}`,
+   * `{{steps.step1.output}}`) with their actual values from the current workflow execution context.
+   *
+   * @param obj - The value to render. Can be:
+   *   - A string with template expressions: `"{{workflow.name}}"`
+   *   - An object with string properties: `{ name: "{{workflow.name}}", id: "{{workflow.id}}" }`
+   *   - An array: `["{{step1.output}}", "static value"]`
+   *   - A nested structure combining any of the above
+   *   - Primitive values (numbers, booleans) are returned as-is
+   *
+   * @returns The same type as the input, with all template expressions resolved to their actual values
+   *
+   * @example
+   * ```typescript
+   * // Render a simple string
+   * const result = contextManager.renderValueAccordingToContext("Workflow: {{workflow.name}}");
+   * // => "Workflow: My Workflow"
+   *
+   * // Render an object with templates
+   * const config = contextManager.renderValueAccordingToContext({
+   *   url: "{{steps.fetchData.output.apiUrl}}",
+   *   headers: { "X-Request-Id": "{{execution.id}}" }
+   * });
+   * // => { url: "https://api.example.com", headers: { "X-Request-Id": "exec-123" } }
+   * ```
+   */
+  public renderValueAccordingToContext<T>(obj: T): T {
+    const context = this.getContext();
+    return this.templateEngine.render(obj, context);
+  }
+
+  public evaluateExpressionInContext(template: string): unknown {
+    const context = this.getContext();
+    return this.templateEngine.evaluateExpression(template, context);
+  }
+
+  public readContextPath(propertyPath: string): { pathExists: boolean; value: unknown } {
+    const propertyPathSegments = parseJsPropertyAccess(propertyPath);
+    let result: unknown = this.getContext();
 
     for (const segment of propertyPathSegments) {
-      if (!(segment in result)) {
+      if (result === null || result === undefined || typeof result !== 'object') {
         return { pathExists: false, value: undefined }; // Path not found in context
       }
 
-      result = result[segment];
+      const resultAsRecord = result as Record<string, unknown>;
+      if (!(segment in resultAsRecord)) {
+        return { pathExists: false, value: undefined }; // Path not found in context
+      }
+
+      result = resultAsRecord[segment];
     }
 
     return { pathExists: true, value: result };
@@ -121,25 +182,16 @@ export class WorkflowContextManager {
     return this.coreStart;
   }
 
+  /**
+   * Get dependencies
+   */
+  public getDependencies(): ContextDependencies {
+    return this.dependencies;
+  }
+
   private buildWorkflowContext(): WorkflowContext {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-
-    return {
-      execution: {
-        id: workflowExecution.id,
-        isTestRun: !!workflowExecution.isTestRun,
-        startedAt: new Date(workflowExecution.startedAt),
-      },
-      workflow: {
-        id: workflowExecution.workflowId,
-        name: workflowExecution.workflowDefinition.name,
-        enabled: workflowExecution.workflowDefinition.enabled,
-        spaceId: workflowExecution.spaceId,
-      },
-      consts: workflowExecution.workflowDefinition.consts || {},
-      event: workflowExecution.context?.event,
-      inputs: workflowExecution.context?.inputs,
-    };
+    return buildWorkflowContext(workflowExecution, this.coreStart, this.dependencies);
   }
 
   private enrichStepContextWithMockedData(stepContext: StepContext): void {
@@ -190,6 +242,7 @@ export class WorkflowContextManager {
     );
 
     while (!scopeStack.isEmpty()) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const topFrame = scopeStack.getCurrentScope()!;
       scopeStack = scopeStack.exitScope();
       const stepExecution = this.workflowExecutionState.getStepExecution(
@@ -215,6 +268,7 @@ export class WorkflowContextManager {
   private getStepData(stepId: string):
     | {
         runStepResult: RunStepResult;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         stepState: Record<string, any> | undefined;
       }
     | undefined {

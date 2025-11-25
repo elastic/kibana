@@ -43,7 +43,7 @@ import {
 import { asyncForEach } from '@kbn/std';
 
 import type { DashboardState } from '../../../common';
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/content_management';
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/constants';
 import type { DashboardPanel } from '../../../server';
 import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
@@ -61,7 +61,7 @@ import { serializeLayout } from './serialize_layout';
 import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
 
 export function initializeLayoutManager(
-  incomingEmbeddable: EmbeddablePackageState | undefined,
+  incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
   trackPanel: ReturnType<typeof initializeTrackPanel>,
   getReferences: (id: string) => Reference[]
@@ -127,18 +127,6 @@ export function initializeLayoutManager(
   // --------------------------------------------------------------------------------------
   // Panel placement functions
   // --------------------------------------------------------------------------------------
-  const placeIncomingPanel = (uuid: string, size: EmbeddablePackageState['size']) => {
-    const { newPanelPlacement } = runPanelPlacementStrategy(
-      PanelPlacementStrategy.findTopLeftMostOpenSpace,
-      {
-        width: size?.width ?? DEFAULT_PANEL_WIDTH,
-        height: size?.height ?? DEFAULT_PANEL_HEIGHT,
-        currentPanels: layout$.value.panels,
-      }
-    );
-    return { ...newPanelPlacement, i: uuid };
-  };
-
   const placeNewPanel = async (
     uuid: string,
     panelPackage: PanelPackage,
@@ -150,7 +138,7 @@ export function initializeLayoutManager(
         ...layout$.value,
         panels: {
           ...layout$.value.panels,
-          [uuid]: { grid: { ...grid, i: uuid }, type },
+          [uuid]: { grid, type },
         },
       };
     }
@@ -173,38 +161,46 @@ export function initializeLayoutManager(
       ...layout$.value,
       panels: {
         ...otherPanels,
-        [uuid]: { grid: { ...newPanelPlacement, i: uuid }, type },
+        [uuid]: { grid: newPanelPlacement, type },
       },
     };
   };
 
   // --------------------------------------------------------------------------------------
-  // Place the incoming embeddable if there is one
+  // Place the incoming embeddables if there is at least one
   // --------------------------------------------------------------------------------------
-  if (incomingEmbeddable) {
-    const { serializedState, size, type } = incomingEmbeddable;
-    const uuid = incomingEmbeddable.embeddableId ?? v4();
-    const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
-    const sameType = existingPanel?.type === type;
+  if (incomingEmbeddables?.length) {
+    for (const incomingEmbeddable of incomingEmbeddables) {
+      const { serializedState, size, type } = incomingEmbeddable;
+      const uuid = incomingEmbeddable.embeddableId ?? v4();
+      const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
+      const sameType = existingPanel?.type === type;
 
-    const grid = existingPanel ? existingPanel.grid : placeIncomingPanel(uuid, size);
-    currentChildState[uuid] = {
-      rawState: {
-        ...(sameType && currentChildState[uuid] ? currentChildState[uuid].rawState : {}),
-        ...serializedState.rawState,
-      },
-      references: serializedState?.references,
-    };
+      const grid = existingPanel
+        ? existingPanel.grid
+        : runPanelPlacementStrategy(PanelPlacementStrategy.findTopLeftMostOpenSpace, {
+            width: size?.width ?? DEFAULT_PANEL_WIDTH,
+            height: size?.height ?? DEFAULT_PANEL_HEIGHT,
+            currentPanels: layout$.value.panels,
+          }).newPanelPlacement;
+      currentChildState[uuid] = {
+        rawState: {
+          ...(sameType && currentChildState[uuid] ? currentChildState[uuid].rawState : {}),
+          ...serializedState.rawState,
+        },
+        references: serializedState?.references,
+      };
 
-    layout$.next({
-      ...layout$.value,
-      panels: {
-        ...layout$.value.panels,
-        [uuid]: { grid, type },
-      },
-    });
-    trackPanel.setScrollToPanelId(uuid);
-    trackPanel.setHighlightPanelId(uuid);
+      layout$.next({
+        ...layout$.value,
+        panels: {
+          ...layout$.value.panels,
+          [uuid]: { grid, type },
+        },
+      });
+      trackPanel.setScrollToPanelId(uuid);
+      trackPanel.setHighlightPanelId(uuid);
+    }
   }
 
   function getDashboardPanelFromId(panelId: string) {
@@ -314,7 +310,6 @@ export function initializeLayoutManager(
         [uuidOfDuplicate]: {
           grid: {
             ...newPanelPlacement,
-            i: uuidOfDuplicate,
             sectionId: layoutItemToDuplicate.grid.sectionId,
           },
           type: layoutItemToDuplicate.type,
@@ -432,7 +427,7 @@ export function initializeLayoutManager(
         const sections = { ...currentLayout.sections };
         const newId = v4();
         sections[newId] = {
-          grid: { i: newId, y: maxY },
+          grid: { y: maxY },
           title: i18n.translate('dashboard.defaultSectionTitle', {
             defaultMessage: 'New collapsible section',
           }),

@@ -389,6 +389,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         <>
           <EuiSpacer size="xs" />
           <EuiCallOut
+            announceOnMount={false}
             title={i18n.translate('xpack.aiops.analysis.errorCallOutTitle', {
               defaultMessage:
                 'The following {errorCount, plural, one {error} other {errors}} occurred running the analysis.',

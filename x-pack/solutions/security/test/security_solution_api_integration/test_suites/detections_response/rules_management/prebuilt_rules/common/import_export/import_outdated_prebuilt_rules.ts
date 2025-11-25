@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   createHistoricalPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
@@ -13,7 +14,6 @@ import {
   installPrebuiltRules,
   importRulesWithSuccess,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -96,6 +96,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           },
           {
@@ -105,6 +107,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           },
         ];
@@ -128,12 +132,22 @@ export default ({ getService }: FtrProviderContext): void => {
             expect.objectContaining({
               rule_id: PREBUILT_RULE_ID_A,
               immutable: true,
-              rule_source: { type: 'external', is_customized: false },
+              rule_source: {
+                type: 'external',
+                is_customized: false,
+                customized_fields: [],
+                has_base_version: true,
+              },
             }),
             expect.objectContaining({
               rule_id: PREBUILT_RULE_ID_B,
               immutable: true,
-              rule_source: { type: 'external', is_customized: true },
+              rule_source: {
+                type: 'external',
+                is_customized: true,
+                customized_fields: [{ field_name: 'name' }],
+                has_base_version: true,
+              },
             }),
           ])
         );
@@ -230,6 +244,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           },
           {
@@ -238,6 +254,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           },
           {
@@ -247,6 +265,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           },
           {
@@ -256,6 +276,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           },
         ];
@@ -280,22 +302,42 @@ export default ({ getService }: FtrProviderContext): void => {
             expect.objectContaining({
               rule_id: PREBUILT_RULE_ID_A,
               immutable: true,
-              rule_source: { type: 'external', is_customized: false },
+              rule_source: {
+                type: 'external',
+                is_customized: false,
+                customized_fields: [],
+                has_base_version: true,
+              },
             }),
             expect.objectContaining({
               rule_id: PREBUILT_RULE_ID_B,
               immutable: true,
-              rule_source: { type: 'external', is_customized: false },
+              rule_source: {
+                type: 'external',
+                is_customized: false,
+                customized_fields: [],
+                has_base_version: true,
+              },
             }),
             expect.objectContaining({
               rule_id: PREBUILT_RULE_ID_C,
               immutable: true,
-              rule_source: { type: 'external', is_customized: true },
+              rule_source: {
+                type: 'external',
+                is_customized: true,
+                customized_fields: [{ field_name: 'description' }],
+                has_base_version: true,
+              },
             }),
             expect.objectContaining({
               rule_id: PREBUILT_RULE_ID_D,
               immutable: true,
-              rule_source: { type: 'external', is_customized: true },
+              rule_source: {
+                type: 'external',
+                is_customized: true,
+                customized_fields: [{ field_name: 'description' }],
+                has_base_version: true,
+              },
             }),
           ])
         );
@@ -412,6 +454,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           },
           {
@@ -420,6 +464,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           },
           {
@@ -429,6 +475,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           },
           {
@@ -438,6 +486,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           },
         ];
@@ -462,22 +512,42 @@ export default ({ getService }: FtrProviderContext): void => {
             expect.objectContaining({
               rule_id: PREBUILT_RULE_ID_A,
               immutable: true,
-              rule_source: { type: 'external', is_customized: false },
+              rule_source: {
+                type: 'external',
+                is_customized: false,
+                customized_fields: [],
+                has_base_version: true,
+              },
             }),
             expect.objectContaining({
               rule_id: PREBUILT_RULE_ID_B,
               immutable: true,
-              rule_source: { type: 'external', is_customized: false },
+              rule_source: {
+                type: 'external',
+                is_customized: false,
+                customized_fields: [],
+                has_base_version: true,
+              },
             }),
             expect.objectContaining({
               rule_id: PREBUILT_RULE_ID_C,
               immutable: true,
-              rule_source: { type: 'external', is_customized: true },
+              rule_source: {
+                type: 'external',
+                is_customized: true,
+                customized_fields: [{ field_name: 'description' }],
+                has_base_version: true,
+              },
             }),
             expect.objectContaining({
               rule_id: PREBUILT_RULE_ID_D,
               immutable: true,
-              rule_source: { type: 'external', is_customized: true },
+              rule_source: {
+                type: 'external',
+                is_customized: true,
+                customized_fields: [{ field_name: 'description' }],
+                has_base_version: true,
+              },
             }),
           ])
         );
@@ -594,6 +664,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           },
           {
@@ -602,6 +674,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           },
           {
@@ -611,6 +685,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           },
           {
@@ -620,6 +696,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           },
         ];
@@ -644,22 +722,42 @@ export default ({ getService }: FtrProviderContext): void => {
             expect.objectContaining({
               rule_id: PREBUILT_RULE_ID_A,
               immutable: true,
-              rule_source: { type: 'external', is_customized: false },
+              rule_source: {
+                type: 'external',
+                is_customized: false,
+                customized_fields: [],
+                has_base_version: true,
+              },
             }),
             expect.objectContaining({
               rule_id: PREBUILT_RULE_ID_B,
               immutable: true,
-              rule_source: { type: 'external', is_customized: false },
+              rule_source: {
+                type: 'external',
+                is_customized: false,
+                customized_fields: [],
+                has_base_version: true,
+              },
             }),
             expect.objectContaining({
               rule_id: PREBUILT_RULE_ID_C,
               immutable: true,
-              rule_source: { type: 'external', is_customized: true },
+              rule_source: {
+                type: 'external',
+                is_customized: true,
+                customized_fields: [{ field_name: 'description' }],
+                has_base_version: true,
+              },
             }),
             expect.objectContaining({
               rule_id: PREBUILT_RULE_ID_D,
               immutable: true,
-              rule_source: { type: 'external', is_customized: true },
+              rule_source: {
+                type: 'external',
+                is_customized: true,
+                customized_fields: [{ field_name: 'description' }],
+                has_base_version: true,
+              },
             }),
           ])
         );

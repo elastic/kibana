@@ -16,18 +16,18 @@ import { overviewHeaderTitle } from '../../../../common/translations';
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function OverviewHeader({
-  handleRefresh,
+  handleTimeChange,
 }: {
-  handleRefresh: (dateRange: TimeRange) => void;
+  handleTimeChange: (dateRange: TimeRange) => void;
 }) {
-  const { timeRange, updateTimeRange, onRefreshChange } = useDatasetQualityDetailsState();
+  const { timeRange } = useDatasetQualityDetailsState();
   const { unifiedSearch } = useKibanaContextForPlugin().services;
 
   const onTimeChange = useCallback(
-    ({ ...timeRangeProps }: { start: string; end: string }) => {
-      updateTimeRange({ ...timeRangeProps });
+    ({ ...timeRangeProps }: TimeRange) => {
+      handleTimeChange({ ...timeRangeProps });
     },
-    [updateTimeRange]
+    [handleTimeChange]
   );
 
   return (
@@ -40,7 +40,7 @@ export default function OverviewHeader({
         alignItems="center"
         gutterSize="xs"
       >
-        <EuiTitle size="s">
+        <EuiTitle size="xs">
           <span>{overviewHeaderTitle}</span>
         </EuiTitle>
       </EuiFlexGroup>
@@ -62,15 +62,8 @@ export default function OverviewHeader({
           query={undefined}
           dateRangeFrom={timeRange.from}
           dateRangeTo={timeRange.to}
-          onQuerySubmit={(payload) =>
-            onTimeChange({ start: payload.dateRange.from, end: payload.dateRange.to })
-          }
-          onRefresh={(payload) => handleRefresh(payload.dateRange)}
-          onRefreshChange={({ refreshInterval, isPaused }) =>
-            onRefreshChange({ refreshInterval, isPaused })
-          }
-          refreshInterval={timeRange.refresh.value}
-          isRefreshPaused={timeRange.refresh.pause}
+          onQuerySubmit={(payload) => onTimeChange(payload.dateRange)}
+          isAutoRefreshDisabled={true}
         />
       </EuiFlexGroup>
     </EuiFlexGroup>

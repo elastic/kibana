@@ -93,7 +93,12 @@ export class BreakedLegend extends Component<Props, State> {
               title={this.props.style.getDisplayStyleName()}
               content={this.state.label}
             >
-              <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
+              <EuiText
+                className="eui-textTruncate"
+                size="xs"
+                style={{ maxWidth: '180px' }}
+                tabIndex={0}
+              >
                 <small>
                   <strong>{this.state.label}</strong>
                 </small>

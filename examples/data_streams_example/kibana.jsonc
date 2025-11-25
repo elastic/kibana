@@ -3,10 +3,14 @@
   "id": "@kbn/data-streams-example-plugin",
   "owner": "@elastic/kibana-core",
   "description": "Testing the data streams core service",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "dataStreamsExample",
     "server": true,
     "browser": false,
-    "requiredPlugins": ["developerExamples"]
+    "requiredPlugins": [
+      "developerExamples"
+    ]
   }
 }

@@ -20,6 +20,7 @@ import {
   selectTriggerApplyChanges,
   selectChangesApplied,
   removeDimension,
+  setLayerDefaultDimension,
 } from '.';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { makeLensStore, defaultState, mockStoreDeps } from '../mocks';
@@ -29,10 +30,11 @@ import type {
   Visualization,
   VisualizationDimensionGroupConfig,
   VisualizationMap,
-} from '../types';
+  DataViewsState,
+  LensAppState,
+} from '@kbn/lens-common';
+import { LENS_LAYER_TYPES } from '@kbn/lens-common';
 import { applyChanges, disableAutoApply, enableAutoApply, setChangesApplied } from './lens_slice';
-import type { DataViewsState, LensAppState } from './types';
-import { layerTypes } from '../../common/layer_types';
 
 describe('lensSlice', () => {
   let store: EnhancedStore<{ lens: LensAppState }>;
@@ -308,7 +310,7 @@ describe('lensSlice', () => {
           getLayerIds: (layerIds: unknown) => layerIds as string[],
           getLayersToLinkTo: (state, newLayerId) => ['linked-layer-id'],
           appendLayer: (layerIds: unknown, layerId: string) => [...(layerIds as string[]), layerId],
-          getSupportedLayers: jest.fn(() => [{ type: layerTypes.DATA, label: 'Data Layer' }]),
+          getSupportedLayers: jest.fn(() => [{ type: LENS_LAYER_TYPES.DATA, label: 'Data Layer' }]),
         } as Partial<Visualization>,
       };
 
@@ -321,11 +323,13 @@ describe('lensSlice', () => {
             visualization: {
               activeId: activeVisId,
               state: ['layer1', 'layer2'],
+              selectedLayerId: null,
             },
             stagedPreview: {
               visualization: {
                 activeId: activeVisId,
                 state: ['layer1', 'layer2'],
+                selectedLayerId: null,
               },
               datasourceStates,
             },
@@ -385,7 +389,7 @@ describe('lensSlice', () => {
         customStore.dispatch(
           addLayer({
             layerId: 'foo',
-            layerType: layerTypes.DATA,
+            layerType: LENS_LAYER_TYPES.DATA,
             extraArg: undefined,
           })
         );
@@ -455,6 +459,177 @@ describe('lensSlice', () => {
         `);
       });
 
+      // These tests replicate behavior that was previously tested in ConfigPanel tests
+      // back when that component rendered all layers. Now that layer management moved to tabs
+      // into LayerTabs and addLayer is no longer part of ConfigPanel,
+      // we are just testing the state behavior here.
+      describe('setLayerDefaultDimension', () => {
+        it('should not call initializeDimension when layer has noDatasource: true', () => {
+          const activeVisualization = visualizationMap[activeVisId] as Visualization;
+          const testDatasourceWithInit = {
+            ...datasourceMap.testDatasource,
+            initializeDimension: jest.fn((state) => state),
+          };
+          const setDimensionMock = jest.fn(({ prevState }) => prevState);
+
+          const customStoreWithInit = makeLensStore({
+            preloadedState: {
+              activeDatasourceId: 'testDatasource',
+              datasourceStates,
+              visualization: {
+                activeId: activeVisId,
+                state: ['layer1'],
+                selectedLayerId: null,
+              },
+            },
+            storeDeps: mockStoreDeps({
+              visualizationMap: {
+                [activeVisId]: {
+                  ...activeVisualization,
+                  getSupportedLayers: jest.fn(() => [
+                    {
+                      type: LayerTypes.ANNOTATIONS,
+                      label: 'Annotations',
+                      noDatasource: true,
+                      initialDimensions: [
+                        {
+                          groupId: 'testGroup',
+                          columnId: 'testColumn',
+                          staticValue: 100,
+                        },
+                      ],
+                    },
+                  ]),
+                  getLayerType: jest.fn(() => LayerTypes.ANNOTATIONS),
+                  setDimension: setDimensionMock,
+                  getConfiguration: jest.fn(() => ({ groups: [] })),
+                },
+              } as unknown as VisualizationMap,
+              datasourceMap: {
+                testDatasource: testDatasourceWithInit,
+              } as unknown as DatasourceMap,
+            }),
+          }).store;
+
+          customStoreWithInit.dispatch(
+            setLayerDefaultDimension({
+              layerId: 'layer1',
+              columnId: 'testColumn',
+              groupId: 'testGroup',
+            })
+          );
+
+          expect(testDatasourceWithInit.initializeDimension).not.toHaveBeenCalled();
+          expect(setDimensionMock).toHaveBeenCalled();
+        });
+
+        it('should call initializeDimension when layer does not have noDatasource flag', () => {
+          const activeVisualization = visualizationMap[activeVisId] as Visualization;
+          const testDatasourceWithInit = {
+            ...datasourceMap.testDatasource,
+            initializeDimension: jest.fn((state) => state),
+          };
+
+          const customStoreWithInit = makeLensStore({
+            preloadedState: {
+              activeDatasourceId: 'testDatasource',
+              datasourceStates,
+              visualization: {
+                activeId: activeVisId,
+                state: ['layer1'],
+                selectedLayerId: null,
+              },
+            },
+            storeDeps: mockStoreDeps({
+              visualizationMap: {
+                [activeVisId]: {
+                  ...activeVisualization,
+                  getSupportedLayers: jest.fn(() => [
+                    {
+                      type: LayerTypes.DATA,
+                      label: 'Data Layer',
+                      initialDimensions: [
+                        {
+                          groupId: 'testGroup',
+                          columnId: 'testColumn',
+                          staticValue: 100,
+                        },
+                      ],
+                    },
+                  ]),
+                  getLayerType: jest.fn(() => LayerTypes.DATA),
+                  setDimension: jest.fn(({ prevState }) => prevState),
+                  getConfiguration: jest.fn(() => ({ groups: [] })),
+                },
+              } as unknown as VisualizationMap,
+              datasourceMap: {
+                testDatasource: testDatasourceWithInit,
+              } as unknown as DatasourceMap,
+            }),
+          }).store;
+
+          customStoreWithInit.dispatch(
+            setLayerDefaultDimension({
+              layerId: 'layer1',
+              columnId: 'testColumn',
+              groupId: 'testGroup',
+            })
+          );
+
+          expect(testDatasourceWithInit.initializeDimension).toHaveBeenCalled();
+        });
+
+        it('should not initialize dimension when no initialDimensions are specified', () => {
+          const activeVisualization = visualizationMap[activeVisId] as Visualization;
+          const testDatasourceWithInit = {
+            ...datasourceMap.testDatasource,
+            initializeDimension: jest.fn((state) => state),
+          };
+
+          const customStoreWithInit = makeLensStore({
+            preloadedState: {
+              activeDatasourceId: 'testDatasource',
+              datasourceStates,
+              visualization: {
+                activeId: activeVisId,
+                state: ['layer1'],
+                selectedLayerId: null,
+              },
+            },
+            storeDeps: mockStoreDeps({
+              visualizationMap: {
+                [activeVisId]: {
+                  ...activeVisualization,
+                  getSupportedLayers: jest.fn(() => [
+                    {
+                      type: LayerTypes.REFERENCELINE,
+                      label: 'Reference Layer',
+                      // No initialDimensions specified
+                    },
+                  ]),
+                  getLayerType: jest.fn(() => LayerTypes.REFERENCELINE),
+                  setDimension: jest.fn(({ prevState }) => prevState),
+                  getConfiguration: jest.fn(() => ({ groups: [] })),
+                },
+              } as unknown as VisualizationMap,
+              datasourceMap: {
+                testDatasource: testDatasourceWithInit,
+              } as unknown as DatasourceMap,
+            }),
+          }).store;
+
+          customStoreWithInit.dispatch(
+            setLayerDefaultDimension({
+              layerId: 'layer1',
+              columnId: 'testColumn',
+              groupId: 'testGroup',
+            })
+          );
+
+          expect(testDatasourceWithInit.initializeDimension).not.toHaveBeenCalled();
+        });
+      });
+
       it('removeLayer: should remove the layer if it is not the only layer', () => {
         customStore.dispatch(
           removeOrClearLayer({
@@ -493,11 +668,13 @@ describe('lensSlice', () => {
             visualization: {
               activeId: activeVisId,
               state: ['layer1', 'layer2'],
+              selectedLayerId: null,
             },
             stagedPreview: {
               visualization: {
                 activeId: activeVisId,
                 state: ['layer1', 'layer2'],
+                selectedLayerId: null,
               },
               datasourceStates,
             },
@@ -574,6 +751,7 @@ describe('lensSlice', () => {
             visualization: {
               activeId: activeVisId,
               state: visualizationState,
+              selectedLayerId: null,
             },
             dataViews,
           } as Partial<LensAppState>,

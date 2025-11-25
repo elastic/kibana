@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { getRegularEcsField } from '@kbn/streams-schema';
 import { EcsRecommendation } from './ecs_recommendation';
@@ -92,6 +93,9 @@ export const FieldTypeSelector = ({
       valueOfSelected={value}
       options={typeSelectorOptions}
       fullWidth
+      aria-label={i18n.translate('xpack.streams.fieldFormType.typeSelectAriaLabel', {
+        defaultMessage: 'Field type',
+      })}
     />
   );
 };

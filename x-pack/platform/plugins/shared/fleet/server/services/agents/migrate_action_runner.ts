@@ -66,16 +66,24 @@ export async function bulkMigrateAgentsBatch(
         `Agent ${agent.id} cannot be migrated because it is a fleet-server.`
       );
     } else if (!isAgentMigrationSupported(agent)) {
-      errors[agent.id] = new FleetError(
-        `Agent ${agent.id} cannot be migrated. Migrate action is supported from version ${MINIMUM_MIGRATE_AGENT_VERSION}.`
-      );
+      // Check if it's specifically a containerized agent
+      if (agent.local_metadata?.elastic?.agent?.upgradeable === false) {
+        errors[agent.id] = new FleetError(
+          `Agent ${agent.id} cannot be migrated because it is containerized.`
+        );
+      } else {
+        // Otherwise it's a version issue
+        errors[agent.id] = new FleetError(
+          `Agent ${agent.id} cannot be migrated. Migrate action is supported from version ${MINIMUM_MIGRATE_AGENT_VERSION}.`
+        );
+      }
     } else {
       agentsToAction.push(agent);
     }
   });
   const actionId = options.actionId ?? uuidv4();
-  const total = options.total ?? agents.length;
   const agentIds = agentsToAction.map((agent) => agent.id);
+  const total = options.total ?? agentIds.length;
   const spaceId = options.spaceId;
   const namespaces = spaceId ? [spaceId] : [];
 

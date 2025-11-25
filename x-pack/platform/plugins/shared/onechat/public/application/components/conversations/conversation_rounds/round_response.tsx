@@ -38,6 +38,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       aria-label={i18n.translate('xpack.onechat.round.assistantResponse', {
         defaultMessage: 'Assistant response',
       })}
+      data-test-subj="agentBuilderRoundResponse"
     >
       {showThinking && (
         <EuiFlexItem grow={false}>

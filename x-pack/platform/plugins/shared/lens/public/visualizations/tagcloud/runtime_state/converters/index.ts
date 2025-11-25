@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GeneralDatasourceStates } from '../../../../state_management';
+import type { GeneralDatasourceStates } from '@kbn/lens-common';
 import { convertToRawColorMappingsFn } from './raw_color_mappings';
 
 export const getRuntimeConverters = (datasourceStates?: Readonly<GeneralDatasourceStates>) => [

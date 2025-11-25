@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
+import { IOCRightPanelKey } from '../../../../../flyout/ioc_details/constants/panel_keys';
 import { BUTTON_TEST_ID } from './test_ids';
 import { VIEW_DETAILS_BUTTON_LABEL } from './translations';
 
@@ -17,35 +18,39 @@ export interface OpenIndicatorFlyoutButtonProps {
    * {@link Indicator} passed to the flyout component.
    */
   indicator: Indicator;
-  /**
-   * Method called by the onClick event to open/close the flyout.
-   */
-  onOpen: (indicator: Indicator) => void;
-  /**
-   * Boolean used to change the color and type of icon depending on the state of the flyout.
-   */
-  isOpen: boolean;
 }
 
 /**
  * Button added to the actions column of the indicators table to open/close the IndicatorFlyout component.
  */
-export const OpenIndicatorFlyoutButton: FC<OpenIndicatorFlyoutButtonProps> = ({
-  indicator,
-  onOpen,
-  isOpen,
-}) => {
+export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyoutButtonProps) => {
+  const { openFlyout } = useExpandableFlyoutApi();
+
+  const open = useCallback(
+    () =>
+      openFlyout({
+        right: {
+          id: IOCRightPanelKey,
+          params: {
+            id: indicator._id,
+          },
+        },
+      }),
+    [indicator._id, openFlyout]
+  );
+
   return (
     <EuiToolTip content={VIEW_DETAILS_BUTTON_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
-        data-test-subj={BUTTON_TEST_ID}
-        color={isOpen ? 'text' : 'primary'}
-        iconType={isOpen ? 'minimize' : 'expand'}
-        isSelected={isOpen}
-        iconSize="s"
         aria-label={VIEW_DETAILS_BUTTON_LABEL}
-        onClick={() => onOpen(indicator)}
+        data-test-subj={BUTTON_TEST_ID}
+        color="text"
+        iconType="expand"
+        onClick={open}
+        size="s"
       />
     </EuiToolTip>
   );
-};
+});
+
+OpenIndicatorFlyoutButton.displayName = 'OpenIndicatorFlyoutButton';

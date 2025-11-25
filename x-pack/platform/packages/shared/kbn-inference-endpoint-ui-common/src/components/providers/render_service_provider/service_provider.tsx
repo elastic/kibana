@@ -34,6 +34,7 @@ import deepSeekIcon from '../assets/images/deepseek.svg';
 import ai21Icon from '../assets/images/ai21_labs_default.svg';
 import llamaIcon from '../assets/images/llama_stack_default.svg';
 import defaultIcon from '../assets/images/default_connector_icon.svg';
+import contextualAiIcon from '../assets/images/contextual_ai_icon.svg';
 
 interface ServiceProviderProps {
   providerKey: ServiceProviderKeys;
@@ -87,6 +88,11 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
   [ServiceProviderKeys.cohere]: {
     icon: cohereIcon,
     name: 'Cohere',
+    solutions: ['Search'],
+  },
+  [ServiceProviderKeys.contextualai]: {
+    icon: contextualAiIcon,
+    name: 'Contextual AI',
     solutions: ['Search'],
   },
   [ServiceProviderKeys.elasticsearch]: {
@@ -184,5 +190,9 @@ export const ServiceProviderName: React.FC<ServiceProviderProps> = ({
   const provider = SERVICE_PROVIDERS[providerKey];
   const providerName = provider ? provider.name : providerKey;
 
-  return <EuiHighlight search={searchValue ?? ''}>{providerName}</EuiHighlight>;
+  return (
+    <EuiHighlight data-test-subj={`${providerName}-provider`} search={searchValue ?? ''}>
+      {providerName}
+    </EuiHighlight>
+  );
 };

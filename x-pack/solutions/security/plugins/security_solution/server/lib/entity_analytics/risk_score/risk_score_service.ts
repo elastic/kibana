@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import { ENABLE_ESQL_RISK_SCORING } from '../../../../common/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
 import type {
@@ -42,7 +43,7 @@ export interface RiskScoreService {
   refreshRiskScoreIndex: () => Promise<void>;
   resetToZero: (
     deps: Pick<ResetToZeroDependencies, 'refresh' | 'entityType' | 'excludedEntities'>
-  ) => Promise<void>;
+  ) => Promise<{ scoresWritten: number }>;
 }
 
 export interface RiskScoreServiceFactoryParams {
@@ -54,6 +55,7 @@ export interface RiskScoreServiceFactoryParams {
   spaceId: string;
   refresh?: 'wait_for';
   experimentalFeatures: ExperimentalFeatures;
+  uiSettingsClient: IUiSettingsClient;
 }
 
 export const riskScoreServiceFactory = ({
@@ -64,17 +66,24 @@ export const riskScoreServiceFactory = ({
   riskScoreDataClient,
   spaceId,
   experimentalFeatures,
+  uiSettingsClient,
 }: RiskScoreServiceFactoryParams): RiskScoreService => ({
-  calculateScores: (params) => {
-    const calculate = experimentalFeatures.disableESQLRiskScoring
-      ? calculateRiskScores
-      : calculateScoresWithESQL;
+  calculateScores: async (params) => {
+    const isESQLRiskScoringAdvancedSettingEnabled = await uiSettingsClient.get<boolean>(
+      ENABLE_ESQL_RISK_SCORING
+    );
+
+    const calculate =
+      !experimentalFeatures.disableESQLRiskScoring && isESQLRiskScoringAdvancedSettingEnabled
+        ? calculateScoresWithESQL
+        : calculateRiskScores;
     return calculate({
       ...params,
       assetCriticalityService,
       esClient,
       logger,
       experimentalFeatures,
+      filters: params.filters || [],
     });
   },
   calculateAndPersistScores: (params) =>
@@ -106,7 +115,7 @@ export const riskScoreServiceFactory = ({
   resetToZero: async (
     deps: Pick<ResetToZeroDependencies, 'refresh' | 'entityType' | 'excludedEntities'>
   ) => {
-    await resetToZero({
+    const results = await resetToZero({
       ...deps,
       esClient,
       dataClient: riskScoreDataClient,
@@ -114,6 +123,7 @@ export const riskScoreServiceFactory = ({
       assetCriticalityService,
       logger,
     });
+    return results;
   },
 
   getRiskInputsIndex: async (params) => riskScoreDataClient.getRiskInputsIndex(params),

@@ -7,6 +7,7 @@
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 import { decompressFromBase64 } from 'lz-string';
 import { getSavedQuerySecurityUtils } from '../../../saved_query_management/utils/saved_query_security';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -214,7 +215,8 @@ export default function (ctx: FtrProviderContext) {
         const actualUrl = await share.getSharedUrl();
         expect(actualUrl).to.contain(`?l=${DISCOVER_APP_LOCATOR}`);
         const urlSearchParams = new URLSearchParams(actualUrl);
-        expect(JSON.parse(decompressFromBase64(urlSearchParams.get('lz')!)!)).to.eql({
+        const parsedSharedUrl = JSON.parse(decompressFromBase64(urlSearchParams.get('lz')!)!);
+        expect(omit(parsedSharedUrl, 'tab')).to.eql({
           query: {
             language: 'kuery',
             query: '',
@@ -233,6 +235,8 @@ export default function (ctx: FtrProviderContext) {
             pause: true,
           },
         });
+        expect(parsedSharedUrl.tab.id).to.be.a('string');
+        expect(parsedSharedUrl.tab.label).to.be.a('string');
         await share.closeShareModal();
       });
 

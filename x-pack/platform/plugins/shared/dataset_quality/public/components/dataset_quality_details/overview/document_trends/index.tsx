@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
 import React, { useCallback } from 'react';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import {
   discoverAriaText,
   openInDiscoverText,
@@ -23,6 +24,7 @@ import {
   editFailureStoreText,
 } from '../../../../../common/translations';
 import {
+  useDatasetDetailsTelemetry,
   useDatasetQualityDetailsState,
   useFailureStoreModal,
   useQualityIssuesDocsChart,
@@ -54,6 +56,8 @@ export default function DocumentTrends({
     ...qualityIssuesChartProps
   } = useQualityIssuesDocsChart();
 
+  const { trackDatasetDetailsBreakdownFieldChanged } = useDatasetDetailsTelemetry();
+
   const {
     services: { application, alerting },
   } = useKibanaContextForPlugin();
@@ -67,6 +71,14 @@ export default function DocumentTrends({
     [updateTimeRange]
   );
 
+  const onBreakdownFieldChange = useCallback(
+    (breakdownField: DataViewField | undefined) => {
+      trackDatasetDetailsBreakdownFieldChanged();
+      breakdown.onChange(breakdownField);
+    },
+    [breakdown, trackDatasetDetailsBreakdownFieldChanged]
+  );
+
   const {
     openModal: openFailureStoreModal,
     canUserManageFailureStore,
@@ -75,7 +87,6 @@ export default function DocumentTrends({
 
   return (
     <>
-      <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="stretch" justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
           <EuiSkeletonRectangle width={160} height={32} isLoading={!dataView}>
@@ -87,7 +98,7 @@ export default function DocumentTrends({
                     ? breakdown.dataViewField
                     : undefined,
               }}
-              onBreakdownFieldChange={breakdown.onChange}
+              onBreakdownFieldChange={onBreakdownFieldChange}
             />
           </EuiSkeletonRectangle>
         </EuiFlexItem>
@@ -101,6 +112,7 @@ export default function DocumentTrends({
                 size="s"
                 data-test-subj="datasetQualityDetailsLinkToDiscover"
                 {...redirectLinkProps.linkProps}
+                color="text"
               />
             </EuiToolTip>
             {displayCreateRuleButton && isAlertingAvailable && (
@@ -112,6 +124,7 @@ export default function DocumentTrends({
                   size="s"
                   data-test-subj="datasetQualityDetailsCreateRule"
                   onClick={openAlertFlyout}
+                  color="text"
                 />
               </EuiToolTip>
             )}
@@ -124,6 +137,7 @@ export default function DocumentTrends({
                   size="s"
                   data-test-subj="datasetQualityDetailsEditFailureStore"
                   onClick={openFailureStoreModal}
+                  color="text"
                 />
               </EuiToolTip>
             )}

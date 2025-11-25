@@ -30,7 +30,6 @@ import { css } from '@emotion/react';
 import type { FileUploadResults } from '@kbn/file-upload-common';
 import { i18n } from '@kbn/i18n';
 import { ErrorCallout } from './error_callout';
-import { isPlaceholderColumn } from '../utils';
 import { UnsavedChangesModal } from './modals/unsaved_changes_modal';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 import { QueryBar } from './query_bar';
@@ -62,6 +61,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     coreStart.application,
     coreStart.http,
     coreStart.notifications,
+    undefined,
     // onUploadComplete
     (results: FileUploadResults | null) => {
       if (results) {
@@ -73,11 +73,9 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     }
   );
 
-  const columnsWithoutPlaceholders = dataViewColumns?.filter(
-    (column) => !isPlaceholderColumn(column.name)
-  );
+  const rowsWithValues = rows?.some((row) => Object.keys(row.flattened).length > 0);
 
-  const noResults = !isLoading && columnsWithoutPlaceholders?.length === 0;
+  const noResults = !isLoading && !rowsWithValues;
 
   return (
     <KibanaContextProvider
@@ -112,6 +110,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
                   })}
                 >
                   <EuiBetaBadge
+                    tabIndex={0}
                     label=""
                     iconType="beaker"
                     size="s"
@@ -137,7 +136,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
               {dataView ? (
                 <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
                   <EuiFlexItem grow={false}>
-                    <QueryBar />
+                    <QueryBar onOpenIndexInDiscover={props.onOpenIndexInDiscover} />
                   </EuiFlexItem>
 
                   <EuiFlexItem grow={true} css={{ minHeight: 0 }}>

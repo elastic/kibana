@@ -27,13 +27,10 @@ import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
-import {
-  type RuntimeStateManager,
-  selectTabRuntimeAppState,
-  selectTabRuntimeInternalState,
-} from './runtime_state';
+import { type RuntimeStateManager, selectTabRuntimeInternalState } from './runtime_state';
 import {
   TabsBarVisibility,
   type DiscoverInternalState,
@@ -43,6 +40,8 @@ import {
 import { loadDataViewList, initializeTabs } from './actions';
 import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
+import type { DiscoverSearchSessionManager } from '../discover_search_session';
+import { createEsqlDataSource } from '../../../../../common/data_sources';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
@@ -178,6 +177,25 @@ export const internalStateSlice = createSlice({
         tab.globalState = action.payload.globalState;
       }),
 
+    setAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
+      withTab(state, action, (tab) => {
+        let appState = action.payload.appState;
+
+        // When updating to an ES|QL query, sync the data source
+        if (isOfAggregateQueryType(appState.query)) {
+          appState = { ...appState, dataSource: createEsqlDataSource() };
+        }
+
+        tab.previousAppState = tab.appState;
+        tab.appState = appState;
+      }),
+
+    resetAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
+      withTab(state, action, (tab) => {
+        tab.previousAppState = action.payload.appState;
+        tab.appState = action.payload.appState;
+      }),
+
     setOverriddenVisContextAfterInvalidation: (
       state,
       action: TabAction<Pick<TabState, 'overriddenVisContextAfterInvalidation'>>
@@ -275,6 +293,13 @@ export const internalStateSlice = createSlice({
       withTab(state, action, (tab) => {
         tab.uiState.searchDraft = action.payload.searchDraftUiState;
       }),
+    setMetricsGridState: (
+      state,
+      action: TabAction<{ metricsGridState: Partial<TabState['uiState']['metricsGrid']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.metricsGrid = action.payload.metricsGridState;
+      }),
   },
   extraReducers: (builder) => {
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {
@@ -326,13 +351,10 @@ const createMiddleware = (options: InternalStateDependencies) => {
         const discoverSession =
           action.payload.updatedDiscoverSession ?? listenerApi.getState().persistedDiscoverSession;
         const { runtimeStateManager, tabsStorageManager } = listenerApi.extra;
-        const getTabAppState = (tabId: string) =>
-          selectTabRuntimeAppState(runtimeStateManager, tabId);
         const getTabInternalState = (tabId: string) =>
           selectTabRuntimeInternalState(runtimeStateManager, tabId);
         void tabsStorageManager.persistLocally(
           action.payload,
-          getTabAppState,
           getTabInternalState,
           discoverSession?.id
         );
@@ -350,7 +372,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
         withTab(listenerApi.getState(), action, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
             internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id),
-            appState: selectTabRuntimeAppState(runtimeStateManager, tab.id),
+            appState: tab.appState,
             globalState: tab.globalState,
           });
         });
@@ -376,6 +398,7 @@ export interface InternalStateDependencies {
   runtimeStateManager: RuntimeStateManager;
   urlStateStorage: IKbnUrlStateStorage;
   tabsStorageManager: TabsStorageManager;
+  searchSessionManager: DiscoverSearchSessionManager;
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';

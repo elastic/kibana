@@ -443,4 +443,82 @@ describe('useLookupIndexCommand', () => {
     expect(decoratorResult).toBe(false);
     expect(mockModel.deltaDecorations).not.toHaveBeenCalled();
   });
+
+  it('should call onNewFieldsAddedToIndex when a new field has been added', async () => {
+    const mockOnNewFieldsAddedToIndex = jest.fn();
+
+    renderHook(
+      () =>
+        useLookupIndexCommand(
+          mockEditorRef,
+          mockEditorModel,
+          mockGetLookupIndices,
+          mockQuery,
+          mockOnIndexCreated,
+          mockOnNewFieldsAddedToIndex
+        ),
+      { wrapper: createWrapper }
+    );
+
+    // Access the onFlyoutClose function through the openFlyout mechanism
+    const trigger = mockServices.uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID');
+    (trigger.exec as jest.Mock).mockImplementation(async (context) => {
+      await context.onClose({
+        indexName: 'test-index',
+        indexCreatedDuringFlyout: false,
+        indexHasNewFields: true,
+      });
+    });
+
+    // Trigger the command
+    const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
+    const commandHandler = registerCommandCall[1];
+
+    await commandHandler(undefined, {
+      indexName: 'test-index',
+      doesIndexExist: false,
+      canEditIndex: false,
+    });
+
+    expect(mockOnNewFieldsAddedToIndex).toHaveBeenCalledWith('test-index');
+  });
+
+  it('should not call onNewFieldsAddedToIndex when no new field has been added', async () => {
+    const mockOnNewFieldsAddedToIndex = jest.fn();
+
+    renderHook(
+      () =>
+        useLookupIndexCommand(
+          mockEditorRef,
+          mockEditorModel,
+          mockGetLookupIndices,
+          mockQuery,
+          mockOnIndexCreated,
+          mockOnNewFieldsAddedToIndex
+        ),
+      { wrapper: createWrapper }
+    );
+
+    // Access the onFlyoutClose function through the openFlyout mechanism
+    const trigger = mockServices.uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID');
+    (trigger.exec as jest.Mock).mockImplementation(async (context) => {
+      await context.onClose({
+        indexName: 'test-index',
+        indexCreatedDuringFlyout: false,
+        indexHasNewFields: false,
+      });
+    });
+
+    // Trigger the command
+    const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
+    const commandHandler = registerCommandCall[1];
+
+    await commandHandler(undefined, {
+      indexName: 'test-index',
+      doesIndexExist: false,
+      canEditIndex: false,
+    });
+
+    expect(mockOnNewFieldsAddedToIndex).not.toHaveBeenCalled();
+  });
 });

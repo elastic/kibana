@@ -11,7 +11,11 @@ import type { MonitoringEntitySource } from '../../../../../../../../common/api/
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { MonitoringEntitySourceDescriptorClient } from '../../../../saved_objects';
 
-const FIRST_RUN_DEFAULT_RANGE = 'now-1M'; // on first run, look back over last month
+const FIRST_RUN_DEFAULT_RANGE = 'now-1M'; // on first run (update detection), look back over last month
+interface EventDoc {
+  '@timestamp': string;
+  event?: { action?: 'started' | 'completed' };
+}
 
 const parseOrThrow = (expr: string): string => {
   const date = datemath.parse(expr);
@@ -44,8 +48,60 @@ export const createSyncMarkersService = (
     }
   };
 
+  const updateLastFullSyncMarker = async (
+    source: MonitoringEntitySource,
+    lastFullSyncMarker: string
+  ): Promise<void> => {
+    await monitoringIndexSourceClient.updateLastFullSyncMarker(source, lastFullSyncMarker);
+  };
+
+  const getLastFullSyncMarker = async (
+    source: MonitoringEntitySource
+  ): Promise<string | undefined> => {
+    const fromSO = await monitoringIndexSourceClient.getLastFullSyncMarker(source);
+    if (fromSO) return fromSO;
+    return undefined;
+  };
+
+  const findLastEventMarkerInIndex = async (
+    source: MonitoringEntitySource,
+    action: 'started' | 'completed'
+  ) => {
+    // find the last event marker in the index
+    const esClient = deps.clusterClient.asCurrentUser;
+    const resp = await esClient.search<EventDoc>({
+      index: source.integrations?.syncMarkerIndex,
+      sort: [{ '@timestamp': { order: 'desc' } }],
+      size: 1,
+      query: {
+        term: { 'event.action': action },
+      },
+      _source: ['@timestamp'],
+    });
+    const hit = resp?.hits?.hits?.[0]?._source?.['@timestamp'] ?? undefined;
+    return hit;
+  };
+
+  const detectNewFullSync = async (source: MonitoringEntitySource): Promise<boolean> => {
+    const lastFullSync = await getLastFullSyncMarker(source);
+    const latestCompletedEvent = await findLastEventMarkerInIndex(source, 'completed');
+    // No completed event found, no new full sync.
+    if (!latestCompletedEvent) return false;
+
+    // Decide if we should update (first marker OR newer than saved)
+    const shouldUpdate = !lastFullSync || latestCompletedEvent > lastFullSync;
+
+    if (!shouldUpdate) return false;
+    await updateLastFullSyncMarker(source, latestCompletedEvent);
+    return true;
+  };
+
   return {
     updateLastProcessedMarker,
     getLastProcessedMarker,
+    updateLastFullSyncMarker,
+    getLastFullSyncMarker,
+    detectNewFullSync,
+    findLastEventMarkerInIndex,
   };
 };

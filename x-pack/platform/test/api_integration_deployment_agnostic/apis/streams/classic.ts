@@ -56,6 +56,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             settings: {},
             processing: { steps: [] },
             classic: {},
+            failure_store: { inherit: {} },
           },
         } satisfies Streams.ClassicStream.Definition);
       });
@@ -86,6 +87,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     ],
                   },
                   classic: {},
+                  failure_store: { inherit: {} },
                 },
               },
             },
@@ -135,6 +137,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ],
             },
             classic: {},
+            failure_store: { inherit: {} },
           },
         } satisfies Streams.ClassicStream.Definition);
 
@@ -201,6 +204,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   processing: { steps: [] },
                   settings: {},
                   classic: {},
+                  failure_store: { inherit: {} },
                 },
               },
             },
@@ -261,6 +265,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               classic: {
                 field_overrides: {},
               },
+              failure_store: { inherit: {} },
             },
           },
         };
@@ -274,7 +279,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect((streamsResponse as any).message).to.contain('Failed to change state:');
         expect((streamsResponse as any).message).to.contain(
-          `The cluster state may be inconsistent. If you experience issues, please use the resync API to restore a consistent state.`
+          `The stream state may be inconsistent. Revert your last change, or use the resync API to restore a consistent state.`
         );
       });
     });
@@ -299,6 +304,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       },
                     },
                   },
+                  failure_store: { inherit: {} },
                 },
               },
             },
@@ -330,6 +336,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       },
                     },
                   },
+                  failure_store: { inherit: {} },
                 },
               },
             },
@@ -467,6 +474,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ],
               },
               classic: {},
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -530,6 +538,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ],
               },
               classic: {},
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -554,6 +563,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               processing: { steps: [] },
               settings: {},
               classic: {},
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -575,6 +585,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               processing: { steps: [] },
               settings: {},
               classic: {},
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -647,6 +658,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               classic: {
                 field_overrides: {},
               },
+              failure_store: { inherit: {} },
             },
           },
         };
@@ -700,10 +712,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 ],
               },
-
               classic: {
                 field_overrides: {},
               },
+              failure_store: { inherit: {} },
             },
           },
         };
@@ -735,6 +747,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   processing: { steps: [] },
                   settings: {},
                   classic: {},
+                  failure_store: { inherit: {} },
                 },
               },
             },

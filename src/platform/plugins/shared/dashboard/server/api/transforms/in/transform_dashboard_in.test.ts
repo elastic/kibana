@@ -1,0 +1,173 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
+import type { DashboardState } from '../../types';
+import { transformDashboardIn } from './transform_dashboard_in';
+
+describe('transformDashboardIn', () => {
+  test('should transform dashboard state to saved object', () => {
+    const dashboardState: DashboardState = {
+      controlGroupInput: {
+        chainingSystem: 'NONE',
+        labelPosition: 'twoLine',
+        controls: [
+          {
+            controlConfig: { anyKey: 'some value' },
+            grow: false,
+            id: 'foo',
+            order: 0,
+            type: 'type1',
+            width: 'small',
+          },
+        ],
+        ignoreParentSettings: {
+          ignoreFilters: true,
+          ignoreQuery: true,
+          ignoreTimerange: true,
+          ignoreValidations: true,
+        },
+        autoApplySelections: false,
+      },
+      description: 'description',
+      query: { query: 'test', language: 'KQL' },
+      options: {
+        hidePanelTitles: true,
+        useMargins: false,
+        syncColors: false,
+        syncTooltips: false,
+        syncCursor: false,
+      },
+      panels: [
+        {
+          grid: { x: 0, y: 0, w: 10, h: 10 },
+          config: {
+            enhancements: {},
+            savedObjectId: '1',
+          },
+          uid: '1',
+          title: 'title1',
+          type: 'type1',
+          version: '2',
+        },
+      ],
+      tags: [],
+      title: 'title',
+      refreshInterval: { pause: true, value: 1000 },
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "controlGroupInput": Object {
+            "chainingSystem": "NONE",
+            "controlStyle": "twoLine",
+            "ignoreParentSettingsJSON": "{\\"ignoreFilters\\":true,\\"ignoreQuery\\":true,\\"ignoreTimerange\\":true,\\"ignoreValidations\\":true}",
+            "panelsJSON": "{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"anyKey\\":\\"some value\\"}}}",
+            "showApplySelections": true,
+          },
+          "description": "description",
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"KQL\\"}}",
+          },
+          "optionsJSON": "{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncTooltips\\":false,\\"syncCursor\\":false}",
+          "panelsJSON": "[{\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"version\\":\\"2\\",\\"embeddableConfig\\":{\\"enhancements\\":{},\\"savedObjectId\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
+          "refreshInterval": Object {
+            "pause": true,
+            "value": 1000,
+          },
+          "timeFrom": "now-15m",
+          "timeRestore": true,
+          "timeTo": "now",
+          "title": "title",
+        },
+        "error": null,
+        "references": Array [],
+      }
+    `);
+  });
+
+  it('should handle missing optional state keys', () => {
+    const dashboardState: DashboardState = {
+      title: 'title',
+      description: 'my description',
+      panels: [],
+      options: DEFAULT_DASHBOARD_OPTIONS,
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "description": "my description",
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "{}",
+          },
+          "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"syncColors\\":false,\\"syncCursor\\":true,\\"syncTooltips\\":false}",
+          "panelsJSON": "[]",
+          "timeRestore": false,
+          "title": "title",
+        },
+        "error": null,
+        "references": Array [],
+      }
+    `);
+  });
+
+  it('should return error when passed tag references', () => {
+    const dashboardState: DashboardState = {
+      title: 'title',
+      panels: [],
+      references: [
+        {
+          name: 'someTagRef',
+          type: 'tag',
+          id: '1',
+        },
+      ],
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output).toMatchInlineSnapshot(`
+      Object {
+        "attributes": null,
+        "error": [Error: Tag references are not supported. Pass tags in with 'data.tags'],
+        "references": null,
+      }
+    `);
+  });
+
+  it('should return error when passed search source references', () => {
+    const dashboardState: DashboardState = {
+      title: 'title',
+      panels: [],
+      references: [
+        {
+          id: 'fizzle-1234',
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+          type: 'index-pattern',
+        },
+      ],
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output).toMatchInlineSnapshot(`
+      Object {
+        "attributes": null,
+        "error": [Error: Search source references are not supported. Pass filters in with injected references'],
+        "references": null,
+      }
+    `);
+  });
+});

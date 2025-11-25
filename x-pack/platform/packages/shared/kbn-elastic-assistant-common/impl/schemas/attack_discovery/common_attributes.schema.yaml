@@ -307,10 +307,15 @@ components:
       properties:
         alertsIndexPattern:
           type: string
+          description: |
+            The (space specific) index pattern that contains the alerts to use as
+            context for the attack discovery.
+            Example: .alerts-security.alerts-default
         anonymizationFields:
           items:
             $ref: '../anonymization_fields/bulk_crud_anonymization_fields_route.schema.yaml#/components/schemas/AnonymizationFieldResponse'
           type: array
+          description: The list of fields, and whether or not they are anonymized, allowed to be sent to LLMs. Consider using the output of the `/api/security_ai_assistant/anonymization_fields/_find` API (for a specific Kibana space) to provide this value.
         apiConfig:
           $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
           description: LLM API configuration.
@@ -321,10 +326,41 @@ components:
         filter:
           type: object
           additionalProperties: true
+          description: >-
+            An Elasticsearch-style query DSL object used to filter alerts. For
+            example:
+
+            ```json
+            {
+              "filter": {
+                "bool": {
+                  "must": [],
+                  "filter": [
+                    {
+                      "bool": {
+                        "should": [
+                          {
+                            "term": {
+                              "user.name": { "value": "james" }
+                            }
+                          }
+                        ],
+                        "minimum_should_match": 1
+                      }
+                    }
+                  ],
+                  "should": [],
+                  "must_not": []
+                }
+              }
+            }
+            ```
         langSmithProject:
           type: string
+          x-internal: true
         langSmithApiKey:
           type: string
+          x-internal: true
         model:
           type: string
         replacements:

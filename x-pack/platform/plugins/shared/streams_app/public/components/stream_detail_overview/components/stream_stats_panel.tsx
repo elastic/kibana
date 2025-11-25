@@ -19,6 +19,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { type Streams, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 
+import { useTimefilter } from '../../../hooks/use_timefilter';
 import { IlmLink } from '../../data_management/stream_detail_lifecycle/general_data/ilm_link';
 import {
   formatBytes,
@@ -88,7 +89,8 @@ const StatItem = ({ label, value, withBorder = false }: StatItemProps) => {
 };
 
 export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
-  const dataStreamStats = useDataStreamStats({ definition }).stats;
+  const { timeState } = useTimefilter();
+  const data = useDataStreamStats({ definition, timeState }).stats;
   const retentionLabel = i18n.translate('xpack.streams.entityDetailOverview.retention', {
     defaultMessage: 'Data retention',
   });
@@ -127,9 +129,12 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
               value={
                 <PrivilegesWarningIconWrapper
                   hasPrivileges={definition.privileges.monitor}
-                  title="totalDocCount"
+                  title={i18n.translate(
+                    'xpack.streams.streamStatsPanel.privilegesWarningIconWrapper.totaldoccountLabel',
+                    { defaultMessage: 'Total doc count' }
+                  )}
                 >
-                  {dataStreamStats ? formatNumber(dataStreamStats.totalDocs || 0, 'decimal0') : '-'}
+                  {data ? formatNumber(data.ds.stats.totalDocs || 0, 'decimal0') : '-'}
                 </PrivilegesWarningIconWrapper>
               }
             />
@@ -138,11 +143,12 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
               value={
                 <PrivilegesWarningIconWrapper
                   hasPrivileges={definition.privileges.monitor}
-                  title="sizeBytes"
+                  title={i18n.translate(
+                    'xpack.streams.streamStatsPanel.privilegesWarningIconWrapper.sizebytesLabel',
+                    { defaultMessage: 'Size in bytes' }
+                  )}
                 >
-                  {dataStreamStats && dataStreamStats.sizeBytes
-                    ? formatBytes(dataStreamStats.sizeBytes)
-                    : '-'}
+                  {data && data.ds.stats.sizeBytes ? formatBytes(data.ds.stats.sizeBytes) : '-'}
                 </PrivilegesWarningIconWrapper>
               }
               withBorder
@@ -166,11 +172,12 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
               value={
                 <PrivilegesWarningIconWrapper
                   hasPrivileges={definition.privileges.monitor}
-                  title="ingestionRate"
+                  title={i18n.translate(
+                    'xpack.streams.streamStatsPanel.privilegesWarningIconWrapper.ingestionrateLabel',
+                    { defaultMessage: 'Ingestion rate' }
+                  )}
                 >
-                  {dataStreamStats
-                    ? formatIngestionRate(dataStreamStats.bytesPerDay || 0, true)
-                    : '-'}
+                  {data?.ds.stats ? formatIngestionRate(data.ds.stats.bytesPerDay || 0, true) : '-'}
                 </PrivilegesWarningIconWrapper>
               }
               withBorder

@@ -64,6 +64,7 @@ import { OBSERVABLE_TYPE_HOSTNAME } from '../../../common/constants/observables'
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { useBulkPostObservables } from '../../containers/use_bulk_post_observables';
 import { DEFAULT_FEATURES } from '../../../common/constants';
+import { useAttachEventsEBT } from '../../analytics/use_attach_events_ebt';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
@@ -83,6 +84,7 @@ jest.mock('../../containers/user_profiles/api');
 jest.mock('../../common/use_license');
 jest.mock('../../containers/use_get_categories');
 jest.mock('../app/use_available_owners');
+jest.mock('../../analytics/use_attach_events_ebt');
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
@@ -101,6 +103,7 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useLicenseMock = useLicense as jest.Mock;
 const useGetCategoriesMock = useGetCategories as jest.Mock;
 const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
+const useAttachEventsEBTMock = jest.mocked(useAttachEventsEBT);
 
 const sampleId = 'case-id';
 
@@ -771,7 +774,7 @@ describe('Create case', () => {
             id: 'resilient-2',
             name: 'My Resilient connector',
             type: '.resilient',
-            fields: { incidentTypes: ['21'], severityCode: '4' },
+            fields: { incidentTypes: ['21'], severityCode: '4', additionalFields: null },
           },
         },
       });
@@ -782,7 +785,7 @@ describe('Create case', () => {
           id: 'resilient-2',
           name: 'My Resilient connector',
           type: '.resilient',
-          fields: { incidentTypes: ['21'], severityCode: '4' },
+          fields: { incidentTypes: ['21'], severityCode: '4', additionalFields: null },
         },
       });
 
@@ -953,6 +956,9 @@ describe('Create case', () => {
       attachments,
       caseOwner: 'securitySolution',
     });
+
+    // ebt should be called
+    expect(useAttachEventsEBTMock()).toHaveBeenCalled();
   });
 
   it('should NOT call createAttachments if the attachments are an empty array', async () => {
@@ -1159,6 +1165,43 @@ describe('Create case', () => {
         afterCaseOrder < pushCaseToExternalServiceOrder &&
         pushCaseToExternalServiceOrder < onFormSubmitSuccessOrder
     ).toBe(true);
+  });
+
+  it('should succeed even when pushing to an external service fails', async () => {
+    const failPushCaseToExternalService = jest.fn().mockRejectedValue(new Error('Push failed'));
+    usePostPushToServiceMock.mockImplementation(() => ({
+      isLoading: false,
+      isError: false,
+      mutateAsync: failPushCaseToExternalService,
+    }));
+
+    renderWithTestingProviders(
+      <FormContext
+        selectedOwner={SECURITY_SOLUTION_OWNER}
+        onSuccess={onFormSubmitSuccess}
+        afterCaseCreated={afterCaseCreated}
+        currentConfiguration={currentConfiguration}
+      >
+        <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectorsMock} />
+        <SubmitCaseButton />
+      </FormContext>
+    );
+
+    await waitForFormToRender();
+    await fillFormReactTestingLib({ user });
+
+    await user.click(screen.getByTestId('dropdown-connectors'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    await user.click(screen.getByTestId('create-case-submit'));
+
+    await waitFor(() => {
+      expect(onFormSubmitSuccess).toHaveBeenCalled();
+    });
   });
 
   describe('Permissions', () => {

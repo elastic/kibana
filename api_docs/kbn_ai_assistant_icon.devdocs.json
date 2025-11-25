@@ -282,7 +282,7 @@
           "\nAvatar component for the AI Assistant."
         ],
         "signature": [
-          "{ id?: string | undefined; prefix?: string | undefined; type?: \"space\" | \"user\" | undefined; onError?: React.ReactEventHandler<HTMLDivElement> | undefined; defaultValue?: string | number | readonly string[] | undefined; name: string; security?: string | undefined; className?: string | undefined; \"aria-label\"?: string | undefined; 'data-test-subj'?: string | undefined; css?: ",
+          "{ id?: string | undefined; prefix?: string | undefined; type?: \"space\" | \"user\" | undefined; onError?: React.ReactEventHandler<HTMLDivElement> | undefined; name: string; security?: string | undefined; defaultValue?: string | number | readonly string[] | undefined; className?: string | undefined; \"aria-label\"?: string | undefined; 'data-test-subj'?: string | undefined; css?: ",
           "Interpolation",
           "<",
           "Theme",
@@ -303,7 +303,7 @@
           "\nProps for the AI Assistant icon."
         ],
         "signature": [
-          "{ string?: string | number | undefined; id?: string | undefined; onError?: React.ReactEventHandler<SVGElement> | undefined; min?: string | number | undefined; end?: string | number | undefined; filter?: string | undefined; max?: string | number | undefined; in?: string | undefined; mode?: string | number | undefined; order?: string | number | undefined; version?: string | undefined; format?: string | number | undefined; fill?: string | undefined; values?: string | undefined; name?: string | undefined; transform?: string | undefined; className?: string | undefined; \"aria-label\"?: string | undefined; 'data-test-subj'?: string | undefined; css?: ",
+          "{ string?: string | number | undefined; id?: string | undefined; onError?: React.ReactEventHandler<SVGElement> | undefined; name?: string | undefined; transform?: string | undefined; min?: string | number | undefined; end?: string | number | undefined; filter?: string | undefined; max?: string | number | undefined; in?: string | undefined; mode?: string | number | undefined; order?: string | number | undefined; version?: string | undefined; format?: string | number | undefined; fill?: string | undefined; values?: string | undefined; className?: string | undefined; \"aria-label\"?: string | undefined; 'data-test-subj'?: string | undefined; css?: ",
           "Interpolation",
           "<",
           "Theme",

@@ -45,7 +45,7 @@ describe('When displaying Endpoint Response Actions', () => {
   describe('for agent type endpoint', () => {
     beforeEach(() => {
       (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
-        responseActionUploadEnabled: true,
+        responseActionsEndpointMemoryDump: true,
       });
       commands = getEndpointConsoleCommands({
         agentType: 'endpoint',
@@ -73,9 +73,18 @@ describe('When displaying Endpoint Response Actions', () => {
         HELP_GROUPS.responseActions.label
       );
 
-      const endpointCommands = CONSOLE_RESPONSE_ACTION_COMMANDS.filter(
-        (command) => command !== 'runscript' && command !== 'cancel'
-      );
+      const endpointCommands = CONSOLE_RESPONSE_ACTION_COMMANDS.filter((command) => {
+        if (
+          command === 'runscript' ||
+          command === 'cancel' ||
+          (command === 'memory-dump' &&
+            !ExperimentalFeaturesService.get().responseActionsEndpointMemoryDump)
+        ) {
+          return false;
+        }
+
+        return true;
+      });
       const expectedCommands: string[] = [...endpointCommands];
       // add status to the list of expected commands in that order
       expectedCommands.splice(2, 0, 'status');
@@ -90,11 +99,7 @@ describe('When displaying Endpoint Response Actions', () => {
   describe('for agent type sentinel_one', () => {
     beforeEach(() => {
       (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
-        responseActionsCrowdstrikeManualHostIsolationEnabled: true,
         responseActionsSentinelOneV1Enabled: true,
-        responseActionsSentinelOneGetFileEnabled: true,
-        responseActionsSentinelOneKillProcessEnabled: true,
-        responseActionsSentinelOneProcessesEnabled: true,
         responseActionsSentinelOneRunScriptEnabled: true,
       });
 
@@ -153,7 +158,6 @@ describe('When displaying Endpoint Response Actions', () => {
   describe('for agent type crowdstrike', () => {
     beforeEach(() => {
       (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
-        responseActionsCrowdstrikeManualHostIsolationEnabled: true,
         crowdstrikeRunScriptEnabled: true,
       });
       commands = getEndpointConsoleCommands({
@@ -188,10 +192,6 @@ describe('When displaying Endpoint Response Actions', () => {
 
   describe('for agent type microsoft defender for endpoint', () => {
     beforeEach(() => {
-      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
-        responseActionsMSDefenderEndpointEnabled: true,
-      });
-
       commands = getEndpointConsoleCommands({
         agentType: 'microsoft_defender_endpoint',
         endpointAgentId: '123',
@@ -219,6 +219,118 @@ describe('When displaying Endpoint Response Actions', () => {
       );
 
       expect(commandsInPanel).toEqual(['isolate', 'release']);
+    });
+
+    describe('cancel command', () => {
+      describe('when microsoftDefenderEndpointCancelEnabled is true', () => {
+        beforeEach(() => {
+          (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+            microsoftDefenderEndpointCancelEnabled: true,
+          });
+        });
+
+        it.each([
+          {
+            agentType: 'microsoft_defender_endpoint' as const,
+            flags: {
+              microsoftDefenderEndpointCancelEnabled: true,
+            },
+            hasAction: true,
+            helpVisible: true,
+          },
+          {
+            agentType: 'crowdstrike' as const,
+            flags: { microsoftDefenderEndpointCancelEnabled: true },
+            hasAction: false,
+            helpVisible: false,
+          },
+          {
+            agentType: 'sentinel_one' as const,
+            flags: {
+              responseActionsSentinelOneV1Enabled: true,
+              microsoftDefenderEndpointCancelEnabled: true,
+            },
+            hasAction: false,
+            helpVisible: false,
+          },
+          {
+            agentType: 'endpoint' as const,
+            flags: { microsoftDefenderEndpointCancelEnabled: true },
+            hasAction: false,
+            helpVisible: false,
+          },
+        ])(
+          'should include cancel command for $agentType agent type with correct configuration',
+          ({ agentType, flags, hasAction, helpVisible }) => {
+            (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue(flags);
+
+            commands = getEndpointConsoleCommands({
+              agentType,
+              endpointAgentId: '123',
+              endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
+              endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+              platform: 'linux',
+            });
+
+            const cancelCommand = commands.find((cmd) => cmd.name === 'cancel');
+
+            expect(cancelCommand).toBeDefined();
+            expect(cancelCommand?.args?.comment).toBeDefined();
+            expect(cancelCommand?.args?.comment?.required).toBe(false);
+
+            if (hasAction) {
+              expect(cancelCommand?.args?.action).toBeDefined();
+              expect(cancelCommand?.args?.action?.required).toBe(true);
+              expect(cancelCommand?.args?.action?.SelectorComponent).toBeDefined();
+            } else {
+              expect(cancelCommand?.args?.action).toBeUndefined();
+            }
+
+            expect(cancelCommand?.helpDisabled).toBe(!helpVisible);
+            expect(cancelCommand?.helpHidden).toBe(!helpVisible);
+          }
+        );
+
+        it('should show cancel command in help panel for MDE agent type', () => {
+          commands = getEndpointConsoleCommands({
+            agentType: 'microsoft_defender_endpoint',
+            endpointAgentId: '123',
+            endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
+            endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+            platform: 'linux',
+          });
+
+          render({ commands });
+          consoleSelectors.openHelpPanel();
+          const commandsInPanel = helpPanelSelectors.getHelpCommandNames(
+            HELP_GROUPS.responseActions.label
+          );
+
+          expect(commandsInPanel).toContain('cancel --action');
+        });
+      });
+
+      describe('when microsoftDefenderEndpointCancelEnabled is false', () => {
+        beforeEach(() => {
+          (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+            microsoftDefenderEndpointCancelEnabled: false,
+          });
+        });
+
+        it('should NOT include cancel command at all', () => {
+          commands = getEndpointConsoleCommands({
+            agentType: 'microsoft_defender_endpoint',
+            endpointAgentId: '123',
+            endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
+            endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+            platform: 'linux',
+          });
+
+          const cancelCommand = commands.find((cmd) => cmd.name === 'cancel');
+
+          expect(cancelCommand).toBeUndefined();
+        });
+      });
     });
   });
 });

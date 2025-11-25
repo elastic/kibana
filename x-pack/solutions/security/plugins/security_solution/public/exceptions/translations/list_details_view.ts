@@ -49,20 +49,6 @@ export const EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON = i18n.translate(
   }
 );
 
-export const EXCEPTION_LIST_SEARCH_ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.list.exceptionItemSearchErrorTitle',
-  {
-    defaultMessage: 'Error searching',
-  }
-);
-
-export const EXCEPTION_LIST_SEARCH_ERROR_BODY = i18n.translate(
-  'xpack.securitySolution.exceptions.list.exceptionItemSearchErrorBody',
-  {
-    defaultMessage: 'An error occurred searching for exception items. Please try again.',
-  }
-);
-
 export const EXCEPTION_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.exceptions.list.exceptionItemsFetchError',
   {
@@ -94,11 +80,6 @@ export const EXCEPTION_ITEM_DELETE_TEXT = (itemName: string) =>
     }
   );
 
-export const EXCEPTION_LIST_DELETED_SUCCESSFULLY = (listName: string) =>
-  i18n.translate('xpack.securitySolution.exceptions.list.deleted_successfully', {
-    values: { listName },
-    defaultMessage: '{listName} deleted successfully',
-  });
 export const MANAGE_RULES_CANCEL = i18n.translate(
   'xpack.securitySolution.exceptions.list.manage_rules_cancel',
   {

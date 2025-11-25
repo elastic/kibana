@@ -150,7 +150,7 @@ To that end, the different modules (packages and plugins) have been categorised 
 `group: 'platform'`
 : These modules are used by more than one solution, and thus they belong to the _platform_ layer, which is built / tested / loaded systematically. Platform modules **cannot** depend on solution modules.
 
-`group: 'observability' | 'security' | 'search' | 'chat'`
+`group: 'observability' | 'security' | 'search' | 'workplaceai'`
 : These modules belong to a particular solution, and their code/services are _private_ (aka they cannot be accessed from platform or from other solutions). This allows building / testing / loading them in the context of the solution they belong to.
 
 ### Platform modules have visibility

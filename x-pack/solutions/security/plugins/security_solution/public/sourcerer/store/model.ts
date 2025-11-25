@@ -9,22 +9,14 @@ import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import { EMPTY_BROWSER_FIELDS } from '@kbn/timelines-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
-
-/** Uniquely identifies a Sourcerer Scope */
-export enum SourcererScopeName {
-  default = 'default',
-  detections = 'detections',
-  timeline = 'timeline',
-  analyzer = 'analyzer',
-  explore = 'explore',
-}
+import { PageScope } from '../../data_view_manager/constants';
 
 /**
  * Data related to each sourcerer scope
  */
 export interface SourcererScope {
   /** Uniquely identifies a Sourcerer Scope */
-  id: SourcererScopeName;
+  id: PageScope;
   /** is an update being made to the sourcerer data view */
   loading: boolean;
   /** selected data view id, null if it is legacy index patterns*/
@@ -32,13 +24,13 @@ export interface SourcererScope {
   /** selected patterns within the data view */
   selectedPatterns: string[];
   /** if has length,
-   * id === SourcererScopeName.timeline
+   * id === PageScope.timeline
    * selectedDataViewId === null OR defaultDataView.id
    * saved timeline has pattern that is not in the default */
   missingPatterns: string[];
 }
 
-export type SourcererScopeById = Record<SourcererScopeName, SourcererScope>;
+export type SourcererScopeById = Record<PageScope, SourcererScope>;
 
 export interface KibanaDataView {
   /** Uniquely identifies a Kibana Data View */
@@ -109,6 +101,8 @@ export interface SourcererModel {
   defaultDataView: SourcererDataView & { id: string; error?: unknown };
   /** default security-solution alert data view */
   alertDataView: SourcererDataView & { id: string; error?: unknown };
+  /** default security-solution attack data view */
+  attackDataView: SourcererDataView & { id: string; error?: unknown };
   /** all Kibana data views, including security-solution */
   kibanaDataViews: SourcererDataView[];
   /** security solution signals index name */
@@ -120,7 +114,7 @@ export interface SourcererModel {
 }
 
 export type SourcererUrlState = Partial<{
-  [id in SourcererScopeName]: {
+  [id in PageScope]: {
     id: string;
     selectedPatterns: string[];
   };
@@ -146,29 +140,34 @@ export const initDataView: SourcererDataView & { id: string; error?: unknown } =
 export const initialSourcererState: SourcererModel = {
   defaultDataView: initDataView,
   alertDataView: initDataView,
+  attackDataView: initDataView,
   kibanaDataViews: [],
   signalIndexName: null,
   signalIndexMappingOutdated: null,
   sourcererScopes: {
-    [SourcererScopeName.default]: {
+    [PageScope.default]: {
       ...initSourcererScope,
-      id: SourcererScopeName.default,
+      id: PageScope.default,
     },
-    [SourcererScopeName.detections]: {
+    [PageScope.alerts]: {
       ...initSourcererScope,
-      id: SourcererScopeName.detections,
+      id: PageScope.alerts,
     },
-    [SourcererScopeName.timeline]: {
+    [PageScope.attacks]: {
       ...initSourcererScope,
-      id: SourcererScopeName.timeline,
+      id: PageScope.attacks,
     },
-    [SourcererScopeName.analyzer]: {
+    [PageScope.timeline]: {
       ...initSourcererScope,
-      id: SourcererScopeName.analyzer,
+      id: PageScope.timeline,
     },
-    [SourcererScopeName.explore]: {
+    [PageScope.analyzer]: {
       ...initSourcererScope,
-      id: SourcererScopeName.explore,
+      id: PageScope.analyzer,
+    },
+    [PageScope.explore]: {
+      ...initSourcererScope,
+      id: PageScope.explore,
     },
   },
 };

@@ -8,6 +8,7 @@
  */
 
 import { isArray } from 'lodash';
+import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
 import { monaco } from '../../../../monaco_imports';
 
 // From Monaco position to linear offset
@@ -114,4 +115,18 @@ export const getDecorationHoveredMessages = (
     console.error('Error extracting decoration hover messages:', error);
     return [];
   }
+};
+
+/**
+ * Extracts the suggestions with custom commands from a list of suggestions.
+ * Suggestions with editor.action.triggerSuggest are excluded.
+ * @param suggestions
+ * @returns
+ */
+export const filterSuggestionsWithCustomCommands = (suggestions: ISuggestionItem[]): string[] => {
+  return suggestions
+    .filter(
+      (suggestion) => suggestion.command && suggestion.command.id !== 'editor.action.triggerSuggest'
+    )
+    .map((suggestion) => suggestion.command!.id); // we know command is defined because of the filter
 };

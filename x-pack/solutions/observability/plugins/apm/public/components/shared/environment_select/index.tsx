@@ -147,6 +147,7 @@ export function EnvironmentSelect({
       <EuiComboBox
         data-test-subj="environmentFilter"
         async
+        compressed
         isClearable={false}
         isInvalid={isInvalid}
         placeholder={i18n.translate('xpack.apm.filter.environment.placeholder', {

@@ -16,22 +16,29 @@ import { getToolsTableColumns } from './tools_table_columns';
 import { ToolsTableHeader } from './tools_table_header';
 import { toolQuickActionsHoverStyles } from './tools_table_quick_actions';
 import { useToolsTableSearch } from './tools_table_search';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 export const OnechatToolsTable = memo(() => {
   const { euiTheme } = useEuiTheme();
   const { tools, isLoading: isLoadingTools, error: toolsError } = useToolsService();
   const [tablePageIndex, setTablePageIndex] = useState(0);
+  const [tablePageSize, setTablePageSize] = useState(10);
   const [selectedTools, setSelectedTools] = useState<ToolDefinition[]>([]);
   const { searchConfig, results: tableTools } = useToolsTableSearch();
+  const { manageTools } = useUiPrivileges();
 
   useEffect(() => {
     setTablePageIndex(0);
   }, [tableTools]);
 
-  const columns = useMemo(() => getToolsTableColumns(), []);
+  const columns = useMemo(
+    () => getToolsTableColumns({ canManageTools: manageTools }),
+    [manageTools]
+  );
 
   return (
     <EuiInMemoryTable
+      data-test-subj="agentBuilderToolsTable"
       css={css`
         border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
         table {
@@ -55,14 +62,24 @@ export const OnechatToolsTable = memo(() => {
       itemId="id"
       error={toolsError ? labels.tools.listToolsErrorMessage : undefined}
       search={searchConfig}
-      onTableChange={({ page: { index } }: CriteriaWithPagination<ToolDefinition>) => {
-        setTablePageIndex(index);
+      onTableChange={({ page }: CriteriaWithPagination<ToolDefinition>) => {
+        if (page) {
+          setTablePageIndex(page.index);
+          if (page.size !== tablePageSize) {
+            setTablePageSize(page.size);
+            setTablePageIndex(0);
+          }
+        }
       }}
       pagination={{
         pageIndex: tablePageIndex,
-        pageSize: 10,
-        showPerPageOptions: false,
+        pageSize: tablePageSize,
+        pageSizeOptions: [10, 25, 50, 100],
+        showPerPageOptions: true,
       }}
+      rowProps={(tool) => ({
+        'data-test-subj': `agentBuilderToolsTableRow-${tool.id}`,
+      })}
       selection={{
         selectable: (tool) => !tool.readonly,
         onSelectionChange: (selectedItems: ToolDefinition[]) => {

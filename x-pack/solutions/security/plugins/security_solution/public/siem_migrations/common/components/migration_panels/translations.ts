@@ -58,11 +58,6 @@ export const MIGRATION_PROGRESS_DESCRIPTION = (totalItems: number) =>
     values: { totalItems },
   });
 
-export const MIGRATION_IN_PROGRESS_BADGE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.panels.progress.badge',
-  { defaultMessage: `Translation in progress` }
-);
-
 export const MIGRATION_PREPARING = i18n.translate(
   'xpack.securitySolution.siemMigrations.panels.progress.preparing',
   { defaultMessage: `Preparing environment for the AI powered translation.` }

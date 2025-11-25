@@ -27,6 +27,7 @@ import type {
   Suggestion,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
+  XYState,
 } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
@@ -37,8 +38,8 @@ import {
   mapVisToChartType,
   computeInterval,
 } from '@kbn/visualization-utils';
-import type { LegendSize } from '@kbn/visualizations-plugin/public';
-import type { XYConfiguration } from '@kbn/visualizations-plugin/common';
+import type { LegendSize } from '@kbn/chart-expressions-common';
+import type { XYState as XYConfiguration } from '@kbn/lens-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
@@ -496,7 +497,7 @@ export class LensVisService {
   private getHistogramSuggestionForESQL = ({
     queryParams,
     breakdownField,
-    preferredVisAttributes,
+    preferredVisAttributes: originalPreferredVisAttributes,
   }: {
     queryParams: QueryParams;
     breakdownField?: DataViewField;
@@ -506,6 +507,29 @@ export class LensVisService {
     const breakdownColumn = breakdownField?.name
       ? columns?.find((column) => column.name === breakdownField.name)
       : undefined;
+    let preferredVisAttributes = originalPreferredVisAttributes;
+
+    if (preferredVisAttributes && breakdownColumn) {
+      const visualization = preferredVisAttributes?.state?.visualization as XYState | undefined;
+      const layers = Array.isArray(visualization?.layers) ? visualization.layers : [];
+      if (
+        !layers.some(
+          (layer) => 'splitAccessor' in layer && layer.splitAccessor === breakdownColumn.name
+        )
+      ) {
+        // the preferred vis attributes don't contain the breakdown column, so we discard it to avoid issues
+        preferredVisAttributes = undefined;
+      }
+    }
+
+    if (preferredVisAttributes) {
+      const dataSource = preferredVisAttributes.state.datasourceStates?.textBased;
+      const layers = Object.values(dataSource?.layers ?? {});
+      if (!layers.some((layer) => layer.index === dataView.id)) {
+        // the preferred vis attributes don't contain the current data view, so we discard it to avoid issues
+        preferredVisAttributes = undefined;
+      }
+    }
 
     if (
       dataView.isTimeBased() &&
@@ -619,7 +643,7 @@ export class LensVisService {
     const language = getAggregateQueryMode(query);
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
     const normalizedQuery = convertTimeseriesCommandToFrom(safeQuery);
-    const breakdown = breakdownColumn ? `, \`${breakdownColumn.name}\`` : '';
+    const breakdown = breakdownColumn ? `\`${breakdownColumn.name}\`, ` : '';
 
     // sort by breakdown column if it's sortable
     const sortBy =
@@ -627,9 +651,10 @@ export class LensVisService {
         ? ` | sort \`${breakdownColumn.name}\` asc`
         : '';
 
+    const timeBuckets = `${TIMESTAMP_COLUMN} = BUCKET(${dataView.timeFieldName}, ${queryInterval})`;
     return appendToESQLQuery(
       normalizedQuery,
-      `| EVAL ${TIMESTAMP_COLUMN}=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by ${TIMESTAMP_COLUMN}${breakdown}${sortBy}`
+      `| STATS results = COUNT(*) BY ${breakdown}${timeBuckets}${sortBy}`
     );
   };
 

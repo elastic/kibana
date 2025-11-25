@@ -1,0 +1,73 @@
+{
+  "id": "@kbn/deeplinks-agent-builder",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/deeplinks-agent-builder",
+        "id": "def-common.AGENT_BUILDER_AGENTS_CREATE",
+        "type": "string",
+        "tags": [],
+        "label": "AGENT_BUILDER_AGENTS_CREATE",
+        "description": [],
+        "signature": [
+          "\"agents_create\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/agent_builder/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-agent-builder",
+        "id": "def-common.AGENT_BUILDER_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "AGENT_BUILDER_APP_ID",
+        "description": [],
+        "signature": [
+          "\"agent_builder\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/agent_builder/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-agent-builder",
+        "id": "def-common.DeepLinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "DeepLinkId",
+        "description": [],
+        "signature": [
+          "\"agent_builder\" | \"agent_builder:agents\" | \"agent_builder:tools\" | \"agent_builder:conversations\" | \"agent_builder:agents_create\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/agent_builder/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

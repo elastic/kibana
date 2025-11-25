@@ -113,7 +113,7 @@ describe('ruleActionsAlertsFilterTimeframe', () => {
     ).toBeTruthy();
 
     const alertsFilterTimeframeStart = wrapper.find(
-      '[data-test-subj="alertsFilterTimeframeStart"]'
+      '[data-test-subj="alertsFilterTimeframe-start-date"]'
     );
     expect(alertsFilterTimeframeStart.exists()).toBeTruthy();
     {
@@ -125,7 +125,9 @@ describe('ruleActionsAlertsFilterTimeframe', () => {
       expect(selectedDate.format('HH:mm')).toEqual('10:00');
     }
 
-    const alertsFilterTimeframeEnd = wrapper.find('[data-test-subj="alertsFilterTimeframeEnd"]');
+    const alertsFilterTimeframeEnd = wrapper.find(
+      '[data-test-subj="alertsFilterTimeframe-end-date"]'
+    );
     expect(alertsFilterTimeframeEnd.exists()).toBeTruthy();
     {
       // @ts-expect-error upgrade typescript v4.9.5

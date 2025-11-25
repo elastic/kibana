@@ -22,7 +22,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
   const toasts = getService('toasts');
 
-  describe('Cases List', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/238814
+  describe.skip('Cases List', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
 

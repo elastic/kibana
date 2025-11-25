@@ -8,10 +8,11 @@
  */
 
 import React, { useMemo } from 'react';
+import type { JsonValue } from '@kbn/utility-types';
 import { JSONCodeEditorCommonMemoized } from './json_editor_common';
 
 interface JsonDataCodeProps {
-  json: Record<string, unknown>;
+  json: JsonValue;
 }
 
 export const JsonDataCode = ({ json }: JsonDataCodeProps) => {

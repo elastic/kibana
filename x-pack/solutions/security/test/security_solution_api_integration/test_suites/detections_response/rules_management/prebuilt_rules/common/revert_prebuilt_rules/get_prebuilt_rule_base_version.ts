@@ -11,7 +11,7 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
@@ -72,6 +72,8 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_source: {
             is_customized: true,
             type: 'external',
+            customized_fields: [{ field_name: 'description' }],
+            has_base_version: true,
           },
           updated_at: modifiedCurrentVersion.updated_at,
         });

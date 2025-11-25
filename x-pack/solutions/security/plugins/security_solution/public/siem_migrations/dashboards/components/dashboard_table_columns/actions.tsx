@@ -82,8 +82,8 @@ export const createActionsColumn = ({
           <FormattedMessage
             id="xpack.securitySolution.siemMigrations.dashboards.tableColumn.actionsTooltip"
             defaultMessage="{title}
-            {view} - go to the installed Dashboard. {lineBreak}
-            {install} - install Dashboard to view and edit it. {lineBreak}"
+            {view} - go to the installed dashboard.{lineBreak}
+            {install} - install dashboard to view and edit it."
             values={{
               lineBreak: <br />,
               title: (

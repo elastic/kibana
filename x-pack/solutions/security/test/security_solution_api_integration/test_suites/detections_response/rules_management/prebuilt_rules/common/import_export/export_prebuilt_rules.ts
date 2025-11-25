@@ -8,8 +8,8 @@
 import expect from 'expect';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { BulkActionTypeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import {
   binaryToString,
   createPrebuiltRuleAssetSavedObjects,
@@ -93,6 +93,8 @@ export default ({ getService }: FtrProviderContext): void => {
                 rule_source: {
                   type: 'external',
                   is_customized: false,
+                  customized_fields: [],
+                  has_base_version: true,
                 },
               }),
               expect.objectContaining({
@@ -101,6 +103,8 @@ export default ({ getService }: FtrProviderContext): void => {
                 rule_source: {
                   type: 'external',
                   is_customized: false,
+                  customized_fields: [],
+                  has_base_version: true,
                 },
               }),
             ])
@@ -163,6 +167,8 @@ export default ({ getService }: FtrProviderContext): void => {
                 rule_source: {
                   type: 'external',
                   is_customized: true,
+                  customized_fields: [{ field_name: 'name' }, { field_name: 'tags' }],
+                  has_base_version: true,
                 },
               }),
               expect.objectContaining({
@@ -171,6 +177,8 @@ export default ({ getService }: FtrProviderContext): void => {
                 rule_source: {
                   type: 'external',
                   is_customized: true,
+                  customized_fields: [{ field_name: 'name' }, { field_name: 'tags' }],
+                  has_base_version: true,
                 },
               }),
             ])
@@ -244,6 +252,8 @@ export default ({ getService }: FtrProviderContext): void => {
                 rule_source: {
                   type: 'external',
                   is_customized: false,
+                  customized_fields: [],
+                  has_base_version: true,
                 },
               }),
               expect.objectContaining({
@@ -252,6 +262,8 @@ export default ({ getService }: FtrProviderContext): void => {
                 rule_source: {
                   type: 'external',
                   is_customized: true,
+                  customized_fields: [{ field_name: 'name' }, { field_name: 'tags' }],
+                  has_base_version: true,
                 },
               }),
               expect.objectContaining({
@@ -321,12 +333,22 @@ export default ({ getService }: FtrProviderContext): void => {
               expect.objectContaining({
                 rule_id: PREBUILT_RULE_ID_A,
                 immutable: true,
-                rule_source: { type: 'external', is_customized: false },
+                rule_source: {
+                  type: 'external',
+                  is_customized: false,
+                  customized_fields: [],
+                  has_base_version: true,
+                },
               }),
               expect.objectContaining({
                 rule_id: PREBUILT_RULE_ID_B,
                 immutable: true,
-                rule_source: { type: 'external', is_customized: true },
+                rule_source: {
+                  type: 'external',
+                  is_customized: true,
+                  customized_fields: [{ field_name: 'tags' }],
+                  has_base_version: true,
+                },
               }),
               expect.objectContaining({
                 rule_id: CUSTOM_RULE_ID,
@@ -387,6 +409,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           }),
           expect.objectContaining({
@@ -395,6 +419,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           }),
         ])
@@ -433,6 +459,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           }),
           expect.objectContaining({
@@ -441,6 +469,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           }),
         ])

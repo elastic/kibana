@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { memoize } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLControlVariable, RecommendedField } from '@kbn/esql-types';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import {
   type FunctionDefinition,
@@ -33,6 +32,7 @@ import { removeFinalUnknownIdentiferArg } from './shared';
 import { getTestFunctions } from './test_functions';
 import { getMatchingSignatures } from './expressions';
 import { isLiteral } from '../../ast/is';
+import { SuggestionCategory } from '../../sorting/types';
 
 const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
   defaultMessage: `Technical Preview`,
@@ -77,6 +77,7 @@ export const buildFieldsDefinitions = (
         defaultMessage: `Field specified by the input table`,
       }),
       sortText: 'D',
+      category: SuggestionCategory.FIELD,
     };
     return openSuggestions ? withAutoSuggest(suggestion) : suggestion;
   });
@@ -153,14 +154,35 @@ export const filterFunctionDefinitions = (
 };
 
 export function getAllFunctions(options?: {
-  type: Array<FunctionDefinition['type']> | FunctionDefinition['type'];
+  type?: Array<FunctionDefinition['type']> | FunctionDefinition['type'];
+  includeOperators?: boolean;
 }) {
+  const { type, includeOperators = true } = options ?? {};
+
   const fns = buildFunctionLookup();
-  if (!options?.type) {
-    return Array.from(fns.values());
+  const seen = new Set<string>();
+  const uniqueFunctions: FunctionDefinition[] = [];
+
+  for (const fn of fns.values()) {
+    if (!seen.has(fn.name)) {
+      seen.add(fn.name);
+      uniqueFunctions.push(fn);
+    }
   }
-  const types = new Set(Array.isArray(options.type) ? options.type : [options.type]);
-  return Array.from(fns.values()).filter((fn) => types.has(fn.type));
+
+  let result = uniqueFunctions;
+
+  if (!includeOperators) {
+    result = result.filter((fn) => fn.type !== FunctionDefinitionTypes.OPERATOR);
+  }
+
+  if (!type) {
+    return result;
+  }
+
+  const types = new Set(Array.isArray(type) ? type : [type]);
+
+  return result.filter((fn) => types.has(fn.type));
 }
 
 export function printArguments(
@@ -227,16 +249,6 @@ export function getFunctionSignatures(
   });
 }
 
-const allFunctions = memoize(
-  () =>
-    aggFunctionDefinitions
-      .concat(scalarFunctionDefinitions)
-      .concat(groupingFunctionDefinitions)
-      .concat(getTestFunctions())
-      .concat(timeSeriesAggFunctionDefinitions),
-  () => getTestFunctions()
-);
-
 export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
   let detail = fn.description;
   const labels = [];
@@ -253,15 +265,33 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     detail = `[${labels.join('] [')}] ${detail}`;
   }
   const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
+  const hasNoArguments = fn.signatures.every((sig) => sig.params.length === 0);
 
   let text = `${fn.name.toUpperCase()}($0)`;
+
+  if (hasNoArguments) {
+    text = `${fn.name.toUpperCase()}()`;
+  }
+
   if (fn.customParametersSnippet) {
     text = `${fn.name.toUpperCase()}(${fn.customParametersSnippet})`;
   }
+
   let functionsPriority = fn.type === FunctionDefinitionTypes.AGG ? 'A' : 'C';
   if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
     functionsPriority = '1A';
   }
+
+  // Determine function category explicitly
+  let category: SuggestionCategory;
+  if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
+    category = SuggestionCategory.FUNCTION_TIME_SERIES_AGG;
+  } else if (fn.type === FunctionDefinitionTypes.AGG) {
+    category = SuggestionCategory.FUNCTION_AGG;
+  } else {
+    category = SuggestionCategory.FUNCTION_SCALAR;
+  }
+
   return withAutoSuggest({
     label: fn.name.toUpperCase(),
     text,
@@ -282,27 +312,9 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     },
     // time_series_agg functions have priority over everything else
     sortText: functionsPriority,
+    category,
   });
 }
-
-/**
- * Builds suggestions for functions based on the provided predicates.
- *
- * @param predicates a set of conditions that must be met for a function to be included in the suggestions
- * @returns
- */
-export const getFunctionSuggestions = (
-  predicates?: FunctionFilterPredicates,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
-  activeProduct?: PricingProduct | undefined
-): ISuggestionItem[] => {
-  return filterFunctionDefinitions(
-    allFunctions(),
-    predicates,
-    hasMinimumLicenseRequired,
-    activeProduct
-  ).map(getFunctionSuggestion);
-};
 
 export function checkFunctionInvocationComplete(
   func: ESQLFunction,
@@ -386,6 +398,29 @@ const getVariablePrefix = (variableType: ESQLVariableType) =>
     ? '??'
     : '?';
 
+function getColumnSuggestionCategory(
+  column: ESQLColumnData,
+  fieldIsRecommended: boolean
+): SuggestionCategory {
+  if (column.userDefined) {
+    return SuggestionCategory.USER_DEFINED_COLUMN;
+  }
+
+  if (fieldIsRecommended) {
+    return SuggestionCategory.RECOMMENDED_FIELD;
+  }
+
+  if (column.type === 'date' || column.type === 'date_nanos') {
+    return SuggestionCategory.TIME_FIELD;
+  }
+
+  if (column.isEcs) {
+    return SuggestionCategory.ECS_FIELD;
+  }
+
+  return SuggestionCategory.FIELD;
+}
+
 export const buildColumnSuggestions = (
   columns: ESQLColumnData[],
   recommendedFieldsFromExtensions: RecommendedField[] = [],
@@ -395,6 +430,7 @@ export const buildColumnSuggestions = (
     addComma?: boolean;
     variableType?: ESQLVariableType;
     supportsControls?: boolean;
+    supportsMultiValue?: boolean;
   },
   variables?: ESQLControlVariable[]
 ): ISuggestionItem[] => {
@@ -411,6 +447,9 @@ export const buildColumnSuggestions = (
       !column.userDefined && Boolean(column.isEcs),
       Boolean(fieldIsRecommended)
     );
+
+    const category = getColumnSuggestionCategory(column, fieldIsRecommended);
+
     const suggestion: ISuggestionItem = {
       label: column.name,
       text:
@@ -420,6 +459,7 @@ export const buildColumnSuggestions = (
       kind: 'Variable',
       detail: titleCaseType,
       sortText,
+      category,
     };
 
     return options?.openSuggestions ? withAutoSuggest(suggestion) : suggestion;
@@ -434,6 +474,7 @@ export const buildColumnSuggestions = (
     const controlSuggestions = columns.length
       ? getControlSuggestion(
           variableType,
+          ControlTriggerSource.SMART_SUGGESTION,
           userDefinedColumns?.map((v) => `${getVariablePrefix(variableType)}${v.key}`)
         )
       : [];

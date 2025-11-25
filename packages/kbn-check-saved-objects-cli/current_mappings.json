@@ -35,6 +35,12 @@
       "end": {
         "type": "date"
       },
+      "initiator": {
+        "type": "keyword"
+      },
+      "initiatorId": {
+        "type": "keyword"
+      },
       "rule": {
         "properties": {
           "alertTypeId": {
@@ -633,6 +639,9 @@
       },
       "observables": {
         "properties": {
+          "description": {
+            "type": "keyword"
+          },
           "typeKey": {
             "type": "keyword"
           },
@@ -647,10 +656,10 @@
       },
       "settings": {
         "properties": {
-          "syncAlerts": {
+          "extractObservables": {
             "type": "boolean"
           },
-          "extractObservables": {
+          "syncAlerts": {
             "type": "boolean"
           }
         }
@@ -676,6 +685,12 @@
         "type": "integer"
       },
       "total_comments": {
+        "type": "integer"
+      },
+      "total_events": {
+        "type": "integer"
+      },
+      "total_observables": {
         "type": "integer"
       },
       "updated_at": {
@@ -1058,6 +1073,40 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "data_stream-config": {
+    "dynamic": false,
+    "properties": {
+      "created_by": {
+        "type": "keyword"
+      },
+      "data_stream_id": {
+        "type": "keyword"
+      },
+      "integration_id": {
+        "type": "keyword"
+      },
+      "job_info": {
+        "properties": {
+          "job_id": {
+            "type": "keyword"
+          },
+          "job_type": {
+            "type": "keyword"
+          },
+          "status": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
+      "metadata": {
+        "properties": {}
+      },
+      "result": {
+        "properties": {}
       }
     }
   },
@@ -2587,6 +2636,10 @@
         "index": false,
         "type": "boolean"
       },
+      "ilm_migration_status": {
+        "dynamic": false,
+        "properties": {}
+      },
       "output_secret_storage_requirements_met": {
         "type": "boolean"
       },
@@ -2602,6 +2655,26 @@
       },
       "use_space_awareness_migration_status": {
         "index": false,
+        "type": "keyword"
+      }
+    }
+  },
+  "integration-config": {
+    "dynamic": false,
+    "properties": {
+      "created_by": {
+        "type": "keyword"
+      },
+      "data_stream_count": {
+        "type": "integer"
+      },
+      "integration_id": {
+        "type": "keyword"
+      },
+      "metadata": {
+        "properties": {}
+      },
+      "status": {
         "type": "keyword"
       }
     }
@@ -3129,6 +3202,9 @@
       "dataViewId": {
         "type": "keyword"
       },
+      "enableResetToZero": {
+        "type": "boolean"
+      },
       "enabled": {
         "type": "boolean"
       },
@@ -3138,6 +3214,17 @@
       "filter": {
         "dynamic": false,
         "properties": {}
+      },
+      "filters": {
+        "properties": {
+          "entity_types": {
+            "type": "keyword"
+          },
+          "filter": {
+            "type": "text"
+          }
+        },
+        "type": "nested"
       },
       "identifierType": {
         "type": "keyword"

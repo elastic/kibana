@@ -13,11 +13,12 @@ import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
-  EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormControlButton,
   EuiInputPopover,
+  EuiNotificationBadge,
   EuiToken,
   EuiToolTip,
   htmlIdGenerator,
@@ -55,48 +56,27 @@ const optionListControlStyles = {
     font-weight: ${euiTheme.font.weight.medium};
   `,
   invalidSelectionsToken: css({ verticalAlign: 'text-bottom' }),
-  filterButton: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      fontWeight: `${euiTheme.font.weight.regular} !important` as 'normal',
-      color: `${euiTheme.colors.subduedText} !important`,
-      '&:hover::before': {
-        background: `${euiTheme.colors.backgroundBaseSubdued} !important`,
-      },
-    }),
-  filterButtonText: css({
-    flexGrow: 1,
-    textAlign: 'left',
-  }),
+  // temp. override until alignment is fixed on EUI side
+  filterButton: css`
+    .euiButtonEmpty__content {
+      justify-content: flex-end;
+    }
+  `,
   inputButtonOverride: css({
     maxInlineSize: '100% !important',
-    '.euiButtonEmpty': {
-      borderEndStartRadius: '0 !important',
-      borderStartStartRadius: '0 !important',
-    },
+    borderRadius: 'inherit',
   }),
-  /* additional custom overrides due to unexpected component usage;
-    open issue: https://github.com/elastic/eui-private/issues/270 */
   filterGroup: css`
-    /* prevents duplicate border due to nested filterGroup */
-    &::after {
-      display: none;
-    }
-
-    .euiFilterButton__wrapper {
-      padding: 0;
-
-      &::before,
-      &::after {
-        display: none;
-      }
-    }
+    padding: 0 !important;
   `,
 };
 
 export const OptionsListControl = ({
   controlPanelClassName,
+  disableMultiValueEmptySelection = false,
 }: {
   controlPanelClassName: string;
+  disableMultiValueEmptySelection?: boolean;
 }) => {
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
   const { componentApi, displaySettings } = useOptionsListContext();
@@ -152,9 +132,7 @@ export const OptionsListControl = ({
                 <>
                   {selectedOptions?.length
                     ? selectedOptions.map((value: OptionsListSelection, i, { length }) => {
-                        const text = `${fieldFormatter(value)}${
-                          i + 1 === length ? '' : delimiter
-                        } `;
+                        const text = `${fieldFormatter(value)}${i + 1 === length ? '' : delimiter}`;
                         const isInvalid = invalidSelections?.has(value);
                         return (
                           <span
@@ -210,25 +188,24 @@ export const OptionsListControl = ({
   ]);
 
   const button = (
-    <EuiFilterButton
-      badgeColor="success"
+    <EuiFormControlButton
+      role="combobox"
+      compressed={isCompressed(componentApi)}
       iconType={loading ? 'empty' : 'arrowDown'}
-      data-test-subj={`optionsList-control-${componentApi.uuid}`}
+      iconSide="right"
+      value={hasSelections || existsSelected ? selectionDisplayNode : ''}
+      placeholder={displaySettings.placeholder ?? OptionsListStrings.control.getPlaceholder()}
       css={styles.filterButton}
       onClick={() => setPopoverOpen(!isPopoverOpen)}
-      isSelected={isPopoverOpen}
-      numActiveFilters={selectedOptionsCount}
-      hasActiveFilters={Boolean(selectedOptionsCount)}
-      textProps={{ css: styles.filterButtonText }}
       aria-label={panelTitle ?? defaultPanelTitle}
       aria-expanded={isPopoverOpen}
       aria-controls={popoverId}
-      role="combobox"
+      data-test-subj={`optionsList-control-${componentApi.uuid}`}
     >
-      {hasSelections || existsSelected
-        ? selectionDisplayNode
-        : displaySettings.placeholder ?? OptionsListStrings.control.getPlaceholder()}
-    </EuiFilterButton>
+      {Boolean(selectedOptionsCount) && (
+        <EuiNotificationBadge color="success">{selectedOptionsCount}</EuiNotificationBadge>
+      )}
+    </EuiFormControlButton>
   );
 
   return (
@@ -257,7 +234,7 @@ export const OptionsListControl = ({
           'aria-label': OptionsListStrings.popover.getAriaLabel(panelTitle ?? defaultPanelTitle!),
         }}
       >
-        <OptionsListPopover />
+        <OptionsListPopover disableMultiValueEmptySelection={disableMultiValueEmptySelection} />
       </EuiInputPopover>
     </EuiFilterGroup>
   );

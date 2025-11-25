@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { cloneDeep, keys } from 'lodash';
+import { cloneDeep, clone, keys } from 'lodash';
 import { Alert } from '../alert/alert';
 import type { AlertFactory } from '../alert/create_alert_factory';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
@@ -186,9 +186,9 @@ export class LegacyAlertsClient<
 
     this.processedAlerts.new = processedAlertsNew;
     this.processedAlerts.active = processedAlertsActive;
-    this.processedAlerts.trackedActiveAlerts = processedAlertsActive;
+    this.processedAlerts.trackedActiveAlerts = clone(processedAlertsActive);
     this.processedAlerts.recovered = processedAlertsRecovered;
-    this.processedAlerts.trackedRecoveredAlerts = processedAlertsRecovered;
+    this.processedAlerts.trackedRecoveredAlerts = clone(processedAlertsRecovered);
   }
 
   public logAlerts({ ruleRunMetricsStore, shouldLogAlerts }: LogAlertsOpts) {
@@ -200,6 +200,8 @@ export class LegacyAlertsClient<
       recoveredAlerts: this.processedAlerts.recovered,
       ruleLogPrefix: this.ruleLogPrefix,
       ruleRunMetricsStore,
+      // don't log alert instance docs to event log if rule type is persistent
+      shouldLogAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAlerts,
     });
@@ -287,9 +289,15 @@ export class LegacyAlertsClient<
     return;
   }
 
-  public async updatePersistedAlertsWithMaintenanceWindowIds() {
-    return null;
+  public async getAlertsToUpdateWithMaintenanceWindows() {
+    return {};
   }
+
+  public getAlertsToUpdateWithLastScheduledActions() {
+    return {};
+  }
+
+  public async updatePersistedAlerts() {}
 
   public async setAlertStatusToUntracked() {
     return;

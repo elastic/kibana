@@ -94,7 +94,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         );
         await common.navigateToApp('dashboard');
         await dashboard.loadSavedDashboard('dashboard with filter');
-        await header.waitUntilLoadingHasFinished();
       });
 
       afterEach(async () => {

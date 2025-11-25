@@ -37,7 +37,6 @@ const createStartContractMock = () => {
             healthCheckDelayMs: 2500,
             logQueries: false,
             numberOfHostsConfigured: 1,
-            pingTimeoutMs: 30000,
             requestHeadersWhitelistConfigured: false,
             requestTimeoutMs: 30000,
             shardTimeoutMs: 30000,

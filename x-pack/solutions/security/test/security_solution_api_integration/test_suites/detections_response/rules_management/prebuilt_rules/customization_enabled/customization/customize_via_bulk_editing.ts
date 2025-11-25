@@ -15,7 +15,7 @@ import {
   BulkActionEditTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
@@ -340,7 +340,7 @@ export default ({ getService }: FtrProviderContext): void => {
     };
 
     describe('when base version is available', () => {
-      testCustomizationViaBulkEditing({ hasBaseVersion: false });
+      testCustomizationViaBulkEditing({ hasBaseVersion: true });
     });
 
     describe('when base version is missing', () => {

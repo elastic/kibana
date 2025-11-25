@@ -13,7 +13,7 @@ import { Streams } from '@kbn/streams-schema';
 import { uniq } from 'lodash';
 import { AssetImage } from '../../asset_image';
 import { SchemaEditor } from '../schema_editor';
-import type { SchemaField } from '../schema_editor/types';
+import type { SchemaEditorField } from '../schema_editor/types';
 import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
@@ -21,10 +21,10 @@ import {
 import { isSelectableField } from '../schema_editor/schema_editor_table';
 
 interface DetectedFieldsEditorProps {
-  detectedFields: SchemaField[];
+  schemaEditorFields: SchemaEditorField[];
 }
 
-export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorProps) => {
+export const DetectedFieldsEditor = ({ schemaEditorFields }: DetectedFieldsEditorProps) => {
   const { euiTheme } = useEuiTheme();
 
   const { mapField, unmapField } = useStreamEnrichmentEvents();
@@ -32,12 +32,12 @@ export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorPro
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const isWiredStream = Streams.WiredStream.GetResponse.is(definition);
   const [selectedFields, setSelectedFields] = React.useState<string[]>(
-    detectedFields
+    schemaEditorFields
       .filter((field) => isSelectableField(definition.stream.name, field))
       .map(({ name }) => name)
   );
 
-  const hasFields = detectedFields.length > 0;
+  const hasFields = schemaEditorFields.length > 0;
 
   if (!hasFields) {
     return (
@@ -49,8 +49,7 @@ export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorPro
             {i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields.noResults.content',
               {
-                defaultMessage:
-                  'No fields were detected during the simulation. You can add fields manually in the Schema Editor.',
+                defaultMessage: 'No fields were detected. Add fields manually from the Schema tab.',
               }
             )}
           </p>
@@ -73,15 +72,14 @@ export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorPro
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFieldsHeadline',
             {
-              defaultMessage:
-                'You can review and adjust saved fields further in the Schema Editor.',
+              defaultMessage: 'You can review and adjust saved fields further in the Schema tab.',
             }
           )}
         </EuiText>
       )}
       <SchemaEditor
-        defaultColumns={['name', 'type', 'format', 'status']}
-        fields={detectedFields}
+        defaultColumns={['name', 'type', 'format', 'status', 'result']}
+        fields={schemaEditorFields}
         stream={definition.stream}
         onFieldUpdate={(field) => {
           if (field.status === 'mapped') {

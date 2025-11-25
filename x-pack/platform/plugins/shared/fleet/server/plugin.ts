@@ -69,6 +69,8 @@ import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../common/constants';
 
+import { runWithCache } from './services/epm/packages/cache';
+
 import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
 import type { MessageSigningServiceInterface } from './services/security';
@@ -152,6 +154,7 @@ import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task'
 import { registerPackagesBulkOperationTask } from './tasks/packages_bulk_operations';
 import { AutoInstallContentPackagesTask } from './tasks/auto_install_content_packages_task';
 import { AgentStatusChangeTask } from './tasks/agent_status_change_task';
+import { FleetPolicyRevisionsCleanupTask } from './tasks/fleet_policy_revisions_cleanup/fleet_policy_revisions_cleanup_task';
 import { registerSetupTasks } from './tasks/setup';
 
 export interface FleetSetupDeps {
@@ -209,6 +212,7 @@ export interface FleetAppContext {
   automaticAgentUpgradeTask: AutomaticAgentUpgradeTask;
   autoInstallContentPackagesTask: AutoInstallContentPackagesTask;
   agentStatusChangeTask?: AgentStatusChangeTask;
+  fleetPolicyRevisionsCleanupTask?: FleetPolicyRevisionsCleanupTask;
   taskManagerStart?: TaskManagerStartContract;
   fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   syncIntegrationsTask: SyncIntegrationsTask;
@@ -256,6 +260,7 @@ export interface FleetStartContract {
    * Services for Fleet's package policies
    */
   packagePolicyService: typeof packagePolicyService;
+  runWithCache: typeof runWithCache;
   agentPolicyService: AgentPolicyServiceInterface;
   cloudConnectorService: CloudConnectorServiceInterface;
   /**
@@ -322,6 +327,7 @@ export class FleetPlugin
   private automaticAgentUpgradeTask?: AutomaticAgentUpgradeTask;
   private autoInstallContentPackagesTask?: AutoInstallContentPackagesTask;
   private agentStatusChangeTask?: AgentStatusChangeTask;
+  private fleetPolicyRevisionsCleanupTask?: FleetPolicyRevisionsCleanupTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -355,7 +361,10 @@ export class FleetPlugin
 
     core.status.set(this.fleetStatus$.asObservable());
 
-    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
+    const experimentalFeatures = parseExperimentalConfigValue(
+      config.enableExperimental ?? [],
+      config.experimentalFeatures || {}
+    );
     const requireAllSpaces = experimentalFeatures.useSpaceAwareness ? false : true;
 
     registerSavedObjects(core.savedObjects, {
@@ -705,6 +714,16 @@ export class FleetPlugin
         taskInterval: config.agentStatusChange?.taskInterval,
       },
     });
+    this.fleetPolicyRevisionsCleanupTask = new FleetPolicyRevisionsCleanupTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+      config: {
+        maxRevisions: config.fleetPolicyRevisionsCleanup?.maxRevisions,
+        interval: config.fleetPolicyRevisionsCleanup?.interval,
+        maxPoliciesPerRun: config.fleetPolicyRevisionsCleanup?.maxPoliciesPerRun,
+      },
+    });
     this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());
 
     // Register fields metadata extractors
@@ -738,7 +757,8 @@ export class FleetPlugin
       configInitialValue: this.configInitialValue,
       config$: this.config$,
       experimentalFeatures: parseExperimentalConfigValue(
-        this.configInitialValue.enableExperimental || []
+        this.configInitialValue.enableExperimental || [],
+        this.configInitialValue.experimentalFeatures || {}
       ),
       savedObjects: core.savedObjects,
       savedObjectsTagging: plugins.savedObjectsTagging,
@@ -763,6 +783,7 @@ export class FleetPlugin
       lockManagerService: this.lockManagerService,
       autoInstallContentPackagesTask: this.autoInstallContentPackagesTask!,
       agentStatusChangeTask: this.agentStatusChangeTask,
+      fleetPolicyRevisionsCleanupTask: this.fleetPolicyRevisionsCleanupTask,
       alertingStart: plugins.alerting,
     });
     licenseService.start(plugins.licensing.license$);
@@ -786,6 +807,9 @@ export class FleetPlugin
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});
     this.agentStatusChangeTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    this.fleetPolicyRevisionsCleanupTask
+      ?.start({ taskManager: plugins.taskManager })
+      .catch(() => {});
 
     const logger = appContextService.getLogger();
 
@@ -793,7 +817,6 @@ export class FleetPlugin
 
     this.policyWatcher.start(licenseService);
 
-    // We only retry when this feature flag is enabled (Serverless)
     const setupAttempts = this.configInitialValue.internal?.retrySetupOnBoot ? 25 : 1;
 
     const fleetSetupPromise = (async () => {
@@ -843,7 +866,7 @@ export class FleetPlugin
             jitter: 'full',
             retry: (error: any, attemptCount: number) => {
               const summary = `Fleet setup attempt ${attemptCount} failed, will retry after backoff`;
-              logger.warn(summary, { error: { message: error } });
+              logger.warn(summary, { error });
 
               this.fleetStatus$.next({
                 level: ServiceStatusLevels.available,
@@ -867,7 +890,7 @@ export class FleetPlugin
         });
       } catch (error) {
         logger.warn(`Fleet setup failed after ${setupAttempts} attempts`, {
-          error: { message: error },
+          error,
         });
 
         this.fleetStatus$.next({
@@ -920,11 +943,11 @@ export class FleetPlugin
       },
       getPackageSpecTagId,
       async createOutputClient(request: KibanaRequest) {
-        const soClient = appContextService.getSavedObjects().getScopedClient(request);
         const authz = await getAuthzFromRequest(request);
-        return new OutputClient(soClient, authz);
+        return new OutputClient(authz);
       },
       cloudConnectorService,
+      runWithCache,
     };
   }
 
@@ -986,7 +1009,7 @@ export class FleetPlugin
     } catch (error) {
       appContextService
         .getLogger()
-        .error('Error happened during uninstall token generation.', { error: { message: error } });
+        .error('Error happened during uninstall token generation.', { error });
     }
 
     try {
@@ -994,7 +1017,7 @@ export class FleetPlugin
     } catch (error) {
       appContextService
         .getLogger()
-        .error('Error happened during uninstall token validation.', { error: { message: error } });
+        .error('Error happened during uninstall token validation.', { error });
     }
   }
 

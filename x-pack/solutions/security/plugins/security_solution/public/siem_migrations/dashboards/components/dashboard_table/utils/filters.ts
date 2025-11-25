@@ -13,7 +13,7 @@ const STATUS_FILTERS: Record<StatusFilterBase, DashboardMigrationFilters> = {
   [StatusFilterBase.FAILED]: { failed: true },
   [StatusFilterBase.INSTALLED]: { installed: true },
   [StatusFilterBase.TRANSLATED]: { installed: false, fullyTranslated: true },
-  [StatusFilterBase.PARTIALLY_TRANSLATED]: { partiallyTranslated: true },
+  [StatusFilterBase.PARTIALLY_TRANSLATED]: { installed: false, partiallyTranslated: true },
   [StatusFilterBase.UNTRANSLATABLE]: { untranslatable: true },
 };
 

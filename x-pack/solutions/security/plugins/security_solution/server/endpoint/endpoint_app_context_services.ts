@@ -28,6 +28,7 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { installScriptsLibraryIndexTemplates } from './lib/scripts_library';
 import type { ReferenceDataClientInterface } from './lib/reference_data';
 import { ReferenceDataClient } from './lib/reference_data';
 import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
@@ -132,6 +133,17 @@ export class EndpointAppContextService {
 
     this.registerFleetExtensions();
     this.registerListsExtensions();
+
+    // Setup scripts library
+    if (this.startDependencies.experimentalFeatures.responseActionsScriptLibraryManagement) {
+      const scriptsLogger = this.createLogger('scriptsLibrarySetup');
+      installScriptsLibraryIndexTemplates({
+        esClient: this.getInternalEsClient(),
+        logger: scriptsLogger,
+      }).catch((e) => {
+        scriptsLogger.error(e);
+      });
+    }
   }
 
   public stop() {
@@ -277,20 +289,16 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    const spaceIdValue = this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-      ? spaceId
-      : DEFAULT_SPACE_ID;
-
     return new EndpointMetadataService(
       this.startDependencies.esClient,
-      this.savedObjects.createInternalScopedSoClient({ readonly: false, spaceId: spaceIdValue }),
-      this.getInternalFleetServices(spaceIdValue),
+      this.savedObjects.createInternalScopedSoClient({ readonly: false, spaceId }),
+      this.getInternalFleetServices(spaceId),
       this.createLogger('endpointMetadata')
     );
   }
 
   /**
-   * SpaceId should be defined if wanting go get back an inernal client that is scoped to a given space id
+   * SpaceId should be defined if wanting go get back an internal client that is scoped to a given space id
    * @param spaceId
    * @param unscoped
    */
@@ -302,10 +310,7 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    return this.fleetServicesFactory.asInternalUser(
-      this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled ? spaceId : undefined,
-      unscoped
-    );
+    return this.fleetServicesFactory.asInternalUser(spaceId, unscoped);
   }
 
   public getManifestManager(): ManifestManager | undefined {

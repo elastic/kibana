@@ -40,6 +40,7 @@ describe('extractToolReturn', () => {
     expect(result).toEqual({
       results: [
         {
+          tool_result_id: expect.any(String),
           type: 'error',
           data: {
             message: 'Error: foo',

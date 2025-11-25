@@ -7,15 +7,29 @@
 
 import { isString } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
-import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
+import {
+  AlertingConnectorFeatureId,
+  SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
+import type {
+  ActionParamsType,
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+} from '@kbn/connector-schemas/xmatters';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  ConfigSchema,
+  ParamsSchema,
+  SecretsSchema,
+} from '@kbn/connector-schemas/xmatters';
 import { postXmatters } from './post_xmatters';
 
 export type XmattersConnectorType = ConnectorType<
@@ -30,44 +44,17 @@ export type XmattersConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ActionParamsType
 >;
 
-const configSchemaProps = {
-  configUrl: schema.nullable(schema.string()),
-  usesBasic: schema.boolean({ defaultValue: true }),
-};
-const ConfigSchema = schema.object(configSchemaProps);
-export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
-
-// secrets definition
-export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
-const secretSchemaProps = {
-  user: schema.nullable(schema.string()),
-  password: schema.nullable(schema.string()),
-  secretsUrl: schema.nullable(schema.string()),
-};
-const SecretsSchema = schema.object(secretSchemaProps);
-
-// params definition
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
-const ParamsSchema = schema.object({
-  alertActionGroupName: schema.maybe(schema.string()),
-  signalId: schema.maybe(schema.string()),
-  ruleName: schema.maybe(schema.string()),
-  date: schema.maybe(schema.string()),
-  severity: schema.string(),
-  spaceId: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.string()),
-});
-
-export const ConnectorTypeId = '.xmatters';
 // connector type definition
 export function getConnectorType(): XmattersConnectorType {
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stackConnectors.xmatters.title', {
-      defaultMessage: 'xMatters',
-    }),
-    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
+    name: CONNECTOR_NAME,
+    supportedFeatureIds: [
+      AlertingConnectorFeatureId,
+      SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
+    ],
     validate: {
       config: {
         schema: ConfigSchema,
