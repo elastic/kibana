@@ -47,7 +47,9 @@ export interface MonitorableNode {
   monitor(monitoredContext: StepExecutionRuntime): Promise<void> | void;
 }
 
-export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep> implements NodeImplementation {
+export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
+  implements NodeImplementation
+{
   protected step: TStep;
   protected stepExecutionRuntime: StepExecutionRuntime;
   protected connectorExecutor: ConnectorExecutor;
