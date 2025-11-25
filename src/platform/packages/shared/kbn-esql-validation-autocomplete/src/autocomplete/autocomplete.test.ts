@@ -417,7 +417,7 @@ describe('autocomplete', () => {
     // STATS argument BY expression
     testSuggestions('FROM index1 | STATS field BY f/', [
       'col0 = ',
-      getDateHistogramCompletionItem(),
+      { ...getDateHistogramCompletionItem(), sortText: '0000' },
       ...getFunctionSignaturesByReturnType(Location.STATS, 'any', { grouping: true, scalar: true }),
       ...getFieldNamesByType('any'),
     ]);
@@ -831,7 +831,7 @@ describe('autocomplete', () => {
       'by'
     );
     testSuggestions('FROM a | STATS AVG(numberField) BY /', [
-      getDateHistogramCompletionItem(),
+      { ...getDateHistogramCompletionItem(), sortText: '0000' },
       attachTriggerCommand('col0 = '),
       ...getFieldNamesByType('any').map(attachTriggerCommand),
       ...allByCompatibleFunctions,
@@ -839,7 +839,7 @@ describe('autocomplete', () => {
 
     // STATS argument BY assignment (checking field suggestions)
     testSuggestions('FROM a | STATS AVG(numberField) BY col0 = /', [
-      getDateHistogramCompletionItem(),
+      { ...getDateHistogramCompletionItem(), sortText: '0000' },
       ...getFieldNamesByType('any').map(attachTriggerCommand),
       ...allByCompatibleFunctions,
     ]);
