@@ -17,6 +17,7 @@ export class StreamsApp {
   public readonly conditionEditorValueComboBox;
   public readonly processorTypeComboBox;
   public readonly fieldTypeSuperSelect;
+  public readonly previewDataGrid;
   public readonly schemaDataGrid;
 
   constructor(private readonly page: ScoutPage) {
@@ -40,6 +41,8 @@ export class StreamsApp {
       this.page,
       'streamsAppFieldFormTypeSelect'
     );
+    // TODO: Make locator more specific when possible
+    this.previewDataGrid = new EuiDataGridWrapper(this.page, { locator: '.euiDataGrid' });
     this.schemaDataGrid = new EuiDataGridWrapper(
       this.page,
       'streamsAppSchemaEditorFieldsTableLoaded'
@@ -657,24 +660,7 @@ export class StreamsApp {
   async getPreviewTableRows() {
     // Wait for the preview table to be rendered
     await expect(this.page.getByTestId('euiDataGridBody')).toBeVisible();
-    return this.page.locator('.euiDataGridRow').all();
-  }
-
-  private getCellLocator({ columnName, rowIndex }: { columnName: string; rowIndex: number }) {
-    return this.page.locator(
-      `[data-gridcell-column-id="${columnName}"][data-gridcell-row-index="${rowIndex}"]`
-    );
-  }
-
-  async getCellTextContent({
-    columnName,
-    rowIndex,
-  }: {
-    columnName: string;
-    rowIndex: number;
-  }): Promise<string> {
-    const cellContent = this.getCellLocator({ columnName, rowIndex });
-    return (await cellContent.textContent())?.trim() || '';
+    return this.page.locator('[class="euiDataGridRow"]').all();
   }
 
   async expectCellValueContains({
@@ -688,7 +674,7 @@ export class StreamsApp {
     value: string;
     invertCondition?: boolean;
   }) {
-    const cellLocator = this.getCellLocator({ columnName, rowIndex });
+    const cellLocator = this.previewDataGrid.getCellLocatorByColId(rowIndex, columnName);
 
     if (invertCondition) {
       await expect(cellLocator).not.toContainText(value);
