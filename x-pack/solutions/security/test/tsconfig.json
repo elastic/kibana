@@ -64,5 +64,6 @@
     "@kbn/management-settings-ids",
     "@kbn/connector-schemas",
     "@kbn/cloud-security-posture-graph",
+    "@kbn/securitysolution-list-constants",
   ]
 }
