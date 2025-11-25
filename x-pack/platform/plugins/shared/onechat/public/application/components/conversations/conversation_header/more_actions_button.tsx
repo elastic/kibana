@@ -152,7 +152,7 @@ export const MoreActionsButton: React.FC = () => {
           </EuiContextMenuItem>,
         ]
       : []),
-    <MenuSectionTitle title={fullscreenLabels.conversationAgentLabel} />,
+    <MenuSectionTitle key="agent-title" title={fullscreenLabels.conversationAgentLabel} />,
     <EuiContextMenuItem
       key="edit-current-agent"
       icon="pencil"
@@ -177,7 +177,10 @@ export const MoreActionsButton: React.FC = () => {
     >
       {fullscreenLabels.cloneAgentAsNew}
     </EuiContextMenuItem>,
-    <MenuSectionTitle title={fullscreenLabels.conversationManagementLabel} />,
+    <MenuSectionTitle
+      key="management-title"
+      title={fullscreenLabels.conversationManagementLabel}
+    />,
     <EuiContextMenuItem
       key="agents"
       icon="machineLearningApp"
