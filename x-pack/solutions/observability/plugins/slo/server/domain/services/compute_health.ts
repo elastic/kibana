@@ -9,6 +9,7 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import type { TransformGetTransformStatsTransformStats } from 'elasticsearch-8.x/lib/api/types';
 import { keyBy, uniqBy, type Dictionary } from 'lodash';
+import pLimit from 'p-limit';
 import {
   getSLOSummaryTransformId,
   getSLOTransformId,
@@ -61,16 +62,36 @@ async function getTransformStatsById(
 ): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
   const dedupedList = uniqBy(list, (i) => `${i.id}-${i.revision}`);
 
-  const stats = await deps.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
-    {
-      transform_id: dedupedList.map((item) => getWildcardTransformId(item.id, item.revision)),
-      allow_no_match: true,
-      size: dedupedList.length * 2,
-    },
-    { ignore: [404] }
+  if (dedupedList.length === 0) {
+    return {};
+  }
+
+  const limiter = pLimit(3);
+  const chunks: Item[][] = [];
+  const chunkSize = 50; // 48 id bytes + overhead (slo-*, revision) = ~60 bytes per slo. 4096/60 > 50 items per request
+  for (let i = 0; i < dedupedList.length; i += chunkSize) {
+    chunks.push(dedupedList.slice(i, i + chunkSize));
+  }
+
+  const results = await Promise.allSettled(
+    chunks.map((chunk) =>
+      limiter(() =>
+        deps.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
+          {
+            transform_id: chunk.map((item) => getWildcardTransformId(item.id, item.revision)),
+            allow_no_match: true,
+            size: chunk.length * 2,
+          },
+          { ignore: [404] }
+        )
+      )
+    )
   );
 
-  return keyBy(stats.transforms, (transform) => transform.id);
+  const allTransforms = results.flatMap((r) =>
+    r.status === 'fulfilled' ? r.value.transforms : []
+  );
+  return keyBy(allTransforms, (transform) => transform.id);
 }
 
 function computeItemHealth(
