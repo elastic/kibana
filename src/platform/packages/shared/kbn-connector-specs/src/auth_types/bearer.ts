@@ -11,9 +11,11 @@ import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 
-const authSchema = z.object({
-  token: z.string().meta({ sensitive: true }).describe('Bearer Token'),
-});
+const authSchema = z
+  .object({
+    token: z.string().meta({ sensitive: true, label: 'Bearer Token' }),
+  })
+  .meta({ label: 'Bearer Token' });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 

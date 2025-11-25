@@ -225,6 +225,10 @@ export interface ConnectorTest {
 export interface AuthTypeDef {
   type: string;
   defaults: Record<string, unknown>;
+  overrides?: {
+    meta?: Record<string, Record<string, unknown>>;
+    // can override other Zod fields here in the future if needed
+  };
 }
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
