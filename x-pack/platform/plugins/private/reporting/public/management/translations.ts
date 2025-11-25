@@ -235,7 +235,7 @@ export const SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_LABEL = i18n.translate(
 export const SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_PLACEHOLDER = i18n.translate(
   'xpack.reporting.scheduledReportingForm.emailSubjectPlaceholder',
   {
-    defaultMessage: 'New export available for {{title}}',
+    defaultMessage: "New export available for '{{title}}'",
   }
 );
 
@@ -258,7 +258,7 @@ export const SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_PLACEHOLDER = i18n.translate(
   'xpack.reporting.scheduledReportingForm.emailMessagePlaceholder',
   {
     defaultMessage:
-      '# Your export is ready\n\nTitle: {{title}}\nFilename: {{filename}}\nDate: {{date}}',
+      "# Your export is ready\n\nTitle: '{{title}}'\nFilename: '{{filename}}'\nDate: '{{date}}'",
   }
 );
 
