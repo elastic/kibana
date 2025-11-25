@@ -8,6 +8,7 @@
 import type { StartServicesAccessor, Logger, DocLinksServiceSetup } from '@kbn/core/server';
 import type { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
+import { registerTrialCompanionRoutes } from '../lib/trial_companion/register_routes';
 import type { EndpointAppContext } from '../endpoint/types';
 import type { SecuritySolutionPluginRouter } from '../types';
 
@@ -139,4 +140,6 @@ export const initRoutes = (
   registerAssetInventoryRoutes({ router, logger });
 
   registerSiemReadinessRoutes({ router, logger });
+
+  registerTrialCompanionRoutes({ router, logger });
 };

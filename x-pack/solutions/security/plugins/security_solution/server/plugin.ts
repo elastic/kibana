@@ -146,6 +146,8 @@ import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_d
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
+import type { TrialCompanionMilestoneService } from './lib/trial_companion/services/trial_companion_milestone_service.types';
+import { TrialCompanionMilestoneServiceImpl } from './lib/trial_companion/services/trial_companion_milestone_service';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -176,6 +178,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
   private telemetryUsageCounter?: UsageCounter;
   private endpointContext: EndpointAppContext;
+  private trialCompanionMilestoneService: TrialCompanionMilestoneService;
 
   private isServerless: boolean;
 
@@ -223,6 +226,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.logger.debug('plugin initialized');
 
     this.healthDiagnosticService = new HealthDiagnosticServiceImpl(this.logger);
+    this.trialCompanionMilestoneService = new TrialCompanionMilestoneServiceImpl(this.logger);
   }
 
   public setup(
@@ -599,6 +603,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.healthDiagnosticService.setup({
         taskManager: plugins.taskManager,
       });
+
+      this.trialCompanionMilestoneService.setup({
+        taskManager: plugins.taskManager,
+      });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
@@ -866,6 +874,12 @@ export class Plugin implements ISecuritySolutionPlugin {
         this.logger.warn('Error starting health diagnostic task', {
           error: e.message,
         } as LogMeta);
+      });
+
+      this.trialCompanionMilestoneService.start({
+        taskManager: plugins.taskManager,
+        packageService,
+        savedObjects: core.savedObjects,
       });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not started.');
