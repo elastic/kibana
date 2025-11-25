@@ -97,6 +97,7 @@ dependsOn:
   - '@kbn/presentation-util'
   - '@kbn/discover-utils'
   - '@kbn/react-query'
+  - '@kbn/router-utils'
 tags:
   - plugin
   - prod
