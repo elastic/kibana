@@ -41,7 +41,7 @@ export function useStreamDocCountsFetch({
     data,
   } = useKibana().dependencies.start;
   const docCountsPromiseCache = useRef<StreamDocCountsFetch | null>(null);
-  const histogramPromiseCache = useRef<Promise<UnparsedEsqlResponse> | null>(null);
+  const histogramPromiseCache = useRef<Partial<Record<string, Promise<UnparsedEsqlResponse>>>>({});
   const abortControllerRef = useRef<AbortController>();
 
   if (!abortControllerRef.current) {
@@ -50,7 +50,7 @@ export function useStreamDocCountsFetch({
 
   useUpdateEffect(() => {
     docCountsPromiseCache.current = null;
-    histogramPromiseCache.current = null;
+    histogramPromiseCache.current = {};
     abortControllerRef.current?.abort();
     abortControllerRef.current = new AbortController();
   }, [canReadFailureStore]);
@@ -68,7 +68,7 @@ export function useStreamDocCountsFetch({
 
         if (shouldRefresh) {
           docCountsPromiseCache.current = null;
-          histogramPromiseCache.current = null;
+          histogramPromiseCache.current = {};
           abortControllerRef.current?.abort();
           abortControllerRef.current = new AbortController();
         }
@@ -138,8 +138,9 @@ export function useStreamDocCountsFetch({
       return docCountsFetch;
     },
     getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse> {
-      if (histogramPromiseCache.current) {
-        return histogramPromiseCache.current;
+      const cachedPromise = histogramPromiseCache.current[streamName];
+      if (cachedPromise) {
+        return cachedPromise;
       }
 
       const abortController = abortControllerRef.current;
@@ -152,14 +153,14 @@ export function useStreamDocCountsFetch({
       const source = canReadFailureStore ? `${streamName},${streamName}::failures` : streamName;
 
       const histogramPromise = executeEsqlQuery({
-        query: `FROM ${source} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
+            query: `FROM ${source} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
         search: data.search.search,
         signal: abortController.signal,
         start: timeState.start,
         end: timeState.end,
       }) as Promise<UnparsedEsqlResponse>;
 
-      histogramPromiseCache.current = histogramPromise;
+      histogramPromiseCache.current[streamName] = histogramPromise;
 
       return histogramPromise;
     },
