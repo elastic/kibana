@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext } from 'react';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import {
@@ -44,12 +43,8 @@ export const NewsfeedFlyout = (
         onClose={closeFlyout}
         size="s"
         aria-labelledby="flyoutSmallTitle"
-        aria-label={i18n.translate('newsfeed.flyoutList.ariaLabel', {
-          defaultMessage: 'Elastic Newsfeed',
-        })}
         className="kbnNews__flyout"
         data-test-subj="NewsfeedFlyout"
-        session="start"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">

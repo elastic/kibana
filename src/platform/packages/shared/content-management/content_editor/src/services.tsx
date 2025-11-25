@@ -19,7 +19,7 @@ import type { EuiComboBoxProps } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
-import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
+import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -45,7 +45,7 @@ export interface Theme {
  * Abstract external services for this component.
  */
 export interface Services {
-  openSystemFlyout(node: ReactNode, options?: OverlaySystemFlyoutOpenOptions): OverlayRef;
+  openFlyout(node: ReactNode, options?: OverlayFlyoutOpenOptions): OverlayRef;
   notifyError: NotifyFn;
   TagList?: FC<{ references: SavedObjectsReference[] }>;
   TagSelector?: React.FC<TagSelectorProps>;
@@ -80,10 +80,7 @@ export interface ContentEditorKibanaDependencies {
   /** CoreStart contract */
   core: ContentEditorStartServices & {
     overlays: {
-      openSystemFlyout(
-        content: React.ReactElement,
-        options?: OverlaySystemFlyoutOpenOptions
-      ): OverlayRef;
+      openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
     };
     notifications: {
       toasts: {
@@ -130,7 +127,7 @@ export const ContentEditorKibanaProvider: FC<
 > = ({ children, ...services }) => {
   const { core, savedObjectsTagging } = services;
   const { overlays, notifications, rendering } = core;
-  const { openSystemFlyout: coreOpenSystemFlyout } = overlays;
+  const { openFlyout: coreOpenFlyout } = overlays;
 
   const TagList = useMemo(() => {
     const Comp: Services['TagList'] = ({ references }) => {
@@ -147,21 +144,24 @@ export const ContentEditorKibanaProvider: FC<
   const userProfilesServices = useUserProfilesServices();
   const queryClient = useQueryClient();
 
-  const openSystemFlyout = useCallback(
-    (node: ReactNode, options: OverlaySystemFlyoutOpenOptions) => {
-      return coreOpenSystemFlyout(
-        <QueryClientProvider client={queryClient}>
-          <UserProfilesProvider {...userProfilesServices}>{node}</UserProfilesProvider>
-        </QueryClientProvider>,
+  const openFlyout = useCallback(
+    (node: ReactNode, options: OverlayFlyoutOpenOptions) => {
+      return coreOpenFlyout(
+        toMountPoint(
+          <QueryClientProvider client={queryClient}>
+            <UserProfilesProvider {...userProfilesServices}>{node}</UserProfilesProvider>
+          </QueryClientProvider>,
+          rendering
+        ),
         options
       );
     },
-    [coreOpenSystemFlyout, userProfilesServices, queryClient]
+    [coreOpenFlyout, rendering, userProfilesServices, queryClient]
   );
 
   return (
     <ContentEditorProvider
-      openSystemFlyout={openSystemFlyout}
+      openFlyout={openFlyout}
       notifyError={(title, text) => {
         notifications.toasts.addDanger({ title: toMountPoint(title, rendering), text });
       }}

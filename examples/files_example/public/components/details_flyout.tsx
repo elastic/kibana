@@ -40,7 +40,7 @@ export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss
   const flyoutTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiFlyout session="start" onClose={onDismiss} aria-label={file.name}>
+    <EuiFlyout onClose={onDismiss} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2 id={flyoutTitleId}>{file.name}</h2>

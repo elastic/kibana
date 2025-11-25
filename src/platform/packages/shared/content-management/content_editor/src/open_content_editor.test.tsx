@@ -34,9 +34,7 @@ describe('useOpenContentEditor() hook', () => {
   };
 
   const mockedServices = getMockServices();
-  const openFlyout = mockedServices.openSystemFlyout as jest.MockedFunction<
-    Services['openSystemFlyout']
-  >;
+  const openFlyout = mockedServices.openFlyout as jest.MockedFunction<Services['openFlyout']>;
 
   const setup = registerTestBed(WithServices(TestComp, mockedServices), {
     memoryRouter: { wrapComponent: false },

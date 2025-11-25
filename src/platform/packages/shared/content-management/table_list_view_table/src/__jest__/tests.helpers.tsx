@@ -49,7 +49,7 @@ export function WithServices<P>(
     return (
       <MaybeQueryClientProvider>
         <UserProfilesProvider {...services}>
-          <ContentEditorProvider openSystemFlyout={jest.fn()} notifyError={() => undefined}>
+          <ContentEditorProvider openFlyout={jest.fn()} notifyError={() => undefined}>
             <TableListViewProvider {...services}>
               <Comp {...(props as any)} />
             </TableListViewProvider>

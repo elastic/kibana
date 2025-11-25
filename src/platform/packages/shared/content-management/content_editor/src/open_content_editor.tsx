@@ -9,7 +9,6 @@
 
 import React, { useCallback, useRef } from 'react';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { i18n } from '@kbn/i18n';
 
 import { useServices } from './services';
 
@@ -29,33 +28,23 @@ export type OpenContentEditorParams = Pick<
 
 export function useOpenContentEditor() {
   const services = useServices();
-  const { openSystemFlyout } = services;
+  const { openFlyout } = services;
   const flyout = useRef<OverlayRef | null>(null);
 
   return useCallback(
     (args: OpenContentEditorParams) => {
-      // Validate arguments: onSave must be provided if isReadonly is false
+      // Validate arguments
       if (args.isReadonly === false && args.onSave === undefined) {
         throw new Error(`A value for [onSave()] must be provided when [isReadonly] is false.`);
-      }
-      // Retrieve item title or use a default value
-      let title = args.item.title;
-      if (!args.item.title) {
-        // eslint-disable-next-line no-console
-        console.warn('Item title is missing. Using default title "Details - Untitled".');
-        title = i18n.translate('contentManagement.contentEditor.defaultItemTitle', {
-          defaultMessage: 'Details - Untitled',
-        });
       }
 
       const closeFlyout = () => {
         flyout.current?.close();
       };
 
-      flyout.current = openSystemFlyout(
+      flyout.current = openFlyout(
         <ContentEditorLoader {...args} onCancel={closeFlyout} services={services} />,
         {
-          title,
           maxWidth: 600,
           size: 'm',
           ownFocus: true,
@@ -65,6 +54,6 @@ export function useOpenContentEditor() {
 
       return closeFlyout;
     },
-    [openSystemFlyout, services]
+    [openFlyout, services]
   );
 }
