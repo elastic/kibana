@@ -28,6 +28,7 @@ import type { FunctionDefinition } from '../../types';
 import type { SupportedDataType } from '../../types';
 import { argMatchesParamType, getExpressionType, getParamAtPosition } from '../expressions';
 import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../functions';
+import { SuggestionCategory } from '../../../sorting/types';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getColumnByName } from '../shared';
 
@@ -53,6 +54,7 @@ export const buildUserDefinedColumnsDefinitions = (
       defaultMessage: `Column specified by the user within the ES|QL query`,
     }),
     sortText: 'D',
+    category: SuggestionCategory.USER_DEFINED_COLUMN,
   }));
 
 export function pushItUpInTheList(suggestions: ISuggestionItem[], shouldPromote: boolean) {
@@ -327,6 +329,7 @@ export function getControlSuggestion(
         defaultMessage: 'Click to create',
       }),
       sortText: '1',
+      category: SuggestionCategory.CUSTOM_ACTION,
       command: {
         id: `esql.control.${type}.create`,
         title: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
@@ -341,7 +344,10 @@ export function getControlSuggestion(
           i18n.translate('kbn-esql-ast.esql.autocomplete.namedParamDefinition', {
             defaultMessage: 'Named parameter',
           }),
-          '1A'
+          '1A',
+          undefined,
+          undefined,
+          SuggestionCategory.USER_DEFINED_COLUMN
         )
       : []),
   ];
@@ -519,6 +525,7 @@ export function createInferenceEndpointToCompletionItem(
     label: inferenceEndpoint.inference_id,
     sortText: '1',
     text: inferenceEndpoint.inference_id,
+    category: SuggestionCategory.VALUE,
   };
 }
 
