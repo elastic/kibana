@@ -79,4 +79,3 @@ export const FlyoutResultItem: React.FC<FlyoutResultItemProps> = ({
     </ThinkingItemLayout>
   );
 };
-
