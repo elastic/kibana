@@ -28,11 +28,13 @@ import {
   processToolNodeResponse,
   processAnswerResponse,
 } from './action_utils';
+import { createAnswerAgentStructured } from './answer_agent_structured';
 import {
   isToolCallAction,
   isHandoverAction,
   isAgentErrorAction,
   isAnswerAction,
+  isStructuredAnswerAction,
   errorAction,
   handoverAction,
 } from './actions';
@@ -48,6 +50,8 @@ export const createAgentGraph = ({
   capabilities,
   logger,
   events,
+  structuredOutput = false,
+  outputSchema,
   processedConversation,
 }: {
   chatModel: InferenceChatModel;
@@ -56,6 +60,8 @@ export const createAgentGraph = ({
   configuration: ResolvedConfiguration;
   logger: Logger;
   events: AgentEventEmitter;
+  structuredOutput?: boolean;
+  outputSchema?: Record<string, unknown>;
   processedConversation: ProcessedConversation;
 }) => {
   const toolNode = new ToolNode<BaseMessage[]>(tools);
@@ -190,6 +196,15 @@ export const createAgentGraph = ({
     }
   };
 
+  const answerAgentStructured = createAnswerAgentStructured({
+    chatModel,
+    configuration,
+    capabilities,
+    events,
+    outputSchema,
+    logger,
+  });
+
   const answerAgentEdge = async (state: StateType) => {
     const lastAction = state.answerActions[state.answerActions.length - 1];
 
@@ -200,7 +215,7 @@ export const createAgentGraph = ({
         // max error count reached, stop execution by throwing
         throw lastAction.error;
       }
-    } else if (isAnswerAction(lastAction)) {
+    } else if (isAnswerAction(lastAction) || isStructuredAnswerAction(lastAction)) {
       return steps.finalize;
     }
 
@@ -210,7 +225,11 @@ export const createAgentGraph = ({
 
   const finalize = async (state: StateType) => {
     const answerAction = state.answerActions[state.answerActions.length - 1];
-    if (isAnswerAction(answerAction)) {
+    if (isStructuredAnswerAction(answerAction)) {
+      return {
+        finalAnswer: answerAction.data,
+      };
+    } else if (isAnswerAction(answerAction)) {
       return {
         finalAnswer: answerAction.message,
       };
@@ -219,13 +238,15 @@ export const createAgentGraph = ({
     }
   };
 
+  const selectedAnswerAgent = structuredOutput ? answerAgentStructured : answerAgent;
+
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graph = new StateGraph(StateAnnotation)
     // nodes
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
     .addNode(steps.prepareToAnswer, prepareToAnswer)
-    .addNode(steps.answerAgent, answerAgent)
+    .addNode(steps.answerAgent, selectedAnswerAgent)
     .addNode(steps.finalize, finalize)
     // edges
     .addEdge(_START_, steps.researchAgent)
