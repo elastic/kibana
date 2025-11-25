@@ -117,6 +117,7 @@ dependsOn:
   - '@kbn/spaces-utils'
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
+  - '@kbn/fs'
 tags:
   - plugin
   - prod
@@ -128,6 +129,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - tasks/**/*
     - server/**/*.json
     - scripts/**/*
     - package.json
