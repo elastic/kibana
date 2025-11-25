@@ -28,6 +28,9 @@ export function formFieldToResilientFieldValue(
     return value.map((v) => Number(v));
   } else if (typeof value === 'string' && fieldMetadata.input_type === 'number') {
     return Number(value);
+  } else if (value === '' && fieldMetadata.input_type === 'boolean') {
+    // We interpret not setting the boolean field as false
+    return false;
   } else {
     return value;
   }

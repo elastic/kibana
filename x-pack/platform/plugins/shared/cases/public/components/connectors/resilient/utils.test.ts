@@ -62,5 +62,13 @@ describe('utils', () => {
 
       expect(result).toBe(text);
     });
+
+    it('should interpret empty values in boolean fields as false', () => {
+      const result = formFieldToResilientFieldValue('', {
+        input_type: 'boolean',
+      } as EnhancedFieldMetaData);
+
+      expect(result).toBe(false);
+    });
   });
 });
