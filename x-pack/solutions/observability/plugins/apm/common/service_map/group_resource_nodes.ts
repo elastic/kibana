@@ -104,7 +104,7 @@ function groupNodes({
         id,
         [SPAN_TYPE]: spanType || 'external',
         ...(spanSubtype && { [SPAN_SUBTYPE]: spanSubtype }),
-        label: i18n.translate('xpack.apm.serviceMap.numberOfResources', {
+        label: i18n.translate('xpack.apm.serviceMap.resourceCountLabel', {
           defaultMessage: '{count} resources',
           values: { count: targets.length },
         }),
