@@ -7,31 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpSetup } from '@kbn/core/public';
+import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { ProjectRouting } from '@kbn/es-query';
-import { BehaviorSubject } from 'rxjs';
-import type { ProjectTagsResponse, ICPSManager, ProjectsData } from '@kbn/cps-utils';
+import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
+import { type ICPSManager, type ProjectsData, PROJECT_ROUTING } from '@kbn/cps-utils';
+import type { ProjectFetcher } from './project_fetcher';
 
-const MAX_RETRIES = 2;
-const RETRY_DELAY_MS = 1000;
+/**
+ * This should be configured on spaces level.
+ * Common values: PROJECT_ROUTING.ALL (all projects, will be parsed to undefined on request level), '_alias:_origin' (origin project only)
+ */
+export const DEFAULT_PROJECT_ROUTING: ProjectRouting = PROJECT_ROUTING.ALL;
 
 /**
  * Central service for managing project routing and project data.
  *
  * - Fetches project data from ES via `/internal/cps/projects_tags` endpoint (with caching and retry logic)
  * - Manages current project routing state using observables
+ * - projectRouting$ represents temporary UI state; apps should reset to their saved value or DEFAULT_PROJECT_ROUTING on navigation
  */
 export class CPSManager implements ICPSManager {
   private readonly http: HttpSetup;
   private readonly logger: Logger;
-  private fetchPromise: Promise<ProjectsData | null> | null = null;
-  private cachedData: ProjectsData | null = null;
-  private readonly projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
+  private readonly application: ApplicationStart;
+  private projectFetcherPromise: Promise<ProjectFetcher> | null = null;
+  private readonly projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(
+    DEFAULT_PROJECT_ROUTING
+  );
+  private readonly projectPickerAccess$;
 
-  constructor(deps: { http: HttpSetup; logger: Logger }) {
+  constructor(deps: { http: HttpSetup; logger: Logger; application: ApplicationStart }) {
     this.http = deps.http;
     this.logger = deps.logger.get('cps_manager');
+    this.application = deps.application;
+
+    this.projectPickerAccess$ = combineLatest([
+      this.application.currentAppId$,
+      this.application.currentLocation$,
+    ]).pipe(
+      switchMap(async ([appId, location]) => {
+        // Lazy load access control only when observable is subscribed
+        const { getProjectRoutingAccess, getReadonlyMessage } = await import('./async_services');
+        const access = getProjectRoutingAccess(appId ?? '', location ?? '');
+        return { access, readonlyMessage: getReadonlyMessage(appId) };
+      })
+    );
   }
 
   /**
@@ -56,17 +77,31 @@ export class CPSManager implements ICPSManager {
   }
 
   /**
+   * Get the default project routing value.
+   * This is the fallback value used when no app-specific or saved value exists.
+   */
+  public getDefaultProjectRouting(): ProjectRouting {
+    return DEFAULT_PROJECT_ROUTING;
+  }
+
+  /**
+   * Get the project picker access level as an observable.
+   * This combines the current app ID and location to determine whether
+   * the project picker should be editable, readonly, or disabled.
+   * Also returns the custom readonly message if applicable.
+   */
+  public getProjectPickerAccess$() {
+    return this.projectPickerAccess$;
+  }
+
+  /**
    * Fetches projects from the server with caching and retry logic.
    * Returns cached data if already loaded. If a fetch is already in progress, returns the existing promise.
    * @returns Promise resolving to ProjectsData
    */
   public async fetchProjects(): Promise<ProjectsData | null> {
-    // Return cached data if available
-    if (this.cachedData) {
-      return this.cachedData;
-    }
-
-    return this.doFetch();
+    const fetcher = await this.getProjectFetcher();
+    return fetcher.fetchProjects();
   }
 
   /**
@@ -74,59 +109,16 @@ export class CPSManager implements ICPSManager {
    * @returns Promise resolving to ProjectsData
    */
   public async refresh(): Promise<ProjectsData | null> {
-    return this.doFetch();
+    const fetcher = await this.getProjectFetcher();
+    return fetcher.refresh();
   }
 
-  private async doFetch(): Promise<ProjectsData | null> {
-    // If a fetch is already in progress, return the existing promise
-    if (this.fetchPromise) {
-      return this.fetchPromise;
+  private async getProjectFetcher() {
+    if (!this.projectFetcherPromise) {
+      this.projectFetcherPromise = import('./async_services').then(({ createProjectFetcher }) =>
+        createProjectFetcher(this.http, this.logger)
+      );
     }
-
-    this.fetchPromise = this.fetchProjectsWithRetry()
-      .then((projectsData) => {
-        this.cachedData = projectsData;
-        return projectsData;
-      })
-      .finally(() => {
-        this.fetchPromise = null;
-      });
-
-    return this.fetchPromise;
-  }
-
-  private async fetchProjectsWithRetry(): Promise<ProjectsData | null> {
-    let lastError: Error = new Error('');
-
-    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-      try {
-        const response = await this.http.get<ProjectTagsResponse>('/internal/cps/projects_tags');
-        const originValues = response.origin ? Object.values(response.origin) : [];
-
-        return {
-          origin: originValues.length > 0 ? originValues[0] : null,
-          linkedProjects: response.linked_projects
-            ? Object.values(response.linked_projects).sort((a, b) =>
-                a._alias.localeCompare(b._alias)
-              )
-            : [],
-        };
-      } catch (error) {
-        lastError = error instanceof Error ? error : new Error(String(error));
-        this.logger.error(`Failed to fetch projects (attempt ${attempt + 1}/${MAX_RETRIES + 1})`, {
-          error,
-        });
-
-        // Don't wait after the last attempt
-        if (attempt < MAX_RETRIES) {
-          // Exponential backoff
-          await new Promise((resolve) =>
-            setTimeout(resolve, RETRY_DELAY_MS * Math.pow(2, attempt))
-          );
-        }
-      }
-    }
-
-    throw lastError;
+    return this.projectFetcherPromise;
   }
 }

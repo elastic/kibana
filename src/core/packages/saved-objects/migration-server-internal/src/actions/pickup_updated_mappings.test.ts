@@ -19,11 +19,11 @@ describe('pickupUpdatedMappings', () => {
   });
 
   it('calls both handlers when the promise rejection cannot be retried by either', async () => {
-    // Create a mock client that rejects all methods with a 502 status code
+    // Create a mock client that rejects all methods with a 500 status code
     // response
     const retryableError = new EsErrors.ResponseError(
       elasticsearchClientMock.createApiResponse({
-        statusCode: 502,
+        statusCode: 500,
         body: { error: { type: 'es_type', reason: 'es_reason' } },
       })
     );
@@ -38,7 +38,7 @@ describe('pickupUpdatedMappings', () => {
     );
 
     const task = pickupUpdatedMappings(client, 'my_index', 1000);
-    // Should throw because both handlers can't retry 502 responses
+    // Should throw because both handlers can't retry 500 responses
     await expect(task()).rejects.toThrow();
     expect(catchSearchPhaseExceptionSpy).toHaveBeenCalledWith(retryableError);
     expect(catchClientErrorsSpy).toHaveBeenCalledWith(retryableError);

@@ -19,10 +19,9 @@
  * MVP implementation focusing on core domain reputation actions.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import type { ConnectorSpec } from '../connector_spec';
-import { UISchemas } from '../connector_spec_ui';
 
 export const URLVoidConnector: ConnectorSpec = {
   metadata: {
@@ -33,14 +32,14 @@ export const URLVoidConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows'],
   },
 
-  schema: z.discriminatedUnion('method', [
-    z.object({
-      method: z.literal('headers'),
-      headers: z.object({
-        'X-Api-Key': UISchemas.secret().describe('API Key'),
-      }),
-    }),
-  ]),
+  authTypes: [
+    {
+      type: 'api_key_header',
+      defaults: {
+        headerField: 'X-Api-Key',
+      },
+    },
+  ],
 
   actions: {
     scanDomain: {
@@ -50,7 +49,7 @@ export const URLVoidConnector: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { domain: string };
-        const apiKey = ctx.auth.method === 'headers' ? ctx.auth.headers['X-Api-Key'] : '';
+        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get(
           `https://api.urlvoid.com/api1000/${apiKey}/host/${typedInput.domain}`
         );
@@ -66,12 +65,12 @@ export const URLVoidConnector: ConnectorSpec = {
     checkUrl: {
       isTool: true,
       input: z.object({
-        url: z.string().url().describe('URL to check'),
+        url: z.url().describe('URL to check'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { url: string };
         const domain = new URL(typedInput.url).hostname;
-        const apiKey = ctx.auth.method === 'headers' ? ctx.auth.headers['X-Api-Key'] : '';
+        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get(
           `https://api.urlvoid.com/api1000/${apiKey}/host/${domain}`
         );
@@ -92,7 +91,7 @@ export const URLVoidConnector: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { domain: string };
-        const apiKey = ctx.auth.method === 'headers' ? ctx.auth.headers['X-Api-Key'] : '';
+        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get(
           `https://api.urlvoid.com/api1000/${apiKey}/host/${typedInput.domain}`
         );
@@ -112,7 +111,7 @@ export const URLVoidConnector: ConnectorSpec = {
       isTool: true,
       input: z.object({}),
       handler: async (ctx) => {
-        const apiKey = ctx.auth.method === 'headers' ? ctx.auth.headers['X-Api-Key'] : '';
+        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get(
           `https://api.urlvoid.com/api1000/${apiKey}/stats/remained`
         );
@@ -128,7 +127,7 @@ export const URLVoidConnector: ConnectorSpec = {
   test: {
     handler: async (ctx) => {
       try {
-        const apiKey = ctx.auth.method === 'headers' ? ctx.auth.headers['X-Api-Key'] : '';
+        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         await ctx.client.get(`https://api.urlvoid.com/api1000/${apiKey}/stats/remained`);
         return {
           ok: true,

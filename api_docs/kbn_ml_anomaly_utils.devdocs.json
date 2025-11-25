@@ -957,6 +957,70 @@
           "The hex color string for the severity, corresponding to the current theme."
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-anomaly-utils",
+        "id": "def-common.validateCustomFilterFields",
+        "type": "Function",
+        "tags": [],
+        "label": "validateCustomFilterFields",
+        "description": [
+          "\nValidates that fields in a KQL filter are not in the disallowlist for the given result type."
+        ],
+        "signature": [
+          "(kqlQueryString: string, resultType: ",
+          {
+            "pluginId": "@kbn/ml-anomaly-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAnomalyUtilsPluginApi",
+            "section": "def-common.MlAnomalyResultType",
+            "text": "MlAnomalyResultType"
+          },
+          ") => string | undefined"
+        ],
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/custom_filter_validation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.validateCustomFilterFields.$1",
+            "type": "string",
+            "tags": [],
+            "label": "kqlQueryString",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/custom_filter_validation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-anomaly-utils",
+            "id": "def-common.validateCustomFilterFields.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "resultType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-anomaly-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAnomalyUtilsPluginApi",
+                "section": "def-common.MlAnomalyResultType",
+                "text": "MlAnomalyResultType"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/alerting/custom_filter_validation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [

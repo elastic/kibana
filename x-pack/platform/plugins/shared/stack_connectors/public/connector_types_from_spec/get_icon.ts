@@ -21,6 +21,6 @@ export function getIcon(spec: ConnectorSpec): IconType {
     return lazyIcon;
   }
 
-  // Default to globe icon
-  return 'globe';
+  // Default to plugs icon
+  return 'plugs';
 }
