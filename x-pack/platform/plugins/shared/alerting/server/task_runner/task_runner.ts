@@ -297,7 +297,7 @@ export class TaskRunner<
 
     const ruleFlappingSettings = rule.flapping
       ? {
-          enabled: true,
+          enabled: true, // default to true if flapping.enabled is undefined
           ...rule.flapping,
         }
       : null;
