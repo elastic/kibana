@@ -319,7 +319,7 @@ describe('UninstallTokenService', () => {
           expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith(
             {
               type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-              filter: `(${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:test) and (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${so.id}")`,
+              filter: `((${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:test) or (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:"*")) and (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${so.id}")`,
               perPage: SO_SEARCH_LIMIT,
             }
           );
@@ -458,7 +458,7 @@ describe('UninstallTokenService', () => {
 
           expect(soClientMock.createPointInTimeFinder).toHaveBeenCalledWith(
             expect.objectContaining({
-              filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:test`,
+              filter: `(${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:test) or (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:"*")`,
             })
           );
         });
