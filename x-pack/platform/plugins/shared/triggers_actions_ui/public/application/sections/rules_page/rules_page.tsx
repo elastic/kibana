@@ -42,7 +42,6 @@ export const RulesPage = () => {
     filteredRuleTypes: [],
   });
 
-  // when path is /app/rules, the pathname is /, check for /logs and handle for that tab
   const currentSection: Section = location.pathname.endsWith('/logs') ? 'logs' : 'rules';
 
   const tabs: Array<{
@@ -89,7 +88,7 @@ export const RulesPage = () => {
 
   const renderRulesList = useCallback(() => {
     return (
-      <KibanaPageTemplate.Section>
+      <KibanaPageTemplate.Section paddingSize="l">
         <RulesList
           consumers={NON_SIEM_CONSUMERS}
           rulesListKey="rules-page"
@@ -124,9 +123,6 @@ export const RulesPage = () => {
   return (
     <KibanaPageTemplate
       restrictWidth={false}
-      // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
-      // this is a stop-gap for Stack management specifically until page components can be converted to template components
-      mainProps={{ paddingSize: 'l' }}
       panelled
       pageHeader={{
         paddingSize: 'none',
