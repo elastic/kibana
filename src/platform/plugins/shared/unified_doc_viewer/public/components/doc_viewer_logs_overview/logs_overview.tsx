@@ -37,6 +37,7 @@ import {
 import { TraceWaterfall } from '../observability/traces/components/trace_waterfall';
 import { DataSourcesProvider } from '../observability/traces/hooks/use_data_sources';
 import { SimilarErrors } from './sub_components/similar_errors';
+import { hasErrorFields } from './utils/has_error_fields';
 
 export type LogsOverviewProps = DocViewRenderProps & {
   renderAIAssistant?: ObservabilityLogsAIAssistantFeature['render'];
@@ -73,6 +74,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
     const LogsOverviewAIAssistant = renderAIAssistant;
     const stacktraceFields = getStacktraceFields(hit as LogDocument);
     const isStacktraceAvailable = Object.values(stacktraceFields).some(Boolean);
+    const showSimilarErrors = hasErrorFields(parsedDoc);
     const qualityIssuesSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const stackTraceSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -123,9 +125,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             onRemoveColumn={onRemoveColumn}
             dataView={dataView}
           />
-
           <div>{renderFlyoutStreamField && renderFlyoutStreamField({ dataView, doc: hit })}</div>
-
           <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
           {isStacktraceAvailable && (
             <LogsOverviewStacktraceSection
@@ -134,10 +134,8 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
               dataView={dataView}
             />
           )}
-
           <DataSourcesProvider indexes={indexes}>
-            {/* TODO decide when to show this section, only when log is an error*/}
-            <SimilarErrors hit={hit} formattedDoc={parsedDoc} />
+            {showSimilarErrors ? <SimilarErrors hit={hit} formattedDoc={parsedDoc} /> : null}
             {parsedDoc[TRACE_ID_FIELD] && showTraceWaterfall ? (
               <TraceWaterfall
                 traceId={parsedDoc[TRACE_ID_FIELD]}
@@ -147,7 +145,6 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
               />
             ) : null}
           </DataSourcesProvider>
-
           {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
         </div>
       </FieldActionsProvider>
