@@ -6,7 +6,7 @@
  */
 
 import type { AxiosError } from 'axios';
-import { omitBy, isNil } from 'lodash/fp';
+import { omitBy, isNil, isObject } from 'lodash/fp';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { CaseConnector, getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import { z } from '@kbn/zod';
@@ -22,10 +22,10 @@ import type {
   ResilientConfig,
   ResilientSecrets,
   UpdateIncidentParams,
-} from './types';
-import * as i18n from './translations';
-import { SUB_ACTION } from './constants';
+  ResilientFieldMeta,
+} from '@kbn/connector-schemas/resilient';
 import {
+  SUB_ACTION,
   ExecutorSubActionCommonFieldsParamsSchema,
   ExecutorSubActionGetIncidentTypesParamsSchema,
   ExecutorSubActionGetSeverityParamsSchema,
@@ -33,8 +33,9 @@ import {
   GetIncidentTypesResponseSchema,
   GetSeverityResponseSchema,
   GetIncidentResponseSchema,
-  type ResilientFieldMeta,
-} from './schema';
+  CONNECTOR_NAME,
+} from '@kbn/connector-schemas/resilient';
+import * as i18n from './translations';
 import { formatUpdateRequest, prepareAdditionalFieldsForCreation } from './utils';
 
 const VIEW_INCIDENT_URL = `#incidents`;
@@ -74,6 +75,9 @@ export class ResilientConnector extends CaseConnector<
     }
     if (error.response.status === 401) {
       return i18n.UNAUTHORIZED_API_ERROR;
+    }
+    if (isObject(error.response?.data) && 'message' in error.response.data) {
+      return `API Error: ${error.response.data.message}`;
     }
     return `API Error: ${error.response?.statusText}`;
   }
@@ -191,7 +195,7 @@ export class ResilientConnector extends CaseConnector<
       };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to create incident. Error: ${error.message}.`)
+        getErrorMessage(CONNECTOR_NAME, `Unable to create incident. Error: ${error.message}.`)
       );
     }
   }
@@ -240,7 +244,7 @@ export class ResilientConnector extends CaseConnector<
     } catch (error) {
       throw new Error(
         getErrorMessage(
-          i18n.NAME,
+          CONNECTOR_NAME,
           `Unable to update incident with id ${incidentId}. Error: ${error.message}.`
         )
       );
@@ -265,7 +269,7 @@ export class ResilientConnector extends CaseConnector<
     } catch (error) {
       throw new Error(
         getErrorMessage(
-          i18n.NAME,
+          CONNECTOR_NAME,
           `Unable to create comment at incident with id ${incidentId}. Error: ${error.message}.`
         )
       );
@@ -293,7 +297,10 @@ export class ResilientConnector extends CaseConnector<
       return res.data;
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get incident with id ${id}. Error: ${error.message}.`)
+        getErrorMessage(
+          CONNECTOR_NAME,
+          `Unable to get incident with id ${id}. Error: ${error.message}.`
+        )
       );
     }
   }
@@ -321,7 +328,7 @@ export class ResilientConnector extends CaseConnector<
       }));
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get incident types. Error: ${error.message}.`)
+        getErrorMessage(CONNECTOR_NAME, `Unable to get incident types. Error: ${error.message}.`)
       );
     }
   }
@@ -348,7 +355,7 @@ export class ResilientConnector extends CaseConnector<
       }));
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get severity. Error: ${error.message}.`)
+        getErrorMessage(CONNECTOR_NAME, `Unable to get severity. Error: ${error.message}.`)
       );
     }
   }
@@ -382,7 +389,9 @@ export class ResilientConnector extends CaseConnector<
 
       return fields;
     } catch (error) {
-      throw new Error(getErrorMessage(i18n.NAME, `Unable to get fields. Error: ${error.message}.`));
+      throw new Error(
+        getErrorMessage(CONNECTOR_NAME, `Unable to get fields. Error: ${error.message}.`)
+      );
     }
   }
 }

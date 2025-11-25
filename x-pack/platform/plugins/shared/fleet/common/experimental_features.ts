@@ -19,6 +19,10 @@ const _allowedExperimentalValues = {
   enableAgentStatusAlerting: true,
   enableAgentPrivilegeLevelChange: false,
   installIntegrationsKnowledge: false,
+  enableFleetPolicyRevisionsCleanupTask: true,
+  agentlessPoliciesAPI: true,
+  useAgentlessAPIInUI: false,
+  disabledAgentlessLegacyAPI: false,
 };
 
 /**

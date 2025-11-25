@@ -2678,7 +2678,7 @@
                 "description": [],
                 "signature": [
                   "PluginInitializerContext",
-                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>>"
+                  "<Readonly<{} & { search: Readonly<{} & { asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>>"
                 ],
                 "path": "src/platform/plugins/shared/data/public/plugin.ts",
                 "deprecated": false,
@@ -8433,6 +8433,29 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.SearchSourceFields.nonHighlightingFilters",
+            "type": "Array",
+            "tags": [],
+            "label": "nonHighlightingFilters",
+            "description": [
+              "\nFilters that should not trigger highlighting.\nThese filters will be included in the search query for document retrieval,\nbut excluded from the highlight_query parameter in Elasticsearch.\n{@link Filter}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.SearchSourceFields.sort",
             "type": "CompoundType",
             "tags": [],
@@ -9937,6 +9960,14 @@
             "text": "AggregateQuery"
           },
           " | undefined; filter?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; nonHighlightingFilters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -11489,7 +11520,7 @@
                 "description": [],
                 "signature": [
                   "PluginInitializerContext",
-                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>>"
+                  "<Readonly<{} & { search: Readonly<{} & { asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>>"
                 ],
                 "path": "src/platform/plugins/shared/data/server/plugin.ts",
                 "deprecated": false,

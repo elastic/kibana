@@ -27,8 +27,8 @@ import type {
   PostMessageParams,
   SlackApiConfig,
   ValidChannelIdSubActionParams,
-  ValidChannelResponse,
-} from '../../../common/slack_api/types';
+} from '@kbn/connector-schemas/slack_api';
+import type { ValidChannelResponse } from '../../../common/slack_api/types';
 
 const SlackParamsFields: React.FunctionComponent<
   ActionParamsProps<PostMessageParams | PostBlockkitParams>

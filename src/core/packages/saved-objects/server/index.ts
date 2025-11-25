@@ -126,6 +126,7 @@ export {
 } from './src/saved_objects_error_helpers';
 
 export type {
+  ModelVersionIdentifier,
   SavedObjectsModelVersion,
   SavedObjectsModelVersionMap,
   SavedObjectsModelVersionMapProvider,
@@ -146,6 +147,8 @@ export type {
   SavedObjectModelVersionForwardCompatibilityFn,
   SavedObjectModelVersionForwardCompatibilityObjectSchema,
   SavedObjectModelVersionForwardCompatibilitySchema,
+  SavedObjectsFullModelVersion,
+  SavedObjectsFullModelVersionSchemaDefinitions,
 } from './src/model_version';
 
 // We re-export the SavedObject types here for convenience.

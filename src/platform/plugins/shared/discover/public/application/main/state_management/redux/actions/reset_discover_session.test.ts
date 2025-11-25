@@ -25,12 +25,12 @@ import type { DiscoverAppState } from '../../discover_app_state_container';
 
 const createPersistedTab = ({
   tabId,
-  initialAppState,
+  appState,
   dataView,
   services,
 }: {
   tabId: string;
-  initialAppState?: DiscoverAppState;
+  appState?: DiscoverAppState;
   dataView: DataView;
   services: DiscoverServices;
 }) =>
@@ -40,7 +40,7 @@ const createPersistedTab = ({
       initialInternalState: {
         serializedSearchSource: { index: dataView.id },
       },
-      ...(initialAppState ? { initialAppState } : {}),
+      ...(appState ? { appState } : {}),
     }),
     timeRestore: false,
     services,
@@ -63,13 +63,13 @@ const setup = async () => {
     });
   const persistedTab1 = createPersistedTab({
     tabId: 'tab-1',
-    initialAppState: { columns: ['tab-1-column'] },
+    appState: { columns: ['tab-1-column'] },
     dataView: dataViewWithTimefieldMock,
     services,
   });
   const persistedTab2 = createPersistedTab({
     tabId: 'tab-2',
-    initialAppState: { columns: ['tab-2-column'] },
+    appState: { columns: ['tab-2-column'] },
     dataView: dataViewWithNoTimefieldMock,
     services,
   });
@@ -130,20 +130,10 @@ describe('resetDiscoverSession', () => {
     const tab1RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab1.id);
     const tab1StateContainer = tab1RuntimeState.stateContainer$.getValue()!;
     const tab1SavedSearchSetSpy = jest.spyOn(tab1StateContainer.savedSearchState, 'set');
-    const tab1UndoSavedSearchChangesSpy = jest.spyOn(
-      tab1StateContainer.actions,
-      'undoSavedSearchChanges'
-    );
-    const tab1ResetInitialStateSpy = jest.spyOn(tab1StateContainer.appState, 'resetInitialState');
 
     const tab2RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab2.id);
     const tab2StateContainer = tab2RuntimeState.stateContainer$.getValue()!;
     const tab2SavedSearchSetSpy = jest.spyOn(tab2StateContainer.savedSearchState, 'set');
-    const tab2UndoSavedSearchChangesSpy = jest.spyOn(
-      tab2StateContainer.actions,
-      'undoSavedSearchChanges'
-    );
-    const tab2ResetInitialStateSpy = jest.spyOn(tab2StateContainer.appState, 'resetInitialState');
 
     const tab3RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab3.id);
 
@@ -169,14 +159,10 @@ describe('resetDiscoverSession', () => {
     expect(tab1SavedSearchSetSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({ columns: persistedTab1.columns })
     );
-    expect(tab1UndoSavedSearchChangesSpy).toHaveBeenCalled();
-    expect(tab1ResetInitialStateSpy).toHaveBeenCalled();
 
     expect(tab2SavedSearchSetSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({ columns: persistedTab2.columns })
     );
-    expect(tab2UndoSavedSearchChangesSpy).toHaveBeenCalled();
-    expect(tab2ResetInitialStateSpy).toHaveBeenCalled();
 
     expect(tab3RuntimeState.stateContainer$.getValue()).toBeUndefined();
 

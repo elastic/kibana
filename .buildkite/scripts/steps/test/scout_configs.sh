@@ -66,8 +66,20 @@ RUN_MODES["observability"]="--stateful --serverless=oblt --serverless=oblt-logs-
 RUN_MODES["search"]="--stateful --serverless=es"
 RUN_MODES["security"]="--stateful --serverless=security"
 
+# Define serverless-only run modes based on group
+declare -A RUN_MODES_SERVERLESS_ONLY
+RUN_MODES_SERVERLESS_ONLY["platform"]="--serverless=es --serverless=oblt --serverless=security"
+RUN_MODES_SERVERLESS_ONLY["observability"]="--serverless=oblt --serverless=oblt-logs-essentials"
+RUN_MODES_SERVERLESS_ONLY["search"]="--serverless=es"
+RUN_MODES_SERVERLESS_ONLY["security"]="--serverless=security"
+
 # Determine valid run modes for the group
-RUN_MODE_LIST=${RUN_MODES[$group]}
+if [[ -n "${SERVERLESS_TESTS_ONLY:-}" ]]; then
+  echo "--- Using serverless-only test modes (SERVERLESS_TESTS_ONLY is set)"
+  RUN_MODE_LIST=${RUN_MODES_SERVERLESS_ONLY[$group]}
+else
+  RUN_MODE_LIST=${RUN_MODES[$group]}
+fi
 
 if [[ -z "$RUN_MODE_LIST" ]]; then
   echo "Unknown group: $group"

@@ -573,9 +573,7 @@
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-server.ISavedObjectsRepository.search",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "search",
             "description": [
               "\nPerforms a raw search against the saved objects indices, returning the raw Elasticsearch response"
@@ -592,98 +590,8 @@
               "<T, A>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts",
-            "deprecated": true,
+            "deprecated": false,
             "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/saved_objects_client.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/repository.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/lib/apis/search.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/mocks/repository.mock.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/saved_objects_client.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/saved_objects_client.test.ts"
-              }
-            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -3923,9 +3831,7 @@
             "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-server.SavedObjectsClientContract.search",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "search",
             "description": [
               "\nPerforms a raw search against the saved objects indices, returning the raw Elasticsearch response"
@@ -3942,18 +3848,8 @@
               "<T, A>>"
             ],
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_client.ts",
-            "deprecated": true,
+            "deprecated": false,
             "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/saved_objects_client.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/api-server-internal/src/saved_objects_client.test.ts"
-              }
-            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-api-server",
@@ -5309,19 +5205,19 @@
               "the point-in-time finder client"
             ],
             "signature": [
-              "{ find: <T = unknown, A = unknown>(options: ",
-              "SavedObjectsFindOptions",
-              ", internalOptions?: ",
-              "SavedObjectsFindInternalOptions",
-              " | undefined) => Promise<",
-              "SavedObjectsFindResponse",
-              "<T, A>>; closePointInTime: (id: string, options?: ",
+              "{ closePointInTime: (id: string, options?: ",
               "SavedObjectsBaseOptions",
               " | undefined, internalOptions?: ",
               "SavedObjectsFindInternalOptions",
               " | undefined) => Promise<",
               "SavedObjectsClosePointInTimeResponse",
-              ">; openPointInTimeForType: (type: string | string[], options?: ",
+              ">; find: <T = unknown, A = unknown>(options: ",
+              "SavedObjectsFindOptions",
+              ", internalOptions?: ",
+              "SavedObjectsFindInternalOptions",
+              " | undefined) => Promise<",
+              "SavedObjectsFindResponse",
+              "<T, A>>; openPointInTimeForType: (type: string | string[], options?: ",
               "SavedObjectsOpenPointInTimeOptions",
               " | undefined, internalOptions?: ",
               "SavedObjectsFindInternalOptions",
@@ -7255,9 +7151,9 @@
           "\nOptions for the create point-in-time finder operation\n"
         ],
         "signature": [
-          "{ type: string | string[]; filter?: any; aggs?: Record<string, ",
+          "{ type: string | string[]; search?: string | undefined; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
+          "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
           "SortOrder",
           " | undefined; hasReference?: ",
           "SavedObjectsFindOptionsReference",
@@ -7284,19 +7180,19 @@
           "\nPoint-in-time finder client.\nPartially implements {@link ISavedObjectsRepository}\n"
         ],
         "signature": [
-          "{ find: <T = unknown, A = unknown>(options: ",
-          "SavedObjectsFindOptions",
-          ", internalOptions?: ",
-          "SavedObjectsFindInternalOptions",
-          " | undefined) => Promise<",
-          "SavedObjectsFindResponse",
-          "<T, A>>; closePointInTime: (id: string, options?: ",
+          "{ closePointInTime: (id: string, options?: ",
           "SavedObjectsBaseOptions",
           " | undefined, internalOptions?: ",
           "SavedObjectsFindInternalOptions",
           " | undefined) => Promise<",
           "SavedObjectsClosePointInTimeResponse",
-          ">; openPointInTimeForType: (type: string | string[], options?: ",
+          ">; find: <T = unknown, A = unknown>(options: ",
+          "SavedObjectsFindOptions",
+          ", internalOptions?: ",
+          "SavedObjectsFindInternalOptions",
+          " | undefined) => Promise<",
+          "SavedObjectsFindResponse",
+          "<T, A>>; openPointInTimeForType: (type: string | string[], options?: ",
           "SavedObjectsOpenPointInTimeOptions",
           " | undefined, internalOptions?: ",
           "SavedObjectsFindInternalOptions",

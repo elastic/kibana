@@ -29,7 +29,6 @@ import {
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import type { LensApiState, LegacyMetricState } from '../../schema';
 import { fromMetricAPItoLensState } from '../columns/metric';
-import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import type { DeepMutable, DeepPartial } from '../utils';
 import { generateLayer } from '../utils';
 import type {
@@ -84,10 +83,7 @@ function reverseBuildVisualizationState(
     ...generateApiLayer(layer),
     metric: isEsqlTableTypeDataset(dataset)
       ? getValueApiColumn(visualization.accessor, layer as TextBasedLayer)
-      : (operationFromColumn(
-          visualization.accessor,
-          layer as FormBasedLayer
-        ) as LensApiAllMetricOperations),
+      : operationFromColumn(visualization.accessor, layer as FormBasedLayer),
   } as LegacyMetricState;
 
   if (props.metric) {
@@ -121,7 +117,7 @@ function reverseBuildVisualizationState(
 }
 
 function buildFormBasedLayer(layer: LegacyMetricStateNoESQL): FormBasedPersistedState['layers'] {
-  const columns = fromMetricAPItoLensState(layer.metric as LensApiAllMetricOperations);
+  const columns = fromMetricAPItoLensState(layer.metric);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
   const defaultLayer = layers[DEFAULT_LAYER_ID];
@@ -172,7 +168,11 @@ export function fromLensStateToAPI(
   const { state } = config;
   const visualization = state.visualization as LegacyMetricVisualizationState;
   const layers =
-    state.datasourceStates.formBased?.layers ?? state.datasourceStates.textBased?.layers ?? [];
+    state.datasourceStates.formBased?.layers ??
+    state.datasourceStates.textBased?.layers ??
+    // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
+    (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
+    [];
 
   const [layerId, layer] = Object.entries(layers)[0];
 

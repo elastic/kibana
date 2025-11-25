@@ -11,7 +11,8 @@ import { useCallback, useState } from 'react';
 import type YAML from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
-import { formatMonacoYamlMarker } from '../../../widgets/workflow_yaml_editor/lib/format_monaco_yaml_marker';
+import { filterMonacoYamlMarkers } from './filter_monaco_yaml_markers';
+import { formatMonacoYamlMarker } from './format_monaco_yaml_marker';
 import type { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { getSeverityString } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { isYamlValidationMarkerOwner, type YamlValidationResult } from '../model/types';
@@ -20,7 +21,7 @@ export interface UseMonacoMarkersChangedInterceptorResult {
   transformMonacoMarkers: (
     editorModel: monaco.editor.ITextModel,
     owner: string,
-    markers: monaco.editor.IMarker[] | monaco.editor.IMarkerData[]
+    markers: monaco.editor.IMarkerData[]
   ) => monaco.editor.IMarker[] | monaco.editor.IMarkerData[];
   handleMarkersChanged: (
     editorModel: monaco.editor.ITextModel,
@@ -45,19 +46,21 @@ export function useMonacoMarkersChangedInterceptor({
     (
       editorModel: monaco.editor.ITextModel,
       owner: string,
-      markers: monaco.editor.IMarker[] | monaco.editor.IMarkerData[]
+      markers: monaco.editor.IMarkerData[]
     ) => {
-      return markers.map((marker) => {
-        if (owner === 'yaml') {
-          return formatMonacoYamlMarker(
-            marker,
-            editorModel,
-            workflowYamlSchema,
-            yamlDocumentRef.current
-          );
+      return filterMonacoYamlMarkers(markers, editorModel, yamlDocumentRef.current).map(
+        (marker) => {
+          if (owner === 'yaml') {
+            return formatMonacoYamlMarker(
+              marker,
+              editorModel,
+              workflowYamlSchema,
+              yamlDocumentRef.current
+            );
+          }
+          return marker;
         }
-        return marker;
-      });
+      );
     },
     [workflowYamlSchema, yamlDocumentRef]
   );
@@ -66,7 +69,7 @@ export function useMonacoMarkersChangedInterceptor({
     (
       _editorModel: monaco.editor.ITextModel,
       owner: string,
-      markers: monaco.editor.IMarker[] | monaco.editor.IMarkerData[]
+      markers: monaco.editor.IMarkerData[]
     ) => {
       const errors: YamlValidationResult[] = [];
       for (const marker of markers) {

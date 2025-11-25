@@ -8,7 +8,7 @@
  */
 
 // TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
@@ -83,9 +83,18 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
           }
         : withInputs;
 
+      const connectorIdRendered =
+        this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+          step['connector-id']
+        );
+
+      if (!connectorIdRendered) {
+        throw new Error(`Connector ID is required`);
+      }
+
       const output = await this.connectorExecutor.execute(
         stepType,
-        step['connector-id']!,
+        connectorIdRendered,
         renderedInputs,
         step.spaceId,
         this.stepExecutionRuntime.abortController

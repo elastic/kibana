@@ -32,8 +32,8 @@ import {
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { isEqual } from 'lodash';
+import { AuthType, SSLCertType, MAX_HEADERS } from '@kbn/connector-schemas/common/auth/constants';
 import { useSecretHeaders } from './use_secret_headers';
-import { AuthType, SSLCertType, MAX_HEADERS } from '../../../common/auth/constants';
 import { SSLCertFields } from './ssl_cert_fields';
 import { BasicAuthFields } from './basic_auth_fields';
 import { HeaderFields } from './header_fields';
@@ -105,14 +105,21 @@ export const AuthConfig: FunctionComponent<Props> = ({
     if (loadingHeaders) return;
 
     const formData = getFormData();
-    const currentHeaders: Array<InternalFormData> = formData.__internal__?.headers ?? [];
-    const configHeaders = currentHeaders.filter((header) => header.type === 'config');
-    const secretHeaders = secretHeaderKeys.map((key) => ({
-      key,
-      value: '',
-      type: 'secret',
-    }));
-    let mergedHeaders: Array<InternalFormData> = [...configHeaders, ...secretHeaders];
+    const secretHeaderKeysSet = new Set(secretHeaderKeys);
+    const currentHeaders: Array<InternalFormData> = (formData.__internal__?.headers ?? []).map(
+      (header: InternalFormData) => {
+        if (secretHeaderKeysSet.has(header.key)) {
+          return { ...header, value: '', type: 'secret' };
+        }
+        return header;
+      }
+    );
+    const currentHeadersKeysSet = new Set(currentHeaders.map((header) => header.key));
+    const newSecretHeaders = secretHeaderKeys
+      .filter((key) => !currentHeadersKeysSet.has(key))
+      .map((key) => ({ key, value: '', type: 'secret' }));
+
+    let mergedHeaders: Array<InternalFormData> = [...currentHeaders, ...newSecretHeaders];
 
     if (mergedHeaders.length === 0 && hasHeaders) {
       mergedHeaders = [{ key: '', value: '', type: 'config' }];
