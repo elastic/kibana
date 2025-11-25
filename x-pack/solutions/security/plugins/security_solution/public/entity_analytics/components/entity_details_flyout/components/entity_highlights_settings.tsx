@@ -24,6 +24,10 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
+import { AttachmentType } from '@kbn/onechat-common/attachments';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
+import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 import { useAskAiAssistant } from '../tabs/risk_inputs/use_ask_ai_assistant';
 import { getAnonymizedEntityIdentifier } from '../utils/helpers';
 
@@ -93,6 +97,14 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
     replacements: assistantResult?.replacements,
   });
 
+  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
+    attachmentType: AttachmentType.risk_entity,
+    attachmentData: { identifierType: entityType, identifier: entityIdentifier },
+    attachmentPrompt: `Investigate the entity and suggest next steps.`,
+  });
+
   const items = useMemo(
     () => [
       <EuiPanel color="transparent" paddingSize="none" key={'entity-highlights-settings-menu'}>
@@ -141,26 +153,47 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
           </EuiFlexGroup>
         </EuiContextMenuItem>
 
-        <EuiContextMenuItem
-          aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
-            {
-              defaultMessage: 'Ask AI Assistant',
-            }
-          )}
-          key={'ask-ai-assistant'}
-          onClick={() => {
-            showAssistantOverlay();
-            closePopover();
-          }}
-          icon={<AssistantIcon />}
-          disabled={isLoading}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistant"
-            defaultMessage="Ask AI Assistant"
-          />
-        </EuiContextMenuItem>
+        {isAgentBuilderEnabled ? (
+          <EuiContextMenuItem
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
+              {
+                defaultMessage: 'Ask AI Assistant',
+              }
+            )}
+            key={'ask-ai-assistant'}
+            disabled={isLoading}
+          >
+            <NewAgentBuilderAttachment
+              onClick={() => {
+                openAgentBuilderFlyout();
+                closePopover();
+              }}
+              size="s"
+            />
+          </EuiContextMenuItem>
+        ) : (
+          <EuiContextMenuItem
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
+              {
+                defaultMessage: 'Ask AI Assistant',
+              }
+            )}
+            key={'ask-ai-assistant'}
+            onClick={() => {
+              showAssistantOverlay();
+              closePopover();
+            }}
+            icon={<AssistantIcon />}
+            disabled={isLoading}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistant"
+              defaultMessage="Ask AI Assistant"
+            />
+          </EuiContextMenuItem>
+        )}
 
         <EuiContextMenuItem
           aria-label={i18n.translate(
@@ -189,6 +222,8 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
       connectorId,
       showAssistantOverlay,
       closePopover,
+      isAgentBuilderEnabled,
+      openAgentBuilderFlyout,
     ]
   );
 
