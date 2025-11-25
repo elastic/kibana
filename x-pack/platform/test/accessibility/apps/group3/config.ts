@@ -22,6 +22,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         '--data.search.sessions.enabled=true',
+        '--xpack.upgrade_assistant.ui.enabled=true',
       ],
     },
 
