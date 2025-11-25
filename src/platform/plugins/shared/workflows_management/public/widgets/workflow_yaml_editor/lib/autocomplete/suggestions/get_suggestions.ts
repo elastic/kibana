@@ -10,6 +10,7 @@
 import type { monaco } from '@kbn/monaco';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
+import { getJsonSchemaSuggestions } from './json_schema/get_json_schema_suggestions';
 import {
   createLiquidBlockKeywordCompletions,
   createLiquidFilterCompletions,
@@ -136,18 +137,22 @@ export function getSuggestions(
     return getTimezoneSuggestions(adjustedRange, lineParseResult.fullKey);
   }
 
-  // TODO: Implement connector with block completion
-  // Connector with block completion
+  // JSON Schema autocompletion for inputs.properties
   // e.g.
-  // steps:
-  // - name: search-alerts
-  //   type: elasticsearch.search
-  //   with:
-  //     index: "alerts-*"
-  //     query:
-  //       range:
-  //         "@timestamp":
-  //           gte: "now-1h"
-  //     |<-
+  // inputs:
+  //   properties:
+  //     myProperty:
+  //       type: |<- (suggest: string, number, boolean, object, array, null)
+  //       format: |<- (suggest: email, uri, date-time, etc.)
+  //       enum: |<- (suggest enum values from schema)
+  // This should be checked BEFORE other type completions to avoid conflicts
+  // but AFTER variable/connector completions which are more specific
+  const jsonSchemaSuggestions = getJsonSchemaSuggestions(autocompleteContext);
+  if (jsonSchemaSuggestions.length > 0) {
+    return jsonSchemaSuggestions;
+  }
+
+  // Future enhancement: Connector with block completion
+  // This would provide autocompletion for connector-specific parameters
   return [];
 }

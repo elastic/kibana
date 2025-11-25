@@ -72,7 +72,11 @@ import {
 } from '../../common/lib/errors';
 
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
+import {
+  parseWorkflowYamlToJSON,
+  parseYamlToJSONWithoutValidation,
+  stringifyWorkflowDefinition,
+} from '../../common/lib/yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
@@ -378,16 +382,24 @@ export class WorkflowsService {
           yamlUpdated = true;
         }
 
-        // If any individual fields were updated, regenerate the YAML content
-        if (yamlUpdated && existingDocument._source?.definition) {
-          const updatedWorkflowDefinition = {
-            ...existingDocument._source.definition,
-            ...(workflow.name !== undefined && { name: workflow.name }),
-            ...(workflow.enabled !== undefined && { enabled: updatedData.enabled }),
-            ...(workflow.description !== undefined && { description: workflow.description }),
-            ...(workflow.tags !== undefined && { tags: workflow.tags }),
-          };
-          updatedData.yaml = stringifyWorkflowDefinition(updatedWorkflowDefinition);
+        if (yamlUpdated && existingDocument._source?.yaml) {
+          const originalYamlParse = parseYamlToJSONWithoutValidation(existingDocument._source.yaml);
+          const baseDefinition = originalYamlParse.success
+            ? originalYamlParse.json
+            : existingDocument._source?.definition;
+
+          if (baseDefinition) {
+            const fieldUpdates = {
+              ...(workflow.name !== undefined && { name: workflow.name }),
+              ...(workflow.enabled !== undefined && { enabled: updatedData.enabled }),
+              ...(workflow.description !== undefined && { description: workflow.description }),
+              ...(workflow.tags !== undefined && { tags: workflow.tags }),
+            };
+            updatedData.yaml = stringifyWorkflowDefinition({
+              ...baseDefinition,
+              ...fieldUpdates,
+            });
+          }
         }
       }
 

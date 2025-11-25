@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { convertLegacyInputsToJsonSchema } from './input_conversion';
 import type { ConnectorContractUnion } from '../..';
 import {
   BaseConnectorStepSchema,
@@ -18,8 +19,12 @@ import {
   getOnFailureStepSchema,
   getParallelStepSchema,
   getWorkflowSettingsSchema,
+  TriggerSchema,
   WaitStepSchema,
-  WorkflowSchema,
+  WorkflowConstsSchema,
+  WorkflowInputSchema,
+  WorkflowInputsJsonSchema,
+  WorkflowSchemaForAutocomplete,
 } from '../schema';
 
 function generateStepSchemaForConnector(
@@ -80,15 +85,55 @@ export function generateYamlSchemaFromConnectors(
   const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
 
   if (loose) {
-    return WorkflowSchema.partial().extend({
+    // For loose mode, use WorkflowSchemaForAutocomplete which already handles partial fields
+    return WorkflowSchemaForAutocomplete.extend({
       steps: z.array(recursiveStepSchema).optional(),
     });
   }
 
-  return WorkflowSchema.extend({
+  // For strict mode, we need to build from the base schema before the pipe
+  // since WorkflowSchema uses .pipe() which doesn't support .extend()
+  const baseWorkflowSchema = z.object({
+    version: z.literal('1').default('1').describe('The version of the workflow schema'),
+    name: z.string().min(1),
+    description: z.string().optional(),
     settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
+    enabled: z.boolean().default(true),
+    tags: z.array(z.string()).optional(),
+    triggers: z.array(TriggerSchema).min(1),
+    inputs: z
+      .union([WorkflowInputsJsonSchema, z.array(WorkflowInputSchema)])
+      .optional()
+      .transform((inputs) => {
+        if (!inputs) {
+          return undefined;
+        }
+        if ('properties' in inputs && typeof inputs === 'object' && !Array.isArray(inputs)) {
+          return inputs as z.infer<typeof WorkflowInputsJsonSchema>;
+        }
+        if (Array.isArray(inputs)) {
+          return convertLegacyInputsToJsonSchema(inputs);
+        }
+        return undefined;
+      }),
+    consts: WorkflowConstsSchema.optional(),
     steps: z.array(recursiveStepSchema),
   });
+
+  return baseWorkflowSchema.pipe(
+    z.object({
+      version: z.literal('1'),
+      name: z.string(),
+      description: z.string().optional(),
+      settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
+      enabled: z.boolean(),
+      tags: z.array(z.string()).optional(),
+      triggers: z.array(TriggerSchema),
+      inputs: WorkflowInputsJsonSchema.optional(),
+      consts: WorkflowConstsSchema.optional(),
+      steps: z.array(recursiveStepSchema),
+    })
+  );
 }
 
 export function getStepId(stepName: string): string {

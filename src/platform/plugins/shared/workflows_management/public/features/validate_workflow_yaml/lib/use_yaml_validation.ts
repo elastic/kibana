@@ -13,6 +13,7 @@ import { monaco } from '@kbn/monaco';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllVariables } from './collect_all_variables';
 import { validateConnectorIds } from './validate_connector_ids';
+import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
@@ -52,6 +53,7 @@ export function useYamlValidation(
   const connectors = useSelector(selectConnectors);
   const { application } = useKibana().services;
 
+  // eslint-disable-next-line complexity
   useEffect(() => {
     if (!editor) {
       return;
@@ -71,6 +73,7 @@ export function useYamlValidation(
       monaco.editor.setModelMarkers(model, 'step-name-validation', []);
       monaco.editor.setModelMarkers(model, 'liquid-template-validation', []);
       monaco.editor.setModelMarkers(model, 'connector-id-validation', []);
+      monaco.editor.setModelMarkers(model, 'json-schema-default-validation', []);
       setIsLoading(false);
       setError(null);
       return;
@@ -107,9 +110,10 @@ export function useYamlValidation(
 
     const validationResults: YamlValidationResult[] = [
       validateStepNameUniqueness(yamlDocument),
-      validateVariablesInternal(variableItems, workflowGraph, workflowDefinition),
+      validateVariablesInternal(variableItems, workflowGraph, workflowDefinition, yamlDocument),
       validateLiquidTemplate(model.getValue()),
       validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
+      validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model),
     ].flat();
 
     for (const validationResult of validationResults) {
@@ -141,6 +145,18 @@ export function useYamlValidation(
             stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
           },
         });
+      } else if (validationResult.owner === 'json-schema-default-validation') {
+        if (validationResult.severity !== null) {
+          markers.push({
+            severity: SEVERITY_MAP[validationResult.severity],
+            message: validationResult.message,
+            startLineNumber: validationResult.startLineNumber,
+            startColumn: validationResult.startColumn,
+            endLineNumber: validationResult.endLineNumber,
+            endColumn: validationResult.endColumn,
+            source: 'json-schema-default-validation',
+          });
+        }
       } else if (validationResult.owner === 'liquid-template-validation') {
         markers.push({
           severity: SEVERITY_MAP[validationResult.severity],
@@ -253,6 +269,11 @@ export function useYamlValidation(
       model,
       'connector-id-validation',
       markers.filter((m) => m.source === 'connector-id-validation')
+    );
+    monaco.editor.setModelMarkers(
+      model,
+      'json-schema-default-validation',
+      markers.filter((m) => m.source === 'json-schema-default-validation')
     );
     setError(null);
   }, [

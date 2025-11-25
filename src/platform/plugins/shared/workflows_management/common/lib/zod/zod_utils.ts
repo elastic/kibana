@@ -10,7 +10,6 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { ZodFirstPartySchemaTypes } from '@kbn/zod';
 import { z } from '@kbn/zod';
-import type { WorkflowZodSchemaLooseType } from '../../schema';
 
 export function parsePath(path: string) {
   const segments = path
@@ -34,7 +33,7 @@ interface GetSchemaAtPathResult {
  */
 // eslint-disable-next-line complexity
 export function getSchemaAtPath(
-  schema: WorkflowZodSchemaLooseType,
+  schema: z.ZodType,
   path: string,
   { partial = false }: { partial?: boolean } = {}
 ): GetSchemaAtPathResult {
@@ -221,6 +220,8 @@ export function getZodTypeName(schema: z.ZodType) {
       return 'unknown';
     case 'ZodLiteral':
       return 'literal';
+    case 'ZodEnum':
+      return 'string';
     case 'ZodUnion': {
       // Check if all union members are arrays - if so, treat as array type
       const unionSchema = unwrappedSchema as z.ZodUnion<[z.ZodType, ...z.ZodType[]]>;

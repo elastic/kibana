@@ -11,6 +11,7 @@ import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import {
+  selectEditorYaml,
   selectIsTestModalOpen,
   selectWorkflowDefinition,
   selectWorkflowId,
@@ -34,6 +35,7 @@ export const WorkflowDetailTestModal = () => {
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
   const definition = useSelector(selectWorkflowDefinition);
   const workflowId = useSelector(selectWorkflowId);
+  const yamlString = useSelector(selectEditorYaml);
 
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
   const runWorkflow = useAsyncThunk(runWorkflowThunk);
@@ -88,6 +90,7 @@ export const WorkflowDetailTestModal = () => {
       isTestRun={isTestRun}
       definition={definition}
       workflowId={workflowId}
+      yamlString={yamlString}
       onClose={closeModal}
       onSubmit={handleRunWorkflow}
     />

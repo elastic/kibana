@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove the eslint-disable comments to use the proper types.
+// Note: Dagre library types require dynamic handling for graph manipulation.
+// The `any` types are necessary for working with Dagre's graph structures.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import dagre from '@dagrejs/dagre';
