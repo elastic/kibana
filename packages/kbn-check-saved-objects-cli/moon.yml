@@ -35,9 +35,6 @@ dependsOn:
   - '@kbn/core-saved-objects-server-internal'
   - '@kbn/core-root-server-internal'
   - '@kbn/core-test-helpers-so-type-serializer'
-  - '@kbn/core-saved-objects-api-server'
-  - '@kbn/migrator-test-kit'
-  - '@kbn/config-schema'
 tags:
   - shared-common
   - package
