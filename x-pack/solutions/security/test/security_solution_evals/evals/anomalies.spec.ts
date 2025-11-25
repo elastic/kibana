@@ -403,7 +403,7 @@ evaluate.describe(
         });
       });
 
-      evaluate.only('entity analytics anomalies questions', async ({ evaluateDataset }) => {
+      evaluate('entity analytics anomalies questions', async ({ evaluateDataset }) => {
         await evaluateDataset({
           dataset: {
             name: 'entity-analytics: anomalies',
