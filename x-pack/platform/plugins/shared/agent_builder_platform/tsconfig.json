@@ -18,5 +18,13 @@
     "@kbn/logging",
     "@kbn/config-schema",
     "@kbn/workflows-management-plugin",
+    "@kbn/onechat-server",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/onechat-genai-utils",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/onechat-common",
+    "@kbn/zod",
+    "@kbn/management-settings-ids",
+    "@kbn/onechat-plugin",
   ]
 }
