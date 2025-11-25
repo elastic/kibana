@@ -1219,7 +1219,7 @@ x-pack/solutions/security/plugins/security_solution_serverless @elastic/security
 x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps
 x-pack/solutions/security/test
 x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/security-solution
-x-pack/solutions/security/test/security_solution_api_integration @elastic/secutity-detection-engine
+x-pack/solutions/security/test/security_solution_api_integration @elastic/security-detection-engine
 x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response @elastic/security-detection-engine
 x-pack/solutions/security/test/security_solution_endpoint @elastic/security-defend-workflows
 x-pack/solutions/workplaceai/packages/kbn-workplaceai-api-keys-components @elastic/search-kibana @elastic/workchat-eng
@@ -2289,9 +2289,13 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/fixtures/es_archives/actions @elastic/response-ops
 /x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id @elastic/response-ops
 /x-pack/platform/test/fixtures/es_archives/alerting/8_2_0 @elastic/response-ops
-
 /x-pack/solutions/**/test/serverless/**/test_suites/rules/ @elastic/response-ops
 
+# Gap fill feature has shared responsibility between response-ops and security-detection-engine
+/x-pack/platform/plugins/shared/alerting/common/routes/gaps @elastic/response-ops @elastic/security-detection-engine
+/x-pack/platform/plugins/shared/alerting/server/application/gaps @elastic/response-ops @elastic/security-detection-engine
+/x-pack/platform/plugins/shared/alerting/server/lib/rule_gaps @elastic/response-ops @elastic/security-detection-engine
+/x-pack/platform/plugins/shared/alerting/server/routes/gaps @elastic/response-ops @elastic/security-detection-engine
 
 # Enterprise Search
 # search

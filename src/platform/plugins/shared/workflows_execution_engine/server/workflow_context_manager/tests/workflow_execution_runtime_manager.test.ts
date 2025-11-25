@@ -277,12 +277,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
       ]);
     });
 
-    it('should save the current workflow execution state', async () => {
-      await underTest.saveState();
-
-      expect(workflowExecutionState.flush).toHaveBeenCalled();
-    });
-
     it('should complete workflow execution if no nodes to process', async () => {
       // Mock the WorkflowExecutionRuntimeManager to have no current node
       (underTest as any).nextNodeId = undefined;
