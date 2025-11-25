@@ -7,7 +7,7 @@
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { PackagePolicyClient } from '../package_policy';
+import type { PackagePolicyClient } from '../package_policy_service';
 import { cloudConnectorService } from '../cloud_connector';
 
 /**
