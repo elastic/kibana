@@ -10,6 +10,7 @@ import React, { useMemo, useState } from 'react';
 import { EuiButton, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { AT_TIMESTAMP } from '@kbn/apm-types';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
+// import { OBSERVABILITY_AGENT_ID } from '../../../../../common/observability_agent/agent_id';
 import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '../../../../../common/observability_agent/attachment_ids';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
@@ -126,7 +127,7 @@ export function ErrorSampleContextualInsight({
               
               Only call tools if the attachments do not contain the necessary data to analyze the error.
               Prefer using attachment data if possible and only call tools to fetch any missing context (e.g., grouping key, trace, transaction, span, downstream dependencies) when required.
-              You **DO NOT** need to call any tools to provide an initial explanation of the error as all the error details are provided in the attachments.
+              **DO NOT** call any tools before providing your first response as all the error details are provided in the attachments.
             
               Respond using the following structure:
               - Summary: One paragraph explaining what the error means and likely causes.
@@ -190,6 +191,7 @@ export function ErrorSampleContextualInsight({
                 attachments,
                 sessionTag: 'apm-error-context',
                 newConversation: true,
+                // agentId: OBSERVABILITY_AGENT_ID,
               });
             }}
           >
