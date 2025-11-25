@@ -121,4 +121,149 @@ describe('QradarRulesXmlParser', () => {
       expect(severity).toBeUndefined();
     });
   });
+
+  describe('extractReferenceSets', () => {
+    it('should extract a single reference set name', async () => {
+      const ruleDataWithRefSet = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in any of Blocked IPs</text>
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataWithRefSet);
+      expect(refSets).toEqual(['Blocked IPs']);
+    });
+
+    it('should extract multiple reference set names from one test', async () => {
+      const ruleDataWithRefSets = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in any of IP List 1, IP List 2, Suspicious IPs</text>
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataWithRefSets);
+      expect(refSets).toEqual(['IP List 1', 'IP List 2', 'Suspicious IPs']);
+    });
+
+    it('should extract reference sets from multiple tests', async () => {
+      const ruleDataWithMultipleTests = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in any of List A</text>
+            </test>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in all of List B, List C</text>
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataWithMultipleTests);
+      expect(refSets).toEqual(['List A', 'List B', 'List C']);
+    });
+
+    it('should handle "contained in all of" pattern', async () => {
+      const ruleDataWithAllOf = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in all of Required List 1, Required List 2</text>
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataWithAllOf);
+      expect(refSets).toEqual(['Required List 1', 'Required List 2']);
+    });
+
+    it('should return unique reference set names only', async () => {
+      const ruleDataWithDuplicates = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in any of Duplicate List, Unique List</text>
+            </test>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in any of Duplicate List, Another List</text>
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataWithDuplicates);
+      expect(refSets).toEqual(['Duplicate List', 'Unique List', 'Another List']);
+    });
+
+    it('should ignore non-ReferenceSetTest tests', async () => {
+      const ruleDataWithMixedTests = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.sem.semces.cre.tests.EventCategory_Test">
+              <text>when the event category is contained in any of Authentication</text>
+            </test>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in any of Valid List</text>
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataWithMixedTests);
+      expect(refSets).toEqual(['Valid List']);
+    });
+
+    it('should return empty array when no reference set tests are present', async () => {
+      const ruleDataNoRefSets = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.sem.semces.cre.tests.EventCategory_Test">
+              <text>when the event category is one of Authentication</text>
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataNoRefSets);
+      expect(refSets).toEqual([]);
+    });
+
+    it('should handle reference set names with special characters', async () => {
+      const ruleDataWithSpecialChars = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+              <text>when the event IP is contained in any of IP-List_2024, Blocked.IPs</text>
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataWithSpecialChars);
+      expect(refSets).toEqual(['IP-List_2024', 'Blocked.IPs']);
+    });
+
+    it('should return empty array if text element is missing', async () => {
+      const ruleDataNoText = `
+        <rule>
+          <testDefinitions>
+            <test name="com.q1labs.semsources.cre.tests.ReferenceSetTest">
+            </test>
+          </testDefinitions>
+        </rule>
+      `;
+      const parser = new QradarRulesXmlParser('');
+      const refSets = await parser.getReferenceSetsFromRuleData(ruleDataNoText);
+      expect(refSets).toEqual([]);
+    });
+  });
 });

@@ -102,4 +102,52 @@ export class QradarRulesXmlParser extends XmlParser {
     }
     return val.trim();
   }
+
+  /**
+   * Extracts reference set names from QRadar rule data XML.
+   * Reference sets are identified by ReferenceSetTest tests, and their names
+   * are extracted from text patterns like "contained in any of Name1, Name2"
+   * or "contained in all of Name1, Name2".
+   *
+   * @param ruleData - The decoded XML rule data string
+   * @returns Array of unique reference set names found in the rule
+   */
+  public async getReferenceSetsFromRuleData(ruleData: string): Promise<string[]> {
+    const parsedRuleData = await this.parseRuleData(ruleData);
+
+    // Find all test elements in the rule data
+    const tests = this.findAllDeep(parsedRuleData, 'test');
+
+    const referenceSetNames: string[] = [];
+
+    for (const test of tests) {
+      // Check if this is a ReferenceSetTest by looking at the 'name' attribute
+      const testName = test.$?.name;
+      if (testName === 'com.q1labs.semsources.cre.tests.ReferenceSetTest') {
+        // Extract the text element which contains the reference set names
+        const textElement = this.findDeep(test, 'text');
+
+        if (textElement) {
+          const textContent = this.getStrValue(textElement as Array<string> | string);
+
+          // Parse the pattern: "contained in any/all of Name1, Name2, Name3"
+          // The pattern can be either "contained in any of" or "contained in all of"
+          const match = textContent.match(/contained in (?:any|all).* of (.+)/);
+
+          if (match && match[1]) {
+            // Split by comma and clean up each name
+            const names = match[1]
+              .split(',')
+              .map((name) => name.trim())
+              .filter((name) => name.length > 0);
+
+            referenceSetNames.push(...names);
+          }
+        }
+      }
+    }
+
+    // Return unique names only
+    return [...new Set(referenceSetNames)];
+  }
 }

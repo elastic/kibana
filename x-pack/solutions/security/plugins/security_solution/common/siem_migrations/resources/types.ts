@@ -6,7 +6,9 @@
  */
 import type { SiemMigrationResourceBase, SiemMigrationResourceData } from '../model/common.gen';
 
-export type VendorResourceIdentifier = (input: string) => SiemMigrationResourceBase[];
+export type VendorResourceIdentifier = (
+  input: string
+) => SiemMigrationResourceBase[] | Promise<SiemMigrationResourceBase[]>;
 
 export interface ResourceIdentifiers {
   fromResource: (resource: SiemMigrationResourceData) => SiemMigrationResourceBase[];

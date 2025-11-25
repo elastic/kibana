@@ -13,14 +13,16 @@ import type {
 
 import type { OriginalRule } from '../../model/rule_migration.gen';
 
-export type VendorResourceIdentifier = (input: string) => SiemMigrationResourceBase[];
+export type VendorResourceIdentifier = (
+  input: string
+) => SiemMigrationResourceBase[] | Promise<SiemMigrationResourceBase[]>;
 
 export interface ResourceIdentifiers {
   fromOriginalRule: (originalRule: OriginalRule) => SiemMigrationResourceBase[];
   fromResource: (resource: SiemMigrationResourceData) => SiemMigrationResourceBase[];
 }
 
-const RESOURCE_IDENT_SUPPORTED_VENDORS = ['splunk'] as const;
+const RESOURCE_IDENT_SUPPORTED_VENDORS = ['splunk', 'qradar'] as const;
 
 export type ResourceSupportedVendor = (typeof RESOURCE_IDENT_SUPPORTED_VENDORS)[number];
 
