@@ -32,6 +32,7 @@
     "@kbn/inference-langchain",
     "@kbn/core-application-common",
     "@kbn/i18n",
-    "@kbn/features-plugin"
+    "@kbn/features-plugin",
+    "@kbn/task-manager-plugin"
   ]
 }
