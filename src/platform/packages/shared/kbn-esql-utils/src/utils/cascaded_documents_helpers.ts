@@ -660,7 +660,13 @@ export const appendFilteringWhereClauseForCascadeLayout = <
   // we make an initial assumption that the filtering operation's target field was declared by the stats command driving the cascade experience
   let fieldDeclarationCommandSummary = getStatsCommandToOperateOn(ESQLQuery)!;
 
-  const isFieldUsedInOperatingStatsCommand = fieldDeclarationCommandSummary.grouping[fieldName];
+  // when the grouping option is an unnamed function, it's wrapped in backticks in the generated AST so we test for that first, else we assume this does not apply
+  let normalizedFieldName = fieldDeclarationCommandSummary.grouping[`\`${fieldName}\``]
+    ? `\`${fieldName}\``
+    : fieldName;
+
+  const isFieldUsedInOperatingStatsCommand =
+    fieldDeclarationCommandSummary.grouping[normalizedFieldName];
 
   // create placeholder for the insertion anchor command which is the command that is most suited to accept the user's requested filtering operation
   let insertionAnchorCommand: ESQLCommand;
@@ -674,7 +680,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
   if (isFieldUsedInOperatingStatsCommand) {
     // if the field name is marked as a new field then we know it was declared by the stats command driving the cascade experience,
     // so we set the flag to true and use the stats command as the insertion anchor command
-    if (fieldDeclarationCommandSummary.newFields.has(fieldName)) {
+    if (fieldDeclarationCommandSummary.newFields.has(normalizedFieldName)) {
       isFieldRuntimeDeclared = true;
     } else {
       // otherwise, we need to ascertain that the field was not created by a preceding stats command
@@ -683,7 +689,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
 
       // attempt to find the index of the stats command that declared the field
       const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
-        field.has(fieldName)
+        field.has(normalizedFieldName)
       );
 
       // if the field was declared in a stats command, then we set the flag to true
@@ -709,11 +715,12 @@ export const appendFilteringWhereClauseForCascadeLayout = <
     if (
       (fieldNameParamValue = getFieldParamDefinition(
         fieldName,
-        fieldDeclarationCommandSummary.grouping[fieldName].terminals,
+        fieldDeclarationCommandSummary.grouping[normalizedFieldName].terminals,
         esqlVariables
       ))
     ) {
-      fieldName = fieldNameParamValue;
+      // if the field name is a param definition, we update the normalized field name to the param value so that we can use it in the filtering command to be generated
+      normalizedFieldName = fieldNameParamValue;
     }
   } else {
     // if the requested field doesn't exist on the stats command that's driving the cascade experience,
@@ -724,11 +731,11 @@ export const appendFilteringWhereClauseForCascadeLayout = <
   const { operator, expressionType } = getOperator(operation);
 
   // if the value being filtered on is not "aggregatable" and is either a text or keyword field, we opt to use match phrase for the where command
-  const useMatchPhrase = requiresMatchPhrase(fieldName, dataView.fields);
+  const useMatchPhrase = requiresMatchPhrase(normalizedFieldName, dataView.fields);
 
   if (useMatchPhrase) {
     const matchPhraseExpression = Builder.expression.func.call('match_phrase', [
-      Builder.identifier({ name: fieldName! }),
+      Builder.identifier({ name: removeBackticks(normalizedFieldName) }),
       Builder.expression.literal.string(value as string),
     ]);
 
@@ -741,9 +748,11 @@ export const appendFilteringWhereClauseForCascadeLayout = <
   } else {
     computedFilteringExpression =
       expressionType === 'postfix-unary'
-        ? Builder.expression.func.postfix(operator, [Builder.identifier({ name: fieldName! })])
+        ? Builder.expression.func.postfix(operator, [
+            Builder.identifier({ name: removeBackticks(normalizedFieldName) }),
+          ])
         : Builder.expression.func.binary(operator as BinaryExpressionComparisonOperator, [
-            Builder.identifier({ name: fieldName! }),
+            Builder.identifier({ name: removeBackticks(normalizedFieldName) }),
             fieldType && isSupportedFieldType(fieldType)
               ? fieldType === 'boolean'
                 ? Builder.expression.literal.boolean(value as boolean)
@@ -812,7 +821,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
     const [left] = binaryExpression.args;
 
     modifiedFilteringWhereCommand =
-      (left as ESQLColumn).name === fieldName
+      (left as ESQLColumn).name === normalizedFieldName
         ? // when the expression's left hand's value matches the target field we're trying to filter on, we simply replace it with the new expression
           synth.cmd`WHERE ${computedFilteringExpression}`
         : synth.cmd`WHERE ${computedFilteringExpression} AND ${binaryExpression}`;

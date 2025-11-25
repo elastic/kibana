@@ -600,126 +600,252 @@ describe('cascaded documents helpers utils', () => {
   });
 
   describe('appendFilteringWhereClauseForCascadeLayout', () => {
-    it('appends a filter in where clause in an existing query containing a stats command without a where command', () => {
-      expect(
-        appendFilteringWhereClauseForCascadeLayout(
-          'from logstash-* | stats var = avg(woof)',
-          [],
-          dataViewMock,
-          'dest',
-          'tada!',
-          '+',
-          'string'
-        )
-      ).toBe('FROM logstash-* | WHERE dest == "tada!" | STATS var = AVG(woof)');
+    describe('handling for fields not used in the operating stats command', () => {
+      it('appends a filter in where clause in an existing query containing a stats command without a where command', () => {
+        expect(
+          appendFilteringWhereClauseForCascadeLayout(
+            'from logstash-* | stats var = avg(woof)',
+            [],
+            dataViewMock,
+            'dest',
+            'tada!',
+            '+',
+            'string'
+          )
+        ).toBe('FROM logstash-* | WHERE dest == "tada!" | STATS var = AVG(woof)');
+      });
+
+      it('appends a filter in where clause in an existing query containing a stats command with a where command', () => {
+        expect(
+          appendFilteringWhereClauseForCascadeLayout(
+            'from logstash-* | where country == "GR" | stats var = avg(woof) ',
+            [],
+            dataViewMock,
+            'dest',
+            'tada!',
+            '+',
+            'string'
+          )
+        ).toBe(
+          'FROM logstash-* | WHERE dest == "tada!" AND country == "GR" | STATS var = AVG(woof)'
+        );
+      });
     });
 
-    it('appends a filter in where clause in an existing query containing a stats command with a where command', () => {
-      expect(
-        appendFilteringWhereClauseForCascadeLayout(
-          'from logstash-* | where country == "GR" | stats var = avg(woof) ',
-          [],
-          dataViewMock,
-          'dest',
-          'tada!',
-          '+',
-          'string'
-        )
-      ).toBe('FROM logstash-* | WHERE dest == "tada!" AND country == "GR" | STATS var = AVG(woof)');
-    });
+    describe('handling for fields used in the operating stats command', () => {
+      it('negates a filter in where clause in an existing query containing a stats command without a where command', () => {
+        expect(
+          appendFilteringWhereClauseForCascadeLayout(
+            `FROM logstash-* | WHERE \`geo.dest\` == "BT" | SORT @timestamp DESC | LIMIT 10000 | STATS countB = COUNT(bytes) BY geo.dest | SORT countB`,
+            [],
+            dataViewMock,
+            'geo.dest',
+            'BT',
+            '-',
+            'string'
+          )
+        ).toBe(
+          'FROM logstash-* | WHERE `geo.dest` == "BT" | SORT @timestamp DESC | LIMIT 10000 | WHERE `geo.dest` != "BT" | STATS countB = COUNT(bytes) BY geo.dest | SORT countB'
+        );
+      });
 
-    it('negates a filter in where clause in an existing query containing a stats command without a where command', () => {
-      expect(
-        appendFilteringWhereClauseForCascadeLayout(
-          `FROM logstash-* | WHERE \`geo.dest\` == "BT" | SORT @timestamp DESC | LIMIT 10000 | STATS countB = COUNT(bytes) BY geo.dest | SORT countB`,
-          [],
-          dataViewMock,
-          'geo.dest',
-          'BT',
-          '-',
-          'string'
-        )
-      ).toBe(
-        'FROM logstash-* | WHERE `geo.dest` == "BT" | SORT @timestamp DESC | LIMIT 10000 | WHERE `geo.dest` != "BT" | STATS countB = COUNT(bytes) BY geo.dest | SORT countB'
-      );
-    });
+      it("accounts for case where there's a pre-existing where command that references a runtime field created in a previous stats command ", () => {
+        expect(
+          appendFilteringWhereClauseForCascadeLayout(
+            'from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0',
+            [],
+            dataViewMock,
+            'dest',
+            'tada!',
+            '+',
+            'string'
+          )
+        ).toBe(
+          'FROM logstash-* | WHERE dest == "tada!" | SORT @timestamp DESC | LIMIT 10000 | STATS countB = COUNT(bytes) BY geo.dest | SORT countB | WHERE countB > 0'
+        );
+      });
 
-    it("accounts for case where there's a pre-existing where command that references a runtime field created in a previous stats command ", () => {
-      expect(
-        appendFilteringWhereClauseForCascadeLayout(
-          'from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0',
-          [],
-          dataViewMock,
-          'dest',
-          'tada!',
-          '+',
-          'string'
-        )
-      ).toBe(
-        'FROM logstash-* | WHERE dest == "tada!" | SORT @timestamp DESC | LIMIT 10000 | STATS countB = COUNT(bytes) BY geo.dest | SORT countB | WHERE countB > 0'
-      );
-    });
+      it('handles the case where the field being filtered on is an unnamed function runtime field created by a stats command', () => {
+        expect(
+          appendFilteringWhereClauseForCascadeLayout(
+            'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(message), agent.keyword, clientip',
+            [],
+            dataViewMock,
+            'CATEGORIZE(message)',
+            'tada!',
+            '+',
+            'string'
+          )
+        ).toBe(
+          'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(message), agent.keyword, clientip | WHERE `CATEGORIZE(message)` == "tada!"'
+        );
+      });
 
-    it('handles the case where the field being filtered on is a runtime field created by a stats command', () => {
-      expect(
-        appendFilteringWhereClauseForCascadeLayout(
-          'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip',
+      it('handles the case where the field being filtered on is a named function runtime field created by a stats command', () => {
+        expect(
+          appendFilteringWhereClauseForCascadeLayout(
+            'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip',
+            [],
+            dataViewMock,
+            'Pattern',
+            'tada!',
+            '+',
+            'string'
+          )
+        ).toBe(
+          'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip | WHERE Pattern == "tada!"'
+        );
+      });
+
+      it('handles the case where the field being filtered on is a named function runtime field created by a stats command, followed by other commands', () => {
+        expect(
+          appendFilteringWhereClauseForCascadeLayout(
+            'FROM kibana_sample_data_logs | WHERE clientip == "177.120.218.48" | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip  | SORT count DESC',
+            [],
+            dataViewMock,
+            'Pattern',
+            'tada!',
+            '+',
+            'string'
+          )
+        ).toBe(
+          'FROM kibana_sample_data_logs | WHERE clientip == "177.120.218.48" | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip | WHERE Pattern == "tada!" | SORT count DESC'
+        );
+      });
+
+      it('handles the case where the field being filtered on is a runtime field created by a stats command, and with another filter from the data source applied there after', () => {
+        const initialFilterResult = appendFilteringWhereClauseForCascadeLayout(
+          'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword | SORT count DESC',
           [],
           dataViewMock,
           'Pattern',
           'tada!',
           '+',
           'string'
-        )
-      ).toBe(
-        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip | WHERE Pattern == "tada!"'
-      );
+        );
+
+        expect(initialFilterResult).toBe(
+          'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword | WHERE Pattern == "tada!" | SORT count DESC'
+        );
+
+        expect(
+          appendFilteringWhereClauseForCascadeLayout(
+            initialFilterResult,
+            [],
+            dataViewMock,
+            'clientip',
+            '192.168.1.1',
+            '+',
+            'string'
+          )
+        ).toBe(
+          'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1" | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword | WHERE Pattern == "tada!" | SORT count DESC'
+        );
+      });
     });
 
-    it('handles the case where the field being filtered on is a runtime field created by a stats command, followed by other commands', () => {
-      expect(
-        appendFilteringWhereClauseForCascadeLayout(
-          'FROM kibana_sample_data_logs | WHERE clientip == "177.120.218.48" | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip  | SORT count DESC',
-          [],
-          dataViewMock,
-          'Pattern',
-          'tada!',
-          '+',
-          'string'
-        )
-      ).toBe(
-        'FROM kibana_sample_data_logs | WHERE clientip == "177.120.218.48" | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword, clientip | WHERE Pattern == "tada!" | SORT count DESC'
-      );
-    });
+    describe('handling for param fields', () => {
+      describe('column field group', () => {
+        it("appends filter operation for a param field declared in the stats command column field group using it's param definition value before the driving stats command", () => {
+          expect(
+            appendFilteringWhereClauseForCascadeLayout(
+              'FROM kibana_sample_data_logs  | STATS count = COUNT(bytes), average = AVG(memory) BY ??field | SORT average ASC',
+              [
+                {
+                  key: 'field',
+                  type: ESQLVariableType.FIELDS,
+                  value: 'message',
+                },
+              ],
+              dataViewMock,
+              '??field',
+              'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)',
+              '+'
+            )
+          ).toBe(
+            'FROM kibana_sample_data_logs | WHERE message == "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)" | STATS count = COUNT(bytes), average = AVG(memory) BY ??field | SORT average ASC'
+          );
+        });
 
-    it('handles the case where the field being filtered on is a runtime field created by a stats command, and with another filter from the data source applied there after', () => {
-      const initialFilterResult = appendFilteringWhereClauseForCascadeLayout(
-        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword | SORT count DESC',
-        [],
-        dataViewMock,
-        'Pattern',
-        'tada!',
-        '+',
-        'string'
-      );
+        it('the query generated from a previous filter operation can be used as the input to a subsequent filter operation', () => {
+          expect(
+            appendFilteringWhereClauseForCascadeLayout(
+              appendFilteringWhereClauseForCascadeLayout(
+                'FROM kibana_sample_data_logs  | STATS count = COUNT(bytes), average = AVG(memory) BY ??field | SORT average ASC',
+                [
+                  {
+                    key: 'field',
+                    type: ESQLVariableType.FIELDS,
+                    value: 'message',
+                  },
+                ],
+                dataViewMock,
+                '??field',
+                'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)',
+                '+'
+              ),
+              [
+                {
+                  key: 'field',
+                  type: ESQLVariableType.FIELDS,
+                  value: 'clientip',
+                },
+              ],
+              dataViewMock,
+              '??field',
+              '192.168.1.1',
+              '+',
+              'string'
+            )
+          ).toBe(
+            'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1" AND message == "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)" | STATS count = COUNT(bytes), average = AVG(memory) BY ??field | SORT average ASC'
+          );
+        });
+      });
 
-      expect(initialFilterResult).toBe(
-        'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword | WHERE Pattern == "tada!" | SORT count DESC'
-      );
+      describe('function field group', () => {
+        it("appends filter operation for a param field declared in the stats command function field group using it's param definition value before the driving stats command", () => {
+          expect(
+            appendFilteringWhereClauseForCascadeLayout(
+              'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(??field) | SORT average ASC',
+              [
+                {
+                  key: 'field',
+                  type: ESQLVariableType.FIELDS,
+                  value: 'message',
+                },
+              ],
+              dataViewMock,
+              'CATEGORIZE(??field)',
+              'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)',
+              '+'
+            )
+          ).toBe(
+            'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(??field) | WHERE `CATEGORIZE(??field)` == "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)" | SORT average ASC'
+          );
+        });
 
-      expect(
-        appendFilteringWhereClauseForCascadeLayout(
-          initialFilterResult,
-          [],
-          dataViewMock,
-          'clientip',
-          '192.168.1.1',
-          '+',
-          'string'
-        )
-      ).toBe(
-        'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1" | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(message), agent.keyword | WHERE Pattern == "tada!" | SORT count DESC'
-      );
+        it('appends filter operation for a named function field derived from a function group with a param argument before the driving stats command', () => {
+          expect(
+            appendFilteringWhereClauseForCascadeLayout(
+              'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Named = CATEGORIZE(??field) | SORT average ASC',
+              [
+                {
+                  key: 'field',
+                  type: ESQLVariableType.FIELDS,
+                  value: 'message',
+                },
+              ],
+              dataViewMock,
+              'Named',
+              'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)',
+              '+'
+            )
+          ).toBe(
+            'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Named = CATEGORIZE(??field) | WHERE Named == "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)" | SORT average ASC'
+          );
+        });
+      });
     });
   });
 });
