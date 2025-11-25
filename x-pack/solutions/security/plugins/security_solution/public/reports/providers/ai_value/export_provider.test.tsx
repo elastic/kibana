@@ -107,7 +107,7 @@ describe('AIValueExportContext', () => {
   const setInsight = (insight: string) => act(() => context?.setInsight(insight));
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    jest.clearAllMocks();
     Object.defineProperties(global, {
       crypto: { value: webcrypto, writable: true },
     });
@@ -283,7 +283,7 @@ describe('AIValueExportContext', () => {
               isExportMode: false,
             }
           );
-        })
+        });
       });
     });
   });

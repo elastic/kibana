@@ -51,10 +51,10 @@ import type {
   RuleUpgradeTelemetryEventsMap,
 } from './events/rule_upgrade/types';
 
-import {
+import type {
   AIValueReportEventTypes,
-  AIValueReportTelemetryEventsMap
-} from './events/ai_value_report/types'
+  AIValueReportTelemetryEventsMap,
+} from './events/ai_value_report/types';
 
 export * from './events/app/types';
 export * from './events/alerts_grouping/types';
