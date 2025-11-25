@@ -15,7 +15,7 @@ import { MonitorConfiguration } from './monitor_configuration';
 import type { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
 import type { OverviewMonitorsEmbeddableCustomState } from '../monitors_overview/monitors_embeddable_factory';
-import type { OverviewStatsEmbeddableCustomState } from '../stats_overview/stats_overview_embeddable_factory';
+import type { OverviewStatsEmbeddableCustomState } from '../../../../common/embeddables/stats_overview/types';
 
 interface CommonParams {
   title: string;

@@ -23,10 +23,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
-import type { MonitorFilters } from '../monitors_overview/types';
 import { MonitorFiltersForm } from './monitor_filters_form';
 import type { OverviewView } from '../../synthetics/state';
 import { DEFAULT_OVERVIEW_VIEW } from '../../synthetics/state';
+import type { MonitorFilters } from '../../../../common/embeddables/stats_overview/types';
 
 const MonitorConfigurationContext = React.createContext<{
   overviewView: OverviewView;
