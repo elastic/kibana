@@ -370,53 +370,65 @@ async function checkSliAndSourceData(
       false // isServerless - could be made configurable if needed
     );
 
-    // Get the earliest and latest timestamps of source data in the past 1 hour
-    // This tells us:
+    // Get the earliest timestamp and document count in recent windows to verify:
     // 1. When source data first appeared (earliest) - to verify it's been present for at least 30 minutes
-    // 2. When source data last appeared (latest) - to verify data is still actively flowing (not sparse)
+    // 2. Document count in recent window - to verify data is actively flowing (not sparse)
     const timestampField = slo.indicator.params.timestampField || '@timestamp';
-    const sourceDataResponse = await esClient.search({
-      index: sourceQuery1h.index,
-      size: 0,
-      query: sourceQuery1h.query,
-      aggs: {
-        earliest_timestamp: {
-          min: {
-            field: timestampField,
+    const now = new Date(dateEnd);
+    const recentWindowStart = new Date(now.getTime() - 20 * 60 * 1000); // Last 20 minutes
+
+    // Build query for recent window (last 20 minutes)
+    const recentWindowQuery = await buildSourceDataQuery(
+      slo,
+      { from: recentWindowStart, to: now },
+      dataViews,
+      spaceId,
+      false
+    );
+
+    const [sourceDataResponse, recentDataCount] = await Promise.all([
+      // Get earliest timestamp from full 1-hour window
+      esClient.search({
+        index: sourceQuery1h.index,
+        size: 0,
+        query: sourceQuery1h.query,
+        aggs: {
+          earliest_timestamp: {
+            min: {
+              field: timestampField,
+            },
           },
         },
-        latest_timestamp: {
-          max: {
-            field: timestampField,
-          },
-        },
-      },
-    });
+      }),
+      // Get document count in recent window (last 20 minutes)
+      esClient.count({
+        index: recentWindowQuery.index,
+        query: recentWindowQuery.query,
+      }),
+    ]);
 
     const earliestTimestampValue = sourceDataResponse.aggregations?.earliest_timestamp?.value;
-    const latestTimestampValue = sourceDataResponse.aggregations?.latest_timestamp?.value;
 
-    if (earliestTimestampValue && latestTimestampValue) {
+    if (earliestTimestampValue && recentDataCount.count > 0) {
       const earliestTimestamp = new Date(earliestTimestampValue);
-      const latestTimestamp = new Date(latestTimestampValue);
-      const now = new Date(dateEnd);
 
       // Check if the earliest source data is at least 30 minutes old
       // This ensures data has been consistently present for at least 30 minutes
       const dataAgeMinutes = (now.getTime() - earliestTimestamp.getTime()) / (1000 * 60);
       const minimumAgeMinutes = 30 + 10; // 30 min minimum presence + 10 min transform lag buffer
 
-      // Check if the latest source data is recent (within the last 15-20 minutes)
-      // This ensures data is still actively flowing and not sparse
-      // We use 20 minutes to account for transform lag (10 min) + some buffer
-      const latestDataAgeMinutes = (now.getTime() - latestTimestamp.getTime()) / (1000 * 60);
-      const maximumLatestAgeMinutes = 20; // Data should be coming in within last 20 minutes
+      // Check if there's sufficient document count in the recent window
+      // This ensures data is actively flowing and not sparse
+      // We use a minimum threshold to distinguish sparse data from active data
+      // For sparse data (e.g., 1 doc every 30 min), recent window might have 0-1 docs
+      // For active data, recent window should have multiple docs
+      const minimumRecentDocCount = 3; // Minimum documents in last 20 minutes to consider data "active"
 
       // Only alert if:
       // 1. Earliest data is old enough (data has been present for a while)
-      // 2. Latest data is recent enough (data is still actively flowing)
+      // 2. Recent window has sufficient document count (data is actively flowing, not sparse)
       // This prevents false positives from sparse data or data that just stopped
-      if (dataAgeMinutes >= minimumAgeMinutes && latestDataAgeMinutes <= maximumLatestAgeMinutes) {
+      if (dataAgeMinutes >= minimumAgeMinutes && recentDataCount.count >= minimumRecentDocCount) {
         // Source data has been consistently present for at least 30 minutes AND is still actively flowing
         // (latest data within last 20 minutes), but no SLI data exists - trigger "no data" alert
         const reason = i18n.translate('xpack.slo.alerting.burnRate.noSliDataReason', {
@@ -467,7 +479,7 @@ async function checkSliAndSourceData(
       } else {
         // Source data exists but either:
         // 1. Earliest document is less than 40 minutes old (data just started coming)
-        // 2. Latest document is more than 20 minutes old (data is sparse or stopped)
+        // 2. Recent window (last 20 minutes) has insufficient document count (data is sparse)
         // In both cases, give transform time to catch up or wait for more data
         // Proceed with evaluation without alerting to avoid false positives
         return true;
