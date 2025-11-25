@@ -60,7 +60,7 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
     elasticsearchClient: ElasticsearchClient,
     lazyCreation: boolean
   ) {
-    if (this.dataStreamClients.has(dataStreamName)) {
+    if (this.dataStreamClients.get(dataStreamName)) {
       // already initialized
       return;
     }

@@ -45,7 +45,6 @@ export async function initialize({
 
   // The index template is created and updated in all cases except if the data stream does not exist and we will not create it now.
   const createIndexTemplateIfDoesntExist = existingDataStream ? true : !lazyCreation;
-
   // create the data stream only if not lazy.
   const createDataStreamIfDoesntExist = !lazyCreation;
 
