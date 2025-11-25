@@ -906,6 +906,21 @@ export class IndexUpdateService {
 
   /** Adds an empty document */
   public addEmptyRow(atIndex: number) {
+    // This is for the case when there is only one empty placeholder row in the table, and the user adds a new row.
+    // We need to push an extra row to replace the one we show if there are no rows.
+    const rows = this._rows$.getValue();
+    if (
+      rows.length === 1 &&
+      rows[0].id.startsWith(ROW_PLACEHOLDER_PREFIX) &&
+      Object.keys(rows[0].flattened).length === 0
+    ) {
+      this.addAction('add-doc', {
+        id: `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`,
+        value: {},
+        atIndex: 0,
+      });
+    }
+
     const newDocId = `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`;
     this.addAction('add-doc', { id: newDocId, value: {}, atIndex });
 
