@@ -7,12 +7,31 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
-import { CreateListIndexResponse } from '@kbn/securitysolution-lists-common/api';
+import {
+  type CreateListIndexResponse,
+  CreateListIndexResponse as ResponseSchema,
+} from '@kbn/securitysolution-lists-common/api';
 import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse } from '../utils';
 import { getInternalListClient } from '..';
+
+const getAcknowledgedResponse = (): { body: CreateListIndexResponse } => ({
+  body: ResponseSchema.parse({ acknowledged: true }),
+});
+
+const ignoreResourceAlreadyExistsError = async (runFn: () => Promise<void>): Promise<void> => {
+  try {
+    await runFn();
+  } catch (err) {
+    const isResourceAlreadyExistError =
+      typeof err?.message === 'string' && err.message.includes('resource_already_exists_exception');
+    if (!isResourceAlreadyExistError) {
+      throw err;
+    }
+  }
+};
 
 export const createListIndexRoute = (router: ListsPluginRouter): void => {
   router.versioned
@@ -46,27 +65,28 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
         }
 
         if (listDataStreamExists && listItemDataStreamExists) {
-          return siemResponse.error({
-            body: `data stream: "${lists.getListName()}" and "${lists.getListItemName()}" already exists`,
-            statusCode: 409,
-          });
+          return response.ok(getAcknowledgedResponse());
         }
 
         if (!listDataStreamExists) {
-          const listIndexExists = await lists.getListIndexExists();
-          await (listIndexExists
-            ? lists.migrateListIndexToDataStream()
-            : lists.createListDataStream());
+          await ignoreResourceAlreadyExistsError(async () => {
+            const listIndexExists = await lists.getListIndexExists();
+            await (listIndexExists
+              ? lists.migrateListIndexToDataStream()
+              : lists.createListDataStream());
+          });
         }
 
         if (!listItemDataStreamExists) {
-          const listItemIndexExists = await lists.getListItemIndexExists();
-          await (listItemIndexExists
-            ? lists.migrateListItemIndexToDataStream()
-            : lists.createListItemDataStream());
+          await ignoreResourceAlreadyExistsError(async () => {
+            const listItemIndexExists = await lists.getListItemIndexExists();
+            await (listItemIndexExists
+              ? lists.migrateListItemIndexToDataStream()
+              : lists.createListItemDataStream());
+          });
         }
 
-        return response.ok({ body: CreateListIndexResponse.parse({ acknowledged: true }) });
+        return response.ok(getAcknowledgedResponse());
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({
