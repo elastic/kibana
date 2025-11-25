@@ -40,6 +40,8 @@ export const getSearchConfiguration = (
   });
 };
 
+const omitManaged = <T extends { managed?: unknown }>({ managed, ...rest }: T) => rest;
+
 const adjustSearchConfigurationFilter = (
   searchConfiguration: CustomThresholdSearchSourceFields
 ): CustomThresholdSearchSourceFields => {
@@ -48,8 +50,16 @@ const adjustSearchConfigurationFilter = (
     ? searchConfiguration.filter.map(({ meta, query }) => ({ meta, query }))
     : undefined;
 
+  // Remove the 'managed' field from data view spec if index is an object
+  // The 'managed' field is not needed in rule params and is not part of the validated schema
+  const index =
+    searchConfiguration.index && typeof searchConfiguration.index === 'object'
+      ? omitManaged(searchConfiguration.index)
+      : searchConfiguration.index;
+
   return {
     ...searchConfiguration,
+    index,
     filter,
   };
 };
