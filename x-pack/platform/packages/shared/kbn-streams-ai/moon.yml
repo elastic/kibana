@@ -17,7 +17,18 @@ project:
   owner: '@elastic/streams-program-team'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-streams-ai
-dependsOn: []
+dependsOn:
+  - '@kbn/ai-tools'
+  - '@kbn/std'
+  - '@kbn/core'
+  - '@kbn/streamlang'
+  - '@kbn/streams-schema'
+  - '@kbn/inference-common'
+  - '@kbn/zod'
+  - '@kbn/inference-prompt-utils'
+  - '@kbn/es-query'
+  - '@kbn/zod-helpers'
+  - '@kbn/fields-metadata-plugin'
 tags:
   - shared-server
   - package
