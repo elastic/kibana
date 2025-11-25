@@ -29,7 +29,6 @@ const logsRepositoryMappings = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date(),
-    message: mappings.text(),
     spaceId: mappings.keyword(),
     level: mappings.keyword(),
     workflow: mappings.object({

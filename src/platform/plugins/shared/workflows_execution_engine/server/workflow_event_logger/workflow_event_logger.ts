@@ -179,6 +179,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
   private createBaseEvent(): WorkflowLogEvent {
     return {
       '@timestamp': new Date().toISOString(),
+      message: '',
       spaceId: this.context.spaceId,
       workflow: {
         id: this.context.workflowId,
