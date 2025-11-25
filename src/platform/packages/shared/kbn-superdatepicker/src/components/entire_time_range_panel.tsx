@@ -8,16 +8,10 @@
  */
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import {
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import type { EntireTimeRangePanelProps } from '../types';
 
 export const EntireTimeRangePanel = ({
@@ -25,6 +19,7 @@ export const EntireTimeRangePanel = ({
   getEntireTimeRange,
 }: EntireTimeRangePanelProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isHoveringButton, setIsHoveringButton] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -34,6 +29,14 @@ export const EntireTimeRangePanel = ({
         abortControllerRef.current.abort();
       }
     };
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHoveringButton(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHoveringButton(false);
   }, []);
 
   const handleApplyTime = useCallback(async () => {
@@ -69,7 +72,7 @@ export const EntireTimeRangePanel = ({
 
   return (
     <>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="xs" />
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiLink onClick={handleApplyTime} disabled={isLoading}>
@@ -79,27 +82,30 @@ export const EntireTimeRangePanel = ({
             />
           </EuiLink>
         </EuiFlexItem>
-        {isLoading && (
-          <>
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="s" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="cross"
-                onClick={handleAbort}
-                aria-label={i18n.translate(
-                  'kbnSuperDatePicker.entireTimeRangePanel.cancelRequestAriaLabel',
-                  {
-                    defaultMessage: 'Cancel request',
-                  }
-                )}
-                size="xs"
-                color="danger"
-              />
-            </EuiFlexItem>
-          </>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiFlexItem
+            grow={false}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            css={css`
+              visibility: ${isLoading ? 'visible' : 'hidden'};
+            `}
+          >
+            <EuiButtonIcon
+              isLoading={!isHoveringButton}
+              iconType="cross"
+              onClick={handleAbort}
+              aria-label={i18n.translate(
+                'kbnSuperDatePicker.entireTimeRangePanel.cancelRequestAriaLabel',
+                {
+                  defaultMessage: 'Cancel request',
+                }
+              )}
+              size="xs"
+              color="danger"
+            />
+          </EuiFlexItem>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
