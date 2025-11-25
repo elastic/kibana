@@ -93,7 +93,7 @@ describe('IndexUpdateService', () => {
       const initial = await firstValueFrom(service.hasUnsavedChanges$);
       expect(initial).toBe(false);
 
-      service.addEmptyRow();
+      service.addEmptyRow(1);
 
       const afterAdd = await firstValueFrom(service.hasUnsavedChanges$);
       expect(afterAdd).toBe(false);
@@ -123,7 +123,7 @@ describe('IndexUpdateService', () => {
       const initial = await firstValueFrom(service.hasUnsavedChanges$);
       expect(initial).toBe(false);
 
-      service.addEmptyRow();
+      service.addEmptyRow(1);
       const placeholderRow = (await firstValueFrom(service.rows$))[0];
 
       service.deleteDoc([placeholderRow.id]);
@@ -191,7 +191,6 @@ describe('IndexUpdateService', () => {
   });
 
   it('Handles rows successive modifications in a correct manner', async () => {
-    service.addEmptyRow();
     const rows = await firstValueFrom(service.rows$);
     expect(rows.length).toBe(1);
     expect(rows[0].raw).toEqual({});
@@ -222,8 +221,7 @@ describe('IndexUpdateService', () => {
       service.setIndexCreated(true);
       await firstValueFrom(service.dataView$);
 
-      // Adding and modifying a new row counts as 1 row added and 0 cells edited
-      service.addEmptyRow();
+      // Modifying the placeholder row counts as 1 row added and 0 cells edited
       const placeholderRow = (await firstValueFrom(service.rows$))[0];
       service.updateDoc(placeholderRow.id, { field: 'value' });
 

@@ -44,11 +44,7 @@ export const getCustomToolbar =
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {additionalControls && (
-              <EuiFlexItem grow={false}>
-                <div>{additionalControls}</div>
-              </EuiFlexItem>
-            )}
+            {additionalControls && <EuiFlexItem grow={false}>{additionalControls}</EuiFlexItem>}
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexItem grow={false}>
