@@ -58,11 +58,12 @@ export function AlertDetailInvestigateButton({ alert }: { alert: AlertData | nul
         // ignore
       }
       const initialMessage = dedent(`
-            I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.
+            I am looking at an alert that was triggered. I want to understand what it means, what may have caused it, and next steps I can take to investigate it.
           `);
 
       onechat?.openConversationFlyout?.({
         newConversation: true,
+        agentId: 'observability.agent',
         sessionTag: 'observability-alert',
         initialMessage,
         attachments: [
@@ -99,18 +100,34 @@ export function AlertDetailInvestigateButton({ alert }: { alert: AlertData | nul
             type: 'text',
             getContent: async () => ({
               content: dedent(`
-                <contextual_instructions>
-I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.
+                <contextual_insight_instructions>
+        Purpose: Help an SRE quickly understand likely cause, impact, and next actions for this alert using only the provided context.
 
+        Output shape (plain text):
+        - Summary (1–2 sentences): What is likely happening and why it matters. If recovered, acknowledge and reduce urgency. If no strong signals, say “Inconclusive” and briefly note why.
+        - Assessment: Most plausible explanation or “Inconclusive” if signals do not support a clear assessment.
+        - Related signals (top 3–5, each with provenance and relevance): For each item, include source (change points | errors | log rate | log categories | anomalies | service summary), timeframe near alert start, and relevance to alert scope as Direct | Indirect | Unrelated.
+        - Immediate actions (2–3): Concrete next checks or fixes an SRE can take now.
 
-        The user already know the alert reason so do not repeat this: ${alert.formatted.reason}
-        Be brief and to the point.
-        Do not list the alert details as bullet points.
-        Pay special attention to regressions in downstream dependencies like big increases or decreases in throughput, latency or failure rate
-        Suggest reasons why the alert happened and what may have contributed to it.
-        Present the primary insights in a single paragraph at the top in bold text. Add additional paragraphs with more detailed insights if needed but keep them brief.
-        If the alert is a false positive, mention that in the first paragraph.
-                </contextual_instructions>
+        Guardrails:
+        - Do not repeat the alert reason string or rule name verbatim.
+        - Only provide a non‑inconclusive Assessment when supported by on‑topic related signals; otherwise set Assessment to “Inconclusive” and do not speculate a cause.
+        - Corroboration: prefer assessment supported by multiple independent signal types; if only one source supports it, state that support is limited.
+        - If signals are weak or conflicting, state that clearly and recommend the safest next diagnostic step.
+        - Do not list raw alert fields as bullet points. Bullets are allowed only for Related signals and Immediate actions.
+        - Keep it concise (~150–200 words).
+
+        Related signals hierarchy (use what exists, skip what doesn’t):
+        1) Change points (service and exit‑span): sudden shifts in throughput/latency/failure; name impacted downstream services verbatim when present and whether propagation is likely.
+        2) Errors: signatures enriched with downstream resource/name; summarize patterns without long stacks; tie to alert scope.
+        3) Logs: strongest log‑rate significant items and top categories; very short examples and implications; tie to alert scope.
+        4) Anomalies: note ML anomalies around alert time; multiple affected services may imply systemic issues.
+        5) Service summary: only details that materially change interpretation (avoid re‑listing fields).
+
+        Recovery / false positives:
+        - If recovered or normalizing, recommend light‑weight validation and watchful follow‑up.
+        - If inconclusive or signals skew Indirect/Unrelated, state that the alert may be unrelated/noisy and suggest targeted traces/logging for the suspected path.
+                </contextual_insight_instructions>
               `),
             }),
           },
