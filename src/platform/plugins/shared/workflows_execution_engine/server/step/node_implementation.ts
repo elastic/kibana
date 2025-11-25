@@ -45,7 +45,7 @@ export interface NodeImplementation {
   /**
    * Executes the node's logic.
    */
-  run(): Promise<void>;
+  run(): Promise<void> | void;
 }
 
 /**
@@ -57,7 +57,7 @@ export interface NodeWithErrorCatching {
    * Handles errors that occur within the node's execution context.
    * @param failedContext The context of the failed step execution.
    */
-  catchError(failedContext: StepExecutionRuntime): Promise<void>;
+  catchError(failedContext: StepExecutionRuntime): Promise<void> | void;
 }
 
 /**
@@ -70,7 +70,7 @@ export interface MonitorableNode {
    * Monitors the execution context of the node.
    * @param monitoredContext The context of the monitored step execution.
    */
-  monitor(monitoredContext: StepExecutionRuntime): Promise<void>;
+  monitor(monitoredContext: StepExecutionRuntime): Promise<void> | void;
 }
 
 export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
@@ -103,11 +103,11 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
   public async run(): Promise<void> {
     let input: any;
-    await this.stepExecutionRuntime.startStep();
+    this.stepExecutionRuntime.startStep();
 
     try {
       input = await this.getInput();
-      await this.stepExecutionRuntime.setInput(input);
+      this.stepExecutionRuntime.setInput(input);
       const result = await this._run(input);
 
       // Don't update step execution runtime if abort was initiated
@@ -116,13 +116,13 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       }
 
       if (result.error) {
-        await this.stepExecutionRuntime.failStep(result.error);
+        this.stepExecutionRuntime.failStep(result.error);
       } else {
-        await this.stepExecutionRuntime.finishStep(result.output);
+        this.stepExecutionRuntime.finishStep(result.output);
       }
     } catch (error) {
-      const result = await this.handleFailure(input, error);
-      await this.stepExecutionRuntime.failStep(result.error || error);
+      const result = this.handleFailure(input, error);
+      this.stepExecutionRuntime.failStep(result.error || error);
     }
 
     this.workflowExecutionRuntime.navigateToNextNode();
@@ -132,7 +132,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   protected abstract _run(input?: any): Promise<RunStepResult>;
 
   // Helper for handling on-failure, retries, etc.
-  protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
+  protected handleFailure(input: any, error: any): RunStepResult {
     return {
       input,
       output: undefined,

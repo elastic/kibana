@@ -20,11 +20,11 @@ export class EnterContinueNodeImpl implements NodeImplementation, NodeWithErrorC
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
-  public async run(): Promise<void> {
+  public run(): void {
     this.workflowRuntime.navigateToNextNode();
   }
 
-  public async catchError(failedContext: StepExecutionRuntime): Promise<void> {
+  public catchError(failedContext: StepExecutionRuntime): void {
     const shouldContinue = failedContext.contextManager.evaluateBooleanExpressionInContext(
       this.node.configuration.condition,
       {

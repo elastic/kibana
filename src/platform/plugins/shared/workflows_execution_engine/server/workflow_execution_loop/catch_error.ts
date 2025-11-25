@@ -70,7 +70,7 @@ export async function catchError(
     }
 
     if (failedStepExecutionRuntime.stepExecutionExists()) {
-      await failedStepExecutionRuntime.failStep(
+      failedStepExecutionRuntime.failStep(
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         params.workflowExecutionState.getWorkflowExecution().error!
       );
@@ -112,7 +112,7 @@ export async function catchError(
         });
 
         try {
-          await stepErrorCatcher.catchError(failedContext);
+          await Promise.resolve(stepErrorCatcher.catchError(failedContext));
         } catch (error) {
           params.workflowExecutionState.updateWorkflowExecution({
             error,
@@ -122,7 +122,7 @@ export async function catchError(
 
       if (params.workflowExecutionState.getWorkflowExecution().error) {
         if (stepExecutionRuntime.stepExecutionExists()) {
-          await stepExecutionRuntime.failStep(
+          stepExecutionRuntime.failStep(
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             params.workflowExecutionState.getWorkflowExecution().error!
           );
