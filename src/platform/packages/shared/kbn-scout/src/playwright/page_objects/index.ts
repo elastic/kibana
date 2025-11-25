@@ -16,8 +16,11 @@ import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
 import { FilterBar } from './fiter_bar';
 import { MapsPage } from './maps_page';
+import { MonacoEditor } from './monaco_editor';
 import { RenderablePage } from './renderable_page';
 import { Toasts } from './toasts';
+import { CodeBlock } from './code_block';
+import { SuperSelect } from './super_select';
 import { createLazyPageObject } from './utils';
 import { Inspector } from './inspector';
 
@@ -35,7 +38,10 @@ export interface PageObjects {
   maps: MapsPage;
   renderable: RenderablePage;
   collapsibleNav: CollapsibleNav;
+  monacoEditor: MonacoEditor;
   toasts: Toasts;
+  codeBlock: CodeBlock;
+  superSelect: SuperSelect;
   inspector: Inspector;
 }
 
@@ -54,7 +60,10 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     maps: createLazyPageObject(MapsPage, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
+    monacoEditor: createLazyPageObject(MonacoEditor, fixtures.page),
     toasts: createLazyPageObject(Toasts, fixtures.page),
+    codeBlock: createLazyPageObject(CodeBlock, fixtures.page),
+    superSelect: createLazyPageObject(SuperSelect, fixtures.page),
     inspector: createLazyPageObject(Inspector, fixtures.page),
     // Add new page objects here
   };

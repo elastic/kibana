@@ -11,6 +11,7 @@ import type { Condition, StreamlangDSL } from '@kbn/streamlang';
 import type { IngestStream } from '@kbn/streams-schema/src/models/ingest';
 import { type Ingest } from '@kbn/streams-schema/src/models/ingest';
 import { WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
+import { ClassicStream } from '@kbn/streams-schema/src/models/ingest/classic';
 import type { RoutingStatus } from '@kbn/streams-schema';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
@@ -126,18 +127,31 @@ export const getStreamsApiService = ({
     clearStreamMappings: async (streamName: string) => {
       await measurePerformanceAsync(log, 'streamsApi.clearStreamMappings', async () => {
         const definition = await service.getStreamDefinition(streamName);
-        if (!WiredStream.Definition.is(definition.stream)) {
-          throw new Error(`Stream ${streamName} is not a wired stream, cannot clear mappings.`);
-        }
-        await service.updateStream(streamName, {
-          ingest: {
-            ...definition.stream.ingest,
-            wired: {
-              ...definition.stream.ingest.wired,
-              fields: {},
+        if (WiredStream.Definition.is(definition.stream)) {
+          await service.updateStream(streamName, {
+            ingest: {
+              ...definition.stream.ingest,
+              wired: {
+                ...definition.stream.ingest.wired,
+                fields: {},
+              },
             },
-          },
-        });
+          });
+        } else if (ClassicStream.Definition.is(definition.stream)) {
+          await service.updateStream(streamName, {
+            ingest: {
+              ...definition.stream.ingest,
+              classic: {
+                ...definition.stream.ingest.classic,
+                field_overrides: {},
+              },
+            },
+          });
+        } else {
+          throw new Error(
+            `Stream ${streamName} is not a wired or classic stream, cannot clear mappings.`
+          );
+        }
       });
     },
     clearStreamProcessors: async (streamName: string) => {

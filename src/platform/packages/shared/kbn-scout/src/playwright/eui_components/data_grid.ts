@@ -135,6 +135,74 @@ export class EuiDataGridWrapper {
     return await this.rows.count();
   }
 
+  /**
+   * Process all rows from the data grid, handling virtualization if present.
+   * For virtualized grids, scrolls through and processes each row as it's encountered.
+   * @param processRowCallback Callback function that processes each row locator and optional row index
+   * @param maxScrolls Maximum number of scroll attempts (default: 100)
+   * @param scrollDelayMs Delay in milliseconds after each scroll to allow rendering (default: 100ms)
+   */
+  async processAllVirtualizedRows(
+    processRowCallback: (row: Locator, rowIndex?: string) => Promise<void> | void,
+    maxScrolls = 100,
+    scrollDelayMs = 100
+  ): Promise<void> {
+    await this.ensureGridVisible();
+
+    // Check if the data grid wrapper has the virtualized class or contains a virtualized element
+    const virtualizedLocator = this.dataGridWrapper.locator('.euiDataGrid__virtualized');
+    const isVirtualized = (await virtualizedLocator.count()) > 0;
+
+    if (!isVirtualized) {
+      // Non-virtualized grid: process all rows directly
+      const allRows = await this.rows.all();
+      for (const row of allRows) {
+        const rowIndex = await row.getAttribute('data-grid-row-index');
+        await processRowCallback(row, rowIndex || undefined);
+      }
+      return;
+    }
+
+    // Virtualized grid: scroll through and process rows as we encounter them
+    const seenRowIndices = new Set<string>();
+    let previousRowCount = 0;
+    let scrollAttempts = 0;
+
+    while (scrollAttempts < maxScrolls) {
+      // Get all currently visible rows
+      const currentRows = await this.rows.all();
+      const currentRowCount = currentRows.length;
+
+      // Process each row that we haven't seen yet
+      for (const row of currentRows) {
+        const rowIndex = await row.getAttribute('data-grid-row-index');
+        if (rowIndex !== null && !seenRowIndices.has(rowIndex)) {
+          seenRowIndices.add(rowIndex);
+          // Process the row immediately while it's still in the DOM
+          await processRowCallback(row, rowIndex);
+        }
+      }
+
+      // If no new rows appeared, we've reached the end
+      if (currentRowCount === previousRowCount) {
+        break;
+      }
+
+      previousRowCount = currentRowCount;
+      scrollAttempts++;
+
+      // Scroll to the last visible row to trigger loading more rows
+      if (currentRows.length > 0) {
+        const lastRow = currentRows[currentRows.length - 1];
+        await lastRow.scrollIntoViewIfNeeded();
+        // Small delay to allow virtualization to render new rows
+        await this.page.waitForTimeout(scrollDelayMs);
+      } else {
+        break;
+      }
+    }
+  }
+
   async openFullScreenMode() {
     await this.ensureGridVisible();
     await this.toolbarFullScreenButton.click();

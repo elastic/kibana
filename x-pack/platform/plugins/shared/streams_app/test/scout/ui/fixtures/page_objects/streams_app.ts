@@ -8,8 +8,7 @@
 /* eslint-disable playwright/no-nth-methods */
 
 import type { ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout';
-import { EuiComboBoxWrapper } from '@kbn/scout';
+import { expect, EuiDataGridWrapper, EuiSuperSelectWrapper, EuiComboBoxWrapper } from '@kbn/scout';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
@@ -17,6 +16,8 @@ export class StreamsApp {
   public readonly conditionEditorFieldComboBox;
   public readonly conditionEditorValueComboBox;
   public readonly processorTypeComboBox;
+  public readonly fieldTypeSuperSelect;
+  public readonly schemaDataGrid;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -34,6 +35,14 @@ export class StreamsApp {
     this.processorTypeComboBox = new EuiComboBoxWrapper(
       this.page,
       'streamsAppProcessorTypeSelector'
+    );
+    this.fieldTypeSuperSelect = new EuiSuperSelectWrapper(
+      this.page,
+      'streamsAppFieldFormTypeSelect'
+    );
+    this.schemaDataGrid = new EuiDataGridWrapper(
+      this.page,
+      'streamsAppSchemaEditorFieldsTableLoaded'
     );
   }
 
@@ -644,7 +653,24 @@ export class StreamsApp {
   async getPreviewTableRows() {
     // Wait for the preview table to be rendered
     await expect(this.page.getByTestId('euiDataGridBody')).toBeVisible();
-    return this.page.locator('[class="euiDataGridRow"]').all();
+    return this.page.locator('.euiDataGridRow').all();
+  }
+
+  private getCellLocator({ columnName, rowIndex }: { columnName: string; rowIndex: number }) {
+    return this.page.locator(
+      `[data-gridcell-column-id="${columnName}"][data-gridcell-row-index="${rowIndex}"]`
+    );
+  }
+
+  async getCellTextContent({
+    columnName,
+    rowIndex,
+  }: {
+    columnName: string;
+    rowIndex: number;
+  }): Promise<string> {
+    const cellContent = this.getCellLocator({ columnName, rowIndex });
+    return (await cellContent.textContent())?.trim() || '';
   }
 
   async expectCellValueContains({
@@ -658,14 +684,12 @@ export class StreamsApp {
     value: string;
     invertCondition?: boolean;
   }) {
-    const cellContent = this.page.locator(
-      `[data-gridcell-column-id="${columnName}"][data-gridcell-row-index="${rowIndex}"]`
-    );
+    const cellLocator = this.getCellLocator({ columnName, rowIndex });
 
     if (invertCondition) {
-      await expect(cellContent).not.toContainText(value);
+      await expect(cellLocator).not.toContainText(value);
     } else {
-      await expect(cellContent).toContainText(value);
+      await expect(cellLocator).toContainText(value);
     }
   }
 
@@ -699,6 +723,10 @@ export class StreamsApp {
 
   async clickFieldStatusFilter() {
     await this.page.getByRole('button', { name: 'Status' }).click();
+  }
+
+  async getFilterOptions() {
+    return this.getModal().getByRole('option');
   }
 
   async selectFilterValue(value: string) {

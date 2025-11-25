@@ -8,8 +8,8 @@
 /* eslint-disable playwright/expect-expect */
 
 import { expect } from '@kbn/scout';
-import { test } from '../../fixtures';
-import { generateLogsData } from '../../fixtures/generators';
+import { test } from '../../../fixtures';
+import { generateLogsData } from '../../../fixtures/generators';
 
 test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
