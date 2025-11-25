@@ -11,17 +11,21 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHighlight,
+  EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AgentDefinition } from '@kbn/onechat-common';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
 import { labels } from '../../../../../utils/i18n';
+import { AgentAvatar } from '../../../../common/agent_avatar';
 
 const agentSelectId = 'agentBuilderAgentSelect';
 
@@ -44,6 +48,43 @@ const AgentSelectButton: React.FC<AgentSelectButtonProps> = ({ selectedAgentName
   </EuiButtonEmpty>
 );
 
+const AgentOptionPrepend: React.FC<{ agent: AgentDefinition }> = ({ agent }) => {
+  const { euiTheme } = useEuiTheme();
+  const panelStyles = css`
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+  `;
+  return (
+    <EuiPanel css={panelStyles} hasShadow={false}>
+      <AgentAvatar size="s" agent={agent} />
+    </EuiPanel>
+  );
+};
+
+type AgentOptionData = EuiSelectableOption<{ agent?: AgentDefinition }>;
+
+const AgentOption: React.FC<{ agent?: AgentDefinition; searchValue: string }> = ({
+  agent,
+  searchValue,
+}) => {
+  if (!agent) {
+    return null;
+  }
+  return (
+    <>
+      <EuiText size="s" color="subdued">
+        <h4>
+          <EuiHighlight search={searchValue}>{agent.name}</EuiHighlight>
+        </h4>
+        <p>
+          <EuiHighlight search={searchValue}>{agent.description}</EuiHighlight>
+        </p>
+      </EuiText>
+    </>
+  );
+};
+
+const AGENT_OPTION_ROW_HEIGHT = 88;
+
 interface AgentSelectDropdownProps {
   selectedAgent?: AgentDefinition;
   onAgentChange: (agentId: string) => void;
@@ -60,25 +101,24 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const options: EuiSelectableOption[] = useMemo(
+  const options = useMemo(
     () =>
-      agents.map((agent) => ({
-        key: agent.id,
-        label: agent.name,
-        checked: agent.id === selectedAgent?.id ? 'on' : undefined,
-      })),
+      agents.map((agent) => {
+        let checked: 'on' | undefined;
+        if (agent.id === selectedAgent?.id) {
+          checked = 'on';
+        }
+        const option: AgentOptionData = {
+          key: agent.id,
+          label: agent.name,
+          searchableLabel: `${agent.name} ${agent.description}`,
+          checked,
+          prepend: <AgentOptionPrepend agent={agent} />,
+          data: { agent },
+        };
+        return option;
+      }),
     [agents, selectedAgent?.id]
-  );
-
-  const handleAgentChange = useCallback(
-    (value: EuiSelectableOption[]) => {
-      const newAgentId = value.find((v) => v.checked === 'on')?.key;
-      if (newAgentId) {
-        onAgentChange(newAgentId);
-        setIsPopoverOpen(false);
-      }
-    },
-    [onAgentChange]
   );
 
   const panelStyles = css`
@@ -104,11 +144,22 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
         aria-label={labels.conversations.selectAgentAriaLabel}
         searchable
         options={options}
-        onChange={handleAgentChange}
+        onChange={(_options, _event, changedOption) => {
+          const { checked, agent } = changedOption;
+          const isChecked = checked === 'on';
+          if (isChecked && agent) {
+            onAgentChange(agent.id);
+            setIsPopoverOpen(false);
+          }
+        }}
         singleSelection
+        renderOption={({ agent }, searchValue) => {
+          return <AgentOption agent={agent} searchValue={searchValue} />;
+        }}
+        listProps={{ isVirtualized: true, rowHeight: AGENT_OPTION_ROW_HEIGHT }}
       >
         {(list, search) => (
-          <>
+          <div>
             <EuiPopoverTitle paddingSize="s">
               <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={true}>{search}</EuiFlexItem>
@@ -131,7 +182,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
               </EuiFlexGroup>
             </EuiPopoverTitle>
             {list}
-          </>
+          </div>
         )}
       </EuiSelectable>
     </EuiPopover>
