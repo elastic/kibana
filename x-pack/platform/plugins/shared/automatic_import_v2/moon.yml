@@ -35,6 +35,9 @@ dependsOn:
   - '@kbn/storage-adapter'
   - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/inference-langchain'
+  - '@kbn/core-application-common'
+  - '@kbn/i18n'
+  - '@kbn/features-plugin'
 tags:
   - plugin
   - prod
