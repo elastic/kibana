@@ -74355,6 +74355,10 @@ components:
         timeWindowUnit:
           $ref: '#/components/schemas/timewindowunit'
     params_property_infra_inventory:
+      title: Inventory
+      description: |
+        The parameters for the infrastructure inventory rule. These parameters are appropriate when `rule_type_id` is `metrics.alert.inventory.threshold`.
+      type: object
       properties:
         criteria:
           type: array
@@ -74467,7 +74471,9 @@ components:
           type: boolean
     params_property_log_threshold:
       oneOf:
-        - title: Count
+        - title: Log threshold count
+          description: |
+            The parameters for a log threshold rule that counts the number of log entries that match the criteria. These parameters are appropriate when `rule_type_id` is `logs.alert.document.count`.
           type: object
           required:
             - count
@@ -74545,7 +74551,9 @@ components:
               type: array
               items:
                 type: string
-        - title: Ratio
+        - title: Log threshold ratio
+          description: |
+            The parameters for a log threshold rule that calculates the ratio of log entries that match the criteria. These parameters are appropriate when `rule_type_id` is `logs.alert.document.count`.
           type: object
           required:
             - count
@@ -74628,6 +74636,10 @@ components:
               items:
                 type: string
     params_property_infra_metric_threshold:
+      title: Metric threshold
+      description: |
+        The parameters for the metric threshold rule. These parameters are appropriate when `rule_type_id` is `metrics.alert.threshold`.
+      type: object
       properties:
         criteria:
           type: array
