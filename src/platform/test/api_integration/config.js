@@ -40,6 +40,7 @@ export default async function ({ readConfigFile }) {
         // for testing set buffer duration to 0 to immediately flush counters into saved objects.
         '--usageCollection.usageCounters.bufferDuration=0',
         '--coreApp.allowDynamicConfigOverrides=true',
+        '--server.oas.enabled=true',
       ],
     },
     indexRefreshInterval: '1s',

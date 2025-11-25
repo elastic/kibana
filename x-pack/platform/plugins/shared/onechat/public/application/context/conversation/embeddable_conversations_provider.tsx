@@ -18,10 +18,9 @@ import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
 import { getProcessedAttachments } from './get_processed_attachments';
-import { AppLeaveContext, type OnAppLeave } from '../app_leave_context';
+import { AppLeaveContext } from '../app_leave_context';
 
-const noopOnAppLeave: OnAppLeave = () => {};
-
+const noopOnAppLeave = () => {};
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
   children: React.ReactNode;
 }
