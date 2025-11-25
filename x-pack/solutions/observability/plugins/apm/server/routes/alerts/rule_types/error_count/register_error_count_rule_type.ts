@@ -66,6 +66,7 @@ import {
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import { getAlertDiscoverUrl } from '../utils/get_discover_url';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 
@@ -82,6 +83,7 @@ export const errorCountActionVariables = [
   apmActionVariables.triggerValue,
   apmActionVariables.viewInAppUrl,
   apmActionVariables.grouping,
+  apmActionVariables.discoverUrl,
 ];
 
 type ErrorCountRuleTypeParams = ApmRuleParamsType[ApmRuleType.ErrorCount];
@@ -98,6 +100,7 @@ export function registerErrorCountRuleType({
   getApmIndices,
   logger,
   ruleDataClient,
+  discoverLocator,
 }: RegisterRuleDependencies) {
   if (!alerting) {
     throw new Error(
@@ -157,7 +160,9 @@ export function registerErrorCountRuleType({
           ]
         : [];
 
-      const { dateStart } = getTimeRange(`${ruleParams.windowSize}${ruleParams.windowUnit}`);
+      const { dateStart, dateEnd } = getTimeRange(
+        `${ruleParams.windowSize}${ruleParams.windowUnit}`
+      );
 
       const searchParams = {
         index: indices.error,
@@ -245,6 +250,15 @@ export function registerErrorCountRuleType({
           const groupByActionVariables = getGroupByActionVariables(groupByFields);
           const groupingObject = unflattenObject(groupByFields);
 
+          const discoverUrl = getAlertDiscoverUrl({
+            discoverLocator,
+            index: indices.error,
+            groupByFields,
+            dateStart,
+            dateEnd,
+            spaceId,
+          });
+
           const payload = {
             [PROCESSOR_EVENT]: ProcessorEvent.error,
             [ALERT_EVALUATION_VALUE]: errorCount,
@@ -257,6 +271,7 @@ export function registerErrorCountRuleType({
 
           const context = {
             alertDetailsUrl,
+            discoverUrl,
             interval: formatDurationFromTimeUnitChar(
               ruleParams.windowSize,
               ruleParams.windowUnit as TimeUnitChar
@@ -314,8 +329,19 @@ export function registerErrorCountRuleType({
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
         const groupingObject = unflattenObject(groupByFields);
 
+        const recoveredDiscoverUrl = getAlertDiscoverUrl({
+          discoverLocator,
+          processorEvent: ProcessorEvent.error,
+          index: indices.error,
+          groupByFields,
+          dateStart,
+          dateEnd,
+          spaceId,
+        });
+
         const recoveredContext = {
           alertDetailsUrl,
+          discoverUrl: recoveredDiscoverUrl,
           interval: formatDurationFromTimeUnitChar(
             ruleParams.windowSize,
             ruleParams.windowUnit as TimeUnitChar

@@ -18,7 +18,7 @@ import { from } from '@kbn/esql-composer';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { BaseDiscoverButton } from './base_discover_button';
-import { filterByKuery, filterBySpanId } from './filters';
+import { filterByKuery, filterBySpanId } from '../../../../../common/utils/esql/filters';
 
 export const getESQLQuery = ({
   params,

@@ -14,6 +14,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { alertsLocatorID } from '@kbn/observability-plugin/common';
+import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { isEmpty, mapValues } from 'lodash';
 import type { APMConfig } from '.';
@@ -197,6 +198,8 @@ export class APMPlugin
         observability: plugins.observability,
         ruleDataClient,
         alertsLocator: plugins.share.url.locators.get(alertsLocatorID),
+        discoverLocator:
+          plugins.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR),
       });
     }
 

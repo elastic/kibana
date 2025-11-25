@@ -20,6 +20,7 @@ export const errorCountMessage = i18n.translate(
 - Threshold: '{{context.threshold}}'
 
 [View alert details]('{{context.alertDetailsUrl}}')
+[View in Discover]('{{context.discoverUrl}}')
 `,
   }
 );

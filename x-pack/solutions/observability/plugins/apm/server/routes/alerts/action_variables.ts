@@ -89,4 +89,11 @@ export const apmActionVariables = {
     }),
     name: 'grouping' as const,
   },
+  discoverUrl: {
+    description: i18n.translate('xpack.apm.alerts.action_variables.discoverUrl', {
+      defaultMessage: 'Link to view the alert data in Discover',
+    }),
+    name: 'discoverUrl' as const,
+    usesPublicBaseUrl: true,
+  },
 };
