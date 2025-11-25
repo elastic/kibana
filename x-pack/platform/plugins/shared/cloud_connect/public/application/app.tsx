@@ -55,6 +55,7 @@ export const CloudConnectedAppMain: React.FC = () => {
   const extendedContext = {
     ...appContext,
     hasEncryptedSOEnabled: config?.hasEncryptedSOEnabled,
+    hasConfigurePermission: appContext.application.capabilities.cloudConnect?.configure === true,
   };
 
   return (

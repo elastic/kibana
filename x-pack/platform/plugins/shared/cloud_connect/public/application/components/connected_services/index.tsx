@@ -73,7 +73,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   onDisconnect,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { notifications } = useCloudConnectedAppContext();
+  const { notifications, hasConfigurePermission } = useCloudConnectedAppContext();
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isDisconnectModalVisible, setIsDisconnectModalVisible] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
@@ -186,18 +186,22 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
             }}
           />
         }
-        rightSideItems={[
-          <EuiPopover
-            key="actions"
-            button={actionsButton}
-            isOpen={isActionsPopoverOpen}
-            closePopover={closeActionsPopover}
-            panelPaddingSize="none"
-            anchorPosition="downRight"
-          >
-            <EuiContextMenuPanel items={actionsMenuItems} />
-          </EuiPopover>,
-        ]}
+        rightSideItems={
+          hasConfigurePermission
+            ? [
+                <EuiPopover
+                  key="actions"
+                  button={actionsButton}
+                  isOpen={isActionsPopoverOpen}
+                  closePopover={closeActionsPopover}
+                  panelPaddingSize="none"
+                  anchorPosition="downRight"
+                >
+                  <EuiContextMenuPanel items={actionsMenuItems} />
+                </EuiPopover>,
+              ]
+            : []
+        }
       />
       <EuiSpacer size="l" />
 

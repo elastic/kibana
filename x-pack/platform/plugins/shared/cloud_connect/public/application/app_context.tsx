@@ -16,6 +16,7 @@ export interface CloudConnectedAppContextValue {
   notifications: CoreStart['notifications'];
   history: AppMountParameters['history'];
   hasEncryptedSOEnabled?: boolean;
+  hasConfigurePermission?: boolean;
 }
 
 const CloudConnectedAppContext = createContext<CloudConnectedAppContextValue | null>(null);

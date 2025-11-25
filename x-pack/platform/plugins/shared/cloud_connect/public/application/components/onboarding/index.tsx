@@ -28,10 +28,7 @@ interface OnboardingPageProps {
 }
 
 export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => {
-  const { http, application, docLinks } = useCloudConnectedAppContext();
-  const hasPermissions =
-    application.capabilities.cloudConnect?.configure === true &&
-    application.capabilities.cloudConnect?.connect === true;
+  const { http, docLinks, hasConfigurePermission } = useCloudConnectedAppContext();
 
   return (
     <EuiPageSection restrictWidth={1200}>
@@ -71,7 +68,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
               />
             </p>
           </EuiText>
-          {!hasPermissions && (
+          {!hasConfigurePermission && (
             <>
               <EuiSpacer size="m" />
               <EuiText color="subdued" size="s" style={{ fontStyle: 'italic' }}>
@@ -105,7 +102,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
 
       {/* Main Content Section */}
       <EuiFlexGroup justifyContent="spaceBetween">
-        {hasPermissions && (
+        {hasConfigurePermission && (
           <EuiFlexItem grow={true}>
             <div style={{ maxWidth: '650px' }}>
               <ConnectionWizard onConnect={onConnect} />
@@ -113,7 +110,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
           </EuiFlexItem>
         )}
 
-        <ServiceCards hasPermissions={hasPermissions} />
+        <ServiceCards hasPermissions={hasConfigurePermission} />
       </EuiFlexGroup>
     </EuiPageSection>
   );

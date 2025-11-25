@@ -33,7 +33,7 @@ export const cloudConnectedFeature: KibanaFeatureConfig = {
         all: [],
         read: [],
       },
-      ui: ['show', 'configure', 'connect'],
+      ui: ['show', 'configure'],
       api: [],
     },
     read: {

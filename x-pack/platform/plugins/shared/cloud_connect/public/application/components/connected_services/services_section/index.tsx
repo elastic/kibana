@@ -13,6 +13,7 @@ import { ServiceCard } from './details_card';
 import { DisableServiceModal } from './disable_service_modal';
 import { useServiceActions } from './use_service_actions';
 import { SERVICE_CONFIG } from '../../../../../common/constants';
+import { useCloudConnectedAppContext } from '../../../app_context';
 
 interface ServiceMetadata {
   documentation_url?: string;
@@ -42,6 +43,7 @@ interface ServicesSectionProps {
 }
 
 export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onServiceUpdate }) => {
+  const { hasConfigurePermission } = useCloudConnectedAppContext();
   const {
     loadingService,
     disableModalService,

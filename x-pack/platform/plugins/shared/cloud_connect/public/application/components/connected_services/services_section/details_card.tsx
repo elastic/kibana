@@ -22,9 +22,11 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useCloudConnectedAppContext } from '../../../app_context';
 
 export interface ServiceCardProps {
   title: string;
@@ -61,6 +63,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   isLoading = false,
   isCardDisabled = false,
 }) => {
+  const { hasConfigurePermission } = useCloudConnectedAppContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopover = () => setIsPopoverOpen(false);
@@ -112,6 +115,30 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   const renderActions = () => {
     if (isCardDisabled || !supported) {
       return null;
+    }
+
+    // Show permission message if user doesn't have configure permission
+    if (!hasConfigurePermission) {
+      return (
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.cloudConnect.connectedServices.service.onlyAdminsCanManage"
+                defaultMessage="Only admins can manage services"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              content={i18n.translate('xpack.cloudConnect.connectedServices.service.contactAdmin', {
+                defaultMessage: 'Contact your admin',
+              })}
+              position="top"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
     }
 
     if (enabled) {
