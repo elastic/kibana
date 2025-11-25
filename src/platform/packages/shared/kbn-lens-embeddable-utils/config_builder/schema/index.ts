@@ -32,7 +32,9 @@ export const lensApiStateSchema = schema.oneOf([
   legacyMetricStateSchema,
   gaugeStateSchema,
   tagcloudStateSchema,
-  partitionStateSchema,
+  // disable for now to avoid type issues at the config builder root level
+  // TODO: enabled once transformations are available
+  // partitionStateSchema,
 ]);
 
 export type LensApiState = TypeOf<typeof lensApiStateSchema>;
