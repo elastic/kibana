@@ -27,9 +27,13 @@ import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils'
 import type {
   FlattenRecord,
   NamedFieldDefinitionConfig,
-  FieldDefinitionConfig,
-  InheritedFieldDefinitionConfig,
   FieldDefinition,
+  SimulationError,
+  DocSimulationStatus,
+  SimulationDocReport,
+  ProcessorMetrics,
+  DetectedField,
+  ProcessingSimulationResponse,
 } from '@kbn/streams-schema';
 import {
   getInheritedFieldsFromAncestors,
@@ -64,55 +68,6 @@ export interface SimulateProcessingDeps {
   fieldsMetadataClient: IFieldsMetadataClient;
 }
 
-export interface BaseSimulationError {
-  message: string;
-}
-
-export type SimulationError = BaseSimulationError &
-  (
-    | {
-        type: 'field_mapping_failure';
-      }
-    | {
-        type: 'generic_processor_failure';
-        processor_id: string;
-      }
-    | {
-        type: 'generic_simulation_failure';
-        processor_id?: string;
-      }
-    | {
-        type: 'ignored_fields_failure';
-        ignored_fields: Array<Record<string, string>>;
-      }
-    | {
-        type: 'non_namespaced_fields_failure';
-        processor_id: string;
-      }
-    | {
-        type: 'reserved_field_failure';
-        processor_id: string;
-      }
-  );
-
-export type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'skipped' | 'failed' | 'dropped';
-
-export interface SimulationDocReport {
-  detected_fields: Array<{ processor_id: string; name: string }>;
-  errors: SimulationError[];
-  status: DocSimulationStatus;
-  value: FlattenRecord;
-}
-
-export interface ProcessorMetrics {
-  detected_fields: string[];
-  errors: SimulationError[];
-  failed_rate: number;
-  skipped_rate: number;
-  parsed_rate: number;
-  dropped_rate: number;
-}
-
 // Narrow down the type to only successful processor results
 export type SuccessfulPipelineSimulateDocumentResult = WithRequired<
   IngestSimulateDocumentResult,
@@ -143,15 +98,6 @@ export type IngestSimulationResult =
       error: SimulationError;
     };
 
-export type DetectedField =
-  | WithNameAndEsType
-  | WithNameAndEsType<FieldDefinitionConfig | InheritedFieldDefinitionConfig>;
-
-export type WithNameAndEsType<TObj = {}> = TObj & {
-  name: string;
-  esType?: string;
-  suggestedType?: string;
-};
 export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
 
 /**
@@ -206,7 +152,7 @@ export const simulateProcessing = async ({
   scopedClusterClient,
   streamsClient,
   fieldsMetadataClient,
-}: SimulateProcessingDeps) => {
+}: SimulateProcessingDeps): Promise<ProcessingSimulationResponse> => {
   /* 0. Retrieve required data to prepare the simulation */
   const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
     await Promise.all([

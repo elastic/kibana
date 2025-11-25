@@ -7,9 +7,8 @@
 
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import type { Streams } from '@kbn/streams-schema';
+import type { Streams, ProcessingSimulationResponse } from '@kbn/streams-schema';
 import type { StreamlangDSL, GrokProcessor, DissectProcessor } from '@kbn/streamlang';
-import type { simulateProcessing } from '@kbn/streams-plugin/server/routes/internal/streams/processing/simulation_handler';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { isOtelStream } from '@kbn/streams-schema';
@@ -33,7 +32,7 @@ export async function suggestProcessingPipeline({
   parsingProcessor?: GrokProcessor | DissectProcessor;
   maxSteps?: number | undefined;
   signal: AbortSignal;
-  simulatePipeline(pipeline: StreamlangDSL): ReturnType<typeof simulateProcessing>;
+  simulatePipeline(pipeline: StreamlangDSL): Promise<ProcessingSimulationResponse>;
   documents: FlattenRecord[];
   fieldsMetadataClient: IFieldsMetadataClient;
   esClient: ElasticsearchClient;
@@ -164,7 +163,7 @@ async function getMappedFields(esClient: ElasticsearchClient, index: string) {
 }
 
 async function getSimulationMetrics(
-  simulationResult: Awaited<ReturnType<typeof simulateProcessing>>,
+  simulationResult: ProcessingSimulationResponse,
   fieldsMetadataClient: IFieldsMetadataClient,
   isOtel: boolean,
   mappedFields: Record<string, string>

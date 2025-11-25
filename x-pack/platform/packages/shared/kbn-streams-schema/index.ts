@@ -138,3 +138,15 @@ export {
   featureWithFilterSchema,
   isFeatureWithFilter,
 } from './src/feature';
+
+export {
+  type BaseSimulationError,
+  type SimulationError,
+  type DocSimulationStatus,
+  type SimulationDocReport,
+  type ProcessorMetrics,
+  type DetectedField,
+  type WithNameAndEsType,
+  type DocumentsMetrics,
+  type ProcessingSimulationResponse,
+} from './src/models/processing_simulation';
