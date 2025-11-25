@@ -10,10 +10,10 @@ import {
   findInheritedLifecycle,
   getInheritedFieldsFromAncestors,
   getInheritedSettings,
+  findInheritedFailureStore,
 } from '@kbn/streams-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { findInheritedFailureStore } from '@kbn/streams-schema/src/helpers/lifecycle';
 import type {
   DataStreamWithFailureStore,
   WiredIngestStreamEffectiveFailureStore,

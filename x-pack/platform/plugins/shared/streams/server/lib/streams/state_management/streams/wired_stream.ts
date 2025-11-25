@@ -11,6 +11,7 @@ import {
   MAX_NESTING_LEVEL,
   Streams,
   findInheritedLifecycle,
+  findInheritedFailureStore,
   getInheritedSettings,
   getSegments,
   isInheritLifecycle,
@@ -25,7 +26,6 @@ import {
   isIlmLifecycle,
 } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
-import { findInheritedFailureStore } from '@kbn/streams-schema/src/helpers/lifecycle';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import {
   isDisabledLifecycleFailureStore,
