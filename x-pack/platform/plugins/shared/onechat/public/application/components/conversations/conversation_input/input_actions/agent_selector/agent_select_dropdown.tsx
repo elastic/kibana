@@ -152,10 +152,10 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
         searchProps={{ placeholder: agentSearchPlaceholder }}
         options={options}
         onChange={(_options, _event, changedOption) => {
-          const { checked, agent } = changedOption;
+          const { checked, key: agentId } = changedOption;
           const isChecked = checked === 'on';
-          if (isChecked && agent) {
-            onAgentChange(agent.id);
+          if (isChecked && agentId) {
+            onAgentChange(agentId);
             setIsPopoverOpen(false);
           }
         }}
