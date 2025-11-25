@@ -1,0 +1,1012 @@
+{
+  "id": "@kbn/dissect-heuristics",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.extractDissectPattern",
+        "type": "Function",
+        "tags": [],
+        "label": "extractDissectPattern",
+        "description": [
+          "\nWARNING: DO NOT RUN THIS FUNCTION ON THE MAIN THREAD\n\nExtracts a Dissect pattern from an array of log messages by analyzing\ncommon delimiters and structure.\n\nThis function performs multiple passes to identify consistent delimiter patterns\nand normalize the data into a structured format. It is computationally intensive\n(O(n × m²) complexity) and should not be run on the main thread.\n\nSteps:\n1. Find common delimiter sequences that appear in all messages.\n2. Build an ordered delimiter tree by position.\n3. Extract variable regions between delimiters as fields.\n4. Detect modifiers (right padding, skip fields).\n5. Generate the final Dissect pattern string.\n"
+        ],
+        "signature": [
+          "(messages: string[]) => ",
+          {
+            "pluginId": "@kbn/dissect-heuristics",
+            "scope": "common",
+            "docId": "kibKbnDissectHeuristicsPluginApi",
+            "section": "def-common.DissectPattern",
+            "text": "DissectPattern"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/extract_dissect_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.extractDissectPattern.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "messages",
+            "description": [
+              "- Array of log message strings to analyze"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/extract_dissect_pattern.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "DissectPattern object with pattern string and field metadata"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.getDissectProcessor",
+        "type": "Function",
+        "tags": [],
+        "label": "getDissectProcessor",
+        "description": [
+          "\nGenerates an Elasticsearch Dissect processor configuration from a Dissect pattern.\n"
+        ],
+        "signature": [
+          "(pattern: ",
+          {
+            "pluginId": "@kbn/dissect-heuristics",
+            "scope": "common",
+            "docId": "kibKbnDissectHeuristicsPluginApi",
+            "section": "def-common.DissectPattern",
+            "text": "DissectPattern"
+          },
+          ", sourceField: string) => ",
+          {
+            "pluginId": "@kbn/dissect-heuristics",
+            "scope": "common",
+            "docId": "kibKbnDissectHeuristicsPluginApi",
+            "section": "def-common.DissectProcessorResult",
+            "text": "DissectProcessorResult"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/get_dissect_processor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.getDissectProcessor.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern",
+            "description": [
+              "- The DissectPattern object containing AST and field metadata"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/dissect-heuristics",
+                "scope": "common",
+                "docId": "kibKbnDissectHeuristicsPluginApi",
+                "section": "def-common.DissectPattern",
+                "text": "DissectPattern"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/get_dissect_processor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.getDissectProcessor.$2",
+            "type": "string",
+            "tags": [],
+            "label": "sourceField",
+            "description": [
+              "- The source field to apply dissect to (default: 'message')"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/get_dissect_processor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "DissectProcessorResult with processor config and metadata"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.getDissectProcessorWithReview",
+        "type": "Function",
+        "tags": [],
+        "label": "getDissectProcessorWithReview",
+        "description": [
+          "\nGenerates a Dissect processor by combining extracted pattern and\nthe result of an LLM review. It replaces generic field names (field_1, field_2, etc.)\nwith ECS-compliant field names and handles field grouping."
+        ],
+        "signature": [
+          "(pattern: ",
+          {
+            "pluginId": "@kbn/dissect-heuristics",
+            "scope": "common",
+            "docId": "kibKbnDissectHeuristicsPluginApi",
+            "section": "def-common.DissectPattern",
+            "text": "DissectPattern"
+          },
+          ", reviewResult: ",
+          "NormalizedReviewResult",
+          ", sourceField: string) => ",
+          {
+            "pluginId": "@kbn/dissect-heuristics",
+            "scope": "common",
+            "docId": "kibKbnDissectHeuristicsPluginApi",
+            "section": "def-common.DissectProcessorResult",
+            "text": "DissectProcessorResult"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_dissect_processor_with_review.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.getDissectProcessorWithReview.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/dissect-heuristics",
+                "scope": "common",
+                "docId": "kibKbnDissectHeuristicsPluginApi",
+                "section": "def-common.DissectPattern",
+                "text": "DissectPattern"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_dissect_processor_with_review.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.getDissectProcessorWithReview.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "reviewResult",
+            "description": [],
+            "signature": [
+              "NormalizedReviewResult"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_dissect_processor_with_review.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.getDissectProcessorWithReview.$3",
+            "type": "string",
+            "tags": [],
+            "label": "sourceField",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_dissect_processor_with_review.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.getReviewFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getReviewFields",
+        "description": [
+          "\nGenerates an object of fields with their example values and positions\nfor LLM review and ECS field mapping."
+        ],
+        "signature": [
+          "(pattern: ",
+          {
+            "pluginId": "@kbn/dissect-heuristics",
+            "scope": "common",
+            "docId": "kibKbnDissectHeuristicsPluginApi",
+            "section": "def-common.DissectPattern",
+            "text": "DissectPattern"
+          },
+          ", numExamples: number) => ",
+          {
+            "pluginId": "@kbn/dissect-heuristics",
+            "scope": "common",
+            "docId": "kibKbnDissectHeuristicsPluginApi",
+            "section": "def-common.ReviewFields",
+            "text": "ReviewFields"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_review_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.getReviewFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/dissect-heuristics",
+                "scope": "common",
+                "docId": "kibKbnDissectHeuristicsPluginApi",
+                "section": "def-common.DissectPattern",
+                "text": "DissectPattern"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_review_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.getReviewFields.$2",
+            "type": "number",
+            "tags": [],
+            "label": "numExamples",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_review_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.groupMessagesByPattern",
+        "type": "Function",
+        "tags": [],
+        "label": "groupMessagesByPattern",
+        "description": [],
+        "signature": [
+          "(messages: string[], params: { patternThreshold?: number | undefined; minProbability?: number | undefined; limit?: number | undefined; } | undefined) => { truncatedPattern: string; probability: number; messages: string[]; }[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.groupMessagesByPattern.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "messages",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.groupMessagesByPattern.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dissect-heuristics",
+                "id": "def-common.groupMessagesByPattern.$2.patternThreshold",
+                "type": "number",
+                "tags": [],
+                "label": "patternThreshold",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dissect-heuristics",
+                "id": "def-common.groupMessagesByPattern.$2.minProbability",
+                "type": "number",
+                "tags": [],
+                "label": "minProbability",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dissect-heuristics",
+                "id": "def-common.groupMessagesByPattern.$2.limit",
+                "type": "number",
+                "tags": [],
+                "label": "limit",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.serializeAST",
+        "type": "Function",
+        "tags": [],
+        "label": "serializeAST",
+        "description": [
+          "\nSerialize a Dissect AST to a pattern string\n"
+        ],
+        "signature": [
+          "(ast: ",
+          {
+            "pluginId": "@kbn/dissect-heuristics",
+            "scope": "common",
+            "docId": "kibKbnDissectHeuristicsPluginApi",
+            "section": "def-common.DissectAST",
+            "text": "DissectAST"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/serialize_ast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.serializeAST.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "ast",
+            "description": [
+              "- The Dissect AST to serialize"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/dissect-heuristics",
+                "scope": "common",
+                "docId": "kibKbnDissectHeuristicsPluginApi",
+                "section": "def-common.DissectAST",
+                "text": "DissectAST"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/serialize_ast.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The dissect pattern string"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.DelimiterNode",
+        "type": "Interface",
+        "tags": [],
+        "label": "DelimiterNode",
+        "description": [
+          "\nRepresents a delimiter in the delimiter tree"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DelimiterNode.literal",
+            "type": "string",
+            "tags": [],
+            "label": "literal",
+            "description": [
+              "The literal delimiter string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DelimiterNode.positions",
+            "type": "Array",
+            "tags": [],
+            "label": "positions",
+            "description": [
+              "Position of this delimiter in each message"
+            ],
+            "signature": [
+              "number[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DelimiterNode.medianPosition",
+            "type": "number",
+            "tags": [],
+            "label": "medianPosition",
+            "description": [
+              "Median position across all messages"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DelimiterNode.variance",
+            "type": "number",
+            "tags": [],
+            "label": "variance",
+            "description": [
+              "Position variance (for filtering)"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.DissectAST",
+        "type": "Interface",
+        "tags": [],
+        "label": "DissectAST",
+        "description": [
+          "\nThe complete Dissect pattern AST"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectAST.nodes",
+            "type": "Array",
+            "tags": [],
+            "label": "nodes",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/dissect-heuristics",
+                "scope": "common",
+                "docId": "kibKbnDissectHeuristicsPluginApi",
+                "section": "def-common.DissectASTNode",
+                "text": "DissectASTNode"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.DissectField",
+        "type": "Interface",
+        "tags": [],
+        "label": "DissectField",
+        "description": [
+          "\nRepresents a field in the Dissect pattern"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectField.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "Field name (e.g., \"clientip\", \"field_1\")"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectField.values",
+            "type": "Array",
+            "tags": [],
+            "label": "values",
+            "description": [
+              "Sample values from the analyzed messages"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectField.position",
+            "type": "number",
+            "tags": [],
+            "label": "position",
+            "description": [
+              "Position in the original messages"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectField.modifiers",
+            "type": "Object",
+            "tags": [],
+            "label": "modifiers",
+            "description": [
+              "Applied modifiers"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/dissect-heuristics",
+                "scope": "common",
+                "docId": "kibKbnDissectHeuristicsPluginApi",
+                "section": "def-common.DissectModifiers",
+                "text": "DissectModifiers"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.DissectFieldNode",
+        "type": "Interface",
+        "tags": [],
+        "label": "DissectFieldNode",
+        "description": [
+          "\nRepresents a field in the pattern AST"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectFieldNode.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"field\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectFieldNode.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectFieldNode.modifiers",
+            "type": "Object",
+            "tags": [],
+            "label": "modifiers",
+            "description": [],
+            "signature": [
+              "{ rightPadding?: boolean | undefined; skip?: boolean | undefined; namedSkip?: boolean | undefined; append?: boolean | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.DissectLiteralNode",
+        "type": "Interface",
+        "tags": [],
+        "label": "DissectLiteralNode",
+        "description": [
+          "\nRepresents a literal delimiter in the pattern AST"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectLiteralNode.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"literal\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectLiteralNode.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.DissectModifiers",
+        "type": "Interface",
+        "tags": [],
+        "label": "DissectModifiers",
+        "description": [
+          "\nModifiers that can be applied to a field"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectModifiers.rightPadding",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rightPadding",
+            "description": [
+              "Right padding (->): handles variable trailing whitespace"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectModifiers.skip",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "skip",
+            "description": [
+              "Skip field (?): field should not be extracted"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectModifiers.namedSkip",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "namedSkip",
+            "description": [
+              "Use named skip instead of anonymous"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.DissectPattern",
+        "type": "Interface",
+        "tags": [],
+        "label": "DissectPattern",
+        "description": [
+          "\nRepresents a Dissect pattern with metadata"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectPattern.ast",
+            "type": "Object",
+            "tags": [],
+            "label": "ast",
+            "description": [
+              "The Dissect pattern AST"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/dissect-heuristics",
+                "scope": "common",
+                "docId": "kibKbnDissectHeuristicsPluginApi",
+                "section": "def-common.DissectAST",
+                "text": "DissectAST"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectPattern.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [
+              "Extracted fields with metadata"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/dissect-heuristics",
+                "scope": "common",
+                "docId": "kibKbnDissectHeuristicsPluginApi",
+                "section": "def-common.DissectField",
+                "text": "DissectField"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.DissectProcessorResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "DissectProcessorResult",
+        "description": [
+          "\nResult from getDissectProcessor()"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectProcessorResult.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "Description of the log source (from LLM review)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectProcessorResult.pattern",
+            "type": "string",
+            "tags": [],
+            "label": "pattern",
+            "description": [
+              "The dissect pattern string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectProcessorResult.processor",
+            "type": "Object",
+            "tags": [],
+            "label": "processor",
+            "description": [
+              "The processor configuration"
+            ],
+            "signature": [
+              "{ dissect: { field: string; pattern: string; append_separator?: string | undefined; ignore_missing?: boolean | undefined; }; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectProcessorResult.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [
+              "Metadata about the extraction"
+            ],
+            "signature": [
+              "{ messageCount: number; delimiterCount?: number | undefined; fieldCount: number; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.DissectASTNode",
+        "type": "Type",
+        "tags": [],
+        "label": "DissectASTNode",
+        "description": [
+          "\nA node in the Dissect pattern AST"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/dissect-heuristics",
+            "scope": "common",
+            "docId": "kibKbnDissectHeuristicsPluginApi",
+            "section": "def-common.DissectFieldNode",
+            "text": "DissectFieldNode"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/dissect-heuristics",
+            "scope": "common",
+            "docId": "kibKbnDissectHeuristicsPluginApi",
+            "section": "def-common.DissectLiteralNode",
+            "text": "DissectLiteralNode"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.ReviewFields",
+        "type": "Type",
+        "tags": [],
+        "label": "ReviewFields",
+        "description": [],
+        "signature": [
+          "{ [x: string]: { example_values: string[]; position: number; }; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_review_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.ReviewDissectFieldsPrompt",
+        "type": "Object",
+        "tags": [],
+        "label": "ReviewDissectFieldsPrompt",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Prompt",
+            "text": "Prompt"
+          },
+          "<{ sample_messages: string[]; review_fields: string; }, [{ template: { mustache: { template: string; }; }; toolChoice: { function: \"validate_response_schema\"; }; tools: { validate_response_schema: { readonly description: \"Validate the response schema to ensure the output adheres to the defined structure.\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly log_source: { readonly type: \"string\"; }; readonly fields: { readonly type: \"array\"; readonly items: { readonly type: \"object\"; readonly properties: { readonly ecs_field: { readonly type: \"string\"; }; readonly columns: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"ecs_field\", \"columns\"]; }; }; }; readonly required: readonly [\"log_source\", \"fields\"]; }; }; }; }]>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/review_fields_prompt.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}
