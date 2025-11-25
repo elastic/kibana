@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
+import { ToolType, ToolResultType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { executeEsql } from '@kbn/onechat-genai-utils';
 import { getSpaceIdFromRequest } from './helpers';
@@ -67,13 +67,13 @@ export const attackDiscoverySearchTool = (): BuiltinToolDefinition<
 
         const results = [
           {
-            type: 'query' as const,
+            type: ToolResultType.query,
             data: {
               esql: esqlQuery,
             },
           },
           {
-            type: 'tabularData' as const,
+            type: ToolResultType.tabularData,
             data: {
               source: 'esql',
               query: esqlQuery,
@@ -89,7 +89,7 @@ export const attackDiscoverySearchTool = (): BuiltinToolDefinition<
         return {
           results: [
             {
-              type: 'error',
+              type: ToolResultType.error,
               data: {
                 message: `Error: ${error.message}`,
               },

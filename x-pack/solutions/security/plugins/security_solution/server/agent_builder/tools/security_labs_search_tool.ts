@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolType } from '@kbn/onechat-common';
+import { ToolType, ToolResultType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { runSearchTool } from '@kbn/onechat-genai-utils/tools/search/run_search_tool';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
@@ -54,7 +54,7 @@ export const securityLabsSearchTool = (): BuiltinToolDefinition<
         return {
           results: [
             {
-              type: 'error',
+              type: ToolResultType.error,
               data: {
                 message: `Error: ${error.message}`,
               },
