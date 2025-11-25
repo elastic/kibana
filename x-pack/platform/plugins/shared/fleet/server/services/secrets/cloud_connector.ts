@@ -102,8 +102,10 @@ async function extractAwsCloudConnectorSecrets(
     return awsCloudConnectorVars;
   }
 
-  logger.debug('AWS cloud connector vars not found or incomplete');
-  return undefined;
+  logger.error('AWS cloud connector vars not found or incomplete');
+  throw new CloudConnectorInvalidVarsError(
+    'Missing required AWS cloud connector variables: role_arn and external_id'
+  );
 }
 
 /**
@@ -121,8 +123,8 @@ async function extractAzureCloudConnectorSecrets(
     throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
   }
 
-  const tenantIdVar = vars.tenant_id || vars['azure.tenant_id'];
-  const clientIdVar = vars.client_id || vars['azure.client_id'];
+  const tenantIdVar = vars.tenant_id || vars['azure.credentials.tenant_id'];
+  const clientIdVar = vars.client_id || vars['azure.credentials.client_id'];
   const azureCredentials =
     vars.azure_credentials_cloud_connector_id || vars['azure.credentials.cloud_connector_id'];
 
@@ -192,5 +194,8 @@ async function extractAzureCloudConnectorSecrets(
   logger.error(
     `Missing required Azure vars: tenant_id=${!!tenantIdVar}, client_id=${!!clientIdVar}, azure_credentials=${!!azureCredentials}`
   );
-  return undefined;
+  throw new CloudConnectorInvalidVarsError(
+    'Missing required Azure cloud connector variables: ' +
+      `tenant_id=${!!tenantIdVar}, client_id=${!!clientIdVar}, azure_credentials=${!!azureCredentials}`
+  );
 }

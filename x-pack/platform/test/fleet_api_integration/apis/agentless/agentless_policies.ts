@@ -330,7 +330,9 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('Agentless Policy with Cloud Connectors', () => {
+    describe.skip('Agentless Policy with Cloud Connectors', () => {
+      // See individual tests for more details
+      // Will be resolved in https://github.com/elastic/security-team/issues/14864
       before(async () => {
         const mockAgentlessApiService = setupMockServer();
         mockApiServer = await mockAgentlessApiService.listen(8089);
@@ -352,6 +354,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it.skip('should create agentless policy with AWS cloud connector (requires cloud connector support in test package)', async () => {
+        // Will be resolved in https://github.com/elastic/security-team/issues/14864
         // Note: This test is skipped because the test_agentless package doesn't support cloud connectors
         // To enable this test, we would need to:
         // 1. Create a test package with cloud connector support in the deployment_modes
@@ -395,6 +398,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it.skip('should decrement cloud connector package count when deleting agentless policy (requires cloud connector setup)', async () => {
+        // Will be resolved in https://github.com/elastic/security-team/issues/14864
         // Note: This test is skipped for the same reasons as above
         // This would test:
         // 1. Create an agentless policy with cloud connector
