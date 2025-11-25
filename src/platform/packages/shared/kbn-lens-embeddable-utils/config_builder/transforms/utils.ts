@@ -21,7 +21,7 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import type { LensAttributes, LensDatatableDataset } from '../types';
-import type { LensApiState, NarrowByType } from '../schema';
+import type { LensApiAllOperations, LensApiState, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
 import { getMetricApiColumnFromLensState } from './columns/metric';
 import type { AnyLensStateColumn } from './columns/types';
@@ -73,7 +73,7 @@ function convertToTypedLayerColumns(layer: Omit<FormBasedLayer, 'indexPatternId'
 export const operationFromColumn = (
   columnId: string,
   layer: Omit<FormBasedLayer, 'indexPatternId'>
-) => {
+): LensApiAllOperations | undefined => {
   const typedLayer = convertToTypedLayerColumns(layer);
   const column = typedLayer.columns[columnId];
   if (!column) {
@@ -81,6 +81,7 @@ export const operationFromColumn = (
   }
   // map columns to array of { column, id }
   const columnMap = Object.entries(layer.columns).map(([id, c]) => ({
+    // need to cast here as the GenericIndexPatternColumn type is not compatible with Reference based column types
     column: c as AnyLensStateColumn,
     id,
   }));

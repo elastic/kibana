@@ -13,7 +13,10 @@ import { metricStateSchema } from './charts/metric';
 import { legacyMetricStateSchema } from './charts/legacy_metric';
 import { gaugeStateSchema } from './charts/gauge';
 import { tagcloudStateSchema } from './charts/tagcloud';
-import type { LensApiAllMetricOperations } from './metric_ops';
+import type {
+  LensApiAllMetricOrFormulaOperations,
+  LensApiStaticValueOperation,
+} from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
 import { xyStateSchema } from './charts/xy';
 
@@ -42,4 +45,7 @@ export type { LensApiBucketOperations } from './bucket_ops';
 
 export type NarrowByType<T, U> = T extends { type?: U } ? T : never;
 
-export type LensApiAllOperations = LensApiAllMetricOperations | LensApiBucketOperations;
+export type LensApiAllOperations =
+  | LensApiAllMetricOrFormulaOperations
+  | LensApiBucketOperations
+  | LensApiStaticValueOperation;

@@ -19,31 +19,49 @@ import type {
 import type { SavedObjectReference } from '@kbn/core/server';
 import { AvailableReferenceLineIcons } from '@kbn/expression-xy-plugin/common';
 import type { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
+import { isEsqlTableTypeDataset } from '../../../utils';
 import type { DatasetType } from '../../../schema/dataset';
 import { LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE } from '../../../schema/constants';
 import type { LensApiBucketOperations } from '../../../schema/bucket_ops';
-import type { LensApiAllMetricOperations } from '../../../schema/metric_ops';
+import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
 import type {
   DataLayerType,
   ReferenceLineLayerType,
   AnnotationLayerType,
+  DataLayerTypeESQL,
   DataLayerTypeNoESQL,
+  ReferenceLineLayerTypeESQL,
+  ReferenceLineLayerTypeNoESQL,
 } from '../../../schema/charts/xy';
 import {
   buildDatasetState,
   generateApiLayer,
   isDataViewSpec,
   isFormBasedLayer,
+  isTextBasedLayer,
   nonNullable,
   operationFromColumn,
 } from '../../utils';
 import { getValueApiColumn } from '../../columns/esql_column';
 import { fromColorMappingLensStateToAPI, fromStaticColorLensStateToAPI } from '../../coloring';
+import {
+  isAPIColumnOfBucketType,
+  isAPIColumnOfReferenceType,
+  isAPIColumnOfType,
+} from '../../columns/utils';
 
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,
+  layer: Omit<FormBasedLayer, 'indexPatternId'>
+): Omit<DataLayerTypeNoESQL, 'type' | 'dataset'>;
+function convertDataLayerToAPI(
+  visualization: XYDataLayerConfig,
+  layer: TextBasedLayer
+): Omit<DataLayerTypeESQL, 'type' | 'dataset'>;
+function convertDataLayerToAPI(
+  visualization: XYDataLayerConfig,
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer
-): Omit<DataLayerType, 'type' | 'dataset'> {
+): Omit<DataLayerTypeNoESQL, 'type' | 'dataset'> | Omit<DataLayerTypeESQL, 'type' | 'dataset'> {
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
   if (isFormBasedLayer(layer)) {
     const x = visualization.xAccessor
@@ -57,10 +75,12 @@ function convertDataLayerToAPI(
     const y =
       visualization.accessors
         ?.map((accessor) => {
-          const apiOperation = operationFromColumn(accessor, layer) as
-            | LensApiAllMetricOperations
-            | undefined;
-          if (!apiOperation) {
+          const apiOperation = operationFromColumn(accessor, layer);
+          if (
+            !apiOperation ||
+            isAPIColumnOfBucketType(apiOperation) ||
+            isAPIColumnOfType<LensApiStaticValueOperation>('static_value', apiOperation)
+          ) {
             return undefined;
           }
           const yConfig = yConfigMap.get(accessor);
@@ -73,7 +93,7 @@ function convertDataLayerToAPI(
                   color: fromStaticColorLensStateToAPI(yConfig.color),
                 }
               : {}),
-          } as DataLayerTypeNoESQL['y'][number];
+          };
         })
         .filter(nonNullable) ?? [];
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -138,6 +158,26 @@ export function buildAPIDataLayer(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): DataLayerType {
+  const type = convertSeriesTypeToAPIFormat(visualization.seriesType);
+  if (isTextBasedLayer(layer)) {
+    const dataset = buildDatasetState(
+      layer,
+      adHocDataViews,
+      references,
+      adhocReferences,
+      visualization.layerId
+    );
+    const baseLayer = convertDataLayerToAPI(visualization, layer);
+    if (isEsqlTableTypeDataset(dataset)) {
+      return {
+        type,
+        dataset,
+        ...baseLayer,
+      };
+    }
+    // this should be a never as schema should ensure this scenario never happens
+    throw new Error('Text based layers can only be used with ESQL or Table datasets');
+  }
   const dataset = buildDatasetState(
     layer,
     adHocDataViews,
@@ -146,14 +186,17 @@ export function buildAPIDataLayer(
     visualization.layerId
   );
 
+  if (isEsqlTableTypeDataset(dataset)) {
+    // this should be a never as schema should ensure this scenario never happens
+    throw new Error('Form based layers cannot be used with ESQL or Table datasets');
+  }
   const baseLayer = convertDataLayerToAPI(visualization, layer);
-  const type = convertSeriesTypeToAPIFormat(visualization.seriesType);
 
   return {
     type,
     dataset,
     ...baseLayer,
-  } as DataLayerType;
+  };
 }
 
 type ReferenceLineDef = ReferenceLineLayerType['thresholds'][number];
@@ -166,14 +209,17 @@ function isReferenceLineValidIcon(icon: string | undefined): icon is AvailableRe
 
 function convertReferenceLinesDecorationsToAPIFormat(
   yConfig: Omit<YConfig, 'forAccessor'>
-): Pick<ReferenceLineDef, 'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'fill'> {
+): Pick<
+  ReferenceLineDef,
+  'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'fill' | 'axis' | 'text'
+> {
   return {
     ...(yConfig.color ? { color: fromStaticColorLensStateToAPI(yConfig.color) } : {}),
     ...(yConfig.lineStyle ? { stroke_dash: yConfig.lineStyle } : {}),
     ...(yConfig.lineWidth ? { stroke_width: yConfig.lineWidth } : {}),
     ...(isReferenceLineValidIcon(yConfig.icon) ? { icon: yConfig.icon } : {}),
     ...(yConfig.fill && yConfig.fill !== 'none' ? { fill: yConfig.fill } : {}),
-    ...(yConfig.axisMode ? { axis: yConfig.axisMode } : {}),
+    ...(yConfig.axisMode && yConfig.axisMode !== 'auto' ? { axis: yConfig.axisMode } : {}),
     ...(yConfig.textVisibility != null ? { text: yConfig.textVisibility ? 'label' : 'none' } : {}),
   };
 }
@@ -190,28 +236,53 @@ function getLabelFromLayer(
 
 function convertReferenceLineLayerToAPI(
   visualization: XYReferenceLineLayerConfig,
+  layer: Omit<FormBasedLayer, 'indexPatternId'>
+): Omit<ReferenceLineLayerTypeNoESQL, 'type' | 'dataset'>;
+function convertReferenceLineLayerToAPI(
+  visualization: XYReferenceLineLayerConfig,
+  layer: TextBasedLayer
+): Omit<ReferenceLineLayerTypeESQL, 'type' | 'dataset'>;
+function convertReferenceLineLayerToAPI(
+  visualization: XYReferenceLineLayerConfig,
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer
 ): Omit<ReferenceLineLayerType, 'type' | 'dataset'> {
-  const isFormBased = isFormBasedLayer(layer);
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
-  const thresholds =
-    visualization.accessors?.map((accessor) => {
-      const op = isFormBased
-        ? (operationFromColumn(accessor, layer) as LensApiAllMetricOperations)
-        : getValueApiColumn(accessor, layer);
+  const thresholds = (visualization.accessors
+    ?.map((accessor): ReferenceLineDef | undefined => {
       const label = getLabelFromLayer(accessor, layer);
       const { forAccessor, ...yConfigRest } = yConfigMap.get(accessor) || {};
+      const decorationConfig = convertReferenceLinesDecorationsToAPIFormat(yConfigRest);
+
+      // this is very annoying as TS cannot seem to narrow the type correctly here
+      // if we move this check outside the loop
+      if (isFormBasedLayer(layer)) {
+        const op = operationFromColumn(accessor, layer);
+        if (op == null || isAPIColumnOfBucketType(op) || isAPIColumnOfReferenceType(op)) {
+          return undefined;
+        }
+        return {
+          ...op,
+          ...(label != null ? { label } : {}),
+          ...decorationConfig,
+        };
+      }
+      const op = getValueApiColumn(accessor, layer);
+      if (!op) {
+        return undefined;
+      }
       return {
         ...op,
         ...(label != null ? { label } : {}),
-        ...convertReferenceLinesDecorationsToAPIFormat(yConfigRest),
-      } as ReferenceLineLayerType['thresholds'][number];
-    }) ?? [];
+        ...decorationConfig,
+      };
+    })
+    .filter(nonNullable) ?? []) satisfies ReferenceLineDef[];
 
   return {
     ...generateApiLayer(layer),
-    thresholds,
-  } as Omit<ReferenceLineLayerType, 'type' | 'dataset'>;
+    // cannot really workout why satisfies works above and not here
+    thresholds: thresholds as ReferenceLineLayerType['thresholds'],
+  };
 }
 
 export function buildAPIReferenceLinesLayer(
@@ -228,11 +299,24 @@ export function buildAPIReferenceLinesLayer(
     adhocReferences,
     visualization.layerId
   );
+  if (isTextBasedLayer(layer)) {
+    if (isEsqlTableTypeDataset(dataset)) {
+      return {
+        type: 'referenceLines',
+        dataset,
+        ...convertReferenceLineLayerToAPI(visualization, layer),
+      };
+    }
+    throw new Error('Text based layers can only be used with ESQL or Table datasets');
+  }
+  if (isEsqlTableTypeDataset(dataset)) {
+    throw new Error('Form based layers cannot be used with ESQL or Table datasets');
+  }
   return {
     type: 'referenceLines',
     dataset,
     ...convertReferenceLineLayerToAPI(visualization, layer),
-  } as ReferenceLineLayerType;
+  };
 }
 
 function findAnnotationDataView(layerId: string, references: SavedObjectReference[]) {

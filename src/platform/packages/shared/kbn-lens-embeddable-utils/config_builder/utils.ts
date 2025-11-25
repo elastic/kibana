@@ -361,6 +361,8 @@ export function isLensLegacyAttributes(config: unknown): config is LensAttribute
   );
 }
 
-export function isEsqlTableTypeDataset(dataset: DatasetType) {
+export function isEsqlTableTypeDataset(
+  dataset: DatasetType
+): dataset is Extract<DatasetType, { type: 'esql' | 'table' }> {
   return dataset.type === 'esql' || dataset.type === 'table';
 }

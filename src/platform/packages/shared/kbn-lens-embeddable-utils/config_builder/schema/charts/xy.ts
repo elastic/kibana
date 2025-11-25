@@ -461,10 +461,12 @@ const referenceLineLayerShared = {
     })
   ),
   color: schema.maybe(staticColorSchema),
-  axis: schema.oneOf([schema.literal('bottom'), schema.literal('left'), schema.literal('right')], {
-    defaultValue: 'left',
-    meta: { description: 'Which axis the reference line applies to' },
-  }),
+  axis: schema.maybe(
+    schema.oneOf([schema.literal('bottom'), schema.literal('left'), schema.literal('right')], {
+      defaultValue: 'left',
+      meta: { description: 'Which axis the reference line applies to' },
+    })
+  ),
 };
 
 /**

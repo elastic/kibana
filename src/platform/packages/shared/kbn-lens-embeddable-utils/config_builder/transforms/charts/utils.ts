@@ -6,7 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { GaugeVisualizationState, MetricVisualizationState } from '@kbn/lens-common';
+import type {
+  FormBasedLayer,
+  GaugeVisualizationState,
+  MetricVisualizationState,
+  TextBasedLayer,
+} from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
 import type { LensApiState } from '../../schema';
 
@@ -35,7 +40,9 @@ export function getMetricAccessor(
   return visualization.metricAccessor ?? visualization.accessor;
 }
 
-export function getDatasourceLayers(state: LensAttributes['state']) {
+export function getDatasourceLayers(
+  state: LensAttributes['state']
+): Record<string, Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer> {
   const formBasedLayers = state.datasourceStates.formBased?.layers;
   const textBasedLayers = state.datasourceStates.textBased?.layers;
   // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
