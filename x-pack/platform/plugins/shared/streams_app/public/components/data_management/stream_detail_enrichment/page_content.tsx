@@ -31,6 +31,7 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
+import { selectValidationErrors } from './state_management/stream_enrichment_state_machine/selectors';
 import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
@@ -85,6 +86,10 @@ export function StreamDetailEnrichmentContentImpl() {
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const canUpdate = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const validationErrors = useStreamEnrichmentSelector((state) =>
+    selectValidationErrors(state.context)
+  );
+  const hasValidationErrors = Array.from(validationErrors.values()).flat().length > 0;
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
   const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
@@ -154,7 +159,7 @@ export function StreamDetailEnrichmentContentImpl() {
     state.matches({ ready: { stream: 'updating' } })
   );
 
-  const hasChanges = canUpdate && !isSimulating;
+  const hasChanges = canUpdate && !isSimulating && !hasValidationErrors;
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
@@ -237,7 +242,7 @@ export function StreamDetailEnrichmentContentImpl() {
           isLoading={isSavingChanges}
           disabled={!hasChanges}
           insufficientPrivileges={!canManage}
-          isInvalid={hasDefinitionError}
+          isInvalid={hasDefinitionError || hasValidationErrors}
         />
       )}
     </EuiSplitPanel.Outer>
@@ -248,6 +253,14 @@ const StepsEditor = React.memo(() => {
   const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
 
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
+
+  const validationErrors = useStreamEnrichmentSelector((state) =>
+    selectValidationErrors(state.context)
+  );
+
+  const allValidationErrors = useMemo(() => {
+    return Array.from(validationErrors.values()).flat();
+  }, [validationErrors]);
 
   const errors = useMemo(() => {
     if (!simulation) {
@@ -283,6 +296,45 @@ const StepsEditor = React.memo(() => {
   return (
     <>
       {hasSteps ? <RootSteps stepRefs={stepRefs} /> : <NoStepsEmptyPrompt />}
+      {!isEmpty(allValidationErrors) && (
+        <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
+          <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
+            <EuiAccordion
+              id="validation-errors-accordion"
+              initialIsOpen
+              buttonContent={
+                <strong>
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.validationErrors.title',
+                    {
+                      defaultMessage:
+                        '{count, plural, one {# validation error} other {# validation errors}}',
+                      values: { count: allValidationErrors.length },
+                    }
+                  )}
+                </strong>
+              }
+            >
+              <EuiText size="s">
+                <ul>
+                  {allValidationErrors.map((error, idx) => (
+                    <li key={idx}>
+                      <strong>{error.type}:</strong> {error.message}
+                      {error.field && (
+                        <FormattedMessage
+                          id="xpack.streams.streamDetailView.managementTab.enrichment.validationErrors.fieldLabel"
+                          defaultMessage=" (field: {field})"
+                          values={{ field: <EuiCode>{error.field}</EuiCode> }}
+                        />
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </EuiText>
+            </EuiAccordion>
+          </EuiPanel>
+        </EuiPanel>
+      )}
       {(!isEmpty(errors.ignoredFields) ||
         !isEmpty(errors.mappingFailures) ||
         errors.definition_error) && (

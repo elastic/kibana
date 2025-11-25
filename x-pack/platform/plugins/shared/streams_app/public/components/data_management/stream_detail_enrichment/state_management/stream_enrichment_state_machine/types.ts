@@ -14,6 +14,7 @@ import type { GrokCollection } from '@kbn/grok-ui';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
+  StreamlangValidationError,
 } from '@kbn/streamlang';
 import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
@@ -48,6 +49,7 @@ export interface StreamEnrichmentContextType {
   grokCollection: GrokCollection;
   simulatorRef: SimulationActorRef;
   urlState: EnrichmentUrlState;
+  validationErrors: Map<string, StreamlangValidationError[]>;
 }
 
 export type StreamEnrichmentEvent =

@@ -10,7 +10,11 @@ import React, { useEffect, useRef } from 'react';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { useFirstMountState } from 'react-use/lib/useFirstMountState';
 import { css } from '@emotion/react';
-import { useSimulatorSelector } from '../../../state_management/stream_enrichment_state_machine';
+import {
+  useSimulatorSelector,
+  useStreamEnrichmentSelector,
+} from '../../../state_management/stream_enrichment_state_machine';
+import { selectValidationErrors } from '../../../state_management/stream_enrichment_state_machine/selectors';
 import { isRootStep, isStepUnderEdit } from '../../../state_management/steps_state_machine';
 import type { StepConfigurationProps } from '../../steps_list';
 import type { ProcessorMetrics } from '../../../state_management/simulation_state_machine';
@@ -28,6 +32,13 @@ export function ActionBlock(props: StepConfigurationProps) {
   const isRootStepValue = useSelector(stepRef, (snapshot) => isRootStep(snapshot));
 
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
+
+  const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
+  const hasValidationErrors = useStreamEnrichmentSelector((state) => {
+    const errors = selectValidationErrors(state.context);
+    const stepErrors = errors.get(step.customIdentifier);
+    return stepErrors && stepErrors.length > 0;
+  });
 
   const panelColour = getStepPanelColour(level);
 
@@ -54,12 +65,16 @@ export function ActionBlock(props: StepConfigurationProps) {
       css={
         isUnderEdit
           ? css`
-              border: 1px solid ${euiTheme.colors.borderStrongPrimary};
+              border: ${hasValidationErrors
+                ? `2px solid ${euiTheme.colors.danger}`
+                : `1px solid ${euiTheme.colors.borderStrongPrimary}`};
               box-sizing: border-box;
               padding: ${euiTheme.size.m};
             `
           : css`
-              border: ${euiTheme.border.thin};
+              border: ${hasValidationErrors
+                ? `2px solid ${euiTheme.colors.danger}`
+                : euiTheme.border.thin};
               border-radius: ${euiTheme.size.s};
               padding: ${euiTheme.size.m};
             `

@@ -25,6 +25,8 @@ import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
   convertStepsForUI,
+  convertUIStepsToDSL,
+  validateStreamlang,
   type StreamlangProcessorDefinition,
 } from '@kbn/streamlang';
 import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
@@ -96,6 +98,24 @@ export const streamEnrichmentMachine = setup({
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
     notifyUpsertStreamFailure: getPlaceholderFor(createUpsertStreamFailureNofitier),
     refreshDefinition: () => {},
+    /* Validation actions */
+    computeValidation: assign(({ context }) => {
+      const allStepsWithUI = context.stepRefs.map(
+        (stepActorRef) => stepActorRef.getSnapshot().context.step
+      );
+      const streamlangDSL = convertUIStepsToDSL(allStepsWithUI, false);
+      const validationResult = validateStreamlang(streamlangDSL, { validateTypes: true });
+
+      const errorsByStep = new Map<string, typeof validationResult.errors>();
+      validationResult.errors.forEach((error) => {
+        if (error.processorId) {
+          const existing = errorsByStep.get(error.processorId) || [];
+          errorsByStep.set(error.processorId, [...existing, error]);
+        }
+      });
+
+      return { validationErrors: errorsByStep };
+    }),
     /* URL state actions */
     storeUrlState: assign((_, params: { urlState: EnrichmentUrlState }) => ({
       urlState: params.urlState,
@@ -105,31 +125,31 @@ export const streamEnrichmentMachine = setup({
       definition: params.definition,
     })),
     /* Steps actions */
-    setupSteps: assign((assignArgs) => {
-      // Clean-up pre-existing steps
-      assignArgs.context.stepRefs.forEach(stopChild);
-      // Setup processors from the stream definition
-      const uiSteps = convertStepsForUI(assignArgs.context.definition.stream.ingest.processing);
-      const stepRefs = uiSteps.map((step) => {
-        return spawnStep(step, assignArgs);
-      });
+    setupSteps: enqueueActions(({ context, enqueue }) => {
+      enqueue.assign((assignArgs) => {
+        // Clean-up pre-existing steps
+        assignArgs.context.stepRefs.forEach(stopChild);
+        // Setup processors from the stream definition
+        const uiSteps = convertStepsForUI(assignArgs.context.definition.stream.ingest.processing);
+        const stepRefs = uiSteps.map((step) => {
+          return spawnStep(step, assignArgs);
+        });
 
-      return {
-        initialStepRefs: stepRefs,
-        stepRefs,
-      };
+        return {
+          initialStepRefs: stepRefs,
+          stepRefs,
+        };
+      });
+      enqueue({ type: 'computeValidation' });
     }),
-    addProcessor: assign(
-      (
-        assignArgs,
-        {
-          processor,
-          options,
-        }: {
+    addProcessor: enqueueActions(({ context, enqueue }, params) => {
+      enqueue.assign((assignArgs) => {
+        const { processor: processorParam, options } = params as {
           processor?: StreamlangProcessorDefinition;
           options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
-        }
-      ) => {
+        };
+
+        let processor = processorParam;
         if (!processor) {
           processor = getDefaultGrokProcessor({
             sampleDocs: selectPreviewRecords(assignArgs.context.simulatorRef.getSnapshot().context),
@@ -148,47 +168,49 @@ export const streamEnrichmentMachine = setup({
         return {
           stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
         };
-      }
-    ),
-    duplicateProcessor: assign((assignArgs, params: { processorStepId: string }) => {
-      const targetStepUIDefinition = assignArgs.context.stepRefs
-        .map((stepRef) => stepRef.getSnapshot().context.step)
-        .find((stepDefinition) => {
-          return stepDefinition.customIdentifier === params.processorStepId;
-        });
-
-      if (!targetStepUIDefinition) {
-        return {};
-      }
-
-      const parentId = targetStepUIDefinition.parentId;
-      const newProcessorRef = spawnStep(
-        {
-          ...targetStepUIDefinition,
-          customIdentifier: createId(),
-        },
-        assignArgs,
-        {
-          isNew: true,
-        }
-      );
-      const insertIndex = findInsertIndex(assignArgs.context.stepRefs, parentId);
-
-      return {
-        stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
-      };
+      });
+      enqueue({ type: 'computeValidation' });
     }),
-    addCondition: assign(
-      (
-        assignArgs,
-        {
-          condition,
-          options,
-        }: {
+    duplicateProcessor: enqueueActions(({ context, enqueue }, params) => {
+      enqueue.assign((assignArgs) => {
+        const { processorStepId } = params as { processorStepId: string };
+        const targetStepUIDefinition = assignArgs.context.stepRefs
+          .map((stepRef) => stepRef.getSnapshot().context.step)
+          .find((stepDefinition) => {
+            return stepDefinition.customIdentifier === processorStepId;
+          });
+
+        if (!targetStepUIDefinition) {
+          return {};
+        }
+
+        const parentId = targetStepUIDefinition.parentId;
+        const newProcessorRef = spawnStep(
+          {
+            ...targetStepUIDefinition,
+            customIdentifier: createId(),
+          },
+          assignArgs,
+          {
+            isNew: true,
+          }
+        );
+        const insertIndex = findInsertIndex(assignArgs.context.stepRefs, parentId);
+
+        return {
+          stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
+        };
+      });
+      enqueue({ type: 'computeValidation' });
+    }),
+    addCondition: enqueueActions(({ context, enqueue }, params) => {
+      enqueue.assign((assignArgs) => {
+        const { condition: conditionParam, options } = params as {
           condition?: StreamlangWhereBlock;
           options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
-        }
-      ) => {
+        };
+
+        let condition = conditionParam;
         if (!condition) {
           condition = {
             where: {
@@ -210,23 +232,35 @@ export const streamEnrichmentMachine = setup({
         return {
           stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
         };
-      }
-    ),
-    deleteStep: assign(({ context }, params: { id: string }) => {
-      const idsToDelete = collectDescendantIds(params.id, context.stepRefs);
-      idsToDelete.add(params.id);
-      return {
-        stepRefs: context.stepRefs.filter((proc) => !idsToDelete.has(proc.id)),
-      };
+      });
+      enqueue({ type: 'computeValidation' });
     }),
-    reorderSteps: assign(({ context }, params: { stepId: string; direction: 'up' | 'down' }) => {
-      return {
-        stepRefs: [...reorderSteps(context.stepRefs, params.stepId, params.direction)],
-      };
+    deleteStep: enqueueActions(({ context, enqueue }, params) => {
+      enqueue.assign(({ context: ctx }) => {
+        const { id } = params as { id: string };
+        const idsToDelete = collectDescendantIds(id, ctx.stepRefs);
+        idsToDelete.add(id);
+        return {
+          stepRefs: ctx.stepRefs.filter((proc) => !idsToDelete.has(proc.id)),
+        };
+      });
+      enqueue({ type: 'computeValidation' });
     }),
-    reassignSteps: assign(({ context }) => ({
-      stepRefs: [...context.stepRefs],
-    })),
+    reorderSteps: enqueueActions(({ context, enqueue }, params) => {
+      enqueue.assign(({ context: ctx }) => {
+        const { stepId, direction } = params as { stepId: string; direction: 'up' | 'down' };
+        return {
+          stepRefs: [...reorderSteps(ctx.stepRefs, stepId, direction)],
+        };
+      });
+      enqueue({ type: 'computeValidation' });
+    }),
+    reassignSteps: enqueueActions(({ context, enqueue }) => {
+      enqueue.assign(({ context: ctx }) => ({
+        stepRefs: [...ctx.stepRefs],
+      }));
+      enqueue({ type: 'computeValidation' });
+    }),
     /* Data sources actions */
     setupDataSources: assign((assignArgs) => ({
       dataSourcesRefs: assignArgs.context.urlState.dataSources.map((dataSource) =>
@@ -254,12 +288,20 @@ export const streamEnrichmentMachine = setup({
       ({ context, enqueue }, params?: { type: StreamEnrichmentEvent['type'] }) => {
         const simulationMode = getActiveSimulationMode(context);
         const isPartialSimulation = simulationMode === 'partial';
+
+        // Check if there are any validation errors
+        const hasValidationErrors = Array.from(context.validationErrors.values()).flat().length > 0;
+
         /**
+         * When there are validation errors, reset the simulator to prevent running invalid configuration.
          * When any processor is before persisted, we need to reset the simulator
          * because the processors are not in a valid order.
          * If the order allows it, notify the simulator to run the simulation based on the received event.
          */
-        if (isPartialSimulation && selectWhetherAnyProcessorBeforePersisted(context)) {
+        if (
+          hasValidationErrors ||
+          (isPartialSimulation && selectWhetherAnyProcessorBeforePersisted(context))
+        ) {
           enqueue('sendResetEventToSimulator');
         } else {
           enqueue.sendTo('simulator', {
@@ -310,6 +352,7 @@ export const streamEnrichmentMachine = setup({
     initialStepRefs: [],
     stepRefs: [],
     urlState: defaultEnrichmentUrlState,
+    validationErrors: new Map(),
     simulatorRef: spawn('simulationMachine', {
       id: 'simulator',
       input: {
@@ -577,6 +620,7 @@ export const streamEnrichmentMachine = setup({
                   on: {
                     'step.change': {
                       actions: [
+                        { type: 'computeValidation' },
                         { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
