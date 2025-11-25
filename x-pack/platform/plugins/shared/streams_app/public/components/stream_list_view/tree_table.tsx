@@ -87,16 +87,10 @@ export function StreamsTreeTable({
 
   const numDataPoints = 25;
 
-  const streamNamesForDocCounts = React.useMemo(
-    () => streams.filter((stream) => stream.data_stream).map((stream) => stream.stream.name),
-    [streams]
-  );
-
   const { getStreamDocCounts, getStreamHistogram } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: true,
     canReadFailureStore,
     numDataPoints,
-    streamNames: streamNamesForDocCounts,
   });
 
   const docCountsFetch = getStreamDocCounts();

@@ -23,14 +23,12 @@ interface UseDocCountFetchProps {
   groupTotalCountByTimestamp: boolean;
   canReadFailureStore: boolean;
   numDataPoints: number;
-  streamNames?: string[];
 }
 
 export function useStreamDocCountsFetch({
   groupTotalCountByTimestamp: _groupTotalCountByTimestamp,
   canReadFailureStore,
   numDataPoints,
-  streamNames,
 }: UseDocCountFetchProps): {
   getStreamDocCounts(): StreamDocCountsFetch;
   getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse>;
@@ -91,14 +89,9 @@ export function useStreamDocCountsFetch({
         throw new Error('Abort controller not set');
       }
 
-      if (!streamNames || streamNames.length === 0) {
-        throw new Error('Stream names are required for fetching doc counts');
-      }
-
       const commonQueryParams = {
         start: timeState.start.toString(),
         end: timeState.end.toString(),
-        streams: streamNames.join(','),
       };
 
       const countPromise = streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/total', {
@@ -153,7 +146,7 @@ export function useStreamDocCountsFetch({
       const source = canReadFailureStore ? `${streamName},${streamName}::failures` : streamName;
 
       const histogramPromise = executeEsqlQuery({
-            query: `FROM ${source} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
+        query: `FROM ${source} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
         search: data.search.search,
         signal: abortController.signal,
         start: timeState.start,

@@ -113,7 +113,7 @@ test.describe('Stream list view - table values', { tag: ['@ess', '@svlOblt'] }, 
 
   test('should display correct doc count in the table', async ({ pageObjects, page }) => {
     // In serverless, indexing the failed docs takes longer, so we need to wait to ensure the doc counts are correct
-    await page.waitForTimeout(30000);
+    await page.waitForTimeout(50000);
     await page.reload();
 
     // Verify the document count for each stream in the default time range - last 15 minutes

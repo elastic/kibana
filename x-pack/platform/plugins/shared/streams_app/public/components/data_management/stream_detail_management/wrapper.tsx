@@ -71,7 +71,6 @@ export function Wrapper({
       ? definition.privileges.read_failure_store
       : true,
     numDataPoints: 25,
-    streamNames: [streamId],
   });
   const docCountsFetch = getStreamDocCounts();
 

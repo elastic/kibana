@@ -14,7 +14,6 @@ import { getDocCountsForStreams } from './get_streams_doc_counts';
 const docCountsQuerySchema = z.object({
   start: z.string(),
   end: z.string(),
-  streams: z.string().optional(),
 });
 
 const degradedDocCountsRoute = createServerRoute({
@@ -31,12 +30,16 @@ const degradedDocCountsRoute = createServerRoute({
     },
   },
   handler: async ({ params, getScopedClients, request }): Promise<StreamDocsStat[]> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
 
-    const { start, end, streams } = params.query;
+    const { start, end } = params.query;
 
-    const streamNames = streams ? streams.split(',') : [];
+    // Fetch all streams server-side
+    const streams = await streamsClient.listStreams();
+    const streamNames = streams
+      .filter((stream) => stream.name !== 'logs') // Exclude root stream
+      .map((stream) => stream.name);
 
     return await getDocCountsForStreams({
       esClient,
@@ -64,14 +67,16 @@ const failedDocCountsRoute = createServerRoute({
     },
   },
   handler: async ({ params, getScopedClients, request }): Promise<StreamDocsStat[]> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
 
-    const { start, end, streams } = params.query;
+    const { start, end } = params.query;
 
+    // Fetch all streams server-side
+    const streams = await streamsClient.listStreams();
     const streamNames = streams
-      ? streams.split(',').map((stream) => `${stream}${FAILURE_STORE_SELECTOR}`)
-      : [];
+      .filter((stream) => stream.name !== 'logs') // Exclude root stream
+      .map((stream) => `${stream.name}${FAILURE_STORE_SELECTOR}`);
 
     const results = await getDocCountsForStreams({
       esClient,
@@ -102,12 +107,16 @@ const totalDocCountsRoute = createServerRoute({
     },
   },
   handler: async ({ params, getScopedClients, request }): Promise<StreamDocsStat[]> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
 
-    const { start, end, streams } = params.query;
+    const { start, end } = params.query;
 
-    const streamNames = streams ? streams.split(',') : [];
+    // Fetch all streams server-side
+    const streams = await streamsClient.listStreams();
+    const streamNames = streams
+      .filter((stream) => stream.name !== 'logs') // Exclude root stream
+      .map((stream) => stream.name);
 
     return await getDocCountsForStreams({
       esClient,
