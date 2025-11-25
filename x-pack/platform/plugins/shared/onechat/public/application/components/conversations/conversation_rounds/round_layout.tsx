@@ -47,7 +47,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   }, [isCurrentRound, isResponseLoading, scrollContainerHeight]);
 
   const roundContainerStyles = css`
-    ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : ''}
+    ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : 'flex-grow: 0;'};
   `;
 
   const isCurrentRoundLoading = isResponseLoading && isCurrentRound;
