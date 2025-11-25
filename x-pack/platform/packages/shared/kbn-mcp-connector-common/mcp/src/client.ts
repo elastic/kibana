@@ -114,10 +114,10 @@ export class McpClient {
       throw new Error(`Error calling tool ${params.name}: ${response.error}`);
     }
 
-    const content = response.content as Array<{ type: string; text?: string; [key: string]: unknown }>;
+    const content = response.content as Array<{ type: string; text?: string; [key: string]: unknown } | null | undefined>;
     const textParts = content
       .filter((part): part is { type: 'text'; text: string } =>
-        part.type === 'text' && typeof part.text === 'string'
+        part != null && part.type === 'text' && typeof part.text === 'string'
       )
       .map((part): ContentPart => ({
         type: 'text',
