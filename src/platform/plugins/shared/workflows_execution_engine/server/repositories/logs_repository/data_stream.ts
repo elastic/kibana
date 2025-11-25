@@ -74,6 +74,10 @@ export interface WorkflowLogEvent extends GetFieldsOf<typeof logsRepositoryMappi
     is_triggered_by_alerting?: boolean;
     alerting_rule_id?: string;
     transaction_id?: string;
+    outcome?: 'success' | 'failure';
+  };
+  trace?: {
+    trace_id?: string;
   };
   error?: {
     message?: string;
