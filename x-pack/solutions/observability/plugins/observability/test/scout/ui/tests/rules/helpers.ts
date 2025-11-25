@@ -6,12 +6,22 @@
  */
 
 import type { ApiServicesFixture, BrowserAuthFixture, SamlAuth } from '@kbn/scout-oblt';
+
 import type { CreateRuleResponse } from './types';
 
-export async function createRule(apiServices: ApiServicesFixture) {
+interface CreateRuleParams {
+  name: string;
+  ruleTypeId: string;
+}
+
+export async function createRule(
+  apiServices: ApiServicesFixture,
+  ruleParams: Partial<CreateRuleParams> = {}
+) {
   return apiServices.alerting.rules.create({
     name: 'Test rule',
     ruleTypeId: 'observability.rules.custom_threshold',
+    ...ruleParams,
     consumer: 'alerts',
     params: {
       criteria: [
@@ -56,10 +66,10 @@ export const Analyst = {
   },
 };
 
-export const LogsEspecialist = {
+export const LogsSpecialist = {
   /**
    * This method can be called in the `beforeAll` hook of a test suite to set up
-   * the necessary role for the Logs Especialist user.
+   * the necessary role for the Logs Specialist user.
    *
    * Once set up, the role can be used by logging in with the `await browserAuth.loginAs(samlAuth.customRoleName)` method in the `beforeEach` hook.
    * @param samlAuth
@@ -71,5 +81,9 @@ export const LogsEspecialist = {
         cluster: ['monitor'],
       },
     });
+  },
+
+  async login(browserAuth: BrowserAuthFixture, samlAuth: SamlAuth) {
+    await browserAuth.loginAs(samlAuth.customRoleName);
   },
 };

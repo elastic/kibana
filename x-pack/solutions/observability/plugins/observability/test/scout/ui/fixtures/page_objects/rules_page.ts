@@ -184,4 +184,11 @@ export class RulesPage {
   public getNonEditableRules() {
     return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULE_ROW_NON_EDITABLE);
   }
+
+  /**
+   * Gets the editable rules locator
+   */
+  public getEditableRules() {
+    return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULE_ROW);
+  }
 }
