@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { NewChat } from '@kbn/elastic-assistant';
+import { AttachmentType } from '@kbn/onechat-common/attachments';
 import { useUserData } from '../../../../detections/components/user_info';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
@@ -17,6 +18,9 @@ import { getPromptContextFromDetectionRules } from '../../../../assistant/helper
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import * as i18nAssistant from '../../../common/translations';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
+import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 
 export enum AllRulesTabs {
   management = 'management',
@@ -97,6 +101,17 @@ export const RulesTableToolbar = React.memo(() => {
     return `${i18nAssistant.DETECTION_RULES_CONVERSATION_ID} - ${selectedRuleNames.join(', ')}`;
   }, [selectedRuleNames]);
 
+  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const attachmentData = useMemo(
+    () => ({ text: getPromptContextFromDetectionRules(selectedRules) }),
+    [selectedRules]
+  );
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
+    attachmentType: AttachmentType.product_reference,
+    attachmentData,
+    attachmentPrompt: i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS,
+  });
+
   return (
     <EuiFlexGroup justifyContent={'spaceBetween'}>
       <EuiFlexItem grow={false}>
@@ -104,15 +119,21 @@ export const RulesTableToolbar = React.memo(() => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {hasAssistantPrivilege && selectedRules.length > 0 && isAssistantEnabled && (
-          <NewChat
-            category="detection-rules"
-            conversationTitle={chatTitle}
-            description={i18nAssistant.RULE_MANAGEMENT_CONTEXT_DESCRIPTION}
-            getPromptContext={getPromptContext}
-            suggestedUserPrompt={i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS}
-            tooltip={i18nAssistant.RULE_MANAGEMENT_CONTEXT_TOOLTIP}
-            isAssistantEnabled={isAssistantEnabled}
-          />
+          <>
+            {isAgentBuilderEnabled ? (
+              <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+            ) : (
+              <NewChat
+                category="detection-rules"
+                conversationTitle={chatTitle}
+                description={i18nAssistant.RULE_MANAGEMENT_CONTEXT_DESCRIPTION}
+                getPromptContext={getPromptContext}
+                suggestedUserPrompt={i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS}
+                tooltip={i18nAssistant.RULE_MANAGEMENT_CONTEXT_TOOLTIP}
+                isAssistantEnabled={isAssistantEnabled}
+              />
+            )}
+          </>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

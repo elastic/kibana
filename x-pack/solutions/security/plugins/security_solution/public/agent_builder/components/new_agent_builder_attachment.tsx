@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import type { EuiButtonColor } from '@elastic/eui';
+import type { EuiButtonColor, IconType } from '@elastic/eui';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
 import * as i18n from './translations';
-
-export const BUTTON_TEST_ID = 'newAgentBuilderAttachment';
-export const BUTTON_ICON_TEST_ID = 'newAgentBuilderAttachmentIcon';
-export const BUTTON_TEXT_TEST_ID = 'newAgentBuilderAttachmentText';
 
 export interface NewAgentBuilderAttachmentProps {
   /**
@@ -22,6 +18,10 @@ export interface NewAgentBuilderAttachmentProps {
    */
   color?: EuiButtonColor;
   /**
+   * icon type
+   */
+  iconType?: IconType;
+  /**
    * Callback when button is clicked
    */
   onClick: () => void;
@@ -29,16 +29,22 @@ export interface NewAgentBuilderAttachmentProps {
    * Size of the button
    */
   size?: EuiButtonEmptySizes;
+  /**
+   * Optional button text
+   */
+  text?: string;
 }
 
 const NewAgentBuilderAttachmentComponent: React.FC<NewAgentBuilderAttachmentProps> = ({
   color = 'primary',
+  iconType = 'machineLearningApp',
   onClick,
   size = 'm',
+  text = i18n.VIEW_IN_AGENT_BUILDER,
 }) => {
   return (
     <EuiButtonEmpty
-      aria-label={i18n.VIEW_IN_AGENT_BUILDER}
+      aria-label={text}
       color={color}
       data-test-subj={'newAgentBuilderAttachment'}
       onClick={onClick}
@@ -46,9 +52,9 @@ const NewAgentBuilderAttachmentComponent: React.FC<NewAgentBuilderAttachmentProp
     >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="machineLearningApp" />
+          <EuiIcon type={iconType} color={color === 'primary' ? 'default' : color} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{i18n.VIEW_IN_AGENT_BUILDER}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{text}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiButtonEmpty>
   );
