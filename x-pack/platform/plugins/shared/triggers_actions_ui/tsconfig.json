@@ -91,7 +91,6 @@
     "@kbn/presentation-util",
     "@kbn/discover-utils",
     "@kbn/react-query",
-    "@kbn/router-utils"
   ],
   "exclude": ["target/**/*"]
 }
