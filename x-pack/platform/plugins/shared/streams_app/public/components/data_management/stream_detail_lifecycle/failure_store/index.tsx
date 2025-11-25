@@ -112,6 +112,12 @@ export const StreamDetailFailureStore = ({
                 inheritOptions={inheritOptions}
                 showIlmDescription={!isServerless}
                 canShowDisableLifecycle={!isServerless}
+                disableButtonLabel={i18n.translate(
+                  'xpack.streams.dataManagement.streamDetailLifecycle.indefinite',
+                  {
+                    defaultMessage: 'Indefinite',
+                  }
+                )}
               />
             )}
             {data.isLoading || failureStoreEnabled ? (

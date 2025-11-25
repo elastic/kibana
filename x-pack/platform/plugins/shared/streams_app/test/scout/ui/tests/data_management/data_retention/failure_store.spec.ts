@@ -128,7 +128,7 @@ test.describe('Stream data retention - updating failure store', () => {
       // Verify infinite retention is shown
       await expect(page.getByTestId('failureStoreRetention-metric').getByText('∞')).toBeVisible();
       await expect(
-        page.getByTestId('failureStoreRetention-metric-subtitle').getByText('Infinite retention')
+        page.getByTestId('failureStoreRetention-metric-subtitle').getByText('Indefinite retention')
       ).toBeVisible();
     }
   );
@@ -234,7 +234,7 @@ test.describe('Stream data retention - updating failure store', () => {
       // Verify infinite retention is shown
       await expect(page.getByTestId('failureStoreRetention-metric').getByText('∞')).toBeVisible();
       await expect(
-        page.getByTestId('failureStoreRetention-metric-subtitle').getByText('Infinite retention')
+        page.getByTestId('failureStoreRetention-metric-subtitle').getByText('Indefinite retention')
       ).toBeVisible();
     }
   );
