@@ -22,8 +22,8 @@ const clampTextStyles = css`
 const defaultThinkingLabel = i18n.translate('xpack.onechat.conversation.thinking.label', {
   defaultMessage: 'Thinking...',
 });
-const thinkingCompletedLabel = i18n.translate('xpack.onechat.conversation.thinking.completed', {
-  defaultMessage: 'Finished thinking',
+const thinkingCompletedLabel = i18n.translate('xpack.onechat.conversation.completedReasoning', {
+  defaultMessage: 'Completed reasoning',
 });
 const showButtonLabel = i18n.translate('xpack.onechat.conversation.thinking.show', {
   defaultMessage: 'Show',
