@@ -11,6 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { AIChatExperience } from '../../../common/ai_chat_experience';
 import { useIsNavControlVisible } from '../../hooks/use_is_nav_control_visible';
 import type { AIAssistantType } from '../../../common/ai_assistant_type';
 
@@ -28,7 +29,10 @@ export const NavControlInitiator = ({
   coreStart: CoreStart;
   isSecurityAIAssistantEnabled: boolean;
   isObservabilityAIAssistantEnabled: boolean;
-  triggerOpenChat: (event: { assistant: AIAssistantType }) => void;
+  triggerOpenChat: (event: {
+    assistant: AIAssistantType;
+    chatExperience: AIChatExperience;
+  }) => void;
   spaces?: SpacesPluginStart;
 }) => {
   const { isVisible } = useIsNavControlVisible(coreStart, spaces);

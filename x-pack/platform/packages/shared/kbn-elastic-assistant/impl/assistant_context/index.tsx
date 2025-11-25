@@ -26,6 +26,7 @@ import type {
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { AIChatExperience } from '@kbn/ai-assistant-management-plugin/common/ai_chat_experience';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -97,7 +98,7 @@ export interface AssistantProviderProps {
   productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
-  openChatTrigger$?: Observable<{ assistant: AIAssistantType }>;
+  openChatTrigger$?: Observable<{ chatExperience: AIChatExperience; assistant: AIAssistantType }>;
   completeOpenChat?: () => void;
 }
 
@@ -158,7 +159,7 @@ export interface UseAssistantContext {
   productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
-  openChatTrigger$?: Observable<{ assistant: AIAssistantType }>;
+  openChatTrigger$?: Observable<{ chatExperience: AIChatExperience; assistant: AIAssistantType }>;
   completeOpenChat?: () => void;
 }
 

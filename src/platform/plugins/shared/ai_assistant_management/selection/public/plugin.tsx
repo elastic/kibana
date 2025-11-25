@@ -25,13 +25,14 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 import { NavControlInitiator } from './components/navigation_control/lazy_nav_control';
+import { AIChatExperience } from '../common/ai_chat_experience';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AIAssistantManagementSelectionPluginPublicSetup {}
 
 export interface AIAssistantManagementSelectionPluginPublicStart {
   aiAssistantType$: Observable<AIAssistantType>;
-  openChat$: Observable<{ assistant: AIAssistantType }>;
+  openChat$: Observable<{ chatExperience: AIChatExperience; assistant: AIAssistantType }>;
   completeOpenChat(): void;
 }
 
@@ -160,11 +161,18 @@ export class AIAssistantManagementPlugin
       .subscribe((nextValue) => {
         aiAssistantType$.next(nextValue);
       });
-    const openChatSubject = new BehaviorSubject<{ assistant: AIAssistantType }>({
+    const openChatSubject = new BehaviorSubject<{
+      chatExperience: AIChatExperience;
+      assistant: AIAssistantType;
+    }>({
+      chatExperience: AIChatExperience.Classic,
       assistant: AIAssistantType.Default,
     });
     const completeOpenChat = () => {
-      openChatSubject.next({ assistant: AIAssistantType.Default });
+      openChatSubject.next({
+        chatExperience: AIChatExperience.Classic,
+        assistant: AIAssistantType.Default,
+      });
     };
 
     // Check which assistants the user has access to
@@ -191,7 +199,7 @@ export class AIAssistantManagementPlugin
     this.registerNavControl(coreStart, openChatSubject, startDeps.spaces);
 
     return {
-      aiAssistantType$: aiAssistantType$.asObservable(),
+      aiAssistantType$: aiAssistantType$.asObservable(), // TODO: is this needed? Can I not use only openChat$?
       openChat$: openChatSubject.asObservable(),
       completeOpenChat,
     };
@@ -199,7 +207,10 @@ export class AIAssistantManagementPlugin
 
   private registerNavControl(
     coreStart: CoreStart,
-    openChatSubject: BehaviorSubject<{ assistant: AIAssistantType }>,
+    openChatSubject: BehaviorSubject<{
+      chatExperience: AIChatExperience;
+      assistant: AIAssistantType;
+    }>,
     spaces?: SpacesPluginStart
   ) {
     const isObservabilityAIAssistantEnabled =
@@ -223,10 +234,12 @@ export class AIAssistantManagementPlugin
               <NavControlInitiator
                 isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
                 isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
+                // isAgentBuilderEnabled={} // TODO: check if needed
                 coreStart={coreStart}
-                triggerOpenChat={(event: { assistant: AIAssistantType }) =>
-                  openChatSubject.next(event)
-                }
+                triggerOpenChat={(event: {
+                  chatExperience: AIChatExperience;
+                  assistant: AIAssistantType;
+                }) => openChatSubject.next(event)}
                 spaces={spaces}
               />
             ),

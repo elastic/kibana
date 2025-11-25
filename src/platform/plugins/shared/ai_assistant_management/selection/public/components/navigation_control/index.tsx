@@ -28,6 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AIChatExperience } from '../../../common/ai_chat_experience';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../../../common/ui_setting_keys';
 import { AIAssistantType } from '../../../common/ai_assistant_type';
 import { AssistantIcon } from '../../icons/assistant_icon/assistant_icon';
@@ -36,7 +37,10 @@ interface AIAssistantHeaderButtonProps {
   coreStart: CoreStart;
   isSecurityAIAssistantEnabled: boolean;
   isObservabilityAIAssistantEnabled: boolean;
-  triggerOpenChat: (event: { assistant: AIAssistantType }) => void;
+  triggerOpenChat: (event: {
+    chatExperience: AIChatExperience;
+    assistant: AIAssistantType;
+  }) => void;
 }
 
 export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = ({
@@ -49,21 +53,40 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
 
   const { getUrlForApp } = coreStart.application;
 
-  const [selectedType, setSelectedType] = useState<AIAssistantType>(AIAssistantType.Default);
+  const [selectedType, setSelectedType] = useState<{
+    chatExperience: AIChatExperience;
+    assistant: AIAssistantType;
+  }>({
+    chatExperience: AIChatExperience.Classic,
+    assistant: AIAssistantType.Default,
+  });
 
   const onModalClose = useCallback(() => {
     setModalOpen(false);
-    setSelectedType(AIAssistantType.Default);
+    setSelectedType({
+      chatExperience: AIChatExperience.Classic,
+      assistant: AIAssistantType.Default,
+    });
   }, []);
   const modalTitleId = useGeneratedHtmlId({ prefix: 'aiAssistantModalTitle' });
 
   const handleOpenModal = useCallback(() => setModalOpen(true), []);
-  const handleSelect = useCallback((type: AIAssistantType) => setSelectedType(type), []);
+  const handleSelect = useCallback(
+    (type: { assistant: AIAssistantType; chatExperience: AIChatExperience }) =>
+      setSelectedType(type),
+    []
+  );
 
   const onApply = useCallback(async () => {
     setModalOpen(false);
-    await coreStart.settings.client.set(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, selectedType);
-    triggerOpenChat({ assistant: selectedType });
+    await coreStart.settings.client.set(
+      PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+      selectedType.assistant
+    );
+    triggerOpenChat({
+      chatExperience: selectedType.chatExperience,
+      assistant: selectedType.assistant,
+    });
   }, [selectedType, triggerOpenChat, coreStart.settings]);
 
   return (
@@ -123,8 +146,14 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                     display="plain"
                     hasBorder
                     selectable={{
-                      isSelected: selectedType === AIAssistantType.Observability,
-                      onClick: () => handleSelect(AIAssistantType.Observability),
+                      isSelected:
+                        selectedType.chatExperience === AIChatExperience.Classic &&
+                        selectedType.assistant === AIAssistantType.Observability,
+                      onClick: () =>
+                        handleSelect({
+                          chatExperience: AIChatExperience.Classic,
+                          assistant: AIAssistantType.Observability,
+                        }),
                     }}
                     title={i18n.translate(
                       'aiAssistantManagementSelection.headerButton.observabilityLabel',
@@ -158,8 +187,14 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                     display="plain"
                     hasBorder
                     selectable={{
-                      isSelected: selectedType === AIAssistantType.Security,
-                      onClick: () => handleSelect(AIAssistantType.Security),
+                      isSelected:
+                        selectedType.chatExperience === AIChatExperience.Classic &&
+                        selectedType.assistant === AIAssistantType.Security,
+                      onClick: () =>
+                        handleSelect({
+                          chatExperience: AIChatExperience.Classic,
+                          assistant: AIAssistantType.Security,
+                        }),
                     }}
                     title={i18n.translate(
                       'aiAssistantManagementSelection.headerButton.securityLabel',
@@ -170,6 +205,33 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                     titleSize="xs"
                     icon={<EuiIcon size="xxl" type="logoSecurity" />}
                     data-test-subj="aiAssistantSecurityCard"
+                    isDisabled={!isSecurityAIAssistantEnabled}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={1}>
+                  <EuiCard
+                    display="plain"
+                    // TODO: BETA on the top border
+                    hasBorder
+                    selectable={{
+                      isSelected: selectedType.chatExperience === AIChatExperience.Agents,
+                      // selectedType.assistant === AIAssistantType.Never, // TODO: should I change it to never?
+                      onClick: () =>
+                        handleSelect({
+                          chatExperience: AIChatExperience.Agents,
+                          assistant: AIAssistantType.Never, // TODO: check if this is correct
+                        }),
+                    }}
+                    title={i18n.translate(
+                      'aiAssistantManagementSelection.headerButton.aiAgentLabel',
+                      {
+                        defaultMessage: 'AI Agent',
+                      }
+                    )}
+                    titleSize="xs"
+                    // TODO: change icon to AI Agent icon
+                    icon={<EuiIcon size="xxl" type="agent" />}
+                    data-test-subj="aiAssistantAgentCard"
                     isDisabled={!isSecurityAIAssistantEnabled}
                   />
                 </EuiFlexItem>
@@ -192,7 +254,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                   <EuiButton
                     onClick={onApply}
                     fill
-                    isDisabled={selectedType === AIAssistantType.Default}
+                    isDisabled={selectedType.assistant === AIAssistantType.Default}
                     data-test-subj="aiAssistantApplyButton"
                   >
                     {i18n.translate('aiAssistantManagementSelection.headerButton.applyLabel', {
