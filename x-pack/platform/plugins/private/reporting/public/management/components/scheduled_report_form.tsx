@@ -98,6 +98,37 @@ export interface ScheduledReportFormProps {
   readOnly?: boolean;
 }
 
+const CcBccFields = ({ readOnly }: { readOnly?: boolean }) => (
+  <>
+    <FormField
+      path="emailCcRecipients"
+      componentProps={{
+        compressed: true,
+        fullWidth: true,
+        euiFieldProps: {
+          compressed: true,
+          fullWidth: true,
+          isDisabled: readOnly,
+          'data-test-subj': 'emailCcRecipientsCombobox',
+        },
+      }}
+    />
+    <FormField
+      path="emailBccRecipients"
+      componentProps={{
+        compressed: true,
+        fullWidth: true,
+        euiFieldProps: {
+          compressed: true,
+          fullWidth: true,
+          isDisabled: readOnly,
+          'data-test-subj': 'emailBccRecipientsCombobox',
+        },
+      }}
+    />
+  </>
+);
+
 export const ScheduledReportForm = ({
   onSubmitForm,
   isSubmitLoading,
@@ -175,23 +206,39 @@ export const ScheduledReportForm = ({
 
   const onSelectMessageVariable = useCallback(
     (field: 'emailSubject' | 'emailMessage', variable: ActionVariable) => {
-      const templatedVar = templateActionVariable(variable);
-      const fieldElement =
-        field === 'emailSubject' ? emailSubjectFieldRef.current : emailMessageFieldRef.current;
+      const fieldRefs = {
+        emailSubject: emailSubjectFieldRef,
+        emailMessage: emailMessageFieldRef,
+      };
+
+      const fieldValues = {
+        emailSubject,
+        emailMessage,
+      };
+
+      const fieldElement = fieldRefs[field].current;
       if (!fieldElement) {
         return;
       }
-      const startPosition = fieldElement.selectionStart ?? 0;
-      const endPosition = fieldElement.selectionEnd ?? 0;
-      const targetValue = field === 'emailSubject' ? emailSubject : emailMessage;
-      const newValue =
-        (targetValue ?? '').substring(0, startPosition) +
-        templatedVar +
-        (targetValue ?? '').substring(endPosition, (targetValue ?? '').length);
+
+      const templatedVariable = templateActionVariable(variable);
+      const currentValue = fieldValues[field] ?? '';
+      const selectionStart = fieldElement.selectionStart ?? 0;
+      const selectionEnd = fieldElement.selectionEnd ?? 0;
+
+      const textBeforeSelection = currentValue.substring(0, selectionStart);
+      const textAfterSelection = currentValue.substring(selectionEnd);
+      const newValue = `${textBeforeSelection}${templatedVariable}${textAfterSelection}`;
+
       form.setFieldValue(field, newValue);
-      setTimeout(() => {
+
+      // Restore focus after React updates the DOM
+      requestAnimationFrame(() => {
+        const newCaretPosition = selectionStart + templatedVariable.length;
+        fieldElement.selectionStart = newCaretPosition;
+        fieldElement.selectionEnd = newCaretPosition;
         fieldElement.focus();
-      }, 0);
+      });
     },
     [emailMessage, emailSubject, form]
   );
@@ -414,7 +461,6 @@ export const ScheduledReportForm = ({
                     isLoading: isUserProfileLoading,
                     disabled:
                       readOnly ||
-                      editMode ||
                       !reportingHealth.areNotificationsEnabled ||
                       (!hasManageReportingPrivilege && !userProfile?.user.email),
                   },
@@ -424,128 +470,102 @@ export const ScheduledReportForm = ({
                 isEmailActive && (
                   <>
                     <EuiSpacer size="m" />
-                    <EuiFlexGroup direction="column" gutterSize="s">
-                      <FormField
-                        path="emailRecipients"
-                        componentProps={{
-                          fullWidth: true,
-                          helpText: !editMode
-                            ? hasManageReportingPrivilege
-                              ? i18n.SCHEDULED_REPORT_FORM_EMAIL_RECIPIENTS_HINT
-                              : i18n.SCHEDULED_REPORT_FORM_EMAIL_SELF_HINT
-                            : undefined,
-                          labelAppend: hasManageReportingPrivilege && !editMode && (
-                            <EuiButtonEmpty
-                              size="xs"
-                              data-test-subj="showCcBccButton"
-                              onClick={() => {
-                                setShowCcBccFields((old) => !old);
-                              }}
-                            >
-                              {i18n.SCHEDULED_REPORT_FORM_EMAIL_SHOW_CC_BCC_LABEL}
-                            </EuiButtonEmpty>
-                          ),
-                          euiFieldProps: {
-                            compressed: true,
-                            fullWidth: true,
-                            isDisabled: editMode || !hasManageReportingPrivilege,
-                            'data-test-subj': 'emailRecipientsCombobox',
-                            readOnly,
-                          },
-                        }}
-                      />
-                      {hasManageReportingPrivilege && showCcBccFields && (
-                        <>
-                          <FormField
-                            path="emailCcRecipients"
-                            componentProps={{
-                              compressed: true,
-                              fullWidth: true,
-                              euiFieldProps: {
-                                compressed: true,
-                                fullWidth: true,
-                                isDisabled: editMode || readOnly,
-                                'data-test-subj': 'emailCcRecipientsCombobox',
-                              },
+                    <FormField
+                      path="emailRecipients"
+                      componentProps={{
+                        fullWidth: true,
+                        helpText: hasManageReportingPrivilege
+                          ? i18n.SCHEDULED_REPORT_FORM_EMAIL_RECIPIENTS_HINT
+                          : i18n.SCHEDULED_REPORT_FORM_EMAIL_SELF_HINT,
+                        labelAppend: hasManageReportingPrivilege && (
+                          <EuiButtonEmpty
+                            size="xs"
+                            data-test-subj="showCcBccButton"
+                            onClick={() => {
+                              setShowCcBccFields((old) => !old);
                             }}
-                          />
-                          <FormField
-                            path="emailBccRecipients"
-                            componentProps={{
-                              compressed: true,
-                              fullWidth: true,
-                              euiFieldProps: {
-                                compressed: true,
-                                fullWidth: true,
-                                isDisabled: editMode || readOnly,
-                                'data-test-subj': 'emailBccRecipientsCombobox',
-                              },
-                            }}
-                          />
-                        </>
-                      )}
-
-                      <FormField
-                        path="emailSubject"
-                        componentProps={{
+                          >
+                            {i18n.SCHEDULED_REPORT_FORM_EMAIL_SHOW_CC_BCC_LABEL}
+                          </EuiButtonEmpty>
+                        ),
+                        euiFieldProps: {
                           compressed: true,
                           fullWidth: true,
-                          labelAppend: !editMode ? (
-                            <AddMessageVariablesOptional
-                              isOptionalField
-                              messageVariables={scheduledReportMessageVariables}
-                              onSelectEventHandler={(variable) =>
-                                onSelectMessageVariable('emailSubject', variable)
-                              }
-                              paramsProperty="emailSubject"
-                            />
-                          ) : undefined,
-                          euiFieldProps: {
-                            inputRef: emailSubjectFieldRef,
-                            compressed: true,
-                            fullWidth: true,
-                            isDisabled: editMode || readOnly,
-                            'data-test-subj': 'emailSubjectInput',
-                          },
-                        }}
-                      />
+                          isDisabled: !hasManageReportingPrivilege,
+                          'data-test-subj': 'emailRecipientsCombobox',
+                          readOnly,
+                        },
+                      }}
+                    />
+                    {hasManageReportingPrivilege && showCcBccFields && (
+                      <CcBccFields readOnly={readOnly} />
+                    )}
 
-                      <FormField
-                        path="emailMessage"
-                        componentProps={{
+                    <FormField
+                      path="emailSubject"
+                      componentProps={{
+                        compressed: true,
+                        fullWidth: true,
+                        labelAppend: (
+                          <AddMessageVariablesOptional
+                            isOptionalField
+                            messageVariables={scheduledReportMessageVariables}
+                            onSelectEventHandler={(variable) =>
+                              onSelectMessageVariable('emailSubject', variable)
+                            }
+                            paramsProperty="emailSubject"
+                          />
+                        ),
+                        helpText: i18n.SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_HINT,
+                        euiFieldProps: {
+                          inputRef: emailSubjectFieldRef,
                           compressed: true,
                           fullWidth: true,
-                          labelAppend: !editMode ? (
-                            <AddMessageVariablesOptional
-                              isOptionalField
-                              messageVariables={scheduledReportMessageVariables}
-                              onSelectEventHandler={(variable) =>
-                                onSelectMessageVariable('emailMessage', variable)
-                              }
-                              paramsProperty="emailMessage"
-                            />
-                          ) : undefined,
-                          euiFieldProps: {
-                            inputRef: emailMessageFieldRef,
-                            compressed: true,
-                            fullWidth: true,
-                            isDisabled: editMode || readOnly,
-                            'data-test-subj': 'emailMessageTextArea',
-                          },
-                        }}
-                      />
+                          isDisabled: readOnly,
+                          placeholder: i18n.SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_PLACEHOLDER,
+                          'data-test-subj': 'emailSubjectInput',
+                        },
+                      }}
+                    />
 
-                      {!editMode && (
-                        <EuiCallOut
-                          announceOnMount
-                          title={i18n.SCHEDULED_REPORT_FORM_EMAIL_SENSITIVE_INFO_TITLE}
-                          iconType="info"
-                          size="s"
-                        >
-                          <p>{i18n.SCHEDULED_REPORT_FORM_EMAIL_SENSITIVE_INFO_MESSAGE}</p>
-                        </EuiCallOut>
-                      )}
-                    </EuiFlexGroup>
+                    <FormField
+                      path="emailMessage"
+                      componentProps={{
+                        compressed: true,
+                        fullWidth: true,
+                        labelAppend: (
+                          <AddMessageVariablesOptional
+                            isOptionalField
+                            messageVariables={scheduledReportMessageVariables}
+                            onSelectEventHandler={(variable) =>
+                              onSelectMessageVariable('emailMessage', variable)
+                            }
+                            paramsProperty="emailMessage"
+                          />
+                        ),
+                        helpText: i18n.SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_HINT,
+                        euiFieldProps: {
+                          inputRef: emailMessageFieldRef,
+                          compressed: true,
+                          fullWidth: true,
+                          isDisabled: readOnly,
+                          'data-test-subj': 'emailMessageTextArea',
+                          placeholder: i18n.SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_PLACEHOLDER,
+                          rows: 4,
+                        },
+                      }}
+                    />
+
+                    <EuiSpacer size="m" />
+
+                    <EuiCallOut
+                      announceOnMount
+                      title={i18n.SCHEDULED_REPORT_FORM_EMAIL_SENSITIVE_INFO_TITLE}
+                      iconType="info"
+                      size="s"
+                    >
+                      <p>{i18n.SCHEDULED_REPORT_FORM_EMAIL_SENSITIVE_INFO_MESSAGE}</p>
+                    </EuiCallOut>
                   </>
                 )
               ) : (

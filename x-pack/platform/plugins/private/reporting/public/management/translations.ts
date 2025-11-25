@@ -193,15 +193,14 @@ export const SCHEDULED_REPORT_FORM_EMAIL_RECIPIENTS_REQUIRED_MESSAGE = i18n.tran
 export const SCHEDULED_REPORT_FORM_EMAIL_RECIPIENTS_HINT = i18n.translate(
   'xpack.reporting.scheduledReportingForm.emailRecipientsHint',
   {
-    defaultMessage:
-      "On the scheduled date, we'll also email the report to the addresses you specify here.",
+    defaultMessage: "We'll email the report to the addresses you specify here.",
   }
 );
 
 export const SCHEDULED_REPORT_FORM_EMAIL_SELF_HINT = i18n.translate(
   'xpack.reporting.scheduledReportingForm.emailSelfHint',
   {
-    defaultMessage: "On the scheduled date, we'll also email the report to your address.",
+    defaultMessage: "We'll email the report to your address.",
   }
 );
 
@@ -233,10 +232,41 @@ export const SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_LABEL = i18n.translate(
   }
 );
 
+export const SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_PLACEHOLDER = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailSubjectPlaceholder',
+  {
+    defaultMessage: 'New export available for {{title}}',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_HINT = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailSubjectHint',
+  {
+    defaultMessage:
+      'Supports Mustache variables. The report title and date will be used if no subject is provided.',
+  }
+);
+
 export const SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_LABEL = i18n.translate(
   'xpack.reporting.scheduledReportingForm.emailMessageLabel',
   {
     defaultMessage: 'Message',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_PLACEHOLDER = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailMessagePlaceholder',
+  {
+    defaultMessage:
+      '# Your export is ready\n\nTitle: {{title}}\nFilename: {{filename}}\nDate: {{date}}',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_HINT = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailMessageHint',
+  {
+    defaultMessage:
+      'Supports Mustache variables and markdown formatting. A default message will be used if none is provided.',
   }
 );
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import {
   applicationServiceMock,
   coreMock,
@@ -26,6 +26,7 @@ import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { scheduleReport } from '../apis/schedule_report';
 import moment from 'moment';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+import { transformScheduledReport } from '../utils';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('@kbn/reporting-public', () => ({
@@ -44,7 +45,7 @@ jest.mock('../hooks/use_get_user_profile_query');
 jest.mock('../apis/get_reporting_health');
 jest.mock('../apis/schedule_report');
 
-const mockValidateEmailAddresses = jest.fn().mockResolvedValue([]);
+const mockValidateEmailAddresses = jest.fn().mockReturnValue([]);
 const mockReportingHealth = jest.mocked(getReportingHealth);
 const mockGetUserProfileQuery = jest.mocked(useGetUserProfileQuery);
 const mockedUseUiSetting = jest.mocked(useUiSetting);
@@ -72,9 +73,10 @@ describe('createScheduledReportForm', () => {
 
   const defaultProps = {
     apiClient,
-    scheduledReport: mockScheduledReports[1],
+    scheduledReport: transformScheduledReport(mockScheduledReports[1]),
     availableReportTypes: [],
     sharingData: defaultSharingData,
+    objectType: 'dashboard',
     onClose,
   };
 
@@ -170,7 +172,6 @@ describe('createScheduledReportForm', () => {
               rrule: {
                 byhour: [12],
                 byminute: [0],
-                byweekday: ['MO'],
                 freq: 3,
                 interval: 1,
                 dtstart: '2025-11-10T12:00:00.000Z',
@@ -201,5 +202,191 @@ describe('createScheduledReportForm', () => {
     await waitFor(() => {
       expect(onClose).toHaveBeenCalled();
     });
+  });
+
+  describe('with email notification', () => {
+    it('submits the form with email subject and interpolates mustache variables', async () => {
+      user = userEvent.setup({ delay: null });
+      render(
+        <IntlProvider locale="en">
+          <QueryClientProvider client={queryClient}>
+            <CreateScheduledReportForm
+              {...defaultProps}
+              availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
+            />
+          </QueryClientProvider>
+        </IntlProvider>
+      );
+
+      // Enable email notifications
+      const sendByEmailToggle = await screen.findByTestId('sendByEmailToggle');
+      await user.click(sendByEmailToggle);
+
+      // Add at least one recipient to enable form submission
+      const emailField = await screen.findByTestId('emailRecipientsCombobox');
+      const emailInput = within(emailField).getByTestId('comboBoxSearchInput');
+      await user.type(emailInput, 'test@test.com');
+      await user.keyboard('{Enter}');
+
+      // Find and fill the email subject field with mustache variables
+      const emailSubjectInput = await screen.findByTestId('emailSubjectInput');
+      // Doubling the opening curly braces to avoid interpolation by the testing framework
+      const customSubject = 'Report: {{{{title}} - {{{{objectType}} - {{{{date}}';
+      await user.clear(emailSubjectInput);
+      await user.type(emailSubjectInput, customSubject);
+
+      // Submit the form
+      const submitButton = await screen.findByTestId('scheduleExportSubmitButton');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockScheduleReport).toHaveBeenCalledWith(
+          expect.objectContaining({
+            http,
+            params: {
+              reportTypeId: 'printablePdfV2',
+              schedule: {
+                rrule: {
+                  byhour: [12],
+                  byminute: [0],
+                  freq: 3,
+                  interval: 1,
+                  dtstart: '2025-11-10T12:00:00.000Z',
+                  tzid: 'UTC',
+                },
+              },
+              jobParams: expect.any(String),
+              notification: {
+                email: expect.objectContaining({
+                  subject: 'Report: {{title}} - {{objectType}} - {{date}}',
+                }),
+              },
+            },
+          })
+        );
+      });
+    }, 10000);
+
+    it('submits the form with email message containing mustache variables', async () => {
+      user = userEvent.setup({ delay: null });
+      render(
+        <IntlProvider locale="en">
+          <QueryClientProvider client={queryClient}>
+            <CreateScheduledReportForm
+              {...defaultProps}
+              availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
+            />
+          </QueryClientProvider>
+        </IntlProvider>
+      );
+
+      // Enable email notifications
+      const sendByEmailToggle = await screen.findByTestId('sendByEmailToggle');
+      await user.click(sendByEmailToggle);
+
+      // Add at least one recipient to enable form submission
+      const emailField = await screen.findByTestId('emailRecipientsCombobox');
+      const emailInput = within(emailField).getByTestId('comboBoxSearchInput');
+      await user.type(emailInput, 'test@test.com');
+      await user.keyboard('{Enter}');
+
+      // Fill email subject
+      const emailSubjectInput = await screen.findByTestId('emailSubjectInput');
+      await user.clear(emailSubjectInput);
+      await user.type(emailSubjectInput, 'Test Subject');
+
+      // Fill email message with mustache variables
+      const emailMessageTextarea = await screen.findByTestId('emailMessageTextArea');
+      // Doubling the opening curly braces to avoid interpolation by the testing framework
+      const customMessage =
+        'Please find attached the {{{{objectType}} report titled "{{{{title}}".\n\nFilename: {{{{filename}}\nGenerated: {{{{date}}';
+      await user.clear(emailMessageTextarea);
+      await user.type(emailMessageTextarea, customMessage);
+
+      // Submit the form
+      const submitButton = await screen.findByTestId('scheduleExportSubmitButton');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockScheduleReport).toHaveBeenCalledWith(
+          expect.objectContaining({
+            http,
+            params: {
+              reportTypeId: 'printablePdfV2',
+              schedule: expect.any(Object),
+              jobParams: expect.any(String),
+              notification: expect.objectContaining({
+                email: expect.objectContaining({
+                  subject: 'Test Subject',
+                  message:
+                    'Please find attached the {{objectType}} report titled "{{title}}".\n\nFilename: {{filename}}\nGenerated: {{date}}',
+                }),
+              }),
+            },
+          })
+        );
+      });
+    }, 10000);
+
+    it('submits the form with both email subject and message containing multiple mustache variables', async () => {
+      user = userEvent.setup({ delay: null });
+      render(
+        <IntlProvider locale="en">
+          <QueryClientProvider client={queryClient}>
+            <CreateScheduledReportForm
+              {...defaultProps}
+              availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
+            />
+          </QueryClientProvider>
+        </IntlProvider>
+      );
+
+      // Enable email notifications
+      const sendByEmailToggle = await screen.findByTestId('sendByEmailToggle');
+      await user.click(sendByEmailToggle);
+
+      // Add at least one recipient to enable form submission
+      const emailField = await screen.findByTestId('emailRecipientsCombobox');
+      const emailInput = within(emailField).getByTestId('comboBoxSearchInput');
+      await user.type(emailInput, 'test@test.com');
+      await user.keyboard('{Enter}');
+
+      // Fill email subject with mustache variables
+      const emailSubjectInput = await screen.findByTestId('emailSubjectInput');
+      await user.clear(emailSubjectInput);
+      await user.type(emailSubjectInput, '{{{{objectType}} {{{{title}} - {{{{date}}');
+
+      // Fill email message with mustache variables
+      const emailMessageTextarea = await screen.findByTestId('emailMessageTextArea');
+      await user.clear(emailMessageTextarea);
+      await user.type(
+        emailMessageTextarea,
+        'New {{{{objectType}} report available:\n\nTitle: {{{{title}}\nFile: {{{{filename}}\nDate: {{{{date}}'
+      );
+
+      // Submit the form
+      const submitButton = await screen.findByTestId('scheduleExportSubmitButton');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockScheduleReport).toHaveBeenCalledWith(
+          expect.objectContaining({
+            http,
+            params: {
+              reportTypeId: 'printablePdfV2',
+              schedule: expect.any(Object),
+              jobParams: expect.any(String),
+              notification: expect.objectContaining({
+                email: expect.objectContaining({
+                  subject: '{{objectType}} {{title}} - {{date}}',
+                  message:
+                    'New {{objectType}} report available:\n\nTitle: {{title}}\nFile: {{filename}}\nDate: {{date}}',
+                }),
+              }),
+            },
+          })
+        );
+      });
+    }, 10000);
   });
 });

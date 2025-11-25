@@ -124,9 +124,9 @@ export class ScheduledReportsService {
     }
 
     try {
-      const { title, schedule } = updateParams;
+      const { title, schedule, notification } = updateParams;
 
-      await this._updateScheduledReportSavedObject({ id, title, schedule });
+      await this._updateScheduledReportSavedObject({ id, title, schedule, notification });
       await this._updateScheduledReportTaskSchedule({ id, schedule });
 
       const updatedReport = await this.savedObjectsClient.get<ScheduledReportType>(
@@ -571,6 +571,7 @@ export class ScheduledReportsService {
     id,
     title,
     schedule,
+    notification,
   }: { id: string } & UpdateScheduledReportParams) {
     await this.savedObjectsClient.update<ScheduledReportType>(
       SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
@@ -578,6 +579,7 @@ export class ScheduledReportsService {
       {
         title,
         schedule,
+        notification,
       }
     );
   }

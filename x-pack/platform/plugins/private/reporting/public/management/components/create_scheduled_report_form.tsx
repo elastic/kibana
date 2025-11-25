@@ -14,6 +14,7 @@ import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { ReportingSharingData } from '@kbn/reporting-public/share/share_context_menu';
 import { EuiLink } from '@elastic/eui';
 import { REPORTING_MANAGEMENT_SCHEDULES } from '@kbn/reporting-common';
+import { transformEmailNotification } from '../utils';
 import type { ReportTypeData, ScheduledReport } from '../../types';
 import type { FormData } from './scheduled_report_form';
 import { ScheduledReportForm } from './scheduled_report_form';
@@ -70,6 +71,9 @@ export const CreateScheduledReportForm = ({
   }, [capabilities]);
 
   const onSubmit = async (formData: FormData) => {
+    if (!sharingData || !objectType) {
+      return;
+    }
     try {
       const {
         title,
@@ -95,9 +99,8 @@ export const CreateScheduledReportForm = ({
         reportTypeId,
         jobParams: getReportParams({
           apiClient,
-          // The assertion at the top of the component ensures these are defined when scheduling
-          sharingData: sharingData!,
-          objectType: objectType!,
+          sharingData,
+          objectType,
           title,
           reportTypeId,
           ...(reportTypeId === 'printablePdfV2' ? { optimizedForPrinting } : {}),
@@ -105,13 +108,13 @@ export const CreateScheduledReportForm = ({
         schedule: { rrule: rrule as Rrule },
         notification: sendByEmail
           ? {
-              email: {
-                to: emailRecipients,
-                cc: emailCcRecipients,
-                bcc: emailBccRecipients,
-                subject: emailSubject,
-                message: emailMessage,
-              },
+              email: transformEmailNotification({
+                emailRecipients,
+                emailCcRecipients,
+                emailBccRecipients,
+                emailSubject,
+                emailMessage,
+              }),
             }
           : undefined,
       });

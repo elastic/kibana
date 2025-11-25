@@ -191,14 +191,7 @@ describe('ScheduledReportForm', () => {
       expect(await screen.findByTestId('reportTypeIdSelect')).toBeDisabled();
     });
 
-    it('disables send email in edit mode', async () => {
-      const props = { ...defaultProps, editMode: true };
-      renderWithProviders(<ScheduledReportForm {...props} />);
-
-      expect(await screen.findByTestId('sendByEmailToggle')).toBeDisabled();
-    });
-
-    it('disables email fields in edit mode and hides cc bcc toggle button', async () => {
+    it('automatically shows cc and bcc fields if they have a valu', async () => {
       user = userEvent.setup({ delay: null });
       renderWithProviders(
         <ScheduledReportForm
@@ -214,17 +207,30 @@ describe('ScheduledReportForm', () => {
         />
       );
 
-      expect(await screen.findByTestId('sendByEmailToggle')).toBeDisabled();
-      const emailField = await screen.findByTestId('emailRecipientsCombobox');
-      const emailInput = within(emailField).getByTestId('comboBoxSearchInput');
-      expect(emailInput).toBeDisabled();
-      expect(screen.queryByTestId('showCcBccButton')).not.toBeInTheDocument();
-      expect(
-        within(screen.getByTestId('emailCcRecipientsCombobox')).getByTestId('comboBoxSearchInput')
-      ).toBeDisabled();
-      expect(
-        within(screen.getByTestId('emailBccRecipientsCombobox')).getByTestId('comboBoxSearchInput')
-      ).toBeDisabled();
+      // Wait for email fields to be rendered
+      await screen.findByTestId('emailRecipientsCombobox');
+      expect(screen.getByTestId('emailCcRecipientsCombobox')).toBeInTheDocument();
+      expect(screen.getByTestId('emailBccRecipientsCombobox')).toBeInTheDocument();
+    });
+
+    it("automatically hides cc and bcc fields if they don't have a value", async () => {
+      user = userEvent.setup({ delay: null });
+      renderWithProviders(
+        <ScheduledReportForm
+          {...defaultProps}
+          editMode
+          scheduledReport={{
+            ...defaultProps.scheduledReport,
+            sendByEmail: true,
+            emailRecipients: ['to@email.com'],
+          }}
+        />
+      );
+
+      // Wait for email fields to be rendered
+      await screen.findByTestId('emailRecipientsCombobox');
+      expect(screen.queryByTestId('emailCcRecipientsCombobox')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('emailBccRecipientsCombobox')).not.toBeInTheDocument();
     });
 
     it('calls onSubmit correctly in edit mode', async () => {

@@ -140,3 +140,25 @@ export const transformScheduledReport = (report: ScheduledReportApiJSON): Schedu
     emailMessage: notification?.email?.message ?? '',
   };
 };
+
+export const transformEmailNotification = ({
+  emailRecipients,
+  emailCcRecipients,
+  emailBccRecipients,
+  emailSubject,
+  emailMessage,
+}: {
+  emailRecipients: string[];
+  emailCcRecipients: string[];
+  emailBccRecipients: string[];
+  emailSubject: string;
+  emailMessage: string;
+}): NonNullable<NonNullable<ScheduledReportApiJSON['notification']>['email']> => {
+  return {
+    to: emailRecipients,
+    cc: emailCcRecipients,
+    bcc: emailBccRecipients,
+    subject: emailSubject,
+    message: emailMessage,
+  };
+};

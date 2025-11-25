@@ -6,7 +6,7 @@
  */
 
 import { Frequency } from '@kbn/rrule';
-import { transformScheduledReport } from './utils';
+import { transformEmailNotification, transformScheduledReport } from './utils';
 import type { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 import { RecurrenceEnd } from '@kbn/response-ops-recurring-schedule-form/constants';
 
@@ -135,6 +135,27 @@ describe('transformScheduledReport', () => {
     const report = { ...baseReport, notification: undefined } as ScheduledReportApiJSON;
     expect(transformScheduledReport(report)).toEqual(
       expect.objectContaining({ sendByEmail: false, emailRecipients: [] })
+    );
+  });
+});
+
+describe('transformEmailNotification', () => {
+  it('transforms email notification fields correctly', () => {
+    const formEmailData = {
+      emailRecipients: ['to@email.com'],
+      emailCcRecipients: ['cc@email.com'],
+      emailBccRecipients: ['bcc@email.com'],
+      emailSubject: 'Test Subject',
+      emailMessage: 'This is a test message.',
+    };
+    expect(transformEmailNotification(formEmailData)).toEqual(
+      expect.objectContaining({
+        to: formEmailData.emailRecipients,
+        cc: formEmailData.emailCcRecipients,
+        bcc: formEmailData.emailBccRecipients,
+        subject: formEmailData.emailSubject,
+        message: formEmailData.emailMessage,
+      })
     );
   });
 });
