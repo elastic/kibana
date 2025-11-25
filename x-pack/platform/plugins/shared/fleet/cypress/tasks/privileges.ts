@@ -358,7 +358,7 @@ export const deleteRoles = (roles: Role[]) => {
 };
 
 // This function can also be used to create users with built-in roles
-// see https://www.elastic.co/guide/en/elasticsearch/reference/master/built-in-roles.html
+// see https://www.elastic.co/docs/reference/elasticsearch/roles
 export const createUsers = (users: User[]) => {
   const envUser = getEnvAuth();
 

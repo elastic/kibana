@@ -58,7 +58,6 @@ import type {
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
 } from './api_keys_api_client';
-import { useDocLinks } from './doc_link';
 
 const TypeLabel = () => (
   <FormattedMessage
@@ -187,9 +186,8 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { http },
+    services: { http, docLinks },
   } = useKibana();
-  const [docLinks] = useDocLinks();
   const [responseError, setResponseError] = useState<KibanaServerError | undefined>(undefined);
   const [{ value: roles, loading: isLoadingRoles }, getRoles] = useAsyncFn(() => {
     if (http) {
@@ -706,7 +704,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                     }
                     helpText={
                       <EuiLink
-                        href={docLinks.apis.createCrossClusterApiKey}
+                        href={docLinks!.links.apis.createCrossClusterApiKey}
                         target="_blank"
                         external
                       >
@@ -842,7 +840,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       <FormRow
                         helpText={
                           <EuiLink
-                            href={docLinks.apis.createApiKeyRoleDescriptors}
+                            href={docLinks!.links.apis.createApiKeyRoleDescriptors}
                             target="_blank"
                             external
                           >
@@ -928,7 +926,11 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                     <FormRow
                       data-test-subj="apiKeysMetadataCodeEditor"
                       helpText={
-                        <EuiLink href={docLinks.apis.createApiKeyMetadata} target="_blank" external>
+                        <EuiLink
+                          href={docLinks!.links.apis.createApiKeyMetadata}
+                          target="_blank"
+                          external
+                        >
                           <FormattedMessage
                             id="xpack.security.accountManagement.apiKeyFlyout.metadataHelpText"
                             defaultMessage="Learn how to structure metadata."
