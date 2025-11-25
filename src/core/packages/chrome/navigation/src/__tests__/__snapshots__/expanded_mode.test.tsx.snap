@@ -162,6 +162,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
           >
             <span
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              id="generated-id_euiToolTipAnchor"
             >
               <a
                 aria-haspopup="false"
@@ -192,6 +193,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
           >
             <span
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              id="generated-id_euiToolTipAnchor"
             >
               <a
                 aria-haspopup="false"
@@ -253,6 +255,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
           >
             <span
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              id="generated-id_euiToolTipAnchor"
             >
               <a
                 aria-haspopup="false"
@@ -283,6 +286,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
           >
             <span
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
+              id="generated-id_euiToolTipAnchor"
             >
               <a
                 aria-haspopup="false"
