@@ -7,7 +7,8 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiNotificationBadge, useEuiTheme } from '@elastic/eui';
-import React, { ReactNode, useMemo } from 'react';
+import type { ReactNode } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCasesContext } from '../cases_context/use_cases_context';

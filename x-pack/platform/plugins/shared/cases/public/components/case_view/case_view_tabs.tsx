@@ -12,7 +12,8 @@ import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCaseViewNavigation } from '../../common/navigation';
 import { ACTIVITY_TAB, ATTACHMENTS_TAB, SIMILAR_CASES_TAB } from './translations';
 import { type CaseUI } from '../../../common';
-import { CaseViewTab, SimilarCasesBadge, useCaseAttachmentTabs } from './use_case_attachment_tabs';
+import type { CaseViewTab } from './use_case_attachment_tabs';
+import { SimilarCasesBadge, useCaseAttachmentTabs } from './use_case_attachment_tabs';
 import { useGetSimilarCases } from '../../containers/use_get_similar_cases';
 import { useCasesFeatures } from '../../common/use_cases_features';
 
