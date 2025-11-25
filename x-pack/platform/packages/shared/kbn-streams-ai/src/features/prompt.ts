@@ -61,9 +61,6 @@ const infrastructureSchema = {
           description: {
             type: 'string',
           },
-          provider: {
-            type: 'string',
-          },
         },
       },
     },
