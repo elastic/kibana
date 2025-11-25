@@ -308,7 +308,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
           'data-test-subj': (item) => `reportEnableSchedule-${item.id}`,
           available: (item) => !item.enabled && canManageSchedule(item),
           type: 'icon',
-          icon: 'cross',
+          icon: 'check',
           onClick: (item) => {
             onEnable(item);
           },

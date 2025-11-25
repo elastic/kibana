@@ -234,73 +234,11 @@ export class ScheduledReportsService {
     ids: string[];
     user: ReportingUser;
   }): Promise<BulkOperationResult> {
-    try {
-      let taskIdsToDisable: string[] = [];
-
-      const bulkGetResult = await this.savedObjectsClient.bulkGet<ScheduledReportType>(
-        ids.map((id) => ({ id, type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE }))
-      );
-
-      const {
-        errors: bulkErrors,
-        scheduledReportSavedObjectsToUpdate,
-        updatedScheduledReportIds: disabledScheduledReportIds,
-      } = await this._addLogForBulkOperationScheduledReports({
-        action: ScheduledReportAuditAction.DISABLE,
-        scheduledReportSavedObjects: bulkGetResult.saved_objects,
-        user,
-        operation: 'disable',
-      });
-
-      // nothing to update, return early
-      if (scheduledReportSavedObjectsToUpdate.length > 0) {
-        const bulkUpdateResult = await this._updateScheduledReportSavedObjectEnabledState({
-          scheduledReportSavedObjectsToUpdate,
-          shouldEnable: false,
-        });
-
-        for (const so of bulkUpdateResult.saved_objects) {
-          if (so.error) {
-            bulkErrors.push({
-              message: so.error.message,
-              status: so.error.statusCode,
-              id: so.id,
-            });
-            this._auditLog({
-              action: ScheduledReportAuditAction.DISABLE,
-              id: so.id,
-              name: so?.attributes?.title,
-              error: new Error(so.error.message),
-            });
-          } else {
-            taskIdsToDisable.push(so.id);
-          }
-        }
-      } else {
-        return {
-          scheduled_report_ids: [...disabledScheduledReportIds],
-          errors: bulkErrors,
-          total: disabledScheduledReportIds.size + bulkErrors.length,
-        };
-      }
-
-      // it's possible that the scheduled_report saved object was disabled but
-      // task disabling failed so add the list of already disabled IDs
-      // task manager filters out disabled tasks so this will not cause extra load
-      taskIdsToDisable = taskIdsToDisable.concat([...disabledScheduledReportIds]);
-
-      return this._updateScheduledReportTaskEnabledState({
-        taskIdsToUpdate: taskIdsToDisable,
-        shouldEnable: false,
-        bulkErrors,
-        updatedScheduledReportIds: disabledScheduledReportIds,
-      });
-    } catch (error) {
-      throw this.responseFactory.customError({
-        statusCode: 500,
-        body: `Error disabling scheduled reports: ${error.message}`,
-      });
-    }
+    return this._bulkOperation({
+      enable: false,
+      ids,
+      user,
+    });
   }
 
   public async bulkEnable({
@@ -310,70 +248,11 @@ export class ScheduledReportsService {
     ids: string[];
     user: ReportingUser;
   }): Promise<BulkOperationResult> {
-    try {
-      let taskIdsToEnable: string[] = [];
-
-      const bulkGetResult = await this.savedObjectsClient.bulkGet<ScheduledReportType>(
-        ids.map((id) => ({ id, type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE }))
-      );
-
-      const {
-        errors: bulkErrors,
-        scheduledReportSavedObjectsToUpdate,
-        updatedScheduledReportIds: enabledScheduledReportIds,
-      } = await this._addLogForBulkOperationScheduledReports({
-        action: ScheduledReportAuditAction.ENABLE,
-        scheduledReportSavedObjects: bulkGetResult.saved_objects,
-        user,
-        operation: 'enable',
-      });
-
-      // nothing to update, return early
-      if (scheduledReportSavedObjectsToUpdate.length > 0) {
-        const bulkUpdateResult = await this._updateScheduledReportSavedObjectEnabledState({
-          scheduledReportSavedObjectsToUpdate,
-          shouldEnable: true,
-        });
-
-        for (const so of bulkUpdateResult.saved_objects) {
-          if (so.error) {
-            bulkErrors.push({
-              message: so.error.message,
-              status: so.error.statusCode,
-              id: so.id,
-            });
-            this._auditLog({
-              action: ScheduledReportAuditAction.ENABLE,
-              id: so.id,
-              name: so?.attributes?.title,
-              error: new Error(so.error.message),
-            });
-          } else {
-            taskIdsToEnable.push(so.id);
-          }
-        }
-      } else {
-        return {
-          scheduled_report_ids: [...enabledScheduledReportIds],
-          errors: bulkErrors,
-          total: enabledScheduledReportIds.size + bulkErrors.length,
-        };
-      }
-
-      taskIdsToEnable = taskIdsToEnable.concat([...enabledScheduledReportIds]);
-
-      return this._updateScheduledReportTaskEnabledState({
-        taskIdsToUpdate: taskIdsToEnable,
-        shouldEnable: true,
-        bulkErrors,
-        updatedScheduledReportIds: enabledScheduledReportIds,
-      });
-    } catch (error) {
-      throw this.responseFactory.customError({
-        statusCode: 500,
-        body: `Error enabling scheduled reports: ${error.message}`,
-      });
-    }
+    return this._bulkOperation({
+      enable: true,
+      ids,
+      user,
+    });
   }
 
   public async bulkDelete({
@@ -624,6 +503,83 @@ export class ScheduledReportsService {
     );
 
     return reportToUpdate.attributes.createdBy === username;
+  }
+
+  private async _bulkOperation({
+    enable,
+    ids,
+    user,
+  }: {
+    enable: boolean;
+    ids: string[];
+    user: ReportingUser;
+  }): Promise<BulkOperationResult> {
+    try {
+      let taskIdsToUpdate: string[] = [];
+
+      const bulkGetResult = await this.savedObjectsClient.bulkGet<ScheduledReportType>(
+        ids.map((id) => ({ id, type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE }))
+      );
+
+      const {
+        errors: bulkErrors,
+        scheduledReportSavedObjectsToUpdate,
+        updatedScheduledReportIds: enabledScheduledReportIds,
+      } = await this._addLogForBulkOperationScheduledReports({
+        action: enable ? ScheduledReportAuditAction.ENABLE : ScheduledReportAuditAction.DISABLE,
+        scheduledReportSavedObjects: bulkGetResult.saved_objects,
+        user,
+        operation: enable ? 'enable' : 'disable',
+      });
+
+      // nothing to update, return early
+      if (scheduledReportSavedObjectsToUpdate.length > 0) {
+        const bulkUpdateResult = await this._updateScheduledReportSavedObjectEnabledState({
+          scheduledReportSavedObjectsToUpdate,
+          shouldEnable: enable,
+        });
+
+        for (const so of bulkUpdateResult.saved_objects) {
+          if (so.error) {
+            bulkErrors.push({
+              message: so.error.message,
+              status: so.error.statusCode,
+              id: so.id,
+            });
+            this._auditLog({
+              action: enable
+                ? ScheduledReportAuditAction.ENABLE
+                : ScheduledReportAuditAction.DISABLE,
+              id: so.id,
+              name: so?.attributes?.title,
+              error: new Error(so.error.message),
+            });
+          } else {
+            taskIdsToUpdate.push(so.id);
+          }
+        }
+      } else {
+        return {
+          scheduled_report_ids: [...enabledScheduledReportIds],
+          errors: bulkErrors,
+          total: enabledScheduledReportIds.size + bulkErrors.length,
+        };
+      }
+
+      taskIdsToUpdate = taskIdsToUpdate.concat([...enabledScheduledReportIds]);
+
+      return this._updateScheduledReportTaskEnabledState({
+        taskIdsToUpdate,
+        shouldEnable: enable,
+        bulkErrors,
+        updatedScheduledReportIds: enabledScheduledReportIds,
+      });
+    } catch (error) {
+      throw this.responseFactory.customError({
+        statusCode: 500,
+        body: `Error ${enable ? 'enabling' : 'disabling'} scheduled reports: ${error.message}`,
+      });
+    }
   }
 
   private async _updateScheduledReportSavedObjectEnabledState({
