@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import { expect, apiTest } from '@kbn/scout-oblt';
-import {
-  getProfilingPackagePolicyIds,
-  setupFleet,
-  esArchiversPath,
-} from '../../common/utils/profiling_data';
-
-const esResourcesEndpoint = 'GET /api/profiling/setup/es_resources';
+import { expect } from '@kbn/scout-oblt';
+import { apiTest } from '../../common/fixtures';
+import { esArchiversPath, esResourcesEndpoint } from '../../common/fixtures/constants';
 
 apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess'] }, () => {
-  apiTest.beforeAll(async ({ apiServices, profilingSetup, log }) => {
-    await setupFleet(apiServices, log);
-
+  apiTest.beforeAll(async ({ profilingHelper, profilingSetup }) => {
+    await profilingHelper.cleanupPolicies();
+    await profilingHelper.installPolicies();
     await profilingSetup.cleanup();
   });
 
@@ -107,57 +102,46 @@ apiTest.describe('Profiling is setup and data is loaded', { tag: ['@ess'] }, () 
 });
 
 apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, () => {
-  apiTest.beforeAll(async ({ esClient }) => {
-    const indices = await esClient.cat.indices({ format: 'json' });
-
-    const profilingIndices = indices
-      .filter((index) => index.index !== undefined)
-      .map((index) => index.index)
-      .filter((index) => {
-        return index!.startsWith('profiling') || index!.startsWith('.profiling');
-      }) as string[];
-
-    await Promise.all([
-      ...profilingIndices.map((index) => esClient.indices.delete({ index })),
-      esClient.indices.deleteDataStream({
-        name: 'profiling-events*',
-      }),
-    ]);
-  });
-  apiTest.afterAll(async ({ profilingSetup }) => {
+  apiTest.beforeAll(async ({ profilingSetup }) => {
     await profilingSetup.cleanup();
   });
-
-  apiTest('collector integration missing', async ({ roleBasedApiClient, apiServices }) => {
-    const ids = await getProfilingPackagePolicyIds(apiServices);
-    const collectorId = ids.collectorId;
-
-    await apiServices.fleet.package_policies.delete(collectorId!);
-
-    expect(collectorId).toBeDefined();
-
-    const adminRes = await roleBasedApiClient.adminUser({
-      endpoint: esResourcesEndpoint,
-    });
-    const adminStatus = adminRes.body;
-    expect(adminStatus.has_setup).toBeFalsy();
-    expect(adminStatus.has_data).toBeFalsy();
-    expect(adminStatus.pre_8_9_1_data).toBeFalsy();
-
-    const readRes = await roleBasedApiClient.viewerUser({
-      endpoint: esResourcesEndpoint,
-    });
-    const readStatus = readRes.body;
-    expect(readStatus.has_setup).toBeFalsy();
-    expect(readStatus.has_data).toBeFalsy();
-    expect(readStatus.pre_8_9_1_data).toBeFalsy();
-    expect(readStatus.has_required_role).toBeFalsy();
+  apiTest.afterAll(async ({ profilingHelper }) => {
+    profilingHelper.cleanupPolicies();
   });
 
   apiTest(
+    'collector integration missing',
+    async ({ profilingHelper, roleBasedApiClient, apiServices }) => {
+      const ids = await profilingHelper.getPoliciyIds();
+      const collectorId = ids.collectorId;
+
+      await apiServices.fleet.package_policies.delete(collectorId!);
+
+      expect(collectorId).toBeDefined();
+
+      const adminRes = await roleBasedApiClient.adminUser({
+        endpoint: esResourcesEndpoint,
+      });
+      const adminStatus = adminRes.body;
+      expect(adminStatus.has_setup).toBeFalsy();
+      expect(adminStatus.has_data).toBeFalsy();
+      expect(adminStatus.pre_8_9_1_data).toBeFalsy();
+
+      const readRes = await roleBasedApiClient.viewerUser({
+        endpoint: esResourcesEndpoint,
+      });
+      const readStatus = readRes.body;
+      expect(readStatus.has_setup).toBeFalsy();
+      expect(readStatus.has_data).toBeFalsy();
+      expect(readStatus.pre_8_9_1_data).toBeFalsy();
+      expect(readStatus.has_required_role).toBeFalsy();
+    }
+  );
+
+  apiTest(
     'Symbolizer integration is not installed',
-    async ({ roleBasedApiClient, apiServices }) => {
-      const ids = await getProfilingPackagePolicyIds(apiServices);
+    async ({ profilingHelper, roleBasedApiClient, apiServices }) => {
+      const ids = await profilingHelper.getPoliciyIds();
 
       const symbolizerId = ids.symbolizerId;
 

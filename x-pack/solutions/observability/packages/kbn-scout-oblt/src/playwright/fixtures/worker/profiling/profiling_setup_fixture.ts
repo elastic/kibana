@@ -9,8 +9,6 @@ import { test as base } from '@kbn/scout';
 import path from 'path';
 import fs from 'fs';
 
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-
 export interface ProfilingSetupFixture {
   checkStatus: () => Promise<{ has_setup: boolean; has_data: boolean }>;
   setupResources: () => Promise<void>;
@@ -23,7 +21,7 @@ export interface ProfilingSetupFixture {
 // and it needs to be run only once
 export const profilingSetupFixture = base.extend<{}, { profilingSetup: ProfilingSetupFixture }>({
   profilingSetup: [
-    async ({ kbnClient, apiServices, esClient, log }, use) => {
+    async ({ kbnClient, esClient, log }, use) => {
       const checkStatus = async (): Promise<{ has_setup: boolean; has_data: boolean }> => {
         try {
           const response = await kbnClient.request({
@@ -99,29 +97,7 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
       const cleanup = async (): Promise<void> => {
         log.info(`Unloading Profiling data`);
 
-        const getPoliciesIds = async (): Promise<{
-          collectorId: string | undefined;
-          symbolizerId: string | undefined;
-        }> => {
-          const res = await apiServices.fleet.package_policies.get();
-          const policies: PackagePolicy[] = res.data.items;
-
-          const collector = policies.find(
-            (item) => item.name === 'elastic-universal-profiling-collector'
-          );
-          const symbolizer = policies.find(
-            (item) => item.name === 'elastic-universal-profiling-symbolizer'
-          );
-
-          return {
-            collectorId: collector?.id,
-            symbolizerId: symbolizer?.id,
-          };
-        };
-        const [indices, { collectorId, symbolizerId }] = await Promise.all([
-          esClient.cat.indices({ format: 'json' }),
-          getPoliciesIds(),
-        ]);
+        const indices = await esClient.cat.indices({ format: 'json' });
 
         const profilingIndices = indices
           .filter((index) => index.index !== undefined)
@@ -135,10 +111,6 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
           esClient.indices.deleteDataStream({
             name: 'profiling-events*',
           }),
-          collectorId ? apiServices.fleet.package_policies.delete(collectorId) : Promise.resolve(),
-          symbolizerId
-            ? apiServices.fleet.package_policies.delete(symbolizerId)
-            : Promise.resolve(),
         ]);
         log.info('Unloaded Profiling data');
       };
