@@ -13,9 +13,9 @@ import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/pu
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-  DataViewsContract,
   TimefilterContract,
 } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -25,14 +25,14 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { css } from '@emotion/react';
-import type { LensDocument } from '../persistence';
 import type {
+  LensDocument,
   Datasource,
   Visualization,
   EditorFrameSetup,
   EditorFrameInstance,
   EditorFrameStart,
-} from '../types';
+} from '@kbn/lens-common';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;
@@ -153,8 +153,6 @@ export class EditorFrameService {
                 getUserMessages={getUserMessages}
                 addUserMessages={addUserMessages}
                 indexPatternService={indexPatternService}
-                datasourceMap={resolvedDatasources}
-                visualizationMap={resolvedVisualizations}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
               />
             </div>

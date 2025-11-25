@@ -37,9 +37,7 @@ export const createConversationUpdatedEvent = (
   };
 };
 
-export const createConversationIdSetEvent = (
-  conversationId: Conversation['id']
-): ConversationIdSetEvent => {
+export const createConversationIdSetEvent = (conversationId: string): ConversationIdSetEvent => {
   return {
     type: ChatEventType.conversationIdSet,
     data: {

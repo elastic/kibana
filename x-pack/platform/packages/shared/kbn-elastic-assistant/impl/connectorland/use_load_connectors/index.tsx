@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { useEffect } from 'react';
-import type { UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { ServerError } from '@kbn/cases-plugin/public/types';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import type { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { getAvailableAiConnectors } from '@kbn/elastic-assistant-common/impl/connectors/get_available_connectors';
 import type { AIConnector } from '../connector_selector';

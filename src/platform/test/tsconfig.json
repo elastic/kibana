@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -22,13 +22,11 @@
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
     "@kbn/core",
-    { "path": "../../../src/setup_node_env/tsconfig.json" },
     "@kbn/dashboard-plugin",
     "@kbn/expressions-plugin",
     "@kbn/saved-objects-management-plugin",
     "@kbn/telemetry-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/analytics-ftr-helpers-plugin",
     "@kbn/analytics-plugin-a-plugin",
     "@kbn/core-app-status-plugin",
@@ -66,10 +64,6 @@
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/console-plugin",
     "@kbn/core-chrome-browser",
-    "@kbn/default-nav-ml",
-    "@kbn/default-nav-analytics",
-    "@kbn/default-nav-management",
-    "@kbn/default-nav-devtools",
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/core-deprecations-common",
     "@kbn/data-grid-in-table-search",
@@ -82,5 +76,7 @@
     "@kbn/field-formats-common",
     "@kbn/ai-assistant-management-plugin",
     "@kbn/core-chrome-navigation-tour",
+    "@kbn/setup-node-env",
+    "@kbn/visualizations-common",
   ]
 }

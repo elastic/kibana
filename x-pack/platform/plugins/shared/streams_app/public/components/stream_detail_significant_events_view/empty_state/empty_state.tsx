@@ -15,19 +15,19 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AssetImage } from '../../asset_image';
-import { SystemSelector, type SystemSelectorProps } from '../system_selector';
+import { FeaturesSelector, type FeatureSelectorProps } from '../feature_selector';
 import { useAIFeatures } from '../add_significant_event_flyout/generated_flow_form/use_ai_features';
 
 export function NoSignificantEventsEmptyState({
   onGenerateSuggestionsClick,
   onManualEntryClick,
-  systems,
-  selectedSystems,
-  onSystemsChange,
+  features,
+  selectedFeatures,
+  onFeaturesChange,
 }: {
   onGenerateSuggestionsClick: () => void;
   onManualEntryClick: () => void;
-} & SystemSelectorProps) {
+} & FeatureSelectorProps) {
   const aiFeatures = useAIFeatures();
 
   return (
@@ -44,19 +44,21 @@ export function NoSignificantEventsEmptyState({
       <EuiText size="s" textAlign="center" css={{ maxWidth: 480 }}>
         {i18n.translate('xpack.streams.significantEvents.emptyState.description', {
           defaultMessage:
-            "A Significant Event is a single, ‘interesting’ log event identified by an automated rule as being important for understanding a system's behaviour. Select system context, to generate suggestions.",
+            "A Significant Event is a single, ‘interesting’ log event identified by an automated rule as being important for understanding a system's behaviour. Select feature context, to generate suggestions.",
         })}
       </EuiText>
-      <SystemSelector
-        systems={systems}
-        selectedSystems={selectedSystems}
-        onSystemsChange={onSystemsChange}
+      <FeaturesSelector
+        features={features}
+        selectedFeatures={selectedFeatures}
+        onFeaturesChange={onFeaturesChange}
       />
       <EuiFlexGroup direction="row" gutterSize="s">
         <EuiButton
           iconType="sparkles"
           fill
-          disabled={selectedSystems.length === 0 || !aiFeatures?.genAiConnectors?.selectedConnector}
+          disabled={
+            selectedFeatures.length === 0 || !aiFeatures?.genAiConnectors?.selectedConnector
+          }
           onClick={() => onGenerateSuggestionsClick()}
         >
           {i18n.translate(
@@ -67,7 +69,7 @@ export function NoSignificantEventsEmptyState({
           )}
         </EuiButton>
         <EuiButtonEmpty onClick={onManualEntryClick}>
-          {i18n.translate('xpack.streams.significantEvents.noSystems.manualEntryButtonLabel', {
+          {i18n.translate('xpack.streams.significantEvents.emptyState.manualEntryButtonLabel', {
             defaultMessage: 'Manual entry',
           })}
         </EuiButtonEmpty>

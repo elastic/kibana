@@ -10,6 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import SwimlaneParamsFields from './swimlane_params';
 import { SwimlaneConnectorType } from './types';
 import { mappings } from './mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('SwimlaneParamsFields renders', () => {
   const editAction = jest.fn();
@@ -29,16 +30,12 @@ describe('SwimlaneParamsFields renders', () => {
     },
   };
 
-  const connector = {
-    secrets: {},
-    config: { mappings, connectorType: SwimlaneConnectorType.All },
+  const connector = createMockActionConnector({
     id: 'test',
     actionTypeId: '.test',
     name: 'Test',
-    isPreconfigured: false,
-    isSystemAction: false as const,
-    isDeprecated: false,
-  };
+    config: { mappings, connectorType: SwimlaneConnectorType.All },
+  });
 
   const defaultProps = {
     actionParams,

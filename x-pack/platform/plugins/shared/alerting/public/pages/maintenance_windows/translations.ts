@@ -273,6 +273,13 @@ export const TABLE_STATUS_ARCHIVED = i18n.translate(
   }
 );
 
+export const TABLE_STATUS_DISABLED = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.statusDisabled',
+  {
+    defaultMessage: 'Disabled',
+  }
+);
+
 export const TABLE_START_TIME = i18n.translate(
   'xpack.alerting.maintenanceWindows.table.startTime',
   {

@@ -6508,6 +6508,111 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsFullModelVersion",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsFullModelVersion",
+        "description": [
+          "\nRepresents a model version of a given saved object type.\n\nModel versions supersede the {@link SavedObjectsType.migrations | migrations} (and {@link SavedObjectsType.schemas | schemas}) APIs\nby exposing an unified way of describing the changes of shape or data of a type.\n"
+        ],
+        "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsFullModelVersion.changes",
+            "type": "Array",
+            "tags": [],
+            "label": "changes",
+            "description": [
+              "\nThe list of changes associated with this version.\n\nModel version changes are defined via low-level components, allowing to use composition\nto describe the list of changes bound to a given version.\n"
+            ],
+            "signature": [
+              "SavedObjectsModelChange",
+              "[]"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsFullModelVersion.schemas",
+            "type": "Object",
+            "tags": [],
+            "label": "schemas",
+            "description": [
+              "\nThe {@link SavedObjectsModelVersionSchemaDefinitions | schemas} associated with this version.\n\nSchemas are used to validate / convert the shape and/or content of the documents at various stages of their usages.\nRequired for rollback safety"
+            ],
+            "signature": [
+              "SavedObjectsFullModelVersionSchemaDefinitions"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsFullModelVersionSchemaDefinitions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsFullModelVersionSchemaDefinitions",
+        "description": [],
+        "path": "src/core/packages/saved-objects/server/src/model_version/schemas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsFullModelVersionSchemaDefinitions.forwardCompatibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "forwardCompatibility",
+            "description": [
+              "\nThe schema applied when retrieving documents of a higher version from the cluster.\nUsed for multi-version compatibility in managed environments.\n\nWhen retrieving a savedObject document from an index, if the version of the document\nis higher than the latest version known of the Kibana instance, the document will go\nthrough the `forwardCompatibility` schema of the associated model version.\n\nE.g a Kibana instance with model version `2` for type `foo` types fetches a `foo` document\nat model version `3`. The document will then go through the `forwardCompatibility`\nof the model version 2 (if present).\n\nSee {@link SavedObjectModelVersionForwardCompatibilitySchema} for more info."
+            ],
+            "signature": [
+              "SavedObjectModelVersionForwardCompatibilityObjectSchema",
+              " | ",
+              "SavedObjectModelVersionForwardCompatibilityFn",
+              "<unknown, unknown>"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/model_version/schemas.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsFullModelVersionSchemaDefinitions.create",
+            "type": "Object",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\nThe schema applied when creating a document of the current version\nAllows for validating properties using @kbn/config-schema validations"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ObjectType",
+                "text": "ObjectType"
+              },
+              "<any>"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/model_version/schemas.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-server.SavedObjectsImportHookResult",
         "type": "Interface",
         "tags": [],
@@ -7205,14 +7310,322 @@
         "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-server.SavedObjectsModelVersion",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsModelVersion",
         "description": [
           "\nRepresents a model version of a given saved object type.\n\nModel versions supersede the {@link SavedObjectsType.migrations | migrations} (and {@link SavedObjectsType.schemas | schemas}) APIs\nby exposing an unified way of describing the changes of shape or data of a type.\n"
         ],
         "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/server/src/model_version/index.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/server/index.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_mapping_changes.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_mapping_changes.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_mapping_changes.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/model_version.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/model_version.ts"
+          },
+          {
+            "plugin": "encryptedSavedObjects",
+            "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/create_model_version.ts"
+          },
+          {
+            "plugin": "encryptedSavedObjects",
+            "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/create_model_version.ts"
+          },
+          {
+            "plugin": "encryptedSavedObjects",
+            "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/create_model_version.ts"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/model_versions/settings_v1.ts"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/model_versions/settings_v1.ts"
+          },
+          {
+            "plugin": "productDocBase",
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/saved_objects/product_doc_install.ts"
+          },
+          {
+            "plugin": "productDocBase",
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/saved_objects/product_doc_install.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_1.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_1.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_2.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_2.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_3.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_3.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_4.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_4.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_5.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_5.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_6.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_6.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_7.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_7.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_8.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/cases/model_versions/model_version_8.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/comments/model_versions/model_version_1.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/comments/model_versions/model_version_1.ts"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/platform/plugins/shared/osquery/server/lib/saved_query/saved_object_model_versions.ts"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/platform/plugins/shared/osquery/server/lib/saved_query/saved_object_model_versions.ts"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/platform/plugins/shared/osquery/server/lib/saved_query/saved_object_model_versions.ts"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/platform/plugins/shared/osquery/server/lib/saved_query/saved_object_model_versions.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/solutions/observability/plugins/synthetics/server/saved_objects/migrations/private_locations/model_version_1.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/solutions/observability/plugins/synthetics/server/saved_objects/migrations/private_locations/model_version_1.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/timeline/saved_object_mappings/timelines.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/timeline/saved_object_mappings/timelines.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/saved_object/engine_descriptor_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/saved_object/engine_descriptor_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/saved_object/engine_descriptor_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/saved_objects/privilege_monitoring_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/saved_objects/privilege_monitoring_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_mapping_changes.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_mapping_changes.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/model_version.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/model_version.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/model_version.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/validate_migration.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/document_migrator/validate_migration.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/zdt/utils/generate_additive_mapping_diff.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/zdt/utils/generate_additive_mapping_diff.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/zdt/utils/outdated_documents_query.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/zdt/utils/outdated_documents_query.test.ts"
+          },
+          {
+            "plugin": "@kbn/check-saved-objects-cli",
+            "path": "packages/kbn-check-saved-objects-cli/src/migrations/fixtures/create_fixture_template.ts"
+          },
+          {
+            "plugin": "@kbn/check-saved-objects-cli",
+            "path": "packages/kbn-check-saved-objects-cli/src/migrations/fixtures/create_fixture_template.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -7255,14 +7668,50 @@
         "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-server.SavedObjectsModelVersionSchemaDefinitions",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectsModelVersionSchemaDefinitions",
         "description": [
           "\nThe validation and conversion schemas associated with this model version.\n"
         ],
         "path": "src/core/packages/saved-objects/server/src/model_version/schemas.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/server/src/model_version/index.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/server/index.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
@@ -7429,7 +7878,7 @@
         "description": [
           "\nSaved object document as stored in `_source` of doc in ES index\nSimilar to SavedObjectDoc and excludes `version`, includes `references`, has `attributes` in [typeMapping]\n"
         ],
-        "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+        "path": "src/core/packages/saved-objects/common/src/server_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -7440,7 +7889,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7454,7 +7903,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7468,7 +7917,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7483,7 +7932,7 @@
               "SavedObjectsMigrationVersion",
               " | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7497,7 +7946,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7511,7 +7960,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7525,7 +7974,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7539,7 +7988,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7554,7 +8003,7 @@
               "SavedObjectReference",
               "[] | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7568,7 +8017,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7582,7 +8031,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -7596,7 +8045,7 @@
             "signature": [
               "[typeMapping: string]:  any"
             ],
-            "path": "src/core/packages/saved-objects/server/src/serialization.ts",
+            "path": "src/core/packages/saved-objects/common/src/server_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9062,12 +9511,12 @@
                 "path": "x-pack/platform/plugins/shared/apm_sources_access/server/saved_objects/apm_indices.ts"
               },
               {
-                "plugin": "savedSearch",
-                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
-              },
-              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
               },
               {
                 "plugin": "maps",
@@ -9174,10 +9623,6 @@
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts"
               },
               {
-                "plugin": "cloudSecurityPosture",
-                "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/saved_objects/csp_benchmark_rule.ts"
-              },
-              {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/saved_objects/exception_list.ts"
               },
@@ -9204,6 +9649,26 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/saved_object_mappings.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/saved_objects/csp_benchmark_rule.ts"
+              },
+              {
+                "plugin": "@kbn/migrator-test-kit",
+                "path": "src/platform/packages/private/kbn-migrator-test-kit/fixtures/index.ts"
+              },
+              {
+                "plugin": "@kbn/migrator-test-kit",
+                "path": "src/platform/packages/private/kbn-migrator-test-kit/fixtures/index.ts"
+              },
+              {
+                "plugin": "@kbn/migrator-test-kit",
+                "path": "src/platform/packages/private/kbn-migrator-test-kit/fixtures/index.ts"
+              },
+              {
+                "plugin": "@kbn/migrator-test-kit",
+                "path": "src/platform/packages/private/kbn-migrator-test-kit/fixtures/index.ts"
               },
               {
                 "plugin": "eventAnnotation",
@@ -9857,12 +10322,12 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
               },
               {
-                "plugin": "savedSearch",
-                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
-              },
-              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
               },
               {
                 "plugin": "maps",
@@ -10588,6 +11053,23 @@
           "\".kibana\""
         ],
         "path": "src/core/packages/saved-objects/server/src/saved_objects_index_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.ModelVersionIdentifier",
+        "type": "Type",
+        "tags": [],
+        "label": "ModelVersionIdentifier",
+        "description": [
+          "\nA record of {@link SavedObjectsModelVersion | model versions} for a given savedObjects type.\nThe record's keys must be integers, starting with 1 for the first entry, and there shouldn't be gaps.\n"
+        ],
+        "signature": [
+          "\"1\" | \"7\" | \"6\" | \"5\" | \"4\" | \"3\" | \"2\" | \"8\" | \"9\" | \"10\" | \"11\" | \"12\" | \"13\" | \"14\" | \"15\" | \"16\" | \"17\" | \"18\" | \"19\" | \"20\" | \"21\" | \"22\" | \"23\" | \"24\" | \"25\" | \"26\" | \"27\" | \"28\" | \"29\" | \"30\" | \"31\" | \"32\" | \"33\" | \"34\" | \"35\" | \"36\" | \"37\" | \"38\" | \"39\" | \"40\""
+        ],
+        "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11349,52 +11831,168 @@
         "type": "Type",
         "tags": [],
         "label": "SavedObjectsModelVersionMap",
-        "description": [
-          "\nA record of {@link SavedObjectsModelVersion | model versions} for a given savedObjects type.\nThe record's keys must be integers, starting with 1 for the first entry, and there shouldn't be gaps.\n"
-        ],
+        "description": [],
         "signature": [
           "{ 1?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 7?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 6?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 5?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 4?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 3?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 2?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 8?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 9?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 10?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 11?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 12?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 13?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 14?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 15?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 16?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 17?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 18?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 19?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 20?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; 21?: ",
           "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 22?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 23?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 24?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 25?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 26?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 27?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 28?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 29?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 30?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 31?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 32?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 33?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 34?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 35?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 36?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 37?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 38?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 39?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
+          " | undefined; 40?: ",
+          "SavedObjectsModelVersion",
+          " | ",
+          "SavedObjectsFullModelVersion",
           " | undefined; }"
         ],
         "path": "src/core/packages/saved-objects/server/src/model_version/model_version.ts",

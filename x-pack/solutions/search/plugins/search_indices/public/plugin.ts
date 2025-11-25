@@ -90,7 +90,7 @@ export class SearchIndicesPlugin
           indexManagement: plugins.indexManagement,
         });
       },
-      order: 1,
+      order: 2,
       visibleIn: ['sideNav'],
     });
 

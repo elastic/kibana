@@ -7,14 +7,13 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import type { FlattenRecord } from '@kbn/streams-schema';
-import { isSchema } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
-import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
+  ConvertProcessor,
   GrokProcessor,
   ProcessorType,
+  ReplaceProcessor,
   StreamlangProcessorDefinition,
   StreamlangProcessorDefinitionWithUIAttributes,
   StreamlangStepWithUIAttributes,
@@ -27,29 +26,43 @@ import {
   streamlangProcessorSchema,
 } from '@kbn/streamlang';
 import { isWhereBlock } from '@kbn/streamlang/types/streamlang';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import { isSchema } from '@kbn/streams-schema';
+import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
+import type { ProcessorResources } from './state_management/steps_state_machine';
+import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
+import { configDrivenProcessors } from './steps/blocks/action/config_driven';
 import type {
-  DissectFormState,
-  GrokFormState,
-  ProcessorFormState,
+  ConfigDrivenProcessors,
+  ConfigDrivenProcessorType,
+} from './steps/blocks/action/config_driven/types';
+import type {
+  ConvertFormState,
   DateFormState,
-  ManualIngestPipelineFormState,
+  DissectFormState,
+  DropFormState,
   EnrichmentDataSourceWithUIAttributes,
+  GrokFormState,
+  ManualIngestPipelineFormState,
+  ProcessorFormState,
+  ReplaceFormState,
   SetFormState,
   WhereBlockFormState,
 } from './types';
-import { configDrivenProcessors } from './steps/blocks/action/config_driven';
-import type {
-  ConfigDrivenProcessorType,
-  ConfigDrivenProcessors,
-} from './steps/blocks/action/config_driven/types';
-import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
-import type { ProcessorResources } from './state_management/steps_state_machine';
 
 /**
  * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.
  */
-export const SPECIALISED_TYPES = ['date', 'dissect', 'grok', 'set'];
+export const SPECIALISED_TYPES = [
+  'convert',
+  'date',
+  'dissect',
+  'grok',
+  'set',
+  'replace',
+  'drop_document',
+];
 
 interface FormStateDependencies {
   grokCollection: StreamEnrichmentContextType['grokCollection'];
@@ -101,6 +114,16 @@ const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: str
   return mostCommonField ? mostCommonField[0] : '';
 };
 
+const defaultConvertProcessorFormState = (): ConvertFormState => ({
+  action: 'convert' as const,
+  from: '',
+  to: '',
+  type: 'string',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultDateProcessorFormState = (sampleDocs: FlattenRecord[]): DateFormState => ({
   action: 'date',
   from: getDefaultTextField(sampleDocs, PRIORITIZED_DATE_FIELDS),
@@ -118,6 +141,12 @@ const defaultDissectProcessorFormState = (sampleDocs: FlattenRecord[]): DissectF
   ignore_failure: true,
   ignore_missing: true,
   where: ALWAYS_CONDITION,
+});
+
+const defaultDropProcessorFormState = (): DropFormState => ({
+  action: 'drop_document',
+  where: ALWAYS_CONDITION,
+  ignore_failure: true,
 });
 
 const defaultGrokProcessorFormState: (
@@ -151,6 +180,16 @@ const defaultSetProcessorFormState = (): SetFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultReplaceProcessorFormState = (): ReplaceFormState => ({
+  action: 'replace' as const,
+  from: '',
+  pattern: '',
+  replacement: '',
+  ignore_missing: true,
+  ignore_failure: true,
+  where: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -162,10 +201,13 @@ const defaultProcessorFormStateByType: Record<
   ProcessorType,
   (sampleDocs: FlattenRecord[], formStateDependencies: FormStateDependencies) => ProcessorFormState
 > = {
+  convert: defaultConvertProcessorFormState,
   date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
+  drop_document: defaultDropProcessorFormState,
   grok: defaultGrokProcessorFormState,
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
+  replace: defaultReplaceProcessorFormState,
   set: defaultSetProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
@@ -202,7 +244,10 @@ export const getFormStateFromActionStep = (
     step.action === 'dissect' ||
     step.action === 'manual_ingest_pipeline' ||
     step.action === 'date' ||
-    step.action === 'set'
+    step.action === 'drop_document' ||
+    step.action === 'set' ||
+    step.action === 'convert' ||
+    step.action === 'replace'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -297,7 +342,7 @@ export const convertFormStateToProcessor = (
     }
 
     if (formState.action === 'date') {
-      const { from, formats, ignore_failure, to, output_format } = formState;
+      const { from, formats, ignore_failure, to, output_format, timezone, locale } = formState;
 
       return {
         processorDefinition: {
@@ -308,6 +353,19 @@ export const convertFormStateToProcessor = (
           ignore_failure,
           to: isEmpty(to) ? undefined : to,
           output_format: isEmpty(output_format) ? undefined : output_format,
+          timezone: isEmpty(timezone) ? undefined : timezone,
+          locale: isEmpty(locale) ? undefined : locale,
+        },
+      };
+    }
+
+    if (formState.action === 'drop_document') {
+      const { where, ignore_failure } = formState;
+      return {
+        processorDefinition: {
+          action: 'drop_document',
+          where,
+          ignore_failure,
         },
       };
     }
@@ -334,6 +392,39 @@ export const convertFormStateToProcessor = (
           override,
           ignore_failure,
         },
+      };
+    }
+
+    if (formState.action === 'convert') {
+      const { from, type, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'convert',
+          from,
+          type,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          where: 'where' in formState ? formState.where : undefined,
+        } as ConvertProcessor,
+      };
+    }
+
+    if (formState.action === 'replace') {
+      const { from, pattern, replacement, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'replace',
+          from,
+          pattern: isEmpty(pattern) ? '' : pattern,
+          replacement: isEmpty(replacement) ? '' : replacement,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          where: 'where' in formState ? formState.where : undefined,
+        } as ReplaceProcessor,
       };
     }
 

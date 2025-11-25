@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import { boomify, isBoom } from '@hapi/boom';
-
-import type { TypeOf } from '@kbn/config-schema';
 
 import {
   LENS_VIS_API_PATH,
@@ -17,18 +14,21 @@ import {
   LENS_CONTENT_TYPE,
 } from '../../../../common/constants';
 import type { LensCreateIn, LensSavedObject } from '../../../content_management';
-import type { RegisterAPIRouteFn } from '../../types';
-import { ConfigBuilderStub } from '../../../../common/transforms';
-import { lensCreateRequestBodySchema, lensCreateResponseBodySchema } from './schema';
-import { getLensResponseItem } from '../utils';
-import { isNewApiFormat } from '../../../../common/transforms/config_builder_stub';
+import type { LensCreateResponseBody, RegisterAPIRouteFn } from '../../types';
+import {
+  lensCreateRequestBodySchema,
+  lensCreateRequestParamsSchema,
+  lensCreateRequestQuerySchema,
+  lensCreateResponseBodySchema,
+} from './schema';
+import { getLensRequestConfig, getLensResponseItem } from '../utils';
 
 export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement }
+  { contentManagement, builder }
 ) => {
   const createRoute = router.post({
-    path: LENS_VIS_API_PATH,
+    path: `${LENS_VIS_API_PATH}/{id?}`,
     access: LENS_API_ACCESS,
     enableQueryVersion: true,
     summary: 'Create Lens visualization',
@@ -52,6 +52,8 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       version: LENS_API_VERSION,
       validate: {
         request: {
+          query: lensCreateRequestQuerySchema,
+          params: lensCreateRequestParamsSchema,
           body: lensCreateRequestBodySchema,
         },
         response: {
@@ -75,8 +77,8 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
-      const requestBodyData = req.body.data;
-      if (!requestBodyData.visualizationType) {
+      const requestBodyData = req.body;
+      if ('state' in requestBodyData && !requestBodyData.visualizationType) {
         throw new Error('visualizationType is required');
       }
 
@@ -85,29 +87,19 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      const { references, ...lensItem } = isNewApiFormat(requestBodyData)
-        ? // TODO: Find a better way to conditionally omit id
-          omit(ConfigBuilderStub.in(requestBodyData), 'id')
-        : // For now we need to be able to create old SO, this may be moved to the config builder
-          ({
-            ...requestBodyData,
-            // fix type mismatches, null -> undefined
-            description: requestBodyData.description ?? undefined,
-            visualizationType: requestBodyData.visualizationType,
-          } satisfies LensCreateIn['data']);
-
       try {
         // Note: these types are to enforce loose param typings of client methods
-        const data: LensCreateIn['data'] = lensItem;
-        const options: LensCreateIn['options'] = { ...req.body.options, references };
+        const { references, ...data } = getLensRequestConfig(builder, req.body);
+        const options: LensCreateIn['options'] = { ...req.query, references, id: req.params.id };
         const { result } = await client.create(data, options);
 
         if (result.item.error) {
           throw result.item.error;
         }
 
-        return res.created<TypeOf<typeof lensCreateResponseBodySchema>>({
-          body: getLensResponseItem(result.item),
+        const responseItem = getLensResponseItem(builder, result.item);
+        return res.created<LensCreateResponseBody>({
+          body: responseItem,
         });
       } catch (error) {
         if (isBoom(error) && error.output.statusCode === 403) {

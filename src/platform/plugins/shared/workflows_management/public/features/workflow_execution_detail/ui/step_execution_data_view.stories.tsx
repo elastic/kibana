@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import React from 'react';
 import type { ExecutionStatus } from '@kbn/workflows';
-import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 import { StepExecutionDataView } from './step_execution_data_view';
+import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 
 // Decorator to ensure full height container
 const heightDecorator = (Story: React.ComponentType) => (
@@ -146,7 +146,6 @@ const alertsMockData = {
 
 export const Default: Story = {
   args: {
-    title: 'Step Execution Data View',
     mode: 'input',
     stepExecution: {
       ...stepExecution,
@@ -157,7 +156,6 @@ export const Default: Story = {
 
 export const ArrayData: Story = {
   args: {
-    title: 'Step Execution Data',
     mode: 'input',
     stepExecution: {
       ...stepExecution,
@@ -186,7 +184,6 @@ export const ArrayData: Story = {
 
 export const Empty: Story = {
   args: {
-    title: 'Step Execution Data',
     mode: 'input',
     stepExecution: {
       ...stepExecution,

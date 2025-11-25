@@ -1072,6 +1072,16 @@ describe('function validation', () => {
           ['Unknown column "WrongField"']
         );
       });
+
+      describe('operators in STATS WHERE context', () => {
+        it('should allow IS NOT NULL operator in STATS WHERE clause when validation is applied', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('FROM index | STATS COUNT() WHERE unknownField IS NOT NULL', [
+            'Unknown column "unknownField"',
+          ]);
+        });
+      });
     });
   });
 });

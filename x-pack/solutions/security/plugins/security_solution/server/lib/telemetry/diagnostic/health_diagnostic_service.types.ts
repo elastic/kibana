@@ -27,6 +27,10 @@ export enum Action {
    * Represents an action to keep information as is, without masking.
    */
   KEEP = 'keep',
+  /**
+   * Represents an action to encrypt sensitive information.
+   */
+  ENCRYPT = 'encrypt',
 }
 
 /**
@@ -121,6 +125,13 @@ export interface HealthDiagnosticQuery {
    * Query size
    */
   size?: number;
+  /**
+   * Optional RSA public key identifier used for encrypting fields marked with `encrypt` action
+   * in the filterlist. Required when the filterlist contains any `encrypt` actions.
+   * This ID corresponds to keys configured in the plugin-level `encryption_public_keys` map.
+   * Example: "rsa-keypair-v1-2025-q4"
+   */
+  encryptionKeyId?: string;
 }
 
 export interface HealthDiagnosticQueryResult {

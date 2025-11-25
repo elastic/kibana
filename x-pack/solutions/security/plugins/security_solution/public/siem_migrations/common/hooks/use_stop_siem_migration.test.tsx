@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useStopSiemMigration, STOP_SUCCESS, STOP_ERROR } from './use_stop_siem_migration';
 
 const mockStopRuleMigration = jest.fn();

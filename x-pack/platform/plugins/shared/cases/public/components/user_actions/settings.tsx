@@ -18,22 +18,27 @@ import {
   EXTRACT_OBSERVABLES_LC,
 } from './translations';
 
-// TODO: Separate into 2 user actions, https://github.com/elastic/security-team/issues/13709
+const SETTING_CONFIGS = [
+  {
+    key: 'syncAlerts' as const,
+    enabledLabel: `${ENABLED_SETTING} ${SYNC_ALERTS_LC}`,
+    disabledLabel: `${DISABLED_SETTING} ${SYNC_ALERTS_LC}`,
+  },
+  {
+    key: 'extractObservables' as const,
+    enabledLabel: `${ENABLED_SETTING} ${EXTRACT_OBSERVABLES_LC}`,
+    disabledLabel: `${DISABLED_SETTING} ${EXTRACT_OBSERVABLES_LC}`,
+  },
+] as const;
+
 function getSettingsLabel(userAction: SnakeToCamelCase<SettingsUserAction>): ReactNode {
-  let label = '';
+  const settings = userAction.payload.settings;
+  const labels = SETTING_CONFIGS.filter((config) => settings[config.key] !== undefined).map(
+    (config) => (settings[config.key] ? config.enabledLabel : config.disabledLabel)
+  );
 
-  if (userAction.payload.settings.syncAlerts) {
-    label = `${ENABLED_SETTING} ${SYNC_ALERTS_LC}`;
-  } else {
-    label = `${DISABLED_SETTING} ${SYNC_ALERTS_LC}`;
-  }
-
-  if (userAction.payload.settings.extractObservables) {
-    label = `${label} and ${ENABLED_SETTING} ${EXTRACT_OBSERVABLES_LC}`;
-  } else {
-    label = `${label} and ${DISABLED_SETTING} ${EXTRACT_OBSERVABLES_LC}`;
-  }
-  return label;
+  // Join labels if multiple, or return single label
+  return labels.length > 1 ? labels.join(', ') : labels[0] || '';
 }
 
 export const createSettingsUserActionBuilder: UserActionBuilder = ({

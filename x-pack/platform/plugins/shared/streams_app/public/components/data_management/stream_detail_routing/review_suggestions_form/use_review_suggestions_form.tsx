@@ -5,41 +5,99 @@
  * 2.0.
  */
 
-import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import type { Condition } from '@kbn/streamlang';
-import { useForm, useFieldArray } from 'react-hook-form';
-import constate from 'constate';
-import { useFetchSuggestedPartitions } from './use_fetch_suggested_partitions';
-import { useStreamsRoutingActorRef } from '../state_management/stream_routing_state_machine';
-export { FormProvider } from 'react-hook-form';
+import { useState } from 'react';
+import { useAbortController } from '@kbn/react-hooks';
+import { lastValueFrom } from 'rxjs';
+import { isEmpty } from 'lodash';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
+import { showErrorToast } from '../../../../hooks/use_streams_app_fetch';
+import { useKibana } from '../../../../hooks/use_kibana';
+import {
+  useStreamsRoutingActorRef,
+  useStreamsRoutingSelector,
+} from '../state_management/stream_routing_state_machine';
 
-const [ReviewSuggestionsFormProvider, useReviewSuggestionsFormContext] = constate(
-  (props: { form: ReturnType<typeof useReviewSuggestionsForm> }) => props.form
-);
-
-export { ReviewSuggestionsFormProvider, useReviewSuggestionsFormContext };
-
-export interface ReviewSuggestionsInputs {
-  suggestions: Array<{
-    name: string;
-    condition: Condition;
-    selected?: boolean;
-  }>;
+export interface FetchSuggestedPartitionsParams {
+  streamName: string;
+  connectorId: string;
+  start: number;
+  end: number;
 }
 
-export function useReviewSuggestionsForm() {
-  const streamsRoutingActorRef = useStreamsRoutingActorRef();
-  const [suggestedPartitionsState, fetchSuggestions] = useFetchSuggestedPartitions();
-  const reviewSuggestionsForm = useForm<ReviewSuggestionsInputs>({
-    defaultValues: { suggestions: [] },
-  });
-  const { fields: suggestions, remove: removeSuggestion } = useFieldArray({
-    control: reviewSuggestionsForm.control,
-    name: 'suggestions',
-  });
+export interface PartitionSuggestion {
+  name: string;
+  condition: Condition;
+}
 
-  const resetForm = () => {
-    fetchSuggestions(null);
+export type UseReviewSuggestionsFormResult = ReturnType<typeof useReviewSuggestionsForm>;
+
+export function useReviewSuggestionsForm() {
+  const {
+    core: { notifications },
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+  const streamName = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.definition.stream.name
+  );
+  const streamsRoutingActorRef = useStreamsRoutingActorRef();
+
+  const [suggestions, setSuggestions] = useState<PartitionSuggestion[] | undefined>(undefined);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+
+  const abortController = useAbortController();
+
+  const fetchSuggestions = async (params: FetchSuggestedPartitionsParams) => {
+    setIsLoadingSuggestions(true);
+    try {
+      const response = await lastValueFrom(
+        streamsRepositoryClient.stream('POST /internal/streams/{name}/_suggest_partitions', {
+          signal: abortController.signal,
+          params: {
+            path: { name: params.streamName },
+            body: {
+              connector_id: params.connectorId,
+              start: params.start,
+              end: params.end,
+            },
+          },
+        })
+      );
+      setSuggestions(response.partitions);
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        showErrorToast(notifications, error);
+      }
+    } finally {
+      setIsLoadingSuggestions(false);
+    }
+  };
+
+  const removeSuggestion = (index: number) => {
+    if (!suggestions) return;
+
+    const updatedSuggestions = suggestions.toSpliced(index, 1);
+
+    // Reset form when all partitions are removed
+    if (isEmpty(updatedSuggestions)) {
+      resetForm();
+    } else {
+      setSuggestions(updatedSuggestions);
+    }
+  };
+
+  const updateSuggestion = (index: number, updates: Partial<PartitionSuggestion>) => {
+    if (!suggestions) return;
+    const updatedSuggestion = { ...suggestions[index], ...updates };
+    const updatedSuggestions = suggestions.toSpliced(index, 1, updatedSuggestion);
+    setSuggestions(updatedSuggestions);
+  };
+
+  const resetPreview = () => {
     streamsRoutingActorRef.send({
       type: 'suggestion.preview',
       condition: { always: {} },
@@ -48,54 +106,43 @@ export function useReviewSuggestionsForm() {
       toggle: false,
     });
   };
-  const isEmpty = suggestedPartitionsState.value && suggestions.length === 0;
 
-  // Update form values when suggestions are fetched or reset
-  useUpdateEffect(() => {
-    if (suggestedPartitionsState.value) {
-      reviewSuggestionsForm.setValue('suggestions', suggestedPartitionsState.value.partitions);
-    } else {
-      reviewSuggestionsForm.reset();
-    }
-  }, [suggestedPartitionsState.value]);
+  const resetForm = () => {
+    abortController.abort();
+    abortController.refresh();
+    setSuggestions(undefined);
+    resetPreview();
+  };
 
-  // Reset form when all partitions are removed
+  // Reset suggestions when navigating to a different stream
   useUpdateEffect(() => {
-    if (suggestions.length === 0) {
-      resetForm();
-    }
-  }, [suggestions.length]);
+    resetForm();
+  }, [streamName]);
 
   return {
-    reviewSuggestionsForm,
     suggestions,
     removeSuggestion,
-    isEmpty,
-    isLoadingSuggestions: suggestedPartitionsState.loading,
+    isLoadingSuggestions,
     fetchSuggestions,
     resetForm,
+    updateSuggestion,
     previewSuggestion: (index: number, toggle?: boolean) => {
-      const partition = suggestions[index];
-      streamsRoutingActorRef.send({
-        type: 'suggestion.preview',
-        condition: partition.condition,
-        name: partition.name,
-        index,
-        toggle,
-      });
+      if (suggestions) {
+        const partition = suggestions[index];
+        streamsRoutingActorRef.send({
+          type: 'suggestion.preview',
+          condition: partition.condition,
+          name: partition.name,
+          index,
+          toggle,
+        });
+      }
     },
-    acceptSuggestion: (index: number) => {
-      removeSuggestion(index);
-    },
-    rejectSuggestion: (index: number) => {
-      const partition = suggestions[index];
-      streamsRoutingActorRef.send({
-        type: 'suggestion.preview',
-        condition: partition.condition,
-        name: partition.name,
-        index,
-        toggle: false,
-      });
+    acceptSuggestion: removeSuggestion,
+    rejectSuggestion: (index: number, isSelectedPreview: boolean = false) => {
+      if (isSelectedPreview) {
+        resetPreview();
+      }
       removeSuggestion(index);
     },
   };

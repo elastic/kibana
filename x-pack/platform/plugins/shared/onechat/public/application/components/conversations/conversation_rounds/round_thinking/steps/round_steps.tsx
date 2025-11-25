@@ -45,7 +45,11 @@ const mainThinkingResultTypes = [
   ToolResultType.error,
 ];
 // Populated in flyout
-const flyoutResultTypes = [ToolResultType.other, ToolResultType.resource];
+const flyoutResultTypes = [
+  ToolResultType.visualization,
+  ToolResultType.other,
+  ToolResultType.resource,
+];
 
 const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolResult }) => {
   switch (toolResult.type) {
@@ -274,7 +278,7 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
 
       // What is the difference between a reasoning step and a tool call progression message. When does the agent produce one over the other?
       // Is there any difference for how we should display reasoning and progression?
-      if (isReasoningStep(step)) {
+      if (isReasoningStep(step) && !step.transient) {
         return [
           <ThinkingItemLayout key={`step-reasoning-${stepIndex}`}>
             <div role="status" aria-live="polite" aria-label={labels.agentReasoning}>

@@ -588,6 +588,20 @@ FROM index
           // d.1
           /* d.2 */ d /* d.3 */`);
     });
+
+    test('supports binary expressions', () => {
+      assertReprint(
+        `FROM employees
+  | LEFT JOIN
+      asdf
+        ON
+          // hello world
+          /*1*/ aaaaaaaaaaaaaaaaaaaaaaaaa /*2*/ >
+              /*3*/ bbbbbbbbbbbbbbbbbbbbb /*4*/ AND
+            /*5*/ ccccccccccccccccccc /*6*/ ==
+              /*7*/ dddddddddddddddddddddddddddddddddddddddd /*8*/`
+      );
+    });
   });
 
   describe('function call expressions', () => {
@@ -916,6 +930,66 @@ FROM index`;
 FROM index`;
         assertReprint(src);
       });
+    });
+  });
+
+  describe('subqueries (parens)', () => {
+    test('can print comments in complex subqueries', () => {
+      // This single test covers comment preservation in wrapped output
+      const query = [
+        'FROM index1,',
+        '/* before subquery */ (/* inside start */ FROM index2 /* after source */ |',
+        'WHERE a > 10 /* after where */ |',
+        'EVAL b = a * 2 |',
+        'STATS cnt = COUNT(*) BY c |',
+        'SORT cnt DESC |',
+        'LIMIT 10) /* after first subquery */,',
+        'index3,',
+        '(FROM index4 | STATS COUNT(*)) /* after second */ |',
+        'WHERE d > 10 |',
+        'STATS max = MAX(*) BY e |',
+        'SORT max DESC',
+      ].join(' ');
+
+      const expected = `FROM
+  index1,
+  /* before subquery */ (/* inside start */ FROM index2 /* after source */
+    | WHERE a > 10 /* after where */
+    | EVAL b = a * 2
+    | STATS cnt = COUNT(*)
+          BY c
+    | SORT cnt DESC
+    | LIMIT 10) /* after first subquery */,
+  index3,
+  (FROM index4 | STATS COUNT(*)) /* after second */
+  | WHERE d > 10
+  | STATS max = MAX(*)
+        BY e
+  | SORT max DESC`;
+
+      assertReprint(query, expected);
+    });
+  });
+
+  describe('FORK', () => {
+    test('preserves comments in various positions', () => {
+      const query = `FROM index
+  /* before FORK */
+  | FORK
+      /* first branch */
+      (
+          KEEP field1, field2, field3 /* important fields */
+        | WHERE x > 100 /* filter */
+      )
+      /* second branch */
+      (
+          DROP field4, field5 /* not needed */
+        | LIMIT 50
+      )`;
+
+      const text = reprint(query, { multiline: true }).text;
+
+      expect(text).toBe(query);
     });
   });
 });

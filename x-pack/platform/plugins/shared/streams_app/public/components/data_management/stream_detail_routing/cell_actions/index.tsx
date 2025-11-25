@@ -7,7 +7,7 @@
 
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StringOrNumberOrBoolean } from '@kbn/streamlang';
+import type { StringOrNumberOrBoolean, OperatorKeys } from '@kbn/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import React from 'react';
 import {
@@ -17,20 +17,20 @@ import {
 import type { RoutingDefinitionWithUIAttributes } from '../types';
 
 type BtnMode = '+' | '-';
-type FilterOperator = 'eq' | 'neq' | 'exist';
+type FilterOperator = Extract<OperatorKeys, 'eq' | 'neq' | 'exists'>;
 export type RoutingFilterFn = (routingRule: Partial<RoutingDefinitionWithUIAttributes>) => void;
 
 const getOperator = (value: StringOrNumberOrBoolean, mode: BtnMode): FilterOperator => {
-  if (typeof value === 'boolean') {
-    return 'exist';
+  if (value === undefined) {
+    return 'exists';
   }
 
   return mode === '+' ? 'eq' : 'neq';
 };
 
-const getCondition = (value: StringOrNumberOrBoolean, operator: FilterOperator) => {
-  if (typeof value === 'boolean') {
-    return { exist: value };
+const getCondition = (value: StringOrNumberOrBoolean, operator: FilterOperator, mode: BtnMode) => {
+  if (value === undefined) {
+    return { exists: mode === '+' ? false : true };
   }
 
   return { [operator]: `${value}` };
@@ -56,7 +56,11 @@ const FilterBtn = ({
 
   const iconType = mode === '+' ? 'plusInCircle' : 'minusInCircle';
   const operator = getOperator(context[rowIndex][columnId] as StringOrNumberOrBoolean, mode);
-  const condition = getCondition(context[rowIndex][columnId] as StringOrNumberOrBoolean, operator);
+  const condition = getCondition(
+    context[rowIndex][columnId] as StringOrNumberOrBoolean,
+    operator,
+    mode
+  );
 
   const buttonTitle = i18n.translate('xpack.streams.routing.condition.filter', {
     defaultMessage: 'Add routing condition: {operator}',

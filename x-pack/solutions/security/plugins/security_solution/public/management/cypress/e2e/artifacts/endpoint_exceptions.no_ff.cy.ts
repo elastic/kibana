@@ -6,19 +6,29 @@
  */
 import * as essSecurityHeaders from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/screens/security_header';
 import * as serverlessSecurityHeaders from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/screens/serverless_security_header';
-import { APP_ENDPOINT_EXCEPTIONS_PATH, APP_PATH } from '../../../../../common/constants';
+import {
+  APP_ENDPOINT_EXCEPTIONS_PATH,
+  APP_PATH,
+  SECURITY_FEATURE_ID,
+} from '../../../../../common/constants';
 import { login, ROLE } from '../../tasks/login';
 
 describe('Endpoint exceptions - preserving behaviour without `endpointExceptionsMovedUnderManagement` feature flag', () => {
   describe('ESS', { tags: ['@ess'] }, () => {
+    const loginWithReadAccess = () => {
+      login.withCustomKibanaPrivileges({
+        [SECURITY_FEATURE_ID]: ['read', 'endpoint_exceptions_read'],
+      });
+    };
+
     it('should not display Endpoint Exceptions in Administration page', () => {
-      login(ROLE.t1_analyst);
+      loginWithReadAccess();
       cy.visit('app/security/manage');
       cy.getByTestSubj('LandingItem').should('not.contain', 'Endpoint exceptions');
     });
 
     it('should not display Endpoint Exceptions in Manage side panel', () => {
-      login(ROLE.t1_analyst);
+      loginWithReadAccess();
       cy.visit(APP_PATH);
 
       essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ENDPOINT_EXCEPTIONS);
@@ -28,7 +38,7 @@ describe('Endpoint exceptions - preserving behaviour without `endpointExceptions
     });
 
     it('should display Not Found page when opening url directly', () => {
-      login(ROLE.t1_analyst);
+      loginWithReadAccess();
       cy.visit(APP_ENDPOINT_EXCEPTIONS_PATH);
       cy.getByTestSubj('notFoundPage').should('exist');
     });
@@ -36,9 +46,12 @@ describe('Endpoint exceptions - preserving behaviour without `endpointExceptions
 
   describe('Serverless', { tags: ['@serverless', '@skipInServerlessMKI'] }, () => {
     it('should not display Endpoint Exceptions in Assets side panel ', () => {
-      login(ROLE.t1_analyst);
+      // instead of testing with the lowest access (READ), we're testing with t3_analyst with WRITE access,
+      // as we neither have any role with READ access, nor custom roles on serverless yet
+      login(ROLE.t3_analyst);
       cy.visit(APP_PATH);
 
+      serverlessSecurityHeaders.showMoreItems();
       serverlessSecurityHeaders.openNavigationPanelFor(
         serverlessSecurityHeaders.ENDPOINT_EXCEPTIONS
       );
@@ -46,7 +59,7 @@ describe('Endpoint exceptions - preserving behaviour without `endpointExceptions
     });
 
     it('should display Not Found page when opening url directly', () => {
-      login(ROLE.t1_analyst);
+      login(ROLE.t3_analyst);
       cy.visit(APP_ENDPOINT_EXCEPTIONS_PATH);
       cy.getByTestSubj('notFoundPage').should('exist');
     });

@@ -13,14 +13,16 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./enrichment'));
     loadTestFile(require.resolve('./classic'));
     loadTestFile(require.resolve('./flush_config'));
-    loadTestFile(require.resolve('./assets/dashboard'));
-    loadTestFile(require.resolve('./assets/rule'));
+    loadTestFile(require.resolve('./attachments/attachments'));
+    loadTestFile(require.resolve('./attachments/dashboard'));
+    loadTestFile(require.resolve('./attachments/rule'));
     loadTestFile(require.resolve('./schema'));
     loadTestFile(require.resolve('./processing_date_suggestions'));
     loadTestFile(require.resolve('./processing_simulate'));
     loadTestFile(require.resolve('./root_stream'));
     loadTestFile(require.resolve('./group_streams'));
     loadTestFile(require.resolve('./lifecycle'));
+    loadTestFile(require.resolve('./failure_store'));
     loadTestFile(require.resolve('./significant_events'));
     loadTestFile(require.resolve('./queries'));
     loadTestFile(require.resolve('./discover'));
@@ -30,7 +32,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./conflicts'));
     loadTestFile(require.resolve('./permissions'));
     loadTestFile(require.resolve('./global_search'));
-    loadTestFile(require.resolve('./systems'));
+    loadTestFile(require.resolve('./features'));
     loadTestFile(require.resolve('./settings'));
   });
 }

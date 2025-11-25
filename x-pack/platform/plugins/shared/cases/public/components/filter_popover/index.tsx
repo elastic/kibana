@@ -92,6 +92,7 @@ export const FilterPopoverComponent = ({
         <>
           <EuiHorizontalRule margin="none" />
           <EuiCallOut
+            announceOnMount={false}
             title={limitReachedMessage}
             color="warning"
             size="s"

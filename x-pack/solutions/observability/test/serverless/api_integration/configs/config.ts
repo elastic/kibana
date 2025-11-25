@@ -7,7 +7,6 @@
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { createTestConfig } from '@kbn/test-suites-xpack-platform/serverless/api_integration/config.base';
 import { services as apmServices } from '../test_suites/apm_api_integration/common/services';
-import { services as datasetQualityServices } from '../test_suites/dataset_quality_api_integration/common/services';
 
 export default createTestConfig({
   serverlessProject: 'oblt',
@@ -16,7 +15,7 @@ export default createTestConfig({
     reportName: 'Serverless Observability API Integration Tests',
   },
   suiteTags: { exclude: ['skipSvlOblt'] },
-  services: { ...apmServices, ...datasetQualityServices },
+  services: { ...apmServices },
 
   // include settings from project controller
   esServerArgs: [],

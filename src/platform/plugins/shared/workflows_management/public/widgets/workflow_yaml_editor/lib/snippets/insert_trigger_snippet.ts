@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
 import { type Document } from 'yaml';
+import { monaco } from '@kbn/monaco';
 import type { TriggerType } from '@kbn/workflows';
-import { getTriggerNodes } from '../../../../../common/lib/yaml_utils';
-import { getMonacoRangeFromYamlNode } from '../utils';
+import { generateTriggerSnippet } from './generate_trigger_snippet';
+import { getTriggerNodes } from '../../../../../common/lib/yaml';
 import { getIndentLevelFromLineNumber } from '../get_indent_level';
 import { prependIndentToLines } from '../prepend_indent_to_lines';
-import { generateTriggerSnippet } from './generate_trigger_snippet';
+import { getMonacoRangeFromYamlNode } from '../utils';
 
 // Algorithm:
 // 1. Find the next line after the last trigger node range

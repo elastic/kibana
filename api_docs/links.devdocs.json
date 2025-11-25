@@ -22,7 +22,7 @@
         "label": "DashboardLink",
         "description": [],
         "signature": [
-          "{ readonly options?: Readonly<{} & { openInNewTab: boolean; useCurrentFilters: boolean; useCurrentDateRange: boolean; }> | undefined; readonly label?: string | undefined; readonly id: string; readonly type: \"dashboardLink\"; readonly order: number; readonly destination: string; }"
+          "{ readonly options?: Readonly<{ openInNewTab?: boolean | undefined; useCurrentFilters?: boolean | undefined; useCurrentDateRange?: boolean | undefined; } & {}> | undefined; readonly label?: string | undefined; readonly id: string; readonly type: \"dashboardLink\"; readonly order: number; readonly destination: string; }"
         ],
         "path": "src/platform/plugins/private/links/server/content_management/schema/v1/types.ts",
         "deprecated": false,
@@ -37,7 +37,7 @@
         "label": "ExternalLink",
         "description": [],
         "signature": [
-          "{ readonly options?: Readonly<{} & { openInNewTab: boolean; encodeUrl: boolean; }> | undefined; readonly label?: string | undefined; readonly id: string; readonly type: \"externalLink\"; readonly order: number; readonly destination: string; }"
+          "{ readonly options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; readonly label?: string | undefined; readonly id: string; readonly type: \"externalLink\"; readonly order: number; readonly destination: string; }"
         ],
         "path": "src/platform/plugins/private/links/server/content_management/schema/v1/types.ts",
         "deprecated": false,
@@ -52,7 +52,7 @@
         "label": "Link",
         "description": [],
         "signature": [
-          "Readonly<{ options?: Readonly<{} & { openInNewTab: boolean; useCurrentFilters: boolean; useCurrentDateRange: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{} & { openInNewTab: boolean; encodeUrl: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>"
+          "Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; useCurrentFilters?: boolean | undefined; useCurrentDateRange?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>"
         ],
         "path": "src/platform/plugins/private/links/server/content_management/schema/v1/types.ts",
         "deprecated": false,
@@ -67,9 +67,54 @@
         "label": "LinkOptions",
         "description": [],
         "signature": [
-          "Readonly<{} & { openInNewTab: boolean; useCurrentFilters: boolean; useCurrentDateRange: boolean; }> | Readonly<{} & { openInNewTab: boolean; encodeUrl: boolean; }> | undefined"
+          "Readonly<{ openInNewTab?: boolean | undefined; useCurrentFilters?: boolean | undefined; useCurrentDateRange?: boolean | undefined; } & {}> | Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined"
         ],
         "path": "src/platform/plugins/private/links/server/content_management/schema/v1/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "links",
+        "id": "def-server.LinksByReferenceState",
+        "type": "Type",
+        "tags": [],
+        "label": "LinksByReferenceState",
+        "description": [],
+        "signature": [
+          "{ readonly savedObjectId: string; }"
+        ],
+        "path": "src/platform/plugins/private/links/server/embeddable_schemas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "links",
+        "id": "def-server.LinksByValueState",
+        "type": "Type",
+        "tags": [],
+        "label": "LinksByValueState",
+        "description": [],
+        "signature": [
+          "{ readonly layout?: \"horizontal\" | \"vertical\" | undefined; readonly links: (Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; useCurrentFilters?: boolean | undefined; useCurrentDateRange?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>)[]; }"
+        ],
+        "path": "src/platform/plugins/private/links/server/embeddable_schemas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "links",
+        "id": "def-server.LinksEmbeddableState",
+        "type": "Type",
+        "tags": [],
+        "label": "LinksEmbeddableState",
+        "description": [],
+        "signature": [
+          "Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; layout?: \"horizontal\" | \"vertical\" | undefined; } & { links: (Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; useCurrentFilters?: boolean | undefined; useCurrentDateRange?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>)[]; }> | Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & { savedObjectId: string; }>"
+        ],
+        "path": "src/platform/plugins/private/links/server/embeddable_schemas.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -82,7 +127,7 @@
         "label": "LinksState",
         "description": [],
         "signature": [
-          "{ readonly description?: string | undefined; readonly layout?: \"horizontal\" | \"vertical\" | undefined; readonly title: string; readonly links: (Readonly<{ options?: Readonly<{} & { openInNewTab: boolean; useCurrentFilters: boolean; useCurrentDateRange: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{} & { openInNewTab: boolean; encodeUrl: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>)[]; }"
+          "{ readonly description?: string | undefined; readonly layout?: \"horizontal\" | \"vertical\" | undefined; readonly title: string; readonly links: (Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; useCurrentFilters?: boolean | undefined; useCurrentDateRange?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>)[]; }"
         ],
         "path": "src/platform/plugins/private/links/server/content_management/schema/v1/types.ts",
         "deprecated": false,
@@ -97,7 +142,7 @@
         "label": "StoredDashboardLink",
         "description": [],
         "signature": [
-          "Omit<Readonly<{ options?: Readonly<{} & { openInNewTab: boolean; useCurrentFilters: boolean; useCurrentDateRange: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }>, \"destination\"> & { destinationRefName: string; }"
+          "Omit<Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; useCurrentFilters?: boolean | undefined; useCurrentDateRange?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }>, \"destination\"> & { destinationRefName: string; }"
         ],
         "path": "src/platform/plugins/private/links/server/content_management/schema/v1/types.ts",
         "deprecated": false,
@@ -112,7 +157,7 @@
         "label": "StoredLinksState",
         "description": [],
         "signature": [
-          "Omit<Readonly<{ description?: string | undefined; layout?: \"horizontal\" | \"vertical\" | undefined; } & { title: string; links: (Readonly<{ options?: Readonly<{} & { openInNewTab: boolean; useCurrentFilters: boolean; useCurrentDateRange: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{} & { openInNewTab: boolean; encodeUrl: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>)[]; }>, \"links\"> & { links?: (Readonly<{ options?: Readonly<{} & { openInNewTab: boolean; encodeUrl: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }> | ",
+          "Omit<Readonly<{ description?: string | undefined; layout?: \"horizontal\" | \"vertical\" | undefined; } & { title: string; links: (Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; useCurrentFilters?: boolean | undefined; useCurrentDateRange?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>)[]; }>, \"links\"> & { links?: (Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }> | ",
           {
             "pluginId": "links",
             "scope": "server",
@@ -133,33 +178,7 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [
-      {
-        "parentPluginId": "links",
-        "id": "def-common.LinksByReferenceState",
-        "type": "Interface",
-        "tags": [],
-        "label": "LinksByReferenceState",
-        "description": [],
-        "path": "src/platform/plugins/private/links/common/embeddable/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "links",
-            "id": "def-common.LinksByReferenceState.savedObjectId",
-            "type": "string",
-            "tags": [],
-            "label": "savedObjectId",
-            "description": [],
-            "path": "src/platform/plugins/private/links/common/embeddable/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
     "misc": [
       {
@@ -263,15 +282,30 @@
       },
       {
         "parentPluginId": "links",
+        "id": "def-common.LinksByReferenceState",
+        "type": "Type",
+        "tags": [],
+        "label": "LinksByReferenceState",
+        "description": [],
+        "signature": [
+          "{ readonly savedObjectId: string; }"
+        ],
+        "path": "src/platform/plugins/private/links/server/embeddable_schemas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "links",
         "id": "def-common.LinksByValueState",
         "type": "Type",
         "tags": [],
         "label": "LinksByValueState",
         "description": [],
         "signature": [
-          "{ readonly layout?: \"horizontal\" | \"vertical\" | undefined; readonly links: (Readonly<{ options?: Readonly<{} & { openInNewTab: boolean; useCurrentFilters: boolean; useCurrentDateRange: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{} & { openInNewTab: boolean; encodeUrl: boolean; }> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>)[]; }"
+          "{ readonly layout?: \"horizontal\" | \"vertical\" | undefined; readonly links: (Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; useCurrentFilters?: boolean | undefined; useCurrentDateRange?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>)[]; }"
         ],
-        "path": "src/platform/plugins/private/links/common/embeddable/types.ts",
+        "path": "src/platform/plugins/private/links/server/embeddable_schemas.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -284,32 +318,9 @@
         "label": "LinksEmbeddableState",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.Writable",
-            "text": "Writable"
-          },
-          "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>> & (",
-          {
-            "pluginId": "links",
-            "scope": "common",
-            "docId": "kibLinksPluginApi",
-            "section": "def-common.LinksByValueState",
-            "text": "LinksByValueState"
-          },
-          " | ",
-          {
-            "pluginId": "links",
-            "scope": "common",
-            "docId": "kibLinksPluginApi",
-            "section": "def-common.LinksByReferenceState",
-            "text": "LinksByReferenceState"
-          },
-          ")"
+          "Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; layout?: \"horizontal\" | \"vertical\" | undefined; } & { links: (Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; useCurrentFilters?: boolean | undefined; useCurrentDateRange?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"dashboardLink\"; order: number; destination: string; }> | Readonly<{ options?: Readonly<{ openInNewTab?: boolean | undefined; encodeUrl?: boolean | undefined; } & {}> | undefined; label?: string | undefined; } & { id: string; type: \"externalLink\"; order: number; destination: string; }>)[]; }> | Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & { savedObjectId: string; }>"
         ],
-        "path": "src/platform/plugins/private/links/common/embeddable/types.ts",
+        "path": "src/platform/plugins/private/links/server/embeddable_schemas.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -39,7 +39,8 @@ import type { SeverityThreshold } from '../../../common/types/anomalies';
 import { HelpPopover } from '../components/help_popover';
 // @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
-import { ExplorerNoJobsSelected, ExplorerNoResultsFound } from './components';
+import { ExplorerNoResultsFound } from './components';
+import { AnomalyDetectionNoJobsSelected } from '../components/anomaly_detection_no_jobs_selected';
 import { InfluencersList } from '../components/influencers_list';
 import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
@@ -470,10 +471,10 @@ export const Explorer: FC<ExplorerUIProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(selectedJobIds)]);
 
-  if (noJobsSelected && !isDataLoading) {
+  if (noJobsSelected) {
     return (
       <ExplorerPage dataViews={dataViews} jobSelectorProps={jobSelectorProps}>
-        <ExplorerNoJobsSelected />
+        <AnomalyDetectionNoJobsSelected />
       </ExplorerPage>
     );
   }
@@ -492,6 +493,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     <div>
       {stoppedPartitions && (
         <EuiCallOut
+          announceOnMount
           size={'s'}
           title={
             <FormattedMessage
@@ -524,6 +526,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
           </EuiTitle>
           <EuiPanel>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate('xpack.ml.explorer.annotationsErrorCallOutTitle', {
                 defaultMessage: 'An error occurred loading annotations:',
               })}
@@ -643,6 +646,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
         {tableError ? (
           <EuiCallOut
+            announceOnMount
             color="danger"
             iconType="warning"
             title={i18n.translate('xpack.ml.explorer.anomaliesTableErrorTitle', {

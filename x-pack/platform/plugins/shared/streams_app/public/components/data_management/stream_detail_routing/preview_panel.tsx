@@ -18,12 +18,13 @@ import { i18n } from '@kbn/i18n';
 import { isCondition } from '@kbn/streamlang';
 import { getSegments, MAX_NESTING_LEVEL } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
+import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
 import { AssetImage } from '../../asset_image';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { MemoPreviewTable, PreviewFlyout } from '../shared';
+import { MemoPreviewTable, PreviewFlyout, type PreviewTableMode } from '../shared';
 import { buildCellActions } from './cell_actions';
 import { DocumentMatchFilterControls } from './document_match_filter_controls';
 import {
@@ -52,7 +53,8 @@ export function PreviewPanel() {
     content = <EditingPanel />;
   } else if (
     routingSnapshot.matches({ ready: 'creatingNewRule' }) ||
-    routingSnapshot.matches({ ready: 'reviewSuggestedRule' })
+    routingSnapshot.matches({ ready: 'reviewSuggestedRule' }) ||
+    routingSnapshot.matches({ ready: 'editingSuggestedRule' })
   ) {
     content = <SamplePreviewPanel enableActions />;
   }
@@ -116,14 +118,14 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
   const isUpdating =
     samplesSnapshot.matches('debouncingCondition') ||
     samplesSnapshot.matches({ fetching: { documents: 'loading' } });
-  const streamName = useStreamSamplesSelector(
-    (snapshot) => snapshot.context.definition.stream.name
-  );
+  const streamName = samplesSnapshot.context.definition.stream.name;
+  const hasPrivileges = samplesSnapshot.context.definition.privileges.manage;
+
+  const [viewMode, setViewMode] = useState<PreviewTableMode>('summary');
+  const { fieldTypes, dataView: streamDataView } = useStreamDataViewFieldTypes(streamName);
 
   const { documentsError, approximateMatchingPercentage } = samplesSnapshot.context;
-  const documents = useStreamSamplesSelector((snapshot) =>
-    selectPreviewDocuments(snapshot.context)
-  );
+  const documents = selectPreviewDocuments(samplesSnapshot.context);
 
   const condition = processCondition(samplesSnapshot.context.condition);
   const isProcessedCondition = condition ? isCondition(condition) : true;
@@ -137,16 +139,16 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     return buildCellActions(documents, createNewRule, changeRule);
   }, [enableActions, documents, createNewRule, changeRule]);
 
-  const matchedDocumentPercentage = isNaN(parseFloat(approximateMatchingPercentage ?? ''))
-    ? Number.NaN
-    : parseFloat(approximateMatchingPercentage!);
-
   const [sorting, setSorting] = useState<{
     fieldName?: string;
     direction: 'asc' | 'desc';
   }>();
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>();
+
+  const handleSetVisibleColumns = useCallback((newVisibleColumns: string[]) => {
+    setVisibleColumns(newVisibleColumns.length > 0 ? newVisibleColumns : undefined);
+  }, []);
 
   const docViewsRegistry = useDocViewerSetup();
 
@@ -210,8 +212,16 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
             setSorting={setSorting}
             toolbarVisibility={true}
             displayColumns={visibleColumns}
-            setVisibleColumns={setVisibleColumns}
+            setVisibleColumns={handleSetVisibleColumns}
             cellActions={cellActions}
+            mode={viewMode}
+            streamName={streamName}
+            viewModeToggle={{
+              currentMode: viewMode,
+              setViewMode,
+              isDisabled: false,
+            }}
+            dataViewFieldTypes={fieldTypes}
           />
         </RowSelectionContext.Provider>
         <PreviewFlyout
@@ -220,6 +230,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
           setExpandedDoc={setExpandedDoc}
           docViewsRegistry={docViewsRegistry}
           streamName={streamName}
+          streamDataView={streamDataView}
         />
       </EuiFlexItem>
     );
@@ -229,13 +240,15 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     <>
       {isUpdating && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup gutterSize="m" direction="column">
-        <DocumentMatchFilterControls
-          onFilterChange={setDocumentMatchFilter}
-          matchedDocumentPercentage={
-            isNaN(matchedDocumentPercentage) ? undefined : Math.round(matchedDocumentPercentage)
-          }
-          isDisabled={!!documentsError || !condition}
-        />
+        {hasPrivileges ? (
+          <DocumentMatchFilterControls
+            onFilterChange={setDocumentMatchFilter}
+            matchedDocumentPercentage={approximateMatchingPercentage}
+            isDisabled={!!documentsError || !condition || (condition && !isProcessedCondition)}
+          />
+        ) : (
+          <EuiFlexItem grow={false} />
+        )}
         {content}
       </EuiFlexGroup>
     </>

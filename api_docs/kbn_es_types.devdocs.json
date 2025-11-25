@@ -157,7 +157,7 @@
             "description": [],
             "signature": [
               "ScalarValue",
-              "[] | Record<string, string | number | Record<string, string | number> | undefined>[] | undefined"
+              "[] | Record<string, string | number | (string | number)[] | Record<string, string | number> | undefined>[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
             "deprecated": false,

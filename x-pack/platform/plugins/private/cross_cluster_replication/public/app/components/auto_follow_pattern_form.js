@@ -30,7 +30,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { indexPatterns } from '@kbn/data-plugin/public';
+import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
 
 import { extractQueryParams, indices } from '../../shared_imports';
 import { routing } from '../services/routing';
@@ -46,7 +46,7 @@ import {
 
 import { AutoFollowPatternRequestFlyout } from './auto_follow_pattern_request_flyout';
 
-const indexPatternIllegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+const indexPatternIllegalCharacters = ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 const indexNameIllegalCharacters = indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 const getEmptyAutoFollowPattern = (remoteClusterName = '') => ({

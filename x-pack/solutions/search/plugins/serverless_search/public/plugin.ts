@@ -9,7 +9,7 @@ import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
-import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
+import { QueryClient, MutationCache, QueryCache } from '@kbn/react-query';
 import { of } from 'rxjs';
 import { docLinks } from '../common/doc_links';
 import type {

@@ -7,9 +7,11 @@
 import { niceTimeFormatter } from '@elastic/charts';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, System } from '@kbn/streams-schema';
+import type { StreamQueryKql, Feature } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { StreamFeaturesFlyout } from '../stream_detail_features/stream_features/stream_features_flyout';
+import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
 import { useFilteredSigEvents } from './hooks/use_filtered_sig_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { EditSignificantEventFlyout } from './edit_significant_event_flyout';
@@ -21,12 +23,14 @@ import { LoadingPanel } from '../loading_panel';
 import type { Flow } from './add_significant_event_flyout/types';
 import { NoSignificantEventsEmptyState } from './empty_state/empty_state';
 import { SignificantEventsTable } from './significant_events_table';
-import { NO_SYSTEM } from './add_significant_event_flyout/utils/default_query';
-import { NoSystemsEmptyState } from './empty_state/no_systems';
-import { StreamSystemsFlyout } from '../data_management/stream_detail_management/stream_systems/stream_systems_flyout';
-import { useStreamSystems } from '../data_management/stream_detail_management/stream_systems/hooks/use_stream_systems';
-import { useStreamSystemsApi } from '../../hooks/use_stream_systems_api';
+import { NO_FEATURE } from './add_significant_event_flyout/utils/default_query';
+import { NoFeaturesEmptyState } from './empty_state/no_features';
+import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
 import { useAIFeatures } from './add_significant_event_flyout/generated_flow_form/use_ai_features';
+import {
+  OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
+  SELECTED_FEATURES_URL_PARAM,
+} from '../../constants';
 
 interface Props {
   definition: Streams.all.GetResponse;
@@ -45,11 +49,11 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     return niceTimeFormatter([start, end]);
   }, [start, end]);
 
-  const { systems, refresh, loading: systemsLoading } = useStreamSystems(definition.stream);
-  const { identifySystems } = useStreamSystemsApi(definition.stream);
-  const [isSystemDetectionFlyoutOpen, setIsSystemDetectionFlyoutOpen] = useState(false);
-  const [isSystemDetectionLoading, setIsSystemDetectionLoading] = useState(false);
-  const [detectedSystems, setDetectedSystems] = useState<System[]>([]);
+  const { features, refreshFeatures, featuresLoading } = useStreamFeatures(definition.stream);
+  const { identifyFeatures, abort } = useStreamFeaturesApi(definition.stream);
+  const [isFeatureDetectionFlyoutOpen, setIsFeatureDetectionFlyoutOpen] = useState(false);
+  const [isFeatureDetectionLoading, setIsFeatureDetectionLoading] = useState(false);
+  const [detectedFeatures, setDetectedFeatures] = useState<Feature[]>([]);
 
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
@@ -65,7 +69,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
 
-  const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
 
   const [query, setQuery] = useState<string>('');
@@ -75,19 +79,44 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     query
   );
 
-  if (systemsLoading || significantEventsFetchState.loading) {
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get(OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM) === 'true' && features.length > 0) {
+      setIsEditFlyoutOpen(true);
+
+      // Parse selected features from URL parameters
+      const selectedFeaturesParam = urlParams.get(SELECTED_FEATURES_URL_PARAM);
+
+      if (selectedFeaturesParam) {
+        const selectedFeatureNames = selectedFeaturesParam.split(',').filter((name) => name.trim());
+        setSelectedFeatures(
+          features.filter((feature) => selectedFeatureNames.includes(feature.name))
+        );
+      }
+
+      // Clean up the URL parameters after opening the flyout
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete(OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM);
+      newUrl.searchParams.delete(SELECTED_FEATURES_URL_PARAM);
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+  }, [features]);
+
+  if (featuresLoading || significantEventsFetchState.loading) {
     return <LoadingPanel size="xxl" />;
   }
 
-  const systemDetectionFlyout = isSystemDetectionFlyoutOpen ? (
-    <StreamSystemsFlyout
+  const featureDetectionFlyout = isFeatureDetectionFlyoutOpen ? (
+    <StreamFeaturesFlyout
       definition={definition.stream}
-      systems={detectedSystems}
-      isLoading={isSystemDetectionLoading}
+      features={detectedFeatures}
+      isLoading={isFeatureDetectionLoading}
       closeFlyout={() => {
-        refresh();
-        setIsSystemDetectionFlyoutOpen(false);
+        abort();
+        refreshFeatures();
+        setIsFeatureDetectionFlyoutOpen(false);
       }}
+      setFeatures={setDetectedFeatures}
     />
   ) : null;
 
@@ -100,30 +129,30 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       queryToEdit={queryToEdit}
       setQueryToEdit={setQueryToEdit}
       initialFlow={initialFlow}
-      selectedSystems={selectedSystems}
-      setSelectedSystems={setSelectedSystems}
-      systems={systems}
+      selectedFeatures={selectedFeatures}
+      setSelectedFeatures={setSelectedFeatures}
+      features={features}
     />
   );
 
-  const noSystems = systems.length === 0;
+  const noFeatures = features.length === 0;
   const noSignificantEvents =
     significantEventsFetchState.value && significantEventsFetchState.value.length === 0;
 
-  if (noSystems && noSignificantEvents) {
+  if (noFeatures && noSignificantEvents) {
     return (
       <>
-        <NoSystemsEmptyState
-          onSystemDetectionClick={() => {
-            setIsSystemDetectionLoading(true);
-            setIsSystemDetectionFlyoutOpen(true);
+        <NoFeaturesEmptyState
+          onFeatureIdentificationClick={() => {
+            setIsFeatureDetectionLoading(true);
+            setIsFeatureDetectionFlyoutOpen(true);
 
-            identifySystems(aiFeatures?.genAiConnectors.selectedConnector!, 'now', 'now-24h')
+            identifyFeatures(aiFeatures?.genAiConnectors.selectedConnector!, 'now', 'now-24h')
               .then((data) => {
-                setDetectedSystems(data.systems);
+                setDetectedFeatures(data.features);
               })
               .finally(() => {
-                setIsSystemDetectionLoading(false);
+                setIsFeatureDetectionLoading(false);
               });
           }}
           onManualEntryClick={() => {
@@ -132,7 +161,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             setIsEditFlyoutOpen(true);
           }}
         />
-        {systemDetectionFlyout}
+        {featureDetectionFlyout}
         {editFlyout}
       </>
     );
@@ -151,9 +180,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             setInitialFlow('manual');
             setIsEditFlyoutOpen(true);
           }}
-          systems={systems}
-          selectedSystems={selectedSystems}
-          onSystemsChange={setSelectedSystems}
+          features={features}
+          selectedFeatures={selectedFeatures}
+          onFeaturesChange={setSelectedFeatures}
         />
         {editFlyout}
       </>
@@ -229,7 +258,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
               setIsEditFlyoutOpen(true);
               setQueryToEdit({
                 ...item.query,
-                system: item.query.system ?? NO_SYSTEM,
+                feature: item.query.feature ?? NO_FEATURE,
               });
             }}
             onDeleteClick={async (item) => {

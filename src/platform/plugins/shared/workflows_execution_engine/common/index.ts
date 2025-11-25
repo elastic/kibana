@@ -6,93 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
-export const PLUGIN_ID = 'workflowsExecutionEngine';
-export const PLUGIN_NAME = 'Workflows Execution Engine';
-
-export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
-export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.workflows-execution-logs';
-
-export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
-  dynamic: false,
-  properties: {
-    spaceId: {
-      type: 'keyword',
-    },
-    id: {
-      type: 'keyword',
-    },
-    workflowId: {
-      type: 'keyword',
-    },
-    status: {
-      type: 'keyword',
-    },
-    workflowDefinition: {
-      type: 'object',
-      enabled: false,
-    },
-    createdAt: {
-      type: 'date',
-    },
-    error: {
-      type: 'text',
-      index: false,
-    },
-    createdBy: {
-      type: 'keyword',
-    },
-    startedAt: {
-      type: 'date',
-    },
-    finishedAt: {
-      type: 'date',
-    },
-    duration: {
-      type: 'long',
-    },
-    triggeredBy: {
-      type: 'keyword',
-    },
-  },
-};
-
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
-  dynamic: false,
-  properties: {
-    spaceId: {
-      type: 'keyword',
-    },
-    id: {
-      type: 'keyword',
-    },
-    stepId: {
-      type: 'keyword',
-    },
-    workflowRunId: {
-      type: 'keyword',
-    },
-    workflowId: {
-      type: 'keyword',
-    },
-    status: {
-      type: 'keyword',
-    },
-    startedAt: {
-      type: 'date',
-    },
-    finishedAt: {
-      type: 'date',
-    },
-    duration: {
-      // milliseconds
-      type: 'long',
-    },
-    output: {
-      type: 'object',
-      enabled: false,
-    },
-  },
-};
+export {
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+  WORKFLOWS_EXECUTION_LOGS_INDEX,
+} from './mappings';
+export { createIndexes } from './create_indexes';

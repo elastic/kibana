@@ -8,17 +8,17 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs';
+import { isEqual } from 'lodash';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, getDefaultSort } from '@kbn/discover-utils';
-import type {
-  SearchEmbeddableSerializedState,
-  SearchEmbeddableApi,
-} from '@kbn/discover-plugin/public';
+import type { SearchEmbeddableApi } from '@kbn/discover-plugin/public';
+import type { SearchEmbeddableState } from '@kbn/discover-plugin/common';
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { type SavedSearch, toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { SavedSearchComponentProps } from '../types';
+import type { SavedSearchComponentProps, SavedSearchTableConfig } from '../types';
 import { SavedSearchComponentErrorContent } from './error';
 
 const TIMESTAMP_FIELD = '@timestamp';
@@ -27,7 +27,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
   // Creates our *initial* search source and set of attributes.
   // Future changes to these properties will be facilitated by the Parent API from the embeddable.
   const [initialSerializedState, setInitialSerializedState] =
-    useState<SerializedPanelState<SearchEmbeddableSerializedState>>();
+    useState<SerializedPanelState<SearchEmbeddableState>>();
 
   const [error, setError] = useState<Error | undefined>();
 
@@ -36,9 +36,15 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     timeRange,
     query,
     filters,
+    nonHighlightingFilters,
     index,
     timestampField,
     columns,
+    sort,
+    grid,
+    rowHeight,
+    rowsPerPage,
+    density,
     height,
   } = props;
 
@@ -66,6 +72,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
           searchSource.setField('index', dataView);
           searchSource.setField('query', query);
           searchSource.setField('filter', filters);
+          searchSource.setField('nonHighlightingFilters', nonHighlightingFilters);
           const { searchSourceJSON, references } = searchSource.serialize();
           // By-value saved object structure
           const savedSearch: SavedSearch = {
@@ -74,7 +81,12 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
               searchSourceJSON,
             },
             columns,
-            sort: getDefaultSort(dataView, undefined, undefined, isOfAggregateQueryType(query)),
+            sort:
+              sort ?? getDefaultSort(dataView, undefined, undefined, isOfAggregateQueryType(query)),
+            grid,
+            rowHeight,
+            rowsPerPage,
+            density,
             managed: false,
           };
           setInitialSerializedState({
@@ -89,7 +101,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
                 enableDocumentViewer: documentViewerEnabled,
                 enableFilters: filtersEnabled,
               },
-            } as SearchEmbeddableSerializedState,
+            } as SearchEmbeddableState,
             references,
           });
         }
@@ -105,9 +117,15 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     };
   }, [
     columns,
+    sort,
+    grid,
+    rowHeight,
+    rowsPerPage,
+    density,
     dataViews,
     documentViewerEnabled,
     filters,
+    nonHighlightingFilters,
     filtersEnabled,
     index,
     query,
@@ -137,7 +155,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
 
 const SavedSearchComponentTable: React.FC<
   SavedSearchComponentProps & {
-    initialSerializedState: SerializedPanelState<SearchEmbeddableSerializedState>;
+    initialSerializedState: SerializedPanelState<SearchEmbeddableState>;
   }
 > = (props) => {
   const {
@@ -149,8 +167,10 @@ const SavedSearchComponentTable: React.FC<
     timestampField,
     index,
     columns,
+    onTableConfigChange,
   } = props;
   const embeddableApi = useRef<SearchEmbeddableApi | undefined>(undefined);
+  const [isEmbeddableApiAvailable, setIsEmbeddableApiAvailable] = useState(false);
 
   const parentApi = useMemo(() => {
     return {
@@ -218,13 +238,48 @@ const SavedSearchComponentTable: React.FC<
     [columns]
   );
 
+  // Subscribe to table config changes and notify parent via callback
+  useEffect(
+    function notifyTableConfigChanges() {
+      if (!embeddableApi.current || !onTableConfigChange) return;
+
+      const subscription = embeddableApi.current.savedSearch$
+        .pipe(
+          // Debounce to avoid too many updates during rapid changes
+          debounceTime(300),
+          // Map to our table config structure
+          map(
+            (savedSearch): SavedSearchTableConfig => ({
+              columns: savedSearch.columns,
+              sort: savedSearch.sort,
+              grid: savedSearch.grid,
+              rowHeight: savedSearch.rowHeight,
+              rowsPerPage: savedSearch.rowsPerPage,
+              density: savedSearch.density,
+            })
+          ),
+          // Only emit when config actually changes
+          distinctUntilChanged((prev, curr) => isEqual(prev, curr))
+        )
+        .subscribe((config) => {
+          onTableConfigChange(config);
+        });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    },
+    [onTableConfigChange, isEmbeddableApiAvailable]
+  );
+
   return (
-    <EmbeddableRenderer<SearchEmbeddableSerializedState, SearchEmbeddableApi>
+    <EmbeddableRenderer<SearchEmbeddableState, SearchEmbeddableApi>
       maybeId={undefined}
       type={SEARCH_EMBEDDABLE_TYPE}
       getParentApi={() => parentApi}
       onApiAvailable={(api) => {
         embeddableApi.current = api;
+        setIsEmbeddableApiAvailable(true);
       }}
       hidePanelChrome
     />

@@ -83,6 +83,7 @@ export const DstEventGenerator: FC<Props> = ({ addEvents, setTimezone, isDisable
           <EuiSpacer size="s" />
 
           <EuiCallOut
+            announceOnMount
             color="primary"
             iconType="info"
             size="s"

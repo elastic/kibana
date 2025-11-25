@@ -7,8 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { AnalyticsServiceStart } from '@kbn/core/server';
+import { QuerySource } from '@kbn/esql-types';
+import type {
+  TelemetryQuerySubmittedProps,
+  ESQLVariableType,
+  ControlTriggerSource,
+} from '@kbn/esql-types';
+import { BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
 import {
+  hasLimitBeforeAggregate,
+  missingSortBeforeLimit,
+} from '@kbn/esql-utils/src/utils/query_parsing_helpers';
+import {
+  ESQL_CONTROL_CANCELLED,
+  ESQL_CONTROL_FLYOUT_OPENED,
+  ESQL_CONTROL_SAVED,
   ESQL_LOOKUP_JOIN_ACTION_SHOWN,
+  ESQL_QUERY_HISTORY_CLICKED,
+  ESQL_QUERY_HISTORY_OPENED,
+  ESQL_QUERY_SUBMITTED,
+  ESQL_RECOMMENDED_QUERY_CLICKED,
+  ESQL_STARRED_QUERY_CLICKED,
   ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
 } from './events_registration';
 import type { IndexEditorCommandArgs } from '../custom_commands/use_lookup_index_editor';
@@ -79,5 +98,88 @@ export class ESQLEditorTelemetryService {
       return 'create';
     }
     return commandData.canEditIndex ? 'edit' : 'read';
+  }
+
+  public trackQueryHistoryOpened(isOpen: boolean) {
+    if (isOpen) {
+      this._reportEvent(ESQL_QUERY_HISTORY_OPENED, {});
+    }
+  }
+
+  public trackQueryHistoryClicked(isStarredQuery: boolean = false) {
+    if (isStarredQuery) {
+      this._reportEvent(ESQL_STARRED_QUERY_CLICKED, {});
+    } else {
+      this._reportEvent(ESQL_QUERY_HISTORY_CLICKED, {});
+    }
+  }
+
+  public trackQuerySubmitted({ source, query }: TelemetryQuerySubmittedProps) {
+    // parsing and prettifying the raw query
+    // to remove comments for accurately measuring its length
+    const { root } = Parser.parse(query);
+    const prettyQuery = BasicPrettyPrinter.print(root);
+    const hasLimitBeforeStats =
+      source === QuerySource.HELP || source === QuerySource.AUTOCOMPLETE
+        ? false
+        : hasLimitBeforeAggregate(query);
+    const hasMissingSortBeforeLimit =
+      source === QuerySource.HELP || source === QuerySource.AUTOCOMPLETE
+        ? false
+        : missingSortBeforeLimit(query);
+    this._reportEvent(ESQL_QUERY_SUBMITTED, {
+      query_source: source,
+      query_length: prettyQuery.length.toString(),
+      query_lines: query.split('\n').length.toString(),
+      anti_limit_before_aggregate: hasLimitBeforeStats,
+      anti_missing_sort_before_limit: hasMissingSortBeforeLimit,
+    });
+  }
+
+  public trackRecommendedQueryClicked(
+    source: QuerySource.HELP | QuerySource.AUTOCOMPLETE,
+    label: string
+  ) {
+    this._reportEvent(ESQL_RECOMMENDED_QUERY_CLICKED, {
+      trigger_source: source,
+      recommended_query: label,
+    });
+  }
+
+  public trackEsqlControlFlyoutOpened(
+    prefilled: boolean,
+    controlType: ESQLVariableType,
+    triggerSource: ControlTriggerSource,
+    query: string
+  ) {
+    // parsing and prettifying the raw query
+    // to remove comments for accurately measuring its length
+    const { root } = Parser.parse(query);
+    const prettyQuery = BasicPrettyPrinter.print(root);
+
+    this._reportEvent(ESQL_CONTROL_FLYOUT_OPENED, {
+      prefilled,
+      control_kind: controlType,
+      trigger_source: triggerSource,
+      query_length: prettyQuery.length.toString(),
+      query_lines: query.split('\n').length.toString(),
+    });
+  }
+
+  public trackEsqlControlConfigSaved(
+    controlType: ESQLVariableType,
+    triggerSource: ControlTriggerSource
+  ) {
+    this._reportEvent(ESQL_CONTROL_SAVED, {
+      control_kind: controlType,
+      trigger_source: triggerSource,
+    });
+  }
+
+  public trackEsqlControlConfigCancelled(controlType: ESQLVariableType, reason: string) {
+    this._reportEvent(ESQL_CONTROL_CANCELLED, {
+      control_kind: controlType,
+      reason,
+    });
   }
 }

@@ -21,7 +21,7 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type ReviewSuggestionsInputs } from './use_review_suggestions_form';
+import { type PartitionSuggestion } from './use_review_suggestions_form';
 import { ConditionPanel } from '../../shared';
 import {
   useStreamRoutingEvents,
@@ -32,7 +32,7 @@ export function CreateStreamConfirmationModal({
   partition,
   onSuccess,
 }: {
-  partition: ReviewSuggestionsInputs['suggestions'][number];
+  partition: PartitionSuggestion;
   onSuccess: () => void;
 }) {
   const modalTitleId = useGeneratedHtmlId();
@@ -84,7 +84,11 @@ export function CreateStreamConfirmationModal({
             forkStream({
               destination: partition.name,
               where: partition.condition,
-            }).then(() => onSuccess())
+            }).then((result) => {
+              if (result.success) {
+                onSuccess();
+              }
+            })
           }
           fill
         >

@@ -93,7 +93,12 @@ export default function Warnings() {
     <EuiFlexGroup data-test-subj="datasetQualityWarningsContainer" gutterSize="s" wrap>
       {!loading && nonAggregatableDatasets.length > 0 && (
         <EuiFlexItem>
-          <EuiCallOut title={nonAggregatableWarningTitle} color="warning" iconType="warning">
+          <EuiCallOut
+            announceOnMount={false}
+            title={nonAggregatableWarningTitle}
+            color="warning"
+            iconType="warning"
+          >
             <p>{nonAggregatableWarningDescription(nonAggregatableDatasets)}</p>
           </EuiCallOut>
         </EuiFlexItem>

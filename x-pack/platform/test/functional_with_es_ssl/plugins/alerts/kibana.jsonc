@@ -11,7 +11,8 @@
     "requiredPlugins": [
       "alerting",
       "triggersActionsUi",
-      "features"
+      "features",
+      "eventLog",
     ]
   }
 }

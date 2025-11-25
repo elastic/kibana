@@ -235,9 +235,18 @@ export class ScoutJestReporter extends BaseReporter {
         ...this.baseTestRunInfo,
         status: results.numFailedTests === 0 ? 'passed' : 'failed',
         duration: Date.now() - results.startTime || 0,
+        tests: {
+          failures: results.numFailedTests,
+          passes: results.numPassedTests,
+          pending: results.numPendingTests,
+          total: results.numTotalTests,
+        },
       },
       event: {
         action: ScoutReportEventAction.RUN_END,
+      },
+      process: {
+        uptime: Math.floor(process.uptime() * 1000),
       },
     });
 

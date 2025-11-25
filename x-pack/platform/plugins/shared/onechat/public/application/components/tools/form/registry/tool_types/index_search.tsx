@@ -20,16 +20,19 @@ import { createIndexSearchFormValidationSchema } from '../../validation/index_se
 
 import { zodResolver } from '../../../../../utils/zod_resolver';
 import { i18nMessages } from '../../i18n';
-import type { IndexSearchToolTypeRegistryEntry } from '../common';
+import type { ToolTypeRegistryEntry } from '../common';
+import type { IndexSearchToolFormData } from '../../types/tool_form_types';
 import { commonToolFormDefaultValues } from '../common';
 
-export const indexSearchToolRegistryEntry: IndexSearchToolTypeRegistryEntry = {
+export const indexSearchToolRegistryEntry: ToolTypeRegistryEntry<IndexSearchToolFormData> = {
   label: i18nMessages.configuration.form.type.indexSearchOption,
   getConfigurationComponent: () => IndexSearchConfiguration,
   defaultValues: {
     ...commonToolFormDefaultValues,
     type: ToolType.index_search,
     pattern: '',
+    rowLimit: undefined,
+    customInstructions: '',
   },
   toolToFormData: (tool: ToolDefinitionWithSchema) => {
     if (!isIndexSearchTool(tool)) {

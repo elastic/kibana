@@ -12,14 +12,17 @@ import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { TickFormatter } from '@elastic/charts';
-import type { StreamQuery, Streams } from '@kbn/streams-schema';
-import { StreamSystemDetailsFlyout } from '../data_management/stream_detail_management/stream_systems/stream_system_details_flyout';
+import type { Feature, StreamQuery, Streams } from '@kbn/streams-schema';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics/constants';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { StreamFeatureDetailsFlyout } from '../stream_detail_features/stream_features/stream_feature_details_flyout';
 import type { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { formatChangePoint } from './utils/change_point';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
 import { buildDiscoverParams } from './utils/discover_helpers';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
 
 export function SignificantEventsTable({
   definition,
@@ -36,18 +39,17 @@ export function SignificantEventsTable({
   onEditClick?: (query: SignificantEventItem) => void;
   xFormatter: TickFormatter;
 }) {
-  const {
-    dependencies: {
-      start: { discover },
-    },
-  } = useKibana();
+  const { share } = useKibana().dependencies.start;
   const { timeState } = useTimefilter();
 
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [selectedDeleteItem, setSelectedDeleteItem] = useState<SignificantEventItem>();
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
-  const [isSystemDetailFlyoutOpen, setIsSystemDetailFlyoutOpen] = useState<string>('');
+  const [selectedFeature, setSelectedFeature] = useState<Feature>();
+  const { featuresByName, refreshFeatures } = useStreamFeatures(definition);
+
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
     {
@@ -55,52 +57,55 @@ export function SignificantEventsTable({
       name: i18n.translate('xpack.streams.significantEventsTable.titleColumnTitle', {
         defaultMessage: 'Title',
       }),
-      render: (_, record) => (
-        <EuiLink
-          aria-label={i18n.translate('xpack.streams.columns.euiButtonEmpty.openInDiscoverLabel', {
-            defaultMessage: 'Open in discover',
-          })}
-          href={discover?.locator?.getRedirectUrl(
-            buildDiscoverParams(record.query, definition, timeState)
-          )}
-        >
-          {record.query.title}
-        </EuiLink>
-      ),
+      render: (_, record) =>
+        discoverLocator ? (
+          <EuiLink
+            aria-label={i18n.translate('xpack.streams.columns.euiButtonEmpty.openInDiscoverLabel', {
+              defaultMessage: 'Open in discover',
+            })}
+            href={discoverLocator.getRedirectUrl(
+              buildDiscoverParams(record.query, definition, timeState)
+            )}
+          >
+            {record.query.title}
+          </EuiLink>
+        ) : (
+          record.query.title
+        ),
     },
     {
       field: 'query',
-      name: i18n.translate('xpack.streams.significantEventsTable.system', {
-        defaultMessage: 'System',
+      name: i18n.translate('xpack.streams.significantEventsTable.feature', {
+        defaultMessage: 'Feature',
       }),
       render: (query: StreamQuery) => {
         return (
           <EuiBadge
             color="hollow"
             onClickAriaLabel={i18n.translate(
-              'xpack.streams.significantEventsTable.systemDetailsFlyoutAriaLabel',
+              'xpack.streams.significantEventsTable.featureDetailsFlyoutAriaLabel',
               {
-                defaultMessage: 'Open system details',
+                defaultMessage: 'Open feature details',
               }
             )}
             onClick={() => {
-              if (query.system?.name) {
-                setIsSystemDetailFlyoutOpen(query.system.name);
+              if (query.feature?.name) {
+                setSelectedFeature(featuresByName[query.feature.name]);
               }
             }}
             iconOnClick={() => {
-              if (query.system?.name) {
-                setIsSystemDetailFlyoutOpen(query.system.name);
+              if (query.feature?.name) {
+                setSelectedFeature(featuresByName[query.feature.name]);
               }
             }}
             iconOnClickAriaLabel={i18n.translate(
-              'xpack.streams.significantEventsTable.systemDetailsFlyoutAriaLabel',
+              'xpack.streams.significantEventsTable.featureDetailsFlyoutAriaLabel',
               {
-                defaultMessage: 'Open system details',
+                defaultMessage: 'Open feature details',
               }
             )}
           >
-            {query.system?.name ?? '--'}
+            {query.feature?.name ?? '--'}
           </EuiBadge>
         );
       },
@@ -153,11 +158,9 @@ export function SignificantEventsTable({
               defaultMessage: 'Open query in Discover',
             }
           ),
+          enabled: () => discoverLocator !== undefined,
           onClick: (item) => {
-            const url = discover?.locator?.getRedirectUrl(
-              buildDiscoverParams(item.query, definition, timeState)
-            );
-            window.open(url, '_blank');
+            discoverLocator?.navigate(buildDiscoverParams(item.query, definition, timeState));
           },
           isPrimary: true,
         },
@@ -214,13 +217,14 @@ export function SignificantEventsTable({
         tableLayout="auto"
         itemId="id"
       />
-      {isSystemDetailFlyoutOpen && (
-        <StreamSystemDetailsFlyout
+      {selectedFeature && (
+        <StreamFeatureDetailsFlyout
           definition={definition}
-          systemName={isSystemDetailFlyoutOpen}
+          feature={selectedFeature}
           closeFlyout={() => {
-            setIsSystemDetailFlyoutOpen('');
+            setSelectedFeature(undefined);
           }}
+          refreshFeatures={refreshFeatures}
         />
       )}
       {isDeleteModalVisible && selectedDeleteItem && (

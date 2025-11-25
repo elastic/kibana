@@ -26,7 +26,6 @@ import { type AgentPolicyServiceInterface, appContextService, packagePolicyServi
 import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
-import { agentlessAgentService } from './agents/agentless_agent';
 
 async function getFleetServerAgentPolicyId(
   soClient: SavedObjectsClientContract,
@@ -89,7 +88,11 @@ async function createPackagePolicy(
 
   newPackagePolicy.policy_id = agentPolicy.id;
   newPackagePolicy.policy_ids = [agentPolicy.id];
-  newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall);
+  newPackagePolicy.name = await incrementPackageName(
+    soClient,
+    packageToInstall,
+    agentPolicy.space_ids ?? [options.spaceId]
+  );
   if (agentPolicy.supports_agentless) {
     newPackagePolicy.supports_agentless = agentPolicy.supports_agentless;
   }
@@ -203,13 +206,19 @@ export async function createAgentPolicyWithPackages({
     }
   );
 
+  // Since agentPolicyService does not handle multispace assignments, we need to keep this context with package policy creation
+  const agentPolicyWithStagedSpaces = {
+    ...agentPolicy,
+    space_ids: newPolicy.space_ids,
+  };
+
   // Create the fleet server package policy and add it to agent policy.
   if (hasFleetServer) {
     await createPackagePolicy(
       soClient,
       esClient,
       agentPolicyService,
-      agentPolicy,
+      agentPolicyWithStagedSpaces,
       FLEET_SERVER_PACKAGE,
       {
         spaceId,
@@ -226,7 +235,7 @@ export async function createAgentPolicyWithPackages({
       soClient,
       esClient,
       agentPolicyService,
-      agentPolicy,
+      agentPolicyWithStagedSpaces,
       FLEET_SYSTEM_PACKAGE,
       {
         spaceId,
@@ -238,20 +247,21 @@ export async function createAgentPolicyWithPackages({
   }
 
   await ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id);
-  await agentPolicyService.deployPolicy(soClient, agentPolicy.id);
 
-  // Create the agentless agent
-  if (agentPolicy.supports_agentless) {
-    try {
-      await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
-    } catch (err) {
+  try {
+    // Deploy policy will create the agentless agent if needed
+    await agentPolicyService.deployPolicy(soClient, agentPolicy.id, undefined, {
+      throwOnAgentlessError: true,
+    });
+  } catch (err) {
+    if (agentPolicy.supports_agentless) {
       await agentPolicyService.delete(soClient, esClient, agentPolicy.id).catch(() => {
         appContextService
           .getLogger()
           .error(`Error deleting agentless policy`, { error: agentPolicy });
       });
-      throw err;
     }
+    throw err;
   }
 
   return agentPolicy;

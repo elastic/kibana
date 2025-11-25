@@ -21,6 +21,7 @@ import {
   EuiTextTruncate,
 } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { styles as toolbarStyles } from '@kbn/unified-data-table/src/components/custom_toolbar/render_custom_toolbar';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
@@ -72,6 +73,7 @@ export const SelectedField: FC<Props> = ({ fields, selectedField, setSelectedFie
       isOpen={showPopover}
       button={button}
       className="unifiedDataTableToolbarControlButton"
+      css={toolbarStyles.controlButton}
     >
       <FieldSelector
         fields={fields}

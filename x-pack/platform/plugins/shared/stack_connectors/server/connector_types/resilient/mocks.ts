@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ResilientFieldMeta } from './schema';
+import type { ResilientFieldMeta } from '@kbn/connector-schemas/resilient';
 
 export const resilientFields: ResilientFieldMeta[] = [
   {

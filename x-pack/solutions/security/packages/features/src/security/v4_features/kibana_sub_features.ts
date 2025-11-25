@@ -25,6 +25,7 @@ import {
   scanActionSubFeature,
   workflowInsightsSubFeature,
   trustedDevicesSubFeature,
+  socManagementSubFeature,
 } from '../kibana_sub_features';
 
 /**
@@ -45,6 +46,7 @@ export const getSecurityV4SubFeaturesMap = ({
   const securitySubFeaturesList: Array<[SecuritySubFeatureId, SubFeatureConfig]> = [
     [SecuritySubFeatureId.endpointList, endpointListSubFeature()],
     [SecuritySubFeatureId.workflowInsights, workflowInsightsSubFeature()],
+    [SecuritySubFeatureId.socManagement, socManagementSubFeature()],
     [
       SecuritySubFeatureId.globalArtifactManagement,
       globalArtifactManagementSubFeature(experimentalFeatures),
@@ -68,10 +70,8 @@ export const getSecurityV4SubFeaturesMap = ({
     securitySubFeaturesList.map(([id, originalSubFeature]) => {
       let subFeature = originalSubFeature;
 
-      // If the feature is space-aware, we need to set false to the requireAllSpaces flag and remove the privilegesTooltip
-      if (experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-        subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
-      }
+      // Space awareness is now always enabled - set requireAllSpaces to false and remove privilegesTooltip
+      subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
 
       return [id, subFeature];
     })

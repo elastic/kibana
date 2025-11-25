@@ -60,31 +60,31 @@ const useStatusCodeClassNames = (): StatusCodeClassNames => {
   return useMemo(
     () => ({
       monacoStatusCodeLinePrimary: cssClassName`
-        background-color: ${transparentize(euiTheme.colors.primary, 0.9)};
+        background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
       `,
       monacoStatusCodeLineNumberPrimary: cssClassName`
         background-color: ${transparentize(euiTheme.colors.primary, 0.5)};
       `,
       monacoStatusCodeLineSuccess: cssClassName`
-        background-color: ${transparentize(euiTheme.colors.success, 0.9)};
+        background-color: ${transparentize(euiTheme.colors.success, 0.1)};
       `,
       monacoStatusCodeLineNumberSuccess: cssClassName`
         background-color: ${transparentize(euiTheme.colors.success, 0.5)};
       `,
       monacoStatusCodeLineDefault: cssClassName`
-        background-color: ${transparentize(euiTheme.colors.lightShade, 0.9)};
+        background-color: ${transparentize(euiTheme.colors.lightShade, 0.1)};
       `,
       monacoStatusCodeLineNumberDefault: cssClassName`
         background-color: ${transparentize(euiTheme.colors.lightShade, 0.5)};
       `,
       monacoStatusCodeLineWarning: cssClassName`
-        background-color: ${transparentize(euiTheme.colors.warning, 0.9)};
+        background-color: ${transparentize(euiTheme.colors.warning, 0.1)};
       `,
       monacoStatusCodeLineNumberWarning: cssClassName`
         background-color: ${transparentize(euiTheme.colors.warning, 0.5)};
       `,
       monacoStatusCodeLineDanger: cssClassName`
-        background-color: ${transparentize(euiTheme.colors.danger, 0.9)};
+        background-color: ${transparentize(euiTheme.colors.danger, 0.1)};
       `,
       monacoStatusCodeLineNumberDanger: cssClassName`
         background-color: ${transparentize(euiTheme.colors.danger, 0.5)};
