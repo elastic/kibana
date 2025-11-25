@@ -9579,55 +9579,55 @@
     zod "^3.23.8"
     zod-to-json-schema "^3.24.1"
 
-"@moonrepo/cli@1.41.6":
-  version "1.41.6"
-  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-1.41.6.tgz#f5b018516f1aef491443a155e60d090417d8965e"
-  integrity sha512-SkwXawvrHOmWkO0XbxrwlqWwIveK5XOLkNQ2TW4/b7jAxIfiq9Al6ARw8tF1HMg5ir3uEGai9rmaEuSWtx1BZg==
+"@moonrepo/cli@1.41.7":
+  version "1.41.7"
+  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-1.41.7.tgz#72dd13be6309c7d7608843c2e754f395a8fb3153"
+  integrity sha512-zZdE/2m/V/33B3DZOhsuNwRPme+WZiEpggcK6N2og6FCezD/4AxNjc9uZNPBAj2qaDFl3Q+bgtfrHBjdKy4ilg==
   dependencies:
     detect-libc "^2.0.4"
   optionalDependencies:
-    "@moonrepo/core-linux-arm64-gnu" "1.41.6"
-    "@moonrepo/core-linux-arm64-musl" "1.41.6"
-    "@moonrepo/core-linux-x64-gnu" "1.41.6"
-    "@moonrepo/core-linux-x64-musl" "1.41.6"
-    "@moonrepo/core-macos-arm64" "1.41.6"
-    "@moonrepo/core-macos-x64" "1.41.6"
-    "@moonrepo/core-windows-x64-msvc" "1.41.6"
+    "@moonrepo/core-linux-arm64-gnu" "1.41.7"
+    "@moonrepo/core-linux-arm64-musl" "1.41.7"
+    "@moonrepo/core-linux-x64-gnu" "1.41.7"
+    "@moonrepo/core-linux-x64-musl" "1.41.7"
+    "@moonrepo/core-macos-arm64" "1.41.7"
+    "@moonrepo/core-macos-x64" "1.41.7"
+    "@moonrepo/core-windows-x64-msvc" "1.41.7"
 
-"@moonrepo/core-linux-arm64-gnu@1.41.6":
-  version "1.41.6"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.41.6.tgz#a9dd1a77c614d1e080b02dc571adddabcc7e2f72"
-  integrity sha512-3Ob5xqIUUKytQ3ZppTeOKXYUyG5WK9jSc5fgYoy9K9ezFEkkhLoGbQ8ysRbA210AQMWTfIpAcZWwKJ0dFJLDYw==
+"@moonrepo/core-linux-arm64-gnu@1.41.7":
+  version "1.41.7"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.41.7.tgz#8d1393af9c796a1e9c31d6a8529a7350a5bb7b3a"
+  integrity sha512-Opa+jmNLYsHMRlJcmIn78kKY+76CT/93BvynxuMICPfaQqJTAR/5WPGre1omehGlkg5rbiVshsNTiaa+2bHzpA==
 
-"@moonrepo/core-linux-arm64-musl@1.41.6":
-  version "1.41.6"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-1.41.6.tgz#70244776b9b59da62c8d5a430ac5540f9babcc72"
-  integrity sha512-vpH7Gf/0QNWqV78SfhRz4j4pI7TDUBDpWxmP2VlmBWrj3RJzZa31SyatFe1RLvHvN6cyj3w8S5ReaWKhAC399A==
+"@moonrepo/core-linux-arm64-musl@1.41.7":
+  version "1.41.7"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-1.41.7.tgz#288d5a9f0fd0e6c983210b6facc1593e49c41b8f"
+  integrity sha512-0ipCRwg75iFWfsjxIYY9IAm/cMoUy9iUk/qs2+JhruFeDrY6tCdV9Nyo8F2h45WC+/2qwZ7IMEdfWNPJT0TSyA==
 
-"@moonrepo/core-linux-x64-gnu@1.41.6":
-  version "1.41.6"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-1.41.6.tgz#28a439c736d7b1c5f788dfe5983b40af0935ecc8"
-  integrity sha512-wgRPmJZqSkjKL/uwoWb3r8In1YOCHw+hN/FBTpEioTeTmzt7EmTUzwpqMjEp1OAdxFs62DM+YgZ3/fMtYGCk9Q==
+"@moonrepo/core-linux-x64-gnu@1.41.7":
+  version "1.41.7"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-1.41.7.tgz#3044afd53959f2d3e3726ec242f37c12b65c6656"
+  integrity sha512-iHLaZF0ryKhFTf5G/dFrQHPEFII9p88pXXUl17U9tjfeziFyksbdkQrZhNv6sfbE0bDJGPA3H5TEMR93ZwXo/A==
 
-"@moonrepo/core-linux-x64-musl@1.41.6":
-  version "1.41.6"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-1.41.6.tgz#863d6100177d7146a99d71918989e87141d62651"
-  integrity sha512-cAxY5GMdxbdkTTWS3KVrAaVJvMesSbiWCaMyV8Tr/rKC5Ud5MnT5bBGbPJOeDHd7qpu4e9jKIyMXSg2DA0zIYg==
+"@moonrepo/core-linux-x64-musl@1.41.7":
+  version "1.41.7"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-1.41.7.tgz#c17009a889dbd6ea2cea424d3eb31cf6ff925a31"
+  integrity sha512-0nZMjOBBSGHNUSIGcCBrfxgKVmeZQjmXpeMVfO3YG9e2irFR2neHbNIud6vLapC+StgV2UbrKoExR+HRtoyzuA==
 
-"@moonrepo/core-macos-arm64@1.41.6":
-  version "1.41.6"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-1.41.6.tgz#32ee7813534b480e6ff90acb8b5dd83577ba2387"
-  integrity sha512-auPdZbEoP8NtDzj1fpVZG6EY2MrDyz1DBfki3I7WXkH8a6G8HjXn9JLViqs6EPljjrTbj2QBTYX/JCnjlsCcuw==
+"@moonrepo/core-macos-arm64@1.41.7":
+  version "1.41.7"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-1.41.7.tgz#76e9a68c3f72f8f55207f562500498c9d5b6662d"
+  integrity sha512-Z6okifZS8MA6aXFQ1q/Ej45aAq6i2riDgqWB9CmBVqV7JIdJMLP4++ir+FqGu9S0G34SFgspV0g+mrfFgR+/Nw==
 
-"@moonrepo/core-macos-x64@1.41.6":
-  version "1.41.6"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-x64/-/core-macos-x64-1.41.6.tgz#8f6f81e9ce8b1c0fa54eae5dd2fd830e369cb0fb"
-  integrity sha512-76ya4w//hQbnT86tCk5vooQ0GTApxgnLuSA9fzqgN7ZEmTL6UWaP2ob1zfkNVFc6I7KxzgYYcP8wdc8q4F92ew==
+"@moonrepo/core-macos-x64@1.41.7":
+  version "1.41.7"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-x64/-/core-macos-x64-1.41.7.tgz#a4a39b4fcd30b3fc3f49a7b84991b0cfb78f049e"
+  integrity sha512-mOHO4/Ag331oVAxg1QNfaWCNfrKdy6HsUJXNY11ERvpNsi0Fh+qnZ+if3ZiC9jwUdwjw2MvtCRxrlXgtI/shrQ==
 
-"@moonrepo/core-windows-x64-msvc@1.41.6":
-  version "1.41.6"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-1.41.6.tgz#62a4db1b3a888c70a2b56ad27c52bc46ad979322"
-  integrity sha512-agaMCGFeJF60Iggqwqx8M7RdFThIDDtWN/mPJz4vBzKWy3tSGTC99zNgkXjb4Jhny03ky5uFpORvX2Fj/ul9/Q==
+"@moonrepo/core-windows-x64-msvc@1.41.7":
+  version "1.41.7"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-1.41.7.tgz#82051dc3fbdf0e68836f4d0ca7dd3eeeb98e65bb"
+  integrity sha512-p7CiKyWh4j1lhdF81vcacQmgPLV/di3nU5QXjg1lL2mF296HMx4H8sOlcxD/RieGfFW0Qfg5zIreugCHCNUCeA==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
