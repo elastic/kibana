@@ -14,7 +14,7 @@ import * as i18n from './translations';
 import { useBulkUpdateAlertTags } from '../../hooks/use_bulk_update_alert_tags';
 import { useAlertsTableContext } from '../../contexts/alerts_table_context';
 
-interface AlertIdentifier {
+export interface AlertIdentifier {
   _id: string;
   _index: string;
 }
