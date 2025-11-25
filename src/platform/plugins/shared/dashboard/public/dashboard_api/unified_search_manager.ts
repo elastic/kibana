@@ -343,11 +343,12 @@ export function initializeUnifiedSearchManager(
           timeRestore$,
         ]).pipe(
           debounceTime(COMPARE_DEBOUNCE),
-          map(([filters, query, refreshInterval, timeRange]) => ({
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          map(([filters, query, refresh_interval, time_range]) => ({
             filters,
             query,
-            refreshInterval,
-            timeRange,
+            refresh_interval,
+            time_range,
           })),
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) =>

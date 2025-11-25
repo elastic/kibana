@@ -120,7 +120,7 @@ describe('dashboard locator', () => {
           language: 'kuery',
           query: 'bye',
         },
-        refreshInterval: {
+        refresh_interval: {
           pause: false,
           value: 300,
         },
@@ -156,7 +156,7 @@ describe('dashboard locator', () => {
           language: 'kuery',
           query: 'bye',
         },
-        refreshInterval: {
+        refresh_interval: {
           pause: false,
           value: 300,
         },

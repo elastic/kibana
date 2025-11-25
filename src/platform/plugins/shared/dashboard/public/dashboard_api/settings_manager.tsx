@@ -73,7 +73,12 @@ export function initializeSettingsManager(initialState: DashboardState) {
     api: {
       setTags: stateManager.api.setTags,
       getSettings: stateManager.getLatestState,
-      setSettings: stateManager.reinitializeState,
+      setSettings: (settings: Partial<DashboardSettings>) => {
+        stateManager.reinitializeState({
+          ...stateManager.getLatestState(),
+          ...settings,
+        });
+      },
       title$: stateManager.api.title$,
       description$: stateManager.api.description$,
       timeRestore$: stateManager.api.time_restore$,

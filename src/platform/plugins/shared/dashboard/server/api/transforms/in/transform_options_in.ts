@@ -16,7 +16,7 @@ export function transformOptionsIn(options: DashboardState['options']): string {
 
   DASHBOARD_API_OPTION_KEYS.forEach((apiKey, index) => {
     const soKey = DASHBOARD_SO_OPTION_KEYS[index];
-    if (apiOptions[apiKey]) savedObjectOptions[soKey] = apiOptions[apiKey];
+    if (apiOptions[apiKey] !== undefined) savedObjectOptions[soKey] = apiOptions[apiKey];
   });
   return JSON.stringify(savedObjectOptions);
 }

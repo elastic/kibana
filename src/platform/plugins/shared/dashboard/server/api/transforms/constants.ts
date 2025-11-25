@@ -13,14 +13,14 @@ export const DASHBOARD_SO_OPTION_KEYS = [
   'hidePanelTitles',
   'useMargins',
   'syncColors',
-  'syncCursor',
   'syncTooltips',
+  'syncCursor',
 ];
 
 export const DASHBOARD_API_OPTION_KEYS: Array<keyof DashboardOptions> = [
   'hide_panel_titles',
   'use_margins',
   'sync_colors',
-  'sync_cursor',
   'sync_tooltips',
+  'sync_cursor',
 ];

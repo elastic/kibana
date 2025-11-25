@@ -73,6 +73,7 @@ export const transformDashboardIn = (
       ...(panels && {
         panelsJSON,
       }),
+      ...(refresh_interval && { refreshInterval: refresh_interval }),
       ...(sections?.length && { sections }),
       ...(time_range
         ? { timeFrom: time_range.from, timeTo: time_range.to, timeRestore: true }

@@ -72,7 +72,7 @@ describe('initializeUnifiedSearchManager', () => {
         unifiedSearchManager.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
           expect(changes).toMatchInlineSnapshot(`
             Object {
-              "timeRange": Object {
+              "time_range": Object {
                 "from": "now-30m",
                 "to": "now",
               },
@@ -110,7 +110,7 @@ describe('initializeUnifiedSearchManager', () => {
             if (emitCount === 1) {
               expect(changes).toMatchInlineSnapshot(`
               Object {
-                "timeRange": Object {
+                "time_range": Object {
                   "from": "now-30m",
                   "to": "now",
                 },
