@@ -140,7 +140,7 @@ describe('function validation', () => {
 
         it('accepts nulls by default', async () => {
           const { expectErrors } = await setup();
-          expectErrors('FROM a_index | EVAL TEST(NULL)', []);
+          await expectErrors('FROM a_index | EVAL TEST(NULL)', []);
         });
       });
 
