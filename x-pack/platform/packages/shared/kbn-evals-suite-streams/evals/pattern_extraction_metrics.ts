@@ -7,363 +7,457 @@
 
 import type { PatternExtractionGroundTruth } from './pattern_extraction_datasets';
 
-/**
- * Quality metrics for evaluating pattern extraction beyond simple parse rate.
- * These metrics assess whether the generated pattern extracts meaningful, accurate fields.
- */
+// =============================================================================
+// TYPES
+// =============================================================================
 
+/**
+ * Quality metrics for evaluating pattern extraction.
+ */
 export interface PatternQualityMetrics {
-  /** Overall parse rate: percentage of logs successfully parsed */
+  /** Percentage of logs successfully parsed (0-1) */
   parseRate: number;
-  /** Timestamp extraction accuracy (0-1): Whether timestamps are extracted */
+  /** Whether timestamp was extracted correctly (0-1) */
   timestampAccuracy: number;
-  /** Log level accuracy (0-1): Percentage of correctly extracted log levels */
+  /** Whether log level was extracted correctly (0-1) */
   logLevelAccuracy: number;
-  /** Field quality score (0-1): How well other fields match expected values */
+  /** How well fields match expectations (0-1) */
   fieldQuality: number;
-  /** Field count penalty (0-1): Penalty for extracting too many or too few fields */
+  /** Penalty for wrong number of fields (0-1, higher = worse) */
   fieldCountPenalty: number;
-  /** Combined quality score (0-1): Weighted average of all metrics */
+  /** Combined quality score (0-1) */
   overallQuality: number;
 }
 
 export interface ParsedLog {
-  /** Whether the log was successfully parsed */
   parsed: boolean;
-  /** Extracted fields from the log */
   fields: Record<string, string | number | boolean | null>;
-  /** Original log message */
   originalMessage: string;
 }
 
+// =============================================================================
+// CONSTANTS
+// =============================================================================
+
+/** Known log level values for validation (normalized to lowercase) */
+const KNOWN_LOG_LEVELS = new Set([
+  'trace',
+  'debug',
+  'info',
+  'information',
+  'warn',
+  'warning',
+  'error',
+  'err',
+  'fatal',
+  'critical',
+  'notice',
+  'emerg',
+  'alert',
+]);
+
+// =============================================================================
+// FIELD NAME UTILITIES
+// =============================================================================
+
 /**
- * Calculate timestamp extraction accuracy by checking if timestamp fields are extracted.
- * Does NOT attempt to parse or validate the timestamp format - just checks presence.
+ * Normalize a field name for comparison.
+ * Removes common prefixes like "attributes." and "custom." and lowercases.
+ */
+function normalizeFieldName(name: string): string {
+  return name
+    .replace(/^attributes\./, '')
+    .replace(/^custom\./, '')
+    .toLowerCase();
+}
+
+/**
+ * Calculate similarity between two field names using tiered matching.
  *
- * Scoring:
- * - 1.0: Timestamp field extracted with non-empty value
- * - 0.0: No timestamp extracted or empty value
+ * @returns Similarity score:
+ *   - 1.0 = exact match
+ *   - 0.9 = normalized match (e.g., "attributes.source.ip" == "source.ip")
+ *   - 0.7 = base name match (last segment only)
+ *   - 0.5 = contains match (one includes the other)
+ *   - 0.0 = no match
+ */
+function fieldNameSimilarity(extracted: string, expected: string): number {
+  if (extracted === expected) return 1.0;
+
+  const normalizedExtracted = normalizeFieldName(extracted);
+  const normalizedExpected = normalizeFieldName(expected);
+
+  if (normalizedExtracted === normalizedExpected) return 0.9;
+
+  // Base name match (last segment)
+  const baseExtracted = normalizedExtracted.split('.').pop() || normalizedExtracted;
+  const baseExpected = normalizedExpected.split('.').pop() || normalizedExpected;
+  if (baseExtracted === baseExpected) return 0.7;
+
+  // Contains match
+  if (normalizedExtracted.includes(baseExpected) || normalizedExpected.includes(baseExtracted)) {
+    return 0.5;
+  }
+
+  return 0;
+}
+
+/**
+ * Find the best matching extracted field for an expected field name.
+ */
+function findBestFieldMatch(
+  expectedFieldName: string,
+  extractedFieldNames: string[]
+): { score: number; matchedField?: string } {
+  let bestScore = 0;
+  let bestMatch: string | undefined;
+
+  for (const extracted of extractedFieldNames) {
+    const score = fieldNameSimilarity(extracted, expectedFieldName);
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatch = extracted;
+    }
+  }
+
+  return { score: bestScore, matchedField: bestMatch };
+}
+
+// =============================================================================
+// VALUE VALIDATION UTILITIES
+// =============================================================================
+
+/**
+ * Validate that a field value matches the expected type.
+ */
+function validateFieldType(
+  value: string | number | boolean | null,
+  expectedType: 'keyword' | 'number' | 'ip' | 'text' | 'boolean'
+): boolean {
+  if (value === null || value === undefined) return false;
+
+  const valueStr = String(value).trim();
+  if (valueStr.length === 0) return false;
+
+  switch (expectedType) {
+    case 'number':
+      return !isNaN(Number(valueStr));
+    case 'boolean':
+      return ['true', 'false', '1', '0', 'yes', 'no'].includes(valueStr.toLowerCase());
+    case 'ip':
+      // IPv4, IPv6, or hostname
+      return (
+        /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(valueStr) ||
+        /^[0-9a-f:]+$/i.test(valueStr) ||
+        /^[a-z0-9.-]+$/i.test(valueStr)
+      );
+    case 'keyword':
+    case 'text':
+      // Just check it's not a placeholder
+      return !/^(null|undefined|n\/?a|-+)$/i.test(valueStr);
+    default:
+      return true;
+  }
+}
+
+/**
+ * Check if a value looks like a valid log level.
+ */
+function isKnownLogLevel(value: string): boolean {
+  return KNOWN_LOG_LEVELS.has(value.toLowerCase().trim());
+}
+
+/**
+ * Check if a value looks like a timestamp (has numbers and reasonable length).
+ */
+function looksLikeTimestamp(value: string | number | boolean | null): boolean {
+  const valueStr = String(value || '');
+  return valueStr.length >= 8 && /\d/.test(valueStr);
+}
+
+// =============================================================================
+// METRIC CALCULATIONS
+// =============================================================================
+
+/**
+ * Calculate timestamp extraction accuracy.
+ *
+ * Scoring (tiered by field name match quality):
+ * - 1.0: Exact/normalized field name match with valid timestamp value
+ * - 0.8: Similar field name match with valid timestamp value
+ * - 0.5: Partial match with valid timestamp value
+ * - 0.0: Not extracted or invalid
  */
 export function calculateTimestampAccuracy(
   parsedLogs: ParsedLog[],
   expectedFields: PatternExtractionGroundTruth['expected_fields']
 ): number {
-  if (parsedLogs.length === 0) {
-    return 0;
-  }
+  if (parsedLogs.length === 0) return 0;
+  if (!expectedFields.timestamp?.field_name) return 1.0; // No timestamp expected
 
-  const timestampFieldName = expectedFields.timestamp?.field_name;
-  if (!timestampFieldName) {
-    return 1.0; // No timestamp expected, so no penalty
-  }
+  const expectedName = expectedFields.timestamp.field_name;
+  const parsedCount = parsedLogs.filter((log) => log.parsed).length;
+  if (parsedCount === 0) return 0;
 
-  let extractedCount = 0;
+  let totalScore = 0;
 
   for (const log of parsedLogs) {
-    if (!log.parsed) {
-      continue;
-    }
+    if (!log.parsed) continue;
 
-    const extractedTimestamp = log.fields[timestampFieldName];
+    const extractedNames = Object.keys(log.fields);
+    const match = findBestFieldMatch(expectedName, extractedNames);
 
-    // Check if timestamp exists and has a non-empty value
-    if (extractedTimestamp && String(extractedTimestamp).trim().length > 0) {
-      extractedCount++;
+    if (match.matchedField && looksLikeTimestamp(log.fields[match.matchedField])) {
+      // Score based on name match quality
+      if (match.score >= 0.9) {
+        totalScore += 1.0;
+      } else if (match.score >= 0.5) {
+        totalScore += 0.8;
+      } else if (match.score > 0) {
+        totalScore += 0.5;
+      }
     }
   }
 
-  return extractedCount / parsedLogs.length;
+  return totalScore / parsedCount;
 }
 
 /**
- * Calculate log level extraction accuracy by comparing extracted log levels
- * with expected values.
+ * Calculate log level extraction accuracy.
  *
- * Scoring:
- * - 1.0: Extracted level matches one of the expected values (case-insensitive)
- * - 0.0: No level extracted or doesn't match expected values
+ * Scoring (tiered by field name match and value validity):
+ * - 1.0: Exact field name match with expected value
+ * - 0.8: Good field name match with known log level value
+ * - 0.5: Partial match with known log level value
+ * - 0.0: Not extracted or invalid value
  */
 export function calculateLogLevelAccuracy(
   parsedLogs: ParsedLog[],
   expectedFields: PatternExtractionGroundTruth['expected_fields']
 ): number {
-  if (parsedLogs.length === 0 || !expectedFields.log_level) {
-    return 0;
-  }
+  if (parsedLogs.length === 0) return 0;
+  if (!expectedFields.log_level) return 1.0; // No log level expected
 
-  const logLevelFieldName = expectedFields.log_level.field_name;
-  const expectedValues = expectedFields.log_level.example_values.map((v) => v.toLowerCase());
+  const expectedName = expectedFields.log_level.field_name;
+  const expectedValues = new Set(
+    expectedFields.log_level.example_values.map((v) => v.toLowerCase())
+  );
+  const parsedCount = parsedLogs.filter((log) => log.parsed).length;
+  if (parsedCount === 0) return 0;
 
-  let correctCount = 0;
+  let totalScore = 0;
 
   for (const log of parsedLogs) {
-    if (!log.parsed) {
-      continue;
-    }
+    if (!log.parsed) continue;
 
-    const extractedLevel = log.fields[logLevelFieldName];
+    const extractedNames = Object.keys(log.fields);
+    const match = findBestFieldMatch(expectedName, extractedNames);
 
-    if (!extractedLevel) {
-      continue;
-    }
+    if (match.matchedField) {
+      const value = String(log.fields[match.matchedField] || '').trim();
+      const normalizedValue = value.toLowerCase();
+      const isExpectedValue = expectedValues.has(normalizedValue);
+      const isKnownLevel = isKnownLogLevel(value);
 
-    const extractedLevelStr = String(extractedLevel).toLowerCase();
-
-    // Check if extracted level matches any expected value
-    // Also check common variations (e.g., INFO/info, WARN/warning)
-    const matches = expectedValues.some((expected) => {
-      if (extractedLevelStr === expected) return true;
-
-      // Handle common level variations
-      const variations: Record<string, string[]> = {
-        info: ['information', 'informational'],
-        warn: ['warning', 'wrn'],
-        error: ['err', 'fatal', 'critical'],
-        debug: ['dbg', 'trace', 'verbose'],
-        notice: ['note'],
-      };
-
-      for (const [canonical, alts] of Object.entries(variations)) {
-        if (expected.includes(canonical)) {
-          return alts.some((alt) => extractedLevelStr.includes(alt));
+      if (isExpectedValue || isKnownLevel) {
+        if (match.score >= 0.9 && isExpectedValue) {
+          totalScore += 1.0;
+        } else if (match.score >= 0.7 && isKnownLevel) {
+          totalScore += 0.8;
+        } else if (isKnownLevel) {
+          totalScore += 0.5;
         }
       }
-
-      return false;
-    });
-
-    if (matches) {
-      correctCount++;
     }
   }
 
-  return correctCount / parsedLogs.length;
+  return totalScore / parsedCount;
 }
 
 /**
- * Calculate field quality by comparing extracted fields with expected fields.
- * This measures how well the pattern extracts meaningful field names and values.
+ * Calculate field quality score.
  *
- * Scoring considers:
- * - Field name similarity to expected names
- * - Field value types and patterns
- * - Presence of required fields
- * - Absence of junk/noise fields
+ * Evaluates:
+ * - Required fields present (2 points each, weighted by match quality)
+ * - Optional fields present (1 point each)
+ * - Field values match expected types
+ * - Penalty for unexpected/junk fields (max 20% reduction)
  */
 export function calculateFieldQuality(
   parsedLogs: ParsedLog[],
   expectedFields: PatternExtractionGroundTruth['expected_fields']
 ): number {
-  if (parsedLogs.length === 0) {
-    return 0;
+  if (parsedLogs.length === 0) return 0;
+
+  const parsedCount = parsedLogs.filter((log) => log.parsed).length;
+  if (parsedCount === 0) return 0;
+
+  const allExpectedFields = expectedFields.other_fields || [];
+  const requiredFields = allExpectedFields.filter((f) => f.required);
+  const optionalFields = allExpectedFields.filter((f) => !f.required);
+
+  // If no fields defined, just check that some fields were extracted
+  if (allExpectedFields.length === 0) {
+    let hasFields = 0;
+    for (const log of parsedLogs) {
+      if (log.parsed && Object.keys(log.fields).length > 0) hasFields++;
+    }
+    return hasFields / parsedCount;
   }
 
-  const otherFields = expectedFields.other_fields || [];
-  const requiredFields = otherFields.filter((f) => f.required);
-  const allExpectedFieldNames = otherFields.map((f) => f.name);
-
-  let totalQuality = 0;
+  let totalScore = 0;
 
   for (const log of parsedLogs) {
-    if (!log.parsed) {
-      totalQuality += 0;
-      continue;
-    }
+    if (!log.parsed) continue;
 
+    const extractedNames = Object.keys(log.fields);
+    const matchedFields = new Set<string>();
     let logScore = 0;
-    let maxPossibleScore = 0;
+    let maxScore = 0;
 
-    // Score required fields (higher weight)
-    for (const requiredField of requiredFields) {
-      maxPossibleScore += 2; // Required fields worth 2 points
+    // Score required fields (2 points each)
+    for (const field of requiredFields) {
+      maxScore += 2;
+      const match = findBestFieldMatch(field.name, extractedNames);
 
-      if (log.fields[requiredField.name]) {
-        const value = log.fields[requiredField.name];
+      if (match.matchedField && match.score >= 0.5) {
+        matchedFields.add(match.matchedField);
+        let fieldScore = match.score;
 
-        // Check if value is reasonable (not empty, not just whitespace)
-        if (isReasonableFieldValue(value, requiredField)) {
-          logScore += 2;
-        } else {
-          logScore += 0.5; // Partial credit for extracting the field
+        // Bonus for correct type
+        if (validateFieldType(log.fields[match.matchedField], field.type)) {
+          fieldScore += 0.5;
         }
+
+        logScore += Math.min(fieldScore * 2, 2);
       }
     }
 
-    // Score optional expected fields (lower weight)
-    const optionalFields = otherFields.filter((f) => !f.required);
-    for (const optionalField of optionalFields) {
-      maxPossibleScore += 1; // Optional fields worth 1 point
+    // Score optional fields (1 point each)
+    for (const field of optionalFields) {
+      maxScore += 1;
+      const match = findBestFieldMatch(field.name, extractedNames);
 
-      if (log.fields[optionalField.name]) {
-        const value = log.fields[optionalField.name];
+      if (match.matchedField && match.score >= 0.5) {
+        matchedFields.add(match.matchedField);
+        let fieldScore = match.score * 0.5;
 
-        if (isReasonableFieldValue(value, optionalField)) {
-          logScore += 1;
-        } else {
-          logScore += 0.3;
+        if (validateFieldType(log.fields[match.matchedField], field.type)) {
+          fieldScore += 0.25;
         }
+
+        logScore += Math.min(fieldScore * 1.5, 1);
       }
     }
 
-    // Check for unexpected/junk fields (penalty)
-    const extractedFieldNames = Object.keys(log.fields);
-    const junkFields = extractedFieldNames.filter(
-      (name) =>
-        !allExpectedFieldNames.includes(name) &&
-        name !== expectedFields.timestamp?.field_name &&
-        name !== expectedFields.log_level?.field_name
-    );
+    // Penalty for unexpected fields (exclude timestamp and log level)
+    const timestampField = expectedFields.timestamp?.field_name;
+    const logLevelField = expectedFields.log_level?.field_name;
 
-    // Small penalty for each junk field
-    const junkPenalty = junkFields.length * 0.2;
+    const unexpectedFields = extractedNames.filter((name) => {
+      if (matchedFields.has(name)) return false;
+      const matchesTimestamp = timestampField && fieldNameSimilarity(name, timestampField) >= 0.5;
+      const matchesLogLevel = logLevelField && fieldNameSimilarity(name, logLevelField) >= 0.5;
+      return !matchesTimestamp && !matchesLogLevel;
+    });
 
-    // Normalize to 0-1 range
-    const normalizedScore =
-      maxPossibleScore > 0 ? Math.max(0, (logScore - junkPenalty) / maxPossibleScore) : 0;
+    // Small penalty for each unexpected field (max 20%)
+    const junkPenalty = Math.min(unexpectedFields.length * 0.1, 0.2) * maxScore;
+    logScore = Math.max(0, logScore - junkPenalty);
 
-    totalQuality += normalizedScore;
+    if (maxScore > 0) {
+      totalScore += logScore / maxScore;
+    }
   }
 
-  return totalQuality / parsedLogs.length;
+  return totalScore / parsedCount;
 }
 
 /**
- * Check if a field value is reasonable (not empty, matches expected type/pattern)
- */
-function isReasonableFieldValue(
-  value: string | number | boolean | null,
-  fieldDef: PatternExtractionGroundTruth['expected_fields']['other_fields'][0]
-): boolean {
-  if (value === null || value === undefined) {
-    return false;
-  }
-
-  const valueStr = String(value).trim();
-
-  // Empty or just whitespace
-  if (valueStr.length === 0) {
-    return false;
-  }
-
-  // Very short values are suspicious (except for log levels, booleans)
-  if (valueStr.length < 2 && fieldDef.type !== 'boolean') {
-    return false;
-  }
-
-  // Check type compatibility
-  if (fieldDef.type === 'number') {
-    return !isNaN(Number(valueStr));
-  }
-
-  if (fieldDef.type === 'boolean') {
-    return ['true', 'false', '1', '0', 'yes', 'no'].includes(valueStr.toLowerCase());
-  }
-
-  // For IP addresses
-  if (fieldDef.type === 'ip') {
-    // Simple IPv4/IPv6 check
-    return /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(valueStr) || /^[0-9a-f:]+$/i.test(valueStr);
-  }
-
-  // For other types, just check it's not placeholder-like
-  const placeholderPatterns = [
-    /^-+$/, // Just dashes
-    /^\.+$/, // Just dots
-    /^\*+$/, // Just asterisks
-    /^_+$/, // Just underscores
-    /^null$/i, // Literal "null"
-    /^undefined$/i, // Literal "undefined"
-    /^n\/?a$/i, // "N/A" or "n/a"
-  ];
-
-  return !placeholderPatterns.some((pattern) => pattern.test(valueStr));
-}
-
-/**
- * Calculate penalty for extracting too many or too few fields.
- * This helps identify patterns that are too greedy or too conservative.
+ * Calculate field count penalty.
  *
- * Scoring:
- * - 1.0: Field count within expected range (no penalty)
- * - 0.5-0.9: Field count slightly outside range (small penalty)
- * - 0.0-0.4: Field count far from expected (large penalty)
+ * Returns a score (0-1) where 1 means field count is in expected range.
+ * Graduated penalty:
+ * - Too few fields: up to 60% penalty (more severe)
+ * - Too many fields: up to 40% penalty (less severe)
  */
 export function calculateFieldCountPenalty(
   parsedLogs: ParsedLog[],
-  patternCharacteristics: PatternExtractionGroundTruth['pattern_characteristics']
+  characteristics?: PatternExtractionGroundTruth['pattern_characteristics']
 ): number {
-  if (parsedLogs.length === 0 || !patternCharacteristics) {
-    return 0;
-  }
+  if (parsedLogs.length === 0) return 0;
+  if (!characteristics) return 1.0;
 
-  const expectedMin = patternCharacteristics.expected_min_fields;
-  const expectedMax = patternCharacteristics.expected_max_fields;
+  const { expected_min_fields: minFields, expected_max_fields: maxFields } = characteristics;
+  const parsedCount = parsedLogs.filter((log) => log.parsed).length;
+  if (parsedCount === 0) return 0;
 
-  let totalPenalty = 0;
+  let totalScore = 0;
 
   for (const log of parsedLogs) {
-    if (!log.parsed) {
-      totalPenalty += 1.0; // Maximum penalty for unparsed logs
-      continue;
-    }
+    if (!log.parsed) continue;
 
-    const fieldCount = Object.keys(log.fields).length;
+    const count = Object.keys(log.fields).length;
 
-    if (fieldCount >= expectedMin && fieldCount <= expectedMax) {
-      // Perfect: within range
-      totalPenalty += 0;
-    } else if (fieldCount < expectedMin) {
-      // Too few fields
-      const deficit = expectedMin - fieldCount;
-      const penaltyFactor = Math.min(deficit / expectedMin, 1.0);
-      totalPenalty += penaltyFactor * 0.6; // 60% max penalty for too few
+    if (count >= minFields && count <= maxFields) {
+      totalScore += 1.0;
+    } else if (count < minFields) {
+      const deficit = minFields - count;
+      const penaltyRatio = Math.min(deficit / minFields, 1.0);
+      totalScore += 1.0 - penaltyRatio * 0.6;
     } else {
-      // Too many fields
-      const excess = fieldCount - expectedMax;
-      const penaltyFactor = Math.min(excess / expectedMax, 1.0);
-      totalPenalty += penaltyFactor * 0.4; // 40% max penalty for too many
+      const excess = count - maxFields;
+      const penaltyRatio = Math.min(excess / maxFields, 1.0);
+      totalScore += 1.0 - penaltyRatio * 0.4;
     }
   }
 
-  // Return inverse penalty as a score (higher is better)
-  return 1.0 - totalPenalty / parsedLogs.length;
+  return totalScore / parsedCount;
 }
 
+// =============================================================================
+// OVERALL QUALITY CALCULATION
+// =============================================================================
+
 /**
- * Calculate overall pattern quality by combining all metrics with weights.
+ * Calculate overall pattern quality by combining all metrics.
  *
  * Weights:
- * - Parse rate: 25% (must parse at all)
- * - Timestamp accuracy: 20% (critical for log analysis)
- * - Log level accuracy: 15% (important for filtering)
- * - Field quality: 30% (most important for usefulness)
- * - Field count penalty: 10% (prevents over/under extraction)
+ * - Parse rate: 25% (fundamental - must parse)
+ * - Timestamp: 25% (critical for log analysis)
+ * - Log level: 15% (important for filtering)
+ * - Field quality: 25% (extraction usefulness)
+ * - Field count: 10% (prevents over/under extraction)
  */
 export function calculateOverallQuality(
   parsedLogs: ParsedLog[],
   groundTruth: PatternExtractionGroundTruth
 ): PatternQualityMetrics {
+  if (parsedLogs.length === 0) {
+    return {
+      parseRate: 0,
+      timestampAccuracy: 0,
+      logLevelAccuracy: 0,
+      fieldQuality: 0,
+      fieldCountPenalty: 1,
+      overallQuality: 0,
+    };
+  }
+
   const parseRate = parsedLogs.filter((log) => log.parsed).length / parsedLogs.length;
-
   const timestampAccuracy = calculateTimestampAccuracy(parsedLogs, groundTruth.expected_fields);
-
-  const logLevelAccuracy = groundTruth.expected_fields.log_level
-    ? calculateLogLevelAccuracy(parsedLogs, groundTruth.expected_fields)
-    : 1.0; // If no log level expected, don't penalize
-
+  const logLevelAccuracy = calculateLogLevelAccuracy(parsedLogs, groundTruth.expected_fields);
   const fieldQuality = calculateFieldQuality(parsedLogs, groundTruth.expected_fields);
-
   const fieldCountScore = calculateFieldCountPenalty(
     parsedLogs,
     groundTruth.pattern_characteristics
   );
 
-  // Weighted combination
   const overallQuality =
     parseRate * 0.25 +
-    timestampAccuracy * 0.2 +
+    timestampAccuracy * 0.25 +
     logLevelAccuracy * 0.15 +
-    fieldQuality * 0.3 +
+    fieldQuality * 0.25 +
     fieldCountScore * 0.1;
 
   return {
@@ -371,25 +465,7 @@ export function calculateOverallQuality(
     timestampAccuracy,
     logLevelAccuracy,
     fieldQuality,
-    fieldCountPenalty: 1.0 - fieldCountScore, // Invert for intuitive penalty display
+    fieldCountPenalty: 1.0 - fieldCountScore,
     overallQuality,
-  };
-}
-
-/**
- * Helper function to simulate parsing a log message with a pattern.
- * This is a placeholder - actual parsing would use the heuristic pattern generator.
- */
-export function parseLogWithPattern(
-  logMessage: string,
-  pattern: string,
-  patternType: 'grok' | 'dissect'
-): ParsedLog {
-  // TODO: Integrate with actual @kbn/grok-heuristics and @kbn/dissect-heuristics
-  // For now, return a mock parsed result
-  return {
-    parsed: false,
-    fields: {},
-    originalMessage: logMessage,
   };
 }
