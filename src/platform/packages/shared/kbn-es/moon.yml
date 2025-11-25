@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/mock-idp-utils'
   - '@kbn/jest-serializers'
   - '@kbn/repo-info'
+  - '@kbn/utility-types'
 tags:
   - shared-common
   - package
