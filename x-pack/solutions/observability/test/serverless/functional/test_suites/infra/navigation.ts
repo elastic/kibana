@@ -12,7 +12,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'svlCommonNavigation', 'header']);
 
   const openInfraSection = async () => {
-    await pageObjects.svlCommonNavigation.sidenav.expandMore();
     await pageObjects.svlCommonNavigation.sidenav.openPanel('metrics');
   };
 
