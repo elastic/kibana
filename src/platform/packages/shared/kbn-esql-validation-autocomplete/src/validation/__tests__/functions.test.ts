@@ -295,6 +295,10 @@ describe('function validation', () => {
 
           const { expectErrors } = await setup();
 
+          await expectErrors('FROM a_index | EVAL TEST(missingColumn)', [
+            'Unknown column "missingColumn"',
+          ]);
+
           await expectErrors('FROM a_index | EVAL foo=missingColumn', [
             'Unknown column "missingColumn"',
           ]);
