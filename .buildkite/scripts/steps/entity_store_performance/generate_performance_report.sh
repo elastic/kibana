@@ -227,7 +227,7 @@ EOF
           # Extract metrics for each node
           echo "$JSON_PART" | jq -r '.nodes[] | 
             "#### \(.node_name) (\(.node_id))",
-            "- **CPU Usage**: \(.cpu.percent)%",
+            "- **CPU Usage**: \(.os.cpu.percent // .cpu.percent // "unknown")%",
             "- **JVM Heap Used**: \(.jvm.mem.heap_used_percent)% (\(.jvm.mem.heap_used_in_bytes // 0 / 1024 / 1024 | floor)MB / \(.jvm.mem.heap_max_in_bytes // 0 / 1024 / 1024 | floor)MB)",
             "- **OS Memory Used**: \(.os.mem.used_percent)% (\(.os.mem.used_in_bytes // 0 / 1024 / 1024 | floor)MB / \(.os.mem.total_in_bytes // 0 / 1024 / 1024 | floor)MB)",
             "- **Load Average (1m/5m/15m)**: \(.os.cpu.load_average."1m" | tostring) / \(.os.cpu.load_average."5m" | tostring) / \(.os.cpu.load_average."15m" | tostring)",
