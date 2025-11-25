@@ -80,6 +80,7 @@ export function RuleComponent({
     application,
     licensing,
     settings,
+    unifiedSearch,
   } = useKibana().services;
   // The lastReloadRequestTime should be updated when the refreshToken changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -127,6 +128,7 @@ export function RuleComponent({
             application,
             licensing,
             settings,
+            unifiedSearch,
           }}
         />
       );
@@ -153,6 +155,7 @@ export function RuleComponent({
     rule.id,
     ruleType.hasAlertsMappings,
     ruleType.id,
+    unifiedSearch,
     settings,
   ]);
 

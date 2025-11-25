@@ -8,6 +8,8 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { QueryClientProvider } from '@kbn/react-query';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { queryClient } from '../query_client';
 import type { EmbeddableAlertsTableConfig } from '../types';
 import { ConfigEditorContent } from './config_editor_content';
@@ -18,6 +20,8 @@ export interface ConfigEditorProps {
   onSave: (newConfig: EmbeddableAlertsTableConfig) => void;
   closeFlyout: () => void;
   ariaLabelledBy: string;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  data: DataPublicPluginStart;
 }
 
 export const ConfigEditor = ({
@@ -26,6 +30,8 @@ export const ConfigEditor = ({
   onSave,
   closeFlyout,
   ariaLabelledBy,
+  unifiedSearch,
+  data,
 }: ConfigEditorProps) => {
   const { overlays, http, notifications } = coreServices;
 
@@ -39,7 +45,7 @@ export const ConfigEditor = ({
           closeFlyout();
         }}
         onCancel={closeFlyout}
-        services={{ http, notifications, overlays }}
+        services={{ http, notifications, overlays, unifiedSearch, data }}
       />
     </QueryClientProvider>
   );

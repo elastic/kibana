@@ -114,6 +114,8 @@ export const getAlertsTableEmbeddableFactory = (
                   onSave={(newConfig: EmbeddableAlertsTableConfig) => {
                     tableConfig$.next(newConfig);
                   }}
+                  unifiedSearch={deps.unifiedSearch}
+                  data={deps.data}
                 />
               );
             },

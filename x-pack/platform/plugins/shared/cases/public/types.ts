@@ -18,6 +18,7 @@ import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
@@ -95,6 +96,7 @@ export interface CasesPublicStartDependencies {
   storage: Storage;
   triggersActionsUi: TriggersActionsStart;
   uiActions: UiActionsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   toastNotifications: IToasts;
 }

@@ -22,6 +22,7 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { AlertsFiltersExpression } from '@kbn/response-ops-alerts-filters-form/types';
 import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EmbeddableAlertsTablePublicSetup {}
@@ -41,6 +42,7 @@ export interface EmbeddableAlertsTablePublicStartDependencies {
   application: CoreStart['application'];
   licensing: LicensingPluginStart;
   settings: SettingsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export type EmbeddableAlertsTableSerializedState = SerializedTitles &
