@@ -86,7 +86,7 @@ export class EntityStoreESQLService {
     );
   }
 
-  public async runEntityStoreCycle(type: EntityType) {
+  async runEntityStoreCycle(type: EntityType) {
     const lastExecutionTime =
       (await getEntityStoreLastExecutionTime(this.soClient, type, this.namespace)) ||
       defaultLookback();
