@@ -54,13 +54,18 @@ describe('search abort controller', () => {
     expect(signal.reason).toBe(AbortReason.CANCELED);
   });
 
-  test('isCanceled', () => {
-    const sac1 = new SearchAbortController();
-    sac1.abort(AbortReason.CANCELED);
-    expect(sac1.isCanceled()).toBe(true);
-    const sac2 = new SearchAbortController();
-    sac2.abort(AbortReason.TIMEOUT);
-    expect(sac2.isCanceled()).toBe(false);
+  test('when the abort reason is CANCELED', () => {
+    const sac = new SearchAbortController();
+    sac.abort(AbortReason.CANCELED);
+    expect(sac.isCanceled()).toBe(true);
+    expect(sac.isTimeout()).toBe(false);
+  });
+
+  test('when the abort reason is TIMEOUT', () => {
+    const sac = new SearchAbortController();
+    sac.abort(AbortReason.TIMEOUT);
+    expect(sac.isTimeout()).toBe(true);
+    expect(sac.isCanceled()).toBe(false);
   });
 
   test('aborts explicitly even if all inputs are not aborted', () => {
