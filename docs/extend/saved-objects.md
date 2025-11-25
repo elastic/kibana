@@ -1185,7 +1185,7 @@ Because the test bed is only creating the parts of Core required to instantiate 
 
 * all SO types will be using the same SO index
 
-## Ensuring Safe Saved Objects Type Changes
+## Ensuring safe Saved Objects type changes
 
 Since `Saved Objects` are critical to {{kib}}, any changes to their type definitions must adhere to strict safety criteria to prevent:
 
