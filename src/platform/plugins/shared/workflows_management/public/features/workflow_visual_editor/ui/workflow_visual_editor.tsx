@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
-import type { NodeTypes, ReactFlowInstance } from '@xyflow/react';
+import { useEuiTheme, useResizeObserver } from '@elastic/eui';
+import type { ColorMode, NodeTypes, ReactFlowInstance } from '@xyflow/react';
 import { Background, Controls, ReactFlow } from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
 import React, { useEffect, useMemo, useRef } from 'react';
-import { useResizeObserver } from '@elastic/eui';
-import { getLayoutedNodesAndEdges } from '../lib/get_layouted_nodes_and_edges';
+import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import '@xyflow/react/dist/style.css';
 import { WorkflowGraphEdge } from './workflow_edge';
 import { WorkflowGraphNode } from './workflow_node';
+import { getLayoutedNodesAndEdges } from '../lib/get_layouted_nodes_and_edges';
 
 const nodeTypes = {
   trigger: WorkflowGraphNode,
@@ -35,11 +35,12 @@ export function WorkflowVisualEditor({
   stepExecutions,
 }: {
   workflow: WorkflowYaml;
-  stepExecutions?: EsWorkflowStepExecution[];
+  stepExecutions?: WorkflowStepExecutionDto[];
 }) {
+  const { colorMode, euiTheme } = useEuiTheme();
   // TODO: call fitView(), when container is resized
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const reactFlowInstanceRef = useRef<ReactFlowInstance<any, any> | null>(null);
+  const reactFlowInstanceRef = useRef<ReactFlowInstance | null>(null);
   const dimensions = useResizeObserver(containerRef.current);
 
   useEffect(() => {
@@ -61,7 +62,7 @@ export function WorkflowVisualEditor({
     return stepExecutions?.reduce((acc, stepExecution) => {
       acc[stepExecution.stepId] = stepExecution;
       return acc;
-    }, {} as Record<string, EsWorkflowStepExecution>);
+    }, {} as Record<string, WorkflowStepExecutionDto>);
   }, [stepExecutions]);
 
   const { nodes, edges } = useMemo(() => {
@@ -87,20 +88,24 @@ export function WorkflowVisualEditor({
     <div ref={containerRef} css={{ height: '100%', width: '100%' }}>
       <ReactFlow
         onInit={(instance) => {
-          reactFlowInstanceRef.current = instance;
+          reactFlowInstanceRef.current = instance as ReactFlowInstance;
         }}
         nodes={nodes}
         edges={edges}
-        nodeTypes={nodeTypes as any as NodeTypes}
+        nodeTypes={nodeTypes as unknown as NodeTypes}
         edgeTypes={edgeTypes}
         fitView
         fitViewOptions={{ padding: 1 }}
         proOptions={{
           hideAttribution: true,
         }}
+        colorMode={colorMode.toLowerCase() as ColorMode}
       >
         <Controls orientation="horizontal" />
-        <Background bgColor="#F7F8FC" color="#CAD3E2" />
+        <Background
+          bgColor={euiTheme.colors.backgroundBasePlain}
+          color={euiTheme.colors.textSubdued}
+        />
       </ReactFlow>
     </div>
   );

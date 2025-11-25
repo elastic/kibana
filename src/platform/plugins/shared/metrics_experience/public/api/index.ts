@@ -43,14 +43,14 @@ export type MetricsExperienceAPIClientRequestParamsOf<
 
 export type MetricsExperienceClient = ReturnType<typeof createMetricsExperienceClient>;
 export function createMetricsExperienceClient(core: CoreStart | CoreSetup) {
-  const repo = createRepositoryClient(core).fetch as MetricsExperienceRepositoryClient;
+  const request = createRepositoryClient(core).fetch as MetricsExperienceRepositoryClient;
 
   return {
     getDimensions: (
       params: MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/dimensions'>['params']['query'],
       signal?: AbortSignal | null
     ) =>
-      repo('GET /internal/metrics_experience/dimensions', {
+      request('GET /internal/metrics_experience/dimensions', {
         params: {
           query: params,
         },
@@ -60,18 +60,17 @@ export function createMetricsExperienceClient(core: CoreStart | CoreSetup) {
       params: MetricsExperienceAPIClientRequestParamsOf<'GET /internal/metrics_experience/fields'>['params']['query'],
       signal?: AbortSignal | null
     ) =>
-      repo('GET /internal/metrics_experience/fields', {
+      request('GET /internal/metrics_experience/fields', {
         params: {
           query: params,
         },
         signal,
       }),
-
-    postData: (
-      params: MetricsExperienceAPIClientRequestParamsOf<'POST /internal/metrics_experience/data'>['params']['body'],
+    searchFields: (
+      params: MetricsExperienceAPIClientRequestParamsOf<'POST /internal/metrics_experience/fields/_search'>['params']['body'],
       signal?: AbortSignal | null
     ) =>
-      repo('POST /internal/metrics_experience/data', {
+      request('POST /internal/metrics_experience/fields/_search', {
         params: {
           body: params,
         },

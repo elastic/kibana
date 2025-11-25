@@ -10,23 +10,17 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import moment from 'moment';
 
-import type { ReindexSavedObject } from '@kbn/upgrade-assistant-pkg-common';
-import { ReindexStatus, ReindexStep } from '@kbn/upgrade-assistant-pkg-common';
-import { REINDEX_OP_TYPE, type Version } from '@kbn/upgrade-assistant-pkg-server';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import type { ReindexSavedObject } from './types';
+import { ReindexStep } from '../../../common';
+import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
 import type { ReindexActions } from './reindex_actions';
 import { LOCK_WINDOW, reindexActionsFactory } from './reindex_actions';
-import { getMockVersionInfo } from '../__fixtures__/version';
+import { getMockVersionInfo } from '@kbn/upgrade-assistant-pkg-server/src/__fixtures__/version';
 
-const { currentMajor, prevMajor } = getMockVersionInfo();
+const { currentMajor } = getMockVersionInfo();
 
-jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
-  getRollupJobByIndexName: jest.fn(),
-}));
-
-const versionMock = {
-  getMajorVersion: jest.fn().mockReturnValue(8),
-  getPrevMajorVersion: jest.fn().mockReturnValue(7),
-} as unknown as Version;
+const getRollupJobByIndexNameMock = jest.fn();
 
 describe('ReindexActions', () => {
   let client: jest.Mocked<any>;
@@ -52,7 +46,13 @@ describe('ReindexActions', () => {
       ) as any,
     };
     clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    actions = reindexActionsFactory(client, clusterClient.asCurrentUser, log, versionMock);
+    actions = reindexActionsFactory(
+      client,
+      clusterClient.asCurrentUser,
+      log,
+      getRollupJobByIndexNameMock,
+      true
+    );
   });
 
   describe('createReindexOp', () => {
@@ -60,8 +60,11 @@ describe('ReindexActions', () => {
       client.create.mockResolvedValue();
     });
 
-    it(`prepends reindexed-v${currentMajor} to new name`, async () => {
-      await actions.createReindexOp('myIndex');
+    it(`creates new reindex op with correct arguments`, async () => {
+      await actions.createReindexOp({
+        indexName: 'myIndex',
+        newIndexName: `reindexed-v${currentMajor}-myIndex`,
+      });
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: 'myIndex',
         newIndexName: `reindexed-v${currentMajor}-myIndex`,
@@ -74,38 +77,25 @@ describe('ReindexActions', () => {
         errorMessage: null,
         runningReindexCount: null,
       });
+      expect(getRollupJobByIndexNameMock).toHaveBeenCalled();
     });
 
-    it(`prepends reindexed-v${currentMajor} to new name, preserving leading period`, async () => {
-      await actions.createReindexOp('.internalIndex');
-      expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
-        indexName: '.internalIndex',
-        newIndexName: `.reindexed-v${currentMajor}-internalIndex`,
-        reindexOptions: undefined,
-        status: ReindexStatus.inProgress,
-        lastCompletedStep: ReindexStep.created,
-        locked: null,
-        reindexTaskId: null,
-        reindexTaskPercComplete: null,
-        errorMessage: null,
-        runningReindexCount: null,
-      });
-    });
+    it("rollup apis aren't called when disabled", async () => {
+      const rollupJobsMock = jest.fn();
 
-    it(`replaces reindexed-v${prevMajor} with reindexed-v${currentMajor}`, async () => {
-      await actions.createReindexOp(`reindexed-v${prevMajor}-myIndex`);
-      expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
-        indexName: `reindexed-v${prevMajor}-myIndex`,
+      actions = reindexActionsFactory(
+        client,
+        clusterClient.asCurrentUser,
+        log,
+        rollupJobsMock,
+        false
+      );
+
+      await actions.createReindexOp({
+        indexName: 'myIndex',
         newIndexName: `reindexed-v${currentMajor}-myIndex`,
-        reindexOptions: undefined,
-        status: ReindexStatus.inProgress,
-        lastCompletedStep: ReindexStep.created,
-        locked: null,
-        reindexTaskId: null,
-        reindexTaskPercComplete: null,
-        errorMessage: null,
-        runningReindexCount: null,
       });
+      expect(rollupJobsMock).not.toHaveBeenCalled();
     });
   });
 

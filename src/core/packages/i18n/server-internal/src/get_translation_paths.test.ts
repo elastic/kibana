@@ -8,35 +8,59 @@
  */
 
 import { resolve, join } from 'path';
-import { globbyMock, readFileMock } from './get_translation_paths.test.mocks';
 import { getTranslationPaths } from './get_translation_paths';
+
+jest.mock('fs/promises', () => {
+  const actual = jest.requireActual('fs/promises');
+  return {
+    ...actual,
+    glob: jest.fn(),
+    readFile: jest.fn(),
+  };
+});
+
+import { glob, readFile } from 'fs/promises';
+
+const globMock = glob as jest.Mock;
+const readFileMock = readFile as jest.Mock;
 
 describe('getTranslationPaths', () => {
   beforeEach(() => {
-    globbyMock.mockReset();
+    globMock.mockReset();
     readFileMock.mockReset();
 
-    globbyMock.mockResolvedValue([]);
     readFileMock.mockResolvedValue('{}');
   });
 
-  it('calls `globby` with the correct parameters', async () => {
-    getTranslationPaths({ cwd: '/some/cwd', nested: false });
+  it('calls `glob` with the correct parameters', async () => {
+    const emptyIterator = {
+      async *[Symbol.asyncIterator]() {},
+    };
+    globMock.mockReturnValue(emptyIterator);
 
-    expect(globbyMock).toHaveBeenCalledTimes(1);
-    expect(globbyMock).toHaveBeenCalledWith('.i18nrc.json', { cwd: '/some/cwd', dot: true });
+    await getTranslationPaths({ cwd: '/some/cwd', nested: false });
 
-    globbyMock.mockClear();
+    expect(globMock).toHaveBeenCalledTimes(1);
+    expect(globMock).toHaveBeenCalledWith('.i18nrc.json', { cwd: '/some/cwd' });
+
+    globMock.mockClear();
 
     await getTranslationPaths({ cwd: '/other/cwd', nested: true });
 
-    expect(globbyMock).toHaveBeenCalledTimes(1);
-    expect(globbyMock).toHaveBeenCalledWith('*/.i18nrc.json', { cwd: '/other/cwd', dot: true });
+    expect(globMock).toHaveBeenCalledTimes(1);
+    expect(globMock).toHaveBeenCalledWith('*/.i18nrc.json', { cwd: '/other/cwd' });
   });
 
-  it('calls `readFile` for each entry returned by `globby`', async () => {
+  it('calls `readFile` for each entry returned by `glob`', async () => {
     const entries = [join('pathA', '.i18nrc.json'), join('pathB', '.i18nrc.json')];
-    globbyMock.mockResolvedValue(entries);
+    const entriesIterator = {
+      async *[Symbol.asyncIterator]() {
+        for (const entry of entries) {
+          yield entry;
+        }
+      },
+    };
+    globMock.mockReturnValue(entriesIterator);
 
     const cwd = '/kibana-extra';
 
@@ -50,7 +74,14 @@ describe('getTranslationPaths', () => {
 
   it('returns the absolute path to the translation files', async () => {
     const entries = ['.i18nrc.json'];
-    globbyMock.mockResolvedValue(entries);
+    const entriesIterator = {
+      async *[Symbol.asyncIterator]() {
+        for (const entry of entries) {
+          yield entry;
+        }
+      },
+    };
+    globMock.mockReturnValue(entriesIterator);
 
     const i18nFileContent = {
       translations: ['translations/en.json', 'translations/fr.json'],
@@ -68,7 +99,13 @@ describe('getTranslationPaths', () => {
   });
 
   it('throws if i18nrc parsing fails', async () => {
-    globbyMock.mockResolvedValue(['.i18nrc.json']);
+    const entriesIterator = {
+      async *[Symbol.asyncIterator]() {
+        yield '.i18nrc.json';
+      },
+    };
+    globMock.mockReturnValue(entriesIterator);
+
     readFileMock.mockRejectedValue(new Error('error parsing file'));
 
     await expect(

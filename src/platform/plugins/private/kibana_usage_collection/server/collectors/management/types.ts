@@ -49,10 +49,10 @@ export interface UsageStats {
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'ai:anonymizationSettings': string;
-  'onechat:mcp:enabled': boolean;
-  'onechat:a2a:enabled': boolean;
-  'onechat:ui:enabled': boolean;
-  'onechat:api:enabled': boolean;
+  'agentBuilder:enabled': boolean;
+  'agentBuilder:dashboardTools': boolean;
+  'agentBuilder:navEnabled': boolean;
+  'dataConnectors:enabled': boolean;
   'workflows:ui:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
@@ -75,6 +75,7 @@ export interface UsageStats {
   'securitySolution:enableGraphVisualization': boolean;
   'securitySolution:enableAssetInventory': boolean;
   'securitySolution:enablePrivilegedUserMonitoring': boolean;
+  'securitySolution:enableEsqlRiskScoring': boolean;
   'securitySolution:enableCloudConnector': boolean;
   'securitySolution:suppressionBehaviorOnAlertClosure': string;
   'search:includeFrozen': boolean;
@@ -175,10 +176,12 @@ export interface UsageStats {
   'securitySolution:excludedDataTiersForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
-  'observability:enableStreamsUI': boolean;
+  'cases:incrementalIdDisplay:enabled': boolean;
   'observability:enableDiagnosticMode': boolean;
   'observability:streamsEnableSignificantEvents': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'observability:streamsEnableGroupStreams': boolean;
+  'observability:streamsEnableAttachments': boolean;
+  'observability:streamsEnableContentPacks': boolean;
 }

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiAccordion, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import {
@@ -17,7 +17,11 @@ import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/se
 import type { CloudSetup as ICloudSetup } from '@kbn/cloud-plugin/public';
 import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { CloudSetupConfig, UpdatePolicy } from './types';
+import {
+  ADVANCED_OPTION_ACCORDION_TEST_SUBJ,
+  NAMESPACE_INPUT_TEST_SUBJ,
+} from '@kbn/cloud-security-posture-common';
+import type { CloudSetupConfig, UpdatePolicy, CloudProviders } from './types';
 import { updatePolicyWithInputs, getDefaultCloudCredentialsType } from './utils';
 import { ProviderSelector } from './provider_selector';
 import { AwsAccountTypeSelect } from './aws_credentials_form/aws_account_type_selector';
@@ -40,7 +44,7 @@ const EditScreenStepTitle = () => (
     <EuiTitle size="s">
       <h4>
         <FormattedMessage
-          id="securitySolutionPackages.fleetIntegration.integrationSettingsTitle"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.integrationSettingsTitle"
           defaultMessage="Integration Settings"
         />
       </h4>
@@ -86,7 +90,9 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       config,
       defaultProviderType,
       getCloudSetupProviderByInputType,
-      cloudConnectorEnabledVersion,
+      isAzureCloudConnectorEnabled,
+      isGcpCloudConnectorEnabled,
+      isAwsCloudConnectorEnabled,
     } = useCloudSetup();
     const {
       input,
@@ -95,9 +101,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       setupTechnology,
       updateSetupTechnology,
       shouldRenderAgentlessSelector,
-      isServerless,
       hasInvalidRequiredVars,
-      showCloudConnectors,
     } = useLoadCloudSetup({
       newPolicy,
       updatePolicy,
@@ -108,13 +112,27 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       isAgentlessEnabled,
       defaultSetupTechnology,
       cloud,
-      uiSettings,
       templateName,
       defaultProviderType,
       config,
       getCloudSetupProviderByInputType,
-      cloudConnectorEnabledVersion,
     });
+
+    const isCloudConnectorsEnabledForProvider = useCallback(
+      (provider: CloudProviders) => {
+        switch (provider) {
+          case AWS_PROVIDER:
+            return isAwsCloudConnectorEnabled;
+          case AZURE_PROVIDER:
+            return isAzureCloudConnectorEnabled;
+          case GCP_PROVIDER:
+            return isGcpCloudConnectorEnabled;
+          default:
+            return false;
+        }
+      },
+      [isAwsCloudConnectorEnabled, isAzureCloudConnectorEnabled, isGcpCloudConnectorEnabled]
+    );
 
     const namespaceSupportEnabled = config.namespaceSupportEnabled;
 
@@ -125,14 +143,19 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
         {isEditPage && <EditScreenStepTitle />}
         {/* Shows info on the active policy template */}
         <FormattedMessage
-          id="securitySolutionPackages.fleetIntegration.configureCspmIntegrationDescription"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.configureIntegrationDescription"
           defaultMessage="Select the cloud service provider (CSP) you want to monitor and then fill in the name and description to help identify this integration"
         />
         <EuiSpacer size="l" />
         {/* Defines the single enabled input of the active policy template */}
         <ProviderSelector
           selectedProvider={selectedProvider}
-          setInput={setEnabledPolicyInput}
+          setSelectedProvider={(provider) => {
+            const showCloudConnectors =
+              isCloudConnectorsEnabledForProvider(provider) &&
+              setupTechnology === SetupTechnology.AGENTLESS;
+            setEnabledPolicyInput(provider, showCloudConnectors);
+          }}
           disabled={isEditPage}
         />
         <EuiSpacer size="l" />
@@ -163,9 +186,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             input={input}
             newPolicy={newPolicy}
             updatePolicy={updatePolicy}
-            packageInfo={packageInfo}
             disabled={isEditPage}
-            setupTechnology={setupTechnology}
           />
         )}
 
@@ -184,7 +205,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             <EuiSpacer size="m" />
             <EuiAccordion
               id="advancedOptions"
-              data-test-subj="advancedOptionsAccordion"
+              data-test-subj={ADVANCED_OPTION_ACCORDION_TEST_SUBJ}
               buttonContent={
                 <EuiText
                   size="xs"
@@ -194,7 +215,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
                   }}
                 >
                   <FormattedMessage
-                    id="securitySolutionPackages.fleetIntegration.advancedOptionsLabel"
+                    id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.advancedOptionsLabel"
                     defaultMessage="Advanced options"
                   />
                 </EuiText>
@@ -210,9 +231,9 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
                 onNamespaceChange={(namespace: string) => {
                   updatePolicy({ updatedPolicy: { ...newPolicy, namespace } });
                 }}
-                data-test-subj="namespaceInput"
-                labelId="securitySolutionPackages.fleetIntegration.namespaceLabel"
-                helpTextId="securitySolutionPackages.fleetIntegration.awsAccountType.awsOrganizationDescription"
+                data-test-subj={NAMESPACE_INPUT_TEST_SUBJ}
+                labelId="securitySolutionPackages.cloudSecurityPosture.cloudSetup.namespaceLabel"
+                helpTextId="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.accountType.awsOrganizationDescription"
               />
             </EuiAccordion>
           </>
@@ -221,7 +242,6 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
           <>
             <EuiSpacer size="m" />
             <SetupTechnologySelector
-              showLimitationsMessage={!isServerless}
               disabled={isEditPage}
               setupTechnology={setupTechnology}
               allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
@@ -229,18 +249,26 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
               useDescribedFormGroup={false}
               onSetupTechnologyChange={(value) => {
                 updateSetupTechnology(value);
+                const showCloudConnectors =
+                  isCloudConnectorsEnabledForProvider(selectedProvider) &&
+                  value === SetupTechnology.AGENTLESS;
                 updatePolicy({
-                  updatedPolicy: updatePolicyWithInputs(
-                    newPolicy,
-                    config.providers[selectedProvider].type,
-                    getDefaultCloudCredentialsType(
-                      value === SetupTechnology.AGENTLESS,
-                      selectedProvider,
-                      packageInfo,
-                      showCloudConnectors,
-                      templateName
-                    )
-                  ),
+                  updatedPolicy: {
+                    ...updatePolicyWithInputs(
+                      newPolicy,
+                      config.providers[selectedProvider].type,
+                      getDefaultCloudCredentialsType(
+                        value === SetupTechnology.AGENTLESS,
+                        selectedProvider,
+                        packageInfo,
+                        showCloudConnectors,
+                        templateName
+                      )
+                    ),
+                    supports_cloud_connector:
+                      showCloudConnectors && value === SetupTechnology.AGENTLESS,
+                    cloud_connector_id: undefined,
+                  },
                 });
               }}
             />
@@ -249,6 +277,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
 
         {selectedProvider === AWS_PROVIDER && setupTechnology === SetupTechnology.AGENTLESS && (
           <AwsCredentialsFormAgentless
+            cloud={cloud}
             input={input}
             newPolicy={newPolicy}
             packageInfo={packageInfo}
@@ -256,8 +285,6 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             isEditPage={isEditPage}
             setupTechnology={setupTechnology}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
-            showCloudConnectors={showCloudConnectors}
-            cloud={cloud}
           />
         )}
         {selectedProvider === AWS_PROVIDER && setupTechnology !== SetupTechnology.AGENTLESS && (
@@ -290,6 +317,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             updatePolicy={updatePolicy}
             disabled={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
+            isEditPage={isEditPage}
           />
         )}
 
@@ -299,7 +327,10 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             newPolicy={newPolicy}
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}
+            cloud={cloud}
+            isEditPage={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
+            setupTechnology={setupTechnology}
           />
         )}
         {selectedProvider === AZURE_PROVIDER && setupTechnology !== SetupTechnology.AGENTLESS && (
@@ -337,7 +368,13 @@ export const CloudSetup = memo<CloudSetupProps>(
     uiSettings,
   }: CloudSetupProps) => {
     return (
-      <CloudSetupProvider config={configuration}>
+      <CloudSetupProvider
+        config={configuration}
+        cloud={cloud}
+        uiSettings={uiSettings}
+        packagePolicy={newPolicy}
+        packageInfo={packageInfo}
+      >
         <CloudIntegrationSetup
           cloud={cloud}
           defaultSetupTechnology={defaultSetupTechnology}

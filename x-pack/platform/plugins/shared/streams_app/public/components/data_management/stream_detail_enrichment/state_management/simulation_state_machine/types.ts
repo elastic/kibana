@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
+import type { SampleDocument } from '@kbn/streams-schema';
 import type { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { IToasts } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import type { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public';
-import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
 import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 
@@ -31,8 +31,9 @@ export interface SimulationSearchParams extends Required<QueryState> {
 }
 
 export interface SimulationInput {
-  processors: StreamlangProcessorDefinition[];
+  steps: StreamlangStepWithUIAttributes[];
   streamName: string;
+  streamType: 'wired' | 'classic' | 'unknown';
 }
 
 export interface SampleDocumentWithUIAttributes {
@@ -41,29 +42,23 @@ export interface SampleDocumentWithUIAttributes {
 }
 
 export type SimulationEvent =
-  | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
-  | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
   | { type: 'previewColumns.order'; columns: string[] }
-  | { type: 'processors.add'; processors: StreamlangProcessorDefinition[] }
-  | { type: 'processor.cancel'; processors: StreamlangProcessorDefinition[] }
-  | { type: 'processor.change'; processors: StreamlangProcessorDefinition[] }
-  | { type: 'processor.delete'; processors: StreamlangProcessorDefinition[] }
-  | { type: 'processor.edit'; processors: StreamlangProcessorDefinition[] }
-  | { type: 'processor.save'; processors: StreamlangProcessorDefinition[] }
+  | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
+  | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
+  | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
+  | { type: 'simulation.receive_samples'; samples: SampleDocumentWithUIAttributes[] }
+  | { type: 'simulation.receive_steps'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'simulation.reset' }
-  | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
-  | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
-  | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
-  | { type: 'previewColumns.order'; columns: string[] }
-  | { type: 'simulation.receive_samples'; samples: SampleDocumentWithUIAttributes[] };
+  | { type: 'step.change'; steps: StreamlangStepWithUIAttributes[] }
+  | { type: 'step.delete'; steps: StreamlangStepWithUIAttributes[] };
 
 export interface SimulationContext {
   detectedSchemaFields: SchemaField[];
+  detectedSchemaFieldsCache: Map<string, SchemaField>;
   previewDocsFilter: PreviewDocsFilterOption;
-  previewDocuments: FlattenRecord[];
   explicitlyEnabledPreviewColumns: string[];
   explicitlyDisabledPreviewColumns: string[];
   previewColumnsOrder: string[];
@@ -71,8 +66,9 @@ export interface SimulationContext {
     fieldName?: string;
     direction: 'asc' | 'desc';
   };
-  processors: StreamlangProcessorDefinition[];
+  steps: StreamlangStepWithUIAttributes[];
   samples: SampleDocumentWithUIAttributes[];
   simulation?: Simulation;
   streamName: string;
+  streamType: 'wired' | 'classic' | 'unknown';
 }

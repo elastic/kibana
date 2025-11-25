@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './app/index.scss';
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 import { TransformUiPlugin } from './plugin';
 

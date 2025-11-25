@@ -19,6 +19,7 @@ const storageSettings = {
     properties: {
       id: types.keyword({}),
       type: types.keyword({}),
+      space: types.keyword({}),
       description: types.text({}),
       configuration: types.object({
         dynamic: false,
@@ -34,6 +35,7 @@ const storageSettings = {
 export interface ToolProperties<TConfig extends object = Record<string, unknown>> {
   id: string;
   type: ToolType;
+  space: string;
   description: string;
   configuration: TConfig;
   tags: string[];
@@ -43,7 +45,6 @@ export interface ToolProperties<TConfig extends object = Record<string, unknown>
 
 export type ToolStorageSettings = typeof storageSettings;
 
-// @ts-expect-error type mismatch for tags type
 export type ToolStorage = StorageIndexAdapter<ToolStorageSettings, ToolProperties>;
 
 export const createStorage = ({
@@ -53,7 +54,6 @@ export const createStorage = ({
   logger: Logger;
   esClient: ElasticsearchClient;
 }): ToolStorage => {
-  // @ts-expect-error type mismatch for tags type
   return new StorageIndexAdapter<ToolStorageSettings, ToolProperties>(
     esClient,
     logger,

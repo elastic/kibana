@@ -59,6 +59,58 @@ export const getLoadPoliciesError = (error: Error) => {
   });
 };
 
+export const ERROR_LOADING_CUSTOM_SCRIPTS = i18n.translate(
+  'xpack.securitySolution.consoleArgumentSelectors.customScripts.errorLoading',
+  {
+    defaultMessage: 'Error loading custom scripts',
+  }
+);
+
+export const ERROR_LOADING_PENDING_ACTIONS = i18n.translate(
+  'xpack.securitySolution.consoleArgumentSelectors.pendingActions.errorLoading',
+  {
+    defaultMessage: 'Error loading pending actions',
+  }
+);
+
+export const getGenericErrorMessage = (errorTitlePrefix: string, code: string) => {
+  return i18n.translate('xpack.securitySolution.consoleArgumentSelectors.genericError', {
+    defaultMessage: '{prefix}Error {code}',
+    values: { prefix: errorTitlePrefix ? `${errorTitlePrefix}: ` : '', code },
+  });
+};
+
+export const getCancelPermissionDeniedMessage = (displayCommand: string) => {
+  return i18n.translate('xpack.securitySolution.consoleArgumentSelectors.cancel.permissionDenied', {
+    defaultMessage: "You don't have permission to run {displayCommand} action.",
+    values: { displayCommand },
+  });
+};
+
+export const getPendingActionDescription = (
+  action: string,
+  createdBy: string,
+  timeStamp: string
+) => {
+  return i18n.translate(
+    'xpack.securitySolution.consoleArgumentSelectors.pendingAction.description',
+    {
+      defaultMessage: 'Action id {action} submitted by {createdBy} on {timeStamp}',
+      values: { action, createdBy, timeStamp },
+    }
+  );
+};
+
+export const getPermissionVerificationErrorMessage = (displayCommand: string) => {
+  return i18n.translate(
+    'xpack.securitySolution.consoleArgumentSelectors.cancel.permissionVerificationError',
+    {
+      defaultMessage: 'Unable to verify permissions for {displayCommand} action cancellation.',
+      values: { displayCommand },
+    }
+  );
+};
+
 export const CONSOLE_COMMANDS = {
   isolate: {
     title: i18n.translate('xpack.securitySolution.endpointConsoleCommands.isolate.title', {
@@ -233,6 +285,55 @@ export const CONSOLE_COMMANDS = {
       defaultMessage: 'Run a script on the host',
     }),
   },
+  cancel: {
+    about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.cancel.about', {
+      defaultMessage: 'Cancel a pending action on the host',
+    }),
+  },
+  memoryDump: {
+    about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.memoryDump.about', {
+      defaultMessage: 'Generate a memory dump on the host',
+    }),
+    kernelArgAbout: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.kernelArgAbout',
+      {
+        defaultMessage: 'Generates a kernel memory dump',
+      }
+    ),
+    processArgAbout: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.processArgAbout',
+      {
+        defaultMessage: 'Generates memory dump for a process',
+      }
+    ),
+    pidArgAbout: i18n.translate('xpack.securitySolution.translations.memoryDump.pidArgAbout', {
+      defaultMessage:
+        'Process ID to generate a memory dump for. Valid only when "--process" is used',
+    }),
+    entityIdArgAbout: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.entityIdArgAbout',
+      {
+        defaultMessage:
+          'Process Entity ID to generate a memory dump for. Valid only when "--process" is used',
+      }
+    ),
+    agentResultMissing: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.agentResultMissing',
+      { defaultMessage: 'Agent result missing' }
+    ),
+    resultFileLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultFileLabel',
+      { defaultMessage: 'File' }
+    ),
+    resultFileSizeLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultFileSizeLabel',
+      { defaultMessage: 'Size' }
+    ),
+    resultRemainingFreeDiskSpaceLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultRemainingFreeDiskSpaceLabel',
+      { defaultMessage: 'Disk free space' }
+    ),
+  },
 };
 
 export const CROWDSTRIKE_CONSOLE_COMMANDS = {
@@ -282,8 +383,10 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
     title: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.title', {
       defaultMessage: 'Run Script',
     }),
-    helpUsage: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about', {
-      defaultMessage: `Command Examples for Running Scripts:
+    helpExample: i18n.translate(
+      'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about',
+      {
+        defaultMessage: `Command Examples for Running Scripts:
 
 1. Executes a script saved in the CrowdStrike cloud with the specified command-line arguments.
 
@@ -302,7 +405,8 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
    runscript --HostPath="C:\\temp\\LocalScript.ps1" --CommandLine="-Verbose true"
 
 `,
-    }),
+      }
+    ),
     privileges: i18n.translate(
       'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.privileges',
       {
@@ -334,7 +438,7 @@ export const MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS = {
       },
     },
 
-    helpUsage: i18n.translate(
+    helpExample: i18n.translate(
       'xpack.securitySolution.msDefenderEndpointConsoleCommands.runscript.about',
       {
         defaultMessage: `Command Examples for Running Scripts:
@@ -388,3 +492,20 @@ export const ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE = (count: 
       'This artifact is associated with {count} {count, plural, =1 {policy that is} other {policies that are}} not accessible in active space',
     values: { count },
   });
+
+/**
+ * Labels for the response action status (as defined in ResponseActionStatus)
+ */
+export const RESPONSE_ACTION_STATUS = Object.freeze({
+  failedMessage: i18n.translate('xpack.securitySolution.responseActionStatus.failed', {
+    defaultMessage: 'Action failed',
+  }),
+
+  pendingMessage: i18n.translate('xpack.securitySolution.responseActionStatus.pending', {
+    defaultMessage: 'Action pending',
+  }),
+
+  successMessage: i18n.translate('xpack.securitySolution.responseActionStatus.success', {
+    defaultMessage: 'Action successful',
+  }),
+});

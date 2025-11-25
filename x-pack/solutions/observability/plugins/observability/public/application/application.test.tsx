@@ -90,6 +90,7 @@ describe('renderApp', () => {
         uptime: { enabled: false },
       },
     },
+    managedOtlpServiceUrl: '',
   };
 
   beforeEach(() => {

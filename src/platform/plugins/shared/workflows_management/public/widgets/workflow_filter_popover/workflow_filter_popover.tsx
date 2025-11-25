@@ -7,34 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
 
-const WORKFLOW_POPOVER_WIDTH = 500;
+const WORKFLOW_POPOVER_WIDTH = 215;
 
 interface WorkflowFilterPopoverProps {
   filter: string;
   title: string;
-  selectedValues: any[];
+  selectedValues: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   values: EuiSelectableOption[];
-  onSelectedValuesChanged: (newValues: any[]) => void;
+  onSelectedValuesChanged: (newValues: any[]) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
-
-export const toggleSelectedGroup = (
-  group: string,
-  selectedGroups: string[],
-  setSelectedGroups: (groups: string[]) => void
-): void => {
-  const selectedGroupIndex = selectedGroups.indexOf(group);
-  const updatedSelectedGroups = [...selectedGroups];
-  if (selectedGroupIndex >= 0) {
-    updatedSelectedGroups.splice(selectedGroupIndex, 1);
-  } else {
-    updatedSelectedGroups.push(group);
-  }
-  setSelectedGroups(updatedSelectedGroups);
-};
 
 const WorkflowsFilterPopoverComponent = ({
   filter,
@@ -59,7 +46,7 @@ const WorkflowsFilterPopoverComponent = ({
   const handleSelectableOptionsChange = (newOptions: EuiSelectableOption[]) => {
     onSelectedValuesChanged(
       newOptions
-        .map(({ key, checked }: any): string | number | boolean | null => (checked ? key : null))
+        .map(({ key, checked }: any): string | number | boolean | null => (checked ? key : null)) // eslint-disable-line @typescript-eslint/no-explicit-any
         .filter((value) => value !== null)
     );
   };
@@ -69,7 +56,7 @@ const WorkflowsFilterPopoverComponent = ({
     const newSelectableOptions: EuiSelectableOption[] = values.map(
       ({ label, key }): EuiSelectableOption => {
         return {
-          label,
+          label: label ?? key,
           key,
           checked: selectedValuesSet.has(key!) ? 'on' : undefined,
         };

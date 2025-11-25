@@ -7,25 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPopover,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiButtonEmpty,
-  euiTextBreakWord,
   EuiSwitch,
   EuiText,
+  euiTextBreakWord,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { css as classNameCss } from '@emotion/css';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { filterDataErrors, type MonacoMessage } from '../helpers';
+import React, { useCallback, useMemo } from 'react';
+import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import { filterDataErrors } from '../helpers';
 import type { DataErrorsControl } from '../types';
 
 interface TypeConsts {
@@ -70,20 +71,34 @@ function ErrorsWarningsContent({
 }) {
   const { euiTheme } = useEuiTheme();
   const { color } = getConstsByType(type, items.length);
+
+  const handleClick = (item: MonacoMessage) => {
+    const selection = window.getSelection();
+    const selectedText = selection?.toString();
+
+    // If user has selected text, don't treat it as a normal click
+    if (selectedText && selectedText.length > 0) {
+      return;
+    }
+
+    onErrorClick(item);
+  };
+
   return (
-    <div style={{ width: 500, padding: euiTheme.size.s }}>
-      <EuiDescriptionList>
+    <div style={{ width: 500, padding: euiTheme.size.s, maxHeight: 300, overflow: 'auto' }}>
+      <EuiDescriptionList data-test-subj="ESQLEditor-errors-warnings-content">
         {items.map((item, index) => {
           return (
             <EuiDescriptionListDescription
               key={index}
               className={classNameCss`
-                                &:hover {
-                                  cursor: pointer;
-                                }
-                                white-space: pre-line;
-                              `}
-              onClick={() => onErrorClick(item)}
+                &:hover {
+                  cursor: pointer;
+                }
+                white-space: pre-line;
+                user-select: text;
+              `}
+              onClick={() => handleClick(item)}
             >
               <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
                 <EuiFlexItem grow={false}>

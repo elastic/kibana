@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { mockGlobalState } from '../../../../public/common/mock';
+import { allowedExperimentalValues } from '../../../../common';
 import { transformCSVToUpsertRecords } from './transform_csv_to_upsert_records';
 
-const experimentalFeatures = mockGlobalState.app.enableExperimental;
+const experimentalFeatures = allowedExperimentalValues;
 
 describe('transformCSVToUpsertRecords', () => {
   it('should transform a valid row', (done) => {

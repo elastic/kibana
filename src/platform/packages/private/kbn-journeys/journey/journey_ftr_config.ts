@@ -18,6 +18,7 @@ import {
   fleetPackageRegistryDockerImage,
 } from '@kbn/test';
 import path from 'path';
+import apm from 'elastic-apm-node';
 import { services } from '../services';
 import type { AnyStep } from './journey';
 import type { JourneyConfig } from './journey_config';
@@ -64,6 +65,25 @@ export function makeFtrConfigProvider(
       journeyName: config.getName(),
     };
 
+    const allApmLabels = {
+      ...config.getExtraApmLabels(),
+      testJobId,
+      testBuildId,
+      journeyName: config.getName(),
+      ftrConfig: config.getRepoRelPath(),
+      ...JOURNEY_APM_CONFIG.globalLabels,
+    };
+
+    Object.entries(allApmLabels).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        apm.setGlobalLabel(key, value);
+      }
+    });
+
+    const allApmLabelsStringified = Object.entries(allApmLabels)
+      .flatMap(([key, value]) => (value === null || value === undefined ? [] : `${key}=${value}`))
+      .join(',');
+
     /**
      * This is used by CI to set the docker registry port
      * you can also define this environment variable locally when running tests which
@@ -86,7 +106,7 @@ export function makeFtrConfigProvider(
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
         },
       }),
 
@@ -123,25 +143,10 @@ export function makeFtrConfigProvider(
         ],
 
         env: {
-          ELASTIC_APM_ACTIVE: JOURNEY_APM_CONFIG.active,
-          ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: JOURNEY_APM_CONFIG.contextPropagationOnly,
-          ELASTIC_APM_ENVIRONMENT: JOURNEY_APM_CONFIG.environment,
-          ELASTIC_APM_TRANSACTION_SAMPLE_RATE: JOURNEY_APM_CONFIG.transactionSampleRate,
-          ELASTIC_APM_SERVER_URL: JOURNEY_APM_CONFIG.serverUrl,
-          ELASTIC_APM_SECRET_TOKEN: JOURNEY_APM_CONFIG.secretToken,
           ELASTIC_APM_CAPTURE_BODY: JOURNEY_APM_CONFIG.captureBody,
           ELASTIC_APM_CAPTURE_HEADERS: JOURNEY_APM_CONFIG.captureRequestHeaders,
           ELASTIC_APM_LONG_FIELD_MAX_LENGTH: JOURNEY_APM_CONFIG.longFieldMaxLength,
-          ELASTIC_APM_GLOBAL_LABELS: Object.entries({
-            ...config.getExtraApmLabels(),
-            testJobId,
-            testBuildId,
-            journeyName: config.getName(),
-            ftrConfig: config.getRepoRelPath(),
-            ...JOURNEY_APM_CONFIG.globalLabels,
-          })
-            .flatMap(([key, value]) => (value == null ? [] : `${key}=${value}`))
-            .join(','),
+          ELASTIC_APM_GLOBAL_LABELS: allApmLabelsStringified,
         },
       },
     };

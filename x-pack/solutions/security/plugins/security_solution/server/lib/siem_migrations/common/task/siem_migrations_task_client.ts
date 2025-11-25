@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import type { MigrationTaskItemsStats } from '../../../../../common/siem_migrations/model/common.gen';
 import {
@@ -27,15 +27,18 @@ import type {
   SiemMigrationTaskStartResult,
   SiemMigrationTaskStopResult,
 } from './types';
-import type { SiemMigrationTaskRunner } from './siem_migrations_task_runner';
+import type {
+  SiemMigrationTaskRunner,
+  SiemTaskRunnerConstructor,
+} from './siem_migrations_task_runner';
 import type { SiemMigrationEvaluatorConstructor } from './siem_migrations_task_evaluator';
 
 export type MigrationsRunning<
   M extends MigrationDocument = StoredSiemMigration,
   I extends ItemDocument = ItemDocument,
-  P extends object = {}, // The migration task input parameters schema
-  C extends object = {}, // The migration task config schema
-  O extends object = {} // The migration task output schema
+  P extends object = {},
+  C extends object = {},
+  O extends object = {}
 > = Map<string, SiemMigrationTaskRunner<M, I, P, C, O>>;
 
 export abstract class SiemMigrationsTaskClient<
@@ -45,13 +48,14 @@ export abstract class SiemMigrationsTaskClient<
   C extends object = {}, // The migration task config schema
   O extends object = {} // The migration task output schema
 > {
-  protected abstract readonly TaskRunnerClass: typeof SiemMigrationTaskRunner<M, I, P, C, O>;
+  protected abstract readonly TaskRunnerClass: SiemTaskRunnerConstructor<M, I, P, C, O>;
   protected abstract readonly EvaluatorClass?: SiemMigrationEvaluatorConstructor<M, I, P, C, O>;
 
   constructor(
     protected migrationsRunning: MigrationsRunning<M, I, P, C, O>,
     private logger: Logger,
     private data: SiemMigrationsDataClient<M, I>,
+    private request: KibanaRequest,
     private currentUser: AuthenticatedUser,
     private dependencies: SiemMigrationsClientDependencies
   ) {}
@@ -82,6 +86,7 @@ export abstract class SiemMigrationsTaskClient<
     const abortController = new AbortController();
     const migrationTaskRunner = new this.TaskRunnerClass(
       migrationId,
+      this.request,
       this.currentUser,
       abortController,
       this.data,
@@ -137,6 +142,13 @@ export abstract class SiemMigrationsTaskClient<
     migrationId: string,
     filter: RuleMigrationFilters
   ): Promise<{ updated: boolean }> {
+    this.logger.warn(
+      `Updating migration ID:${migrationId} to retry with filter: ${JSON.stringify(
+        filter,
+        null,
+        2
+      )}`
+    );
     if (this.migrationsRunning.has(migrationId)) {
       // not update migrations that are currently running
       return { updated: false };
@@ -240,14 +252,13 @@ export abstract class SiemMigrationsTaskClient<
     if (!this.EvaluatorClass) {
       throw new Error('Evaluator class needs to be defined to use evaluate method');
     }
-
-    const { evaluationId, langsmithOptions, connectorId, invocationConfig, abortController } =
-      params;
+    const { evaluationId, langsmithOptions, connectorId, abortController } = params;
 
     const migrationLogger = this.logger.get('evaluate');
 
     const taskRunner = new this.TaskRunnerClass(
       evaluationId,
+      this.request,
       this.currentUser,
       abortController,
       this.data,
@@ -264,7 +275,6 @@ export abstract class SiemMigrationsTaskClient<
     await migrationTaskEvaluator.evaluate({
       connectorId,
       langsmithOptions,
-      invocationConfig,
     });
   }
 

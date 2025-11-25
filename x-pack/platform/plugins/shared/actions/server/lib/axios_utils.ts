@@ -13,12 +13,14 @@ import type {
   AxiosRequestConfig,
   AxiosHeaderValue,
 } from 'axios';
-import { AxiosHeaders } from 'axios';
+import { AxiosHeaders, isAxiosError } from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorUsageCollector, SSLSettings } from '../types';
 import { combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
+import { createAndThrowUserError } from './create_and_throw_user_error';
+import { getBeforeRedirectFn } from './before_redirect';
 
 export const request = async <T = unknown>({
   axios,
@@ -78,6 +80,7 @@ export const request = async <T = unknown>({
       proxy: false,
       maxContentLength,
       timeout: Math.max(settingsTimeout, timeout ?? 0),
+      beforeRedirect: getBeforeRedirectFn(configurationUtilities),
     });
 
     if (connectorUsageCollector) {
@@ -88,6 +91,9 @@ export const request = async <T = unknown>({
   } catch (error) {
     if (connectorUsageCollector) {
       connectorUsageCollector.addRequestBodyBytes(error, data);
+    }
+    if (isAxiosError(error)) {
+      createAndThrowUserError(error);
     }
     throw error;
   }

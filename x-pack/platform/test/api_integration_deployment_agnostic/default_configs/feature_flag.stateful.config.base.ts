@@ -98,7 +98,7 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
         },
       }),
       testFiles: options.testFiles,
@@ -139,7 +139,7 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
         serverArgs: [
           ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
           // if the config is run locally, explicitly enable mock-idp-plugin for UI role selector
-          ...(isRunOnCI ? [] : ['--mock_idp_plugin.enabled=true']),
+          ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=true']),
           // This ensures that we register the Security SAML API endpoints.
           // In the real world the SAML config is injected by control plane.
           `--plugin-path=${samlIdPPlugin}`,

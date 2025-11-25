@@ -22,6 +22,7 @@ import type {
   UnifiedHistogramFetchStatus,
   UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
+  UnifiedHistogramTopPanelHeightContext,
   UnifiedHistogramVisContext,
 } from '../types';
 import type { UnifiedHistogramStateService } from '../services/state_service';
@@ -148,7 +149,7 @@ export const useStateProps = ({
    */
 
   const onTopPanelHeightChange = useCallback(
-    (newTopPanelHeight: number | undefined) => {
+    (newTopPanelHeight: UnifiedHistogramTopPanelHeightContext) => {
       stateService?.setTopPanelHeight(newTopPanelHeight);
     },
     [stateService]

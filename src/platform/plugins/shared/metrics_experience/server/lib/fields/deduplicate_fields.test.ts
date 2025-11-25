@@ -8,7 +8,7 @@
  */
 
 import { deduplicateFields } from './deduplicate_fields';
-import type { MetricField } from '../../../common/fields/types';
+import type { MetricField } from '../../../common/types';
 
 describe('deduplicateFields', () => {
   const baseField: Omit<MetricField, 'name'> = {
@@ -87,6 +87,18 @@ describe('deduplicateFields', () => {
       { ...baseField, name: 'cpu' },
       { ...baseField, name: 'memory' },
       { ...baseField, name: 'disk.io' },
+    ]);
+  });
+
+  it('should handle fields with the same name but different indices', () => {
+    const fields: MetricField[] = [
+      { ...baseField, name: 'cpu', index: 'test-index-1' },
+      { ...baseField, name: 'cpu', index: 'test-index-2' },
+    ];
+    const result = deduplicateFields(fields);
+    expect(result).toEqual([
+      { ...baseField, name: 'cpu', index: 'test-index-1' },
+      { ...baseField, name: 'cpu', index: 'test-index-2' },
     ]);
   });
 });

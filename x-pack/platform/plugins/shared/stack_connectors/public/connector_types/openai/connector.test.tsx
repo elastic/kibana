@@ -10,7 +10,7 @@ import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
+import { DEFAULT_MODEL, OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
@@ -33,7 +33,7 @@ const openAiConnector = {
   config: {
     apiUrl: 'https://openaiurl.com',
     apiProvider: OpenAiProviderType.OpenAi,
-    defaultModel: DEFAULT_OPENAI_MODEL,
+    defaultModel: DEFAULT_MODEL,
   },
   secrets: {
     apiKey: 'thats-a-nice-looking-key',
@@ -59,6 +59,7 @@ const otherOpenAiConnector = {
     apiUrl: 'https://localhost/oss-llm',
     apiProvider: OpenAiProviderType.Other,
     defaultModel: 'local-model',
+    enableNativeFunctionCalling: false,
   },
   secrets: {
     apiKey: 'thats-a-nice-looking-key',
@@ -129,7 +130,71 @@ describe('ConnectorFields renders', () => {
     expect(getAllByTestId('other-ai-api-keys-doc')[0]).toBeInTheDocument();
     expect(queryByTestId('config.organizationId-input')).not.toBeInTheDocument();
     expect(queryByTestId('config.projectId-input')).not.toBeInTheDocument();
+    expect(queryByTestId('config.enableNativeFunctionCallingSwitch')).toBeInTheDocument();
   });
+
+  test('enableNativeFunctionCalling toggle only renders for Other provider', async () => {
+    const { queryByTestId: queryByTestIdOpenAi } = render(
+      <ConnectorFormTestProvider connector={openAiConnector}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+    expect(queryByTestIdOpenAi('config.enableNativeFunctionCallingSwitch')).not.toBeInTheDocument();
+
+    const { queryByTestId: queryByTestIdAzure } = render(
+      <ConnectorFormTestProvider connector={azureConnector}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+    expect(queryByTestIdAzure('config.enableNativeFunctionCallingSwitch')).not.toBeInTheDocument();
+
+    const { queryByTestId: queryByTestIdOther } = render(
+      <ConnectorFormTestProvider connector={otherOpenAiConnector}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+    expect(queryByTestIdOther('config.enableNativeFunctionCallingSwitch')).toBeInTheDocument();
+  });
+
+  test('enabling enableNativeFunctionCalling saves to config for Other provider', async () => {
+    const onSubmit = jest.fn();
+    render(
+      <ConnectorFormTestProvider connector={otherOpenAiConnector} onSubmit={onSubmit}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+
+    const toggle = await screen.findByTestId('config.enableNativeFunctionCallingSwitch');
+    expect(toggle).toBeInTheDocument();
+
+    await userEvent.click(toggle);
+
+    await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalled();
+    });
+
+    const testFormData = {
+      ...otherOpenAiConnector,
+      config: {
+        ...otherOpenAiConnector.config,
+        enableNativeFunctionCalling: true,
+      },
+      __internal__: {
+        hasHeaders: false,
+        hasPKI: false,
+      },
+    };
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      data: {
+        ...testFormData,
+      },
+      isValid: true,
+    });
+  });
+
   describe('Headers', () => {
     it('toggles headers as expected', async () => {
       const testFormData = {
@@ -139,7 +204,7 @@ describe('ConnectorFields renders', () => {
         config: {
           apiUrl: 'https://openaiurl.com',
           apiProvider: OpenAiProviderType.OpenAi,
-          defaultModel: DEFAULT_OPENAI_MODEL,
+          defaultModel: DEFAULT_MODEL,
         },
         secrets: {
           apiKey: 'thats-a-nice-looking-key',
@@ -174,7 +239,7 @@ describe('ConnectorFields renders', () => {
         config: {
           apiUrl: 'https://openaiurl.com',
           apiProvider: OpenAiProviderType.OpenAi,
-          defaultModel: DEFAULT_OPENAI_MODEL,
+          defaultModel: DEFAULT_MODEL,
         },
         secrets: {
           apiKey: 'thats-a-nice-looking-key',
@@ -202,7 +267,7 @@ describe('ConnectorFields renders', () => {
             config: {
               apiUrl: 'https://openaiurl.com',
               apiProvider: OpenAiProviderType.OpenAi,
-              defaultModel: DEFAULT_OPENAI_MODEL,
+              defaultModel: DEFAULT_MODEL,
             },
             secrets: {
               apiKey: 'thats-a-nice-looking-key',
@@ -223,7 +288,7 @@ describe('ConnectorFields renders', () => {
         config: {
           apiUrl: 'https://openaiurl.com',
           apiProvider: OpenAiProviderType.OpenAi,
-          defaultModel: DEFAULT_OPENAI_MODEL,
+          defaultModel: DEFAULT_MODEL,
         },
         secrets: {
           apiKey: 'thats-a-nice-looking-key',
@@ -256,7 +321,7 @@ describe('ConnectorFields renders', () => {
             config: {
               apiUrl: 'https://openaiurl.com',
               apiProvider: OpenAiProviderType.OpenAi,
-              defaultModel: DEFAULT_OPENAI_MODEL,
+              defaultModel: DEFAULT_MODEL,
               headers: [{ key: 'hello', value: 'world' }],
             },
             secrets: {

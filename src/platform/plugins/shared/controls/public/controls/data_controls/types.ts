@@ -16,7 +16,7 @@ import type {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 
-import type { DefaultDataControlState } from '../../../common';
+import type { DefaultControlState } from '../../../common';
 import type { ControlGroupApi } from '../../control_group/types';
 import type { ControlFactory, DefaultControlApi } from '../types';
 import type { PublishesAsyncFilters } from './publishes_async_filters';
@@ -36,17 +36,17 @@ export type DataControlApi = DefaultControlApi &
   PublishesAsyncFilters;
 
 export interface CustomOptionsComponentProps<
-  State extends DefaultDataControlState = DefaultDataControlState
+  State extends DefaultControlState = DefaultControlState
 > {
   initialState: Partial<State>;
-  field: DataViewField;
+  field?: DataViewField;
   updateState: (newState: Partial<State>) => void;
   setControlEditorValid: (valid: boolean) => void;
   controlGroupApi: ControlGroupApi;
 }
 
 export interface DataControlFactory<
-  State extends DefaultDataControlState = DefaultDataControlState,
+  State extends DefaultControlState = DefaultControlState,
   Api extends DataControlApi = DataControlApi
 > extends ControlFactory<State, Api> {
   isFieldCompatible: (field: DataViewField) => boolean;

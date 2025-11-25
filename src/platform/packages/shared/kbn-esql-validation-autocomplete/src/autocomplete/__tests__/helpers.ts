@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { camelCase } from 'lodash';
-import type { FieldType, FunctionParameterType, FunctionReturnType } from '@kbn/esql-ast';
-import { TRIGGER_SUGGESTION_COMMAND, fieldTypes, FunctionDefinitionTypes } from '@kbn/esql-ast';
+import type {
+  FieldType,
+  FunctionParameterType,
+  FunctionReturnType,
+  FunctionDefinition,
+} from '@kbn/esql-ast';
+import { withAutoSuggest, fieldTypes, FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
 import type {
   Location,
@@ -19,7 +24,15 @@ import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/
 import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
-import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
+import {
+  operatorsDefinitions,
+  logicalOperators,
+  arithmeticOperators,
+  comparisonFunctions,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
+} from '@kbn/esql-ast/src/definitions/all_operators';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
@@ -46,15 +59,27 @@ export const fields: TestField[] = [
   ...fieldTypes.map((type) => ({
     name: `${camelCase(type)}Field`,
     type,
+    userDefined: false as const,
+    // suggestedAs is optional and omitted here
   })),
-  { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`' },
-  { name: 'kubernetes.something.something', type: 'double' },
+  {
+    name: 'any#Char$Field',
+    type: 'double',
+    suggestedAs: '`any#Char$Field`',
+    userDefined: false as const,
+  },
+  {
+    name: 'kubernetes.something.something',
+    type: 'double',
+    suggestedAs: undefined,
+    userDefined: false as const,
+  },
 ];
 
 export const lookupIndexFields: TestField[] = [
-  { name: 'booleanField', type: 'boolean' },
-  { name: 'dateField', type: 'date' },
-  { name: 'joinIndexOnlyField', type: 'text' },
+  { name: 'booleanField', type: 'boolean', userDefined: false },
+  { name: 'dateField', type: 'date', userDefined: false },
+  { name: 'joinIndexOnlyField', type: 'text', userDefined: false },
 ];
 
 export const indexes = (
@@ -118,6 +143,7 @@ export function getFunctionSignaturesByReturnType(
     grouping,
     scalar,
     operators,
+    excludeOperatorGroups,
     timeseriesAgg,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
@@ -127,6 +153,10 @@ export function getFunctionSignaturesByReturnType(
     grouping?: boolean;
     scalar?: boolean;
     operators?: boolean;
+    /** Exclude specific operator groups (e.g., ['in', 'nullCheck']) */
+    excludeOperatorGroups?: Array<
+      'logical' | 'comparison' | 'arithmetic' | 'pattern' | 'in' | 'nullCheck'
+    >;
     timeseriesAgg?: boolean;
     skipAssign?: boolean;
   } = {},
@@ -156,7 +186,43 @@ export function getFunctionSignaturesByReturnType(
     list.push(...timeSeriesAggFunctionDefinitions);
   }
   if (operators) {
-    list.push(...operatorsDefinitions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
+    // Build set of operator names to exclude based on excludeOperatorGroups
+    const excludedOperatorNames = new Set<string>();
+
+    if (excludeOperatorGroups) {
+      const operatorGroupMap: Record<string, FunctionDefinition[]> = {
+        logical: logicalOperators,
+        comparison: comparisonFunctions,
+        arithmetic: arithmeticOperators,
+        pattern: patternMatchOperators,
+        in: inOperators,
+        nullCheck: nullCheckOperators,
+      };
+
+      for (const groupName of excludeOperatorGroups) {
+        const group = operatorGroupMap[groupName];
+
+        if (group) {
+          for (const op of group) {
+            excludedOperatorNames.add(op.name);
+          }
+        }
+      }
+    }
+
+    list.push(
+      ...operatorsDefinitions.filter(({ name }) => {
+        if (skipAssign && (name === '=' || name === ':')) {
+          return false;
+        }
+
+        if (excludedOperatorNames.has(name)) {
+          return false;
+        }
+
+        return true;
+      })
+    );
   }
 
   const deduped = Array.from(new Set(list));
@@ -240,6 +306,15 @@ export function getFunctionSignaturesByReturnType(
           label: name.toUpperCase(),
         };
       }
+
+      const hasNoArguments = signatures.every((sig) => sig.params.length === 0);
+      if (hasNoArguments) {
+        return {
+          text: `${name.toUpperCase()}()`,
+          label: name.toUpperCase(),
+        };
+      }
+
       return {
         text: customParametersSnippet
           ? `${name.toUpperCase()}(${customParametersSnippet})`
@@ -303,7 +378,8 @@ export function createCustomCallbackMocks(
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
     getEditorExtensions: jest.fn(async (queryString: string) => {
-      if (queryString.includes('logs*')) {
+      // from * is called in the empty state
+      if (queryString.includes('logs*') || queryString === 'from *') {
         return {
           recommendedQueries: editorExtensions.recommendedQueries,
           recommendedFields: editorExtensions.recommendedFields,
@@ -393,8 +469,7 @@ export const attachTriggerCommand = (
   s: string | PartialSuggestionWithText
 ): PartialSuggestionWithText =>
   typeof s === 'string'
-    ? {
+    ? withAutoSuggest({
         text: s,
-        command: TRIGGER_SUGGESTION_COMMAND,
-      }
-    : { ...s, command: TRIGGER_SUGGESTION_COMMAND };
+      } as ISuggestionItem)
+    : withAutoSuggest(s as ISuggestionItem);

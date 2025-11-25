@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -28,7 +28,6 @@
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/test-jest-helpers",
     "@kbn/content-management-table-list-view-common",
     "@kbn/user-profile-components",
@@ -39,7 +38,8 @@
     "@kbn/content-management-content-insights-public",
     "@kbn/content-management-favorites-public",
     "@kbn/kibana-utils-plugin",
-    "@kbn/shared-ux-table-persist"
+    "@kbn/shared-ux-table-persist",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*"

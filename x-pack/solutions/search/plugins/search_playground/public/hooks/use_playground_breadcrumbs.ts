@@ -29,7 +29,7 @@ export const usePlaygroundBreadcrumbs = (playgroundName?: string) => {
           ]),
       {
         text: i18n.translate('xpack.searchPlayground.breadcrumbs.playground', {
-          defaultMessage: 'RAG Playground',
+          defaultMessage: 'Playground',
         }),
         href: playgroundName !== undefined ? http.basePath.prepend(PLUGIN_PATH) : undefined,
       },

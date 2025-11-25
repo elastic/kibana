@@ -176,12 +176,12 @@ export function validatePlaygroundName(name: string): string | null {
   const trimmedName = name.trim();
   if (!name || !trimmedName) {
     return i18n.translate('xpack.searchPlayground.savedPlayground.errors.name.required', {
-      defaultMessage: 'RAG Playground name is required',
+      defaultMessage: 'Playground name is required',
     });
   }
   if (name.length > 100) {
     return i18n.translate('xpack.searchPlayground.savedPlayground.errors.name.tooLong', {
-      defaultMessage: 'RAG Playground name must be less than 100 characters',
+      defaultMessage: 'Playground name must be less than 100 characters',
     });
   }
   return null;

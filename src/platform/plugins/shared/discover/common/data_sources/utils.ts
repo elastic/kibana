@@ -8,7 +8,7 @@
  */
 
 import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import {
   DataSourceType,
   type DataViewDataSource,
@@ -33,14 +33,19 @@ export const createDataSource = ({
   dataView,
   query,
 }: {
-  dataView: DataView | undefined;
+  dataView: DataView | DataViewSpec | string | undefined;
   query: Query | AggregateQuery | undefined;
 }) => {
-  return isOfAggregateQueryType(query)
-    ? createEsqlDataSource()
-    : dataView?.id
-    ? createDataViewDataSource({ dataViewId: dataView.id })
-    : undefined;
+  if (isOfAggregateQueryType(query)) {
+    return createEsqlDataSource();
+  }
+  if (typeof dataView === 'string') {
+    return createDataViewDataSource({ dataViewId: dataView });
+  }
+  if (dataView?.id) {
+    return createDataViewDataSource({ dataViewId: dataView.id });
+  }
+  return undefined;
 };
 
 export const isDataSourceType = <T extends DataSourceType>(

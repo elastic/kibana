@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { SEARCH_AI_LAKE_PACKAGES, type PackageListItem } from '@kbn/fleet-plugin/common';
+import { type PackageListItem, SEARCH_AI_LAKE_PACKAGES } from '@kbn/fleet-plugin/common';
 import { installationStatuses, useGetPackagesQuery } from '@kbn/fleet-plugin/public';
 
 export interface UseFetchIntegrationsResult {
@@ -15,18 +15,18 @@ export interface UseFetchIntegrationsResult {
    */
   isLoading: boolean;
   /**
-   * The AI for SOC installed integrations (see list in the constant above)
+   * EASE installed integrations (see list in the constant above)
    */
   installedPackages: PackageListItem[];
   /**
-   * The AI for SOC not-installed integrations (see list in the constant above)
+   * EASE not-installed integrations (see list in the constant above)
    */
   availablePackages: PackageListItem[];
 }
 
 /**
  * Fetches all integrations, then returns the installed and non-installed ones filtered with a list of
- * hard coded AI for SOC integrations:
+ * hard coded EASE integrations:
  * - splunk
  * - google_secops
  * - microsoft_sentinel
@@ -41,22 +41,22 @@ export const useFetchIntegrations = (): UseFetchIntegrationsResult => {
     prerelease: true,
   });
 
-  const aiForSOCPackages: PackageListItem[] = useMemo(
+  const easePackages: PackageListItem[] = useMemo(
     () => (allPackages?.items || []).filter((pkg) => SEARCH_AI_LAKE_PACKAGES.includes(pkg.name)),
     [allPackages]
   );
   const availablePackages: PackageListItem[] = useMemo(
-    () => aiForSOCPackages.filter((pkg) => pkg.status === installationStatuses.NotInstalled),
-    [aiForSOCPackages]
+    () => easePackages.filter((pkg) => pkg.status === installationStatuses.NotInstalled),
+    [easePackages]
   );
   const installedPackages: PackageListItem[] = useMemo(
     () =>
-      aiForSOCPackages.filter(
+      easePackages.filter(
         (pkg) =>
           pkg.status === installationStatuses.Installed ||
           pkg.status === installationStatuses.InstallFailed
       ),
-    [aiForSOCPackages]
+    [easePackages]
   );
 
   return useMemo(

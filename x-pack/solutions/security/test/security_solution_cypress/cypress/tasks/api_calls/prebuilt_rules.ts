@@ -8,8 +8,8 @@
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { PerformRuleInstallationResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
-  PERFORM_RULE_INSTALLATION_URL,
   BOOTSTRAP_PREBUILT_RULES_URL,
+  PERFORM_RULE_INSTALLATION_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ELASTIC_SECURITY_RULE_ID,
@@ -80,66 +80,6 @@ export const getInstalledPrebuiltRulesCount = () => {
   return getPrebuiltRulesStatus().then(({ body }) => body.rules_installed);
 };
 
-export const getAvailableToInstallPrebuiltRulesCount = () => {
-  cy.log('Get available to install prebuilt rules count');
-
-  return getPrebuiltRulesStatus().then(
-    ({ body }) => body.rules_installed + body.rules_not_installed
-  );
-};
-
-export const waitTillPrebuiltRulesReadyToInstall = () => {
-  cy.waitUntil(
-    () => {
-      return getAvailableToInstallPrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
-        return availablePrebuiltRulesCount > 0;
-      });
-    },
-    { interval: 2000, timeout: 60000 }
-  );
-};
-
-/**
- * Install all prebuilt rules.
- *
- * This is a heavy request and should be used with caution. Most likely you
- * don't need all prebuilt rules to be installed, crating just a few prebuilt
- * rules should be enough for most cases.
- */
-export const excessivelyInstallAllPrebuiltRules = () => {
-  cy.log('Install prebuilt rules (heavy request)');
-  waitTillPrebuiltRulesReadyToInstall();
-  installAllPrebuiltRulesRequest();
-};
-
-export const createNewRuleAsset = ({
-  index = '.kibana_security_solution',
-  rule = SAMPLE_PREBUILT_RULE,
-}: {
-  index?: string;
-  rule?: typeof SAMPLE_PREBUILT_RULE;
-}) => {
-  const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_doc/security-rule:${
-    rule['security-rule'].rule_id
-  }?refresh`;
-  cy.log('URL', url);
-  cy.waitUntil(
-    () => {
-      return cy
-        .request({
-          method: 'PUT',
-          url,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: rule,
-        })
-        .then((response) => response.status === 200);
-    },
-    { interval: 500, timeout: 12000 }
-  );
-};
-
 export const bulkCreateRuleAssets = ({
   index = '.kibana_security_solution',
   rules = [SAMPLE_PREBUILT_RULE],
@@ -169,22 +109,6 @@ export const bulkCreateRuleAssets = ({
 
   cy.task('putMapping', index);
   cy.task('bulkInsert', bulkIndexRequestBody);
-};
-
-export const getRuleAssets = (index: string | undefined = '.kibana_security_solution') => {
-  const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_search?size=10000`;
-  return rootRequest({
-    method: 'GET',
-    url,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: {
-      query: {
-        term: { type: { value: 'security-rule' } },
-      },
-    },
-  });
 };
 
 /* Prevent the installation of the `security_detection_engine` package from Fleet
@@ -228,17 +152,6 @@ export const installMockPrebuiltRulesPackage = (): void => {
   installByUploadPrebuiltRulesPackage(
     'security_detection_engine_packages/mock-security_detection_engine-99.0.0.zip'
   );
-};
-
-export const deleteMockPrebuiltRulesPackage = (): Cypress.Chainable<Cypress.Response<unknown>> => {
-  return rootRequest({
-    method: 'DELETE',
-    url: `/api/fleet/epm/packages/security_detection_engine/99.0.0`,
-    headers: {
-      'elastic-api-version': '2023-10-31',
-      'kbn-xsrf': 'xxxx',
-    },
-  });
 };
 
 /**

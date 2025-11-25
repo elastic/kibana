@@ -1,7 +1,0 @@
-@import '../shared';
-
-.pipelineProcessorsEditor__itemTooltip {
-  position: fixed;
-  pointer-events: none;
-  z-index: $processorItemMouseTooltipZIndex;
-}

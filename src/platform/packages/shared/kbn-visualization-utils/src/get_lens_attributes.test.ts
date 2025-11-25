@@ -38,6 +38,7 @@ describe('getLensAttributesFromSuggestion', () => {
           'index-pattern-with-timefield-id': {},
         },
       }),
+      version: 1,
       references: [],
       title: currentSuggestionMock.title,
       visualizationType: 'lnsHeatmap',

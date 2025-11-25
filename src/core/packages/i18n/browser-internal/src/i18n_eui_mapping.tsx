@@ -973,6 +973,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiModal.closeModal': i18n.translate('core.euiModal.closeModal', {
       defaultMessage: 'Closes this modal window',
     }),
+    'euiModal.screenReaderModalDialog': i18n.translate('core.euiModal.screenReaderModalDialog', {
+      defaultMessage:
+        'You are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.',
+    }),
     'euiErrorBoundary.error': i18n.translate('core.euiErrorBoundary.error', {
       defaultMessage: 'Error',
       description: 'Error boundary for uncaught exceptions when rendering part of the application',
@@ -1337,6 +1341,34 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiQuickSelect.applyButton': i18n.translate('core.euiQuickSelect.applyButton', {
       defaultMessage: 'Apply',
     }),
+    'euiTimeWindowButtons.invalidShiftLabel': i18n.translate(
+      'core.euiTimeWindowButtons.invalidShiftLabel',
+      { defaultMessage: 'Cannot shift invalid time window' }
+    ),
+    'euiTimeWindowButtons.invalidZoomOutLabel': i18n.translate(
+      'core.euiTimeWindowButtons.invalidZoomOutLabel',
+      { defaultMessage: 'Cannot zoom out invalid time window' }
+    ),
+    'euiTimeWindowButtons.previousLabel': i18n.translate(
+      'core.euiTimeWindowButtons.previousLabel',
+      { defaultMessage: 'Previous' }
+    ),
+    'euiTimeWindowButtons.previousDescription': ({ displayInterval }: EuiValues) =>
+      i18n.translate('core.euiTimeWindowButtons.previousDescription', {
+        defaultMessage: 'Previous {displayInterval}',
+        values: { displayInterval },
+      }),
+    'euiTimeWindowButtons.zoomOutLabel': i18n.translate('core.euiTimeWindowButtons.zoomOutLabel', {
+      defaultMessage: 'Zoom out',
+    }),
+    'euiTimeWindowButtons.nextLabel': i18n.translate('core.euiTimeWindowButtons.nextLabel', {
+      defaultMessage: 'Next',
+    }),
+    'euiTimeWindowButtons.nextDescription': ({ displayInterval }: EuiValues) =>
+      i18n.translate('core.euiTimeWindowButtons.nextDescription', {
+        defaultMessage: 'Next {displayInterval}',
+        values: { displayInterval },
+      }),
     'euiQuickSelect.fullDescription': ({ timeTense, timeValue, timeUnit }: EuiValues) =>
       i18n.translate('core.euiQuickSelect.fullDescription', {
         defaultMessage: 'Currently set to {timeTense} {timeValue} {timeUnit}.',

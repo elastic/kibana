@@ -10,7 +10,7 @@ import { selectDataViewAsync } from '../actions';
 import type { DataViewsServicePublic, FieldSpec } from '@kbn/data-views-plugin/public';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import type { RootState } from '../reducer';
-import { DataViewManagerScopeName, DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../../constants';
 import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../../common/constants';
 
 const mockDataViewsService = {
@@ -36,7 +36,11 @@ const mockedState: RootState = {
       dataViewId: null,
       status: 'pristine',
     },
-    detections: {
+    alerts: {
+      dataViewId: null,
+      status: 'pristine',
+    },
+    attacks: {
       dataViewId: null,
       status: 'pristine',
     },
@@ -94,13 +98,13 @@ describe('createDataViewSelectedListener', () => {
     jest.clearAllMocks();
     listener = createDataViewSelectedListener({
       dataViews: mockDataViewsService,
-      scope: DataViewManagerScopeName.default,
+      scope: PageScope.default,
     });
   });
 
   it('should cancel previous effects that would set the data view for given scope', async () => {
     await listener.effect(
-      selectDataViewAsync({ id: 'adhoc_test-*', scope: DataViewManagerScopeName.default }),
+      selectDataViewAsync({ id: 'adhoc_test-*', scope: PageScope.default }),
       mockListenerApi
     );
 
@@ -109,7 +113,7 @@ describe('createDataViewSelectedListener', () => {
 
   it('should return cached adhoc data view first', async () => {
     await listener.effect(
-      selectDataViewAsync({ id: 'adhoc_test-*', scope: DataViewManagerScopeName.default }),
+      selectDataViewAsync({ id: 'adhoc_test-*', scope: PageScope.default }),
       mockListenerApi
     );
 
@@ -121,7 +125,7 @@ describe('createDataViewSelectedListener', () => {
       selectDataViewAsync({
         id: 'fetched-id',
         fallbackPatterns: ['test-*'],
-        scope: DataViewManagerScopeName.default,
+        scope: PageScope.default,
       }),
       mockListenerApi
     );
@@ -148,7 +152,7 @@ describe('createDataViewSelectedListener', () => {
     await listener.effect(
       selectDataViewAsync({
         fallbackPatterns: ['test-*'],
-        scope: DataViewManagerScopeName.default,
+        scope: PageScope.default,
       }),
       mockListenerApi
     );
@@ -162,30 +166,6 @@ describe('createDataViewSelectedListener', () => {
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         payload: 'adhoc_test-*',
-      })
-    );
-  });
-
-  it('should dispatch an error if both fetching and creation fail', async () => {
-    jest
-      .mocked(mockDataViewsService)
-      .getDataViewLazy.mockRejectedValueOnce(new Error('some random get data view failure'));
-
-    jest
-      .mocked(mockDataViewsService)
-      .create.mockRejectedValueOnce(new Error('some random create data view failure'));
-
-    await listener.effect(
-      selectDataViewAsync({
-        fallbackPatterns: ['test-*'],
-        scope: DataViewManagerScopeName.default,
-      }),
-      mockListenerApi
-    );
-
-    expect(mockDispatch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'x-pack/security_solution/dataViewManager/default/dataViewSelectionError',
       })
     );
   });

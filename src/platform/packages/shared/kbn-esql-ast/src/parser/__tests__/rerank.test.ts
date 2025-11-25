@@ -130,15 +130,13 @@ describe('RERANK', () => {
             type: 'function',
             subtype: 'binary-expression',
             name: '=',
-            args: expect.arrayContaining([
-              expect.objectContaining({ type: 'column', name: 'overview' }),
-              expect.arrayContaining([
-                expect.objectContaining({
-                  type: 'function',
-                  name: 'substring',
-                }),
-              ]),
-            ]),
+            args: [
+              {},
+              {
+                type: 'function',
+                name: 'substring',
+              },
+            ],
           },
         ],
       });
@@ -200,7 +198,7 @@ describe('RERANK', () => {
         fields: [{ type: 'column', name: 'title' }],
       });
 
-      expect(rerankCmd).not.toHaveProperty('inferenceId');
+      expect(rerankCmd.inferenceId).toEqual(undefined);
     });
 
     it('should handle missing ON clause', () => {

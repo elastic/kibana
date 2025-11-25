@@ -8,6 +8,67 @@ Cloud Posture automates the identification and remediation of risks across cloud
 
 Read [Kibana Contributing Guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for more details
 
+### DataView Migration Logic
+
+The data view migration is split into two parts:
+
+1. Deletion of old and legacy data views during the plugin initialization (only runs once when the CSP package is installed or when Kibana is started)
+2. Creation of new data views when the user navigates to the CSP page (the check runs every time the user navigates to the CSP page to see if the data views need to be created)
+
+When making changes to CSP data views, follow these guidelines:
+
+#### When to Update Data View Version
+
+Create a new data view version when:
+
+1. **Index Pattern Changes**: Updating the underlying index pattern (e.g., from `logs-*` to `security_solution-*`)
+2. **Field Mapping Updates**: Making significant changes to field mappings that could affect existing queries
+3. **Breaking Changes**: Any change that would break existing saved searches, visualizations, or dashboards
+4. **Data Source Migration**: Moving from one data source to another (e.g., from native to CDR indices)
+
+#### How to Update Data View Version
+
+1. **Update Constants** in `packages/kbn-cloud-security-posture/common/constants.ts`:
+
+   - Add the current version to the OLD_VERSIONS array
+   - Update the main constant to the new version `_v{n+1}`
+
+   ```typescript
+   // Array of old data view IDs for migration purposes
+   export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS = [
+     'security_solution_cdr_latest_misconfigurations', // v1
+     'security_solution_cdr_latest_misconfigurations_v2', // v2 - Add current version here when moving to v3
+     // Future deprecated versions will be added here
+   ];
+
+   // Current data view ID - increment version when making breaking changes
+   export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
+     'security_solution_cdr_latest_misconfigurations_v3'; // Updated to v3
+   ```
+
+2. **Update Tests** in `test/cloud_security_posture_functional/data_views/data_views.ts`:
+   - Test deletion from v1 to current version (with space suffix)
+   - Test deletion from legacy to current version (global to space-specific)
+   - Test deletion of old and legacy data views during plugin initialization
+   - Test creation of new data views when the user navigates to the CSP page
+
+#### Example: Moving from v2 to v3
+
+```typescript
+// Step 1: Update the OLD_VERSIONS array in packages/kbn-cloud-security-posture/common/constants.ts
+export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS = [
+  'security_solution_cdr_latest_misconfigurations', // v1
+  'security_solution_cdr_latest_misconfigurations_v2', // v2 - Added current version
+];
+
+// Step 2: Update the current version
+export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
+  'security_solution_cdr_latest_misconfigurations_v3'; // Now v3
+
+// Note: Legacy versions (global data views) are tracked separately and rarely change
+export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS = [];
+```
+
 ## Testing
 
 For general guidelines, read [Kibana Testing Guide](https://www.elastic.co/guide/en/kibana/current/development-tests.html) for more details
@@ -66,7 +127,7 @@ Run [**API Integration Tests**](https://docs.elastic.dev/kibana-dev-docs/tutoria
 
 ```bash
 yarn test:ftr --config x-pack/solutions/security/test/cloud_security_posture_api/config.ts
-yarn test:ftr --config x-pack/test/api_integration/apis/cloud_security_posture/config.ts
+yarn test:ftr --config x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/config.ts
 yarn test:ftr --config x-pack/solutions/security/test/serverless/api_integration/configs/config.ts --include-tag=cloud_security_posture
 ```
 
@@ -77,7 +138,7 @@ yarn test:ftr --config x-pack/solutions/security/test/cloud_security_posture_fun
 yarn test:ftr --config x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.ts
 ```
 
-Run [**End-to-End Cypress Tests**](https://github.com/elastic/kibana/tree/main/x-pack/test/security_solution_cypress/cypress):
+Run [**End-to-End Cypress Tests**](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/test/security_solution_cypress/cypress):
 
 > **Note**
 >
@@ -99,8 +160,8 @@ For example,
 run ESS (stateful) api integration tests:
 
 ```bash
-yarn test:ftr:server --config x-pack/test/api_integration/config.ts
-yarn test:ftr:runner --config x-pack/test/api_integration/apis/cloud_security_posture/config.ts
+yarn test:ftr:server --config x-pack/solutions/security/test/api_integration/config.ts
+yarn test:ftr:runner --config x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/config.ts
 ```
 
 run ESS (stateful) telemetry integration tests:
@@ -115,6 +176,13 @@ run ESS (stateful) e2e tests:
 ```bash
 yarn test:ftr:server --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
 yarn test:ftr:runner --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
+```
+
+run data view migration tests:
+
+```bash
+yarn test:ftr:server --config x-pack/solutions/security/test/cloud_security_posture_functional/data_views/config.ts
+yarn test:ftr:runner --config x-pack/solutions/security/test/cloud_security_posture_functional/data_views/config.ts
 ```
 
 run serverless api integration tests:
@@ -163,7 +231,7 @@ Unlike FTR where we have to set server and runner separately, Cypress handles ev
 
 ### Troubleshooting
 
-If you encounter an error related to running machine learning code, you should add the following string `'xpack.ml.enabled=false'` under the `esTestCluster` property in the `x-pack/test/functional/config.base.js` file.
+If you encounter an error related to running machine learning code, you should add the following string `'xpack.ml.enabled=false'` under the `esTestCluster` property in the `x-pack/solutions/security/test/functional/config.base.js` file.
 
 Example:
 

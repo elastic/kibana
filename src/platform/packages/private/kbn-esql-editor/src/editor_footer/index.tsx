@@ -7,32 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useState, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiText,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCode,
-  EuiButtonIcon,
-  EuiButtonEmpty,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
+import { getLimitFromESQLQuery } from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  LanguageDocumentationInline,
   LanguageDocumentationFlyout,
+  LanguageDocumentationInline,
 } from '@kbn/language-documentation';
-import { getLimitFromESQLQuery } from '@kbn/esql-utils';
-import { type MonacoMessage } from '../helpers';
-import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
-import { QueryHistoryAction, HistoryAndStarredQueriesTabs } from './history_starred_queries';
-import { SubmitFeedbackComponent } from './feedback_component';
-import { QueryWrapComponent } from './query_wrap_component';
-import { KeyboardShortcuts } from './keyboard_shortcuts';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import type { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';
+import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
+import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_starred_queries';
+import { KeyboardShortcuts } from './keyboard_shortcuts';
+import { QueryWrapComponent } from './query_wrap_component';
+import { QuickSearchAction } from '../editor_visor/quick_search_action';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -48,7 +49,7 @@ interface EditorFooterProps {
   warnings?: MonacoMessage[];
   detectedTimestamp?: string;
   onErrorClick: (error: MonacoMessage) => void;
-  runQuery: () => void;
+  onUpdateAndSubmitQuery: (newQuery: string, querySource: QuerySource) => void;
   updateQuery: (qs: string) => void;
   isHistoryOpen: boolean;
   setIsHistoryOpen: (status: boolean) => void;
@@ -62,8 +63,10 @@ interface EditorFooterProps {
   isSpaceReduced?: boolean;
   hideTimeFilterInfo?: boolean;
   hideQueryHistory?: boolean;
+  hideQuickSearch?: boolean;
   displayDocumentationAsFlyout?: boolean;
   dataErrorsControl?: DataErrorsControl;
+  toggleVisor: () => void;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -73,7 +76,7 @@ export const EditorFooter = memo(function EditorFooter({
   warnings,
   detectedTimestamp,
   onErrorClick,
-  runQuery,
+  onUpdateAndSubmitQuery,
   updateQuery,
   hideRunQueryText,
   editorIsInline,
@@ -86,29 +89,17 @@ export const EditorFooter = memo(function EditorFooter({
   isLanguageComponentOpen,
   setIsLanguageComponentOpen,
   hideQueryHistory,
+  hideQuickSearch,
   displayDocumentationAsFlyout,
   measuredContainerWidth,
   code,
   dataErrorsControl,
+  toggleVisor,
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
-
-  const onUpdateAndSubmit = useCallback(
-    (qs: string) => {
-      // update the query first
-      updateQuery(qs);
-      // submit the query with some latency
-      // if I do it immediately there is some race condition until
-      // the state is updated and it won't be sumbitted correctly
-      setTimeout(() => {
-        runQuery();
-      }, 300);
-    },
-    [runQuery, updateQuery]
-  );
 
   const toggleHistoryComponent = useCallback(() => {
     setIsHistoryOpen(!isHistoryOpen);
@@ -236,7 +227,7 @@ export const EditorFooter = memo(function EditorFooter({
             <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
               {!Boolean(editorIsInline) && (
                 <>
-                  <SubmitFeedbackComponent />
+                  {!hideQuickSearch && <QuickSearchAction toggleVisor={toggleVisor} />}
                   {!hideQueryHistory && (
                     <QueryHistoryAction
                       toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
@@ -298,7 +289,9 @@ export const EditorFooter = memo(function EditorFooter({
             <>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-                  <SubmitFeedbackComponent isSpaceReduced={true} />
+                  {!hideQuickSearch && (
+                    <QuickSearchAction toggleVisor={toggleVisor} isSpaceReduced={true} />
+                  )}
                   {!hideQueryHistory && (
                     <QueryHistoryAction
                       toggleHistory={toggleHistoryComponent}
@@ -333,7 +326,7 @@ export const EditorFooter = memo(function EditorFooter({
         <EuiFlexItem grow={false}>
           <HistoryAndStarredQueriesTabs
             containerCSS={styles.historyContainer}
-            onUpdateAndSubmit={onUpdateAndSubmit}
+            onUpdateAndSubmit={onUpdateAndSubmitQuery}
             containerWidth={measuredContainerWidth}
             height={resizableContainerHeight}
             isSpaceReduced={isSpaceReduced}

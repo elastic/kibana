@@ -10,6 +10,7 @@ import type { ArtifactsSchema, TutorialSchema } from '@kbn/home-plugin/server';
 import { TutorialsCategory } from '@kbn/home-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
+import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import type { APMConfig } from '..';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';
@@ -25,11 +26,17 @@ export const tutorialProvider =
     apmIndices,
     cloud,
     isFleetPluginEnabled,
+    observability,
+    isManagedOtlpServiceFeatureEnabled,
+    managedOtlpServiceUrl,
   }: {
     apmConfig: APMConfig;
     apmIndices: APMIndices;
     cloud?: CloudSetup;
+    observability: ObservabilityPluginSetup;
     isFleetPluginEnabled: boolean;
+    isManagedOtlpServiceFeatureEnabled: boolean;
+    managedOtlpServiceUrl: string;
   }) =>
   () => {
     const artifacts: ArtifactsSchema = {
@@ -85,6 +92,8 @@ It allows you to monitor the performance of thousands of applications in real ti
         apmIndices,
         isFleetPluginEnabled,
         cloudSetup: cloud,
+        isManagedOtlpServiceFeatureEnabled,
+        managedOtlpServiceUrl,
       }),
       previewImagePath: '/plugins/apm/assets/apm.png',
     } as TutorialSchema;

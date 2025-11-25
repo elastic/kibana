@@ -67,7 +67,7 @@ describe('getStylesheetPaths', () => {
       ).toMatchInlineSnapshot(`
         Array [
           "/base-path/buildShaShort/ui/legacy_dark_theme.min.css",
-          "/base-path/buildShaShort/ui/charts/theme_dark.css",
+          "/base-path/buildShaShort/ui/charts/theme_only_dark.css",
         ]
       `);
     });
@@ -82,7 +82,7 @@ describe('getStylesheetPaths', () => {
       ).toMatchInlineSnapshot(`
         Array [
           "/base-path/buildShaShort/ui/legacy_light_theme.min.css",
-          "/base-path/buildShaShort/ui/charts/theme_light.css",
+          "/base-path/buildShaShort/ui/charts/theme_only_light.css",
         ]
       `);
     });

@@ -27,6 +27,12 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
 }) => {
   const { to, subject, body } = action;
   const toOptions = to ? to.map((label) => ({ label })) : [];
+  const toEmailAddressLabel = i18n.translate(
+    'xpack.watcher.sections.watchEdit.threshold.emailAction.recipientTextFieldLabel',
+    {
+      defaultMessage: 'To email address',
+    }
+  );
 
   return (
     <Fragment>
@@ -36,16 +42,12 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
         fullWidth
         errors={errors}
         isShowingErrors={hasErrors && to !== undefined}
-        label={i18n.translate(
-          'xpack.watcher.sections.watchEdit.threshold.emailAction.recipientTextFieldLabel',
-          {
-            defaultMessage: 'To email address',
-          }
-        )}
+        label={toEmailAddressLabel}
       >
         <EuiComboBox
           noSuggestions
           fullWidth
+          aria-label={toEmailAddressLabel}
           data-test-subj="toEmailAddressInput"
           selectedOptions={toOptions}
           onCreateOption={(searchValue: string) => {

@@ -22,6 +22,7 @@ export const MetricRowControls = ({ onDelete, disableDelete }: MetricRowControlP
           iconType="trash"
           color="danger"
           style={{ marginBottom: '0.2em' }}
+          aria-label={DELETE_LABEL}
           onClick={onDelete}
           disabled={disableDelete}
           title={DELETE_LABEL}

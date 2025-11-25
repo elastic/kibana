@@ -789,6 +789,14 @@
             "description": "Indicates if the API returns only outdated SLO or all SLO definitions",
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "name": "includeHealth",
+            "in": "query",
+            "description": "Indicates if the API returns SLO health data with definitions",
+            "schema": {
+              "type": "boolean"
             },
             "example": true
           },
@@ -2430,6 +2438,29 @@
           }
         }
       },
+      "artifacts": {
+        "title": "Artifacts",
+        "description": "Links to related assets for the SLO",
+        "type": "object",
+        "properties": {
+          "dashboards": {
+            "description": "Array of dashboard references",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id"
+              ],
+              "properties": {
+                "id": {
+                  "description": "Dashboard saved-object id",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
       "create_slo_request": {
         "title": "Create SLO request",
         "description": "The create SLO API request body varies depending on the type of indicator, time window and budgeting method.\n",
@@ -2499,6 +2530,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "artifacts": {
+            "$ref": "#/components/schemas/artifacts"
           }
         }
       },
@@ -2594,6 +2628,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "artifacts": {
+            "$ref": "#/components/schemas/artifacts"
           }
         }
       },
@@ -2697,6 +2734,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "artifacts": {
+            "$ref": "#/components/schemas/artifacts"
           },
           "createdAt": {
             "description": "The creation date",

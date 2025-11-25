@@ -19,8 +19,8 @@ const assertMarkerRemoved = (_query: string) => {
     throw new Error(`Query does not contain marker: ${query}`);
   }
 
-  const { ast } = Parser.parse(query);
-  const result = getAstContext(query, ast, _query.length);
+  const { root } = Parser.parse(query);
+  const result = getAstContext(query, root, _query.length);
 
   if (!result.command) {
     throw new Error(`No command found in AST for query: ${query}`);
@@ -74,10 +74,6 @@ describe('it should remove marker nodes from the AST', () => {
     assertMarkerRemoved(`FROM employees | EVAL total = salary + `);
     assertMarkerRemoved(`FROM employees | EVAL total = salary + bonus, `);
 
-    // After assignment
-    // @TODO reenable when fixed...
-    // assertMarkerRemoved(`FROM employees | EVAL total = `);
-
     // STATS command with binary operator and comma
     assertMarkerRemoved(`FROM employees | STATS avg(salary), `);
 
@@ -87,4 +83,6 @@ describe('it should remove marker nodes from the AST', () => {
     // SORT command with comma
     assertMarkerRemoved(`FROM employees | SORT age, `);
   });
+
+  it.todo('removes marker from right-side of assignment'); // e.g. assertMarkerRemoved(`FROM employees | EVAL total = `);
 });

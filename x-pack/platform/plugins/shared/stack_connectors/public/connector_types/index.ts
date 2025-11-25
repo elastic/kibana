@@ -37,6 +37,7 @@ import { getSentinelOneConnectorType } from './sentinelone';
 import { getTheHiveConnectorType } from './thehive';
 import { getCrowdStrikeConnectorType } from './crowdstrike';
 import { getXSOARConnectorType } from './xsoar';
+import { getJiraServiceManagementConnectorType } from './jira-service-management';
 
 export interface RegistrationServices {
   validateEmailAddresses: (
@@ -68,6 +69,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getJiraConnectorType());
   connectorTypeRegistry.register(getResilientConnectorType());
   connectorTypeRegistry.register(getOpsgenieConnectorType());
+  connectorTypeRegistry.register(getJiraServiceManagementConnectorType());
   connectorTypeRegistry.register(getOpenAIConnectorType());
   connectorTypeRegistry.register(getBedrockConnectorType());
   connectorTypeRegistry.register(getGeminiConnectorType());

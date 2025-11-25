@@ -32,14 +32,21 @@ export const readStreamRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<Streams.all.GetResponse> => {
-    const { assetClient, streamsClient, scopedClusterClient } = await getScopedClients({
-      request,
-    });
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<Streams.all.GetResponse> => {
+    const { assetClient, attachmentClient, streamsClient, scopedClusterClient } =
+      await getScopedClients({
+        request,
+      });
 
     const body = await readStream({
       name: params.path.name,
       assetClient,
+      attachmentClient,
       scopedClusterClient,
       streamsClient,
     });
@@ -106,10 +113,10 @@ export const editStreamRoute = createServerRoute({
     const { streamsClient } = await getScopedClients({ request });
 
     if (
-      !Streams.ClassicStream.UpsertRequest.is(params.body) &&
+      Streams.WiredStream.UpsertRequest.is(params.body) &&
       !(await streamsClient.isStreamsEnabled())
     ) {
-      throw badData('Streams are not enabled for Wired and Group streams.');
+      throw badData('Streams are not enabled for Wired streams.');
     }
 
     const core = await context.core;

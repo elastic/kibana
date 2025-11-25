@@ -130,7 +130,15 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
                 {
                   role: MessageRole.Assistant as const,
                   content: '',
-                  toolCalls: error.meta.toolCalls!,
+                  toolCalls: error.meta.toolCalls?.map((toolCall) => {
+                    return {
+                      ...toolCall,
+                      function: {
+                        ...toolCall.function,
+                        arguments: JSON.parse(toolCall.function.arguments),
+                      },
+                    };
+                  }),
                 },
                 ...(error.meta.toolCalls?.map((toolCall) => {
                   return {

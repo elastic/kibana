@@ -113,11 +113,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       ? [
           <EuiContextMenuItem
             data-test-subj="PackagePolicyActionsUpgradeItem"
-            disabled={
-              !canWriteIntegrationPolicies ||
-              !upgradePackagePolicyHref ||
-              agentPolicy?.supports_agentless === true
-            }
+            disabled={!canWriteIntegrationPolicies || !upgradePackagePolicyHref}
             icon="refresh"
             href={upgradePackagePolicyHref}
             key="packagePolicyUpgrade"
@@ -149,6 +145,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         agentPolicies={agentPolicies}
         key="packagePolicyDelete"
         packagePolicyPackage={packagePolicy.package}
+        isAgentlessPolicy={packagePolicy.supports_agentless}
       >
         {(deletePackagePoliciesPrompt) => {
           return (

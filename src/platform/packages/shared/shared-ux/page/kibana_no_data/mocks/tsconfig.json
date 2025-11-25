@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -16,7 +16,6 @@
     "@kbn/shared-ux-page-kibana-no-data-types",
     "@kbn/shared-ux-prompt-no-data-views-mocks",
     "@kbn/shared-ux-storybook-mock",
-    "@kbn/shared-ux-page-no-data-types",
   ],
   "exclude": [
     "target/**/*",

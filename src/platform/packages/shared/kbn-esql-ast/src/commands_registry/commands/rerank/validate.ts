@@ -7,48 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-import type { ESQLCommand, ESQLMessage, ESQLAst, ESQLAstRerankCommand } from '../../../types';
+import type {
+  ESQLAstAllCommands,
+  ESQLMessage,
+  ESQLAst,
+  ESQLAstRerankCommand,
+} from '../../../types';
 import type { ICommandContext, ICommandCallbacks } from '../../types';
+import { getExpressionType } from '../../../definitions/utils/expressions';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
+import { errors } from '../../../definitions/utils/errors';
+
+const supportedQueryTypes = ['keyword', 'text', 'param'];
 
 export const validate = (
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   ast: ESQLAst,
   context?: ICommandContext,
   callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
-  // Run standard argument validation
+  const { query, location, inferenceId } = command as ESQLAstRerankCommand;
+  const rerankExpressionType = getExpressionType(query, context?.columns);
+
+  // check for supported query types
+  if (!supportedQueryTypes.includes(rerankExpressionType)) {
+    messages.push(
+      errors.byId('unsupportedQueryType', 'location' in query ? query?.location : location, {
+        command: 'RERANK',
+        expressionType: rerankExpressionType,
+      })
+    );
+  }
+
+  if (inferenceId?.incomplete) {
+    messages.push(errors.byId('inferenceIdRequired', command.location, { command: 'RERANK' }));
+  }
+
   messages.push(...validateCommandArguments(command, ast, context, callbacks));
-
-  // Cast to RERANK command for type-specific validation
-  const rerankCommand = command as ESQLAstRerankCommand;
-
-  // Validate that query text is provided
-  if (!rerankCommand.query) {
-    messages.push({
-      location: command.location,
-      text: i18n.translate('kbn-esql-ast.esql.validation.rerankMissingQuery', {
-        defaultMessage: '[RERANK] Query text is required.',
-      }),
-      type: 'error',
-      code: 'rerankMissingQuery',
-    });
-  }
-
-  // Validate that at least one field is specified in ON clause
-  if (!rerankCommand.fields || rerankCommand.fields.length === 0) {
-    messages.push({
-      location: command.location,
-      text: i18n.translate('kbn-esql-ast.esql.validation.rerankMissingFields', {
-        defaultMessage: '[RERANK] At least one field must be specified in the ON clause.',
-      }),
-      type: 'error',
-      code: 'rerankMissingFields',
-    });
-  }
 
   return messages;
 };

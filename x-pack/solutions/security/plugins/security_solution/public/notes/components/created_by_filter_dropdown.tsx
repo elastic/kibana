@@ -64,6 +64,7 @@ export const CreatedByFilterDropdown = React.memo(() => {
     () => (
       <EuiComboBox
         prepend={CREATED_BY}
+        aria-label={CREATED_BY}
         singleSelection={{ asPlainText: true }}
         options={users}
         selectedOptions={selectedUser}

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
+import { isResourceSupportedVendor } from '../../../../../common/siem_migrations/rules/resources/types';
 import type {
   ElasticRule,
   RuleMigration,
@@ -15,11 +16,13 @@ import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_clie
 import type { MigrateRuleConfigSchema, MigrateRuleState } from './agent/types';
 import { getRuleMigrationAgent } from './agent';
 import { RuleMigrationsRetriever } from './retrievers';
-import type { RuleMigrationsClientDependencies, StoredRuleMigrationRule } from '../types';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
+import type { StoredRuleMigrationRule } from '../types';
 import { EsqlKnowledgeBase } from '../../common/task/util/esql_knowledge_base';
 import { nullifyMissingProperties } from '../../common/task/util/nullify_missing_properties';
 import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_runner';
 import { RuleMigrationTelemetryClient } from './rule_migrations_telemetry_client';
+import { getRulesMigrationTools } from './agent/tools';
 
 export type RuleMigrationTaskInput = Pick<MigrateRuleState, 'id' | 'original_rule' | 'resources'>;
 export type RuleMigrationTaskOutput = MigrateRuleState;
@@ -32,16 +35,18 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
   RuleMigrationTaskOutput
 > {
   private retriever: RuleMigrationsRetriever;
+  protected readonly taskConcurrency = 10;
 
   constructor(
     public readonly migrationId: string,
+    protected readonly request: KibanaRequest,
     public readonly startedBy: AuthenticatedUser,
     public readonly abortController: AbortController,
     protected readonly data: RuleMigrationsDataClient,
     protected readonly logger: Logger,
-    protected readonly dependencies: RuleMigrationsClientDependencies
+    protected readonly dependencies: SiemMigrationsClientDependencies
   ) {
-    super(migrationId, startedBy, abortController, data, logger, dependencies);
+    super(migrationId, request, startedBy, abortController, data, logger, dependencies);
     this.retriever = new RuleMigrationsRetriever(this.migrationId, {
       data: this.data,
       rules: this.dependencies.rulesClient,
@@ -51,13 +56,21 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
 
   /** Retrieves the connector and creates the migration agent */
   public async setup(connectorId: string): Promise<void> {
-    const { inferenceClient } = this.dependencies;
+    const { inferenceService } = this.dependencies;
 
     const model = await this.actionsClientChat.createModel({
       connectorId,
       migrationId: this.migrationId,
+      migrationType: 'rules',
       abortController: this.abortController,
     });
+
+    const toolMap = getRulesMigrationTools(this.migrationId, {
+      rulesClient: this.data,
+    });
+
+    const modelWithTools = model.bindTools(Object.values(toolMap));
+
     const modelName = this.actionsClientChat.getModelName(model);
 
     const telemetryClient = new RuleMigrationTelemetryClient(
@@ -70,16 +83,17 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
     const esqlKnowledgeBase = new EsqlKnowledgeBase(
       connectorId,
       this.migrationId,
-      inferenceClient,
+      inferenceService.getClient({ request: this.request }),
       this.logger
     );
 
     const agent = getRuleMigrationAgent({
       esqlKnowledgeBase,
-      model,
+      model: modelWithTools,
       ruleMigrationsRetriever: this.retriever,
       logger: this.logger,
       telemetryClient,
+      tools: toolMap,
     });
 
     this.telemetry = telemetryClient;
@@ -94,8 +108,14 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
   protected async prepareTaskInput(
     migrationRule: StoredRuleMigrationRule
   ): Promise<RuleMigrationTaskInput> {
-    const resources = await this.retriever.resources.getResources(migrationRule.original_rule);
-    return { id: migrationRule.id, original_rule: migrationRule.original_rule, resources };
+    const resources = isResourceSupportedVendor(migrationRule.original_rule.vendor)
+      ? await this.retriever.resources.getResources(migrationRule.original_rule)
+      : {};
+    return {
+      id: migrationRule.id,
+      original_rule: migrationRule.original_rule,
+      resources,
+    };
   }
 
   /**

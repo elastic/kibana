@@ -6,12 +6,10 @@
  */
 
 import type { Capabilities } from '@kbn/core/public';
-import {
-  SECURITY_FEATURE_ID_V3,
-  SIEM_MIGRATIONS_FEATURE_ID,
-} from '@kbn/security-solution-features/constants';
+import { SIEM_MIGRATIONS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import { i18n } from '@kbn/i18n';
 import { CapabilitiesChecker } from '../../../common/lib/capabilities';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 export interface MissingCapability {
   capability: string;
@@ -20,7 +18,7 @@ export interface MissingCapability {
 
 const minimumCapabilities: MissingCapability[] = [
   {
-    capability: `${SECURITY_FEATURE_ID_V3}.show`,
+    capability: `${SECURITY_FEATURE_ID}.show`,
     description: i18n.translate(
       'xpack.securitySolution.siemMigrations.service.capabilities.securityAll',
       { defaultMessage: 'Security > Security: Read' }
@@ -37,7 +35,7 @@ const minimumCapabilities: MissingCapability[] = [
 
 const allCapabilities: MissingCapability[] = [
   {
-    capability: `${SECURITY_FEATURE_ID_V3}.crud`,
+    capability: `${SECURITY_FEATURE_ID}.crud`,
     description: i18n.translate(
       'xpack.securitySolution.siemMigrations.service.capabilities.securityAll',
       { defaultMessage: 'Security > Security: All' }
@@ -61,15 +59,18 @@ const allCapabilities: MissingCapability[] = [
 
 export type CapabilitiesLevel = 'minimum' | 'all';
 
-const requiredCapabilities: Record<CapabilitiesLevel, MissingCapability[]> = {
+export type CapabilitiesByLevel = Record<CapabilitiesLevel, MissingCapability[]>;
+
+export const requiredSiemMigrationCapabilities: CapabilitiesByLevel = {
   minimum: minimumCapabilities,
   all: allCapabilities,
 };
 
-export const getMissingCapabilities = (
-  capabilities: Capabilities,
-  level: CapabilitiesLevel = 'all'
-): MissingCapability[] => {
-  const checker = new CapabilitiesChecker(capabilities);
-  return requiredCapabilities[level].filter((required) => !checker.has(required.capability));
+export const getMissingCapabilitiesChecker = (
+  requiredCapabilities: CapabilitiesByLevel = requiredSiemMigrationCapabilities
+) => {
+  return (capabilities: Capabilities, level: CapabilitiesLevel = 'all'): MissingCapability[] => {
+    const checker = new CapabilitiesChecker(capabilities);
+    return requiredCapabilities[level].filter((required) => !checker.has(required.capability));
+  };
 };

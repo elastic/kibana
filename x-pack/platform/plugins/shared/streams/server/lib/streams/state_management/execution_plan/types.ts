@@ -13,6 +13,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
+import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 
 export interface UpsertComponentTemplateAction {
   type: 'upsert_component_template';
@@ -125,10 +126,45 @@ export interface DeleteDotStreamsDocumentAction {
   };
 }
 
+export interface UpdateFailureStoreAction {
+  type: 'update_failure_store';
+  request: {
+    name: string;
+    failure_store: FailureStore;
+    definition: Streams.all.Definition;
+  };
+}
+
 export interface DeleteQueriesAction {
   type: 'delete_queries';
   request: {
     name: string;
+  };
+}
+
+export interface UnlinkAssetsAction {
+  type: 'unlink_assets';
+  request: {
+    name: string;
+  };
+}
+
+export interface UnlinkFeaturesAction {
+  type: 'unlink_features';
+  request: {
+    name: string;
+  };
+}
+
+export interface UpdateIngestSettingsAction {
+  type: 'update_ingest_settings';
+  request: {
+    name: string;
+    settings: {
+      'index.number_of_replicas'?: number | null;
+      'index.number_of_shards'?: number | null;
+      'index.refresh_interval': string | -1 | null;
+    };
   };
 }
 
@@ -149,7 +185,11 @@ export type ElasticsearchAction =
   | UpsertDotStreamsDocumentAction
   | DeleteDotStreamsDocumentAction
   | UpdateDataStreamMappingsAction
-  | DeleteQueriesAction;
+  | DeleteQueriesAction
+  | UnlinkAssetsAction
+  | UnlinkFeaturesAction
+  | UpdateFailureStoreAction
+  | UpdateIngestSettingsAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
@@ -169,4 +209,8 @@ export interface ActionsByType {
   delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
   update_data_stream_mappings: UpdateDataStreamMappingsAction[];
   delete_queries: DeleteQueriesAction[];
+  unlink_assets: UnlinkAssetsAction[];
+  unlink_features: UnlinkFeaturesAction[];
+  update_failure_store: UpdateFailureStoreAction[];
+  update_ingest_settings: UpdateIngestSettingsAction[];
 }

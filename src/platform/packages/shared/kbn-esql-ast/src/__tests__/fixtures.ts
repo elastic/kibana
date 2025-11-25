@@ -29,6 +29,13 @@ FROM index, metrics:index, "another_index", """index""", metrics-metrics-metrics
   | LIMIT 10
   | STATS bytes = (SUM(destination.bytes, true))::INTEGER
   | SORT asdf
+  | WHERE MATCH( aws.s3.bucket.name, ?variable, {
+      "minimum_should_match": ?min_should_match,
+      "fuzziness": 2,
+      "key": "value",
+      "nil": NULL,
+      "another_param": ?param
+    })
   | SORT @timestamp DESC, @timestamp ASC
   | SORT kb, date ASC NULLS FIRST, ip DESC NULLS LAST
   | DROP date, ip, \`AVG(FALSE, null, { "this": "is", "map": 123 })\`

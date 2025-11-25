@@ -18,21 +18,14 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
   const isEnterprise = useLicense().isEnterprise();
   const {
     application: { capabilities },
-    featureFlags,
   } = useKibana().services;
 
-  const isAssistantSharingEnabled = featureFlags.getBooleanValue(
-    'elasticAssistant.assistantSharingEnabled',
-    false
-  );
   const hasAssistantPrivilege = capabilities[ASSISTANT_FEATURE_ID]?.['ai-assistant'] === true;
   const hasUpdateAIAssistantAnonymization =
     capabilities[ASSISTANT_FEATURE_ID]?.updateAIAssistantAnonymization === true;
   const hasManageGlobalKnowledgeBase =
     capabilities[ASSISTANT_FEATURE_ID]?.manageGlobalKnowledgeBaseAIAssistant === true;
   const hasSearchAILakeConfigurations = capabilities[SECURITY_FEATURE_ID]?.configurations === true;
-  const hasManageAssistantPrivilege =
-    capabilities?.management?.ai?.aiAssistantManagementSelection === true;
 
   // Connectors & Actions capabilities as defined in x-pack/plugins/actions/server/feature.ts
   // `READ` ui capabilities defined as: { ui: ['show', 'execute'] }
@@ -49,10 +42,9 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     hasAssistantPrivilege,
     hasConnectorsAllPrivilege,
     hasConnectorsReadPrivilege,
-    isAssistantSharingEnabled,
     isAssistantEnabled: isEnterprise,
     isAssistantVisible: isEnterprise && isVisible,
-    isAssistantManagementEnabled: isEnterprise && hasManageAssistantPrivilege,
+    isAssistantManagementEnabled: isEnterprise && hasAssistantPrivilege,
     hasUpdateAIAssistantAnonymization,
     hasManageGlobalKnowledgeBase,
   };

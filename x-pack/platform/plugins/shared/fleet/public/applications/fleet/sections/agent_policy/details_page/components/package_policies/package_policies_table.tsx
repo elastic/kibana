@@ -37,7 +37,12 @@ import {
   useGetOutputs,
   useDefaultOutput,
 } from '../../../../../hooks';
-import { pkgKeyFromPackageInfo } from '../../../../../services';
+import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../../services';
+
+import {
+  OTEL_INPUTS_MINIMUM_VERSION,
+  packagePolicyHasOtelInputs,
+} from '../../../../../../../../common/services/otelcol_helpers';
 
 import { AddIntegrationFlyout } from './add_integration_flyout';
 
@@ -72,6 +77,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
   const [showAddIntegrationFlyout, setShowAddIntegrationFlyout] = React.useState(false);
+  const { enableOtelIntegrations } = ExperimentalFeaturesService.get();
 
   const permissionCheck = usePermissionCheck();
   const missingSecurityConfiguration =
@@ -147,13 +153,29 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                 {packagePolicy.description ? (
                   <span>
                     &nbsp;
-                    <EuiToolTip content={packagePolicy.description}>
-                      <EuiIcon type="question" />
-                    </EuiToolTip>
+                    <EuiIconTip content={packagePolicy.description} type="question" />
                   </span>
                 ) : null}
               </EuiLink>
             </EuiFlexItem>
+            {enableOtelIntegrations && packagePolicyHasOtelInputs(packagePolicy?.inputs) && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="warning"
+                  color="warning"
+                  content={
+                    <FormattedMessage
+                      id="xpack.fleet.policyDetails.packagePoliciesTable.containsOtelPackages"
+                      defaultMessage="The {integrationTitle} integration collects OpenTelemetry data adhering to semantic conventions and is available in technical preview. To collect OTel data, Elastic Agents must be on version {minVersion} or later."
+                      values={{
+                        integrationTitle: packagePolicy.packageTitle,
+                        minVersion: OTEL_INPUTS_MINIMUM_VERSION,
+                      }}
+                    />
+                  }
+                />
+              </EuiFlexItem>
+            )}
             {canUseMultipleAgentPolicies &&
               canReadAgentPolicies &&
               canReadIntegrationPolicies &&
@@ -173,6 +195,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                       color="subdued"
                       size="xs"
                       className="eui-textNoWrap"
+                      tabIndex={0}
                     >
                       <FormattedMessage
                         id="xpack.fleet.agentPolicyList.agentsColumn.sharedText"
@@ -236,14 +259,14 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
               {packagePolicy.hasUpgrade && (
                 <>
                   <EuiFlexItem grow={false}>
-                    <EuiToolTip
+                    <EuiIconTip
+                      type="warning"
+                      color="warning"
                       content={i18n.translate(
                         'xpack.fleet.policyDetails.packagePoliciesTable.upgradeAvailable',
                         { defaultMessage: 'Upgrade Available' }
                       )}
-                    >
-                      <EuiIcon type="warning" color="warning" />
-                    </EuiToolTip>
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButton
@@ -378,6 +401,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       canReadIntegrationPolicies,
       getHref,
       agentPolicy,
+      enableOtelIntegrations,
       canUseMultipleAgentPolicies,
       canReadAgentPolicies,
       getSharedPoliciesNumber,

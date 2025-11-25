@@ -14,7 +14,7 @@ import { useDispatch } from 'react-redux';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/state_management/discover_app_state_container';
 import type { TimeRange } from '@kbn/es-query';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useDiscoverState } from '../../../timelines/components/timeline/tabs/esql/use_discover_state';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { TimelineId } from '../../../../common/types';
@@ -128,22 +128,38 @@ export const useDiscoverInTimelineActions = (
             savedSearchState?.appState ?? {}
           );
           setDiscoverAppState(savedSearchState?.appState ?? defaultDiscoverAppState());
-          discoverStateContainer.current?.globalState.set({
-            ...discoverStateContainer.current?.globalState.get(),
-            time: savedSearch.timeRange ?? defaultDiscoverTimeRange,
-          });
+          const discoverState = discoverStateContainer.current;
+          discoverState?.internalState.dispatch(
+            discoverState.injectCurrentTab(discoverState.internalStateActions.setGlobalState)({
+              globalState: {
+                ...discoverState.getCurrentTab().globalState,
+                timeRange: savedSearch.timeRange ?? defaultDiscoverTimeRange,
+              },
+            })
+          );
         } catch (e) {
           /* empty */
         }
       } else {
         const defaultState = defaultDiscoverAppState();
-        discoverStateContainer.current?.appState.resetToState(defaultState);
+        discoverStateContainer.current?.internalState.dispatch(
+          discoverStateContainer.current.injectCurrentTab(
+            discoverStateContainer.current.internalStateActions.resetAppState
+          )({
+            appState: defaultState,
+          })
+        );
         await discoverStateContainer.current?.appState.replaceUrlState({});
         setDiscoverAppState(defaultState);
-        discoverStateContainer.current?.globalState.set({
-          ...discoverStateContainer.current?.globalState.get(),
-          time: defaultDiscoverTimeRange,
-        });
+        const discoverState = discoverStateContainer.current;
+        discoverState?.internalState.dispatch(
+          discoverState.injectCurrentTab(discoverState.internalStateActions.setGlobalState)({
+            globalState: {
+              ...discoverState.getCurrentTab().globalState,
+              timeRange: defaultDiscoverTimeRange,
+            },
+          })
+        );
       }
     },
     [discoverStateContainer, getAppStateFromSavedSearch, savedSearchService, setDiscoverAppState]

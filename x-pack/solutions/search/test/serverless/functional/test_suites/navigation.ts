@@ -20,18 +20,19 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const solutionNavigation = getPageObject('solutionNavigation');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const header = getPageObject('header');
   const esArchiver = getService('esArchiver');
+  const common = getPageObject('common');
 
   describe('navigation', function () {
     before(async () => {
       await esArchiver.load(archiveEmptyIndex);
-      await svlCommonPage.loginWithRole('developer');
-      await svlSearchNavigation.navigateToLandingPage();
+      await svlCommonPage.loginWithRole('admin');
+      await svlSearchNavigation.navigateToElasticsearchHome();
     });
     after(async () => {
       await esArchiver.unload(archiveEmptyIndex);
     });
+
     it('navigate search sidenav & breadcrumbs', async () => {
       const expectNoPageReload = await svlCommonNavigation.createNoPageReloadCheck();
 
@@ -40,7 +41,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectExists();
       await svlSearchLandingPage.assertSvlSearchSideNavExists();
 
-      await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
       // Should default to Homepage
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
@@ -50,87 +50,50 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // Check Side Nav Links
       const sideNavCases: Array<{
-        deepLinkId: AppDeepLinkId;
+        link: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string };
         breadcrumbs: string[];
         pageTestSubject: string;
       }> = [
         {
-          deepLinkId: 'searchHomepage',
+          link: { deepLinkId: 'searchHomepage' },
           breadcrumbs: ['Home'],
           pageTestSubject: 'search-homepage',
         },
         {
-          deepLinkId: 'discover',
+          link: { navId: 'agent_builder' },
+          breadcrumbs: [],
+          pageTestSubject: 'agentBuilderWrapper',
+        },
+        {
+          link: { deepLinkId: 'discover' },
           breadcrumbs: ['Discover'],
           pageTestSubject: 'queryInput',
         },
         {
-          deepLinkId: 'dashboards',
+          link: { deepLinkId: 'dashboards' },
           breadcrumbs: ['Dashboards'],
           pageTestSubject: 'dashboardLandingPage',
         },
         {
-          deepLinkId: 'elasticsearchIndexManagement',
-          breadcrumbs: ['Build', 'Index Management', 'Indices'],
-          pageTestSubject: 'elasticsearchIndexManagement',
-        },
-        {
-          deepLinkId: 'searchPlayground',
-          breadcrumbs: ['Build', 'RAG Playground'],
+          link: { deepLinkId: 'searchPlayground' },
+          breadcrumbs: ['Build', 'Playground'],
           pageTestSubject: 'playgroundsListPage',
         },
         {
-          deepLinkId: 'searchSynonyms',
-          breadcrumbs: ['Relevance', 'Synonyms'],
-          pageTestSubject: 'searchSynonymsOverviewPage',
-        },
-        {
-          deepLinkId: 'searchQueryRules',
-          breadcrumbs: ['Relevance', 'Query rules'],
-          pageTestSubject: 'queryRulesBasePage',
-        },
-        {
-          deepLinkId: 'searchInferenceEndpoints',
-          breadcrumbs: ['Relevance', 'Inference endpoints'],
-          pageTestSubject: 'inferenceEndpointsPage',
-        },
-        {
-          deepLinkId: 'dev_tools:console',
+          link: { deepLinkId: 'dev_tools:console' },
           breadcrumbs: ['Developer Tools'],
           pageTestSubject: 'console',
         },
       ];
 
       for (const testCase of sideNavCases) {
-        await solutionNavigation.sidenav.clickLink({
-          deepLinkId: testCase.deepLinkId,
-        });
-        await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: testCase.deepLinkId,
-        });
+        await solutionNavigation.sidenav.clickLink(testCase.link);
+        await solutionNavigation.sidenav.expectLinkActive(testCase.link);
         for (const breadcrumb of testCase.breadcrumbs) {
           await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: breadcrumb });
         }
         await testSubjects.existOrFail(testCase.pageTestSubject);
       }
-
-      // Open Project Settings
-      await solutionNavigation.sidenav.openSection(
-        'search_project_nav_footer.project_settings_project_nav'
-      );
-      // check Project Settings
-      // > Trained Models
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'management:trained_models',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management:trained_models',
-      });
-      // > Management
-      await solutionNavigation.sidenav.clickLink({ navId: 'management' });
-      await solutionNavigation.sidenav.expectLinkActive({ navId: 'management' });
-      await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
 
       // navigate back to serverless search overview
       await svlCommonNavigation.clickLogo();
@@ -143,35 +106,29 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await expectNoPageReload();
     });
 
-    it('navigate to playground from side nav', async () => {
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'searchPlayground' });
-      await header.waitUntilLoadingHasFinished();
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Build', 'RAG Playground']);
+    it('navigate admin and settings', async () => {
+      await svlCommonNavigation.sidenav.openPanel('admin_and_settings');
 
-      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'searchPlayground' });
-      expect(await browser.getCurrentUrl()).contain('/app/search_playground');
-    });
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'management:trained_models',
+      });
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'management:trained_models',
+      });
 
-    it("management apps from the sidenav hide the 'stack management' root from the breadcrumbs", async () => {
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'elasticsearchIndexManagement' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
-        'Build',
-        'Index Management',
-        'Indices',
-      ]);
-    });
-
-    it('navigate management', async () => {
-      await svlCommonNavigation.sidenav.openSection(
-        'search_project_nav_footer.project_settings_project_nav'
-      );
-      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
       await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Tags' });
 
-      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
       await svlCommonNavigation.sidenav.clickPanelLink('management:dataViews');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Data views']);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data views' });
+    });
+
+    it('navigate data management', async () => {
+      await svlCommonNavigation.sidenav.openPanel('data_management');
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'management:index_management',
+      });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
     });
 
     it('navigate using search', async () => {
@@ -190,93 +147,51 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       expect(await testSubjects.missingOrFail('cases'));
     });
 
-    it('does not navigate to cases app', async () => {
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
-
-      expect(await browser.getCurrentUrl()).not.contain('/app/management/cases');
-      await testSubjects.missingOrFail('cases-all-title');
-    });
-
     it('renders expected side navigation items', async () => {
-      await solutionNavigation.sidenav.openSection(
-        'search_project_nav_footer.project_settings_project_nav'
-      );
-      const isV2 = await solutionNavigation.sidenav.isV2();
-      const isV1 = !isV2;
-
-      // Verify all expected top-level links exist
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'RAG Playground' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Query rules' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference endpoints' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained Models' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Performance' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Billing and subscription' });
-
-      if (isV1) {
-        // v2 ignores sections
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Build' });
-      }
-
-      await solutionNavigation.sidenav.openSection(
-        'search_project_nav_footer.project_settings_project_nav'
-      );
-      await solutionNavigation.sidenav.expectSectionOpen(
-        'search_project_nav_footer.project_settings_project_nav'
-      );
-      if (isV1) {
-        await solutionNavigation.sidenav.expectOnlyDefinedLinks([
-          'search_project_nav',
-          'home',
+      await solutionNavigation.sidenav.expectOnlyDefinedLinks(
+        [
+          // home:
+          'searchHomepage',
+          // main;
+          'agent_builder',
           'discover',
           'dashboards',
-          'build',
-          'elasticsearchIndexManagement',
           'searchPlayground',
-          'relevance',
-          'searchSynonyms',
-          'searchQueryRules',
-          'searchInferenceEndpoints',
-          'search_project_nav_footer',
+          'machine_learning',
+          // footer:
           'dev_tools',
-          'project_settings_project_nav',
-          'management:trained_models',
-          'management',
-          'cloudLinkDeployment',
-          'cloudLinkBilling',
-        ]);
-      } else {
-        // in v2 we don't have "sections" and order is different because items under "more" are in the end
-        await solutionNavigation.sidenav.expectOnlyDefinedLinks(
-          [
-            // home:
-            'home',
+          'data_management',
+          'admin_and_settings',
+        ],
+        { checkOrder: false }
+      );
+    });
 
-            // main;
-            'discover',
-            'dashboards',
-            'elasticsearchIndexManagement',
-            'searchPlayground',
-            'searchSynonyms',
-            'searchQueryRules',
-            'searchInferenceEndpoints',
+    it('renders a feedback callout', async function () {
+      await solutionNavigation.sidenav.feedbackCallout.reset();
+      await solutionNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
+      await solutionNavigation.sidenav.feedbackCallout.expectExists();
+      await solutionNavigation.sidenav.feedbackCallout.dismiss();
+      await solutionNavigation.sidenav.feedbackCallout.expectMissing();
+      await browser.refresh();
+      await solutionNavigation.sidenav.feedbackCallout.expectMissing();
+    });
 
-            // footer:
-            'dev_tools',
-            'management:trained_models',
-            'management',
-            'cloudLinkDeployment',
-            'cloudLinkBilling',
-          ],
-          { checkOrder: false }
-        );
-      }
+    it('renders tour', async () => {
+      await solutionNavigation.sidenav.tour.reset();
+      await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
+      await solutionNavigation.sidenav.tour.nextStep();
+      await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
+      await solutionNavigation.sidenav.tour.nextStep();
+      await solutionNavigation.sidenav.tour.expectHidden();
+      await browser.refresh();
+      await solutionNavigation.sidenav.tour.expectHidden();
+    });
+
+    it('opens panel on legacy management landing page', async () => {
+      await common.navigateToApp('management');
+      await testSubjects.exists('cards-navigation-page');
+      await solutionNavigation.sidenav.expectPanelExists('admin_and_settings');
     });
   });
 }

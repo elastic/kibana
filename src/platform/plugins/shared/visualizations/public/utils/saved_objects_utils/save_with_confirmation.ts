@@ -11,10 +11,9 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { OVERWRITE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';
-import type { StartServices } from '../../types';
+import type { StartServices, VisSavedObject } from '../../types';
 import { visualizationsClient } from '../../content_management';
 import type { VisualizationSavedObjectAttributes, VisualizationSavedObject } from '../../../common';
-import type { VisualizeOutputState } from '../../embeddable/types';
 import type { CreateOptions } from '../../../common/content_management';
 
 /**
@@ -32,7 +31,7 @@ import type { CreateOptions } from '../../../common/content_management';
  */
 export async function saveWithConfirmation(
   source: VisualizationSavedObjectAttributes,
-  savedObject: Pick<VisualizeOutputState, 'title' | 'displayName'>,
+  savedObject: Pick<VisSavedObject, 'title' | 'displayName'>,
   options: CreateOptions,
   services: StartServices
 ): Promise<{ item: VisualizationSavedObject }> {

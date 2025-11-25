@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -89,11 +89,12 @@
     "@kbn/typed-react-router-config",
     "@kbn/observability-ai-assistant-app-plugin",
     "@kbn/dev-utils",
-    "@kbn/data-quality-plugin",
     "@kbn/serverless-observability-settings",
-    "@kbn/cypress-config",
-    "@kbn/dev-proc-runner",
-    "@kbn/cypress-test-helper",
     "@kbn/streams-schema",
+    "@kbn/data-quality",
+    "@kbn/onechat-common",
+    "@kbn/observability-agent-plugin",
+    "@kbn/onechat-plugin",
+    "@kbn/aiops-log-rate-analysis",
   ]
 }

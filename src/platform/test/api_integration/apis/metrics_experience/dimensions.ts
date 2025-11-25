@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { timerange } from './timerange';
+import { toggleMetricsExperienceFeature } from './utils/helpers';
 
 const ENDPOINT = '/internal/metrics_experience/dimensions';
 
@@ -32,11 +33,12 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload(
         'src/platform/test/api_integration/fixtures/es_archiver/metrics_experience'
       );
+      await toggleMetricsExperienceFeature(supertest, true);
     });
 
     it('should return dimension values for a single dimension', async () => {
       const { body, status } = await sendRequest({
-        indices: 'fieldsense-station-metrics',
+        indices: JSON.stringify(['fieldsense-station-metrics']),
         dimensions: JSON.stringify(['station.name']),
         from: timerange.min,
         to: timerange.max,
@@ -48,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return dimension values for multiple dimensions', async () => {
       const { body, status } = await sendRequest({
-        indices: 'fieldsense-station-metrics',
+        indices: JSON.stringify(['fieldsense-station-metrics']),
         dimensions: JSON.stringify(['station.name', 'sensor.type', 'network.interface']),
         from: timerange.min,
         to: timerange.max,
@@ -60,14 +62,14 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return 400 if dimensions are missing', async () => {
       const { status } = await sendRequest({
-        indices: 'fieldsense-station-metrics',
+        indices: JSON.stringify(['fieldsense-station-metrics']),
       });
       expect(status).to.be(400);
     });
 
     it('should return 400 if dimensions are invalid JSON', async () => {
       const { status } = await sendRequest({
-        indices: 'fieldsense-station-metrics',
+        indices: JSON.stringify(['fieldsense-station-metrics']),
         dimensions: 'not-json',
       });
       expect(status).to.be(400);
@@ -75,10 +77,22 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return 400 if dimensions is an empty array', async () => {
       const { status } = await sendRequest({
-        indices: 'fieldsense-station-metrics',
+        indices: JSON.stringify(['fieldsense-station-metrics']),
         dimensions: JSON.stringify([]),
       });
       expect(status).to.be(400);
+    });
+
+    it('should return 404 if feature flag is disabled', async () => {
+      await toggleMetricsExperienceFeature(supertest, false);
+
+      const { status } = await sendRequest({
+        indices: JSON.stringify(['fieldsense-station-metrics']),
+        dimensions: JSON.stringify(['station.name']),
+        from: timerange.min,
+        to: timerange.max,
+      });
+      expect(status).to.be(404);
     });
   });
 }

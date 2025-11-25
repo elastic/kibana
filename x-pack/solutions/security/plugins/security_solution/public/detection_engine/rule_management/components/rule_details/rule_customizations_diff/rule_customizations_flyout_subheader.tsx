@@ -8,13 +8,16 @@
 import React from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
-import type { PartialRuleDiff, RuleResponse } from '../../../../../../common/api/detection_engine';
+import type {
+  PartialThreeWayRuleDiff,
+  RuleResponse,
+} from '../../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 import { convertFieldToDisplayName } from '../helpers';
 
 interface RuleCustomizationsFlyoutSubheaderProps {
   currentRule: RuleResponse;
-  diff: PartialRuleDiff;
+  diff: PartialThreeWayRuleDiff;
   isOutdated: boolean;
 }
 
@@ -60,6 +63,7 @@ export const RuleCustomizationsFlyoutSubheader = ({
         <>
           <EuiSpacer size="xs" />
           <EuiCallOut
+            announceOnMount
             data-test-subj="ruleCustomizationsOutdatedCallout"
             color="warning"
             iconType="warning"

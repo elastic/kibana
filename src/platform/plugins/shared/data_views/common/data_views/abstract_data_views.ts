@@ -127,6 +127,10 @@ export abstract class AbstractDataView {
    * list of indices that the index pattern matched
    */
   public matchedIndices: string[] = [];
+  /**
+   * Whether the data view is managed by the application.
+   */
+  public managed: boolean = false;
 
   protected scriptedFieldsMap: DataViewFieldBaseSpecMap;
 
@@ -196,6 +200,7 @@ export abstract class AbstractDataView {
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
     this.allowHidden = spec.allowHidden || false;
+    this.managed = spec.managed || false;
   }
 
   getAllowHidden = () => this.allowHidden;
@@ -419,6 +424,7 @@ export abstract class AbstractDataView {
       allowNoIndex: this.allowNoIndex,
       name: this.name,
       allowHidden: this.getAllowHidden(),
+      managed: this.managed,
     };
 
     // Filter undefined values from the spec

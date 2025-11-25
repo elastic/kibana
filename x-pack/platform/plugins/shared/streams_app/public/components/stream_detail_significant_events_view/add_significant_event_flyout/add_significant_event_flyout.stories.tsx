@@ -25,10 +25,10 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
       fields: {},
       routing: [],
     },
-    lifecycle: {
-      inherit: {},
-    },
+    lifecycle: { inherit: {} },
     processing: { steps: [] },
+    settings: {},
+    failure_store: { inherit: {} },
   },
 };
 
@@ -38,6 +38,17 @@ export const Default: StoryFn<{}> = () => {
       definition={logsStreamDefinition}
       onClose={() => {}}
       onSave={async (queries) => {}}
+      features={[
+        {
+          type: 'system',
+          name: 'Test feature',
+          filter: {
+            field: 'host.name',
+            eq: 'test.host',
+          },
+          description: '',
+        },
+      ]}
     />
   );
 };
@@ -48,11 +59,29 @@ export const Edit: StoryFn<{}> = () => {
       definition={logsStreamDefinition}
       onClose={() => {}}
       onSave={async (queries) => {}}
+      features={[
+        {
+          type: 'system',
+          name: 'Test feature',
+          filter: {
+            field: 'host.name',
+            eq: 'test.host',
+          },
+          description: '',
+        },
+      ]}
       query={{
         id: '123',
         title: 'Operational Event: Service Lifecycle - LockScreenActivity',
         kql: {
           query: 'message:"cmp=com.tencent.qqmusic/.business.lockscreen.LockScreenActivity"',
+        },
+        feature: {
+          name: 'Test feature',
+          filter: {
+            field: 'host.name',
+            eq: 'test.host',
+          },
         },
       }}
     />

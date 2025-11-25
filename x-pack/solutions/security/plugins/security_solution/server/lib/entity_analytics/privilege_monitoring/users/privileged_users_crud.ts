@@ -27,6 +27,52 @@ export const createPrivilegedUsersCrudService = ({
     source: PrivMonUserSource,
     maxUsersAllowed: number
   ): Promise<CreatePrivMonUserResponse> => {
+    deps.logger.info(`Maximum supported number of privileged users allowed: ${maxUsersAllowed}`);
+    // Check if user already exists by username
+    const username = user.user?.name;
+    if (username) {
+      const existingUserResponse = await esClient.search({
+        index,
+        query: { term: { 'user.name': username } },
+        size: 1,
+      });
+
+      if (existingUserResponse.hits.hits.length > 0) {
+        const existingUser = existingUserResponse.hits.hits[0];
+        const existingUserId = existingUser._id;
+
+        if (existingUserId) {
+          const existingUserDoc = existingUser._source as MonitoredUserDoc;
+          const existingSources = existingUserDoc?.labels?.sources || [];
+          const updatedSources = existingSources.includes(source)
+            ? existingSources
+            : [...existingSources, source];
+
+          await esClient.update({
+            index,
+            id: existingUserId,
+            refresh: 'wait_for',
+            doc: {
+              ...user,
+              user: {
+                ...user.user,
+                is_privileged: true,
+                entity: { attributes: { Privileged: true } },
+              },
+              labels: { sources: updatedSources },
+            },
+          });
+
+          const updatedUser = await get(existingUserId);
+          if (!updatedUser) {
+            throw new Error(`Failed to retrieve updated user: ${existingUserId}`);
+          }
+          return updatedUser;
+        }
+      }
+    }
+
+    // Check user count limit before creating new user
     const currentUserCount = await esClient.count({
       index,
       query: {
@@ -40,9 +86,12 @@ export const createPrivilegedUsersCrudService = ({
       throw new Error(`Cannot create user: Maximum user limit of ${maxUsersAllowed} reached`);
     }
 
+    // Create new user
     const doc = merge(user, {
+      '@timestamp': new Date().toISOString(),
       user: {
         is_privileged: true,
+        entity: { attributes: { Privileged: true } },
       },
       labels: {
         sources: [source],

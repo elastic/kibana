@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { errors as esErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { createToolNotFoundError, createBadRequestError } from '@kbn/onechat-common';
+import { createSpaceDslFilter } from '../../../../utils/spaces';
 import type { ToolCreateParams, ToolTypeUpdateParams } from '../../tool_provider';
 import type { ToolStorage } from './storage';
 import { createStorage } from './storage';
@@ -27,91 +27,74 @@ export interface ToolClient {
 }
 
 export const createClient = ({
+  space,
   logger,
   esClient,
 }: {
+  space: string;
   logger: Logger;
   esClient: ElasticsearchClient;
 }): ToolClient => {
   const storage = createStorage({ logger, esClient });
-  return new ToolClientImpl({ storage });
+  return new ToolClientImpl({ space, storage });
 };
 
 class ToolClientImpl {
+  private readonly space: string;
   private readonly storage: ToolStorage;
 
-  constructor({ storage }: { storage: ToolStorage }) {
+  constructor({ space, storage }: { space: string; storage: ToolStorage }) {
+    this.space = space;
     this.storage = storage;
   }
 
   async get(id: string): Promise<ToolPersistedDefinition> {
-    try {
-      const document = await this.storage.getClient().get({ id });
-      return fromEs(document);
-    } catch (e) {
-      if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
-        throw createToolNotFoundError({
-          toolId: id,
-        });
-      } else {
-        throw e;
-      }
+    const document = await this._get(id);
+    if (!document) {
+      throw createToolNotFoundError({
+        toolId: id,
+      });
     }
+    return fromEs(document);
   }
 
   async list(): Promise<ToolPersistedDefinition[]> {
     const document = await this.storage.getClient().search({
       query: {
-        match_all: {},
+        bool: {
+          filter: [createSpaceDslFilter(this.space)],
+        },
       },
       size: 1000,
-      track_total_hits: true,
+      track_total_hits: false,
     });
 
     return document.hits.hits.map((hit) => fromEs(hit as ToolDocument));
   }
 
   async create(createRequest: ToolCreateParams): Promise<ToolPersistedDefinition> {
-    let exists: boolean;
-    try {
-      await this.storage.getClient().get({ id: createRequest.id });
-      exists = true;
-    } catch (e) {
-      if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
-        exists = false;
-      } else {
-        throw e;
-      }
-    }
-    if (exists) {
-      throw createBadRequestError(`Tool with id '${createRequest.id}' already exists.`);
+    const { id } = createRequest;
+
+    const document = await this._get(id);
+    if (document) {
+      throw createBadRequestError(`Tool with id '${id}' already exists.`);
     }
 
-    const attributes = createAttributes({ createRequest });
+    const attributes = createAttributes({ createRequest, space: this.space });
 
     await this.storage.getClient().index({
-      id: createRequest.id,
       document: attributes,
     });
 
-    return fromEs({
-      _id: createRequest.id,
-      _source: attributes,
-    });
+    return this.get(id);
   }
 
   async update(id: string, update: ToolTypeUpdateParams): Promise<ToolPersistedDefinition> {
-    let document: ToolDocument;
-    try {
-      document = await this.storage.getClient().get({ id });
-    } catch (e) {
-      if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
-        throw createToolNotFoundError({
-          toolId: id,
-        });
-      } else {
-        throw e;
-      }
+    const document = await this._get(id);
+    if (!document) {
+      throw createToolNotFoundError({
+        toolId: id,
+      });
     }
 
     const updatedAttributes = updateDocument({
@@ -120,21 +103,43 @@ class ToolClientImpl {
     });
 
     await this.storage.getClient().index({
-      id,
+      id: document._id,
       document: updatedAttributes,
     });
 
     return fromEs({
-      _id: id,
+      _id: document._id,
       _source: updatedAttributes,
     });
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await this.storage.getClient().delete({ id });
+    const document = await this._get(id);
+    if (!document) {
+      throw createToolNotFoundError({ toolId: id });
+    }
+    const result = await this.storage.getClient().delete({ id: document._id });
     if (result.result === 'not_found') {
       throw createToolNotFoundError({ toolId: id });
     }
     return true;
+  }
+
+  async _get(id: string): Promise<ToolDocument | undefined> {
+    const response = await this.storage.getClient().search({
+      track_total_hits: false,
+      size: 1,
+      terminate_after: 1,
+      query: {
+        bool: {
+          filter: [createSpaceDslFilter(this.space), { term: { id } }],
+        },
+      },
+    });
+    if (response.hits.hits.length === 0) {
+      return undefined;
+    } else {
+      return response.hits.hits[0] as ToolDocument;
+    }
   }
 }

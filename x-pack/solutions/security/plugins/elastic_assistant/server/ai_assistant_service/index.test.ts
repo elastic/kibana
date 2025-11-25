@@ -28,6 +28,7 @@ import { retryUntil } from './create_resource_installation_helper.test';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { getDefaultAnonymizationFields } from '../../common/anonymization';
 
 jest.mock('../ai_assistant_data_clients/conversations', () => ({
   AIAssistantConversationsDataClient: jest.fn(),
@@ -123,6 +124,7 @@ describe('AI Assistant Service', () => {
     clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
     clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
     clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
+    clusterClient.indices.get.mockResolvedValue({});
     ml = mlPluginMock.createSetupContract() as unknown as MlPluginSetup; // Missing SharedServices mock, so manually mocking trainedModelsProvider
     ml.trainedModelsProvider = jest.fn().mockImplementation(() => ({
       getELSER: jest.fn().mockImplementation(() => '.elser_model_2'),
@@ -137,8 +139,10 @@ describe('AI Assistant Service', () => {
       taskManager: taskManagerMock.createSetup(),
       productDocManager: Promise.resolve({
         getStatus: jest.fn(),
+        getStatuses: jest.fn(),
         install: jest.fn(),
         update: jest.fn(),
+        updateAll: jest.fn(),
         uninstall: jest.fn(),
       }),
     };
@@ -160,8 +164,6 @@ describe('AI Assistant Service', () => {
 
       expect(assistantService.isInitialized()).toEqual(true);
 
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(6);
-
       const expectedTemplates = [
         '.kibana-elastic-ai-assistant-component-template-conversations',
         '.kibana-elastic-ai-assistant-component-template-knowledge-base',
@@ -169,10 +171,16 @@ describe('AI Assistant Service', () => {
         '.kibana-elastic-ai-assistant-component-template-anonymization-fields',
         '.kibana-elastic-ai-assistant-component-template-defend-insights',
         '.kibana-elastic-ai-assistant-component-template-alert-summary',
+        '.kibana-elastic-ai-assistant-component-template-checkpoints',
+        '.kibana-elastic-ai-assistant-component-template-checkpoint-writes',
       ];
-      expectedTemplates.forEach((t, i) => {
-        expect(clusterClient.cluster.putComponentTemplate.mock.calls[i][0].name).toEqual(t);
+      clusterClient.cluster.putComponentTemplate.mock.calls.forEach((call, i) => {
+        expect(call[0].name).toEqual(expectedTemplates[i]);
       });
+
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(
+        expectedTemplates.length
+      );
     });
 
     test('should log error and set initialized to false if creating/updating common component template throws error', async () => {
@@ -670,7 +678,6 @@ describe('AI Assistant Service', () => {
         'AI Assistant service initialized',
         async () => assistantService.isInitialized() === true
       );
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(8);
 
       const expectedTemplates = [
         '.kibana-elastic-ai-assistant-component-template-conversations',
@@ -681,10 +688,17 @@ describe('AI Assistant Service', () => {
         '.kibana-elastic-ai-assistant-component-template-anonymization-fields',
         '.kibana-elastic-ai-assistant-component-template-defend-insights',
         '.kibana-elastic-ai-assistant-component-template-alert-summary',
+        '.kibana-elastic-ai-assistant-component-template-checkpoints',
+        '.kibana-elastic-ai-assistant-component-template-checkpoint-writes',
       ];
-      expectedTemplates.forEach((t, i) => {
-        expect(clusterClient.cluster.putComponentTemplate.mock.calls[i][0].name).toEqual(t);
+
+      clusterClient.cluster.putComponentTemplate.mock.calls.forEach((call, i) => {
+        expect(call[0].name).toEqual(expectedTemplates[i]);
       });
+
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(
+        expectedTemplates.length
+      );
     });
 
     test('should retry updating index template for transient ES errors', async () => {
@@ -705,7 +719,6 @@ describe('AI Assistant Service', () => {
         async () => (await getSpaceResourcesInitialized(assistantService)) === true
       );
 
-      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(8);
       const expectedTemplates = [
         '.kibana-elastic-ai-assistant-index-template-conversations',
         '.kibana-elastic-ai-assistant-index-template-conversations',
@@ -715,10 +728,16 @@ describe('AI Assistant Service', () => {
         '.kibana-elastic-ai-assistant-index-template-anonymization-fields',
         '.kibana-elastic-ai-assistant-index-template-defend-insights',
         '.kibana-elastic-ai-assistant-index-template-alert-summary',
+        '.kibana-elastic-ai-assistant-index-template-checkpoints',
+        '.kibana-elastic-ai-assistant-index-template-checkpoint-writes',
       ];
-      expectedTemplates.forEach((t, i) => {
-        expect(clusterClient.indices.putIndexTemplate.mock.calls[i][0].name).toEqual(t);
+      clusterClient.indices.putIndexTemplate.mock.calls.forEach((call, i) => {
+        expect(call[0].name).toEqual(expectedTemplates[i]);
       });
+
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(
+        expectedTemplates.length
+      );
     });
 
     test('should retry updating index settings for existing indices for transient ES errors', async () => {
@@ -793,6 +812,70 @@ describe('AI Assistant Service', () => {
       );
 
       expect(clusterClient.indices.createDataStream).toHaveBeenCalledTimes(7);
+    });
+  });
+
+  describe('createDefaultAnonymizationFields', () => {
+    test('should create default anonymization fields', async () => {
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
+      });
+
+      const assistantService = new AIAssistantService(assistantServiceOpts);
+      await assistantService.createDefaultAnonymizationFields('test');
+
+      expect(clusterClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.arrayContaining([
+            { create: { _index: '.kibana-elastic-ai-assistant-anonymization-fields-test' } },
+          ]),
+        }),
+        expect.any(Object)
+      );
+    });
+
+    test('should not create default anonymization fields if they already exist', async () => {
+      const defaultAnonymizationFields = getDefaultAnonymizationFields('default');
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [],
+          total: { value: defaultAnonymizationFields.length },
+        },
+      });
+
+      const assistantService = new AIAssistantService(assistantServiceOpts);
+      await assistantService.createDefaultAnonymizationFields('default');
+
+      expect(clusterClient.bulk).not.toHaveBeenCalled();
+    });
+
+    test('should create one default anonymization field when the last default anonymization field does not exist in the index', async () => {
+      const defaultAnonymizationFields = getDefaultAnonymizationFields('default');
+      // Mock the search response to return the default anonymization fields except the last one
+      const storedFieldsLength = defaultAnonymizationFields.length - 1;
+      const defaultFieldsExpectLast = defaultAnonymizationFields.slice(0, -1);
+      const lastField = defaultAnonymizationFields[storedFieldsLength];
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [...defaultFieldsExpectLast.map((field) => ({ _source: field }))],
+          total: { value: storedFieldsLength },
+        },
+      });
+
+      const assistantService = new AIAssistantService(assistantServiceOpts);
+      await assistantService.createDefaultAnonymizationFields('test');
+
+      // it should create the last default anonymization field
+      expect(clusterClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.arrayContaining([
+            expect.objectContaining({
+              field: lastField.field,
+            }),
+          ]),
+        }),
+        expect.any(Object)
+      );
     });
   });
 });

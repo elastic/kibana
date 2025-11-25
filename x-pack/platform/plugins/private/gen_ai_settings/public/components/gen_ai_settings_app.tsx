@@ -33,6 +33,7 @@ import { getElasticManagedLlmConnector } from '../utils/get_elastic_managed_llm_
 import { useSettingsContext } from '../contexts/settings_context';
 import { DefaultAIConnector } from './default_ai_connector/default_ai_connector';
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
+import { AIAssistantVisibility } from './ai_assistant_visibility/ai_assistant_visibility';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -40,8 +41,13 @@ interface GenAiSettingsAppProps {
 
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
-  const { application, http, docLinks, notifications } = services;
-  const { showSpacesIntegration, isPermissionsBased, showAiBreadcrumb } = useEnabledFeatures();
+  const { application, http, docLinks } = services;
+  const {
+    showSpacesIntegration,
+    isPermissionsBased,
+    showAiBreadcrumb,
+    showAiAssistantsVisibilitySetting,
+  } = useEnabledFeatures();
   const { euiTheme } = useEuiTheme();
   const { unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
 
@@ -185,17 +191,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   ]);
 
   async function handleSave() {
-    try {
-      await saveAll();
-    } catch (e) {
-      const error = e as Error;
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.observabilityAiAssistantManagement.save.error', {
-          defaultMessage: 'An error occurred while saving the settings',
-        }),
-        text: error.message,
-      });
-      throw error;
+    const needsReload = await saveAll();
+    if (needsReload) {
+      window.location.reload();
     }
   }
 
@@ -323,6 +321,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   />
                 </EuiFormRow>
               </EuiDescribedFormGroup>
+            )}
+            {showAiAssistantsVisibilitySetting && (
+              <EuiFlexItem>
+                <AIAssistantVisibility />
+              </EuiFlexItem>
             )}
           </EuiPanel>
         </EuiPageSection>

@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricsContextService } from '../data_types';
+import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
+import { getMetricsContextService } from '../data_types';
 
-export const createMetricsContextServiceMock = (): MetricsContextService => {
-  const metricsExperienceClient = {
+export const createMetricsContextServiceMock = () => {
+  const metricsExperienceClient: MetricsExperienceClient = {
     getDimensions: jest.fn().mockResolvedValue([]),
     getFields: jest.fn().mockResolvedValue([]),
-    postData: jest.fn().mockResolvedValue({}),
+    searchFields: jest.fn().mockResolvedValue([]),
   };
 
-  return {
-    getMetricsExperienceClient: jest.fn().mockReturnValue(metricsExperienceClient),
-  };
+  return getMetricsContextService({
+    metricsExperienceClient,
+  });
 };

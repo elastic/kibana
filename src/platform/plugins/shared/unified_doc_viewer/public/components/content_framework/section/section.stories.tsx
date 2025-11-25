@@ -10,8 +10,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import type { UnifiedDocViewerStorybookArgs } from '../../../../.storybook/preview';
-import { ContentFrameworkSection, type ContentFrameworkSectionProps } from '.';
 import APMSpanFixture from '../../../__fixtures__/span_apm_minimal.json';
+import ContentFrameworkSection from '.';
+import type { ContentFrameworkSectionProps } from './section';
 
 type Args = UnifiedDocViewerStorybookArgs<ContentFrameworkSectionProps>;
 const meta = {

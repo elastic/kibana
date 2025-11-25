@@ -7,11 +7,8 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
+import { deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import { dataGeneratorFactory } from '../../../../detections_response/utils';
-import {
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
@@ -38,7 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless @serverlessQA Risk Scoring Task Execution', () => {
+  const doTests = () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -101,10 +98,15 @@ export default ({ getService }: FtrProviderContext): void => {
             await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
 
             const scores = await readRiskScores(es);
-            expect(normalizeScores(scores).map(({ id_value: idValue }) => idValue)).to.eql(
+            expect(
+              normalizeScores(scores)
+                .map(({ id_value: idValue }) => idValue)
+                .sort()
+            ).to.eql(
               Array(10)
                 .fill(0)
                 .map((_, index) => `host-${index}`)
+                .sort()
             );
           });
 
@@ -146,7 +148,9 @@ export default ({ getService }: FtrProviderContext): void => {
                 ({ id_value: idValue }) => idValue
               );
 
-              expect(actualHostNames).to.eql([...expectedHostNames, ...expectedHostNames]);
+              expect(actualHostNames.sort()).to.eql(
+                [...expectedHostNames, ...expectedHostNames].sort()
+              );
             });
           });
 
@@ -280,10 +284,10 @@ export default ({ getService }: FtrProviderContext): void => {
                 criticality_level: 'extreme_impact',
                 criticality_modifier: 2,
                 calculated_level: 'Moderate',
-                calculated_score: 79.81345973382406,
-                calculated_score_norm: 47.08016240063269,
+                calculated_score: 79.8134597338,
+                calculated_score_norm: 47.0801624006,
                 category_1_count: 10,
-                category_1_score: 30.787478681462762,
+                category_1_score: 30.7874786815,
               },
             ]);
           });
@@ -316,6 +320,27 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       });
+    });
+  };
+
+  describe('@ess @serverless @serverlessQA Risk Scoring Task Execution', () => {
+    describe('ESQL', () => {
+      doTests();
+    });
+
+    describe('Scripted metric', () => {
+      before(async () => {
+        await kibanaServer.uiSettings.update({
+          ['securitySolution:enableEsqlRiskScoring']: false,
+        });
+      });
+
+      after(async () => {
+        await kibanaServer.uiSettings.update({
+          ['securitySolution:enableEsqlRiskScoring']: true,
+        });
+      });
+      doTests();
     });
   });
 };

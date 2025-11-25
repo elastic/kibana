@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { ConversationRound, RoundInput, ToolSelection } from '@kbn/onechat-common';
+import type {
+  AgentCapabilities,
+  Conversation,
+  ConversationRound,
+  RawRoundInput,
+  AgentConfiguration,
+} from '@kbn/onechat-common';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type { AgentHandlerContext } from '@kbn/onechat-server';
 import { runDefaultAgentMode } from './default';
 
@@ -13,20 +20,19 @@ export interface RunAgentParams {
   /**
    * The next message in this conversation that the agent should respond to.
    */
-  nextInput: RoundInput;
+  nextInput: RawRoundInput;
   /**
-   * Previous rounds of conversation.
+   * Current conversation.
    */
-  conversation?: ConversationRound[];
+  conversation?: Conversation;
   /**
-   * Optional custom instructions to add to the prompts.
+   * Configuration of the agent to run
    */
-  customInstructions?: string;
+  agentConfiguration: AgentConfiguration;
   /**
-   * Selection of tools which will be exposed to the agent.
-   * Defaults to exposing all available tools.
+   * Capabilities to enable. if not specified will use the default capabilities.
    */
-  toolSelection?: ToolSelection[];
+  capabilities?: AgentCapabilities;
   /**
    * In case of nested calls (e.g calling from a tool), allows to define the runId.
    */
@@ -39,6 +45,19 @@ export interface RunAgentParams {
    * optional signal to abort the execution of the agent
    */
   abortSignal?: AbortSignal;
+  /**
+   * Browser API tools to make available to the agent
+   */
+  browserApiTools?: BrowserApiToolMetadata[];
+  /**
+   * Whether to use structured output mode. When true, the agent will return structured data instead of plain text.
+   */
+  structuredOutput?: boolean;
+  /**
+   * Optional JSON schema for structured output. Only used when structuredOutput is true.
+   * If not provided, uses a default schema.
+   */
+  outputSchema?: Record<string, unknown>;
 }
 
 export interface RunAgentResponse {

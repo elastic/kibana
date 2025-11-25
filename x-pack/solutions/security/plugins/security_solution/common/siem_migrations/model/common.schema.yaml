@@ -41,6 +41,7 @@ components:
       description: The vendor identifier.
       enum:
         - splunk
+        - qradar
 
     MigrationComment:
       type: object
@@ -90,6 +91,9 @@ components:
       type: object
       description: The last execution of a migration task.
       properties:
+        total_execution_time_ms:
+          type: integer
+          description: The total execution time in milliseconds for the migration. This includes duration of last_execution and any previous executions.
         started_at:
           type: string
           description: The moment the last execution started.
@@ -107,6 +111,62 @@ components:
         is_stopped:
           type: boolean
           description: Indicates if the last execution was stopped by the user.
+
+    MigrationTranslationStats:
+      type: object
+      description: The items migration translation stats object.
+      required:
+        - id
+        - items
+      properties:
+        id:
+          description: The migration id
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        items:
+          type: object
+          description: The items migration translation stats.
+          required:
+            - total
+            - success
+            - failed
+          properties:
+            total:
+              type: integer
+              description: The total number of items in the migration.
+            success:
+              type: object
+              description: The number of items that have been successfully translated.
+              required:
+                - total
+                - result
+                - installable
+              properties:
+                total:
+                  type: integer
+                  description: The total number of items that have been successfully translated.
+                result:
+                  type: object
+                  description: The translation results
+                  required:
+                    - full
+                    - partial
+                    - untranslatable
+                  properties:
+                    full:
+                      type: integer
+                      description: The number of items that have been fully translated.
+                    partial:
+                      type: integer
+                      description: The number of items that have been partially translated.
+                    untranslatable:
+                      type: integer
+                      description: The number of items that could not be translated.
+                installable:
+                  type: integer
+                  description: The number of items that have been successfully translated and can be installed.
+            failed:
+              type: integer
+              description: The number of items that have failed translation.
 
     MigrationTranslationResult:
       type: string
@@ -175,12 +235,11 @@ components:
           type: integer
           description: The number of items that have failed migration.
 
+    ## should be combination of SplunkResourceType and QradarResourceType types in vendor folder
     SiemMigrationResourceType:
-      type: string
-      description: The type of the resource
-      enum:
-        - macro
-        - lookup
+      oneOf:
+        - $ref: './vendor/common/splunk.schema.yaml#/components/schemas/SplunkResourceType'
+        - $ref: './vendor/common/qradar.schema.yaml#/components/schemas/QradarResourceType'
 
     SiemMigrationResourceBase:
       type: object

@@ -20,8 +20,6 @@ export {
   routingDefinitionListSchema,
 } from './src/models/ingest/routing';
 
-export { type ContentPack, contentPackSchema } from './src/content';
-
 export { isRootStreamDefinition } from './src/helpers/is_root';
 export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
 
@@ -33,6 +31,7 @@ export {
 } from './src/helpers/namespaced_ecs';
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
 export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fields_from_ancestors';
+export { getInheritedSettings } from './src/helpers/get_inherited_settings';
 export { buildEsqlQuery } from './src/helpers/query';
 
 export * from './src/ingest_pipeline_processors';
@@ -75,7 +74,13 @@ export {
   streamQuerySchema,
 } from './src/queries';
 
-export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lifecycle';
+export {
+  findInheritedLifecycle,
+  findInheritingStreams,
+  effectiveToIngestLifecycle,
+} from './src/helpers/lifecycle';
+
+export { streamObjectNameSchema } from './src/shared/stream_object_name';
 
 export {
   type IngestStreamLifecycle,
@@ -84,6 +89,7 @@ export {
   type IlmPolicyPhase,
   type IlmPolicyHotPhase,
   type IlmPolicyDeletePhase,
+  type IngestStreamLifecycleAll,
   type IngestStreamLifecycleILM,
   type IngestStreamLifecycleDSL,
   type IngestStreamLifecycleDisabled,
@@ -97,6 +103,20 @@ export {
   isDisabledLifecycle,
 } from './src/models/ingest/lifecycle';
 
+export {
+  type IngestStreamSettings,
+  type WiredIngestStreamEffectiveSettings,
+} from './src/models/ingest/settings';
+
+export {
+  type FailureStore,
+  type EffectiveFailureStore,
+  type WiredIngestStreamEffectiveFailureStore,
+  type FailureStoreStatsResponse,
+  isEnabledFailureStore,
+  isInheritFailureStore,
+} from './src/models/ingest/failure_store';
+
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
@@ -104,3 +124,16 @@ export type {
   SignificantEventsGenerateResponse,
   GeneratedSignificantEventQuery,
 } from './src/api/significant_events';
+
+export { emptyAssets } from './src/helpers/empty_assets';
+
+export {
+  type Feature,
+  type SystemFeature,
+  type FeatureWithFilter,
+  type FeatureType,
+  featureSchema,
+  featureTypeSchema,
+  featureWithFilterSchema,
+  isFeatureWithFilter,
+} from './src/feature';

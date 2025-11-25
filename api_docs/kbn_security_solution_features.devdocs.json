@@ -105,15 +105,7 @@
             "label": "baseKibanaFeature",
             "description": [],
             "signature": [
-              "{ id: string; scope?: readonly ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.KibanaFeatureScope",
-                "text": "KibanaFeatureScope"
-              },
-              "[] | undefined; order?: number | undefined; name: string; alerting?: ",
+              "{ id: string; name: string; order?: number | undefined; alerting?: ",
               "AlertingKibanaPrivilege",
               " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; category: ",
               "AppCategory",
@@ -391,15 +383,7 @@
         "label": "BaseKibanaFeatureConfig",
         "description": [],
         "signature": [
-          "{ id: string; scope?: readonly ",
-          {
-            "pluginId": "features",
-            "scope": "common",
-            "docId": "kibFeaturesPluginApi",
-            "section": "def-common.KibanaFeatureScope",
-            "text": "KibanaFeatureScope"
-          },
-          "[] | undefined; order?: number | undefined; name: string; alerting?: ",
+          "{ id: string; name: string; order?: number | undefined; alerting?: ",
           "AlertingKibanaPrivilege",
           " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; category: ",
           "AppCategory",
@@ -634,23 +618,7 @@
                 "section": "def-common.RecursiveWritable",
                 "text": "RecursiveWritable"
               },
-              "<boolean | undefined>; scope?: ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.RecursiveWritable",
-                "text": "RecursiveWritable"
-              },
-              "<readonly ",
-              {
-                "pluginId": "features",
-                "scope": "common",
-                "docId": "kibFeaturesPluginApi",
-                "section": "def-common.KibanaFeatureScope",
-                "text": "KibanaFeatureScope"
-              },
-              "[] | undefined>; deprecated?: ",
+              "<boolean | undefined>; deprecated?: ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -817,23 +785,7 @@
             "section": "def-common.RecursiveWritable",
             "text": "RecursiveWritable"
           },
-          "<boolean | undefined>; scope?: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.RecursiveWritable",
-            "text": "RecursiveWritable"
-          },
-          "<readonly ",
-          {
-            "pluginId": "features",
-            "scope": "common",
-            "docId": "kibFeaturesPluginApi",
-            "section": "def-common.KibanaFeatureScope",
-            "text": "KibanaFeatureScope"
-          },
-          "[] | undefined>; deprecated?: ",
+          "<boolean | undefined>; deprecated?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -1252,6 +1204,16 @@
           },
           "<",
           "SecuritySubFeatureId",
+          "> | undefined; ai_value_report?: ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
+          },
+          "<",
+          "SecuritySubFeatureId",
           "> | undefined; detections?: ",
           {
             "pluginId": "@kbn/security-solution-features",
@@ -1577,6 +1539,10 @@
           "<{ rule?: { all?: ",
           "AlertingKibanaPrivilege",
           " | undefined; read?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; enable?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; manual_run?: ",
           "AlertingKibanaPrivilege",
           " | undefined; } | undefined; alert?: { all?: ",
           "AlertingKibanaPrivilege",

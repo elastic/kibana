@@ -114,6 +114,12 @@ export class RequestContextFactory implements IRequestContextFactory {
       checkPrivileges: () => {
         return startPlugins.security.authz.checkPrivilegesWithRequest(request);
       },
+      /**
+       * Test purpose only.
+       */
+      updateAnonymizationFields: async () => {
+        return this.assistantService.createDefaultAnonymizationFields(getSpaceId());
+      },
       llmTasks: startPlugins.llmTasks,
       inference: startPlugins.inference,
       savedObjectsClient,
@@ -213,7 +219,20 @@ export class RequestContextFactory implements IRequestContextFactory {
           licensing: context.licensing,
           logger: this.logger,
           currentUser,
-          contentReferencesEnabled: params?.contentReferencesEnabled,
+          assistantInterruptsEnabled: params?.assistantInterruptsEnabled,
+        });
+      }),
+
+      getCheckpointSaver: memoize(async () => {
+        if (!this.assistantService.getIsCheckpointSaverEnabled()) {
+          return null;
+        }
+        const currentUser = await getCurrentUser();
+        return this.assistantService.createCheckpointSaver({
+          spaceId: getSpaceId(),
+          licensing: context.licensing,
+          logger: this.logger,
+          currentUser,
         });
       }),
     };

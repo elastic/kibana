@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { DEGRADED_DOCS_QUERY, FAILURE_STORE_SELECTOR } from '../../../../common/constants';
+import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
 import {
   degradedFieldMessageIssueDoesNotExistInLatestIndex,
@@ -51,6 +51,7 @@ export default function QualityIssueFlyout() {
     renderedItems,
     isAnalysisInProgress,
     degradedFieldAnalysisFormattedResult,
+    isDegradedFieldsValueLoading,
   } = useQualityIssues();
   const { dataStreamSettings, datasetDetails, timeRange } = useDatasetQualityDetailsState();
   const pushedFlyoutTitleId = useGeneratedHtmlId({
@@ -72,13 +73,13 @@ export default function QualityIssueFlyout() {
   });
 
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat: datasetDetails,
+    dataStreamStat: datasetDetails.rawName,
     timeRangeConfig: timeRange,
     query: {
       language: 'kuery',
       query:
         expandedDegradedField && expandedDegradedField.type === 'degraded'
-          ? DEGRADED_DOCS_QUERY
+          ? `${_IGNORED}: ${expandedDegradedField.name}`
           : '',
     },
     selector:
@@ -90,7 +91,8 @@ export default function QualityIssueFlyout() {
 
   return (
     <EuiFlyout
-      maxWidth={450}
+      type="push"
+      size="s"
       onClose={closeDegradedFieldFlyout}
       aria-labelledby={pushedFlyoutTitleId}
       data-test-subj={'datasetQualityDetailsDegradedFieldFlyout'}
@@ -132,7 +134,8 @@ export default function QualityIssueFlyout() {
           isUserViewingTheIssueOnLatestBackingIndex &&
           !isAnalysisInProgress &&
           degradedFieldAnalysisFormattedResult &&
-          !degradedFieldAnalysisFormattedResult.identifiedUsingHeuristics && (
+          !degradedFieldAnalysisFormattedResult.identifiedUsingHeuristics &&
+          !isDegradedFieldsValueLoading && (
             <>
               <EuiSpacer size="s" />
               <EuiTextColor

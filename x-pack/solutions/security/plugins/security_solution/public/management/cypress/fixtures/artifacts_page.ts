@@ -8,6 +8,7 @@
 import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { FormAction } from '../tasks/perform_user_actions';
+import type { SiemVersion } from '../common/constants';
 
 interface FormEditingDescription {
   formActions: FormAction[];
@@ -24,7 +25,12 @@ export interface ArtifactsFixtureType {
   tabId: keyof typeof ENDPOINT_ARTIFACT_LISTS;
   nextTabId: string;
   artifactName: string;
+
+  /** The siem version from which the artifact privilege is available.
+   */
+  firstSiemVersion?: SiemVersion;
   privilegePrefix: string;
+
   urlPath: string;
   emptyState: string;
 
@@ -514,6 +520,7 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
     tabId: 'trustedDevices',
     nextTabId: 'trustedApps',
     artifactName: 'Trusted device name',
+    firstSiemVersion: 'siemV3',
     privilegePrefix: 'trusted_devices_',
     create: {
       formActions: [
@@ -541,18 +548,18 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'click',
-          customSelector: '[role="option"]:contains("Username")',
+          customSelector: '[role="option"]:contains("Host")',
         },
         {
           type: 'input',
           selector: 'trustedDevices-form-valueField',
-          value: 'test-user',
+          value: 'test-host',
         },
       ],
       checkResults: [
         {
           selector: 'trustedDevicesList-card-criteriaConditions',
-          value: ' OSIS Windows, MacAND user.nameIS test-user',
+          value: ' OSIS Windows, MacAND host.nameIS test-host',
         },
       ],
     },
@@ -583,13 +590,13 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         {
           type: 'input',
           selector: 'trustedDevices-form-valueField',
-          value: 'updated-user',
+          value: 'updated-host',
         },
       ],
       checkResults: [
         {
           selector: 'trustedDevicesList-card-criteriaConditions',
-          value: ' OSIS Windows, MacAND user.nameIS test-user',
+          value: ' OSIS Windows, MacAND host.nameIS updated-host',
         },
         {
           selector: 'trustedDevicesList-card-header-title',
@@ -611,13 +618,129 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
       list_id: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
       entries: [
         {
-          field: 'user.name',
+          field: 'host.name',
           operator: 'included',
           type: 'match',
-          value: 'test-user',
+          value: 'test-host',
         },
       ],
       os_types: ['windows', 'macos'],
+    },
+  },
+  {
+    title: 'Endpoint exceptions',
+    pagePrefix: 'endpointExceptionsListPage',
+    tabId: 'endpointExceptions',
+    nextTabId: 'eventFilters', // todo: update when Policy details tabs are implemented
+    artifactName: 'Endpoint exception name',
+    firstSiemVersion: 'siemV4',
+    privilegePrefix: 'endpoint_exceptions_',
+    create: {
+      formActions: [
+        {
+          type: 'input',
+          selector: 'endpointExceptions-form-name-input',
+          value: 'Endpoint exception name',
+        },
+        {
+          type: 'input',
+          selector: 'endpointExceptions-form-description-input',
+          value: 'This is the endpoint exception description',
+        },
+
+        {
+          type: 'input',
+          selector: 'fieldAutocompleteComboBox',
+          value: 'agent.version',
+        },
+        {
+          type: 'click',
+          selector: 'valuesAutocompleteMatch',
+        },
+        {
+          type: 'input',
+          selector: 'valuesAutocompleteMatch',
+          value: '1234',
+        },
+        {
+          type: 'click',
+          selector: 'endpointExceptions-form-description-input',
+        },
+      ],
+      checkResults: [
+        {
+          selector: 'endpointExceptionsListPage-card-criteriaConditions-condition',
+          value: 'AND agent.versionIS 1234',
+        },
+      ],
+    },
+    update: {
+      formActions: [
+        {
+          type: 'clear',
+          selector: 'endpointExceptions-form-name-input',
+        },
+        {
+          type: 'input',
+          selector: 'endpointExceptions-form-name-input',
+          value: 'Endpoint exception name edited',
+        },
+        {
+          type: 'clear',
+          selector: 'endpointExceptions-form-description-input',
+        },
+        {
+          type: 'input',
+          selector: 'endpointExceptions-form-description-input',
+          value: 'This is the endpoint exception description edited',
+        },
+        {
+          type: 'input',
+          selector: 'fieldAutocompleteComboBox',
+          value: '{selectAll}agent.name',
+        },
+        {
+          type: 'input',
+          selector: 'valuesAutocompleteMatch',
+          value: 'test',
+        },
+        {
+          type: 'click',
+          selector: 'endpointExceptions-form-description-input',
+        },
+      ],
+      checkResults: [
+        {
+          selector: 'endpointExceptionsListPage-card-criteriaConditions-condition',
+          value: 'AND agent.nameIS test',
+        },
+        {
+          selector: 'endpointExceptionsListPage-card-header-title',
+          value: 'Endpoint exception name edited',
+        },
+        {
+          selector: 'endpointExceptionsListPage-card-description',
+          value: 'This is the endpoint exception description edited',
+        },
+      ],
+    },
+    delete: {
+      confirmSelector: 'endpointExceptionsListPage-deleteModal-submitButton',
+      card: 'endpointExceptionsListPage-card',
+    },
+    urlPath: 'endpoint_exceptions',
+    emptyState: 'endpointExceptionsListPage-emptyState',
+    createRequestBody: {
+      list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+      entries: [
+        {
+          field: 'process.name',
+          operator: 'included',
+          type: 'match',
+          value: 'notepad.exe',
+        },
+      ],
+      os_types: ['windows'],
     },
   },
 ];

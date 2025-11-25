@@ -17,9 +17,13 @@ export type ESQLAstCommand =
   | ESQLAstJoinCommand
   | ESQLAstChangePointCommand
   | ESQLAstRerankCommand
-  | ESQLAstCompletionCommand;
+  | ESQLAstCompletionCommand
+  | ESQLAstFuseCommand
+  | ESQLAstForkCommand;
 
-export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
+export type ESQLAstAllCommands = ESQLAstCommand | ESQLAstHeaderCommand;
+
+export type ESQLAstNode = ESQLAstCommand | ESQLAstHeaderCommand | ESQLAstExpression | ESQLAstItem;
 
 /**
  * Represents an *expression* in the AST.
@@ -31,6 +35,7 @@ export type ESQLSingleAstItem =
   | ESQLFunction
   | ESQLCommandOption
   | ESQLSource
+  | ESQLParens
   | ESQLColumn
   | ESQLDatePeriodLiteral
   | ESQLTimeDurationLiteral
@@ -72,7 +77,7 @@ export type ESQLAstNodeWithChildren = ESQLAstNodeWithArgs | ESQLList;
  * of the nodes which are plain arrays, all nodes will be *proper* and we can
  * remove this type.
  */
-export type ESQLProperNode = ESQLAstExpression | ESQLAstCommand;
+export type ESQLProperNode = ESQLAstExpression | ESQLAstCommand | ESQLAstHeaderCommand;
 
 export interface ESQLLocation {
   min: number;
@@ -129,11 +134,55 @@ export interface ESQLAstCompletionCommand extends ESQLCommand<'completion'> {
   targetField?: ESQLColumn;
 }
 
+export interface ESQLAstFuseCommand extends ESQLCommand<'fuse'> {
+  fuseType?: ESQLIdentifier;
+}
+
 export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
   query: ESQLLiteral;
   fields: ESQLAstField[];
   targetField?: ESQLColumn;
+  inferenceId: ESQLLiteral | undefined;
 }
+
+export interface ESQLAstForkCommand extends ESQLCommand<'fork'> {
+  args: ESQLForkParens[];
+}
+
+/**
+ * Represents a header pseudo-command, such as SET.
+ *
+ * Example:
+ *
+ * ```
+ * SET setting1 = "value1", setting2 = "value2";
+ * ```
+ */
+export interface ESQLAstHeaderCommand<Name extends string = string, Arg = ESQLAstExpression>
+  extends ESQLAstBaseItem {
+  type: 'header-command';
+
+  /** Name of the command */
+  name: Name;
+
+  /**
+   * Represents the arguments for the command. It has to be a list, because
+   * even the SET command was initially designed to accept multiple
+   * assignments.
+   *
+   * Example:
+   *
+   * ```
+   * SET setting1 = "value1", setting2 = "value2"
+   * ```
+   */
+  args: Arg[];
+}
+
+export type ESQLAstSetHeaderCommand = ESQLAstHeaderCommand<
+  'set',
+  ESQLBinaryExpression<BinaryExpressionAssignmentOperator>
+>;
 
 export type ESQLIdentifierOrParam = ESQLIdentifier | ESQLParamLiteral;
 
@@ -144,6 +193,7 @@ export interface ESQLCommandOption extends ESQLAstBaseItem {
 
 export interface ESQLAstQueryExpression extends ESQLAstBaseItem<''> {
   type: 'query';
+  header?: ESQLAstHeaderCommand[];
   commands: ESQLAstCommand[];
 }
 
@@ -197,7 +247,8 @@ export interface ESQLFunctionCallExpression extends ESQLFunction<'variadic-call'
   args: ESQLAstItem[];
 }
 
-export interface ESQLUnaryExpression extends ESQLFunction<'unary-expression'> {
+export interface ESQLUnaryExpression<Name extends string = string>
+  extends ESQLFunction<'unary-expression', Name> {
   subtype: 'unary-expression';
   args: [ESQLAstItem];
 }
@@ -326,6 +377,22 @@ export interface ESQLSource extends ESQLAstBaseItem {
    * ```
    */
   selector?: ESQLStringLiteral | undefined;
+}
+
+/**
+ * Represents any expression wrapped in parentheses.
+ *
+ * ```
+ * FROM ( <query> )
+ * ```
+ */
+export interface ESQLParens extends ESQLAstBaseItem {
+  type: 'parens';
+  child: ESQLAstExpression;
+}
+
+export interface ESQLForkParens extends ESQLParens {
+  child: ESQLAstQueryExpression;
 }
 
 export interface ESQLColumn extends ESQLAstBaseItem {
@@ -544,6 +611,8 @@ export interface ESQLMessage {
   text: string;
   location: ESQLLocation;
   code: string;
+  errorType?: 'semantic';
+  requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
 }
 
 export interface EditorError {
@@ -552,7 +621,7 @@ export interface EditorError {
   startColumn: number;
   endColumn: number;
   message: string;
-  code?: string;
+  code: string;
   severity: 'error' | 'warning' | number;
 }
 

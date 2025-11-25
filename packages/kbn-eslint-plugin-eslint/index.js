@@ -23,5 +23,7 @@ module.exports = {
     require_kibana_feature_privileges_naming: require('./rules/require_kibana_feature_privileges_naming'),
     no_deprecated_imports: require('./rules/no_deprecated_imports'),
     deployment_agnostic_test_context: require('./rules/deployment_agnostic_test_context'),
+    scout_no_describe_configure: require('./rules/scout_no_describe_configure'),
+    require_kbn_fs: require('./rules/require_kbn_fs'),
   },
 };

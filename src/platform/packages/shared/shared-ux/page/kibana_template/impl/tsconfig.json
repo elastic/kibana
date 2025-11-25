@@ -1,11 +1,12 @@
 {
-  "extends": "../../../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
       "jest",
       "node",
       "@kbn/ambient-ui-types",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
@@ -18,6 +19,9 @@
     "@kbn/shared-ux-page-solution-nav",
     "@kbn/shared-ux-page-no-data-types",
     "@kbn/shared-ux-page-kibana-template-types",
+    "@kbn/test-jest-helpers",
+    "@kbn/shared-ux-card-no-data",
+    "@kbn/shared-ux-card-no-data-mocks",
   ],
   "exclude": [
     "target/**/*",

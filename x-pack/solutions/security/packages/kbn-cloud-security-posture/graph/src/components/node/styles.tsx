@@ -18,12 +18,13 @@ import {
   EuiText,
   useEuiBackgroundColor,
   useEuiTheme,
+  transparentize,
 } from '@elastic/eui';
 import { rgba } from 'polished';
 import { css } from '@emotion/react';
 import { getSpanIcon } from './get_span_icon';
-import type { NodeExpandButtonProps } from './node_expand_button';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
+import { GRAPH_ENTITY_NODE_BUTTON_ID } from '../test_ids';
 
 /**
  * The total height of an entity node including the shape and details below, in pixels.
@@ -126,6 +127,16 @@ export const LabelShape = styled(EuiText, {
   `};
 `;
 
+export const LabelStackedShape = styled.div<{ borderColor: string }>`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform: scale(0.9) translateY(calc(-100% + 3px));
+  z-index: -1;
+  border: ${(props) => `${LABEL_BORDER_WIDTH}px solid ${props.borderColor}`};
+  border-radius: ${LABEL_BORDER_RADIUS}px;
+`;
+
 export const LabelShapeOnHover = styled.div`
   position: absolute;
   top: 50%;
@@ -191,12 +202,16 @@ export const NodeShapeContainer = styled.div`
   height: ${NODE_HEIGHT}px;
 `;
 
-export const NodeShapeSvg = styled.svg<{ shadow?: string }>`
+export const NodeShapeSvg = styled.svg<{ shadow?: string; yPosDelta?: number }>`
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
   z-index: 1;
+
+  ${({ yPosDelta }) => {
+    const delta = typeof yPosDelta === 'number' ? yPosDelta : 0;
+    return `transform: translate(-50%, calc(-50% + ${delta}px));`;
+  }}
 
   ${({ shadow }) => `
     /* Apply shadow when node is selected */
@@ -213,36 +228,50 @@ export const NodeShapeSvg = styled.svg<{ shadow?: string }>`
   `};
 `;
 
-export interface NodeButtonProps extends CommonProps {
+interface ButtonContainerProps extends CommonProps {
   width?: number;
   height?: number;
-  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
+}
+
+export interface NodeButtonProps extends ButtonContainerProps {
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 export const NodeButton = ({ onClick, width, height, ...props }: NodeButtonProps) => (
   <StyledNodeContainer width={width} height={height} {...props}>
-    <StyledNodeButton width={width} height={height} onClick={onClick} />
+    <StyledNodeButton
+      width={width}
+      height={height}
+      onClick={onClick}
+      data-test-subj={GRAPH_ENTITY_NODE_BUTTON_ID}
+    />
   </StyledNodeContainer>
 );
 
-const StyledNodeContainer = styled.div<NodeButtonProps>`
+const StyledNodeContainer = styled.div<ButtonContainerProps>`
   position: absolute;
   width: ${(props) => props.width ?? NODE_WIDTH}px;
   height: ${(props) => props.height ?? NODE_HEIGHT}px;
   z-index: 1;
 `;
 
-const StyledNodeButton = styled.div<NodeButtonProps>`
+const StyledNodeButton = styled.button<NodeButtonProps>`
+  appearance: none;
   width: ${(props) => props.width ?? NODE_WIDTH}px;
   height: ${(props) => props.height ?? NODE_HEIGHT}px;
 `;
 
-export const StyledNodeExpandButton = styled.div<NodeExpandButtonProps>`
+interface NodeExpandButtonContainerProps extends CommonProps {
+  x?: string;
+  y?: string;
+}
+
+export const NodeExpandButtonContainer = styled.div<NodeExpandButtonContainerProps>`
+  appearance: none;
   opacity: 0; /* Hidden by default */
   transition: opacity 0.2s ease; /* Smooth transition */
-  ${(props: NodeExpandButtonProps) =>
-    (Boolean(props.x) || Boolean(props.y)) &&
-    `transform: translate(${props.x ?? '0'}, ${props.y ?? '0'});`}
+  ${({ x, y }: NodeExpandButtonContainerProps) =>
+    (x || y) && `transform: translate(${x ?? '0'}, ${y ?? '0'});`}
   position: absolute;
   z-index: 1;
 
@@ -271,8 +300,8 @@ export const NodeShapeOnHoverSvg = styled(NodeShapeSvg)`
     opacity: 1; /* Show on hover */
   }
 
-  ${NodeShapeContainer}:has(${StyledNodeExpandButton}.toggled) &,
-  ${LabelNodeContainer}:has(${StyledNodeExpandButton}.toggled) & {
+  ${NodeShapeContainer}:has(${NodeExpandButtonContainer}.toggled) &,
+  ${LabelNodeContainer}:has(${NodeExpandButtonContainer}.toggled) & {
     opacity: 1; /* Show on hover */
   }
 
@@ -314,7 +343,7 @@ export const RoundEuiButtonIcon = styled(EuiButtonIcon, {
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%) translate(0.5px, 0.5px);
+    transform: translate(-50%, -50%);
   }
 
   :hover,
@@ -401,4 +430,20 @@ export const ToolTipButton = (props: PropsWithChildren) => {
       type="button"
     />
   );
+};
+
+export const middleEntityNodeShapeStyle = (strokeColor: string) => {
+  return {
+    transform: 'scale(0.9) translateY(7px)',
+    transformOrigin: 'center',
+    stroke: transparentize(strokeColor, 0.5),
+  };
+};
+
+export const bottomEntityNodeShapeStyle = (strokeColor: string) => {
+  return {
+    transform: 'scale(0.8) translateY(16px)',
+    transformOrigin: 'center',
+    stroke: transparentize(strokeColor, 0.3),
+  };
 };

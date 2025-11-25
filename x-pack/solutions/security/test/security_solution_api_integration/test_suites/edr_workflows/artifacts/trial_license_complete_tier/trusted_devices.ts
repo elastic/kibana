@@ -15,8 +15,8 @@ import {
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import { TrustedDeviceConditionEntryField } from '@kbn/securitysolution-utils';
 import type TestAgent from 'supertest/lib/agent';
-import type { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
-import type { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
+import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
+import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 
@@ -341,9 +341,87 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/Duplicate OS entries are not allowed/));
           });
 
-          // Test all supported trusted device fields
+          it(`should allow USERNAME field with Windows-only OS on [${trustedDeviceApiCall.method}]`, async () => {
+            const body = trustedDeviceApiCall.getBody();
+
+            if ('_version' in body) {
+              body._version = trustedDeviceData.artifact._version;
+            }
+
+            body.os_types = ['windows'];
+            body.entries = [
+              {
+                field: TrustedDeviceConditionEntryField.USERNAME,
+                operator: 'included',
+                type: 'match',
+                value: 'test-user',
+              },
+            ];
+
+            await endpointPolicyManagerSupertest[trustedDeviceApiCall.method](
+              trustedDeviceApiCall.path
+            )
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(200);
+          });
+
+          it(`should error on [${trustedDeviceApiCall.method}] if USERNAME field is used with Mac-only OS`, async () => {
+            const body = trustedDeviceApiCall.getBody();
+
+            body.os_types = ['macos'];
+            body.entries = [
+              {
+                field: TrustedDeviceConditionEntryField.USERNAME,
+                operator: 'included',
+                type: 'match',
+                value: 'test-user',
+              },
+            ];
+
+            await endpointPolicyManagerSupertest[trustedDeviceApiCall.method](
+              trustedDeviceApiCall.path
+            )
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(
+                anErrorMessageWith(/Username field is only supported for Windows OS exclusively/)
+              );
+          });
+
+          it(`should error on [${trustedDeviceApiCall.method}] if USERNAME field is used with Windows+Mac OS`, async () => {
+            const body = trustedDeviceApiCall.getBody();
+
+            body.os_types = ['windows', 'macos'];
+            body.entries = [
+              {
+                field: TrustedDeviceConditionEntryField.USERNAME,
+                operator: 'included',
+                type: 'match',
+                value: 'test-user',
+              },
+            ];
+
+            await endpointPolicyManagerSupertest[trustedDeviceApiCall.method](
+              trustedDeviceApiCall.path
+            )
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400)
+              .expect(anEndpointArtifactError)
+              .expect(
+                anErrorMessageWith(/Username field is only supported for Windows OS exclusively/)
+              );
+          });
+
           for (const field of Object.values(TrustedDeviceConditionEntryField)) {
-            it(`should allow valid ${field} field on [${trustedDeviceApiCall.method}]`, async () => {
+            if (field === TrustedDeviceConditionEntryField.USERNAME) {
+              continue; // Skip USERNAME field - handled separately above
+            }
+
+            it(`should allow valid ${field} field with any OS on [${trustedDeviceApiCall.method}]`, async () => {
               const body = trustedDeviceApiCall.getBody();
 
               // Match request version with artifact version
@@ -378,6 +456,7 @@ export default function ({ getService }: FtrProviderContext) {
               body._version = trustedDeviceData.artifact._version;
             }
 
+            body.os_types = ['windows'];
             body.entries = [
               {
                 field: TrustedDeviceConditionEntryField.USERNAME,

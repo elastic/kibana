@@ -6,6 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+export { layoutVar, layoutVarName } from './src/css_variables';
+export type {
+  LayoutVarName,
+  CSSVarName,
+  LayoutComponent,
+  LayoutProperty,
+  ApplicationComponent,
+  ApplicationVarName,
+} from './src/css_variables';
+export { layoutLevels } from './src/levels';
 
 /**
  * The ID of the main scroll container in the application.

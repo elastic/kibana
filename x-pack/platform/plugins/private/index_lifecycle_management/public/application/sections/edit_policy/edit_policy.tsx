@@ -10,8 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { get } from 'lodash';
-
-import './edit_policy.scss';
+import { css } from '@emotion/react';
 
 import {
   EuiButton,
@@ -24,6 +23,7 @@ import {
   EuiSwitch,
   EuiPageHeader,
   EuiTimeline,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import {
@@ -59,7 +59,28 @@ import type { FormInternal } from './types';
 
 const policyNamePath = 'name';
 
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    // offset the vertical line and the phase icons to align with the phase toggle
+    phases: css`
+      [class*='euiTimelineItemIcon-top'] {
+        padding-top: ${euiTheme.size.base};
+      }
+      [class*='euiTimelineItemIcon-top']::before {
+        margin-top: ${euiTheme.size.xl};
+      }
+    `,
+    fullWidth: css`
+      max-width: 100%;
+    `,
+  };
+};
+
 export const EditPolicy: React.FunctionComponent = () => {
+  const styles = useStyles();
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -214,7 +235,7 @@ export const EditPolicy: React.FunctionComponent = () => {
             <EuiFormRow>
               <EuiSwitch
                 data-test-subj="saveAsNewSwitch"
-                style={{ maxWidth: '100%' }}
+                css={styles.fullWidth}
                 checked={isClonedPolicy}
                 onChange={(e) => {
                   setIsClonedPolicy(e.target.checked);
@@ -264,7 +285,7 @@ export const EditPolicy: React.FunctionComponent = () => {
 
         <EuiSpacer size="l" />
 
-        <EuiTimeline className="ilmPhases">
+        <EuiTimeline css={styles.phases}>
           <HotPhase />
 
           <WarmPhase />

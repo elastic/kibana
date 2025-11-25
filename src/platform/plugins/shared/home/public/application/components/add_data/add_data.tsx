@@ -28,7 +28,6 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { ApplicationStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { MoveData } from '../move_data';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { getServices } from '../../kibana_services';
@@ -91,29 +90,23 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
 
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
-                <RedirectAppLinks
-                  coreStart={{
-                    application,
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                <EuiButton
+                  data-test-subj="homeAddData"
+                  fill={true}
+                  href={addBasePath('/app/integrations/browse')}
+                  iconType="plusInCircle"
+                  onClick={(event: MouseEvent) => {
+                    trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
+                    createAppNavigationHandler('/app/integrations/browse')(event);
                   }}
+                  fullWidth
                 >
-                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                  <EuiButton
-                    data-test-subj="homeAddData"
-                    fill={true}
-                    href={addBasePath('/app/integrations/browse')}
-                    iconType="plusInCircle"
-                    onClick={(event: MouseEvent) => {
-                      trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
-                      createAppNavigationHandler('/app/integrations/browse')(event);
-                    }}
-                    fullWidth
-                  >
-                    <FormattedMessage
-                      id="home.addData.addDataButtonLabel"
-                      defaultMessage="Add integrations"
-                    />
-                  </EuiButton>
-                </RedirectAppLinks>
+                  <FormattedMessage
+                    id="home.addData.addDataButtonLabel"
+                    defaultMessage="Add integrations"
+                  />
+                </EuiButton>
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>

@@ -8,39 +8,15 @@
  */
 import uniqBy from 'lodash/uniqBy';
 import type { ESQLCommand } from '../../../types';
-import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
-import type { ICommandContext } from '../../types';
-import type { FieldType } from '../../../definitions/types';
-
-function transformMapToESQLFields(
-  inputMap: Map<string, ESQLUserDefinedColumn[]>
-): ESQLFieldWithMetadata[] {
-  const esqlFields: ESQLFieldWithMetadata[] = [];
-
-  for (const [, userDefinedColumns] of inputMap) {
-    for (const userDefinedColumn of userDefinedColumns) {
-      if (userDefinedColumn.type) {
-        esqlFields.push({
-          name: userDefinedColumn.name,
-          type: userDefinedColumn.type as FieldType,
-        });
-      }
-    }
-  }
-
-  return esqlFields;
-}
+import { columnsAfter as columnsAfterStats } from '../stats/columns_after';
+import type { ESQLColumnData } from '../../types';
 
 export const columnsAfter = (
-  _command: ESQLCommand,
-  previousColumns: ESQLFieldWithMetadata[],
-  context?: ICommandContext
+  command: ESQLCommand,
+  previousColumns: ESQLColumnData[],
+  query: string
 ) => {
-  const userDefinedColumns =
-    context?.userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>();
+  const newColumns = columnsAfterStats(command, previousColumns, query);
 
-  const arrayOfUserDefinedColumns: ESQLFieldWithMetadata[] =
-    transformMapToESQLFields(userDefinedColumns);
-
-  return uniqBy([...previousColumns, ...arrayOfUserDefinedColumns], 'name');
+  return uniqBy([...newColumns, ...previousColumns], 'name');
 };

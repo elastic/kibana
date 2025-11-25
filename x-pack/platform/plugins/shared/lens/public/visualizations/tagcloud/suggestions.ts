@@ -7,7 +7,7 @@
 
 import { partition } from 'lodash';
 import { IconChartTagcloud } from '@kbn/chart-icons';
-import type { SuggestionRequest, VisualizationSuggestion } from '../../types';
+import type { SuggestionRequest, VisualizationSuggestion } from '@kbn/lens-common';
 import type { TagcloudState } from './types';
 import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
 import { getColorMappingDefaults } from '../../utils';

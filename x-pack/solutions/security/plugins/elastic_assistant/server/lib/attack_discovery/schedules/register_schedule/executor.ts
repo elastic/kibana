@@ -30,6 +30,7 @@ import {
 } from '../../persistence/transforms/transform_to_alert_documents';
 import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
 import { getScheduledIndexPattern } from '../../persistence/get_scheduled_index_pattern';
+import { updateAlertsWithAttackIds } from './updateAlertsWithAttackIds';
 
 export interface AttackDiscoveryScheduleExecutorParams {
   options: AttackDiscoveryExecutorOptions;
@@ -116,7 +117,9 @@ export const attackDiscoveryScheduleExecutor = async ({
       anonymizedAlerts,
       apiConfig: params.apiConfig,
       connectorName: params.apiConfig.name,
+      enableFieldRendering: true, // Always enable field rendering for scheduled discoveries. It's still possible for clients who read the generated discoveries to specify false when retrieving them.
       replacements,
+      withReplacements: false, // Never apply replacements to the results. It's still possible for clients who read the generated discoveries to specify true when retrieving them.
     };
 
     // Deduplicate attackDiscoveries before creating alerts
@@ -135,6 +138,13 @@ export const attackDiscoveryScheduleExecutor = async ({
       spaceId,
     });
 
+    /**
+     * Map that uses alert id as key and an array
+     * of attack ids as value.
+     * Used to update alerts in one query
+     */
+    const alertIdToAttackIds: Record<string, string[]> = {};
+
     await Promise.all(
       dedupedDiscoveries.map(async (attackDiscovery) => {
         const alertInstanceId = generateAttackDiscoveryAlertHash({
@@ -148,6 +158,11 @@ export const attackDiscoveryScheduleExecutor = async ({
           id: alertInstanceId,
           actionGroup: 'default',
         });
+
+        for (const alertId of attackDiscovery.alertIds) {
+          alertIdToAttackIds[alertId] = alertIdToAttackIds[alertId] ?? [];
+          alertIdToAttackIds[alertId].push(alertDocId);
+        }
 
         const baseAlertDocument = transformToBaseAlertDocument({
           alertDocId,
@@ -184,6 +199,12 @@ export const attackDiscoveryScheduleExecutor = async ({
         });
       })
     );
+
+    await updateAlertsWithAttackIds({
+      alertIdToAttackIdsMap: alertIdToAttackIds,
+      esClient,
+      spaceId,
+    });
   } catch (error) {
     logger.error(error);
     const transformedError = transformError(error);

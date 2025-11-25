@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createTabItem } from './utils';
+import { createTabItem, extractEsqlVariables } from './utils';
 import { type TabState } from './types';
-import { defaultTabState } from './internal_state';
+import { getTabStateMock } from './__mocks__/internal_state.mocks';
+import type { ControlPanelsState, ControlPanelState } from '@kbn/controls-plugin/public';
+import type { ESQLControlState } from '@kbn/esql-types';
+import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 
-const createMockTabState = (id: string, label: string): TabState => ({
-  ...defaultTabState,
-  id,
-  label,
-});
+const createMockTabState = (id: string, label: string): TabState => getTabStateMock({ id, label });
 
 describe('createTabItem', () => {
   it('should create a tab with default label when no tabs exist', () => {
@@ -60,5 +60,103 @@ describe('createTabItem', () => {
 
     const result = createTabItem(tabs);
     expect(result.label).toBe('Untitled 2');
+  });
+});
+
+describe('extractEsqlVariables', () => {
+  const createMockESQLControlPanel = (
+    variableName: string,
+    variableType: ESQLVariableType,
+    selectedOptions: string[],
+    singleSelect: boolean = true,
+    order: number = 0
+  ): ControlPanelState<ESQLControlState> => ({
+    type: ESQL_CONTROL,
+    order,
+    variableName,
+    variableType,
+    selectedOptions,
+    singleSelect,
+    availableOptions: selectedOptions,
+    title: `Control for ${variableName}`,
+    width: 'medium',
+    grow: false,
+    controlType: EsqlControlType.STATIC_VALUES,
+    esqlQuery: '',
+  });
+
+  it('should extract single-select string variable', () => {
+    const panels: ControlPanelsState<ESQLControlState> = {
+      panel1: createMockESQLControlPanel(
+        'myVar',
+        ESQLVariableType.VALUES,
+        ['option1', 'option2'],
+        true
+      ),
+    };
+
+    const result = extractEsqlVariables(panels);
+    expect(result).toEqual([
+      {
+        key: 'myVar',
+        type: ESQLVariableType.VALUES,
+        value: 'option1', // First selected value as string
+      },
+    ]);
+  });
+
+  it('should extract single-select numeric variable', () => {
+    const panels: ControlPanelsState<ESQLControlState> = {
+      panel1: createMockESQLControlPanel('numVar', ESQLVariableType.VALUES, ['123', '456'], true),
+    };
+
+    const result = extractEsqlVariables(panels);
+    expect(result).toEqual([
+      {
+        key: 'numVar',
+        type: ESQLVariableType.VALUES,
+        value: 123, // First selected value converted to number
+      },
+    ]);
+  });
+
+  it('should extract multi-select string variables', () => {
+    const panels: ControlPanelsState<ESQLControlState> = {
+      panel1: createMockESQLControlPanel(
+        'multiVar',
+        ESQLVariableType.MULTI_VALUES,
+        ['apple', 'banana', 'cherry'],
+        false
+      ),
+    };
+
+    const result = extractEsqlVariables(panels);
+    expect(result).toEqual([
+      {
+        key: 'multiVar',
+        type: ESQLVariableType.MULTI_VALUES,
+        value: ['apple', 'banana', 'cherry'],
+      },
+    ]);
+  });
+
+  it('should extract multi-select numeric variables', () => {
+    const panels: ControlPanelsState<ESQLControlState> = {
+      panel1: createMockESQLControlPanel(
+        'multiVar',
+        ESQLVariableType.MULTI_VALUES,
+        ['1', '2', '3'],
+        false
+      ),
+    };
+
+    const result = extractEsqlVariables(panels);
+    expect(result).toEqual([
+      {
+        key: 'multiVar',
+        type: ESQLVariableType.MULTI_VALUES,
+        value: [1, 2, 3],
+      },
+    ]);
   });
 });

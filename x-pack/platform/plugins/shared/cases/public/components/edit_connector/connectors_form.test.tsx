@@ -20,6 +20,7 @@ import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_ty
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { renderWithTestingProviders } from '../../common/mock';
 
+jest.mock('../../common/lib/kibana');
 jest.mock('../connectors/servicenow/use_get_choices');
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
@@ -190,7 +191,7 @@ describe('ConnectorsForm ', () => {
         name: 'My Resilient connector',
         type: '.resilient',
         // severity changed from 5 to 4
-        fields: { incidentTypes: null, severityCode: '4' },
+        fields: { incidentTypes: null, severityCode: '4', additionalFields: null },
       });
     });
   });
@@ -336,6 +337,7 @@ describe('ConnectorsForm ', () => {
         fields: {
           incidentTypes: null,
           severityCode: null,
+          additionalFields: null,
         },
         id: 'resilient-2',
         name: 'My Resilient connector',

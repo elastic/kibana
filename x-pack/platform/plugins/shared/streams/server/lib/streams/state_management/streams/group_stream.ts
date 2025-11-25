@@ -45,7 +45,49 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
 
     this._definition = definition;
 
-    return { cascadingChanges: [], changeStatus: 'upserted' };
+    const missingMembers: string[] = [];
+    for (const member of this._definition.group.members) {
+      if (!desiredState.has(member)) {
+        missingMembers.push(member);
+      }
+    }
+
+    const existsAsDataStream = await Promise.all(
+      missingMembers.map(async (member) => {
+        try {
+          const dataStreamResult =
+            await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
+              name: member,
+            });
+
+          return dataStreamResult.data_streams.length > 0 ? member : null;
+        } catch (error) {
+          if (!isNotFoundError(error)) {
+            throw error;
+          }
+          return null;
+        }
+      })
+    );
+
+    const cascadingChanges: StreamChange[] = existsAsDataStream
+      .filter((member): member is string => member !== null)
+      .map((member) => ({
+        type: 'upsert',
+        definition: {
+          name: member,
+          description: '',
+          ingest: {
+            classic: {},
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
+            failure_store: { inherit: {} },
+          },
+        },
+      }));
+
+    return { cascadingChanges, changeStatus: 'upserted' };
   }
 
   protected async doHandleDeleteChange(
@@ -115,16 +157,24 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
       };
     }
 
+    const missingMembers: string[] = [];
     for (const member of this._definition.group.members) {
       const relatedStream = desiredState.get(member);
       if (!relatedStream || relatedStream.isDeleted()) {
-        return {
-          isValid: false,
-          errors: [
-            new Error(`Group stream ${this.name} has ${member} as a member which was not found`),
-          ],
-        };
+        missingMembers.push(member);
       }
+    }
+    if (missingMembers.length > 0) {
+      return {
+        isValid: false,
+        errors: [
+          new Error(
+            `Group stream ${
+              this.name
+            } has the following members which were not found: ${missingMembers.join(', ')}`
+          ),
+        ],
+      };
     }
 
     const duplicates = this._definition.group.members.filter(
@@ -198,6 +248,18 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
     return [
       {
         type: 'delete_dot_streams_document',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
+        type: 'unlink_assets',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
+        type: 'unlink_features',
         request: {
           name: this._definition.name,
         },

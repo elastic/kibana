@@ -26,6 +26,11 @@ import { SecurityPageName } from '../../../app/types';
 import type { Query } from '@kbn/es-query';
 import { getEventsHistogramLensAttributes } from './lens_attributes/common/events';
 import type { EuiThemeComputed } from '@elastic/eui';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import {
+  defaultImplementation,
+  withIndices,
+} from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('generated-uuid'),
@@ -46,6 +51,10 @@ const params = {
   euiTheme: {} as EuiThemeComputed,
 };
 describe('useLensAttributes', () => {
+  beforeAll(() => {
+    jest.mocked(useDataView).mockReturnValue(withIndices(['auditbeat-*']));
+  });
+
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       dataViewId: 'security-solution-default',
@@ -279,6 +288,8 @@ describe('useLensAttributes', () => {
   });
 
   it('should return null if no indices exist', () => {
+    jest.mocked(useDataView).mockImplementation(defaultImplementation);
+
     (useSourcererDataView as jest.Mock).mockReturnValue({
       dataViewId: 'security-solution-default',
       indicesExist: false,

@@ -26,6 +26,9 @@ describe('Read conversation route', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
+    clients.elasticAssistant.getAIAssistantConversationsDataClient.conversationExists.mockResolvedValue(
+      true
+    );
     clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
       getConversationMock(getQueryConversationParams())
     );
@@ -79,8 +82,8 @@ describe('Read conversation route', () => {
 
   describe('data validation', () => {
     test('returns 404 if given a non-existent id', async () => {
-      clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
-        null
+      clients.elasticAssistant.getAIAssistantConversationsDataClient.conversationExists.mockResolvedValue(
+        false
       );
       const request = requestMock.create({
         method: 'get',
@@ -93,6 +96,27 @@ describe('Read conversation route', () => {
       expect(response.body).toEqual({
         message: 'conversation id: "99403909-ca9b-49ba-9d7a-7e5320e68d05" not found',
         status_code: 404,
+      });
+    });
+
+    test('returns 403 if conversation exists but user does not have access', async () => {
+      clients.elasticAssistant.getAIAssistantConversationsDataClient.conversationExists.mockResolvedValue(
+        true
+      );
+      clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
+        null
+      );
+      const request = requestMock.create({
+        method: 'get',
+        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+        params: { id: '99403909-ca9b-49ba-9d7a-7e5320e68d05' },
+      });
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(403);
+      expect(response.body).toEqual({
+        message: 'Access denied to conversation id: "99403909-ca9b-49ba-9d7a-7e5320e68d05"',
+        status_code: 403,
       });
     });
   });

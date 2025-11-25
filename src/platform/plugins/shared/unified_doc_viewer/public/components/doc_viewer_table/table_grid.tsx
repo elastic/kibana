@@ -73,7 +73,6 @@ export interface TableGridProps {
   customRenderCellValue?: RenderCellValue;
   customRenderCellPopover?: React.JSXElementConstructor<EuiDataGridCellPopoverElementProps>;
   gridStyle?: EuiDataGridStyle;
-  hideDataGridHeader?: boolean;
 }
 
 const MIN_NAME_COLUMN_WIDTH = 150;
@@ -101,7 +100,6 @@ export function TableGrid({
   customRenderCellValue,
   customRenderCellPopover,
   gridStyle,
-  hideDataGridHeader = false,
 }: TableGridProps) {
   const styles = useMemoCss(componentStyles);
   const { toasts } = getUnifiedDocViewerServices();
@@ -218,7 +216,7 @@ export function TableGrid({
           {Boolean(warningMessage) && (
             <div>
               <EuiSpacer size="xs" />
-              <EuiCallOut title={warningMessage} color="warning" size="s" />
+              <EuiCallOut announceOnMount={false} title={warningMessage} color="warning" size="s" />
             </div>
           )}
         </>
@@ -240,7 +238,7 @@ export function TableGrid({
         defaultMessage: 'Field values',
       })}
       className="kbnDocViewer__fieldsGrid"
-      css={[styles.fieldsGrid, hideDataGridHeader && styles.hideDataGridHeader]}
+      css={styles.fieldsGrid}
       columns={gridColumns}
       toolbarVisibility={false}
       rowCount={rows.length}
@@ -309,13 +307,6 @@ const componentStyles = {
       '.euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction': {
         opacity: 1,
       },
-    });
-  },
-  hideDataGridHeader: (themeContext: UseEuiTheme) => {
-    const { euiTheme } = themeContext;
-    return css({
-      '.euiDataGridHeader': { height: `calc(${euiTheme.size.base} * 1.25)` },
-      '.euiDataGridHeaderCell': { display: 'none' },
     });
   },
 };

@@ -23,7 +23,7 @@ const dataViewCreationTestData = {
   isSavedSearch: true,
   dateTimeField: '@timestamp',
   chartClickCoordinates: [0, 0] as [number, number],
-  comparisonChartClickCoordinates: [2, 2] as [number, number],
+  comparisonChartClickCoordinates: [0, 0] as [number, number],
   totalDocCount: '86,274',
 };
 

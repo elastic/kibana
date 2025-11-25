@@ -12,23 +12,19 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { ActionsClientLlm } from '@kbn/langchain/server';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
 import type { DefendInsightsGraphMetadata } from '../../langchain/graphs';
-import type { DefendInsightsCombinedPrompts } from '../graphs/default_defend_insights_graph/prompts';
 import type { DefaultDefendInsightsGraph } from '../graphs/default_defend_insights_graph';
 import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { createOrUpdateEvaluationResults, EvaluationStatus } from '../../../routes/evaluate/utils';
 import { getLlmType } from '../../../routes/utils';
 import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from '../../attack_discovery/evaluation/constants';
+import { getDefendInsightsPrompt } from '../graphs/default_defend_insights_graph/prompts';
 import { runDefendInsightsEvaluations } from './run_evaluations';
-
-interface ConnectorWithPrompts extends Connector {
-  prompts: DefendInsightsCombinedPrompts;
-}
 
 export const evaluateDefendInsights = async ({
   actionsClient,
@@ -38,6 +34,7 @@ export const evaluateDefendInsights = async ({
   connectorTimeout,
   datasetName,
   esClient,
+  soClient,
   kbDataClient,
   esClientInternalUser,
   evaluationId,
@@ -51,10 +48,11 @@ export const evaluateDefendInsights = async ({
   actionsClient: PublicMethodsOf<ActionsClient>;
   defendInsightsGraphs: DefendInsightsGraphMetadata[];
   anonymizationFields?: AnonymizationFieldResponse[];
-  connectors: ConnectorWithPrompts[];
+  connectors: Connector[];
   connectorTimeout: number;
   datasetName: string;
   esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   esClientInternalUser: ElasticsearchClient;
   evaluationId: string;
@@ -65,73 +63,85 @@ export const evaluateDefendInsights = async ({
   runName: string;
   size: number;
 }): Promise<void> => {
-  await asyncForEach(defendInsightsGraphs, async ({ getDefaultDefendInsightsGraph }) => {
-    // create a graph for every connector:
-    const graphs: Array<{
-      connector: Connector;
-      graph: DefaultDefendInsightsGraph;
-      llmType: string | undefined;
-      name: string;
-      traceOptions: {
-        projectName: string | undefined;
-        tracers: LangChainTracer[];
-      };
-    }> = connectors.map((connector) => {
-      const llmType = getLlmType(connector.actionTypeId);
+  await asyncForEach(
+    defendInsightsGraphs,
+    async ({ getDefaultDefendInsightsGraph, insightType }) => {
+      // create a graph for every connector:
+      const graphs: Array<{
+        connector: Connector;
+        graph: DefaultDefendInsightsGraph;
+        llmType: string | undefined;
+        name: string;
+        traceOptions: {
+          projectName: string | undefined;
+          tracers: LangChainTracer[];
+        };
+      }> = await Promise.all(
+        connectors.map(async (connector) => {
+          const llmType = getLlmType(connector.actionTypeId);
+          const prompts = await getDefendInsightsPrompt({
+            type: insightType,
+            actionsClient,
+            connectorId: connector.id,
+            connector,
+            savedObjectsClient: soClient,
+          });
 
-      const traceOptions = {
-        projectName: langSmithProject,
-        tracers: [
-          ...getLangSmithTracer({
-            apiKey: langSmithApiKey,
+          const traceOptions = {
             projectName: langSmithProject,
+            tracers: [
+              ...getLangSmithTracer({
+                apiKey: langSmithApiKey,
+                projectName: langSmithProject,
+                logger,
+              }),
+            ],
+          };
+
+          const llm = new ActionsClientLlm({
+            actionsClient,
+            connectorId: connector.id,
+            llmType,
             logger,
-          }),
-        ],
-      };
+            temperature: 0, // zero temperature for defend insights, because we want structured JSON output
+            timeout: connectorTimeout,
+            traceOptions,
+            model: connector.config?.defaultModel,
+          });
 
-      const llm = new ActionsClientLlm({
-        actionsClient,
-        connectorId: connector.id,
-        llmType,
+          const graph = getDefaultDefendInsightsGraph({
+            insightType,
+            endpointIds: [], // Empty endpointIds, because we are seeding the graph with the dataset
+            esClient,
+            kbDataClient: kbDataClient || null,
+            llm,
+            logger,
+            size,
+            anonymizationFields,
+            prompts,
+          });
+
+          return {
+            connector,
+            graph,
+            llmType,
+            name: `${runName} - ${connector.name} - ${evaluationId} - Defend Insights`,
+            traceOptions,
+          };
+        })
+      );
+
+      // run the evaluations for each graph:
+      await runDefendInsightsEvaluations({
+        insightType,
+        evaluatorConnectorId,
+        datasetName,
+        graphs,
+        langSmithApiKey,
         logger,
-        temperature: 0, // zero temperature for defend insights, because we want structured JSON output
-        timeout: connectorTimeout,
-        traceOptions,
-        model: connector.config?.defaultModel,
       });
-
-      const graph = getDefaultDefendInsightsGraph({
-        insightType: DefendInsightType.Enum.incompatible_antivirus, // TODO: parameterize
-        endpointIds: [], // Empty endpointIds, because we are seeding the graph with the dataset
-        esClient,
-        kbDataClient: kbDataClient || null,
-        llm,
-        logger,
-        size,
-        anonymizationFields,
-        prompts: connector.prompts,
-      });
-
-      return {
-        connector,
-        graph,
-        llmType,
-        name: `${runName} - ${connector.name} - ${evaluationId} - Defend Insights`,
-        traceOptions,
-      };
-    });
-
-    // run the evaluations for each graph:
-    await runDefendInsightsEvaluations({
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
-      evaluatorConnectorId,
-      datasetName,
-      graphs,
-      langSmithApiKey,
-      logger,
-    });
-  });
+    }
+  );
 
   await createOrUpdateEvaluationResults({
     evaluationResults: [{ id: evaluationId, status: EvaluationStatus.COMPLETE }],

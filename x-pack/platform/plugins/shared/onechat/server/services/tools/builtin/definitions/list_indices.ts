@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
+import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { listSearchSources } from '@kbn/onechat-genai-utils';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
@@ -25,14 +25,16 @@ const listIndicesSchema = z.object({
 
 export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchema> => {
   return {
-    id: builtinToolIds.listIndices,
+    id: platformCoreTools.listIndices,
+    type: ToolType.builtin,
     description: `List the indices, aliases and datastreams from the Elasticsearch cluster.
 
 The 'pattern' optional parameter is an index pattern which can be used to filter resources.
 This parameter should only be used when you already know of a specific pattern to filter on,
 e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.`,
     schema: listIndicesSchema,
-    handler: async ({ pattern }, { esClient }) => {
+    handler: async ({ pattern }, { esClient, logger }) => {
+      logger.debug(`list indices tool called with pattern: ${pattern}`);
       const {
         indices,
         data_streams: dataStreams,
@@ -61,6 +63,6 @@ e.g. if the user provided one. Otherwise, do not try to invent or guess a patter
         ],
       };
     },
-    tags: [builtinTags.retrieval],
+    tags: [],
   };
 };

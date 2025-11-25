@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
+import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import { indexExplorer } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
@@ -27,7 +27,8 @@ const indexExplorerSchema = z.object({
 
 export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerSchema> => {
   return {
-    id: builtinToolIds.indexExplorer,
+    id: platformCoreTools.indexExplorer,
+    type: ToolType.builtin,
     description: `List relevant indices, aliases and datastreams based on a natural language query.
 
 The 'indexPattern' parameter can be used to filter indices by a specific pattern, e.g. 'foo*'.
@@ -42,8 +43,11 @@ Tool result: [{ type: "index", name: '.alerts' }]
     schema: indexExplorerSchema,
     handler: async (
       { query: nlQuery, indexPattern = '*', limit = 1 },
-      { esClient, modelProvider }
+      { esClient, modelProvider, logger }
     ) => {
+      logger.debug(
+        `Index explorer tool called with query: ${nlQuery}, indexPattern: ${indexPattern}, limit: ${limit}`
+      );
       const model = await modelProvider.getDefaultModel();
       const response = await indexExplorer({
         nlQuery,
@@ -68,6 +72,6 @@ Tool result: [{ type: "index", name: '.alerts' }]
         ],
       };
     },
-    tags: [builtinTags.retrieval],
+    tags: [],
   };
 };

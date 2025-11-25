@@ -27,10 +27,10 @@ interface UseChatComplete {
 // useChatComplete uses the same api as useSendMessage (post_actions_connector_execute) but without requiring conversationId/apiConfig
 // it is meant to be used for one-off messages that don't require a conversation
 export const useChatComplete = ({ connectorId }: { connectorId: string }): UseChatComplete => {
-  const { alertsIndexPattern, http, traceOptions } = useAssistantContext();
+  const { alertsIndexPattern, http, traceOptions, settings } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
   const abortController = useRef(new AbortController());
-  const { data: connectors } = useLoadConnectors({ http, inferenceEnabled: true });
+  const { data: connectors } = useLoadConnectors({ http, inferenceEnabled: true, settings });
   const actionTypeId = useMemo(
     () => connectors?.find(({ id }) => id === connectorId)?.actionTypeId ?? '.gen-ai',
     [connectors, connectorId]

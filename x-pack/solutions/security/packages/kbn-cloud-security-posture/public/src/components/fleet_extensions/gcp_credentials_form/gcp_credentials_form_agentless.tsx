@@ -13,6 +13,7 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
+import { ORGANIZATION_ACCOUNT } from '@kbn/cloud-security-posture-common';
 import {
   getTemplateUrlFromPackageInfo,
   updatePolicyWithInputs,
@@ -20,7 +21,6 @@ import {
   getGcpInputVarsFields,
 } from '../utils';
 import {
-  ORGANIZATION_ACCOUNT,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
 } from '../constants';
@@ -73,8 +73,8 @@ export const GcpCredentialsFormAgentless = ({
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
   const commandText = `gcloud config set project ${
-    isOrganization ? `<PROJECT_ID> && ORG_ID=<ORG_ID_VALUE>` : `<PROJECT_ID>`
-  } ./deploy_service_account.sh`;
+    isOrganization ? `<PROJECT_ID> && ORG_ID=<ORG_ID_VALUE> && ` : `<PROJECT_ID> && `
+  }./deploy_service_account.sh`;
 
   return (
     <>
@@ -82,9 +82,9 @@ export const GcpCredentialsFormAgentless = ({
       <EuiSpacer size="m" />
       {!showCloudTemplates && (
         <>
-          <EuiCallOut color="warning">
+          <EuiCallOut announceOnMount={false} color="warning">
             <FormattedMessage
-              id="securitySolutionPackages.cspIntegration.gcpCloudCredentials.cloudFormationSupportedMessage"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudFormationSupportedMessage"
               defaultMessage="Launch Cloud Shell for automated credentials not supported in current integration version. Please upgrade to the latest version to enable Launch Cloud Shell for automated credentials."
             />
           </EuiCallOut>
@@ -114,7 +114,7 @@ export const GcpCredentialsFormAgentless = ({
             href={cloudShellUrl}
           >
             <FormattedMessage
-              id="securitySolutionPackages.agentlessForms.googleCloudShell.cloudCredentials.button"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.googleCloudShell.cloudCredentials.button"
               defaultMessage="Launch Google Cloud Shell"
             />
           </EuiButton>

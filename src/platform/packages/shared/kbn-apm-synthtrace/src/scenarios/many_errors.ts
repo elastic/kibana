@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a high volume of APM error documents with varied messages and types.
+ */
+
 import type { ApmFields } from '@kbn/apm-synthtrace-client';
 import { apm } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';
@@ -19,6 +23,8 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
   const { logger } = runOptions;
+  const { withoutErrorId = false } = runOptions.scenarioOpts;
+
   const severities = ['critical', 'error', 'warning', 'info', 'debug', 'trace'];
 
   return {
@@ -37,22 +43,26 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         .interval('1m')
         .rate(2000)
         .generator((timestamp, index) => {
-          const severity = severities[index % severities.length];
-          const errorMessage = `${severity}: ${getRandomNameForIndex(index)} ${index}`;
+          const errors = Array.from({ length: 10 }, (_, errorIndex) => {
+            const severity = severities[errorIndex % severities.length];
+            const errorMessage = `${severity}: ${getRandomNameForIndex(index)}`;
+
+            return instance
+              .error({
+                message: errorMessage + ` ${errorIndex}`,
+                type: getExceptionTypeForIndex(index + errorIndex),
+                culprit: 'request (node_modules/@elastic/transport/src/Transport.ts)',
+                withoutErrorId,
+              })
+              .timestamp(timestamp + 50 * (errorIndex + 1)); // Stagger error timestamps
+          });
+
           return instance
             .transaction({ transactionName })
             .timestamp(timestamp)
             .duration(1000)
             .failure()
-            .errors(
-              instance
-                .error({
-                  message: errorMessage,
-                  type: getExceptionTypeForIndex(index),
-                  culprit: 'request (node_modules/@elastic/transport/src/Transport.ts)',
-                })
-                .timestamp(timestamp + 50)
-            );
+            .errors(...errors);
         });
 
       return withClient(

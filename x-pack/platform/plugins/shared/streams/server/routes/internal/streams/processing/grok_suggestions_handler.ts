@@ -8,10 +8,17 @@
 import { z } from '@kbn/zod';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { ReviewFieldsPrompt } from '@kbn/grok-heuristics';
-import type { InferenceClient } from '@kbn/inference-common';
-import { Streams } from '@kbn/streams-schema';
+import type { InferenceClient, ToolOptionsOfPrompt } from '@kbn/inference-common';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import type { ToolCallsOfToolOptions } from '@kbn/inference-common/src/chat_complete/tools_of';
+import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import type { StreamsClient } from '../../../../lib/streams/client';
-import { getOtelFieldName } from './convert_ecs_fields_to_otel';
+import {
+  determineOtelFieldNameUsage,
+  callInferenceWithPrompt,
+  fetchFieldMetadata,
+  normalizeFieldName,
+} from './common_processing_helpers';
 
 export interface ProcessingGrokSuggestionsParams {
   path: {
@@ -35,6 +42,8 @@ export interface ProcessingGrokSuggestionsHandlerDeps {
   inferenceClient: InferenceClient;
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
+  signal: AbortSignal;
 }
 
 export const processingGrokSuggestionsSchema = z.object({
@@ -52,38 +61,53 @@ export const processingGrokSuggestionsSchema = z.object({
   }),
 }) satisfies z.Schema<ProcessingGrokSuggestionsParams>;
 
+type FieldReviewResults = ToolCallsOfToolOptions<
+  ToolOptionsOfPrompt<typeof ReviewFieldsPrompt>
+>[number]['function']['arguments']['fields'];
+
 export const handleProcessingGrokSuggestions = async ({
   params,
   inferenceClient,
   streamsClient,
+  fieldsMetadataClient,
+  signal,
 }: ProcessingGrokSuggestionsHandlerDeps) => {
-  const stream = await streamsClient.getStream(params.path.name);
-  const isWiredStream = Streams.WiredStream.Definition.is(stream);
+  // Determine if we should use OTEL field names
+  const useOtelFieldNames = await determineOtelFieldNameUsage(streamsClient, params.path.name);
 
-  const response = await inferenceClient.prompt({
-    connectorId: params.body.connector_id,
-    prompt: ReviewFieldsPrompt,
-    input: {
-      sample_messages: params.body.sample_messages,
-      review_fields: JSON.stringify(params.body.review_fields),
-    },
-  });
-  const reviewResult = response.toolCalls[0].function.arguments;
+  // Call LLM inference to review fields
+  const reviewResult = await callInferenceWithPrompt(
+    inferenceClient,
+    params.body.connector_id,
+    ReviewFieldsPrompt,
+    params.body.sample_messages,
+    params.body.review_fields,
+    signal
+  );
 
-  // if the stream is wired, or if it matches the logs-*.otel-* pattern, use the OTEL field names
-  const useOtelFieldNames = isWiredStream || params.path.name.match(/^logs-.*\.otel-/);
+  // Fetch field metadata for ECS/OTEL field name resolution
+  const fieldMetadata = await fetchFieldMetadata(
+    fieldsMetadataClient,
+    reviewResult.fields.map((field: { ecs_field: string }) => field.ecs_field)
+  );
 
   return {
     log_source: reviewResult.log_source,
-    fields: reviewResult.fields.map((field) => {
-      const name = field.ecs_field.startsWith('@timestamp')
-        ? field.ecs_field.replace('@timestamp', 'custom.timestamp')
-        : field.ecs_field;
-      return {
-        name: useOtelFieldNames ? getOtelFieldName(name) : name,
-        columns: field.columns,
-        grok_components: field.grok_components,
-      };
-    }),
+    fields: mapFields(reviewResult.fields, fieldMetadata, useOtelFieldNames),
   };
 };
+
+export function mapFields(
+  reviewResults: FieldReviewResults,
+  fieldMetadata: Record<string, FieldMetadataPlain>,
+  useOtelFieldNames: boolean
+) {
+  return reviewResults.map((field) => {
+    const name = normalizeFieldName(field.ecs_field, fieldMetadata, useOtelFieldNames);
+    return {
+      name,
+      columns: field.columns,
+      grok_components: field.grok_components,
+    };
+  });
+}

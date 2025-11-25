@@ -74,6 +74,7 @@ describe('ResilientParamsFields renders', () => {
 
     expect(screen.getByText('Malware')).toBeInTheDocument();
     expect(screen.getByTestId('severitySelect')).toHaveValue('6');
+    expect(screen.getByTestId('additionalFieldsEditor')).toBeInTheDocument();
   });
 
   it('disabled the fields when loading incident types', async () => {

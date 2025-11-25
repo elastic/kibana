@@ -67,7 +67,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           '589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1'
         )}`
       );
-      await alertsPage.waitForListToHaveAlerts();
+      await alertsPage.waitForListToHaveAlerts(20000);
 
       await alertsPage.flyout.expandVisualizations();
       await alertsPage.flyout.assertGraphPreviewVisible();
@@ -107,7 +107,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Show events with the same action
       await expandedFlyoutGraph.showEventsOfSameAction(
-        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)'
+        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)oe(1)oa(1)'
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
@@ -118,9 +118,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
       );
 
+      await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+
       // Hide events with the same action
       await expandedFlyoutGraph.hideEventsOfSameAction(
-        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)'
+        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)oe(1)oa(1)'
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
@@ -152,6 +154,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         value: 'admin2@example.com',
       });
       await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
       await expandedFlyoutGraph.assertGraphNodesNumber(5);
 
       // Open timeline
@@ -188,9 +192,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
-        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)'
+        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)oe(1)oa(1)'
       );
-      await alertsPage.flyout.assertPreviewPanelIsOpen('alert');
+      // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
+      await alertsPage.flyout.assertPreviewPanelIsOpen('group');
+      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
     });
 
     it('show related alerts', async () => {
@@ -216,9 +222,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.showActionsOnEntity('projects/your-project-id/roles/customRole');
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
-        'a(admin6@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole2)'
+        'a(admin6@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole2)oe(0)oa(0)'
       );
-      await alertsPage.flyout.assertPreviewPanelIsOpen('alert');
+      // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
+      await alertsPage.flyout.assertPreviewPanelIsOpen('group');
+      await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
     });
   });
 }

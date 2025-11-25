@@ -537,6 +537,7 @@ EOF`}
       ) : (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="question"
             title={

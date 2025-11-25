@@ -5,121 +5,58 @@
  * 2.0.
  */
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { Logger } from '@kbn/core/server';
-import {
-  ActionsClientChatBedrockConverse,
-  ActionsClientChatOpenAI,
-  ActionsClientChatVertexAI,
-} from '@kbn/langchain/server';
-import type { CustomChatModelInput as ActionsClientBedrockChatModelParams } from '@kbn/langchain/server/language_models/bedrock_chat';
-import type { ActionsClientChatOpenAIParams } from '@kbn/langchain/server/language_models/chat_openai';
-import type {
-  CustomChatModelInput as ActionsClientChatVertexAIParams,
-  ActionsClientGeminiChatModel,
-} from '@kbn/langchain/server/language_models/gemini_chat';
-import type { CustomChatModelInput as ActionsClientSimpleChatModelParams } from '@kbn/langchain/server/language_models/simple_chat_model';
-import { InferenceChatModel } from '@kbn/inference-langchain';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { TELEMETRY_SIEM_MIGRATION_ID } from './constants';
+import type { SiemMigrationsClientDependencies } from '../../types';
 
-export type ChatModel =
-  | ActionsClientChatBedrockConverse
-  | ActionsClientChatOpenAI
-  | ActionsClientGeminiChatModel
-  | ActionsClientChatVertexAI
-  | InferenceChatModel;
-
-export type ActionsClientChatModelClass =
-  | typeof ActionsClientChatBedrockConverse
-  | typeof ActionsClientChatOpenAI
-  | typeof ActionsClientGeminiChatModel
-  | typeof ActionsClientChatVertexAI;
-
-export type ChatModelParams = Partial<ActionsClientSimpleChatModelParams> &
-  Partial<ActionsClientChatOpenAIParams> &
-  Partial<ActionsClientBedrockChatModelParams> &
-  Partial<ActionsClientChatVertexAIParams>;
-
-const llmTypeDictionary = {
-  '.gen-ai': 'openai',
-  '.bedrock': 'bedrock',
-  '.gemini': 'gemini',
-  '.inference': 'inference',
-} as const;
-type SupportedActionTypeId = keyof typeof llmTypeDictionary;
-type LlmType = (typeof llmTypeDictionary)[SupportedActionTypeId];
-
-const isSupportedActionTypeId = (actionTypeId: string): actionTypeId is SupportedActionTypeId => {
-  return actionTypeId in llmTypeDictionary;
-};
+/** Using the inference chat model class, which extends from LangChain's `BaseChatModel` */
+export type ChatModel = InferenceChatModel;
 
 interface CreateModelParams {
   migrationId: string;
+  migrationType: string;
   connectorId: string;
   abortController: AbortController;
 }
 
 export class ActionsClientChat {
-  constructor(private readonly actionsClient: ActionsClient, private readonly logger: Logger) {}
+  constructor(
+    private readonly request: KibanaRequest,
+    private readonly dependencies: SiemMigrationsClientDependencies
+  ) {}
 
   public async createModel({
     migrationId,
+    migrationType,
     connectorId,
     abortController,
   }: CreateModelParams): Promise<ChatModel> {
-    const connector = await this.actionsClient.get({ id: connectorId });
-    if (!connector) {
-      throw new Error(`Connector not found: ${connectorId}`);
-    }
-    if (!isSupportedActionTypeId(connector.actionTypeId)) {
-      throw new Error(`Connector type not supported: ${connector.actionTypeId}`);
-    }
+    const { inferenceService } = this.dependencies;
 
-    const llmType = this.getLLMType(connector.actionTypeId);
-
-    const ChatModelClass = this.getLLMClass(llmType);
-
-    const model = new ChatModelClass({
-      actionsClient: this.actionsClient,
+    return inferenceService.getChatModel({
+      request: this.request,
       connectorId,
-      llmType,
-      model: connector.config?.defaultModel,
-      streaming: false,
-      convertSystemMessageToHumanContent: false,
-      temperature: 0.05,
-      maxRetries: 1, // Only retry once inside the model, we will handle backoff retries in the task runner
-      telemetryMetadata: { pluginId: TELEMETRY_SIEM_MIGRATION_ID, aggregateBy: migrationId },
-      signal: abortController.signal,
-      logger: this.logger,
+      chatModelOptions: {
+        // not passing specific `model`, we'll always use the connector default model
+        // temperature may need to be parametrized in the future
+        temperature: 0.05,
+        // Only retry once inside the model call, we already handle backoff retries in the task runner for the entire task
+        maxRetries: 1,
+        // Disable streaming explicitly
+        disableStreaming: true,
+        // Set a hard limit of 50 concurrent requests
+        maxConcurrency: 50,
+        telemetryMetadata: {
+          pluginId: `${TELEMETRY_SIEM_MIGRATION_ID}_${migrationType}`,
+          aggregateBy: migrationId,
+        },
+        signal: abortController.signal,
+      },
     });
-    return model;
   }
 
-  public getModelName(model: ChatModel): string {
-    if (model instanceof InferenceChatModel) {
-      const modelName = model.identifyingParams().model_name;
-      return `inference${modelName ? ` (${modelName})` : ''}`;
-    }
-    return model.model;
-  }
-
-  private getLLMType(actionTypeId: SupportedActionTypeId): LlmType {
-    if (llmTypeDictionary[actionTypeId]) {
-      return llmTypeDictionary[actionTypeId];
-    }
-    throw new Error(`Unknown LLM type for action type ID: ${actionTypeId}`);
-  }
-
-  private getLLMClass(llmType: LlmType): ActionsClientChatModelClass {
-    switch (llmType) {
-      case 'bedrock':
-        return ActionsClientChatBedrockConverse;
-      case 'gemini':
-        return ActionsClientChatVertexAI;
-      case 'inference':
-      case 'openai':
-      default:
-        return ActionsClientChatOpenAI;
-    }
+  public getModelName(model: ChatModel): string | undefined {
+    return model.identifyingParams().model_name;
   }
 }

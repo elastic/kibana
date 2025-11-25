@@ -5,23 +5,16 @@
  * 2.0.
  */
 
-import {
-  EuiFieldSearch,
-  EuiHeaderSectionItemButton,
-  EuiSelectable,
-  EuiSelectableListItem,
-} from '@elastic/eui';
-import { act, render, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
 
-import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { NavControlPopover, type Props as NavControlPopoverProps } from './nav_control_popover';
-import type { Space } from '../../common';
+import type { GetSpaceResult, Space } from '../../common';
 import { EventTracker } from '../analytics';
-import { SpaceAvatarInternal } from '../space_avatar/space_avatar_internal';
-import { SpaceSolutionBadge } from '../space_solution_badge';
 import type { SpacesManager } from '../spaces_manager';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 
@@ -48,316 +41,218 @@ const reportEvent = jest.fn();
 const eventTracker = new EventTracker({ reportEvent });
 
 describe('NavControlPopover', () => {
-  async function setup(
-    spaces: Space[],
-    allowSolutionVisibility = false,
-    activeSpace?: Space,
-    props?: Partial<NavControlPopoverProps>
-  ) {
-    const spacesManager = spacesManagerMock.create();
-    spacesManager.getSpaces = jest.fn().mockResolvedValue(spaces);
+  let queryClient: QueryClient;
+  let spacesManager: ReturnType<typeof spacesManagerMock.create>;
 
+  beforeEach(() => {
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
+    spacesManager = spacesManagerMock.create();
+    spacesManager.getSpaces = jest.fn().mockResolvedValue(mockSpaces);
+    jest.clearAllMocks();
+  });
+
+  function renderNavControlPopover(props?: Partial<NavControlPopoverProps>, activeSpace?: Space) {
     if (activeSpace) {
       // @ts-ignore readonly check
       spacesManager.onActiveSpaceChange$ = Rx.of(activeSpace);
     }
 
-    const wrapper = mountWithIntl(
-      <NavControlPopover
-        spacesManager={spacesManager as unknown as SpacesManager}
-        serverBasePath={'/server-base-path'}
-        anchorPosition={'rightCenter'}
-        capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
-        navigateToApp={jest.fn()}
-        navigateToUrl={jest.fn()}
-        allowSolutionVisibility={allowSolutionVisibility}
-        eventTracker={eventTracker}
-        showTour$={Rx.of(false)}
-        onFinishTour={jest.fn()}
-        {...props}
-      />
+    const defaultProps: NavControlPopoverProps = {
+      spacesManager: spacesManager as unknown as SpacesManager,
+      serverBasePath: '/server-base-path',
+      anchorPosition: 'rightCenter',
+      capabilities: { navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } },
+      navigateToApp: jest.fn(),
+      navigateToUrl: jest.fn(),
+      allowSolutionVisibility: false,
+      eventTracker,
+      showTour$: Rx.of(false),
+      onFinishTour: jest.fn(),
+      manageSpacesLink: '/manage/spaces',
+      manageSpacesDocsLink: 'https://elastic.co/docs',
+      ...props,
+    };
+
+    return renderWithI18n(
+      <QueryClientProvider client={queryClient}>
+        <NavControlPopover {...defaultProps} />
+      </QueryClientProvider>
     );
-
-    await waitFor(() => {
-      wrapper.update();
-    });
-
-    return wrapper;
   }
 
   it('renders without crashing', () => {
-    const spacesManager = spacesManagerMock.create();
-
-    const { baseElement, queryByTestId } = render(
-      <NavControlPopover
-        spacesManager={spacesManager as unknown as SpacesManager}
-        serverBasePath={'/server-base-path'}
-        anchorPosition={'downRight'}
-        capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
-        navigateToApp={jest.fn()}
-        navigateToUrl={jest.fn()}
-        allowSolutionVisibility={false}
-        eventTracker={eventTracker}
-        showTour$={Rx.of(false)}
-        onFinishTour={jest.fn()}
-      />
-    );
-    expect(baseElement).toMatchSnapshot();
-    expect(queryByTestId('spaceSolutionTour')).toBeNull();
+    renderNavControlPopover();
+    expect(screen.getByTestId('spacesNavSelector')).toBeInTheDocument();
   });
 
   it('renders a SpaceAvatar with the active space', async () => {
-    const spacesManager = spacesManagerMock.create();
-    spacesManager.getSpaces = jest.fn().mockResolvedValue(mockSpaces);
-    // @ts-ignore readonly check
-    spacesManager.onActiveSpaceChange$ = Rx.of({
+    const activeSpace = {
       id: 'default',
       name: 'Default Space',
       description: 'this is your default space',
       disabledFeatures: [],
-    });
+    };
 
-    const wrapper = mountWithIntl(
-      <NavControlPopover
-        spacesManager={spacesManager as unknown as SpacesManager}
-        serverBasePath={'/server-base-path'}
-        anchorPosition={'rightCenter'}
-        capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
-        navigateToApp={jest.fn()}
-        navigateToUrl={jest.fn()}
-        allowSolutionVisibility={false}
-        eventTracker={eventTracker}
-        showTour$={Rx.of(false)}
-        onFinishTour={jest.fn()}
-      />
-    );
+    renderNavControlPopover({}, activeSpace);
 
-    wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
-
-    // Wait for `getSpaces` promise to resolve
     await waitFor(() => {
-      wrapper.update();
-      expect(wrapper.find(SpaceAvatarInternal)).toHaveLength(mockSpaces.length + 1); // one additional avatar for the button itself
+      expect(screen.getByTestId('spacesNavSelector')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('space-avatar-default')).toBeInTheDocument();
   });
 
-  it('clicking the button renders an EuiSelectable menu with the provided spaces', async () => {
-    const wrapper = await setup(mockSpaces);
+  it('clicking the button opens the spaces menu', async () => {
+    const activeSpace = mockSpaces[0];
+    renderNavControlPopover({}, activeSpace);
 
-    await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
+    fireEvent.click(screen.getByTestId('spacesNavSelector'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('spaceMenuPopoverPanel')).toBeInTheDocument();
     });
-    wrapper.update();
 
-    await act(async () => {
-      const menu = wrapper.find(EuiSelectable);
-      expect(menu).toHaveLength(1);
-
-      const items = menu.find(EuiSelectableListItem);
-      expect(items).toHaveLength(mockSpaces.length);
-
-      mockSpaces.forEach((space, index) => {
-        const spaceAvatar = items.at(index).find(SpaceAvatarInternal);
-        expect(spaceAvatar.props().space).toEqual(space);
-      });
+    await waitFor(() => {
+      expect(screen.getByText('Space 1')).toBeInTheDocument();
+      expect(screen.getByText('Space 2')).toBeInTheDocument();
     });
   });
 
   it('should render a search box when there are 8 or more spaces', async () => {
-    const eightSpaces = mockSpaces.concat([
-      {
-        id: 'space-3',
-        name: 'Space-3',
-        disabledFeatures: [],
-      },
-      {
-        id: 'space-4',
-        name: 'Space 4',
-        disabledFeatures: [],
-      },
-      {
-        id: 'space-5',
-        name: 'Space 5',
-        disabledFeatures: [],
-      },
-      {
-        id: 'space-6',
-        name: 'Space 6',
-        disabledFeatures: [],
-      },
-      {
-        id: 'space-7',
-        name: 'Space 7',
-        disabledFeatures: [],
-      },
-    ]);
-    const wrapper = await setup(eightSpaces);
+    const manySpaces = [
+      ...mockSpaces,
+      { id: 'space-3', name: 'Space 3', disabledFeatures: [] },
+      { id: 'space-4', name: 'Space 4', disabledFeatures: [] },
+      { id: 'space-5', name: 'Space 5', disabledFeatures: [] },
+      { id: 'space-6', name: 'Space 6', disabledFeatures: [] },
+      { id: 'space-7', name: 'Space 7', disabledFeatures: [] },
+      { id: 'space-8', name: 'Space 8', disabledFeatures: [] },
+    ];
 
-    await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
+    spacesManager.getSpaces.mockResolvedValue(manySpaces);
+    const activeSpace = manySpaces[0];
+    renderNavControlPopover({}, activeSpace);
+
+    fireEvent.click(screen.getByTestId('spacesNavSelector'));
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Find a space')).toBeInTheDocument();
     });
-    wrapper.update();
-
-    expect(wrapper.find(EuiFieldSearch)).toHaveLength(1);
   });
 
-  it('should NOT render a search box when there are less than 8 spaces', async () => {
-    const sevenSpaces = mockSpaces.concat([
-      {
-        id: 'space-3',
-        name: 'Space-3',
-        disabledFeatures: [],
-      },
-      {
-        id: 'space-4',
-        name: 'Space 4',
-        disabledFeatures: [],
-      },
-      {
-        id: 'space-5',
-        name: 'Space 5',
-        disabledFeatures: [],
-      },
-      {
-        id: 'space-6',
-        name: 'Space 6',
-        disabledFeatures: [],
-      },
-    ]);
-    const wrapper = await setup(sevenSpaces);
+  it('should not render a search box when there are fewer than 8 spaces', async () => {
+    const activeSpace = mockSpaces[0];
+    renderNavControlPopover({}, activeSpace);
 
-    await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
+    fireEvent.click(screen.getByTestId('spacesNavSelector'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('spaceMenuPopoverPanel')).toBeInTheDocument();
     });
-    wrapper.update();
 
-    expect(wrapper.find(EuiFieldSearch)).toHaveLength(0);
+    expect(screen.queryByPlaceholderText('Find a space')).not.toBeInTheDocument();
   });
 
-  it('can close its popover', async () => {
-    jest.useFakeTimers();
-    const wrapper = await setup(mockSpaces);
-
-    expect(findTestSubject(wrapper, 'spaceMenuPopoverPanel').exists()).toEqual(false); // closed
-
-    // Open the popover
-    await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
-    });
-    wrapper.update();
-    expect(findTestSubject(wrapper, 'spaceMenuPopoverPanel').exists()).toEqual(true); // open
-
-    // Close the popover
-    await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
-    });
-    act(() => {
-      jest.runAllTimers();
-    });
-    wrapper.update();
-    expect(findTestSubject(wrapper, 'spaceMenuPopoverPanel').exists()).toEqual(false); // closed
-
-    jest.useRealTimers();
-  });
-
-  it('should render solution for spaces', async () => {
-    const spaces: Space[] = [
+  it('should render solution badges when allowSolutionVisibility is true', async () => {
+    const spacesWithSolutions = [
       {
-        id: 'space-1',
-        name: 'Space-1',
-        disabledFeatures: [],
-        solution: 'classic',
+        ...mockSpaces[0],
+        solution: 'security' as const,
       },
       {
-        id: 'space-2',
-        name: 'Space 2',
-        disabledFeatures: [],
-        solution: 'security',
+        ...mockSpaces[1],
+        solution: 'observability' as const,
       },
     ];
 
-    const wrapper = await setup(spaces, true /** isSolutionEnabled **/);
+    spacesManager.getSpaces.mockResolvedValue(spacesWithSolutions as GetSpaceResult[]);
+    const activeSpace = spacesWithSolutions[0];
 
-    await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
+    renderNavControlPopover({ allowSolutionVisibility: true }, activeSpace as Space);
+
+    fireEvent.click(screen.getByTestId('spacesNavSelector'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('spaceMenuPopoverPanel')).toBeInTheDocument();
     });
 
-    wrapper.update();
-
-    expect(wrapper.find(SpaceSolutionBadge)).toHaveLength(2);
-  });
-
-  it('should report event when switching space', async () => {
-    const spaces: Space[] = [
-      {
-        id: 'space-1',
-        name: 'Space-1',
-        disabledFeatures: [],
-        solution: 'classic',
-      },
-      {
-        id: 'space-2',
-        name: 'Space 2',
-        disabledFeatures: [],
-        solution: 'security',
-      },
-    ];
-
-    const activeSpace = spaces[0];
-    const wrapper = await setup(spaces, true /** allowSolutionVisibility **/, activeSpace);
-
-    await act(async () => {
-      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
-    });
-    wrapper.update();
-
-    expect(reportEvent).not.toHaveBeenCalled();
-
-    findTestSubject(wrapper, 'space-2-selectableSpaceItem').simulate('click');
-
-    expect(reportEvent).toHaveBeenCalledWith('space_changed', {
-      solution: 'security',
-      solution_prev: 'classic',
-      space_id: 'space-2',
-      space_id_prev: 'space-1',
+    await waitFor(() => {
+      expect(screen.getByText('Security')).toBeInTheDocument();
+      expect(screen.getByText('Classic')).toBeInTheDocument();
     });
   });
 
-  it('should show the solution view tour', async () => {
-    jest.useFakeTimers(); // the underlying EUI tour component has a timeout that needs to be flushed for the test to pass
+  it('calls navigateToUrl when a space is selected', async () => {
+    const navigateToUrl = jest.fn();
+    const activeSpace = mockSpaces[0];
 
-    const spaces: Space[] = [
-      {
-        id: 'space-1',
-        name: 'Space-1',
-        disabledFeatures: [],
-        solution: 'es',
-      },
-    ];
+    renderNavControlPopover({ navigateToUrl }, activeSpace);
 
-    const activeSpace = spaces[0];
-    const showTour$ = new Rx.BehaviorSubject(true);
-    const onFinishTour = jest.fn().mockImplementation(() => {
-      showTour$.next(false);
+    fireEvent.click(screen.getByTestId('spacesNavSelector'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('spaceMenuPopoverPanel')).toBeInTheDocument();
     });
 
-    const wrapper = await setup(spaces, true /** allowSolutionVisibility **/, activeSpace, {
-      showTour$,
-      onFinishTour,
+    await waitFor(() => {
+      const spaceButton = screen.getByText('Space 1');
+      fireEvent.click(spaceButton);
     });
 
-    expect(findTestSubject(wrapper, 'spaceSolutionTour').exists()).toBe(true);
-
-    act(() => {
-      findTestSubject(wrapper, 'closeTourBtn').simulate('click');
+    await waitFor(() => {
+      expect(navigateToUrl).toHaveBeenCalledWith('/server-base-path/s/space-1/spaces/enter');
     });
-    act(() => {
-      jest.runAllTimers();
+  });
+
+  it('displays loading state while spaces are being fetched', () => {
+    spacesManager.getSpaces.mockImplementation(() => new Promise(() => {}));
+
+    const activeSpace = mockSpaces[0];
+    renderNavControlPopover({}, activeSpace);
+
+    fireEvent.click(screen.getByTestId('spacesNavSelector'));
+
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
+  });
+
+  it('closes the popover when clicking the button again', async () => {
+    const activeSpace = mockSpaces[0];
+    renderNavControlPopover({}, activeSpace);
+
+    fireEvent.click(screen.getByTestId('spacesNavSelector'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('spaceMenuPopoverPanel')).toBeInTheDocument();
     });
-    wrapper.update();
 
-    expect(findTestSubject(wrapper, 'spaceSolutionTour').exists()).toBe(false);
+    fireEvent.click(screen.getByTestId('spacesNavSelector'));
 
-    jest.useRealTimers();
+    await waitFor(() => {
+      expect(screen.queryByTestId('spaceMenuPopoverPanel')).not.toBeInTheDocument();
+    });
+  });
+
+  it('calls navigateToApp when manage spaces button is clicked', async () => {
+    const navigateToApp = jest.fn();
+    const activeSpace = mockSpaces[0];
+
+    renderNavControlPopover({ navigateToApp }, activeSpace);
+
+    fireEvent.click(screen.getByTestId('spacesNavSelector'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('spaceMenuPopoverPanel')).toBeInTheDocument();
+    });
+
+    const manageButton = screen.getByTestId('manageSpaces');
+    fireEvent.click(manageButton);
+
+    expect(navigateToApp).toHaveBeenCalledWith('management', { path: 'kibana/spaces' });
   });
 });

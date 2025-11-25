@@ -6,28 +6,44 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
+import { walk } from '../../../walker';
+import type { ESQLAst, ESQLAstAllCommands, ESQLMessage, ESQLSingleAstItem } from '../../../types';
 import type { ICommandContext } from '../../types';
 import { buildMissingMetadataMessage } from './utils';
 
+const REQUIRED_METADATA_FIELDS = ['_id', '_index', '_score'];
+
 export const validate = (
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   ast: ESQLAst,
   context?: ICommandContext
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
-  if (!context?.fields.get('_id')) {
-    messages.push(buildMissingMetadataMessage(command, '_id'));
+  const missingFields: string[] = [...REQUIRED_METADATA_FIELDS];
+  const sourceCommand = ast.find((_command) =>
+    ['ts', 'from'].includes(_command.name.toLocaleLowerCase())
+  );
+
+  if (sourceCommand) {
+    walk(sourceCommand, {
+      visitCommandOption: (node) => {
+        if (node.name.toLocaleLowerCase() === 'metadata') {
+          const metadataFields = node.args.map((arg) =>
+            (arg as ESQLSingleAstItem)?.name?.toLocaleLowerCase()
+          );
+          for (const field of REQUIRED_METADATA_FIELDS) {
+            if (metadataFields.includes(field)) {
+              missingFields.splice(missingFields.indexOf(field), 1);
+            }
+          }
+        }
+      },
+    });
   }
 
-  if (!context?.fields.get('_index')) {
-    messages.push(buildMissingMetadataMessage(command, '_index'));
+  if (missingFields.length > 0) {
+    messages.push(buildMissingMetadataMessage(command, missingFields.join(', ')));
   }
-
-  if (!context?.fields.get('_score')) {
-    messages.push(buildMissingMetadataMessage(command, '_score'));
-  }
-
   return messages;
 };

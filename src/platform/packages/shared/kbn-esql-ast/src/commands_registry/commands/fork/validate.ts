@@ -6,56 +6,48 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { i18n } from '@kbn/i18n';
-import type { ESQLAstQueryExpression } from '../../../types';
-import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
+import type { ESQLAst, ESQLAstAllCommands, ESQLAstForkCommand, ESQLMessage } from '../../../types';
 import { Walker } from '../../../walker';
 import type { ICommandContext, ICommandCallbacks } from '../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 import { esqlCommandRegistry } from '../..';
 import { errors } from '../../../definitions/utils';
+import { isSubQuery } from '../../../ast/is';
 
 const MIN_BRANCHES = 2;
 const MAX_BRANCHES = 8;
 
 export const validate = (
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   ast: ESQLAst,
   context?: ICommandContext,
   callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
+  const forkCommand = command as ESQLAstForkCommand;
   const messages: ESQLMessage[] = [];
 
-  if (command.args.length < MIN_BRANCHES) {
-    messages.push({
-      location: command.location,
-      text: i18n.translate('kbn-esql-ast.esql.validation.forkTooFewBranches', {
-        defaultMessage: '[FORK] Must include at least two branches.',
-      }),
-      type: 'error',
-      code: 'forkTooFewBranches',
-    });
+  if (forkCommand.args.length < MIN_BRANCHES) {
+    messages.push(errors.forkTooFewBranches(forkCommand));
   }
 
-  if (command.args.length > MAX_BRANCHES) {
-    messages.push({
-      location: (command.args.at(-1) as ESQLAstQueryExpression)?.location,
-      text: i18n.translate('kbn-esql-ast.esql.validation.forkTooManyBranches', {
-        defaultMessage: '[FORK] Supports a maximum of 8 branches.',
-      }),
-      type: 'error',
-      code: 'forkTooManyBranches',
-    });
+  if (forkCommand.args.length > MAX_BRANCHES) {
+    messages.push(errors.forkTooManyBranches(forkCommand));
   }
 
-  messages.push(...validateCommandArguments(command, ast, context, callbacks));
+  messages.push(...validateCommandArguments(forkCommand, ast, context, callbacks));
 
-  for (const arg of command.args.flat()) {
-    if (!Array.isArray(arg) && arg.type === 'query') {
+  for (const arg of forkCommand.args) {
+    const query = arg.child;
+
+    if (!Array.isArray(query) && query.type === 'query') {
       // all the args should be commands
-      arg.commands.forEach((subCommand) => {
+      query.commands.forEach((subCommand) => {
         const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
-        const validationMessages = subCommandMethods?.validate?.(subCommand, arg.commands, context);
+        const validationMessages = subCommandMethods?.validate?.(
+          subCommand,
+          query.commands,
+          context
+        );
         messages.push(...(validationMessages || []));
       });
     }
@@ -68,10 +60,13 @@ export const validate = (
     messages.push(errors.tooManyForks(forks[1]));
   }
 
-  context?.fields.set('_fork', {
-    name: '_fork',
-    type: 'keyword',
-  });
+  // FORK is not allowed when the query contains subqueries
+  const fromCommands = allCommands.filter(({ name }) => name.toLowerCase() === 'from');
+  const hasSubqueries = fromCommands.some((cmd) => cmd.args.some((arg) => isSubQuery(arg)));
+
+  if (hasSubqueries) {
+    messages.push(errors.forkNotAllowedWithSubqueries(forkCommand));
+  }
 
   return messages;
 };

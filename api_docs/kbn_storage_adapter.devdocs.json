@@ -12,12 +12,83 @@
     "classes": [
       {
         "parentPluginId": "@kbn/storage-adapter",
+        "id": "def-server.BulkOperationError",
+        "type": "Class",
+        "tags": [],
+        "label": "BulkOperationError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/storage-adapter",
+            "scope": "server",
+            "docId": "kibKbnStorageAdapterPluginApi",
+            "section": "def-server.BulkOperationError",
+            "text": "BulkOperationError"
+          },
+          " extends Error"
+        ],
+        "path": "src/platform/packages/shared/kbn-storage-adapter/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/storage-adapter",
+            "id": "def-server.BulkOperationError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-storage-adapter/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/storage-adapter",
+                "id": "def-server.BulkOperationError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-storage-adapter/src/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/storage-adapter",
+                "id": "def-server.BulkOperationError.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "response",
+                "description": [],
+                "signature": [
+                  "BulkResponse"
+                ],
+                "path": "src/platform/packages/shared/kbn-storage-adapter/src/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/storage-adapter",
         "id": "def-server.StorageIndexAdapter",
         "type": "Class",
         "tags": [],
         "label": "StorageIndexAdapter",
         "description": [
-          "\nAdapter for writing and reading documents to/from Elasticsearch,\nusing plain indices.\n\nTODO:\n- Index Lifecycle Management\n- Schema upgrades w/ fallbacks"
+          "\nAdapter for writing and reading documents to/from Elasticsearch,\nusing plain indices.\n\nTODO:\n- Schema upgrades w/ fallbacks"
         ],
         "signature": [
           {
@@ -293,7 +364,14 @@
                     "section": "def-server.StorageClientBulkOperation",
                     "text": "StorageClientBulkOperation"
                   },
-                  "<TDocumentType>[]; }"
+                  "<TDocumentType>[]; } & ",
+                  {
+                    "pluginId": "@kbn/storage-adapter",
+                    "scope": "server",
+                    "docId": "kibKbnStorageAdapterPluginApi",
+                    "section": "def-server.StorageClientBulkOptions",
+                    "text": "StorageClientBulkOptions"
+                  }
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
                 "deprecated": false,
@@ -336,7 +414,7 @@
                 "signature": [
                   "{ id?: string | undefined; version?: number | undefined; timeout?: ",
                   "Duration",
-                  " | undefined; routing?: string | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; require_data_stream?: undefined; document?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; require_data_stream?: undefined; document?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; document?: Omit<TDocumentType, \"_id\"> | undefined; pipeline?: string | undefined; refresh?: ",
+                  " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; require_data_stream?: undefined; document?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; require_data_stream?: undefined; document?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; routing?: string | undefined; document?: Omit<TDocumentType, \"_id\"> | undefined; pipeline?: string | undefined; refresh?: ",
                   "Refresh",
                   " | undefined; wait_for_active_shards?: ",
                   "WaitForActiveShards",
@@ -393,7 +471,7 @@
                 "signature": [
                   "{ id: string; version?: number | undefined; timeout?: ",
                   "Duration",
-                  " | undefined; routing?: string | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; refresh?: ",
+                  " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; routing?: string | undefined; refresh?: ",
                   "Refresh",
                   " | undefined; wait_for_active_shards?: ",
                   "WaitForActiveShards",
@@ -470,19 +548,21 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  "{ id: string; sort?: ",
+                  "{ id: string; explain?: boolean | undefined; scroll?: ",
+                  "Duration",
+                  " | undefined; sort?: ",
                   "Sort",
                   " | undefined; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
                   "> | undefined; slice?: ",
                   "SlicedScroll",
-                  " | undefined; version?: undefined; explain?: boolean | undefined; scroll?: ",
-                  "Duration",
-                  " | undefined; size?: number | undefined; fields?: (string | ",
+                  " | undefined; version?: undefined; size?: number | undefined; fields?: (string | ",
                   "QueryDslFieldAndFormat",
                   ")[] | undefined; query?: ",
                   "QueryDslQueryContainer",
-                  " | undefined; timeout?: string | undefined; allow_no_indices?: boolean | undefined; allow_partial_search_results?: boolean | undefined; analyzer?: string | undefined; analyze_wildcard?: boolean | undefined; batched_reduce_size?: number | undefined; ccs_minimize_roundtrips?: boolean | undefined; default_operator?: ",
+                  " | undefined; timeout?: string | undefined; allow_partial_search_results?: boolean | undefined; runtime_mappings?: ",
+                  "MappingRuntimeFields",
+                  " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & string) | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; allow_no_indices?: boolean | undefined; analyzer?: string | undefined; analyze_wildcard?: boolean | undefined; batched_reduce_size?: number | undefined; ccs_minimize_roundtrips?: boolean | undefined; default_operator?: ",
                   "QueryDslOperator",
                   " | undefined; df?: string | undefined; expand_wildcards?: ",
                   "ExpandWildcards",
@@ -532,9 +612,7 @@
                   "Fields",
                   " | undefined; pit?: ",
                   "SearchPointInTimeReference",
-                  " | undefined; runtime_mappings?: ",
-                  "MappingRuntimeFields",
-                  " | undefined; stats?: string[] | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & string) | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; refresh?: boolean | undefined; version_type?: ",
+                  " | undefined; stats?: string[] | undefined; refresh?: boolean | undefined; version_type?: ",
                   "VersionType",
                   " | undefined; realtime?: boolean | undefined; }"
                 ],
@@ -559,6 +637,38 @@
             "trackAdoption": false,
             "returnComment": [],
             "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/storage-adapter",
+        "id": "def-server.StorageClientBulkOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "StorageClientBulkOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/storage-adapter",
+            "id": "def-server.StorageClientBulkOptions.throwOnFail",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "throwOnFail",
+            "description": [
+              "\nIf true, throws BulkOperationError when any operation in the bulk request fails.\nIf false (default), returns the response with errors field populated, similar to Promise.allSettled behavior."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -780,7 +890,9 @@
         "type": "Type",
         "tags": [],
         "label": "StorageClientBulk",
-        "description": [],
+        "description": [
+          "\nPerforms bulk operations on documents.\n\nBy default, behaves similar to Promise.allSettled - individual operation failures\nare returned in the response without throwing an error. Set `throwOnFail: true`\nto throw a BulkOperationError when any operation fails."
+        ],
         "signature": [
           "(request: ",
           {
@@ -817,7 +929,14 @@
                 "section": "def-server.StorageClientBulkOperation",
                 "text": "StorageClientBulkOperation"
               },
-              "<TDocumentType>[]; }"
+              "<TDocumentType>[]; } & ",
+              {
+                "pluginId": "@kbn/storage-adapter",
+                "scope": "server",
+                "docId": "kibKbnStorageAdapterPluginApi",
+                "section": "def-server.StorageClientBulkOptions",
+                "text": "StorageClientBulkOptions"
+              }
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
             "deprecated": false,
@@ -859,7 +978,14 @@
             "section": "def-server.StorageClientBulkOperation",
             "text": "StorageClientBulkOperation"
           },
-          "<TDocument>[]; }"
+          "<TDocument>[]; } & ",
+          {
+            "pluginId": "@kbn/storage-adapter",
+            "scope": "server",
+            "docId": "kibKbnStorageAdapterPluginApi",
+            "section": "def-server.StorageClientBulkOptions",
+            "text": "StorageClientBulkOptions"
+          }
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
         "deprecated": false,
@@ -947,7 +1073,7 @@
             "signature": [
               "{ id: string; version?: number | undefined; timeout?: ",
               "Duration",
-              " | undefined; routing?: string | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; refresh?: ",
+              " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; routing?: string | undefined; refresh?: ",
               "Refresh",
               " | undefined; wait_for_active_shards?: ",
               "WaitForActiveShards",
@@ -972,7 +1098,7 @@
         "signature": [
           "{ id: string; version?: number | undefined; timeout?: ",
           "Duration",
-          " | undefined; routing?: string | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; refresh?: ",
+          " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; routing?: string | undefined; refresh?: ",
           "Refresh",
           " | undefined; wait_for_active_shards?: ",
           "WaitForActiveShards",
@@ -1041,19 +1167,21 @@
             "label": "request",
             "description": [],
             "signature": [
-              "{ id: string; sort?: ",
+              "{ id: string; explain?: boolean | undefined; scroll?: ",
+              "Duration",
+              " | undefined; sort?: ",
               "Sort",
               " | undefined; aggs?: Record<string, ",
               "AggregationsAggregationContainer",
               "> | undefined; slice?: ",
               "SlicedScroll",
-              " | undefined; version?: undefined; explain?: boolean | undefined; scroll?: ",
-              "Duration",
-              " | undefined; size?: number | undefined; fields?: (string | ",
+              " | undefined; version?: undefined; size?: number | undefined; fields?: (string | ",
               "QueryDslFieldAndFormat",
               ")[] | undefined; query?: ",
               "QueryDslQueryContainer",
-              " | undefined; timeout?: string | undefined; allow_no_indices?: boolean | undefined; allow_partial_search_results?: boolean | undefined; analyzer?: string | undefined; analyze_wildcard?: boolean | undefined; batched_reduce_size?: number | undefined; ccs_minimize_roundtrips?: boolean | undefined; default_operator?: ",
+              " | undefined; timeout?: string | undefined; allow_partial_search_results?: boolean | undefined; runtime_mappings?: ",
+              "MappingRuntimeFields",
+              " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & string) | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; allow_no_indices?: boolean | undefined; analyzer?: string | undefined; analyze_wildcard?: boolean | undefined; batched_reduce_size?: number | undefined; ccs_minimize_roundtrips?: boolean | undefined; default_operator?: ",
               "QueryDslOperator",
               " | undefined; df?: string | undefined; expand_wildcards?: ",
               "ExpandWildcards",
@@ -1103,9 +1231,7 @@
               "Fields",
               " | undefined; pit?: ",
               "SearchPointInTimeReference",
-              " | undefined; runtime_mappings?: ",
-              "MappingRuntimeFields",
-              " | undefined; stats?: string[] | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & string) | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; refresh?: boolean | undefined; version_type?: ",
+              " | undefined; stats?: string[] | undefined; refresh?: boolean | undefined; version_type?: ",
               "VersionType",
               " | undefined; realtime?: boolean | undefined; }"
             ],
@@ -1124,19 +1250,21 @@
         "label": "StorageClientGetRequest",
         "description": [],
         "signature": [
-          "{ id: string; sort?: ",
+          "{ id: string; explain?: boolean | undefined; scroll?: ",
+          "Duration",
+          " | undefined; sort?: ",
           "Sort",
           " | undefined; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
           "> | undefined; slice?: ",
           "SlicedScroll",
-          " | undefined; version?: undefined; explain?: boolean | undefined; scroll?: ",
-          "Duration",
-          " | undefined; size?: number | undefined; fields?: (string | ",
+          " | undefined; version?: undefined; size?: number | undefined; fields?: (string | ",
           "QueryDslFieldAndFormat",
           ")[] | undefined; query?: ",
           "QueryDslQueryContainer",
-          " | undefined; timeout?: string | undefined; allow_no_indices?: boolean | undefined; allow_partial_search_results?: boolean | undefined; analyzer?: string | undefined; analyze_wildcard?: boolean | undefined; batched_reduce_size?: number | undefined; ccs_minimize_roundtrips?: boolean | undefined; default_operator?: ",
+          " | undefined; timeout?: string | undefined; allow_partial_search_results?: boolean | undefined; runtime_mappings?: ",
+          "MappingRuntimeFields",
+          " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & string) | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; allow_no_indices?: boolean | undefined; analyzer?: string | undefined; analyze_wildcard?: boolean | undefined; batched_reduce_size?: number | undefined; ccs_minimize_roundtrips?: boolean | undefined; default_operator?: ",
           "QueryDslOperator",
           " | undefined; df?: string | undefined; expand_wildcards?: ",
           "ExpandWildcards",
@@ -1186,9 +1314,7 @@
           "Fields",
           " | undefined; pit?: ",
           "SearchPointInTimeReference",
-          " | undefined; runtime_mappings?: ",
-          "MappingRuntimeFields",
-          " | undefined; stats?: string[] | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & string) | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; refresh?: boolean | undefined; version_type?: ",
+          " | undefined; stats?: string[] | undefined; refresh?: boolean | undefined; version_type?: ",
           "VersionType",
           " | undefined; realtime?: boolean | undefined; }"
         ],
@@ -1248,7 +1374,7 @@
             "signature": [
               "{ id?: string | undefined; version?: number | undefined; timeout?: ",
               "Duration",
-              " | undefined; routing?: string | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; require_data_stream?: undefined; document?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; require_data_stream?: undefined; document?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; document?: Omit<TDocumentType, \"_id\"> | undefined; pipeline?: string | undefined; refresh?: ",
+              " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; require_data_stream?: undefined; document?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; require_data_stream?: undefined; document?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; routing?: string | undefined; document?: Omit<TDocumentType, \"_id\"> | undefined; pipeline?: string | undefined; refresh?: ",
               "Refresh",
               " | undefined; wait_for_active_shards?: ",
               "WaitForActiveShards",
@@ -1275,7 +1401,7 @@
         "signature": [
           "{ id?: string | undefined; version?: number | undefined; timeout?: ",
           "Duration",
-          " | undefined; routing?: string | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; require_data_stream?: undefined; document?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; require_data_stream?: undefined; document?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; document?: Omit<TDocument, \"_id\"> | undefined; pipeline?: string | undefined; refresh?: ",
+          " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; require_data_stream?: undefined; document?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; require_data_stream?: undefined; document?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; routing?: string | undefined; document?: Omit<TDocument, \"_id\"> | undefined; pipeline?: string | undefined; refresh?: ",
           "Refresh",
           " | undefined; wait_for_active_shards?: ",
           "WaitForActiveShards",

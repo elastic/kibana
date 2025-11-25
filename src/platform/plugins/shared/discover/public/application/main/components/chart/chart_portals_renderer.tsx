@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type PropsWithChildren, useEffect, useRef, useMemo } from 'react';
+import React, { type PropsWithChildren, useEffect, useRef, useMemo, useCallback } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
 import type {
   ChartSectionConfiguration,
@@ -16,6 +16,7 @@ import type {
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
+import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
@@ -25,6 +26,10 @@ import {
   selectTabRuntimeState,
   useInternalStateSelector,
   useRuntimeState,
+  useCurrentTabSelector,
+  useInternalStateDispatch,
+  useCurrentTabAction,
+  internalStateActions,
 } from '../../state_management/redux';
 import type { DiscoverMainContentProps } from '../layout/discover_main_content';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
@@ -142,6 +147,20 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
     [getChartConfigAccessor]
   );
 
+  useEffect(() => {
+    const histogramConfig$ = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    ).unifiedHistogramConfig$;
+
+    histogramConfig$.next({
+      ...histogramConfig$.getValue(),
+      localStorageKeyPrefix: chartSectionConfig.replaceDefaultChart
+        ? chartSectionConfig.localStorageKeyPrefix
+        : undefined,
+    });
+  }, [chartSectionConfig, stateContainer]);
+
   return chartSectionConfig.replaceDefaultChart ? (
     <CustomChartSectionWrapper
       stateContainer={stateContainer}
@@ -191,15 +210,32 @@ const CustomChartSectionWrapper = ({
 }: UnifiedHistogramChartProps & {
   chartSectionConfig: Extract<ChartSectionConfiguration, { replaceDefaultChart: true }>;
 }) => {
-  const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(stateContainer);
+  const dispatch = useInternalStateDispatch();
+  const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(
+    stateContainer,
+    chartSectionConfig.localStorageKeyPrefix
+  );
+  const localStorageKeyPrefix =
+    chartSectionConfig.localStorageKeyPrefix ?? unifiedHistogramProps.localStorageKeyPrefix;
 
   const { setUnifiedHistogramApi, ...restProps } = unifiedHistogramProps;
-  const { api, stateProps, requestParams } = useServicesBootstrap({
+  const { api, stateProps, requestParams, input$ } = useServicesBootstrap({
     ...restProps,
     initialState: unifiedHistogramProps.initialState,
-    localStorageKeyPrefix:
-      chartSectionConfig.localStorageKeyPrefix ?? unifiedHistogramProps.localStorageKeyPrefix,
+    localStorageKeyPrefix,
   });
+
+  const metricsGridState = useCurrentTabSelector((state) => state.uiState.metricsGrid);
+  const setMetricsGridState = useCurrentTabAction(internalStateActions.setMetricsGridState);
+  const onInitialStateChange = useCallback(
+    (newMetricsGridState: Partial<UnifiedMetricsGridRestorableState>) => {
+      // Defer dispatch to next tick - ensures React render cycle is complete
+      // setTimeout(() => {
+      dispatch(setMetricsGridState({ metricsGridState: newMetricsGridState }));
+      // }, 0);
+    },
+    [setMetricsGridState, dispatch]
+  );
 
   useEffect(() => {
     if (api) {
@@ -213,8 +249,14 @@ const CustomChartSectionWrapper = ({
       isChartAvailable: true,
       chart: stateProps.chart,
       topPanelHeight: stateProps.topPanelHeight,
+      defaultTopPanelHeight: chartSectionConfig.defaultTopPanelHeight,
     }),
-    [stateProps.onTopPanelHeightChange, stateProps.chart, stateProps.topPanelHeight]
+    [
+      chartSectionConfig.defaultTopPanelHeight,
+      stateProps.chart,
+      stateProps.onTopPanelHeightChange,
+      stateProps.topPanelHeight,
+    ]
   );
 
   const { isEsqlMode, renderCustomChartToggleActions } = useUnifiedHistogramCommon({
@@ -222,6 +264,7 @@ const CustomChartSectionWrapper = ({
     layoutProps,
     stateContainer,
     panelsToggle,
+    localStorageKeyPrefix,
   });
 
   const { chartToolbarCss, histogramCss } = useChartStyles(
@@ -232,7 +275,7 @@ const CustomChartSectionWrapper = ({
   const isComponentVisible =
     !!chartSectionConfig.Component && !!layoutProps.chart && !layoutProps.chart.hidden;
 
-  if (!isComponentVisible || !hasValidSession) {
+  if (!hasValidSession) {
     return null;
   }
 
@@ -241,8 +284,12 @@ const CustomChartSectionWrapper = ({
       histogramCss={histogramCss}
       chartToolbarCss={chartToolbarCss}
       renderToggleActions={renderCustomChartToggleActions}
+      input$={input$}
+      requestParams={requestParams}
+      isComponentVisible={isComponentVisible}
       {...unifiedHistogramProps}
-      {...requestParams}
+      initialState={metricsGridState}
+      onInitialStateChange={onInitialStateChange}
     />
   );
 };

@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart, ScopedHistory } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -17,6 +17,8 @@ import { OnechatRoutes } from './routes';
 import type { OnechatInternalService } from '../services';
 import type { OnechatStartDependencies } from '../types';
 import { OnechatServicesContext } from './context/onechat_services_context';
+import { PageWrapper } from './page_wrapper';
+import { AppLeaveContext, type OnAppLeave } from './context/app_leave_context';
 
 export const mountApp = async ({
   core,
@@ -24,15 +26,18 @@ export const mountApp = async ({
   element,
   history,
   services,
+  onAppLeave,
 }: {
   core: CoreStart;
   plugins: OnechatStartDependencies;
   element: HTMLElement;
   history: ScopedHistory;
   services: OnechatInternalService;
+  onAppLeave: OnAppLeave;
 }) => {
-  const kibanaServices = { ...core, plugins };
+  const kibanaServices = { ...core, plugins, appParams: { history } };
   const queryClient = new QueryClient();
+  await services.accessChecker.initAccess();
 
   ReactDOM.render(
     core.rendering.addContext(
@@ -40,11 +45,15 @@ export const mountApp = async ({
         <I18nProvider>
           <QueryClientProvider client={queryClient}>
             <OnechatServicesContext.Provider value={services}>
-              <RedirectAppLinks coreStart={core}>
-                <Router history={history}>
-                  <OnechatRoutes />
-                </Router>
-              </RedirectAppLinks>
+              <AppLeaveContext.Provider value={onAppLeave}>
+                <RedirectAppLinks coreStart={core}>
+                  <PageWrapper>
+                    <Router history={history}>
+                      <OnechatRoutes />
+                    </Router>
+                  </PageWrapper>
+                </RedirectAppLinks>
+              </AppLeaveContext.Provider>
             </OnechatServicesContext.Provider>
           </QueryClientProvider>
         </I18nProvider>

@@ -11,7 +11,6 @@ import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-
 import { get } from 'lodash/fp';
 import { AlertPreviewButton } from '../../../../../flyout/shared/components/alert_preview_button';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
@@ -30,6 +29,7 @@ import { buildEntityNameFilter } from '../../../../../../common/search_strategy'
 import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';
+import { AskAiAssistant } from './ask_ai_assistant';
 
 export interface RiskInputsTabProps<T extends EntityType> {
   entityType: T;
@@ -166,6 +166,7 @@ export const RiskInputsTab = <T extends EntityType>({
   if (riskScoreError) {
     return (
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.securitySolution.flyout.entityDetails.riskInputs.errorTitle"
@@ -220,6 +221,7 @@ export const RiskInputsTab = <T extends EntityType>({
       />
       <EuiSpacer size="m" />
       {riskInputsAlertSection}
+      <AskAiAssistant entityType={entityType} entityName={entityName} />
     </>
   );
 };

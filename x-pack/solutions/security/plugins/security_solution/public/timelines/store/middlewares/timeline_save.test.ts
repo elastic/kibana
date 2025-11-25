@@ -7,12 +7,13 @@
 
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
+import { type DataView } from '@kbn/data-plugin/common';
 import { Direction } from '../../../../common/search_strategy';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { convertTimelineAsInput } from './timeline_save';
 import type { TimelineModel } from '../model';
-import { createMockStore, kibanaMock, mockGlobalState } from '../../../common/mock';
+import { createMockStore, kibanaMock } from '../../../common/mock';
 import { selectTimelineById } from '../selectors';
 import { copyTimeline, persistTimeline } from '../../containers/api';
 import { refreshTimelines } from './helpers';
@@ -25,6 +26,8 @@ import {
   showCallOutUnauthorizedMsg,
   startTimelineSaving,
 } from '../actions';
+import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
+import { mockDataViewManagerState } from '../../../data_view_manager/redux/mock';
 
 jest.mock('../actions', () => {
   const actual = jest.requireActual('../actions');
@@ -42,7 +45,10 @@ jest.mock('../actions', () => {
   };
 });
 jest.mock('../../containers/api');
-jest.mock('./helpers');
+jest.mock('./helpers', () => ({
+  refreshTimelines: jest.fn(),
+  extractTimelineIdsAndVersions: jest.requireActual('./helpers').extractTimelineIdsAndVersions,
+}));
 
 const startTimelineSavingMock = startTimelineSaving as unknown as jest.Mock;
 const endTimelineSavingMock = endTimelineSaving as unknown as jest.Mock;
@@ -50,8 +56,18 @@ const showCallOutUnauthorizedMsgMock = showCallOutUnauthorizedMsg as unknown as 
 
 describe('Timeline save middleware', () => {
   let store = createMockStore(undefined, undefined, kibanaMock);
+  let dataView: DataView;
 
   beforeEach(() => {
+    dataView = getMockDataViewWithMatchedIndices();
+    dataView.version = 'is-persisted';
+
+    (kibanaMock.plugins.onStart as jest.Mock).mockReturnValue({
+      dataViews: {
+        found: true,
+        contract: { get: () => dataView },
+      },
+    });
     store = createMockStore(undefined, undefined, kibanaMock);
     jest.clearAllMocks();
   });
@@ -69,13 +85,55 @@ describe('Timeline save middleware', () => {
       })
     );
     await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: false }));
-
+    expect(mockDataViewManagerState).toBeDefined();
     expect(startTimelineSavingMock).toHaveBeenCalled();
     expect(persistTimeline as unknown as jest.Mock).toHaveBeenCalledWith(
       expect.objectContaining({
         timeline: expect.objectContaining({
-          dataViewId: mockGlobalState.sourcerer.sourcererScopes.timeline.selectedDataViewId,
-          indexNames: mockGlobalState.sourcerer.sourcererScopes.timeline.selectedPatterns,
+          dataViewId: mockDataViewManagerState.dataViewManager.timeline.dataViewId,
+          indexNames: ['test'],
+        }),
+      })
+    );
+    expect(refreshTimelines as unknown as jest.Mock).toHaveBeenCalled();
+    expect(endTimelineSavingMock).toHaveBeenCalled();
+    expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
+      expect.objectContaining({
+        version: 'newVersion',
+        changed: false,
+      })
+    );
+  });
+
+  it('should not save any adhoc dataViewId when persisting a timeline', async () => {
+    dataView = getMockDataViewWithMatchedIndices();
+    dataView.version = undefined;
+    (kibanaMock.plugins.onStart as jest.Mock).mockReturnValue({
+      dataViews: {
+        found: true,
+        contract: { get: () => dataView },
+      },
+    });
+    (persistTimeline as jest.Mock).mockResolvedValue({
+      savedObjectId: 'soid',
+      version: 'newVersion',
+    });
+
+    await store.dispatch(setChanged({ id: TimelineId.test, changed: true }));
+    expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
+      expect.objectContaining({
+        version: null,
+        changed: true,
+      })
+    );
+    await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: false }));
+    expect(mockDataViewManagerState).toBeDefined();
+    expect(startTimelineSavingMock).toHaveBeenCalled();
+    expect(persistTimeline as unknown as jest.Mock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        timeline: expect.objectContaining({
+          dataViewId: null,
+          indexNames: ['test'],
         }),
       })
     );

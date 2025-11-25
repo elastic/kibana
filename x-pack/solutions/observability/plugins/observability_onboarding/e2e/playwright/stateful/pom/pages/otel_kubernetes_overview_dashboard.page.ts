@@ -10,18 +10,16 @@ import { expect, type Page, type Locator } from '@playwright/test';
 export class OtelKubernetesOverviewDashboardPage {
   page: Page;
 
-  private readonly nodesPanelValue: Locator;
+  private readonly metricPanelValues: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
-    this.nodesPanelValue = this.page.locator(
-      `#panel-6119419c-1899-4765-aed4-c050cde4c30a .echMetricText__value`
-    );
+    this.metricPanelValues = this.page.locator(`[id^=panel] .echMetricText__value`);
   }
 
   async assertNodesPanelNotEmpty() {
-    await expect(this.nodesPanelValue).toBeVisible();
-    expect(await this.nodesPanelValue.textContent()).toMatch(/\d+/);
+    await expect(this.metricPanelValues.first()).toBeVisible();
+    expect(await this.metricPanelValues.first().textContent()).toMatch(/\d+/);
   }
 }

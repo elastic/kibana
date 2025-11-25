@@ -8,6 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { partition } from 'lodash';
+import { isResourceSupportedVendor } from '../../../../../../common/siem_migrations/rules/resources/types';
 import { SIEM_RULE_MIGRATION_RESOURCES_PATH } from '../../../../../../common/siem_migrations/constants';
 import {
   UpsertRuleMigrationResourcesRequestBody,
@@ -69,7 +70,10 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             }
 
             const [lookups, macros] = partition(resources, { type: 'lookup' });
-            const processedLookups = await processLookups(lookups, ruleMigrationsClient);
+            const processedLookups = await processLookups(
+              lookups,
+              ruleMigrationsClient.data.lookups
+            );
             const resourcesUpsert = [...macros, ...processedLookups].map((resource) => ({
               ...resource,
               migration_id: migrationId,
@@ -78,7 +82,12 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             // Upsert the resources
             await ruleMigrationsClient.data.resources.upsert(resourcesUpsert);
 
-            // Create identified resource documents to keep track of them (without content)
+            if (!isResourceSupportedVendor(rule.original_rule.vendor)) {
+              logger.debug(
+                `Identifying resources for rule migration [id=${migrationId}] and vendor [${rule.original_rule.vendor}]  is not supported. Skipping resource identification.`
+              );
+              return res.ok({ body: { acknowledged: true } });
+            }
             const resourceIdentifier = new RuleResourceIdentifier(rule.original_rule.vendor);
             const resourcesToCreate = resourceIdentifier
               .fromResources(resources)
@@ -89,6 +98,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             await ruleMigrationsClient.data.resources.create(resourcesToCreate);
 
             return res.ok({ body: { acknowledged: true } });
+            // Create identified resource documents to keep track of them (without content)
           } catch (error) {
             logger.error(error);
             await siemMigrationAuditLogger.logUploadResources({ migrationId, error });

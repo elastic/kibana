@@ -18,6 +18,7 @@ import {
   securitySolutionOnlyReadSpace2,
   securitySolutionOnlyAllSpacesAllWithReadESIndices,
   securitySolutionOnlyAllSpacesAllAssistantMinimalAll,
+  securitySolutionOnlyAllSpacesAllAttackDiscoveryMinimalAll,
 } from './roles';
 import type { User } from './types';
 
@@ -93,6 +94,12 @@ export const secOnlySpacesAllAssistantMinimalAll: User = {
   roles: [securitySolutionOnlyAllSpacesAllAssistantMinimalAll.name],
 };
 
+export const secOnlySpacesAllAttackDiscoveryMinimalAll: User = {
+  username: 'sec_only_all_spaces_all_attack_discovery_minimal_all',
+  password: 'sec_only_all_spaces_all_attack_discovery_minimal_all',
+  roles: [securitySolutionOnlyAllSpacesAllAttackDiscoveryMinimalAll.name],
+};
+
 export const allUsers = [
   superUser,
   secOnly,
@@ -102,6 +109,7 @@ export const allUsers = [
   secOnlySpacesAll,
   secOnlySpacesAllEsReadAll,
   secOnlySpacesAllAssistantMinimalAll,
+  secOnlySpacesAllAttackDiscoveryMinimalAll,
   secOnlyReadSpacesAll,
   secOnlySpace2,
   secOnlyReadSpace2,

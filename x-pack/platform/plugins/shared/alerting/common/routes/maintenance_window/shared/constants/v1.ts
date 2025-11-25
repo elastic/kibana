@@ -12,5 +12,10 @@ export const maintenanceWindowCategoryIdTypes = {
   MANAGEMENT: 'management',
 } as const;
 
-export type MaintenanceWindowCategoryIdTypes =
-  (typeof maintenanceWindowCategoryIdTypes)[keyof typeof maintenanceWindowCategoryIdTypes];
+export const maintenanceWindowStatus = {
+  RUNNING: 'running',
+  FINISHED: 'finished',
+  UPCOMING: 'upcoming',
+  ARCHIVED: 'archived',
+  DISABLED: 'disabled',
+} as const;

@@ -9,26 +9,31 @@
 import {
   createConversationMock$,
   executeAgentMock$,
-  getConversationMock$,
-  conversationExistsMock$,
+  getConversationMock,
+  conversationExistsMock,
   updateConversationMock$,
-  generateTitleMock$,
-  getChatModelMock$,
+  generateTitleMock,
+  resolveServicesMock,
 } from './chat_service.test.mocks';
+import { ChatEventType } from '@kbn/onechat-common';
 
 import { firstValueFrom, toArray, of } from 'rxjs';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import {
   createAgentsServiceStartMock,
   createConversationServiceMock,
+  createConversationClientMock,
   createEmptyConversation,
 } from '../../test_utils';
-import type { ChatService } from './chat_service';
+import type { ChatService } from './types';
 import { createChatService } from './chat_service';
+import { isConversationIdSetEvent } from '@kbn/onechat-common/chat';
 
 const createChatModel = (): InferenceChatModel => {
   // we don't really need it
@@ -41,6 +46,8 @@ describe('ChatService', () => {
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let agentService: ReturnType<typeof createAgentsServiceStartMock>;
   let conversationService: ReturnType<typeof createConversationServiceMock>;
+  let uiSettings: ReturnType<typeof uiSettingsServiceMock.createStartContract>;
+  let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
 
   let chatService: ChatService;
 
@@ -50,19 +57,32 @@ describe('ChatService', () => {
     inference = inferenceMock.createStartContract();
     agentService = createAgentsServiceStartMock();
     conversationService = createConversationServiceMock();
+    uiSettings = uiSettingsServiceMock.createStartContract();
+    savedObjects = savedObjectsServiceMock.createStartContract();
 
     chatService = createChatService({
       inference,
       logger,
       agentService,
       conversationService,
+      uiSettings,
+      savedObjects,
     });
 
     const conversation = createEmptyConversation();
 
-    getConversationMock$.mockReturnValue(of(conversation));
-    generateTitleMock$.mockReturnValue(of('generated title'));
-    getChatModelMock$.mockReturnValue(of(createChatModel()));
+    getConversationMock.mockResolvedValue({ ...conversation, operation: 'CREATE' });
+    generateTitleMock.mockReturnValue(of('generated title'));
+
+    // Mock resolveServices to return all necessary services with a proper conversation client
+    const conversationClientMock = createConversationClientMock();
+    conversationClientMock.get.mockResolvedValue(conversation);
+
+    resolveServicesMock.mockResolvedValue({
+      conversationClient: conversationClientMock,
+      chatModel: createChatModel(),
+      selectedConnectorId: 'test-connector-id',
+    });
 
     executeAgentMock$.mockReturnValue(of());
     createConversationMock$.mockReturnValue(of());
@@ -72,11 +92,11 @@ describe('ChatService', () => {
   afterEach(() => {
     createConversationMock$.mockReset();
     executeAgentMock$.mockReset();
-    getConversationMock$.mockReset();
-    conversationExistsMock$.mockReset();
+    getConversationMock.mockReset();
+    conversationExistsMock.mockReset();
     updateConversationMock$.mockReset();
-    generateTitleMock$.mockReset();
-    getChatModelMock$.mockReset();
+    generateTitleMock.mockReset();
+    resolveServicesMock.mockReset();
   });
 
   it('calls executeAgent$ with the right parameters', async () => {
@@ -91,21 +111,27 @@ describe('ChatService', () => {
     await firstValueFrom(obs$.pipe(toArray()));
 
     expect(executeAgentMock$).toHaveBeenCalledTimes(1);
-    expect(executeAgentMock$).toHaveBeenCalledWith({
-      nextInput: {
-        message: 'hello',
-      },
-      conversation$: expect.anything(),
-      agentId: 'my-agent',
-      request,
-      agentService,
-    });
+    expect(executeAgentMock$).toHaveBeenCalledWith(
+      expect.objectContaining({
+        nextInput: {
+          message: 'hello',
+        },
+        conversation: expect.anything(),
+        agentId: 'my-agent',
+        request,
+        agentService,
+        defaultConnectorId: 'test-connector-id',
+        abortSignal: undefined,
+      })
+    );
   });
 
   describe('autoCreateConversationWithId', () => {
     it('creates new conversation when autoCreateConversationWithId=true and conversation does not exist', async () => {
-      conversationExistsMock$.mockReturnValue(of(false));
-      getConversationMock$.mockReturnValue(of(createEmptyConversation()));
+      getConversationMock.mockResolvedValue({
+        ...createEmptyConversation(),
+        operation: 'CREATE',
+      });
 
       const obs$ = chatService.converse({
         agentId: 'my-agent',
@@ -119,10 +145,6 @@ describe('ChatService', () => {
 
       await firstValueFrom(obs$.pipe(toArray()));
 
-      expect(conversationExistsMock$).toHaveBeenCalledWith({
-        conversationId: 'non-existing-conversation',
-        conversationClient: expect.anything(),
-      });
       expect(createConversationMock$).toHaveBeenCalledWith({
         agentId: 'my-agent',
         conversationClient: expect.anything(),
@@ -134,8 +156,10 @@ describe('ChatService', () => {
     });
 
     it('updates existing conversation when autoCreateConversationWithId=true and conversation exists', async () => {
-      conversationExistsMock$.mockReturnValue(of(true));
-      getConversationMock$.mockReturnValue(of(createEmptyConversation()));
+      getConversationMock.mockResolvedValue({
+        ...createEmptyConversation(),
+        operation: 'UPDATE',
+      });
 
       const obs$ = chatService.converse({
         agentId: 'my-agent',
@@ -149,13 +173,9 @@ describe('ChatService', () => {
 
       await firstValueFrom(obs$.pipe(toArray()));
 
-      expect(conversationExistsMock$).toHaveBeenCalledWith({
-        conversationId: 'existing-conversation',
-        conversationClient: expect.anything(),
-      });
       expect(updateConversationMock$).toHaveBeenCalledWith({
         conversationClient: expect.anything(),
-        conversation$: expect.anything(),
+        conversation: expect.anything(),
         title$: expect.anything(),
         roundCompletedEvents$: expect.anything(),
       });
@@ -163,7 +183,10 @@ describe('ChatService', () => {
     });
 
     it('follows default behavior when autoCreateConversationWithId=false (default)', async () => {
-      getConversationMock$.mockReturnValue(of(createEmptyConversation()));
+      getConversationMock.mockResolvedValue({
+        ...createEmptyConversation(),
+        operation: 'UPDATE',
+      });
 
       const obs$ = chatService.converse({
         agentId: 'my-agent',
@@ -176,10 +199,10 @@ describe('ChatService', () => {
 
       await firstValueFrom(obs$.pipe(toArray()));
 
-      expect(conversationExistsMock$).not.toHaveBeenCalled();
+      expect(conversationExistsMock).not.toHaveBeenCalled();
       expect(updateConversationMock$).toHaveBeenCalledWith({
         conversationClient: expect.anything(),
-        conversation$: expect.anything(),
+        conversation: expect.anything(),
         title$: expect.anything(),
         roundCompletedEvents$: expect.anything(),
       });
@@ -187,7 +210,8 @@ describe('ChatService', () => {
     });
 
     it('creates new conversation when no conversationId is provided regardless of autoCreateConversationWithId flag', async () => {
-      getConversationMock$.mockReturnValue(of(createEmptyConversation()));
+      const conversation = createEmptyConversation();
+      getConversationMock.mockResolvedValue({ ...conversation, operation: 'CREATE' });
 
       const obs$ = chatService.converse({
         agentId: 'my-agent',
@@ -200,20 +224,22 @@ describe('ChatService', () => {
 
       await firstValueFrom(obs$.pipe(toArray()));
 
-      expect(conversationExistsMock$).not.toHaveBeenCalled();
+      expect(conversationExistsMock).not.toHaveBeenCalled();
       expect(createConversationMock$).toHaveBeenCalledWith({
         agentId: 'my-agent',
         conversationClient: expect.anything(),
-        conversationId: undefined,
+        conversationId: conversation.id,
         title$: expect.anything(),
         roundCompletedEvents$: expect.anything(),
       });
       expect(updateConversationMock$).not.toHaveBeenCalled();
     });
 
-    it('passes autoCreateConversationWithId parameter to getConversation$', async () => {
-      conversationExistsMock$.mockReturnValue(of(false));
-      getConversationMock$.mockReturnValue(of(createEmptyConversation()));
+    it('passes autoCreateConversationWithId parameter to getConversation', async () => {
+      getConversationMock.mockResolvedValue({
+        ...createEmptyConversation(),
+        operation: 'CREATE',
+      });
 
       const obs$ = chatService.converse({
         agentId: 'my-agent',
@@ -227,12 +253,182 @@ describe('ChatService', () => {
 
       await firstValueFrom(obs$.pipe(toArray()));
 
-      expect(getConversationMock$).toHaveBeenCalledWith({
+      expect(getConversationMock).toHaveBeenCalledWith({
         agentId: 'my-agent',
         conversationId: 'test-conversation',
         autoCreateConversationWithId: true,
         conversationClient: expect.anything(),
       });
+    });
+  });
+
+  it('throws when no connector is available for chat execution', async () => {
+    resolveServicesMock.mockRejectedValue(new Error('No connector available for chat execution'));
+    getConversationMock.mockResolvedValue({
+      ...createEmptyConversation(),
+      operation: 'CREATE',
+    });
+
+    const obs$ = chatService.converse({
+      agentId: 'my-agent',
+      request,
+      nextInput: { message: 'hello' },
+    });
+
+    await expect(firstValueFrom(obs$)).rejects.toThrow('No connector available for chat execution');
+  });
+
+  describe('conversationIdSetEvent', () => {
+    it('emits conversationIdSetEvent for new conversations (no conversationId)', async () => {
+      const conversation = createEmptyConversation();
+      getConversationMock.mockResolvedValue({ ...conversation, operation: 'CREATE' });
+
+      // Mock agent events to include a round complete event
+      const mockRoundCompleteEvent = {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'round-1',
+            trace_id: 'trace-1',
+            steps: [],
+            response: 'Test response',
+          },
+        },
+      };
+      executeAgentMock$.mockReturnValue(of(mockRoundCompleteEvent));
+
+      const obs$ = chatService.converse({
+        agentId: 'my-agent',
+        request,
+        nextInput: { message: 'hello' },
+      });
+
+      const events = await firstValueFrom(obs$.pipe(toArray()));
+
+      // Should emit conversationIdSetEvent
+      const conversationIdSetEvents = events.filter(isConversationIdSetEvent);
+      expect(conversationIdSetEvents).toHaveLength(1);
+      expect(conversationIdSetEvents[0].data.conversation_id).toBe(conversation.id);
+    });
+
+    it('emits conversationIdSetEvent for new conversations (autoCreateConversationWithId=true, conversation does not exist)', async () => {
+      const providedId = 'non-existing-conversation';
+      const conversation = {
+        ...createEmptyConversation(),
+        id: providedId,
+      };
+      conversationExistsMock.mockResolvedValue(false);
+      getConversationMock.mockResolvedValue({ ...conversation, operation: 'CREATE' });
+
+      // Mock agent events to include a round complete event
+      const mockRoundCompleteEvent = {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'round-1',
+            trace_id: 'trace-1',
+            steps: [],
+            response: 'Test response',
+          },
+        },
+      };
+      executeAgentMock$.mockReturnValue(of(mockRoundCompleteEvent));
+
+      const obs$ = chatService.converse({
+        agentId: 'my-agent',
+        conversationId: providedId,
+        autoCreateConversationWithId: true,
+        request,
+        nextInput: { message: 'hello' },
+      });
+
+      const events = await firstValueFrom(obs$.pipe(toArray()));
+
+      // Should emit conversationIdSetEvent with the provided ID
+      const conversationIdSetEvents = events.filter(isConversationIdSetEvent);
+      expect(conversationIdSetEvents).toHaveLength(1);
+      expect(conversationIdSetEvents[0].data.conversation_id).toBe(providedId);
+    });
+
+    it('does NOT emit conversationIdSetEvent for existing conversations (autoCreateConversationWithId=false)', async () => {
+      const existingConversationId = 'existing-conversation';
+      const conversation = {
+        ...createEmptyConversation(),
+        id: existingConversationId, // ← Use the same ID
+      };
+      getConversationMock.mockResolvedValue({ ...conversation, operation: 'UPDATE' });
+
+      // Mock agent events to include a round complete event
+      const mockRoundCompleteEvent = {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'round-1',
+            trace_id: 'trace-1',
+            steps: [],
+            response: 'Test response',
+          },
+        },
+      };
+      executeAgentMock$.mockReturnValue(of(mockRoundCompleteEvent));
+
+      const obs$ = chatService.converse({
+        agentId: 'my-agent',
+        conversationId: existingConversationId,
+        request,
+        nextInput: { message: 'hello' },
+      });
+
+      const events = await firstValueFrom(obs$.pipe(toArray()));
+
+      // Should NOT emit conversationIdSetEvent
+      const conversationIdSetEvents = events.filter(isConversationIdSetEvent);
+      expect(conversationIdSetEvents).toHaveLength(0);
+    });
+
+    it('emits conversationIdSetEvent before other events for new conversations', async () => {
+      const conversation = createEmptyConversation();
+      getConversationMock.mockResolvedValue({ ...conversation, operation: 'CREATE' });
+
+      // Mock agent events to include multiple events
+      const mockAgentEvents = [
+        {
+          type: ChatEventType.reasoning,
+          data: { message: 'Thinking...' },
+        },
+        {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: {
+              id: 'round-1',
+              trace_id: 'trace-1',
+              steps: [],
+              response: 'Test response',
+            },
+          },
+        },
+      ];
+      executeAgentMock$.mockReturnValue(of(...mockAgentEvents));
+
+      const obs$ = chatService.converse({
+        agentId: 'my-agent',
+        request,
+        nextInput: { message: 'hello' },
+      });
+
+      const events = await firstValueFrom(obs$.pipe(toArray()));
+
+      // Find the conversationIdSetEvent
+      const conversationIdSetEventIndex = events.findIndex(isConversationIdSetEvent);
+      expect(conversationIdSetEventIndex).toBeGreaterThanOrEqual(0);
+
+      // Find the first agent event (reasoning)
+      const reasoningEventIndex = events.findIndex(
+        (event) => event.type === ChatEventType.reasoning
+      );
+
+      // conversationIdSetEvent should come before agent events
+      expect(conversationIdSetEventIndex).toBeLessThan(reasoningEventIndex);
     });
   });
 });

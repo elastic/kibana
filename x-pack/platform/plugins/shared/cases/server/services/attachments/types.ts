@@ -53,6 +53,14 @@ export interface AlertIdsAggsResult {
   };
 }
 
+export interface EventIdsAggsResult {
+  eventIds: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+}
+
 export type AlertsAttachedToCaseArgs = AttachedToCaseArgs;
 
 export interface AttachmentsAttachedToCaseArgs extends AttachedToCaseArgs {

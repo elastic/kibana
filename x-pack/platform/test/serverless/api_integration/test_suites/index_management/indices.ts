@@ -139,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
           'documents',
           'hidden',
           'isFrozen',
+          'mode',
           'name',
           'size',
         ]);

@@ -7,16 +7,10 @@
 
 export { getDocumentById, type GetDocumentByIdResult } from './get_documents';
 export {
-  getIndexMappings,
-  type GetIndexMappingEntry,
-  type GetIndexMappingsResult,
-} from './get_mappings';
-export {
   performMatchSearch,
   type PerformMatchSearchResponse,
   type MatchResult,
 } from './perform_match_search';
-export { executeEsql, type EsqlResponse } from './execute_esql';
 export { listIndices, type ListIndexBasicInfo, type ListIndexDetailInfo } from './list_indices';
 export {
   listSearchSources,
@@ -26,4 +20,3 @@ export {
   type EsSearchSource,
   type ListSourcesResponse,
 } from './list_search_sources';
-export { resolveResource, type ResolveResourceResponse } from './resolve_resource';

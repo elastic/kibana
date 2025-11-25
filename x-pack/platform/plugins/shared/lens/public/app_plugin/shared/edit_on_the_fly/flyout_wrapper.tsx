@@ -18,6 +18,7 @@ import {
   EuiButton,
   EuiLink,
   EuiBetaBadge,
+  EuiSpacer,
   EuiText,
   EuiCallOut,
   useEuiTheme,
@@ -27,31 +28,38 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FlyoutWrapperProps } from './types';
 
+const applyAndCloseLabel = i18n.translate('xpack.lens.config.applyFlyoutLabel', {
+  defaultMessage: 'Apply and close',
+});
+
 export const FlyoutWrapper = ({
   children,
+  toolbar,
+  layerTabs,
   isInlineFlyoutVisible,
   isScrollable,
   displayFlyoutHeader,
-  language,
   isNewPanel,
   isSaveable,
   onCancel,
   navigateToLensEditor,
   onApply,
   isReadOnly,
+  applyButtonLabel = applyAndCloseLabel,
 }: FlyoutWrapperProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <>
       {isInlineFlyoutVisible && displayFlyoutHeader && (
         <EuiFlyoutHeader
-          hasBorder
+          hasBorder={false}
           css={css`
             pointer-events: auto;
             background-color: ${euiTheme.colors.emptyShade};
           `}
           data-test-subj="editFlyoutHeader"
         >
+          {/* Header row 1: Title */}
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs" data-test-subj="inlineEditingFlyoutLabel">
@@ -76,6 +84,7 @@ export const FlyoutWrapper = ({
                         )}
                       >
                         <EuiBetaBadge
+                          tabIndex={0}
                           label=""
                           iconType="beaker"
                           size="s"
@@ -89,22 +98,54 @@ export const FlyoutWrapper = ({
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
-            {navigateToLensEditor && !isReadOnly && (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <EuiLink onClick={navigateToLensEditor} data-test-subj="navigateToLensEditorLink">
-                    {i18n.translate('xpack.lens.config.editLinkLabel', {
-                      defaultMessage: 'Edit in Lens',
-                    })}
-                  </EuiLink>
-                </EuiText>
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+          {/* Header row 2: Edit in Lens and button groups */}
+          {(navigateToLensEditor || toolbar) && (
+            <>
+              <EuiFlexGroup
+                gutterSize="s"
+                justifyContent="spaceBetween"
+                alignItems="center"
+                responsive={false}
+              >
+                {navigateToLensEditor && !isReadOnly && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs">
+                      <EuiLink
+                        onClick={navigateToLensEditor}
+                        data-test-subj="navigateToLensEditorLink"
+                      >
+                        {i18n.translate('xpack.lens.config.editLinkLabel', {
+                          defaultMessage: 'Edit in Lens',
+                        })}
+                      </EuiLink>
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+                {/* Empty growing flex item to push toolbar to the right */}
+                <EuiFlexItem grow={true} />
+                {toolbar ?? null}
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
+            </>
+          )}
+          {/* Header row 3: Layer tabs */}
+          {layerTabs ? (
+            <div
+              // Adding negative margin to compensate for EuiFlyout header padding
+              css={css({
+                marginInline: `-${euiTheme.size.base}`,
+              })}
+            >
+              {layerTabs}
+            </div>
+          ) : null}
         </EuiFlyoutHeader>
       )}
       {isInlineFlyoutVisible && isReadOnly ? (
         <EuiCallOut
+          announceOnMount={false}
           title={i18n.translate('xpack.lens.config.readOnly', {
             defaultMessage: 'Read-only: Changes will be reverted on close',
           })}
@@ -170,10 +211,7 @@ export const FlyoutWrapper = ({
                   iconType="check"
                   data-test-subj="applyFlyoutButton"
                 >
-                  <FormattedMessage
-                    id="xpack.lens.config.applyFlyoutLabel"
-                    defaultMessage="Apply and close"
-                  />
+                  {applyButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
             )}

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -33,7 +33,6 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/shared-ux-router",
     "@kbn/zod-helpers",
-    "@kbn/stack-connectors-plugin",
     "@kbn/core-analytics-browser",
     "@kbn/logging-mocks",
     "@kbn/licensing-plugin",
@@ -45,6 +44,9 @@
     "@kbn/zod",
     "@kbn/tooling-log",
     "@kbn/ai-assistant-icon",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/inference-plugin",
+    "@kbn/inference-langchain",
+    "@kbn/connector-schemas"
   ]
 }

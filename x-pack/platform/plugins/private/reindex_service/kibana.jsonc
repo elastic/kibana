@@ -19,6 +19,9 @@
     ],
     "requiredBundles": [
       "esUiShared",
+    ],
+    "extraPublicDirs": [
+      "common"
     ]
   }
 }

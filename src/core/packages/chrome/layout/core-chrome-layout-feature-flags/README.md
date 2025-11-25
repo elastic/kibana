@@ -1,28 +1,21 @@
 # @kbn/core-chrome-layout-feature-flags
 
-This package provides feature flag utilities for the Chrome layout system in Kibana. It enables toggling and retrieving layout-related feature flags, such as layout type, debug mode, and side navigation version, to support progressive enhancement and experimentation in the UI.
-
-## Exports
-
-- `LAYOUT_FEATURE_FLAG_KEY`: The feature flag key for selecting the layout type (`legacy-fixed` or `grid`).
-- `LAYOUT_DEBUG_FEATURE_FLAG_KEY`: The feature flag key for enabling layout debug mode.
-- `LAYOUT_PROJECT_SIDENAV_FEATURE_FLAG_KEY`: The feature flag key for selecting the project side navigation version (`v1`, `v2`, or `both`).
-- `getLayoutVersion(featureFlags)`: Returns the current layout type.
-- `getLayoutDebugFlag(featureFlags)`: Returns whether layout debug mode is enabled.
-- `getSideNavVersion(featureFlags)`: Returns the current side navigation version.
+Feature flag utilities for Kibana's Chrome layout system.
 
 ## Usage
 
-Import the utilities and use them with a `FeatureFlagsStart` instance:
+```typescript
+import { getLayoutVersion, getLayoutDebugFlag } from '@kbn/core-chrome-layout-feature-flags';
 
-```ts
-import {
-  getLayoutVersion,
-  getLayoutDebugFlag,
-  getSideNavVersion,
-} from '@kbn/core-chrome-layout-feature-flags';
-
-const layoutType = getLayoutVersion(featureFlags);
-const isDebug = getLayoutDebugFlag(featureFlags);
-const sideNavVersion = getSideNavVersion(featureFlags);
+const layoutType = getLayoutVersion(featureFlags); // 'legacy-fixed' | 'grid'
+const isDebug = getLayoutDebugFlag(featureFlags); // boolean
 ```
+
+## Feature Flags
+
+- **`LAYOUT_FEATURE_FLAG_KEY`**: Layout type selection
+- **`LAYOUT_DEBUG_FEATURE_FLAG_KEY`**: Debug mode toggle
+
+## Functions
+
+See the implementation file for complete API documentation and usage details.

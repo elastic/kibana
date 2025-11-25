@@ -40,26 +40,16 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
       fields: {},
       routing: [],
     },
-    lifecycle: {
-      inherit: {},
-    },
-    processing: {
-      steps: [],
-    },
+    lifecycle: { inherit: {} },
+    processing: { steps: [] },
+    settings: {},
+    failure_store: { inherit: {} },
   },
 };
 
 export const Empty: StoryFn<{}> = () => {
   return (
-    <SignificantEventsTable
-      definition={logsStreamDefinition}
-      response={{
-        loading: false,
-        value: [],
-        error: undefined,
-      }}
-      xFormatter={xFormatter}
-    />
+    <SignificantEventsTable definition={logsStreamDefinition} items={[]} xFormatter={xFormatter} />
   );
 };
 
@@ -74,30 +64,33 @@ export const SomeThings: StoryFn<{}> = () => {
           }, 1000)
         );
       }}
-      response={{
-        loading: false,
-        value: [
-          {
-            query: {
-              id: 'match_everything',
-              title: 'Match everything',
-              kql: {
-                query: '*',
+      items={[
+        {
+          title: 'High error rate',
+          query: {
+            id: 'match_everything',
+            title: 'Match everything',
+            kql: {
+              query: '*',
+            },
+            feature: {
+              name: 'Feature',
+              filter: {
+                always: {},
               },
             },
-            change_points: {
-              type: {
-                spike: {
-                  change_point: 3,
-                  p_value: 0.0001,
-                },
-              },
-            },
-            occurrences: generateValues(),
           },
-        ],
-        error: undefined,
-      }}
+          change_points: {
+            type: {
+              spike: {
+                change_point: 3,
+                p_value: 0.0001,
+              },
+            },
+          },
+          occurrences: generateValues(),
+        },
+      ]}
       xFormatter={xFormatter}
     />
   );

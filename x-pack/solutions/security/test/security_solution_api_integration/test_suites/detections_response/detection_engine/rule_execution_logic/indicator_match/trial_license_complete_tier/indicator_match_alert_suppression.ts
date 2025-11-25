@@ -26,7 +26,7 @@ import type { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/c
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { createRule } from '../../../../../../config/services/detections_response';
+import { createRule } from '@kbn/detections-response-ftr-services';
 import {
   getOpenAlerts,
   getPreviewAlerts,
@@ -1254,10 +1254,9 @@ export default ({ getService }: FtrProviderContext) => {
 
           await indexGeneratedSourceDocuments({
             docsCount: 60000,
-            interval: [firstTimestamp, '2020-10-28T05:45:50.000Z'],
-            seed: (index, _, timestamp) => ({
+            seed: (index) => ({
               id,
-              '@timestamp': timestamp,
+              '@timestamp': new Date('2020-10-28T05:45:00.000Z').getTime() - index,
               host: {
                 name: `host-${index}`,
               },
@@ -1267,10 +1266,9 @@ export default ({ getService }: FtrProviderContext) => {
 
           await indexGeneratedSourceDocuments({
             docsCount: 60000,
-            interval: [secondTimestamp, '2020-10-28T06:20:50.000Z'],
-            seed: (index, _, timestamp) => ({
+            seed: (index) => ({
               id,
-              '@timestamp': timestamp,
+              '@timestamp': new Date('2020-10-28T06:20:00.000Z').getTime() - index,
               host: {
                 name: `host-${index}`,
               },

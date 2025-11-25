@@ -6,18 +6,22 @@
  */
 
 import { z } from '@kbn/zod';
+import type { Logger } from '@kbn/logging';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import { tool as toTool } from '@langchain/core/tools';
-import type { ScopedModel } from '@kbn/onechat-server';
+import type { ScopedModel, ToolEventEmitter } from '@kbn/onechat-server';
 import type { ResourceResult, ToolResult } from '@kbn/onechat-common/tools';
 import { ToolResultType } from '@kbn/onechat-common/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { getToolResultId, createErrorResult } from '@kbn/onechat-server/tools';
 import { relevanceSearch } from '../relevance_search';
 import { naturalLanguageSearch } from '../nl_search';
 import type { MatchResult } from '../steps/perform_match_search';
+import { progressMessages } from './i18n';
 
 const convertMatchResult = (result: MatchResult): ResourceResult => {
   return {
+    tool_result_id: getToolResultId(),
     type: ToolResultType.resource,
     data: {
       reference: {
@@ -37,9 +41,11 @@ export const relevanceSearchToolName = 'relevance_search';
 export const createRelevanceSearchTool = ({
   model,
   esClient,
+  events,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
+  events?: ToolEventEmitter;
 }) => {
   return toTool(
     async ({ term, index, size }) => {
@@ -47,6 +53,7 @@ export const createRelevanceSearchTool = ({
         relevanceSearchToolName,
         { tool: { input: { term, index, size } } },
         async () => {
+          events?.reportProgress(progressMessages.performingRelevanceSearch({ term }));
           const { results: rawResults } = await relevanceSearch({
             target: index,
             term,
@@ -86,9 +93,17 @@ export const naturalLanguageSearchToolName = 'natural_language_search';
 export const createNaturalLanguageSearchTool = ({
   model,
   esClient,
+  events,
+  logger,
+  rowLimit,
+  customInstructions,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
+  events: ToolEventEmitter;
+  logger: Logger;
+  rowLimit?: number;
+  customInstructions?: string;
 }) => {
   return toTool(
     async ({ query, index }) => {
@@ -96,25 +111,46 @@ export const createNaturalLanguageSearchTool = ({
         naturalLanguageSearchToolName,
         { tool: { input: { query, index } } },
         async () => {
+          events?.reportProgress(progressMessages.performingNlSearch({ query }));
           const response = await naturalLanguageSearch({
             nlQuery: query,
             target: index,
             model,
             esClient,
+            events,
+            logger,
+            rowLimit,
+            customInstructions,
           });
 
-          const results: ToolResult[] = [
-            {
-              type: ToolResultType.query,
-              data: {
-                esql: response.generatedQuery,
-              },
-            },
-            {
-              type: ToolResultType.tabularData,
-              data: response.esqlData,
-            },
-          ];
+          const results: ToolResult[] = response.esqlData
+            ? [
+                {
+                  tool_result_id: getToolResultId(),
+                  type: ToolResultType.query,
+                  data: {
+                    esql: response.generatedQuery,
+                  },
+                },
+                {
+                  tool_result_id: getToolResultId(),
+                  type: ToolResultType.tabularData,
+                  data: {
+                    source: 'esql',
+                    query: response.generatedQuery,
+                    columns: response.esqlData.columns,
+                    values: response.esqlData.values,
+                  },
+                },
+              ]
+            : [
+                createErrorResult({
+                  message: response.error ?? 'Query was not executed',
+                  metadata: {
+                    query: response.generatedQuery,
+                  },
+                }),
+              ];
 
           const content = JSON.stringify(results);
           const artifact = { results };

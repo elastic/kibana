@@ -666,6 +666,44 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
 
   // ASK: best way, if any, to avoid `any`?
   const assets = paths.reduce((map: any, path) => {
+    // Handle knowledge base assets specially - they include all .md files from the docs/ folder
+    if (path.includes('/docs/') && path.endsWith('.md')) {
+      // Extract package info and filename from the path
+      const pathWithoutPrefix = path.replace(/^\/package\//, '');
+      const [pkgkey, ...rest] = pathWithoutPrefix.split('/');
+      const docsIndex = rest.indexOf('docs');
+
+      if (docsIndex >= 0) {
+        // Get path after docs/
+        const pathAfterDocs = rest.slice(docsIndex + 1).join('/');
+
+        let fileName: string;
+        // If it's in knowledge_base subfolder, remove that prefix for backward compatibility
+        if (pathAfterDocs.startsWith('knowledge_base/')) {
+          fileName = pathAfterDocs.substring('knowledge_base/'.length);
+        } else {
+          // For other .md files in docs/, use the full path relative to docs/
+          fileName = pathAfterDocs;
+        }
+
+        // Create KB asset parts with elasticsearch service but keep original file reference
+        const kbParts = {
+          pkgkey,
+          service: 'elasticsearch' as const,
+          type: 'knowledge_base' as const,
+          file: fileName,
+          // For KB assets, we want the path to still reference the original docs location
+          path: path.replace(/^\/package\//, ''),
+        };
+
+        if (!map.elasticsearch) map.elasticsearch = {};
+        if (!map.elasticsearch.knowledge_base) map.elasticsearch.knowledge_base = [];
+        map.elasticsearch.knowledge_base.push(kbParts);
+        return map;
+      }
+    }
+
+    // Handle regular assets
     const parts = getPathParts(path.replace(/^\/package\//, ''));
     if (
       (parts.service === 'kibana' && kibanaAssetTypes.includes(parts.type)) ||

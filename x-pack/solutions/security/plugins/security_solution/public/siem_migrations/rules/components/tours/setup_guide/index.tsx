@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
+import { TOURS, useTourQueue } from '@kbn/tour-queue';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -32,12 +33,15 @@ export const SiemMigrationSetupTour: React.FC<SetupTourProps> = React.memo(({ ch
     return tourConfig;
   });
 
+  const { isActive: isActiveInQueue, onComplete } = useTourQueue(TOURS.SECURITY_SIEM_MIGRATION);
+
   const onTourFinished = useCallback(() => {
     setTourState({
       ...tourState,
       isTourActive: false,
     });
-  }, [tourState]);
+    onComplete();
+  }, [tourState, onComplete]);
 
   useEffect(() => {
     storage.set(NEW_FEATURES_TOUR_STORAGE_KEYS.SIEM_MAIN_LANDING_PAGE, tourState);
@@ -52,11 +56,17 @@ export const SiemMigrationSetupTour: React.FC<SetupTourProps> = React.memo(({ ch
   }, []);
 
   const showTour = useMemo(() => {
-    return siemMigrations.rules.isAvailable() && tourState.isTourActive && tourDelayElapsed;
-  }, [siemMigrations.rules, tourDelayElapsed, tourState.isTourActive]);
+    return (
+      siemMigrations.rules.isAvailable() &&
+      tourState.isTourActive &&
+      tourDelayElapsed &&
+      isActiveInQueue
+    );
+  }, [siemMigrations.rules, tourDelayElapsed, tourState.isTourActive, isActiveInQueue]);
 
   return (
     <EuiTourStep
+      data-test-subj="siemMigrationsSetupTourStep"
       anchorPosition="downCenter"
       content={i18n.SETUP_SIEM_MIGRATION_TOUR_CONTENT}
       isStepOpen={showTour}
@@ -68,7 +78,14 @@ export const SiemMigrationSetupTour: React.FC<SetupTourProps> = React.memo(({ ch
       subtitle={i18n.SETUP_SIEM_MIGRATION_TOUR_SUBTITLE}
       title={i18n.SETUP_SIEM_MIGRATION_TOUR_TITLE}
       footerAction={
-        <EuiButtonEmpty size="xs" color="text" flush="right" onClick={onTourFinished}>
+        <EuiButtonEmpty
+          data-test-subj="finishTourButton"
+          aria-label={i18n.FINISH_TOUR_BUTTON}
+          size="xs"
+          color="text"
+          flush="right"
+          onClick={onTourFinished}
+        >
           {i18n.FINISH_TOUR_BUTTON}
         </EuiButtonEmpty>
       }

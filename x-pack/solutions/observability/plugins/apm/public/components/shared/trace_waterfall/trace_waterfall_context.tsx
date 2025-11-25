@@ -33,6 +33,7 @@ export interface TraceWaterfallContextProps {
   colorBy: WaterfallLegendType;
   showLegend: boolean;
   serviceName?: string;
+  message?: string;
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
@@ -51,7 +52,27 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
 });
 
 export type OnNodeClick = (id: string) => void;
-export type OnErrorClick = (params: { traceId: string; docId: string }) => void;
+export type OnErrorClick = (params: {
+  traceId: string;
+  docId: string;
+  errorCount: number;
+  errorDocId?: string;
+}) => void;
+
+interface Props {
+  children: React.ReactNode;
+  traceItems: TraceItem[];
+  showAccordion: boolean;
+  highlightedTraceId?: string;
+  onClick?: OnNodeClick;
+  onErrorClick?: OnErrorClick;
+  scrollElement?: Element;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  isEmbeddable: boolean;
+  showLegend: boolean;
+  serviceName?: string;
+  isFiltered?: boolean;
+}
 
 export function TraceWaterfallContextProvider({
   children,
@@ -65,22 +86,12 @@ export function TraceWaterfallContextProvider({
   isEmbeddable,
   showLegend,
   serviceName,
-}: {
-  children: React.ReactNode;
-  traceItems: TraceItem[];
-  showAccordion: boolean;
-  highlightedTraceId?: string;
-  onClick?: OnNodeClick;
-  onErrorClick?: OnErrorClick;
-  scrollElement?: Element;
-  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
-  isEmbeddable: boolean;
-  showLegend: boolean;
-  serviceName?: string;
-}) {
-  const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy, traceState } =
+  isFiltered,
+}: Props) {
+  const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy, traceState, message } =
     useTraceWaterfall({
       traceItems,
+      isFiltered,
     });
 
   const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;
@@ -108,6 +119,7 @@ export function TraceWaterfallContextProvider({
         colorBy,
         showLegend,
         serviceName,
+        message,
       }}
     >
       {children}

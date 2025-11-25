@@ -8,6 +8,5 @@
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  loadTestFile(require.resolve('./calculate_is_customized'));
-  loadTestFile(require.resolve('./customize_via_bulk_editing'));
+  loadTestFile(require.resolve('./unable_to_customize_via_bulk_editing'));
 };

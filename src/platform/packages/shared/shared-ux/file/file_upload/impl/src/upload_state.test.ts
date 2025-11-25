@@ -47,6 +47,27 @@ describe('UploadState', () => {
     testScheduler = getTestScheduler();
   });
 
+  it('throws for empty files', () => {
+    testScheduler.run(({ expectObservable }) => {
+      const file = {
+        name: 'empty',
+        size: 0,
+      } as File;
+
+      uploadState.setFiles([file]);
+
+      expectObservable(uploadState.files$).toBe('a', {
+        a: [
+          {
+            file,
+            status: 'idle',
+            error: new Error('File is empty. Please provide a file with content.'),
+          },
+        ],
+      });
+    });
+  });
+
   it('calls file client with expected arguments', async () => {
     testScheduler.run(({ expectObservable, cold, flush }) => {
       const file1 = { name: 'test.png', size: 1, type: 'image/png' } as File;
@@ -126,8 +147,8 @@ describe('UploadState', () => {
       filesClient.upload.mockReturnValue(of(undefined).pipe(delay(10)) as any);
       filesClient.delete.mockReturnValue(of(undefined) as any);
 
-      const file1 = { name: 'test', type: 'text/plain' } as File;
-      const file2 = { name: 'test 2.png', type: 'image/png' } as File;
+      const file1 = { name: 'test', size: 1, type: 'text/plain' } as File;
+      const file2 = { name: 'test 2.png', size: 1, type: 'image/png' } as File;
 
       uploadState.setFiles([file1, file2]);
 
@@ -228,8 +249,8 @@ describe('UploadState', () => {
         { allowRepeatedUploads: true },
         imageMetadataFactory
       );
-      const file1 = { name: 'test' } as File;
-      const file2 = { name: 'test 2.png' } as File;
+      const file1 = { name: 'test', size: 1 } as File;
+      const file2 = { name: 'test 2.png', size: 1 } as File;
 
       uploadState.setFiles([file1, file2]);
 
@@ -240,8 +261,8 @@ describe('UploadState', () => {
   });
 
   it('correctly detects when files are ready for upload', () => {
-    const file1 = { name: 'test' } as File;
-    const file2 = { name: 'test 2.png' } as File;
+    const file1 = { name: 'test', size: 1 } as File;
+    const file2 = { name: 'test 2.png', size: 1 } as File;
     expect(uploadState.hasFiles()).toBe(false);
     uploadState.setFiles([file1, file2]);
     expect(uploadState.hasFiles()).toBe(true);

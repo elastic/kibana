@@ -12,7 +12,7 @@ import { FunctionDefinitionTypes, getNoValidCallSignatureError } from '@kbn/esql
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
-import { PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING } from '@kbn/esql-ast/src/definitions/utils/validation/function';
+import { PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING } from '@kbn/esql-ast/src/definitions/utils/expressions';
 
 describe('function validation', () => {
   afterEach(() => {
@@ -390,6 +390,24 @@ describe('function validation', () => {
               getNoValidCallSignatureError('test', ['keyword', 'keyword']),
             ]);
           });
+        });
+
+        it('skips column validation for left assignment arg', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('FROM a_index | EVAL lolz = 2', []);
+          await expectErrors('FROM a_index | EVAL lolz = nonexistent', [
+            'Unknown column "nonexistent"',
+          ]);
+        });
+
+        it('skips column validation for right arg to AS', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('FROM a_index | RENAME keywordField AS lolz', []);
+          await expectErrors('FROM a_index | RENAME nonexistent AS lolz', [
+            'Unknown column "nonexistent"',
+          ]);
         });
       });
     });
@@ -1053,6 +1071,16 @@ describe('function validation', () => {
           'FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(WrongField)',
           ['Unknown column "WrongField"']
         );
+      });
+
+      describe('operators in STATS WHERE context', () => {
+        it('should allow IS NOT NULL operator in STATS WHERE clause when validation is applied', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('FROM index | STATS COUNT() WHERE unknownField IS NOT NULL', [
+            'Unknown column "unknownField"',
+          ]);
+        });
       });
     });
   });

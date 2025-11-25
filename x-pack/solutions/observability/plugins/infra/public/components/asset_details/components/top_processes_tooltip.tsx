@@ -10,12 +10,16 @@ import { i18n } from '@kbn/i18n';
 import { EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Popover } from '../tabs/common/popover';
+import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
 
 const DOCUMENTATION_LINK =
   'https://www.elastic.co/guide/en/observability/current/view-infrastructure-metrics.html';
-const SYSTEM_INTEGRATION_DOCS_LINK = 'https://docs.elastic.co/en/integrations/system';
+const SYSTEM_INTEGRATION_DOCS_LINK = 'https://ela.st/hosts-ui-systems-integration';
+const SEMCONV_INTEGRATION_DOCS_LINK = 'https://ela.st/otel-process-hosts-ui';
 
 export const TopProcessesTooltip = React.memo(() => {
+  const { schema } = useAssetDetailsRenderPropsContext();
+
   return (
     <Popover
       aria-label={i18n.translate('xpack.infra.metrics.nodeDetails.processesHeader.tooltipLabel', {
@@ -32,30 +36,53 @@ export const TopProcessesTooltip = React.memo(() => {
             defaultMessage="The processes listed are based on an aggregation of the top CPU and the top memory consuming processes. It does not show all processes."
           />
         </p>
-        <p>
-          <FormattedMessage
-            id="xpack.infra.assetDetails.processes.tooltip.label"
-            defaultMessage="The number of top processes is configurable in the {systemIntegration}."
-            values={{
-              systemIntegration: (
-                <EuiLink
-                  data-test-subj="infraAssetDetailsTooltipSystemIntegrationDocumentationLink"
-                  href={SYSTEM_INTEGRATION_DOCS_LINK}
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="xpack.infra.assetDetails.processes.tooltip.systemIntegrationDocumentationLink"
-                    defaultMessage="System Integration"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
+        {schema === 'ecs' ? (
+          <p>
+            <FormattedMessage
+              id="xpack.infra.assetDetails.processes.tooltip.ecsLabel"
+              defaultMessage="You can configure the {systemIntegration} to emit process data for your hosts."
+              values={{
+                systemIntegration: (
+                  <EuiLink
+                    data-test-subj="infraAssetDetailsTooltipECSIntegrationDocumentationLink"
+                    href={SYSTEM_INTEGRATION_DOCS_LINK}
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.infra.assetDetails.processes.tooltip.ecsIntegrationDocumentationLink"
+                      defaultMessage="System Integration"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        ) : (
+          <p>
+            <FormattedMessage
+              id="xpack.infra.assetDetails.processes.tooltip.semconvLabel"
+              defaultMessage="You can {configureOpenTelemetryCollector} to emit process data for your hosts."
+              values={{
+                configureOpenTelemetryCollector: (
+                  <EuiLink
+                    data-test-subj="infraAssetDetailsTooltipSemconvIntegrationDocumentationLink"
+                    href={SEMCONV_INTEGRATION_DOCS_LINK}
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.infra.assetDetails.processes.tooltip.semconvIntegrationDocumentationLink"
+                      defaultMessage="configure your OpenTelemetry Collector"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        )}
         <p>
           <FormattedMessage
             id="xpack.infra.assetDetails.processes.tooltip.documentationLabel"
-            defaultMessage="Please see the following {documentation} for more details on processes."
+            defaultMessage="Please see our {documentation} for more details on processes."
             values={{
               documentation: (
                 <EuiLink

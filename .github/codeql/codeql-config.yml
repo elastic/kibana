@@ -119,6 +119,7 @@ paths-ignore:
   - x-pack/examples
   - x-pack/packages/ai-infra/product-doc-artifact-builder
   - x-pack/packages/kbn-synthetics-private-location
+  - x-pack/platform/packages/private/security/kbn_uiam_dev_cli
   - x-pack/platform/packages/shared/kbn-ai-tools-cli
   - x-pack/platform/packages/shared/kbn-data-forge
   - x-pack/platform/packages/shared/kbn-inference-cli
@@ -131,9 +132,10 @@ paths-ignore:
   - x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant
   - x-pack/solutions/observability/packages/kbn-genai-cli
   - x-pack/solutions/*/test
-  - x-pack/test
 query-filters:
   - exclude:
       paths:
         - codeql/javascript-queries/AngularJS
         - codeql/javascript-queries/Electron
+packs:
+  - githubsecuritylab/codeql-javascript-queries

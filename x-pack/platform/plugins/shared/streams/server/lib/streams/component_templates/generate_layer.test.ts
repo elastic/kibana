@@ -26,6 +26,8 @@ describe('generateLayer', () => {
         // simulate DSL lifecycle
         dsl: { data_retention: '30d' },
       },
+      settings: {},
+      failure_store: { inherit: {} },
     },
   };
 
@@ -116,13 +118,6 @@ describe('generateLayer', () => {
                   "attributes": Object {
                     "subobjects": false,
                     "type": "object",
-                  },
-                  "dropped_attributes_count": Object {
-                    "type": "long",
-                  },
-                  "schema_url": Object {
-                    "ignore_above": 1024,
-                    "type": "keyword",
                   },
                 },
                 "type": "object",

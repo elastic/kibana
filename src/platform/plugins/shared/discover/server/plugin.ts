@@ -28,7 +28,7 @@ import {
   METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
   TRACES_PRODUCT_FEATURE_ID,
 } from '../common/constants';
-import { searchEmbeddableTransforms } from '../common/embeddable';
+import { getSearchEmbeddableTransforms } from '../common/embeddable';
 
 export class DiscoverServerPlugin
   implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
@@ -65,7 +65,13 @@ export class DiscoverServerPlugin
     }
 
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
-    plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_TYPE, searchEmbeddableTransforms);
+    plugins.embeddable.registerTransforms(
+      SEARCH_EMBEDDABLE_TYPE,
+      getSearchEmbeddableTransforms(
+        plugins.embeddable.transformEnhancementsIn,
+        plugins.embeddable.transformEnhancementsOut
+      )
+    );
 
     core.pricing.registerProductFeatures([
       {
@@ -76,7 +82,10 @@ export class DiscoverServerPlugin
       {
         id: METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
         description: 'Metrics experience in Discover',
-        products: [{ name: 'observability', tier: 'complete' }],
+        products: [
+          { name: 'observability', tier: 'complete' },
+          { name: 'security', tier: 'complete' },
+        ],
       },
     ]);
 

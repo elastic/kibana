@@ -14,10 +14,10 @@ describe('isRootStreamDefinition', () => {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: {
-          steps: [],
-        },
+        processing: { steps: [] },
+        settings: {},
         wired: { fields: {}, routing: [] },
+        failure_store: { inherit: {} },
       },
     };
     expect(isRootStreamDefinition(validWired)).toBe(true);
@@ -30,7 +30,9 @@ describe('isRootStreamDefinition', () => {
       ingest: {
         lifecycle: { inherit: {} },
         processing: { steps: [] },
+        settings: {},
         wired: { fields: {}, routing: [] },
+        failure_store: { inherit: {} },
       },
     };
     expect(isRootStreamDefinition(nonRootWired)).toBe(false);
@@ -43,7 +45,9 @@ describe('isRootStreamDefinition', () => {
       ingest: {
         lifecycle: { inherit: {} },
         processing: { steps: [] },
+        settings: {},
         classic: {},
+        failure_store: { inherit: {} },
       },
     };
     expect(isRootStreamDefinition(classic)).toBe(false);

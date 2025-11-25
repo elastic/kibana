@@ -16,16 +16,11 @@ import type { BehaviorSubject } from 'rxjs';
 
 const MOCK_VALUES_FROM_QUERY = ['option1', 'option2', 'option3', 'option4', 'option5'];
 
-const mockGetESQLSingleColumnValues = jest.fn();
-const mockIsSuccess = jest.fn();
-
 jest.mock('./utils/get_esql_single_column_values', () => {
   const getESQLSingleColumnValues = () => {
-    mockGetESQLSingleColumnValues();
     return { values: MOCK_VALUES_FROM_QUERY };
   };
   getESQLSingleColumnValues.isSuccess = () => {
-    mockIsSuccess();
     return true;
   };
   return {
@@ -51,16 +46,16 @@ describe('initializeESQLControlSelections', () => {
         controlType: EsqlControlType.VALUES_FROM_QUERY,
       } as ESQLControlState;
 
+      let dataHasLoaded = false;
       const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
+      controlFetch$.next({});
 
-      await waitFor(() => {
-        expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(1);
-        expect(mockIsSuccess).toHaveBeenCalledTimes(1);
+      selections.internalApi.availableOptions$.subscribe((result) => {
+        if (result?.length === 5) dataHasLoaded = true;
       });
 
       await waitFor(() => {
-        const availableOptions = selections.internalApi.availableOptions$.getValue();
-        expect(availableOptions?.length).toBe(5);
+        expect(dataHasLoaded).toBe(true);
       });
 
       const latestState = selections.getLatestState();
@@ -72,6 +67,7 @@ describe('initializeESQLControlSelections', () => {
           "selectedOptions": Array [
             "option1",
           ],
+          "singleSelect": true,
           "title": "",
           "variableName": "variable1",
           "variableType": "values",
@@ -91,6 +87,7 @@ describe('initializeESQLControlSelections', () => {
       } as ESQLControlState;
 
       const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
+      controlFetch$.next({});
 
       await waitFor(() => {
         const availableOptions = selections.internalApi.availableOptions$.getValue();
@@ -109,14 +106,62 @@ describe('initializeESQLControlSelections', () => {
           "selectedOptions": Array [
             "option1",
           ],
+          "singleSelect": true,
           "title": "",
           "variableName": "variable1",
           "variableType": "values",
         }
       `);
     });
+  });
 
-    expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(0);
-    expect(mockIsSuccess).toHaveBeenCalledTimes(0);
+  describe('esqlVariable$', () => {
+    test('should emit single value for single-select mode', async () => {
+      const initialState = {
+        selectedOptions: ['option1'],
+        availableOptions: ['option1', 'option2'],
+        variableName: 'myVariable',
+        variableType: 'values',
+        controlType: EsqlControlType.STATIC_VALUES,
+        singleSelect: true,
+        title: 'Test Control',
+        esqlQuery: '',
+      } as ESQLControlState;
+
+      const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
+
+      await waitFor(() => {
+        const variable = selections.api.esqlVariable$.getValue();
+        expect(variable).toEqual({
+          key: 'myVariable',
+          value: 'option1',
+          type: 'values',
+        });
+      });
+    });
+
+    test('should emit array for multi-select mode', async () => {
+      const initialState = {
+        selectedOptions: ['option1', 'option2'],
+        availableOptions: ['option1', 'option2', 'option3'],
+        variableName: 'myVariable',
+        variableType: 'values',
+        controlType: EsqlControlType.STATIC_VALUES,
+        singleSelect: false,
+        title: 'Test Control',
+        esqlQuery: '',
+      } as ESQLControlState;
+
+      const selections = initializeESQLControlSelections(initialState, controlFetch$, jest.fn());
+
+      await waitFor(() => {
+        const variable = selections.api.esqlVariable$.getValue();
+        expect(variable).toEqual({
+          key: 'myVariable',
+          value: ['option1', 'option2'],
+          type: 'values',
+        });
+      });
+    });
   });
 });

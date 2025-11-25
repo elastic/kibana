@@ -8,13 +8,14 @@
 import expect from 'expect';
 
 import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
+import { generatePrebuiltRulesPackageBuffer } from '@kbn/security-solution-test-api-clients/prebuilt_rules_package_generation';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   getCustomQueryRuleParams,
-  createPrebuiltRulesPackage,
   installFleetPackageByUpload,
   installPrebuiltRules,
+  deletePrebuiltRulesFleetPackage,
 } from '../../../../utils';
 import {
   MOCK_PKG_VERSION,
@@ -25,31 +26,35 @@ import {
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
+  const retryService = getService('retry');
+
+  const installPrebuiltRulesFromUploadedPackage = async () => {
+    const securityDetectionEnginePackageBuffer = await generatePrebuiltRulesPackageBuffer({
+      packageName: PREBUILT_RULES_PACKAGE_NAME,
+      packageSemver: MOCK_PKG_VERSION,
+      prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
+    });
+    await installFleetPackageByUpload({
+      getService,
+      packageBuffer: securityDetectionEnginePackageBuffer,
+    });
+  };
 
   describe('@ess @serverless @serverlessQA modifying non-customizable fields', () => {
+    beforeEach(async () => {
+      await deleteAllRules(supertest, log);
+      await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
+    });
+
     describe('patch rules', () => {
-      beforeEach(async () => {
-        await deleteAllRules(supertest, log);
-      });
-
       it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
-        const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
-          packageName: PREBUILT_RULES_PACKAGE_NAME,
-          packageSemver: MOCK_PKG_VERSION,
-          prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
-        });
-
-        await installFleetPackageByUpload({
-          getService,
-          packageBuffer: securityDetectionEnginePackageZip.toBuffer(),
-        });
-
+        await installPrebuiltRulesFromUploadedPackage();
         await installPrebuiltRules(es, supertest);
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .patchRule({
             body: {
               rule_id: PREBUILT_RULE_ID_A,
@@ -63,31 +68,17 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('update rules', () => {
-      afterEach(async () => {
-        await deleteAllRules(supertest, log);
-      });
-
       it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
-        const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
-          packageName: PREBUILT_RULES_PACKAGE_NAME,
-          packageSemver: MOCK_PKG_VERSION,
-          prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
-        });
-
-        await installFleetPackageByUpload({
-          getService,
-          packageBuffer: securityDetectionEnginePackageZip.toBuffer(),
-        });
-
+        await installPrebuiltRulesFromUploadedPackage();
         await installPrebuiltRules(es, supertest);
 
-        const { body: existingRule } = await securitySolutionApi
+        const { body: existingRule } = await detectionsApi
           .readRule({
             query: { rule_id: PREBUILT_RULE_ID_A },
           })
           .expect(200);
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .updateRule({
             body: getCustomQueryRuleParams({
               ...existingRule,

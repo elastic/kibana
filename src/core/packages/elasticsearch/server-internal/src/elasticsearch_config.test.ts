@@ -36,6 +36,7 @@ test('set correct defaults', () => {
       "customHeaders": Object {},
       "dnsCacheTtl": "P0D",
       "healthCheckDelay": "PT2.5S",
+      "healthCheckRetry": 3,
       "healthCheckStartupDelay": "PT0.5S",
       "hosts": Array [
         "http://localhost:9200",
@@ -46,11 +47,57 @@ test('set correct defaults', () => {
       "maxResponseSize": undefined,
       "maxSockets": 800,
       "password": undefined,
-      "pingTimeout": "PT30S",
       "publicBaseUrl": undefined,
       "requestHeadersWhitelist": Array [
         "authorization",
         "es-client-authentication",
+      ],
+      "requestTimeout": "PT30S",
+      "serviceAccountToken": undefined,
+      "shardTimeout": "PT30S",
+      "skipStartupConnectionCheck": false,
+      "sniffInterval": false,
+      "sniffOnConnectionFault": false,
+      "sniffOnStart": false,
+      "ssl": Object {
+        "alwaysPresentCertificate": false,
+        "certificate": undefined,
+        "certificateAuthorities": undefined,
+        "key": undefined,
+        "keyPassphrase": undefined,
+        "verificationMode": "full",
+      },
+      "username": undefined,
+    }
+  `);
+});
+
+test('set correct defaults (serverless)', () => {
+  const configValue = new ElasticsearchConfig(config.schema.validate({}, { serverless: true }));
+  expect(configValue).toMatchInlineSnapshot(`
+    ElasticsearchConfig {
+      "apiVersion": "master",
+      "apisToRedactInLogs": Array [],
+      "compression": false,
+      "customHeaders": Object {},
+      "dnsCacheTtl": "P0D",
+      "healthCheckDelay": "PT2.5S",
+      "healthCheckRetry": 3,
+      "healthCheckStartupDelay": "PT0.5S",
+      "hosts": Array [
+        "http://localhost:9200",
+      ],
+      "idleSocketTimeout": "PT1M",
+      "ignoreVersionMismatch": true,
+      "maxIdleSockets": 256,
+      "maxResponseSize": undefined,
+      "maxSockets": 800,
+      "password": undefined,
+      "publicBaseUrl": undefined,
+      "requestHeadersWhitelist": Array [
+        "authorization",
+        "es-client-authentication",
+        "x-client-authentication",
       ],
       "requestTimeout": "PT30S",
       "serviceAccountToken": undefined,

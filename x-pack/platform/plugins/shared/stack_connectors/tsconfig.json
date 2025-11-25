@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -45,6 +45,13 @@
     "@kbn/alerts-ui-shared",
     "@kbn/deeplinks-analytics",
     "@kbn/spaces-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/core-http-server-mocks",
+    "@kbn/usage-collection-plugin",
+    "@kbn/react-query",
+    "@kbn/zod",
+    "@kbn/connector-schemas",
+    "@kbn/connector-specs",
   ],
   "exclude": [
     "target/**/*",

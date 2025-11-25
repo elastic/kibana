@@ -10,7 +10,7 @@ import { getMessageFromId } from '../../../definitions/utils/errors';
 import { isLiteral, isInlineCast, isOptionNode } from '../../../ast/is';
 import type {
   ESQLColumn,
-  ESQLCommand,
+  ESQLAstAllCommands,
   ESQLMessage,
   ESQLCommandOption,
   ESQLAst,
@@ -19,12 +19,12 @@ import type { ICommandContext, ICommandCallbacks } from '../../types';
 import type { FieldType } from '../../../definitions/types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 
-const validateColumnForGrokDissect = (command: ESQLCommand, context?: ICommandContext) => {
+const validateColumnForGrokDissect = (command: ESQLAstAllCommands, context?: ICommandContext) => {
   const acceptedColumnTypes: FieldType[] = ['keyword', 'text'];
   const astCol = command.args[0] as ESQLColumn;
-  const columnRef = context?.fields.get(astCol.name);
+  const columnRef = context?.columns.get(astCol.name);
 
-  if (columnRef && !acceptedColumnTypes.includes(columnRef.type)) {
+  if (columnRef && !acceptedColumnTypes.includes(columnRef.type as FieldType)) {
     return [
       getMessageFromId({
         messageId: 'unsupportedColumnTypeForCommand',
@@ -43,7 +43,7 @@ const validateColumnForGrokDissect = (command: ESQLCommand, context?: ICommandCo
 };
 
 export const validate = (
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   ast: ESQLAst,
   context?: ICommandContext,
   callbacks?: ICommandCallbacks

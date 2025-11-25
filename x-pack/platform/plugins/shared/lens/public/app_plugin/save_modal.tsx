@@ -33,7 +33,7 @@ export interface Props {
   returnToOriginSwitchLabel?: string;
   returnToOrigin?: boolean;
   onClose: () => void;
-  onSave: (props: SaveProps, options: { saveToLibrary: boolean }) => void;
+  onSave: (props: SaveProps, options: { saveToLibrary: boolean }) => Promise<void>;
 
   managed: boolean;
 }
@@ -85,9 +85,9 @@ export const SaveModal = (props: Props) => {
       savedObjectsTagging={savedObjectsTagging}
       initialTags={tagsIds}
       canSaveByReference={Boolean(savingToLibraryPermitted)}
-      onSave={(saveProps) => {
+      onSave={async (saveProps) => {
         const saveToLibrary = Boolean(saveProps.addToLibrary);
-        onSave(saveProps, { saveToLibrary });
+        await onSave(saveProps, { saveToLibrary });
       }}
       onClose={onClose}
       documentInfo={{

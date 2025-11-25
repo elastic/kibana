@@ -9,18 +9,17 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import { LabelNodeDetails } from './label_node_details';
-import { TEST_SUBJ_TEXT, TEST_SUBJ_PLUS_COUNT } from '../ips/ips';
-import { TEST_SUBJ_BADGE } from '../country_flags/country_flags';
+import { GRAPH_IPS_TEXT_ID, GRAPH_IPS_PLUS_COUNT_ID, GRAPH_FLAGS_BADGE_ID } from '../../test_ids';
 
 describe('LabelNodeDetails', () => {
   test('renders empty div when no props are provided', () => {
     const { container } = render(<LabelNodeDetails />);
-    expect(container.firstChild).toBeEmptyDOMElement();
+    expect(container.firstChild).toBeNull();
   });
 
   test('renders empty div when empty arrays are provided', () => {
     const { container } = render(<LabelNodeDetails ips={[]} countryCodes={[]} />);
-    expect(container.firstChild).toBeEmptyDOMElement();
+    expect(container.firstChild).toBeNull();
   });
 
   test('renders Ips component when ips are provided', () => {
@@ -28,17 +27,17 @@ describe('LabelNodeDetails', () => {
     const { container } = render(<LabelNodeDetails ips={ips} />);
 
     // Check that the IPs text is shown
-    const ipsElement = screen.getByTestId(TEST_SUBJ_TEXT);
+    const ipsElement = screen.getByTestId(GRAPH_IPS_TEXT_ID);
     expect(ipsElement).toBeInTheDocument();
-    expect(ipsElement.textContent).toContain(ips[0]); // Only first IP is shown by default
+    expect(screen.getByText(ips[0])).toBeInTheDocument();
 
     // If there are multiple IPs, there should be a "+1" indicator
     if (ips.length > 1) {
-      expect(screen.getByTestId(TEST_SUBJ_PLUS_COUNT)).toBeInTheDocument();
+      expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID)).toBeInTheDocument();
     }
 
     // Check that the country flags are not rendered
-    expect(container.querySelectorAll(`[data-test-subj="${TEST_SUBJ_BADGE}"]`).length).toBe(0);
+    expect(container.querySelectorAll(`[data-test-subj="${GRAPH_FLAGS_BADGE_ID}"]`).length).toBe(0);
   });
 
   test('renders CountryFlags component when countryCodes are provided', () => {
@@ -46,7 +45,7 @@ describe('LabelNodeDetails', () => {
     const { container } = render(<LabelNodeDetails countryCodes={countryCodes} />);
 
     // Check that the country flags badge is shown
-    const flagsElement = screen.getByTestId(TEST_SUBJ_BADGE);
+    const flagsElement = screen.getByTestId(GRAPH_FLAGS_BADGE_ID);
     expect(flagsElement).toBeInTheDocument();
 
     // The badge should contain the flag emojis
@@ -54,7 +53,7 @@ describe('LabelNodeDetails', () => {
     expect(flagsElement.textContent).toContain('🇨🇦');
 
     // Check that the IPs are not rendered
-    expect(container.querySelectorAll(`[data-test-subj="${TEST_SUBJ_TEXT}"]`).length).toBe(0);
+    expect(container.querySelectorAll(`[data-test-subj="${GRAPH_IPS_TEXT_ID}"]`).length).toBe(0);
   });
 
   test('renders both components when both props are provided', () => {
@@ -63,12 +62,12 @@ describe('LabelNodeDetails', () => {
     render(<LabelNodeDetails ips={ips} countryCodes={countryCodes} />);
 
     // Check that the IPs text is shown
-    const ipsElement = screen.getByTestId(TEST_SUBJ_TEXT);
+    const ipsElement = screen.getByTestId(GRAPH_IPS_TEXT_ID);
     expect(ipsElement).toBeInTheDocument();
-    expect(ipsElement.textContent).toContain(ips[0]); // Only first IP is shown by default
+    expect(screen.getByText(ips[0])).toBeInTheDocument(); // Only first IP is shown by default
 
     // Check that the country flags badge is shown
-    const flagsElement = screen.getByTestId(TEST_SUBJ_BADGE);
+    const flagsElement = screen.getByTestId(GRAPH_FLAGS_BADGE_ID);
     expect(flagsElement).toBeInTheDocument();
   });
 });

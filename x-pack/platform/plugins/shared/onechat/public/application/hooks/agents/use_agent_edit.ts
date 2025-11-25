@@ -6,13 +6,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  ToolType,
-  type AgentDefinition,
-  type ToolSelection,
-  defaultAgentToolIds,
-} from '@kbn/onechat-common';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import { type AgentDefinition, type ToolSelection, defaultAgentToolIds } from '@kbn/onechat-common';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useOnechatServices } from '../use_onechat_service';
 import { useOnechatAgentById } from './use_agent_by_id';
@@ -20,12 +15,12 @@ import { useToolsService } from '../tools/use_tools';
 import { queryKeys } from '../../query_keys';
 import { duplicateName } from '../../utils/duplicate_name';
 import { searchParamNames } from '../../search_param_names';
+import { cleanInvalidToolReferences } from '../../utils/tool_selection_utils';
 
-export type AgentEditState = Omit<AgentDefinition, 'type'>;
+export type AgentEditState = Omit<AgentDefinition, 'type' | 'readonly'>;
 
 const defaultToolSelection: ToolSelection[] = [
   {
-    type: ToolType.builtin,
     tool_ids: [...defaultAgentToolIds],
   },
 ];
@@ -57,11 +52,7 @@ export function useAgentEdit({
   const queryClient = useQueryClient();
   const [state, setState] = useState<AgentEditState>(emptyState());
 
-  const {
-    tools,
-    isLoading: toolsLoading,
-    error: toolsError,
-  } = useToolsService({ includeSystemTools: true });
+  const { tools, isLoading: toolsLoading, error: toolsError } = useToolsService();
   const sourceAgentId = searchParams.get(searchParamNames.sourceId);
   const isClone = Boolean(!editingAgentId && sourceAgentId);
   const agentId = editingAgentId || sourceAgentId || '';
@@ -110,15 +101,17 @@ export function useAgentEdit({
   }, [agentId, agent, isClone]);
 
   const submit = useCallback(
-    (data: AgentEditState) => {
+    async (data: AgentEditState) => {
+      const cleanedData = cleanInvalidToolReferences(data, tools);
+
       if (editingAgentId) {
-        const { id, ...updatedAgent } = data;
-        updateMutation.mutate(updatedAgent);
+        const { id, ...updatedAgent } = cleanedData;
+        await updateMutation.mutateAsync(updatedAgent);
       } else {
-        createMutation.mutate(data);
+        await createMutation.mutateAsync(cleanedData);
       }
     },
-    [editingAgentId, createMutation, updateMutation]
+    [editingAgentId, createMutation, updateMutation, tools]
   );
 
   const isLoading = agentId ? agentLoading || toolsLoading : false;

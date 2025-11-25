@@ -53,8 +53,12 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             ...('actionId' in request ? { actionId: request.actionId } : {}),
             ...('startDate' in request ? { startDate: request.startDate } : {}),
             ...('agentId' in request ? { agentId: request.agentId } : {}),
+            ...('agentIds' in request ? { agentIds: request.agentIds } : {}),
             ...('policyIds' in request ? { policyIds: request.policyIds } : {}),
             ...('spaceId' in request ? { spaceId: request.spaceId } : {}),
+            ...('integrationNamespaces' in request
+              ? { integrationNamespaces: request.integrationNamespaces }
+              : {}),
           } as StrategyRequestType<T>;
 
           const dsl = queryFactory.buildDsl({
@@ -62,9 +66,11 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             componentTemplateExists: actionsIndexExists,
           } as StrategyRequestType<T>);
 
-          // use internal user for searching .fleet* indices
+          // Select internal client for all osquery indices that require it
           es =
-            dsl.index?.includes('fleet') || dsl.index?.includes('logs-osquery_manager.action')
+            dsl.index?.includes('fleet') ||
+            dsl.index?.includes('logs-osquery_manager.action') ||
+            dsl.index?.includes('logs-osquery_manager.result')
               ? data.search.searchAsInternalUser
               : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 

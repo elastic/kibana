@@ -10,9 +10,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
-import { EuiSpacer, useResizeObserver } from '@elastic/eui';
+import { EuiSpacer, EuiText, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
+import { css } from '@emotion/react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 import { FieldRow } from '../../doc_viewer_table/field_row';
@@ -35,7 +36,8 @@ export interface TableFieldConfiguration {
   name: string;
   value: unknown;
   description?: string;
-  valueCellContent?: React.ReactNode;
+  type?: string;
+  valueCellContent: (params?: { truncate?: boolean }) => React.ReactNode;
 }
 
 export interface ContentFrameworkTableProps
@@ -52,7 +54,8 @@ export interface ContentFrameworkTableProps
   > {
   fieldNames: string[];
   fieldConfigurations?: Record<string, FieldConfiguration>;
-  title: string;
+  id: string;
+  'data-test-subj'?: string;
 }
 
 export function ContentFrameworkTable({
@@ -61,18 +64,20 @@ export function ContentFrameworkTable({
   fieldConfigurations,
   dataView,
   columns,
-  title,
+  id,
   textBasedHits,
+  'data-test-subj': dataTestSubj,
   filter,
   onAddColumn,
   onRemoveColumn,
 }: ContentFrameworkTableProps) {
+  const { euiTheme } = useEuiTheme();
   const {
     fieldsMetadata: { useFieldsMetadata },
     fieldFormats,
   } = getUnifiedDocViewerServices();
   const { fieldsMetadata = {} } = useFieldsMetadata({
-    attributes: ['short', 'flat_name', 'name'],
+    attributes: ['short', 'type'],
     fieldNames,
   });
 
@@ -106,11 +111,14 @@ export function ContentFrameworkTable({
             name: fieldConfiguration?.title || fieldName,
             value,
             description: fieldDescription,
-            valueCellContent: fieldConfiguration?.formatter ? (
-              <>{fieldConfiguration.formatter(value, formattedValue)}</>
-            ) : (
-              <FormattedValue value={formattedValue} />
-            ),
+            type: fieldsMetadata[fieldName]?.type,
+            valueCellContent: ({ truncate }: { truncate?: boolean } = { truncate: true }) => {
+              return fieldConfiguration?.formatter ? (
+                <>{fieldConfiguration.formatter(value, formattedValue)}</>
+              ) : (
+                <FormattedValue value={formattedValue} truncate={truncate} />
+              );
+            },
           };
 
           acc.rows.push(
@@ -149,16 +157,26 @@ export function ContentFrameworkTable({
 
       if (!fieldConfig) return null;
       if (columnId === 'name') {
+        const rowDataTestSubj = `${dataTestSubj}${fieldConfig.name
+          .replace(/ (\w)/g, (_, c) => c.toUpperCase())
+          .replace(/^\w/, (c) => c.toUpperCase())}`;
+
         return (
           <>
             <EuiSpacer size="s" />
-            {fieldConfig.name}
+            <EuiText
+              size="xs"
+              css={{ fontWeight: euiTheme.font.weight.bold }}
+              data-test-subj={rowDataTestSubj}
+            >
+              {fieldConfig.name}
+            </EuiText>
           </>
         );
       }
-      return fieldConfig.valueCellContent;
+      return fieldConfig.valueCellContent();
     },
-    [rows, fields]
+    [rows, fields, dataTestSubj, euiTheme.font.weight.bold]
   );
 
   const cellPopoverRenderer = useCallback(
@@ -186,10 +204,22 @@ export function ContentFrameworkTable({
   }
 
   return (
-    <div ref={setContainerRef}>
+    <div
+      ref={setContainerRef}
+      // EUI Override: .euiDataGrid__virtualized is necessary to prevent a blank space at the bottom of the grid due to an internal height calculation
+      css={css`
+        .euiDataGrid__virtualized {
+          height: auto !important;
+        }
+        .euiDataGridRow:last-of-type .euiDataGridRowCell {
+          border-bottom: none;
+        }
+      `}
+      data-test-subj={dataTestSubj}
+    >
       <TableGrid
         data-test-subj="ContentFrameworkTableTableGrid"
-        id={title}
+        id={id}
         containerWidth={containerWidth}
         rows={rows}
         isEsqlMode={isEsqlMode}
@@ -200,8 +230,7 @@ export function ContentFrameworkTable({
         initialPageSize={DEFAULT_INITIAL_PAGE_SIZE}
         customRenderCellValue={cellValueRenderer}
         customRenderCellPopover={cellPopoverRenderer}
-        gridStyle={{ stripes: false, rowHover: 'none' }}
-        hideDataGridHeader
+        gridStyle={{ stripes: false, rowHover: 'none', header: 'shade' }}
       />
     </div>
   );

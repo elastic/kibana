@@ -33,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const synthtrace = getService('svlLogsSynthtraceClient');
   const esClient = getService('es');
   const retry = getService('retry');
+  const queryBar = getService('queryBar');
   const to = new Date().toISOString();
   const type = 'logs';
   const degradedDatasetName = 'synth.degraded';
@@ -99,6 +100,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await PageObjects.datasetQuality.closeFlyout();
+      });
+
+      it('should go to discover page when the open in discover button is clicked', async () => {
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: degradedDataStreamName,
+          expandedDegradedField: 'test_field',
+        });
+
+        await testSubjects.click('datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover');
+
+        await retry.tryForTime(5000, async () => {
+          const queryText = await queryBar.getQueryString();
+
+          expect(queryText).to.be('_ignored: test_field');
+        });
       });
     });
 
@@ -521,6 +537,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud',
             showCurrentQualityIssues: true,
           });
+
+          await testSubjects.missingOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout
+          );
+        });
+
+        it('should close the flyout when current quality switch is toggled on and the flyout is already open with an old field ', async () => {
+          await PageObjects.datasetQuality.navigateToDetails({
+            dataStream: degradedDatasetWithLimitDataStreamName,
+            expandedDegradedField: 'cloud',
+          });
+
+          await testSubjects.existOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout
+          );
+
+          await testSubjects.click(
+            PageObjects.datasetQuality.testSubjectSelectors
+              .datasetQualityDetailsOverviewDegradedFieldToggleSwitch
+          );
 
           await testSubjects.missingOrFail(
             PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout

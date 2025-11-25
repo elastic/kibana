@@ -10,44 +10,60 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLoadingLogo,
+  EuiLoadingElastic,
   EuiProgress,
-  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isCondition } from '@kbn/streamlang';
+import { getSegments, MAX_NESTING_LEVEL } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import React from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
+import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
+import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
+import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
 import { AssetImage } from '../../asset_image';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { PreviewTable } from '../preview_table';
-import { PreviewMatches } from './preview_matches';
+import { MemoPreviewTable, PreviewFlyout, type PreviewTableMode } from '../shared';
+import { buildCellActions } from './cell_actions';
+import { DocumentMatchFilterControls } from './document_match_filter_controls';
 import {
   selectPreviewDocuments,
+  useStreamRoutingEvents,
   useStreamSamplesSelector,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
+import { processCondition, toDataTableRecordWithIndex } from './utils';
+import { RowSelectionContext } from '../shared/preview_table';
 
 export function PreviewPanel() {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const { definition } = routingSnapshot.context;
+  const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
+  const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
 
   let content;
 
   if (routingSnapshot.matches({ ready: 'idle' })) {
-    content = <SamplePreviewPanel />;
+    content = <SamplePreviewPanel enableActions={canCreateRoutingRules && !maxNestingLevel} />;
   } else if (
     routingSnapshot.matches({ ready: 'editingRule' }) ||
     routingSnapshot.matches({ ready: 'reorderingRules' })
   ) {
     content = <EditingPanel />;
-  } else if (routingSnapshot.matches({ ready: 'creatingNewRule' })) {
-    content = <SamplePreviewPanel />;
+  } else if (
+    routingSnapshot.matches({ ready: 'creatingNewRule' }) ||
+    routingSnapshot.matches({ ready: 'reviewSuggestedRule' }) ||
+    routingSnapshot.matches({ ready: 'editingSuggestedRule' })
+  ) {
+    content = <SamplePreviewPanel enableActions />;
   }
 
   return (
     <>
       <EuiFlexItem grow={false} data-test-subj="routingPreviewPanel">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
-          <EuiFlexGroup component="span" gutterSize="s" alignItems="center">
+        <EuiFlexGroup justifyContent="spaceBetween" wrap>
+          <EuiFlexGroup component="span" gutterSize="s">
             <EuiIcon type="inspect" />
             <strong>
               {i18n.translate('xpack.streams.streamDetail.preview.header', {
@@ -58,7 +74,6 @@ export function PreviewPanel() {
           <StreamsAppSearchBar showDatePicker />
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiSpacer size="s" />
       <EuiFlexItem grow>{content}</EuiFlexItem>
     </>
   );
@@ -67,7 +82,7 @@ export function PreviewPanel() {
 const EditingPanel = () => (
   <EuiEmptyPrompt
     icon={<AssetImage />}
-    titleSize="s"
+    titleSize="xxs"
     title={
       <h2>
         {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessage', {
@@ -77,59 +92,85 @@ const EditingPanel = () => (
     }
     body={
       <>
-        <p>
-          {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageBody', {
-            defaultMessage:
-              'Once you save your changes, the results of your conditions will appear here.',
-          })}
-        </p>
-        <p>
-          {i18n.translate('xpack.streams.streamDetail.preview.editPreviewReorderingWarning', {
-            defaultMessage:
-              'Additionally, you will not be able to edit existing streams while reordering them, you should save or cancel your changes first.',
-          })}
-        </p>
+        <EuiText size="xs">
+          <p>
+            {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageBody', {
+              defaultMessage:
+                'Once you save your changes, the results of your conditions will appear here.',
+            })}
+          </p>
+          <p>
+            {i18n.translate('xpack.streams.streamDetail.preview.editPreviewReorderingWarning', {
+              defaultMessage:
+                'Additionally, you will not be able to edit existing streams while reordering them, you should save or cancel your changes first.',
+            })}
+          </p>
+        </EuiText>
       </>
     }
   />
 );
 
-const SamplePreviewPanel = () => {
+const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
   const samplesSnapshot = useStreamSamplesSelector((snapshot) => snapshot);
+  const { setDocumentMatchFilter, changeRule, createNewRule } = useStreamRoutingEvents();
   const isLoadingDocuments = samplesSnapshot.matches({ fetching: { documents: 'loading' } });
   const isUpdating =
     samplesSnapshot.matches('debouncingCondition') ||
     samplesSnapshot.matches({ fetching: { documents: 'loading' } });
-  const isLoadingDocumentCounts = samplesSnapshot.matches({
-    fetching: { documentCounts: 'loading' },
-  });
-  const { documentsError, approximateMatchingPercentage, approximateMatchingPercentageError } =
-    samplesSnapshot.context;
+  const streamName = samplesSnapshot.context.definition.stream.name;
+  const hasPrivileges = samplesSnapshot.context.definition.privileges.manage;
 
-  const documents = useStreamSamplesSelector((snapshot) =>
-    selectPreviewDocuments(snapshot.context)
-  );
+  const [viewMode, setViewMode] = useState<PreviewTableMode>('summary');
+  const { fieldTypes, dataView: streamDataView } = useStreamDataViewFieldTypes(streamName);
+
+  const { documentsError, approximateMatchingPercentage } = samplesSnapshot.context;
+  const documents = selectPreviewDocuments(samplesSnapshot.context);
+
+  const condition = processCondition(samplesSnapshot.context.condition);
+  const isProcessedCondition = condition ? isCondition(condition) : true;
   const hasDocuments = !isEmpty(documents);
+
+  const cellActions = useMemo(() => {
+    if (!enableActions) {
+      return [];
+    }
+
+    return buildCellActions(documents, createNewRule, changeRule);
+  }, [enableActions, documents, createNewRule, changeRule]);
+
+  const [sorting, setSorting] = useState<{
+    fieldName?: string;
+    direction: 'asc' | 'desc';
+  }>();
+
+  const [visibleColumns, setVisibleColumns] = useState<string[]>();
+
+  const handleSetVisibleColumns = useCallback((newVisibleColumns: string[]) => {
+    setVisibleColumns(newVisibleColumns.length > 0 ? newVisibleColumns : undefined);
+  }, []);
+
+  const docViewsRegistry = useDocViewerSetup();
+
+  const hits = useMemo(() => {
+    return toDataTableRecordWithIndex(documents);
+  }, [documents]);
+
+  const { currentDoc, selectedRowIndex, onRowSelected, setExpandedDoc } =
+    useDocumentExpansion(hits);
+
+  const rowSelectionContextValue = useMemo(
+    () => ({ selectedRowIndex, onRowSelected }),
+    [selectedRowIndex, onRowSelected]
+  );
 
   let content: React.ReactNode | null = null;
 
   if (isLoadingDocuments && !hasDocuments) {
     content = (
-      <EuiEmptyPrompt
-        icon={<EuiLoadingLogo logo="logoLogging" size="xl" />}
-        titleSize="s"
-        title={
-          <h2>
-            {i18n.translate('xpack.streams.streamDetail.preview.loadingPreviewTitle', {
-              defaultMessage: 'Loading routing preview',
-            })}
-          </h2>
-        }
-        body={i18n.translate('xpack.streams.streamDetail.preview.loadingPreviewBody', {
-          defaultMessage:
-            'This may take a few moments depending on the complexity of the conditions and the amount of data',
-        })}
-      />
+      <EuiFlexGroup justifyContent="center" alignItems="center">
+        <EuiLoadingElastic size="xl" />
+      </EuiFlexGroup>
     );
   } else if (documentsError) {
     content = (
@@ -147,11 +188,11 @@ const SamplePreviewPanel = () => {
         body={documentsError.message}
       />
     );
-  } else if (!hasDocuments) {
+  } else if (!hasDocuments || !isProcessedCondition) {
     content = (
       <EuiEmptyPrompt
         icon={<AssetImage type="noResults" />}
-        titleSize="s"
+        titleSize="xxs"
         title={
           <h2>
             {i18n.translate('xpack.streams.streamDetail.preview.empty', {
@@ -164,16 +205,33 @@ const SamplePreviewPanel = () => {
   } else if (hasDocuments) {
     content = (
       <EuiFlexItem grow data-test-subj="routingPreviewPanelWithResults">
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={false}>
-            <PreviewMatches
-              approximateMatchingPercentage={approximateMatchingPercentage}
-              error={approximateMatchingPercentageError}
-              isLoading={isLoadingDocumentCounts}
-            />
-          </EuiFlexItem>
-          <PreviewTable documents={documents} />
-        </EuiFlexGroup>
+        <RowSelectionContext.Provider value={rowSelectionContextValue}>
+          <MemoPreviewTable
+            documents={documents}
+            sorting={sorting}
+            setSorting={setSorting}
+            toolbarVisibility={true}
+            displayColumns={visibleColumns}
+            setVisibleColumns={handleSetVisibleColumns}
+            cellActions={cellActions}
+            mode={viewMode}
+            streamName={streamName}
+            viewModeToggle={{
+              currentMode: viewMode,
+              setViewMode,
+              isDisabled: false,
+            }}
+            dataViewFieldTypes={fieldTypes}
+          />
+        </RowSelectionContext.Provider>
+        <PreviewFlyout
+          currentDoc={currentDoc}
+          hits={hits}
+          setExpandedDoc={setExpandedDoc}
+          docViewsRegistry={docViewsRegistry}
+          streamName={streamName}
+          streamDataView={streamDataView}
+        />
       </EuiFlexItem>
     );
   }
@@ -181,7 +239,18 @@ const SamplePreviewPanel = () => {
   return (
     <>
       {isUpdating && <EuiProgress size="xs" color="accent" position="absolute" />}
-      {content}
+      <EuiFlexGroup gutterSize="m" direction="column">
+        {hasPrivileges ? (
+          <DocumentMatchFilterControls
+            onFilterChange={setDocumentMatchFilter}
+            matchedDocumentPercentage={approximateMatchingPercentage}
+            isDisabled={!!documentsError || !condition || (condition && !isProcessedCondition)}
+          />
+        ) : (
+          <EuiFlexItem grow={false} />
+        )}
+        {content}
+      </EuiFlexGroup>
     </>
   );
 };

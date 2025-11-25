@@ -73,14 +73,12 @@ export const Notes = memo(() => {
   const { addError: addErrorToast } = useAppToasts();
   const { notesPrivileges } = useUserPrivileges();
 
-  const { navigateToLeftPanel: openExpandedFlyoutNotesTab, isEnabled: isLinkEnabled } =
-    useNavigateToLeftPanel({
-      tab: LeftPanelNotesTab,
-    });
+  const openExpandedFlyoutNotesTab = useNavigateToLeftPanel({
+    tab: LeftPanelNotesTab,
+  });
 
-  const isNotesDisabled = !isLinkEnabled || isRulePreview;
-  const cannotAddNotes = isNotesDisabled || !notesPrivileges.crud;
-  const cannotReadNotes = isNotesDisabled || !notesPrivileges.read;
+  const cannotAddNotes = isRulePreview || !notesPrivileges.crud;
+  const cannotReadNotes = isRulePreview || !notesPrivileges.read;
 
   useEffect(() => {
     // fetch notes only if we are not in a preview panel, or not in a rule preview workflow, and if the user has the correct privileges

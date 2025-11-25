@@ -5,24 +5,45 @@
  * 2.0.
  */
 
-import type { AgentDefinition } from '@kbn/onechat-common';
 import type { AgentHandlerFn } from '@kbn/onechat-server';
+import type { InternalAgentDefinition } from '../agent_registry';
 import { runAgent } from './run_agent';
 
 /**
  * Create the handler function for the default onechat agent.
  */
-export const createAgentHandler = ({ agent }: { agent: AgentDefinition }): AgentHandlerFn => {
-  return async ({ agentParams: { nextInput, conversation = [] }, runId, abortSignal }, context) => {
+export const createAgentHandler = ({
+  agent,
+}: {
+  agent: InternalAgentDefinition;
+}): AgentHandlerFn => {
+  return async (
+    {
+      agentParams: {
+        nextInput,
+        conversation,
+        capabilities,
+        browserApiTools,
+        structuredOutput,
+        outputSchema,
+      },
+      runId,
+      abortSignal,
+    },
+    context
+  ) => {
     const { round } = await runAgent(
       {
         nextInput,
         conversation,
+        capabilities,
         runId,
         abortSignal,
         agentId: agent.id,
-        toolSelection: agent.configuration.tools,
-        customInstructions: agent.configuration.instructions,
+        agentConfiguration: agent.configuration,
+        browserApiTools,
+        structuredOutput,
+        outputSchema,
       },
       context
     );

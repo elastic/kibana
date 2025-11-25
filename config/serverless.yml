@@ -12,12 +12,10 @@ xpack.fleet.internal.retrySetupOnBoot: true
 xpack.fleet.internal.useMeteringApi: true
 xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 xpack.fleet.internal.registry.spec.min: '3.0'
-xpack.fleet.internal.registry.spec.max: '3.4'
+xpack.fleet.internal.registry.spec.max: '3.5'
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
-  onechat:
-    hidden: true
   dashboard:
     privileges:
       ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.
@@ -133,6 +131,7 @@ xpack.ilm.enabled: false
 xpack.remote_clusters.enabled: false
 xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
+xpack.reindex_service.rollupsEnabled: false
 
 # Management team UI configurations
 # Disable index actions from the Index Management UI
@@ -167,6 +166,7 @@ xpack.cloud_integrations.data_migration.enabled: false
 
 # Other disabled plugins
 xpack.canvas.enabled: false
+xpack.reindex_service.enabled: false
 data.search.sessions.enabled: false
 advanced_settings.globalSettingsEnabled: false
 
@@ -296,3 +296,8 @@ xpack.product_intercept.interval: '90d'
 xpack.genAiSettings:
   showAiBreadcrumb: false
   showSpacesIntegration: false
+  showAiAssistantsVisibilitySetting: false
+
+# Cross Project Search
+cps.enabled: true
+cps.cpsEnabled: false

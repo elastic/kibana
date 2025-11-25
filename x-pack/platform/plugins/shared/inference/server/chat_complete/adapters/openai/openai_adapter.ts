@@ -34,9 +34,10 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     metadata,
   }) => {
     const connector = executor.getConnector();
+
     const useSimulatedFunctionCalling =
       functionCalling === 'auto'
-        ? !isNativeFunctionCallingSupported(executor.getConnector())
+        ? !isNativeFunctionCallingSupported(connector)
         : functionCalling === 'simulated';
 
     let request: OpenAIRequest;
@@ -60,7 +61,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         ...getTemperatureIfValid(temperature, { connector, modelName }),
         model: modelName,
         messages: messagesToOpenAI({ system, messages }),
-        tool_choice: toolChoiceToOpenAI(toolChoice),
+        tool_choice: toolChoiceToOpenAI(toolChoice, { connector, tools }),
         tools: toolsToOpenAI(tools),
       };
     }

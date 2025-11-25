@@ -597,6 +597,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
 
 export const fillDefineEqlRule = (rule: EqlRuleCreateProps) => {
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).scrollIntoView();
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.query);
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
@@ -838,6 +839,7 @@ export const fillDefineMachineLearningRule = (rule: MachineLearningRuleCreatePro
     ? rule.machine_learning_job_id
     : [rule.machine_learning_job_id];
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
+  cy.get(COMBO_BOX_OPTION).should('have.length.gte', 1);
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(optionsToComboboxText(jobsAsArray));
   cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${rule.anomaly_threshold}`, {
     force: true,
@@ -940,10 +942,19 @@ export const enablesAndPopulatesThresholdSuppression = (
   cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.enabled').should('be.checked');
 };
 
-export const fillAlertSuppressionFields = (fields: string[]) => {
+/**
+ * @param fields - The fields to fill in the alert suppression combo box.
+ * @param checkFieldsInComboBox - Whether to check if the fields are in the combo box before filling. It can be useful if takes time to load all options from index.
+ * If there are many fields in combobox, they are might be visible only after scrolling down menu.
+ */
+export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboBox?: boolean) => {
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).click();
   fields.forEach((field) => {
+    if (checkFieldsInComboBox) {
+      cy.get(COMBO_BOX_OPTION).should('contain.text', field);
+    }
+
     cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{downArrow}{enter}{esc}`);
   });
 };
@@ -956,12 +967,14 @@ export const clearAlertSuppressionFields = () => {
 };
 
 export const selectAlertSuppressionPerInterval = () => {
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.enabled');
   // checkbox is covered by label, force:true is a workaround
   // click on label not working, likely because it has child components
   cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).click({ force: true });
 };
 
 export const selectAlertSuppressionPerRuleExecution = () => {
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).should('be.enabled');
   cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).click();
 };
 
@@ -970,7 +983,10 @@ export const selectDoNotSuppressForMissingFields = () => {
 };
 
 export const setAlertSuppressionDuration = (interval: number, timeUnit: 's' | 'm' | 'h') => {
+  cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT).should('be.enabled');
   cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT).type(`{selectall}${interval}`);
+
+  cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT).should('be.enabled');
   cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT).select(timeUnit);
 };
 

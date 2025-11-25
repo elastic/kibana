@@ -7,8 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useMetricDataQuery } from './use_metric_data_query';
 export { useMetricFieldsQuery } from './use_metric_fields_query';
+export { useMetricFieldsSearchQuery } from './use_metric_fields_search_query';
+export { useFilteredMetricFields } from './use_filtered_metric_fields';
 export { useDimensionsQuery } from './use_dimensions_query';
-export { useEsqlAst } from './use_esql_ast';
-export { useMetricsExperience } from './use_metrics_experience';
+export { useDimensionFilters } from './use_dimension_filters';
+export { useEsqlQueryInfo } from './use_esql_query_info';
+export { usePagination } from './use_pagination';
+export { useMetricsGridFullScreen } from './use_metrics_grid_fullscreen';
+export { useGridNavigation } from './use_grid_navigation';
+export {
+  METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
+  METRICS_GRID_FULL_SCREEN_CLASS,
+  METRICS_GRID_RESTRICT_BODY_CLASS,
+  MAX_VALUES_SELECTIONS,
+  MAX_DIMENSIONS_SELECTIONS,
+} from '../common/constants';

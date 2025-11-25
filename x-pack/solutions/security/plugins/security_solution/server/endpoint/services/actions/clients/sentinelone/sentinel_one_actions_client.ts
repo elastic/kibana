@@ -8,9 +8,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
-  SENTINELONE_CONNECTOR_ID,
+  CONNECTOR_ID as SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+} from '@kbn/connector-schemas/sentinelone/constants';
 import { groupBy } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
@@ -28,7 +28,7 @@ import type {
   SentinelOneIsolateHostParams,
   SentinelOneFetchAgentFilesParams,
   SentinelOneExecuteScriptParams,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+} from '@kbn/connector-schemas/sentinelone';
 import type {
   QueryDslQueryContainer,
   SearchHit,
@@ -460,9 +460,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     // RUN SCRIPT
     if (payload.command === 'runscript') {
-      const parameters = (
-        payload as ResponseActionsClientWriteActionRequestToEndpointIndexOptions<SentinelOneRunScriptActionRequestParams>
-      ).parameters;
+      const runScriptRequestPayload = payload as Mutable<
+        ResponseActionsClientWriteActionRequestToEndpointIndexOptions<SentinelOneRunScriptActionRequestParams>
+      >;
+      const parameters = runScriptRequestPayload.parameters;
       const scriptId = (parameters?.scriptId ?? '').trim();
 
       if (!scriptId) {
@@ -474,10 +475,31 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       const scriptDetails = await this.sendAction<
         SentinelOneGetRemoteScriptsResponse,
         SentinelOneGetRemoteScriptsParams
-      >(SUB_ACTION.GET_REMOTE_SCRIPTS, { ids: scriptId });
+      >(SUB_ACTION.GET_REMOTE_SCRIPTS, { ids: scriptId }).then(
+        (response) => response.data?.data[0]
+      );
 
-      if (scriptDetails.data?.data.length === 0 || scriptDetails.data?.data[0].id !== scriptId) {
+      if (!scriptDetails || scriptDetails.id !== scriptId) {
         throw new ResponseActionsClientError(`Script ID [${scriptId}] not found`, 404);
+      }
+
+      // This validation is needed because, when calling the S1 API to execute a script ID that does not support
+      // the targeted host's OS type, S1 API still returns a successful response, but it includes
+      // no `parentTaskId` - which indicates nothing was actually triggered in S1.
+      if (agentDetails.osType && !scriptDetails.osTypes.includes(agentDetails.osType)) {
+        throw new ResponseActionsClientError(
+          `Script [${scriptDetails.scriptName}] not supported for OS type [${agentDetails.osType}]`,
+          400
+        );
+      }
+
+      // Prepend the script name to the `comment` field for reference
+      const scriptNameComment = `(Script name: ${scriptDetails.scriptName})`;
+
+      if (!(runScriptRequestPayload.comment ?? '').startsWith(scriptNameComment)) {
+        runScriptRequestPayload.comment = `(Script name: ${scriptDetails.scriptName})${
+          runScriptRequestPayload.comment ? ` ${runScriptRequestPayload.comment}` : ''
+        }`;
       }
     }
 
@@ -519,23 +541,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    const { actionDetails, actionEsDoc: actionRequestDoc } =
-      await this.handleResponseActionCreation(reqIndexOptions);
-
-    if (
-      !actionRequestDoc.error &&
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled
-    ) {
-      await this.writeActionResponseToEndpointIndex({
-        actionId: actionRequestDoc.EndpointActions.action_id,
-        agentId: actionRequestDoc.agent.id,
-        data: {
-          command: actionRequestDoc.EndpointActions.data.command,
-        },
-      });
-
-      return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
-    }
+    const { actionDetails } = await this.handleResponseActionCreation(reqIndexOptions);
 
     return actionDetails;
   }
@@ -575,23 +581,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    const { actionDetails, actionEsDoc: actionRequestDoc } =
-      await this.handleResponseActionCreation(reqIndexOptions);
-
-    if (
-      !actionRequestDoc.error &&
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled
-    ) {
-      await this.writeActionResponseToEndpointIndex({
-        actionId: actionRequestDoc.EndpointActions.action_id,
-        agentId: actionRequestDoc.agent.id,
-        data: {
-          command: actionRequestDoc.EndpointActions.data.command,
-        },
-      });
-
-      return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
-    }
+    const { actionDetails } = await this.handleResponseActionCreation(reqIndexOptions);
 
     return actionDetails;
   }
@@ -600,15 +590,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionRequest: ResponseActionGetFileRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
-    if (
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled
-    ) {
-      throw new ResponseActionsClientError(
-        `get-file not supported for ${this.agentType} agent type. Feature disabled`,
-        400
-      );
-    }
-
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       ResponseActionGetFileParameters,
       ResponseActionGetFileOutputContent,
@@ -702,17 +683,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       },
     } = await this.fetchActionRequestEsDoc(actionId);
 
-    const {
-      responseActionsSentinelOneGetFileEnabled: isGetFileEnabled,
-      responseActionsSentinelOneProcessesEnabled: isRunningProcessesEnabled,
-      responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled,
-    } = this.options.endpointService.experimentalFeatures;
+    const { responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled } =
+      this.options.endpointService.experimentalFeatures;
 
-    if (
-      (command === 'get-file' && !isGetFileEnabled) ||
-      (command === 'running-processes' && !isRunningProcessesEnabled) ||
-      (command === 'runscript' && !isRunScriptEnabled)
-    ) {
+    if (command === 'runscript' && !isRunScriptEnabled) {
       throw new ResponseActionsClientError(
         `File downloads are not supported for ${this.agentType} ${command}. Feature disabled`,
         400
@@ -815,17 +789,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       },
     } = await this.fetchActionRequestEsDoc(actionId);
 
-    const {
-      responseActionsSentinelOneGetFileEnabled: isGetFileEnabled,
-      responseActionsSentinelOneProcessesEnabled: isRunningProcessesEnabled,
-      responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled,
-    } = this.options.endpointService.experimentalFeatures;
+    const { responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled } =
+      this.options.endpointService.experimentalFeatures;
 
-    if (
-      (command === 'get-file' && !isGetFileEnabled) ||
-      (command === 'running-processes' && !isRunningProcessesEnabled) ||
-      (command === 'runscript' && !isRunScriptEnabled)
-    ) {
+    if (command === 'runscript' && !isRunScriptEnabled) {
       throw new ResponseActionsClientError(
         `File downloads are not supported for ${this.agentType} ${command}. Feature disabled`,
         400
@@ -927,16 +894,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   ): Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
-    if (
-      !this.options.endpointService.experimentalFeatures
-        .responseActionsSentinelOneKillProcessEnabled
-    ) {
-      throw new ResponseActionsClientError(
-        `kill-process not supported for ${this.agentType} agent type. Feature disabled`,
-        400
-      );
-    }
-
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       ResponseActionParametersWithProcessName,
       KillProcessActionOutputContent,
@@ -1004,15 +961,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionRequest: GetProcessesRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
-    if (
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled
-    ) {
-      throw new ResponseActionsClientError(
-        `processes not supported for ${this.agentType} agent type. Feature disabled`,
-        400
-      );
-    }
-
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       undefined,
       GetProcessesActionOutputContent,
@@ -1089,10 +1037,12 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       );
     }
 
-    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
-      SentinelOneRunScriptActionRequestParams,
-      ResponseActionRunScriptOutputContent,
-      Partial<SentinelRunScriptRequestMeta>
+    const reqIndexOptions: Mutable<
+      ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+        SentinelOneRunScriptActionRequestParams,
+        ResponseActionRunScriptOutputContent,
+        Partial<SentinelRunScriptRequestMeta>
+      >
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
@@ -1104,6 +1054,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       let error = (await this.validateRequest(reqIndexOptions)).error;
 
       if (!error) {
+        const scriptId = reqIndexOptions.parameters?.scriptId ?? '';
+
         try {
           const s1Response = await this.sendAction<
             SentinelOneExecuteScriptResponse,
@@ -1113,7 +1065,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               ids: actionRequest.endpoint_ids[0],
             },
             script: {
-              scriptId: reqIndexOptions.parameters?.scriptId ?? '',
+              scriptId,
               taskDescription: this.buildExternalComment(reqIndexOptions),
               requiresApproval: false,
               outputDestination: 'SentinelCloud',

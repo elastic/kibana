@@ -8,7 +8,10 @@
 import React, { memo, useCallback, useMemo, useRef, useEffect, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import type { PartialRuleDiff, RuleResponse } from '../../../../../../common/api/detection_engine';
+import type {
+  PartialThreeWayRuleDiff,
+  RuleResponse,
+} from '../../../../../../common/api/detection_engine';
 import { PerFieldRuleDiffTab } from '../per_field_rule_diff_tab';
 import { RuleDetailsFlyout, TabContentPadding } from '../rule_details_flyout';
 import * as ruleDetailsI18n from '../translations';
@@ -30,7 +33,7 @@ interface PrebuiltRuleConcurrencyControl {
 interface RuleCustomizationsFlyoutProps {
   currentRule: RuleResponse;
   baseRule: RuleResponse;
-  diff: PartialRuleDiff;
+  diff: PartialThreeWayRuleDiff;
   closeFlyout: () => void;
   isReverting: boolean;
 }
@@ -91,7 +94,12 @@ export const RuleCustomizationsFlyout = memo(function RuleCustomizationsFlyout({
   const extraTabs = useMemo(() => {
     const headerCallout = isReverting ? (
       <>
-        <EuiCallOut title={i18n.REVERTING_RULE_CALLOUT_TITLE} color="warning" iconType="warning">
+        <EuiCallOut
+          announceOnMount={false}
+          title={i18n.REVERTING_RULE_CALLOUT_TITLE}
+          color="warning"
+          iconType="warning"
+        >
           <p>{i18n.REVERTING_RULE_CALLOUT_MESSAGE}</p>
         </EuiCallOut>
         <EuiSpacer size="l" />
@@ -102,7 +110,7 @@ export const RuleCustomizationsFlyout = memo(function RuleCustomizationsFlyout({
       id: 'updates',
       name: (
         <EuiToolTip position="top" content={i18n.RULE_CUSTOMIZATIONS_FLYOUT_UPDATES_TAB_TOOLTIP}>
-          <>{i18n.RULE_CUSTOMIZATIONS_FLYOUT_UPDATES_TAB_TITLE}</>
+          <span tabIndex={0}>{i18n.RULE_CUSTOMIZATIONS_FLYOUT_UPDATES_TAB_TITLE}</span>
         </EuiToolTip>
       ),
       content: (
@@ -124,7 +132,7 @@ export const RuleCustomizationsFlyout = memo(function RuleCustomizationsFlyout({
       id: 'jsonViewUpdates',
       name: (
         <EuiToolTip position="top" content={i18n.RULE_CUSTOMIZATIONS_FLYOUT_JSON_TAB_TOOLTIP}>
-          <>{ruleDetailsI18n.JSON_VIEW_UPDATES_TAB_LABEL}</>
+          <span tabIndex={0}>{ruleDetailsI18n.JSON_VIEW_UPDATES_TAB_LABEL}</span>
         </EuiToolTip>
       ),
       content: (

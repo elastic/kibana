@@ -50,13 +50,15 @@
       "logsDataAccess",
       "embeddableEnhanced",
       "apmSourcesAccess",
+      "fileUpload",
       "metricsExperience"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
       "unifiedSearch",
-      "savedObjects"
+      "savedObjects",
+      "controls",
     ],
     "extraPublicDirs": [
       "common"

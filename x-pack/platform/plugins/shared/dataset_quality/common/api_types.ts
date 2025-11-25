@@ -10,6 +10,7 @@ import * as rt from 'io-ts';
 const userPrivilegesRt = rt.type({
   canMonitor: rt.boolean,
   canReadFailureStore: rt.boolean,
+  canManageFailureStore: rt.boolean,
 });
 
 const datasetPrivilegeRt = rt.record(
@@ -49,6 +50,8 @@ export const dataStreamStatRt = rt.intersection([
     totalDocs: rt.number,
     creationDate: rt.number,
     hasFailureStore: rt.boolean,
+    customRetentionPeriod: rt.string,
+    defaultRetentionPeriod: rt.string,
   }),
 ]);
 

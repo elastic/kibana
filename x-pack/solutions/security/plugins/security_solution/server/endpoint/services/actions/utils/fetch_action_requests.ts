@@ -112,34 +112,32 @@ export const fetchActionRequests = async ({
   const must: QueryDslQueryContainer[] = [];
 
   // if space awareness is enabled, then add filter for integration policy ids
-  if (endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-    logger.debug(
-      () =>
-        `Space awareness is enabled - adding filter to narrow results to only response actions visible in space [${spaceId}]`
-    );
+  logger.debug(
+    () =>
+      `Space awareness is enabled - adding filter to narrow results to only response actions visible in space [${spaceId}]`
+  );
 
-    const matchIntegrationPolicyIds: QueryDslQueryContainer = {
-      terms: { 'agent.policy.integrationPolicyId': await fetchIntegrationPolicyIds(fleetServices) },
-    };
-    const matchOrphanActions: QueryDslQueryContainer | undefined =
-      orphanActionsSpaceId && orphanActionsSpaceId === spaceId
-        ? { term: { tags: ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted } }
-        : undefined;
+  const matchIntegrationPolicyIds: QueryDslQueryContainer = {
+    terms: { 'agent.policy.integrationPolicyId': await fetchIntegrationPolicyIds(fleetServices) },
+  };
+  const matchOrphanActions: QueryDslQueryContainer | undefined =
+    orphanActionsSpaceId && orphanActionsSpaceId === spaceId
+      ? { term: { tags: ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted } }
+      : undefined;
 
-    if (matchOrphanActions) {
-      must.push({
-        bool: {
-          filter: {
-            bool: {
-              should: [matchIntegrationPolicyIds, matchOrphanActions],
-              minimum_should_match: 1,
-            },
+  if (matchOrphanActions) {
+    must.push({
+      bool: {
+        filter: {
+          bool: {
+            should: [matchIntegrationPolicyIds, matchOrphanActions],
+            minimum_should_match: 1,
           },
         },
-      });
-    } else {
-      must.push({ bool: { filter: matchIntegrationPolicyIds } });
-    }
+      },
+    });
+  } else {
+    must.push({ bool: { filter: matchIntegrationPolicyIds } });
   }
 
   // Add the date filters

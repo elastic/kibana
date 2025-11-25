@@ -44,6 +44,7 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
         category: 'kibana',
         producer: 'alertsFixture',
         minimum_license_required: 'basic',
+        is_internally_managed: false,
         is_exportable: true,
         enabled_in_license: true,
         has_alerts_mappings: false,

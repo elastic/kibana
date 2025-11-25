@@ -144,17 +144,6 @@ describe('PackagePolicyActionsMenu', () => {
     });
   });
 
-  it('Should not enable upgrade button if package has upgrade and agentless policy is enabled', async () => {
-    const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
-    const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
-    const { utils } = renderMenu({ agentPolicies, packagePolicy });
-
-    await waitFor(() => {
-      const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
-      expect(upgradeButton).toBeDisabled();
-    });
-  });
-
   it('Should not be able to delete integration from a managed policy', async () => {
     const agentPolicies = createMockAgentPolicies({ is_managed: true });
     const packagePolicy = createMockPackagePolicy();

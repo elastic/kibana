@@ -7,75 +7,151 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiFontSize, useEuiTheme } from '@elastic/eui';
-import type { ExecutionStatus } from '@kbn/workflows';
-import React from 'react';
-import { FormattedRelative } from '@kbn/i18n-react';
-import { useFormattedDateTime } from '../../../shared/ui/use_formatted_date';
+import type { EuiThemeComputed, UseEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiIconTip,
+  EuiPanel,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useMemo } from 'react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { ExecutionStatus } from '@kbn/workflows';
+import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
-import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
+import { getExecutionStatusColors, getExecutionStatusIcon } from '../../../shared/ui/status_badge';
+import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
+
+export const getExecutionTitleColor = (
+  euiTheme: EuiThemeComputed,
+  status: ExecutionStatus
+): string | undefined => {
+  if (status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED) {
+    return getExecutionStatusColors(euiTheme, status).color;
+  }
+};
 
 interface WorkflowExecutionListItemProps {
   status: ExecutionStatus;
-  startedAt: Date;
-  selected: boolean;
-  onClick: () => void;
-  // TODO: add duration, triggeredBy, finishedAt, etc.?
+  isTestRun: boolean;
+  startedAt: Date | null;
+  duration: number | null;
+  selected?: boolean;
+  onClick?: () => void;
 }
+export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemProps>(
+  ({ status, isTestRun, startedAt, duration, selected, onClick }) => {
+    const { euiTheme } = useEuiTheme();
+    const styles = useMemoCss(componentStyles);
+    const getFormattedDate = useGetFormattedDateTime();
+    const formattedDate = startedAt ? getFormattedDate(startedAt) : null;
+    const formattedDuration = useMemo(() => {
+      if (duration) {
+        return formatDuration(duration);
+      }
+      return null;
+    }, [duration]);
 
-export const WorkflowExecutionListItem = ({
-  status,
-  startedAt,
-  selected = false,
-  onClick,
-}: WorkflowExecutionListItemProps) => {
-  const { euiTheme } = useEuiTheme();
+    const panelCss = useMemo(() => {
+      if (selected) {
+        return styles.selectedContainer;
+      }
+      if (onClick) {
+        return styles.selectableContainer;
+      }
+    }, [selected, onClick, styles]);
 
-  const formattedDate = useFormattedDateTime(startedAt);
-
-  return (
-    <EuiFlexGroup
-      css={{
-        padding: euiTheme.size.m,
-        backgroundColor: selected
-          ? euiTheme.colors.backgroundBaseInteractiveSelect
-          : euiTheme.colors.backgroundBasePlain,
-        borderRadius: euiTheme.border.radius.medium,
-        gap: euiTheme.size.m,
-        flexGrow: 0,
-        '&:hover': !selected && {
-          backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
-          cursor: 'pointer',
-        },
-      }}
-      alignItems="center"
-      justifyContent="flexStart"
-      onClick={onClick}
-      responsive={false}
-    >
-      <EuiFlexItem css={{ flexGrow: 0, width: '16px', height: '16px' }}>
-        {getExecutionStatusIcon(euiTheme, status)}
-      </EuiFlexItem>
-      <EuiFlexItem css={{ flex: 1 }}>
+    return (
+      <EuiPanel onClick={onClick} hasShadow={false} paddingSize="m" hasBorder css={panelCss}>
         <EuiFlexGroup
-          direction="column"
-          css={{
-            gap: euiTheme.size.xs,
-            flexGrow: 0,
-            flexShrink: 1,
-            fontSize: useEuiFontSize('s').fontSize,
-          }}
+          gutterSize="m"
+          alignItems="center"
+          justifyContent="flexStart"
+          responsive={false}
         >
+          <EuiFlexItem grow={false}>{getExecutionStatusIcon(euiTheme, status)}</EuiFlexItem>
           <EuiFlexItem>
-            <p css={{ fontWeight: 500 }}>{getStatusLabel(status)}</p>
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              <EuiFlexItem>
+                <EuiText
+                  size="s"
+                  css={{ fontWeight: 'bold', color: getExecutionTitleColor(euiTheme, status) }}
+                >
+                  {getStatusLabel(status)}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {startedAt ? (
+                  <EuiToolTip position="left" content={formattedDate}>
+                    <EuiText size="xs" tabIndex={0} color="subdued">
+                      <FormattedRelative value={startedAt} />
+                    </EuiText>
+                  </EuiToolTip>
+                ) : (
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="workflows.workflowExecutionListItem.notStarted"
+                      defaultMessage="Not started"
+                    />
+                  </EuiText>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem css={{ alignSelf: 'flex-start' }}>
-            <EuiToolTip position="right" content={formattedDate}>
-              <FormattedRelative value={startedAt} />
-            </EuiToolTip>
-          </EuiFlexItem>
+          {formattedDuration && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap>
+                {isTestRun && (
+                  <EuiFlexItem>
+                    <EuiIconTip
+                      type="flask"
+                      color={euiTheme.colors.backgroundFilledText}
+                      title={i18n.translate(
+                        'workflows.workflowExecutionListItem.testRunIconTitle',
+                        {
+                          defaultMessage: 'Test Run',
+                        }
+                      )}
+                    />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="clock" color="subdued" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {formattedDuration}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+      </EuiPanel>
+    );
+  }
+);
+WorkflowExecutionListItem.displayName = 'WorkflowExecutionListItem';
+
+const componentStyles = {
+  selectedContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
+    }),
+  selectableContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '&:hover': {
+        backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
+        // Prevent hover animation effect from affecting the panel
+        boxShadow: 'none',
+        transform: 'none',
+      },
+    }),
 };

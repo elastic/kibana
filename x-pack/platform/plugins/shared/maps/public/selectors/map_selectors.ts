@@ -125,7 +125,7 @@ export function createLayerInstance(
           customIcons,
         });
       default:
-        throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
+        throw new Error(`Unrecognized layerType ${(layerDescriptor as { type: string }).type}`);
     }
   } catch (error) {
     return new InvalidLayer(layerDescriptor, error);

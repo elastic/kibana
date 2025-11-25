@@ -12,6 +12,7 @@ import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createStartContractMock = (): DocLinksStart => {
   // This service is so simple that we actually use the real implementation
@@ -21,10 +22,11 @@ const createStartContractMock = (): DocLinksStart => {
 };
 
 type DocLinksServiceContract = PublicMethodsOf<DocLinksService>;
-const createMock = (): jest.Mocked<DocLinksServiceContract> => ({
-  setup: jest.fn().mockReturnValue(undefined),
-  start: jest.fn().mockReturnValue(createStartContractMock()),
-});
+const createMock = (): jest.Mocked<DocLinksServiceContract> =>
+  lazyObject({
+    setup: jest.fn().mockReturnValue(undefined),
+    start: jest.fn().mockReturnValue(createStartContractMock()),
+  });
 
 export const docLinksServiceMock = {
   create: createMock,

@@ -57,9 +57,13 @@ import type {
   UpdateFieldLimitParams,
 } from '../../../common/data_stream_details/types';
 import { DatasetQualityError } from '../../../common/errors';
+import type { ITelemetryClient } from '../telemetry';
 
 export class DataStreamDetailsClient implements IDataStreamDetailsClient {
-  constructor(private readonly http: HttpStart) {}
+  constructor(
+    private readonly http: HttpStart,
+    private readonly telemetryClient: ITelemetryClient
+  ) {}
 
   public async getDataStreamSettings({ dataStream }: GetDataStreamSettingsParams) {
     const response = await this.http
@@ -337,6 +341,12 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
       .catch((error) => {
         throw new DatasetQualityError(`Failed to update failure store": ${error}`, error);
       });
+
+    this.telemetryClient.trackFailureStoreUpdated({
+      data_stream_name: dataStream,
+      failure_store_enabled: failureStoreEnabled,
+      custom_retention_period: customRetentionPeriod,
+    });
 
     return decodeOrThrow(
       updateFailureStoreResponseRt,

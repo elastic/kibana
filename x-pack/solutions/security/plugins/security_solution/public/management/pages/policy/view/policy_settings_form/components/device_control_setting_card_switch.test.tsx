@@ -46,10 +46,12 @@ const setDeviceControlMode = ({
   windowsDeviceControl.enabled = enabled;
   macDeviceControl.enabled = enabled;
 
-  // When enabling, we set a default `usb_storage` level
   if (enabled) {
     windowsDeviceControl.usb_storage = DeviceControlAccessLevelEnum.deny_all;
     macDeviceControl.usb_storage = DeviceControlAccessLevelEnum.deny_all;
+  } else {
+    windowsDeviceControl.usb_storage = DeviceControlAccessLevelEnum.audit;
+    macDeviceControl.usb_storage = DeviceControlAccessLevelEnum.audit;
   }
 
   policy.windows.popup.device_control = { enabled, message: '' };
@@ -125,38 +127,6 @@ describe('Policy form DeviceControlSettingCardSwitch component', () => {
 
     render();
     await userEvent.click(renderResult.getByTestId('test'));
-
-    expect(formProps.onChange).toHaveBeenCalledWith({
-      isValid: true,
-      updatedPolicy: expectedUpdatedPolicy,
-    });
-  });
-
-  it('should invoke `additionalOnSwitchChange` callback if one was defined', async () => {
-    formProps.additionalOnSwitchChange = jest.fn(({ policyConfigData }) => {
-      const updated = cloneDeep(policyConfigData);
-      if (updated.windows.popup.device_control) {
-        updated.windows.popup.device_control.message = 'foo';
-      }
-      return updated;
-    });
-
-    const expectedPolicyDataBeforeAdditionalCallback = cloneDeep(formProps.policy);
-    setDeviceControlMode({ policy: expectedPolicyDataBeforeAdditionalCallback, turnOff: true });
-
-    const expectedUpdatedPolicy = cloneDeep(expectedPolicyDataBeforeAdditionalCallback);
-    if (expectedUpdatedPolicy.windows.popup.device_control) {
-      expectedUpdatedPolicy.windows.popup.device_control.message = 'foo';
-    }
-
-    render();
-    await userEvent.click(renderResult.getByTestId('test'));
-
-    expect(formProps.additionalOnSwitchChange).toHaveBeenCalledWith({
-      value: false,
-      policyConfigData: expectedPolicyDataBeforeAdditionalCallback,
-      protectionOsList: formProps.osList,
-    });
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,

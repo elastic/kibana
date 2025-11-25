@@ -15,6 +15,7 @@ import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
 import { InitEntityStoreRequestBody } from '../../../../../common/api/entity_analytics/entity_store/enable.gen';
+import { checkAndInitPrivilegeMonitoringResources } from '../../privilege_monitoring/check_and_init_privmon_resources';
 
 export const enableEntityStoreRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -47,6 +48,7 @@ export const enableEntityStoreRoute = (
         const { pipelineDebugMode } = config.entityAnalytics.entityStore.developer;
 
         await checkAndInitAssetCriticalityResources(context, logger);
+        await checkAndInitPrivilegeMonitoringResources(context, logger);
 
         try {
           const body: InitEntityStoreResponse = await secSol

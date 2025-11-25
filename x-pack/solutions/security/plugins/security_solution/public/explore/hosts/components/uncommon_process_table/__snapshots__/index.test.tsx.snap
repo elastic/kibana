@@ -2,11 +2,11 @@
 
 exports[`Uncommon Process Table Component rendering it renders the default Uncommon process table 1`] = `
 .c3 {
-  color: #98a2b3;
+  color: #7186A8;
 }
 
 .c1 .siemSubtitle__item {
-  color: #7a7f89;
+  color: #98A8C3;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -50,7 +50,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
 
   .c5 .euiPagination::before {
     bottom: 0;
-    color: #515761;
+    color: #1D2A3E;
     content: '\\2026';
     font-size: 14px;
     padding: 5px 8px;
@@ -841,6 +841,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
       class="euiFlexItem c5 emotion-euiFlexItem-growZero"
     >
       <nav
+        aria-label="Table pagination"
         class="euiPagination emotion-euiPagination"
         data-test-subj="numberedPagination"
       >

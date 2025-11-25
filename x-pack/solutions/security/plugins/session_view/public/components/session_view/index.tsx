@@ -15,6 +15,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import byteSize from 'byte-size';
 import { SectionLoading } from '../../shared_imports';
@@ -36,6 +37,8 @@ import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
 import {
   AUDITBEAT_DATA_SOURCE,
   AUDITBEAT_INDEX,
+  CLOUD_DEFEND_DATA_SOURCE,
+  CLOUD_DEFEND_INDEX,
   ELASTIC_DEFEND_DATA_SOURCE,
   ENDPOINT_INDEX,
 } from '../../methods';
@@ -69,6 +72,7 @@ export const SessionView = ({
   // track session open telemetry
   useEffect(() => {
     const sourceMap: Record<string, SessionViewIndices> = {
+      [CLOUD_DEFEND_INDEX]: CLOUD_DEFEND_DATA_SOURCE,
       [ENDPOINT_INDEX]: ELASTIC_DEFEND_DATA_SOURCE,
       [AUDITBEAT_INDEX]: AUDITBEAT_DATA_SOURCE,
     };
@@ -467,7 +471,13 @@ export const SessionView = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon onClick={toggleDetailPanel} iconType="list" />
+            <EuiButtonIcon
+              onClick={toggleDetailPanel}
+              iconType="list"
+              aria-label={i18n.translate('xpack.sessionView.detailsPanelButton.ariaLabel', {
+                defaultMessage: 'Open details panel',
+              })}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

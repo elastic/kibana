@@ -7,635 +7,572 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiIcon, useEuiTheme } from '@elastic/eui';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import { monaco } from '@kbn/monaco';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
+import classnames from 'classnames';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import YAML, { isPair, isScalar, visit } from 'yaml';
-import { getStepNode } from '../../../../common/lib/yaml_utils';
-import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
-import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
-import { YamlEditor } from '../../../shared/ui/yaml_editor';
-import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
-import { useYamlValidation } from '../lib/use_yaml_validation';
+import { useDispatch, useSelector } from 'react-redux';
+import type YAML from 'yaml';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { monaco, YAML_LANG_ID } from '@kbn/monaco';
+import { isTriggerType } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
+import type { z } from '@kbn/zod';
+import { ActionsMenuButton } from './actions_menu_button';
 import {
-  getHighlightStepDecorations,
-  getMonacoRangeFromYamlNode,
-  navigateToErrorPosition,
-} from '../lib/utils';
-import type { YamlValidationError } from '../model/types';
-import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
+  useAlertTriggerDecorations,
+  useConnectorTypeDecorations,
+  useFocusedStepOutline,
+  useLineDifferencesDecorations,
+  useStepDecorationsInExecution,
+  useTriggerTypeDecorations,
+} from './decorations';
+import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
+import { StepActions } from './step_actions';
+import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
+import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
+import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
+import type { StepInfo } from '../../../entities/workflows/store';
+import {
+  selectEditorFocusedStepInfo,
+  selectEditorYamlDocument,
+  selectSchema,
+  setCursorPosition,
+  setYamlString,
+} from '../../../entities/workflows/store';
+import {
+  selectEditorYaml,
+  selectHasChanges,
+  selectIsExecutionsTab,
+  selectIsSavingYaml,
+  selectStepExecutions,
+  selectWorkflow,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
+import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
+import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
+import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
+import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
+import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
+import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
+import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
+import { useKibana } from '../../../hooks/use_kibana';
+import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
+import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
+import {
+  ElasticsearchMonacoConnectorHandler,
+  GenericMonacoConnectorHandler,
+  KibanaMonacoConnectorHandler,
+} from '../lib/monaco_connectors';
+import {
+  registerMonacoConnectorHandler,
+  registerUnifiedHoverProvider,
+} from '../lib/monaco_providers';
+import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
+import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
+import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
+import { navigateToErrorPosition } from '../lib/utils';
+import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
+import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
+import {
+  EXECUTION_YAML_SNAPSHOT_CLASS,
+  useWorkflowEditorStyles,
+} from '../styles/use_workflow_editor_styles';
+import {
+  useWorkflowsMonacoTheme,
+  WORKFLOWS_MONACO_EDITOR_THEME,
+} from '../styles/use_workflows_monaco_theme';
 
-const getTriggerNodes = (
-  yamlDocument: YAML.Document
-): Array<{ node: any; triggerType: string; typePair: any }> => {
-  const triggerNodes: Array<{ node: any; triggerType: string; typePair: any }> = [];
-
-  if (!yamlDocument?.contents) return triggerNodes;
-
-  visit(yamlDocument, {
-    Pair(key, pair, ancestors) {
-      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
-        return;
-      }
-
-      // Check if this is a type field within a trigger
-      const path = ancestors.slice();
-      let isTriggerType = false;
-
-      // Walk up the ancestors to see if we're in a triggers array
-      for (let i = path.length - 1; i >= 0; i--) {
-        const ancestor = path[i];
-        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'triggers') {
-          isTriggerType = true;
-          break;
-        }
-      }
-
-      if (isTriggerType && isScalar(pair.value)) {
-        const triggerType = pair.value.value as string;
-        // Find the parent map node that contains this trigger
-        const triggerMapNode = ancestors[ancestors.length - 1];
-        triggerNodes.push({
-          node: triggerMapNode,
-          triggerType,
-          typePair: pair, // Store the actual type pair for precise positioning
-        });
-      }
-    },
-  });
-
-  return triggerNodes;
-};
-
-const WorkflowSchemaUri = 'file:///workflow-schema.json';
-
-const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
-
-const useWorkflowJsonSchema = () => {
-  return jsonSchema;
+const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
+  minimap: { enabled: false },
+  automaticLayout: true,
+  lineNumbers: 'on',
+  glyphMargin: true,
+  scrollBeyondLastLine: false,
+  tabSize: 2,
+  lineNumbersMinChars: 2,
+  insertSpaces: true,
+  fontSize: 14,
+  lineHeight: 23, // default ~21px + 2px
+  renderWhitespace: 'none',
+  wordWrap: 'on',
+  wordWrapColumn: 80,
+  wrappingIndent: 'indent',
+  theme: WORKFLOWS_MONACO_EDITOR_THEME,
+  padding: {
+    top: 24,
+    bottom: 16,
+  },
+  quickSuggestions: {
+    other: true,
+    comments: false,
+    strings: true,
+  },
+  suggest: {
+    snippetsPreventQuickSuggestions: false,
+    showSnippets: true,
+    filterGraceful: true, // Better filtering
+    localityBonus: true, // Prioritize matches near cursor
+  },
+  wordBasedSuggestions: false,
+  hover: {
+    enabled: true,
+    delay: 300,
+    sticky: true,
+    above: false, // Force hover below cursor to avoid clipping
+  },
+  formatOnType: true,
+  suggestLineHeight: 25, // default 21 + 4px for padding
 };
 
 export interface WorkflowYAMLEditorProps {
-  workflowId?: string;
-  filename?: string;
-  readOnly?: boolean;
-  hasChanges?: boolean;
-  lastUpdatedAt?: Date;
-  highlightStep?: string;
-  stepExecutions?: EsWorkflowStepExecution[];
-  'data-testid'?: string;
-  value: string;
-  onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
-  onChange?: (value: string | undefined) => void;
-  onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationError[]>>;
-  onSave?: (value: string) => void;
+  highlightDiff?: boolean;
+  onStepRun: (params: { stepId: string; actionType: string }) => void;
 }
 
 export const WorkflowYAMLEditor = ({
-  workflowId,
-  filename = `${workflowId}.yaml`,
-  readOnly = false,
-  hasChanges = false,
-  lastUpdatedAt,
-  highlightStep,
-  stepExecutions,
-  onMount,
-  onChange,
-  onSave,
-  onValidationErrors,
-  ...props
+  highlightDiff = false,
+  onStepRun,
 }: WorkflowYAMLEditorProps) => {
   const { euiTheme } = useEuiTheme();
+  const { http, notifications } = useKibana().services;
 
+  const saveYaml = useSaveYaml();
+  const isSaving = useSelector(selectIsSavingYaml);
+  const dispatch = useDispatch();
+  const onChange = useCallback(
+    (yaml: string) => {
+      dispatch(setYamlString(yaml));
+    },
+    [dispatch]
+  );
+
+  const workflowYaml = useSelector(selectEditorYaml) ?? '';
+  const isExecutionYaml = useSelector(selectIsExecutionsTab);
+  const hasChanges = useSelector(selectHasChanges);
+  const workflow = useSelector(selectWorkflow);
+
+  const originalValue = workflow?.yaml ?? '';
+
+  // Refs
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
-  const workflowJsonSchema = useWorkflowJsonSchema();
+  const stepExecutions = useSelector(selectStepExecutions);
+  const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
+  stepExecutionsRef.current = stepExecutions;
+
+  // Ref to track saving state for keyboard handlers
+  const isSavingRef = useRef<boolean>(false);
+  isSavingRef.current = isSaving;
+
+  // Refs / Disposables for Monaco providers
+  const disposablesRef = useRef<monaco.IDisposable[]>([]);
+  const workflowYamlSchema = useSelector(selectSchema);
+  // The current yaml document in the editor (could be unsaved)
+  const yamlDocument = useSelector(selectEditorYamlDocument);
+  const yamlDocumentRef = useRef<YAML.Document | null>(yamlDocument ?? null);
+  yamlDocumentRef.current = yamlDocument || null;
+
+  const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
+  const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
+  focusedStepInfoRef.current = focusedStepInfo;
+
+  // Data
+  const connectorsData = useAvailableConnectors();
+
+  // Styles
+  const styles = useWorkflowEditorStyles();
+  const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
+  const { styles: stepOutlineStyles } = useFocusedStepOutline(editorRef.current);
+  const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
+
+  useWorkflowsMonacoTheme();
+  useDynamicTypeIcons(connectorsData);
+
+  // Only show debug features in development
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+
+  // Initialize monkey-patch to intercept monaco-yaml's provider BEFORE it loads
+  useEffect(() => {
+    interceptMonacoYamlProvider();
+  }, []);
+
+  // Validation
+  const { jsonSchema: workflowJsonSchemaStrict, uri: workflowSchemaUriStrict } =
+    useWorkflowJsonSchema({ loose: false });
   const schemas: SchemasSettings[] = useMemo(() => {
+    if (!workflowSchemaUriStrict || !workflowJsonSchemaStrict) {
+      return [];
+    }
     return [
       {
         fileMatch: ['*'],
         // casting here because zod-to-json-schema returns a more complex type than JSONSchema7 expected by monaco-yaml
-        schema: workflowJsonSchema as any,
-        uri: WorkflowSchemaUri,
+        schema: workflowJsonSchemaStrict as SchemasSettings['schema'],
+        uri: workflowSchemaUriStrict,
       },
     ];
-  }, [workflowJsonSchema]);
+  }, [workflowJsonSchemaStrict, workflowSchemaUriStrict]);
 
-  const [yamlDocument, setYamlDocument] = useState<YAML.Document | null>(null);
-  const highlightStepDecorationCollectionRef =
-    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
-  const stepExecutionsDecorationCollectionRef =
-    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
-  const alertTriggerDecorationCollectionRef =
-    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const { error: errorValidating, isLoading: isLoadingValidation } = useYamlValidation(
+    editorRef.current
+  );
 
-  const {
-    error: errorValidating,
-    validationErrors,
-    validateVariables,
-    handleMarkersChanged,
-  } = useYamlValidation({
-    workflowYamlSchema: WORKFLOW_ZOD_SCHEMA_LOOSE,
-    onValidationErrors,
-  });
+  const { validationErrors, transformMonacoMarkers, handleMarkersChanged } =
+    useMonacoMarkersChangedInterceptor({
+      yamlDocumentRef,
+      workflowYamlSchema: workflowYamlSchema as z.ZodSchema,
+    });
 
+  const handleErrorClick = useCallback((error: YamlValidationResult) => {
+    if (!editorRef.current) {
+      return;
+    }
+    navigateToErrorPosition(editorRef.current, error.startLineNumber, error.startColumn);
+  }, []);
+
+  // Lifecycle
   const [isEditorMounted, setIsEditorMounted] = useState(false);
 
-  const changeSideEffects = useCallback(() => {
-    if (editorRef.current) {
-      const model = editorRef.current.getModel();
+  useEffect(() => {
+    if (!isEditorMounted) {
+      return;
+    }
+
+    editorRef.current!.onDidScrollChange(() => {
+      if (!focusedStepInfoRef.current) {
+        return;
+      }
+
+      updateContainerPosition(focusedStepInfoRef.current, editorRef.current!);
+    });
+  }, [isEditorMounted]);
+
+  const { registerKeyboardCommands, unregisterKeyboardCommands } = useRegisterKeyboardCommands();
+
+  // handlers for the keyboard commands, passed only the first time the component is mounted
+  // they should not have any dependencies, so they are not affected by the changes in the component
+  const keyboardHandlers = useMemo(
+    () => ({
+      save: () => {
+        if (isSavingRef.current) {
+          return;
+        }
+        saveYaml();
+      },
+      run: () => dispatch(setIsTestModalOpen(true)),
+      saveAndRun: () => {
+        if (isSavingRef.current) {
+          return;
+        }
+        saveYaml().then(() => dispatch(setIsTestModalOpen(true)));
+      },
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const completionProvider = useWorkflowYamlCompletionProvider();
+
+  const handleEditorDidMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      editorRef.current = editor;
+
+      registerKeyboardCommands({
+        editor,
+        openActionsPopover,
+        ...keyboardHandlers,
+      });
+
+      if (completionProvider) {
+        const disposable = monaco.languages.registerCompletionItemProvider(
+          YAML_LANG_ID,
+          completionProvider
+        );
+        disposablesRef.current.push(disposable);
+      }
+
+      // Listen to content changes to detect typing
+      const model = editor.getModel();
       if (!model) {
         return;
       }
-      validateVariables(editorRef.current);
-      try {
-        const value = model.getValue();
-        setYamlDocument(YAML.parseDocument(value ?? ''));
-      } catch (error) {
-        setYamlDocument(null);
-      }
-    }
-  }, [validateVariables]);
+      // If no model, just set the mounted state
+      setTimeout(() => {
+        setIsEditorMounted(true);
+      }, 0);
 
-  const handleChange = useCallback(
-    (value: string | undefined) => {
-      if (onChange) {
-        onChange(value);
+      // Setup Elasticsearch step providers if we have the required services
+      if (http && notifications) {
+        // Register Elasticsearch connector handler
+        const elasticsearchHandler = new ElasticsearchMonacoConnectorHandler({
+          http,
+          notifications,
+        });
+        registerMonacoConnectorHandler(elasticsearchHandler);
+
+        // Register Kibana connector handler
+        const kibanaHandler = new KibanaMonacoConnectorHandler({
+          http,
+          notifications,
+          kibanaHost: window.location.origin,
+        });
+        registerMonacoConnectorHandler(kibanaHandler);
+
+        // Monaco YAML hover is now disabled via configuration (hover: false)
+        // The unified hover provider will handle all hover content including validation errors
+
+        const genericHandler = new GenericMonacoConnectorHandler();
+        registerMonacoConnectorHandler(genericHandler);
+
+        // Create unified providers
+        const providerConfig = {
+          getYamlDocument: () => yamlDocumentRef.current || null,
+          options: {
+            http,
+            notifications,
+            esHost: 'http://localhost:9200',
+            kibanaHost: window.location.origin,
+          },
+        };
+
+        // Register the unified hover provider for API documentation and other content
+        const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
+        disposablesRef.current.push(hoverDisposable);
       }
-      changeSideEffects();
     },
-    [onChange, changeSideEffects]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
-  const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
-    editorRef.current = editor;
-
-    editor.updateOptions({
-      glyphMargin: true,
-    });
-
-    onMount?.(editor, monaco);
-
-    setIsEditorMounted(true);
-  };
-
-  useEffect(() => {
-    // After editor is mounted or workflowId changes, validate the initial content
-    if (isEditorMounted && editorRef.current && editorRef.current.getModel()?.getValue() !== '') {
-      changeSideEffects();
-    }
-  }, [changeSideEffects, isEditorMounted, workflowId]);
-
-  useEffect(() => {
-    const model = editorRef.current?.getModel() ?? null;
-    if (highlightStepDecorationCollectionRef.current) {
-      highlightStepDecorationCollectionRef.current.clear();
-    }
-    if (!model || !isEditorMounted || !yamlDocument || !highlightStep) {
-      return;
-    }
-    const stepNode = getStepNode(yamlDocument, highlightStep);
-    if (!stepNode) {
-      return;
-    }
-    const range = getMonacoRangeFromYamlNode(model, stepNode);
-    if (!range) {
-      return;
-    }
-    editorRef.current?.revealLineInCenter(range.startLineNumber);
-    if (highlightStepDecorationCollectionRef.current) {
-      highlightStepDecorationCollectionRef.current.clear();
-    }
-    highlightStepDecorationCollectionRef.current =
-      editorRef.current?.createDecorationsCollection(getHighlightStepDecorations(model, range)) ??
-      null;
-  }, [highlightStep, isEditorMounted, yamlDocument]);
-
-  useEffect(() => {
-    const model = editorRef.current?.getModel() ?? null;
-    if (stepExecutionsDecorationCollectionRef.current) {
-      // clear existing decorations
-      stepExecutionsDecorationCollectionRef.current.clear();
-    }
-
-    if (!model || !yamlDocument || !stepExecutions || stepExecutions.length === 0) {
-      // no model or yamlDocument or sExecutions, skipping
-      return;
-    }
-
-    const decorations = stepExecutions
-      .map((stepExecution) => {
-        const stepNode = getStepNode(yamlDocument, stepExecution.stepId);
-        if (!stepNode) {
-          return null;
-        }
-        const stepRange = getMonacoRangeFromYamlNode(model, stepNode);
-        if (!stepRange) {
-          return null;
-        }
-        const decoration: monaco.editor.IModelDeltaDecoration = {
-          range: new monaco.Range(
-            stepRange.startLineNumber,
-            stepRange.startColumn,
-            stepRange.startLineNumber,
-            stepRange.endColumn
-          ),
-          options: {
-            glyphMarginClassName: `step-execution-${stepExecution.status}-glyph ${
-              !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
-            }`,
-          },
-        };
-        const bgClassName = `step-execution-${stepExecution.status} ${
-          !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
-        }`;
-        // TODO: handle steps with nested steps
-        const decoration2: monaco.editor.IModelDeltaDecoration = {
-          range: new monaco.Range(
-            stepRange.startLineNumber,
-            stepRange.startColumn,
-            stepRange.endLineNumber - 1,
-            stepRange.endColumn
-          ),
-          options: {
-            className: bgClassName,
-            marginClassName: bgClassName,
-            isWholeLine: true,
-          },
-        };
-        return [decoration, decoration2];
-      })
-      .flat()
-      .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
-
-    stepExecutionsDecorationCollectionRef.current =
-      editorRef.current?.createDecorationsCollection(decorations) ?? null;
-  }, [isEditorMounted, stepExecutions, highlightStep, yamlDocument]);
-
-  useEffect(() => {
-    const model = editorRef.current?.getModel() ?? null;
-    if (alertTriggerDecorationCollectionRef.current) {
-      // clear existing decorations
-      alertTriggerDecorationCollectionRef.current.clear();
-    }
-
-    // Don't show alert dots when in executions view
-    if (!model || !yamlDocument || !isEditorMounted || readOnly) {
-      return;
-    }
-
-    const triggerNodes = getTriggerNodes(yamlDocument);
-    const alertTriggers = triggerNodes.filter(({ triggerType }) => triggerType === 'alert');
-
-    if (alertTriggers.length === 0) {
-      return;
-    }
-
-    const decorations = alertTriggers
-      .map(({ node, typePair }) => {
-        // Try to get the range from the typePair first, fallback to searching within the trigger node
-        let typeRange = getMonacoRangeFromYamlNode(model, typePair);
-
-        if (!typeRange) {
-          // Fallback: use the trigger node range and search for the type line
-          const triggerRange = getMonacoRangeFromYamlNode(model, node);
-          if (!triggerRange) {
-            return null;
-          }
-
-          // Find the specific line that contains "type:" and "alert" within this trigger
-          let typeLineNumber = triggerRange.startLineNumber;
-          for (
-            let lineNum = triggerRange.startLineNumber;
-            lineNum <= triggerRange.endLineNumber;
-            lineNum++
-          ) {
-            const lineContent = model.getLineContent(lineNum);
-            if (lineContent.includes('type:') && lineContent.includes('alert')) {
-              typeLineNumber = lineNum;
-              break;
-            }
-          }
-
-          typeRange = {
-            startLineNumber: typeLineNumber,
-            endLineNumber: typeLineNumber,
-            startColumn: 1,
-            endColumn: model.getLineMaxColumn(typeLineNumber),
-          };
-        }
-
-        const glyphDecoration: monaco.editor.IModelDeltaDecoration = {
-          range: new monaco.Range(
-            typeRange.startLineNumber,
-            1,
-            typeRange.startLineNumber,
-            model.getLineMaxColumn(typeRange.startLineNumber)
-          ),
-          options: {
-            glyphMarginClassName: 'alert-trigger-glyph',
-            glyphMarginHoverMessage: {
-              value: i18n.translate(
-                'workflows.workflowDetail.yamlEditor.alertTriggerGlyphTooltip',
-                {
-                  defaultMessage:
-                    'Alert trigger: This workflow will be executed automatically only when connected to a rule via the "Run Workflow" action.',
-                }
-              ),
-            },
-          },
-        };
-
-        const lineHighlightDecoration: monaco.editor.IModelDeltaDecoration = {
-          range: new monaco.Range(
-            typeRange.startLineNumber,
-            1,
-            typeRange.startLineNumber,
-            model.getLineMaxColumn(typeRange.startLineNumber)
-          ),
-          options: {
-            className: 'alert-trigger-highlight',
-            marginClassName: 'alert-trigger-highlight',
-            isWholeLine: true,
-          },
-        };
-
-        return [glyphDecoration, lineHighlightDecoration];
-      })
-      .flat()
-      .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
-
-    alertTriggerDecorationCollectionRef.current =
-      editorRef.current?.createDecorationsCollection(decorations) ?? null;
-  }, [isEditorMounted, yamlDocument, readOnly]);
-
-  const completionProvider = useMemo(() => {
-    return getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE);
-  }, []);
-
-  useEffect(() => {
-    monaco.editor.defineTheme('workflows-subdued', {
-      base: 'vs',
-      inherit: true,
-      rules: [],
-      colors: {
-        'editor.background': euiTheme.colors.backgroundBaseSubdued,
-      },
-    });
-  }, [euiTheme]);
-
-  const editorOptions = useMemo<monaco.editor.IStandaloneEditorConstructionOptions>(
-    () => ({
-      readOnly,
-      minimap: { enabled: false },
-      automaticLayout: true,
-      lineNumbers: 'on',
-      glyphMargin: true,
-      scrollBeyondLastLine: false,
-      tabSize: 2,
-      lineNumbersMinChars: 2,
-      insertSpaces: true,
-      fontSize: 14,
-      renderWhitespace: 'all',
-      wordWrap: 'on',
-      wordWrapColumn: 80,
-      wrappingIndent: 'indent',
-      theme: 'workflows-subdued',
-      padding: {
-        top: 24,
-        bottom: 16,
-      },
-      quickSuggestions: {
-        other: true,
-        comments: false,
-        strings: true,
-      },
-      formatOnType: true,
-    }),
-    [readOnly]
-  );
-
-  const styles = useMemoCss(componentStyles);
+  const handleEditorWillUnmount = useCallback(() => {
+    unregisterKeyboardCommands();
+  }, [unregisterKeyboardCommands]);
 
   // Clean up the monaco model and editor on unmount
   useEffect(() => {
     const editor = editorRef.current;
     return () => {
+      // Dispose of Monaco providers
+      disposablesRef.current.forEach((disposable) => disposable.dispose());
+      disposablesRef.current = [];
+
       editor?.dispose();
     };
   }, []);
 
+  // Decorations
+  useTriggerTypeDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    isEditorMounted,
+  });
+
+  useConnectorTypeDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    isEditorMounted,
+  });
+
+  useLineDifferencesDecorations({
+    editor: editorRef.current,
+    isEditorMounted,
+    highlightDiff,
+    originalValue,
+    currentValue: workflowYaml,
+  });
+
+  useAlertTriggerDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    isEditorMounted,
+    readOnly: isExecutionYaml,
+  });
+
+  const updateContainerPosition = (
+    stepInfo: StepInfo,
+    _editor: monaco.editor.IStandaloneCodeEditor
+  ) => {
+    if (!_editor || !stepInfo) {
+      return;
+    }
+
+    setPositionStyles({
+      top: `${_editor.getTopForLineNumber(stepInfo.lineStart, true) - _editor.getScrollTop()}px`,
+      right: '0px',
+    });
+  };
+
   useEffect(() => {
-    // Monkey patching to set the initial markers
-    // https://github.com/suren-atoyan/monaco-react/issues/70#issuecomment-760389748
+    if (!focusedStepInfo) {
+      return;
+    }
+    updateContainerPosition(focusedStepInfo, editorRef.current!);
+  }, [isEditorMounted, focusedStepInfo, setPositionStyles]);
+
+  useEffect(() => {
+    if (!isEditorMounted) {
+      return;
+    }
+
+    const disposable = editorRef.current!.onDidChangeCursorPosition((event) => {
+      dispatch(setCursorPosition({ lineNumber: event.position.lineNumber }));
+    });
+
+    return () => disposable.dispose();
+  }, [isEditorMounted, dispatch]);
+
+  // Actions
+  const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);
+  const openActionsPopover = useCallback(() => {
+    setActionsPopoverOpen(true);
+  }, []);
+  const closeActionsPopover = useCallback(() => {
+    setActionsPopoverOpen(false);
+  }, []);
+  const onActionSelected = useCallback(
+    (action: ActionOptionData) => {
+      const model = editorRef.current?.getModel();
+      const yamlDocumentCurrent = yamlDocumentRef.current;
+      const cursorPosition = editorRef.current?.getPosition();
+      const editor = editorRef.current;
+      if (!model || !yamlDocumentCurrent || !editor) {
+        return;
+      }
+      if (isTriggerType(action.id)) {
+        insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
+      } else {
+        insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
+      }
+      closeActionsPopover();
+    },
+    [closeActionsPopover]
+  );
+
+  const options = useMemo(() => {
+    return { ...editorOptions, readOnly: isExecutionYaml };
+  }, [isExecutionYaml]);
+
+  useEffect(() => {
+    // Monkey patching
+    // 1. to set the initial markers https://github.com/suren-atoyan/monaco-react/issues/70#issuecomment-760389748
+    // 2. to intercept and format markers validation messages – this prevents Monaco from ever seeing the problematic numeric enum messages
     const setModelMarkers = monaco.editor.setModelMarkers;
     monaco.editor.setModelMarkers = function (model, owner, markers) {
-      setModelMarkers.call(monaco.editor, model, owner, markers);
-      if (editorRef.current) {
-        handleMarkersChanged(editorRef.current, model.uri, markers, owner);
+      // as we intercepted the setModelMarkers method, we need to check if the call is from the current editor to avoid setting markers which could come from other editors
+      const editorUri = editorRef.current?.getModel()?.uri;
+      if (model.uri.path !== editorUri?.path) {
+        return;
       }
+      const transformedMarkers = transformMonacoMarkers(model, owner, markers);
+      setModelMarkers.call(monaco.editor, model, owner, transformedMarkers);
+      handleMarkersChanged(model, owner, transformedMarkers);
     };
 
     return () => {
       // Reset the monaco.editor.setModelMarkers to the original function
       monaco.editor.setModelMarkers = setModelMarkers;
     };
-  }, [handleMarkersChanged]);
+  }, [handleMarkersChanged, transformMonacoMarkers]);
+
+  // Debug
+  const downloadSchema = useCallback(() => {
+    try {
+      const blob = new Blob([JSON.stringify(workflowJsonSchemaStrict, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'workflow-schema.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      // to download schema:', error);
+      notifications?.toasts.addError(error as Error, {
+        title: 'Failed to download schema',
+      });
+    }
+  }, [workflowJsonSchemaStrict, notifications]);
 
   return (
-    <div css={styles.container}>
-      <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} />
-      <div
-        css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
-      >
-        {hasChanges ? (
-          <div
-            css={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '4px 6px',
-              color: euiTheme.colors.accent,
-            }}
-          >
-            <EuiIcon type="dot" />
-            <span>
-              <FormattedMessage
-                id="workflows.workflowDetail.yamlEditor.unsavedChanges"
-                defaultMessage="Unsaved changes"
-              />
-            </span>
-          </div>
-        ) : (
-          <div
-            css={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '4px 6px',
-              color: euiTheme.colors.textSubdued,
-            }}
-          >
-            <EuiIcon type="check" />
-            <span>
-              <FormattedMessage
-                id="workflows.workflowDetail.yamlEditor.saved"
-                defaultMessage="Saved"
-              />{' '}
-              {lastUpdatedAt ? <FormattedRelative value={lastUpdatedAt} /> : null}
-            </span>
-          </div>
-        )}
+    <div css={css([styles.container, stepOutlineStyles, stepExecutionStyles])} ref={containerRef}>
+      <GlobalWorkflowEditorStyles />
+      <ActionsMenuPopover
+        anchorPosition="upCenter"
+        offset={32}
+        button={<EuiButton iconType="plusInCircle" css={{ display: 'none' }} />}
+        container={containerRef.current ?? undefined}
+        closePopover={closeActionsPopover}
+        onActionSelected={onActionSelected}
+        isOpen={actionsPopoverOpen}
+        panelProps={{ css: styles.actionsMenuPopoverPanel }}
+      />
+      <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
+      {/* Floating Elasticsearch step actions */}
+      <div css={styles.stepActionsContainer} style={positionStyles ? positionStyles : {}}>
+        <StepActions onStepActionClicked={onStepRun} />
       </div>
-      <div css={styles.editorContainer}>
+      {isDevelopment && (
+        <div
+          css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            {/* Debug: Download Schema Button - Only show in development */}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                css={styles.downloadSchemaButton}
+                iconType="download"
+                size="xs"
+                aria-label="Download JSON schema for debugging"
+                onClick={downloadSchema}
+                tabIndex={0}
+                onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.currentTarget.click();
+                  }
+                }}
+              >
+                <FormattedMessage
+                  id="workflows.yamlEditor.downloadSchemaButtonLabel"
+                  defaultMessage="JSON Schema"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      )}
+      <div
+        css={styles.editorContainer}
+        className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
+      >
         <YamlEditor
           editorDidMount={handleEditorDidMount}
-          onChange={handleChange}
-          options={editorOptions}
+          editorWillUnmount={handleEditorWillUnmount}
+          onChange={onChange}
+          options={options}
           schemas={schemas}
-          suggestionProvider={completionProvider}
-          {...props}
+          value={workflowYaml}
         />
       </div>
       <div css={styles.validationErrorsContainer}>
-        <WorkflowYAMLValidationErrors
+        <WorkflowYamlValidationAccordion
           isMounted={isEditorMounted}
+          isLoading={isLoadingValidation}
           error={errorValidating}
           validationErrors={validationErrors}
-          onErrorClick={(error) => {
-            if (!editorRef.current) {
-              return;
-            }
-            navigateToErrorPosition(editorRef.current, error.lineNumber, error.column);
-          }}
+          onErrorClick={handleErrorClick}
+          extraAction={
+            // Only show the shortcuts in edit mode
+            !isExecutionYaml ? <ActionsMenuButton onClick={openActionsPopover} /> : null
+          }
         />
       </div>
     </div>
   );
-};
-
-const componentStyles = {
-  container: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flex: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      position: 'relative',
-      minHeight: 0,
-      // css classes for the monaco editor
-      '.template-variable-valid': {
-        backgroundColor: euiTheme.colors.backgroundLightPrimary,
-        borderRadius: '2px',
-      },
-      '.template-variable-error': {
-        backgroundColor: euiTheme.colors.vis.euiColorVisWarning1,
-        color: euiTheme.colors.severity.danger,
-        borderRadius: '2px',
-      },
-      '.step-highlight': {
-        backgroundColor: euiTheme.colors.backgroundBaseAccent,
-        borderRadius: '2px',
-      },
-      '.dimmed': {
-        opacity: 0.5,
-      },
-      '.step-execution-skipped': {
-        backgroundColor: euiTheme.colors.backgroundBaseFormsControlDisabled,
-      },
-      '.step-execution-waiting_for_input': {
-        backgroundColor: euiTheme.colors.backgroundLightWarning,
-      },
-      '.step-execution-running': {
-        backgroundColor: euiTheme.colors.backgroundLightPrimary,
-      },
-      '.step-execution-completed': {
-        backgroundColor: euiTheme.colors.backgroundLightSuccess,
-      },
-      '.step-execution-failed': {
-        backgroundColor: euiTheme.colors.backgroundLightDanger,
-      },
-      '.step-execution-skipped-glyph': {
-        '&:before': {
-          content: '""',
-          display: 'block',
-          width: '12px',
-          height: '12px',
-          backgroundColor: euiTheme.colors.backgroundFilledText,
-          borderRadius: '50%',
-        },
-      },
-      '.step-execution-waiting_for_input-glyph': {
-        '&:before': {
-          content: '""',
-          display: 'block',
-          width: '12px',
-          height: '12px',
-          backgroundColor: euiTheme.colors.backgroundFilledWarning,
-          borderRadius: '50%',
-        },
-      },
-      '.step-execution-running-glyph': {
-        '&:before': {
-          content: '""',
-          display: 'block',
-          width: '12px',
-          height: '12px',
-          backgroundColor: euiTheme.colors.backgroundFilledPrimary,
-          borderRadius: '50%',
-        },
-      },
-      '.step-execution-completed-glyph': {
-        '&:before': {
-          content: '""',
-          display: 'block',
-          width: '12px',
-          height: '12px',
-          backgroundColor: euiTheme.colors.vis.euiColorVis0,
-          borderRadius: '50%',
-        },
-      },
-      '.step-execution-failed-glyph': {
-        '&:before': {
-          content: '""',
-          display: 'block',
-          width: '12px',
-          height: '12px',
-          backgroundColor: euiTheme.colors.danger,
-          borderRadius: '50%',
-        },
-      },
-      '.alert-trigger-glyph': {
-        '&:before': {
-          content: '""',
-          display: 'block',
-          width: '12px',
-          height: '12px',
-          backgroundColor: euiTheme.colors.warning,
-          borderRadius: '50%',
-        },
-      },
-      '.alert-trigger-highlight': {
-        backgroundColor: euiTheme.colors.backgroundLightWarning,
-      },
-    }),
-  editorContainer: css({
-    flex: '1 1 0',
-    minWidth: 0,
-    overflowY: 'auto',
-    minHeight: 0,
-  }),
-  validationErrorsContainer: css({
-    flexShrink: 0,
-    overflow: 'hidden',
-  }),
 };

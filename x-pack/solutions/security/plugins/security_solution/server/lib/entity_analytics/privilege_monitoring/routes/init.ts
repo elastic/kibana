@@ -20,6 +20,7 @@ import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setti
 import { createInitialisationService } from '../engine/initialisation_service';
 import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
 import { monitoringEntitySourceType } from '../saved_objects';
+import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
 
 export const initPrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -62,11 +63,16 @@ export const initPrivilegeMonitoringEngineRoute = (
             monitoringEntitySourceType.name,
           ],
         });
-        const service = createInitialisationService(dataClient);
+        const service = createInitialisationService(dataClient, soClient);
 
         try {
-          const body = await service.init(soClient);
-          return response.ok({ body });
+          const initResult = await service.init();
+
+          if (initResult.status === PRIVILEGE_MONITORING_ENGINE_STATUS.ERROR) {
+            return siemResponse.error({ statusCode: 500, body: initResult });
+          }
+
+          return response.ok({ body: initResult });
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error initializing privilege monitoring engine: ${error.message}`);

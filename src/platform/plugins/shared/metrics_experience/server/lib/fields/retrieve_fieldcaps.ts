@@ -7,86 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  FieldCapsFieldCapability,
-  Fields,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { FieldCapsFieldCapability, Fields } from '@elastic/elasticsearch/lib/api/types';
 import { type ElasticsearchClient } from '@kbn/core/server';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { parse } from '@kbn/datemath';
 import { dateRangeQuery } from '@kbn/es-query';
+import { DIMENSION_TYPES, NUMERIC_TYPES } from '../../../common/fields/constants';
+import type { EpochTimeRange } from '../../types';
 
 export async function retrieveFieldCaps({
   esClient,
   indexPattern,
   fields = '*',
-  to,
-  from,
+  timerange: { from, to },
 }: {
   esClient: ElasticsearchClient;
   indexPattern: string;
   fields?: Fields;
-  to?: string;
-  from?: string;
+  timerange: EpochTimeRange;
 }) {
-  // Build index_filter for time range if provided
-  let indexFilter: QueryDslQueryContainer | undefined;
-  const dataStreamFieldCapsMap = new Map<
+  const indexFieldCapsMap = new Map<
     string,
     Record<string, Record<string, FieldCapsFieldCapability>>
   >();
 
-  if (from && to) {
-    const start = parse(from);
-    const end = parse(to, { roundUp: true });
-    if (start && end) {
-      indexFilter = dateRangeQuery(start.valueOf(), end.valueOf(), '@timestamp')[0];
-    }
-  }
-  // First, resolve the index pattern to get data streams
+  // First, resolve the index pattern to get data streams or indices
   const resolveResponse = await esClient.indices.resolveIndex({
     name: indexPattern,
-    expand_wildcards: 'all',
+    expand_wildcards: 'open',
   });
 
-  // Extract data stream names
-  const dataStreams = resolveResponse.data_streams || [];
+  // Extract resolved indices (data streams and regular indices)
+  const resolvedIndices = [...resolveResponse.data_streams, ...resolveResponse.indices];
 
-  if (dataStreams.length === 0) {
-    return dataStreamFieldCapsMap;
-  }
+  const uniqueFieldTypes = new Set([...NUMERIC_TYPES, ...DIMENSION_TYPES]);
 
-  // Call field caps in parallel for each data stream
-  const fieldCapsPromises = dataStreams.map(async (dataStream) => {
+  // Call field caps in parallel for each index
+  const fieldCapsPromises = resolvedIndices.map(async (index) => {
     const fieldCaps = await esClient.fieldCaps({
-      index: dataStream.name,
+      index: index.name,
       fields,
       include_unmapped: false,
-      index_filter: indexFilter,
-      types: [
-        // Numeric types for metrics
-        ES_FIELD_TYPES.LONG,
-        ES_FIELD_TYPES.INTEGER,
-        ES_FIELD_TYPES.SHORT,
-        ES_FIELD_TYPES.BYTE,
-        ES_FIELD_TYPES.DOUBLE,
-        ES_FIELD_TYPES.FLOAT,
-        ES_FIELD_TYPES.HALF_FLOAT,
-        ES_FIELD_TYPES.SCALED_FLOAT,
-        ES_FIELD_TYPES.UNSIGNED_LONG,
-        ES_FIELD_TYPES.HISTOGRAM,
-        // String types for dimensions
-        ES_FIELD_TYPES.KEYWORD,
-      ],
+      index_filter: dateRangeQuery(from, to)[0],
+      types: [...uniqueFieldTypes],
     });
 
-    dataStreamFieldCapsMap.set(dataStream.name, fieldCaps.fields);
+    if (Object.keys(fieldCaps.fields).length > 0) {
+      indexFieldCapsMap.set(index.name, fieldCaps.fields);
+    }
   });
 
   // Wait for all field caps requests to complete
   await Promise.all(fieldCapsPromises);
 
-  // Return the datastream field caps map.
-  return dataStreamFieldCapsMap;
+  // Return the index field caps map
+  return indexFieldCapsMap;
 }

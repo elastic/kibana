@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { useCallback } from 'react';
 import type { FC, ReactNode } from 'react';
-import React from 'react';
 
 import { SecondaryMenu } from '../secondary_menu';
+import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { useNestedMenu } from './use_nested_menu';
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
 export interface PanelProps {
   children: ReactNode;
@@ -20,19 +22,49 @@ export interface PanelProps {
 }
 
 export const Panel: FC<PanelProps> = ({ children, id, title }) => {
-  const { currentPanel } = useNestedMenu();
+  const { currentPanel, panelStackDepth, returnFocusId } = useNestedMenu();
+  const nestedPanelTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-nestedPanel-${id}`;
 
-  if (currentPanel !== id) {
-    return null;
-  }
+  const panelRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (currentPanel !== id) return;
+
+      // If we have a return focus id, we focus the trigger element
+      if (returnFocusId && node) {
+        const triggerElement = node.querySelector<HTMLElement>(`#${CSS.escape(returnFocusId)}`);
+        if (triggerElement) return triggerElement.focus();
+      }
+
+      // If we are at the root panel, we don't need to focus anything
+      if (panelStackDepth === 0) return;
+
+      // Otherwise, we focus the first focusable element in the panel
+      if (node) {
+        const elements = getFocusableElements(node);
+        elements[0]?.focus();
+      }
+    },
+    [currentPanel, id, panelStackDepth, returnFocusId]
+  );
+
+  if (currentPanel !== id) return null;
 
   if (title) {
     return (
-      <SecondaryMenu title={title} isPanel={false}>
+      <SecondaryMenu
+        data-test-subj={nestedPanelTestSubj}
+        ref={panelRef}
+        title={title}
+        isPanel={false}
+      >
         {children}
       </SecondaryMenu>
     );
   }
 
-  return <div>{children}</div>;
+  return (
+    <div data-test-subj={nestedPanelTestSubj} ref={panelRef}>
+      {children}
+    </div>
+  );
 };

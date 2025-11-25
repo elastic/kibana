@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  useIsWithinBreakpoints,
   EuiText,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -43,6 +44,18 @@ const FormRow = getFormRow({ titleTag: 'h3' });
 
 const COLUMN_MAX_WIDTH = 420;
 
+const useStyles = () => {
+  const shouldHaveFixedWidth = useIsWithinBreakpoints(['l', 'xl']);
+
+  return {
+    flexItem: shouldHaveFixedWidth
+      ? css`
+          max-width: ${COLUMN_MAX_WIDTH}px;
+        `
+      : undefined,
+  };
+};
+
 export const PipelineFormFields: React.FunctionComponent<Props> = ({
   processors,
   onFailure,
@@ -54,7 +67,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
   canEditName,
   isEditing,
 }) => {
-  const shouldHaveFixedWidth = useIsWithinBreakpoints(['l', 'xl']);
+  const styles = useStyles();
 
   return (
     <>
@@ -119,7 +132,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
           </ProcessorsEditorContextProvider>
         </EuiFlexItem>
 
-        <EuiFlexItem css={shouldHaveFixedWidth ? { maxWidth: COLUMN_MAX_WIDTH } : {}}>
+        <EuiFlexItem css={styles.flexItem}>
           <CollapsiblePanel
             title={
               <EuiText size="s">

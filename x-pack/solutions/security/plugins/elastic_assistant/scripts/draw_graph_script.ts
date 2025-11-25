@@ -11,7 +11,6 @@ import fs from 'fs/promises';
 import path from 'path';
 import type {
   ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
   ActionsClientLlm,
 } from '@kbn/langchain/server/language_models';
 import type { Logger } from '@kbn/logging';
@@ -20,6 +19,7 @@ import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { MemorySaver } from '@langchain/langgraph-checkpoint';
 import {
   ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
   ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,
@@ -49,7 +49,7 @@ interface Drawable {
 
 const mockLlm = new FakeLLM({
   response: JSON.stringify({}, null, 2),
-}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+}) as unknown as ActionsClientChatOpenAI;
 
 class FakeChatModelWithBindTools extends FakeChatModel {
   bindTools = () => this;
@@ -68,6 +68,7 @@ async function getAssistantGraph(logger: Logger): Promise<Drawable> {
     tools: [],
     savedObjectsClient: {} as unknown as SavedObjectsClientContract,
     contentReferencesStore: {} as unknown as ContentReferencesStore,
+    checkpointSaver: new MemorySaver(),
   });
   return graph.getGraphAsync({ xray: true });
 }

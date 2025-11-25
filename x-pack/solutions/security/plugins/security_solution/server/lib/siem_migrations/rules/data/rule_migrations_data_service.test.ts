@@ -10,7 +10,8 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { IndexPatternAdapter, IndexAdapter } from '@kbn/index-adapter';
 import { Subject } from 'rxjs';
-import type { RuleMigrationIndexNameProviders, RuleMigrationsClientDependencies } from '../types';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
+import type { RuleMigrationIndexNameProviders } from '../types';
 import type { SetupParams } from './rule_migrations_data_service';
 import { RuleMigrationsDataService } from './rule_migrations_data_service';
 import { RuleMigrationIndexMigrator } from '../index_migrators';
@@ -35,7 +36,7 @@ const MockedIndexPatternAdapter = IndexPatternAdapter as unknown as jest.MockedC
 >;
 const MockedIndexAdapter = IndexAdapter as unknown as jest.MockedClass<typeof IndexAdapter>;
 
-const dependencies = {} as RuleMigrationsClientDependencies;
+const dependencies = {} as SiemMigrationsClientDependencies;
 const esClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 
 describe('SiemRuleMigrationsDataService', () => {

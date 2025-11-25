@@ -1,7 +1,7 @@
 # Kibana Platform Serverless Tests
 
 The tests and helper methods (services, page objects) defined here in
-`x-pack/platform/test/serverless` cover the platform-shared serverless functionality that works across all serverless project types (Security, Observability, Search, Chat).
+`x-pack/platform/test/serverless` cover the platform-shared serverless functionality that works across all serverless project types (Security, Observability, Search, Workplace AI).
 
 **Important**: Only tests that validate platform-shared functionality should be located here. Solution-specific serverless tests should be located in their respective solution directories: `x-pack/solutions/<solution>/test/serverless`.
 

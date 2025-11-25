@@ -15,19 +15,26 @@
 import { uniq } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-types';
 import type {
-  ESQLUserDefinedColumn,
-  ESQLFieldWithMetadata,
   ICommandCallbacks,
   ISuggestionItem,
   Location,
+  ESQLColumnData,
 } from '../commands_registry/types';
-import { getLocationFromCommandOrOptionName } from '../commands_registry/types';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '../definitions/generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
-import { operatorsDefinitions } from '../definitions/all_operators';
+import {
+  operatorsDefinitions,
+  comparisonFunctions,
+  logicalOperators,
+  arithmeticOperators,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
+} from '../definitions/all_operators';
 import { parse } from '../parser';
-import type { ESQLCommand } from '../types';
+import type { ESQLAstAllCommands } from '../types';
 import type {
   FieldType,
   FunctionParameterType,
@@ -40,6 +47,24 @@ import { getSafeInsertText } from '../definitions/utils';
 import { timeUnitsToSuggest } from '../definitions/constants';
 import { correctQuerySyntax, findAstPosition } from '../definitions/utils/ast';
 
+export const DATE_DIFF_TIME_UNITS = (() => {
+  const dateDiffDefinition = scalarFunctionDefinitions.find(
+    ({ name }) => name.toLowerCase() === 'date_diff'
+  );
+  const suggestedValues = dateDiffDefinition?.signatures?.[0]?.params?.[0]?.suggestedValues ?? [];
+
+  return suggestedValues.map((unit) => `"${unit}", `);
+})();
+
+export const mockFieldsWithTypes = (
+  mockCallbacks: ICommandCallbacks,
+  fieldNames: string[]
+): void => {
+  (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    fieldNames.map((fieldName) => ({ label: fieldName, text: fieldName }))
+  );
+};
+
 export const suggest = (
   query: string,
   context = mockContext,
@@ -47,11 +72,10 @@ export const suggest = (
   mockCallbacks = getMockCallbacks(),
   autocomplete: (
     arg0: string,
-    arg1: ESQLCommand,
+    arg1: ESQLAstAllCommands,
     arg2: ICommandCallbacks,
     arg3: {
-      userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-      fields: Map<string, ESQLFieldWithMetadata>;
+      columns: Map<string, ESQLColumnData>;
     },
     arg4?: number
   ) => Promise<ISuggestionItem[]>,
@@ -59,14 +83,20 @@ export const suggest = (
 ): Promise<ISuggestionItem[]> => {
   const innerText = query.substring(0, offset ?? query.length);
   const correctedQuery = correctQuerySyntax(innerText);
-  const { ast } = parse(correctedQuery, { withFormatting: true });
+  const { ast, root } = parse(correctedQuery, { withFormatting: true });
+  const headerConstruction = root?.header?.find((cmd) => cmd.name === commandName);
+
   const cursorPosition = offset ?? query.length;
-  const { command } = findAstPosition(ast, cursorPosition);
+
+  const command = headerConstruction ?? findAstPosition(ast, cursorPosition).command;
+
   if (!command) {
     throw new Error(`${commandName.toUpperCase()} command not found in the parsed query`);
   }
 
-  return autocomplete(query, command, mockCallbacks, context, cursorPosition);
+  const contextWithRoot = { ...context, rootAst: root };
+
+  return autocomplete(query, command, mockCallbacks, contextWithRoot, cursorPosition);
 };
 
 export const expectSuggestions = async (
@@ -77,11 +107,10 @@ export const expectSuggestions = async (
   mockCallbacks = getMockCallbacks(),
   autocomplete: (
     arg0: string,
-    arg1: ESQLCommand,
+    arg1: ESQLAstAllCommands,
     arg2: ICommandCallbacks,
     arg3: {
-      userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-      fields: Map<string, ESQLFieldWithMetadata>;
+      columns: Map<string, ESQLColumnData>;
     },
     arg4?: number
   ) => Promise<ISuggestionItem[]>,
@@ -91,6 +120,11 @@ export const expectSuggestions = async (
 
   const suggestions: string[] = [];
   result.forEach((suggestion) => {
+    if (containsSnippet(suggestion.text) && !suggestion.asSnippet) {
+      throw new Error(
+        `Suggestion with snippet placeholder must be marked as a snippet. -> ${suggestion.text}`
+      );
+    }
     suggestions.push(suggestion.text);
   });
   expect(uniq(suggestions).sort()).toEqual(uniq(expectedSuggestions).sort());
@@ -100,12 +134,10 @@ export function getFieldNamesByType(
   _requestedType: Readonly<FieldType | 'any' | Array<FieldType | 'any'>>,
   excludeUserDefined: boolean = false
 ) {
-  const fieldsMap = mockContext.fields;
-  const userDefinedColumnsMap = mockContext.userDefinedColumns;
-  const fields = Array.from(fieldsMap.values());
-  const userDefinedColumns = Array.from(userDefinedColumnsMap.values()).flat();
+  const columnMap = mockContext.columns;
+  const columns = Array.from(columnMap.values());
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
-  const finalArray = excludeUserDefined ? fields : [...fields, ...userDefinedColumns];
+  const finalArray = excludeUserDefined ? columns.filter((col) => !col.userDefined) : columns;
   return finalArray
     .filter(
       ({ type }) =>
@@ -138,17 +170,24 @@ export function getFunctionSignaturesByReturnType(
   _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
+    timeseriesAgg,
     grouping,
     scalar,
     operators,
+    excludeOperatorGroups,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
     skipAssign,
   }: {
     agg?: boolean;
+    timeseriesAgg?: boolean;
     grouping?: boolean;
     scalar?: boolean;
     operators?: boolean;
+    /** Exclude specific operator groups (e.g., ['in', 'nullCheck']) */
+    excludeOperatorGroups?: Array<
+      'logical' | 'comparison' | 'arithmetic' | 'pattern' | 'in' | 'nullCheck'
+    >;
     skipAssign?: boolean;
   } = {},
   paramsTypes?: Readonly<FunctionParameterType[]>,
@@ -166,6 +205,9 @@ export function getFunctionSignaturesByReturnType(
   if (agg) {
     list.push(...aggFunctionDefinitions);
   }
+  if (timeseriesAgg) {
+    list.push(...timeSeriesAggFunctionDefinitions);
+  }
   if (grouping) {
     list.push(...groupingFunctionDefinitions);
   }
@@ -174,7 +216,50 @@ export function getFunctionSignaturesByReturnType(
     list.push(...scalarFunctionDefinitions);
   }
   if (operators) {
-    list.push(...operatorsDefinitions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
+    const hasStringParams = paramsTypes?.some((type) => type === 'text' || type === 'keyword');
+    const comparisonOperatorNames = comparisonFunctions.map(({ name }) => name);
+
+    // Build set of operator names to exclude based on excludeOperatorGroups
+    const excludedOperatorNames = new Set<string>();
+
+    if (excludeOperatorGroups) {
+      const operatorGroupMap: Record<string, Array<{ name: string; signatures?: unknown[] }>> = {
+        logical: logicalOperators,
+        comparison: comparisonFunctions,
+        arithmetic: arithmeticOperators,
+        pattern: patternMatchOperators,
+        in: inOperators,
+        nullCheck: nullCheckOperators,
+      };
+
+      for (const groupName of excludeOperatorGroups) {
+        const group = operatorGroupMap[groupName];
+
+        if (group) {
+          for (const op of group) {
+            excludedOperatorNames.add(op.name);
+          }
+        }
+      }
+    }
+
+    const filteredOperators = operatorsDefinitions.filter(({ name }) => {
+      if (skipAssign && (name === '=' || name === ':')) {
+        return false;
+      }
+
+      if (hasStringParams && comparisonOperatorNames.includes(name)) {
+        return false;
+      }
+
+      if (excludedOperatorNames.has(name)) {
+        return false;
+      }
+
+      return true;
+    });
+
+    list.push(...filteredOperators);
   }
 
   const deduped = Array.from(new Set(list));
@@ -210,11 +295,7 @@ export function getFunctionSignaturesByReturnType(
         if (ignoreAsSuggestion) {
           return false;
         }
-        if (
-          !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
-            (loc) => locationsAvailable.includes(loc)
-          )
-        ) {
+        if (!locations.some((loc) => locationsAvailable.includes(loc))) {
           return false;
         }
         const filteredByReturnType = signatures.filter(
@@ -255,6 +336,11 @@ export function getFunctionSignaturesByReturnType(
           ? `${name.toUpperCase()} $0`
           : name.toUpperCase();
       }
+
+      const hasNoArguments = signatures.every((sig) => sig.params.length === 0);
+      if (hasNoArguments) {
+        return `${name.toUpperCase()}()`;
+      }
       return customParametersSnippet
         ? `${name.toUpperCase()}(${customParametersSnippet})`
         : `${name.toUpperCase()}($0)`;
@@ -268,4 +354,25 @@ export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]
     return timeUnitsToSuggest.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
   }
   return [];
+}
+
+export const containsSnippet = (text: string): boolean => {
+  // Matches most common monaco snippets
+  // $0, $1, etc. and ${1:placeholder}, ${2:another}
+  const snippetRegex = /\$(\d+|\{\d+:[^}]*\})/;
+  return snippetRegex.test(text);
+};
+
+/**
+ * Convert operator definition groups to suggestion strings.
+ * Use this instead of hardcoding operator strings in tests.
+ */
+export function getOperatorSuggestions(
+  operators: Array<{ name: string; signatures: Array<{ params: unknown[] }> }>
+): string[] {
+  return operators.map(({ name, signatures }) =>
+    signatures.some(({ params }) => params.length > 1)
+      ? `${name.toUpperCase()} $0`
+      : name.toUpperCase()
+  );
 }

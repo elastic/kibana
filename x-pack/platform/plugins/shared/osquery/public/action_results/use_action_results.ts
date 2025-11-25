@@ -5,30 +5,27 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import { flatten, reverse, uniqBy } from 'lodash/fp';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { lastValueFrom } from 'rxjs';
+import { useMemo } from 'react';
 import type { InspectResponse } from '../common/helpers';
-import { getInspectResponse, generateTablePaginationOptions } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
-import type {
-  ResultEdges,
-  ActionResultsRequestOptions,
-  ActionResultsStrategyResponse,
-  Direction,
-} from '../../common/search_strategy';
-import { OsqueryQueries } from '../../common/search_strategy';
-import { queryClient } from '../query_client';
+import type { ResultEdges, Direction } from '../../common/search_strategy';
+import { API_VERSIONS, ACTION_RESPONSES_INDEX } from '../../common/constants';
+import { getAgentIdFromFields } from '../../common/utils/agent_fields';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
-export interface ResultsArgs {
-  results: ResultEdges;
-  id: string;
+export interface ActionResultsArgs {
+  edges: ResultEdges;
+  aggregations: {
+    totalRowCount: number;
+    totalResponded: number;
+    successful: number;
+    failed: number;
+    pending: number;
+  };
   inspect: InspectResponse;
-  isInspected: boolean;
 }
 
 export interface UseActionResults {
@@ -40,8 +37,23 @@ export interface UseActionResults {
   limit: number;
   sortField: string;
   kuery?: string;
-  skip?: boolean;
   isLive?: boolean;
+}
+
+interface ActionResultsResponse {
+  edges: ResultEdges;
+  total: number;
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
+  aggregations: {
+    totalRowCount: number;
+    totalResponded: number;
+    successful: number;
+    failed: number;
+    pending: number;
+  };
+  inspect?: InspectResponse;
 }
 
 export const useActionResults = ({
@@ -53,78 +65,80 @@ export const useActionResults = ({
   sortField,
   kuery,
   startDate,
-  skip = false,
   isLive = false,
 }: UseActionResults) => {
-  const { data } = useKibana().services;
+  const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery<{}, Error, ActionResultsStrategyResponse>(
-    ['actionResults', { actionId }],
-    async () => {
-      const responseData = await lastValueFrom(
-        data.search.search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
-          {
-            actionId,
-            startDate,
-            factoryQueryType: OsqueryQueries.actionResults,
-            kuery,
-            pagination: generateTablePaginationOptions(activePage, limit),
-            sort: {
-              direction,
-              field: sortField,
-            },
-          },
-          {
-            strategy: 'osquerySearchStrategy',
-          }
-        )
-      );
+  const currentPageAgentIds = useMemo(() => {
+    const startIndex = activePage * limit;
+    const endIndex = startIndex + limit;
 
-      const totalResponded =
-        responseData.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count ?? 0;
-      const totalRowCount =
-        responseData.rawResponse?.aggregations?.aggs.responses_by_action_id?.rows_count?.value ?? 0;
-      const aggsBuckets =
-        responseData.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
+    return agentIds?.slice(startIndex, endIndex) || [];
+  }, [agentIds, activePage, limit]);
 
-      const cachedData = queryClient.getQueryData<ActionResultsStrategyResponse>([
-        'actionResults',
-        { actionId },
-      ]);
-
-      const previousEdges = cachedData?.edges.length
-        ? cachedData?.edges
-        : agentIds?.map(
-            (agentId) =>
-              ({ fields: { agent_id: [agentId] } } as unknown as estypes.SearchHit<object>)
-          ) ?? [];
-
-      return {
-        ...responseData,
-        edges: reverse(uniqBy('fields.agent_id[0]', flatten([responseData.edges, previousEdges]))),
-        aggregations: {
-          totalRowCount,
-          totalResponded,
-          successful: aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0,
-          failed: aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0,
+  return useQuery<ActionResultsResponse, Error, ActionResultsArgs>(
+    ['actionResults', { actionId, activePage, limit, direction, sortField }],
+    () =>
+      http.get<ActionResultsResponse>(`/api/osquery/action_results/${actionId}`, {
+        version: API_VERSIONS.public.v1,
+        query: {
+          page: activePage,
+          pageSize: limit,
+          sort: sortField,
+          sortOrder: direction,
+          ...(kuery && { kuery }),
+          ...(startDate && { startDate }),
+          ...(currentPageAgentIds.length > 0 && {
+            agentIds: currentPageAgentIds.join(','),
+          }),
+          totalAgents: agentIds?.length ?? 0,
         },
-        inspect: getInspectResponse(responseData, {} as InspectResponse),
-      };
-    },
+      }),
     {
+      select: (response) => {
+        // Server already filtered by agentIds - build set of responded agents
+        const respondedAgentIds = new Set(
+          response.edges
+            .map((edge) => getAgentIdFromFields(edge.fields))
+            .filter((id): id is string => id !== undefined)
+        );
+
+        const placeholderEdges = currentPageAgentIds
+          .filter((agentId) => agentId && !respondedAgentIds.has(agentId))
+          .map((agentId) => ({
+            _index: `${ACTION_RESPONSES_INDEX}-default`,
+            _id: `placeholder-${agentId}`,
+            _source: {},
+            fields: { agent_id: [agentId] },
+          }));
+
+        const mergedEdges = [...response.edges, ...placeholderEdges] as ResultEdges;
+
+        return {
+          edges: mergedEdges,
+          aggregations: response.aggregations,
+          inspect: response.inspect || { dsl: [], response: [] },
+        };
+      },
       initialData: {
         edges: [],
+        total: 0,
+        currentPage: 0,
+        pageSize: limit,
+        totalPages: 0,
         aggregations: {
+          totalRowCount: 0,
           totalResponded: 0,
           successful: 0,
           pending: agentIds?.length ?? 0,
           failed: 0,
         },
+        inspect: { dsl: [], response: [] },
       },
       refetchInterval: isLive ? 5000 : false,
       keepPreviousData: true,
-      enabled: !skip && !!agentIds?.length,
+      enabled: !!actionId && !!agentIds?.length,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
         setErrorToast(error, {

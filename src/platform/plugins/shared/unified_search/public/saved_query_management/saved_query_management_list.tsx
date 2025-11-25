@@ -484,6 +484,12 @@ export const SavedQueryManagementList = ({
                   activePage={currentPageNumber}
                   onPageClick={(activePage) => setCurrentPageNumber(activePage)}
                   compressed
+                  aria-label={i18n.translate(
+                    'unifiedSearch.search.searchBar.savedQueryPaginationAriaLabel',
+                    {
+                      defaultMessage: 'Saved queries pagination',
+                    }
+                  )}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -612,30 +618,27 @@ const ListTitle = ({ queryBarMenuRef }: { queryBarMenuRef: RefObject<EuiContextM
   const { application, http } = useKibana<IUnifiedSearchPluginServices>().services;
   const canEditSavedObjects = application.capabilities.savedObjectsManagement.edit;
 
+  const tooltipContent = i18n.translate(
+    'unifiedSearch.search.searchBar.savedQueryPopoverManageLabel',
+    {
+      defaultMessage: 'Manage queries',
+    }
+  );
+
   return (
     <PanelTitle
       queryBarMenuRef={queryBarMenuRef}
       title={queryBarMenuPanelsStrings.getLoadCurrentFilterSetLabel()}
       append={
         canEditSavedObjects && (
-          <EuiToolTip
-            position="bottom"
-            content={i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverManageLabel', {
-              defaultMessage: 'Manage queries',
-            })}
-          >
+          <EuiToolTip position="bottom" content={tooltipContent} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="gear"
               color="text"
               href={http.basePath.prepend(
                 `/app/management/kibana/objects?initialQuery=type:("query")`
               )}
-              aria-label={i18n.translate(
-                'unifiedSearch.search.searchBar.savedQueryPopoverManageLabel',
-                {
-                  defaultMessage: 'Manage queries',
-                }
-              )}
+              aria-label={tooltipContent}
             />
           </EuiToolTip>
         )
@@ -663,7 +666,7 @@ const savedQueryListStyles = {
     css({
       // Addition height will ensure one item is "cutoff" to indicate more below the scroll
       maxHeight: `${euiTheme.base * 26}px `,
-      'overflow-y': 'hidden',
+      overflowY: 'hidden',
     }),
   listWrapperInner: css({
     position: 'relative',

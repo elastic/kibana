@@ -12,6 +12,11 @@ import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/commo
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import {
+  GCP_INPUT_FIELDS_TEST_SUBJECTS,
+  GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
+  GCP_ORGANIZATION_ACCOUNT,
+} from '@kbn/cloud-security-posture-common';
 import type { CspRadioOption } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
 import {
@@ -22,12 +27,8 @@ import {
   getGcpCredentialsType,
   getGcpInputVarsFields,
 } from '../utils';
-import { GCP_CREDENTIALS_TYPE, GCP_ORGANIZATION_ACCOUNT, GCP_SETUP_ACCESS } from '../constants';
+import { GCP_CREDENTIALS_TYPE, GCP_SETUP_ACCESS } from '../constants';
 import { ReadDocumentation } from '../common';
-import {
-  GCP_INPUT_FIELDS_TEST_SUBJECTS,
-  GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
-} from './gcp_test_subjects';
 import type { GcpFields, GcpInputFields, UpdatePolicy } from '../types';
 import { GcpInputVarFields } from './gcp_input_var_fields';
 import { GCPSetupInfoContent } from './gcp_setup_info';
@@ -76,27 +77,27 @@ const GoogleCloudShellSetup = ({
         >
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.gcpIntegration.cloudShellSetupStep.hostRequirement"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudShellSetupStep.hostRequirement"
               defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
             />
           </li>
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.gcpIntegration.cloudShellSetupStep.login"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudShellSetupStep.login"
               defaultMessage="Log into your Google Cloud Console"
             />
           </li>
           {accountType === GCP_ORGANIZATION_ACCOUNT ? (
             <li>
               <FormattedMessage
-                id="securitySolutionPackages.gcpIntegration.organizationCloudShellSetupStep.save"
+                id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.organizationCloudShellSetupStep.save"
                 defaultMessage="Note down the GCP organization ID of the organization you wish to monitor and project ID where you want to provision resources for monitoring purposes and provide them in the input boxes below"
               />
             </li>
           ) : (
             <li>
               <FormattedMessage
-                id="securitySolutionPackages.gcpIntegration.cloudShellSetupStep.save"
+                id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudShellSetupStep.save"
                 defaultMessage="Note down the GCP project ID of the project you wish to monitor"
               />
             </li>
@@ -104,7 +105,7 @@ const GoogleCloudShellSetup = ({
 
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.gcpIntegration.cloudShellSetupStep.launch"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudShellSetupStep.launch"
               defaultMessage='Click "Save and Continue" at the bottom right of the page. Then, on the pop-up modal, click "Launch Google Cloud Shell"'
             />
           </li>
@@ -158,21 +159,24 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
   {
     id: GCP_SETUP_ACCESS.CLOUD_SHELL,
     label: i18n.translate(
-      'securitySolutionPackages.gcpIntegration.setupFormatOptions.googleCloudShell',
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.setupFormatOptions.googleCloudShell',
       {
         defaultMessage: 'Google Cloud Shell',
       }
     ),
     disabled: false,
-    testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUD_SHELL,
+    testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.CLOUD_SHELL,
   },
   {
     id: GCP_SETUP_ACCESS.MANUAL,
-    label: i18n.translate('securitySolutionPackages.gcpIntegration.setupFormatOptions.manual', {
-      defaultMessage: 'Manual',
-    }),
+    label: i18n.translate(
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.setupFormatOptions.manual',
+      {
+        defaultMessage: 'Manual',
+      }
+    ),
     disabled: false,
-    testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL,
+    testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL,
   },
 ];
 
@@ -340,9 +344,9 @@ export const GcpCredentialsForm = ({
     return (
       <>
         <EuiSpacer size="l" />
-        <EuiCallOut color="warning">
+        <EuiCallOut announceOnMount={false} color="warning">
           <FormattedMessage
-            id="securitySolutionPackages.gcpIntegration.gcpNotSupportedMessage"
+            id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.gcpNotSupportedMessage"
             defaultMessage="CIS GCP is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS GCP"
           />
         </EuiCallOut>

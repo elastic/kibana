@@ -7,7 +7,7 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import type { AlertAttachment, CaseCustomField, User, Attachment } from '../../common/types/domain';
+import type { CaseCustomField, User } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
@@ -25,9 +25,8 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   UserActionInternalFindResponse,
-  CaseSummaryResponse,
-  InferenceConnectorsResponse,
   FindCasesContainingAllAlertsResponse,
+  BulkAddObservablesRequest,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -44,7 +43,6 @@ import type {
   SimilarCasesProps,
   CasesSimilarResponseUI,
   InternalFindCaseUserActions,
-  InferenceConnectors,
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
 import {
@@ -63,8 +61,7 @@ import {
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseSimilarCasesUrl,
-  getCaseSummaryUrl,
-  getInferenceConnectorsUrl,
+  getBulkCreateObservablesUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -98,7 +95,6 @@ import type {
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
   UserActionUI,
-  CaseSummary,
 } from './types';
 
 import {
@@ -111,8 +107,6 @@ import {
   constructReportersFilter,
   decodeCaseUserActionStatsResponse,
   constructCustomFieldsFilter,
-  decodeCaseSummaryResponse,
-  decodeInferenceConnectorsResponse,
   decodeFindAllAttachedAlertsResponse,
 } from './utils';
 import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
@@ -193,35 +187,6 @@ export const getSingleCaseMetrics = async (
   return convertToCamelCase<SingleCaseMetricsResponse, SingleCaseMetrics>(
     decodeSingleCaseMetricsResponse(response)
   );
-};
-
-export const getCaseSummary = async (
-  caseId: string,
-  connectorId: string,
-  signal?: AbortSignal
-): Promise<CaseSummary> => {
-  const response = await KibanaServices.get().http.fetch<CaseSummaryResponse>(
-    getCaseSummaryUrl(caseId),
-    {
-      method: 'GET',
-      signal,
-      query: { connectorId },
-    }
-  );
-  return decodeCaseSummaryResponse(response);
-};
-
-export const getInferenceConnectors = async (
-  signal?: AbortSignal
-): Promise<InferenceConnectors> => {
-  const response = await KibanaServices.get().http.fetch<InferenceConnectorsResponse>(
-    getInferenceConnectorsUrl(),
-    {
-      method: 'GET',
-      signal,
-    }
-  );
-  return decodeInferenceConnectorsResponse(response);
 };
 
 export const findCasesByAttachmentId = async (alertIds: string[], caseIds: string[]) => {
@@ -456,54 +421,30 @@ export const postComment = async (
 export const patchComment = async ({
   caseId,
   commentId,
+  commentUpdate,
   version,
-  patch,
+  owner,
   signal,
 }: {
   caseId: string;
   commentId: string;
-  patch: AttachmentRequest;
+  commentUpdate: string;
   version: string;
+  owner: string;
   signal?: AbortSignal;
-}): Promise<Attachment> => {
-  const response = await KibanaServices.get().http.fetch<Attachment>(getCaseCommentsUrl(caseId), {
+}): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(getCaseCommentsUrl(caseId), {
     method: 'PATCH',
-    body: JSON.stringify({ id: commentId, version, ...patch }),
+    body: JSON.stringify({
+      comment: commentUpdate,
+      type: AttachmentType.user,
+      id: commentId,
+      version,
+      owner,
+    }),
     signal,
   });
-  return convertToCamelCase(response);
-};
-
-export const removeAlertFromComment = async ({
-  caseId,
-  alertId: alertIdToRemove,
-  alertAttachment,
-  signal,
-}: {
-  caseId: string;
-  alertId: string;
-  alertAttachment: AlertAttachment;
-  signal?: AbortSignal;
-}): Promise<Attachment | void> => {
-  const { alertId, index, rule, version, id, owner } = alertAttachment;
-  if (Array.isArray(alertId) && Array.isArray(index) && alertId.length > 1) {
-    const alertIdx = alertId.indexOf(alertIdToRemove);
-    const newAlertId = [...alertId.slice(0, alertIdx), ...alertId.slice(alertIdx + 1)];
-    const newIndex = [...index.slice(0, alertIdx), ...index.slice(alertIdx + 1)];
-    return patchComment({
-      caseId,
-      commentId: id,
-      version,
-      patch: { type: AttachmentType.alert, alertId: newAlertId, index: newIndex, rule, owner },
-      signal,
-    });
-  } else {
-    return deleteComment({
-      caseId,
-      commentId: alertAttachment.id,
-      signal,
-    });
-  }
+  return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
 export const deleteComment = async ({
@@ -719,6 +660,21 @@ export const deleteObservable = async (
     method: 'DELETE',
     signal,
   });
+};
+
+export const bulkPostObservables = async (
+  request: BulkAddObservablesRequest,
+  signal?: AbortSignal
+): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(
+    getBulkCreateObservablesUrl(request.caseId),
+    {
+      method: 'POST',
+      body: JSON.stringify({ caseId: request.caseId, observables: request.observables }),
+      signal,
+    }
+  );
+  return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
 export const getSimilarCases = async ({

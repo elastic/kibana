@@ -41,7 +41,7 @@ import { updateRuleApiKeyRoute } from './rule/apis/update_api_key/update_rule_ap
 import { bulkEditInternalRulesRoute } from './rule/apis/bulk_edit/bulk_edit_rules_route';
 import { snoozeRuleInternalRoute, snoozeRuleRoute } from './rule/apis/snooze';
 import { unsnoozeRuleRoute, unsnoozeRuleInternalRoute } from './rule/apis/unsnooze';
-import { runSoonRoute } from './run_soon';
+import { runSoonRoute } from './rule/apis/run_soon';
 import { bulkDeleteRulesRoute } from './rule/apis/bulk_delete/bulk_delete_rules_route';
 import { bulkEnableRulesRoute } from './rule/apis/bulk_enable/bulk_enable_rules_route';
 import { bulkDisableRulesRoute } from './rule/apis/bulk_disable/bulk_disable_rules_route';
@@ -69,6 +69,7 @@ import { deleteMaintenanceWindowRoute } from './maintenance_window/apis/external
 import { archiveMaintenanceWindowRoute } from './maintenance_window/apis/external/archive/archive_maintenance_window_route';
 import { unarchiveMaintenanceWindowRoute } from './maintenance_window/apis/external/unarchive/unarchive_maintenance_window_route';
 import { updateMaintenanceWindowRoute } from './maintenance_window/apis/external/update/update_maintenance_window_route';
+import { findMaintenanceWindowsRoute } from './maintenance_window/apis/external/find/find_maintenance_windows_route';
 
 import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggestion_rules';
 import { registerFieldsRoute } from './suggestions/fields_rules';
@@ -92,6 +93,7 @@ import { getRuleIdsWithGapsRoute } from './gaps/apis/get_rule_ids_with_gaps/get_
 import { getGapsSummaryByRuleIdsRoute } from './gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route';
 import { getGlobalExecutionSummaryRoute } from './get_global_execution_summary';
 import type { AlertingPluginsStart } from '../plugin';
+import { getInternalRuleTemplateRoute } from './rule_templates/apis/get/get_rule_template_route';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -120,6 +122,7 @@ export function defineRoutes(opts: RouteOptions) {
 
   createRuleRoute(opts);
   getRuleRoute(router, licenseState);
+  getInternalRuleTemplateRoute(router, licenseState);
   getInternalRuleRoute(router, licenseState);
   resolveRuleRoute(router, licenseState);
   updateRuleRoute(router, licenseState);
@@ -179,6 +182,7 @@ export function defineRoutes(opts: RouteOptions) {
     archiveMaintenanceWindowRoute(router, licenseState);
     unarchiveMaintenanceWindowRoute(router, licenseState);
     updateMaintenanceWindowRoute(router, licenseState);
+    findMaintenanceWindowsRoute(router, licenseState);
   }
   // backfill APIs
   scheduleBackfillRoute(router, licenseState);

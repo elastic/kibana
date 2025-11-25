@@ -6,18 +6,18 @@
  */
 
 import {
-  getAttackDiscoveryMarkdown,
   type AttackDiscovery,
   type AttackDiscoveryAlert,
-  type Replacements,
+  getAttackDiscoveryMarkdown,
   getOriginalAlertIds,
+  type Replacements,
 } from '@kbn/elastic-assistant-common';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  useGeneratedHtmlId,
   EuiPopover,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
@@ -112,7 +112,7 @@ const TakeActionComponent: React.FC<Props> = ({
 
   /**
    * Called by the modal when the user confirms the action,
-   * or directly when the user selects an action in AI for SOC.
+   * or directly when the user selects an action in EASE.
    */
   const onConfirm = useCallback(
     async ({
@@ -159,7 +159,7 @@ const TakeActionComponent: React.FC<Props> = ({
       setPendingAction(workflowStatus);
 
       if (hasSearchAILakeConfigurations) {
-        // there's no modal for AI for SOC, so we call onConfirm directly
+        // there's no modal for EASE, so we call onConfirm directly
         onConfirm({ updateAlerts: false, workflowStatus });
       }
     },

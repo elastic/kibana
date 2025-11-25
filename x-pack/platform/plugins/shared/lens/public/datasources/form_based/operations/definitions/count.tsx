@@ -13,10 +13,8 @@ import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import type { TimeScaleUnit } from '../../../../../common/expressions';
+import type { CountIndexPatternColumn, TimeScaleUnit, IndexPatternField } from '@kbn/lens-common';
 import type { OperationDefinition, ParamEditorProps } from '.';
-import type { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
-import type { IndexPatternField } from '../../../../types';
 import {
   getInvalidFieldMessage,
   getFilter,
@@ -71,14 +69,6 @@ function ofName(
     reducedTimeRange
   );
 }
-
-export type CountIndexPatternColumn = FieldBasedIndexPatternColumn & {
-  operationType: typeof COUNT_ID;
-  params?: {
-    emptyAsNull?: boolean;
-    format?: ValueFormatConfig;
-  };
-};
 
 const SCALE = 'ratio';
 const IS_BUCKETED = false;

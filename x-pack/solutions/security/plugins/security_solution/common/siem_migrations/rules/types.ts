@@ -8,9 +8,6 @@
 import type { SiemMigrationFilters } from '../types';
 
 export interface RuleMigrationFilters extends SiemMigrationFilters {
-  searchTerm?: string;
-  installed?: boolean;
-  installable?: boolean;
   prebuilt?: boolean;
   missingIndex?: boolean;
 }

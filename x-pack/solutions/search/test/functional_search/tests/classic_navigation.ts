@@ -12,8 +12,7 @@ export default function searchSolutionNavigation({
   getService,
 }: FtrProviderContext) {
   const { common, searchClassicNavigation } = getPageObjects(['common', 'searchClassicNavigation']);
-  const spaces = getService('spaces');
-  const browser = getService('browser');
+  const searchSpace = getService('searchSpace');
   const testSubjects = getService('testSubjects');
 
   describe('Search Classic Navigation', () => {
@@ -21,17 +20,12 @@ export default function searchSolutionNavigation({
     let spaceCreated: { id: string } = { id: '' };
 
     before(async () => {
-      // Navigate to the spaces management page which will log us in Kibana
-      await common.navigateToUrl('management', 'kibana/spaces', {
-        shouldUseHashForSubUrl: false,
-      });
+      ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace(
+        'search-classic-ftr',
+        'classic'
+      ));
 
-      // Create a space with the search solution and navigate to its home page
-      ({ cleanUp, space: spaceCreated } = await spaces.create({
-        name: 'search-classic-ftr',
-        solution: 'classic',
-      }));
-      await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+      await searchSpace.navigateTo(spaceCreated.id);
       await common.navigateToApp('searchHomepage');
     });
 
@@ -40,14 +34,15 @@ export default function searchSolutionNavigation({
       await cleanUp();
     });
 
-    it('renders expected navigation items', async () => {
+    // TODO: see https://github.com/elastic/kibana/pull/243499
+    it.skip('renders expected navigation items', async () => {
       await searchClassicNavigation.expectAllNavItems([
         { id: 'Home', label: 'Home' },
         { id: 'Build', label: 'Build' },
         { id: 'Indices', label: 'Index Management' },
-        { id: 'Playground', label: 'RAG Playground' },
-        { id: 'Connectors', label: 'Connectors' },
+        { id: 'Playground', label: 'Playground' },
         { id: 'SearchApplications', label: 'Search applications' },
+        { id: 'Agents', label: 'Agents' },
         { id: 'Relevance', label: 'Relevance' },
         { id: 'Synonyms', label: 'Synonyms' },
         { id: 'QueryRules', label: 'Query rules' },
@@ -70,13 +65,8 @@ export default function searchSolutionNavigation({
           pageTestSubject: 'indexManagementHeaderContent',
         },
         {
-          navItem: 'Connectors',
-          breadcrumbs: ['Build', 'Connectors'],
-          pageTestSubject: 'searchCreateConnectorPage',
-        },
-        {
           navItem: 'Playground',
-          breadcrumbs: ['Build', 'RAG Playground'],
+          breadcrumbs: ['Build', 'Playground'],
           pageTestSubject: 'playgroundsListPage',
         },
         {

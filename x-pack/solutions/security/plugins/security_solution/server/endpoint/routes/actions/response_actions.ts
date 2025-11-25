@@ -6,37 +6,34 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { MemoryDumpActionRequestSchema } from '../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   EndpointActionGetFileSchema,
-  type ExecuteActionRequestBody,
   ExecuteActionRequestSchema,
   GetProcessesRouteRequestSchema,
   IsolateRouteRequestSchema,
-  type KillProcessRequestBody,
   KillProcessRouteRequestSchema,
-  type ResponseActionGetFileRequestBody,
   type ResponseActionsRequestBody,
-  type ScanActionRequestBody,
   ScanActionRequestSchema,
-  type SuspendProcessRequestBody,
   SuspendProcessRouteRequestSchema,
   UnisolateRouteRequestSchema,
-  type UploadActionApiRequestBody,
   UploadActionRequestSchema,
   RunScriptActionRequestSchema,
-  type RunScriptActionRequestBody,
+  CancelActionRequestSchema,
 } from '../../../../common/api/endpoint';
 
 import {
+  CANCEL_ROUTE,
   EXECUTE_ROUTE,
   GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
+  MEMORY_DUMP_ROUTE,
   RUN_SCRIPT_ROUTE,
   SCAN_ROUTE,
   SUSPEND_PROCESS_ROUTE,
@@ -62,7 +59,11 @@ import { errorHandler } from '../error_handler';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { ResponseActionsClient } from '../../services';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
-import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
+import {
+  executeResponseAction,
+  buildResponseActionResult,
+  createCancelActionAdditionalChecks,
+} from './utils';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -335,6 +336,55 @@ export function registerResponseActionRoutes(
         )
       )
     );
+
+  router.versioned
+    .post({
+      access: 'public',
+      path: CANCEL_ROUTE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: CancelActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canCancelAction'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'cancel'),
+        createCancelActionAdditionalChecks(endpointContext)
+      )
+    );
+
+  router.versioned
+    .post({
+      access: 'public',
+      path: MEMORY_DUMP_ROUTE,
+      security: {
+        authz: { requiredPrivileges: ['securitySolution'] },
+        authc: { enabled: true },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: MemoryDumpActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteExecuteOperations'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'memory-dump')
+      )
+    );
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
@@ -351,63 +401,53 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
   return async (context, req, res) => {
     logger.debug(() => `response action [${command}]:\n${stringify(req.body)}`);
 
-    const experimentalFeatures = endpointContext.experimentalFeatures;
-
-    // Note:  because our API schemas are defined as module static variables (as opposed to a
-    //        `getter` function), we need to include this additional validation here, since
-    //        `agent_type` is included in the schema independent of the feature flag
-    if (isThirdPartyFeatureDisabled(req.body.agent_type, command, experimentalFeatures)) {
-      return errorHandler(
-        logger,
-        res,
-        new CustomHttpRequestError(`[request body.agent_type]: feature is disabled`, 400)
-      );
-    }
-
-    const coreContext = await context.core;
-    const user = coreContext.security.authc.getCurrentUser();
-    const esClient = coreContext.elasticsearch.client.asInternalUser;
-    const casesClient = await endpointContext.service.getCasesClient(req);
-    const connectorActions = (await context.actions).getActionsClient();
-    const spaceId = (await context.securitySolution).getSpaceId();
-    const responseActionsClient: ResponseActionsClient = getResponseActionsClient(
-      req.body.agent_type || 'endpoint',
-      {
-        esClient,
-        casesClient,
-        spaceId,
-        endpointService: endpointContext.service,
-        username: user?.username || 'unknown',
-        connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
-      }
-    );
-
     try {
-      const action: ActionDetails = await handleActionCreation(
+      const experimentalFeatures = endpointContext.experimentalFeatures;
+
+      // Note:  because our API schemas are defined as module static variables (as opposed to a
+      //        `getter` function), we need to include this additional validation here, since
+      //        `agent_type` is included in the schema independent of the feature flag
+      if (isResponseActionDisabled(req.body.agent_type, command, experimentalFeatures)) {
+        return errorHandler(
+          logger,
+          res,
+          new CustomHttpRequestError(`[request body.agent_type]: feature is disabled`, 400)
+        );
+      }
+
+      const coreContext = await context.core;
+      const user = coreContext.security.authc.getCurrentUser();
+      const esClient = coreContext.elasticsearch.client.asInternalUser;
+      const casesClient = await endpointContext.service.getCasesClient(req);
+      const connectorActions = (await context.actions).getActionsClient();
+      const spaceId = (await context.securitySolution).getSpaceId();
+      const responseActionsClient: ResponseActionsClient = getResponseActionsClient(
+        req.body.agent_type || 'endpoint',
+        {
+          esClient,
+          casesClient,
+          spaceId,
+          endpointService: endpointContext.service,
+          username: user?.username || 'unknown',
+          connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
+        }
+      );
+
+      const action: ActionDetails = await executeResponseAction(
         command,
         req.body,
         responseActionsClient
       );
-      const { action: actionId, ...data } = action;
-      const legacyResponseData = responseActionsWithLegacyActionProperty.includes(command)
-        ? {
-            action: actionId ?? data.id ?? '',
-          }
-        : {};
 
-      return res.ok({
-        body: {
-          ...legacyResponseData,
-          data,
-        },
-      });
+      const result = buildResponseActionResult(command, action);
+      return res.ok(result);
     } catch (err) {
       return errorHandler(logger, res, err);
     }
   };
 }
 
-function isThirdPartyFeatureDisabled(
+function isResponseActionDisabled(
   agentType: ResponseActionAgentType | undefined,
   command: ResponseActionsApiCommandNames,
   experimentalFeatures: EndpointAppContext['experimentalFeatures']
@@ -421,48 +461,11 @@ function isThirdPartyFeatureDisabled(
   }
 
   if (
-    (agentType === 'sentinel_one' && !experimentalFeatures.responseActionsSentinelOneV1Enabled) ||
-    (agentType === 'crowdstrike' &&
-      !experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled) ||
-    (agentType === 'microsoft_defender_endpoint' &&
-      !experimentalFeatures.responseActionsMSDefenderEndpointEnabled)
+    command === 'memory-dump' &&
+    (agentType !== 'endpoint' || !experimentalFeatures.responseActionsEndpointMemoryDump)
   ) {
     return true;
   }
 
   return false;
-}
-
-async function handleActionCreation(
-  command: ResponseActionsApiCommandNames,
-  body: ResponseActionsRequestBody,
-  responseActionsClient: ResponseActionsClient
-): Promise<ActionDetails> {
-  switch (command) {
-    case 'isolate':
-      return responseActionsClient.isolate(body);
-    case 'unisolate':
-      return responseActionsClient.release(body);
-    case 'running-processes':
-      return responseActionsClient.runningProcesses(body);
-    case 'execute':
-      return responseActionsClient.execute(body as ExecuteActionRequestBody);
-    case 'suspend-process':
-      return responseActionsClient.suspendProcess(body as SuspendProcessRequestBody);
-    case 'kill-process':
-      return responseActionsClient.killProcess(body as KillProcessRequestBody);
-    case 'get-file':
-      return responseActionsClient.getFile(body as ResponseActionGetFileRequestBody);
-    case 'upload':
-      return responseActionsClient.upload(body as UploadActionApiRequestBody);
-    case 'scan':
-      return responseActionsClient.scan(body as ScanActionRequestBody);
-    case 'runscript':
-      return responseActionsClient.runscript(body as RunScriptActionRequestBody);
-    default:
-      throw new CustomHttpRequestError(
-        `No handler found for response action command: [${command}]`,
-        501
-      );
-  }
 }

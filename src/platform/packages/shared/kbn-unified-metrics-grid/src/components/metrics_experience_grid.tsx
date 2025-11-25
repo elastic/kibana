@@ -9,209 +9,125 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { ChartSectionTemplate } from '@kbn/unified-histogram';
-import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import type { EuiFlexGridProps } from '@elastic/eui';
-import { FIELD_VALUE_SEPARATOR } from '../common/utils';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { keys } from '@elastic/eui';
 import {
-  setCurrentPage,
-  selectCurrentPage,
-  selectValueFilters,
-  setDimensions,
-  setValueFilters,
-  selectDimensions,
-} from '../store/slices';
-import { MetricsGrid } from './metrics_grid';
-import { Pagination } from './pagination';
-import { DimensionsSelector } from './toolbar/dimensions_selector';
-import { ValuesSelector } from './toolbar/values_selector';
+  METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
+  METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
+} from '../common/constants';
+import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
+import { MetricsGridWrapper } from './metrics_grid_wrapper';
+import { EmptyState } from './empty_state/empty_state';
+import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
+import { SearchButton } from './toolbar/right_side_actions/search_button';
 import { useMetricFieldsQuery } from '../hooks';
+import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 
 export const MetricsExperienceGrid = ({
   dataView,
   renderToggleActions,
   chartToolbarCss,
   histogramCss,
-  getTimeRange,
+  onBrushEnd,
+  onFilter,
+  searchSessionId,
+  requestParams,
+  services,
+  input$,
+  isChartLoading: isDiscoverLoading,
+  isComponentVisible,
+  abortController,
+  timeRange,
 }: ChartSectionProps) => {
-  // Get grid-specific state from Redux store
-  const dispatch = useAppDispatch();
-  const currentPage = useAppSelector(selectCurrentPage);
-  const dimensions = useAppSelector(selectDimensions);
-  const valueFilters = useAppSelector(selectValueFilters);
+  const { searchTerm, isFullscreen, valueFilters, onSearchTermChange, onToggleFullscreen } =
+    useMetricsExperienceState();
+
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
-
-  const timeRange = useMemo(() => getTimeRange(), [getTimeRange]);
-
-  const { data: fields = [], isLoading: loading } = useMetricFieldsQuery({
+  const { data: fields = [], isFetching: isFetchingAllFields } = useMetricFieldsQuery({
     index: indexPattern,
-    ...timeRange,
+    timeRange,
   });
 
-  const columns = useMemo<EuiFlexGridProps['columns']>(
-    () => (Array.isArray(fields) ? Math.min(fields.length, 4) : 1) as EuiFlexGridProps['columns'],
-    [fields]
-  );
+  const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
+    fields,
+    renderToggleActions,
+    requestParams,
+  });
 
-  const onDimensionsChange = useCallback(
-    (nextDimensions: string[]) => {
-      dispatch(setDimensions(nextDimensions));
-
-      // If no dimensions are selected, clear all values
-      if (nextDimensions.length === 0) {
-        dispatch(setDimensions([]));
-      } else {
-        // Filter existing values to keep only those whose dimension is still selected
-        const filteredValues = valueFilters.filter((selectedValue) => {
-          const [field] = selectedValue.split(`${FIELD_VALUE_SEPARATOR}`);
-          return nextDimensions.includes(field);
-        });
-
-        dispatch(setValueFilters(filteredValues));
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLElement>) => {
+      if (e.key === keys.ESCAPE && isFullscreen && !areSelectorPortalsOpen()) {
+        e.preventDefault();
+        onToggleFullscreen?.();
       }
     },
-    [dispatch, valueFilters]
+    [isFullscreen, onToggleFullscreen]
   );
 
-  const onValuesChange = useCallback(
-    (values: string[]) => {
-      dispatch(setValueFilters(values));
-    },
-    [dispatch]
-  );
-
-  const pageSize = columns === 4 ? 20 : 15;
-  const actions: IconButtonGroupProps['buttons'] = [
-    {
-      iconType: 'search',
-      label: i18n.translate('metricsExperience.searchButton', {
-        defaultMessage: 'Search',
-      }),
-
-      onClick: () => {},
-      'data-test-subj': 'metricsExperienceToolbarSearch',
-    },
-    {
-      iconType: 'fullScreen',
-      label: i18n.translate('metricsExperience.fullScreenButton', {
-        defaultMessage: 'Full screen',
-      }),
-
-      onClick: () => {},
-      'data-test-subj': 'metricsExperienceToolbarFullScreen',
-    },
-  ];
-
-  const rightSideComponents = useMemo(
-    () => [
-      renderToggleActions(),
-      <DimensionsSelector
-        fields={fields}
-        onChange={onDimensionsChange}
-        selectedDimensions={dimensions}
-      />,
-      dimensions.length > 0 ? (
-        <ValuesSelector
-          selectedDimensions={dimensions}
-          selectedValues={valueFilters}
-          onChange={onValuesChange}
-          disabled={dimensions.length === 0}
-          indices={[indexPattern]}
-          timeRange={timeRange}
-        />
-      ) : null,
-    ],
-    [
-      dimensions,
-      fields,
-      timeRange,
-      indexPattern,
-      onDimensionsChange,
-      onValuesChange,
-      renderToggleActions,
-      valueFilters,
-    ]
-  );
-
-  const filters = useMemo(() => {
-    if (!valueFilters || valueFilters.length === 0) {
-      return [];
-    }
-
-    return valueFilters
-      .map((selectedValue) => {
-        const [field, value] = selectedValue.split(`${FIELD_VALUE_SEPARATOR}`);
-        return {
-          field,
-          value,
-        };
-      })
-      .filter((filter) => filter.field !== '');
-  }, [valueFilters]);
-
-  const filteredFields = useMemo(() => {
-    return fields.filter(
-      (field) =>
-        !field.noData &&
-        (dimensions.length === 0 ||
-          dimensions.every((sel) => field.dimensions.some((d) => d.name === sel)))
-    );
-  }, [fields, dimensions]);
-
-  // Calculate pagination
-  const totalPages = useMemo(
-    () => Math.ceil(filteredFields.length / pageSize),
-    [filteredFields.length, pageSize]
-  );
-
-  const currentFields = useMemo(() => {
-    const startIndex = currentPage * pageSize;
-    const endIndex = startIndex + pageSize;
-    return filteredFields.slice(startIndex, endIndex);
-  }, [filteredFields, currentPage, pageSize]);
-
-  // Pagination handler
-  const handlePageChange = (pageIndex: number) => {
-    dispatch(setCurrentPage(pageIndex));
-  };
+  if (fields.length === 0 && valueFilters.length === 0) {
+    return <EmptyState isLoading={isFetchingAllFields} />;
+  }
 
   return (
-    <ChartSectionTemplate
-      id="unifiedMetricsExperienceGridPanel"
+    <MetricsGridWrapper
+      id="metricsExperienceGrid"
       toolbarCss={chartToolbarCss}
       toolbar={{
-        leftSide: rightSideComponents,
-        rightSide: actions,
+        toggleActions,
+        leftSide: leftSideActions,
+        rightSide: rightSideActions,
+        additionalControls: {
+          prependRight: (
+            <SearchButton
+              isFullscreen={isFullscreen}
+              value={searchTerm}
+              onSearchTermChange={onSearchTermChange}
+              onKeyDown={onKeyDown}
+              data-test-subj="metricsExperienceGridToolbarSearch"
+            />
+          ),
+        },
       }}
+      toolbarWrapAt={isFullscreen ? 'l' : 'xl'}
+      isComponentVisible={isComponentVisible}
+      isFullscreen={isFullscreen}
+      onKeyDown={onKeyDown}
     >
-      <section
-        tabIndex={-1}
-        data-test-subj="unifiedMetricsExperienceRendered"
-        css={css`
-          ${histogramCss || ''}
-          height: 100%;
-          overflow: hidden;
-        `}
-      >
-        <MetricsGrid
-          fields={currentFields}
-          timeRange={timeRange}
-          loading={loading}
-          filters={filters}
-          dimensions={dimensions}
-          pivotOn="metric"
-          columns={columns}
-        />
-
-        <Pagination
-          totalPages={totalPages}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-        />
-      </section>
-    </ChartSectionTemplate>
+      <MetricsExperienceGridContent
+        fields={fields}
+        timeRange={timeRange}
+        services={services}
+        input$={input$}
+        requestParams={requestParams}
+        onBrushEnd={onBrushEnd}
+        onFilter={onFilter}
+        searchSessionId={searchSessionId}
+        abortController={abortController}
+        histogramCss={histogramCss}
+        isFieldsLoading={isFetchingAllFields}
+        isDiscoverLoading={isDiscoverLoading}
+      />
+    </MetricsGridWrapper>
   );
+};
+
+const areSelectorPortalsOpen = () => {
+  const portals = document.querySelectorAll('[data-euiportal]');
+
+  for (const portal of portals) {
+    const hasBreakdownSelector = portal.querySelector(
+      `[data-test-subj*=${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}]`
+    );
+    const hasValuesSelector = portal.querySelector(
+      `[data-test-subj*=${METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ}]`
+    );
+    const hasSelectableList = portal.querySelector('[data-test-subj*="Selectable"]');
+
+    if (hasBreakdownSelector || hasValuesSelector || hasSelectableList) {
+      // Check if the portal is visible and has focusable content
+      const style = window.getComputedStyle(portal);
+      if (style.display !== 'none' && style.visibility !== 'hidden') {
+        return true;
+      }
+    }
+  }
 };

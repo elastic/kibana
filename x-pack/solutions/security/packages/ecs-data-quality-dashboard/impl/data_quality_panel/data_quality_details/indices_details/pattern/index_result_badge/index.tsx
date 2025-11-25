@@ -41,6 +41,7 @@ export const IndexResultBadgeComponent: React.FC<Props> = ({
         data-test-subj="indexResultBadge"
         color={getCheckTextColor(incompatible)}
         {...props}
+        tabIndex={0}
       >
         {incompatible > 0 ? FAIL : PASS}
       </EuiBadge>

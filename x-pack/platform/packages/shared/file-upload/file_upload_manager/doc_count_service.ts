@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { AnalysisResult } from '@kbn/file-upload-common';
+import type { FileUploadPluginStartApi } from '@kbn/file-upload-plugin/public/api';
 import type { Subscription } from 'rxjs';
 import { catchError, exhaustMap, finalize, from, map, takeWhile, throwError, timer } from 'rxjs';
 
@@ -15,9 +19,10 @@ export class DocCountService {
   private indexName: string | null = null;
   private indexSearchableSubscription: Subscription | null = null;
   private allDocsSearchableSubscription: Subscription | null = null;
+  private initialDocCount: number = 0;
 
   constructor(
-    private fileUpload: FileUploadStartApi,
+    private fileUpload: FileUploadPluginStartApi,
     private onIndexSearchable: (indexName: string) => void,
     private onAllDocsSearchable: (indexName: string) => void
   ) {}
@@ -44,10 +49,11 @@ export class DocCountService {
   }
 
   public startAllDocsSearchableCheck(indexName: string, totalDocCount: number): void {
+    const expectedDocCount = totalDocCount + this.initialDocCount;
     this.indexName = indexName;
     this.allDocsSearchableSubscription = timer(0, POLL_INTERVAL * 1000)
       .pipe(
-        exhaustMap(() => this.isSearchable$(totalDocCount)),
+        exhaustMap(() => this.isSearchable$(expectedDocCount)),
         takeWhile((isSearchable) => !isSearchable, true) // takeUntil we get `true`, including the final one
       )
       .pipe(finalize(() => this.onAllDocsSearchable(indexName)))
@@ -65,4 +71,48 @@ export class DocCountService {
       catchError((err) => throwError(() => err))
     );
   }
+
+  public async loadInitialIndexCount(indexName: string) {
+    const { count } = await this.fileUpload.isIndexSearchable(indexName, 0);
+    this.initialDocCount = count;
+  }
+
+  public resetInitialDocCount() {
+    this.initialDocCount = 0;
+  }
+}
+
+const DOC_COUNT = 10;
+
+export async function getSampleDocs(
+  data: DataPublicPluginStart,
+  analysisResult: AnalysisResult,
+  fileName: string
+): Promise<DataTableRecord[]> {
+  const docs = analysisResult.preview?.docs.filter((doc) => !doc.error);
+  if (docs === undefined || docs.length === 0) {
+    return [];
+  }
+
+  const tempDataView = await data.dataViews.create(
+    {
+      id: fileName,
+      title: `temp_${fileName}`,
+      allowNoIndex: true,
+    },
+    true,
+    false
+  );
+  return (
+    docs.slice(0, DOC_COUNT).map((doc, i) => {
+      return buildDataTableRecord(
+        {
+          ...doc.doc,
+          _id: `${fileName}-${i}`,
+          _index: `temp_index_${i}`,
+        } as EsHitRecord,
+        tempDataView
+      );
+    }) ?? []
+  );
 }

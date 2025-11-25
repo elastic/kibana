@@ -13,9 +13,9 @@ import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import * as Either from 'fp-ts/Either';
 import type { DatasetQualityDetailsPublicStateUpdate } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import * as rt from 'io-ts';
-import { DATA_QUALITY_URL_STATE_KEY } from '../../../common/url_schema';
-import * as urlSchemaV1 from './url_schema_v1';
-import * as urlSchemaV2 from './url_schema_v2';
+import { DATA_QUALITY_URL_STATE_KEY } from '@kbn/data-quality/common';
+import { datasetQualityDetailsSerializationSchemaV1 as urlSchemaV1 } from '@kbn/data-quality/public';
+import { datasetQualityDetailsSerializationSchemaV2 as urlSchemaV2 } from '@kbn/data-quality/public';
 
 export const updateUrlFromDatasetQualityDetailsState = ({
   urlStateStorageContainer,

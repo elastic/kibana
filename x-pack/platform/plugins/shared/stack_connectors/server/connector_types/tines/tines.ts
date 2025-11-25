@@ -11,10 +11,12 @@ import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { AxiosError } from 'axios';
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
+  API_MAX_RESULTS,
+  SUB_ACTION,
   TinesStoriesActionParamsSchema,
   TinesWebhooksActionParamsSchema,
   TinesRunActionParamsSchema,
-} from '../../../common/tines/schema';
+} from '@kbn/connector-schemas/tines';
 import type {
   TinesConfig,
   TinesSecrets,
@@ -25,18 +27,20 @@ import type {
   TinesWebhooksActionResponse,
   TinesWebhookObject,
   TinesStoryObject,
-} from '../../../common/tines/types';
+  TinesWebhookActionConfig,
+} from '@kbn/connector-schemas/tines';
 import {
   TinesStoriesApiResponseSchema,
   TinesWebhooksApiResponseSchema,
   TinesRunApiResponseSchema,
+  TinesWebhookApiResponseSchema,
 } from './api_schema';
 import type {
   TinesBaseApiResponse,
   TinesStoriesApiResponse,
+  TinesWebhookApiResponse,
   TinesWebhooksApiResponse,
 } from './api_schema';
-import { API_MAX_RESULTS, SUB_ACTION } from '../../../common/tines/constants';
 
 export const API_PATH = '/api/v1';
 export const WEBHOOK_PATH = '/webhook';
@@ -48,9 +52,9 @@ const storiesReducer = ({ stories }: TinesStoriesApiResponse) => ({
 
 const webhooksReducer = ({ agents }: TinesWebhooksApiResponse) => ({
   webhooks: agents.reduce<TinesWebhookObject[]>(
-    (webhooks, { id, type, name, story_id: storyId, options: { path = '', secret = '' } }) => {
+    (webhooks, { id, type, name, story_id: storyId }) => {
       if (type === WEBHOOK_AGENT_TYPE) {
-        webhooks.push({ id, name, path, secret, storyId });
+        webhooks.push({ id, name, storyId });
       }
       return webhooks;
     },
@@ -62,7 +66,8 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
   private urls: {
     stories: string;
     agents: string;
-    getRunWebhookURL: (webhook: TinesWebhookObject) => string;
+    getActionUrl: (id: number) => string;
+    getRunWebhookURL: (config: TinesWebhookActionConfig) => string;
   };
 
   constructor(params: ServiceParams<TinesConfig, TinesSecrets>) {
@@ -71,8 +76,9 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
     this.urls = {
       stories: `${this.config.url}${API_PATH}/stories`,
       agents: `${this.config.url}${API_PATH}/agents`,
-      getRunWebhookURL: (webhook) =>
-        `${this.config.url}${WEBHOOK_PATH}/${webhook.path}/${webhook.secret}`,
+      getActionUrl: (actionId) => `${this.config.url}${API_PATH}/actions/${actionId}`,
+      getRunWebhookURL: (config) =>
+        `${this.config.url}${WEBHOOK_PATH}/${config.path}/${config.secret}`,
     };
 
     this.registerSubActions();
@@ -126,6 +132,23 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
     };
   }
 
+  private async getWebhookParameters(
+    webhook: TinesWebhookObject,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<TinesWebhookApiResponse> {
+    const response = await this.request(
+      {
+        url: this.urls.getActionUrl(webhook.id),
+        method: 'get',
+        headers: this.getAuthHeaders(),
+        responseSchema: TinesWebhookApiResponseSchema,
+      },
+      connectorUsageCollector
+    );
+
+    return response.data;
+  }
+
   protected getResponseErrorMessage(error: AxiosError): string {
     if (error.response?.statusText) {
       return `API Error: ${error.response?.statusText}`;
@@ -155,7 +178,7 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
     return this.tinesApiRequest(
       {
         url: this.urls.agents,
-        params: { story_id: storyId },
+        params: { story_id: storyId, action_type: WEBHOOK_AGENT_TYPE },
         headers: this.getAuthHeaders(),
         responseSchema: TinesWebhooksApiResponseSchema,
       },
@@ -171,9 +194,30 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
     if (!webhook && !webhookUrl) {
       throw Error('Invalid subActionsParams: [webhook] or [webhookUrl] expected but got none');
     }
+
+    let webhookConfig;
+    if (webhook && !webhookUrl) {
+      const config = await this.getWebhookParameters(webhook, connectorUsageCollector);
+
+      const parametersMatch =
+        config.type === WEBHOOK_AGENT_TYPE &&
+        config.id === webhook.id &&
+        config.story_id === webhook.storyId;
+
+      const expectedOptionsReturned = config.options.path && config.options.secret;
+
+      if (!parametersMatch || !expectedOptionsReturned) {
+        throw Error(
+          `Invalid configuration for webhook id: ${webhook.id}. Verify webhook exists in Tines.`
+        );
+      }
+
+      webhookConfig = config.options as TinesWebhookActionConfig;
+    }
+
     const response = await this.request(
       {
-        url: webhookUrl ? webhookUrl : this.urls.getRunWebhookURL(webhook!),
+        url: webhookUrl ? webhookUrl : this.urls.getRunWebhookURL(webhookConfig!),
         method: 'post',
         responseSchema: TinesRunApiResponseSchema,
         data: body,

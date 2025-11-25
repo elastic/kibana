@@ -26,11 +26,10 @@ import {
   getNoConnectorToast,
 } from '../../common/service';
 import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../../common/types';
-import { getSuccessToast } from './notifications/success_notification';
+import { raiseSuccessToast } from './notification/success_notification';
+import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
 
-export const TASK_STATS_POLLING_SLEEP_SECONDS = 10 as const;
-export const START_STOP_POLLING_SLEEP_SECONDS = 1 as const;
-const CREATE_MIGRATION_BODY_BATCH_SIZE = 50 as const;
+const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
 
 export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMigrationStats> {
   public telemetry: SiemRulesMigrationsTelemetry;
@@ -73,7 +72,9 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
   ): Promise<string> {
     const rulesCount = data.length;
     if (rulesCount === 0) {
-      throw new Error(i18n.EMPTY_RULES_ERROR);
+      const emptyRulesError = new Error(i18n.EMPTY_RULES_ERROR);
+      this.telemetry.reportSetupMigrationCreated({ count: rulesCount, error: emptyRulesError });
+      throw emptyRulesError;
     }
 
     try {
@@ -84,10 +85,10 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
 
       await this.addRulesToMigration(migrationId, data);
 
-      this.telemetry.reportSetupMigrationCreated({ migrationId, rulesCount });
+      this.telemetry.reportSetupMigrationCreated({ migrationId, count: rulesCount });
       return migrationId;
     } catch (error) {
-      this.telemetry.reportSetupMigrationCreated({ rulesCount, error });
+      this.telemetry.reportSetupMigrationCreated({ count: rulesCount, error });
       throw error;
     }
   }
@@ -239,6 +240,6 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
   }
 
   protected sendFinishedMigrationNotification(taskStats: RuleMigrationStats) {
-    this.core.notifications.toasts.addSuccess(getSuccessToast(taskStats, this.core));
+    raiseSuccessToast(taskStats, this.core);
   }
 }

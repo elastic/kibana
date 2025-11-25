@@ -19,6 +19,13 @@ jest.mock('./use_find_schedules');
 jest.mock('../api');
 jest.mock('../../../../../common/hooks/use_app_toasts');
 
+const mockUseKibanaFeatureFlags = jest
+  .fn()
+  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
+jest.mock('../../../use_kibana_feature_flags', () => ({
+  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
+}));
+
 const createAttackDiscoveryScheduleMock = createAttackDiscoverySchedule as jest.MockedFunction<
   typeof createAttackDiscoverySchedule
 >;
@@ -55,6 +62,7 @@ describe('useCreateAttackDiscoverySchedule', () => {
     await act(async () => {
       await result.mutateAsync({ scheduleToCreate: mockCreateAttackDiscoverySchedule });
       expect(createAttackDiscoveryScheduleMock).toHaveBeenCalledWith({
+        attackDiscoveryPublicApiEnabled: false,
         body: mockCreateAttackDiscoverySchedule,
       });
     });

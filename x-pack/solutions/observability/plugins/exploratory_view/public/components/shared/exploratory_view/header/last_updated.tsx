@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { ChartCreationInfo } from './chart_creation_info';
@@ -48,9 +48,11 @@ export function LastUpdated() {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={<ChartCreationInfo {...chartTimeRangeContext} />}>
-          <EuiIcon type="info" />
-        </EuiToolTip>
+        <EuiIconTip
+          position="top"
+          content={<ChartCreationInfo {...chartTimeRangeContext} />}
+          type="info"
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText color={isDanger ? 'danger' : isWarning ? 'warning' : 'subdued'} size="s">

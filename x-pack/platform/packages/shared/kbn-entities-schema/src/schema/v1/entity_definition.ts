@@ -14,6 +14,7 @@ import {
   durationSchema,
   identityFieldsSchema,
   semVerSchema,
+  capabilitySchema,
 } from './common';
 
 export const entityDefinitionSchema = z.object({
@@ -25,6 +26,7 @@ export const entityDefinitionSchema = z.object({
   filter: filterSchema,
   indexPatterns: arrayOfStringsSchema,
   identityFields: z.array(identityFieldsSchema),
+  capabilities: z.optional(z.array(capabilitySchema)),
   displayNameTemplate: z.string(),
   metadata: z.optional(z.array(metadataSchema)),
   metrics: z.optional(z.array(keyMetricSchema)),
@@ -60,6 +62,7 @@ export const entityDefinitionSchema = z.object({
           z.literal('transform'),
           z.literal('ingest_pipeline'),
           z.literal('template'),
+          z.literal('ilm_policy'),
         ]),
         id: z.string(),
       })

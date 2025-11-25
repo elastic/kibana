@@ -41,7 +41,7 @@ export const translateRuleState = Annotation.Root({
   }),
   validation_errors: Annotation<TranslateRuleValidationErrors>({
     reducer: (current, value) => value ?? current,
-    default: () => ({ iterations: 0 } as TranslateRuleValidationErrors),
+    default: () => ({ retries_left: 3 }),
   }),
   translation_result: Annotation<MigrationTranslationResult>({
     reducer: (current, value) => value ?? current,
@@ -50,5 +50,10 @@ export const translateRuleState = Annotation.Root({
   comments: Annotation<RuleMigrationRule['comments']>({
     reducer: (current, value) => (value ? (current ?? []).concat(value) : current),
     default: () => [],
+  }),
+  /* Natural Language Query */
+  nl_query: Annotation<string>({
+    reducer: (current, value) => value ?? current,
+    default: () => '',
   }),
 });

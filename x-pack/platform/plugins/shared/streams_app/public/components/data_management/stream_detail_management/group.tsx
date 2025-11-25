@@ -25,10 +25,8 @@ function isValidManagementSubTab(value: string): value is GroupStreamManagementS
 
 export function GroupStreamDetailManagement({
   definition,
-  refreshDefinition,
 }: {
   definition: Streams.GroupStream.GetResponse;
-  refreshDefinition: () => void;
 }) {
   const {
     features: { groupStreams },
@@ -44,9 +42,7 @@ export function GroupStreamDetailManagement({
 
   const tabs = {
     overview: {
-      content: (
-        <GroupStreamDetailView definition={definition} refreshDefinition={refreshDefinition} />
-      ),
+      content: <GroupStreamDetailView stream={definition} />,
       label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
         defaultMessage: 'Overview',
       }),

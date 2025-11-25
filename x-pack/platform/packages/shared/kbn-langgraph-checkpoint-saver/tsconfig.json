@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -16,6 +16,7 @@
   "kbn_references": [
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-saved-objects-utils-server",
   ]
 }

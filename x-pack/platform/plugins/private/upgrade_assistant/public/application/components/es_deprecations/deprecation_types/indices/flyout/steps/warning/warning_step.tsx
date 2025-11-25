@@ -20,14 +20,16 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type {
-  EnrichedDeprecationInfo,
   IndexWarning,
   IndexWarningType,
-  ReindexAction,
   ReindexStatusResponse,
+} from '@kbn/reindex-service-plugin/common';
+import type {
+  EnrichedDeprecationInfo,
+  ReindexAction,
 } from '../../../../../../../../../common/types';
-import { ReindexStatus } from '../../../../../../../../../common/types';
 import { useAppContext } from '../../../../../../../app_context';
 import type { WarningCheckboxProps } from './warning_step_checkbox';
 import {
@@ -139,6 +141,7 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
         {warnings.length > 0 && (
           <>
             <EuiCallOut
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.calloutTitle"

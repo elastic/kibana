@@ -1,0 +1,100 @@
+{
+  "id": "@kbn/deeplinks-workflows",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/deeplinks-workflows",
+        "id": "def-common.AppId",
+        "type": "Type",
+        "tags": [],
+        "label": "AppId",
+        "description": [],
+        "signature": [
+          "\"workflows\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/workflows/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-workflows",
+        "id": "def-common.DeepLinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "DeepLinkId",
+        "description": [],
+        "signature": [
+          "\"workflows\" | \"workflows:workflows\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/workflows/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-workflows",
+        "id": "def-common.LinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "LinkId",
+        "description": [],
+        "signature": [
+          "\"workflows\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/workflows/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-workflows",
+        "id": "def-common.WORKFLOWS_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOWS_APP_ID",
+        "description": [],
+        "signature": [
+          "\"workflows\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/workflows/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-workflows",
+        "id": "def-common.WorkflowsPageName",
+        "type": "string",
+        "tags": [],
+        "label": "WorkflowsPageName",
+        "description": [],
+        "path": "src/platform/packages/shared/deeplinks/workflows/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

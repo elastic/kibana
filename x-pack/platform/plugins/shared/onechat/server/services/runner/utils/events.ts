@@ -6,12 +6,14 @@
  */
 
 import type {
-  RunContext,
-  ToolEventHandlerFn,
-  ToolEventEmitter,
   AgentEventEmitter,
   RunAgentOnEventFn,
+  RunContext,
+  ToolEventEmitter,
+  ToolEventHandlerFn,
 } from '@kbn/onechat-server';
+import type { InternalToolProgressEvent } from '@kbn/onechat-server/runner';
+import { ChatEventType } from '@kbn/onechat-common';
 
 /**
  * Creates a run event emitter sending events to the provided event handler.
@@ -45,13 +47,25 @@ export const createToolEventEmitter = ({
   context: RunContext;
 }): ToolEventEmitter => {
   if (eventHandler === undefined) {
-    return createNoopEventEmitter();
+    return createNoopToolEventEmitter();
   }
 
   return {
-    emit: (event) => {
+    reportProgress: (progressMessage) => {
+      const event: InternalToolProgressEvent = {
+        type: ChatEventType.toolProgress,
+        data: {
+          message: progressMessage,
+        },
+      };
       eventHandler(event);
     },
+  };
+};
+
+const createNoopToolEventEmitter = () => {
+  return {
+    reportProgress: () => {},
   };
 };
 

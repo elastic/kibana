@@ -6,7 +6,7 @@
  */
 import React, { useCallback } from 'react';
 import type { EuiSelectProps } from '@elastic/eui';
-import { EuiSelect, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiSelect, EuiIconTip } from '@elastic/eui';
 import * as i18n from './translations';
 
 const OPTIONS = [
@@ -43,14 +43,11 @@ export const SelectInterval: React.FC<{
     <EuiSelect
       data-test-subj="selectInterval"
       prepend={i18n.INTERVAL}
-      append={
-        <EuiToolTip content={i18n.INTERVAL_TOOLTIP}>
-          <EuiIcon type="question" color="subdued" />
-        </EuiToolTip>
-      }
+      append={<EuiIconTip content={i18n.INTERVAL_TOOLTIP} type="question" color="subdued" />}
       options={OPTIONS}
       value={interval}
       onChange={onChangeCb}
+      aria-label={i18n.INTERVAL}
     />
   );
 };

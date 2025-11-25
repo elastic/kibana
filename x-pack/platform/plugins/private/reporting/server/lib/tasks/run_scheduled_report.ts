@@ -10,6 +10,9 @@ import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { ScheduleType } from '@kbn/reporting-server';
+import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import { EXPORT_TYPE_SCHEDULED } from '@kbn/reporting-common';
 import type { ScheduledReportTaskParams, ScheduledReportTaskParamsWithoutSpaceId } from '.';
 import { SCHEDULED_REPORTING_EXECUTE_TYPE } from '.';
 import type { SavedReport } from '../store';
@@ -26,6 +29,8 @@ type ScheduledReportTaskInstance = Omit<TaskInstance, 'params'> & {
   params: Omit<ScheduledReportTaskParams, 'schedule'>;
 };
 export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskParams> {
+  public readonly exportType = EXPORT_TYPE_SCHEDULED;
+
   public get TYPE() {
     return SCHEDULED_REPORTING_EXECUTE_TYPE;
   }
@@ -72,6 +77,15 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
       if (!jobId) {
         throw new Error(`Unable to store report document in ReportingStore`);
       }
+
+      // event tracking of claimed job
+      const eventTracker = this.getEventTracker(report);
+      const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
+      eventTracker?.claimJob({
+        timeSinceCreation,
+        scheduledTaskId: report.scheduled_report_id,
+        scheduleType: ScheduleType.SCHEDULED,
+      });
     } catch (failedToClaim) {
       // error claiming report - log the error
       errorLogger(
@@ -129,12 +143,25 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
         const email = notification.email;
         const title = scheduledReport.attributes.title;
         const extension = this.getJobContentExtension(report.jobtype);
+        const filename = `${title}-${runAt.toISOString()}.${extension}`;
+        const templateVariables = {
+          title,
+          filename,
+          objectType: scheduledReport.attributes.meta.objectType,
+          date: scheduledReport.attributes.schedule?.rrule?.dtstart,
+        };
+        const subject = email.subject
+          ? renderMustacheString(this.logger, email.subject, templateVariables, 'none')
+          : `${title}-${runAt.toISOString()} scheduled report`;
+        const message = email.message
+          ? renderMustacheString(this.logger, email.message, templateVariables, 'markdown')
+          : 'Your scheduled report is attached for you to download or share.';
 
         await this.emailNotificationService.notify({
           reporting: this.opts.reporting,
           index: report._index,
           id: report._id,
-          filename: `${title}-${runAt.toISOString()}.${extension}`,
+          filename,
           contentType: output.content_type,
           relatedObject: {
             id: scheduledReport.id,
@@ -145,13 +172,30 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
             to: email.to,
             cc: email.cc,
             bcc: email.bcc,
-            subject: `${title}-${runAt.toISOString()} scheduled report`,
+            subject,
+            message,
             spaceId,
           },
+        });
+
+        // event tracking of successful notification
+        const eventTracker = this.getEventTracker(report);
+        eventTracker?.completeNotification({
+          byteSize,
+          scheduledTaskId: report.scheduled_report_id,
+          scheduleType: ScheduleType.SCHEDULED,
         });
       }
     } catch (error) {
       const message = `Error sending notification for scheduled report: ${error.message}`;
+      // event tracking of successful notification
+      const eventTracker = this.getEventTracker(report);
+      eventTracker?.failedNotification({
+        byteSize,
+        scheduledTaskId: report.scheduled_report_id,
+        scheduleType: ScheduleType.SCHEDULED,
+        errorMessage: message,
+      });
       this.saveExecutionWarning(
         report,
         {

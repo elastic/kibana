@@ -197,90 +197,6 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-public.getColumnHeaders",
-        "type": "Function",
-        "tags": [],
-        "label": "getColumnHeaders",
-        "description": [
-          "Enriches the column headers with field details from the specified browserFields"
-        ],
-        "signature": [
-          "(headers: ",
-          "ColumnHeaderOptions",
-          "[], browserFields: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.BrowserFields",
-            "text": "BrowserFields"
-          },
-          ", isEventRenderedView?: boolean | undefined) => ",
-          "ColumnHeaderOptions",
-          "[]"
-        ],
-        "path": "x-pack/solutions/security/packages/data-table/components/data_table/column_headers/helpers.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-public.getColumnHeaders.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "headers",
-            "description": [],
-            "signature": [
-              "ColumnHeaderOptions",
-              "[]"
-            ],
-            "path": "x-pack/solutions/security/packages/data-table/components/data_table/column_headers/helpers.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-public.getColumnHeaders.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "browserFields",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "timelines",
-                "scope": "common",
-                "docId": "kibTimelinesPluginApi",
-                "section": "def-common.BrowserFields",
-                "text": "BrowserFields"
-              }
-            ],
-            "path": "x-pack/solutions/security/packages/data-table/components/data_table/column_headers/helpers.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-public.getColumnHeaders.$3",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isEventRenderedView",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/data-table/components/data_table/column_headers/helpers.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-data-table",
         "id": "def-public.getEventIdToDataMapping",
         "type": "Function",
         "tags": [],
@@ -480,53 +396,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-public.isEventBuildingBlockType",
-        "type": "Function",
-        "tags": [],
-        "label": "isEventBuildingBlockType",
-        "description": [],
-        "signature": [
-          "(event: ",
-          {
-            "pluginId": "@kbn/securitysolution-ecs",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionEcsPluginApi",
-            "section": "def-common.EcsSecurityExtension",
-            "text": "EcsSecurityExtension"
-          },
-          ") => boolean"
-        ],
-        "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-public.isEventBuildingBlockType.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "event",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/securitysolution-ecs",
-                "scope": "common",
-                "docId": "kibKbnSecuritysolutionEcsPluginApi",
-                "section": "def-common.EcsSecurityExtension",
-                "text": "EcsSecurityExtension"
-              }
-            ],
-            "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -1109,28 +978,6 @@
           "\"open\""
         ],
         "path": "x-pack/solutions/security/packages/data-table/common/types/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-public.SortDirectionTable",
-        "type": "Type",
-        "tags": [],
-        "label": "SortDirectionTable",
-        "description": [],
-        "signature": [
-          "\"asc\" | \"desc\" | \"none\" | ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.Direction",
-            "text": "Direction"
-          }
-        ],
-        "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

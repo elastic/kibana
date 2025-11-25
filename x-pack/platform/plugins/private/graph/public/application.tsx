@@ -20,7 +20,8 @@ import type {
 } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
-import type { DataPlugin, DataViewsContract } from '@kbn/data-plugin/public';
+import type { DataPlugin } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
@@ -57,7 +58,7 @@ export interface GraphDependencies {
   licensing: LicensingPluginStart;
   chrome: ChromeStart;
   toastNotifications: ToastsStart;
-  indexPatterns: DataViewsContract;
+  dataViews: DataViewsContract;
   data: ReturnType<DataPlugin['start']>;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   contentClient: ContentClient;

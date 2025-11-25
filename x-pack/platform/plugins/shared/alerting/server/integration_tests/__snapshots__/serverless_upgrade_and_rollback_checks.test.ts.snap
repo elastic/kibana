@@ -419,6 +419,7 @@ Object {
     "sourceFields": Object {
       "flags": Object {
         "default": [Function],
+        "description": "The sourceFields param is ignored.",
         "error": [Function],
         "presence": "optional",
       },
@@ -6125,6 +6126,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -6797,6 +6816,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -7535,6 +7572,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -8188,6 +8243,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -8897,6 +8970,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -9607,6 +9698,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -10317,6 +10426,24 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
+                "customizedFields": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "fieldName": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "fieldName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "hasBaseVersion": Object {
+                  "type": "boolean",
+                },
                 "isCustomized": Object {
                   "type": "boolean",
                 },
@@ -11208,6 +11335,44 @@ Object {
       ],
       "type": "object",
     },
+    "kqlQueryString": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "method": [Function],
+                },
+                "name": "custom",
+              },
+            ],
+            "type": "string",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
     "lookbackInterval": Object {
       "flags": Object {
         "default": null,
@@ -11349,6 +11514,14 @@ Object {
       "type": "alternatives",
     },
   },
+  "rules": Array [
+    Object {
+      "args": Object {
+        "method": [Function],
+      },
+      "name": "custom",
+    },
+  ],
   "type": "object",
 }
 `;

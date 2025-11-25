@@ -24,12 +24,20 @@ export const createMetricsContextService = async ({
   metricsExperience,
 }: MetricsContextServiceDeps): Promise<MetricsContextService> => {
   if (!metricsExperience) {
-    return {
-      getMetricsExperienceClient: () => undefined,
-    };
+    return getMetricsContextService({ metricsExperienceClient: undefined });
   }
 
+  return getMetricsContextService({
+    metricsExperienceClient: metricsExperience.metricsExperienceClient,
+  });
+};
+
+export const getMetricsContextService = ({
+  metricsExperienceClient,
+}: {
+  metricsExperienceClient: MetricsExperienceClient | undefined;
+}) => {
   return {
-    getMetricsExperienceClient: () => metricsExperience.metricsExperienceClient,
+    getMetricsExperienceClient: () => metricsExperienceClient,
   };
 };

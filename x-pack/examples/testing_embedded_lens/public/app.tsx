@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import useDebounce from 'react-use/lib/useDebounce';
-import { DOCUMENT_FIELD_NAME } from '@kbn/lens-plugin/common/constants';
+import { DOCUMENT_FIELD_NAME, LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common/constants';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   TypedLensByValueInput,
@@ -145,6 +145,7 @@ function getBaseAttributes(
   const finalDataLayer = dataLayer ?? getDataLayer(finalType, fields[finalType]);
   return {
     title: 'Prefilled from example app',
+    version: LENS_ITEM_LATEST_VERSION,
     references: [
       {
         id: defaultIndexPattern.id!,
@@ -704,7 +705,7 @@ export const App = (props: {
                         </EuiButton>
                       </EuiFlexItem>
                       {hasParsingErrorDebounced && currentSO.current !== currentValid && (
-                        <EuiCallOut title="Error" color="danger" iconType="warning">
+                        <EuiCallOut announceOnMount title="Error" color="danger" iconType="warning">
                           <p>Check the spec</p>
                         </EuiCallOut>
                       )}

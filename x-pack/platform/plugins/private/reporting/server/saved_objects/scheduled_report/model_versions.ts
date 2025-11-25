@@ -6,7 +6,12 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { rawScheduledReportSchemaV1, rawScheduledReportSchemaV2 } from './schemas';
+import {
+  rawScheduledReportSchemaV1,
+  rawScheduledReportSchemaV2,
+  rawScheduledReportSchemaV3,
+  rawScheduledReportSchemaV4,
+} from './schemas';
 
 export const scheduledReportModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -21,6 +26,20 @@ export const scheduledReportModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawScheduledReportSchemaV2.extends({}, { unknowns: 'ignore' }),
       create: rawScheduledReportSchemaV2,
+    },
+  },
+  '3': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawScheduledReportSchemaV3.extends({}, { unknowns: 'ignore' }),
+      create: rawScheduledReportSchemaV3,
+    },
+  },
+  '4': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawScheduledReportSchemaV4.extends({}, { unknowns: 'ignore' }),
+      create: rawScheduledReportSchemaV4,
     },
   },
 };

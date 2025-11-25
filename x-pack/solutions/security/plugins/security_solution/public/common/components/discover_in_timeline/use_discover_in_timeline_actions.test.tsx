@@ -178,7 +178,7 @@ describe('useDiscoverInTimelineActions', () => {
       const { result } = renderTestHook();
       await result.current.resetDiscoverAppState();
       await waitFor(() => {
-        const appState = mockDiscoverStateContainerRef.current.appState.getState();
+        const appState = mockDiscoverStateContainerRef.current.appState.get();
         expect(appState).toMatchObject(result.current.defaultDiscoverAppState);
       });
     });
@@ -186,8 +186,8 @@ describe('useDiscoverInTimelineActions', () => {
       const { result } = renderTestHook();
       await result.current.resetDiscoverAppState();
       await waitFor(() => {
-        const globalState = mockDiscoverStateContainerRef.current.globalState.get();
-        expect(globalState).toMatchObject({ time: { from: 'now-15m', to: 'now' } });
+        const globalState = mockDiscoverStateContainerRef.current.getCurrentTab().globalState;
+        expect(globalState).toMatchObject({ timeRange: { from: 'now-15m', to: 'now' } });
       });
     });
   });

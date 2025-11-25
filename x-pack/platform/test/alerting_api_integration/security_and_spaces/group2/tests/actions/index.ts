@@ -9,7 +9,7 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import { setupSpacesAndUsers, tearDown } from '../../../setup';
 
 export default function connectorsTests({ loadTestFile, getService }: FtrProviderContext) {
-  describe('Connectors', () => {
+  describe('testtest Connectors', () => {
     before(async () => {
       await setupSpacesAndUsers(getService);
     });
@@ -21,6 +21,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/oauth_access_token'));
     loadTestFile(require.resolve('./connector_types/cases_webhook'));
     loadTestFile(require.resolve('./connector_types/jira'));
+    loadTestFile(require.resolve('./connector_types/jira_service_management'));
     loadTestFile(require.resolve('./connector_types/resilient'));
     loadTestFile(require.resolve('./connector_types/servicenow_itsm'));
     loadTestFile(require.resolve('./connector_types/servicenow_sir'));
@@ -44,6 +45,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/bedrock'));
     loadTestFile(require.resolve('./connector_types/gemini'));
     loadTestFile(require.resolve('./connector_types/xsoar'));
+    loadTestFile(require.resolve('./connector_types/get_webhook_secret_headers_keys'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./execute'));

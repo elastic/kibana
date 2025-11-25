@@ -6,11 +6,9 @@
  */
 
 export { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
-export { isReservedToolId, isBuiltInToolId, idRegexp } from './tool_ids';
+export { isReservedToolId, validateToolId, toolIdRegexp, toolIdMaxLength } from './tool_ids';
 export {
-  builtinToolIds,
-  builtinTags,
-  builtInToolIdPrefix,
+  platformCoreTools,
   activeToolsCountWarningThreshold,
   defaultAgentToolIds,
   editableToolTypes,
@@ -30,16 +28,29 @@ export {
   EsqlToolFieldType,
   type EsqlToolFieldTypes,
   type EsqlToolParam,
+  type EsqlToolParamValue,
   type EsqlToolDefinition,
   type EsqlToolDefinitionWithSchema,
   isEsqlTool,
-} from './esql';
+} from './types/esql';
 export {
   isIndexSearchTool,
   type IndexSearchToolDefinition,
   type IndexSearchToolDefinitionWithSchema,
   type IndexSearchToolConfig,
-} from './index_search';
+} from './types/index_search';
+export {
+  isWorkflowTool,
+  type WorkflowToolConfig,
+  type WorkflowToolDefinition,
+  type WorkflowToolDefinitionWithSchema,
+} from './types/workflow';
+export {
+  isBuiltinTool,
+  type BuiltinToolConfig,
+  type BuiltinToolDefinition,
+  type BuiltinToolDefinitionWithSchema,
+} from './types/builtin';
 export {
   ToolResultType,
   type ToolResult,
@@ -47,5 +58,12 @@ export {
   type QueryResult,
   type ResourceResult,
   type TabularDataResult,
+  type VisualizationResult,
   type OtherResult,
+  isErrorResult,
+  isOtherResult,
+  isQueryResult,
+  isResourceResult,
+  isTabularDataResult,
 } from './tool_result';
+export { type BrowserApiToolMetadata } from './browser_tool_metadata';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type {
   CustomCellRenderer,
   DataGridDensity,
@@ -29,6 +29,7 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type { TabState } from '../application/main/state_management/redux';
 
 /**
  * Supports extending the Discover app menu
@@ -51,6 +52,19 @@ export interface PaginationConfigExtension {
    * @returns paginationMode - which mode to use for loading Pagination toolbar
    */
   paginationMode: DataGridPaginationMode;
+}
+
+/**
+ * Support exposing additional fields for the Field List API
+ */
+
+export interface FieldListExtension {
+  /**
+   * Adds additional fields to the field list
+   * @param recommendedFields The field list
+   * @returns The updated field list
+   */
+  recommendedFields: Array<DataViewField['name']>;
 }
 
 /**
@@ -319,6 +333,24 @@ export interface AdditionalCellAction {
 }
 
 /**
+ * Parameters passed to the open in new tab action
+ */
+export interface OpenInNewTabParams {
+  /**
+   * The query to open in the new tab
+   */
+  query?: TabState['appState']['query'];
+  /**
+   * The label of the new tab
+   */
+  tabLabel?: string;
+  /**
+   * The time range to open in the new tab
+   */
+  timeRange?: TabState['globalState']['timeRange'];
+}
+
+/**
  * The core profile interface for Discover context awareness.
  * Each of the available methods map to a specific extension point in the Discover application.
  */
@@ -446,4 +478,10 @@ export interface Profile {
    * Example use case is to overwrite the column header display name or to add icons to the column headers.
    */
   getColumnsConfiguration: () => CustomGridColumnsConfiguration;
+
+  /**
+   * Allows passing additional fields (recommended fields) to the field list area.
+   * @returns The additional fields to display in the Field List under Recommended fields section
+   */
+  getRecommendedFields: () => FieldListExtension;
 }

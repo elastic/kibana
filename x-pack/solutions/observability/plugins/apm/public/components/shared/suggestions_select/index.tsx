@@ -8,7 +8,7 @@
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { throttle } from 'lodash';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
@@ -26,6 +26,7 @@ interface SuggestionsSelectProps {
   dataTestSubj?: string;
   prepend?: string;
   serviceName?: string;
+  shouldReset?: boolean;
 }
 
 export type { SuggestionsSelectProps };
@@ -44,6 +45,7 @@ export function SuggestionsSelect({
   isClearable = true,
   prepend,
   serviceName,
+  shouldReset = false,
 }: SuggestionsSelectProps) {
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
@@ -71,6 +73,27 @@ export function SuggestionsSelect({
     [fieldName, searchValue, start, end, serviceName],
     { preservePreviousData: false }
   );
+
+  // Track previous shouldReset to only reset on transition from false to true
+  const prevShouldResetRef = useRef(shouldReset);
+
+  // Reset when shouldReset transitions from false to true
+  useEffect(() => {
+    if (shouldReset && !prevShouldResetRef.current && selectedOptions.length > 0) {
+      setSelectedOptions([]);
+      setSearchValue('');
+      onChange('');
+    }
+    prevShouldResetRef.current = shouldReset;
+  }, [shouldReset, onChange, selectedOptions.length]);
+
+  useEffect(() => {
+    if (defaultValue) {
+      setSelectedOptions([{ label: defaultValue, value: defaultValue }]);
+    } else {
+      setSelectedOptions([]);
+    }
+  }, [defaultValue]);
 
   const handleChange = useCallback(
     (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {

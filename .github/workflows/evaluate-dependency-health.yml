@@ -16,7 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.repository == 'elastic/kibana' &&
-      github.actor != 'elastic-renovate-prod[bot]' &&
+      github.event.pull_request.user.login != 'app/elastic-renovate-prod' &&
+      github.event.pull_request.user.type != 'Bot' &&
       github.event.pull_request.draft == false
     steps:
       - name: Checkout kibana-operations
@@ -26,6 +27,7 @@ jobs:
           ref: main
           path: ./kibana-operations
           token: ${{secrets.KIBANAMACHINE_TOKEN}}
+          persist-credentials: false
 
       - name: Run dependency health score script
         working-directory: ./kibana-operations/triage

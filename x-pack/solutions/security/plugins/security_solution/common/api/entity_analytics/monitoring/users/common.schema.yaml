@@ -16,23 +16,11 @@ components:
               type: string
               description: The name of the user.
 
-    MonitoredUserDoc:
+    MonitoredUserUpdateDoc:
       type: object
       properties:
         id:
           type: string
-
-        event:
-          type: object
-          properties:
-            ingested:
-              type: string
-              format: date-time
-
-        "@timestamp":
-          type: string
-          format: date-time
-
         user:
           type: object
           properties:
@@ -59,18 +47,55 @@ components:
               type: array
               items:
                 type: string
-
         entity_analytics_monitoring:
           type: object
           properties:
             labels:
               type: array
               items:
+                $ref: '#/components/schemas/MonitoringLabel'
+
+    MonitoringLabel:
+      type: object
+      required:
+        - field
+        - value
+        - source
+      properties:
+        field:
+          type: string
+        value:
+          type: string
+        source:
+          type: string
+    MonitoredUserDoc:
+      allOf:
+      - $ref: '#/components/schemas/MonitoredUserUpdateDoc'
+      - type: object
+        properties:
+          event:
+            type: object
+            properties:
+              ingested:
+                type: string
+                format: date-time
+          "@timestamp":
+            type: string
+            format: date-time
+          user:
+            type: object
+            properties:
+              name:
+                type: string
+              is_privileged:
+                type: boolean
+                description: Indicates if the user is privileged.
+              entity:
                 type: object
                 properties:
-                  field:
-                    type: string
-                  value:
-                    type: string
-                  source:
-                    type: string
+                  attributes:
+                    type: object
+                    properties:
+                       Privileged:
+                        type: boolean
+                        description: Indicates if the user is privileged.

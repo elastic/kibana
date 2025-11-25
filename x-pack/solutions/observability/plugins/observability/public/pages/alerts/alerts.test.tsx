@@ -15,7 +15,7 @@ import { TimeBuckets } from '@kbn/data-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
@@ -82,6 +82,7 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
         uptime: { enabled: false },
       },
     },
+    managedOtlpServiceUrl: '',
     aiAssistant: {
       enabled: false,
       feedback: {

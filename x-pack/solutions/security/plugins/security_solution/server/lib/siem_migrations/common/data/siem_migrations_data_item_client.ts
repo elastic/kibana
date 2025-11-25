@@ -15,6 +15,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
+import type { MigrationType } from '../../../../../common/siem_migrations/types';
 import type { ItemDocument, Stored } from '../types';
 import {
   SiemMigrationStatus,
@@ -23,10 +24,11 @@ import {
 import { SiemMigrationsDataBaseClient } from './siem_migrations_data_base_client';
 import { MAX_ES_SEARCH_SIZE } from './constants';
 import type {
-  MigrationType,
   SiemMigrationAllDataStats,
   SiemMigrationDataStats,
   SiemMigrationFilters,
+  SiemMigrationGetItemsOptions,
+  SiemMigrationSort,
 } from './types';
 import { dsl } from './dsl_queries';
 
@@ -34,18 +36,6 @@ export type CreateMigrationItemInput<I extends ItemDocument> = Omit<
   I,
   '@timestamp' | 'id' | 'status' | 'created_by' | 'updated_by' | 'updated_at'
 >;
-
-export interface SiemMigrationItemSort {
-  sortField?: string;
-  sortDirection?: estypes.SortOrder;
-}
-
-export interface SiemMigrationGetItemsOptions<F extends object = object> {
-  filters?: F;
-  sort?: SiemMigrationItemSort;
-  from?: number;
-  size?: number;
-}
 
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed. */
@@ -64,30 +54,36 @@ export abstract class SiemMigrationsDataItemClient<
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    let itemsSlice: CreateMigrationItemInput<I>[];
-    const allItems = structuredClone(items);
     const createdAt = new Date().toISOString();
-    while ((itemsSlice = allItems.splice(0, BULK_MAX_SIZE)).length) {
-      await this.esClient
-        .bulk({
-          refresh: 'wait_for',
-          operations: itemsSlice.flatMap((item) => [
-            { create: { _index: index } },
-            {
-              ...item,
-              '@timestamp': createdAt,
-              status: SiemMigrationStatus.PENDING,
-              created_by: profileId,
-              updated_by: profileId,
-              updated_at: createdAt,
-            },
-          ]),
-        })
-        .catch((error) => {
-          this.logger.error(`Error creating migration ${this.type}: ${error.message}`);
-          throw error;
-        });
+
+    const batches: CreateMigrationItemInput<I>[][] = [];
+    for (let i = 0; i < items.length; i += BULK_MAX_SIZE) {
+      batches.push(items.slice(i, i + BULK_MAX_SIZE));
     }
+
+    await Promise.all(
+      batches.map((itemsSlice) =>
+        this.esClient
+          .bulk({
+            refresh: 'wait_for',
+            operations: itemsSlice.flatMap((item) => [
+              { create: { _index: index } },
+              {
+                ...item,
+                '@timestamp': createdAt,
+                status: SiemMigrationStatus.PENDING,
+                created_by: profileId,
+                updated_by: profileId,
+                updated_at: createdAt,
+              },
+            ]),
+          })
+          .catch((error) => {
+            this.logger.error(`Error creating migration ${this.type}: ${error.message}`);
+            throw error;
+          })
+      )
+    );
   }
 
   /** Updates an array of migration items */
@@ -95,10 +91,14 @@ export abstract class SiemMigrationsDataItemClient<
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    let itemsUpdateSlice: U[];
     const updatedAt = new Date().toISOString();
-    while ((itemsUpdateSlice = itemsUpdate.splice(0, BULK_MAX_SIZE)).length) {
-      await this.esClient
+    const batches: U[][] = [];
+    for (let i = 0; i < itemsUpdate.length; i += BULK_MAX_SIZE) {
+      batches.push(itemsUpdate.slice(i, i + BULK_MAX_SIZE));
+    }
+
+    const batchPromises = batches.map((itemsUpdateSlice) =>
+      this.esClient
         .bulk({
           refresh: 'wait_for',
           operations: itemsUpdateSlice.flatMap((item) => {
@@ -118,8 +118,10 @@ export abstract class SiemMigrationsDataItemClient<
         .catch((error) => {
           this.logger.error(`Error updating migration ${this.type}: ${error.message}`);
           throw error;
-        });
-    }
+        })
+    );
+
+    await Promise.all(batchPromises);
   }
 
   /** Retrieves an array of migration items of a specific migration */
@@ -135,6 +137,29 @@ export abstract class SiemMigrationsDataItemClient<
       .search<I>({ index, query, sort, from, size })
       .catch((error) => {
         this.logger.error(`Error searching migration ${this.type}: ${error.message}`);
+        throw error;
+      });
+    return {
+      total: this.getTotalHits(result),
+      data: this.processResponseHits(result),
+    };
+  }
+
+  async getByQuery(
+    migrationId: string,
+    { queryDSL, from, size }: { queryDSL: object; from?: number; size?: number }
+  ): Promise<{ total: number; data: Stored<I>[] }> {
+    const index = await this.getIndexName();
+    const baseQuery = this.getFilterQuery(migrationId, {});
+    const combinedQuery = {
+      bool: {
+        must: [baseQuery, queryDSL],
+      },
+    };
+    const result = await this.esClient
+      .search<I>({ index, query: combinedQuery, from, size })
+      .catch((error) => {
+        this.logger.error(`Error searching migration ${this.type} by query: ${error.message}`);
         throw error;
       });
     return {
@@ -373,5 +398,5 @@ export abstract class SiemMigrationsDataItemClient<
     return { bool: { filter } };
   }
 
-  protected abstract getSortOptions(sort?: SiemMigrationItemSort): estypes.Sort;
+  protected abstract getSortOptions(sort?: SiemMigrationSort): estypes.Sort;
 }

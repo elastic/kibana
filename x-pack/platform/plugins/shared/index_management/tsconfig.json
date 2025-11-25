@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -61,6 +61,11 @@
     "@kbn/deeplinks-observability",
     "@kbn/streams-app-plugin",
     "@kbn/licensing-types",
+    "@kbn/reindex-service-plugin",
+    "@kbn/inference-common",
+    "@kbn/upgrade-assistant-pkg-common",
+    "@kbn/failure-store-modal",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }

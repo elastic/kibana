@@ -17,8 +17,8 @@ import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { ValuesType } from 'utility-types';
 import type { KbnPalettes } from '@kbn/palettes';
 import { KbnPalette } from '@kbn/palettes';
-import type { VisualizationDimensionEditorProps } from '../../../types';
-import type { State, XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
+import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
+import type { XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
 import type { FormatFactory } from '../../../../common/types';
 import { getSeriesColor, isHorizontalChart } from '../state_helpers';
 import { getDataLayers } from '../visualization_helpers';
@@ -30,22 +30,22 @@ import { ColorMappingByTerms } from '../../../shared_components/coloring/color_m
 export const idPrefix = htmlIdGenerator()();
 
 function updateLayer(
-  state: State,
+  state: XYState,
   index: number,
-  layer: ValuesType<State['layers']>,
-  newLayer: Partial<ValuesType<State['layers']>>
-): State['layers'] {
+  layer: ValuesType<XYState['layers']>,
+  newLayer: Partial<ValuesType<XYState['layers']>>
+): XYState['layers'] {
   const newLayers = [...state.layers];
   newLayers[index] = {
     ...layer,
     ...newLayer,
-  } as ValuesType<State['layers']>;
+  } as ValuesType<XYState['layers']>;
 
   return newLayers;
 }
 
 export function DataDimensionEditor(
-  props: VisualizationDimensionEditorProps<State> & {
+  props: VisualizationDimensionEditorProps<XYState> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
     palettes: KbnPalettes;
@@ -62,7 +62,7 @@ export function DataDimensionEditor(
   });
 
   const updateLayerState = useCallback(
-    (layerIndex: number, newLayer: Partial<ValuesType<State['layers']>>) => {
+    (layerIndex: number, newLayer: Partial<ValuesType<XYState['layers']>>) => {
       setLocalState({
         ...localState,
         layers: updateLayer(localState, layerIndex, layer, newLayer),
@@ -142,20 +142,22 @@ export function DataDimensionEditor(
     const formatter = props.formatFactory(columnMeta?.params);
 
     return !layer.collapseFn ? (
-      <ColorMappingByTerms
-        isDarkMode={isDarkMode}
-        colorMapping={layer.colorMapping}
-        palette={layer.palette}
-        isInlineEditing={isInlineEditing}
-        setPalette={setPalette}
-        setColorMapping={setColorMapping}
-        paletteService={props.paletteService}
-        palettes={props.palettes}
-        panelRef={props.panelRef}
-        categories={splitCategories}
-        formatter={formatter}
-        allowCustomMatch={allowCustomMatch}
-      />
+      <div className="lnsIndexPatternDimensionEditor--padded">
+        <ColorMappingByTerms
+          isDarkMode={isDarkMode}
+          colorMapping={layer.colorMapping}
+          palette={layer.palette}
+          isInlineEditing={isInlineEditing}
+          setPalette={setPalette}
+          setColorMapping={setColorMapping}
+          paletteService={props.paletteService}
+          palettes={props.palettes}
+          panelRef={props.panelRef}
+          categories={splitCategories}
+          formatter={formatter}
+          allowCustomMatch={allowCustomMatch}
+        />
+      </div>
     ) : null;
   }
 
@@ -168,7 +170,7 @@ export function DataDimensionEditor(
     : undefined;
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <ColorPicker
         {...props}
         overwriteColor={overwriteColor}
@@ -230,12 +232,12 @@ export function DataDimensionEditor(
           }}
         />
       </EuiFormRow>
-    </>
+    </div>
   );
 }
 
 export function DataDimensionEditorDataSectionExtra(
-  props: VisualizationDimensionEditorProps<State> & {
+  props: VisualizationDimensionEditorProps<XYState> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
   }
@@ -250,7 +252,7 @@ export function DataDimensionEditorDataSectionExtra(
   });
 
   const updateLayerState = useCallback(
-    (layerIndex: number, newLayer: Partial<ValuesType<State['layers']>>) => {
+    (layerIndex: number, newLayer: Partial<ValuesType<XYState['layers']>>) => {
       setLocalState({
         ...localState,
         layers: updateLayer(localState, layerIndex, layer, newLayer),

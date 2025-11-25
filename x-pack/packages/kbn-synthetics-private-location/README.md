@@ -53,4 +53,9 @@ xpack.fleet.outputs:
     is_default: true
     is_default_monitoring: true
     hosts: ['http://host.docker.internal:9200'] # For enrolling dockerized agents
+
+xpack.fleet.packages:
+  - name: fleet_server
+    version: latest
+
 ```

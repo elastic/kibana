@@ -24,6 +24,9 @@ export interface SiemMigrationFilters {
   fullyTranslated?: boolean;
   partiallyTranslated?: boolean;
   untranslatable?: boolean;
+  searchTerm?: string;
+  installed?: boolean;
+  installable?: boolean;
 }
 
 export type SiemMigrationVendor = OriginalRuleVendor | OriginalDashboardVendor;
@@ -33,3 +36,5 @@ export type ItemDocument = RuleMigrationRule | DashboardMigrationDashboard;
 export type OriginalItem<I> = I extends RuleMigrationRule
   ? RuleMigrationRule['original_rule']
   : DashboardMigrationDashboard['original_dashboard'];
+
+export type MigrationType = 'rule' | 'dashboard';

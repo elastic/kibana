@@ -15,12 +15,15 @@ import {
   type DiffableSavedQueryFields,
   type DiffableThreatMatchFields,
   type DiffableThresholdFields,
-  type RuleFieldsDiff,
+  type ThreeWayRuleFieldsDiff,
 } from '../../../../../common/api/detection_engine';
 
 export type NonUpgradeableDiffableFields = (typeof NON_UPGRADEABLE_DIFFABLE_FIELDS)[number];
 
-export type UpgradeableDiffableFields = Exclude<keyof RuleFieldsDiff, NonUpgradeableDiffableFields>;
+export type UpgradeableDiffableFields = Exclude<
+  keyof ThreeWayRuleFieldsDiff,
+  NonUpgradeableDiffableFields
+>;
 
 export type UpgradeableCommonFields = Exclude<
   keyof DiffableCommonFields,

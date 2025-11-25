@@ -9,10 +9,18 @@
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
+import type { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 import type { TimeRange } from '@kbn/es-query';
-import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
+import {
+  ESQLVariableType,
+  EsqlControlType,
+  VariableNamePrefix,
+  TelemetryControlCancelledReason,
+  type ESQLControlVariable,
+  type ESQLControlState,
+  type ControlTriggerSource,
+} from '@kbn/esql-types';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
-import { EsqlControlType, VariableNamePrefix } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { monaco } from '@kbn/monaco';
 import { ValueControlForm } from './value_control_form';
@@ -42,6 +50,9 @@ interface ESQLControlsFlyoutProps {
   initialState?: ESQLControlState;
   closeFlyout: () => void;
   ariaLabelledBy: string;
+  currentApp?: string;
+  telemetryTriggerSource?: ControlTriggerSource;
+  telemetryService: ESQLEditorTelemetryService;
 }
 
 export function ESQLControlsFlyout({
@@ -56,6 +67,9 @@ export function ESQLControlsFlyout({
   initialState,
   closeFlyout,
   ariaLabelledBy,
+  currentApp,
+  telemetryTriggerSource,
+  telemetryService,
 }: ESQLControlsFlyoutProps) {
   // ?? or ?
   const [variableNamePrefix, setVariableNamePrefix] = useState(
@@ -165,6 +179,12 @@ export function ESQLControlsFlyout({
       } else {
         await onSaveControl?.(controlState, '');
       }
+      if (!isControlInEditMode) {
+        telemetryService.trackEsqlControlConfigSaved(
+          variableType,
+          telemetryTriggerSource as ControlTriggerSource
+        );
+      }
     }
     closeFlyout();
   }, [
@@ -175,7 +195,18 @@ export function ESQLControlsFlyout({
     queryString,
     variableName,
     onSaveControl,
+    variableType,
+    telemetryTriggerSource,
+    telemetryService,
   ]);
+
+  const onCloseFlyout = useCallback(() => {
+    telemetryService.trackEsqlControlConfigCancelled(
+      initialVariableType,
+      TelemetryControlCancelledReason.CANCEL_BUTTON
+    );
+    closeFlyout();
+  }, [closeFlyout, initialVariableType, telemetryService]);
 
   const formBody =
     variableNamePrefix === VariableNamePrefix.VALUE ? (
@@ -189,6 +220,7 @@ export function ESQLControlsFlyout({
         search={search}
         valuesRetrieval={valuesField}
         timeRange={timeRange}
+        currentApp={currentApp}
       />
     ) : (
       <IdentifierControlForm
@@ -200,6 +232,7 @@ export function ESQLControlsFlyout({
         initialState={initialState}
         search={search}
         cursorPosition={cursorPosition}
+        currentApp={currentApp}
       />
     );
 
@@ -222,11 +255,9 @@ export function ESQLControlsFlyout({
         {formBody}
       </EuiFlyoutBody>
       <Footer
-        isControlInEditMode={isControlInEditMode}
-        variableName={variableName}
         onCancelControl={onCancelControl}
         isSaveDisabled={formIsInvalid}
-        closeFlyout={closeFlyout}
+        closeFlyout={onCloseFlyout}
         onCreateControl={onCreateControl}
       />
     </>

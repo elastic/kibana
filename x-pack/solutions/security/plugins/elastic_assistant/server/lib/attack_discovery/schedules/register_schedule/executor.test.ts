@@ -27,6 +27,7 @@ import {
 import { mockAttackDiscoveries } from '../../evaluation/__mocks__/mock_attack_discoveries';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../../../__mocks__/response';
 import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
+import * as transforms from '../../persistence/transforms/transform_to_alert_documents';
 
 jest.mock('../../../../ai_assistant_data_clients/find', () => ({
   ...jest.requireActual('../../../../ai_assistant_data_clients/find'),
@@ -349,6 +350,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
           'Critical Malware and Phishing Alerts on host e1cb3cf0-30f3-4f99-a9c8-518b955c6f90',
         'kibana.alert.attack_discovery.title_with_replacements':
           'Critical Malware and Phishing Alerts on host Test-Host-1',
+        'kibana.alert.attack_ids': ['fake-alert'],
       },
       context: {
         attack: {
@@ -502,5 +504,43 @@ describe('attackDiscoveryScheduleExecutor', () => {
         context: { attack: expect.objectContaining({ alertIds, timestamp, mitreAttackTactics }) },
       });
     }
+  });
+
+  it('should call transformToBaseAlertDocument with alertsParams.withReplacements set to false', async () => {
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+    const spy = jest.spyOn(transforms, 'transformToBaseAlertDocument');
+
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    const firstCallArg = spy.mock.calls[0][0] as {
+      alertsParams: { withReplacements?: boolean };
+    };
+    expect(firstCallArg.alertsParams.withReplacements).toBe(false);
+
+    spy.mockRestore();
+  });
+
+  it('should call transformToBaseAlertDocument with alertsParams.enableFieldRendering set to true', async () => {
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+    const spy = jest.spyOn(transforms, 'transformToBaseAlertDocument');
+
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    const firstCallArg = spy.mock.calls[0][0] as {
+      alertsParams: { enableFieldRendering?: boolean };
+    };
+    expect(firstCallArg.alertsParams.enableFieldRendering).toBe(true);
+
+    spy.mockRestore();
   });
 });

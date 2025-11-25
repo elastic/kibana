@@ -8,12 +8,13 @@
 import type * as http from 'http';
 import expect from '@kbn/expect';
 import equals from 'fast-deep-equal';
+import {
+  AWS_PROVIDER_TEST_SUBJ,
+  AWS_SINGLE_ACCOUNT_TEST_SUBJ,
+} from '@kbn/cloud-security-posture-common';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
-import { testSubjectIds } from '../constants/test_subject_ids';
-
-const { CIS_AWS_OPTION_TEST_ID, AWS_SINGLE_ACCOUNT_TEST_ID } = testSubjectIds;
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -29,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
 
   // https://github.com/elastic/kibana/issues/229298
-  describe.skip('Agentless cloud', function () {
+  describe('Agentless cloud', function () {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     let mockApiServer: http.Server;
@@ -49,7 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
         CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
-      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
       await cisIntegration.inputUniqueIntegrationName();
       await pageObjects.header.waitUntilLoadingHasFinished();
       await cisIntegration.selectSetupTechnology('agent-based');
@@ -74,8 +75,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
-      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
+      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
@@ -117,8 +118,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
-      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
+      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
@@ -153,8 +154,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
-      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
+      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -186,8 +187,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
-      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
+      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
       await cisIntegration.selectSetupTechnology('agent-based');

@@ -10,6 +10,7 @@ import path from 'path';
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
+import { sanitizeSvg } from '@kbn/fs';
 
 import type { GetFileRequestSchema, FleetRequestHandler } from '../../types';
 import { getFile, getInstallation } from '../../services/epm/packages';
@@ -17,10 +18,38 @@ import { getAsset } from '../../services/epm/archive/storage';
 import { getBundledPackageByPkgKey } from '../../services/epm/packages/bundled_packages';
 import { pkgToPkgKey } from '../../services/epm/registry';
 import { unpackArchiveEntriesIntoMemory } from '../../services/epm/archive';
+import { FleetError } from '../../errors';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
 };
+
+const ALLOWED_MIME_TYPES = [
+  'image/svg+xml',
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'application/json',
+  'application/yaml',
+  'text/plain',
+  'text/markdown',
+  'text/yaml',
+];
+
+function validateContentTypeIsAllowed(contentType: string) {
+  if (!ALLOWED_MIME_TYPES.includes(contentType.split(';')[0])) {
+    throw new FleetError(`File content type "${contentType}" is not allowed to be retrieved`, 400);
+  }
+}
+
+function sanitize(contentType: string, buffer: Buffer) {
+  if (contentType === 'image/svg+xml') {
+    return sanitizeSvg(buffer);
+  }
+
+  return buffer;
+}
+
 export const getFileHandler: FleetRequestHandler<
   TypeOf<typeof GetFileRequestSchema.params>
 > = async (context, request, response) => {
@@ -42,7 +71,8 @@ export const getFileHandler: FleetRequestHandler<
     }
 
     const contentType = storedAsset.media_type;
-    const buffer = storedAsset.data_utf8
+    validateContentTypeIsAllowed(contentType);
+    let buffer = storedAsset.data_utf8
       ? Buffer.from(storedAsset.data_utf8, 'utf8')
       : Buffer.from(storedAsset.data_base64, 'base64');
 
@@ -52,6 +82,8 @@ export const getFileHandler: FleetRequestHandler<
         statusCode: 400,
       });
     }
+
+    buffer = sanitize(contentType, buffer);
 
     return response.custom({
       body: buffer,
@@ -83,10 +115,8 @@ export const getFileHandler: FleetRequestHandler<
 
     // if storedAsset is not available, fileBuffer *must* be
     // b/c we error if we don't have at least one, and storedAsset is the least likely
-    const { buffer, contentType } = {
-      contentType: mime.contentType(path.extname(assetPath)),
-      buffer: fileBuffer,
-    };
+    let buffer = fileBuffer;
+    const contentType = mime.contentType(path.extname(assetPath));
 
     if (!contentType) {
       return response.custom({
@@ -94,6 +124,8 @@ export const getFileHandler: FleetRequestHandler<
         statusCode: 400,
       });
     }
+    validateContentTypeIsAllowed(contentType);
+    buffer = sanitize(contentType, buffer);
 
     return response.custom({
       body: buffer,
@@ -120,6 +152,11 @@ export const getFileHandler: FleetRequestHandler<
       }
       return headers;
     }, {} as ResponseHeaders);
+
+    if (!proxiedHeaders['content-type'] || typeof proxiedHeaders['content-type'] !== 'string') {
+      throw new FleetError(`unknown content type for file: ${filePath}`);
+    }
+    validateContentTypeIsAllowed(proxiedHeaders['content-type']);
 
     return response.custom({
       body: registryResponse.body,

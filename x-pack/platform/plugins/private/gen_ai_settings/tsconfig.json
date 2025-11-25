@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -27,7 +27,9 @@
     "@kbn/management-settings-utilities",
     "@kbn/management-settings-field-definition",
     "@kbn/react-kibana-context-theme",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
+    "@kbn/management-settings-components-field-row",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

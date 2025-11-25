@@ -9,6 +9,8 @@ import moment from 'moment';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 
+import { ScheduleType } from '@kbn/reporting-server';
+import { EXPORT_TYPE_SINGLE } from '@kbn/reporting-common';
 import type { ReportTaskParams } from '.';
 import { REPORTING_EXECUTE_TYPE } from '.';
 import { SavedReport } from '../store';
@@ -21,6 +23,8 @@ type SingleReportTaskInstance = Omit<TaskInstance, 'params'> & {
   params: ReportTaskParams;
 };
 export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
+  public readonly exportType = EXPORT_TYPE_SINGLE;
+
   public get TYPE() {
     return REPORTING_EXECUTE_TYPE;
   }
@@ -62,7 +66,7 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
     // event tracking of claimed job
     const eventTracker = this.getEventTracker(report);
     const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
-    eventTracker?.claimJob({ timeSinceCreation });
+    eventTracker?.claimJob({ timeSinceCreation, scheduleType: ScheduleType.SINGLE });
 
     const resp = await store.setReportClaimed(claimedReport, doc);
     claimedReport._seq_no = resp._seq_no!;

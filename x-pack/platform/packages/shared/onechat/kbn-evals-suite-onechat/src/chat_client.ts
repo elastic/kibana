@@ -27,6 +27,7 @@ type ConverseFunction = (params: ConverseFunctionParams) => Promise<{
   messages: Messages;
   errors: any[];
   steps?: any[];
+  traceId?: string;
 }>;
 
 export class OnechatEvaluationChatClient {
@@ -46,9 +47,10 @@ export class OnechatEvaluationChatClient {
       messages: { message: string }[];
       errors: any[];
       steps?: any[];
+      traceId?: string;
     }> => {
       // Use the non-async OneChat API endpoint
-      const response = await this.fetch('/api/chat/converse', {
+      const response = await this.fetch('/api/agent_builder/converse', {
         method: 'POST',
         version: '2023-10-31',
         body: JSON.stringify({
@@ -70,12 +72,14 @@ export class OnechatEvaluationChatClient {
         conversation_id: conversationIdFromResponse,
         response: latestResponse,
         steps,
+        trace_id: traceId,
       } = chatResponse;
 
       return {
         conversationId: conversationIdFromResponse,
         messages: [...messages, latestResponse],
         steps,
+        traceId,
         errors: [],
       };
     };

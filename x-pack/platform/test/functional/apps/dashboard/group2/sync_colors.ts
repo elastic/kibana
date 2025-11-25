@@ -29,7 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return colorMapping;
   }
 
-  describe('sync colors', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/235883
+  describe.skip('sync colors', function () {
     before(async function () {
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/logstash_functional'

@@ -7,15 +7,15 @@
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import {
+  CONNECTOR_ID as CROWDSTRIKE_CONNECTOR_ID,
   SUB_ACTION,
-  CROWDSTRIKE_CONNECTOR_ID,
-} from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+} from '@kbn/connector-schemas/crowdstrike/constants';
 import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   CrowdstrikeBaseApiResponse,
   CrowdStrikeExecuteRTRResponse,
   CrowdstrikeGetScriptsResponse,
-} from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
+} from '@kbn/connector-schemas/crowdstrike';
 import { v4 as uuidv4 } from 'uuid';
 
 import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../common/endpoint/service/response_actions/crowdstrike';
@@ -146,8 +146,8 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         inner_hits: {
           name: 'most_recent',
           size: 1,
-          _source: ['agent', 'device.id', 'event.created'],
-          sort: [{ 'event.created': 'desc' }],
+          _source: ['agent', 'device.id', '@timestamp'],
+          sort: [{ '@timestamp': 'desc' }],
         },
       },
       _source: false,

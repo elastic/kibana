@@ -54,10 +54,6 @@
 # Use this token instead of a username/password.
 # elasticsearch.serviceAccountToken: "my_token"
 
-# Time in milliseconds to wait for Elasticsearch to respond to pings. Defaults to the value of
-# the elasticsearch.requestTimeout setting.
-#elasticsearch.pingTimeout: 1500
-
 # Time in milliseconds to wait for responses from the back end or Elasticsearch. This value
 # must be a positive integer.
 #elasticsearch.requestTimeout: 30000

@@ -51,6 +51,9 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
   SavedObjectsFindInternalOptions,
+  SavedObjectsRawDocSource,
+  SavedObjectsSearchOptions,
+  SavedObjectsSearchResponse,
   ISavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server';
 import type {
@@ -86,6 +89,7 @@ import {
   performResolve,
   performUpdateObjectsSpaces,
   performCollectMultiNamespaceReferences,
+  performSearch,
 } from './apis';
 import { createRepositoryHelpers } from './utils';
 
@@ -328,6 +332,15 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       },
       this.apiExecutionContext
     );
+  }
+
+  /**
+   * {@inheritDoc ISavedObjectsRepository.search}
+   */
+  async search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
+    options: SavedObjectsSearchOptions
+  ): Promise<SavedObjectsSearchResponse<T, A>> {
+    return performSearch({ options }, this.apiExecutionContext);
   }
 
   /**

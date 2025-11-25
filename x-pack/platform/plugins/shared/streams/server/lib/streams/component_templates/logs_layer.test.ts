@@ -200,6 +200,8 @@ describe('logs_layer', () => {
             },
             lifecycle: { inherit: {} },
             processing: { steps: [] },
+            settings: {},
+            failure_store: { inherit: {} },
           },
         },
         conflictingFields

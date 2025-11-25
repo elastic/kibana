@@ -8,20 +8,19 @@
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   CreateFieldComponent,
   GetFieldTableColumns,
 } from '@kbn/response-ops-alerts-fields-browser/types';
-import { browserFieldsManager } from '../../../data_view_manager/utils/security_browser_fields_manager';
+import type { PageScope } from '../../../data_view_manager/constants';
 import type { ColumnHeaderOptions } from '../../../../common/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useDataView as useDataViewOld } from '../../../common/containers/source/use_data_view';
 import { useKibana } from '../../../common/lib/kibana';
-import { sourcererSelectors } from '../../../common/store';
 import type { State } from '../../../common/store';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import { sourcererSelectors } from '../../../common/store';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { useCreateFieldButton } from './create_field_button';
@@ -36,7 +35,7 @@ export type OpenFieldEditor = (fieldName?: string) => void;
 export type OpenDeleteFieldModal = (fieldName: string) => void;
 
 export interface UseFieldBrowserOptionsProps {
-  sourcererScope: SourcererScopeName;
+  sourcererScope: PageScope;
   removeColumn: (columnId: string) => void;
   upsertColumn: (column: ColumnHeaderOptions, index: number) => void;
   editorActionsRef?: FieldEditorActionsRef;
@@ -114,8 +113,7 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
             // Fetch the updated list of fields
             // Using cleanCache since the number of fields might have not changed, but we need to update the state anyway
             if (newDataViewPickerEnabled) {
-              browserFieldsManager.removeFromCache(sourcererScope);
-              await dataViews.clearInstanceCache(selectedDataViewId);
+              dataViews.clearInstanceCache(selectedDataViewId);
             } else {
               await indexFieldsSearch({ dataViewId: selectedDataViewId, cleanCache: true });
             }
@@ -159,7 +157,6 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
       editorActionsRef,
       startTransaction,
       newDataViewPickerEnabled,
-      sourcererScope,
       dataViews,
       indexFieldsSearch,
       upsertColumn,
@@ -177,8 +174,7 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
             startTransaction({ name: FIELD_BROWSER_ACTIONS.FIELD_DELETED });
 
             if (newDataViewPickerEnabled) {
-              browserFieldsManager.removeFromCache(sourcererScope);
-              await dataViews.clearInstanceCache(selectedDataViewId);
+              dataViews.clearInstanceCache(selectedDataViewId);
             } else {
               await indexFieldsSearch({ dataViewId: selectedDataViewId, cleanCache: true });
             }
@@ -194,7 +190,6 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
       startTransaction,
       newDataViewPickerEnabled,
       removeColumn,
-      sourcererScope,
       dataViews,
       indexFieldsSearch,
     ]
@@ -206,7 +201,7 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
   );
 
   const createFieldButton = useCreateFieldButton({
-    isAllowed: hasFieldEditPermission && !!selectedDataViewId,
+    isAllowed: hasFieldEditPermission && !!selectedDataViewId && !dataView?.managed,
     loading: !dataView,
     openFieldEditor,
   });

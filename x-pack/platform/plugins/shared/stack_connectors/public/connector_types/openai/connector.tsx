@@ -30,9 +30,9 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import * as i18nAuth from '../../common/auth/translations';
 import DashboardLink from './dashboard_link';
-import { OpenAiProviderType } from '../../../common/openai/constants';
 import * as i18n from './translations';
 import {
   azureAiConfig,
@@ -126,6 +126,22 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
             secretsFormSchema={otherOpenAiSecrets}
           />
           <EuiSpacer size="s" />
+          <UseField
+            path="config.enableNativeFunctionCalling"
+            component={ToggleField}
+            config={{
+              label: i18n.USE_NATIVE_FUNCTION_CALLING_LABEL,
+              helpText: i18n.USE_NATIVE_FUNCTION_CALLING_DESC,
+              defaultValue: false,
+            }}
+            componentProps={{
+              euiFieldProps: {
+                disabled: readOnly,
+                'data-test-subj': 'config.enableNativeFunctionCallingSwitch',
+              },
+            }}
+          />
+          <EuiSpacer size="m" />
           <UseField
             path="__internal__.hasPKI"
             component={ToggleField}

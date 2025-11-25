@@ -32,6 +32,7 @@ export const transformRuleTypesResponse = (
       has_alerts_mappings: ruleType.hasAlertsMappings,
       has_fields_for_a_a_d: true,
       id: ruleType.id,
+      is_internally_managed: Boolean(ruleType.internallyManaged),
       is_exportable: ruleType.isExportable,
       minimum_license_required: ruleType.minimumLicenseRequired,
       name: ruleType.name,

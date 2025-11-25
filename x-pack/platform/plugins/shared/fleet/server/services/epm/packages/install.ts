@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import type Boom from '@hapi/boom';
 import moment from 'moment';
-import { omit } from 'lodash';
+import { omit, uniqBy } from 'lodash';
 import type {
   ElasticsearchClient,
   SavedObject,
@@ -43,6 +43,7 @@ import type {
   KibanaAssetType,
   PackageVerificationResult,
   InstallResultStatus,
+  InstallLatestExecutedState,
 } from '../../../types';
 import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
@@ -460,6 +461,25 @@ function sendEvent(telemetryEvent: PackageUpdateEvent) {
   );
 }
 
+function sendEventWithLatestState(
+  telemetryEvent: PackageUpdateEvent,
+  errorMessage: string,
+  latestExecutedState?: InstallLatestExecutedState
+) {
+  sendEvent({
+    ...telemetryEvent,
+    errorMessage,
+    ...(latestExecutedState
+      ? {
+          latestExecutedState: {
+            name: latestExecutedState.name,
+            error: latestExecutedState.error,
+          },
+        }
+      : {}),
+  });
+}
+
 async function installPackageFromRegistry({
   savedObjectsClient,
   pkgkey,
@@ -487,11 +507,12 @@ async function installPackageFromRegistry({
   let installType: InstallType = 'unknown';
   const installSource = 'registry';
   const telemetryEvent: PackageUpdateEvent = getTelemetryEvent(pkgName, pkgVersion);
+  let installedPkg: SavedObject<Installation> | undefined;
 
   try {
     // get the currently installed package
 
-    const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+    installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
     installType = getInstallType({ pkgVersion, installedPkg });
 
     telemetryEvent.installType = installType;
@@ -583,10 +604,11 @@ async function installPackageFromRegistry({
       automaticInstall,
     });
   } catch (e) {
-    sendEvent({
-      ...telemetryEvent,
-      errorMessage: e.message,
-    });
+    sendEventWithLatestState(
+      telemetryEvent,
+      e.message,
+      installedPkg?.attributes.latest_executed_state
+    );
     return {
       error: e,
       installType,
@@ -791,7 +813,7 @@ export async function installPackageWithStateMachine(options: {
       })
       .catch(async (err: Error) => {
         logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`, {
-          error: { stack_trace: err.stack },
+          error: err,
         });
         await handleInstallPackageFailure({
           savedObjectsClient,
@@ -804,17 +826,19 @@ export async function installPackageWithStateMachine(options: {
           authorizationHeader,
           keepFailedInstallation,
         });
-        sendEvent({
-          ...telemetryEvent!,
-          errorMessage: err.message,
-        });
+        sendEventWithLatestState(
+          telemetryEvent,
+          err.message,
+          installedPkg?.attributes.latest_executed_state
+        );
         return { error: err, installType, installSource, pkgName };
       });
   } catch (e) {
-    sendEvent({
-      ...telemetryEvent,
-      errorMessage: e.message,
-    });
+    sendEventWithLatestState(
+      telemetryEvent,
+      e.message,
+      installedPkg?.attributes.latest_executed_state
+    );
     return {
       error: e,
       installType,
@@ -1278,7 +1302,8 @@ export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
   assetRefs: KibanaAssetReference[] | null,
-  saveAsAdditionnalSpace = false
+  saveAsAdditionnalSpace = false,
+  append = false
 ) => {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
@@ -1294,33 +1319,46 @@ export const saveKibanaAssetsRefs = async (
   // to retry constantly until it succeeds to optimize this critical user journey path as much as possible.
   await pRetry(
     async () => {
-      const installation = saveAsAdditionnalSpace
-        ? await savedObjectsClient
-            .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
-            .catch((e) => {
-              if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-                return undefined;
-              }
-              throw e;
-            })
-        : undefined;
+      const installation =
+        saveAsAdditionnalSpace || append
+          ? await savedObjectsClient
+              .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
+              .catch((e) => {
+                if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+                  return undefined;
+                }
+                throw e;
+              })
+          : undefined;
+
+      if (saveAsAdditionnalSpace) {
+        return savedObjectsClient.update<Installation>(
+          PACKAGES_SAVED_OBJECT_TYPE,
+          pkgName,
+          {
+            additional_spaces_installed_kibana: {
+              ...omit(installation?.attributes?.additional_spaces_installed_kibana ?? {}, spaceId),
+              ...(assetRefs !== null ? { [spaceId]: assetRefs } : {}),
+            },
+          },
+          { refresh: false }
+        );
+      }
+
+      let newAssetRefs = assetRefs !== null ? assetRefs : [];
+      if (append && installation) {
+        newAssetRefs = uniqBy(
+          [...newAssetRefs, ...(installation.attributes.installed_kibana ?? [])],
+          (asset) => asset.id + asset.type
+        );
+      }
 
       return savedObjectsClient.update<Installation>(
         PACKAGES_SAVED_OBJECT_TYPE,
         pkgName,
-        saveAsAdditionnalSpace
-          ? {
-              additional_spaces_installed_kibana: {
-                ...omit(
-                  installation?.attributes?.additional_spaces_installed_kibana ?? {},
-                  spaceId
-                ),
-                ...(assetRefs !== null ? { [spaceId]: assetRefs } : {}),
-              },
-            }
-          : {
-              installed_kibana: assetRefs !== null ? assetRefs : [],
-            },
+        {
+          installed_kibana: newAssetRefs,
+        },
         { refresh: false }
       );
     },

@@ -47,12 +47,43 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 `xpack.security.authc.providers.anonymous.<provider-name>.credentials`
 :   Specifies which credentials Kibana should use for anonymous users.
 
+### Visualizations [ec_visualizations]
 
+
+
+#### Supported versions before 8.0.0 [ec_vis_supported_versions_before_8_0_0]
+
+`vis_type_table.legacyVisEnabled`
+:   Starting from version 7.11, a new datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0 and later, the old implementation is removed and this setting is no longer supported.
+
+`vega.enableExternalUrls`
+:   Set to `true` to allow Vega vizualizations to use data from sources other than the linked Elasticsearch cluster. In version 8.0 and later, the `vega.enableExternalUrls` is not supported. Use `vis_type_vega.enableExternalUrls` instead.
+
+#### Version 7.7+ [ec_vis_supported_versions_7_7]
+
+`vis_type_vega.enable`
+:   For 7.7 version and later, set to `false` to disable Vega vizualizations. **Default: `true`**
+
+#### Version 7.8+ [ec_vis_supported_versions_7_8]
+
+`vis_type_vega.enableExternalUrls`
+:   Set this value to `true` to allow Vega to use any URL to access external data sources and images. When `false`, Vega can only get data from {{es}}. **Default: `false`**
 
 
 ## X-Pack configuration settings [ec-xpack-config]
 
 You can configure the following X-Pack settings from the Kibana **User Settings** editor.
+
+### Version 9.3+ [ec_version_9_3]
+```{applies_to}
+stack: ga 9.3
+```
+
+`xpack.actions.email.maximum_body_length`
+:    The maximum length of an email body in bytes.  Values longer than this length will be truncated.  The default is 25MB, the maximum is 25MB.
+
+`xpack.fleet.integrationRollbackTTL`
+:   Configure the time-to-live (TTL) for integration rollback availability. This setting controls how long the rollback option remains available after an integration is upgraded. The value must be specified in a duration format (for example, `7d`, `14d`, `168h`, or `1w`). Defaults to `7d` (7 days). For more information, refer to [Roll back an integration](docs-content://reference/fleet/roll-back-integration.md).
 
 ### Version 9.2+ [ec_version_9_2]
 ```{applies_to}
@@ -87,6 +118,12 @@ stack: ga 9.1
 
 `xpack.product_intercept.interval`:
 :   Set the time that elapses between Elastic product feedback prompts. The time is formatted as a number and a time unit (d,h,m,s). For example, 20m, 24h, 7d. Defaults to `90d`.
+
+`xpack.fleet.autoUpgrades.taskInterval`:
+:   Configure the interval of the automatic upgrade task for {{fleet}}-managed {{agents}}. Defaults to `30m`.
+
+`xpack.fleet.autoUpgrades.retryDelays`:
+:   Configure the retry delays of the automatic upgrade task for {{fleet}}-managed {{agents}}. The array's length indicates the maximum number of retries. Defaults to `['30m', '1h', '2h', '4h', '8h', '16h', '24h']`.
 
 ### Version 8.18+ [ec_version_8_18]
 
@@ -385,6 +422,9 @@ This setting is not available in versions 8.0.0 through 8.2.0. As such, this set
 `csp.img_src`
 :   Add sources for the [Content Security Policy `img-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/img-src).
 
+`csp.object_src` {applies_to}`stack: ga 9.3`
+:   Add sources for the [Content Security Policy `object-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/object-src).
+
 `csp.report_uri`
 :   Add sources for the [Content Security Policy `report-uri` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri).
 
@@ -397,8 +437,8 @@ $$$csp-strict$$$ `csp.strict`
 `csp.warnLegacyBrowsers`
 :   Shows a warning message after loading Kibana to any browser that does not enforce even rudimentary CSP rules, though Kibana is still accessible. This configuration is effectively ignored when [`csp.strict`](#csp-strict) is enabled. **Default: `true`**
 
-`csp.disableUnsafeEval`
-:   [preview] Set this to `true` to remove the [`unsafe-eval`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions) source expression from the `script-src` directive. **Default: `false`**
+`csp.disableUnsafeEval` {applies_to}`stack: preview`
+:   Set this to `true` to remove the [`unsafe-eval`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions) source expression from the `script-src` directive. **Default: `false`**
 
     By enabling `csp.disableUnsafeEval`, Kibana will use a custom version of the Handlebars template library which doesn’t support [inline partials](https://handlebarsjs.com/guide/partials.md#inline-partials). Handlebars is used in various locations in the Kibana frontend where custom templates can be supplied by the user when for instance setting up a visualisation. If you experience any issues rendering Handlebars templates after turning on `csp.disableUnsafeEval`, or if you rely on inline partials, please revert this setting to `false` and [open an issue](https://github.com/elastic/kibana/issues/new/choose) in the Kibana GitHub repository.
 
@@ -476,7 +516,7 @@ Support for the The option `auto` was included here, when the config value is se
 
 
 `xpack.screenshotting.capture.timeouts.openUrl`
-:   Specify how long to allow the Reporting browser to wait for the "Loading…​" screen to dismiss and find the initial data for the Kibana page.  If the time is exceeded, a page screenshot is captured showing the current state, and the download link shows a warning message.
+:   Specify how long to allow the Reporting browser to wait for the "Loading…" screen to dismiss and find the initial data for the Kibana page.  If the time is exceeded, a page screenshot is captured showing the current state, and the download link shows a warning message.
 
     Defaults to `30000` (30 seconds).
 

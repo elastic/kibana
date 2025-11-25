@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -27,5 +27,6 @@
     "@kbn/core-chrome-browser",
     "@kbn/cloud-plugin",
     "@kbn/licensing-types",
+    "@kbn/deeplinks-management",
   ]
 }

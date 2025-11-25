@@ -9,7 +9,7 @@
 
 import { BinaryExpressionGroup } from '../ast/grouping';
 import { binaryExpressionGroup, unaryExpressionGroup } from '../ast/grouping';
-import { isBinaryExpression } from '../ast/is';
+import { isBinaryExpression, isIdentifier, isParamLiteral } from '../ast/is';
 import type { ESQLAstBaseItem, ESQLAstQueryExpression } from '../types';
 import type {
   CommandOptionVisitorContext,
@@ -22,7 +22,11 @@ import { CommandVisitorContext, Visitor } from '../visitor';
 import { children, singleItems } from '../visitor/utils';
 import type { BasicPrettyPrinterOptions } from './basic_pretty_printer';
 import { BasicPrettyPrinter } from './basic_pretty_printer';
-import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
+import {
+  commandOptionsWithEqualsSeparator,
+  commandsWithNoCommaArgSeparator,
+  commandsWithSpecialCommaRules,
+} from './constants';
 import { getPrettyPrintStats } from './helpers';
 import { LeafPrinter } from './leaf_printer';
 
@@ -129,6 +133,7 @@ export class WrappingPrettyPrinter {
       indent: opts.indent ?? '',
       tab: opts.tab ?? '  ',
       pipeTab: opts.pipeTab ?? '  ',
+      skipHeader: opts.skipHeader ?? false,
       commandTab: opts.commandTab ?? '    ',
       multiline: opts.multiline ?? false,
       wrap: opts.wrap ?? 80,
@@ -302,6 +307,10 @@ export class WrappingPrettyPrinter {
     let remainingCurrentLine = inp.remaining;
     let oneArgumentPerLine = false;
 
+    if (ctx.node.name === 'fork') {
+      oneArgumentPerLine = true;
+    }
+
     for (const child of children(ctx.node)) {
       if (getPrettyPrintStats(child).hasLineBreakingDecorations) {
         oneArgumentPerLine = true;
@@ -312,6 +321,7 @@ export class WrappingPrettyPrinter {
     const commaBetweenArgs = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
 
     if (!oneArgumentPerLine) {
+      let argIndex = 0;
       ARGS: for (const arg of singleItems(ctx.arguments())) {
         if (arg.type === 'option') {
           continue;
@@ -324,7 +334,13 @@ export class WrappingPrettyPrinter {
           largestArg = formattedArgLength;
         }
 
-        let separator = txt ? (commaBetweenArgs ? ',' : '') : '';
+        // Check if this command has special comma rules
+        const specialRule = commandsWithSpecialCommaRules.get(ctx.node.name);
+        const needsComma = specialRule ? specialRule(argIndex) : commaBetweenArgs;
+        let separator = txt ? (needsComma ? ',' : '') : '';
+
+        argIndex++;
+
         let fragment = '';
 
         if (needsWrap) {
@@ -380,14 +396,17 @@ export class WrappingPrettyPrinter {
       for (let i = 0; i <= last; i++) {
         const isFirstArg = i === 0;
         const isLastArg = i === last;
+        const specialRule = commandsWithSpecialCommaRules.get(ctx.node.name);
+        const needsComma = specialRule ? specialRule(i) : commaBetweenArgs;
         const arg = ctx.visitExpression(args[i], {
           indent,
           remaining: this.opts.wrap - indent.length,
-          suffix: isLastArg ? '' : commaBetweenArgs ? ',' : '',
+          suffix: isLastArg ? '' : needsComma ? ',' : '',
         });
-        const separator = isFirstArg ? '' : '\n';
         const indentation = arg.indented ? '' : indent;
-        txt += separator + indentation + arg.txt;
+        const formattedArg = arg.txt;
+        const separator = isFirstArg ? '' : '\n';
+        txt += separator + indentation + formattedArg;
         lines++;
       }
     }
@@ -489,6 +508,75 @@ export class WrappingPrettyPrinter {
       return { txt };
     })
 
+    .on('visitHeaderCommand', (ctx, inp: Input): Output => {
+      const opts = this.opts;
+      const cmd = opts.lowercaseCommands ? ctx.node.name : ctx.node.name.toUpperCase();
+
+      let args = '';
+
+      for (const arg of ctx.visitArgs(inp)) {
+        args += (args ? ', ' : '') + arg.txt;
+      }
+
+      const argsFormatted = args ? ` ${args}` : '';
+      const formatted = `${cmd}${argsFormatted};`;
+
+      const formatting = ctx.node.formatting;
+      let txt = formatted;
+      let indented = false;
+
+      if (formatting) {
+        if (formatting.left) {
+          const comments = LeafPrinter.commentList(formatting.left);
+          if (comments) {
+            indented = true;
+            txt = `${inp.indent}${comments} ${txt}`;
+          }
+        }
+
+        if (formatting.top) {
+          const top = formatting.top;
+          const length = top.length;
+          for (let i = length - 1; i >= 0; i--) {
+            const decoration = top[i];
+            if (decoration.type === 'comment') {
+              if (!indented) {
+                txt = inp.indent + txt;
+                indented = true;
+              }
+              txt = inp.indent + LeafPrinter.comment(decoration) + '\n' + txt;
+              indented = true;
+            }
+          }
+        }
+
+        if (formatting.right) {
+          const comments = LeafPrinter.commentList(formatting.right);
+          if (comments) {
+            txt = `${txt} ${comments}`;
+          }
+        }
+
+        // For header commands, rightSingleLine comments should appear on the same line
+        // but we need to ensure there's a newline after the comment for the next statement
+        if (formatting.rightSingleLine) {
+          const comment = LeafPrinter.comment(formatting.rightSingleLine);
+          txt = `${txt} ${comment}`;
+        }
+
+        if (formatting.bottom) {
+          for (const decoration of formatting.bottom) {
+            if (decoration.type === 'comment') {
+              indented = true;
+              txt = txt + '\n' + inp.indent + LeafPrinter.comment(decoration);
+            }
+          }
+        }
+      }
+
+      return { txt, indented };
+    })
+
     .on('visitIdentifierExpression', (ctx, inp: Input) => {
       const formatted = LeafPrinter.identifier(ctx.node);
       const { txt, indented } = this.decorateWithComments(inp, ctx.node, formatted);
@@ -588,13 +676,58 @@ export class WrappingPrettyPrinter {
       return this.decorateWithComments(inp, ctx.node, formatted);
     })
 
+    .on('visitParensExpression', (ctx, inp: Input): Output => {
+      // Check if parent is FORK command
+      const parent = ctx.parent?.node;
+      const isForkBranch =
+        !Array.isArray(parent) &&
+        parent?.type === 'command' &&
+        parent.name === 'fork' &&
+        ctx.node.child?.type === 'query';
+
+      let formatted: string;
+      if (isForkBranch) {
+        const baseIndent = inp.indent + this.opts.tab;
+        const childText = this.visitor.visitQuery(ctx.node.child as ESQLAstQueryExpression, {
+          indent: baseIndent,
+          remaining: this.opts.wrap - baseIndent.length,
+        });
+
+        const lines = childText.txt.split('\n');
+
+        for (let i = 0; i < lines.length; i++) {
+          if (i === 0) {
+            lines[i] = '  ' + lines[i];
+          } else if (lines[i].startsWith('  ')) {
+            lines[i] = lines[i].slice(2);
+          }
+        }
+
+        formatted = `(\n${lines.join('\n')}\n${inp.indent})`;
+      } else {
+        const child = ctx.visitChild(inp);
+        formatted = `(${child.txt.trimStart()})`;
+      }
+
+      return this.decorateWithComments(inp, ctx.node, formatted);
+    })
+
     .on('visitFunctionCallExpression', (ctx, inp: Input): Output => {
       const node = ctx.node;
       let operator = ctx.operator();
       let txt: string = '';
 
-      if (this.opts.lowercaseFunctions ?? this.opts.lowercase) {
-        operator = operator.toLowerCase();
+      // Check if function name is a parameter stored in node.operator
+      if (ctx.node.operator && isParamLiteral(ctx.node.operator)) {
+        operator = LeafPrinter.param(ctx.node.operator);
+      } else {
+        if (ctx.node.operator && isIdentifier(ctx.node.operator)) {
+          operator = ctx.node.operator.name;
+        }
+        operator =
+          this.opts.lowercaseFunctions ?? this.opts.lowercase
+            ? operator.toLowerCase()
+            : operator.toUpperCase();
       }
 
       switch (node.subtype) {
@@ -733,11 +866,13 @@ export class WrappingPrettyPrinter {
       return { txt, lines: args.lines /* add options lines count */ };
     })
 
-    .on('visitQuery', (ctx) => {
+    .on('visitQuery', (ctx, inp: Input): Output => {
       const opts = this.opts;
-      const indent = opts.indent ?? '';
+      const indent = inp?.indent ?? opts.indent ?? '';
+      const remaining = inp?.remaining ?? opts.wrap;
       const commands = ctx.node.commands;
       const commandCount = commands.length;
+      const hasHeaderCommands = !opts.skipHeader && ctx.node.header && ctx.node.header.length > 0;
 
       let multiline = opts.multiline ?? commandCount > 3;
 
@@ -748,29 +883,79 @@ export class WrappingPrettyPrinter {
         }
       }
 
-      if (!multiline) {
+      if (!multiline && !hasHeaderCommands) {
         const oneLine = indent + BasicPrettyPrinter.print(ctx.node, opts);
-        if (oneLine.length <= opts.wrap) {
-          return oneLine;
+        if (oneLine.length <= remaining) {
+          return { txt: oneLine };
         } else {
           multiline = true;
         }
       }
 
+      // Special handling for queries with header commands: we want to try
+      // to keep the main query on a single line if possible.
+      if (hasHeaderCommands && !multiline && commandCount < 4) {
+        // Use skipHeader option to format just the main query
+        const mainQueryOneLine = BasicPrettyPrinter.print(ctx.node, {
+          ...opts,
+          skipHeader: true,
+        });
+
+        if (mainQueryOneLine.length <= remaining) {
+          // Main query fits on one line, print headers separately then main query
+          let text = indent;
+          let hasHeaderCommandsOutput = false;
+
+          for (const headerOut of ctx.visitHeaderCommands({
+            indent,
+            remaining: remaining - indent.length,
+          })) {
+            if (hasHeaderCommandsOutput) {
+              text += '\n' + indent;
+            }
+            text += headerOut.txt;
+            hasHeaderCommandsOutput = true;
+          }
+
+          if (hasHeaderCommandsOutput) {
+            text += '\n' + indent;
+          }
+
+          text += mainQueryOneLine;
+          return { txt: text };
+        } else {
+          // Main query doesn't fit, use multiline formatting
+          multiline = true;
+        }
+      }
+
+      // Regular top-level query formatting
       let text = indent;
       const pipedCommandIndent = `${indent}${opts.pipeTab ?? '  '}`;
       const cmdSeparator = multiline ? `${pipedCommandIndent}| ` : ' | ';
-      let i = 0;
-      let prevOut: Output | undefined;
 
-      for (const out of ctx.visitCommands({ indent, remaining: opts.wrap - indent.length })) {
-        const isFirstCommand = i === 0;
-        const isSecondCommand = i === 1;
+      // Print header pseudo-commands first (e.g., SET instructions).
+      // Each header command goes on its own line.
+      let hasHeaderCommandsOutput = false;
 
-        if (isSecondCommand) {
-          const firstCommandIsMultiline = prevOut?.lines && prevOut.lines > 1;
-          if (firstCommandIsMultiline) text += '\n' + indent;
+      if (hasHeaderCommands) {
+        for (const headerOut of ctx.visitHeaderCommands({
+          indent,
+          remaining: remaining - indent.length,
+        })) {
+          if (hasHeaderCommandsOutput) {
+            text += '\n' + indent;
+          }
+          text += headerOut.txt;
+          hasHeaderCommandsOutput = true;
         }
+      }
+
+      let i = 0;
+      let hasCommands = false;
+
+      for (const out of ctx.visitCommands({ indent, remaining: remaining - indent.length })) {
+        const isFirstCommand = i === 0;
 
         const commandIndent = isFirstCommand ? indent : pipedCommandIndent;
         const topDecorations = this.printTopDecorations(commandIndent, commands[i]);
@@ -782,22 +967,26 @@ export class WrappingPrettyPrinter {
           text += topDecorations;
         }
 
-        if (!isFirstCommand) {
+        if (hasCommands) {
+          // Separate main commands with pipe `|`
           if (multiline && !topDecorations) {
             text += '\n';
           }
           text += cmdSeparator;
+        } else if (hasHeaderCommandsOutput) {
+          // Separate header commands from main commands with a newline
+          text += '\n' + indent;
         }
 
         text += out.txt;
         i++;
-        prevOut = out;
+        hasCommands = true;
       }
 
-      return text;
+      return { txt: text };
     });
 
   public print(query: ESQLAstQueryExpression) {
-    return this.visitor.visitQuery(query, undefined);
+    return this.visitor.visitQuery(query, undefined).txt;
   }
 }

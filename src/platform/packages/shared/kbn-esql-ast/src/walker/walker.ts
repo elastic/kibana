@@ -8,14 +8,20 @@
  */
 
 import type * as types from '../types';
+import { resolveItem } from '../visitor/utils';
 import type { NodeMatchTemplate } from './helpers';
-import { templateToPredicate } from './helpers';
+import { replaceProperties, templateToPredicate } from './helpers';
 
 type Node = types.ESQLAstNode | types.ESQLAstNode[];
 
 export interface WalkerOptions {
   visitCommand?: (
     node: types.ESQLCommand,
+    parent: types.ESQLAstQueryExpression | undefined,
+    walker: WalkerVisitorApi
+  ) => void;
+  visitHeaderCommand?: (
+    node: types.ESQLAstHeaderCommand,
     parent: types.ESQLAstQueryExpression | undefined,
     walker: WalkerVisitorApi
   ) => void;
@@ -84,6 +90,11 @@ export interface WalkerOptions {
     parent: types.ESQLProperNode | undefined,
     walker: WalkerVisitorApi
   ) => void;
+  visitParens?: (
+    node: types.ESQLParens,
+    parent: types.ESQLProperNode | undefined,
+    walker: WalkerVisitorApi
+  ) => void;
 
   /**
    * Called on every expression node.
@@ -115,6 +126,14 @@ export interface WalkerOptions {
    * @default 'forward'
    */
   order?: 'forward' | 'backward';
+
+  /**
+   * If true, skip traversal of header commands (e.g., SET statements).
+   * This allows processing only the main query commands without the header.
+   *
+   * @default false
+   */
+  skipHeader?: boolean;
 }
 
 export type WalkerAstNode = types.ESQLAstNode | types.ESQLAstNode[];
@@ -274,16 +293,13 @@ export class Walker {
   public static readonly replace = (
     tree: WalkerAstNode,
     matcher: NodeMatchTemplate | ((node: types.ESQLProperNode) => boolean),
-    newValue: types.ESQLProperNode
+    newValue: types.ESQLProperNode | ((node: types.ESQLProperNode) => types.ESQLProperNode)
   ): types.ESQLProperNode | undefined => {
     const node =
       typeof matcher === 'function' ? Walker.find(tree, matcher) : Walker.match(tree, matcher);
     if (!node) return;
-    for (const key in node) {
-      if (typeof key === 'string' && Object.prototype.hasOwnProperty.call(node, key))
-        delete (node as any)[key];
-    }
-    Object.assign(node, newValue);
+    const replacement = typeof newValue === 'function' ? newValue(node) : newValue;
+    replaceProperties(node, replacement);
     return node;
   };
 
@@ -299,7 +315,7 @@ export class Walker {
   public static readonly replaceAll = (
     tree: WalkerAstNode,
     matcher: NodeMatchTemplate | ((node: types.ESQLProperNode) => boolean),
-    newValue: types.ESQLProperNode
+    newValue: types.ESQLProperNode | ((node: types.ESQLProperNode) => types.ESQLProperNode)
   ): types.ESQLProperNode[] => {
     const nodes =
       typeof matcher === 'function'
@@ -307,11 +323,8 @@ export class Walker {
         : Walker.matchAll(tree, matcher);
     if (nodes.length === 0) return [];
     for (const node of nodes) {
-      for (const key in node) {
-        if (typeof key === 'string' && Object.prototype.hasOwnProperty.call(node, key))
-          delete (node as any)[key];
-      }
-      Object.assign(node, newValue);
+      const replacement = typeof newValue === 'function' ? newValue(node) : newValue;
+      replaceProperties(node, replacement);
     }
     return nodes;
   };
@@ -538,6 +551,11 @@ export class Walker {
         tree as types.ESQLAstCommand,
         parent as types.ESQLAstQueryExpression | undefined
       );
+    } else if (tree.type === 'header-command') {
+      this.walkHeaderCommand(
+        tree as types.ESQLAstHeaderCommand,
+        parent as types.ESQLAstQueryExpression | undefined
+      );
     } else {
       this.walkExpression(tree as types.ESQLAstExpression, parent);
     }
@@ -568,6 +586,17 @@ export class Walker {
 
     const { options } = this;
     (options.visitCommand ?? options.visitAny)?.(node, parent, this);
+    this.walkList(node.args, node);
+  }
+
+  public walkHeaderCommand(
+    node: types.ESQLAstHeaderCommand,
+    parent: types.ESQLAstQueryExpression | undefined
+  ): void {
+    if (this.aborted) return;
+
+    const { options } = this;
+    (options.visitHeaderCommand ?? options.visitAny)?.(node, parent, this);
     this.walkList(node.args, node);
   }
 
@@ -671,11 +700,20 @@ export class Walker {
     (options.visitMapEntry ?? options.visitAny)?.(node, parent, this);
 
     if (options.order === 'backward') {
-      this.walkSingleAstItem(node.value, node);
-      this.walkSingleAstItem(node.key, node);
+      this.walkSingleAstItem(resolveItem(node.value), node);
+      this.walkSingleAstItem(resolveItem(node.key), node);
     } else {
-      this.walkSingleAstItem(node.key, node);
-      this.walkSingleAstItem(node.value, node);
+      this.walkSingleAstItem(resolveItem(node.key), node);
+      this.walkSingleAstItem(resolveItem(node.value), node);
+    }
+  }
+
+  public walkParens(node: types.ESQLParens, parent: types.ESQLProperNode | undefined): void {
+    const { options } = this;
+    (options.visitParens ?? options.visitAny)?.(node, parent, this);
+
+    if (node.child) {
+      this.walkSingleAstItem(node.child, node);
     }
   }
 
@@ -685,6 +723,11 @@ export class Walker {
   ): void {
     const { options } = this;
     (options.visitQuery ?? options.visitAny)?.(node, parent, this);
+
+    if (node.header && !options.skipHeader) {
+      this.walkList(node.header, node);
+    }
+
     this.walkList(node.commands, node);
   }
 
@@ -739,6 +782,10 @@ export class Walker {
       }
       case 'inlineCast': {
         this.walkInlineCast(node, parent);
+        break;
+      }
+      case 'parens': {
+        this.walkParens(node as types.ESQLParens, parent);
         break;
       }
       case 'identifier': {

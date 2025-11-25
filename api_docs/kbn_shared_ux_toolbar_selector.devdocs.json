@@ -1,0 +1,548 @@
+{
+  "id": "@kbn/shared-ux-toolbar-selector",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+        "id": "def-public.ToolbarSelector",
+        "type": "Function",
+        "tags": [],
+        "label": "ToolbarSelector",
+        "description": [],
+        "signature": [
+          "({ \"data-test-subj\": dataTestSubj, \"data-selected-value\": dataSelectedValue, buttonLabel, popoverContentBelowSearch, popoverTitle, options, searchable, optionMatcher, onChange, singleSelection, hasArrow, disabled, fullWidth, }: ",
+          {
+            "pluginId": "@kbn/shared-ux-toolbar-selector",
+            "scope": "public",
+            "docId": "kibKbnSharedUxToolbarSelectorPluginApi",
+            "section": "def-public.ToolbarSelectorProps",
+            "text": "ToolbarSelectorProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.ToolbarSelector.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  'data-test-subj': dataTestSubj,\n  'data-selected-value': dataSelectedValue,\n  buttonLabel,\n  popoverContentBelowSearch,\n  popoverTitle,\n  options,\n  searchable,\n  optionMatcher,\n  onChange,\n  singleSelection,\n  hasArrow = true,\n  disabled = false,\n  fullWidth = false,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-toolbar-selector",
+                "scope": "public",
+                "docId": "kibKbnSharedUxToolbarSelectorPluginApi",
+                "section": "def-public.ToolbarSelectorProps",
+                "text": "ToolbarSelectorProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+        "id": "def-public.BaseToolbarProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "BaseToolbarProps",
+        "description": [],
+        "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.BaseToolbarProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.BaseToolbarProps.dataselectedvalue",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "'data-selected-value'",
+            "description": [],
+            "signature": [
+              "string | string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.BaseToolbarProps.buttonLabel",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "buttonLabel",
+            "description": [],
+            "signature": [
+              "string | React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.BaseToolbarProps.popoverContentBelowSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "popoverContentBelowSearch",
+            "description": [],
+            "signature": [
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.BaseToolbarProps.popoverTitle",
+            "type": "string",
+            "tags": [],
+            "label": "popoverTitle",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.BaseToolbarProps.options",
+            "type": "Array",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "((",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableGroupLabelOption",
+              "<{ value: string; }>, ",
+              "EuiSelectableLIOption",
+              "<{ value: string; }>> & ",
+              "CommonProps",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              "EuiTextTruncateProps",
+              ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+              "EuiToolTipProps",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableLIOption",
+              "<{ value: string; }>, ",
+              "EuiSelectableGroupLabelOption",
+              "<{ value: string; }>> & Omit<",
+              "EuiSelectableOptionBase",
+              ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }))[]"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.BaseToolbarProps.searchable",
+            "type": "boolean",
+            "tags": [],
+            "label": "searchable",
+            "description": [],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.BaseToolbarProps.optionMatcher",
+            "type": "Function",
+            "tags": [],
+            "label": "optionMatcher",
+            "description": [],
+            "signature": [
+              "EuiSelectableOptionMatcher",
+              "<{}> | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.BaseToolbarProps.hasArrow",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasArrow",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.BaseToolbarProps.disabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.BaseToolbarProps.fullWidth",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fullWidth",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+        "id": "def-public.ToolbarMultiSelectorProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolbarMultiSelectorProps",
+        "description": [],
+        "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.ToolbarMultiSelectorProps.singleSelection",
+            "type": "boolean",
+            "tags": [],
+            "label": "singleSelection",
+            "description": [],
+            "signature": [
+              "false"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.ToolbarMultiSelectorProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [],
+            "signature": [
+              "((c?: ((",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableGroupLabelOption",
+              "<{ value: string; }>, ",
+              "EuiSelectableLIOption",
+              "<{ value: string; }>> & ",
+              "CommonProps",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              "EuiTextTruncateProps",
+              ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+              "EuiToolTipProps",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableLIOption",
+              "<{ value: string; }>, ",
+              "EuiSelectableGroupLabelOption",
+              "<{ value: string; }>> & Omit<",
+              "EuiSelectableOptionBase",
+              ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }))[] | undefined) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+                "id": "def-public.ToolbarMultiSelectorProps.onChange.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "c",
+                "description": [],
+                "signature": [
+                  "((",
+                  "DisambiguateSet",
+                  "<",
+                  "EuiSelectableGroupLabelOption",
+                  "<{ value: string; }>, ",
+                  "EuiSelectableLIOption",
+                  "<{ value: string; }>> & ",
+                  "CommonProps",
+                  " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+                  "EuiTextTruncateProps",
+                  ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+                  "EuiToolTipProps",
+                  ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
+                  "DisambiguateSet",
+                  "<",
+                  "EuiSelectableLIOption",
+                  "<{ value: string; }>, ",
+                  "EuiSelectableGroupLabelOption",
+                  "<{ value: string; }>> & Omit<",
+                  "EuiSelectableOptionBase",
+                  ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }))[] | undefined"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+        "id": "def-public.ToolbarSingleSelectorProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolbarSingleSelectorProps",
+        "description": [],
+        "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.ToolbarSingleSelectorProps.singleSelection",
+            "type": "boolean",
+            "tags": [],
+            "label": "singleSelection",
+            "description": [],
+            "signature": [
+              "true | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+            "id": "def-public.ToolbarSingleSelectorProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [],
+            "signature": [
+              "((c?: (",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableGroupLabelOption",
+              "<{ value: string; }>, ",
+              "EuiSelectableLIOption",
+              "<{ value: string; }>> & ",
+              "CommonProps",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              "EuiTextTruncateProps",
+              ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+              "EuiToolTipProps",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableLIOption",
+              "<{ value: string; }>, ",
+              "EuiSelectableGroupLabelOption",
+              "<{ value: string; }>> & Omit<",
+              "EuiSelectableOptionBase",
+              ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }) | undefined) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+                "id": "def-public.ToolbarSingleSelectorProps.onChange.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "c",
+                "description": [],
+                "signature": [
+                  "(",
+                  "DisambiguateSet",
+                  "<",
+                  "EuiSelectableGroupLabelOption",
+                  "<{ value: string; }>, ",
+                  "EuiSelectableLIOption",
+                  "<{ value: string; }>> & ",
+                  "CommonProps",
+                  " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+                  "EuiTextTruncateProps",
+                  ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+                  "EuiToolTipProps",
+                  ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
+                  "DisambiguateSet",
+                  "<",
+                  "EuiSelectableLIOption",
+                  "<{ value: string; }>, ",
+                  "EuiSelectableGroupLabelOption",
+                  "<{ value: string; }>> & Omit<",
+                  "EuiSelectableOptionBase",
+                  ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; }) | undefined"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+        "id": "def-public.EMPTY_OPTION",
+        "type": "string",
+        "tags": [],
+        "label": "EMPTY_OPTION",
+        "description": [],
+        "signature": [
+          "\"__EMPTY_SELECTOR_OPTION__\""
+        ],
+        "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+        "id": "def-public.SelectableEntry",
+        "type": "Type",
+        "tags": [],
+        "label": "SelectableEntry",
+        "description": [],
+        "signature": [
+          "(",
+          "DisambiguateSet",
+          "<",
+          "EuiSelectableGroupLabelOption",
+          "<{ value: string; }>, ",
+          "EuiSelectableLIOption",
+          "<{ value: string; }>> & ",
+          "CommonProps",
+          " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+          "EuiTextTruncateProps",
+          ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+          "EuiToolTipProps",
+          ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & { value: string; }) | (",
+          "DisambiguateSet",
+          "<",
+          "EuiSelectableLIOption",
+          "<{ value: string; }>, ",
+          "EuiSelectableGroupLabelOption",
+          "<{ value: string; }>> & Omit<",
+          "EuiSelectableOptionBase",
+          ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; } & { value: string; })"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-toolbar-selector",
+        "id": "def-public.ToolbarSelectorProps",
+        "type": "Type",
+        "tags": [],
+        "label": "ToolbarSelectorProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-toolbar-selector",
+            "scope": "public",
+            "docId": "kibKbnSharedUxToolbarSelectorPluginApi",
+            "section": "def-public.BaseToolbarProps",
+            "text": "BaseToolbarProps"
+          },
+          " & (",
+          {
+            "pluginId": "@kbn/shared-ux-toolbar-selector",
+            "scope": "public",
+            "docId": "kibKbnSharedUxToolbarSelectorPluginApi",
+            "section": "def-public.ToolbarSingleSelectorProps",
+            "text": "ToolbarSingleSelectorProps"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/shared-ux-toolbar-selector",
+            "scope": "public",
+            "docId": "kibKbnSharedUxToolbarSelectorPluginApi",
+            "section": "def-public.ToolbarMultiSelectorProps",
+            "text": "ToolbarMultiSelectorProps"
+          },
+          ")"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/toolbar_selector/src/toolbar_selector.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

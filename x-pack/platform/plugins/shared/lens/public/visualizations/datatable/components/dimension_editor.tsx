@@ -11,6 +11,7 @@ import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic
 import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import {
   CUSTOM_PALETTE,
+  DEFAULT_COLOR_MAPPING_CONFIG,
   applyPaletteParams,
   canCreateCustomMatch,
   getFallbackDataBounds,
@@ -19,9 +20,11 @@ import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getOriginalId } from '@kbn/transpose-utils';
 import type { KbnPalettes } from '@kbn/palettes';
+import type {
+  VisualizationDimensionEditorProps,
+  DatatableVisualizationState,
+} from '@kbn/lens-common';
 import { DatatableInspectorTables } from '../../../../common/expressions';
-import type { VisualizationDimensionEditorProps } from '../../../types';
-import type { DatatableVisualizationState } from '../visualization';
 
 import {
   defaultPaletteParams,
@@ -124,7 +127,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   }
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -214,15 +217,23 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 const params: Partial<ColumnType> = {
                   colorMode: newMode,
                 };
-                if (!column?.palette && newMode !== 'none') {
-                  params.palette = {
-                    ...activePalette,
-                    params: {
-                      ...activePalette.params,
-                      // that's ok, at first open we're going to throw them away and recompute
-                      stops: displayStops,
-                    },
-                  };
+
+                if (newMode !== 'none') {
+                  if (!column?.colorMapping && showColorByTerms) {
+                    params.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+                  }
+
+                  // also set palette for now
+                  if (!column?.palette) {
+                    params.palette = {
+                      ...activePalette,
+                      params: {
+                        ...activePalette.params,
+                        // that's ok, at first open we're going to throw them away and recompute
+                        stops: displayStops,
+                      },
+                    };
+                  }
                 }
 
                 // clear up when switching to no coloring
@@ -341,7 +352,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
           />
         </EuiFormRow>
       )}
-    </>
+    </div>
   );
 }
 

@@ -20,6 +20,8 @@ interface UseSecurityDefaultPatternsResult {
   indexPatterns: string[];
 }
 
+const emptyArray: string[] = [];
+
 /**
  * Returns the default data view id and index patterns.
  */
@@ -34,7 +36,7 @@ export const useSecurityDefaultPatterns = (): UseSecurityDefaultPatternsResult =
   return useMemo(
     () => ({
       id: defaultDataViewSpec?.id ?? '',
-      indexPatterns: defaultDataViewSpec?.title?.split(',') ?? [],
+      indexPatterns: defaultDataViewSpec?.title?.split(',') ?? emptyArray,
     }),
     [defaultDataViewSpec]
   );

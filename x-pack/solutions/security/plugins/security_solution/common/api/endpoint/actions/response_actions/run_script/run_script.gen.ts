@@ -16,7 +16,10 @@
 
 import { z } from '@kbn/zod';
 
-import { SuccessResponse } from '../../../model/schema/common.gen';
+import {
+  ResponseActionCreateSuccessResponse,
+  BaseActionSchema,
+} from '../../../model/schema/common.gen';
 
 export type RawScriptParameters = z.infer<typeof RawScriptParameters>;
 export const RawScriptParameters = z.object({
@@ -66,17 +69,56 @@ export const CloudFileScriptParameters = z.object({
   timeout: z.number().int().min(1).optional(),
 });
 
-export type RunScriptRouteRequestBody = z.infer<typeof RunScriptRouteRequestBody>;
-export const RunScriptRouteRequestBody = z.object({
+/**
+ * Parameters for Run Script response action against SentinelOne agent type.
+ */
+export type SentinelOneRunScriptParameters = z.infer<typeof SentinelOneRunScriptParameters>;
+export const SentinelOneRunScriptParameters = z.object({
   /**
-   * Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided. CommandLine and Timeout are optional for all.
+   * The script ID from SentinelOne scripts library that will be executed.
    */
-  parameters: z.union([RawScriptParameters, HostPathScriptParameters, CloudFileScriptParameters]),
+  script: z.string().min(1),
+  /**
+   * The input parameter arguments for the script that was selected.
+   */
+  inputParams: z.string().min(1).optional(),
 });
+
+/**
+ * Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
+ */
+export type MDERunScriptParameters = z.infer<typeof MDERunScriptParameters>;
+export const MDERunScriptParameters = z.object({
+  /**
+   * The name of the script to execute from the cloud storage.
+   */
+  scriptName: z.string().min(1),
+  /**
+   * Optional command line arguments for the script.
+   */
+  args: z.string().min(1).optional(),
+});
+
+export type RunScriptRouteRequestBody = z.infer<typeof RunScriptRouteRequestBody>;
+export const RunScriptRouteRequestBody = BaseActionSchema.merge(
+  z.object({
+    /** 
+      * One of the following set of parameters must be provided
+ 
+      */
+    parameters: z.union([
+      RawScriptParameters,
+      HostPathScriptParameters,
+      CloudFileScriptParameters,
+      SentinelOneRunScriptParameters,
+      MDERunScriptParameters,
+    ]),
+  })
+);
 
 export type RunScriptActionRequestBody = z.infer<typeof RunScriptActionRequestBody>;
 export const RunScriptActionRequestBody = RunScriptRouteRequestBody;
 export type RunScriptActionRequestBodyInput = z.input<typeof RunScriptActionRequestBody>;
 
 export type RunScriptActionResponse = z.infer<typeof RunScriptActionResponse>;
-export const RunScriptActionResponse = SuccessResponse;
+export const RunScriptActionResponse = ResponseActionCreateSuccessResponse;

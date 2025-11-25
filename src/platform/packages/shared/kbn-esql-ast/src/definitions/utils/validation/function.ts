@@ -7,36 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LicenseType } from '@kbn/licensing-types';
-import { uniqBy } from 'lodash';
 import { errors, getFunctionDefinition } from '..';
-import { FunctionDefinitionTypes, within } from '../../../..';
+import { FunctionDefinitionTypes } from '../../../..';
 import {
   isColumn,
   isFunctionExpression,
   isIdentifier,
   isInlineCast,
   isLiteral,
-  isOptionNode,
   isParamLiteral,
 } from '../../../ast/is';
-import type { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
-import { Location, getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
-import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction, ESQLMessage } from '../../../types';
-import { Walker } from '../../../walker';
+import { getLocationInfo } from '../../../commands_registry/location';
 import type {
-  FunctionDefinition,
-  FunctionParameterType,
-  Signature,
-  SupportedDataType,
-} from '../../types';
-import {
-  getExpressionType,
-  getParamAtPosition,
-  getSignaturesWithMatchingArity,
-  matchesArity,
-} from '../expressions';
+  ICommandCallbacks,
+  ICommandContext,
+  Location,
+} from '../../../commands_registry/types';
+import type {
+  ESQLAst,
+  ESQLAstAllCommands,
+  ESQLAstItem,
+  ESQLFunction,
+  ESQLMessage,
+} from '../../../types';
+import type { FunctionDefinition, SupportedDataType } from '../../types';
+import { getExpressionType, getMatchingSignatures } from '../expressions';
 import { ColumnValidator } from './column';
-import { isArrayType } from '../operators';
 
 export function validateFunction({
   fn,
@@ -46,7 +42,7 @@ export function validateFunction({
   callbacks,
 }: {
   fn: ESQLFunction;
-  parentCommand: ESQLCommand;
+  parentCommand: ESQLAstAllCommands;
   ast: ESQLAst;
   context: ICommandContext;
   callbacks: ICommandCallbacks;
@@ -66,17 +62,17 @@ class FunctionValidator {
 
   constructor(
     private readonly fn: ESQLFunction,
-    private readonly parentCommand: ESQLCommand,
+    private readonly parentCommand: ESQLAstAllCommands,
     private readonly ast: ESQLAst,
     private readonly context: ICommandContext,
     private readonly callbacks: ICommandCallbacks,
     private readonly parentAggFunction: string | undefined = undefined
   ) {
     this.definition = getFunctionDefinition(fn.name);
-    for (const arg of this.fn.args) {
-      this.argTypes.push(
-        getExpressionType(arg, this.context.fields, this.context.userDefinedColumns)
-      );
+    for (const _arg of this.fn.args) {
+      const arg = Array.isArray(_arg) ? _arg[0] : _arg; // for some reason, some args are wrapped in an array, for example named params
+
+      this.argTypes.push(getExpressionType(arg, this.context.columns));
       this.argLiteralsMask.push(isLiteral(arg));
     }
   }
@@ -134,15 +130,12 @@ class FunctionValidator {
       return;
     }
 
-    // Begin signature validation
-    const A = getSignaturesWithMatchingArity(this.definition, this.fn);
-
-    if (!A.length) {
-      this.report(errors.noMatchingCallSignature(this.fn, this.definition, this.argTypes));
-      return;
-    }
-
-    const S = getSignaturesMatchingTypes(A, this.argTypes, this.argLiteralsMask);
+    const S = getMatchingSignatures(
+      this.definition.signatures,
+      this.argTypes,
+      this.argLiteralsMask,
+      true
+    );
 
     if (!S.length) {
       this.report(errors.noMatchingCallSignature(this.fn, this.definition, this.argTypes));
@@ -155,20 +148,24 @@ class FunctionValidator {
     }
 
     // Validate column arguments
-    const columnMessages = this.fn.args.flat().flatMap((arg) => {
-      if (isColumn(arg) || isIdentifier(arg)) {
-        return new ColumnValidator(arg, this.context, this.parentCommand.name).validate();
+    const columnsToValidate = [];
+    const flatArgs = this.fn.args.flat();
+    for (let i = 0; i < flatArgs.length; i++) {
+      const arg = flatArgs[i];
+      if (
+        (isColumn(arg) || isIdentifier(arg)) &&
+        !(this.definition.name === '=' && i === 0) && // don't validate left-hand side of assignment
+        !(this.definition.name === 'as' && i === 1) // don't validate right-hand side of AS
+      ) {
+        columnsToValidate.push(arg);
       }
-      return [];
+    }
+
+    const columnMessages = columnsToValidate.flatMap((arg) => {
+      return new ColumnValidator(arg, this.context, this.parentCommand.name).validate();
     });
 
-    // uniqBy is used to cover a special case in ENRICH where an implicit assignment is possible
-    // so the AST actually stores an explicit "columnX = columnX" which duplicates the message
-    //
-    // @TODO - we will no longer need to store an assignment in the AST approach when we
-    // align field availability detection with the system used by autocomplete
-    // (start using columnsAfter instead of collectUserDefinedColumns)
-    this.report(...uniqBy(columnMessages, ({ location }) => `${location.min}-${location.max}`));
+    this.report(...columnMessages);
   }
 
   /**
@@ -238,7 +235,7 @@ class FunctionValidator {
    * Gets information about the location of the current function
    */
   private get location(): { displayName: string; id: Location } {
-    return getFunctionLocation(this.fn, this.parentCommand, this.ast, !!this.parentAggFunction);
+    return getLocationInfo(this.fn, this.parentCommand, this.ast, !!this.parentAggFunction);
   }
 
   /**
@@ -249,114 +246,6 @@ class FunctionValidator {
     const arity = this.fn.args.length;
     return arity >= min && arity <= max;
   }
-}
-
-export const PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FunctionParameterType[] = [
-  'date',
-  'date_nanos',
-  'date_period',
-  'time_duration',
-  'version',
-  'ip',
-  'boolean',
-];
-
-/**
- * Returns a signature matching the given types if it exists
- * @param definition
- * @param types
- */
-function getSignaturesMatchingTypes(
-  signatures: Signature[],
-  givenTypes: Array<SupportedDataType | 'unknown'>,
-  // a boolean array indicating which args are literals
-  literalMask: boolean[]
-): Signature[] {
-  return signatures.filter((sig) => {
-    if (!matchesArity(sig, givenTypes.length)) {
-      return false;
-    }
-
-    return givenTypes.every((givenType, index) => {
-      // safe to assume the param is there, because we checked the length above
-      const expectedType = unwrapArrayOneLevel(getParamAtPosition(sig, index)!.type);
-      return argMatchesParamType(givenType, expectedType, literalMask[index]);
-    });
-  });
-}
-
-/**
- * Checks if the given type matches the expected parameter type
- *
- * @param givenType
- * @param expectedType
- * @param givenIsLiteral
- */
-function argMatchesParamType(
-  givenType: SupportedDataType | 'unknown',
-  expectedType: FunctionParameterType,
-  givenIsLiteral: boolean
-): boolean {
-  if (givenType === expectedType) return true;
-
-  if (expectedType === 'any') return true;
-
-  if (givenType === 'param') return true;
-
-  if (givenType === 'unknown') return true;
-
-  // all ES|QL functions accept null, but this is not reflected
-  // in our function definitions so we let it through here
-  if (givenType === 'null') return true;
-
-  // all functions accept keywords for text parameters
-  if (bothStringTypes(givenType, expectedType)) return true;
-
-  if (
-    givenIsLiteral &&
-    givenType === 'keyword' &&
-    PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING.includes(expectedType)
-  )
-    return true;
-
-  return false;
-}
-
-/**
- * Checks if both types are string types.
- *
- * Functions in ES|QL accept `text` and `keyword` types interchangeably.
- * @param type1
- * @param type2
- * @returns
- */
-function bothStringTypes(type1: string, type2: string): boolean {
-  return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
-}
-
-/**
- * Identifies the location ID of the function's position
- */
-function getFunctionLocation(
-  fn: ESQLFunction,
-  parentCommand: ESQLCommand,
-  ast: ESQLAst,
-  withinAggFunction: boolean
-) {
-  if (withinAggFunction && ast[0].name === 'ts') {
-    return {
-      id: Location.STATS_TIMESERIES,
-      displayName: 'agg_function_in_timeseries_context',
-    };
-  }
-
-  const option = Walker.find(parentCommand, (node) => isOptionNode(node) && within(fn, node));
-
-  const displayName = (option ?? parentCommand).name;
-
-  const id = getLocationFromCommandOrOptionName(displayName);
-
-  return { id, displayName };
 }
 
 /**
@@ -383,11 +272,4 @@ function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
     return removeInlineCasts(arg.value);
   }
   return arg;
-}
-
-/**
- * Given an array type for example `string[]` it will return `string`
- */
-function unwrapArrayOneLevel(type: FunctionParameterType): FunctionParameterType {
-  return isArrayType(type) ? (type.slice(0, -2) as FunctionParameterType) : type;
 }

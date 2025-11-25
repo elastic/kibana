@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["jest", "node", "react", "@kbn/ambient-ui-types"]
@@ -9,7 +9,6 @@
   "kbn_references": [
     "@kbn/alerting-types",
     "@kbn/i18n",
-    "@kbn/triggers-actions-ui-types",
     "@kbn/core",
     "@kbn/actions-types",
     "@kbn/alerts-ui-shared",
@@ -34,5 +33,6 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/content-management-plugin",
     "@kbn/dashboards-selector",
+    "@kbn/react-query",
   ]
 }

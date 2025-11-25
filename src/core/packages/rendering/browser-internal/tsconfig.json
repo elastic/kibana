@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -36,7 +36,8 @@
     "@kbn/core-feature-flags-browser",
     "@kbn/core-chrome-layout",
     "@kbn/core-feature-flags-browser-mocks",
-    "@kbn/core-chrome-layout-feature-flags"
+    "@kbn/core-chrome-layout-feature-flags",
+    "@kbn/global-redirect-app-links"
   ],
   "exclude": [
     "target/**/*"

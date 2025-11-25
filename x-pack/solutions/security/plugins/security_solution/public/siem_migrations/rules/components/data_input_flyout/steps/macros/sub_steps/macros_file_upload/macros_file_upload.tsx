@@ -12,11 +12,14 @@ import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
+import { UploadFileButton } from '../../../../../../../common/components';
+import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
+import {
+  useParseFileInput,
+  type SplunkRow,
+} from '../../../../../../../common/hooks/use_parse_file_input';
 import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
-import { FILE_UPLOAD_ERROR } from '../../../../translations';
 import type { SPLUNK_MACROS_COLUMNS } from '../../../../constants';
-import { useParseFileInput, type SplunkRow } from '../../../common/use_parse_file_input';
-import { UploadFileButton } from '../../../common/upload_file_button';
 import * as i18n from './translations';
 
 type SplunkMacroResult = Partial<Record<(typeof SPLUNK_MACROS_COLUMNS)[number], string>>;
@@ -66,7 +69,7 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
         <EuiFlexItem>
           <EuiFormRow
             helpText={
-              <EuiText color="danger" size="xs">
+              <EuiText color="danger" size="xs" data-test-subj="macrosFileUploadError">
                 {error}
               </EuiText>
             }
@@ -96,7 +99,7 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj="macrosUploadFileButton">
               <UploadFileButton
                 onClick={createMacros}
                 isLoading={showLoader}

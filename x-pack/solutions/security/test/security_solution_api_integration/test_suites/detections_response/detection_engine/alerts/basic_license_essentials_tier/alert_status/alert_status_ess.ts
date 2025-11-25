@@ -15,8 +15,10 @@ import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import type { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { refreshIndex, setAlertStatus } from '../../../../utils';
+import {
+  closingReason,
+  type DetectionAlert,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   createAlertsIndex,
   deleteAllAlerts,
@@ -27,7 +29,8 @@ import {
   getAlertsByIds,
   waitForRuleSuccess,
   getRuleForAlertTesting,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
+import { refreshIndex, setAlertStatus } from '../../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../../config/services/common';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -148,6 +151,70 @@ export default ({ getService }: FtrProviderContext) => {
           .auth(ROLES.reader, 'changeme') // each user has the same password
           .send(setAlertStatus({ alertIds, status: 'closed' }))
           .expect(403);
+      });
+
+      it('should close the alerts with the provided closing reason', async () => {
+        // Login so we can test changing alert status within an interactive session
+        // We write `profile_uid` to `kibana.alert.workflow_user` if it's available,
+        // but `profile_uid` is only available in interactive sessions
+        const response = await supertestWithoutAuth
+          .post('/internal/security/login')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            providerType: 'basic',
+            providerName: 'basic',
+            currentURL: '/',
+            params: { username: adminTestUser.username, password: adminTestUser.password },
+          })
+          .expect(200);
+
+        const cookies = response.header['set-cookie'];
+        expect(cookies).to.have.length(1);
+
+        const rule = {
+          ...getRuleForAlertTesting(['auditbeat-*']),
+          query: 'process.executable: "/usr/bin/sudo"',
+        };
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccess({ supertest, log, id });
+        await waitForAlertsToBePresent(supertest, log, 1, [id]);
+        const alertsOpen = await getAlertsByIds(supertest, log, [id]);
+        const alertIds = alertsOpen.hits.hits.map((alert) => alert._id!);
+        const selectedClosingReason = closingReason.enum.automated_closure;
+
+        await supertestWithoutAuth
+          .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
+          .set('kbn-xsrf', 'true')
+          .set('Cookie', parseCookie(cookies[0])!.cookieString())
+          .send(
+            setAlertStatus({
+              alertIds,
+              status: 'closed',
+              reason: selectedClosingReason,
+            })
+          )
+          .expect(200);
+
+        await refreshIndex(es, '.alerts-security.alerts-default*');
+
+        const { body: alertsClosed }: { body: estypes.SearchResponse<DetectionAlert> } =
+          await supertest
+            .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(getQueryAlertIds(alertIds))
+            .expect(200);
+        expect(alertsClosed.hits.hits.length).to.equal(10);
+        const everyAlertClosed = alertsClosed.hits.hits.every(
+          (hit) => hit._source?.['kibana.alert.workflow_status'] === 'closed'
+        );
+        expect(everyAlertClosed).to.eql(true);
+
+        //  Every alert should have the same closing reason used
+        //  in the request
+        const everyAlertClosingReasonMatches = alertsClosed.hits.hits.every(
+          (hit) => hit._source?.['kibana.alert.workflow_reason'] === selectedClosingReason
+        );
+        expect(everyAlertClosingReasonMatches).to.eql(true);
       });
     });
   });

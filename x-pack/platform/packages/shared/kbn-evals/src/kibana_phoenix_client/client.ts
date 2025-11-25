@@ -11,7 +11,7 @@ import type { RanExperiment, TaskOutput } from '@arizeai/phoenix-client/dist/esm
 import type { DatasetInfo, Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
-import { withActiveInferenceSpan } from '@kbn/inference-tracing';
+import { withInferenceContext } from '@kbn/inference-tracing';
 import type { Evaluator, EvaluationDataset, ExperimentTask } from '../types';
 import { upsertDataset } from './upsert_dataset';
 import type { PhoenixConfig } from '../utils/get_phoenix_config';
@@ -27,6 +27,7 @@ export class KibanaPhoenixClient {
       log: SomeDevLog;
       model: Model;
       runId: string;
+      repetitions?: number;
     }
   ) {
     this.phoenixClient = createClient({
@@ -83,12 +84,11 @@ export class KibanaPhoenixClient {
   }
 
   async runExperiment<TEvaluationDataset extends EvaluationDataset, TTaskOutput extends TaskOutput>(
-    {
-      dataset,
-      task,
-    }: {
+    options: {
       dataset: TEvaluationDataset;
+      metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
+      concurrency?: number;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<RanExperiment>;
@@ -97,13 +97,17 @@ export class KibanaPhoenixClient {
     {
       dataset,
       task,
+      metadata: experimentMetadata,
+      concurrency,
     }: {
       dataset: EvaluationDataset;
       task: ExperimentTask<Example, TaskOutput>;
+      metadata?: Record<string, unknown>;
+      concurrency?: number;
     },
     evaluators: Evaluator[]
   ): Promise<RanExperiment> {
-    return await withActiveInferenceSpan('RunExperiment', async (span) => {
+    return withInferenceContext(async () => {
       const { datasetId } = await this.syncDataSet(dataset);
 
       const experiments = await import('@arizeai/phoenix-client/experiments');
@@ -111,8 +115,10 @@ export class KibanaPhoenixClient {
       const ranExperiment = await experiments.runExperiment({
         client: this.phoenixClient,
         dataset: { datasetId },
+        experimentName: `Run ID: ${this.options.runId} - Dataset: ${dataset.name}`,
         task,
         experimentMetadata: {
+          ...experimentMetadata,
           model: this.options.model,
           runId: this.options.runId,
         },
@@ -135,6 +141,8 @@ export class KibanaPhoenixClient {
           info: this.options.log.info.bind(this.options.log),
           log: this.options.log.info.bind(this.options.log),
         },
+        repetitions: this.options.repetitions ?? 1,
+        concurrency,
       });
 
       this.experiments.push(ranExperiment);

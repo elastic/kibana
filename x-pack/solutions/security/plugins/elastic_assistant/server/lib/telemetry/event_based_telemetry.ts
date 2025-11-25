@@ -72,6 +72,14 @@ export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
   },
 };
 
+const toolCountSchema: SchemaValue<number | undefined> = {
+  type: 'long',
+  _meta: {
+    description: 'Number of times tool was invoked.',
+    optional: true,
+  },
+};
+
 export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   assistantStreamingEnabled: boolean;
   actionTypeId: string;
@@ -87,6 +95,9 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
     SecurityLabsKnowledgeBaseTool?: number;
     ProductDocumentationTool?: number;
     CustomTool?: number;
+    EntityRiskScoreTool?: number;
+    IntegrationKnowledgeTool?: number;
+    AssetMisconfigurationsTool?: number;
   };
   model?: string;
   isOssModel?: boolean;
@@ -133,69 +144,18 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
     },
     toolsInvoked: {
       properties: {
-        AlertCountsTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
-        GenerateESQLTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
-        AskAboutESQLTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
-        ProductDocumentationTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
-        KnowledgeBaseRetrievalTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
-        KnowledgeBaseWriteTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
-        OpenAndAcknowledgedAlertsTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
-        SecurityLabsKnowledgeBaseTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
-        CustomTool: {
-          type: 'long',
-          _meta: {
-            description: 'Number of times tool was invoked.',
-            optional: true,
-          },
-        },
+        AlertCountsTool: toolCountSchema,
+        GenerateESQLTool: toolCountSchema,
+        AskAboutESQLTool: toolCountSchema,
+        ProductDocumentationTool: toolCountSchema,
+        KnowledgeBaseRetrievalTool: toolCountSchema,
+        KnowledgeBaseWriteTool: toolCountSchema,
+        OpenAndAcknowledgedAlertsTool: toolCountSchema,
+        SecurityLabsKnowledgeBaseTool: toolCountSchema,
+        CustomTool: toolCountSchema,
+        EntityRiskScoreTool: toolCountSchema,
+        IntegrationKnowledgeTool: toolCountSchema,
+        AssetMisconfigurationsTool: toolCountSchema,
       },
     },
   },

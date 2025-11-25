@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -124,9 +125,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await lens.switchToVisualization('line');
 
-      expect(await lens.getLayerType(0)).to.eql('Line');
+      await lens.ensureLayerTabIsActive(0);
+      expect(await lens.getLayerType()).to.eql('Line');
       // expect first layer to be line, second layer to be bar chart
-      expect(await lens.getLayerType(1)).to.eql('Bar');
+      await lens.ensureLayerTabIsActive(1);
+      expect(await lens.getLayerType()).to.eql('Bar');
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
@@ -139,9 +142,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'machine.ram',
       });
 
-      expect(await lens.getLayerCount()).to.eql(2);
+      await lens.assertLayerCount(2);
       await lens.removeLayer();
       await lens.removeLayer();
+      await lens.ensureLayerTabIsActive();
       await testSubjects.existOrFail('workspace-drag-drop-prompt');
     });
 
@@ -162,7 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await lens.createLayer('data', undefined, 'bar');
-      expect(await lens.getLayerType(1)).to.eql('Bar');
+      expect(await lens.getLayerType()).to.eql('Bar');
 
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -178,12 +182,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // only changes one layer for compatible chart
       await lens.switchToVisualization('line', undefined, 1);
-      expect(await lens.getLayerType(0)).to.eql('Bar');
-      expect(await lens.getLayerType(1)).to.eql('Line');
+      await lens.ensureLayerTabIsActive(0);
+      expect(await lens.getLayerType()).to.eql('Bar');
+      await lens.ensureLayerTabIsActive(1);
+      expect(await lens.getLayerType()).to.eql('Line');
 
       // generates new one layer chart based on selected layer
       await lens.switchToVisualization('pie', undefined, 1);
-      expect(await lens.getLayerType(0)).to.eql('Pie');
+      expect(await lens.getLayerType()).to.eql('Pie');
       const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel');
       const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel');
       expect(sliceByText).to.be('Top 5 values of geo.src');
@@ -206,12 +212,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.editDimensionLabel('Test of label');
       await lens.editDimensionFormat('Percent');
       await lens.editDimensionColor('#ff0000');
-      await lens.openVisualOptions();
+
+      await lens.openStyleSettingsFlyout();
 
       await lens.setCurvedLines('CURVE_MONOTONE_X');
       await lens.editMissingValues('Linear');
 
       await lens.assertMissingValues('Linear');
+
+      await lens.closeFlyoutWithBackButton();
 
       await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await lens.assertColor('#ff0000');
@@ -292,8 +301,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show value labels on bar charts when enabled', async () => {
       // enable value labels
-      await lens.openTextOptions();
+      await lens.openStyleSettingsFlyout();
       await testSubjects.click('lns_valueLabels_inside');
+      await lens.closeFlyoutWithBackButton();
 
       // check for value labels
       const data = await lens.getCurrentChartDebugState('xyVisChart');
@@ -302,7 +312,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should override axis title', async () => {
       const axisTitle = 'overridden axis';
-      await lens.toggleToolbarPopover('lnsLeftAxisButton');
+      await lens.openStyleSettingsFlyout();
       await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
         clearWithKeyboard: true,
       });
@@ -315,6 +325,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       data = await lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
+
+      await lens.closeFlyoutWithBackButton();
     });
 
     it('should transition from a multi-layer stacked bar to treemap chart using suggestions', async () => {
@@ -350,7 +362,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.save('twolayerchart');
       await testSubjects.click('lnsSuggestion-treemap > lnsSuggestion');
 
-      expect(await lens.getLayerCount()).to.eql(1);
+      await lens.assertLayerCount(1);
       expect(await lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel')).to.eql(
         'Top 5 values of geo.dest'
       );
@@ -539,7 +551,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         range(0, 6).map((index) => lens.getDatatableCellText(index, 1))
       );
       expect(values).to.eql([
-        '-',
+        NULL_LABEL,
         '222,420.00',
         '702,050.00',
         '1,879,613.33',
@@ -767,10 +779,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.clickVisType('lens');
       await lens.switchToVisualization('pie');
 
-      const hasVisualOptionsButton = await lens.hasVisualOptionsButton();
-      expect(hasVisualOptionsButton).to.be(true);
+      await lens.openStyleSettingsFlyout();
 
-      await lens.openVisualOptions();
       await retry.try(async () => {
         expect(await lens.hasEmptySizeRatioButtonGroup()).to.be(true);
       });
@@ -836,6 +846,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.duplicateLayer();
 
       // now make the first layer bar percentage to lead it in an broken rendering state
+      await lens.ensureLayerTabIsActive(0);
       await lens.switchToVisualizationSubtype('Percentage');
 
       // now check that both the main visualization and the current visualization suggestion are in error state
@@ -874,7 +885,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         before(async () => {
           await lens.switchToVisualization('line');
           await lens.waitForVisualization('xyVisChart');
-          await lens.openVisualOptions();
+
+          await lens.openStyleSettingsFlyout();
+        });
+        after(async () => {
+          await lens.closeFlyoutWithBackButton();
         });
         it(`points should be visible when Point visibility is 'Auto'`, async () => {
           await testSubjects.click('xy_point_visibility_auto');
@@ -897,7 +912,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         before(async () => {
           await lens.switchToVisualization('area');
           await lens.waitForVisualization('xyVisChart');
-          await lens.openVisualOptions();
+
+          await lens.openStyleSettingsFlyout();
+        });
+        after(async () => {
+          await lens.closeFlyoutWithBackButton();
         });
         it(`points should be visible when Point visibility is 'Auto'`, async () => {
           await testSubjects.click('xy_point_visibility_auto');

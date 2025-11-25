@@ -60,9 +60,15 @@ import { CreateCaseFormFields } from './form_fields';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { renderWithTestingProviders } from '../../common/mock';
 import { coreMock } from '@kbn/core/public/mocks';
+import { OBSERVABLE_TYPE_HOSTNAME } from '../../../common/constants/observables';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { useBulkPostObservables } from '../../containers/use_bulk_post_observables';
+import { DEFAULT_FEATURES } from '../../../common/constants';
+import { useAttachEventsEBT } from '../../analytics/use_attach_events_ebt';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
+jest.mock('../../containers/use_bulk_post_observables');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
@@ -78,11 +84,13 @@ jest.mock('../../containers/user_profiles/api');
 jest.mock('../../common/use_license');
 jest.mock('../../containers/use_get_categories');
 jest.mock('../app/use_available_owners');
+jest.mock('../../analytics/use_attach_events_ebt');
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
+const useBulkPostObservablesMock = useBulkPostObservables as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
@@ -95,6 +103,7 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useLicenseMock = useLicense as jest.Mock;
 const useGetCategoriesMock = useGetCategories as jest.Mock;
 const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
+const useAttachEventsEBTMock = jest.mocked(useAttachEventsEBT);
 
 const sampleId = 'case-id';
 
@@ -165,6 +174,7 @@ describe('Create case', () => {
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
   const createAttachments = jest.fn();
+  const bulkPostObservables = jest.fn();
   let user: UserEvent;
 
   // eslint-disable-next-line prefer-object-spread
@@ -207,6 +217,7 @@ describe('Create case', () => {
     });
     usePostCaseMock.mockImplementation(() => defaultPostCase);
     useCreateAttachmentsMock.mockImplementation(() => ({ mutateAsync: createAttachments }));
+    useBulkPostObservablesMock.mockImplementation(() => ({ mutateAsync: bulkPostObservables }));
     usePostPushToServiceMock.mockImplementation(() => defaultPostPushToService);
     useGetConnectorsMock.mockReturnValue(sampleConnectorData);
     useGetAllCaseConfigurationsMock.mockImplementation(() => useGetAllCaseConfigurationsResponse);
@@ -421,7 +432,7 @@ describe('Create case', () => {
       expect(postCase).toBeCalledWith({
         request: {
           ...sampleDataWithoutTags,
-          settings: { syncAlerts: false },
+          settings: { syncAlerts: false, extractObservables: false },
         },
       });
     });
@@ -458,7 +469,7 @@ describe('Create case', () => {
       expect(postCase).toBeCalledWith({
         request: {
           ...sampleDataWithoutTags,
-          settings: { syncAlerts: false },
+          settings: { syncAlerts: false, extractObservables: false },
         },
       });
     });
@@ -763,7 +774,7 @@ describe('Create case', () => {
             id: 'resilient-2',
             name: 'My Resilient connector',
             type: '.resilient',
-            fields: { incidentTypes: ['21'], severityCode: '4' },
+            fields: { incidentTypes: ['21'], severityCode: '4', additionalFields: null },
           },
         },
       });
@@ -774,7 +785,7 @@ describe('Create case', () => {
           id: 'resilient-2',
           name: 'My Resilient connector',
           type: '.resilient',
-          fields: { incidentTypes: ['21'], severityCode: '4' },
+          fields: { incidentTypes: ['21'], severityCode: '4', additionalFields: null },
         },
       });
 
@@ -945,6 +956,9 @@ describe('Create case', () => {
       attachments,
       caseOwner: 'securitySolution',
     });
+
+    // ebt should be called
+    expect(useAttachEventsEBTMock()).toHaveBeenCalled();
   });
 
   it('should NOT call createAttachments if the attachments are an empty array', async () => {
@@ -977,7 +991,89 @@ describe('Create case', () => {
     expect(createAttachments).not.toHaveBeenCalled();
   });
 
+  it('should call bulkPostObservables if the observables are not empty', async () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+    const observables = [
+      {
+        typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+        value: 'host1',
+        description: null,
+      },
+      {
+        typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+        value: 'host2',
+        description: null,
+      },
+    ];
+
+    renderWithTestingProviders(
+      <FormContext
+        selectedOwner={SECURITY_SOLUTION_OWNER}
+        onSuccess={onFormSubmitSuccess}
+        observables={observables}
+        currentConfiguration={currentConfiguration}
+      >
+        <CreateCaseFormFields {...defaultCreateCaseForm} />
+        <SubmitCaseButton />
+      </FormContext>,
+      {
+        wrapperProps: { license, features: { observables: { enabled: true, autoExtract: true } } },
+      }
+    );
+
+    await waitForFormToRender();
+    await fillFormReactTestingLib({ user });
+
+    expect(screen.getByTestId('caseObservablesToggle')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('create-case-submit'));
+
+    await waitFor(() => {
+      expect(bulkPostObservables).toHaveBeenCalledTimes(1);
+    });
+
+    expect(bulkPostObservables).toHaveBeenCalledWith({
+      caseId: 'case-id',
+      observables,
+    });
+  });
+
+  it('should NOT call bulkPostObservables if the observables are an empty array', async () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
+    renderWithTestingProviders(
+      <FormContext
+        selectedOwner={SECURITY_SOLUTION_OWNER}
+        onSuccess={onFormSubmitSuccess}
+        observables={[]}
+        currentConfiguration={currentConfiguration}
+      >
+        <CreateCaseFormFields {...defaultCreateCaseForm} />
+        <SubmitCaseButton />
+      </FormContext>,
+      {
+        wrapperProps: { license, features: { observables: { enabled: true, autoExtract: true } } },
+      }
+    );
+
+    await waitForFormToRender();
+    await fillFormReactTestingLib({ user });
+
+    expect(screen.getByTestId('caseObservablesToggle')).toBeInTheDocument();
+    await user.click(screen.getByTestId('create-case-submit'));
+
+    await waitForComponentToUpdate();
+
+    expect(createAttachments).not.toHaveBeenCalled();
+  });
+
   it(`should call callbacks in correct order`, async () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
+    });
     useGetConnectorsMock.mockReturnValue({
       ...sampleConnectorData,
       data: connectorsMock,
@@ -995,6 +1091,14 @@ describe('Create case', () => {
       },
     ];
 
+    const observables = [
+      {
+        typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+        value: 'host1',
+        description: null,
+      },
+    ];
+
     renderWithTestingProviders(
       <FormContext
         selectedOwner={SECURITY_SOLUTION_OWNER}
@@ -1002,10 +1106,20 @@ describe('Create case', () => {
         onSuccess={onFormSubmitSuccess}
         afterCaseCreated={afterCaseCreated}
         attachments={attachments}
+        observables={observables}
       >
         <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectorsMock} />
         <SubmitCaseButton />
-      </FormContext>
+      </FormContext>,
+      {
+        wrapperProps: {
+          license,
+          features: {
+            ...DEFAULT_FEATURES,
+            observables: { enabled: true, autoExtract: true },
+          },
+        },
+      }
     );
 
     await waitForFormToRender();
@@ -1026,8 +1140,12 @@ describe('Create case', () => {
     });
 
     expect(createAttachments).toHaveBeenCalled();
+    expect(bulkPostObservables).toHaveBeenCalled();
     expect(afterCaseCreated).toHaveBeenCalled();
-    expect(pushCaseToExternalService).toHaveBeenCalled();
+
+    await waitFor(() => {
+      expect(pushCaseToExternalService).toHaveBeenCalled();
+    });
 
     await waitFor(() => {
       expect(onFormSubmitSuccess).toHaveBeenCalled();
@@ -1035,13 +1153,15 @@ describe('Create case', () => {
 
     const postCaseOrder = postCase.mock.invocationCallOrder[0];
     const createAttachmentsOrder = createAttachments.mock.invocationCallOrder[0];
+    const bulkPostObservablesOrder = bulkPostObservables.mock.invocationCallOrder[0];
     const afterCaseOrder = afterCaseCreated.mock.invocationCallOrder[0];
     const pushCaseToExternalServiceOrder = pushCaseToExternalService.mock.invocationCallOrder[0];
     const onFormSubmitSuccessOrder = onFormSubmitSuccess.mock.invocationCallOrder[0];
 
     expect(
       postCaseOrder < createAttachmentsOrder &&
-        createAttachmentsOrder < afterCaseOrder &&
+        createAttachmentsOrder < bulkPostObservablesOrder &&
+        bulkPostObservablesOrder < afterCaseOrder &&
         afterCaseOrder < pushCaseToExternalServiceOrder &&
         pushCaseToExternalServiceOrder < onFormSubmitSuccessOrder
     ).toBe(true);

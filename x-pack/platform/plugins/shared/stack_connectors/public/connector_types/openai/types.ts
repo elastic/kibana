@@ -7,8 +7,11 @@
 
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
-import type { RunActionParams } from '../../../common/openai/types';
+import type {
+  OpenAiProviderType,
+  SUB_ACTION,
+  RunActionParams,
+} from '@kbn/connector-schemas/openai';
 
 export interface ActionParams {
   subAction: SUB_ACTION.RUN | SUB_ACTION.TEST;
@@ -25,6 +28,8 @@ export interface Config {
   privateKeyData?: string;
   verificationMode?: 'full' | 'certificate' | 'none';
   caData?: string;
+  // This property is only used when apiProvider is OpenAiProviderType.Other
+  enableNativeFunctionCalling?: boolean;
 }
 
 export interface InternalConfig {

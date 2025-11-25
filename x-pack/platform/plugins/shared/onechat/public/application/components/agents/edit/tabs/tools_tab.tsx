@@ -12,6 +12,7 @@ import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { ToolsSelection } from '../tools_selection';
 import type { AgentFormData } from '../agent_form';
+import { useUiPrivileges } from '../../../../hooks/use_ui_privileges';
 
 interface ToolsTabProps {
   control: Control<AgentFormData>;
@@ -26,8 +27,8 @@ export const ToolsTab: React.FC<ToolsTabProps> = ({
   isLoading,
   isFormDisabled,
 }) => {
+  const { manageTools } = useUiPrivileges();
   const [showActiveOnly, setShowActiveOnly] = useState(false);
-  const [showGroupedView, setShowGroupedView] = useState(true);
 
   return (
     <>
@@ -42,10 +43,8 @@ export const ToolsTab: React.FC<ToolsTabProps> = ({
             selectedTools={field.value}
             onToolsChange={field.onChange}
             disabled={isFormDisabled}
-            showActiveOnly={showActiveOnly}
+            showActiveOnly={showActiveOnly || !manageTools} // For readonly users, show only active tools
             onShowActiveOnlyChange={setShowActiveOnly}
-            showGroupedView={showGroupedView}
-            onShowGroupedViewChange={setShowGroupedView}
           />
         )}
       />

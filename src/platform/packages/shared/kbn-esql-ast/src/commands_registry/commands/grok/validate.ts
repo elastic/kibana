@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { getMessageFromId } from '../../../definitions/utils/errors';
-import type { ESQLAst, ESQLColumn, ESQLCommand, ESQLMessage } from '../../../types';
+import type { ESQLAst, ESQLColumn, ESQLAstAllCommands, ESQLMessage } from '../../../types';
 import type { ICommandContext, ICommandCallbacks } from '../../types';
 import type { FieldType } from '../../../definitions/types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 
 export const validate = (
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   ast: ESQLAst,
   context?: ICommandContext,
   callbacks?: ICommandCallbacks
@@ -21,9 +21,9 @@ export const validate = (
   const messages: ESQLMessage[] = [];
   const acceptedColumnTypes: FieldType[] = ['keyword', 'text'];
   const astCol = command.args[0] as ESQLColumn;
-  const columnRef = context?.fields.get(astCol.name);
+  const columnRef = context?.columns.get(astCol.name);
 
-  if (columnRef && !acceptedColumnTypes.includes(columnRef.type)) {
+  if (columnRef && !acceptedColumnTypes.includes(columnRef.type as FieldType)) {
     messages.push(
       getMessageFromId({
         messageId: 'unsupportedColumnTypeForCommand',

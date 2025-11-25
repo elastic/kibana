@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import type { APMIndices, ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import { containsIndexPattern } from '../../utils';
 
@@ -28,38 +28,26 @@ export const DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP = createRegExpPatternFr
   'data'
 );
 
-export const createTracesContextService = async ({
-  apmSourcesAccess,
-}: TracesContextServiceDeps): Promise<TracesContextService> => {
-  if (!apmSourcesAccess) {
+export const createTracesContextService = ({
+  indices,
+}: {
+  indices: APMIndices | null;
+}): TracesContextService => {
+  if (!indices) {
     return defaultTracesContextService;
   }
 
-  try {
-    const indices = await apmSourcesAccess.getApmIndices();
+  const { transaction, span } = indices;
+  const allTraceIndices = getAllIndices(transaction, span);
 
-    if (!indices) {
-      return defaultTracesContextService;
-    }
+  const tracesIndexPattern = allTraceIndices.join();
+  const allowedDataSources = [...allTraceIndices, DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP];
 
-    const { transaction, span } = indices;
-    const allIndices = getAllIndices(transaction, span);
-    const uniqueIndices = Array.from(new Set(allIndices));
-
-    const tracesIndexPattern = uniqueIndices.join();
-    const allowedDataSources = [
-      createRegExpPatternFrom(uniqueIndices, 'data'),
-      DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP,
-    ];
-
-    return getTracesContextService({ tracesIndexPattern, allowedDataSources });
-  } catch (error) {
-    return defaultTracesContextService;
-  }
+  return getTracesContextService({ tracesIndexPattern, allowedDataSources });
 };
 
 function getAllIndices(transaction: string, span: string) {
-  return [transaction, span].flatMap((index) => index.split(','));
+  return Array.from(new Set([transaction, span].flatMap((index) => index.split(','))));
 }
 
 export const getTracesContextService = ({
@@ -67,7 +55,7 @@ export const getTracesContextService = ({
   allowedDataSources,
 }: {
   tracesIndexPattern?: string;
-  allowedDataSources: RegExp[];
+  allowedDataSources: Array<string | RegExp>;
 }) => ({
   getAllTracesIndexPattern: () => tracesIndexPattern,
   isTracesIndexPattern: testPatternAgainstAllowedList(allowedDataSources),

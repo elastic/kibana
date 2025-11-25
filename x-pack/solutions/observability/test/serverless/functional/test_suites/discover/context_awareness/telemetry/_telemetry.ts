@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         await dashboard.waitForRenderComplete();
         const rows = await dataGrid.getDocTableRows();
         expect(rows.length).to.be.above(0);
-        await testSubjects.click('dashboardEditorMenuButton');
+        await dashboardAddPanel.openAddPanelFlyout();
 
         const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['click'],

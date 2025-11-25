@@ -7,7 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { dsl as genericDsl } from '../../common/data/dsl_queries';
-import { SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../../../../../common/siem_migrations/constants';
+import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../common/constants';
 
 export const dsl = {
   isInstalled(): QueryDslQueryContainer {
@@ -22,20 +22,33 @@ export const dsl = {
   isCustom(): QueryDslQueryContainer {
     return { bool: { must_not: dsl.isPrebuilt() } };
   },
-  matchTitle(title: string): QueryDslQueryContainer {
+  matchElasticTitle(title: string): QueryDslQueryContainer {
     return { match: { 'elastic_rule.title': title } };
   },
-  isInstallable(): QueryDslQueryContainer[] {
-    return [genericDsl.isFullyTranslated(), dsl.isNotInstalled()];
+  matchOriginalTitle(title: string): QueryDslQueryContainer {
+    return { match: { 'original_rule.title': title } };
   },
-  isNotInstallable(): QueryDslQueryContainer[] {
-    return [genericDsl.isNotFullyTranslated(), dsl.isInstalled()];
+  matchTitle(title: string): QueryDslQueryContainer {
+    return {
+      bool: {
+        should: [
+          // Match the translated title
+          dsl.matchElasticTitle(title),
+          // If translation failed, match the original title
+          { bool: { must: [genericDsl.isFailed(), dsl.matchOriginalTitle(title)] } },
+        ],
+      },
+    };
+  },
+  isInstallable(): QueryDslQueryContainer {
+    return { bool: { must: [genericDsl.isFullyTranslated(), dsl.isNotInstalled()] } };
+  },
+  isNotInstallable(): QueryDslQueryContainer {
+    return { bool: { should: [genericDsl.isNotFullyTranslated(), dsl.isInstalled()] } };
   },
   isMissingIndex(): QueryDslQueryContainer {
     return {
-      query_string: {
-        query: `elastic_rule.query: "${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}"`,
-      },
+      query_string: { query: `elastic_rule.query: "${MISSING_INDEX_PATTERN_PLACEHOLDER}"` },
     };
   },
 };

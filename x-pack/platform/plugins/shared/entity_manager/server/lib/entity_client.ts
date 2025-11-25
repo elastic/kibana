@@ -28,6 +28,7 @@ export class EntityClient {
     private options: {
       clusterClient: IScopedClusterClient;
       soClient: SavedObjectsClientContract;
+      isServerless: boolean;
       logger: Logger;
     }
   ) {}
@@ -46,6 +47,7 @@ export class EntityClient {
       definition,
       esClient: this.options.clusterClient.asCurrentUser,
       soClient: this.options.soClient,
+      isServerless: this.options.isServerless,
       logger: this.options.logger,
     });
 
@@ -98,6 +100,7 @@ export class EntityClient {
       definitionUpdate,
       soClient: this.options.soClient,
       esClient: this.options.clusterClient.asCurrentUser,
+      isServerless: this.options.isServerless,
       logger: this.options.logger,
     });
 
@@ -186,5 +189,9 @@ export class EntityClient {
       definition,
       this.options.logger
     );
+  }
+
+  public isServerless(): boolean {
+    return this.options.isServerless;
   }
 }

@@ -5,51 +5,55 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiAccordion, EuiButton, EuiPanel, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { ConversationRoundStep } from '@kbn/onechat-common';
-import React from 'react';
-import type { Timer } from '../../../../hooks/use_timer';
-import { RoundTimer } from './round_timer';
+import type { ConversationRound, ConversationRoundStep } from '@kbn/onechat-common';
+import React, { useState } from 'react';
+import { useSendMessage } from '../../../../context/send_message/send_message_context';
+import { RoundFlyout } from '../round_flyout';
 import { RoundSteps } from './steps/round_steps';
+import { ThinkingTimeDisplay } from './thinking_time_display';
 
 interface RoundThinkingProps {
+  rawRound: ConversationRound;
   steps: ConversationRoundStep[];
   isLoading: boolean;
-  timer: Timer;
 }
 
-const fullWidthStyles = css`
-  width: 100%;
-`;
+const buttonContentClassName = 'thinkingButtonContent';
 
-const thinkingLabel = i18n.translate('xpack.onechat.conversation.thinking.label', {
+const defaultThinkingLabel = i18n.translate('xpack.onechat.conversation.thinking.label', {
   defaultMessage: 'Thinking...',
 });
 const thinkingCompletedLabel = i18n.translate('xpack.onechat.conversation.thinking.completed', {
   defaultMessage: 'Thinking completed',
 });
+const rawResponseButtonLabel = i18n.translate('xpack.onechat.conversation.rawResponseButton', {
+  defaultMessage: 'View raw response',
+});
 
-export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, timer }) => {
+export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, rawRound }) => {
   const { euiTheme } = useEuiTheme();
+  const thinkingButtonStyles = css`
+    margin-right: ${euiTheme.size.xs};
+    & .${buttonContentClassName} {
+      /*
+        From what I can tell this is by far the easiest solution to limit the content to one line.
+        These CSS properties are supported by all modern browsers https://developer.mozilla.org/en-US/docs/Web/CSS/line-clamp
+      */
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  `;
   const thinkingAccordionId = useGeneratedHtmlId({ prefix: 'roundThinkingAccordion' });
+  const { agentReasoning } = useSendMessage();
+  const [showFlyout, setShowFlyout] = useState(false);
 
   if (steps.length === 0) {
-    return timer.showTimer ? (
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <RoundTimer elapsedTime={timer.elapsedTime} isStopped={timer.isStopped} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ) : null;
+    return null;
   }
 
   const accordionStyles = css`
@@ -58,24 +62,39 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
     }
   `;
 
+  let thinkingButtonLabel = thinkingCompletedLabel;
+  if (isLoading) {
+    // While this round is loading, show the agent reasoning as the button label if available
+    // Otherwise fallback to default thinking label.
+    // Agent reasoning can be reasoning directly from the agent or individual tool call progression
+    thinkingButtonLabel = agentReasoning ?? defaultThinkingLabel;
+  }
+  const toggleFlyout = () => {
+    setShowFlyout(!showFlyout);
+  };
+
   return (
     <EuiAccordion
       id={thinkingAccordionId}
       arrowDisplay="left"
       css={accordionStyles}
+      data-test-subj="agentBuilderThinkingToggle"
       buttonProps={{
-        css: fullWidthStyles,
+        css: thinkingButtonStyles,
       }}
-      buttonContent={isLoading ? thinkingLabel : thinkingCompletedLabel}
-      extraAction={
-        timer.showTimer ? (
-          <RoundTimer elapsedTime={timer.elapsedTime} isStopped={timer.isStopped} />
-        ) : undefined
-      }
+      buttonContent={thinkingButtonLabel}
+      buttonContentClassName={buttonContentClassName}
     >
       <EuiPanel paddingSize="l" hasShadow={false} hasBorder={false} color="subdued">
         <RoundSteps steps={steps} />
+        {!isLoading && (
+          <EuiButton iconType={'code'} color="primary" iconSide="left" onClick={toggleFlyout}>
+            {rawResponseButtonLabel}
+          </EuiButton>
+        )}
+        <ThinkingTimeDisplay timeToFirstToken={rawRound.time_to_first_token} />
       </EuiPanel>
+      <RoundFlyout isOpen={showFlyout} onClose={toggleFlyout} rawRound={rawRound} />
     </EuiAccordion>
   );
 };

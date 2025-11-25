@@ -21,6 +21,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
+import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { CreateConnectorFilter } from './create_connector_filter';
 import type {
   ActionConnector,
@@ -35,7 +36,6 @@ import { ActionTypeMenu } from '../action_type_menu';
 import { useCreateConnector } from '../../../hooks/use_create_connector';
 import type { ConnectorFormState, ResetForm } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
-import type { ConnectorFormSchema } from '../types';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
@@ -47,6 +47,7 @@ export interface CreateConnectorFlyoutProps {
   onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
   isServerless?: boolean;
+  initialConnector?: Partial<Omit<ActionConnector, 'secrets'>> & { actionTypeId: string };
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
@@ -55,6 +56,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   onClose,
   onConnectorCreated,
   onTestConnector,
+  initialConnector,
 }) => {
   const {
     application: { capabilities },
@@ -80,18 +82,36 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     preSubmitValidator: null,
   });
 
-  const initialConnector = {
+  useEffect(() => {
+    if (initialConnector && allActionTypes && !actionType) {
+      const foundActionType = allActionTypes[initialConnector.actionTypeId];
+      if (foundActionType) {
+        setActionType(foundActionType);
+      }
+    }
+  }, [initialConnector, allActionTypes, actionType]);
+
+  const emptyConnector = {
     actionTypeId: actionType?.id ?? '',
     isDeprecated: false,
     config: {},
     secrets: {},
     isMissingSecrets: false,
+    isConnectorTypeDeprecated: false,
   };
+
+  const defaultConnector = initialConnector
+    ? {
+        ...emptyConnector,
+        ...initialConnector,
+      }
+    : emptyConnector;
 
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
 
   const hasErrors = isFormValid === false;
   const isSaving = isSavingConnector || isSubmitting;
+  const isUsingInitialConnector = Boolean(initialConnector);
   const hasConnectorTypeSelected = actionType != null;
 
   const actionTypeModel: ActionTypeModel | null =
@@ -99,17 +119,22 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
     actionTypeModel && actionTypeModel.subtype
-      ? (actionTypeModel?.subtype ?? []).map((subtypeAction) => ({
-          ...actionTypeRegistry.get(subtypeAction.id),
-          name: subtypeAction.name,
-        }))
+      ? (actionTypeModel?.subtype ?? [])
+          .filter((item) => allActionTypes && allActionTypes[item.id].enabledInConfig)
+          .map((subtypeAction) => ({
+            ...actionTypeRegistry.get(subtypeAction.id),
+            name: subtypeAction.name,
+          }))
       : [];
 
-  const groupActionButtons = groupActionTypeModel.map((gAction) => ({
-    id: gAction.id,
-    label: gAction.name,
-    'data-test-subj': `${gAction.id}Button`,
-  }));
+  const groupActionButtons =
+    groupActionTypeModel?.length > 1
+      ? groupActionTypeModel.map((gAction) => ({
+          id: gAction.id,
+          label: gAction.name,
+          'data-test-subj': `${gAction.id}Button`,
+        }))
+      : [];
 
   const resetConnectorForm = useRef<ResetForm | undefined>();
 
@@ -264,6 +289,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             {showFormErrors && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   color="danger"
                   iconType="warning"
@@ -287,7 +313,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             )}
             <ConnectorForm
               actionTypeModel={actionTypeModel}
-              connector={initialConnector}
+              connector={defaultConnector}
               isEdit={false}
               onChange={setFormState}
               setResetForm={setResetForm}
@@ -349,6 +375,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         hasConnectorTypeSelected={hasConnectorTypeSelected}
         onBack={resetActionType}
         onCancel={onClose}
+        isUsingInitialConnector={isUsingInitialConnector}
       />
     </EuiFlyout>
   );

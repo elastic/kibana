@@ -8,6 +8,7 @@
 import { Transform } from 'stream';
 import type { estypes } from '@elastic/elasticsearch';
 import { omit } from 'lodash';
+import { Report } from '../store';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { KibanaShuttingDownError } from '@kbn/reporting-common';
 import type { ReportDocument } from '@kbn/reporting-common/types';
@@ -21,6 +22,8 @@ import type { ReportingCore } from '../..';
 import { createMockReportingCore } from '../../test_helpers';
 import type { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
 import { EventTracker } from '../../usage';
+import { eventTrackerMock } from '../../usage/event_tracker.mock';
+import type { ReportingStore } from '../store';
 
 interface StreamMock {
   getSeqNo: () => number;
@@ -94,6 +97,8 @@ function createStreamMock(): StreamMock {
 }
 
 const mockStream = createStreamMock();
+const mockEventTracker = eventTrackerMock.create();
+
 jest.mock('../content_stream', () => ({
   getContentStream: () => mockStream,
   finishedWithNoPendingCallbacks: () => Promise.resolve(),
@@ -271,6 +276,7 @@ describe('Run Single Report Task', () => {
   });
 
   it('uses authorization headers from task manager fake request if defined', async () => {
+    const notifyUsage = jest.fn();
     const runTaskFn = jest.fn().mockResolvedValue({ content_type: 'application/pdf' });
     mockReporting.getExportTypesRegistry().register({
       id: 'test1',
@@ -279,6 +285,9 @@ describe('Run Single Report Task', () => {
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test1 single export',
+      notifyUsage,
       jobContentEncoding: 'base64',
       jobType: 'test1',
       validLicenses: [],
@@ -306,6 +315,7 @@ describe('Run Single Report Task', () => {
 
     await taskRunner.run();
 
+    expect(notifyUsage).toHaveBeenCalledWith('single');
     expect(runTaskFn.mock.calls[0][0].request.headers).toEqual({
       authorization: 'ApiKey skdjtq4u543yt3rhewrh',
     });
@@ -316,6 +326,7 @@ describe('Run Single Report Task', () => {
       'cool-encryption-key-where-did-you-find-it',
       headers
     );
+    const notifyUsage = jest.fn();
     const runTaskFn = jest.fn().mockResolvedValue({ content_type: 'application/pdf' });
     mockReporting.getExportTypesRegistry().register({
       id: 'test2',
@@ -324,6 +335,9 @@ describe('Run Single Report Task', () => {
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test2 single export',
+      notifyUsage,
       jobContentEncoding: 'base64',
       jobType: 'test2',
       validLicenses: [],
@@ -355,6 +369,7 @@ describe('Run Single Report Task', () => {
 
     await taskRunner.run();
 
+    expect(notifyUsage).toHaveBeenCalledWith('single');
     expect(runTaskFn.mock.calls[0][0].request.headers).toEqual(headers);
   });
 
@@ -363,6 +378,7 @@ describe('Run Single Report Task', () => {
       'cool-encryption-key-where-did-you-find-it',
       headers
     );
+    const notifyUsage = jest.fn();
     const runTaskFn = jest.fn().mockResolvedValue({ content_type: 'application/pdf' });
     mockReporting.getExportTypesRegistry().register({
       id: 'test3',
@@ -371,6 +387,9 @@ describe('Run Single Report Task', () => {
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test3 single export',
+      notifyUsage,
       jobContentEncoding: 'base64',
       jobType: 'test3',
       validLicenses: [],
@@ -403,9 +422,68 @@ describe('Run Single Report Task', () => {
 
     await taskRunner.run();
 
+    expect(notifyUsage).toHaveBeenCalledWith('single');
     expect(runTaskFn.mock.calls[0][0].request.headers).toEqual({
       ...omit(headers, ['authorization', 'cookie']),
       authorization: 'ApiKey skdjtq4u543yt3rhewrh',
+    });
+  });
+
+  it('sends telemetry event when job is claimed', async () => {
+    const runTaskFn = jest.fn().mockResolvedValue({ content_type: 'application/pdf' });
+    mockReporting.getExportTypesRegistry().register({
+      id: 'test1',
+      name: 'Test1',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: runTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test1 single export',
+      notifyUsage: jest.fn(),
+      jobContentEncoding: 'base64',
+      jobType: 'test1',
+      validLicenses: [],
+    } as unknown as ExportType);
+    mockReporting.getStore = () =>
+      Promise.resolve({
+        findReportFromTask: jest.fn().mockImplementation(
+          (report) =>
+            new Report({
+              ...report,
+              _id: 'test',
+              _index: '.reporting-foo-index-234',
+              _seq_no: 1,
+              _primary_term: 1,
+              payload: { objectType: 'dashboard' },
+            })
+        ),
+        setReportClaimed: jest.fn().mockImplementation(() => ({ _seq_no: 1, _primary_term: 1 })),
+      } as unknown as ReportingStore);
+    mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+      .spyOn(task, 'completeJob')
+      .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager);
+
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'random-task-id',
+        params: { index: 'cool-reporting-index', id: 'test1', jobtype: 'test1', payload: {} },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    await taskRunner.run();
+
+    expect(mockReporting.getEventTracker).toHaveBeenCalledWith('test', 'test1', 'dashboard');
+    expect(mockEventTracker.claimJob).toHaveBeenCalledWith({
+      timeSinceCreation: expect.any(Number),
+      scheduleType: 'single',
     });
   });
 
@@ -417,6 +495,9 @@ describe('Run Single Report Task', () => {
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: () => new Promise(() => {}),
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: pdf single export',
+      notifyUsage: jest.fn(),
       jobContentExtension: 'pdf',
       jobType: 'noop',
       validLicenses: [],
@@ -483,6 +564,9 @@ describe('Run Single Report Task', () => {
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test1 single export',
+      notifyUsage: jest.fn(),
       jobContentEncoding: 'base64',
       jobType: 'test1',
       validLicenses: [],
@@ -547,6 +631,9 @@ describe('Run Single Report Task', () => {
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test1 single export',
+      notifyUsage: jest.fn(),
       jobContentEncoding: 'base64',
       jobType: 'test1',
       validLicenses: [],

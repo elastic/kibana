@@ -8,7 +8,7 @@ This directory contains the server-side components and API routes for the ES|QL 
 
 The ES|QL server exposes the following internal API routes:
 
-* **`/internal/esql/autocomplete/join/indices`**: Used by the ES|QL editor to retrieve a list of indices suitable for **`JOIN`** autocompletion.
+* **`/internal/esql/autocomplete/join/indices`**: Used by the ES|QL editor to retrieve a list of indices suitable for **`JOIN`** autocompletion. If the remoteClusters array is passed it will also retrieve the list of remote indices.
 * **`/internal/esql/autocomplete/timeseries/indices`**: Provides index suggestions specifically for **time-series analysis** contexts within the ES|QL editor.
 * **`/internal/esql/autocomplete/inference_endpoints/{taskType}`**: This endpoint is used to fetch LLM inference endpoints by task type.
 * **`/internal/esql_registry/extensions/{query}`**: This is the primary endpoint for fetching **registered ES|QL extensions**, which enhance the editor's capabilities by providing contextual suggestions.
@@ -29,7 +29,7 @@ The registry intelligently handles both exact index pattern matches (e.g., "logs
 
 **Note**: The registry will only return indices (remote or local) that exist in the instance.
 
-**Important:**: Extensions registered through this mechanism are solution-specific. They are categorized by solution (e.g., 'es', 'oblt', 'security', 'chat') and are only visible when working within the context of that specific solution. Extensions are not displayed in classic or non-solution-based Kibana instances.
+**Important:**: Extensions registered through this mechanism are solution-specific. They are categorized by solution (e.g., 'es', 'oblt', 'security', 'workplaceai') and are only visible when working within the context of that specific solution. Extensions are not displayed in classic or non-solution-based Kibana instances.
 
 ---
 
@@ -51,7 +51,7 @@ Here's an example of how to register `recommendedQueries`:
       esql: ESQLSetup;
       // ... other dependencies
     }
-    const solutionId: SolutionId = 'oblt'; // Or 'security', 'es', 'chat', etc.
+    const solutionId: SolutionId = 'oblt'; // Or 'security', 'es', 'workplaceai', etc.
 
     // Inside your plugin's `Plugin` class
     public setup(core: CoreSetup, { esql }: SetupDeps) {
@@ -93,6 +93,18 @@ Here's an example of how to register `recommendedQueries`:
           ],
             solutionId
         );
+
+        // --- Unsetting Recommended Queries ---
+        esqlExtensionsRegistry.unsetRecommendedQueries(
+          [
+            {
+              name: 'Logs count by log level',
+              query: 'from logs* | STATS count(*) by log_level',
+            }
+          ],
+          solutionId
+        );
+
         return {};
     }
 

@@ -15,8 +15,7 @@ import {
   EuiPageBody,
   EuiPageSection,
   EuiText,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
@@ -79,7 +78,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
     }
 
     return (
-      <EuiToolTip
+      <EuiIconTip
         position="right"
         content={
           <FormattedMessage
@@ -91,9 +90,9 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             }}
           />
         }
-      >
-        <EuiIcon type="info" size="s" />
-      </EuiToolTip>
+        type="info"
+        size="s"
+      />
     );
   };
 

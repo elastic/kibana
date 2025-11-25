@@ -28,7 +28,7 @@ const onlyOneClauseMessage = i18n.translate(
     defaultMessage: 'You can only use one clause in the search bar',
   }
 );
-// for now limit the search bar to snapshot, repository and policyName queries
+// for now limit the search bar to snapshot, repository, policyName and state queries
 const searchSchema: SchemaType = {
   strict: true,
   fields: {
@@ -39,6 +39,9 @@ const searchSchema: SchemaType = {
       type: 'string',
     },
     policyName: {
+      type: 'string',
+    },
+    state: {
       type: 'string',
     },
   },
@@ -118,6 +121,47 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
         view: repository,
       })),
     },
+    {
+      type: 'field_value_selection' as const,
+      field: 'state',
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.stateFilterLabel', {
+        defaultMessage: 'State',
+      }),
+      operator: 'exact',
+      multiSelect: false,
+      options: [
+        {
+          value: 'SUCCESS',
+          view: i18n.translate('xpack.snapshotRestore.snapshotList.table.stateFilterSuccess', {
+            defaultMessage: 'Success',
+          }),
+        },
+        {
+          value: 'IN_PROGRESS',
+          view: i18n.translate('xpack.snapshotRestore.snapshotList.table.stateFilterInProgress', {
+            defaultMessage: 'In Progress',
+          }),
+        },
+        {
+          value: 'FAILED',
+          view: i18n.translate('xpack.snapshotRestore.snapshotList.table.stateFilterFailed', {
+            defaultMessage: 'Failed',
+          }),
+        },
+        {
+          value: 'PARTIAL',
+          view: i18n.translate('xpack.snapshotRestore.snapshotList.table.stateFilterPartial', {
+            defaultMessage: 'Partial',
+          }),
+        },
+        {
+          value: 'INCOMPATIBLE',
+          view: i18n.translate('xpack.snapshotRestore.snapshotList.table.stateFilterIncompatible', {
+            defaultMessage: 'Incompatible',
+          }),
+        },
+      ],
+    },
   ];
 
   const reloadButton = (
@@ -164,6 +208,7 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
       {error ? (
         <>
           <EuiCallOut
+            announceOnMount={false}
             data-test-subj="snapshotListSearchError"
             iconType="warning"
             role="alert"

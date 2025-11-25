@@ -22,6 +22,7 @@ import { OPERATING_SYSTEM_WINDOWS_AND_MAC, OS_TITLES } from '../../../../common/
 import { INPUT_ERRORS, CONDITION_FIELD_TITLE, OPERATOR_TITLES } from '../translations';
 import { TrustedDevicesForm } from './form';
 import { licenseService } from '../../../../../common/hooks/use_license';
+import { useGetTrustedDeviceSuggestions } from '../../hooks/use_get_trusted_device_suggestions';
 
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/hooks/use_license', () => {
@@ -37,6 +38,8 @@ jest.mock('../../../../../common/hooks/use_license', () => {
   };
 });
 
+jest.mock('../../hooks/use_get_trusted_device_suggestions');
+
 describe('Trusted devices form', () => {
   const formPrefix = 'trustedDevices-form';
   let resetHTMLElementOffsetWidth: ReturnType<typeof forceHTMLElementOffsetWidth>;
@@ -48,8 +51,9 @@ describe('Trusted devices form', () => {
 
   const getUI = () => <TrustedDevicesForm {...formProps} />;
 
-  const render = () => {
-    return (renderResult = mockedContext.render(getUI()));
+  const render = async () => {
+    renderResult = mockedContext.render(getUI());
+    return renderResult;
   };
 
   const rerender = () => renderResult.rerender(getUI());
@@ -79,9 +83,9 @@ describe('Trusted devices form', () => {
       list_id: 'trusted-devices-list-id',
       name: '',
       description: '',
-      // start with Windows to let the component normalize to [Windows, Mac] for create mode
+      // Use Windows-only OS for USERNAME field compatibility, or HOST field for other combinations
       os_types: [OperatingSystem.WINDOWS],
-      entries: [createEntry(TrustedDeviceConditionEntryField.USERNAME, 'match', '')],
+      entries: [createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', '')],
       type: 'simple',
       tags: ['policy:all'],
       meta: { temporaryUuid: 'td-1111' },
@@ -106,13 +110,25 @@ describe('Trusted devices form', () => {
   }
 
   // Helpers
-  const setTextFieldValue = (textField: HTMLInputElement | HTMLTextAreaElement, value: string) => {
-    act(() => {
-      fireEvent.change(textField, {
-        target: { value },
+  const setTextFieldValue = async (
+    textField: HTMLInputElement | HTMLTextAreaElement,
+    value: string
+  ) => {
+    // For EuiComboBox (has role="combobox"), use userEvent.type
+    if (textField.getAttribute('role') === 'combobox') {
+      await userEvent.clear(textField);
+      await userEvent.type(textField, value);
+      // Press Enter to create the custom option
+      await userEvent.keyboard('{Enter}');
+    } else {
+      // For regular text fields
+      act(() => {
+        fireEvent.change(textField, {
+          target: { value },
+        });
+        fireEvent.blur(textField);
       });
-      fireEvent.blur(textField);
-    });
+    }
   };
 
   const getDetailsBlurb = (dataTestSub: string = formPrefix): HTMLInputElement | null => {
@@ -147,7 +163,10 @@ describe('Trusted devices form', () => {
   };
 
   const getConditionsValueField = (dataTestSub: string = formPrefix): HTMLInputElement => {
-    return renderResult.getByTestId(`${dataTestSub}-valueField`) as HTMLInputElement;
+    const comboBox = renderResult.getByTestId(`${dataTestSub}-valueField`);
+    // EuiComboBox has a searchable input inside it
+    const searchInput = comboBox.querySelector('input[role="combobox"]');
+    return searchInput as HTMLInputElement;
   };
 
   beforeEach(() => {
@@ -156,6 +175,14 @@ describe('Trusted devices form', () => {
     (licenseService.isEnterprise as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
     latestUpdatedItem = createItem();
+
+    // Mock the useGetTrustedDeviceSuggestions hook
+    (useGetTrustedDeviceSuggestions as jest.Mock).mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
 
     formProps = {
       item: latestUpdatedItem,
@@ -173,16 +200,18 @@ describe('Trusted devices form', () => {
     cleanup();
   });
 
-  it('should display form submission errors', () => {
+  it('should display form submission errors', async () => {
     const message = 'submit failure';
     formProps.error = new Error(message) as IHttpFetchError;
-    render();
+    await render();
 
     expect(renderResult.getByTestId(`${formPrefix}-submitError`).textContent).toMatch(message);
   });
 
   describe('Details and Conditions', () => {
-    beforeEach(() => render());
+    beforeEach(async () => {
+      await render();
+    });
 
     it('should NOT initially show any inline validation errors', () => {
       expect(renderResult.container.querySelectorAll('.euiFormErrorText').length).toBe(0);
@@ -194,8 +223,8 @@ describe('Trusted devices form', () => {
       expect(getDetailsBlurb()).toBeNull();
     });
 
-    it('should show name required on blur', () => {
-      setTextFieldValue(getNameField(), '  ');
+    it('should show name required on blur', async () => {
+      await setTextFieldValue(getNameField(), '  ');
       expect(renderResult.getByText(INPUT_ERRORS.name)).toBeTruthy();
     });
 
@@ -220,8 +249,8 @@ describe('Trusted devices form', () => {
       ]);
     });
 
-    it('should correctly edit name', () => {
-      setTextFieldValue(getNameField(), 'My TD');
+    it('should correctly edit name', async () => {
+      await setTextFieldValue(getNameField(), 'My TD');
       const expected = createOnChangeArgs({
         item: createItem({
           name: 'My TD',
@@ -231,8 +260,8 @@ describe('Trusted devices form', () => {
       expect(formProps.onChange).toHaveBeenCalledWith(expected);
     });
 
-    it('should correctly edit description', () => {
-      setTextFieldValue(getDescriptionField(), 'describe td');
+    it('should correctly edit description', async () => {
+      await setTextFieldValue(getDescriptionField(), 'describe td');
       const expected = createOnChangeArgs({
         item: createItem({
           description: 'describe td',
@@ -256,7 +285,9 @@ describe('Trusted devices form', () => {
   });
 
   describe('Conditions', () => {
-    beforeEach(() => render());
+    beforeEach(async () => {
+      await render();
+    });
 
     it('should render field, operator, and value controls with defaults', () => {
       const labels = Array.from(
@@ -266,7 +297,40 @@ describe('Trusted devices form', () => {
       expect(labels).toEqual(expect.arrayContaining(['Field', 'Operator', 'Value']));
     });
 
-    it('should display 5 options for Field with proper labels', async () => {
+    it('should display field options based on OS selection', async () => {
+      // Form defaults to Windows+Mac OS, so USERNAME field should NOT be available
+      const fieldSelect = getConditionsFieldSelect();
+      await userEvent.click(fieldSelect);
+
+      const options = Array.from(
+        renderResult.baseElement.querySelectorAll(
+          '.euiSuperSelect__listbox button.euiSuperSelect__item'
+        )
+      ).map((button) => button.textContent?.trim());
+
+      // USERNAME should not be available with Windows+Mac OS
+      expect(options).toEqual([
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_ID],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_TYPE],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.HOST],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER_ID],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_NAME],
+      ]);
+      expect(options).not.toContain(
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME]
+      );
+    });
+
+    it('should show USERNAME field when Windows-only OS is selected', async () => {
+      // Change to Windows-only OS first
+      await openOsCombo();
+      await userEvent.click(
+        screen.getByRole('option', { name: OS_TITLES[OperatingSystem.WINDOWS] })
+      );
+
+      // Check field options - USERNAME should now be available
       const fieldSelect = getConditionsFieldSelect();
       await userEvent.click(fieldSelect);
 
@@ -277,12 +341,52 @@ describe('Trusted devices form', () => {
       ).map((button) => button.textContent?.trim());
 
       expect(options).toEqual([
-        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME],
-        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.HOST],
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_ID],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_TYPE],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.HOST],
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER_ID],
         CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_NAME],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME],
       ]);
+    });
+
+    it('should hide USERNAME field when Mac-only OS is selected', async () => {
+      // Change to Mac-only OS first
+      await openOsCombo();
+      await userEvent.click(screen.getByRole('option', { name: OS_TITLES[OperatingSystem.MAC] }));
+
+      // Wait for component to update after OS change
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      // Re-render to ensure component reflects the OS change
+      rerenderWithLatestProps();
+
+      // Check field options - USERNAME should be hidden
+      const fieldSelect = getConditionsFieldSelect();
+      await userEvent.click(fieldSelect);
+
+      const options = Array.from(
+        renderResult.baseElement.querySelectorAll(
+          '.euiSuperSelect__listbox button.euiSuperSelect__item'
+        )
+      ).map((button) => button.textContent?.trim());
+
+      expect(options).toEqual([
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_ID],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_TYPE],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.HOST],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER_ID],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_NAME],
+      ]);
+      expect(options).not.toContain(
+        CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME]
+      );
     });
 
     it('should toggle operator from "is" to "matches" and update entry type to wildcard', async () => {
@@ -304,7 +408,7 @@ describe('Trusted devices form', () => {
     });
 
     it('should show value required error after blur when empty', async () => {
-      setTextFieldValue(getNameField(), 'some name');
+      await setTextFieldValue(getNameField(), 'some name');
 
       act(() => {
         fireEvent.blur(getConditionsValueField());
@@ -321,7 +425,7 @@ describe('Trusted devices form', () => {
       rerenderWithLatestProps();
 
       const valueField = getConditionsValueField();
-      setTextFieldValue(valueField, 'prefix**suffix');
+      await setTextFieldValue(valueField, 'prefix**suffix');
 
       act(() => {
         fireEvent.blur(valueField);
@@ -335,10 +439,70 @@ describe('Trusted devices form', () => {
         )
       ).toBeTruthy();
     });
+
+    it('should reset USERNAME field to DEVICE_ID when OS changes from Windows to Mac', async () => {
+      // Start with USERNAME field and Windows OS
+      formProps.item = createItem({
+        os_types: [OperatingSystem.WINDOWS],
+        entries: [createEntry(TrustedDeviceConditionEntryField.USERNAME, 'match', 'testuser')],
+      });
+      rerenderWithLatestProps();
+
+      // Change OS to Mac-only
+      await openOsCombo();
+      await userEvent.click(screen.getByRole('option', { name: OS_TITLES[OperatingSystem.MAC] }));
+
+      // Expect field to be reset to DEVICE_ID and value cleared
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
+      expect(lastCall?.item.entries?.[0]?.value).toBe('');
+      expect(lastCall?.item.os_types).toEqual([OperatingSystem.MAC]);
+    });
+
+    it('should reset USERNAME field to DEVICE_ID when OS changes from Windows to Windows+Mac', async () => {
+      // Start with USERNAME field and Windows OS
+      formProps.item = createItem({
+        os_types: [OperatingSystem.WINDOWS],
+        entries: [createEntry(TrustedDeviceConditionEntryField.USERNAME, 'match', 'testuser')],
+      });
+      rerenderWithLatestProps();
+
+      // Change OS to Windows+Mac
+      await openOsCombo();
+      await userEvent.click(screen.getByRole('option', { name: OPERATING_SYSTEM_WINDOWS_AND_MAC }));
+
+      // Expect field to be reset to DEVICE_ID and value cleared
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
+      expect(lastCall?.item.entries?.[0]?.value).toBe('');
+      expect(lastCall?.item.os_types).toEqual([OperatingSystem.WINDOWS, OperatingSystem.MAC]);
+    });
+
+    it('should preserve HOST field value when OS changes', async () => {
+      // Start with HOST field and Mac OS
+      formProps.item = createItem({
+        os_types: [OperatingSystem.MAC],
+        entries: [createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'myhost')],
+      });
+      latestUpdatedItem = formProps.item;
+      rerenderWithLatestProps();
+
+      // Clear onChange calls to get only the OS change call
+      (formProps.onChange as jest.Mock).mockClear();
+
+      // Change OS to Windows+Mac - HOST field should be preserved
+      await openOsCombo();
+      await userEvent.click(screen.getByRole('option', { name: OPERATING_SYSTEM_WINDOWS_AND_MAC }));
+
+      // Expect field and value to be preserved (no reset for HOST field)
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.HOST);
+      expect(lastCall?.item.entries?.[0]?.value).toBe('myhost');
+    });
   });
 
-  it('should display effective scope options', () => {
-    render();
+  it('should display effective scope options', async () => {
+    await render();
     const globalButton = renderResult.getByTestId(
       `${formPrefix}-effectedPolicies-global`
     ) as HTMLButtonElement;
@@ -351,41 +515,41 @@ describe('Trusted devices form', () => {
   });
 
   describe('Assignment section visibility', () => {
-    it('should show assignment section with enterprise license', () => {
+    it('should show assignment section with enterprise license', async () => {
       (licenseService.isEnterprise as jest.Mock).mockReturnValue(true);
-      render();
+      await render();
 
       expect(renderResult.getByTestId(`${formPrefix}-policySelection`)).toBeTruthy();
     });
 
-    it('should hide assignment section with non-enterprise license in create mode', () => {
+    it('should hide assignment section with non-enterprise license in create mode', async () => {
       (licenseService.isEnterprise as jest.Mock).mockReturnValue(false);
       formProps.mode = 'create';
-      render();
+      await render();
 
       expect(renderResult.queryByTestId(`${formPrefix}-policySelection`)).toBeNull();
     });
 
-    it('should show assignment section with non-enterprise license in edit mode for by-policy artifacts', () => {
+    it('should show assignment section with non-enterprise license in edit mode for by-policy artifacts', async () => {
       (licenseService.isEnterprise as jest.Mock).mockReturnValue(false);
       formProps.mode = 'edit';
       formProps.item = createItem({
         name: 'existing device',
         tags: ['policy:some-policy-id'],
       });
-      render();
+      await render();
 
       expect(renderResult.getByTestId(`${formPrefix}-policySelection`)).toBeTruthy();
     });
 
-    it('should hide assignment section with non-enterprise license in edit mode for global artifacts', () => {
+    it('should hide assignment section with non-enterprise license in edit mode for global artifacts', async () => {
       (licenseService.isEnterprise as jest.Mock).mockReturnValue(false);
       formProps.mode = 'edit';
       formProps.item = createItem({
         name: 'existing device',
         tags: ['policy:all'],
       });
-      render();
+      await render();
 
       expect(renderResult.queryByTestId(`${formPrefix}-policySelection`)).toBeNull();
     });

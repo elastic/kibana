@@ -10,14 +10,15 @@ import axios from 'axios';
 
 import { createExternalService } from './service';
 import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
-import type { CasesWebhookPublicConfigurationType, ExternalService } from './types';
+import type { CasesWebhookPublicConfigurationType } from '@kbn/connector-schemas/cases_webhook';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { AuthType, WebhookMethods, SSLCertType } from '../../../common/auth/constants';
-import { CRT_FILE, KEY_FILE } from '../../../common/auth/mocks';
+import { AuthType, WebhookMethods, SSLCertType } from '@kbn/connector-schemas/common/auth';
+import { CRT_FILE, KEY_FILE } from '@kbn/connector-schemas/common/auth/mocks';
+import type { ExternalService } from './types';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -61,6 +62,8 @@ const secrets = {
   crt: null,
   key: null,
   pfx: null,
+  clientSecret: null,
+  secretHeaders: null,
 };
 const defaultSSLOverrides = {};
 const actionId = '1234';
@@ -72,7 +75,15 @@ const sslConfig: CasesWebhookPublicConfigurationType = {
   certType: SSLCertType.CRT,
   hasAuth: true,
 };
-const sslSecrets = { crt: CRT_FILE, key: KEY_FILE, password: 'foobar', user: null, pfx: null };
+const sslSecrets = {
+  crt: CRT_FILE,
+  key: KEY_FILE,
+  password: 'foobar',
+  user: null,
+  pfx: null,
+  clientSecret: null,
+  secretHeaders: null,
+};
 let connectorUsageCollector: ConnectorUsageCollector;
 
 describe('Cases webhook service', () => {
@@ -183,6 +194,59 @@ describe('Cases webhook service', () => {
       expect(axios.create).toHaveBeenCalledWith({
         headers: {
           ...getBasicAuthHeader({ username: 'username', password: 'password' }),
+          'content-type': 'application/json',
+          foo: 'bar',
+        },
+      });
+    });
+
+    it('adds the secret headers correctly', () => {
+      createExternalService(
+        actionId,
+        {
+          config,
+          secrets: {
+            ...secrets,
+            user: 'username',
+            password: 'password',
+            secretHeaders: { secretKey: 'secretValue' },
+          },
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          ...getBasicAuthHeader({ username: 'username', password: 'password' }),
+          'content-type': 'application/json',
+          foo: 'bar',
+          secretKey: 'secretValue',
+        },
+      });
+    });
+
+    it('secretHeaders should override configHeaders when keys overlap', () => {
+      createExternalService(
+        actionId,
+        {
+          config,
+          secrets: {
+            ...secrets,
+            user: 'username',
+            password: 'password',
+            secretHeaders: { Authorization: 'secretAuthorizationValue' },
+          },
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          Authorization: 'secretAuthorizationValue',
           'content-type': 'application/json',
           foo: 'bar',
         },

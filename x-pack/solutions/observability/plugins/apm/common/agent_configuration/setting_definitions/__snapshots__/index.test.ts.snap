@@ -139,6 +139,11 @@ Array [
     "validationName": "string",
   },
   Object {
+    "key": "infer_spans",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
     "key": "log_ecs_reformatting",
     "options": Array [
       Object {

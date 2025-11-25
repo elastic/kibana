@@ -1,0 +1,38 @@
+{
+    "type": "visualization",
+    "gridData": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 6,
+        "i": "0735694d-1138-4e11-a315b20"
+    },
+    "panelIndex": "0735694d-1138-4e11-a315-29c0dfdd3b20",
+    "embeddableConfig": {
+        "savedVis": {
+            "id": "",
+            "title": "",
+            "description": "",
+            "type": "markdown",
+            "params": {
+                "fontSize": 12,
+                "openLinksInNewTab": false,
+                "markdown": "Sample text"
+            },
+            "uiState": {},
+            "data": {
+                "aggs": [],
+                "searchSource": {
+                    "query": {
+                        "query": "",
+                        "language": "kuery"
+                    },
+                    "filter": []
+                }
+            }
+        },
+        "description": "",
+        "enhancements": {}
+    },
+    "title": "Markdown"
+}
