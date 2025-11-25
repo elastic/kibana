@@ -14,13 +14,16 @@ import {
   loadManifestFileMock,
   majorMinorMock,
   latestVersionMock,
-  unlinkMock,
 } from './artifact_manager.test.mocks';
+
+import { deleteFile } from '@kbn/fs';
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { getArtifactName } from '@kbn/product-doc-common';
 import { DatasetSampleType } from '../../../common';
 import { ArtifactManager } from './artifact_manager';
+
+jest.mock('@kbn/fs');
 
 const artifactsFolder = '/tmp/artifacts';
 const artifactRepositoryUrl = 'https://artifacts.elastic.co';
@@ -81,13 +84,6 @@ describe('ArtifactManager', () => {
 
   describe('prepareArtifact', () => {
     it('should successfully prepare artifact when version matches current version', async () => {
-      const result = await artifactManager.prepareArtifact(DatasetSampleType.elasticsearch);
-
-      expect(majorMinorMock).toHaveBeenCalledWith(kibanaVersion);
-      expect(fetchArtifactVersionsMock).toHaveBeenCalledWith({
-        artifactRepositoryUrl,
-      });
-
       const expectedArtifactName = getArtifactName({
         productName: 'elasticsearch',
         productVersion: '8.16',
@@ -95,12 +91,22 @@ describe('ArtifactManager', () => {
       const expectedArtifactUrl = `${artifactRepositoryUrl}/${expectedArtifactName}`;
       const expectedArtifactPath = `${artifactsFolder}/${expectedArtifactName}`;
 
+      downloadMock.mockResolvedValueOnce(expectedArtifactPath);
+
+      const result = await artifactManager.prepareArtifact(DatasetSampleType.elasticsearch);
+
+      expect(majorMinorMock).toHaveBeenCalledWith(kibanaVersion);
+      expect(fetchArtifactVersionsMock).toHaveBeenCalledWith({
+        artifactRepositoryUrl,
+      });
+
       expect(downloadMock).toHaveBeenCalledWith(
         expectedArtifactUrl,
         expectedArtifactPath,
         'application/zip',
         undefined
       );
+
       expect(openZipArchiveMock).toHaveBeenCalledWith(expectedArtifactPath);
       expect(validateArtifactArchiveMock).toHaveBeenCalledWith(mockArchive);
       expect(loadManifestFileMock).toHaveBeenCalledWith(mockArchive);
@@ -268,8 +274,8 @@ describe('ArtifactManager', () => {
       });
       const expectedArtifactPath = `${artifactsFolder}/${expectedArtifactName}`;
 
-      expect(unlinkMock).toHaveBeenCalledWith(expectedArtifactPath);
-      expect(unlinkMock).toHaveBeenCalledTimes(1);
+      expect(deleteFile).toHaveBeenCalledWith(expectedArtifactPath);
+      expect(deleteFile).toHaveBeenCalledTimes(1);
     });
   });
 });

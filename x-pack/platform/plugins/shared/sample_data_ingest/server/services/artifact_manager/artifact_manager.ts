@@ -8,7 +8,6 @@
 import type { Logger } from '@kbn/logging';
 import { DocumentationProduct, getArtifactName } from '@kbn/product-doc-common';
 import { deleteFile } from '@kbn/fs';
-import { basename } from 'path';
 import { DatasetSampleType } from '../../../common';
 import { majorMinor, latestVersion } from './utils/semver';
 import {
@@ -70,8 +69,7 @@ export class ArtifactManager {
     const productVersion = majorMinor(await this.getProductVersion(productName));
     const artifactFileName = getArtifactName({ productName, productVersion });
     const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
-    const artifactVolume = basename(this.artifactsFolder);
-    const artifactPathAtVolume = `${artifactVolume}/${artifactFileName}`;
+    const artifactPathAtVolume = `${this.artifactsFolder}/${artifactFileName}`;
     this.log.debug(`Downloading artifact from [${artifactUrl}]`);
     const artifactFullPath = await download(
       artifactUrl,

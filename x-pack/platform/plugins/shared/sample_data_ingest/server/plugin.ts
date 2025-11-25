@@ -58,7 +58,7 @@ export class SampleDataIngestPlugin
   start(core: CoreStart, { taskManager }: SampleDataStartDependencies): {} {
     const sampleDataManager = new SampleDataManager({
       kibanaVersion: this.context.env.packageInfo.version,
-      artifactsFolder: Path.join(getDataPath(), 'sample-data-artifacts'),
+      artifactsFolder: 'sample-data-artifacts',
       artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
       elserInferenceId: this.context.config.get().elserInferenceId,
       logger: this.logger,
