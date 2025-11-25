@@ -55,13 +55,6 @@ function validateCPU(s: string) {
   }
 }
 
-function validateCloudProvider(s: string) {
-  const csps = ['aws', 'azure', 'gcp'];
-  if (!csps.includes(s)) {
-    return 'Invalid cloud provider';
-  }
-}
-
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
   space_ids: schema.maybe(schema.arrayOf(schema.string())),
