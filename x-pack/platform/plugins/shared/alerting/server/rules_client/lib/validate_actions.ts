@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { ConnectorType } from '@kbn/actions-plugin/server';
 import { validateHours } from '../../routes/lib/validate_hours';
 import type { RawRule } from '../../types';
 import { RuleNotifyWhen } from '../../types';
@@ -15,7 +16,6 @@ import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import type { NormalizedAlertAction, NormalizedSystemAction } from '../types';
 import type { RulesClientContext } from '../types';
 import { parseDuration } from '../../lib';
-import { ConnectorType } from '@kbn/actions-plugin/server';
 
 export type ValidateActionsData = Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & {
   actions: NormalizedAlertAction[];
