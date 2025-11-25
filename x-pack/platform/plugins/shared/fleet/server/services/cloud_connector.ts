@@ -91,7 +91,6 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     const normalizedName = CloudConnectorService.normalizeName(name);
 
     // Check for existing connector with same name (case-insensitive, normalized)
-    // Use SO_SEARCH_LIMIT to get all connectors and only fetch name field for performance
     const existingConnectors = await this.getList(soClient, {
       perPage: SO_SEARCH_LIMIT,
       fields: ['name'],
