@@ -171,9 +171,6 @@ export async function getCurrentQueryAvailableColumns(
     return previousPipeFields;
   }
   const lastCommand = commands[commands.length - 1];
-  if (!lastCommand?.name) {
-    return previousPipeFields;
-  }
   const commandDef = esqlCommandRegistry.getCommandByName(lastCommand.name);
   if (!commandDef?.methods.columnsAfter) {
     return previousPipeFields;
