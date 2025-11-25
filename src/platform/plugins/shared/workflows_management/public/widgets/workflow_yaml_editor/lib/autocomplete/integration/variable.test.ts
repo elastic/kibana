@@ -329,7 +329,7 @@ consts:
 steps:
   - name: step0
     type: console
-    with:  
+    with:
       message: "{{ consts.docs.|<- }}"
 `.trim();
 
@@ -349,7 +349,7 @@ consts:
 steps:
   - name: step0
     type: console
-    with: 
+    with:
       message: "{{ consts.docs.a|<- }}"
 `.trim();
 
@@ -408,5 +408,197 @@ steps:
       `.trim();
     const suggestions = await getSuggestions(yamlContent);
     expect(suggestions.map((s) => s.insertText)).toEqual(expect.arrayContaining(['["api-url"]']));
+  });
+
+  describe('@ completion restriction to value nodes', () => {
+    it('should provide @ completions when cursor is in value node (after colon)', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: step1
+    type: console
+    with:
+      message: @|<-
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      expect(suggestions.length).toBeGreaterThan(0);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'consts',
+          'event',
+          'now',
+          'workflow',
+          'steps',
+          'execution',
+          'inputs',
+        ])
+      );
+      // Verify that suggestions include curly braces when not already inside braces
+      const constsSuggestion = suggestions.find((s) => s.label === 'consts');
+      expect(constsSuggestion?.insertText).toContain('{{');
+      expect(constsSuggestion?.insertText).toContain('}}');
+    });
+
+    it('should provide @ completions in quoted string value', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "@|<-"
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      expect(suggestions.length).toBeGreaterThan(0);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'consts',
+          'event',
+          'now',
+          'workflow',
+          'steps',
+          'execution',
+          'inputs',
+        ])
+      );
+    });
+  });
+
+  describe('@ completion inside existing curly braces', () => {
+    it('should NOT add extra curly braces when already inside {{ }}', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "{{ consts.@|<-"
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      const apiUrlSuggestion = suggestions.find((s) => s.label === 'apiUrl');
+      // Should insert just "apiUrl" without adding {{ }}
+      expect(apiUrlSuggestion).toBeDefined();
+      expect(apiUrlSuggestion?.insertText).toBe('apiUrl');
+      expect(apiUrlSuggestion?.insertText).not.toContain('{{');
+      expect(apiUrlSuggestion?.insertText).not.toContain('}}');
+    });
+
+    it('should add curly braces when NOT inside existing braces', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: step1
+    type: console
+    with:
+      message: @|<-
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      const constsSuggestion = suggestions.find((s) => s.label === 'consts');
+      // Should insert with {{ }}
+      expect(constsSuggestion).toBeDefined();
+      expect(constsSuggestion?.insertText).toContain('{{');
+      expect(constsSuggestion?.insertText).toContain('}}');
+    });
+
+    it('should handle nested braces correctly', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "{{ outer {{ consts.@|<-"
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      const apiUrlSuggestion = suggestions.find((s) => s.label === 'apiUrl');
+      // Should detect we're inside and not add extra braces
+      expect(apiUrlSuggestion).toBeDefined();
+      expect(apiUrlSuggestion?.insertText).not.toContain('{{');
+      expect(apiUrlSuggestion?.insertText).not.toContain('}}');
+    });
+
+    it('should handle unclosed braces correctly', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "{{ consts.@|<-"
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      const apiUrlSuggestion = suggestions.find((s) => s.label === 'apiUrl');
+      // Should detect we're inside unclosed braces and not add extra braces
+      expect(apiUrlSuggestion).toBeDefined();
+      expect(apiUrlSuggestion?.insertText).not.toContain('{{');
+      expect(apiUrlSuggestion?.insertText).not.toContain('}}');
+    });
+
+    it('should add braces when @ is used outside of braces in quoted string', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "some text @|<-"
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      const constsSuggestion = suggestions.find((s) => s.label === 'consts');
+      // Should add braces since we're not inside existing braces
+      expect(constsSuggestion).toBeDefined();
+      expect(constsSuggestion?.insertText).toContain('{{');
+      expect(constsSuggestion?.insertText).toContain('}}');
+    });
+
+    it('should support multiple @ completions in the same expression', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+inputs:
+  threshold: 100
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "{{ consts.@ + inputs.@|<-"
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      // Should show suggestions for inputs (the path before the second @)
+      const thresholdSuggestion = suggestions.find((s) => s.label === 'threshold');
+      expect(thresholdSuggestion).toBeDefined();
+      expect(thresholdSuggestion?.insertText).toBe('threshold');
+      expect(thresholdSuggestion?.insertText).not.toContain('{{');
+      expect(thresholdSuggestion?.insertText).not.toContain('}}');
+
+      // Should also show other inputs properties
+      const inputsSuggestions = suggestions.filter(
+        (s) => s.label === 'threshold' || s.label === 'inputs'
+      );
+      expect(inputsSuggestions.length).toBeGreaterThan(0);
+    });
   });
 });
