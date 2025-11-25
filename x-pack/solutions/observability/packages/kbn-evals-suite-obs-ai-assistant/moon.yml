@@ -18,7 +18,7 @@ project:
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant
 dependsOn:
-  - '@kbn/apm-synthtrace-client'
+  - '@kbn/synthtrace-client'
   - '@kbn/evals'
   - '@kbn/observability-ai-assistant-plugin'
   - '@kbn/tooling-log'
@@ -34,7 +34,7 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/scout'
   - '@kbn/some-dev-log'
-  - '@kbn/apm-synthtrace'
+  - '@kbn/synthtrace'
   - '@kbn/onechat-common'
 tags:
   - functional-tests

@@ -78,7 +78,7 @@ dependsOn:
   - '@kbn/monaco'
   - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/utility-types'
-  - '@kbn/apm-synthtrace-client'
+  - '@kbn/synthtrace-client'
   - '@kbn/streamlang'
   - '@kbn/failure-store-modal'
   - '@kbn/data-quality'

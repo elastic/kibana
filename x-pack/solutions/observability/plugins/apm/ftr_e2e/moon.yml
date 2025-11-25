@@ -19,8 +19,8 @@ project:
     sourceRoot: x-pack/solutions/observability/plugins/apm/ftr_e2e
 dependsOn:
   - '@kbn/test'
-  - '@kbn/apm-synthtrace'
-  - '@kbn/apm-synthtrace-client'
+  - '@kbn/synthtrace'
+  - '@kbn/synthtrace-client'
   - '@kbn/axe-config'
   - '@kbn/cypress-config'
   - '@kbn/apm-plugin'
