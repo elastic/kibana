@@ -30,6 +30,7 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
   const dateFormat = useUiSetting<string>('dateFormat');
 
   const tags = alert?.fields[TAGS];
+  const workflowTags = alert?.fields['kibana.alert.workflow_tags'];
 
   if (!alert) {
     return null;
@@ -54,6 +55,9 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
       <CaseLinks alert={alert} />
       <EuiFlexItem grow={false}>
         <TagsList tags={tags} ignoreEmpty color="default" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <TagsList tags={workflowTags} ignoreEmpty color="default" />
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={{ minWidth: 100 }}>
         <EuiFlexGroup gutterSize="none">
