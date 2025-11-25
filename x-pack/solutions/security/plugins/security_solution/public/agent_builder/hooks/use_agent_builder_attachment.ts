@@ -18,6 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { ChatResponse } from '@kbn/onechat-plugin/common/http_api/chat';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useAppUrl } from '../../common/lib/kibana/hooks';
 
@@ -113,11 +114,15 @@ export const useAgentBuilderAttachment = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const openAgentBuilderFlyout = useCallback(async () => {
+    if (!http || !application) {
+      return;
+    }
+
     setIsLoading(true);
     try {
       // TODO: This API call is temporary until the agent builder UI is ready.
       // Once the UI is ready, this will open a flyout with the attachment data instead.
-      const result = await http.post('/api/agent_builder/converse', {
+      const result = await http.post<ChatResponse>('/api/agent_builder/converse', {
         body: JSON.stringify({
           input: attachmentPrompt,
           attachments: [
@@ -139,7 +144,7 @@ export const useAgentBuilderAttachment = ({
         : null;
 
       const onViewConversationClick = () => {
-        if (conversationUrl) {
+        if (conversationUrl && application) {
           application.navigateToUrl(conversationUrl);
         }
       };
@@ -157,15 +162,16 @@ export const useAgentBuilderAttachment = ({
         title: i18n.translate('xpack.securitySolution.agentBuilder.attachment.successTitle', {
           defaultMessage: 'Agent builder conversation started',
         }),
-        text: conversationUrl
-          ? toMountPoint(
-              React.createElement(AgentBuilderToastSuccessContent, {
-                content: renderContent,
-                onViewConversationClick,
-              }),
-              { i18n: i18nService, theme, userProfile }
-            )
-          : renderContent,
+        text:
+          conversationUrl && i18nService && theme
+            ? toMountPoint(
+                React.createElement(AgentBuilderToastSuccessContent, {
+                  content: renderContent,
+                  onViewConversationClick,
+                }),
+                { i18n: i18nService, theme, userProfile }
+              )
+            : renderContent,
       });
     } catch (error) {
       toasts.addError(error, {

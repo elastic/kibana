@@ -35,7 +35,7 @@ const isRiskEntityFormattedData = (data: unknown): data is string => {
  */
 export const createRiskEntityAttachmentType = (): AttachmentTypeDefinition => {
   return {
-    id: SecurityAgentBuilderAttachments.alert,
+    id: SecurityAgentBuilderAttachments.risk_entity,
     validate: (input) => {
       const parseResult = riskEntityAttachmentDataSchema.safeParse(input);
       if (parseResult.success) {

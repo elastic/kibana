@@ -705,7 +705,7 @@ export const ESSENTIAL_ALERT_FIELDS = [
 ] as const;
 
 export enum SecurityAgentBuilderAttachments {
-  attack_discovery = 'attack_discovery',
-  alert = 'alert',
-  risk_entity = 'alert',
+  attack_discovery = 'security.attack_discovery',
+  alert = 'security.alert',
+  risk_entity = 'security.risk_entity',
 }

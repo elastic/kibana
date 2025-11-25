@@ -243,44 +243,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       return;
     }
 
-    // Register alert attachment type
-    try {
-      onechat.attachments.registerType(createAlertAttachmentType());
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('already registered')) {
-        this.logger.debug(
-          'Alert attachment type already registered by onechat plugin, using built-in version'
-        );
-      } else {
-        this.logger.warn(`Failed to register alert attachment type: ${error}`);
-      }
-    }
-
-    // Register attack discovery attachment type
-    try {
-      onechat.attachments.registerType(createAttackDiscoveryAttachmentType());
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('already registered')) {
-        this.logger.debug(
-          'Attack discovery attachment type already registered by onechat plugin, using built-in version'
-        );
-      } else {
-        this.logger.warn(`Failed to register attack discovery attachment type: ${error}`);
-      }
-    }
-
-    // Register risk entity attachment type
-    try {
-      onechat.attachments.registerType(createRiskEntityAttachmentType());
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('already registered')) {
-        this.logger.debug(
-          'Risk entity attachment type already registered by onechat plugin, using built-in version'
-        );
-      } else {
-        this.logger.warn(`Failed to register risk entity attachment type: ${error}`);
-      }
-    }
+    onechat.attachments.registerType(createAlertAttachmentType());
+    onechat.attachments.registerType(createAttackDiscoveryAttachmentType());
+    onechat.attachments.registerType(createRiskEntityAttachmentType());
 
     // Register tools
     try {

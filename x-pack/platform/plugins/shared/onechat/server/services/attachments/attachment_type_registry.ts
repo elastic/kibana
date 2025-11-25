@@ -24,9 +24,12 @@ class AttachmentTypeRegistryImpl implements AttachmentTypeRegistry {
   constructor() {}
 
   register(type: AttachmentTypeDefinition) {
+    console.log('register ==>', type);
     if (this.attachmentTypes.has(type.id)) {
+      console.log('register error ==>', type.id);
       throw new Error(`Attachment type with id ${type.id} already registered`);
     }
+    console.log('register add ==>', type.id);
     this.attachmentTypes.set(type.id, type);
   }
 

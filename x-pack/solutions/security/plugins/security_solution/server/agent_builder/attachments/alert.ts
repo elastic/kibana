@@ -40,7 +40,6 @@ export const createAlertAttachmentType = (): AttachmentTypeDefinition => {
   return {
     id: SecurityAgentBuilderAttachments.alert,
     validate: (input) => {
-      console.log('alert validate');
       const parseResult = alertAttachmentDataSchema.safeParse(input);
       if (parseResult.success) {
         return { valid: true, data: parseResult.data };

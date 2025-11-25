@@ -36,7 +36,6 @@ export const createAttackDiscoveryAttachmentType = (): AttachmentTypeDefinition 
   return {
     id: SecurityAgentBuilderAttachments.attack_discovery,
     validate: (input) => {
-      console.log('attack_discovery validate');
       const parseResult = attackDiscoveryAttachmentDataSchema.safeParse(input);
       if (parseResult.success) {
         return { valid: true, data: parseResult.data };
