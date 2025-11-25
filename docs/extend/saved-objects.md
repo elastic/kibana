@@ -229,7 +229,7 @@ This API also intend to address minor DX issues of the old migration system, by 
 With the previous migration system, migrations were defined per stack version, meaning that the "granularity" for defining
 migrations was the stack version. You couldn't for example, add 2 consecutive migrations on `8.6.0` (to be executed at different points in time).
 
-It was fine for on-prem distributions, given there is no way to upgrade Kibana to something else than a "fixed" stack version.
+It was fine for on-prem distributions, given there is no way to upgrade {{kib}} to something else than a "fixed" stack version.
 
 For our managed offering however, where we're planning on decoupling deployments and upgrades from stack versions
 (deploying more often, so more than once per stack release), it would have been an issue, as it wouldn't have been possible
@@ -241,14 +241,14 @@ We needed a way to decouple SO versioning from the stack versioning to support t
 
 ### 2. The current migrations API is unsafe for the zero-downtime and backward-compatible requirements
 
-On traditional deployments (on-prem/non-managed cloud), upgrading Kibana is done with downtime.
+On traditional deployments (on-prem/non-managed cloud), upgrading {{kib}} is done with downtime.
 The upgrade process requires shutting down all the nodes of the prior version before deploying the new one.
-That way, there is always a single version of Kibana running at a given time, which avoids all risks of data incompatibility
+That way, there is always a single version of {{kib}} running at a given time, which avoids all risks of data incompatibility
 between version (e.g the new version introduces a migration that changes the shape of the document in a way that breaks compatibility
 with the previous version)
 
-For serverless however, the same process can't be used, as we need to be able to upgrade Kibana without interruption of service.
-Which means that the old and new version of Kibana will have to cohabitate for a time.
+For Serverless however, the same process can't be used, as we need to be able to upgrade {{kib}} without interruption of service.
+Which means that the old and new version of {{kib}} will have to cohabitate for a time.
 
 This leads to a lot of constraints regarding what can, or cannot, be done with data transformations (migrations) during an upgrade.
 And, unsurprisingly, the existing migration API (which allows to register any kind of *(doc) => doc* transformations) was way too permissive and
@@ -526,7 +526,7 @@ Forward compatibility schema can be implemented in two different ways.
     ```
 
     :::{note}
-    Even if highly recommended, implementing this schema is not strictly required. Type owners can manage unknown fields and inter-version compatibility themselves in their service layer instead.
+    Starting with {{kib}} 9.3.0, all new model versions must include a `forwardCompatibility` schema. This new requirement is designed to ensure that if a Serverless instance needs to be rolled back to an earlier version, the Saved Objects APIs will still deliver data in the original, pre-upgrade format, thereby maintaining API compatibility and safety during the rollback process.
     :::
 
 #### create [_create]
@@ -1053,15 +1053,15 @@ const myType: SavedObjectsType = {
 };
 ```
 
-### Testing model versions [_testing_model_versions]
+## Testing model versions [_testing_model_versions]
 
 Model versions definitions are more structured than the legacy migration functions, which makes them harder to test without the proper tooling. This is why a set of testing tools and utilities are exposed from the `@kbn/core-test-helpers-model-versions` package, to help properly test the logic associated with model version and their associated transformations.
 
-#### Tooling for unit tests [_tooling_for_unit_tests]
+### Tooling for unit tests [_tooling_for_unit_tests]
 
 For unit tests, the package exposes utilities to easily test the impact of transforming documents from a model version to another one, either upward or backward.
 
-##### Model version test migrator [_model_version_test_migrator]
+#### Model version test migrator [_model_version_test_migrator]
 
 The `createModelVersionTestMigrator` helper allows to create a test migrator that can be used to test model version changes between versions, by transforming documents the same way the migration algorithm would during an upgrade.
 
@@ -1110,11 +1110,11 @@ describe('mySoTypeDefinition model version transformations', () => {
 });
 ```
 
-#### Tooling for integration tests [_tooling_for_integration_tests]
+### Tooling for integration tests [_tooling_for_integration_tests]
 
 During integration tests, we can boot a real {{es}} cluster, allowing us to manipulate SO documents in a way almost similar to how it would be done on production runtime. With integration tests, we can even simulate the cohabitation of two {{kib}} instances with different model versions to assert the behavior of their interactions.
 
-##### Model version test bed [_model_version_test_bed]
+#### Model version test bed
 
 The package exposes a `createModelVersionTestBed` function that can be used to fully setup a test bed for model version integration testing. It can be used to start and stop the ES server, and to initiate the migration between the two versions we’re testing.
 
@@ -1183,6 +1183,80 @@ Because the test bed is only creating the parts of Core required to instantiate 
   * no spaces
 
 * all SO types will be using the same SO index
+
+## Ensuring Safe Saved Objects Type Changes
+
+Since `Saved Objects` are critical to {{kib}}, any changes to their type definitions must adhere to strict safety criteria to prevent:
+
+* Data corruption.
+* Unsupported changes in mappings.
+* Rollback issues, should the need arise.
+
+To enforce these criteria, a validation logic has been implemented. This logic automatically identifies changed types and performs a series of checks to confirm the changes are acceptable. It runs automatically in CI during the `pull_request` and `on-merge` pipelines, and developers can also run it manually on their workstations.
+
+### Manually running Saved Objects checks
+
+The checks can be run manually using the following command in your PR branch:
+
+```shell
+# First, find your current commit ID <lastCommitId>
+git log -n 1
+
+# Second, find the merge-base commit (the example assumes you are developing on 'main' branch)
+git merge-base -a <lastCommitId> main
+
+# Finally, run the script in your local environment (validating changes with respect to that merge-base commit)
+node scripts/check_saved_objects --baseline <mergeBase> --fix
+```
+
+Please refer to the [Troubleshooting](#troubleshooting) section if you encounter validation errors.
+
+### Saved Object Type Validation Rules
+
+The following validations are performed to ensure changes to Saved Object types adhere to necessary constraints and maintain compatibility across environments.
+
+#### Immutability Constraints
+
+* **Existing Model Versions/Migrations:** Once defined, existing model versions and migrations cannot be mutated (changed or deleted).
+
+  * Rationale: This prevents discrepancies between environments that have already upgraded and those that have not.
+
+* **Deleting Model Versions/Migrations:** You cannot delete existing model versions; you can only define new ones.
+
+#### Versioning Requirements
+
+* **Model Version Sequence:** Defined model versions must be consecutive integers, starting at 1. You cannot skip any version number.
+
+* **Single Model Version per PR:** A given *Pull Request* cannot define more than one model version for the same Saved Object type.
+
+  * Rationale: If the changes are part of a 2-step rollout, they must be shipped in separate Serverless releases. The `on-merge` pipeline will compare changes against current serverless release.
+
+* **Legacy Migrations:** Types cannot define new versions using the legacy `migrations:` property, as it is deprecated.
+
+#### Mapping and Schema Compatibility
+
+* **Mapping Changes Require New Version:** If you update the mappings, you must also provide a new model version that accounts for those mapping changes.
+
+* **Backward Compatible Mappings:** To satisfy migration constraints, updates to mappings must be performed in place and without requiring a reindex. Therefore, all mapping updates must be compatible.
+
+  * Note: {{es}} has limitations preventing certain breaking changes, such as removing fields or updating the data types of fields (e.g., changing an `integer` to a `text`).
+
+* **Mandatory Schemas:** New model versions must include the `create` and `forwardCompatibility` schemas, as these are now mandatory.
+
+### Ensuring Robust Serverless Rollbacks
+
+To provide guarantees for Serverless rollbacks, the validation script requires type owners to supply data fixtures for any updated Saved Object types.
+
+* These fixtures represent the before-upgrade and after-upgrade states.
+* They are crucial for automated testing of the upgrade and rollback processes.
+
+When a Saved Object type is updated, the script performs the following sequence using internal tools:
+
+* Simulate Upgrade $\rightarrow$ Simulate Rollback $\rightarrow$ Simulate Second Upgrade.
+* At each step, it queries the stored documents via the `SavedObjectsRepository`.
+* The script then validates that the documents' shape precisely matches the corresponding fixture.
+
+While automated rollback testing introduces a new requirement for developers —specifically, providing data fixtures and defining mandatory `create` and `forwardCompatibility` schemas for each new model version— this effort is a significant gain. This powerful addition complements the [Test Bed](#model-version-test-bed), allowing type owners to fully test both migration logic and rollback scenarios simply by supplying the necessary data fixtures.
 
 ## How to opt-out of the global savedObjects APIs?
 
@@ -1282,9 +1356,9 @@ Before removing a type, ensure:
 * **Data migration is complete**: If users have documents of this type, ensure they've been migrated to a new type or are no longer needed
 * **Coordinate with stakeholders**: Confirm with your team and any dependent teams that the removal is expected
 
-## Limitations and edge cases in serverless environments [_limitations_and_edge_cases_in_serverless_environments]
+## Limitations and edge cases in Serverless environments [_limitations_and_edge_cases_in_serverless_environments]
 
-The serverless environment, and the fact that upgrade in such environments are performed in a way where, at some point, the old and new version of the application are living in cohabitation, leads to some particularities regarding the way the SO APIs works, and to some limitations / edge case that we need to document
+The Serverless environment, and the fact that upgrade in such environments are performed in a way where, at some point, the old and new version of the application are living in cohabitation, leads to some particularities regarding the way the SO APIs works, and to some limitations / edge case that we need to document
 
 ### Using the `fields` option of the `find` savedObjects API [_using_the_fields_option_of_the_find_savedobjects_api]
 
@@ -1329,7 +1403,7 @@ Please find your error in the list below, to understand what scenario your PR is
 ❌ Some model versions have been deleted for SO type '<soType>'.
 ```
 
-**Problem:** For the same reasons as the previous error, `modelVersions` cannot be deleted. In this scenario, it could happen that your PR stems from a commit that is older than the current serverless release, and is missing `modelVersions` for some SO types.
+**Problem:** For the same reasons as the previous error, `modelVersions` cannot be deleted. In this scenario, it could happen that your PR stems from a commit that is older than the current Serverless release, and is missing `modelVersions` for some SO types.
 **Solution:** Rebase your PR to get the latest SO type definitions.
 
 ```shell
@@ -1356,7 +1430,7 @@ These errors are pretty obvious. Model versions must be defined as consecutive n
 **Scenario 2:** I have only defined 1 new `modelVersion`. My PR was green before and all of a sudden it started failing :shrug:. The sanity checks on SO changes are performed against 2 baselines:
 
 * Your PR merge base commit (or one of its ancestors). This should not change, so likely not the culprit.
-* The current serverless release. If a high-severity issue occurs, Serverless might be rolled back to a previous version. This could in turn impact CI pipelines for PRs that would otherwise be fine. In other words, *"from the current serverless standpoint, your PR is not releasable at the moment"* . This should only happen exceptionally.
+* The current Serverless release. If a high-severity issue occurs, Serverless might be rolled back to a previous version. This could in turn impact CI pipelines for PRs that would otherwise be fine. In other words, *"from the current Serverless standpoint, your PR is not releasable at the moment"* . This should only happen exceptionally.
 
   * **Scenario 2.1**: {{kib}} has been rolled back. Please wait until the situation goes back to normal, i.e. an emergency release is performed after the rollback, and {{kib}} gets to a normal release state.
   * **Scenario 2.2**: {{kib}} has NOT been rolled back. Reach out to the {{kib}} Core team and we will help you figure out what's going on.
