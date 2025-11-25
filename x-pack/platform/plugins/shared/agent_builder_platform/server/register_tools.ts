@@ -16,23 +16,22 @@ import {
   listIndicesTool,
   indexExplorerTool,
   createVisualizationTool,
-} from './definitions';
+} from './tools';
 import type {
-  OnechatSetupDependencies,
-  OnechatStartDependencies,
-  OnechatPluginStart,
-} from '../../../types';
-import type { ToolsServiceSetup } from '../types';
+  PluginSetupDependencies,
+  PluginStartDependencies,
+  AgentBuilderPlatformPluginStart,
+} from './types';
 
-export const registerBuiltinTools = ({
-  registry,
+export const registerTools = ({
   coreSetup,
   setupDeps,
 }: {
-  registry: ToolsServiceSetup;
-  coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>;
-  setupDeps: OnechatSetupDependencies;
+  coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
+  setupDeps: PluginSetupDependencies;
 }) => {
+  const { onechat } = setupDeps;
+
   const tools: Array<BuiltinToolDefinition<any>> = [
     searchTool(),
     getDocumentByIdTool(),
@@ -45,6 +44,6 @@ export const registerBuiltinTools = ({
   ];
 
   tools.forEach((tool) => {
-    registry.register(tool);
+    onechat.tools.register(tool);
   });
 };

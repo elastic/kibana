@@ -6,13 +6,16 @@
  */
 
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { OnechatPluginSetup, OnechatPluginStart } from '@kbn/onechat-plugin/server';
 
 export interface PluginSetupDependencies {
   workflowsManagement?: WorkflowsServerPluginSetup;
+  onechat: OnechatPluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginStartDependencies {}
+export interface PluginStartDependencies {
+  onechat: OnechatPluginStart;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderPlatformPluginSetup {}

@@ -9,7 +9,7 @@
     "server": true,
     "browser": false,
     "configPath": ["xpack", "agentBuilderPlatform"],
-    "requiredPlugins": [],
+    "requiredPlugins": ["onechat"],
     "requiredBundles": [],
     "optionalPlugins": ["workflowsManagement"],
     "extraPublicDirs": []

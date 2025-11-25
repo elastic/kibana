@@ -14,6 +14,7 @@ import type {
   AgentBuilderPlatformPluginSetup,
   AgentBuilderPlatformPluginStart,
 } from './types';
+import { registerTools } from './register_tools';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -38,13 +39,15 @@ export class AgentBuilderPlatformPlugin
     coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>,
     setupDeps: PluginSetupDependencies
   ): AgentBuilderPlatformPluginSetup {
+    registerTools({
+      coreSetup,
+      setupDeps,
+    });
+
     return {};
   }
 
-  start(
-    { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
-    { inference, spaces }: PluginStartDependencies
-  ): AgentBuilderPlatformPluginStart {
+  start(coreStart: CoreStart, startDeps: PluginStartDependencies): AgentBuilderPlatformPluginStart {
     return {};
   }
 
