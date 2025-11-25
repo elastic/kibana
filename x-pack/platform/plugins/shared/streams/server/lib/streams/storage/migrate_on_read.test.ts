@@ -268,7 +268,7 @@ describe('migrateOnRead', () => {
       const result = migrateOnRead(definition);
 
       expect((result as any).ingest.failure_store).toEqual({
-        lifecycle: { enabled: { data_retention: '30d', is_default_retention: false } },
+        lifecycle: { enabled: { data_retention: '30d' } },
       });
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });

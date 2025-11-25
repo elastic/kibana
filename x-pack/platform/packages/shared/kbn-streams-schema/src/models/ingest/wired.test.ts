@@ -108,7 +108,7 @@ describe('WiredStream', () => {
         effective_settings: {},
         inherited_fields: {},
         effective_failure_store: {
-          lifecycle: { enabled: { data_retention: '30d', is_default_retention: true } },
+          lifecycle: { enabled: { data_retention: '30d', is_default: true } },
           from: 'logs',
         },
         ...emptyAssets,

@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { Streams } from '@kbn/streams-schema';
+import type { EffectiveFailureStore, Streams } from '@kbn/streams-schema';
 import { useFailureStoreConfig, transformFailureStoreConfig } from './use_failure_store_config';
 
 const createBaseDefinition = (name: string): Partial<Streams.ingest.all.GetResponse> => ({
@@ -24,7 +24,7 @@ const createBaseDefinition = (name: string): Partial<Streams.ingest.all.GetRespo
 
 const createClassicDefinition = (
   name: string,
-  failureStoreConfig: any
+  failureStoreConfig: EffectiveFailureStore
 ): Streams.ClassicStream.GetResponse => ({
   ...createBaseDefinition(name),
   stream: {
@@ -55,7 +55,7 @@ const createClassicDefinition = (
 
 const createWiredDefinition = (
   name: string,
-  failureStoreConfig: any,
+  failureStoreConfig: EffectiveFailureStore,
   isRoot: boolean = false
 ): Streams.WiredStream.GetResponse => ({
   ...createBaseDefinition(name),
@@ -101,7 +101,7 @@ describe('useFailureStoreConfig', () => {
         lifecycle: {
           enabled: {
             data_retention: '7d',
-            is_default_retention: false,
+            is_default: false,
           },
         },
       });
@@ -124,9 +124,7 @@ describe('useFailureStoreConfig', () => {
     it('should return config for enabled failure store without custom retention', () => {
       const definition = createClassicDefinition('logs-test', {
         lifecycle: {
-          enabled: {
-            is_default_retention: true,
-          },
+          enabled: { is_default: true },
         },
       });
 
@@ -192,11 +190,12 @@ describe('useFailureStoreConfig', () => {
         lifecycle: {
           enabled: {
             data_retention: '14d',
+            is_default: false,
           },
         },
       });
       definition.stream.ingest.failure_store = {
-        lifecycle: { enabled: { data_retention: '14d', is_default_retention: false } },
+        lifecycle: { enabled: { data_retention: '14d' } },
       };
 
       const { result } = renderHook(() => useFailureStoreConfig(definition));
@@ -211,7 +210,7 @@ describe('useFailureStoreConfig', () => {
         lifecycle: {
           enabled: {
             data_retention: '5d',
-            is_default_retention: false,
+            is_default: false,
           },
         },
       });
@@ -236,7 +235,7 @@ describe('useFailureStoreConfig', () => {
         lifecycle: {
           enabled: {
             data_retention: '30d',
-            is_default_retention: true,
+            is_default: true,
           },
         },
       });
@@ -252,12 +251,12 @@ describe('useFailureStoreConfig', () => {
         lifecycle: {
           enabled: {
             data_retention: '10d',
-            is_default_retention: false,
+            is_default: false,
           },
         },
       });
       definition.stream.ingest.failure_store = {
-        lifecycle: { enabled: { data_retention: '10d', is_default_retention: false } },
+        lifecycle: { enabled: { data_retention: '10d' } },
       };
 
       const { result } = renderHook(() => useFailureStoreConfig(definition));
@@ -275,14 +274,15 @@ describe('useFailureStoreConfig', () => {
           lifecycle: {
             enabled: {
               data_retention: '30d',
-              is_default_retention: true,
+              is_default: true,
             },
           },
         },
         true
       );
+      // For root streams, failure_store should not be inherited
       definition.stream.ingest.failure_store = {
-        lifecycle: { enabled: { data_retention: '30d', is_default_retention: true } },
+        lifecycle: { enabled: { data_retention: '30d' } },
       };
 
       const { result } = renderHook(() => useFailureStoreConfig(definition));
@@ -307,14 +307,14 @@ describe('useFailureStoreConfig', () => {
           lifecycle: {
             enabled: {
               data_retention: '60d',
-              is_default_retention: false,
+              is_default: false,
             },
           },
         },
         true
       );
       definition.stream.ingest.failure_store = {
-        lifecycle: { enabled: { data_retention: '60d', is_default_retention: false } },
+        lifecycle: { enabled: { data_retention: '60d' } },
       };
 
       const { result } = renderHook(() => useFailureStoreConfig(definition));
@@ -358,7 +358,7 @@ describe('transformFailureStoreConfig', () => {
     });
 
     expect(result).toEqual({
-      lifecycle: { enabled: { is_default_retention: true } },
+      lifecycle: { enabled: {} },
     });
   });
 
@@ -369,7 +369,7 @@ describe('transformFailureStoreConfig', () => {
     });
 
     expect(result).toEqual({
-      lifecycle: { enabled: { data_retention: '15d', is_default_retention: false } },
+      lifecycle: { enabled: { data_retention: '15d' } },
     });
   });
 

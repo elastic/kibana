@@ -41,12 +41,7 @@ export function transformFailureStoreConfig(update: {
     'customRetentionPeriod' in update ? update.customRetentionPeriod : undefined;
 
   return {
-    lifecycle: {
-      enabled: {
-        ...(customRetentionPeriod ? { data_retention: customRetentionPeriod } : {}),
-        is_default_retention: customRetentionPeriod === undefined,
-      },
-    },
+    lifecycle: { enabled: { data_retention: customRetentionPeriod } },
   };
 }
 
@@ -60,9 +55,7 @@ export function useFailureStoreConfig(definition: Streams.ingest.all.GetResponse
   const failureStoreEnabled = isEnabledFailureStore(failureStore);
   const retentionDisabled = isDisabledLifecycleFailureStore(failureStore);
   const isDefaultRetention =
-    failureStoreEnabled &&
-    !retentionDisabled &&
-    failureStore.lifecycle.enabled.is_default_retention;
+    failureStoreEnabled && !retentionDisabled && failureStore.lifecycle.enabled.is_default;
   const retentionPeriod =
     failureStoreEnabled && !retentionDisabled
       ? failureStore.lifecycle.enabled.data_retention
