@@ -124,14 +124,22 @@ export const VirusTotalConnector: StoryObj<StoryArgs> = {
   },
 };
 
+export const NestedObjectExample: StoryObj<StoryArgs> = {
+  render: (args) => {
+    return <FormWrapper schema={NestedObjectSchema} onSubmit={submit} disabled={args.disabled} />;
+  },
+};
+
 const webhookConnectorFormSchema = z.object({
-  method: z
-    .enum(['POST', 'PUT', 'GET', 'DELETE'])
-    .meta({
-      label: 'Method',
-    })
-    .default('GET'),
-  url: z.url().meta({ label: 'URL', placeholder: 'https://...' }),
+  config: z.object({
+    method: z
+      .enum(['POST', 'PUT', 'GET', 'DELETE'])
+      .meta({
+        label: 'Method',
+      })
+      .default('GET'),
+    url: z.url().meta({ label: 'URL', placeholder: 'https://...' }),
+  }),
   secrets: z
     .discriminatedUnion('authType', [
       z.object({ authType: z.literal('none') }).meta({
@@ -259,4 +267,47 @@ const VirusTotalConnectorSchema = z.object({
         }),
     ])
     .meta({ widget: 'formFieldset', label: 'Authentication' }),
+});
+
+const NestedObjectSchema = z.object({
+  name: z.string().meta({
+    label: 'Application Name',
+    placeholder: 'My Application',
+  }),
+  server: z.object({
+    host: z.string().meta({
+      label: 'Server Host',
+      placeholder: 'localhost',
+      helpText: 'The hostname or IP address of the server',
+    }),
+    port: z.string().meta({
+      label: 'Server Port',
+      placeholder: '8080',
+      helpText: 'The port number to connect to',
+    }),
+  }),
+  database: z.object({
+    host: z.string().meta({
+      label: 'Database Host',
+      placeholder: 'db.example.com',
+    }),
+    port: z.string().meta({
+      label: 'Database Port',
+      placeholder: '5432',
+    }),
+    name: z.string().meta({
+      label: 'Database Name',
+      placeholder: 'mydb',
+    }),
+    credentials: z.object({
+      username: z.string().min(1, { message: 'Username is required' }).meta({
+        label: 'Username',
+        placeholder: 'dbuser',
+      }),
+      password: z.string().min(1, { message: 'Password is required' }).meta({
+        label: 'Password',
+        sensitive: true,
+      }),
+    }),
+  }),
 });

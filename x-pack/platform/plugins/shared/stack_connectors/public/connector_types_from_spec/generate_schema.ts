@@ -10,13 +10,8 @@ import type { ConnectorSpec } from '@kbn/connector-specs';
 import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib';
 
 export const generateSchema = (spec: ConnectorSpec) => {
-  const config = spec.schema ?? z4.object({});
-  const secrets = z4.object({
-    secrets: generateSecretsSchemaFromSpec(spec.authTypes),
-  });
-
   return z4.object({
-    ...config.shape,
-    ...secrets.shape,
+    config: spec.schema ?? z4.object({}),
+    secrets: generateSecretsSchemaFromSpec(spec.authTypes),
   });
 };

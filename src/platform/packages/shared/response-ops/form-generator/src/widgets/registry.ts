@@ -16,6 +16,7 @@ import { SelectWidget } from './components/select_widget';
 import { PasswordWidget } from './components/password_widget';
 import { DiscriminatedUnionWidget } from './components/discriminated_union_widget';
 import { HiddenWidget } from './components/hidden_widget';
+import { ObjectWidget } from './components/object_widget';
 
 const WIDGET_REGISTRY = {
   [WidgetType.Text]: TextWidget,
@@ -23,6 +24,7 @@ const WIDGET_REGISTRY = {
   [WidgetType.Select]: SelectWidget,
   [WidgetType.FormFieldset]: DiscriminatedUnionWidget,
   [WidgetType.Hidden]: HiddenWidget,
+  [WidgetType.Object]: ObjectWidget,
 };
 
 const getDefaultWidgetForSchema = (schema: z.ZodType) => {
@@ -39,6 +41,8 @@ const getDefaultWidgetForSchema = (schema: z.ZodType) => {
     return WidgetType.Select;
   } else if (schema instanceof z.ZodDiscriminatedUnion) {
     return WidgetType.FormFieldset;
+  } else if (schema instanceof z.ZodObject) {
+    return WidgetType.Object;
   } else if (schema instanceof z.ZodLiteral) {
     addMeta(schema, { disabled: true });
     return WidgetType.Text;

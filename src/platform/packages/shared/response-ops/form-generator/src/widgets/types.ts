@@ -17,6 +17,7 @@ export enum WidgetType {
   Select = 'select',
   FormFieldset = 'formFieldset',
   Hidden = 'hidden',
+  Object = 'object',
 }
 
 export interface BaseWidgetProps<

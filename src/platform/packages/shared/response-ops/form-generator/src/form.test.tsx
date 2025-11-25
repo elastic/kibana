@@ -189,22 +189,24 @@ describe('Form', () => {
     });
   });
 
-  it('throws error when widget type is missing and no default is implemented', () => {
+  it('renders nested object fields automatically', () => {
     const schema = z.object({
-      // use another one if a default widget is defined for this type
-      username: z.object(/^[a-zA-Z0-9_]+$/),
+      server: z.object({
+        host: z.string().meta({
+          widget: 'text',
+          label: 'Host',
+        }),
+        port: z.string().meta({
+          widget: 'text',
+          label: 'Port',
+        }),
+      }),
     });
 
-    // Suppress console errors for this test
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    expect(() => {
-      render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"No widget found for schema type: ZodObject. Please specify a widget in the schema metadata."`
-    );
-
-    consoleError.mockRestore();
+    expect(screen.getByLabelText('Host', { selector: 'input' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Port', { selector: 'input' })).toBeInTheDocument();
   });
 
   it('throws error when unsupported widget type is provided', () => {
@@ -760,6 +762,119 @@ describe('Authentication Form Integration Tests', () => {
 
         expect(usernameInput).toBeDisabled();
         expect(passwordInput).toBeEnabled();
+      });
+    });
+  });
+});
+
+describe('Nested Object Widget Integration Tests', () => {
+  const mockOnSubmit = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('submits form with nested object data', async () => {
+    const schema = z.object({
+      server: z.object({
+        host: z.string().meta({
+          label: 'Host',
+        }),
+        port: z.string().meta({
+          label: 'Port',
+        }),
+      }),
+    });
+
+    render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
+
+    const hostInput = screen.getByLabelText('Host', { selector: 'input' });
+    const portInput = screen.getByLabelText('Port', { selector: 'input' });
+
+    fireEvent.change(hostInput, { target: { value: 'localhost' } });
+    fireEvent.change(portInput, { target: { value: '8080' } });
+
+    const submitButton = screen.getByRole('button', { name: 'Submit' });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockOnSubmit).toHaveBeenCalledWith({
+        data: {
+          server: {
+            host: 'localhost',
+            port: '8080',
+          },
+        },
+      });
+    });
+  });
+
+  it('validates nested object fields', async () => {
+    const schema = z.object({
+      credentials: z.object({
+        username: z.string().min(5, 'Username must be at least 5 characters').meta({
+          label: 'Username',
+        }),
+        email: z.email('Invalid email format').meta({
+          label: 'Email',
+        }),
+      }),
+    });
+
+    render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
+
+    const usernameInput = screen.getByLabelText('Username', { selector: 'input' });
+    const emailInput = screen.getByLabelText('Email', { selector: 'input' });
+
+    fireEvent.change(usernameInput, { target: { value: 'abc' } });
+    fireEvent.change(emailInput, { target: { value: 'invalid' } });
+
+    const submitButton = screen.getByRole('button', { name: 'Submit' });
+    fireEvent.click(submitButton);
+
+    expect(await screen.findByText('Username must be at least 5 characters')).toBeInTheDocument();
+    expect(await screen.findByText('Invalid email format')).toBeInTheDocument();
+
+    expect(mockOnSubmit).not.toHaveBeenCalled();
+  });
+
+  it('combines nested objects with top-level fields', async () => {
+    const schema = z.object({
+      name: z.string().meta({
+        label: 'Application Name',
+      }),
+      server: z.object({
+        host: z.string().meta({
+          label: 'Host',
+        }),
+        port: z.string().meta({
+          label: 'Port',
+        }),
+      }),
+    });
+
+    render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
+
+    const nameInput = screen.getByLabelText('Application Name', { selector: 'input' });
+    const hostInput = screen.getByLabelText('Host', { selector: 'input' });
+    const portInput = screen.getByLabelText('Port', { selector: 'input' });
+
+    fireEvent.change(nameInput, { target: { value: 'My App' } });
+    fireEvent.change(hostInput, { target: { value: 'localhost' } });
+    fireEvent.change(portInput, { target: { value: '3000' } });
+
+    const submitButton = screen.getByRole('button', { name: 'Submit' });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockOnSubmit).toHaveBeenCalledWith({
+        data: {
+          name: 'My App',
+          server: {
+            host: 'localhost',
+            port: '3000',
+          },
+        },
       });
     });
   });
