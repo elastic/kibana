@@ -14,7 +14,7 @@ export const TestSingleFileConnector: ConnectorSpec = {
     displayName: 'Test Single File Connector',
     description: 'Functional testing for single file connector registration',
     minimumLicense: 'gold',
-    supportedFeatureIds: ['alerting', 'siem'],
+    supportedFeatureIds: ['workflows'],
   },
 
   authTypes: [

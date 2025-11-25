@@ -38,6 +38,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
         headerField: 'Key',
       },
     },
+    'none',
   ],
 
   actions: {
