@@ -54,8 +54,10 @@ export const useAttackDetails = ({
   attackId,
   indexName,
 }: UseAttackEventDetailsParams): UseAttackEventDetailsResult => {
+  // Now we are retrieving all the browserFields from the data view associated with the attacks page
+  // TODO following the useCreateEaseAlertsDataView pattern, we should create a specific data view for the attack details
+  // https://github.com/elastic/kibana/issues/244205
   const pageScope = PageScope.attacks;
-
   const { dataView } = useDataView(pageScope);
   const browserFields = useBrowserFields(pageScope);
 
