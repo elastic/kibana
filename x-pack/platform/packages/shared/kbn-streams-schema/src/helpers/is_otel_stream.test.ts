@@ -14,6 +14,7 @@ describe('isOtelStream', () => {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
+        failure_store: { inherit: {} },
         processing: { steps: [] },
         settings: {},
         wired: { fields: {}, routing: [] },
@@ -28,6 +29,7 @@ describe('isOtelStream', () => {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
+        failure_store: { inherit: {} },
         processing: { steps: [] },
         settings: {},
         classic: {},
@@ -42,6 +44,7 @@ describe('isOtelStream', () => {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
+        failure_store: { inherit: {} },
         processing: { steps: [] },
         settings: {},
         classic: {},
