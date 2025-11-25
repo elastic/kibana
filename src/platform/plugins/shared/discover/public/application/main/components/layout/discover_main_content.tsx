@@ -15,8 +15,6 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { distinctUntilChanged, from, map } from 'rxjs';
-import { isEqual } from 'lodash';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
@@ -75,14 +73,12 @@ export const DiscoverMainContent = ({
   isChartAvailable,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
-  const isEsqlMode = useIsEsqlMode();
-
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
-  const setDiscoverViewMode = useCallback(
-    (mode: VIEW_MODE) => {
-      dispatch(updateAppState({ appState: { viewMode: mode } }));
+  const replaceAppState = useCurrentTabAction(internalStateActions.replaceAppState);
 
+  const setDiscoverViewMode = useCallback(
+    (mode: VIEW_MODE, replace?: boolean) => {
       if (trackUiMetric) {
         if (mode === VIEW_MODE.AGGREGATED_LEVEL) {
           trackUiMetric(METRIC_TYPE.CLICK, FIELD_STATISTICS_VIEW_CLICK);
@@ -93,27 +89,28 @@ export const DiscoverMainContent = ({
         }
       }
 
+      if (!replace) {
+        dispatch(updateAppState({ appState: { viewMode: mode } }));
+        return Promise.resolve(mode);
+      }
+
       return new Promise<VIEW_MODE>((resolve, reject) => {
         // return a promise to report when the view mode has been updated
-        const subscription = from(stateContainer.internalState)
-          .pipe(
-            map(() => stateContainer.getCurrentTab().appState),
-            distinctUntilChanged((a, b) => isEqual(a, b))
-          )
-          .subscribe((state) => {
-            subscription.unsubscribe();
+        dispatch(replaceAppState({ appState: { viewMode: mode } })).then(() => {
+          const appState = stateContainer.getCurrentTab().appState;
 
-            if (state.viewMode === mode) {
-              resolve(mode);
-            } else {
-              reject(mode);
-            }
-          });
+          if (appState.viewMode === mode) {
+            resolve(mode);
+          } else {
+            reject(mode);
+          }
+        });
       });
     },
-    [dispatch, stateContainer, trackUiMetric, updateAppState]
+    [dispatch, replaceAppState, stateContainer, trackUiMetric, updateAppState]
   );
 
+  const isEsqlMode = useIsEsqlMode();
   const isDropAllowed = Boolean(onDropFieldToTable);
 
   const renderViewModeToggle = useCallback(
@@ -191,7 +188,7 @@ export const DiscoverMainContent = ({
             <PatternAnalysisTab
               dataView={dataView}
               stateContainer={stateContainer}
-              switchToDocumentView={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
+              switchToDocumentView={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL, true)}
               trackUiMetric={trackUiMetric}
               renderViewModeToggle={renderViewModeToggle}
             />
