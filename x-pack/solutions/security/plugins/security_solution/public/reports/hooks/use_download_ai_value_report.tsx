@@ -24,14 +24,15 @@ export const useDownloadAIValueReport = ({
   const { share: shareService, serverless } = useKibana().services;
   const isServerless = !!serverless;
   const aiValueExportContext = useAIValueExportContext();
+  const buildForwardedState = aiValueExportContext?.buildForwardedState;
 
   const forwardedState = useMemo(() => {
-    if (!aiValueExportContext?.buildForwardedState) {
+    if (!buildForwardedState) {
       return undefined;
     }
 
-    return aiValueExportContext.buildForwardedState({ timeRange });
-  }, [timeRange, aiValueExportContext?.buildForwardedState]);
+    return buildForwardedState({ timeRange });
+  }, [timeRange, buildForwardedState]);
 
   const isExportEnabled =
     forwardedState !== undefined &&
