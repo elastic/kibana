@@ -10,7 +10,8 @@
     "@kbn/zod-helpers",
     "@kbn/sse-utils",
     "@kbn/streamlang",
-    "@kbn/esql-ast"
+    "@kbn/esql-ast",
+    "@kbn/inference-common"
   ],
   "exclude": ["target/**/*"]
 }
