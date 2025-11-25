@@ -8,6 +8,7 @@
  */
 
 import type { XYDataLayerConfig, XYLayerConfig } from '@kbn/lens-common';
+import { isEsqlTableTypeDataset } from '../../../utils';
 import type {
   DataLayerType,
   ReferenceLineLayerType,
@@ -62,7 +63,7 @@ export function isAPIXYLayer(layer: unknown): layer is XYLayer {
 }
 
 export function isAPIesqlXYLayer(layer: XYLayer): layer is LayerTypeESQL {
-  return ['esql', 'table'].includes(layer.dataset.type);
+  return isEsqlTableTypeDataset(layer.dataset);
 }
 
 export function isLensStateDataLayer(layer: XYLayerConfig): layer is XYDataLayerConfig {
