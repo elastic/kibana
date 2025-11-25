@@ -10,32 +10,20 @@
 import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import { isString } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import type { AuthTypeSpec } from '../connector_spec';
-
-const API_KEY_REQUIRED_MESSAGE = i18n.translate('connectorSpecs.apiKeyHeader.requiredApiKey', {
-  defaultMessage: 'API key is required',
-});
-
-const API_KEY_LABEL = i18n.translate('connectorSpecs.apiKeyHeader.apiKeyLabel', {
-  defaultMessage: 'API Key',
-});
-
-const HEADER_FIELD_LABEL = i18n.translate('connectorSpecs.apiKeyHeader.headerFieldLabel', {
-  defaultMessage: 'API Key Header Field',
-});
+import * as i18n from './translations';
 
 const HEADER_FIELD_DEFAULT = 'Api-Key';
 const authSchema = z.object({
   headerField: z
     .string()
-    .min(1, { message: API_KEY_REQUIRED_MESSAGE })
+    .min(1, { message: i18n.HEADER_AUTH_REQUIRED_MESSAGE })
     .default(HEADER_FIELD_DEFAULT)
-    .meta({ label: HEADER_FIELD_LABEL, sensitive: true }),
+    .meta({ label: i18n.HEADER_AUTH_LABEL, sensitive: true }),
   apiKey: z
     .string()
-    .min(1, { message: API_KEY_REQUIRED_MESSAGE })
-    .meta({ label: API_KEY_LABEL, sensitive: true }),
+    .min(1, { message: i18n.API_KEY_AUTH_REQUIRED_MESSAGE })
+    .meta({ label: i18n.API_KEY_AUTH_LABEL, sensitive: true }),
 });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
