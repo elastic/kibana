@@ -1,18 +1,39 @@
 ---
-navigation_title: "Elastic Managed LLM"
+navigation_title: "Elastic Managed LLMs"
 applies_to:
     stack: ga 9.0
     serverless: ga
 ---
 
-# Elastic Managed LLM
+# Elastic Managed LLMs
 
-Elastic provides a default LLM vetted for GenAI product features across our platform.
-Details of the currently used model are available in the [model card](https://raw.githubusercontent.com/elastic/kibana/refs/heads/main/docs/reference/resources/Elastic_Managed_LLM_model_card.pdf).
+Elastic provides built-in LLMs vetted for GenAI product features across our platform.
+Currently, the following built-in LLMs are available:
+
+* [General Purpose LLM v2](#general-purpose-llm-v2)
+* [Elastic Managed LLM v1](#elastic-managed-llm-v1)
+
+## General Purpose LLM v2
+```{applies_to}
+stack: ga 9.3
+serverless: ga
+```
+
+Details of this used model are available in the [model card]().
+
+## Elastic Managed LLM v1
+```{applies_to}
+stack: ga 9.0
+serverless: ga
+```
+
+Elastic Managed LLM v1 is the default LLM to use with this connector.
 
 ::::{note}
 The default LLM may change in the future based on evaluations of performance, security, and accuracy.
 ::::
+
+Details of the currently used model are available in the [model card](https://raw.githubusercontent.com/elastic/kibana/refs/heads/main/docs/reference/resources/Elastic_Managed_LLM_model_card.pdf).
 
 ## Prerequisites
 
@@ -20,12 +41,12 @@ The default LLM may change in the future based on evaluations of performance, se
 
 ## Region and hosting
 
-The Elastic Managed LLM is currently proxying to AWS Bedrock in AWS US regions, beginning with `us-east-1`.
+The Elastic Managed LLM v1 and v2 are currently proxying to AWS Bedrock in AWS US regions, beginning with `us-east-1`.
 
 ## Data protection
 
-Customer projects or deployments hosted in any cloud service provider or region have access to the Elastic Managed LLM in the AWS US region `us-east-1`.
-All data is encrypted in transit. The LLM is configured for zero data retention: none of the prompts or outputs are stored by the model.
+Customer projects or deployments hosted in any cloud service provider or region have access to the Elastic Managed LLMs in the AWS US region `us-east-1`.
+All data is encrypted in transit. The LLMs are configured for zero data retention: none of the prompts or outputs are stored by the models.
 
 Only request metadata is logged in AWS CloudWatch.
 No information related to prompts is retained.
@@ -35,6 +56,4 @@ Read more at our [AI Data FAQs](https://www.elastic.co/trust/ai-data-faq) to lea
 
 ## Pricing
 
-The Elastic Managed LLM incurs a cost per million tokens for input and output tokens. Refer to the Elastic Cloud [pricing pages](https://www.elastic.co/pricing) for details. 
-
-
+The Elastic Managed LLMs incur a cost per million tokens for input and output tokens. Refer to the Elastic Cloud [pricing pages](https://www.elastic.co/pricing) for details.
