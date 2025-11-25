@@ -7,6 +7,8 @@ steps:
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 90
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '-1'
@@ -17,9 +19,11 @@ steps:
     agents:
       machineType: n2-highcpu-8
       preemptible: true
-      diskSizeGb: 100
+      diskSizeGb: 115
     key: quick_checks
     timeout_in_minutes: 60
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '-1'
@@ -31,8 +35,10 @@ steps:
     agents:
       machineType: n2-standard-2
       preemptible: true
-      diskSizeGb: 100
+      diskSizeGb: 115
     timeout_in_minutes: 60
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '-1'
@@ -43,9 +49,11 @@ steps:
     agents:
       machineType: n2-standard-16
       preemptible: true
-      diskSizeGb: 100
+      diskSizeGb: 115
     key: linting
     timeout_in_minutes: 60
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '-1'
@@ -56,9 +64,11 @@ steps:
     agents:
       machineType: n2-standard-32
       preemptible: true
-      diskSizeGb: 100
+      diskSizeGb: 115
     key: linting_with_types
     timeout_in_minutes: 60
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '-1'
@@ -71,21 +81,25 @@ steps:
       preemptible: true
     key: check_oas_snapshot
     timeout_in_minutes: 60
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/check_types.sh
+  - command: .buildkite/scripts/steps/typecheck/check_types.sh
     label: 'Check Types'
     agents:
       machineType: c4-standard-4
       diskType: 'hyperdisk-balanced'
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c
-      diskSizeGb: 100
+      diskSizeGb: 115
     key: check_types
     timeout_in_minutes: 60
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '-1'
@@ -95,7 +109,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       machineType: n2-standard-2
-      diskSizeGb: 100
+      diskSizeGb: 115
     timeout_in_minutes: 10
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
@@ -103,6 +117,7 @@ steps:
       JEST_CONFIGS_DEPS: 'check_types'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       FTR_CONFIGS_DEPS: 'build,check_types'
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '*'
@@ -112,8 +127,10 @@ steps:
     label: Mark CI Stats as ready
     agents:
       machineType: n2-standard-2
-      diskSizeGb: 100
+      diskSizeGb: 115
     timeout_in_minutes: 10
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     depends_on:
       - build
       - build_api_docs
@@ -127,7 +144,7 @@ steps:
     agents:
       machineType: n2-highmem-4
       preemptible: true
-      diskSizeGb: 100
+      diskSizeGb: 115
     key: build_api_docs
     depends_on:
       - build
@@ -137,6 +154,8 @@ steps:
       - quick_checks
       - check_oas_snapshot
     timeout_in_minutes: 90
+    env:
+      KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
         - exit_status: '-1'

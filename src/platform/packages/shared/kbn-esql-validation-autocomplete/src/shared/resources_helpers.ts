@@ -24,19 +24,43 @@ export const NOT_SUGGESTED_TYPES = ['unsupported'];
  */
 export class QueryColumns {
   private static readonly cache = new Map<string, ESQLColumnData[]>();
+  // Adding a max size to the cache to prevent unbounded memory growth
+  private static readonly MAX_CACHE_SIZE = 200;
 
   /**
    * Retrieves from cache the columns for a given query, ignoring case.
    * @param query
    * @returns
    */
-  private static fromCache(query: string) {
-    for (const key of QueryColumns.cache.keys()) {
-      if (key.toLowerCase() === query.toLowerCase()) {
-        return QueryColumns.cache.get(key);
-      }
+  static fromCache(query: string) {
+    const key = query.toLowerCase();
+    const result = QueryColumns.cache.get(key);
+    if (result) {
+      // Move it to the end to mark it as recently used
+      QueryColumns.cache.delete(key);
+      QueryColumns.cache.set(key, result);
     }
-    return undefined;
+    return result;
+  }
+
+  /**
+   * Remove from the cache the least recently used when cache is full.
+   */
+  static setCache(key: string, value: ESQLColumnData[]) {
+    const normalizedKey = key.toLowerCase();
+
+    if (QueryColumns.cache.has(normalizedKey)) {
+      QueryColumns.cache.delete(normalizedKey);
+    }
+
+    // Remove oldest entry if cache is full
+    while (QueryColumns.cache.size >= QueryColumns.MAX_CACHE_SIZE) {
+      const oldestKey = QueryColumns.cache.keys().next().value;
+      QueryColumns.cache.delete(oldestKey);
+    }
+
+    // Add new entry at the end
+    QueryColumns.cache.set(normalizedKey, value);
   }
 
   // once computed, the columns for the query will be cached here
@@ -45,7 +69,8 @@ export class QueryColumns {
   constructor(
     private readonly query: ESQLAstQueryExpression,
     private readonly originalQueryText: string,
-    private readonly resourceRetriever?: ESQLCallbacks
+    private readonly resourceRetriever?: ESQLCallbacks,
+    private readonly options?: { invalidateColumnsCache?: boolean }
   ) {
     this.fullQueryCacheKey = BasicPrettyPrinter.print(this.query, { skipHeader: true });
   }
@@ -76,12 +101,43 @@ export class QueryColumns {
    * Returns a map of column name to column metadata for this query.
    */
   async asMap(): Promise<Map<string, ESQLColumnData>> {
+    return this.getColumnsAsMap();
+  }
+
+  /**
+   * Internal method to get columns as map.
+   */
+  private async getColumnsAsMap(): Promise<Map<string, ESQLColumnData>> {
     await this.buildCache();
     const cachedFields = QueryColumns.fromCache(this.fullQueryCacheKey);
-    const cacheCopy = new Map<string, ESQLColumnData>();
-    cachedFields?.forEach((field) => cacheCopy.set(field.name, field));
-    return cacheCopy;
+    const result = new Map<string, ESQLColumnData>();
+    if (cachedFields) {
+      for (let i = 0; i < cachedFields.length; i++) {
+        const field = cachedFields[i];
+        result.set(field.name, field);
+      }
+    }
+    return result;
   }
+
+  private getFields = async (queryToES: string) => {
+    if (!this.options?.invalidateColumnsCache) {
+      const cached = QueryColumns.fromCache(queryToES);
+
+      if (cached) {
+        return cached as ESQLFieldWithMetadata[];
+      }
+    }
+
+    const fields = await getFieldsFromES(queryToES, this.resourceRetriever);
+    QueryColumns.setCache(queryToES, fields);
+    return fields;
+  };
+
+  private getPolicies = async () => {
+    const policies = (await this.resourceRetriever?.getPolicies?.()) ?? [];
+    return new Map(policies.map((p) => [p.name, p]));
+  };
 
   /**
    * Ensures the cache is populated for all subqueries of this query context.
@@ -89,26 +145,10 @@ export class QueryColumns {
   private async buildCache() {
     if (!this.fullQueryCacheKey) return;
 
-    const getFields = async (queryToES: string) => {
-      const cached = QueryColumns.fromCache(queryToES);
-      if (cached) return cached as ESQLFieldWithMetadata[];
-      const fields = await getFieldsFromES(queryToES, this.resourceRetriever);
-      QueryColumns.cache.set(queryToES, fields);
-      return fields;
-    };
-
-    const subqueries = [];
+    // Avoid creating intermediate array - process subqueries directly
     for (let i = 0; i < this.query.commands.length; i++) {
-      subqueries.push(Builder.expression.query(this.query.commands.slice(0, i + 1)));
-    }
-
-    const getPolicies = async () => {
-      const policies = (await this.resourceRetriever?.getPolicies?.()) ?? [];
-      return new Map(policies.map((p) => [p.name, p]));
-    };
-
-    for (const subquery of subqueries) {
-      await this.cacheColumnsForQuery(subquery, getFields, getPolicies);
+      const subquery = Builder.expression.query(this.query.commands.slice(0, i + 1));
+      await this.cacheColumnsForQuery(subquery, this.getFields, this.getPolicies);
     }
   }
 
@@ -134,10 +174,12 @@ export class QueryColumns {
       return;
     }
 
-    const existsInCache = Boolean(QueryColumns.fromCache(cacheKey));
-    if (existsInCache) {
-      // this is already in the cache
-      return;
+    if (!this.options?.invalidateColumnsCache) {
+      const existsInCache = Boolean(QueryColumns.fromCache(cacheKey));
+      if (existsInCache) {
+        // this is already in the cache
+        return;
+      }
     }
 
     const queryBeforeCurrentCommand = BasicPrettyPrinter.print({
@@ -155,7 +197,7 @@ export class QueryColumns {
       this.originalQueryText
     );
 
-    QueryColumns.cache.set(cacheKey, availableFields);
+    QueryColumns.setCache(cacheKey, availableFields);
   }
 }
 

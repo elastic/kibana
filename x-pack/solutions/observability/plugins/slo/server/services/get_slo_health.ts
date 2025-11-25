@@ -5,169 +5,81 @@
  * 2.0.
  */
 
-import type {
-  TransformGetTransformStatsTransformStats,
-  AggregationsAggregate,
-  FieldValue,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { FetchSLOHealthParams, FetchSLOHealthResponse } from '@kbn/slo-schema';
 import { fetchSLOHealthResponseSchema } from '@kbn/slo-schema';
-import { type Dictionary, groupBy, keyBy } from 'lodash';
+import { groupBy, keyBy, map, uniq, type Dictionary } from 'lodash';
 import moment from 'moment';
 import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
-  SUMMARY_INDEX_TEMPLATE_PATTERN,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  getWildcardTransformId,
 } from '../../common/constants';
+import type { SLODefinition } from '../domain/models';
 import type { HealthStatus, State } from '../domain/models/health';
+import type { SLORepository } from './slo_repository';
 import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 
 const LAG_THRESHOLD_MINUTES = 10;
 const STALE_THRESHOLD_MINUTES = 2 * 24 * 60;
-const ES_PAGESIZE_LIMIT = 1000;
-
-function getAfterKey(
-  agg: AggregationsAggregate | undefined
-): Record<string, FieldValue> | undefined {
-  if (agg && typeof agg === 'object' && 'after_key' in agg && agg.after_key) {
-    return agg.after_key as Record<string, FieldValue>;
-  }
-  return undefined;
-}
 
 export class GetSLOHealth {
-  constructor(private scopedClusterClient: IScopedClusterClient) {}
+  constructor(
+    private scopedClusterClient: IScopedClusterClient,
+    private repository: SLORepository
+  ) {}
 
   public async execute(params: FetchSLOHealthParams): Promise<FetchSLOHealthResponse> {
-    let afterKey: AggregationsAggregate | undefined;
-    let sloKeysFromES: Array<{
-      sloId: string;
-      sloInstanceId: string;
-      sloRevision: number;
-      sloName: string;
-    }> = [];
+    const sloIds = uniq(map(params.list, 'sloId'));
+    const definitions = await this.repository.findAllByIds(sloIds);
+    const definitionById = keyBy(definitions, 'id');
 
-    const page = typeof params.page === 'number' && params.page >= 0 ? params.page : 0;
-    const perPage =
-      typeof params.perPage === 'number' && params.perPage >= 1 && params.perPage <= 100
-        ? params.perPage
-        : 100;
+    const list = params.list
+      .filter((item) => !!definitionById[item.sloId])
+      .map((item) => ({
+        id: item.sloId,
+        instanceId: item.sloInstanceId,
+        revision: definitionById[item.sloId].revision,
+        name: definitionById[item.sloId].name,
+      }));
 
-    do {
-      const sloIdCompositeQueryResponse = await this.scopedClusterClient.asCurrentUser.search({
-        index: SUMMARY_INDEX_TEMPLATE_PATTERN,
-        size: 0,
-        aggs: {
-          sloIds: {
-            composite: {
-              after: afterKey as Record<string, FieldValue>,
-              size: ES_PAGESIZE_LIMIT,
-              sources: [
-                {
-                  sloId: { terms: { field: 'slo.id' } },
-                },
-                {
-                  sloInstanceId: { terms: { field: 'slo.instanceId' } },
-                },
-                {
-                  sloRevision: { terms: { field: 'slo.revision' } },
-                },
-                {
-                  sloName: { terms: { field: 'slo.name.keyword' } },
-                },
-              ],
-            },
-          },
-        },
-        ...(params.list?.length && {
-          query: {
-            bool: {
-              filter: [{ terms: { 'slo.id': params.list.map((slo) => slo.sloId) } }],
-            },
-          },
-        }),
-      });
+    const [summaryDocsById, transformStatsById] = await Promise.all([
+      this.getSummaryDocsById(list),
+      this.getTransformStats(definitions),
+    ]);
 
-      afterKey = getAfterKey(sloIdCompositeQueryResponse.aggregations?.sloIds);
+    const results = list.map((item) => {
+      const health = computeHealth(transformStatsById, item);
+      const state = computeState(summaryDocsById, item);
 
-      const buckets = (
-        sloIdCompositeQueryResponse.aggregations?.sloIds as {
-          buckets?: Array<{
-            key: { sloId: string; sloInstanceId: string; sloRevision: number; sloName: string };
-          }>;
-        }
-      )?.buckets;
-
-      if (buckets && buckets.length > 0) {
-        sloKeysFromES = sloKeysFromES.concat([
-          ...buckets.map((bucket) => {
-            return {
-              sloId: bucket.key.sloId,
-              sloInstanceId: bucket.key.sloInstanceId,
-              sloRevision: bucket.key.sloRevision,
-              sloName: bucket.key.sloName,
-            };
-          }),
-        ]);
-      }
-    } while (afterKey);
-
-    const filteredList = sloKeysFromES.map((item) => ({
-      sloId: item.sloId,
-      sloInstanceId: item.sloInstanceId,
-      sloRevision: item.sloRevision,
-      sloName: item.sloName,
-    }));
-
-    const summaryDocsById = await this.getSummaryDocsById(filteredList);
-
-    const results = await Promise.all(
-      filteredList.map(async (item) => {
-        const transformStatsById = await this.getTransformStatsForSLO(item);
-        const health = computeHealth(transformStatsById, item);
-        const state = computeState(summaryDocsById, item);
-
-        return {
-          sloId: item.sloId,
-          sloName: item.sloName,
-          sloInstanceId: item.sloInstanceId,
-          sloRevision: item.sloRevision,
-          state,
-          health,
-        };
-      })
-    );
-
-    const mappedResults = Array.from(
-      new Map(results.map((item) => [`${item.sloId}-${item.sloRevision}`, item])).values()
-    );
-
-    const uniqueResults = params.statusFilter
-      ? mappedResults.filter((item) => item.health.overall === params.statusFilter)
-      : mappedResults;
-
-    return fetchSLOHealthResponseSchema.encode({
-      data: uniqueResults.slice(page * perPage, (page + 1) * perPage),
-      page,
-      perPage,
-      total: uniqueResults.length,
+      return {
+        sloId: item.id,
+        sloName: item.name,
+        sloInstanceId: item.instanceId,
+        sloRevision: item.revision,
+        state,
+        health,
+      };
     });
+
+    return fetchSLOHealthResponseSchema.encode(results);
   }
 
   private async getSummaryDocsById(
-    filteredList: Array<{ sloId: string; sloInstanceId: string; sloRevision: number }>
+    list: Array<{ id: string; instanceId: string; revision: number }>
   ) {
     const summaryDocs = await this.scopedClusterClient.asCurrentUser.search<EsSummaryDocument>({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       query: {
         bool: {
-          should: filteredList.map((item) => ({
+          should: list.map((item) => ({
             bool: {
               must: [
-                { term: { 'slo.id': item.sloId } },
-                { term: { 'slo.instanceId': item.sloInstanceId } },
+                { term: { 'slo.id': item.id } },
+                { term: { 'slo.instanceId': item.instanceId } },
+                { term: { 'slo.revision': item.revision } },
               ],
             },
           })),
@@ -182,36 +94,21 @@ export class GetSLOHealth {
     return summaryDocsById;
   }
 
-  private async getTransformStatsForSLO(item: {
-    sloId: string;
-    sloRevision: number;
-  }): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
-    const rollupTransformStats =
-      await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
-        {
-          transform_id: getSLOTransformId(item.sloId, item.sloRevision),
-          allow_no_match: true,
-          size: 1,
-        },
-        { ignore: [404] }
-      );
+  private async getTransformStats(
+    definitions: SLODefinition[]
+  ): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
+    const stats = await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
+      {
+        transform_id: definitions.map((definition) =>
+          getWildcardTransformId(definition.id, definition.revision)
+        ),
+        allow_no_match: true,
+        size: definitions.length * 2,
+      },
+      { ignore: [404] }
+    );
 
-    const summaryTransformStats =
-      await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
-        {
-          transform_id: getSLOSummaryTransformId(item.sloId, item.sloRevision),
-          allow_no_match: true,
-          size: 1,
-        },
-        { ignore: [404] }
-      );
-
-    const allTransforms = [
-      ...(rollupTransformStats.transforms || []),
-      ...(summaryTransformStats.transforms || []),
-    ];
-
-    return keyBy(allTransforms, (transform) => transform.id);
+    return keyBy(stats.transforms, (transform) => transform.id);
   }
 }
 
@@ -221,9 +118,9 @@ function buildSummaryKey(id: string, instanceId: string) {
 
 function computeState(
   summaryDocsById: Dictionary<EsSummaryDocument[]>,
-  item: { sloId: string; sloInstanceId: string; sloRevision: number }
+  item: { id: string; instanceId: string; revision: number }
 ): State {
-  const sloSummaryDocs = summaryDocsById[buildSummaryKey(item.sloId, item.sloInstanceId)];
+  const sloSummaryDocs = summaryDocsById[buildSummaryKey(item.id, item.instanceId)];
 
   let state: State = 'no_data';
   if (!sloSummaryDocs) {
@@ -275,17 +172,20 @@ function getTransformHealth(
 
 function computeHealth(
   transformStatsById: Dictionary<TransformGetTransformStatsTransformStats>,
-  item: { sloId: string; sloInstanceId: string; sloRevision: number }
+  item: { id: string; instanceId: string; revision: number }
 ): { overall: 'healthy' | 'unhealthy'; rollup: HealthStatus; summary: HealthStatus } {
-  const rollup = getTransformHealth(
-    transformStatsById[getSLOTransformId(item.sloId, item.sloRevision)]
-  );
+  const rollup = getTransformHealth(transformStatsById[getSLOTransformId(item.id, item.revision)]);
   const summary = getTransformHealth(
-    transformStatsById[getSLOSummaryTransformId(item.sloId, item.sloRevision)]
+    transformStatsById[getSLOSummaryTransformId(item.id, item.revision)]
   );
 
   const overall: 'healthy' | 'unhealthy' =
-    rollup.status === 'healthy' && summary.status === 'healthy' ? 'healthy' : 'unhealthy';
+    rollup.status === 'healthy' &&
+    rollup.transformState === 'started' &&
+    summary.status === 'healthy' &&
+    summary.transformState === 'started'
+      ? 'healthy'
+      : 'unhealthy';
 
   return { overall, rollup, summary };
 }

@@ -19,7 +19,7 @@ import { createDataViewSelectedListener } from '../redux/listeners/data_view_sel
 import { createInitListener } from '../redux/listeners/init_listener';
 import { sharedDataViewManagerSlice } from '../redux/slices';
 import { type SelectDataViewAsyncPayload } from '../redux/actions';
-import { DataViewManagerScopeName } from '../constants';
+import { PageScope } from '../constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useUserInfo } from '../../detections/components/user_info';
 
@@ -100,11 +100,12 @@ export const useInitDataViewManager = () => {
 
     // NOTE: Every scope has its own listener instance; this allows for cancellation
     const listeners = [
-      DataViewManagerScopeName.default,
-      DataViewManagerScopeName.timeline,
-      DataViewManagerScopeName.detections,
-      DataViewManagerScopeName.analyzer,
-      DataViewManagerScopeName.explore,
+      PageScope.default,
+      PageScope.timeline,
+      PageScope.alerts,
+      PageScope.attacks,
+      PageScope.analyzer,
+      PageScope.explore,
     ].map((scope) =>
       createDataViewSelectedListener({
         scope,

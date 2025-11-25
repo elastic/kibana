@@ -22,6 +22,7 @@ import { useApplication } from '../../common/lib/kibana/use_application';
 import { createFormSerializer, createFormDeserializer, getInitialCaseValue } from './utils';
 import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
 import { useBulkPostObservables } from '../../containers/use_bulk_post_observables';
+import { useAttachEventsEBT } from '../../analytics/use_attach_events_ebt';
 
 interface Props {
   afterCaseCreated?: (
@@ -55,6 +56,8 @@ export const FormContext: React.FC<Props> = ({
   const { mutateAsync: pushCaseToExternalService } = usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
 
+  const trackAttachEvents = useAttachEventsEBT();
+
   const submitCase = useCallback(
     async (data: CasePostRequest, isValid: boolean) => {
       if (isValid) {
@@ -65,12 +68,15 @@ export const FormContext: React.FC<Props> = ({
         });
 
         // add attachments to the case
+        // NOTE: this is where we add client side telemetry
         if (theCase && Array.isArray(attachments) && attachments.length > 0) {
           await createAttachments({
             caseId: theCase.id,
             caseOwner: theCase.owner,
             attachments,
           });
+
+          trackAttachEvents(window.location.pathname, attachments);
         }
 
         if (theCase && Array.isArray(observables) && observables.length > 0) {
@@ -100,12 +106,13 @@ export const FormContext: React.FC<Props> = ({
       appId,
       attachments,
       postCase,
+      observables,
       afterCaseCreated,
       onSuccess,
       createAttachments,
-      pushCaseToExternalService,
-      observables,
+      trackAttachEvents,
       bulkPostObservables,
+      pushCaseToExternalService,
     ]
   );
 

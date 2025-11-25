@@ -8,24 +8,31 @@
  */
 
 import type { ListrTask } from 'listr2';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import type { Root } from '@kbn/core-root-server-internal';
 import type { FixtureTemplate } from '../migrations/fixtures';
-import type { MigrationSnapshot, ServerHandles } from '../types';
+import type { MigrationSnapshot } from '../types';
 
 export type Task = ListrTask<TaskContext>['task'];
 
 export interface TaskContext {
   gitRev: string;
-  serverHandles?: ServerHandles;
+  esServer?: TestElasticsearchUtils;
+  kibanaServer?: Root;
+  registeredTypes?: SavedObjectsType<any>[];
   from?: MigrationSnapshot;
   to?: MigrationSnapshot;
   newTypes: string[];
-  updatedTypes: string[];
-  fixtures: Record<
-    string,
-    {
-      previous: FixtureTemplate[];
-      current: FixtureTemplate[];
-    }
-  >;
+  updatedTypes: SavedObjectsType<any>[];
+  currentRemovedTypes: string[];
+  newRemovedTypes: string[];
+  baselineMappings?: SavedObjectsTypeMappingDefinitions;
+  fixtures: {
+    previous: Record<string, FixtureTemplate[]>;
+    current: Record<string, FixtureTemplate[]>;
+  };
+  test: boolean; // whether the script is running with TEST data
   fix: boolean;
 }

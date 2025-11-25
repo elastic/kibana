@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { setupDependencies } from './setup_dependencies';
@@ -28,7 +27,6 @@ export async function resumeWorkflow({
   logsRepository,
   dependencies,
   coreStart,
-  esClient,
   actions,
   taskManager,
   logger,
@@ -39,7 +37,6 @@ export async function resumeWorkflow({
   spaceId: string;
   taskAbortController: AbortController;
   coreStart: CoreStart;
-  esClient: Client;
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
   logsRepository: LogsRepository;
@@ -57,15 +54,15 @@ export async function resumeWorkflow({
     workflowLogger,
     nodesFactory,
     workflowExecutionGraph,
-    clientToUse,
+    esClient,
     fakeRequest: fakeRequestFromContainer,
     coreStart: coreStartFromContainer,
+    workflowTaskManager,
   } = await setupDependencies(
     workflowRunId,
     spaceId,
     actions,
     taskManager,
-    esClient,
     logger,
     config,
     workflowExecutionRepository,
@@ -85,9 +82,10 @@ export async function resumeWorkflow({
     workflowLogger,
     nodesFactory,
     workflowExecutionGraph,
-    esClient: clientToUse,
+    esClient,
     fakeRequest: fakeRequestFromContainer,
     coreStart: coreStartFromContainer,
     taskAbortController,
+    workflowTaskManager,
   });
 }
