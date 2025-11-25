@@ -453,13 +453,13 @@ describe('artifacts lists', () => {
         translatedExceptionList,
         'v1',
         'linux',
-        ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+        ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME
       );
       const artifact2 = await buildArtifact(
         translatedExceptionListReversed,
         'v1',
         'linux',
-        ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+        ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME
       );
       expect(artifact1.decodedSha256).toEqual(artifact2.decodedSha256);
     });
@@ -508,13 +508,13 @@ describe('artifacts lists', () => {
         translatedExceptionList,
         'v1',
         'linux',
-        ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+        ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME
       );
       const artifact2 = await buildArtifact(
         translatedExceptionListReversed,
         'v1',
         'linux',
-        ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+        ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME
       );
       expect(artifact1.decodedSha256).toEqual(artifact2.decodedSha256);
     });
