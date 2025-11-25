@@ -7,19 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnvironmentMode, PackageInfo } from '@kbn/config';
-import type { LoggerFactory } from '@kbn/logging';
-import type { CoreId } from '@kbn/core-base-common-internal';
-
-/** @internal */
-export interface CoreContext {
-  coreId: CoreId;
-  logger: LoggerFactory;
-  env: CoreEnv;
-}
-
-/** @internal */
-export interface CoreEnv {
-  mode: Readonly<EnvironmentMode>;
-  packageInfo: Readonly<PackageInfo>;
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/react/kibana_context/env'],
+};
