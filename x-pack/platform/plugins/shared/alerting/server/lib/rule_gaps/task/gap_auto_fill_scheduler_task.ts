@@ -354,14 +354,17 @@ export function registerGapAutoFillSchedulerTask({
                     }
                   });
 
+                  if (scheduledBackfillsCount > 0) {
+                    remainingBackfills = Math.max(remainingBackfills - scheduledBackfillsCount, 0);
+                    if (remainingBackfills <= 0) {
+                      break;
+                    }
+                  }
+
                   // If fewer than gapsPerPage gaps returned, we've reached the end for this batch
                   if (gapsPage.length < gapsPerPage) {
                     break;
                   }
-                }
-
-                if (scheduledBackfillsCount > 0) {
-                  remainingBackfills = Math.max(remainingBackfills - scheduledBackfillsCount, 0);
                 }
               }
 
