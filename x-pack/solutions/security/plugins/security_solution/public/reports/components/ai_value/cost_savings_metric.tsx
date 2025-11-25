@@ -56,7 +56,7 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
   } = useEuiTheme();
 
   const exportContext = useAIValueExportContext();
-  const isExportMode = exportContext?.forwardedState !== undefined;
+  const isExportMode = exportContext?.isExportMode === true;
 
   const signalIndexName = useSignalIndexWithDefault();
   const timerange = useMemo(() => ({ from, to }), [from, to]);

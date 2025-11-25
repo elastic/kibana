@@ -22,6 +22,7 @@ import { AIValueReportEventTypes } from '../../../common/lib/telemetry/events/ai
 
 interface AIValueExportContext {
   forwardedState?: ForwardedAIValueReportState;
+  isExportMode: boolean;
   isInsightVerified: boolean;
   shouldRegenerateInsight?: boolean;
   setReportInput: (inputData: object) => void;
@@ -80,11 +81,12 @@ export function AIValueExportProvider({ children }: AIValueExportProviderProps) 
   const abortControllerRef = useRef<AbortController | null>(null);
   const [hashReportErrorMessage, setHashReportErrorMessage] = useState<string>('');
   const { telemetry } = useKibana().services;
-  const isExportMode = forwardedState !== undefined;
+  const [isExportMode, setIsExportMode] = useState<boolean>(false);
 
   useEffect(() => {
     if (history.location.state) {
       setForwardedState(parseLocationState(history.location.state));
+      setIsExportMode(true);
     }
   }, [history.location.state]);
 
@@ -166,6 +168,7 @@ export function AIValueExportProvider({ children }: AIValueExportProviderProps) 
 
   const value = useMemo(
     () => ({
+      isExportMode,
       forwardedState,
       isInsightVerified,
       shouldRegenerateInsight,
@@ -173,7 +176,7 @@ export function AIValueExportProvider({ children }: AIValueExportProviderProps) 
       setInsight,
       setReportInput,
     }),
-    [forwardedState, buildForwardedState, isInsightVerified, shouldRegenerateInsight]
+    [forwardedState, buildForwardedState, isInsightVerified, shouldRegenerateInsight, isExportMode]
   );
 
   return <AIValueExportContext.Provider value={value}>{children}</AIValueExportContext.Provider>;

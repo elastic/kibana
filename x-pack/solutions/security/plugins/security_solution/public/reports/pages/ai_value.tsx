@@ -49,7 +49,7 @@ import {
 
 const BaseComponent = () => {
   const exportContext = useAIValueExportContext();
-  const isExportMode = exportContext?.forwardedState !== undefined;
+  const isExportMode = exportContext?.isExportMode === true;
   const { loading: oldIsSourcererLoading } = useSourcererDataView();
   const { from, to } = useDeepEqualSelector((state) =>
     pick(['from', 'to'], inputsSelectors.valueReportTimeRangeSelector(state))
