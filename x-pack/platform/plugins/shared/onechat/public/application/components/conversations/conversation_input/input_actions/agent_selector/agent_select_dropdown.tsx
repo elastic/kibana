@@ -22,6 +22,7 @@ import {
 import { css } from '@emotion/react';
 import type { AgentDefinition } from '@kbn/onechat-common';
 import React, { useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
 import { labels } from '../../../../../utils/i18n';
@@ -85,6 +86,11 @@ const AgentOption: React.FC<{ agent?: AgentDefinition; searchValue: string }> = 
 
 const AGENT_OPTION_ROW_HEIGHT = 88;
 
+const agentSearchPlaceholder = i18n.translate(
+  'xpack.onechat.conversationInput.agentSelector.search.placeholder',
+  { defaultMessage: 'Search agents' }
+);
+
 interface AgentSelectDropdownProps {
   selectedAgent?: AgentDefinition;
   onAgentChange: (agentId: string) => void;
@@ -143,6 +149,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
         id={agentSelectId}
         aria-label={labels.conversations.selectAgentAriaLabel}
         searchable
+        searchProps={{ placeholder: agentSearchPlaceholder }}
         options={options}
         onChange={(_options, _event, changedOption) => {
           const { checked, agent } = changedOption;
