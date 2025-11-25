@@ -26,6 +26,11 @@ import { deleteProcessorPromptOptions } from './action/prompt_options';
 import { deleteConditionPromptOptions } from './where/prompt_options';
 import { collectDescendantIds } from '../../state_management/stream_enrichment_state_machine/utils';
 import { EditStepDescriptionModal } from './action/edit_step_description_modal';
+import {
+  ADD_DESCRIPTION_MENU_LABEL,
+  EDIT_DESCRIPTION_MENU_LABEL,
+  REMOVE_DESCRIPTION_MENU_LABEL,
+} from './action/translations';
 import type { StepConfigurationProps } from '../steps_list';
 
 const moveUpItemText = i18n.translate(
@@ -63,34 +68,10 @@ const deleteItemText = i18n.translate(
   }
 );
 
-const addDescriptionItemText = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.addDescriptionButtonText',
-  {
-    defaultMessage: 'Add description',
-  }
-);
-
-const editDescriptionItemText = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.editDescriptionButtonText',
-  {
-    defaultMessage: 'Edit description',
-  }
-);
-
-const removeDescriptionItemText = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.removeDescriptionButtonText',
-  {
-    defaultMessage: 'Remove description',
-  }
-);
-
 type StepContextMenuProps = Pick<
   StepConfigurationProps,
   'stepRef' | 'stepUnderEdit' | 'isFirstStepInLevel' | 'isLastStepInLevel'
 >;
-
-const isNonNull = <T,>(value: T | null | undefined | false): value is T =>
-  value !== null && value !== undefined && value !== false;
 
 export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   stepRef,
@@ -185,7 +166,8 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
       {moveDownItemText}
     </EuiContextMenuItem>,
     ...(!isWhere
-      ? [
+      ? hasCustomDescription
+        ? [
           <EuiContextMenuItem
             data-test-subj="stepContextMenuEditDescriptionItem"
             key="editDescription"
@@ -196,23 +178,35 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
               toggleEditDescriptionModal(true);
             }}
           >
-            {hasCustomDescription ? editDescriptionItemText : addDescriptionItemText}
+            {EDIT_DESCRIPTION_MENU_LABEL}
           </EuiContextMenuItem>,
-          hasCustomDescription && (
-            <EuiContextMenuItem
-              data-test-subj="stepContextMenuRemoveDescriptionItem"
-              key="removeDescription"
-              icon="minusInCircle"
-              disabled={!canEdit}
-              onClick={() => {
-                togglePopover(false);
-                stepRef.send({ type: 'step.changeDescription', description: '' });
-              }}
-            >
-              {removeDescriptionItemText}
-            </EuiContextMenuItem>
-          ),
-        ].filter(isNonNull)
+          <EuiContextMenuItem
+            data-test-subj="stepContextMenuRemoveDescriptionItem"
+            key="removeDescription"
+            icon="minusInCircle"
+            disabled={!canEdit}
+            onClick={() => {
+              togglePopover(false);
+              stepRef.send({ type: 'step.changeDescription', description: '' });
+            }}
+          >
+            {REMOVE_DESCRIPTION_MENU_LABEL}
+          </EuiContextMenuItem>,
+        ]
+        : [
+          <EuiContextMenuItem
+            data-test-subj="stepContextMenuEditDescriptionItem"
+            key="editDescription"
+            icon="editorComment"
+            disabled={!canEdit}
+            onClick={() => {
+              togglePopover(false);
+              toggleEditDescriptionModal(true);
+            }}
+          >
+            {ADD_DESCRIPTION_MENU_LABEL}
+          </EuiContextMenuItem>,
+        ]
       : []),
     <EuiContextMenuItem
       data-test-subj="stepContextMenuEditItem"
@@ -286,7 +280,6 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
       {isEditDescriptionModalOpen && !isWhere && isActionBlock(step) && (
         <EditStepDescriptionModal
           step={step}
-          mode={hasCustomDescription ? 'edit' : 'add'}
           onCancel={() => toggleEditDescriptionModal(false)}
           onSave={(description) => {
             toggleEditDescriptionModal(false);

@@ -56,31 +56,23 @@ export const stepMachine = setup({
         };
       }
     ),
-    changeDescription: assign(
-      (
-        { context },
-        params: {
-          description?: string;
-        }
-      ) => {
-        const trimmedDescription = params.description?.trim();
-        const nextStep = { ...context.step };
-
-        if (isActionBlock(nextStep)) {
-          if (!trimmedDescription) {
-            delete nextStep.description;
-          } else {
-            nextStep.description = trimmedDescription;
-          }
-        }
-
-        return {
-          step: nextStep,
-          previousStep: context.step,
-          isUpdated: true,
-        };
+    changeDescription: assign(({ context }, { description }: { description?: string }) => {
+      if (!isActionBlock(context.step)) {
+        return {};
       }
-    ),
+
+      const trimmedDescription = description?.trim();
+      const updatedStep = {
+        ...context.step,
+        description: trimmedDescription || undefined,
+      };
+
+      return {
+        step: updatedStep,
+        previousStep: context.step,
+        isUpdated: true,
+      };
+    }),
     resetToPrevious: assign(({ context }) => ({
       step: context.previousStep,
     })),

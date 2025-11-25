@@ -16,24 +16,28 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
+  EuiFieldText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
 import { getStepDescription } from './utils';
+import {
+  ADD_DESCRIPTION_MENU_LABEL,
+  DESCRIPTION_FIELD_ARIA_LABEL,
+  DESCRIPTION_HELP_TEXT,
+  EDIT_DESCRIPTION_MENU_LABEL,
+} from './translations';
 
 export interface EditStepDescriptionModalProps {
   step: StreamlangProcessorDefinitionWithUIAttributes;
-  mode: 'add' | 'edit';
   onSave: (description: string) => void;
   onCancel: () => void;
 }
 
 export const EditStepDescriptionModal: React.FC<EditStepDescriptionModalProps> = ({
   step,
-  mode,
   onSave,
   onCancel,
 }) => {
@@ -56,28 +60,12 @@ export const EditStepDescriptionModal: React.FC<EditStepDescriptionModalProps> =
   const [value, setValue] = useState(initialValue);
 
   const handleSave = () => {
-    onSave(value.trim());
+    onSave(value);
   };
 
-  const isEditMode = mode === 'edit';
-
-  const title = isEditMode
-    ? i18n.translate('xpack.streams.enrichment.processor.editDescription.title', {
-        defaultMessage: 'Edit description',
-      })
-    : i18n.translate('xpack.streams.enrichment.processor.addDescription.title', {
-        defaultMessage: 'Add description',
-      });
-
-  const helpText = i18n.translate('xpack.streams.enrichment.processor.editDescription.helpText', {
-    defaultMessage:
-      'Explain this step, this would override the metadata. If you decide to remove the description, the metadata would appear back.',
-  });
-
-  const textAreaAriaLabel = i18n.translate(
-    'xpack.streams.enrichment.processor.editDescription.fieldAriaLabel',
-    { defaultMessage: 'Processor description' }
-  );
+  const isEditMode = Boolean(step.description && step.description.trim().length > 0);
+  const title = isEditMode ? EDIT_DESCRIPTION_MENU_LABEL : ADD_DESCRIPTION_MENU_LABEL;
+  const helpText = DESCRIPTION_HELP_TEXT;
 
   return (
     <EuiModal onClose={onCancel} maxWidth={600}>
@@ -89,14 +77,12 @@ export const EditStepDescriptionModal: React.FC<EditStepDescriptionModalProps> =
           {helpText}
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiTextArea
+        <EuiFieldText
           fullWidth
-          resize="none"
           compressed
-          rows={1}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          aria-label={textAreaAriaLabel}
+          aria-label={DESCRIPTION_FIELD_ARIA_LABEL}
         />
       </EuiModalBody>
       <EuiModalFooter>
