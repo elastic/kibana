@@ -68,7 +68,7 @@ describe('CloudConnectorService', () => {
       type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
       references: [],
       attributes: {
-        name: 'arn:aws:iam::123456789012:role/TestRole',
+        name: 'test-connector',
         namespace: '*',
         cloudProvider: 'aws',
         vars: {
@@ -94,6 +94,15 @@ describe('CloudConnectorService', () => {
       jest
         .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
         .mockResolvedValue(true);
+
+      // Mock the find call for duplicate name checking
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10000,
+      });
+
       mockSoClient.create.mockResolvedValue(mockSavedObject);
 
       const result = await service.create(mockSoClient, mockCreateRequest);
@@ -101,7 +110,7 @@ describe('CloudConnectorService', () => {
       expect(mockSoClient.create).toHaveBeenCalledWith(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         expect.objectContaining({
-          name: 'arn:aws:iam::123456789012:role/TestRole',
+          name: 'test-connector',
           namespace: '*',
           cloudProvider: 'aws',
           packagePolicyCount: 1,
@@ -125,7 +134,7 @@ describe('CloudConnectorService', () => {
 
       expect(result).toEqual({
         id: 'cloud-connector-123',
-        name: 'arn:aws:iam::123456789012:role/TestRole',
+        name: 'test-connector',
         cloudProvider: 'aws',
         namespace: '*',
         vars: {
@@ -169,13 +178,20 @@ describe('CloudConnectorService', () => {
       const error = new Error('Database error');
       mockSoClient.create.mockRejectedValue(error);
 
+      // Mock find for duplicate name check
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10000,
+      });
+
       await expect(service.create(mockSoClient, mockCreateRequest)).rejects.toThrow(
         'Database error'
       );
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to create cloud connector',
-        'Database error'
+        'Failed to create cloud connector: Database error'
       );
     });
 
@@ -214,6 +230,212 @@ describe('CloudConnectorService', () => {
       await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
         /Package policy must contain valid external_id secret reference/
       );
+    });
+
+    describe('duplicate name validation', () => {
+      it('should check for duplicate names using optimized query (SO_SEARCH_LIMIT and fields)', async () => {
+        jest
+          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+          .mockResolvedValue(true);
+
+        const existingConnectors = {
+          saved_objects: [
+            {
+              id: 'existing-connector-1',
+              type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+              score: 1,
+              references: [],
+              attributes: {
+                name: 'existing-connector',
+              },
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 10000,
+        };
+
+        mockSoClient.find.mockResolvedValue(existingConnectors);
+        mockSoClient.create.mockResolvedValue(mockSavedObject);
+
+        await service.create(mockSoClient, mockCreateRequest);
+
+        // Verify that getList was called with optimization parameters
+        expect(mockSoClient.find).toHaveBeenCalledWith({
+          type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          page: 1,
+          perPage: 10000, // SO_SEARCH_LIMIT
+          sortField: 'created_at',
+          sortOrder: 'desc',
+          fields: ['name'], // Only fetch name field
+        });
+      });
+
+      it('should throw error when duplicate name exists (case-insensitive)', async () => {
+        jest
+          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+          .mockResolvedValue(true);
+
+        const existingConnectors = {
+          saved_objects: [
+            {
+              id: 'existing-connector-1',
+              type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+              score: 1,
+              references: [],
+              attributes: {
+                name: 'Test-Connector', // Same name, different case
+              },
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 10000,
+        };
+
+        mockSoClient.find.mockResolvedValue(existingConnectors);
+
+        await expect(service.create(mockSoClient, mockCreateRequest)).rejects.toThrow(
+          'A cloud connector with this name already exists'
+        );
+      });
+
+      it('should throw error when duplicate name exists with extra whitespace', async () => {
+        jest
+          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+          .mockResolvedValue(true);
+
+        const existingConnectors = {
+          saved_objects: [
+            {
+              id: 'existing-connector-1',
+              type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+              score: 1,
+              references: [],
+              attributes: {
+                name: '  test-connector  ', // Same name with extra whitespace
+              },
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 10000,
+        };
+
+        mockSoClient.find.mockResolvedValue(existingConnectors);
+
+        await expect(service.create(mockSoClient, mockCreateRequest)).rejects.toThrow(
+          'A cloud connector with this name already exists'
+        );
+      });
+
+      it('should allow creation when no duplicate names exist', async () => {
+        jest
+          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+          .mockResolvedValue(true);
+
+        const existingConnectors = {
+          saved_objects: [
+            {
+              id: 'existing-connector-1',
+              type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+              score: 1,
+              references: [],
+              attributes: {
+                name: 'different-connector',
+              },
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 10000,
+        };
+
+        mockSoClient.find.mockResolvedValue(existingConnectors);
+        mockSoClient.create.mockResolvedValue(mockSavedObject);
+
+        const result = await service.create(mockSoClient, mockCreateRequest);
+
+        expect(result).toBeDefined();
+        expect(mockSoClient.create).toHaveBeenCalled();
+      });
+
+      it('should normalize connector name by trimming and collapsing spaces', async () => {
+        jest
+          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+          .mockResolvedValue(true);
+
+        const requestWithSpaces: CreateCloudConnectorRequest = {
+          name: '  test   connector   with   spaces  ',
+          cloudProvider: 'aws',
+          vars: {
+            role_arn: {
+              value: 'arn:aws:iam::123456789012:role/TestRole',
+              type: 'text',
+            },
+            external_id: {
+              value: {
+                id: 'ABCDEFGHIJKLMNOPQRST',
+                isSecretRef: true,
+              },
+              type: 'password',
+            },
+          },
+        };
+
+        mockSoClient.find.mockResolvedValue({
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 10000,
+        });
+        mockSoClient.create.mockResolvedValue(mockSavedObject);
+
+        await service.create(mockSoClient, requestWithSpaces);
+
+        expect(mockSoClient.create).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          expect.objectContaining({
+            name: 'test connector with spaces', // Normalized name
+          })
+        );
+      });
+
+      it('should handle large number of existing connectors efficiently', async () => {
+        jest
+          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+          .mockResolvedValue(true);
+
+        // Simulate 500 existing connectors
+        const existingConnectors = {
+          saved_objects: Array.from({ length: 500 }, (_, i) => ({
+            id: `connector-${i}`,
+            type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            score: 1,
+            references: [],
+            attributes: {
+              name: `connector-${i}`,
+            },
+          })),
+          total: 500,
+          page: 1,
+          per_page: 10000,
+        };
+
+        mockSoClient.find.mockResolvedValue(existingConnectors);
+        mockSoClient.create.mockResolvedValue(mockSavedObject);
+
+        await service.create(mockSoClient, mockCreateRequest);
+
+        // Verify optimization: only one call to find with SO_SEARCH_LIMIT and fields
+        expect(mockSoClient.find).toHaveBeenCalledTimes(1);
+        expect(mockSoClient.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            perPage: 10000,
+            fields: ['name'],
+          })
+        );
+      });
     });
   });
 
@@ -305,6 +527,137 @@ describe('CloudConnectorService', () => {
         'Failed to get cloud connectors list',
         'Database error'
       );
+    });
+
+    it('should support fields parameter to only fetch specific fields', async () => {
+      const mockConnectorsWithFields = {
+        saved_objects: [
+          {
+            id: 'cloud-connector-1',
+            type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            score: 1,
+            references: [],
+            attributes: {
+              name: 'connector-1',
+            },
+          },
+          {
+            id: 'cloud-connector-2',
+            type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            score: 1,
+            references: [],
+            attributes: {
+              name: 'connector-2',
+            },
+          },
+        ],
+        total: 2,
+        page: 1,
+        per_page: 20,
+      };
+
+      mockSoClient.find.mockResolvedValue(mockConnectorsWithFields);
+
+      const result = await service.getList(mockSoClient, { fields: ['name'] });
+
+      expect(mockSoClient.find).toHaveBeenCalledWith({
+        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        page: 1,
+        perPage: 20,
+        sortField: 'created_at',
+        sortOrder: 'desc',
+        fields: ['name'],
+      });
+
+      expect(result).toEqual([
+        {
+          id: 'cloud-connector-1',
+          name: 'connector-1',
+        },
+        {
+          id: 'cloud-connector-2',
+          name: 'connector-2',
+        },
+      ]);
+    });
+
+    it('should support custom perPage parameter for fetching all connectors', async () => {
+      const mockManyConnectors = {
+        saved_objects: Array.from({ length: 100 }, (_, i) => ({
+          id: `cloud-connector-${i}`,
+          type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          score: 1,
+          references: [],
+          attributes: {
+            name: `connector-${i}`,
+            cloudProvider: 'aws',
+            namespace: '*',
+            vars: {
+              role_arn: {
+                value: `arn:aws:iam::123456789012:role/Role${i}`,
+                type: 'text',
+              },
+              external_id: {
+                value: {
+                  id: `secret-${i}`,
+                  isSecretRef: true,
+                },
+                type: 'password',
+              },
+            },
+            packagePolicyCount: 1,
+            created_at: '2023-01-01T00:00:00.000Z',
+            updated_at: '2023-01-01T00:00:00.000Z',
+          },
+        })),
+        total: 100,
+        page: 1,
+        per_page: 10000,
+      };
+
+      mockSoClient.find.mockResolvedValue(mockManyConnectors);
+
+      await service.getList(mockSoClient, { perPage: 10000 });
+
+      expect(mockSoClient.find).toHaveBeenCalledWith({
+        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        page: 1,
+        perPage: 10000,
+        sortField: 'created_at',
+        sortOrder: 'desc',
+      });
+    });
+
+    it('should support combining fields and perPage parameters', async () => {
+      const mockConnectorsOptimized = {
+        saved_objects: [
+          {
+            id: 'cloud-connector-1',
+            type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            score: 1,
+            references: [],
+            attributes: {
+              name: 'connector-1',
+            },
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 10000,
+      };
+
+      mockSoClient.find.mockResolvedValue(mockConnectorsOptimized);
+
+      await service.getList(mockSoClient, { perPage: 10000, fields: ['name'] });
+
+      expect(mockSoClient.find).toHaveBeenCalledWith({
+        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        page: 1,
+        perPage: 10000,
+        sortField: 'created_at',
+        sortOrder: 'desc',
+        fields: ['name'],
+      });
     });
   });
 
@@ -635,8 +988,7 @@ describe('CloudConnectorService', () => {
       ).rejects.toThrow('Failed to update cloud connector: Saved object not found');
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to update cloud connector',
-        'Saved object not found'
+        'Failed to update cloud connector: Saved object not found'
       );
     });
 
@@ -683,6 +1035,252 @@ describe('CloudConnectorService', () => {
 
       // Should preserve original attributes
       expect(result.name).toEqual('original-name');
+    });
+
+    describe('duplicate name validation', () => {
+      it('should use optimized query when checking for duplicate names during update', async () => {
+        const existingConnectors = {
+          saved_objects: [
+            {
+              id: 'cloud-connector-123',
+              type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+              score: 1,
+              references: [],
+              attributes: {
+                name: 'original-name',
+              },
+            },
+            {
+              id: 'other-connector',
+              type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+              score: 1,
+              references: [],
+              attributes: {
+                name: 'other-connector-name',
+              },
+            },
+          ],
+          total: 2,
+          page: 1,
+          per_page: 10000,
+        };
+
+        mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
+        mockSoClient.find.mockResolvedValue(existingConnectors);
+        mockSoClient.update.mockResolvedValue({
+          ...mockExistingSavedObject,
+          attributes: {
+            ...mockExistingSavedObject.attributes,
+            name: 'new-unique-name',
+          },
+        });
+
+        await service.update(mockSoClient, 'cloud-connector-123', {
+          name: 'new-unique-name',
+        });
+
+        // Verify optimization: SO_SEARCH_LIMIT and fields parameter
+        expect(mockSoClient.find).toHaveBeenCalledWith({
+          type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          page: 1,
+          perPage: 10000, // SO_SEARCH_LIMIT
+          sortField: 'created_at',
+          sortOrder: 'desc',
+          fields: ['name'], // Only fetch name field
+        });
+      });
+
+      it('should allow updating to the same name (current connector)', async () => {
+        const existingConnectors = {
+          saved_objects: [
+            {
+              id: 'cloud-connector-123',
+              type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+              score: 1,
+              references: [],
+              attributes: {
+                name: 'original-name',
+              },
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 10000,
+        };
+
+        mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
+        mockSoClient.find.mockResolvedValue(existingConnectors);
+        mockSoClient.update.mockResolvedValue(mockExistingSavedObject);
+
+        // Should not throw error when updating to same name
+        const result = await service.update(mockSoClient, 'cloud-connector-123', {
+          name: 'original-name',
+        });
+
+        expect(result).toBeDefined();
+        expect(mockSoClient.update).toHaveBeenCalled();
+      });
+
+      it('should throw error when updating to a name that already exists on a different connector', async () => {
+        const existingConnectors = {
+          saved_objects: [
+            {
+              id: 'cloud-connector-123',
+              type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+              score: 1,
+              references: [],
+              attributes: {
+                name: 'original-name',
+              },
+            },
+            {
+              id: 'other-connector',
+              type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+              score: 1,
+              references: [],
+              attributes: {
+                name: 'existing-name',
+              },
+            },
+          ],
+          total: 2,
+          page: 1,
+          per_page: 10000,
+        };
+
+        mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
+        mockSoClient.find.mockResolvedValue(existingConnectors);
+
+        await expect(
+          service.update(mockSoClient, 'cloud-connector-123', {
+            name: 'existing-name',
+          })
+        ).rejects.toThrow('A cloud connector with this name already exists');
+      });
+
+      it('should throw error when updating to a name that exists (case-insensitive)', async () => {
+        const existingConnectors = {
+          saved_objects: [
+            {
+              id: 'cloud-connector-123',
+              type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+              score: 1,
+              references: [],
+              attributes: {
+                name: 'original-name',
+              },
+            },
+            {
+              id: 'other-connector',
+              type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+              score: 1,
+              references: [],
+              attributes: {
+                name: 'Existing-Name',
+              },
+            },
+          ],
+          total: 2,
+          page: 1,
+          per_page: 10000,
+        };
+
+        mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
+        mockSoClient.find.mockResolvedValue(existingConnectors);
+
+        await expect(
+          service.update(mockSoClient, 'cloud-connector-123', {
+            name: 'existing-name', // Different case
+          })
+        ).rejects.toThrow('A cloud connector with this name already exists');
+      });
+
+      it('should normalize name during update', async () => {
+        const existingConnectors = {
+          saved_objects: [
+            {
+              id: 'cloud-connector-123',
+              type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+              score: 1,
+              references: [],
+              attributes: {
+                name: 'original-name',
+              },
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 10000,
+        };
+
+        mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
+        mockSoClient.find.mockResolvedValue(existingConnectors);
+        mockSoClient.update.mockResolvedValue({
+          ...mockExistingSavedObject,
+          attributes: {
+            ...mockExistingSavedObject.attributes,
+            name: 'new name with spaces',
+          },
+        });
+
+        await service.update(mockSoClient, 'cloud-connector-123', {
+          name: '  new   name   with    spaces  ',
+        });
+
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          'cloud-connector-123',
+          expect.objectContaining({
+            name: 'new name with spaces', // Normalized
+          })
+        );
+      });
+
+      it('should exclude current connector ID from duplicate check', async () => {
+        const existingConnectors = {
+          saved_objects: [
+            {
+              id: 'cloud-connector-123',
+              type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+              score: 1,
+              references: [],
+              attributes: {
+                name: 'Updated Name',
+              },
+            },
+            {
+              id: 'other-connector',
+              type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+              score: 1,
+              references: [],
+              attributes: {
+                name: 'other-name',
+              },
+            },
+          ],
+          total: 2,
+          page: 1,
+          per_page: 10000,
+        };
+
+        mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
+        mockSoClient.find.mockResolvedValue(existingConnectors);
+        mockSoClient.update.mockResolvedValue({
+          ...mockExistingSavedObject,
+          attributes: {
+            ...mockExistingSavedObject.attributes,
+            name: 'updated name',
+          },
+        });
+
+        // Should succeed because cloud-connector-123 is excluded from duplicate check
+        const result = await service.update(mockSoClient, 'cloud-connector-123', {
+          name: 'updated name', // Matches the name in the mock but for the same ID
+        });
+
+        expect(result).toBeDefined();
+        expect(mockSoClient.update).toHaveBeenCalled();
+      });
     });
   });
 
@@ -1197,7 +1795,7 @@ describe('CloudConnectorService', () => {
         const mockSavedObject = {
           id: 'cloud-connector-123',
           attributes: {
-            name: 'secret-cc-id',
+            name: 'azure-test-connector',
             namespace: '*',
             cloudProvider: 'azure',
             vars: azureRequest.vars,
@@ -1207,6 +1805,14 @@ describe('CloudConnectorService', () => {
           },
         } as SavedObject<CloudConnector>;
 
+        // Mock the find call for duplicate name checking
+        mockSoClient.find.mockResolvedValue({
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 10000,
+        });
+
         mockSoClient.create.mockResolvedValue(mockSavedObject);
 
         const result = await service.create(mockSoClient, azureRequest);
@@ -1215,7 +1821,7 @@ describe('CloudConnectorService', () => {
         const [[type, createCall]] = mockSoClient.create.mock.calls;
         expect(type).toBe(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE);
         expect(createCall).toMatchObject({
-          name: 'secret-cc-id',
+          name: 'azure-test-connector',
           cloudProvider: 'azure',
           namespace: '*',
           vars: azureRequest.vars,
@@ -1226,7 +1832,7 @@ describe('CloudConnectorService', () => {
 
         expect(result).toEqual({
           id: 'cloud-connector-123',
-          name: 'secret-cc-id',
+          name: 'azure-test-connector',
           namespace: '*',
           cloudProvider: 'azure',
           vars: azureRequest.vars,
@@ -1236,9 +1842,9 @@ describe('CloudConnectorService', () => {
         });
       });
 
-      it('should use azure_credentials_cloud_connector_id as name for Azure connectors', async () => {
+      it('should use name as name for Azure connectors', async () => {
         const azureRequest: CreateCloudConnectorRequest = {
-          name: 'ignored-name',
+          name: 'actual-connector-name',
           cloudProvider: 'azure',
           vars: {
             tenant_id: { value: { id: 'secret-tenant-id', isSecretRef: true }, type: 'password' },

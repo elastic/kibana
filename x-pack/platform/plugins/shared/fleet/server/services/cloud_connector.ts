@@ -20,7 +20,7 @@ import type {
   CreateCloudConnectorRequest,
   UpdateCloudConnectorRequest,
 } from '../../common/types/rest_spec/cloud_connector';
-import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../common/constants';
 import {
   TENANT_ID_VAR_NAME,
   CLIENT_ID_VAR_NAME,
@@ -91,7 +91,11 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     const normalizedName = CloudConnectorService.normalizeName(name);
 
     // Check for existing connector with same name (case-insensitive, normalized)
-    const existingConnectors = await this.getList(soClient);
+    // Use SO_SEARCH_LIMIT to get all connectors and only fetch name field for performance
+    const existingConnectors = await this.getList(soClient, {
+      perPage: SO_SEARCH_LIMIT,
+      fields: ['name'],
+    });
     const normalizedNameLower = normalizedName.toLowerCase();
     const duplicateConnectorName = existingConnectors.find((c) => {
       // Skip the current connector when updating
@@ -189,6 +193,11 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       // Add KQL filter if specified
       if (options?.kuery) {
         findOptions.filter = options.kuery;
+      }
+
+      // Add fields filter if specified
+      if (options?.fields) {
+        findOptions.fields = options.fields;
       }
 
       const cloudConnectors = await soClient.find<CloudConnectorSOAttributes>(findOptions);
