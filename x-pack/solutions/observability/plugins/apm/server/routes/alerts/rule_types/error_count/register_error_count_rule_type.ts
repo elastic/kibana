@@ -66,7 +66,7 @@ import {
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
-import { getAlertDiscoverUrl } from '../utils/get_discover_url';
+import { getAlertDiscoverUrl } from '../utils/get_alert_discover_url';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 
@@ -331,7 +331,6 @@ export function registerErrorCountRuleType({
 
         const recoveredDiscoverUrl = getAlertDiscoverUrl({
           discoverLocator,
-          processorEvent: ProcessorEvent.error,
           index: indices.error,
           groupByFields,
           dateStart,

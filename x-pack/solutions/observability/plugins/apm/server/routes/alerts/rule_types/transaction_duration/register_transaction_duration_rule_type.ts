@@ -77,7 +77,7 @@ import {
 import { averageOrPercentileAgg, getMultiTermsSortOrder } from './average_or_percentile_agg';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
-import { getAlertDiscoverUrl } from '../utils/get_discover_url';
+import { getAlertDiscoverUrl } from '../utils/get_alert_discover_url';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
@@ -388,7 +388,6 @@ export function registerTransactionDurationRuleType({
 
         const recoveredDiscoverUrl = getAlertDiscoverUrl({
           discoverLocator,
-          processorEvent: ProcessorEvent.transaction,
           index,
           groupByFields,
           dateStart,
