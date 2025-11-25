@@ -12,6 +12,8 @@
       "@kbn/actions-simulators-plugin/*": ["x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/*"],
       "@kbn/actions-types": ["src/platform/packages/shared/kbn-actions-types"],
       "@kbn/actions-types/*": ["src/platform/packages/shared/kbn-actions-types/*"],
+      "@kbn/actions-utils": ["src/platform/packages/shared/kbn-actions-utils"],
+      "@kbn/actions-utils/*": ["src/platform/packages/shared/kbn-actions-utils/*"],
       "@kbn/advanced-settings-plugin": ["src/platform/plugins/private/advanced_settings"],
       "@kbn/advanced-settings-plugin/*": ["src/platform/plugins/private/advanced_settings/*"],
       "@kbn/ai-assistant": ["x-pack/platform/packages/shared/kbn-ai-assistant"],

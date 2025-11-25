@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AxiosInstance } from 'axios';
+import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type { ActionInfo } from './action_executor';
@@ -24,13 +24,18 @@ interface GetAxiosInstanceOpts {
 
 type ValidatedSecrets = Record<string, unknown>;
 
-export type GetAxiosInstanceWithAuthFn = (secrets: ValidatedSecrets) => Promise<AxiosInstance>;
+export interface GetAxiosInstanceWithAuthFnOpts {
+  secrets: ValidatedSecrets;
+}
+export type GetAxiosInstanceWithAuthFn = (
+  opts: GetAxiosInstanceWithAuthFnOpts
+) => Promise<AxiosInstance>;
 export const getAxiosInstanceWithAuth = ({
   authTypeRegistry,
   configurationUtilities,
   logger,
 }: GetAxiosInstanceOpts): GetAxiosInstanceWithAuthFn => {
-  return async (secrets: ValidatedSecrets) => {
+  return async ({ secrets }: GetAxiosInstanceWithAuthFnOpts) => {
     let authTypeId: string | undefined;
     try {
       authTypeId = (secrets as { authType?: string }).authType || 'none';
@@ -49,14 +54,12 @@ export const getAxiosInstanceWithAuth = ({
       });
 
       // create a request interceptor to inject custom http/https agents based on the URL
-      axiosInstance.interceptors.request.use((config) => {
+      axiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
         if (config.url) {
           const { httpAgent, httpsAgent } = getCustomAgents(
             configurationUtilities,
             logger,
-            config.url,
-            // todo - sslOverrides, needed when we support certificate based auth
-            {}
+            config.url
           );
 
           // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
@@ -67,8 +70,15 @@ export const getAxiosInstanceWithAuth = ({
         return config;
       });
 
+      const configureCtx = {
+        getCustomHostSettings: (url: string) => configurationUtilities.getCustomHostSettings(url),
+        logger,
+        proxySettings: configurationUtilities.getProxySettings(),
+        sslSettings: configurationUtilities.getSSLSettings(),
+      };
+
       // use the registered auth type to configure authentication for the axios instance
-      return authType.configure(axiosInstance, secrets);
+      return authType.configure(configureCtx, axiosInstance, secrets);
     } catch (err) {
       logger.error(
         `Error getting configured axios instance configured for auth type "${

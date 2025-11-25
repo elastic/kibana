@@ -433,6 +433,7 @@ src/platform/packages/shared/home/sample_data_card @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_tab @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_types @elastic/appex-sharedux
 src/platform/packages/shared/kbn-actions-types @elastic/response-ops
+src/platform/packages/shared/kbn-actions-utils @elastic/response-ops
 src/platform/packages/shared/kbn-aiops-utils @elastic/ml-ui
 src/platform/packages/shared/kbn-alerting-types @elastic/response-ops
 src/platform/packages/shared/kbn-alerts-as-data-utils @elastic/response-ops

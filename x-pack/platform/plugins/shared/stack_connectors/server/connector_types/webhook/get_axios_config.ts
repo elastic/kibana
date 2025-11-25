@@ -14,7 +14,8 @@ import {
 } from '@kbn/actions-plugin/server/lib';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { Logger } from '@kbn/logging/src/logger';
-import type { SSLSettings, Services } from '@kbn/actions-plugin/server/types';
+import type { SSLSettings } from '@kbn/actions-utils';
+import type { Services } from '@kbn/actions-plugin/server/types';
 import type {
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,

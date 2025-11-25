@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import type { AxiosInstance } from 'axios';
 import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '../../types';
 import type { ExecutorParams } from '../../sub_action_framework/types';
+import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
 
 type RecordUnknown = Record<string, unknown>;
 
@@ -32,7 +32,7 @@ export const generateExecutorFunction = ({
   getAxiosInstanceWithAuth,
 }: {
   actions: ConnectorSpec['actions'];
-  getAxiosInstanceWithAuth: (validatedSecrets: Record<string, unknown>) => Promise<AxiosInstance>;
+  getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
@@ -40,7 +40,9 @@ export const generateExecutorFunction = ({
     const { actionId, config, params, secrets, logger } = execOptions;
     const { subAction, subActionParams } = params as ExecutorParams;
 
-    const axiosInstance = await getAxiosInstanceWithAuth({ ...secrets });
+    const axiosInstance = await getAxiosInstanceWithAuth({
+      secrets,
+    });
 
     if (!actions[subAction]) {
       const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;

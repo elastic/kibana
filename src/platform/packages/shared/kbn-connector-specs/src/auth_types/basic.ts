@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
-import type { AuthTypeSpec } from '../connector_spec';
+import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 
 const authSchema = z.object({
   username: z.string().meta({ sensitive: true }).describe('Username'),
@@ -25,7 +25,11 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const BasicAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'basic',
   schema: authSchema,
-  configure: (axiosInstance: AxiosInstance, secret: AuthSchemaType): AxiosInstance => {
+  configure: (
+    _: AuthContext,
+    axiosInstance: AxiosInstance,
+    secret: AuthSchemaType
+  ): AxiosInstance => {
     // set global defaults
     axiosInstance.defaults.auth = {
       username: secret.username,

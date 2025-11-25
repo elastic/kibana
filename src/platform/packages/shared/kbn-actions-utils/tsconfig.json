@@ -5,8 +5,6 @@
     "types": [
       "jest",
       "node",
-      "react",
-      "@kbn/ambient-ui-types",
     ]
   },
   "include": [
@@ -17,9 +15,8 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/zod",
-    "@kbn/logging",
     "@kbn/licensing-types",
-    "@kbn/actions-utils",
+    "@kbn/config-schema",
+    "@kbn/logging",
   ]
 }

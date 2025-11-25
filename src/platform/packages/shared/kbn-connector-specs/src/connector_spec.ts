@@ -23,6 +23,7 @@
 
 import type { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
+import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/actions-utils';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosInstance } from 'axios';
 
@@ -76,11 +77,17 @@ export interface ConnectorMetadata {
 
 // Auth schemas defined in ./auth_types
 
+export interface AuthContext {
+  getCustomHostSettings: (url: string) => CustomHostSettings | undefined;
+  logger: Logger;
+  proxySettings?: ProxySettings;
+  sslSettings: SSLSettings;
+}
 export interface AuthTypeSpec<T extends Record<string, unknown>> {
   id: string;
   schema: z.ZodObject<Record<string, z.ZodType>>;
   normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
-  configure: (axiosInstance: AxiosInstance, secret: T) => AxiosInstance;
+  configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => AxiosInstance;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
