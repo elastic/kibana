@@ -10,8 +10,6 @@ import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import type { CaseUI } from '../../../../common/ui/types';
 
-import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
-import { CaseViewTabs } from '../case_view_tabs';
 import { ObservablesTable } from '../../observables/observables_table';
 import { useCaseObservables } from '../use_case_observables';
 import type { OnUpdateFields } from '../types';
@@ -49,7 +47,6 @@ export const CaseViewObservables = ({
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        {false && <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />}
         <EuiFlexGroup>
           <EuiFlexItem>
             <ObservablesTable

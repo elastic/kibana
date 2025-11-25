@@ -59,7 +59,6 @@ export const CaseViewAlerts = ({
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
-          {false && <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />}
           <CaseViewAlertsEmpty />
         </EuiFlexItem>
       </EuiFlexGroup>
