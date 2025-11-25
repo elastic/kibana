@@ -179,7 +179,6 @@ export const dataViewSpecSchema = schema.object({
   name: schema.maybe(schema.string()),
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
   allowHidden: schema.maybe(schema.boolean()),
-  managed: schema.maybe(schema.boolean()),
 });
 
 export type DataViewSpec = TypeOf<typeof dataViewSpecSchema>;
