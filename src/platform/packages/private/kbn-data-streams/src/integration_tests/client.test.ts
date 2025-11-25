@@ -321,7 +321,7 @@ describe('DataStreamClient', () => {
       expect(getIndexTemplateSpy).toHaveBeenCalledTimes(2);
       expect(putIndexTemplateSpy).toHaveBeenCalledTimes(1); // Index template not updated when version is same
       expect(createDataStreamSpy).toHaveBeenCalledTimes(1);
-      expect(putMappingSpy).toHaveBeenCalledTimes(1); // Mappings are still applied to write index even when version is same
+      expect(putMappingSpy).toHaveBeenCalledTimes(0); // Mappings are not applied to write index when version is not incremented
     });
   });
 });

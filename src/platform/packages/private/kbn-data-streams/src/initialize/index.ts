@@ -62,6 +62,7 @@ export async function initialize({
     dataStream,
     elasticsearchClient,
     existingDataStream,
+    existingIndexTemplate,
     skipCreation: !createDataStreamIfDoesntExist,
   });
 

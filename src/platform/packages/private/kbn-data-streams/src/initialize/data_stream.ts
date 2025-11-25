@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import invariant from 'node:assert';
 import type api from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { errors as EsErrors } from '@elastic/elasticsearch';
@@ -24,20 +25,37 @@ export async function initializeDataStream({
   dataStream,
   elasticsearchClient,
   existingDataStream,
+  existingIndexTemplate,
   skipCreation = true,
 }: {
   logger: Logger;
   dataStream: AnyDataStreamDefinition;
   elasticsearchClient: ElasticsearchClient;
   existingDataStream: api.IndicesDataStream | undefined;
+  existingIndexTemplate: api.IndicesGetIndexTemplateIndexTemplateItem | undefined;
   skipCreation?: boolean;
 }): Promise<{ uptoDate: boolean }> {
-  logger.debug(`Setting up data stream: ${dataStream.name}`);
+  const version = dataStream.version;
+  logger.debug(`Setting up data stream: ${dataStream.name} v${version}`);
 
   if (skipCreation && !existingDataStream) {
     // data stream does not exist and we will not create it.
     logger.debug(`Skipping data stream creation during lazy initialization: ${dataStream.name}.`);
     return { uptoDate: false };
+  }
+
+  if (existingIndexTemplate) {
+    const deployedVersion = existingIndexTemplate.index_template?._meta?.version;
+    invariant(
+      typeof deployedVersion === 'number' && deployedVersion > 0,
+      `Datastream ${dataStream.name} metadata is in an unexpected state, expected version to be a number but got ${deployedVersion}`
+    );
+
+    if (deployedVersion >= version) {
+      // index already applied and updated.
+      logger.debug(`Deployed ${dataStream.name} v${deployedVersion} already applied and updated.`);
+      return { uptoDate: true };
+    }
   }
 
   if (existingDataStream) {

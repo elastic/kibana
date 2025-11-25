@@ -33,9 +33,9 @@ export async function initializeIndexTemplate({
   existingIndexTemplate: api.IndicesGetIndexTemplateIndexTemplateItem | undefined;
   skipCreation?: boolean;
 }): Promise<{ uptoDate: boolean }> {
-  logger.debug(`Setting up index template for data stream: ${dataStream.name}`);
-
   const version = dataStream.version;
+  logger.debug(`Setting up index template for data stream: ${dataStream.name} v${version}`);
+
   const previousVersions: number[] = [];
   dataStream = applyDefaults(dataStream);
 
@@ -58,7 +58,7 @@ export async function initializeIndexTemplate({
 
     if (deployedVersion >= version) {
       // index already applied and updated.
-      logger.debug(`Index template already applied and updated: ${dataStream.name}.`);
+      logger.debug(`Deployed ${dataStream.name} v${deployedVersion} already applied and updated.`);
       return { uptoDate: true };
     }
     previousVersions.push(
