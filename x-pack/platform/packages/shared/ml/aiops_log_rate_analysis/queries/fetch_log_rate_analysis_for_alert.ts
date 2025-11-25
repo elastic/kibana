@@ -38,6 +38,7 @@ interface QueueItem {
 /**
  * Runs log rate analysis data on an index given some alert metadata.
  */
+
 export async function fetchLogRateAnalysisForAlert({
   esClient,
   abortSignal,
@@ -54,8 +55,7 @@ export async function fetchLogRateAnalysisForAlert({
     searchQuery?: estypes.QueryDslQueryContainer;
   };
 }) {
-  const { alertStartedAt, timefield = '@timestamp' } = args;
-  const alertStart = moment(alertStartedAt);
+  const alertStart = moment(args.alertStartedAt);
 
   const intervalFactor = getIntervalFactor(
     args.alertRuleParameterTimeSize,
@@ -80,11 +80,47 @@ export async function fetchLogRateAnalysisForAlert({
     deviationMax: alertStart.valueOf(),
   };
 
-  const { searchQuery = { match_all: {} } } = args;
+  return runLogRateAnalysis({
+    esClient,
+    abortSignal,
+    arguments: {
+      index: args.index,
+      windowParameters,
+      timefield: args.timefield,
+      searchQuery: args.searchQuery,
+    },
+  });
+}
+
+export async function runLogRateAnalysis({
+  esClient,
+  abortSignal,
+  arguments: args,
+}: {
+  esClient: ElasticsearchClient;
+  abortSignal?: AbortSignal;
+  arguments: {
+    index: string;
+    windowParameters: {
+      baselineMin: number;
+      baselineMax: number;
+      deviationMin: number;
+      deviationMax: number;
+    };
+    timefield?: string;
+    searchQuery?: estypes.QueryDslQueryContainer;
+  };
+}) {
+  const {
+    index,
+    windowParameters,
+    timefield = '@timestamp',
+    searchQuery = { match_all: {} },
+  } = args;
 
   // Step 1: Get field candidates and total doc counts.
   const indexInfoParams: AiopsLogRateAnalysisSchema = {
-    index: args.index,
+    index,
     start: windowParameters.baselineMin,
     end: windowParameters.deviationMax,
     searchQuery: JSON.stringify(searchQuery),
@@ -200,23 +236,26 @@ export async function fetchLogRateAnalysisForAlert({
 
         const fieldType = type === 'keyword' ? 'metadata' : 'log message pattern';
 
-        const data = {
+        const logRateChange = getLogRateChange(
+          logRateAnalysisType,
+          baselineBucketRate,
+          deviationBucketRate
+        );
+
+        const score = bgCount > 0 ? docCount / bgCount : docCount;
+
+        return {
+          score,
           fieldType,
           fieldName,
           fieldValue: String(fieldValue).substring(0, 140),
-          logRateChange: getLogRateChange(
-            logRateAnalysisType,
-            baselineBucketRate,
-            deviationBucketRate
-          ).message,
-        };
-
-        return {
-          logRateChangeSort: bgCount > 0 ? docCount / bgCount : docCount,
-          data,
+          message: logRateChange.message,
+          change: {
+            baseline: baselineBucketRate,
+            deviation: deviationBucketRate,
+          },
         };
       })
-      .sort((a, b) => b.logRateChangeSort - a.logRateChangeSort)
-      .map((d) => d.data),
+      .sort((a, b) => b.score - a.score),
   };
 }

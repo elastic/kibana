@@ -128,100 +128,106 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(response.dashboards.length).to.eql(1);
       });
+    });
 
-      describe('after disabling', () => {
-        before(async () => {
-          // disabling and re-enabling streams wipes the attachment links
-          await disableStreams(apiClient);
-          await enableStreams(apiClient);
-        });
-
-        it('dropped all dashboards', async () => {
-          const response = await getDashboards(apiClient, 'logs');
-
-          expect(response.dashboards.length).to.eql(0);
-        });
-
-        it('recovers on write and lists the linked dashboard ', async () => {
-          await linkDashboard(apiClient, 'logs', SEARCH_DASHBOARD_ID);
-
-          const response = await getDashboards(apiClient, 'logs');
-
-          expect(response.dashboards.length).to.eql(1);
-        });
+    describe('after disabling', () => {
+      before(async () => {
+        // disabling and re-enabling streams wipes the attachment links
+        await disableStreams(apiClient);
+        await enableStreams(apiClient);
+        await loadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
       });
 
-      describe('after deleting the dashboards', () => {
-        before(async () => {
-          await unloadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
-        });
-
-        it('no longer lists the dashboard as a linked attachment', async () => {
-          const response = await getDashboards(apiClient, 'logs');
-
-          expect(response.dashboards.length).to.eql(0);
-        });
+      after(async () => {
+        await unloadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
       });
 
-      describe('linking a dashboard to multiple streams', () => {
-        before(async () => {
-          // Reload dashboards since previous test unloaded them
-          await loadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
+      it('dropped all dashboards', async () => {
+        const response = await getDashboards(apiClient, 'logs');
 
-          // Create one additional stream to test with
-          await putStream(apiClient, 'logs.child', {
-            dashboards: [],
-            rules: [],
-            queries: [],
-            stream: {
-              description: '',
-              ingest: {
-                lifecycle: { inherit: {} },
-                processing: { steps: [] },
-                settings: {},
-                wired: {
-                  routing: [],
-                  fields: {},
-                },
+        expect(response.dashboards.length).to.eql(0);
+      });
+
+      it('recovers on write and lists the linked dashboard ', async () => {
+        await linkDashboard(apiClient, 'logs', SEARCH_DASHBOARD_ID);
+
+        const response = await getDashboards(apiClient, 'logs');
+
+        expect(response.dashboards.length).to.eql(1);
+      });
+    });
+
+    describe('after deleting the dashboards', () => {
+      before(async () => {
+        await unloadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
+      });
+
+      it('no longer lists the dashboard as a linked attachment', async () => {
+        const response = await getDashboards(apiClient, 'logs');
+
+        expect(response.dashboards.length).to.eql(0);
+      });
+    });
+
+    describe('linking a dashboard to multiple streams', () => {
+      before(async () => {
+        // Reload dashboards since previous test unloaded them
+        await loadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
+
+        // Create one additional stream to test with
+        await putStream(apiClient, 'logs.child', {
+          dashboards: [],
+          rules: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: { steps: [] },
+              settings: {},
+              wired: {
+                routing: [],
+                fields: {},
               },
+              failure_store: { inherit: {} },
             },
-          });
-
-          // Link the same dashboard to both logs and logs.child
-          await linkDashboard(apiClient, 'logs', SEARCH_DASHBOARD_ID);
-          await linkDashboard(apiClient, 'logs.child', SEARCH_DASHBOARD_ID);
+          },
         });
 
-        after(async () => {
-          await deleteStream(apiClient, 'logs.child');
-          await unloadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
-        });
+        // Link the same dashboard to both logs and logs.child
+        await linkDashboard(apiClient, 'logs', SEARCH_DASHBOARD_ID);
+        await linkDashboard(apiClient, 'logs.child', SEARCH_DASHBOARD_ID);
+      });
 
-        it('lists the dashboard in the logs stream', async () => {
-          const response = await getDashboards(apiClient, 'logs');
+      after(async () => {
+        await deleteStream(apiClient, 'logs.child');
+        await unloadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
+      });
 
-          expect(response.dashboards.length).to.eql(1);
-          expect(response.dashboards[0].id).to.eql(SEARCH_DASHBOARD_ID);
-        });
+      it('lists the dashboard in the logs stream', async () => {
+        const response = await getDashboards(apiClient, 'logs');
 
-        it('lists the dashboard in the logs.child stream', async () => {
-          const response = await getDashboards(apiClient, 'logs.child');
+        expect(response.dashboards.length).to.eql(1);
+        expect(response.dashboards[0].id).to.eql(SEARCH_DASHBOARD_ID);
+      });
 
-          expect(response.dashboards.length).to.eql(1);
-          expect(response.dashboards[0].id).to.eql(SEARCH_DASHBOARD_ID);
-        });
+      it('lists the dashboard in the logs.child stream', async () => {
+        const response = await getDashboards(apiClient, 'logs.child');
 
-        it('unlinking from one stream does not affect the other stream', async () => {
-          await unlinkDashboard(SEARCH_DASHBOARD_ID, 'logs.child');
+        expect(response.dashboards.length).to.eql(1);
+        expect(response.dashboards[0].id).to.eql(SEARCH_DASHBOARD_ID);
+      });
 
-          const logsResponse = await getDashboards(apiClient, 'logs');
-          const childResponse = await getDashboards(apiClient, 'logs.child');
+      it('unlinking from one stream does not affect the other stream', async () => {
+        await unlinkDashboard(SEARCH_DASHBOARD_ID, 'logs.child');
 
-          expect(logsResponse.dashboards.length).to.eql(1);
-          expect(logsResponse.dashboards[0].id).to.eql(SEARCH_DASHBOARD_ID);
+        const logsResponse = await getDashboards(apiClient, 'logs');
+        const childResponse = await getDashboards(apiClient, 'logs.child');
 
-          expect(childResponse.dashboards.length).to.eql(0);
-        });
+        expect(logsResponse.dashboards.length).to.eql(1);
+        expect(logsResponse.dashboards[0].id).to.eql(SEARCH_DASHBOARD_ID);
+
+        expect(childResponse.dashboards.length).to.eql(0);
       });
     });
 
