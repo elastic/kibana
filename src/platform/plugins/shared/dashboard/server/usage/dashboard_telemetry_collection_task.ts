@@ -19,14 +19,15 @@ import type { CoreSetup, Logger, SavedObjectReference } from '@kbn/core/server';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 import {
-  // controlsCollectorFactory,
   collectPanelsByType,
   getEmptyDashboardData,
   collectDashboardSections,
+  collectStickyControls,
 } from './dashboard_telemetry';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
+  StoredControlGroupInput,
 } from '../dashboard_saved_object';
 
 interface DashboardSavedObjectAttributesAndReferences {
@@ -94,7 +95,6 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
     return {
       async run() {
         let dashboardData = getEmptyDashboardData();
-        // const controlsCollector = controlsCollectorFactory(embeddable);
         const processDashboards = (dashboards: DashboardSavedObjectAttributesAndReferences[]) => {
           for (const dashboard of dashboards) {
             // TODO is this injecting references really necessary?
@@ -102,15 +102,18 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
             //   embeddablePersistableStateService: embeddable,
             // });
 
-            // dashboardData = controlsCollector(dashboard.attributes, dashboardData);
             dashboardData = collectDashboardSections(dashboard.attributes, dashboardData);
 
             try {
               const panels = JSON.parse(
                 dashboard.attributes.panelsJSON as string
               ) as unknown as SavedDashboardPanel[];
-
               collectPanelsByType(panels, dashboardData, embeddable);
+
+              const controls = JSON.parse(
+                dashboard.attributes.controlGroupInput?.panelsJSON as string
+              ) as unknown as StoredControlGroupInput['panels'];
+              collectStickyControls(controls, dashboardData, embeddable);
             } catch (e) {
               logger.warn('Unable to parse panelsJSON for telemetry collection');
             }
