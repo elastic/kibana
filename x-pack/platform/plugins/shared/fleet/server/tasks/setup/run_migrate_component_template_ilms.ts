@@ -16,6 +16,7 @@ import {
   getILMPolicies,
   saveILMMigrationChanges,
 } from '../../services/epm/elasticsearch/template/default_settings';
+import { throwIfAborted } from '../utils';
 
 export async function runMigrateComponentTemplateILMs(params: {
   abortController: AbortController;
@@ -68,12 +69,6 @@ export async function runMigrateComponentTemplateILMs(params: {
     }
   }
   await saveILMMigrationChanges(updatedILMMigrationStatusMap);
-}
-
-function throwIfAborted(abortController: AbortController) {
-  if (abortController.signal.aborted) {
-    throw new Error('Task was aborted');
-  }
 }
 
 async function updateComponentTemplate(
