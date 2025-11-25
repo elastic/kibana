@@ -40,7 +40,8 @@ Object {
               "type": "string",
             },
             "custom-api-key-field": Object {
-              "description": "API Key",
+              "label": "API key",
+              "minLength": 1,
               "sensitive": true,
               "type": "string",
             },
