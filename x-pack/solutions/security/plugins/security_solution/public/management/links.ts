@@ -24,6 +24,7 @@ import {
   MANAGE_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
+  SCRIPTS_LIBRARY_PATH,
   SECURITY_FEATURE_ID,
   SecurityPageName,
   TRUSTED_APPS_PATH,
@@ -40,6 +41,7 @@ import {
   MANAGE,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
+  SCRIPTS_LIBRARY,
   TRUSTED_APPLICATIONS,
   TRUSTED_DEVICES,
 } from '../app/translations';
@@ -83,6 +85,7 @@ const categories = [
       SecurityPageName.blocklist,
       SecurityPageName.endpointExceptions,
       SecurityPageName.responseActionsHistory,
+      SecurityPageName.scriptsLibrary,
     ],
   },
   {
@@ -249,6 +252,17 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
     },
+    {
+      id: SecurityPageName.scriptsLibrary,
+      title: SCRIPTS_LIBRARY,
+      description: i18n.translate('xpack.securitySolution.appLinks.scriptsLibraryDescription', {
+        defaultMessage: 'View and manage your scripts library.',
+      }),
+      landingIcon: 'package',
+      path: SCRIPTS_LIBRARY_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+    },
     notesLink,
   ],
 };
@@ -275,6 +289,7 @@ export const getManagementFilteredLinks = async (
     canReadEventFilters,
     canReadBlocklist,
     canReadPolicyManagement,
+    canReadScriptsLibrary,
   } =
     fleetAuthz && currentUser
       ? calculateEndpointAuthz(licenseService, fleetAuthz, currentUser.roles)
@@ -324,6 +339,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadBlocklist) {
     linksToExclude.push(SecurityPageName.blocklist);
+  }
+
+  if (!canReadScriptsLibrary) {
+    linksToExclude.push(SecurityPageName.scriptsLibrary);
   }
 
   return excludeLinks(linksToExclude);

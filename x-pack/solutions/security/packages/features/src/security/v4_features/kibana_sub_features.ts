@@ -26,6 +26,7 @@ import {
   workflowInsightsSubFeature,
   trustedDevicesSubFeature,
   socManagementSubFeature,
+  scriptsLibrarySubFeature,
 } from '../kibana_sub_features';
 
 /**
@@ -65,6 +66,10 @@ export const getSecurityV4SubFeaturesMap = ({
     [SecuritySubFeatureId.executeAction, executeActionSubFeature()],
     [SecuritySubFeatureId.scanAction, scanActionSubFeature()],
   ];
+
+  if (experimentalFeatures.scriptsLibrary) {
+    securitySubFeaturesList.push([SecuritySubFeatureId.scriptsLibrary, scriptsLibrarySubFeature()]);
+  }
 
   const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(
     securitySubFeaturesList.map(([id, originalSubFeature]) => {

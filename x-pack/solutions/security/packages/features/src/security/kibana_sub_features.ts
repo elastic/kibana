@@ -791,3 +791,48 @@ export const socManagementSubFeature = (): SubFeatureConfig => ({
     },
   ],
 });
+
+export const scriptsLibrarySubFeature = (): SubFeatureConfig => ({
+  requireAllSpaces: true,
+  privilegesTooltip: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.scriptsLibrary.privilegesTooltip',
+    { defaultMessage: 'All Spaces is required for Scripts library access.' }
+  ),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.scriptsLibrary',
+    { defaultMessage: 'Scripts library' }
+  ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.scriptsLibrary.description',
+    { defaultMessage: 'Access the history of response actions performed on endpoints.' }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [`${APP_ID}-writeScriptsLibrary`, `${APP_ID}-readScriptsLibrary`],
+          id: 'scripts_library_all',
+          includeIn: 'none',
+          name: TRANSLATIONS.all,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['writeScriptsLibrary', 'readScriptsLibrary'],
+        },
+        {
+          api: [`${APP_ID}-readScriptsLibrary`],
+          id: 'scripts_library_read',
+          includeIn: 'none',
+          name: TRANSLATIONS.read,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['readScriptsLibrary'],
+        },
+      ],
+    },
+  ],
+});
