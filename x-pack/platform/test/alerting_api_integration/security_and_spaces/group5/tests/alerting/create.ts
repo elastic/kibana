@@ -676,7 +676,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       });
     }
 
-    describe.only('workflows subfeature', () => {
+    describe('workflows subfeature', () => {
       const { user, space } = SuperuserAtSpace1;
 
       it('should handle create alert request appropriately with workflows-only actions', async () => {
