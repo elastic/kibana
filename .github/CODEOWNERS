@@ -92,6 +92,7 @@ packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
+packages/kbn-tsconfig/base @elastic/kibana-operations
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
@@ -922,6 +923,7 @@ x-pack/platform/packages/shared/kbn-evals @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-evals-suite-streams @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-ux-infra_services-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-failure-store-modal @elastic/kibana-management
+x-pack/platform/packages/shared/kbn-fs @elastic/kibana-security
 x-pack/platform/packages/shared/kbn-grok-heuristics @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-inference-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/appex-ai-infra

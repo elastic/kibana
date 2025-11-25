@@ -893,7 +893,8 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        WARNING: This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.
+        > warn
+        > This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.
       operationId: post-agent-builder-a2a-agentid
       parameters:
         - description: The unique identifier of the agent to send the A2A task to.
@@ -1927,7 +1928,8 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        WARNING: This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.
+        > warn
+        > This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.
       operationId: post-agent-builder-mcp
       parameters: []
       requestBody:
