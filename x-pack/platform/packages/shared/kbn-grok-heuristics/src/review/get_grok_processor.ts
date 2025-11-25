@@ -10,7 +10,6 @@ import { GROK_REGEX_MAP } from '../constants';
 import type { NormalizedReviewResult } from './get_review_fields';
 import { sanitize, isCollapsiblePattern } from './get_review_fields';
 import { isNamedField } from '../utils';
-import { collapseSequentialFields } from './collapse_sequential_fields';
 
 export interface GrokProcessorResult {
   description: string;
@@ -25,8 +24,9 @@ export interface GrokProcessorResult {
  * columns, ensuring patterns are validated and adjusted based on example
  * values.
  *
- * After the LLM review renames fields, sequential fields with the same name
- * are collapsed into a single GREEDYDATA field to simplify the pattern.
+ * Special handling: Multi-column groupings that end with GREEDYDATA are
+ * collapsed to a single GREEDYDATA field instead of creating a complex
+ * custom pattern definition (since all preceding patterns are redundant).
  */
 export function getGrokProcessor(
   nodes: GrokPatternNode[],
@@ -50,32 +50,31 @@ export function getGrokProcessor(
     }
   });
 
-  // Apply LLM field renaming
-  const renamedNodes = nodes.map((node) => {
-    if (isNamedField(node)) {
-      // Skip renaming if this field is part of a true multi-column mapping
-      if (trueMultiColumnFields.has(node.id)) {
-        return node;
-      }
-
-      const match = reviewResult.fields.find((field) => field.columns.includes(node.id));
-      if (match) {
-        // Rename to the LLM-suggested name
-        return {
-          ...node,
-          id: match.name,
-        };
-      }
-    }
-    return node;
-  });
-
-  // Collapse sequential fields with the same name into GREEDYDATA
-  const collapsedNodes = collapseSequentialFields(renamedNodes);
-
   let rootPattern = '';
   const patternDefinitions: Record<string, string> = {};
   let targetDefinition: string | undefined;
+  
+  // Build skip ranges for collapsible multi-column groups
+  // Map from field entry to range of node indices to skip
+  const skipRanges: Array<{ start: number; end: number }> = [];
+  
+  reviewResult.fields.forEach((field) => {
+    if (field.columns.length >= 2) {
+      const lastComponent = field.grok_components[field.grok_components.length - 1];
+      if (lastComponent === 'GREEDYDATA') {
+        // This multi-column entry should collapse - find the range to skip
+        const firstColIndex = nodes.findIndex((n) => isNamedField(n) && n.id === field.columns[0]);
+        const lastColIndex = nodes.findIndex(
+          (n) => isNamedField(n) && n.id === field.columns[field.columns.length - 1]
+        );
+        
+        if (firstColIndex >= 0 && lastColIndex >= 0 && lastColIndex > firstColIndex) {
+          // Skip everything from firstColIndex+1 to lastColIndex (inclusive)
+          skipRanges.push({ start: firstColIndex + 1, end: lastColIndex });
+        }
+      }
+    }
+  });
 
   const appendNode = (node: GrokPatternNode) => {
     if (targetDefinition) {
@@ -114,26 +113,41 @@ export function getGrokProcessor(
     return suggestedPattern;
   };
 
-  collapsedNodes.forEach((node) => {
+  nodes.forEach((node, index) => {
+    // Check if this node should be skipped (part of collapsed multi-column group)
+    const shouldSkip = skipRanges.some((range) => index >= range.start && index <= range.end);
+    if (shouldSkip) {
+      return;
+    }
+    
     if (isNamedField(node)) {
       const match = reviewResult.fields.find(
         (field) => field.columns.includes(node.id) || field.name === node.id
       );
 
       if (match) {
-        // Check if this node's original ID is part of a true multi-column grouping
         const isPartOfMultiColumnGroup = trueMultiColumnFields.has(node.id);
+        const isCollapsibleMultiColumn = match.columns.length >= 2 && !isPartOfMultiColumnGroup;
 
-        if (isPartOfMultiColumnGroup) {
+        if (isCollapsibleMultiColumn) {
+          // Multi-column entry that should collapse to GREEDYDATA
+          // Output GREEDYDATA for the first column
+          // (subsequent columns and separators are skipped via skipRanges)
+          appendNode({
+            id: match.name,
+            component: 'GREEDYDATA',
+            values: node.values,
+          });
+        } else if (isPartOfMultiColumnGroup) {
           // Node is part of a true multi-column grouping, create a custom pattern definition
-          const index = match.columns.indexOf(node.id);
+          const colIndex = match.columns.indexOf(node.id);
           const patternDefinitionName = `CUSTOM_${match.name
             .replace(/^(resource\.)?(attributes\.)?(custom_)?/g, '')
             .toUpperCase()
             .replace(/\W+/g, '_')
             .replace(/^_|_$/g, '')}`;
 
-          if (index === 0) {
+          if (colIndex === 0) {
             appendNode({
               id: match.name,
               component: patternDefinitionName,
@@ -147,11 +161,15 @@ export function getGrokProcessor(
           // Append the token to the current pattern definition
           appendNode({
             id: match.name,
-            component: pickValidPattern(match.grok_components[index], node.component, node.values),
+            component: pickValidPattern(
+              match.grok_components[colIndex],
+              node.component,
+              node.values
+            ),
             values: node.values,
           });
 
-          if (index === match.columns.length - 1) {
+          if (colIndex === match.columns.length - 1) {
             // Change destination back after the last column
             targetDefinition = undefined;
           }
