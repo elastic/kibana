@@ -54,7 +54,7 @@ export const createLensEmbeddableFactory = (
      *                  from the Lens component container to the Lens embeddable.
      * @returns an object with the Lens API and the React component to render in the Embeddable
      */
-    buildEmbeddable: async ({ finalizeApi, parentApi, uuid, initialState }) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
 
       const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
