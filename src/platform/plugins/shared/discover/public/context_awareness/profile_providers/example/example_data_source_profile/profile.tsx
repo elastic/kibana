@@ -279,6 +279,12 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
         recommendedFields: exampleRecommendedFieldNames,
       };
     },
+    getChartSectionConfiguration: (prev) => (params) => {
+      const prevConfig = prev(params);
+      return {
+        ...prevConfig,
+      };
+    },
   },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);
