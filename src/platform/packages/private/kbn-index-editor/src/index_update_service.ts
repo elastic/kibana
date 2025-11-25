@@ -16,7 +16,11 @@ import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type {
+  DatatableColumn,
+  DatatableColumnMeta,
+  DatatableColumnType,
+} from '@kbn/expressions-plugin/common';
 import { groupBy, times, zipObject } from 'lodash';
 import {
   BehaviorSubject,
@@ -48,10 +52,12 @@ import { esql } from '@kbn/esql-ast';
 import type { ESQLOrderExpression } from '@kbn/esql-ast/src/types';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import {
   LOOKUP_INDEX_CREATE_ROUTE,
   LOOKUP_INDEX_PRIVILEGES_ROUTE,
   LOOKUP_INDEX_RECREATE_ROUTE,
+  LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE,
   LOOKUP_INDEX_UPDATE_ROUTE,
   type IndicesAutocompleteResult,
 } from '@kbn/esql-types';
@@ -92,11 +98,13 @@ function isDocDelete(update: unknown): update is DeleteDocAction {
 
 interface ColumnAddition {
   name: string;
+  fieldType?: DatatableColumnMeta['esType'];
 }
 
 interface ColumnUpdate {
   name: string;
   previousName?: string;
+  fieldType?: DatatableColumnMeta['esType'];
 }
 
 interface DeleteDocAction {
@@ -139,6 +147,7 @@ export class IndexUpdateService {
 
   public userCanResetIndex: boolean = false;
   private indexHasNewFields: boolean = false;
+  private esqlUnsupportedFieldTypes: Set<string> = new Set<string>();
 
   /**
    * Keeps track of the placement position of newly added rows inside the table
@@ -350,7 +359,11 @@ export class IndexUpdateService {
                 ...docUpdate.payload.value,
                 [action.payload.name]: docUpdate.payload.value[action.payload.previousName],
               };
-              delete newValue[action.payload.previousName];
+
+              if (action.payload.previousName !== action.payload.name) {
+                delete newValue[action.payload.previousName];
+              }
+
               return { ...docUpdate, payload: { ...docUpdate.payload, value: newValue } };
             }
             return docUpdate;
@@ -437,9 +450,12 @@ export class IndexUpdateService {
       const unsavedFields = pendingColumnsToBeSaved
         .filter((column) => !dataView.fields.getByName(column.name))
         .map((column) => {
+          const type = esFieldTypeToKibanaFieldType(column.fieldType ?? KBN_FIELD_TYPES.UNKNOWN);
+
           return dataView.fields.create({
             name: column.name,
-            type: KBN_FIELD_TYPES.UNKNOWN,
+            type,
+            esTypes: column.fieldType ? [column.fieldType] : undefined,
             aggregatable: true,
             searchable: true,
           });
@@ -449,12 +465,15 @@ export class IndexUpdateService {
         .concat(unsavedFields)
         .filter((field) => field.spec.metadata_field !== true && !field.spec.subType)
         .map((field) => {
+          const type = this.esqlUnsupportedFieldTypes.has(field.type)
+            ? KBN_FIELD_TYPES.UNKNOWN
+            : field.type;
           const datatableColumn: DatatableColumn = {
             name: field.name,
             id: field.name,
             isNull: field.isNull,
             meta: {
-              type: field.type as DatatableColumnType,
+              type: type as DatatableColumnType,
               params: {
                 id: field.name,
               },
@@ -559,17 +578,35 @@ export class IndexUpdateService {
     this._subscription.add(
       this._flush$
         .pipe(
-          withLatestFrom(this.bufferState$),
-          map(([, updates]) => updates),
+          withLatestFrom(this.bufferState$, this._pendingColumnsToBeSaved$),
           skipWhile(() => !this.isIndexCreated()),
-          filter((updates) => updates.length > 0),
-          map((updates) => ({ updates, startTime: Date.now() })),
+          map(([, updates, newColumns]) => ({
+            updates,
+            newColumns,
+            startTime: Date.now(),
+          })),
+          filter(({ updates }) => updates.length > 0),
           tap(() => {
             this._isSaving$.next(true);
           }),
           // Save updates
-          exhaustMap(({ updates, startTime }) => {
-            return from(this.bulkUpdate(updates)).pipe(
+          exhaustMap(({ updates, newColumns, startTime }) => {
+            // First update index mapping for new columns
+            const newFieldsMapping = newColumns
+              .filter((col) => !isPlaceholderColumn(col.name) && col.fieldType)
+              .reduce<Record<string, { type: DatatableColumnMeta['esType'] }>>((acc, col) => {
+                acc[col.name] = { type: col.fieldType! }; // Field type is defined due to the filter above
+                return acc;
+              }, {});
+
+            const updateMappingPromise =
+              Object.keys(newFieldsMapping).length > 0
+                ? this.updateIndexMappings(newFieldsMapping)
+                : Promise.resolve();
+
+            return from(updateMappingPromise).pipe(
+              // Then save all updates using a bulk request (this code will not execute if updateMapping fails)
+              switchMap(() => from(this.bulkUpdate(updates))),
               catchError((errors) => {
                 return of({
                   bulkOperations: [],
@@ -765,6 +802,13 @@ export class IndexUpdateService {
           next: (response) => {
             const { documents_found: total, values, columns } = response.rawResponse;
 
+            // Populate unsupported ES|QL field types
+            columns.forEach((col) => {
+              if (col.type === 'unsupported' && col.original_types?.length) {
+                this.esqlUnsupportedFieldTypes.add(col.original_types[0]);
+              }
+            });
+
             const columnNames = columns.map(({ name }) => name);
             const resultRows: DataTableRecord[] = values
               .map((row) => zipObject(columnNames, row))
@@ -800,12 +844,17 @@ export class IndexUpdateService {
               return this.completeWithPlaceholders(0);
             }
             if (action.type === 'add-column') {
-              return [...acc, { name: `${COLUMN_PLACEHOLDER_PREFIX}${this.placeholderIndex++}` }];
+              return [
+                ...acc,
+                {
+                  name: `${COLUMN_PLACEHOLDER_PREFIX}${this.placeholderIndex++}`,
+                },
+              ];
             }
             if (action.type === 'edit-column') {
               return acc.map((column) =>
                 column.name === action.payload.previousName
-                  ? { ...column, name: action.payload.name }
+                  ? { ...column, name: action.payload.name, fieldType: action.payload.fieldType }
                   : column
               );
             }
@@ -867,7 +916,7 @@ export class IndexUpdateService {
     return { newRowsCount, newColumnsCount, cellsEditedCount };
   }
 
-  private completeWithPlaceholders(currentColumnsCount: number) {
+  private completeWithPlaceholders(currentColumnsCount: number): ColumnAddition[] {
     const missingPlaceholders = MAX_COLUMN_PLACEHOLDERS - currentColumnsCount;
     return missingPlaceholders > 0
       ? times(missingPlaceholders, () => ({
@@ -971,6 +1020,10 @@ export class IndexUpdateService {
     bulkOperations: Exclude<BulkRequest['operations'], undefined>;
     bulkResponse: BulkResponse;
   }> {
+    const indexName = this.getIndexName();
+    if (!indexName) {
+      throw new Error('Index name is not set');
+    }
     const deletingDocIds: string[] = updates
       .filter(isDocDelete)
       .map((v) => v.payload.ids)
@@ -1023,7 +1076,7 @@ export class IndexUpdateService {
     });
 
     const bulkResponse = await this.http.post<BulkResponse>(
-      `${LOOKUP_INDEX_UPDATE_ROUTE}/${this.getIndexName()}`,
+      `${LOOKUP_INDEX_UPDATE_ROUTE}/${encodeURIComponent(indexName)}`,
       {
         body,
       }
@@ -1035,14 +1088,42 @@ export class IndexUpdateService {
     };
   }
 
+  private async updateIndexMappings(
+    newFields: Record<string, { type: DatatableColumnMeta['esType'] }>
+  ): Promise<void> {
+    const indexName = this.getIndexName();
+    if (!indexName) {
+      throw new Error('Index name is not set');
+    }
+    const body = JSON.stringify({
+      properties: newFields,
+    });
+
+    try {
+      await this.http.put(
+        `${LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE}/${encodeURIComponent(indexName)}`,
+        {
+          body,
+        }
+      );
+    } catch (error) {
+      this.notifications.toasts.addError(error, {
+        title: i18n.translate('indexEditor.indexManagement.updateMappingErrorTitle', {
+          defaultMessage: 'Error updating index mapping',
+        }),
+      });
+      throw error;
+    }
+  }
+
   public addNewColumn() {
     this.addAction('add-column');
 
     this.telemetry.trackEditInteraction({ actionType: 'add_column' });
   }
 
-  public editColumn(name: string, previousName: string) {
-    this.addAction('edit-column', { name, previousName });
+  public editColumn(name: string, previousName: string, fieldType: string) {
+    this.addAction('edit-column', { name, previousName, fieldType });
 
     this.telemetry.trackEditInteraction({ actionType: 'edit_column' });
   }
@@ -1102,7 +1183,9 @@ export class IndexUpdateService {
   public async createIndex({ exitAfterFlush = false }) {
     try {
       this._isSaving$.next(true);
-      await this.http.post(`${LOOKUP_INDEX_CREATE_ROUTE}/${this.getIndexName()}`);
+      await this.http.post(
+        `${LOOKUP_INDEX_CREATE_ROUTE}/${encodeURIComponent(this.getIndexName()!)}`
+      );
 
       this.setIndexCreated(true);
       this.flush({ exitAfterFlush });

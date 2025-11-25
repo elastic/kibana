@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect((await indexEditor.getColumnNames()).length).to.be(INITIAL_COLUMN_PLACEHOLDERS);
 
       for (let index = 0; index < INITIAL_COLUMN_PLACEHOLDERS; index++) {
-        await indexEditor.setColumnName(`column-${index + 1}`, index);
+        await indexEditor.setColumn(`column-${index + 1}`, 'keyword', index);
       }
 
       expect(await indexEditor.getColumnNames()).to.eql([
@@ -158,12 +158,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Add a new column
       await indexEditor.addColumn();
-      await indexEditor.setColumnName(`extra-column`, 4);
+      await indexEditor.setColumn(`extra-column`, 'keyword', 4);
       expect((await indexEditor.getColumnNames()).length).to.be(INITIAL_COLUMN_PLACEHOLDERS + 1);
 
       // Add another column and then delete it
       await indexEditor.addColumn();
-      await indexEditor.setColumnName(`column-to-be-deleted`, 5);
+      await indexEditor.setColumn(`column-to-be-deleted`, 'text', 5);
       await indexEditor.deleteColumn('column-to-be-deleted');
       expect((await indexEditor.getColumnNames()).length).to.be(INITIAL_COLUMN_PLACEHOLDERS + 1);
 
@@ -179,7 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
 
       // Edit column name
-      await indexEditor.setColumnName('renamed-column-1', 0);
+      await indexEditor.setColumn('renamed-column-1', 'text', 0);
 
       // Save the index
       await indexEditor.saveChangesAndClose();
@@ -206,6 +206,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'extra-column': 'value-2-5',
           },
         ]);
+
+        await indexEditor.verifyIndexMappings(INDEX_NAME_MANUAL, {
+          'renamed-column-1': { type: 'text' },
+          'column-2': { type: 'keyword' },
+          'column-3': { type: 'keyword' },
+          'column-4': { type: 'keyword' },
+          'extra-column': { type: 'keyword' },
+        });
       });
     });
 
@@ -295,7 +303,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Add a new column
       await indexEditor.addColumn();
-      await indexEditor.setColumnName('age', 0); // it's cero because there is only one editable column
+      await indexEditor.setColumn('age', 'integer', 0); // it's cero because there is only one editable column
       await indexEditor.setCellValue(0, 7, '30');
       await indexEditor.setCellValue(1, 7, '40');
       await indexEditor.setCellValue(2, 7, '25');
@@ -336,10 +344,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             age: 30,
           },
         ]);
+        await indexEditor.verifyIndexMappings(INDEX_NAME_EDITION, {
+          age: { type: 'integer' },
+          customer_first_name: { type: 'text' },
+          customer_full_name: { type: 'text' },
+          customer_gender: { type: 'text' },
+          customer_id: { type: 'text' },
+          customer_last_name: { type: 'text' },
+          email: { type: 'text' },
+        });
       });
     });
 
-    it('allows to save an edition without closing the flyout', async () => {
+    it('allows to save an edition without closing the flyout', async function () {
       // Type lookup join query with index name inside it
       await monacoEditor.setCodeEditorValue('');
       await monacoEditor.typeCodeEditorValue(
@@ -352,7 +369,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.isDisplayed('lookupIndexFlyout');
 
       // Manually set content
-      await indexEditor.setColumnName(`my_column`, 0);
+      await indexEditor.setColumn(`my_column`, 'text', 0);
       await indexEditor.setCellValue(0, 1, `value`);
 
       // Save changes
@@ -367,14 +384,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ]);
       });
     });
-  });
 
-  async function cleanLookupJoinIndexes() {
-    for (const name of [INDEX_NAME_EDITION, INDEX_NAME_MANUAL, INDEX_NAME_FILE]) {
-      const indexExists = await es.indices.exists({ index: name });
-      if (indexExists) {
-        await es.indices.delete({ index: name });
+    async function cleanLookupJoinIndexes() {
+      for (const name of [INDEX_NAME_EDITION, INDEX_NAME_MANUAL, INDEX_NAME_FILE]) {
+        const indexExists = await es.indices.exists({ index: name });
+        if (indexExists) {
+          await es.indices.delete({ index: name });
+        }
       }
     }
-  }
+  });
 }

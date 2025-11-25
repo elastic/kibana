@@ -16,9 +16,10 @@ export class IndexEditorObject extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly es = this.ctx.getService('es');
+  private readonly comboBox = this.ctx.getService('comboBox');
 
   public async getColumnNames(): Promise<string[]> {
-    const columnHeaders = await this.testSubjects.findAll('indexEditorindexEditorColumnNameButton');
+    const columnHeaders = await this.testSubjects.findAll('indexEditorColumnNameButton');
 
     const columnNames: string[] = [];
 
@@ -33,14 +34,16 @@ export class IndexEditorObject extends FtrService {
     return columnNames;
   }
 
-  public async setColumnName(name: string, columnIndex: number) {
-    const columnHeaders = await this.testSubjects.findAll('indexEditorindexEditorColumnNameButton');
+  public async setColumn(name: string, type: string, columnIndex: number) {
+    const columnHeaders = await this.testSubjects.findAll('indexEditorColumnNameButton');
     const columnHeader = columnHeaders[columnIndex];
 
     expect(columnHeader).to.not.be(undefined);
 
     await columnHeader.click();
-    await this.testSubjects.setValue('indexEditorindexEditorColumnNameInput', name);
+
+    await this.comboBox.set('indexEditorColumnTypeSelect', type);
+    await this.testSubjects.setValue('indexEditorColumnNameInput', name);
     await this.common.pressEnterKey();
   }
 
@@ -50,7 +53,7 @@ export class IndexEditorObject extends FtrService {
 
   public async deleteColumn(name: string): Promise<void> {
     await this.dataGrid.openColMenuByField(name);
-    await this.testSubjects.click('indexEditorindexEditorDeleteColumnButton');
+    await this.testSubjects.click('indexEditorDeleteColumnButton');
   }
 
   public async setCellValue(rowIndex: number, columnIndex: number, value: string): Promise<void> {
@@ -95,6 +98,23 @@ export class IndexEditorObject extends FtrService {
 
     const docs = indexContent.hits.hits.map((hit) => hit._source);
     expect(docs).to.eql(expectedDocs);
+  }
+
+  public async verifyIndexMappings(
+    indexName: string,
+    expectedMappings: Record<string, unknown>
+  ): Promise<void> {
+    const indexMappings = await this.es.indices.getMapping({
+      index: indexName,
+    });
+
+    const actualMappings = indexMappings[indexName].mappings.properties!;
+
+    // Verify each expected property exists with the correct type
+    for (const [fieldName, expectedField] of Object.entries(expectedMappings)) {
+      const actualField = actualMappings[fieldName];
+      expect(actualField.type).to.eql((expectedField as any).type);
+    }
   }
 
   public async uploadFile(filePath: string): Promise<void> {
