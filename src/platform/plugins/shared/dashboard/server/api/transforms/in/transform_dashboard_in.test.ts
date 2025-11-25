@@ -142,4 +142,27 @@ describe('transformDashboardIn', () => {
       }
     `);
   });
+
+  it('should return error when passed search source references', () => {
+    const dashboardState: DashboardState = {
+      title: 'title',
+      panels: [],
+      references: [
+        {
+          id: 'fizzle-1234',
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+          type: 'index-pattern',
+        },
+      ],
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output).toMatchInlineSnapshot(`
+      Object {
+        "attributes": null,
+        "error": [Error: Search source references are not supported. Pass filters in with injected references'],
+        "references": null,
+      }
+    `);
+  });
 });
