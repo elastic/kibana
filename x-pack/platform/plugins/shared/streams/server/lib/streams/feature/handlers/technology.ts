@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { InfrastructureFeature } from '@kbn/streams-schema';
-import { identifyInfrastructureFeatures, type IdentifyFeaturesOptions } from '@kbn/streams-ai';
+import type { TechnologyFeature } from '@kbn/streams-schema';
+import { identifyTechnologyFeatures, type IdentifyFeaturesOptions } from '@kbn/streams-ai';
 import { FeatureTypeHandler } from '../feature_type_handler';
 import type { StoredFeature } from '../stored_feature';
 import {
@@ -17,18 +17,18 @@ import {
   FEATURE_UUID,
 } from '../fields';
 
-export class InfrastructureFeatureHandler extends FeatureTypeHandler<InfrastructureFeature> {
-  readonly type = 'infrastructure';
+export class TechnologyFeatureHandler extends FeatureTypeHandler<TechnologyFeature> {
+  readonly type = 'technology';
 
-  fromStorage(stored: StoredFeature): InfrastructureFeature {
+  fromStorage(stored: StoredFeature): TechnologyFeature {
     return {
-      type: stored[FEATURE_TYPE] as 'infrastructure',
+      type: stored[FEATURE_TYPE] as 'technology',
       name: stored[FEATURE_NAME],
       description: stored[FEATURE_DESCRIPTION],
     };
   }
 
-  toStorage(streamName: string, feature: InfrastructureFeature): StoredFeature {
+  toStorage(streamName: string, feature: TechnologyFeature): StoredFeature {
     return {
       [STREAM_NAME]: streamName,
       [FEATURE_UUID]: this.getFeatureUuid(streamName, feature.name),
@@ -38,9 +38,7 @@ export class InfrastructureFeatureHandler extends FeatureTypeHandler<Infrastruct
     };
   }
 
-  identifyFeatures(
-    options: IdentifyFeaturesOptions
-  ): Promise<{ features: InfrastructureFeature[] }> {
-    return identifyInfrastructureFeatures({ ...options, dropUnmapped: false });
+  identifyFeatures(options: IdentifyFeaturesOptions): Promise<{ features: TechnologyFeature[] }> {
+    return identifyTechnologyFeatures({ ...options, dropUnmapped: false });
   }
 }

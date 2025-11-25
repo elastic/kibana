@@ -9,6 +9,7 @@ export { generateStreamDescription } from './src/description/generate_descriptio
 export {
   identifyInfrastructureFeatures,
   identifySystemFeatures,
+  identifyTechnologyFeatures,
   type IdentifyFeaturesOptions,
 } from './src/features/identify_features';
 export { partitionStream } from './workflows/partition_stream';

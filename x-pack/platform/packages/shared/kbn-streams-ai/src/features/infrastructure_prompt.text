@@ -33,7 +33,6 @@ FINDINGS> List infrastructure components with supporting evidence.
 
 *   **`name`**: Short, specific name (e.g., "AWS EC2", "Kubernetes", "Debian 11").
 *   **`description`**: What it is and its role (e.g., "Amazon EC2 virtual machine instances providing compute capacity").
-*   **`provider`**: (Optional) Cloud provider name only (e.g., "AWS", "GCP", "Azure"). Omit for non-cloud infrastructure.
 
 ---
 ### Infrastructure Categories
@@ -82,7 +81,7 @@ ANALYSIS> Key indicators found:
 - `cloud.provider`: "aws", `cloud.service.name`: "ec2", `cloud.region`: "us-east-1" → AWS EC2
 - `host.os.name`: "Amazon Linux", `host.os.version`: "2" → Amazon Linux 2
 - `orchestrator.type`: "kubernetes", `orchestrator.cluster.name` present → Kubernetes
-FINDINGS> Three components identified: AWS EC2 (cloud, provider: AWS), Amazon Linux 2 (OS), Kubernetes (orchestration).
+FINDINGS> Three components identified: AWS EC2 (cloud), Amazon Linux 2 (OS), Kubernetes (orchestration).
 <<<END_INTERNAL>>>
 
 ---
@@ -91,12 +90,10 @@ FINDINGS> Three components identified: AWS EC2 (cloud, provider: AWS), Amazon Li
 *   "I identified AWS EC2 as the cloud provider, Ubuntu 22.04 as the operating system, and Docker Engine as the container runtime."
 *   "Found GCP Compute Engine as the cloud platform and Debian 11 as the operating system."
 *   "Infrastructure includes Azure Virtual Machines with Windows Server 2022. No container orchestration detected."
-*   "Identified Kubernetes on Amazon EKS, Amazon Linux 2, and containerd. Cloud provider is AWS."
+*   "Identified Kubernetes on Amazon EKS, Amazon Linux 2, and containerd."
 
 ---
 ### Key Points
 
 *   Look for `cloud.*`, `host.os.*`, `orchestrator.*`, `kubernetes.*`, `container.*` fields.
 *   Only identify infrastructure with clear evidence—it's OK to find none.
-*   Use `provider` field only for cloud platforms (AWS, GCP, Azure), not for OS or orchestration.
-

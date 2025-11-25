@@ -9,7 +9,7 @@ import { formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import type { InfrastructureFeature } from '@kbn/streams-schema';
+import type { InfrastructureFeature, TechnologyFeature } from '@kbn/streams-schema';
 import {
   isFeatureWithFilter,
   type Feature,
@@ -17,7 +17,11 @@ import {
   type SystemFeature,
 } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
-import { IdentifyInfrastructurePrompt, IdentifySystemsPrompt } from './prompt';
+import {
+  IdentifyInfrastructurePrompt,
+  IdentifySystemsPrompt,
+  IdentifyTechnologyPrompt,
+} from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
 import conditionSchemaText from '../shared/condition_schema.text';
 import { generateStreamDescription } from '../description/generate_description';
@@ -205,6 +209,58 @@ export async function identifyInfrastructureFeatures({
           const feature = {
             ...args,
             type: 'infrastructure' as const,
+          };
+          return feature;
+        })
+      )
+    ),
+  };
+}
+
+export async function identifyTechnologyFeatures({
+  stream,
+  inferenceClient,
+  signal,
+  analysis,
+  dropUnmapped = false,
+  maxSteps: initialMaxSteps,
+}: IdentifyFeaturesOptions & {
+  dropUnmapped?: boolean;
+  maxSteps?: number;
+}): Promise<{ features: TechnologyFeature[] }> {
+  const response = await executeAsReasoningAgent({
+    maxSteps: initialMaxSteps,
+    input: {
+      stream: {
+        name: stream.name,
+        description: stream.description || 'This stream has no description.',
+      },
+      dataset_analysis: JSON.stringify(
+        formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped })
+      ),
+    },
+    prompt: IdentifyTechnologyPrompt,
+    inferenceClient,
+    finalToolChoice: {
+      function: 'finalize_technology',
+    },
+    toolCallbacks: {
+      finalize_technology: async (toolCall) => {
+        return {
+          response: {},
+        };
+      },
+    },
+    abortSignal: signal,
+  });
+
+  return {
+    features: await Promise.all(
+      response.toolCalls.flatMap((toolCall) =>
+        toolCall.function.arguments.technology.map((args) => {
+          const feature = {
+            ...args,
+            type: 'technology' as const,
           };
           return feature;
         })

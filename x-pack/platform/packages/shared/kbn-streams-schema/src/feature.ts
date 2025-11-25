@@ -9,7 +9,7 @@ import { conditionSchema, isCondition, type Condition } from '@kbn/streamlang';
 import { z } from '@kbn/zod';
 import { streamObjectNameSchema } from './shared/stream_object_name';
 
-const featureTypes = ['system', 'infrastructure'] as const;
+const featureTypes = ['system', 'infrastructure', 'technology'] as const;
 export type FeatureType = (typeof featureTypes)[number];
 
 export const featureTypeSchema = z.enum(featureTypes);
@@ -44,22 +44,28 @@ export const systemFeatureSchema: z.Schema<SystemFeature> = featureWithFilterSch
   })
 );
 
-export type InfrastructureFeature = BaseFeature<'infrastructure'> & {
-  provider?: string;
-};
+export type InfrastructureFeature = BaseFeature<'infrastructure'>;
 
 export const infrastructureFeatureSchema: z.Schema<InfrastructureFeature> = baseFeatureSchema.and(
   z.object({
     type: z.literal('infrastructure'),
-    provider: z.string().optional(),
   })
 );
 
-export type Feature = SystemFeature | InfrastructureFeature;
+export type TechnologyFeature = BaseFeature<'technology'>;
+
+export const technologyFeatureSchema: z.Schema<TechnologyFeature> = baseFeatureSchema.and(
+  z.object({
+    type: z.literal('technology'),
+  })
+);
+
+export type Feature = SystemFeature | InfrastructureFeature | TechnologyFeature;
 
 export const featureSchema: z.Schema<Feature> = z.union([
   systemFeatureSchema,
   infrastructureFeatureSchema,
+  technologyFeatureSchema,
 ]);
 
 export function isFeatureWithFilter(feature: Feature): feature is SystemFeature {

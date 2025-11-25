@@ -13,6 +13,7 @@ import type { StoredFeature } from './stored_feature';
 import { FEATURE_TYPE } from './fields';
 import { SystemFeatureHandler } from './handlers/system';
 import { InfrastructureFeatureHandler } from './handlers/infrastructure';
+import { TechnologyFeatureHandler } from './handlers/technology';
 
 export class FeatureTypeRegistry {
   private handlers = new Map<string, FeatureTypeHandler>();
@@ -82,6 +83,7 @@ export class FeatureTypeRegistry {
 const defaultRegistry = new FeatureTypeRegistry();
 defaultRegistry.register(new SystemFeatureHandler());
 defaultRegistry.register(new InfrastructureFeatureHandler());
+defaultRegistry.register(new TechnologyFeatureHandler());
 
 export function getDefaultFeatureRegistry() {
   return defaultRegistry;

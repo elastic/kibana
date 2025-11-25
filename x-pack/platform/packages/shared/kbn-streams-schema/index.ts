@@ -122,6 +122,7 @@ export {
   type Feature,
   type SystemFeature,
   type InfrastructureFeature,
+  type TechnologyFeature,
   type FeatureWithFilter,
   type FeatureType,
   featureSchema,

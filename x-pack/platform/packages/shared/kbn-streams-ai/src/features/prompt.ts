@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import { merge } from 'lodash';
 import systemPromptTemplate from './system_prompt.text';
 import infrastructurePromptTemplate from './infrastructure_prompt.text';
+import technologyPromptTemplate from './technology_prompt.text';
 import userPromptTemplate from './user_prompt.text';
 
 const systemsSchemaBase = {
@@ -70,7 +71,27 @@ const infrastructureSchema = {
   required: ['infrastructure'],
 } as const;
 
-const finalInfrastructureSchema = merge({}, infrastructureSchema);
+const technologySchema = {
+  type: 'object',
+  properties: {
+    technology: {
+      type: 'array',
+      items: {
+        required: ['name', 'description'],
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+          },
+          description: {
+            type: 'string',
+          },
+        },
+      },
+    },
+  },
+  required: ['technology'],
+} as const;
 
 export interface ValidateSystemsResponse {
   systems: Array<{
@@ -147,7 +168,37 @@ export const IdentifyInfrastructurePrompt = createPrompt({
     tools: {
       finalize_infrastructure: {
         description: 'Finalize infrastructure identification',
-        schema: finalInfrastructureSchema,
+        schema: infrastructureSchema,
+      },
+    },
+  })
+  .get();
+
+export const IdentifyTechnologyPrompt = createPrompt({
+  name: 'identify_technology',
+  input: z.object({
+    stream: z.object({
+      name: z.string(),
+      description: z.string(),
+    }),
+    dataset_analysis: z.string(),
+  }),
+})
+  .version({
+    system: {
+      mustache: {
+        template: technologyPromptTemplate,
+      },
+    },
+    template: {
+      mustache: {
+        template: userPromptTemplate,
+      },
+    },
+    tools: {
+      finalize_technology: {
+        description: 'Finalize technology identification',
+        schema: technologySchema,
       },
     },
   })
