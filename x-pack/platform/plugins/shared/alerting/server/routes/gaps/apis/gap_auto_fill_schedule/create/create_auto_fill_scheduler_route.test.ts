@@ -75,7 +75,7 @@ describe('createAutoFillSchedulerRoute', () => {
         gapFillRange: '24h',
         maxBackfills: 100,
         numRetries: 3,
-        scope: 'internal',
+        scope: ['internal'],
         ruleTypes: [{ type: 'test-rule-type', consumer: 'test-consumer' }],
         request: expect.any(Object),
       })
@@ -89,6 +89,8 @@ describe('createAutoFillSchedulerRoute', () => {
         schedule: { interval: '1h' },
         gap_fill_range: '24h',
         max_backfills: 100,
+        scope: ['internal'],
+        rule_types: [{ type: 'test-rule-type', consumer: 'test-consumer' }],
         num_retries: 3,
         created_by: 'test-user',
         updated_by: 'test-user',
