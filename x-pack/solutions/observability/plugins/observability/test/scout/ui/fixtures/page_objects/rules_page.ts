@@ -163,4 +163,19 @@ export class RulesPage {
     await this.page.keyboard.press('Escape');
     await expect(this.ruleTypeModal).toBeHidden({ timeout: 5000 });
   }
+
+  /**
+   * Gets the Rules Table container locator
+   */
+  public get rulesTableContainer() {
+    return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULES_TABLE_CONTAINER);
+  }
+
+  public get rulesTable() {
+    return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULES_TABLE);
+  }
+
+  public getNonEditableRules() {
+    return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULE_ROW_NON_EDITABLE);
+  }
 }

@@ -51,7 +51,7 @@ export async function getDisposableRule(apiServices: ApiServicesFixture) {
 }
 
 export const Analyst = {
-  async setUp(browserAuth: BrowserAuthFixture) {
+  async login(browserAuth: BrowserAuthFixture) {
     await browserAuth.loginAsViewer();
   },
 };
