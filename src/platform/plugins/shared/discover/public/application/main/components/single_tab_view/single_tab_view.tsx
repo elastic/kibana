@@ -10,7 +10,8 @@
 import React, { useEffect } from 'react';
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { TmpControlState } from '../../../../../common/app_locator';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
+import type { ESQLControlState } from '@kbn/esql-types';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { MainHistoryLocationState } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -60,7 +61,7 @@ interface SessionInitializationState {
 
 type InitializeSingleSession = (options?: {
   dataViewSpec?: DataViewSpec | undefined;
-  esqlControls?: TmpControlState[] | undefined;
+  esqlControls?: ControlPanelsState<ESQLControlState> | undefined;
   defaultUrlState?: DiscoverAppState;
 }) => Promise<SessionInitializationState>;
 

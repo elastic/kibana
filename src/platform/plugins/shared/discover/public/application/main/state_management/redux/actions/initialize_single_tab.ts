@@ -13,7 +13,6 @@ import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ESQLControlState } from '@kbn/esql-types';
 import type { ControlPanelsState } from '@kbn/controls-plugin/common';
-import type { TmpControlState } from '../../../../../../common/app_locator';
 import {
   internalStateSlice,
   type TabActionPayload,
@@ -48,7 +47,7 @@ export interface InitializeSingleTabsParams {
   stateContainer: DiscoverStateContainer;
   customizationService: ConnectedCustomizationService;
   dataViewSpec: DataViewSpec | undefined;
-  esqlControls: TmpControlState[] | undefined;
+  esqlControls: ControlPanelsState<ESQLControlState> | undefined;
   defaultUrlState: DiscoverAppState | undefined;
 }
 
@@ -233,34 +232,15 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       services,
     });
 
-    const mappedControls = esqlControls?.reduce(
-      (acc, controlState) => ({
-        ...acc,
-        [controlState.id]: {
-          grow: controlState.grow,
-          width: controlState.width as ESQLControlState['width'],
-          singleSelect: controlState.controlConfig.singleSelect,
-          title: controlState.controlConfig.title,
-          variableName: controlState.controlConfig.variableName,
-          variableType: controlState.controlConfig.variableType as ESQLControlState['variableType'],
-          controlType: controlState.controlConfig.controlType as ESQLControlState['controlType'],
-          esqlQuery: controlState.controlConfig.esqlQuery,
-          availableOptions: controlState.controlConfig.availableOptions,
-          selectedOptions: controlState.controlConfig.selectedOptions,
-          type: controlState.type,
-          order: controlState.order,
-        },
-      }),
-      {} as Record<string, ESQLControlState>
-    ) as ControlPanelsState<ESQLControlState>;
-    savedSearch.controlGroupJson = JSON.stringify(mappedControls);
-
-    dispatch(
-      internalStateSlice.actions.setEsqlVariables({
-        tabId,
-        esqlVariables: extractEsqlVariables(mappedControls),
-      })
-    );
+    if (esqlControls) {
+      savedSearch.controlGroupJson = JSON.stringify(esqlControls);
+      dispatch(
+        internalStateSlice.actions.setEsqlVariables({
+          tabId,
+          esqlVariables: extractEsqlVariables(esqlControls),
+        })
+      );
+    }
 
     // Push the tab's initial search session ID to the URL if one exists,
     // unless it should be overridden by a search session ID already in the URL

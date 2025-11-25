@@ -89,10 +89,17 @@ function getEsqlControls(embeddable: LensApi) {
   const parentApi = embeddable.parentApi;
   if (!isApiESQLVariablesCompatible(parentApi)) return null;
 
-  const state = parentApi.controlGroupApi$.getValue()?.serializeState?.();
-  if (!state) return null;
+  const controlGroupApi = parentApi.controlGroupApi$.getValue();
+  if (!controlGroupApi) return null;
 
-  return state.rawState.controls;
+  const children = parentApi.controlGroupApi$.getValue()?.children$?.getValue();
+  if (!children) return null;
+
+  return Object.keys(children).reduce((acc, id) => {
+    const rawState = controlGroupApi.getSerializedStateForChild?.(id)?.rawState;
+    if (!rawState) return acc;
+    return { ...acc, [id]: rawState };
+  }, {});
 }
 
 export async function getHref({ embeddable, locator, filters, dataViews, timeFieldName }: Context) {

@@ -13,27 +13,11 @@ import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { ControlPanelsState } from '@kbn/controls-plugin/common';
+import type { ESQLControlState } from '@kbn/esql-types';
 import type { VIEW_MODE, NEW_TAB_ID } from './constants';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
-
-export interface TmpControlState extends SerializableRecord {
-  controlConfig: {
-    availableOptions: string[];
-    controlType: string;
-    esqlQuery: string;
-    selectedOptions: string[];
-    singleSelect: boolean;
-    title: string;
-    variableName: string;
-    variableType: string;
-  };
-  grow: boolean;
-  id: string;
-  order: number;
-  type: string;
-  width: string;
-}
 
 export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
@@ -142,7 +126,7 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
    *
    */
-  esqlControls?: TmpControlState[];
+  esqlControls?: ControlPanelsState<ESQLControlState> & SerializableRecord;
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
@@ -152,7 +136,7 @@ export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
  */
 export interface MainHistoryLocationState {
   dataViewSpec?: DataViewSpec;
-  esqlControls?: TmpControlState[];
+  esqlControls?: ControlPanelsState<ESQLControlState>;
   isAlertResults?: boolean;
 }
 
