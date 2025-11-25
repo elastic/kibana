@@ -1212,7 +1212,7 @@ node scripts/check_saved_objects --baseline <mergeBase> --fix
 
 Please refer to the [Troubleshooting](#troubleshooting) section if you encounter validation errors.
 
-### Saved Object Type Validation Rules
+### Saved Object type validation rules
 
 The following validations are performed to ensure changes to Saved Object types adhere to necessary constraints and maintain compatibility across environments.
 
