@@ -60,6 +60,7 @@ import type { CustomThresholdRule } from '../../components/custom_threshold/comp
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 import { AlertHistoryChart } from './components/alert_history';
 import StaleAlert from './components/stale_alert';
+import UntrackedAlert from './components/untracked_alert';
 import { RelatedDashboards } from './components/related_dashboards';
 import { getAlertTitle } from '../../utils/format_alert_title';
 import { AlertSubtitle } from './components/alert_subtitle';
@@ -252,6 +253,11 @@ export function AlertDetails() {
     isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
       <>
         <EuiSpacer size="m" />
+        <UntrackedAlert
+          alert={alertDetail.formatted}
+          alertStatus={alertStatus}
+          onUntrackAlert={onUntrackAlert}
+        />
         <StaleAlert
           alert={alertDetail.formatted}
           alertStatus={alertStatus}
