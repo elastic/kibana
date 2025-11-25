@@ -8,7 +8,7 @@
  */
 
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
-import { BasicPrettyPrinter } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, SOURCE_COMMANDS } from '@kbn/esql-ast';
 import type {
   ESQLColumnData,
   ESQLFieldWithMetadata,
@@ -21,7 +21,7 @@ export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
 // Helper to check if a command is a source command that should be cached
 function isSourceCommand(commandName: string): boolean {
-  return ['from', 'row', 'ts'].includes(commandName.toLowerCase());
+  return SOURCE_COMMANDS.has(commandName.toLowerCase());
 }
 
 /**
@@ -117,11 +117,7 @@ export class QueryColumns {
   }
 
   private getFields = async (queryToES: string) => {
-    // Parse the query to check if it's a source command
-    const trimmedQuery = queryToES.trim().toLowerCase();
-    const isSource = isSourceCommand(trimmedQuery.split(' ')[0] || '');
-
-    if (!this.options?.invalidateColumnsCache && isSource) {
+    if (!this.options?.invalidateColumnsCache) {
       const cached = QueryColumns.fromCache(queryToES);
 
       if (cached) {
@@ -131,10 +127,7 @@ export class QueryColumns {
 
     const fields = await getFieldsFromES(queryToES, this.resourceRetriever);
 
-    // Only cache source commands
-    if (isSource) {
-      QueryColumns.setCache(queryToES, fields);
-    }
+    QueryColumns.setCache(queryToES, fields);
 
     return fields;
   };
@@ -145,7 +138,7 @@ export class QueryColumns {
   };
 
   /**
-   * Get fields from previous commands, building up the chain
+   * Get fields from previous commands building up the chain.
    */
   private async getFieldsFromPreviousCommands(
     query: ESQLAstQueryExpression,
@@ -156,8 +149,6 @@ export class QueryColumns {
       return [];
     }
 
-    // For validation consistency, we need to build up the field chain
-    // but only cache source commands
     let fields: ESQLColumnData[] = [];
 
     for (let i = 0; i < query.commands.length - 1; i++) {
