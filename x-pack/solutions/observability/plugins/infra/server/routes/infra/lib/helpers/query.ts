@@ -32,7 +32,7 @@ const getApmDocumentsFilter = async ({
   start,
   end,
 }: {
-  apmDataAccessServices: ApmDataAccessServicesWrapper;
+  apmDataAccessServices: NonNullable<ApmDataAccessServicesWrapper>;
   apmDocumentSources: TimeRangeMetadata['sources'];
   start: number;
   end: number;
