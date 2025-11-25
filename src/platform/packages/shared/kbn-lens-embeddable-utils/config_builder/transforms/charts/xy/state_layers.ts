@@ -103,7 +103,6 @@ function buildAnnotationLayer(
   return {
     layerType: 'annotations',
     layerId: getIdForLayer(layer, i),
-    // @TODO: check this
     indexPatternId: dataViewId,
     ignoreGlobalFilters: layer.ignore_global_filters,
     annotations: layer.events.map((annotation, index) => {
@@ -120,7 +119,6 @@ function buildAnnotationLayer(
           color: annotation.color?.color,
           label: annotation.label ?? 'Event',
           ...(annotation.hidden != null ? { hidden: annotation.hidden } : {}),
-          indexPatternId: dataViewId,
         };
       }
       if (annotation.type === 'point') {
