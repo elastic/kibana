@@ -36,12 +36,14 @@ export class DataSourcesRegistryPlugin
   }
 
   public start(core: CoreStart): DataSourcesRegistryPluginStart {
-    this.logger.debug('dataSourcesRegistry: Started');
+    this.logger.info('dataSourcesRegistry: Started');
 
     const registeredTypes = this.dataCatalog.list();
-    this.logger.debug(`DataTypeRegistry contents: ${JSON.stringify(registeredTypes, null, 2)}`);
+    this.logger.info(`DataTypeRegistry contents: ${JSON.stringify(registeredTypes, null, 2)}`);
 
-    return {};
+    return {
+      getCatalog: () => this.dataCatalog,
+    };
   }
 
   public stop() {}

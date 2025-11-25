@@ -12,6 +12,7 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
+import { registerDataSources } from './data/data_sources';
 import type {
   DataConnectorsServerSetup,
   DataConnectorsServerSetupDependencies,
@@ -47,7 +48,10 @@ export class DataConnectorsServerPlugin
     plugins: DataConnectorsServerSetupDependencies
   ): DataConnectorsServerSetup {
     const { savedObjects, uiSettings } = core;
-    const { encryptedSavedObjects, workflowsManagement } = plugins;
+    const { encryptedSavedObjects, workflowsManagement, dataSourcesRegistry } = plugins;
+
+    // Register WorkplaceAI-owned data sources
+    registerDataSources(dataSourcesRegistry);
 
     registerUISettings({ uiSettings });
 
@@ -73,6 +77,7 @@ export class DataConnectorsServerPlugin
 
     return {};
   }
+
   start(
     core: CoreStart,
     plugins: DataConnectorsServerStartDependencies

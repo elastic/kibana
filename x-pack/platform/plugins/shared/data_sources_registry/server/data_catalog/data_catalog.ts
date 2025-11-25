@@ -5,10 +5,21 @@
  * 2.0.
  */
 
+// Abstraction defining a federated data source
+// This needs to define connectivity (oauth) configuration,
+// what tools should be created, what workflows should be created
+// TODO: handle FE config as well
 export interface DataTypeDefinition {
   id: string;
   name: string;
   description?: string;
+  oauthConfiguration?: {
+    provider: string;
+    scopes?: string[];
+    initiatePath: string;
+    fetchSecretsPath: string;
+    oauthBaseUrl: string;
+  };
 }
 
 export interface DataCatalog {
