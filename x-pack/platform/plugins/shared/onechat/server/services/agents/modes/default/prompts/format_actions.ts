@@ -97,7 +97,7 @@ const formatHandoverAction = ({ message, forceful }: HandoverAction): BaseMessag
       ),
       createUserMessage(
         cleanPrompt(
-          '[dispatcher] Ack. Forwarding to answering agent: Proceed to answer as best as you can with the collected information.'
+          '[dispatcher] Ack. Forwarding to answering agent. Please proceed to respond without invoking any additional tools, using only the information gathered so far.'
         )
       ),
     ];
@@ -113,7 +113,7 @@ const formatHandoverAction = ({ message, forceful }: HandoverAction): BaseMessag
       ),
       createUserMessage(
         cleanPrompt(
-          '[dispatcher] Ack. Forwarding to answering agent: Proceed to answer as best as you can with the collected information.'
+          '[dispatcher] Ack. Forwarding to answering agent. Please proceed to respond without invoking any additional tools, using only the information gathered so far.'
         )
       ),
     ];
