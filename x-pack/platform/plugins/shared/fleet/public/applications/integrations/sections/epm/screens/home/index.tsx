@@ -72,7 +72,7 @@ export const EPMHomePage: React.FC = () => {
   const prereleaseIntegrationsEnabled = settings?.item.prerelease_integrations_enabled ?? false;
   const shouldFetchPackages = !isAuthorizedToFetchSettings || isSettingsFetched;
   // loading packages to find installed ones
-  const { data: allPackages, isLoading } = useGetPackagesQuery(
+  const { data: allPackages } = useGetPackagesQuery(
     {
       prerelease: prereleaseIntegrationsEnabled,
     },
