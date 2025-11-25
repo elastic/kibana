@@ -183,7 +183,7 @@ export function registerGapAutoFillSchedulerTask({
                 await logEvent({
                   status: GAP_AUTO_FILL_STATUS.SKIPPED,
                   results: [],
-                  message: `Skipped execution: no capacity remaining to schedule gap fills (${capacityCheckInitial.currentCount}/${capacityCheckInitial.maxBackfills})`,
+                  message: `Skipped execution: no capacity remaining to schedule gap fills (${capacityCheckInitial.currentCount}/${capacityCheckInitial.maxBackfills}). Existing backfills must finish before new ones can be scheduled.`,
                 });
                 return { state: {} };
               }
