@@ -118,6 +118,20 @@ export const performBulkCreate = async <T>(
     const paramsIncludeAccessControl =
       !!object.accessControl?.accessMode || !!options.accessControl?.accessMode;
 
+    if (!typeSupportsAccessControl && paramsIncludeAccessControl) {
+      return left({
+        id,
+        type,
+        error: {
+          ...errorContent(
+            SavedObjectsErrorHelpers.createBadRequestError(
+              `Cannot create a saved object of type ${type} with an access mode because the type does not support access control`
+            )
+          ),
+        },
+      });
+    }
+
     if (!createdBy && typeSupportsAccessControl && paramsIncludeAccessControl) {
       return left({
         id,
@@ -125,7 +139,7 @@ export const performBulkCreate = async <T>(
         error: {
           ...errorContent(
             SavedObjectsErrorHelpers.createBadRequestError(
-              `Cannot create a saved object of type "${type}" with an access mode because Kibana could not determine the user profile ID for the caller. This access mode requires an identifiable user profile.`
+              `Cannot create a saved object of type ${type} with an access mode because Kibana could not determine the user profile ID for the caller. Access control requires an identifiable user profile`
             )
           ),
         },

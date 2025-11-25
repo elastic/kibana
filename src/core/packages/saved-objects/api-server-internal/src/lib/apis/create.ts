@@ -109,13 +109,13 @@ export const performCreate = async <T>(
 
   if (!typeSupportsAccessControl && accessMode) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
-      `The "accessMode" field is not supported for saved objects of type "${type}".`
+      `Cannot create a saved object of type ${type} with an access mode because the type does not support access control`
     );
   }
 
   if (!createdBy && accessMode) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
-      `Unable to create "${type}" with "accessMode". User profile ID not found.`
+      `Cannot create a saved object of type ${type} with an access mode because Kibana could not determine the user profile ID for the caller. Access control requires an identifiable user profile`
     );
   }
 

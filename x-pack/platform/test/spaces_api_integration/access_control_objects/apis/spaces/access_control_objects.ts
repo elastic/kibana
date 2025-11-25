@@ -155,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain(
-          `Unable to create "${ACCESS_CONTROL_TYPE}" with "accessMode". User profile ID not found.: Bad Request`
+          `Cannot create a saved object of type ${ACCESS_CONTROL_TYPE} with an access mode because Kibana could not determine the user profile ID for the caller. Access control requires an identifiable user profile: Bad Request`
         );
       });
 
@@ -2325,6 +2325,13 @@ export default function ({ getService }: FtrProviderContext) {
           'updated description'
         );
       });
+    });
+
+    describe('access control and RBAC', () => {
+      // ToDo:
+      // 1. Make a user with RBAC permissions for the ACCESS_CONTROL_TYPE and create some objects in default access mode.
+      // 2. Revoke access to the ACCESS_CONTROL_TYPE (e.g. remove the Editor role from simple_user)
+      // 3. Validate that the user cannot overwrite, update, or delete any of the object that they own due to RBAC
     });
   });
 }

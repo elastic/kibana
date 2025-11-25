@@ -71,13 +71,14 @@ export class AccessControlTestPlugin implements Plugin {
               ])
             ),
             isWriteRestricted: schema.maybe(schema.boolean()),
+            description: schema.maybe(schema.string()),
           }),
         },
       },
       async (context, request, response) => {
         const soClient = (await context.core).savedObjects.getClient();
         const objType = request.body.type || ACCESS_CONTROL_TYPE;
-        const { isWriteRestricted } = request.body;
+        const { isWriteRestricted, description } = request.body;
 
         const options = {
           overwrite: request.query.overwrite ?? false,
@@ -90,7 +91,7 @@ export class AccessControlTestPlugin implements Plugin {
           const result = await soClient.create(
             objType,
             {
-              description: 'test',
+              description: description ?? 'test',
             },
             options
           );
@@ -140,6 +141,7 @@ export class AccessControlTestPlugin implements Plugin {
                     ])
                   ),
                   isWriteRestricted: schema.maybe(schema.boolean()),
+                  description: schema.maybe(schema.string()),
                 })
               ),
               force: schema.maybe(schema.boolean({ defaultValue: false })),
@@ -158,7 +160,7 @@ export class AccessControlTestPlugin implements Plugin {
               ? { accessControl: { accessMode: 'write_restricted' as const } }
               : {}),
             attributes: {
-              description: 'description',
+              description: obj.description ?? 'description',
             },
           }));
           const result = await soClient.bulkCreate(createObjects, { overwrite });

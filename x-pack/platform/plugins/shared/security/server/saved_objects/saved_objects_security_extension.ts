@@ -47,7 +47,6 @@ import type {
   ISavedObjectTypeRegistry,
   RedactNamespacesParams,
   SavedObject,
-  SetAccessControlToWriteParams,
   WithAuditName,
 } from '@kbn/core-saved-objects-server';
 import type {
@@ -1696,58 +1695,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   includeSavedObjectNames() {
     return this.auditLogger.includeSavedObjectNames;
-  }
-
-  private setAccessControl({
-    typeSupportsAccessControl,
-    createdBy,
-    accessMode,
-  }: {
-    typeSupportsAccessControl: boolean;
-    createdBy?: string;
-    accessMode?: SavedObjectAccessControl['accessMode'];
-  }) {
-    return typeSupportsAccessControl && createdBy
-      ? {
-          owner: createdBy,
-          accessMode: accessMode ?? 'default',
-        }
-      : undefined;
-  }
-
-  setAccessControlToWrite({
-    accessMode,
-    type,
-    createdBy,
-    preflightAccessControl,
-  }: SetAccessControlToWriteParams) {
-    if (!this.typeRegistry) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('Type registry not found');
-    }
-
-    const typeSupportsAccessControl = this.typeRegistry?.supportsAccessControl(type) ?? false;
-
-    if (!typeSupportsAccessControl && accessMode) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        `The "accessMode" field is not supported for saved objects of type "${type}".`
-      );
-    }
-
-    if (!createdBy && accessMode === 'write_restricted') {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        `Unable to create "write_restricted" "${type}" saved object. User profile ID not found.`
-      );
-    }
-
-    const accessControlToWrite =
-      preflightAccessControl ??
-      this.setAccessControl({
-        typeSupportsAccessControl,
-        createdBy,
-        accessMode,
-      });
-
-    return accessControlToWrite;
   }
 
   /**

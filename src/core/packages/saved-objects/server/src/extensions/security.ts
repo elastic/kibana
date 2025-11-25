@@ -617,13 +617,6 @@ export interface ISavedObjectsSecurityExtension {
   includeSavedObjectNames: () => boolean;
 
   /**
-   * Sets the access control for a saved object that supports access control
-   */
-  setAccessControlToWrite: (
-    params: SetAccessControlToWriteParams
-  ) => SavedObjectAccessControl | undefined;
-
-  /**
    * Filters bulk operation expected results array to filter inaccessible object left
    */
   filterInaccessibleObjectsForBulkAction<
