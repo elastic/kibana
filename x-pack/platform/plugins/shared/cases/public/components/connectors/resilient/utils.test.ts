@@ -35,7 +35,7 @@ describe('utils', () => {
         input_type: 'select',
       } as EnhancedFieldMetaData);
 
-      expect(result).toBeUndefined();
+      expect(result).toBeNull();
     });
 
     it('should convert multiselect field to number array', () => {
@@ -43,7 +43,17 @@ describe('utils', () => {
         input_type: 'multiselect',
       } as EnhancedFieldMetaData);
 
-      expect(result).toEqual([42, 43]);
+      expect(result.length).toBe(2);
+      expect(result).toStrictEqual([42, 43]);
+    });
+
+    it('should convert empty multiselect field value to undefined', () => {
+      const result = formFieldToResilientFieldValue(['42', ''], {
+        input_type: 'multiselect',
+      } as EnhancedFieldMetaData);
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(42);
     });
 
     it('should convert number field to number', () => {
@@ -52,6 +62,14 @@ describe('utils', () => {
       } as EnhancedFieldMetaData);
 
       expect(result).toBe(123);
+    });
+
+    it('should convert unset number field to undefined', () => {
+      const result = formFieldToResilientFieldValue('', {
+        input_type: 'number',
+      } as EnhancedFieldMetaData);
+
+      expect(result).toBeNull();
     });
 
     it('should return the same text for text types', () => {

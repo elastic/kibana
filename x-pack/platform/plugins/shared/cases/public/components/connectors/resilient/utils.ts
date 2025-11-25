@@ -20,14 +20,15 @@ export function formFieldToResilientFieldValue(
   ) {
     // DatePickerFields return Moment objects but resilient expects numbers
     return value.toDate().getTime();
-  } else if (typeof value === 'string' && fieldMetadata.input_type === 'select') {
-    // SelectFields return strings but resilient expects numbers or undefined
-    return value ? Number(value) : undefined;
+  } else if (
+    typeof value === 'string' &&
+    (fieldMetadata.input_type === 'select' || fieldMetadata.input_type === 'number')
+  ) {
+    // SelectFields and NumberFields return strings but resilient expects numbers or undefined
+    return value ? Number(value) : null;
   } else if (Array.isArray(value) && fieldMetadata.input_type === 'multiselect') {
     // MultiSelectFields return string[] but resilient expects number[]
-    return value.map((v) => Number(v));
-  } else if (typeof value === 'string' && fieldMetadata.input_type === 'number') {
-    return Number(value);
+    return value.map((v) => (v ? Number(v) : undefined)).filter((v) => v !== undefined);
   } else if (value === '' && fieldMetadata.input_type === 'boolean') {
     // We interpret not setting the boolean field as false
     return false;
