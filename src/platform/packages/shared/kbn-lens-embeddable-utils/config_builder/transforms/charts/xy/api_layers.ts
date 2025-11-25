@@ -22,7 +22,6 @@ import type { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/commo
 import { isEsqlTableTypeDataset } from '../../../utils';
 import type { DatasetType } from '../../../schema/dataset';
 import { LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE } from '../../../schema/constants';
-import type { LensApiBucketOperations } from '../../../schema/bucket_ops';
 import type { LensApiStaticValueOperation } from '../../../schema/metric_ops';
 import type {
   DataLayerType,
@@ -65,12 +64,21 @@ function convertDataLayerToAPI(
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
   if (isFormBasedLayer(layer)) {
     const x = visualization.xAccessor
-      ? (operationFromColumn(visualization.xAccessor, layer) as LensApiBucketOperations)
+      ? operationFromColumn(visualization.xAccessor, layer)
       : undefined;
+
+    if (x && !isAPIColumnOfBucketType(x)) {
+      throw new Error('X axis must be a bucket operation');
+    }
+
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const breakdown_by = visualization.splitAccessor
-      ? (operationFromColumn(visualization.splitAccessor, layer) as LensApiBucketOperations)
+      ? operationFromColumn(visualization.splitAccessor, layer)
       : undefined;
+
+    if (breakdown_by && !isAPIColumnOfBucketType(breakdown_by)) {
+      throw new Error('Breakdown by axis must be a bucket operation');
+    }
 
     const y =
       visualization.accessors
@@ -144,11 +152,21 @@ function convertDataLayerToAPI(
   };
 }
 
+const seriesTypeFromStateToAPIMap: Record<SeriesType, DataLayerType['type']> = {
+  bar: 'bar',
+  bar_stacked: 'bar_stacked',
+  bar_percentage_stacked: 'bar_percentage',
+  bar_horizontal: 'bar_horizontal',
+  bar_horizontal_stacked: 'bar_horizontal_stacked',
+  bar_horizontal_percentage_stacked: 'bar_horizontal_percentage',
+  line: 'line',
+  area: 'area',
+  area_stacked: 'area_stacked',
+  area_percentage_stacked: 'area_percentage',
+};
+
 function convertSeriesTypeToAPIFormat(seriesType: SeriesType): DataLayerType['type'] {
-  if (seriesType.includes('percentage')) {
-    return seriesType.replace('_stacked', '') as DataLayerType['type'];
-  }
-  return seriesType as DataLayerType['type'];
+  return seriesTypeFromStateToAPIMap[seriesType];
 }
 
 export function buildAPIDataLayer(
@@ -380,7 +398,8 @@ export function buildAPIAnnotationsLayer(
           query: annotation.filter
             ? {
                 language: annotation.filter.language as 'kuery' | 'lucene',
-                query: annotation.filter.query as string,
+                // it should never be a non-string here as schema ensures that
+                query: typeof annotation.filter.query === 'string' ? annotation.filter.query : '',
               }
             : { language: 'kuery', query: '' },
 
