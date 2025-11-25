@@ -121,7 +121,11 @@ export const RulesTableToolbar = React.memo(() => {
         {hasAssistantPrivilege && selectedRules.length > 0 && isAssistantEnabled && (
           <>
             {isAgentBuilderEnabled ? (
-              <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+              <NewAgentBuilderAttachment
+                onClick={openAgentBuilderFlyout}
+                iconType={'discuss'}
+                text={i18nAssistant.CHAT_IN_AGENT_BUILDER}
+              />
             ) : (
               <NewChat
                 category="detection-rules"

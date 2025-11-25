@@ -10,6 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { NewChat } from '@kbn/elastic-assistant';
+import { AttachmentType } from '@kbn/onechat-common/attachments';
 
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { css } from '@emotion/react';
@@ -17,6 +18,9 @@ import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/tele
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { DefineStepRule } from '../../../common/types';
 import type { FormHook, ValidationError } from '../../../../shared_imports';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
+import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 
 import * as i18n from './translations';
 
@@ -96,6 +100,19 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
     return `${i18n.DETECTION_RULES_CREATE_FORM_CONVERSATION_ID} - ${query ?? 'query'}`;
   }, [getFields]);
 
+  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+  const attachmentData = useMemo(() => {
+    const queryField = getFields().queryBar;
+    const { query } = (queryField.value as DefineStepRule['queryBar']).query;
+    return { query: query ?? '' };
+  }, [getFields]);
+
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
+    attachmentType: AttachmentType.esql,
+    attachmentData,
+    attachmentPrompt: i18n.ASK_ASSISTANT_USER_PROMPT(languageName),
+  });
+
   if (!hasAssistantPrivilege) {
     return null;
   }
@@ -108,7 +125,13 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
         id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.askAssistantHelpText"
         defaultMessage="{AiAssistantNewChatLink} to help resolve this error."
         values={{
-          AiAssistantNewChatLink: (
+          AiAssistantNewChatLink: isAgentBuilderEnabled ? (
+            <NewAgentBuilderAttachment
+              onClick={openAgentBuilderFlyout}
+              text={i18n.ASK_AGENT_ERROR_BUTTON}
+              size="xs"
+            />
+          ) : (
             <NewChat
               asLink={true}
               category="detection-rules"
