@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-export const TASK_TYPE = 'fleet:setup';
-export const TASK_TITLE = 'Fleet setup operations';
-export const TASK_TIMEOUT = '10m';
-
-export interface SetupTaskParams {
-  type: 'backportPackagePolicyInputId' | 'migrateComponentTemplateILMs';
+export function throwIfAborted(abortController: AbortController) {
+  if (abortController.signal.aborted) {
+    throw new Error('Task was aborted');
+  }
 }
