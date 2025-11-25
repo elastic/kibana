@@ -15,7 +15,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/licensing-types",
     "@kbn/config-schema",
     "@kbn/logging",
   ]
