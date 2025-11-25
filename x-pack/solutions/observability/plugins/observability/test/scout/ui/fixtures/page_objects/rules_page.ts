@@ -171,10 +171,16 @@ export class RulesPage {
     return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULES_TABLE_CONTAINER);
   }
 
+  /**
+   * Gets the inner Rules Table locator
+   */
   public get rulesTable() {
     return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULES_TABLE);
   }
 
+  /**
+   * Gets the non-editable rules locator
+   */
   public getNonEditableRules() {
     return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULE_ROW_NON_EDITABLE);
   }
