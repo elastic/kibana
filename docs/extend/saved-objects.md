@@ -1224,7 +1224,7 @@ The following validations are performed to ensure changes to Saved Object types 
 
 * **Deleting Model Versions/Migrations:** You cannot delete existing model versions; you can only define new ones.
 
-#### Versioning Requirements
+#### Versioning requirements
 
 * **Model Version Sequence:** Defined model versions must be consecutive integers, starting at 1. You cannot skip any version number.
 
