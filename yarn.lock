@@ -6263,22 +6263,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/default-nav-analytics@link:src/platform/packages/private/default-nav/analytics":
-  version "0.0.0"
-  uid ""
-
-"@kbn/default-nav-devtools@link:src/platform/packages/private/default-nav/devtools":
-  version "0.0.0"
-  uid ""
-
-"@kbn/default-nav-management@link:src/platform/packages/private/default-nav/management":
-  version "0.0.0"
-  uid ""
-
-"@kbn/default-nav-ml@link:src/platform/packages/private/default-nav/ml":
-  version "0.0.0"
-  uid ""
-
 "@kbn/default-tracer@link:src/platform/packages/shared/kbn-default-tracer":
   version "0.0.0"
   uid ""
@@ -7839,6 +7823,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/react-env@link:src/platform/packages/shared/react/env":
+  version "0.0.0"
+  uid ""
+
 "@kbn/react-field@link:src/platform/packages/shared/kbn-react-field":
   version "0.0.0"
   uid ""
@@ -7848,6 +7836,10 @@
   uid ""
 
 "@kbn/react-kibana-context-common@link:src/platform/packages/shared/react/kibana_context/common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-kibana-context-env@link:src/platform/packages/shared/react/kibana_context/env":
   version "0.0.0"
   uid ""
 
