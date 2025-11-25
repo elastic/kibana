@@ -78,7 +78,7 @@ describe('WorkflowsManagementApi', () => {
       const result = await api.cloneWorkflow(originalWorkflow, 'default', mockRequest);
 
       expect(mockWorkflowsService.getWorkflowZodSchema).toHaveBeenCalledWith(
-        { loose: true },
+        { loose: false },
         'default',
         mockRequest
       );
@@ -231,7 +231,7 @@ steps:
       await api.cloneWorkflow(originalWorkflow, spaceId, mockRequest);
 
       expect(mockWorkflowsService.getWorkflowZodSchema).toHaveBeenCalledWith(
-        { loose: true },
+        { loose: false },
         spaceId,
         mockRequest
       );
@@ -559,7 +559,7 @@ steps:
         });
 
         expect(mockWorkflowsService.getWorkflowZodSchema).toHaveBeenCalledWith(
-          { loose: true },
+          { loose: false },
           spaceId,
           mockRequest
         );

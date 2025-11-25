@@ -45,7 +45,7 @@ const logsRepositoryMappings = {
 // Note: Document all _source fields here.
 export interface WorkflowLogEvent extends GetFieldsOf<typeof logsRepositoryMappings> {
   '@timestamp': string;
-  message?: string;
+  message: string;
   level?: 'trace' | 'debug' | 'info' | 'warn' | 'error';
   workflow?: {
     id?: string;

@@ -18,7 +18,6 @@ import type {
 
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
-import type { WorkflowsManagementConfig } from './config';
 
 import {
   getWorkflowsConnectorAdapter,
@@ -48,7 +47,6 @@ export class WorkflowsPlugin
     >
 {
   private readonly logger: Logger;
-  private readonly config: WorkflowsManagementConfig;
   private workflowsService: WorkflowsService | null = null;
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private api: WorkflowsManagementApi | null = null;
@@ -56,7 +54,6 @@ export class WorkflowsPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.config = initializerContext.config.get<WorkflowsManagementConfig>();
   }
 
   public setup(
