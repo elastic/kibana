@@ -21,5 +21,6 @@
     "@kbn/i18n",
     "@kbn/licensing-types",
     "@kbn/task-manager-plugin",
+    "@kbn/fs",
   ]
 }
