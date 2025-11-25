@@ -14,7 +14,7 @@ import { initializeStateManager } from '@kbn/presentation-publishing/state_manag
 export type EditorState = Pick<RangeSliderControlState, 'step'>;
 
 export const editorComparators: StateComparators<EditorState> = {
-  step: 'referenceEquality',
+  step: (a, b) => (a ?? 1) === (b ?? 1),
 };
 
 const defaultEditorState = {
