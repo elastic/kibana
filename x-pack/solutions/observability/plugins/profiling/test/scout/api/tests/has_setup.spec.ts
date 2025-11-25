@@ -7,21 +7,18 @@
 
 import { expect, apiTest } from '@kbn/scout-oblt';
 import {
-  cleanUpProfiling,
-  loadProfilingData,
-  setupProfiling,
   getProfilingPackagePolicyIds,
+  setupFleet,
+  esArchiversPath,
 } from '../../common/utils/profiling_data';
 
 const esResourcesEndpoint = 'GET /api/profiling/setup/es_resources';
 
 apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess'] }, () => {
-  apiTest.beforeAll(async ({ esClient, log, apiServices }) => {
-    await cleanUpProfiling({
-      es: esClient,
-      apiServices,
-      logger: log,
-    });
+  apiTest.beforeAll(async ({ apiServices, profilingSetup, log }) => {
+    await setupFleet(apiServices, log);
+
+    await profilingSetup.cleanup();
   });
 
   apiTest('Admin users', async ({ roleBasedApiClient }) => {
@@ -48,8 +45,10 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess']
 });
 
 apiTest.describe('APM integration not installed but setup completed', { tag: ['@ess'] }, () => {
-  apiTest.beforeAll(async ({ apiServices, kbnClient, log }) => {
-    await setupProfiling(apiServices, kbnClient, log);
+  apiTest.beforeAll(async ({ profilingSetup }) => {
+    if (!(await profilingSetup.checkStatus()).has_setup) {
+      await profilingSetup.setupResources();
+    }
   });
   apiTest('Admin user', async ({ roleBasedApiClient }) => {
     const adminRes = await roleBasedApiClient.adminUser({
@@ -76,15 +75,12 @@ apiTest.describe('APM integration not installed but setup completed', { tag: ['@
 });
 
 apiTest.describe('Profiling is setup and data is loaded', { tag: ['@ess'] }, () => {
-  apiTest.beforeAll(async ({ esClient, kbnClient, apiServices, log }) => {
-    await cleanUpProfiling({
-      es: esClient,
-      apiServices,
-      logger: log,
-    });
-
-    await setupProfiling(apiServices, kbnClient, log);
-    await loadProfilingData(esClient, log);
+  apiTest.beforeAll(async ({ profilingSetup }) => {
+    await profilingSetup.cleanup();
+    if (!(await profilingSetup.checkStatus()).has_setup) {
+      await profilingSetup.setupResources();
+    }
+    await profilingSetup.loadData(esArchiversPath);
   });
 
   apiTest('Admin user', async ({ roleBasedApiClient }) => {
@@ -127,6 +123,9 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
         name: 'profiling-events*',
       }),
     ]);
+  });
+  apiTest.afterAll(async ({ profilingSetup }) => {
+    await profilingSetup.cleanup();
   });
 
   apiTest('collector integration missing', async ({ roleBasedApiClient, apiServices }) => {

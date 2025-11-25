@@ -8,7 +8,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import Path from 'path';
-import type { ApiServicesFixture, KbnClient, ScoutTestConfig } from '@kbn/scout-oblt';
+import type { ApiServicesFixture, ScoutTestConfig } from '@kbn/scout-oblt';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   COLLECTOR_PACKAGE_POLICY_NAME,
@@ -17,14 +17,15 @@ import {
 
 const APM_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 
-const esArchiversPath = Path.posix.join(
+export const esArchiversPath = Path.join(
   __dirname,
   '..',
   '..',
   'common',
   'fixtures',
   'es_archiver',
-  'profiling'
+  'profiling',
+  'data.json'
 );
 
 function logWithTimer(logger: ToolingLog) {
@@ -58,11 +59,7 @@ export function buildKibanaUrl(config: ScoutTestConfig) {
   return baseUrl;
 }
 
-export async function setupProfiling(
-  apiServices: ApiServicesFixture,
-  kbnClient: KbnClient,
-  logger: ToolingLog
-) {
+export async function setupFleet(apiServices: ApiServicesFixture, logger: ToolingLog) {
   const log = logWithTimer(logger);
   log('Checking if APM agent policy exists, creating if needed...');
   const getPolicyResponse = await apiServices.fleet.agent_policies.get({
@@ -87,40 +84,47 @@ export async function setupProfiling(
   } else {
     log(`APM agent policy '${APM_AGENT_POLICY_ID}' already exists`);
   }
-
-  const checkStatus = await (async () => {
-    try {
-      const response = await kbnClient.request({
-        description: 'Check profiling status',
-        path: '/api/profiling/setup/es_resources',
-        method: 'GET',
-      });
-      log(`Checked profiling status: ${JSON.stringify(response.data)}`);
-      return response.data as { has_setup: boolean; has_data: boolean };
-    } catch (error: any) {
-      log(`Error checking profiling status: ${error}`);
-      return { has_setup: false, has_data: false };
-    }
-  })();
-
-  if (!checkStatus.has_setup) {
-    log(`Setting up Universal Profiling`);
-
-    try {
-      await kbnClient.request({
-        description: 'Setup profiling resources',
-        path: '/api/profiling/setup/es_resources',
-        method: 'POST',
-        body: {},
-      });
-    } catch (error: any) {
-      log(`Error setting up profiling resources: ${error}`);
-    }
-  } else {
-    log(`Skipping Universal Profiling set up, already set up`);
-  }
-  log(`Universal Profiling set up`);
 }
+
+// export async function setupProfiling(
+//   apiServices: ApiServicesFixture,
+//   kbnClient: KbnClient,
+//   logger: ToolingLog
+// ) {
+
+//   const checkStatus = await (async () => {
+//     try {
+//       const response = await kbnClient.request({
+//         description: 'Check profiling status',
+//         path: '/api/profiling/setup/es_resources',
+//         method: 'GET',
+//       });
+//       log(`Checked profiling status: ${JSON.stringify(response.data)}`);
+//       return response.data as { has_setup: boolean; has_data: boolean };
+//     } catch (error: any) {
+//       log(`Error checking profiling status: ${error}`);
+//       return { has_setup: false, has_data: false };
+//     }
+//   })();
+
+//   if (!checkStatus.has_setup) {
+//     log(`Setting up Universal Profiling`);
+
+//     try {
+//       await kbnClient.request({
+//         description: 'Setup profiling resources',
+//         path: '/api/profiling/setup/es_resources',
+//         method: 'POST',
+//         body: {},
+//       });
+//     } catch (error: any) {
+//       log(`Error setting up profiling resources: ${error}`);
+//     }
+//   } else {
+//     log(`Skipping Universal Profiling set up, already set up`);
+//   }
+//   log(`Universal Profiling set up`);
+// }
 
 export async function getProfilingPackagePolicyIds(apiServices: ApiServicesFixture) {
   const res = await apiServices.fleet.package_policies.get();
