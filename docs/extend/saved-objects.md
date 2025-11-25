@@ -526,6 +526,7 @@ Forward compatibility schema can be implemented in two different ways.
     ```
 
     :::{note}
+    :applies_to: stack: ga 9.3
     Starting with {{kib}} 9.3.0, all new model versions must include a `forwardCompatibility` schema. This new requirement is designed to ensure that if a Serverless instance needs to be rolled back to an earlier version, the Saved Objects APIs will still deliver data in the original, pre-upgrade format, thereby maintaining API compatibility and safety during the rollback process.
     :::
 
