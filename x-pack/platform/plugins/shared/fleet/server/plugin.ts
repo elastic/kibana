@@ -820,7 +820,6 @@ export class FleetPlugin
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});
 
-
     const logger = appContextService.getLogger();
 
     this.policyWatcher = new PolicyWatcher(logger);
