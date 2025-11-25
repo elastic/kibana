@@ -13,7 +13,6 @@ import datemath from '@elastic/datemath';
 import moment from 'moment';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-
 import { createSyntheticApmDataWithAnomalies } from '../utils/synthtrace_scenarios/create_synthetic_apm_data_with_anomalies';
 
 const SERVICE_NAME = 'service-a';
@@ -26,10 +25,14 @@ const endUnix = datemath.parse(END)!;
 const SPIKE_START = endUnix.valueOf() - moment.duration(2, 'hours').asMilliseconds();
 const SPIKE_END = endUnix.valueOf() - moment.duration(1, 'hours').asMilliseconds();
 
+const START_ISO = new Date(startUnix.valueOf()).toISOString();
+const END_ISO = new Date(endUnix.valueOf()).toISOString();
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const ml = getService('ml');
   const retry = getService('retry');
+  const synthtrace = getService('synthtrace');
 
   describe(`tool: ${OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
@@ -38,9 +41,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       const supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin');
       agentBuilderApiClient = createAgentBuilderApiClient(supertest);
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
-      apmSynthtraceEsClient = await createSyntheticApmDataWithAnomalies({
+      await createSyntheticApmDataWithAnomalies({
         getService,
+        apmSynthtraceEsClient,
         serviceName: SERVICE_NAME,
         environment: ENVIRONMENT,
         language: 'nodejs',
@@ -50,22 +55,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         spikeEnd: SPIKE_END,
       });
 
-      // Create anomaly detection job
-      await supertest
-        .post('/internal/apm/settings/anomaly-detection/jobs')
-        .set('kbn-xsrf', 'true') // Add this line to include the XSRF header
-        .send({ environments: [ENVIRONMENT] })
-        .expect(200);
-
       await retry.waitFor('ML job to have anomalies', async () => {
         const toolResults =
           await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
             id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
-            params: { start: START, end: END },
+            params: { start: START_ISO, end: END_ISO },
           });
 
-        const hasAnomalies = toolResults[0].data.jobs[0].topAnomalies.length > 0;
-        return hasAnomalies;
+        const { topAnomalies } = toolResults[0].data.jobs[0];
+        const hasLatencyAnomaly = topAnomalies.some(
+          ({ fieldName }) => fieldName === 'transaction_latency'
+        );
+        const hasThroughputAnomaly = topAnomalies.some(
+          ({ fieldName }) => fieldName === 'transaction_throughput'
+        );
+
+        return hasLatencyAnomaly && hasThroughputAnomaly;
       });
     });
 
@@ -81,8 +86,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         toolResults = await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
           id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
           params: {
-            start: START,
-            end: END,
+            start: START_ISO,
+            end: END_ISO,
           },
         });
       });
@@ -150,7 +155,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const toolResults =
         await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
           id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
-          params: { jobIds: [jobId], start: START, end: END },
+          params: { jobIds: [jobId], start: START_ISO, end: END_ISO },
         });
 
       expect(toolResults[0].data.jobs).to.have.length(1);
@@ -163,8 +168,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
           params: {
             jobIds: ['non-existent-job-id'],
-            start: START,
-            end: END,
+            start: START_ISO,
+            end: END_ISO,
           },
         });
 
@@ -175,16 +180,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('returns job without anomalies when time range excludes them', async () => {
-      // SPIKE_START is 2 hours ago. SPIKE_END is 1 hour ago.
-      const earlyStart = 'now-12h';
-      const earlyEnd = 'now-3h';
+      // Start check 4 hours before spike to avoid start of dataset initialization noise
+      const EARLY_START_ISO = new Date(
+        SPIKE_START - moment.duration(4, 'hours').asMilliseconds()
+      ).toISOString();
+      const EARLY_END_ISO = new Date(
+        SPIKE_START - moment.duration(30, 'minutes').asMilliseconds()
+      ).toISOString();
 
       const toolResults =
         await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
           id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
           params: {
-            start: earlyStart,
-            end: earlyEnd,
+            start: EARLY_START_ISO,
+            end: EARLY_END_ISO,
           },
         });
 

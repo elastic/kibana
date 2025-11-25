@@ -87,10 +87,17 @@ export default function (providerContext: FtrProviderContextWithServices) {
         .expect(200);
       await waitForTask();
       // Check that only the active agent was upgraded.
-      let res = await supertest.get('/api/fleet/agents/agent1').set('kbn-xsrf', 'xxx').expect(200);
-      expect(typeof res.body.item.upgrade_started_at).to.be('string');
-      expect(res.body.item.upgrade_attempts.length).to.be(1);
-      res = await supertest.get('/api/fleet/agents/agent2').set('kbn-xsrf', 'xxx').expect(200);
+      await waitForResult(async () => {
+        const res = await supertest
+          .get('/api/fleet/agents/agent1')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        return res.body.item.upgrade_started_at && res.body.item.upgrade_attempts.length === 1;
+      });
+      const res = await supertest
+        .get('/api/fleet/agents/agent2')
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
       expect(res.body.item.upgrade_started_at).to.be(undefined);
       expect(res.body.item.upgrade_attempts).to.be(undefined);
 
@@ -275,11 +282,73 @@ export default function (providerContext: FtrProviderContextWithServices) {
         })
         .expect(200);
       await waitForTask();
-      // Check that agent1 was upgraded.
-      let res = await supertest.get('/api/fleet/agents/agent1').set('kbn-xsrf', 'xxx').expect(200);
-      expect(res.body.item.upgrade_started_at).to.be(undefined);
-      res = await supertest.get('/api/fleet/agents/agent2').set('kbn-xsrf', 'xxx').expect(200);
-      expect(typeof res.body.item.upgrade_started_at).to.be('string');
+
+      await waitForResult(async () => {
+        // Check that agent1 was upgraded.
+        const res1 = await supertest
+          .get('/api/fleet/agents/agent1')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        // Check that agent2 upgrade was retried
+        const res2 = await supertest
+          .get('/api/fleet/agents/agent2')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        return res2.body.item.upgrade_started_at && !res1.body.item.upgrade_started_at;
+      });
+    });
+
+    async function waitForResult(verifySuccess: () => Promise<boolean>) {
+      await new Promise((resolve, reject) => {
+        let attempts = 0;
+        const intervalId = setInterval(async () => {
+          if (attempts > 10) {
+            clearInterval(intervalId);
+            reject(new Error('wait timed out'));
+          }
+          ++attempts;
+
+          if (await verifySuccess()) {
+            clearInterval(intervalId);
+            resolve({});
+          }
+        }, 3000);
+      }).catch((e) => {
+        throw e;
+      });
+    }
+
+    it('should retry upgrading agents stuck in updating', async () => {
+      await createAgentDoc(providerContext, 'agent5', policyId, '8.17.0', true, {
+        status: 'updating',
+        upgrade_started_at: new Date(new Date().getTime() - 2 * 60 * 60 * 1000 - 100).toISOString(), // 2h to be stuck in updating
+        upgrade_attempts: [new Date(new Date().getTime() - RETRY_DELAY).toISOString()],
+      });
+      await supertest
+        .put(`/api/fleet/agent_policies/${policyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy',
+          namespace: 'default',
+          required_versions: [
+            {
+              version: '8.17.1',
+              percentage: 100,
+            },
+          ],
+        })
+        .expect(200);
+
+      await waitForResult(async () => {
+        // Check that agent5 upgrade was retried
+        const res = await supertest
+          .get('/api/fleet/agents/agent5')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        return res.body.item.upgrade_attempts.length > 1;
+      });
     });
   });
 }
