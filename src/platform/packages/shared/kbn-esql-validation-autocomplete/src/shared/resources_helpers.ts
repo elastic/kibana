@@ -126,9 +126,7 @@ export class QueryColumns {
     }
 
     const fields = await getFieldsFromES(queryToES, this.resourceRetriever);
-
     QueryColumns.setCache(queryToES, fields);
-
     return fields;
   };
 
