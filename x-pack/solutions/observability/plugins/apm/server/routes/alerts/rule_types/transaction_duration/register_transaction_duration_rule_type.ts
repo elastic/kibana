@@ -77,6 +77,7 @@ import {
 import { averageOrPercentileAgg, getMultiTermsSortOrder } from './average_or_percentile_agg';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import { getAlertDiscoverUrl } from '../utils/get_discover_url';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
@@ -92,6 +93,7 @@ export const transactionDurationActionVariables = [
   apmActionVariables.triggerValue,
   apmActionVariables.viewInAppUrl,
   apmActionVariables.grouping,
+  apmActionVariables.discoverUrl,
 ];
 
 type TransactionDurationRuleTypeParams = ApmRuleParamsType[ApmRuleType.TransactionDuration];
@@ -106,6 +108,7 @@ export function registerTransactionDurationRuleType({
   apmConfig,
   getApmIndices,
   basePath,
+  discoverLocator,
 }: RegisterRuleDependencies) {
   if (!alerting) {
     throw new Error(
@@ -182,7 +185,9 @@ export function registerTransactionDurationRuleType({
           ]
         : [];
 
-      const { dateStart } = getTimeRange(`${ruleParams.windowSize}${ruleParams.windowUnit}`);
+      const { dateStart, dateEnd } = getTimeRange(
+        `${ruleParams.windowSize}${ruleParams.windowUnit}`
+      );
 
       const searchParams = {
         index,
@@ -299,8 +304,18 @@ export function registerTransactionDurationRuleType({
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
         const groupingObject = unflattenObject(groupByFields);
 
+        const discoverUrl = getAlertDiscoverUrl({
+          discoverLocator,
+          index,
+          groupByFields,
+          dateStart,
+          dateEnd,
+          spaceId,
+        });
+
         const context = {
           alertDetailsUrl,
+          discoverUrl,
           interval: formatDurationFromTimeUnitChar(
             ruleParams.windowSize,
             ruleParams.windowUnit as TimeUnitChar
@@ -371,8 +386,19 @@ export function registerTransactionDurationRuleType({
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
         const groupingObject = unflattenObject(groupByFields);
 
+        const recoveredDiscoverUrl = getAlertDiscoverUrl({
+          discoverLocator,
+          processorEvent: ProcessorEvent.transaction,
+          index,
+          groupByFields,
+          dateStart,
+          dateEnd,
+          spaceId,
+        });
+
         const recoveredContext = {
           alertDetailsUrl,
+          discoverUrl: recoveredDiscoverUrl,
           interval: formatDurationFromTimeUnitChar(
             ruleParams.windowSize,
             ruleParams.windowUnit as TimeUnitChar

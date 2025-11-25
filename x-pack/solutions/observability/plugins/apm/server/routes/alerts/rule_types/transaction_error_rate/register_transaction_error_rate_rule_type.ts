@@ -72,6 +72,7 @@ import {
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import { getAlertDiscoverUrl } from '../utils/get_discover_url';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionErrorRate];
 
@@ -87,6 +88,7 @@ export const transactionErrorRateActionVariables = [
   apmActionVariables.triggerValue,
   apmActionVariables.viewInAppUrl,
   apmActionVariables.grouping,
+  apmActionVariables.discoverUrl,
 ];
 
 type TransactionErrorRateRuleTypeParams = ApmRuleParamsType[ApmRuleType.TransactionErrorRate];
@@ -104,6 +106,7 @@ export function registerTransactionErrorRateRuleType({
   getApmIndices,
   logger,
   ruleDataClient,
+  discoverLocator,
 }: RegisterRuleDependencies) {
   if (!alerting) {
     throw new Error(
@@ -178,7 +181,9 @@ export function registerTransactionErrorRateRuleType({
           ]
         : [];
 
-      const { dateStart } = getTimeRange(`${ruleParams.windowSize}${ruleParams.windowUnit}`);
+      const { dateStart, dateEnd } = getTimeRange(
+        `${ruleParams.windowSize}${ruleParams.windowUnit}`
+      );
 
       const searchParams = {
         index,
@@ -295,6 +300,15 @@ export function registerTransactionErrorRateRuleType({
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
         const groupingObject = unflattenObject(groupByFields);
 
+        const discoverUrl = getAlertDiscoverUrl({
+          discoverLocator,
+          index,
+          groupByFields,
+          dateStart,
+          dateEnd,
+          spaceId,
+        });
+
         const payload = {
           [TRANSACTION_NAME]: ruleParams.transactionName,
           [PROCESSOR_EVENT]: ProcessorEvent.transaction,
@@ -307,6 +321,7 @@ export function registerTransactionErrorRateRuleType({
 
         const context = {
           alertDetailsUrl,
+          discoverUrl,
           interval: formatDurationFromTimeUnitChar(
             ruleParams.windowSize,
             ruleParams.windowUnit as TimeUnitChar
@@ -363,8 +378,18 @@ export function registerTransactionErrorRateRuleType({
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
         const groupingObject = unflattenObject(groupByFields);
 
+        const recoveredDiscoverUrl = getAlertDiscoverUrl({
+          discoverLocator,
+          index,
+          groupByFields,
+          dateStart,
+          dateEnd,
+          spaceId,
+        });
+
         const recoveredContext = {
           alertDetailsUrl,
+          discoverUrl: recoveredDiscoverUrl,
           interval: formatDurationFromTimeUnitChar(
             ruleParams.windowSize,
             ruleParams.windowUnit as TimeUnitChar
