@@ -7,26 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import {
   EuiBadge,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiLink,
-  EuiPopover,
   EuiSpacer,
   EuiSplitPanel,
   EuiSwitch,
   EuiText,
-  EuiOutsideClickDetector,
   useEuiTheme,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleSpecificFlappingProperties, RulesSettingsFlapping } from '@kbn/alerting-types';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleSettingsFlappingMessage } from './rule_settings_flapping_message';
 import { RuleSettingsFlappingInputs } from './rule_settings_flapping_inputs';
 
@@ -42,31 +37,18 @@ const flappingOffLabel = i18n.translate('alertsUIShared.ruleSettingsFlappingForm
   defaultMessage: 'OFF',
 });
 
+const enabledOnLabel = i18n.translate('alertsUIShared.ruleSettingsFlappingForm.enabledOnLabel', {
+  defaultMessage: 'On',
+});
+
+const enabledOffLabel = i18n.translate('alertsUIShared.ruleSettingsFlappingForm.enabledOffLabel', {
+  defaultMessage: 'Off',
+});
+
 const flappingOverrideLabel = i18n.translate(
   'alertsUIShared.ruleSettingsFlappingForm.overrideLabel',
   {
     defaultMessage: 'Custom',
-  }
-);
-
-const flappingOffContentRules = i18n.translate(
-  'alertsUIShared.ruleSettingsFlappingForm.flappingOffContentRules',
-  {
-    defaultMessage: 'Rules',
-  }
-);
-
-const flappingOffContentSettings = i18n.translate(
-  'alertsUIShared.ruleSettingsFlappingForm.flappingOffContentSettings',
-  {
-    defaultMessage: 'Settings',
-  }
-);
-
-const flappingExternalLinkLabel = i18n.translate(
-  'alertsUIShared.ruleSettingsFlappingForm.flappingExternalLinkLabel',
-  {
-    defaultMessage: "What's this?",
   }
 );
 
@@ -95,8 +77,6 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
   const { flappingSettings, spaceFlappingSettings, canWriteFlappingSettingsUI, onFlappingChange } =
     props;
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-
   const cachedFlappingSettings = useRef<RuleSpecificFlappingProperties>();
 
   const isDesktop = useIsWithinMinBreakpoint('xl');
@@ -113,6 +93,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
     }
     const initialFlappingSettings = cachedFlappingSettings.current || spaceFlappingSettings;
     onFlappingChange({
+      enabled: initialFlappingSettings.enabled,
       lookBackWindow: initialFlappingSettings.lookBackWindow,
       statusChangeThreshold: initialFlappingSettings.statusChangeThreshold,
     });
@@ -153,63 +134,24 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
     [flappingSettings, internalOnFlappingChange]
   );
 
-  const flappingOffTooltip = useMemo(() => {
-    if (!spaceFlappingSettings) {
-      return null;
-    }
-    const { enabled } = spaceFlappingSettings;
-    if (enabled) {
-      return null;
-    }
-
-    if (canWriteFlappingSettingsUI) {
-      return (
-        <EuiOutsideClickDetector onOutsideClick={() => setIsPopoverOpen(false)}>
-          <EuiPopover
-            repositionOnScroll
-            isOpen={isPopoverOpen}
-            anchorPosition="leftCenter"
-            panelStyle={{
-              width: 250,
-            }}
-            button={
-              <EuiButtonIcon
-                data-test-subj="ruleSettingsFlappingFormTooltipButton"
-                display="empty"
-                color="primary"
-                iconType="question"
-                aria-label="Flapping Off Info"
-                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-              />
-            }
-          >
-            <EuiText data-test-subj="ruleSettingsFlappingFormTooltipContent" size="s">
-              <FormattedMessage
-                id="alertsUIShared.ruleSettingsFlappingForm.flappingOffPopoverContent"
-                defaultMessage="Go to {rules} > {settings} to turn on flapping detection for all rules in a space. You can subsequently customize the look back window and threshold values in each rule."
-                values={{
-                  rules: <b>{flappingOffContentRules}</b>,
-                  settings: <b>{flappingOffContentSettings}</b>,
-                }}
-              />
-            </EuiText>
-          </EuiPopover>
-        </EuiOutsideClickDetector>
-      );
-    }
-    // TODO: Add the external doc link here!
-    return (
-      <EuiLink href="" target="_blank">
-        {flappingExternalLinkLabel}
-      </EuiLink>
-    );
-  }, [canWriteFlappingSettingsUI, isPopoverOpen, spaceFlappingSettings]);
+  const onEnabledChange = useCallback(
+    (value: boolean) => {
+      if (!flappingSettings) {
+        return;
+      }
+      internalOnFlappingChange({
+        ...flappingSettings,
+        enabled: value,
+      });
+    },
+    [flappingSettings, internalOnFlappingChange]
+  );
 
   const flappingFormHeader = useMemo(() => {
     if (!spaceFlappingSettings) {
       return null;
     }
-    const { enabled } = spaceFlappingSettings;
+    const enabled = !flappingSettings ? spaceFlappingSettings.enabled : flappingSettings.enabled;
 
     return (
       <EuiFlexItem>
@@ -232,17 +174,14 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {enabled && (
-              <EuiSwitch
-                data-test-subj="ruleFormAdvancedOptionsOverrideSwitch"
-                compressed
-                checked={!!flappingSettings}
-                label={flappingOverrideConfiguration}
-                disabled={!canWriteFlappingSettingsUI}
-                onChange={onFlappingToggle}
-              />
-            )}
-            {flappingOffTooltip}
+            <EuiSwitch
+              data-test-subj="ruleFormAdvancedOptionsOverrideSwitch"
+              compressed
+              checked={!!flappingSettings}
+              label={flappingOverrideConfiguration}
+              disabled={!canWriteFlappingSettingsUI}
+              onChange={onFlappingToggle}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         {flappingSettings && enabled && (
@@ -258,16 +197,12 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
     euiTheme,
     spaceFlappingSettings,
     flappingSettings,
-    flappingOffTooltip,
     canWriteFlappingSettingsUI,
     onFlappingToggle,
   ]);
 
   const flappingFormBody = useMemo(() => {
     if (!flappingSettings) {
-      return null;
-    }
-    if (!spaceFlappingSettings?.enabled) {
       return null;
     }
     return (
@@ -283,11 +218,27 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
     );
   }, [
     flappingSettings,
-    spaceFlappingSettings,
     canWriteFlappingSettingsUI,
     onLookBackWindowChange,
     onStatusChangeThresholdChange,
   ]);
+
+  const flappingFormSwitch = useMemo(() => {
+    if (!flappingSettings) {
+      return null;
+    }
+
+    return (
+      <EuiFlexItem>
+        <EuiSwitch
+          label={flappingSettings.enabled ? enabledOnLabel : enabledOffLabel}
+          checked={flappingSettings.enabled || false}
+          disabled={!canWriteFlappingSettingsUI}
+          onChange={(e) => onEnabledChange(e.target.checked)}
+        />
+      </EuiFlexItem>
+    );
+  }, [flappingSettings, canWriteFlappingSettingsUI, onEnabledChange]);
 
   const flappingFormMessage = useMemo(() => {
     if (!spaceFlappingSettings || !spaceFlappingSettings.enabled) {
@@ -315,6 +266,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
       <EuiSplitPanel.Inner>
         <EuiFlexGroup direction="column">
           {flappingFormHeader}
+          {flappingFormSwitch}
           {flappingFormBody}
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>

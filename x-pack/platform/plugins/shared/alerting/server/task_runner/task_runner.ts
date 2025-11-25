@@ -302,9 +302,7 @@ export class TaskRunner<
         }
       : null;
 
-    const flappingSettings = spaceFlappingSettings.enabled
-      ? ruleFlappingSettings || spaceFlappingSettings
-      : spaceFlappingSettings;
+    const flappingSettings = ruleFlappingSettings || spaceFlappingSettings;
 
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
