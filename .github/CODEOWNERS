@@ -2289,9 +2289,13 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/fixtures/es_archives/actions @elastic/response-ops
 /x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id @elastic/response-ops
 /x-pack/platform/test/fixtures/es_archives/alerting/8_2_0 @elastic/response-ops
-
 /x-pack/solutions/**/test/serverless/**/test_suites/rules/ @elastic/response-ops
 
+# Gap fill feature has shared responsibility between response-ops and security-detection-engine
+/x-pack/platform/plugins/shared/alerting/common/routes/gaps @elastic/response-ops @elastic/security-detection-engine
+/x-pack/platform/plugins/shared/alerting/server/application/gaps @elastic/response-ops @elastic/security-detection-engine
+/x-pack/platform/plugins/shared/alerting/server/lib/rule_gaps @elastic/response-ops @elastic/security-detection-engine
+/x-pack/platform/plugins/shared/alerting/server/routes/gaps @elastic/response-ops @elastic/security-detection-engine
 
 # Enterprise Search
 # search
@@ -3085,7 +3089,10 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # Moon related configs
 .moon         @elastic/kibana-operations
-/**/moon.yml  @elastic/kibana-operations
+src/platform/test/moon.yml @elastic/kibana-operations
+x-pack/platform/test/moon.yml @elastic/kibana-operations
+x-pack/solutions/observability/test/moon.yml @elastic/kibana-operations
+x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
