@@ -37,6 +37,8 @@ export function createScenarios(
     DATA_ANALYST_PASSWORD,
     REPORTING_USER_USERNAME,
     REPORTING_USER_PASSWORD,
+    MANAGE_REPORTING_USER_USERNAME,
+    MANAGE_REPORTING_USER_PASSWORD,
   } = scenariosAPI;
 
   const loginDataAnalyst = async () => {
@@ -51,6 +53,17 @@ export function createScenarios(
     await PageObjects.security.login(REPORTING_USER_USERNAME, REPORTING_USER_PASSWORD, {
       expectSpaceSelector: false,
     });
+  };
+
+  const loginReportingManager = async () => {
+    await PageObjects.security.forceLogout();
+    await PageObjects.security.login(
+      MANAGE_REPORTING_USER_USERNAME,
+      MANAGE_REPORTING_USER_PASSWORD,
+      {
+        expectSpaceSelector: false,
+      }
+    );
   };
 
   const openSavedVisualization = async (title: string) => {
@@ -157,5 +170,6 @@ export function createScenarios(
     tryReportsNotAvailable,
     loginDataAnalyst,
     loginReportingUser,
+    loginReportingManager,
   };
 }

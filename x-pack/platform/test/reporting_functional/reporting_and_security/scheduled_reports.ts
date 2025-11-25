@@ -18,6 +18,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
   const retry = getService('retry');
   const reportingFunctional = getService('reportingFunctional');
   const reportingAPI = getService('reportingAPI');
+  const comboBox = getService('comboBox');
 
   describe('Scheduled Reports Flyout', () => {
     const openFlyout = async () => {
@@ -162,6 +163,29 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       await retry.try(async () => {
         const successToast = await toasts.getElementByIndex(1);
         expect(await successToast.getVisibleText()).to.contain('Export scheduled');
+      });
+    });
+
+    describe('without reporting management privileges', async () => {
+      it('disables and hides the email recipient fields', async () => {
+        await reportingFunctional.loginReportingUser();
+        await openFlyout();
+
+        // Enable email
+        await testSubjects.click('sendByEmailToggle');
+
+        // Non-managers can only email the reports to themselves so the `To` field should be
+        // pre-filled and disabled
+        const emailToField = await (
+          await testSubjects.find('emailRecipientsCombobox')
+        ).findByTestSubject('comboBoxSearchInput');
+        expect(await emailToField.isEnabled()).to.equal(false);
+        expect((await comboBox.getComboBoxSelectedOptions('emailRecipientsCombobox'))[0]).to.equal(
+          'reportinguser@example.com'
+        );
+        // and the Cc and Bcc fields should be hidden
+        await testSubjects.missingOrFail('emailCcRecipientsCombobox');
+        await testSubjects.missingOrFail('emailBccRecipientsCombobox');
       });
     });
   });
