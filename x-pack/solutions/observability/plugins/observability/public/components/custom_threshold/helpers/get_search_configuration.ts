@@ -29,12 +29,12 @@ export const getSearchConfiguration = (
 ): CustomThresholdSearchSourceFields => {
   if (fields.query && !isOfQueryType(fields.query)) {
     onWarning(searchConfigQueryWarning);
-    return adjustSearchConfigurationFilter({
+    return adjustSearchConfiguration({
       ...fields,
       query: defaultQuery,
     });
   }
-  return adjustSearchConfigurationFilter({
+  return adjustSearchConfiguration({
     ...fields,
     query: fields.query,
   });
@@ -42,7 +42,7 @@ export const getSearchConfiguration = (
 
 const omitManaged = <T extends { managed?: unknown }>({ managed, ...rest }: T) => rest;
 
-const adjustSearchConfigurationFilter = (
+const adjustSearchConfiguration = (
   searchConfiguration: CustomThresholdSearchSourceFields
 ): CustomThresholdSearchSourceFields => {
   // Only meta and query fields are saved in the rule params, so we ignore other fields such as $state

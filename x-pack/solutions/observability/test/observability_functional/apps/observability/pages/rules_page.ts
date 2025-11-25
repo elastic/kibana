@@ -433,5 +433,96 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await testSubjects.missingOrFail('rule-row');
       });
     });
+
+    describe('Custom threshold rule with combined data view', () => {
+      const LOGS_DATA_VIEW_TITLE = 'logs-*';
+      const LOGS_DATA_VIEW_ID = 'logs-data-view-id';
+      const LOGS_DATA_VIEW_NAME = 'Logs';
+      const METRICS_DATA_VIEW_TITLE = 'metrics-*';
+      const METRICS_DATA_VIEW_ID = 'metrics-data-view-id';
+      const METRICS_DATA_VIEW_NAME = 'Metrics';
+      const COMBINED_DATA_VIEW_PATTERN = 'logs-*,metrics-*';
+      const CUSTOM_THRESHOLD_RULE_NAME = 'Custom threshold rule with combined data view';
+
+      before(async () => {
+        const logger = getService('log');
+        // Create two separate data views
+        await observability.alerts.common.createDataView({
+          supertest,
+          id: LOGS_DATA_VIEW_ID,
+          name: LOGS_DATA_VIEW_NAME,
+          title: LOGS_DATA_VIEW_TITLE,
+          logger,
+        });
+        await observability.alerts.common.createDataView({
+          supertest,
+          id: METRICS_DATA_VIEW_ID,
+          name: METRICS_DATA_VIEW_NAME,
+          title: METRICS_DATA_VIEW_TITLE,
+          logger,
+        });
+      });
+
+      after(async () => {
+        const rule = await getRuleByName(CUSTOM_THRESHOLD_RULE_NAME);
+        if (rule) {
+          await deleteRuleById(rule.id);
+        }
+        const logger = getService('log');
+        await observability.alerts.common.deleteDataView({
+          supertest,
+          id: LOGS_DATA_VIEW_ID,
+          logger,
+        });
+        await observability.alerts.common.deleteDataView({
+          supertest,
+          id: METRICS_DATA_VIEW_ID,
+          logger,
+        });
+      });
+
+      it('should create a custom threshold rule with a combined data view', async () => {
+        await navigateAndOpenRuleTypeModal();
+
+        // Select custom threshold rule type
+        await observability.alerts.rulesPage.clickOnObservabilityCategory();
+        await observability.alerts.rulesPage.clickOnCustomThresholdRule();
+
+        await retry.waitFor(
+          'Rule form is visible',
+          async () => await testSubjects.exists('ruleForm')
+        );
+
+        // Set rule name
+        await testSubjects.setValue('ruleDetailsNameInput', CUSTOM_THRESHOLD_RULE_NAME);
+
+        // Select the combined data view by typing the combined pattern
+        await testSubjects.click('selectDataViewExpression');
+        await testSubjects.setValue('indexPattern-switcher--input', COMBINED_DATA_VIEW_PATTERN);
+
+        // Click the "Explore matching indices" button to create an ad-hoc data view
+        await testSubjects.existOrFail('explore-matching-indices-button');
+        await testSubjects.click('explore-matching-indices-button');
+
+        await retry.waitFor('data view selection to happen', async () => {
+          const dataViewSelector = await testSubjects.find('selectDataViewExpression');
+          return (await dataViewSelector.getVisibleText()).includes(COMBINED_DATA_VIEW_PATTERN);
+        });
+
+        // Save the rule
+        await testSubjects.click('rulePageFooterSaveButton');
+        await testSubjects.click('confirmModalConfirmButton');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify the rule was created correctly
+        const rule = await getRuleByName(CUSTOM_THRESHOLD_RULE_NAME);
+        expect(rule).not.to.be(undefined);
+        // The ad-hoc data view should have the combined pattern as its title
+        const searchConfigIndex = rule.params.searchConfiguration.index;
+        // Verify the data view is an ad-hoc data view with the combined pattern
+        expect(searchConfigIndex.title).to.eql(COMBINED_DATA_VIEW_PATTERN);
+      });
+    });
   });
 };
