@@ -35,13 +35,13 @@ export const useSyncTimerangeUrlParam = () => {
   }, [inputState.socTrends, isSocTrendsEnabled]);
 
   const valueReportUrlParams = useMemo(() => {
-      const { linkTo: valueReportLinkTo, timerange: valueReportTimerange } = inputState.valueReport;
-      return {
-        valueReport: {
-          [URL_PARAM_KEY.timerange]: valueReportTimerange,
-          linkTo: valueReportLinkTo,
-        },
-      };
+    const { linkTo: valueReportLinkTo, timerange: valueReportTimerange } = inputState.valueReport;
+    return {
+      valueReport: {
+        [URL_PARAM_KEY.timerange]: valueReportTimerange,
+        linkTo: valueReportLinkTo,
+      },
+    };
   }, [inputState.valueReport]);
 
   useEffect(() => {
