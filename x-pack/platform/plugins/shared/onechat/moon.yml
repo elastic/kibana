@@ -98,6 +98,7 @@ dependsOn:
   - '@kbn/usage-collection-plugin'
   - '@kbn/core-notifications-browser'
   - '@kbn/deeplinks-agent-builder'
+  - '@kbn/llm-tasks-plugin'
 tags:
   - plugin
   - prod
