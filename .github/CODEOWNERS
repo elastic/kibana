@@ -1940,7 +1940,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/functional/services/embedding.ts @elastic/appex-qa
 /src/platform/test/functional/services/data_grid.ts @elastic/kibana-data-discovery
 /src/platform/test/functional/services/combo_box.ts @elastic/appex-qa
-/src/platform/test/functional/services/synthtrace/sythtrace.ts  @elastic/appex-qa
+/src/platform/test/functional/services/synthtrace/sythtrace.ts @elastic/appex-qa
 /src/platform/test/functional/page_objects/time_picker.ts @elastic/appex-qa
 /src/platform/test/functional/page_objects/index.ts @elastic/appex-qa
 /src/platform/test/functional/page_objects/header_page.ts @elastic/appex-qa
