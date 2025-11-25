@@ -17,6 +17,7 @@ import { onboardingHubTelemetryEvents } from './onboarding';
 import { previewRuleTelemetryEvents } from './preview_rule';
 import { siemMigrationsTelemetryEvents } from './siem_migrations';
 import { ruleUpgradeTelemetryEvents } from './rule_upgrade';
+import { aiValueReportTelemetryEvents } from './ai_value_report';
 
 export const telemetryEvents = [
   ...alertsTelemetryEvents,
@@ -32,4 +33,5 @@ export const telemetryEvents = [
   ...notesTelemetryEvents,
   ...appTelemetryEvents,
   ...siemMigrationsTelemetryEvents,
+  ...aiValueReportTelemetryEvents,
 ];
