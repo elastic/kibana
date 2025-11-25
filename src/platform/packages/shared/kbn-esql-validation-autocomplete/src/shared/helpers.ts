@@ -100,6 +100,52 @@ async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
     return results?.fields;
   }
 }
+
+function createGetJoinFields(fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>) {
+  return (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
+    const joinSummary = mutate.commands.join.summarize({
+      type: 'query',
+      commands: [command],
+    } as ESQLAstQueryExpression);
+    const joinIndices = joinSummary.map(({ target: { index } }) => index);
+    if (joinIndices.length > 0) {
+      const joinFieldQuery = synth.cmd`FROM ${joinIndices}`.toString();
+      return fetchFields(joinFieldQuery);
+    }
+    return Promise.resolve([]);
+  };
+}
+
+function createGetEnrichFields(
+  fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  getPolicies: () => Promise<Map<string, ESQLPolicy>>
+) {
+  return async (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
+    if (!isSource(command.args[0])) {
+      return [];
+    }
+
+    const policyName = command.args[0].name;
+
+    const policies = await getPolicies();
+    const policy = policies.get(policyName);
+
+    if (policy) {
+      const fieldsQuery = `FROM ${policy.sourceIndices.join(
+        ', '
+      )} | KEEP ${policy.enrichFields.join(', ')}`;
+      return fetchFields(fieldsQuery);
+    }
+
+    return [];
+  };
+}
+
+function createGetFromFields(fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>) {
+  return (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
+    return fetchFields(BasicPrettyPrinter.command(command));
+  };
+}
 // Get the fields from the FROM clause, enrich them with ECS metadata
 export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCallbacks) {
   const metadata = await getEcsMetadata();
@@ -123,43 +169,13 @@ export async function getCurrentQueryAvailableColumns(
 ) {
   const lastCommand = commands[commands.length - 1];
   const commandDef = esqlCommandRegistry.getCommandByName(lastCommand.name);
+  if (!commandDef?.methods.columnsAfter) {
+    return previousPipeFields;
+  }
 
-  const getJoinFields = (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
-    const joinSummary = mutate.commands.join.summarize({
-      type: 'query',
-      commands: [command],
-    } as ESQLAstQueryExpression);
-    const joinIndices = joinSummary.map(({ target: { index } }) => index);
-    if (joinIndices.length > 0) {
-      const joinFieldQuery = synth.cmd`FROM ${joinIndices}`.toString();
-      return fetchFields(joinFieldQuery);
-    }
-    return Promise.resolve([]);
-  };
-
-  const getEnrichFields = async (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
-    if (!isSource(command.args[0])) {
-      return [];
-    }
-
-    const policyName = command.args[0].name;
-
-    const policies = await getPolicies();
-    const policy = policies.get(policyName);
-
-    if (policy) {
-      const fieldsQuery = `FROM ${policy.sourceIndices.join(
-        ', '
-      )} | KEEP ${policy.enrichFields.join(', ')}`;
-      return fetchFields(fieldsQuery);
-    }
-
-    return [];
-  };
-
-  const getFromFields = (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
-    return fetchFields(BasicPrettyPrinter.command(command));
-  };
+  const getJoinFields = createGetJoinFields(fetchFields);
+  const getEnrichFields = createGetEnrichFields(fetchFields, getPolicies);
+  const getFromFields = createGetFromFields(fetchFields);
 
   const additionalFields: IAdditionalFields = {
     fromJoin: getJoinFields,
