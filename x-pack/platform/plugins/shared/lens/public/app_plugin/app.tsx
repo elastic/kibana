@@ -124,6 +124,7 @@ export function App({
     visualization,
     annotationGroups,
   } = useLensSelector((state) => state.lens);
+  console.log(persistedDoc, 'persistedDoc in App component');
 
   const activeVisualization = visualization.activeId
     ? visualizationMap[visualization.activeId]
@@ -141,6 +142,7 @@ export function App({
   const currentDoc = useLensSelector((state) =>
     selectSavedObjectFormat(state, selectorDependencies)
   );
+  console.log(currentDoc, 'currentDoc in App component');
 
   // Used to show a popover that guides the user towards changing the date range when no data is available.
   const [indicateNoData, setIndicateNoData] = useState(false);

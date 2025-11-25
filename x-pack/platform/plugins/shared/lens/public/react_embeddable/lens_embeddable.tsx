@@ -64,7 +64,10 @@ export const createLensEmbeddableFactory = (
       );
 
       const initialRuntimeState = await deserializeState(services, initialState.rawState);
-
+      console.log(
+        initialRuntimeState?.attributes?.state?.filters[0].meta.index,
+        'initialRuntimeState"'
+      ); // this is changing before and after navigating back from lens editor to dashboard
       /**
        * Observables and functions declared here are used internally to store mutating state values
        * This is an internal API not exposed outside of the embeddable.

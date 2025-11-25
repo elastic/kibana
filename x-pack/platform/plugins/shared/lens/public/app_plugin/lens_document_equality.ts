@@ -88,6 +88,9 @@ export const isLensEqual = (
     return false;
   }
 
+  console.log(doc1.state.filters[0].meta.index, 'doc1'); // the docs have different state.filters[0].meta.index - values
+  console.log(doc2.state.filters[0].meta.index, 'doc2');
+
   const [filtersInjected1, filtersInjected2] = [doc1, doc2].map((doc) =>
     removePinnedFilters(injectDocFilterReferences(injectFilterReferences, doc))
   );

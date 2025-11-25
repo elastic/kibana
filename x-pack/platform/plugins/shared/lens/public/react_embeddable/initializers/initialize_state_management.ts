@@ -62,7 +62,7 @@ export function initializeStateManagement(
     anyStateChange$: merge(internalApi.attributes$).pipe(map(() => undefined)),
     getComparators: () => {
       return {
-        attributes: initialState.savedObjectId === undefined ? 'deepEquality' : 'skip',
+        attributes: initialState.savedObjectId === undefined ? 'deepEquality' : 'skip', // here
         savedObjectId: 'skip',
       };
     },
