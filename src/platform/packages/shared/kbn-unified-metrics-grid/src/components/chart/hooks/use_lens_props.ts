@@ -41,14 +41,13 @@ export type LensProps = Pick<
   | 'noPadding'
   | 'searchSessionId'
   | 'executionContext'
-  | 'onLoad'
+  | 'lastReloadRequestTime'
 >;
 
 export const useLensProps = ({
   title,
   query,
   services,
-  getTimeRange,
   searchSessionId,
   discoverFetch$,
   chartRef,
@@ -58,13 +57,14 @@ export const useLensProps = ({
   title: string;
   query: string;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
-  getTimeRange: () => TimeRange;
   chartRef?: React.RefObject<HTMLDivElement>;
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
 } & Pick<ChartSectionProps, 'services' | 'searchSessionId'>) => {
   const { euiTheme } = useEuiTheme();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
+
+  const { dataViews, data } = services;
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
@@ -73,7 +73,7 @@ export const useLensProps = ({
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
     const lensParams = buildLensParams({ query, title, chartLayers, yBounds });
-    const builder = new LensConfigBuilder(services.dataViews);
+    const builder = new LensConfigBuilder(dataViews);
 
     const result = (await builder.build(lensParams, {
       query: {
@@ -87,11 +87,12 @@ export const useLensProps = ({
     (attributes: LensAttributes) => {
       return getLensProps({
         searchSessionId,
-        getTimeRange,
+        getTimeRange: data.query.timefilter.timefilter.getTime,
         attributes,
+        lastReloadRequestTime: Date.now(),
       });
     },
-    [searchSessionId, getTimeRange]
+    [searchSessionId, data.query.timefilter.timefilter.getTime]
   );
 
   const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
@@ -185,12 +186,14 @@ const getLensProps = ({
   searchSessionId,
   getTimeRange,
   attributes,
+  lastReloadRequestTime,
 }: {
   searchSessionId?: string;
   attributes: LensAttributes;
   getTimeRange: () => TimeRange;
+  lastReloadRequestTime?: number;
 }): LensProps => ({
-  id: 'metricsExperienceLensComponent',
+  id: `metricsExperienceLensComponent-${attributes.title}`,
   viewMode: 'view',
   timeRange: getTimeRange(),
   attributes,
@@ -199,4 +202,5 @@ const getLensProps = ({
   executionContext: {
     description: 'metrics experience chart data',
   },
+  lastReloadRequestTime,
 });

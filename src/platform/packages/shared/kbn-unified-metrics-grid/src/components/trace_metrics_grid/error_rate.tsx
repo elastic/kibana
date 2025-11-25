@@ -52,7 +52,6 @@ export const ErrorRateChart = () => {
       esqlQuery={esqlQuery}
       size="s"
       discoverFetch$={discoverFetch$}
-      requestParams={requestParams}
       services={services}
       abortController={abortController}
       searchSessionId={searchSessionId}

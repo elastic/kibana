@@ -17,7 +17,6 @@ import { getThroughputChart } from './trace_charts_definition';
 export const ThroughputChart = () => {
   const {
     filters,
-    requestParams,
     services,
     abortController,
     discoverFetch$,
@@ -55,7 +54,6 @@ export const ThroughputChart = () => {
       esqlQuery={esqlQuery}
       size="s"
       discoverFetch$={discoverFetch$}
-      requestParams={requestParams}
       services={services}
       abortController={abortController}
       searchSessionId={searchSessionId}

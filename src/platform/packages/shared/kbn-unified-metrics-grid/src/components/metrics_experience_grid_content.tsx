@@ -11,9 +11,7 @@ import React, { useMemo, useCallback } from 'react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import { useFetch } from '@kbn/unified-histogram';
-import { Subject, shareReplay } from 'rxjs';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import {
   EuiBetaBadge,
   EuiFlexGroup,
@@ -53,7 +51,7 @@ export const MetricsExperienceGridContent = ({
   fields: allFields,
   timeRange,
   services,
-  input$: originalInput$,
+  input$,
   requestParams,
   onBrushEnd,
   onFilter,
@@ -65,25 +63,6 @@ export const MetricsExperienceGridContent = ({
 }: MetricsExperienceGridContentProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
-
-  const { updateTimeRange } = requestParams;
-
-  const input$ = useMemo(
-    () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
-    [originalInput$]
-  );
-
-  const baseFetch$ = useFetch({
-    input$,
-    beforeFetch: updateTimeRange,
-  });
-
-  const discoverFetch$ = useMemo(
-    // Buffer and replay emissions to child components that subscribe in later useEffects
-    // without this, child components would miss emissions that occurred before they subscribed
-    () => baseFetch$.pipe(shareReplay({ bufferSize: 1, refCount: false })),
-    [baseFetch$]
-  );
 
   const { searchTerm, currentPage, dimensions, valueFilters, onPageChange } =
     useMetricsExperienceState();
@@ -197,7 +176,7 @@ export const MetricsExperienceGridContent = ({
           searchSessionId={searchSessionId}
           onBrushEnd={onBrushEnd}
           onFilter={onFilter}
-          discoverFetch$={discoverFetch$}
+          discoverFetch$={input$}
           requestParams={requestParams}
           abortController={abortController}
           searchTerm={searchTerm}

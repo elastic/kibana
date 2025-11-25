@@ -18,6 +18,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
 import type { UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { TimeRange } from '@kbn/data-plugin/common';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 jest.mock('./use_chart_layers');
 jest.mock('@kbn/lens-embeddable-utils/config_builder');
@@ -26,6 +27,7 @@ const LensConfigBuilderMock = LensConfigBuilder as jest.MockedClass<typeof LensC
 const useChartLayersMock = useChartLayers as jest.MockedFunction<typeof useChartLayers>;
 const servicesMock: Partial<UnifiedHistogramServices> = {
   dataViews: dataViewPluginMocks.createStartContract(),
+  data: dataPluginMock.createStartContract(),
 };
 
 describe('useLensProps', () => {
@@ -102,7 +104,6 @@ describe('useLensProps', () => {
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
-        getTimeRange,
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
@@ -134,7 +135,6 @@ describe('useLensProps', () => {
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
-        getTimeRange,
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
@@ -181,7 +181,6 @@ describe('useLensProps', () => {
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
-        getTimeRange,
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
@@ -211,7 +210,6 @@ describe('useLensProps', () => {
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
-        getTimeRange,
         discoverFetch$,
         chartRef: undefined,
         chartLayers: mockChartLayers,

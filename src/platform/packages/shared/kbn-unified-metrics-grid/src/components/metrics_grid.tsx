@@ -230,7 +230,6 @@ const ChartItem = React.memo(
         onBrushEnd,
         onFilter,
         abortController,
-        requestParams,
         discoverFetch$,
         rowIndex,
         colIndex,
@@ -279,7 +278,6 @@ const ChartItem = React.memo(
             esqlQuery={esqlQuery}
             size={size}
             discoverFetch$={discoverFetch$}
-            requestParams={requestParams}
             services={services}
             abortController={abortController}
             searchSessionId={searchSessionId}
