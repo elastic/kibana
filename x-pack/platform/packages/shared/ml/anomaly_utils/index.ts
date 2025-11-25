@@ -55,8 +55,6 @@ export {
   DISALLOWED_FILTER_FIELDS,
 } from './alerting/filter_field_constants';
 
-export { validateCustomFilterFields } from './alerting/custom_filter_validation';
-
 export {
   isMlKibanaUrlConfigWithTimeRange,
   type MlCustomUrlAnomalyRecordDoc,
