@@ -9,26 +9,27 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics/monitoring';
 import type { PrivilegeMonitoringDataClient } from '../../../engine/data_client';
 import { createSourcesSyncService } from '../sources_sync';
+import { createIndexUpdateDetectionService } from './update_detection/update_detection';
 
 export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
 
 export const createIndexSyncService = (
   dataClient: PrivilegeMonitoringDataClient,
-  maxUsersAllowed: number
+  maxUsersAllowed: number,
+  soClient: SavedObjectsClientContract
 ) => {
-  // TODO: implement update detection service for index sources
-  const udateDetectionService = createIndexUpdateDetectionService(dataClient, soClient);
+  const updateDetectionService = createIndexUpdateDetectionService(dataClient, soClient);
   const sourcesSyncService = createSourcesSyncService(dataClient);
   /**
    * Pattern matcher service to find privileged users based on matchers defined in saved objects
    */
-  const indexSync = async (soClient: SavedObjectsClientContract) => {
+  const indexSync = async () => {
     await sourcesSyncService.syncBySourceType({
       soClient,
       sourceType: 'index',
       process: async (source: MonitoringEntitySource) => {
         // process each index source
-        await udateDetectionService.updateDetection(source); // TODO
+        await updateDetectionService.updateDetection(source); // TODO
       },
     });
   };

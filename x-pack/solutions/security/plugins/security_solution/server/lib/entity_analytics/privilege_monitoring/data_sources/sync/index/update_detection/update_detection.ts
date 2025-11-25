@@ -29,6 +29,11 @@ export const createIndexUpdateDetectionService = (
     const users: PrivMonBulkUser[] = await patternMatcherService.findPrivilegedUsersFromMatchers(
       source
     );
+    dataClient.log(
+      'info',
+      `Index Update Detection: Found ${users.length} privileged users from index source ${source.id}`
+    );
+    return users;
   };
   return {
     updateDetection,

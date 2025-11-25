@@ -64,6 +64,13 @@ export const createIndexSyncService = (
       'info',
       `Privilege monitoring sync started - Maximum supported number of privileged users allowed: ${maxUsersAllowed}`
     );
+    // TODO: Update this log in line with https://github.com/elastic/kibana/pull/233335#discussion_r2330097328
+    // Tracked Issue: https://github.com/elastic/security-team/issues/14860
+    /**
+     * Should be:
+     * "The maximum supported number of privileged users has been exceeded
+     * (current count <current_count> of a max <maxUsersAllowed>). Please remove privileged users to prevent performance degradation"
+     */
 
     const allStaleUsers: PrivMonBulkUser[] = [];
 
@@ -136,6 +143,7 @@ export const createIndexSyncService = (
    *
    * @param indexName - Name of the Elasticsearch index to pull usernames from.
    * @param kuery - Optional KQL filter to narrow down results.
+   * @paramn sourceId - The ID of the monitoring entity source.
    * @returns A list of all usernames processed from the source index.
    */
   const syncUsernamesFromIndex = async ({

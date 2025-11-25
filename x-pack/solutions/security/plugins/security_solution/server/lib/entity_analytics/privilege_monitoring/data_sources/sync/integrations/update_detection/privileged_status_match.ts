@@ -7,7 +7,6 @@
 
 import { uniq } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import moment from 'moment';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { buildPrivilegedSearchBody } from './queries';
@@ -16,68 +15,15 @@ import { createSearchService } from '../../../../users/search';
 import { generateMonitoringLabels } from '../../generate_monitoring_labels';
 import { createSyncMarkersService } from '../sync_markers/sync_markers';
 import { createSyncMarkersStrategy } from '../../sync_markers_strategy';
-export type AfterKey = Record<string, string> | undefined;
-
-export interface PrivTopHitSource {
-  '@timestamp'?: string;
-  user?: {
-    id?: string;
-    name?: string;
-    email?: string;
-    roles?: string[];
-    is_privileged?: boolean;
-  };
-}
-
-interface PrivTopHitFields {
-  'user.is_privileged'?: boolean[];
-}
-
-export interface PrivTopHit {
-  _index?: string;
-  _id?: string;
-  _source?: PrivTopHitSource;
-  fields?: PrivTopHitFields;
-}
-
-export interface PrivBucket {
-  key: { username: string };
-  doc_count: number;
-  latest_doc_for_user: {
-    hits: { hits: PrivTopHit[] };
-  };
-}
-
-export interface PrivMatchersAggregation {
-  privileged_user_status_since_last_run?: {
-    after_key?: AfterKey;
-    buckets: PrivBucket[];
-  };
-}
-
-interface PrivMatcherModeConfig {
-  useSyncMarkers: boolean;
-  emptyMatcherPolicy: 'none' | 'all';
-}
-
-const PRIV_MATCHER_MODE_CONFIG: Record<MonitoringEntitySyncType, PrivMatcherModeConfig> = {
-  /**
-   * - Uses lastProcessedTimestamp
-   * - If no matchers → return 0 privileged users
-   */
-  entity_analytics_integration: {
-    useSyncMarkers: true,
-    emptyMatcherPolicy: 'none',
-  },
-  /**
-   * - Ignores timestamps (full scan style)
-   * - If no matchers → treat all as privileged
-   */
-  index: {
-    useSyncMarkers: false,
-    emptyMatcherPolicy: 'all',
-  },
-};
+import { isTimestampGreaterThan } from '../../utils';
+import type {
+  AfterKey,
+  PrivBucket,
+  PrivMatcherModeConfig,
+  PrivMatchersAggregation,
+  PrivTopHit,
+} from './types';
+import { PRIV_MATCHER_MODE_CONFIG } from './types';
 
 export const createPatternMatcherService = ({
   dataClient,
@@ -101,7 +47,11 @@ export const createPatternMatcherService = ({
     source: MonitoringEntitySource
   ): Promise<PrivMonBulkUser[]> => {
     if (!source.matchers?.length) {
-      defaultMatchersPolicy(modeConfig.emptyMatcherPolicy, source); // TODO: too many params
+      const defaultMatchersUsers: PrivMonBulkUser[] = await defaultMatchersPolicy(
+        modeConfig.emptyMatcherPolicy,
+        source
+      );
+      return defaultMatchersUsers;
     }
 
     const esClient = dataClient.deps.clusterClient.asCurrentUser;
@@ -208,7 +158,7 @@ export const createPatternMatcherService = ({
     // TODO: this assumes type is the index or integrations type
     emptyMatcherPolicy: PrivMatcherModeConfig['emptyMatcherPolicy'],
     source: MonitoringEntitySource
-  ) => {
+  ): Promise<PrivMonBulkUser[]> => {
     if (emptyMatcherPolicy === 'none') {
       dataClient.log(
         'info',
@@ -228,6 +178,7 @@ export const createPatternMatcherService = ({
       // You’ll plug in whatever “fetch all users” logic makes sense here:
       return []; //  fetchAllUsersAsPrivileged(esClient, source); // TODO: implement this function
     }
+    return [];
   };
 
   return { findPrivilegedUsersFromMatchers };

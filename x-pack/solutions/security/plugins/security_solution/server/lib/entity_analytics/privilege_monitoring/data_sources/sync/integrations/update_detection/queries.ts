@@ -71,17 +71,20 @@ const extractMatcherFields = (matchers: Matcher[]): string[] => {
  */
 export const buildPrivilegedSearchBody = (
   matchers: Matcher[],
-  timeGte: string,
+  timeGte?: string,
   afterKey?: AfterKey,
   pageSize: number = 100
 ): Omit<estypes.SearchRequest, 'index'> => {
   // this will get called multiple times with the same matchers during pagination
   const script = memoize(buildMatcherScript, (v) => hash(v))(matchers);
+  const query = timeGte
+    ? {
+        range: { '@timestamp': { gte: timeGte, lte: 'now' } },
+      }
+    : { match_all: {} };
   return {
     size: 0,
-    query: {
-      range: { '@timestamp': { gte: timeGte, lte: 'now' } },
-    },
+    query,
     aggs: {
       privileged_user_status_since_last_run: {
         composite: {
