@@ -8,6 +8,7 @@ import type { ActorRefFrom, SnapshotFrom } from 'xstate5';
 import { assign, forwardTo, sendTo, setup } from 'xstate5';
 import type {
   StreamlangProcessorDefinition,
+  StreamlangStepWithUIAttributes,
   StreamlangWhereBlockWithUIAttributes,
 } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
@@ -31,12 +32,20 @@ export const stepMachine = setup({
           resources?: ProcessorResources;
         }
       ) => {
+        const nextStep: StreamlangStepWithUIAttributes = {
+          ...params.step,
+          customIdentifier: context.step.customIdentifier,
+          parentId: context.step.parentId,
+        };
+
+        if (isActionBlock(context.step) && isActionBlock(nextStep)) {
+          if (context.step.description && !nextStep.description) {
+            nextStep.description = context.step.description;
+          }
+        }
+
         return {
-          step: {
-            ...params.step,
-            customIdentifier: context.step.customIdentifier,
-            parentId: context.step.parentId,
-          },
+          step: nextStep,
           resources: params.resources,
         };
       }
@@ -69,7 +78,7 @@ export const stepMachine = setup({
 
       return {
         step: updatedStep,
-        previousStep: context.step,
+        previousStep: updatedStep,
         isUpdated: true,
       };
     }),
