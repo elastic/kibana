@@ -12,9 +12,9 @@ import {
   replaceAnonymizedValuesWithOriginalValues,
   type Replacements,
 } from '@kbn/elastic-assistant-common';
-import { AttachmentType } from '@kbn/onechat-common/attachments';
 import React, { useMemo } from 'react';
 
+import { SecurityAgentBuilderAttachments } from '../../../../../../common/constants';
 import { ATTACK_DISCOVERY_ATTACHMENT_PROMPT } from '../../../../../agent_builder/components/prompts';
 import { SECURITY_FEATURE_ID } from '../../../../../../common';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -86,7 +86,7 @@ const ActionableSummaryComponent: React.FC<Props> = ({
   );
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: AttachmentType.attack_discovery,
+    attachmentType: SecurityAgentBuilderAttachments.attack_discovery,
     attachmentData: { attackDiscovery: attackDiscoveryWithOriginalValues },
     attachmentPrompt: ATTACK_DISCOVERY_ATTACHMENT_PROMPT,
   });

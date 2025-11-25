@@ -152,9 +152,6 @@ import {
   createRiskEntityAttachmentType,
 } from './agent_builder/attachments';
 import {
-  alertsTool,
-  alertsIndexSearchTool,
-  evaluateAlertTool,
   entityRiskScoreTool,
   attackDiscoverySearchTool,
   securityLabsSearchTool,
@@ -236,6 +233,63 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.logger.debug('plugin initialized');
 
     this.healthDiagnosticService = new HealthDiagnosticServiceImpl(this.logger);
+  }
+
+  private registerOnechatAttachmentsAndTools(
+    onechat: SecuritySolutionPluginSetupDependencies['onechat'],
+    config: ConfigType
+  ): void {
+    if (!onechat || !config.experimentalFeatures.agentBuilderEnabled) {
+      return;
+    }
+
+    // Register alert attachment type
+    try {
+      onechat.attachments.registerType(createAlertAttachmentType());
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already registered')) {
+        this.logger.debug(
+          'Alert attachment type already registered by onechat plugin, using built-in version'
+        );
+      } else {
+        this.logger.warn(`Failed to register alert attachment type: ${error}`);
+      }
+    }
+
+    // Register attack discovery attachment type
+    try {
+      onechat.attachments.registerType(createAttackDiscoveryAttachmentType());
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already registered')) {
+        this.logger.debug(
+          'Attack discovery attachment type already registered by onechat plugin, using built-in version'
+        );
+      } else {
+        this.logger.warn(`Failed to register attack discovery attachment type: ${error}`);
+      }
+    }
+
+    // Register risk entity attachment type
+    try {
+      onechat.attachments.registerType(createRiskEntityAttachmentType());
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('already registered')) {
+        this.logger.debug(
+          'Risk entity attachment type already registered by onechat plugin, using built-in version'
+        );
+      } else {
+        this.logger.warn(`Failed to register risk entity attachment type: ${error}`);
+      }
+    }
+
+    // Register tools
+    try {
+      onechat.tools.register(entityRiskScoreTool());
+      onechat.tools.register(attackDiscoverySearchTool());
+      onechat.tools.register(securityLabsSearchTool());
+    } catch (error) {
+      this.logger.warn(`Failed to register onechat tools: ${error}`);
+    }
   }
 
   public setup(
@@ -620,63 +674,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     // Note: This requires onechat to be added as an optional plugin dependency
     // Note: The alert attachment type may already be registered by onechat's built-in types.
     // If so, we'll skip registration and use the built-in version.
-    if (plugins.onechat && config.experimentalFeatures.agentBuilderEnabled) {
-      try {
-        // Register attachment type
-        plugins.onechat.attachments.registerType(createAlertAttachmentType());
-      } catch (error) {
-        // Alert attachment type may already be registered by onechat's built-in types
-        if (error instanceof Error && error.message.includes('already registered')) {
-          this.logger.debug(
-            'Alert attachment type already registered by onechat plugin, using built-in version'
-          );
-        } else {
-          this.logger.warn(`Failed to register alert attachment type: ${error}`);
-          // Don't throw - allow plugin to continue loading even if attachment registration fails
-        }
-      }
-
-      try {
-        // Register attack discovery attachment type
-        plugins.onechat.attachments.registerType(createAttackDiscoveryAttachmentType());
-      } catch (error) {
-        if (error instanceof Error && error.message.includes('already registered')) {
-          this.logger.debug(
-            'Attack discovery attachment type already registered by onechat plugin, using built-in version'
-          );
-        } else {
-          this.logger.warn(`Failed to register attack discovery attachment type: ${error}`);
-          // Don't throw - allow plugin to continue loading even if attachment registration fails
-        }
-      }
-
-      try {
-        // Register risk entity attachment type
-        plugins.onechat.attachments.registerType(createRiskEntityAttachmentType());
-      } catch (error) {
-        if (error instanceof Error && error.message.includes('already registered')) {
-          this.logger.debug(
-            'Risk entity attachment type already registered by onechat plugin, using built-in version'
-          );
-        } else {
-          this.logger.warn(`Failed to register risk entity attachment type: ${error}`);
-          // Don't throw - allow plugin to continue loading even if attachment registration fails
-        }
-      }
-
-      // Register tools
-      try {
-        // plugins.onechat.tools.register(alertsTool());
-        // plugins.onechat.tools.register(alertsIndexSearchTool());
-        // plugins.onechat.tools.register(evaluateAlertTool());
-        plugins.onechat.tools.register(entityRiskScoreTool());
-        plugins.onechat.tools.register(attackDiscoverySearchTool());
-        plugins.onechat.tools.register(securityLabsSearchTool());
-      } catch (error) {
-        this.logger.warn(`Failed to register onechat tools: ${error}`);
-        // Don't throw - allow plugin to continue loading even if tool registration fails
-      }
-    }
+    this.registerOnechatAttachmentsAndTools(plugins.onechat, config);
 
     return {
       setProductFeaturesConfigurator:

@@ -16,18 +16,12 @@ export enum AttachmentType {
   screenContext = 'screen_context',
   text = 'text',
   esql = 'esql',
-  alert = 'alert',
-  attack_discovery = 'attack_discovery',
-  risk_entity = 'risk_entity',
 }
 
 interface AttachmentDataMap {
   [AttachmentType.esql]: EsqlAttachmentData;
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
-  [AttachmentType.alert]: AlertAttachmentData;
-  [AttachmentType.attack_discovery]: AttackDiscoveryAttachmentData;
-  [AttachmentType.risk_entity]: RiskEntityAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -81,45 +75,6 @@ export interface ScreenContextAttachmentData {
   description?: string;
   /** arbitrary additional context data */
   additional_data?: Record<string, string>;
-}
-
-export const alertAttachmentDataSchema = z.object({
-  alert: z.string(),
-});
-
-/**
- * Data for an alert attachment.
- */
-export interface AlertAttachmentData {
-  /** The condensed alert data in key-value format (comma-separated, newline-delimited) */
-  alert: string;
-}
-
-export const attackDiscoveryAttachmentDataSchema = z.object({
-  attackDiscovery: z.string(),
-});
-
-/**
- * Data for an attack discovery attachment.
- */
-export interface AttackDiscoveryAttachmentData {
-  /** The formatted attack discovery data including title, summary, details, and attack chain */
-  attackDiscovery: string;
-}
-
-export const riskEntityAttachmentDataSchema = z.object({
-  identifierType: z.enum(['host', 'user', 'service', 'generic']),
-  identifier: z.string().min(1),
-});
-
-/**
- * Data for a risk entity attachment.
- */
-export interface RiskEntityAttachmentData {
-  /** The type of entity: host, user, service, or generic */
-  identifierType: 'host' | 'user' | 'service' | 'generic';
-  /** The value that identifies the entity (e.g., hostname, username) */
-  identifier: string;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

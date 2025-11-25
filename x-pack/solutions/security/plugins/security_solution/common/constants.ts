@@ -703,3 +703,9 @@ export const ESSENTIAL_ALERT_FIELDS = [
   'threat.technique.subtechnique.name',
   'threat.technique.subtechnique.reference',
 ] as const;
+
+export enum SecurityAgentBuilderAttachments {
+  attack_discovery = 'attack_discovery',
+  alert = 'alert',
+  risk_entity = 'alert',
+}

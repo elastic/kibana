@@ -10,7 +10,6 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NewChatByTitle } from '@kbn/elastic-assistant';
-import { AttachmentType } from '@kbn/onechat-common/attachments';
 import { ALERT_ATTACHMENT_PROMPT } from '../../../agent_builder/components/prompts';
 import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
 import { useDocumentDetailsContext } from '../shared/context';
@@ -21,6 +20,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { NewAgentBuilderAttachment } from '../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../agent_builder/hooks/use_agent_builder_attachment';
 import { getRawData, filterAndStringifyAlertData } from '../../../assistant/helpers';
+import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 
 export const ASK_AI_ASSISTANT = i18n.translate(
   'xpack.securitySolution.ease.flyout.right.footer.askAIAssistant',
@@ -54,7 +54,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
   }, [dataFormattedForFieldBrowser]);
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: AttachmentType.alert,
+    attachmentType: SecurityAgentBuilderAttachments.alert,
     attachmentData: { alert: alertData },
     attachmentPrompt: ALERT_ATTACHMENT_PROMPT,
   });

@@ -24,12 +24,12 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
-import { AttachmentType } from '@kbn/onechat-common/attachments';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 import { useAskAiAssistant } from '../tabs/risk_inputs/use_ask_ai_assistant';
 import { getAnonymizedEntityIdentifier } from '../utils/helpers';
+import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 
 interface EntityHighlightsSettingsProps {
   onRegenerate: () => void;
@@ -100,7 +100,7 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
   const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: AttachmentType.risk_entity,
+    attachmentType: SecurityAgentBuilderAttachments.risk_entity,
     attachmentData: { identifierType: entityType, identifier: entityIdentifier },
     attachmentPrompt: `Investigate the entity and suggest next steps.`,
   });

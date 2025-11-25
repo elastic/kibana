@@ -4,22 +4,38 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { RiskEntityAttachmentData } from '@kbn/onechat-common/attachments';
-import { AttachmentType, riskEntityAttachmentDataSchema } from '@kbn/onechat-common/attachments';
+import { z } from '@kbn/zod';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
+import type { Attachment } from '@kbn/onechat-common/attachments';
+import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
+const riskEntityAttachmentDataSchema = z.object({
+  identifierType: z.enum(['host', 'user', 'service', 'generic']),
+  identifier: z.string().min(1),
+});
+
+/**
+ * Data for a risk entity attachment.
+ * Note: After validation, the data is stored as a formatted string.
+ */
+type RiskEntityAttachmentData = z.infer<typeof riskEntityAttachmentDataSchema>;
+
+/**
+ * Type guard to check if data is a formatted risk entity string
+ */
+const isRiskEntityFormattedData = (data: unknown): data is string => {
+  return (
+    typeof data === 'string' && data.includes('identifier:') && data.includes('identifierType:')
+  );
+};
 
 /**
  * Creates the definition for the `risk_entity` attachment type.
  */
-export const createRiskEntityAttachmentType = (): AttachmentTypeDefinition<
-  AttachmentType.risk_entity,
-  RiskEntityAttachmentData
-> => {
+export const createRiskEntityAttachmentType = (): AttachmentTypeDefinition => {
   return {
-    id: AttachmentType.risk_entity,
+    id: SecurityAgentBuilderAttachments.alert,
     validate: (input) => {
       const parseResult = riskEntityAttachmentDataSchema.safeParse(input);
       if (parseResult.success) {
@@ -28,10 +44,16 @@ export const createRiskEntityAttachmentType = (): AttachmentTypeDefinition<
         return { valid: false, error: parseResult.error.message };
       }
     },
-    format: (attachment) => {
+    format: (attachment: Attachment<string, unknown>) => {
+      // Extract data to allow proper type narrowing
+      const data = attachment.data;
+      // Type narrowing: validation ensures data is a formatted string
+      if (!isRiskEntityFormattedData(data)) {
+        throw new Error(`Invalid risk entity attachment data for attachment ${attachment.id}`);
+      }
       return {
         getRepresentation: () => {
-          return { type: 'text', value: attachment.data };
+          return { type: 'text', value: data };
         },
       };
     },

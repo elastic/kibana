@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -162,7 +161,7 @@ export const useAgentBuilderAttachment = ({
           ? toMountPoint(
               React.createElement(AgentBuilderToastSuccessContent, {
                 content: renderContent,
-                onViewConversationClick: onViewConversationClick,
+                onViewConversationClick,
               }),
               { i18n: i18nService, theme, userProfile }
             )

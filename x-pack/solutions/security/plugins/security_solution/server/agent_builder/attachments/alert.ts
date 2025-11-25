@@ -5,27 +5,42 @@
  * 2.0.
  */
 
-import type { AlertAttachmentData } from '@kbn/onechat-common/attachments';
-import { AttachmentType, alertAttachmentDataSchema } from '@kbn/onechat-common/attachments';
+import { z } from '@kbn/zod';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
+import type { Attachment } from '@kbn/onechat-common/attachments';
 import { platformCoreTools } from '@kbn/onechat-common';
+import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import {
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
   SECURITY_LABS_SEARCH_TOOL_ID,
 } from '../tools';
 
+export const alertAttachmentDataSchema = z.object({
+  alert: z.string(),
+});
+
+/**
+ * Data for an alert attachment.
+ */
+export type AlertAttachmentData = z.infer<typeof alertAttachmentDataSchema>;
+
+/**
+ * Type guard to narrow attachment data to AlertAttachmentData
+ */
+const isAlertAttachmentData = (data: unknown): data is AlertAttachmentData => {
+  return alertAttachmentDataSchema.safeParse(data).success;
+};
+
 /**
  * Creates the definition for the `alert` attachment type.
  */
-export const createAlertAttachmentType = (): AttachmentTypeDefinition<
-  AttachmentType.alert,
-  AlertAttachmentData
-> => {
+export const createAlertAttachmentType = (): AttachmentTypeDefinition => {
   return {
-    id: AttachmentType.alert,
+    id: SecurityAgentBuilderAttachments.alert,
     validate: (input) => {
+      console.log('alert validate');
       const parseResult = alertAttachmentDataSchema.safeParse(input);
       if (parseResult.success) {
         return { valid: true, data: parseResult.data };
@@ -33,10 +48,16 @@ export const createAlertAttachmentType = (): AttachmentTypeDefinition<
         return { valid: false, error: parseResult.error.message };
       }
     },
-    format: (attachment) => {
+    format: (attachment: Attachment<string, unknown>) => {
+      // Extract data to allow proper type narrowing
+      const data = attachment.data;
+      // Type narrowing: validation ensures data matches AlertAttachmentData
+      if (!isAlertAttachmentData(data)) {
+        throw new Error(`Invalid alert attachment data for attachment ${attachment.id}`);
+      }
       return {
         getRepresentation: () => {
-          return { type: 'text', value: formatAlertData(attachment.data) };
+          return { type: 'text', value: formatAlertData(data) };
         },
       };
     },

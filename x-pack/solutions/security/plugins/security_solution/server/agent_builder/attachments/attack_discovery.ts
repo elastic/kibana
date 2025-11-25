@@ -5,26 +5,38 @@
  * 2.0.
  */
 
-import type { AttackDiscoveryAttachmentData } from '@kbn/onechat-common/attachments';
-import {
-  AttachmentType,
-  attackDiscoveryAttachmentDataSchema,
-} from '@kbn/onechat-common/attachments';
+import { z } from '@kbn/zod';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
+import type { Attachment } from '@kbn/onechat-common/attachments';
 import { platformCoreTools } from '@kbn/onechat-common';
+import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } from '../tools';
+
+export const attackDiscoveryAttachmentDataSchema = z.object({
+  attackDiscovery: z.string(),
+});
+
+/**
+ * Data for an attack discovery attachment.
+ */
+export type AttackDiscoveryAttachmentData = z.infer<typeof attackDiscoveryAttachmentDataSchema>;
+
+/**
+ * Type guard to narrow attachment data to AttackDiscoveryAttachmentData
+ */
+const isAttackDiscoveryAttachmentData = (data: unknown): data is AttackDiscoveryAttachmentData => {
+  return attackDiscoveryAttachmentDataSchema.safeParse(data).success;
+};
 
 /**
  * Creates the definition for the `attack_discovery` attachment type.
  */
-export const createAttackDiscoveryAttachmentType = (): AttachmentTypeDefinition<
-  AttachmentType.attack_discovery,
-  AttackDiscoveryAttachmentData
-> => {
+export const createAttackDiscoveryAttachmentType = (): AttachmentTypeDefinition => {
   return {
-    id: AttachmentType.attack_discovery,
+    id: SecurityAgentBuilderAttachments.attack_discovery,
     validate: (input) => {
+      console.log('attack_discovery validate');
       const parseResult = attackDiscoveryAttachmentDataSchema.safeParse(input);
       if (parseResult.success) {
         return { valid: true, data: parseResult.data };
@@ -32,10 +44,16 @@ export const createAttackDiscoveryAttachmentType = (): AttachmentTypeDefinition<
         return { valid: false, error: parseResult.error.message };
       }
     },
-    format: (attachment) => {
+    format: (attachment: Attachment<string, unknown>) => {
+      // Extract data to allow proper type narrowing
+      const data = attachment.data;
+      // Type narrowing: validation ensures data matches AttackDiscoveryAttachmentData
+      if (!isAttackDiscoveryAttachmentData(data)) {
+        throw new Error(`Invalid attack discovery attachment data for attachment ${attachment.id}`);
+      }
       return {
         getRepresentation: () => {
-          return { type: 'text', value: formatAttackDiscoveryData(attachment.data) };
+          return { type: 'text', value: formatAttackDiscoveryData(data) };
         },
       };
     },

@@ -10,11 +10,11 @@ import {
   getAttackDiscoveryMarkdown,
   replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/elastic-assistant-common';
-import { AttachmentType } from '@kbn/onechat-common/attachments';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
+import { SecurityAgentBuilderAttachments } from '../../../../../../../common/constants';
 import { ATTACK_DISCOVERY_ATTACHMENT_PROMPT } from '../../../../../../agent_builder/components/prompts';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { AttackChain } from './attack/attack_chain';
@@ -97,7 +97,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
   );
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: AttachmentType.attack_discovery,
+    attachmentType: SecurityAgentBuilderAttachments.attack_discovery,
     attachmentData: { attackDiscovery: attackDiscoveryWithOriginalValues },
     attachmentPrompt: ATTACK_DISCOVERY_ATTACHMENT_PROMPT,
   });
