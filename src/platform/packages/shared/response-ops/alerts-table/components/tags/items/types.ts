@@ -12,6 +12,7 @@ import type { EuiSelectableOption, IconType } from '@elastic/eui';
 export interface UseActionProps {
   onAction: () => void;
   onActionSuccess: () => void;
+  onActionError: () => void;
   isDisabled: boolean;
 }
 

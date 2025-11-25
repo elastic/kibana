@@ -14,6 +14,8 @@ import type { AdditionalContext, AlertActionsProps } from '../types';
 import { typedMemo } from '../utils/react';
 import { EditTagsFlyout } from './tags/edit_tags_flyout';
 import type { ItemsSelectionState } from './tags/items/types';
+import { useBulkUpdateAlertTags } from '../hooks/use_bulk_update_alert_tags';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
 export const EditTagsAction = typedMemo(
   <AC extends AdditionalContext = AdditionalContext>({
@@ -21,6 +23,10 @@ export const EditTagsAction = typedMemo(
     refresh,
     onActionExecuted,
   }: AlertActionsProps<AC>) => {
+    const {
+      services: { http, notifications },
+    } = useAlertsTableContext();
+    const { mutateAsync: updateAlertTags } = useBulkUpdateAlertTags({ http, notifications });
     const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
     const handleOpenFlyout = useCallback(() => {
@@ -35,11 +41,17 @@ export const EditTagsAction = typedMemo(
       async (tagsSelection: ItemsSelectionState) => {
         // TODO: Implement the actual API call to save tags
 
+        await updateAlertTags({
+          index: alert._index,
+          alertIds: [alert._id],
+          add: tagsSelection.selectedItems?.length ? tagsSelection.selectedItems : undefined,
+          remove: tagsSelection.unSelectedItems?.length ? tagsSelection.unSelectedItems : undefined,
+        });
         handleCloseFlyout();
         onActionExecuted?.();
         refresh();
       },
-      [handleCloseFlyout, onActionExecuted, refresh]
+      [alert, updateAlertTags, handleCloseFlyout, onActionExecuted, refresh]
     );
 
     return (

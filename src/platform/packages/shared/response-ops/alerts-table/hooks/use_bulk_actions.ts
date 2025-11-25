@@ -14,7 +14,6 @@ import { ALERT_CASE_IDS, isSiemRuleType } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { Alert } from '@kbn/alerting-types';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import type {
   BulkActionsConfig,
@@ -306,11 +305,17 @@ export const useBulkTagsActions = ({ refresh, clearSelection }: UseBulkTagsActio
     clearSelection();
   }, [clearSelection, refresh]);
 
+  const onActionError = useCallback(() => {
+    refresh();
+    clearSelection();
+  }, [clearSelection, refresh]);
+
   const onAction = useCallback(() => {}, []);
 
   const tagsAction = useTagsAction({
     onAction,
     onActionSuccess,
+    onActionError,
     isDisabled: false,
   });
 
@@ -383,8 +388,12 @@ export function useBulkActions({
         'data-test-subj': 'edit-tags',
         onClick: (alerts?: TimelineItem[]) => {
           if (!alerts) return;
-
-          const alertsForFlyout = alerts as unknown as Alert[];
+          const alertsForFlyout = alerts.map((alert) => {
+            return {
+              _id: alert._id,
+              _index: alert._index as string,
+            };
+          });
           const action = tagsAction.getAction(alertsForFlyout);
           action.onClick();
         },
