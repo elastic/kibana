@@ -326,7 +326,7 @@ export function getDiscoverStateContainer({
 
     if (isDataSourceType(getCurrentTab().appState.dataSource, DataSourceType.DataView)) {
       await internalState.dispatch(
-        injectCurrentTab(internalStateActions.replaceAppState)({
+        injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
           appState: {
             dataSource: nextDataView.id
               ? createDataViewDataSource({ dataViewId: nextDataView.id })

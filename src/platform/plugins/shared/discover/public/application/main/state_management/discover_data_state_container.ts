@@ -332,7 +332,7 @@ export function getDataStateContainer({
           if (preFetchStateUpdate) {
             disableNextFetchOnStateChange$.next(true);
             await internalState.dispatch(
-              injectCurrentTab(internalStateActions.replaceAppState)({
+              injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
                 appState: preFetchStateUpdate,
               })
             );
@@ -372,7 +372,7 @@ export function getDataStateContainer({
 
               if (postFetchStateUpdate) {
                 await internalState.dispatch(
-                  injectCurrentTab(internalStateActions.replaceAppState)({
+                  injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
                     appState: postFetchStateUpdate,
                   })
                 );

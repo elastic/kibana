@@ -107,7 +107,7 @@ describe('Discover state', () => {
       state = getDiscoverStateMock({ history });
       state.savedSearchState.set(savedSearchMock);
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.replaceAppState)({ appState: {} })
+        state.injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({ appState: {} })
       );
       state.actions.initializeAndSync();
     });
@@ -203,7 +203,7 @@ describe('Discover state', () => {
       state = getDiscoverStateMock({ stateStorageContainer: stateStorage, history });
       state.savedSearchState.set(savedSearchMock);
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.replaceAppState)({ appState: {} })
+        state.injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({ appState: {} })
       );
       state.actions.initializeAndSync();
     });
@@ -1484,7 +1484,7 @@ describe('Discover state', () => {
       });
       state.savedSearchState.set(savedSearchMock);
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.replaceAppState)({ appState: {} })
+        state.injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({ appState: {} })
       );
       state.actions.initializeAndSync();
     });

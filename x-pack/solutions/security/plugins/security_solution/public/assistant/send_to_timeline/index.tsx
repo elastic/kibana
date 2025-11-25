@@ -103,7 +103,7 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
 
           await discoverStateContainer.current?.internalState.dispatch(
             discoverStateContainer.current?.injectCurrentTab(
-              discoverStateContainer.current?.internalStateActions.replaceAppState
+              discoverStateContainer.current?.internalStateActions.updateAppStateAndReplaceUrl
             )({
               appState: {
                 query: {

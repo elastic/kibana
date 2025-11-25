@@ -178,7 +178,9 @@ export const buildEsqlFetchSubscribe = ({
         };
 
         await internalState.dispatch(
-          injectCurrentTab(internalStateActions.replaceAppState)({ appState: nextState })
+          injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+            appState: nextState,
+          })
         );
       }
     }

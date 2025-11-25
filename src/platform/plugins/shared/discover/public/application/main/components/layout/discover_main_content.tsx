@@ -75,7 +75,9 @@ export const DiscoverMainContent = ({
   const { trackUiMetric } = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
-  const replaceAppState = useCurrentTabAction(internalStateActions.replaceAppState);
+  const updateAppStateAndReplaceUrl = useCurrentTabAction(
+    internalStateActions.updateAppStateAndReplaceUrl
+  );
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE, replace?: boolean) => {
@@ -96,7 +98,7 @@ export const DiscoverMainContent = ({
 
       return new Promise<VIEW_MODE>((resolve, reject) => {
         // return a promise to report when the view mode has been updated
-        dispatch(replaceAppState({ appState: { viewMode: mode } })).then(() => {
+        dispatch(updateAppStateAndReplaceUrl({ appState: { viewMode: mode } })).then(() => {
           const appState = stateContainer.getCurrentTab().appState;
 
           if (appState.viewMode === mode) {
@@ -107,7 +109,7 @@ export const DiscoverMainContent = ({
         });
       });
     },
-    [dispatch, replaceAppState, stateContainer, trackUiMetric, updateAppState]
+    [dispatch, updateAppStateAndReplaceUrl, stateContainer, trackUiMetric, updateAppState]
   );
 
   const isEsqlMode = useIsEsqlMode();

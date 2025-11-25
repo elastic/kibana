@@ -119,7 +119,7 @@ export const buildStateSubscribe =
       // and instead reset the app state to the fallback data view
       if (fallback) {
         await internalState.dispatch(
-          internalStateActions.replaceAppState({
+          internalStateActions.updateAppStateAndReplaceUrl({
             tabId: getCurrentTab().id,
             appState: {
               dataSource: nextDataView.id

@@ -47,10 +47,11 @@ export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> 
 /**
  * Partially update the tab app state, merging with existing state and replacing URL history
  */
-export const replaceAppState: InternalStateThunkActionCreator<[AppStatePayload], Promise<void>> = (
-  payload
-) =>
-  async function replaceAppStateThunkFn(dispatch, getState, { urlStateStorage }) {
+export const updateAppStateAndReplaceUrl: InternalStateThunkActionCreator<
+  [AppStatePayload],
+  Promise<void>
+> = (payload) =>
+  async function updateAppStateAndReplaceUrlThunkFn(dispatch, getState, { urlStateStorage }) {
     const currentState = getState();
 
     if (currentState.tabs.unsafeCurrentId !== payload.tabId) {
@@ -127,6 +128,6 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
   async function pushCurrentTabStateToUrlThunkFn(dispatch) {
     await Promise.all([
       dispatch(replaceGlobalState({ tabId, globalState: {} })),
-      dispatch(replaceAppState({ tabId, appState: {} })),
+      dispatch(updateAppStateAndReplaceUrl({ tabId, appState: {} })),
     ]);
   };
