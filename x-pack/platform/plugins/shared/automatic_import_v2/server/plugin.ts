@@ -24,6 +24,7 @@ import type {
 } from './types';
 import { RequestContextFactory } from './request_context_factory';
 import { AutomaticImportService } from './services';
+import { AUTOMATIC_IMPORT_FEATURE } from './feature';
 
 export class AutomaticImportV2Plugin
   implements
@@ -56,6 +57,8 @@ export class AutomaticImportV2Plugin
     plugins: AutomaticImportV2PluginSetupDependencies
   ) {
     this.logger.debug('automaticImportV2: Setup');
+
+    plugins.features.registerKibanaFeature(AUTOMATIC_IMPORT_FEATURE);
 
     const coreStartServices = core.getStartServices().then(([coreStart]) => ({
       esClient: coreStart.elasticsearch.client.asInternalUser as ElasticsearchClient,
