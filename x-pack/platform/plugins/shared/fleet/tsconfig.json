@@ -126,8 +126,6 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/react-query",
-    "@kbn/setup-node-env",
-    "@kbn/react-query",
     "@kbn/fs"
   ]
 }
