@@ -146,7 +146,6 @@ describe('transformDashboardIn', () => {
   it('should return error when passed search source references', () => {
     const dashboardState: DashboardState = {
       title: 'title',
-      panels: [],
       references: [
         {
           id: 'fizzle-1234',
