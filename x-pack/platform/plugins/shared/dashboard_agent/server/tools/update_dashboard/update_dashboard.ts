@@ -7,8 +7,6 @@
 
 import { z } from '@kbn/zod';
 import type { RequestHandlerContext, SavedObjectsServiceStart } from '@kbn/core/server';
-import type { UpdateResult } from '@kbn/content-management-plugin/common';
-import type { DashboardItem } from '@kbn/dashboard-plugin/server/content_management';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
@@ -16,14 +14,9 @@ import { getToolResultId } from '@kbn/onechat-server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { DashboardAppLocator } from '@kbn/dashboard-plugin/common/locator/locator';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { dashboardTools } from '../../../common';
-import { checkDashboardToolsAvailability } from '../utils';
 
-// Type for the response from dashboardClient.update()
-interface UpdateItemResponse<T = unknown, M = void> {
-  contentTypeId: string;
-  result: UpdateResult<T, M>;
-}
+import { dashboardTools } from '../../../common';
+import { checkDashboardToolsAvailability, normalizePanels } from '../utils';
 
 const updateDashboardSchema = z.object({
   id: z.string().describe('The ID of the dashboard to update.'),
@@ -60,59 +53,43 @@ This tool will:
     tags: [],
     handler: async ({ id, title, description, panels, ...rest }, { logger, request, esClient }) => {
       try {
-        const dashboardContentClient = dashboard.getContentClient();
-        if (!dashboardContentClient) {
-          throw new Error('Dashboard content client is not available');
-        }
+        const dashboardsClient = dashboard.client;
+
+        const coreContext = {
+          savedObjects: { client: savedObjects.getScopedClient(request) },
+        };
 
         // Create a minimal request handler context
         const requestHandlerContext = {
-          core: Promise.resolve({
-            savedObjects: {
-              client: savedObjects.getScopedClient(request),
-            },
-            elasticsearch: {
-              client: esClient,
-            },
-          }),
+          core: Promise.resolve(coreContext),
+          resolve: async () => ({ core: coreContext }),
         } as unknown as RequestHandlerContext;
 
-        const dashboardClient = dashboardContentClient.getForRequest({
-          request,
-          requestHandlerContext,
-          version: 1,
-        });
+        // First, read the existing dashboard to get current values
+        const existingDashboard = await dashboardsClient.read(requestHandlerContext, id);
 
-        // Build update data object with only provided fields
-        const updateData: Partial<{
-          title: string;
-          description: string;
-          panels: unknown;
-        }> = {};
+        const normalizedPanels =
+          panels !== undefined ? normalizePanels(panels as unknown[]) : undefined;
 
-        if (title !== undefined) {
-          updateData.title = title;
-        }
-        if (description !== undefined) {
-          updateData.description = description;
-        }
-        // if (panels !== undefined) {
-        //   updateData.panels = panels;
-        // }
+        // Merge existing data with provided updates
+        const updateData = {
+          title: title ?? existingDashboard.data.title,
+          description: description ?? existingDashboard.data.description,
+          panels: normalizedPanels ?? existingDashboard.data.panels,
+        };
 
         // Update dashboard using the Dashboard plugin's client
-        const response = (await dashboardClient.update(
-          id,
-          updateData,
-          {} // options
-        )) as UpdateItemResponse<DashboardItem>;
+        const dashboardUpdateResponse = await dashboardsClient.update(requestHandlerContext, id, {
+          data: updateData,
+        });
 
-        const dashboardId = response.result.item.id;
-        logger.info(`Dashboard updated successfully: ${dashboardId}`);
+        logger.info(`Dashboard updated successfully: ${dashboardUpdateResponse.id}`);
 
         const spaceId = spaces?.spacesService?.getSpaceId(request);
-        const dashboardUrl = await dashboardLocator?.getRedirectUrl({ dashboardId }, { spaceId });
-        const updatedTitle = title || response.result.item.attributes.title;
+        const dashboardUrl = await dashboardLocator?.getRedirectUrl(
+          { dashboardId: dashboardUpdateResponse.id },
+          { spaceId }
+        );
 
         return {
           results: [
@@ -120,24 +97,12 @@ This tool will:
               type: ToolResultType.dashboard,
               tool_result_id: getToolResultId(),
               data: {
-                reference: {
-                  id: dashboardId,
-                },
-                title: updatedTitle,
+                id: dashboardUpdateResponse.id,
+                title: updateData.title,
                 content: {
                   url: dashboardUrl,
-                  description:
-                    description !== undefined
-                      ? description
-                      : response.result.item.attributes.description || '',
-                  panelCount:
-                    panels !== undefined
-                      ? Array.isArray(panels)
-                        ? panels.length
-                        : 0
-                      : response.result.item.attributes.panels
-                      ? response.result.item.attributes.panels.length
-                      : 0,
+                  description: updateData.description ?? '',
+                  panelCount: updateData.panels.length,
                 },
               },
             },

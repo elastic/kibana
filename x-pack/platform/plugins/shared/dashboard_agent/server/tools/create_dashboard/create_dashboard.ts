@@ -11,19 +11,12 @@ import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { getToolResultId } from '@kbn/onechat-server';
-import type { DashboardPluginStart, DashboardPanel } from '@kbn/dashboard-plugin/server';
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '@kbn/dashboard-plugin/common/constants';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { DashboardAppLocator } from '@kbn/dashboard-plugin/common/locator/locator';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import {
-  LensConfigBuilder,
-  type LensApiSchemaType,
-} from '@kbn/lens-embeddable-utils/config_builder';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
-import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
 import { dashboardTools } from '../../../common';
-import { checkDashboardToolsAvailability } from '../utils';
+import { checkDashboardToolsAvailability, normalizePanels } from '../utils';
 
 const createDashboardSchema = z.object({
   title: z.string().describe('The title of the dashboard to create.'),
@@ -117,40 +110,5 @@ This tool will:
         };
       }
     },
-  };
-};
-
-// this is a temporary function to normalize the panels to the correct format
-const normalizePanels = (panels: unknown[] | undefined): DashboardPanel[] => {
-  return (panels ?? []).map((panel, index) => {
-    return buildLensPanelFromApi(panel as LensApiSchemaType, index);
-  });
-};
-
-const buildLensPanelFromApi = (config: LensApiSchemaType, index: number): DashboardPanel => {
-  const lensAttributes: LensAttributes = new LensConfigBuilder().fromAPIFormat(config);
-
-  const lensConfig: LensSerializedAPIConfig = {
-    title: lensAttributes.title ?? config.title ?? 'Generated panel',
-    attributes: lensAttributes,
-  };
-
-  return {
-    type: 'lens',
-    grid: createDefaultGrid(index),
-    config: lensConfig,
-  };
-};
-
-const createDefaultGrid = (
-  index: number,
-  existing?: DashboardPanel['grid']
-): DashboardPanel['grid'] => {
-  const yOffset = index * DEFAULT_PANEL_HEIGHT;
-  return {
-    x: existing?.x ?? 0,
-    y: existing?.y ?? yOffset,
-    w: existing?.w ?? DEFAULT_PANEL_WIDTH,
-    h: existing?.h ?? DEFAULT_PANEL_HEIGHT,
   };
 };
