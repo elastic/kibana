@@ -90,10 +90,18 @@ export const FormContext: React.FC<Props> = ({
         }
 
         if (theCase?.id && data.connector.id !== 'none') {
-          await pushCaseToExternalService({
-            caseId: theCase.id,
-            connector: data.connector,
-          });
+          try {
+            await pushCaseToExternalService({
+              caseId: theCase.id,
+              connector: data.connector,
+            });
+          } catch (error) {
+            // Catch the error but do not interrupt the flow.
+            // The case has been created successfully at this point.
+            // The only thing that failed was pushing to the external service.
+            // Changes to the connector fields can be made later on by the user.
+            // They will be notified about the connector failure.
+          }
         }
 
         if (onSuccess && theCase) {
