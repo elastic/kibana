@@ -60,6 +60,11 @@ export function ReviewSuggestionsForm({
     snapshot.matches({ ready: 'editingSuggestedRule' }) ? snapshot.context.editedSuggestion : null
   );
 
+  const isEditingOrReorderingStreams = useStreamsRoutingSelector(
+    (snapshot) =>
+      snapshot.matches({ ready: 'editingRule' }) || snapshot.matches({ ready: 'reorderingRules' })
+  );
+
   // For the confirmation modal, use edited suggestion if available, otherwise find by name
   const partitionForModal =
     editingSuggestion || suggestions.find(({ name }) => name === ruleUnderReview)!;
@@ -118,6 +123,19 @@ export function ReviewSuggestionsForm({
           )}
         </EuiText>
         <EuiSpacer size="m" />
+        {isEditingOrReorderingStreams && (
+          <>
+            <EuiCallOut
+              size="s"
+              color="primary"
+              iconType="info"
+              title={i18n.translate('xpack.streams.reviewSuggestionsForm.actionsDisabled', {
+                defaultMessage: 'Finish editing or reordering streams to interact with suggestions',
+              })}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         {suggestions.map((partition, index) => (
           <NestedView key={partition.name} last={index === suggestions.length - 1}>
             <SuggestedStreamPanel
@@ -128,6 +146,7 @@ export function ReviewSuggestionsForm({
               onDismiss={() => rejectSuggestion(index, selectedPreviewName === partition.name)}
               onEdit={editSuggestion}
               onSave={handleSave}
+              isDisabled={isEditingOrReorderingStreams}
             />
             <EuiSpacer size="s" />
           </NestedView>
