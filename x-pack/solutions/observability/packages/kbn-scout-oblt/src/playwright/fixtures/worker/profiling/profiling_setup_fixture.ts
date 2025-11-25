@@ -8,11 +8,18 @@
 import { test as base } from '@kbn/scout';
 import path from 'path';
 import fs from 'fs';
+import {
+  COLLECTOR_PACKAGE_POLICY_NAME,
+  SYMBOLIZER_PACKAGE_POLICY_NAME,
+} from '@kbn/profiling-data-access-plugin/common';
+
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 
 export interface ProfilingSetupFixture {
   checkStatus: () => Promise<{ has_setup: boolean; has_data: boolean }>;
   setupResources: () => Promise<void>;
-  loadData: () => Promise<void>;
+  loadData: (file?: string) => Promise<void>;
+  cleanup: () => Promise<void>;
 }
 
 // This fixture should be used only in the global setup hook
@@ -20,7 +27,7 @@ export interface ProfilingSetupFixture {
 // and it needs to be run only once
 export const profilingSetupFixture = base.extend<{}, { profilingSetup: ProfilingSetupFixture }>({
   profilingSetup: [
-    async ({ kbnClient, esClient, log }, use) => {
+    async ({ kbnClient, apiServices, esClient, log }, use) => {
       const checkStatus = async (): Promise<{ has_setup: boolean; has_data: boolean }> => {
         try {
           const response = await kbnClient.request({
@@ -42,7 +49,10 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
             description: 'Setup profiling resources',
             path: '/api/profiling/setup/es_resources',
             method: 'POST',
-            body: {},
+            headers: {
+              'content-type': 'application/json',
+              'kbn-xsrf': 'reporting',
+            },
           });
           log.info('Profiling resources set up successfully');
         } catch (error) {
@@ -51,7 +61,7 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
         }
       };
 
-      const loadData = async (): Promise<void> => {
+      const loadData = async (file?: string): Promise<void> => {
         try {
           log.info('Loading profiling data');
 
@@ -60,12 +70,14 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
             './test_data/profiling_data_anonymized.json'
           );
 
-          if (!fs.existsSync(PROFILING_DATA_PATH)) {
+          const dataFilePath = file || PROFILING_DATA_PATH;
+
+          if (!fs.existsSync(dataFilePath)) {
             log.info('Profiling data file not found, skipping data loading');
             return;
           }
 
-          const profilingData = fs.readFileSync(PROFILING_DATA_PATH, 'utf8');
+          const profilingData = fs.readFileSync(dataFilePath, 'utf8');
           const operations = profilingData.split('\n').filter((line: string) => line.trim());
 
           // Use esClient for bulk operations
@@ -88,11 +100,54 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
           throw error;
         }
       };
+      const cleanup = async (): Promise<void> => {
+        log.info(`Unloading Profiling data`);
+
+        const getPoliciesIds = async (): Promise<{
+          collectorId: string | undefined;
+          symbolizerId: string | undefined;
+        }> => {
+          const res = await apiServices.fleet.package_policies.get();
+          const policies: PackagePolicy[] = res.data.items;
+
+          const collector = policies.find((item) => item.name === COLLECTOR_PACKAGE_POLICY_NAME);
+          const symbolizer = policies.find((item) => item.name === SYMBOLIZER_PACKAGE_POLICY_NAME);
+
+          return {
+            collectorId: collector?.id,
+            symbolizerId: symbolizer?.id,
+          };
+        };
+        const [indices, { collectorId, symbolizerId }] = await Promise.all([
+          esClient.cat.indices({ format: 'json' }),
+          getPoliciesIds(),
+        ]);
+
+        const profilingIndices = indices
+          .filter((index) => index.index !== undefined)
+          .map((index) => index.index)
+          .filter((index) => {
+            return index!.startsWith('profiling') || index!.startsWith('.profiling');
+          }) as string[];
+
+        await Promise.all([
+          ...profilingIndices.map((index) => esClient.indices.delete({ index })),
+          esClient.indices.deleteDataStream({
+            name: 'profiling-events*',
+          }),
+          collectorId ? apiServices.fleet.package_policies.delete(collectorId) : Promise.resolve(),
+          symbolizerId
+            ? apiServices.fleet.package_policies.delete(symbolizerId)
+            : Promise.resolve(),
+        ]);
+        log.info('Unloaded Profiling data');
+      };
 
       await use({
         checkStatus,
         setupResources,
         loadData,
+        cleanup,
       });
     },
     { scope: 'worker' },
