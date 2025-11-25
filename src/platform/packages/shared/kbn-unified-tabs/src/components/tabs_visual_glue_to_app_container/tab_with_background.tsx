@@ -15,12 +15,13 @@ import type { TabsServices } from '../../types';
 export interface TabWithBackgroundProps extends HTMLAttributes<HTMLElement> {
   isSelected: boolean;
   isDragging?: boolean;
+  hideRightSeparator?: boolean;
   services: TabsServices;
   children: React.ReactNode;
 }
 
 export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgroundProps>(
-  ({ isSelected, isDragging, services, children, ...otherProps }, ref) => {
+  ({ isSelected, isDragging, hideRightSeparator, services, children, ...otherProps }, ref) => {
     const euiThemeContext = useEuiTheme();
     const { euiTheme } = euiThemeContext;
 
@@ -30,6 +31,7 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
         ref={ref}
         // tab main background and another background color on hover
         css={css`
+          position: relative;
           display: inline-block;
           border-radius: ${euiTheme.border.radius.small};
           background: ${isSelected || isDragging
@@ -56,6 +58,21 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
               border-radius: ${euiTheme.border.radius.small};
           `
             : ''}
+
+          // right vertical separator
+          &::before {
+            content: '';
+            position: absolute;
+            right: ${euiTheme.size.xs};
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: ${euiTheme.size.base};
+            background: ${euiTheme.colors.borderBaseProminent};
+            transition: opacity ${euiTheme.animation.fast};
+            opacity: ${hideRightSeparator ? '0' : '1'};
+            pointer-events: none;
+          }
         `}
       >
         <div

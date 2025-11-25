@@ -40,6 +40,8 @@ export interface TabProps {
   isSelected: boolean;
   isUnsaved?: boolean;
   isDragging?: boolean;
+  hideRightSeparator?: boolean;
+  onHoverChange?: (itemId: string, isHovered: boolean) => void;
   dragHandleProps?: DraggableProvidedDragHandleProps | null;
   tabContentId: string;
   tabsSizeConfig: TabsSizeConfig;
@@ -69,6 +71,8 @@ export const Tab: React.FC<TabProps> = (props) => {
     isSelected,
     isUnsaved,
     isDragging,
+    hideRightSeparator,
+    onHoverChange,
     dragHandleProps,
     tabContentId,
     tabsSizeConfig,
@@ -296,7 +300,10 @@ export const Tab: React.FC<TabProps> = (props) => {
       data-test-subj={`unifiedTabs_tab_${item.id}`}
       isSelected={isSelected}
       isDragging={isDragging}
+      hideRightSeparator={hideRightSeparator}
       services={services}
+      onMouseEnter={() => onHoverChange?.(item.id, true)}
+      onMouseLeave={() => onHoverChange?.(item.id, false)}
     >
       {mainTabContent}
     </TabWithBackground>
