@@ -86,6 +86,14 @@ export const LAST_VALUE_I18N = (metric: string) =>
     },
   });
 
+export const MEDIAN_I18N = (metric: string) =>
+  i18n.translate('xpack.observability.customThreshold.rule.aggregators.median', {
+    defaultMessage: 'Median of {metric}',
+    values: {
+      metric,
+    },
+  });
+
 export const CUSTOM_EQUATION_I18N = i18n.translate(
   'xpack.observability.customThreshold.rule.aggregators.customEquation',
   {
