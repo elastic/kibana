@@ -30,6 +30,9 @@ const mergeAppState = (
   return { mergedAppState, hasStateChanges: !isEqualState(currentAppState, mergedAppState) };
 };
 
+/**
+ * Partially update the tab app state, merging with existing state and pushing to URL history
+ */
 export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (payload) =>
   async function updateAppStateThunkFn(dispatch, getState) {
     const { mergedAppState, hasStateChanges } = mergeAppState(getState(), payload);
@@ -41,6 +44,9 @@ export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> 
     }
   };
 
+/**
+ * Partially update the tab app state, merging with existing state and replacing URL history
+ */
 export const replaceAppState: InternalStateThunkActionCreator<[AppStatePayload], Promise<void>> = (
   payload
 ) =>
@@ -70,6 +76,9 @@ const mergeGlobalState = (
   };
 };
 
+/**
+ * Partially update the tab global state, merging with existing state and pushing to URL history
+ */
 export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayload]> = (payload) =>
   async function updateGlobalStateThunkFn(dispatch, getState) {
     const { mergedGlobalState, hasStateChanges } = mergeGlobalState(getState(), payload);
@@ -84,6 +93,9 @@ export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayl
     }
   };
 
+/**
+ * Partially update the tab global state, merging with existing state and replacing URL history
+ */
 export const replaceGlobalState: InternalStateThunkActionCreator<
   [GlobalStatePayload],
   Promise<void>
@@ -105,6 +117,9 @@ export const replaceGlobalState: InternalStateThunkActionCreator<
     await urlStateStorage.set(GLOBAL_STATE_URL_KEY, globalUrlState, { replace: true });
   };
 
+/**
+ * Push the current tab app state and global state to the URL, replacing URL history
+ */
 export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
   [TabActionPayload],
   Promise<void>

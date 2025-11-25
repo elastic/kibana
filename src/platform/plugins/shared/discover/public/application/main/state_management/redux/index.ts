@@ -9,31 +9,7 @@
 
 import { omit } from 'lodash';
 import { internalStateSlice, syncLocallyPersistedTabState } from './internal_state';
-import {
-  loadDataViewList,
-  appendAdHocDataViews,
-  initializeSingleTab,
-  replaceAdHocDataViewWithId,
-  setAdHocDataViews,
-  setDataView,
-  setDefaultProfileAdHocDataViews,
-  setTabs,
-  updateTabs,
-  disconnectTab,
-  restoreTab,
-  openInNewTab,
-  openInNewTabExtPointAction,
-  openSearchSessionInNewTab,
-  clearRecentlyClosedTabs,
-  initializeTabs,
-  saveDiscoverSession,
-  resetDiscoverSession,
-  updateAppState,
-  replaceAppState,
-  updateGlobalState,
-  replaceGlobalState,
-  pushCurrentTabStateToUrl,
-} from './actions';
+import { actions } from './actions';
 
 export {
   type DiscoverInternalState,
@@ -49,30 +25,8 @@ export { type InternalStateStore, createInternalStateStore } from './internal_st
 
 export const internalStateActions = {
   ...omit(internalStateSlice.actions, 'setTabs', 'setDefaultProfileAdHocDataViewIds'),
-  loadDataViewList,
-  setTabs,
-  updateTabs,
-  disconnectTab,
-  setDataView,
-  setAdHocDataViews,
-  setDefaultProfileAdHocDataViews,
-  appendAdHocDataViews,
-  replaceAdHocDataViewWithId,
-  initializeSingleTab,
+  ...actions,
   syncLocallyPersistedTabState,
-  restoreTab,
-  openInNewTab,
-  openInNewTabExtPointAction,
-  openSearchSessionInNewTab,
-  clearRecentlyClosedTabs,
-  initializeTabs,
-  saveDiscoverSession,
-  resetDiscoverSession,
-  updateAppState,
-  replaceAppState,
-  updateGlobalState,
-  replaceGlobalState,
-  pushCurrentTabStateToUrl,
 };
 
 export {

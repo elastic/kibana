@@ -13,3 +13,7 @@ export * from './tabs';
 export * from './save_discover_session';
 export * from './reset_discover_session';
 export * from './tab_state';
+
+// Namespace export to preserve TSDoc comments and function
+// references when spreading into internalStateActions
+export * as actions from '.';
