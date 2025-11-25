@@ -25,7 +25,6 @@
     "@kbn/inference-prompt-utils",
     "@kbn/es-query",
     "@kbn/zod-helpers",
-    "@kbn/streams-plugin",
     "@kbn/fields-metadata-plugin",
   ]
 }
