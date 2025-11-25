@@ -2592,7 +2592,6 @@ export class CstToAstConverter {
         [right],
       ] as ast.ESQLBinaryExpression['args'];
 
-      // TODO: use binary expression construction method.
       const assignment = this.toFunction(
         '=',
         ctx,
