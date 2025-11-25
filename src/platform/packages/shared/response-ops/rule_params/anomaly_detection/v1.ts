@@ -24,6 +24,7 @@ export const mlAnomalyDetectionAlertParamsSchema = schema.object(
       schema.literal(ML_ANOMALY_RESULT_TYPE.BUCKET),
       schema.literal(ML_ANOMALY_RESULT_TYPE.INFLUENCER),
     ]),
+    /** If true, include interim results from the anomaly detection job */
     includeInterim: schema.boolean({ defaultValue: true }),
     /** User's override for the lookback interval */
     lookbackInterval: schema.nullable(schema.string()),

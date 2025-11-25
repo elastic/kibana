@@ -106,7 +106,11 @@ describe('UiamService', () => {
       });
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
-        connect: { ca: ['mocked file content for /some/ca/path'], rejectUnauthorized: true },
+        connect: {
+          ca: ['mocked file content for /some/ca/path'],
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
       });
 
       agentSpy.mockClear();
@@ -126,6 +130,7 @@ describe('UiamService', () => {
             'mocked file content for /some/ca/path-1',
             'mocked file content for /some/ca/path-2',
           ],
+          allowPartialTrustChain: true,
           rejectUnauthorized: true,
         },
       });
@@ -143,6 +148,7 @@ describe('UiamService', () => {
       expect(agentSpy).toHaveBeenCalledWith({
         connect: {
           ca: ['mocked file content for /some/ca/path'],
+          allowPartialTrustChain: true,
           rejectUnauthorized: true,
           checkServerIdentity: expect.any(Function),
         },
@@ -157,7 +163,11 @@ describe('UiamService', () => {
       });
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
-        connect: { rejectUnauthorized: true, checkServerIdentity: expect.any(Function) },
+        connect: {
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+          checkServerIdentity: expect.any(Function),
+        },
       });
     });
 
@@ -170,7 +180,9 @@ describe('UiamService', () => {
         ssl: { verificationMode: 'none' },
       });
       expect(agentSpy).toHaveBeenCalledTimes(1);
-      expect(agentSpy).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: { allowPartialTrustChain: true, rejectUnauthorized: false },
+      });
     });
   });
 

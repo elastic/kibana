@@ -125,3 +125,5 @@ export type {
   CriteriaField,
   Influencer,
 } from './types';
+
+export { validateCustomFilterFields } from './alerting/custom_filter_validation';
