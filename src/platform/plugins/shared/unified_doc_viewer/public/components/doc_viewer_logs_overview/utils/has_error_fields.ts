@@ -13,18 +13,20 @@ import {
   getMessageFieldWithFallbacks,
   getLogExceptionTypeFieldWithFallback,
   getLogLevelFieldWithFallback,
+  getLogEventTypeFieldWithFallback,
 } from '@kbn/discover-utils';
 
 export function hasErrorFields(formattedDoc: LogDocumentOverview): boolean {
+  if (!hasErrorLevel(formattedDoc) && !hasErrorEventType(formattedDoc)) {
+    return false;
+  }
+
   const culpritValue = formattedDoc[fieldConstants.ERROR_CULPRIT_FIELD];
   const groupingNameValue = formattedDoc[fieldConstants.ERROR_GROUPING_NAME_FIELD];
   const { value: messageValue } = getMessageFieldWithFallbacks(formattedDoc);
   const { value: typeValue } = getLogExceptionTypeFieldWithFallback(formattedDoc);
 
-  return (
-    hasErrorLevel(formattedDoc) &&
-    Boolean(culpritValue || messageValue || typeValue || groupingNameValue)
-  );
+  return Boolean(culpritValue || messageValue || typeValue || groupingNameValue);
 }
 
 function hasErrorLevel(formattedDoc: LogDocumentOverview): boolean {
@@ -39,6 +41,15 @@ function hasErrorLevel(formattedDoc: LogDocumentOverview): boolean {
     }
 
     return false;
+  }
+  return false;
+}
+
+function hasErrorEventType(formattedDoc: LogDocumentOverview): boolean {
+  const { value: eventTypeValue } = getLogEventTypeFieldWithFallback(formattedDoc);
+  if (eventTypeValue) {
+    const eventTypeStr = String(eventTypeValue).toLowerCase();
+    return eventTypeStr.includes('error') || eventTypeStr.includes('exception');
   }
   return false;
 }

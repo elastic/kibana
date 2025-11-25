@@ -51,14 +51,29 @@ describe('hasErrorFields', () => {
     });
 
     describe('without error log level', () => {
-      it('returns false when error.culprit is present', () => {
-        const doc: LogDocumentOverview = {
-          ...createBaseDoc(),
-          [fieldConstants.LOG_LEVEL_FIELD]: 'info',
-          [fieldConstants.ERROR_CULPRIT_FIELD]: 'charge',
-        };
+      describe('with error event type', () => {
+        it('returns true when error.culprit is present', () => {
+          const doc: LogDocumentOverview = {
+            ...createBaseDoc(),
+            [fieldConstants.LOG_LEVEL_FIELD]: 'info',
+            [fieldConstants.PROCESSOR_EVENT_FIELD]: 'error',
+            [fieldConstants.ERROR_CULPRIT_FIELD]: 'charge',
+          } as any;
 
-        expect(hasErrorFields(doc)).toBe(false);
+          expect(hasErrorFields(doc)).toBe(true);
+        });
+      });
+
+      describe('without error event type', () => {
+        it('returns false when error.culprit is present', () => {
+          const doc: LogDocumentOverview = {
+            ...createBaseDoc(),
+            [fieldConstants.LOG_LEVEL_FIELD]: 'info',
+            [fieldConstants.ERROR_CULPRIT_FIELD]: 'charge',
+          };
+
+          expect(hasErrorFields(doc)).toBe(false);
+        });
       });
     });
   });
@@ -187,14 +202,29 @@ describe('hasErrorFields', () => {
     });
 
     describe('without error log level', () => {
-      it('returns false when error.message is present', () => {
-        const doc: LogDocumentOverview = {
-          ...createBaseDoc(),
-          [fieldConstants.LOG_LEVEL_FIELD]: 'info',
-          [fieldConstants.ERROR_MESSAGE_FIELD]: 'Error occurred',
-        };
+      describe('with error event type', () => {
+        it('returns true when error.message is present', () => {
+          const doc: LogDocumentOverview = {
+            ...createBaseDoc(),
+            [fieldConstants.LOG_LEVEL_FIELD]: 'info',
+            [fieldConstants.OTEL_EVENT_NAME_FIELD]: 'exception',
+            [fieldConstants.ERROR_MESSAGE_FIELD]: 'Error occurred',
+          } as any;
 
-        expect(hasErrorFields(doc)).toBe(false);
+          expect(hasErrorFields(doc)).toBe(true);
+        });
+      });
+
+      describe('without error event type', () => {
+        it('returns false when error.message is present', () => {
+          const doc: LogDocumentOverview = {
+            ...createBaseDoc(),
+            [fieldConstants.LOG_LEVEL_FIELD]: 'info',
+            [fieldConstants.ERROR_MESSAGE_FIELD]: 'Error occurred',
+          };
+
+          expect(hasErrorFields(doc)).toBe(false);
+        });
       });
     });
   });
@@ -262,14 +292,29 @@ describe('hasErrorFields', () => {
     });
 
     describe('without error log level', () => {
-      it('returns false when exception.type is present', () => {
-        const doc: LogDocumentOverview = {
-          ...createBaseDoc(),
-          [fieldConstants.LOG_LEVEL_FIELD]: 'info',
-          [fieldConstants.OTEL_EXCEPTION_TYPE_FIELD]: 'ProgrammingError',
-        };
+      describe('with error event type', () => {
+        it('returns true when exception.type is present', () => {
+          const doc: LogDocumentOverview = {
+            ...createBaseDoc(),
+            [fieldConstants.LOG_LEVEL_FIELD]: 'info',
+            [fieldConstants.PROCESSOR_EVENT_FIELD]: 'error',
+            [fieldConstants.OTEL_EXCEPTION_TYPE_FIELD]: 'ProgrammingError',
+          } as any;
 
-        expect(hasErrorFields(doc)).toBe(false);
+          expect(hasErrorFields(doc)).toBe(true);
+        });
+      });
+
+      describe('without error event type', () => {
+        it('returns false when exception.type is present', () => {
+          const doc: LogDocumentOverview = {
+            ...createBaseDoc(),
+            [fieldConstants.LOG_LEVEL_FIELD]: 'info',
+            [fieldConstants.OTEL_EXCEPTION_TYPE_FIELD]: 'ProgrammingError',
+          };
+
+          expect(hasErrorFields(doc)).toBe(false);
+        });
       });
     });
   });
@@ -298,12 +343,111 @@ describe('hasErrorFields', () => {
     });
 
     describe('without error log level', () => {
-      it('returns false when error.grouping_name is present', () => {
+      describe('with error event type', () => {
+        it('returns true when error.grouping_name is present', () => {
+          const doc: LogDocumentOverview = {
+            ...createBaseDoc(),
+            [fieldConstants.LOG_LEVEL_FIELD]: 'info',
+            [fieldConstants.OTEL_EVENT_NAME_FIELD]: 'exception',
+            [fieldConstants.ERROR_GROUPING_NAME_FIELD]: 'error-group-123',
+          } as any;
+
+          expect(hasErrorFields(doc)).toBe(true);
+        });
+      });
+
+      describe('without error event type', () => {
+        it('returns false when error.grouping_name is present', () => {
+          const doc: LogDocumentOverview = {
+            ...createBaseDoc(),
+            [fieldConstants.LOG_LEVEL_FIELD]: 'info',
+            [fieldConstants.ERROR_GROUPING_NAME_FIELD]: 'error-group-123',
+          };
+
+          expect(hasErrorFields(doc)).toBe(false);
+        });
+      });
+    });
+  });
+
+  describe('event.type fields', () => {
+    describe('with error event type', () => {
+      it('returns true when processor.event is "error" and error.culprit is present', () => {
         const doc: LogDocumentOverview = {
           ...createBaseDoc(),
-          [fieldConstants.LOG_LEVEL_FIELD]: 'info',
+          [fieldConstants.PROCESSOR_EVENT_FIELD]: 'error',
+          [fieldConstants.ERROR_CULPRIT_FIELD]: 'charge',
+        } as any;
+
+        expect(hasErrorFields(doc)).toBe(true);
+      });
+
+      it('returns true when event_name is "exception" and error.message is present', () => {
+        const doc: LogDocumentOverview = {
+          ...createBaseDoc(),
+          event_name: 'exception',
+          [fieldConstants.ERROR_MESSAGE_FIELD]: 'Error occurred',
+        } as any;
+
+        expect(hasErrorFields(doc)).toBe(true);
+      });
+
+      it('returns true when processor.event is "error" and exception.type is present', () => {
+        const doc: LogDocumentOverview = {
+          ...createBaseDoc(),
+          [fieldConstants.PROCESSOR_EVENT_FIELD]: 'error',
+          [fieldConstants.OTEL_EXCEPTION_TYPE_FIELD]: 'ProgrammingError',
+        } as any;
+
+        expect(hasErrorFields(doc)).toBe(true);
+      });
+
+      it('returns true when event_name includes "error" and error.grouping_name is present', () => {
+        const doc: LogDocumentOverview = {
+          ...createBaseDoc(),
+          [fieldConstants.OTEL_EVENT_NAME_FIELD]: 'error_event',
           [fieldConstants.ERROR_GROUPING_NAME_FIELD]: 'error-group-123',
-        };
+        } as any;
+
+        expect(hasErrorFields(doc)).toBe(true);
+      });
+
+      it('returns false when processor.event is "error" but no error fields are present', () => {
+        const doc: LogDocumentOverview = {
+          ...createBaseDoc(),
+          [fieldConstants.PROCESSOR_EVENT_FIELD]: 'error',
+        } as any;
+
+        expect(hasErrorFields(doc)).toBe(false);
+      });
+
+      it('returns false when event_name is "exception" but no error fields are present', () => {
+        const doc: LogDocumentOverview = {
+          ...createBaseDoc(),
+          event_name: 'exception',
+        } as any;
+
+        expect(hasErrorFields(doc)).toBe(false);
+      });
+    });
+
+    describe('without error event type', () => {
+      it('returns false when processor.event is "transaction" and error fields are present', () => {
+        const doc: LogDocumentOverview = {
+          ...createBaseDoc(),
+          [fieldConstants.PROCESSOR_EVENT_FIELD]: 'transaction',
+          [fieldConstants.ERROR_CULPRIT_FIELD]: 'charge',
+        } as any;
+
+        expect(hasErrorFields(doc)).toBe(false);
+      });
+
+      it('returns false when event_name is "span" and error fields are present', () => {
+        const doc: LogDocumentOverview = {
+          ...createBaseDoc(),
+          [fieldConstants.OTEL_EVENT_NAME_FIELD]: 'span',
+          [fieldConstants.ERROR_MESSAGE_FIELD]: 'Error occurred',
+        } as any;
 
         expect(hasErrorFields(doc)).toBe(false);
       });
@@ -358,6 +502,16 @@ describe('hasErrorFields', () => {
       };
 
       expect(hasErrorFields(doc)).toBe(false);
+    });
+
+    it('returns true when log level is missing but event.type is error and error fields are present', () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        [fieldConstants.PROCESSOR_EVENT_FIELD]: 'error',
+        [fieldConstants.ERROR_CULPRIT_FIELD]: 'charge',
+      } as any;
+
+      expect(hasErrorFields(doc)).toBe(true);
     });
   });
 
