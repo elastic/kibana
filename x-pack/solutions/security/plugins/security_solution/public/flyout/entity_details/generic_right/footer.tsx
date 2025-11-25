@@ -11,6 +11,7 @@ import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { NewChatByTitle } from '@kbn/elastic-assistant';
+import { AttachmentType } from '@kbn/onechat-common/attachments';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
 import { TakeAction } from '../shared/components/take_action';
 import {
@@ -23,6 +24,10 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ASK_AI_ASSISTANT } from '../shared/translations';
 import { useAssetInventoryAssistant } from './hooks/use_asset_inventory_assistant';
 import type { AssetCriticalityLevel } from '../../../../common/api/entity_analytics/asset_criticality';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { NewAgentBuilderAttachment } from '../../../agent_builder/components/new_agent_builder_attachment';
+import { useAgentBuilderAttachment } from '../../../agent_builder/hooks/use_agent_builder_attachment';
+import { ENTITY_ANALYSIS } from '../../../agent_builder/components/prompts';
 
 interface GenericEntityFlyoutFooterProps {
   entityId: EntityEcs['id'];
@@ -47,6 +52,22 @@ export const GenericEntityFlyoutFooter = ({
     entityFields,
     isPreviewMode,
     assetCriticalityLevel,
+  });
+
+  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
+
+  const attachmentData = useMemo(() => {
+    return {
+      ...entityFields,
+      'asset.criticality': assetCriticalityLevel ? [assetCriticalityLevel] : undefined,
+    };
+  }, [entityFields, assetCriticalityLevel]);
+
+  // TODO confirm behavior with @maxcold  https://github.com/elastic/kibana/pull/234324
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
+    attachmentType: AttachmentType.text,
+    attachmentData,
+    attachmentPrompt: ENTITY_ANALYSIS,
   });
 
   const openDocumentFlyout = useCallback(() => {
@@ -89,7 +110,14 @@ export const GenericEntityFlyoutFooter = ({
 
           {showAssistant && (
             <EuiFlexItem grow={false}>
-              <NewChatByTitle showAssistantOverlay={showAssistantOverlay} text={ASK_AI_ASSISTANT} />
+              {isAgentBuilderEnabled ? (
+                <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+              ) : (
+                <NewChatByTitle
+                  showAssistantOverlay={showAssistantOverlay}
+                  text={ASK_AI_ASSISTANT}
+                />
+              )}
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
