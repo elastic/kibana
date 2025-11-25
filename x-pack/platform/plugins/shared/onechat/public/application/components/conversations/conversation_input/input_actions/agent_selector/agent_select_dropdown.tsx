@@ -5,25 +5,22 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiText,
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopoverFooter,
-  EuiButton,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { AgentDefinition } from '@kbn/onechat-common';
-import { appPaths } from '../../../../../utils/app_paths';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigation } from '../../../../../hooks/use_navigation';
+import { appPaths } from '../../../../../utils/app_paths';
 import { labels } from '../../../../../utils/i18n';
 
 const agentSelectId = 'agentBuilderAgentSelect';
@@ -85,7 +82,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
   );
 
   const panelStyles = css`
-    inline-size: calc(${euiTheme.size.xxl} * 7);
+    inline-size: calc(${euiTheme.size.xxxl} * 10);
   `;
 
   return (
@@ -105,46 +102,35 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
       <EuiSelectable
         id={agentSelectId}
         aria-label={labels.conversations.selectAgentAriaLabel}
-        searchable={false}
+        searchable
         options={options}
         onChange={handleAgentChange}
         singleSelection
       >
-        {(list) => (
+        {(list, search) => (
           <>
             <EuiPopoverTitle paddingSize="s">
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={true}>{search}</EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText
-                    css={css`
-                      font-weight: ${euiTheme.font.weight.bold};
-                    `}
-                    size="xs"
-                  >
-                    {labels.conversations.title}
-                  </EuiText>
+                  <EuiButtonIcon
+                    iconType="plus"
+                    color="text"
+                    aria-label={labels.conversations.createAnAgent}
+                    href={createOnechatUrl(appPaths.agents.new)}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    <EuiLink href={createOnechatUrl(appPaths.agents.list)}>
-                      {labels.conversations.manageAgents}
-                    </EuiLink>
-                  </EuiText>
+                  <EuiButtonIcon
+                    iconType="gear"
+                    color="text"
+                    aria-label={labels.conversations.manageAgents}
+                    href={createOnechatUrl(appPaths.agents.list)}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPopoverTitle>
             {list}
-            <EuiPopoverFooter paddingSize="s">
-              <EuiButton
-                iconSide="left"
-                iconType="plus"
-                size="s"
-                fullWidth
-                href={createOnechatUrl(appPaths.agents.new)}
-              >
-                {labels.conversations.createAnAgent}
-              </EuiButton>
-            </EuiPopoverFooter>
           </>
         )}
       </EuiSelectable>
