@@ -14587,10 +14587,10 @@
   resolved "https://registry.yarnpkg.com/@types/stats-lite/-/stats-lite-2.2.2.tgz#8b84b20615cd2ee5bf66c1a3e561217ddd7dd019"
   integrity sha512-T+bzT53cbPbE0hMlCNZux1QuH6hQFNHIwRMTQCu3YPG0W7XUfeoULHl+TehJCjaxQx8cz4wlg5oQsOyG9LvZmA==
 
-"@types/statuses@^2.0.4":
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/@types/statuses/-/statuses-2.0.5.tgz#f61ab46d5352fd73c863a1ea4e1cef3b0b51ae63"
-  integrity sha512-jmIUGWrAiwu3dZpxntxieC+1n/5c3mjrImkmOSQ2NC5uP6cYO4aAZDdSmRcI5C1oiTmqlZGHC+/NmJrKogbP5A==
+"@types/statuses@^2.0.6":
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/@types/statuses/-/statuses-2.0.6.tgz#66748315cc9a96d63403baa8671b2c124f8633aa"
+  integrity sha512-xMAgYwceFhRA2zY+XbEA7mxYbA093wdiW8Vu6gZPGWy9cmOyU9XesH1tNcEWsKFd5Vzrqx5T3D38PWx1FIIXkA==
 
 "@types/styled-components@^5.1.0":
   version "5.1.0"
@@ -22141,10 +22141,15 @@ graphql-tag@^2.12.6:
   dependencies:
     tslib "^2.1.0"
 
-graphql@^16.10.0, graphql@^16.11.0, graphql@^16.8.1:
+graphql@^16.10.0, graphql@^16.11.0:
   version "16.11.0"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.11.0.tgz#96d17f66370678027fdf59b2d4c20b4efaa8a633"
   integrity sha512-mS1lbMsxgQj6hge1XZ6p7GPhbrtFwUFYi3wRzXAC/FmYnyXMTvvI3td3rjmQ2u8ewXueaSvRPWaEcgVVOT9Jnw==
+
+graphql@^16.12.0:
+  version "16.12.0"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.12.0.tgz#28cc2462435b1ac3fdc6976d030cef83a0c13ac7"
+  integrity sha512-DKKrynuQRne0PNpEbzuEdHlYOMksHSUI8Zc9Unei5gTsMNA2/vMpoMz/yKba50pejK56qj98qM0SjYxAKi13gQ==
 
 gtoken@^7.0.0:
   version "7.1.0"
@@ -26528,17 +26533,17 @@ msgpackr@^1.11.2:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@~2.11.6:
-  version "2.11.6"
-  resolved "https://registry.yarnpkg.com/msw/-/msw-2.11.6.tgz#9ae647c3b050fbc1e1a2300dee15b3605c14c25d"
-  integrity sha512-MCYMykvmiYScyUm7I6y0VCxpNq1rgd5v7kG8ks5dKtvmxRUUPjribX6mUoUNBbM5/3PhUyoelEWiKXGOz84c+w==
+msw@~2.12.1:
+  version "2.12.3"
+  resolved "https://registry.yarnpkg.com/msw/-/msw-2.12.3.tgz#fdafc6d1245f3e04bd04aeb97a2979320e03240c"
+  integrity sha512-/5rpGC0eK8LlFqsHaBmL19/PVKxu/CCt8pO1vzp9X6SDLsRDh/Ccudkf3Ur5lyaKxJz9ndAx+LaThdv0ySqB6A==
   dependencies:
     "@inquirer/confirm" "^5.0.0"
     "@mswjs/interceptors" "^0.40.0"
     "@open-draft/deferred-promise" "^2.2.0"
-    "@types/statuses" "^2.0.4"
+    "@types/statuses" "^2.0.6"
     cookie "^1.0.2"
-    graphql "^16.8.1"
+    graphql "^16.12.0"
     headers-polyfill "^4.0.2"
     is-node-process "^1.2.0"
     outvariant "^1.4.3"
@@ -26548,7 +26553,7 @@ msw@~2.11.6:
     statuses "^2.0.2"
     strict-event-emitter "^0.5.1"
     tough-cookie "^6.0.0"
-    type-fest "^4.26.1"
+    type-fest "^5.2.0"
     until-async "^3.0.2"
     yargs "^17.7.2"
 
@@ -32287,6 +32292,11 @@ table@^6.8.1, table@^6.8.2:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
+tagged-tag@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/tagged-tag/-/tagged-tag-1.0.0.tgz#a0b5917c2864cba54841495abfa3f6b13edcf4d6"
+  integrity sha512-yEFYrVhod+hdNyx7g5Bnkkb0G6si8HJurOoOEgC8B/O0uXLHlaey/65KRv6cuWBNhBgHKAROVpc7QyYqE5gFng==
+
 tapable@^2.0.0, tapable@^2.1.1, tapable@^2.2.0, tapable@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/tapable/-/tapable-2.2.1.tgz#1967a73ef4060a82f12ab96af86d52fdb76eeca0"
@@ -33043,10 +33053,17 @@ type-fest@^1.2.1:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-1.4.0.tgz#e9fb813fe3bf1744ec359d55d1affefa76f14be1"
   integrity sha512-yGSza74xk0UG8k+pLh5oeoYirvIiWo5t0/o3zHHAO2tRDiZcxWP7fywNlXhqb6/r6sWvwi+RsyQMWhVLe4BVuA==
 
-type-fest@^4.15.0, type-fest@^4.17.0, type-fest@^4.18.2, type-fest@^4.26.1:
+type-fest@^4.15.0, type-fest@^4.17.0, type-fest@^4.18.2:
   version "4.26.1"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-4.26.1.tgz#a4a17fa314f976dd3e6d6675ef6c775c16d7955e"
   integrity sha512-yOGpmOAL7CkKe/91I5O3gPICmJNLJ1G4zFYVAsRHg7M64biSnPtRj0WNQt++bRkjYOqjWXrhnUw1utzmVErAdg==
+
+type-fest@^5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-5.2.0.tgz#7dd671273eb6bcba71af0babe303e8dbab60f795"
+  integrity sha512-xxCJm+Bckc6kQBknN7i9fnP/xobQRsRQxR01CztFkp/h++yfVxUUcmMgfR2HttJx/dpWjS9ubVuyspJv24Q9DA==
+  dependencies:
+    tagged-tag "^1.0.0"
 
 type-is@^2.0.0:
   version "2.0.0"
