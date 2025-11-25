@@ -32,6 +32,7 @@ import {
   CloudConnectorGetListError,
   CloudConnectorInvalidVarsError,
   CloudConnectorDeleteError,
+  rethrowIfInstanceOrWrap,
 } from '../errors';
 
 import { appContextService } from './app_context';
@@ -66,6 +67,15 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
   }
 
   /**
+   * Normalizes a cloud connector name by trimming and collapsing consecutive spaces
+   * @param name - The name to normalize
+   * @returns The normalized name
+   */
+  private static normalizeName(name: string): string {
+    return name.trim().replace(/\s+/g, ' ');
+  }
+
+  /**
    * Validates and normalizes a cloud connector name, checking for duplicates
    * @param soClient - Saved objects client
    * @param name - The name to validate
@@ -78,8 +88,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     name: string,
     excludeId?: string
   ): Promise<string> {
-    // Normalize the name: trim and collapse consecutive spaces
-    const normalizedName = name.trim().replace(/\s+/g, ' ');
+    const normalizedName = CloudConnectorService.normalizeName(name);
 
     // Check for existing connector with same name (case-insensitive, normalized)
     const existingConnectors = await this.getList(soClient);
@@ -89,7 +98,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       if (excludeId && c.id === excludeId) {
         return false;
       }
-      return c.name.trim().replace(/\s+/g, ' ').toLowerCase() === normalizedNameLower;
+      return CloudConnectorService.normalizeName(c.name).toLowerCase() === normalizedNameLower;
     });
 
     if (duplicateConnectorName) {
@@ -148,13 +157,15 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         ...savedObject.attributes,
       };
     } catch (error) {
-      logger.error('Failed to create cloud connector', error.message);
-      // If it's already a CloudConnectorCreateError, just rethrow it to avoid double wrapping
-      if (error instanceof CloudConnectorCreateError) {
-        throw error;
-      }
-      throw new CloudConnectorCreateError(
-        `CloudConnectorService Failed to create cloud connector: ${error.message}\n${error.stack}`
+      logger.error(
+        `Failed to create cloud connector: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      rethrowIfInstanceOrWrap(
+        error,
+        CloudConnectorCreateError,
+        'CloudConnectorService Failed to create cloud connector'
       );
     }
   }
@@ -288,14 +299,12 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         ...mergedAttributes,
       };
     } catch (error) {
-      logger.error('Failed to update cloud connector', error.message);
-      // If it's already a CloudConnectorCreateError, just rethrow it to avoid double wrapping
-      if (error instanceof CloudConnectorCreateError) {
-        throw error;
-      }
-      throw new CloudConnectorCreateError(
-        `Failed to update cloud connector: ${error.message}\n${error.stack}`
+      logger.error(
+        `Failed to update cloud connector: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
+      rethrowIfInstanceOrWrap(error, CloudConnectorCreateError, 'Failed to update cloud connector');
     }
   }
 
