@@ -67,7 +67,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
     return capabilities.manageReporting.show === true;
   }, [capabilities]);
 
-  const canEditSchedule = useCallback(
+  const canManageSchedule = useCallback(
     (item: ScheduledReportApiJSON) => {
       if (hasManageReportingPrivilege) return true;
 
@@ -230,7 +230,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
           'data-test-subj': (item) => `reportEditConfig-${item.id}`,
           type: 'icon',
           icon: 'calendar',
-          available: (item) => canEditSchedule(item),
+          available: (item) => canManageSchedule(item),
           onClick: (item) => setReportAndOpenConfigFlyout(item),
         },
         {
@@ -243,7 +243,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
           'data-test-subj': (item) => `reportViewConfig-${item.id}`,
           type: 'icon',
           icon: 'calendar',
-          available: (item) => !canEditSchedule(item),
+          available: (item) => !canManageSchedule(item),
           onClick: (item) => setReportAndOpenConfigFlyout(item),
         },
         {
@@ -290,7 +290,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
             }
           ),
           'data-test-subj': (item) => `reportDisableSchedule-${item.id}`,
-          available: (item) => item.enabled,
+          available: (item) => item.enabled && canManageSchedule(item),
           type: 'icon',
           icon: 'cross',
           onClick: (item) => setReportAndOpenDisableModal(item),
@@ -306,7 +306,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
             }
           ),
           'data-test-subj': (item) => `reportEnableSchedule-${item.id}`,
-          available: (item) => !item.enabled,
+          available: (item) => !item.enabled && canManageSchedule(item),
           type: 'icon',
           icon: 'cross',
           onClick: (item) => {
@@ -323,6 +323,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
               defaultMessage: 'Delete report schedule',
             }
           ),
+          available: (item) => canManageSchedule(item),
           'data-test-subj': (item) => `reportDeleteSchedule-${item.id}`,
           type: 'icon',
           icon: 'trash',
@@ -428,7 +429,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
       />
       {selectedReport &&
         isConfigFlyOutOpen &&
-        (canEditSchedule(selectedReport) ? (
+        (canManageSchedule(selectedReport) ? (
           <EditScheduledReportFlyout
             onClose={() => {
               unSetReportAndCloseConfigFlyout();

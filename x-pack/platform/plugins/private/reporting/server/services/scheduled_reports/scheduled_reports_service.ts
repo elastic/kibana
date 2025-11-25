@@ -343,7 +343,7 @@ export class ScheduledReportsService {
               id: so.id,
             });
             this._auditLog({
-              action: ScheduledReportAuditAction.DISABLE,
+              action: ScheduledReportAuditAction.ENABLE,
               id: so.id,
               name: so?.attributes?.title,
               error: new Error(so.error.message),
@@ -371,7 +371,7 @@ export class ScheduledReportsService {
     } catch (error) {
       throw this.responseFactory.customError({
         statusCode: 500,
-        body: `Error listing scheduled reports: ${error.message}`,
+        body: `Error enabling scheduled reports: ${error.message}`,
       });
     }
   }
