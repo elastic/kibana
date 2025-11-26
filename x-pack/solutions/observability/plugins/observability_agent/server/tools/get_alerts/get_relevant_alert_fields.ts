@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import datemath from '@elastic/datemath';
 import type { Logger } from '@kbn/core/server';
 import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -65,8 +64,8 @@ export async function getRelevantAlertFields({
         ? {
             range: {
               '@timestamp': {
-                gte: datemath.parse(start)!.toISOString(),
-                lt: datemath.parse(end)!.toISOString(),
+                gte: start,
+                lt: end,
               },
             },
           }
