@@ -112,7 +112,7 @@ export const DisconnectClusterModal: React.FC<DisconnectClusterModalProps> = ({
             aria-label={i18n.translate(
               'xpack.cloudConnect.connectedServices.disconnect.confirmationInputAriaLabel',
               {
-                defaultMessage: 'Type cluster ID to confirm disconnection',
+                defaultMessage: 'Type the cluster ID to confirm disconnection',
               }
             )}
           />
