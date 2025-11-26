@@ -10,6 +10,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { StreamDescription } from '../../stream_detail_features/stream_description';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { RedirectTo } from '../../redirect_to';
 import type { ManagementTabs } from './wrapper';
 import { Wrapper } from './wrapper';
@@ -20,6 +21,7 @@ import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
+import { StreamDetailAttachments } from '../../stream_detail_attachments';
 
 const classicStreamManagementSubTabs = [
   'processing',
@@ -29,6 +31,7 @@ const classicStreamManagementSubTabs = [
   'significantEvents',
   'schemaEditor',
   'schema',
+  'attachments',
   'references',
 ] as const;
 
@@ -54,6 +57,10 @@ export function ClassicStreamDetailManagement({
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
+
+  const {
+    features: { attachments },
+  } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
@@ -149,6 +156,15 @@ export function ClassicStreamDetailManagement({
       </EuiToolTip>
     ),
   };
+
+  if (attachments?.enabled) {
+    tabs.attachments = {
+      content: <StreamDetailAttachments definition={definition} />,
+      label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
+        defaultMessage: 'Attachments',
+      }),
+    };
+  }
 
   if (otherTabs.significantEvents) {
     tabs.significantEvents = otherTabs.significantEvents;

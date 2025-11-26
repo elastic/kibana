@@ -35,6 +35,21 @@ export {
   type InferenceEndpointAutocompleteItem,
 } from './src/inference_endpoint_autocomplete_types';
 
-export { REGISTRY_EXTENSIONS_ROUTE, SOURCES_TYPES } from './src/constants';
+export {
+  REGISTRY_EXTENSIONS_ROUTE,
+  SOURCES_AUTOCOMPLETE_ROUTE,
+  TIMEFIELD_ROUTE,
+  SOURCES_TYPES,
+  LOOKUP_INDEX_CREATE_ROUTE,
+  LOOKUP_INDEX_UPDATE_ROUTE,
+  LOOKUP_INDEX_RECREATE_ROUTE,
+  LOOKUP_INDEX_PRIVILEGES_ROUTE,
+} from './src/constants';
 
-export { type ESQLTelemetryCallbacks } from './src/esql_telemetry_types';
+export {
+  type ESQLTelemetryCallbacks,
+  ControlTriggerSource,
+  QuerySource,
+  TelemetryControlCancelledReason,
+  type TelemetryQuerySubmittedProps,
+} from './src/esql_telemetry_types';

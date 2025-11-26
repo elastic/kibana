@@ -8,7 +8,7 @@ import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type BoundInferenceClient } from '@kbn/inference-common';
 import { conditionToQueryDsl } from '@kbn/streamlang';
-import type { Feature, Streams } from '@kbn/streams-schema';
+import type { Streams, SystemFeature } from '@kbn/streams-schema';
 import { GenerateStreamDescriptionPrompt } from './prompt';
 
 /**
@@ -21,13 +21,15 @@ export async function generateStreamDescription({
   end,
   esClient,
   inferenceClient,
+  signal,
 }: {
   stream: Streams.all.Definition;
-  feature?: Feature;
+  feature?: SystemFeature;
   start: number;
   end: number;
   esClient: ElasticsearchClient;
   inferenceClient: BoundInferenceClient;
+  signal: AbortSignal;
 }): Promise<string> {
   const analysis = await describeDataset({
     start,
@@ -45,6 +47,7 @@ export async function generateStreamDescription({
       ),
     },
     prompt: GenerateStreamDescriptionPrompt,
+    abortSignal: signal,
   });
 
   return response.content;

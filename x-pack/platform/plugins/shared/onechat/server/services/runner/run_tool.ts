@@ -9,19 +9,17 @@ import type { ZodObject } from '@kbn/zod';
 import type { ToolResult, ToolType } from '@kbn/onechat-common';
 import { createBadRequestError } from '@kbn/onechat-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
+import type { RunToolReturn, ToolHandlerContext, ToolHandlerReturn } from '@kbn/onechat-server';
 import type {
-  ToolHandlerContext,
   ScopedRunnerRunToolsParams,
-  ToolHandlerReturn,
-  RunToolReturn,
-} from '@kbn/onechat-server';
+  ScopedRunnerRunInternalToolParams,
+} from '@kbn/onechat-server/runner';
 import { createErrorResult } from '@kbn/onechat-server';
+import type { InternalToolDefinition } from '@kbn/onechat-server/tools';
 import { getToolResultId } from '@kbn/onechat-server/tools';
-import { registryToProvider } from '../tools/utils';
-import { forkContextForToolRun } from './utils/run_context';
-import { createToolEventEmitter } from './utils/events';
+import { ToolCallSource } from '../../telemetry';
+import { forkContextForToolRun, createToolEventEmitter, createToolProvider } from './utils';
 import type { RunnerManager } from './runner';
-import type { InternalToolDefinition } from '../tools/tool_provider';
 
 export const runTool = async <TParams = Record<string, unknown>>({
   toolExecutionParams,
@@ -30,11 +28,8 @@ export const runTool = async <TParams = Record<string, unknown>>({
   toolExecutionParams: ScopedRunnerRunToolsParams<TParams>;
   parentManager: RunnerManager;
 }): Promise<RunToolReturn> => {
-  const { toolId, toolParams } = toolExecutionParams;
-
-  const context = forkContextForToolRun({ parentContext: parentManager.context, toolId });
-  const manager = parentManager.createChild(context);
-  const { toolsService, request, resultStore } = manager.deps;
+  const { trackingService, toolsService, request } = parentManager.deps;
+  const { toolId, ...scopedParams } = toolExecutionParams;
 
   const toolRegistry = await toolsService.getRegistry({ request });
   const tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<
@@ -42,6 +37,30 @@ export const runTool = async <TParams = Record<string, unknown>>({
     any,
     ZodObject<any>
   >;
+
+  if (trackingService) {
+    try {
+      trackingService.trackToolCall(toolId, ToolCallSource.API);
+    } catch (error) {
+      /* empty */
+    }
+  }
+
+  return runInternalTool({ toolExecutionParams: { ...scopedParams, tool }, parentManager });
+};
+
+export const runInternalTool = async <TParams = Record<string, unknown>>({
+  toolExecutionParams,
+  parentManager,
+}: {
+  toolExecutionParams: ScopedRunnerRunInternalToolParams<TParams>;
+  parentManager: RunnerManager;
+}): Promise<RunToolReturn> => {
+  const { tool, toolParams } = toolExecutionParams;
+
+  const context = forkContextForToolRun({ parentContext: parentManager.context, toolId: tool.id });
+  const manager = parentManager.createChild(context);
+  const { resultStore } = manager.deps;
 
   const { results } = await withExecuteToolSpan(
     tool.id,
@@ -51,12 +70,12 @@ export const runTool = async <TParams = Record<string, unknown>>({
       const validation = schema.safeParse(toolParams);
       if (validation.error) {
         throw createBadRequestError(
-          `Tool ${toolId} was called with invalid parameters: ${validation.error.message}`
+          `Tool ${tool.id} was called with invalid parameters: ${validation.error.message}`
         );
       }
 
       const toolHandlerContext = await createToolHandlerContext<TParams>({
-        toolExecutionParams,
+        toolExecutionParams: { ...toolExecutionParams, toolId: tool.id },
         manager,
       });
 
@@ -96,24 +115,16 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   manager: RunnerManager;
 }): Promise<ToolHandlerContext> => {
   const { onEvent } = toolExecutionParams;
-  const {
-    request,
-    defaultConnectorId,
-    elasticsearch,
-    modelProviderFactory,
-    toolsService,
-    resultStore,
-    logger,
-  } = manager.deps;
+  const { request, elasticsearch, modelProvider, toolsService, resultStore, logger } = manager.deps;
   return {
     request,
     logger,
     esClient: elasticsearch.client.asScoped(request),
-    modelProvider: modelProviderFactory({ request, defaultConnectorId }),
+    modelProvider,
     runner: manager.getRunner(),
-    toolProvider: registryToProvider({
+    toolProvider: createToolProvider({
       registry: await toolsService.getRegistry({ request }),
-      getRunner: manager.getRunner,
+      runner: manager.getRunner(),
       request,
     }),
     resultStore: resultStore.asReadonly(),

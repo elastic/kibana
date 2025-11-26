@@ -36,16 +36,6 @@ export class ConsolePageObject extends FtrService {
     return await editorViewDiv[line].getVisibleText();
   }
 
-  public async getCurrentLineNumber() {
-    const textArea = await this.getTextArea();
-    const styleAttribute = (await textArea.getAttribute('style')) ?? '';
-    const height = parseFloat(styleAttribute.replace(/.*height: ([+-]?\d+(\.\d+)?).*/, '$1'));
-    const top = parseFloat(styleAttribute.replace(/.*top: ([+-]?\d+(\.\d+)?).*/, '$1'));
-    // calculate the line number by dividing the top position by the line height
-    // and adding 1 because line numbers start at 1
-    return Math.ceil(top / height) + 1;
-  }
-
   public async clearEditorText() {
     const textArea = await this.getTextArea();
     await textArea.clickMouseButton();

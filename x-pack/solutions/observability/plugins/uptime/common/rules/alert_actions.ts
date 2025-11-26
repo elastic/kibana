@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ServiceNowActionParams } from '@kbn/stack-connectors-plugin/server/connector_types';
+import type { ServiceNowActionParams } from '@kbn/connector-schemas/servicenow';
 import type { ActionParamsType as EmailActionParams } from '@kbn/connector-schemas/email';
 import type { ActionParamsType as IndexActionParams } from '@kbn/connector-schemas/es_index';
 import type { ActionParamsType as JiraActionParams } from '@kbn/connector-schemas/jira';
@@ -133,17 +133,31 @@ export function populateAlertActions({
 
 function getSlackAPIActionParams(
   { defaultActionMessage, defaultRecoveryMessage }: Translations,
-  allowedChannels: Array<{ id: string; name: string }>,
+  allowedChannels: Array<{ id?: string; name: string }>,
   recovery = false
 ): SlackApiActionParams {
   return {
     subAction: 'postMessage',
     subActionParams: {
       text: recovery ? defaultRecoveryMessage : defaultActionMessage,
-      channelIds: allowedChannels.map((channel) => channel.id),
+      channels: getValidChannels(allowedChannels),
     },
   };
 }
+
+const getValidChannels = (allowedChannels: Array<{ id?: string; name: string }>) => {
+  return allowedChannels.reduce((channels, channel) => {
+    if (channel.name) {
+      channels.push(channel.name);
+    }
+
+    if (channel.id) {
+      channels.push(channel.id);
+    }
+
+    return channels;
+  }, [] as string[]);
+};
 
 function getIndexActionParams(translations: Translations, recovery = false): IndexActionParams {
   if (recovery) {

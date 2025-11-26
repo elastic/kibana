@@ -128,5 +128,9 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
       border-radius: ${euiTheme.border.radius.medium} !important;
       margin-right: 2px;
     }
+
+    .monaco-editor .suggest-widget .monaco-list .monaco-list-row .suggest-icon {
+      color: ${euiTheme.colors.textParagraph} !important;
+    }
   `;
 };

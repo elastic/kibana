@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import { uniq } from 'lodash';
 import { matchesSpecialFunction } from '../utils';
 import { shouldSuggestComma, type CommaContext } from '../comma_decision_engine';
@@ -93,13 +93,6 @@ function tryExclusiveSuggestions(
   const { functionDefinition, paramDefinitions } = functionParamContext;
   const { options } = ctx;
 
-  const suggestions: ISuggestionItem[] = [];
-
-  // Special case: COUNT function suggests "*" (e.g., "COUNT(*)")
-  if (matchesSpecialFunction(functionDefinition!.name, 'count')) {
-    suggestions.push(allStarConstant);
-  }
-
   // Enum values are exclusive - if present, return only those
   const enumItems = buildEnumValueSuggestions(
     paramDefinitions,
@@ -112,7 +105,7 @@ function tryExclusiveSuggestions(
     return enumItems;
   }
 
-  return suggestions;
+  return [];
 }
 
 /** Build composite suggestions: literals + fields + functions */
@@ -120,6 +113,7 @@ async function buildCompositeSuggestions(
   functionParamContext: FunctionParamContext,
   ctx: ExpressionContext
 ): Promise<ISuggestionItem[]> {
+  const { functionDefinition } = functionParamContext;
   const { options } = ctx;
 
   // Determine configuration
@@ -129,6 +123,11 @@ async function buildCompositeSuggestions(
   );
 
   const suggestions: ISuggestionItem[] = [];
+
+  // Special case: COUNT function suggests "*" (e.g., "COUNT(*)")
+  if (matchesSpecialFunction(functionDefinition!.name, 'count')) {
+    suggestions.push(allStarConstant);
+  }
 
   // Add literal suggestions
   suggestions.push(...buildLiteralSuggestions(functionParamContext, ctx, config));
@@ -290,7 +289,11 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
           ?.filter(({ type }) => type === controlType)
           .map(({ key }) => `${prefix}${key}`) ?? [];
 
-      const controlSuggestions = getControlSuggestion(controlType, variableNames);
+      const controlSuggestions = getControlSuggestion(
+        controlType,
+        ControlTriggerSource.SMART_SUGGESTION,
+        variableNames
+      );
       suggestions.push(...controlSuggestions);
     }
   }

@@ -113,6 +113,7 @@ const SecurityAttackDiscoveryAlertOptional = rt.partial({
       id: schemaString,
     })
   ),
+  'kibana.alert.attack_ids': schemaStringArray,
   'kibana.alert.case_ids': schemaStringArray,
   'kibana.alert.consecutive_matches': schemaStringOrNumber,
   'kibana.alert.duration.us': schemaStringOrNumber,
