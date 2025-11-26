@@ -12,8 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { ServiceCard } from './details_card';
 import { DisableServiceModal } from './disable_service_modal';
 import { useServiceActions } from './use_service_actions';
-import { SERVICE_CONFIG } from '../../../../../common/constants';
-import { useCloudConnectedAppContext } from '../../../app_context';
 
 interface ServiceMetadata {
   documentation_url?: string;
@@ -43,7 +41,6 @@ interface ServicesSectionProps {
 }
 
 export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onServiceUpdate }) => {
-  const { hasConfigurePermission } = useCloudConnectedAppContext();
   const {
     loadingService,
     disableModalService,
@@ -56,11 +53,10 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onSe
 
   // Build service cards array
   const allServiceCards = [
-    // EIS Service
     {
       key: 'eis',
-      title: i18n.translate(SERVICE_CONFIG.eis.titleId, {
-        defaultMessage: SERVICE_CONFIG.eis.titleDefault,
+      title: i18n.translate('xpack.cloudConnect.services.eis.title', {
+        defaultMessage: 'Elastic Inference Service',
       }),
       enabled: services.eis?.enabled ?? false,
       supported: services.eis?.support?.supported ?? true,
@@ -69,11 +65,10 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onSe
             defaultMessage: 'This service is not supported with the current cluster configuration.',
           })
         : undefined,
-      region: services.eis?.config?.region_id
-        ? `AWS, N. Virginia (${services.eis.config.region_id})`
-        : undefined,
-      description: i18n.translate(SERVICE_CONFIG.eis.descriptionId, {
-        defaultMessage: SERVICE_CONFIG.eis.descriptionDefault,
+      region: services.eis?.config?.region_id ?? undefined,
+      description: i18n.translate('xpack.cloudConnect.services.eis.description', {
+        defaultMessage:
+          'Tap into AI-powered search and chat—no ML model deployment or management needed.',
       }),
       learnMoreUrl: services.eis?.metadata?.documentation_url,
       serviceUrl: services.eis?.metadata?.service_url,
@@ -81,17 +76,16 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onSe
       onDisable: () =>
         showDisableModal(
           'eis',
-          i18n.translate(SERVICE_CONFIG.eis.titleId, {
-            defaultMessage: SERVICE_CONFIG.eis.titleDefault,
+          i18n.translate('xpack.cloudConnect.services.eis.title', {
+            defaultMessage: 'Elastic Inference Service',
           })
         ),
       isLoading: loadingService === 'eis',
     },
-    // AutoOps Service
     {
       key: 'auto_ops',
-      title: i18n.translate(SERVICE_CONFIG.auto_ops.titleId, {
-        defaultMessage: SERVICE_CONFIG.auto_ops.titleDefault,
+      title: i18n.translate('xpack.cloudConnect.services.autoOps.title', {
+        defaultMessage: 'AutoOps',
       }),
       enabled: services.auto_ops?.enabled ?? false,
       supported: services.auto_ops?.support?.supported ?? true,
@@ -100,9 +94,10 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onSe
             defaultMessage: 'This service is not supported with the current cluster configuration.',
           })
         : undefined,
-      region: services.auto_ops?.config?.region_id ? services.auto_ops.config.region_id : undefined,
-      description: i18n.translate(SERVICE_CONFIG.auto_ops.descriptionId, {
-        defaultMessage: SERVICE_CONFIG.auto_ops.descriptionDefault,
+      region: services.auto_ops?.config?.region_id ?? undefined,
+      description: i18n.translate('xpack.cloudConnect.services.autoOps.description', {
+        defaultMessage:
+          'Get instant cluster diagnostics, performance tips, and cost-saving recommendations—no extra management needed.',
       }),
       learnMoreUrl: services.auto_ops?.metadata?.documentation_url,
       serviceUrl: services.auto_ops?.metadata?.service_url,
@@ -114,8 +109,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onSe
       onDisable: () =>
         showDisableModal(
           'auto_ops',
-          i18n.translate(SERVICE_CONFIG.auto_ops.titleId, {
-            defaultMessage: SERVICE_CONFIG.auto_ops.titleDefault,
+          i18n.translate('xpack.cloudConnect.services.autoOps.title', {
+            defaultMessage: 'AutoOps',
           })
         ),
       isLoading: loadingService === 'auto_ops',
@@ -123,15 +118,16 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onSe
     // Synthetics Service (hardcoded as coming soon)
     {
       key: 'synthetics',
-      title: i18n.translate(SERVICE_CONFIG.synthetics.titleId, {
-        defaultMessage: SERVICE_CONFIG.synthetics.titleDefault,
+      title: i18n.translate('xpack.cloudConnect.services.synthetics.title', {
+        defaultMessage: 'Synthetic',
       }),
       enabled: false,
       badge: i18n.translate('xpack.cloudConnect.services.comingSoon', {
         defaultMessage: 'COMING SOON',
       }),
-      description: i18n.translate(SERVICE_CONFIG.synthetics.descriptionId, {
-        defaultMessage: SERVICE_CONFIG.synthetics.descriptionDefault,
+      description: i18n.translate('xpack.cloudConnect.services.synthetics.description', {
+        defaultMessage:
+          'Proactive, automated monitoring for apps and APIs—catch issues early, get deep diagnostics, and integrate easily.',
       }),
       isCardDisabled: true,
     },

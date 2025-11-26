@@ -49,10 +49,22 @@ export const STEP_3_TITLE = i18n.translate('xpack.cloudConnect.wizard.step3.titl
   defaultMessage: 'Paste your Cloud Connect API key and connect',
 });
 
-export const STEP_3_DESCRIPTION = i18n.translate('xpack.cloudConnect.wizard.step3.description', {
-  defaultMessage:
-    'Paste your generated Cloud Connect API key in the field below and click Connect.',
-});
+export const getStep3Description = () => (
+  <FormattedMessage
+    id="xpack.cloudConnect.wizard.step3.description"
+    defaultMessage="Paste your generated Cloud Connect API key in the following field and click {connect}."
+    values={{
+      connect: (
+        <b>
+          <FormattedMessage
+            id="xpack.cloudConnect.wizard.step3.descriptionConnectLabel"
+            defaultMessage="Connect"
+          />
+        </b>
+      ),
+    }}
+  />
+);
 
 export const SIGN_UP_BUTTON = i18n.translate('xpack.cloudConnect.wizard.signUpButton', {
   defaultMessage: 'Sign up',

@@ -24,13 +24,13 @@ import {
   STEP_1_DESCRIPTION_1,
   STEP_1_DESCRIPTION_2,
   STEP_2_TITLE,
+  getStep2Description,
   STEP_3_TITLE,
-  STEP_3_DESCRIPTION,
+  getStep3Description,
   SIGN_UP_BUTTON,
   LOGIN_BUTTON,
   CONNECT_BUTTON,
   API_KEY_PLACEHOLDER,
-  getStep2Description,
 } from './translations';
 
 interface ConnectionWizardProps {
@@ -122,7 +122,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
     children: (
       <>
         <EuiText size="s">
-          <p>{STEP_3_DESCRIPTION}</p>
+          <p>{getStep3Description()}</p>
         </EuiText>
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="s">

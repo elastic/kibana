@@ -20,33 +20,3 @@ export const CLOUD_CONNECT_API_KEY_ID = '239feff0-7e11-4413-b800-f1f1621e9c69';
  * Base URL for the Cloud API
  */
 export const CLOUD_API_BASE_URL = 'https://console.qa.cld.elstc.co/api/v1';
-
-/**
- * Service configuration mapping
- */
-export const SERVICE_CONFIG = {
-  auto_ops: {
-    key: 'auto_ops',
-    titleId: 'xpack.cloudConnect.services.autoOps.title',
-    titleDefault: 'AutoOps',
-    descriptionId: 'xpack.cloudConnect.services.autoOps.description',
-    descriptionDefault:
-      'Get instant cluster diagnostics, performance tips, and cost-saving recommendations—no extra management needed.',
-  },
-  eis: {
-    key: 'eis',
-    titleId: 'xpack.cloudConnect.services.eis.title',
-    titleDefault: 'Elastic Inference Service',
-    descriptionId: 'xpack.cloudConnect.services.eis.description',
-    descriptionDefault:
-      'Tap into AI-powered search and chat—no ML model deployment or management needed.',
-  },
-  synthetics: {
-    key: 'synthetics',
-    titleId: 'xpack.cloudConnect.services.synthetics.title',
-    titleDefault: 'Synthetic',
-    descriptionId: 'xpack.cloudConnect.services.synthetics.description',
-    descriptionDefault:
-      'Proactive, automated monitoring for apps and APIs—catch issues early, get deep diagnostics, and integrate easily.',
-  },
-} as const;

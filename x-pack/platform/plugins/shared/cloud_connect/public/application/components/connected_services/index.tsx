@@ -73,7 +73,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   onDisconnect,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { notifications, hasConfigurePermission } = useCloudConnectedAppContext();
+  const { notifications, hasConfigurePermission, docLinks } = useCloudConnectedAppContext();
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isDisconnectModalVisible, setIsDisconnectModalVisible] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
@@ -173,7 +173,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
             values={{
               learnMore: (
                 <EuiLink
-                  href="https://www.elastic.co/guide/en/cloud/current/ec-cloud-connect.html"
+                  href={docLinks.links.cloud.cloudConnect}
                   target="_blank"
                   external
                 >

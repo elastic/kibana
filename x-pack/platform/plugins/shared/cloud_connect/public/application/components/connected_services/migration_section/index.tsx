@@ -15,9 +15,12 @@ import {
   EuiButton,
   EuiPanel,
 } from '@elastic/eui';
+import { useCloudConnectedAppContext } from '../../../app_context';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const MigrationSection: React.FC = () => {
+  const { docLinks } = useCloudConnectedAppContext();
+
   const benefits = [
     {
       title: (
@@ -90,7 +93,7 @@ export const MigrationSection: React.FC = () => {
           <EuiButton
             color="text"
             size="s"
-            href="https://www.elastic.co/cloud"
+            href={docLinks.links.cloud.cloudConnect}
             target="_blank"
             iconType="popout"
             iconSide="right"
