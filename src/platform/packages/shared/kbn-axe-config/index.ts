@@ -50,3 +50,8 @@ export const AXE_OPTIONS = {
     },
   },
 };
+
+export const AXE_IMPACT_LEVELS: Array<'minor' | 'moderate' | 'serious' | 'critical'> = [
+  'critical',
+  'serious',
+];

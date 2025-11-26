@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test, expect } from '../../../../../src/playwright';
+import { test, expect } from '../../../../src/playwright';
 
-test.describe('runA11yScan', () => {
+test.describe('runA11yScan', { tag: ['@svlSecurity', '@ess'] }, () => {
   test('returns violations array (empty for basic accessible markup)', async ({ page }) => {
     await page.setContent(`
       <main>

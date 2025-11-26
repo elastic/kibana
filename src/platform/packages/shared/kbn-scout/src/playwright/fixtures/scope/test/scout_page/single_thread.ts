@@ -12,7 +12,7 @@ import type { Page } from '@playwright/test';
 import { test as base } from '@playwright/test';
 import type { ScoutPage } from '.';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
-import { keyTo, checkA11y } from '../../../../utils';
+import { keyTo, checkA11y, type RunA11yScanOptions } from '../../../../utils';
 import type { KibanaUrl, ScoutLogger } from '../../worker';
 
 /**
@@ -109,7 +109,7 @@ export function extendPlaywrightPage({
     return await keyTo(page, selector, key, maxElementsToTraverse);
   };
 
-  extendedPage.checkA11y = () => checkA11y(page, kbnUrl);
+  extendedPage.checkA11y = (options) => checkA11y(page, kbnUrl, options);
 
   // Method to type text with delay character by character
   extendedPage.typeWithDelay = (selector: string, text: string, options?: { delay: number }) =>

@@ -9,7 +9,7 @@
 
 import type { Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { AXE_OPTIONS } from '@kbn/axe-config';
+import { AXE_OPTIONS, AXE_IMPACT_LEVELS } from '@kbn/axe-config';
 
 import type { KibanaUrl } from '../../..';
 
@@ -30,8 +30,6 @@ export interface A11yViolation {
 export interface RunA11yScanOptions {
   /** Optional CSS selectors to exclude from scan */
   exclude?: string[];
-  /** Optional result impact levels to include (e.g. \['critical','serious'\]) */
-  impactLevels?: Array<'minor' | 'moderate' | 'serious' | 'critical'>;
   /** Timeout in ms for the scan (defaults 10000) */
   timeoutMs?: number;
 }
@@ -42,13 +40,15 @@ export interface RunA11yScanResult {
 
 export const runA11yScan = async (
   page: Page,
-  { exclude = [], impactLevels, timeoutMs = 10000 }: RunA11yScanOptions = {}
+  { exclude = [], timeoutMs = 10000 }: RunA11yScanOptions = {}
 ): Promise<RunA11yScanResult> => {
   const builder = new AxeBuilder({ page });
   builder.options(AXE_OPTIONS);
 
-  for (const selector of exclude) {
-    builder.exclude(selector);
+  if (exclude) {
+    for (const selector of exclude) {
+      builder.exclude(selector);
+    }
   }
 
   const analysisPromise = builder.analyze();
@@ -70,10 +70,10 @@ export const runA11yScan = async (
 
   let violations = (result.violations as A11yViolation[]) || [];
 
-  if (impactLevels && impactLevels.length) {
-    const allowed = new Set(impactLevels);
+  if (AXE_IMPACT_LEVELS?.length) {
+    const allowed = new Set(AXE_IMPACT_LEVELS);
     violations = violations.filter(
-      (v) => v.impact && allowed.has(v.impact as (typeof impactLevels)[number])
+      (v) => v.impact && allowed.has(v.impact as (typeof AXE_IMPACT_LEVELS)[number])
     );
   }
 
@@ -83,13 +83,19 @@ export const runA11yScan = async (
 /**
  * Assert helper usable inside tests.
  */
-export const checkA11y = async (page: Page, kbnUrl?: KibanaUrl) => {
-  const { violations } = await runA11yScan(page);
+export const checkA11y = async (page: Page, kbnUrl?: KibanaUrl, options?: RunA11yScanOptions) => {
+  const { violations } = await runA11yScan(page, options);
 
   return {
-    violations: violations.map((v) => ({
-      ...v,
-      url: kbnUrl?.toString(),
-    })),
+    violations: violations.map(
+      (v) =>
+        `Accessibility violation: ${v.id} (${v.impact}): \n
+          ${v.helpUrl}\n
+          ${v.description}\n
+          ${kbnUrl} \n
+          Nodes:\n${v.nodes
+            .map((n) => `    ${n.target.join(', ')} -> ${n.failureSummary}`)
+            .join('\n')}`
+    ),
   };
 };
