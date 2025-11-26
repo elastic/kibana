@@ -87,7 +87,10 @@ describe('buildResultsAgentsQuery', () => {
       });
 
       expect(result.aggs?.unique_agents).toHaveProperty('composite');
-      expect(result.aggs?.unique_agents.composite).toHaveProperty('size', COMPOSITE_AGGREGATION_BATCH_SIZE);
+      expect(result.aggs?.unique_agents.composite).toHaveProperty(
+        'size',
+        COMPOSITE_AGGREGATION_BATCH_SIZE
+      );
       expect(result.aggs?.unique_agents.composite).toHaveProperty('sources');
     });
 
@@ -436,7 +439,9 @@ describe('buildResultsAgentsQuery', () => {
     });
 
     it('should handle startDate at exact search window boundary', () => {
-      const startDate = moment().subtract(ACTION_EXPIRATION.SEARCH_WINDOW_MINUTES, 'minutes').toISOString();
+      const startDate = moment()
+        .subtract(ACTION_EXPIRATION.SEARCH_WINDOW_MINUTES, 'minutes')
+        .toISOString();
 
       const result = buildResultsAgentsQuery({
         actionId: 'action-boundary',

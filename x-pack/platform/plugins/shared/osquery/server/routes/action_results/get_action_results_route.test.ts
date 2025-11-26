@@ -624,12 +624,14 @@ describe('getActionResultsRoute', () => {
 
     it('should calculate hybrid aggregations combining Fleet and results data', async () => {
       const mockActionResults: ActionResultsStrategyResponse = {
-        edges: Array(70).fill(null).map((_, i) => ({
-          _id: `result-${i}`,
-          _index: '.logs-osquery_manager.action.responses',
-          _source: {},
-          fields: { agent_id: [`fleet-agent-${i}`] },
-        })),
+        edges: Array(70)
+          .fill(null)
+          .map((_, i) => ({
+            _id: `result-${i}`,
+            _index: '.logs-osquery_manager.action.responses',
+            _source: {},
+            fields: { agent_id: [`fleet-agent-${i}`] },
+          })),
         total: 70,
         rawResponse: {
           aggregations: {
@@ -644,10 +646,12 @@ describe('getActionResultsRoute', () => {
                   ],
                 },
                 unique_agent_ids: {
-                  buckets: Array(70).fill(null).map((_, i) => ({
-                    key: `fleet-agent-${i}`,
-                    doc_count: 1,
-                  })),
+                  buckets: Array(70)
+                    .fill(null)
+                    .map((_, i) => ({
+                      key: `fleet-agent-${i}`,
+                      doc_count: 1,
+                    })),
                 },
               },
             },
@@ -655,7 +659,9 @@ describe('getActionResultsRoute', () => {
         },
         inspect: { dsl: [] },
         resultsAgentBuckets: [
-          ...Array(70).fill(null).map((_, i) => ({ key: `fleet-agent-${i}`, doc_count: 30 })),
+          ...Array(70)
+            .fill(null)
+            .map((_, i) => ({ key: `fleet-agent-${i}`, doc_count: 30 })),
           { key: 'inferred-1', doc_count: 50 },
           { key: 'inferred-2', doc_count: 50 },
           { key: 'inferred-3', doc_count: 50 },
@@ -668,7 +674,10 @@ describe('getActionResultsRoute', () => {
       const mockRequest = createMockRequest({
         actionId: 'test-action-id',
         query: {
-          agentIds: Array(100).fill(null).map((_, i) => `agent-${i}`).join(','),
+          agentIds: Array(100)
+            .fill(null)
+            .map((_, i) => `agent-${i}`)
+            .join(','),
           totalAgents: 100,
         },
       });
@@ -737,12 +746,14 @@ describe('getActionResultsRoute', () => {
       const inferredAgents = 5000;
 
       const mockActionResults: ActionResultsStrategyResponse = {
-        edges: Array(fleetAgents).fill(null).map((_, i) => ({
-          _id: `result-${i}`,
-          _index: '.logs-osquery_manager.action.responses',
-          _source: {},
-          fields: { agent_id: [`fleet-${i}`] },
-        })),
+        edges: Array(fleetAgents)
+          .fill(null)
+          .map((_, i) => ({
+            _id: `result-${i}`,
+            _index: '.logs-osquery_manager.action.responses',
+            _source: {},
+            fields: { agent_id: [`fleet-${i}`] },
+          })),
         total: fleetAgents,
         rawResponse: {
           aggregations: {
@@ -757,10 +768,12 @@ describe('getActionResultsRoute', () => {
                   ],
                 },
                 unique_agent_ids: {
-                  buckets: Array(fleetAgents).fill(null).map((_, i) => ({
-                    key: `fleet-${i}`,
-                    doc_count: 1,
-                  })),
+                  buckets: Array(fleetAgents)
+                    .fill(null)
+                    .map((_, i) => ({
+                      key: `fleet-${i}`,
+                      doc_count: 1,
+                    })),
                 },
               },
             },
@@ -768,8 +781,12 @@ describe('getActionResultsRoute', () => {
         },
         inspect: { dsl: [] },
         resultsAgentBuckets: [
-          ...Array(fleetAgents).fill(null).map((_, i) => ({ key: `fleet-${i}`, doc_count: 5 })),
-          ...Array(inferredAgents).fill(null).map((_, i) => ({ key: `inferred-${i}`, doc_count: 5 })),
+          ...Array(fleetAgents)
+            .fill(null)
+            .map((_, i) => ({ key: `fleet-${i}`, doc_count: 5 })),
+          ...Array(inferredAgents)
+            .fill(null)
+            .map((_, i) => ({ key: `inferred-${i}`, doc_count: 5 })),
         ],
         resultsTotalDocs: 75000,
       } as unknown as ActionResultsStrategyResponse;
@@ -779,7 +796,10 @@ describe('getActionResultsRoute', () => {
       const mockRequest = createMockRequest({
         actionId: 'test-action-id',
         query: {
-          agentIds: Array(20000).fill(null).map((_, i) => `agent-${i}`).join(','),
+          agentIds: Array(20000)
+            .fill(null)
+            .map((_, i) => `agent-${i}`)
+            .join(','),
           totalAgents: 20000,
         },
       });
