@@ -13,6 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AddPanelFlyout } from './add_panel_flyout';
 import type { DashboardApi } from '../../../../dashboard_api/types';
+import { BehaviorSubject } from 'rxjs';
 
 jest.mock('../get_menu_item_groups', () => ({}));
 
@@ -49,25 +50,27 @@ describe('AddPanelFlyout', () => {
     beforeEach(() => {
       onClickMock.mockClear();
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../get_menu_item_groups').getMenuItemGroups = async () => [
-        {
-          id: 'panel1',
-          title: 'App 1',
-          items: [
-            {
-              icon: 'icon1',
-              id: 'mockFactory',
-              name: 'Factory 1',
-              description: 'Factory 1 description',
-              'data-test-subj': 'myItem',
-              onClick: onClickMock,
-              order: 0,
-            },
-          ],
-          order: 10,
-          'data-test-subj': 'dashboardEditorMenu-group1Group',
-        },
-      ];
+      require('../get_menu_item_groups').getMenuItemGroups = async () => ({
+        groups$: new BehaviorSubject([
+          {
+            id: 'panel1',
+            title: 'App 1',
+            items: [
+              {
+                icon: 'icon1',
+                id: 'mockFactory',
+                name: 'Factory 1',
+                description: 'Factory 1 description',
+                'data-test-subj': 'myItem',
+                onClick: onClickMock,
+                order: 0,
+              },
+            ],
+            order: 10,
+            'data-test-subj': 'dashboardEditorMenu-group1Group',
+          },
+        ]),
+      });
     });
 
     test('calls item onClick handler when item is clicked', async () => {

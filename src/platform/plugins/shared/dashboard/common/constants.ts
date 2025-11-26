@@ -20,9 +20,9 @@ export const DEFAULT_DASHBOARD_OPTIONS = {
   hidePanelTitles: false,
   useMargins: true,
   autoApplyFilters: true,
-  syncColors: true,
+  syncColors: false,
   syncCursor: true,
-  syncTooltips: true,
+  syncTooltips: false,
 } as const;
 
 export const UI_SETTINGS = {

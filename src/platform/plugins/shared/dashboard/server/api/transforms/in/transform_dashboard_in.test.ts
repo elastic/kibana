@@ -7,33 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { StickyControlState } from '@kbn/controls-schemas';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
 import type { DashboardState } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
+
+jest.mock('../../../kibana_services', () => ({
+  ...jest.requireActual('../../../kibana_services'),
+  embeddableService: {
+    getTransforms: jest.fn(),
+  },
+}));
 
 describe('transformDashboardIn', () => {
   test('should transform dashboard state to saved object', () => {
     const dashboardState: DashboardState = {
       controlGroupInput: {
-        labelPosition: 'twoLine',
         controls: [
           {
-            controlConfig: { anyKey: 'some value' },
+            config: { anyKey: 'some value' },
             grow: false,
-            id: 'foo',
+            uid: 'foo',
             order: 0,
-            // @ts-expect-error Test type
             type: 'type1',
             width: 'small',
-          },
+          } as unknown as StickyControlState,
         ],
-        ignoreParentSettings: {
-          ignoreFilters: true,
-          ignoreQuery: true,
-          ignoreTimerange: true,
-          ignoreValidations: true,
-        },
-        autoApplySelections: false,
       },
       description: 'description',
       query: { query: 'test', language: 'KQL' },
@@ -43,6 +42,7 @@ describe('transformDashboardIn', () => {
         syncColors: false,
         syncTooltips: false,
         syncCursor: false,
+        autoApplyFilters: true,
       },
       panels: [
         {
@@ -71,16 +71,13 @@ describe('transformDashboardIn', () => {
       Object {
         "attributes": Object {
           "controlGroupInput": Object {
-            "controlStyle": "twoLine",
-            "ignoreParentSettingsJSON": "{\\"ignoreFilters\\":true,\\"ignoreQuery\\":true,\\"ignoreTimerange\\":true,\\"ignoreValidations\\":true}",
-            "panelsJSON": "{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"anyKey\\":\\"some value\\"}}}",
-            "showApplySelections": true,
+            "panelsJSON": "{\\"foo\\":{\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"grow\\":false,\\"explicitInput\\":{\\"anyKey\\":\\"some value\\"}}}",
           },
           "description": "description",
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"KQL\\"}}",
           },
-          "optionsJSON": "{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncTooltips\\":false,\\"syncCursor\\":false}",
+          "optionsJSON": "{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncTooltips\\":false,\\"syncCursor\\":false,\\"autoApplyFilters\\":true}",
           "panelsJSON": "[{\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"version\\":\\"2\\",\\"embeddableConfig\\":{\\"enhancements\\":{},\\"savedObjectId\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
           "refreshInterval": Object {
             "pause": true,
@@ -113,7 +110,7 @@ describe('transformDashboardIn', () => {
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",
           },
-          "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"syncColors\\":false,\\"syncCursor\\":true,\\"syncTooltips\\":false}",
+          "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"autoApplyFilters\\":true,\\"syncColors\\":false,\\"syncCursor\\":true,\\"syncTooltips\\":false}",
           "panelsJSON": "[]",
           "timeRestore": false,
           "title": "title",

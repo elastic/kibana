@@ -84,6 +84,7 @@ describe('initializeSettingsManager', () => {
         expect(changes).toMatchInlineSnapshot(`
           Object {
             "options": Object {
+              "autoApplyFilters": true,
               "hidePanelTitles": true,
               "syncColors": false,
               "syncCursor": true,

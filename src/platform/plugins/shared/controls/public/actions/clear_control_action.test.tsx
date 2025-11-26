@@ -59,7 +59,7 @@ describe('ClearControlAction', () => {
     });
 
     test('should be compatible if there is a selection', async () => {
-      const hasSelections = { ...controlApi, hasSelections$: true };
+      const hasSelections = { ...controlApi, hasSelections$: new BehaviorSubject(true) };
 
       expect(await clearControlAction.isCompatible({ embeddable: hasSelections })).toBe(true);
     });

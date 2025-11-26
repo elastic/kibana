@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isEqual, omit } from 'lodash';
+import { isEqual } from 'lodash';
 import { useCallback, useEffect, useRef } from 'react';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -14,6 +14,7 @@ import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-g
 import { skip } from 'rxjs';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
+  extractEsqlVariables,
   internalStateActions,
   parseControlGroupJson,
   useCurrentTabAction,
@@ -78,38 +79,30 @@ export const useESQLVariables = ({
 
     const inputSubscription = controlGroupApi.getInput$().subscribe((input) => {
       if (input && input.initialChildControlState) {
-        const currentTabControlState = input.initialChildControlState;
+        const controlGroupState = input.initialChildControlState as ControlPanelsState;
+
         stateContainer.savedSearchState.updateControlState({
-          nextControlState: currentTabControlState,
+          nextControlState: controlGroupState,
         });
-        dispatch(
-          setControlGroupState({
-            controlGroupState: currentTabControlState,
-          })
-        );
-      }
-    });
+        dispatch(setControlGroupState({ controlGroupState }));
 
-    // update the ES|QL query with new variables, if necessary
-    if (pendingQueryUpdate.current) {
-      onUpdateESQLQuery(pendingQueryUpdate.current);
-      pendingQueryUpdate.current = undefined;
-    }
+        if (pendingQueryUpdate.current) {
+          onUpdateESQLQuery(pendingQueryUpdate.current);
+          pendingQueryUpdate.current = undefined;
+        }
 
-    const variableSubscription = controlGroupApi.esqlVariables$.subscribe((newVariables) => {
-      // ignore meta data when comparing and storing filters, since we do not use it
-      const variablesWithoutMetaData = newVariables.map((variable) => omit(variable, 'meta'));
-      if (!isEqual(variablesWithoutMetaData, currentEsqlVariables)) {
-        // Update the ESQL variables in the internal state
-        dispatch(setEsqlVariables({ esqlVariables: variablesWithoutMetaData }));
-        stateContainer.dataState.fetch();
+        const newVariables = extractEsqlVariables(controlGroupState);
+        if (!isEqual(newVariables, currentEsqlVariables)) {
+          // Update the ESQL variables in the internal state
+          dispatch(setEsqlVariables({ esqlVariables: newVariables }));
+          stateContainer.dataState.fetch();
+        }
       }
     });
 
     return () => {
       inputSubscription.unsubscribe();
       savedSearchResetSubscription.unsubscribe();
-      variableSubscription.unsubscribe();
     };
   }, [
     controlGroupApi,

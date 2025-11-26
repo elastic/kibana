@@ -30,6 +30,8 @@ describe('TimeSliderControlApi', () => {
 
   const dashboardApi = {
     timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
+    lastSavedStateForChild$: jest.fn(),
+    getLastSavedStateForChild: jest.fn(),
   };
   const factory = getTimesliderControlFactory();
   const finalizeApi = getMockedFinalizeApi<TimeSliderControlState, TimeSliderControlApi>(
@@ -76,6 +78,7 @@ describe('TimeSliderControlApi', () => {
       parentApi: dashboardApi,
     });
 
+    expect(api.appliedTimeslice$.value).toBeDefined();
     expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
       '2024-06-09T06:00:00.000Z'
     );
@@ -234,10 +237,9 @@ describe('TimeSliderControlApi', () => {
       timesliceStartAsPercentageOfTimeRange: 0.25,
       timesliceEndAsPercentageOfTimeRange: 0.5,
     };
-    // TODO: Fix this portion of the test in upcoming PR
-    // dashboardApi.setLastSavedStateForChild(uuid, {
-    //   rawState,
-    // });
+    dashboardApi.getLastSavedStateForChild.mockReturnValueOnce({
+      rawState,
+    });
     const { api } = await factory.buildEmbeddable({
       initialState: { rawState },
       finalizeApi,
@@ -259,8 +261,7 @@ describe('TimeSliderControlApi', () => {
     expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
       '2024-06-09T18:00:00.000Z'
     );
-
-    api.resetUnsavedChanges();
+    await api.resetUnsavedChanges();
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(new Date(api.appliedTimeslice$.value![0]).toISOString()).toEqual(
