@@ -265,101 +265,85 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   | NewTermsRuleFields<T> => {
   switch (type) {
     case 'machine_learning':
-      const {
-        index,
-        queryBar,
-        threshold,
-        threatIndex,
-        threatQueryBar,
-        threatMapping,
-        eqlOptions,
-        newTermsFields,
-        historyWindowSize,
-        ...mlRuleFields
-      } = fields;
-      return mlRuleFields;
+      return omit(fields, [
+        'index',
+        'queryBar',
+        'threshold',
+        'threatIndex',
+        'threatQueryBar',
+        'threatMapping',
+        'eqlOptions',
+        'newTermsFields',
+        'historyWindowSize',
+      ]);
     case 'threshold':
-      const {
-        anomalyThreshold,
-        machineLearningJobId,
-        threatIndex,
-        threatQueryBar,
-        threatMapping,
-        eqlOptions,
-        newTermsFields,
-        historyWindowSize,
-        ...thresholdRuleFields
-      } = fields;
-      return thresholdRuleFields;
+      return omit(fields, [
+        'anomalyThreshold',
+        'machineLearningJobId',
+        'threatIndex',
+        'threatQueryBar',
+        'threatMapping',
+        'eqlOptions',
+        'newTermsFields',
+        'historyWindowSize',
+      ]);
     case 'threat_match':
-      const {
-        anomalyThreshold,
-        machineLearningJobId,
-        threshold,
-        eqlOptions,
-        newTermsFields,
-        historyWindowSize,
-        ...threatMatchRuleFields
-      } = fields;
-      return threatMatchRuleFields;
+      return omit(fields, [
+        'anomalyThreshold',
+        'machineLearningJobId',
+        'threshold',
+        'eqlOptions',
+        'newTermsFields',
+        'historyWindowSize',
+      ]);
     case 'query':
     case 'saved_query':
-      const {
-        anomalyThreshold,
-        machineLearningJobId,
-        threshold,
-        threatIndex,
-        threatQueryBar,
-        threatMapping,
-        eqlOptions,
-        newTermsFields,
-        historyWindowSize,
-        ...queryRuleFields
-      } = fields;
-      return queryRuleFields;
+      return omit(fields, [
+        'anomalyThreshold',
+        'machineLearningJobId',
+        'threshold',
+        'threatIndex',
+        'threatQueryBar',
+        'threatMapping',
+        'eqlOptions',
+        'newTermsFields',
+        'historyWindowSize',
+      ]);
     case 'eql':
-      const {
-        anomalyThreshold,
-        machineLearningJobId,
-        threshold,
-        threatIndex,
-        threatQueryBar,
-        threatMapping,
-        newTermsFields,
-        historyWindowSize,
-        ...eqlRuleFields
-      } = fields;
-      return eqlRuleFields;
-
+      return omit(fields, [
+        'anomalyThreshold',
+        'machineLearningJobId',
+        'threshold',
+        'threatIndex',
+        'threatQueryBar',
+        'threatMapping',
+        'newTermsFields',
+        'historyWindowSize',
+      ]);
     case 'new_terms':
-      const {
-        anomalyThreshold,
-        machineLearningJobId,
-        threshold,
-        threatIndex,
-        threatQueryBar,
-        threatMapping,
-        eqlOptions,
-        ...newTermsRuleFields
-      } = fields;
-      return newTermsRuleFields;
-
+      return omit(fields, [
+        'anomalyThreshold',
+        'machineLearningJobId',
+        'threshold',
+        'threatIndex',
+        'threatQueryBar',
+        'threatMapping',
+        'eqlOptions',
+      ]);
     case 'esql':
-      const {
-        anomalyThreshold,
-        machineLearningJobId,
-        threshold,
-        threatIndex,
-        threatQueryBar,
-        threatMapping,
-        newTermsFields,
-        historyWindowSize,
-        eqlOptions,
-        index,
-        dataViewId,
-        ...esqlRuleFields
-      } = fields;
-      return esqlRuleFields;
+      return omit(fields, [
+        'anomalyThreshold',
+        'machineLearningJobId',
+        'threshold',
+        'threatIndex',
+        'threatQueryBar',
+        'threatMapping',
+        'newTermsFields',
+        'historyWindowSize',
+        'eqlOptions',
+        'index',
+        'dataViewId',
+      ]);
   }
   assertUnreachable(type);
 };
