@@ -109,28 +109,8 @@ export function getGapAutoFillRunOutcome(consolidated: AggregatedByRuleEntry[]):
   };
 }
 
-export async function handleCancellation({
-  abortController,
-  aggregatedByRule,
-  logEvent,
-}: {
-  abortController: AbortController;
-  aggregatedByRule: Map<string, AggregatedByRuleEntry>;
-  logEvent: GapAutoFillSchedulerEventLogger;
-}): Promise<boolean> {
-  if (!abortController.signal.aborted) return false;
-
-  const consolidated = resultsFromMap(aggregatedByRule);
-
-  await logEvent({
-    status: GAP_AUTO_FILL_STATUS.SUCCESS,
-    results: consolidated,
-    message: `Gap Auto Fill Scheduler cancelled by timeout | Results: ${formatConsolidatedSummary(
-      consolidated
-    )}`,
-  });
-
-  return true;
+export function isCancelled(abortController: AbortController): boolean {
+  return abortController.signal.aborted;
 }
 
 export async function filterGapsWithOverlappingBackfills(

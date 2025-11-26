@@ -1177,7 +1177,6 @@ describe('Gap Auto Fill Scheduler Task', () => {
 
       expect(result.state).toBe(SchedulerLoopState.CANCELLED);
       expect(result.aggregatedByRule.size).toBe(0);
-      expect(logEvent).toHaveBeenCalledTimes(1);
       expect(mockedFindGaps.findGapsSearchAfter).not.toHaveBeenCalled();
     });
   });
@@ -1316,7 +1315,6 @@ describe('Gap Auto Fill Scheduler Task', () => {
         Array.from(aggregatedByRule.entries())
       );
       expect(mockedFindGaps.findGapsSearchAfter).not.toHaveBeenCalled();
-      expect(logEvent).toHaveBeenCalledTimes(1);
     });
   });
 });
