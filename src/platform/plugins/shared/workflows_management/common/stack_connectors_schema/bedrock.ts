@@ -16,11 +16,8 @@ import { z } from '@kbn/zod';
 
 // Bedrock connector parameter schema
 export const BedrockParamsSchema = z.object({
-  subAction: z.enum(['run', 'test']),
-  subActionParams: z.object({
-    body: z.string(),
-    model: z.string().optional(),
-  }),
+  body: z.string(),
+  model: z.string().optional(),
 });
 
 // Bedrock connector response schema

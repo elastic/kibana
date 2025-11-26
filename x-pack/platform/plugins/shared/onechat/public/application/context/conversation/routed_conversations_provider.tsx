@@ -12,7 +12,6 @@ import { useQueryClient } from '@kbn/react-query';
 import { ConversationContext } from './conversation_context';
 import type { LocationState } from '../../hooks/use_navigation';
 import { newConversationId } from '../../utils/new_conversation';
-import { queryKeys } from '../../query_keys';
 import { appPaths } from '../../utils/app_paths';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
@@ -37,13 +36,13 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
 
   const location = useLocation<LocationState>();
   const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;
+  const initialMessage = location.state?.initialMessage;
 
   // Get search params for agent ID syncing
   const [searchParams] = useSearchParams();
   const { agents } = useOnechatAgents();
 
   const { navigateToOnechatUrl } = useNavigation();
-  const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const shouldAllowConversationRedirectRef = useRef(true);
   const agentIdSyncedRef = useRef(false);
 
@@ -87,7 +86,6 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
 
   const conversationActions = useConversationActions({
     conversationId,
-    queryKey,
     queryClient,
     conversationsService,
     onConversationCreated,
@@ -117,8 +115,9 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       shouldStickToBottom,
       isEmbeddedContext: false,
       conversationActions,
+      initialMessage,
     }),
-    [conversationId, shouldStickToBottom, conversationActions]
+    [conversationId, shouldStickToBottom, conversationActions, initialMessage]
   );
 
   return (

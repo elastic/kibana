@@ -10,19 +10,12 @@
 import expect from '@kbn/expect';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 
-import type { NavigationID as MlNavId } from '@kbn/default-nav-ml';
-import type { NavigationID as AlNavId } from '@kbn/default-nav-analytics';
-import type { NavigationID as MgmtNavId } from '@kbn/default-nav-management';
-import type { NavigationID as DevNavId } from '@kbn/default-nav-devtools';
 import type { TourStepId } from '@kbn/core-chrome-navigation-tour';
 
-// use this for nicer type suggestions, but allow any string anyway
-type NavigationId = MlNavId | AlNavId | MgmtNavId | DevNavId | string;
+type NavigationId = string;
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
-
-const getSectionIdTestSubj = (sectionId: NavigationId) => `~nav-item-${sectionId}`;
 
 const TIMEOUT_CHECK = 3000;
 
@@ -33,35 +26,13 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
   const log = ctx.getService('log');
   const kibanaServer = ctx.getService('kibanaServer');
 
-  async function getSideNavVersion(): Promise<'v1' | 'v2'> {
-    const sidenav = await testSubjects.find('~projectSideNav', TIMEOUT_CHECK);
-    const dataTestSubj = await sidenav.getAttribute('data-test-subj');
-    if (dataTestSubj && dataTestSubj.includes('projectSideNavV2')) return 'v2';
-    return 'v1';
-  }
-
-  async function isV2() {
-    const version = await getSideNavVersion();
-    return version === 'v2';
-  }
-
-  async function noopIfV2() {
-    if (await isV2()) {
-      log.debug('SolutionNavigation.sidenav - skipping action for v2 sidenav');
-      return true;
-    }
-    return false;
-  }
-
   async function expandMoreIfNeeded() {
-    if (!(await isV2())) return;
-
     log.debug(
       'SolutionNavigation.sidenav.expandMoreIfNeeded - checking if "More" menu needs to be expanded'
     );
-    if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: TIMEOUT_CHECK })) {
+    if (await testSubjects.exists('kbnChromeNav-moreMenuTrigger', { timeout: TIMEOUT_CHECK })) {
       await retry.try(async () => {
-        const moreMenuItem = await testSubjects.find('sideNavMoreMenuItem', TIMEOUT_CHECK);
+        const moreMenuItem = await testSubjects.find('kbnChromeNav-moreMenuTrigger', TIMEOUT_CHECK);
         let isExpanded = await moreMenuItem.getAttribute('aria-expanded');
         log.debug(
           'SolutionNavigation.sidenav.expandMoreIfNeeded - More Popover Visible',
@@ -79,15 +50,14 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
   }
 
   async function collapseMoreIfNeeded() {
-    if (!(await isV2())) return;
     log.debug(
       'SolutionNavigation.sidenav.collapseMoreIfNeeded - checking if "More" menu needs to be collapsed'
     );
-    if (await testSubjects.exists('sideNavMoreMenuItem', { timeout: TIMEOUT_CHECK })) {
+    if (await testSubjects.exists('kbnChromeNav-moreMenuTrigger', { timeout: TIMEOUT_CHECK })) {
       // TODO: find a better way to collapse
       // https://github.com/elastic/kibana/issues/236242
       await retry.try(async () => {
-        const moreMenuItem = await testSubjects.find('sideNavMoreMenuItem', TIMEOUT_CHECK);
+        const moreMenuItem = await testSubjects.find('kbnChromeNav-moreMenuTrigger', TIMEOUT_CHECK);
         let isExpanded = await moreMenuItem.getAttribute('aria-expanded');
         log.debug(
           'SolutionNavigation.sidenav.collapseMoreIfNeeded - More Popover Visible',
@@ -132,15 +102,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     },
     // side nav related actions
     sidenav: {
-      async isV2() {
-        return (await getSideNavVersion()) === 'v2';
-      },
-      async skipIfV2(mochaContext: Mocha.Context) {
-        if (await isV2()) {
-          log.debug('SolutionNavigation.sidenav.skipIfV2 - skipping test for v2 sidenav');
-          mochaContext.skip();
-        }
-      },
       expandMore: expandMoreIfNeeded,
       collapseMore: collapseMoreIfNeeded,
       async expectLinkExists(
@@ -159,15 +120,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         } else if ('navId' in by) {
           await testSubjects.existOrFail(`~nav-item-id-${by.navId}`, { timeout: TIMEOUT_CHECK });
         } else if ('panelNavLinkId' in by) {
-          if (await isV2()) {
-            await testSubjects.existOrFail(`~nav-item-id-${by.panelNavLinkId}`, {
-              timeout: TIMEOUT_CHECK,
-            });
-          } else {
-            await testSubjects.existOrFail(`~panelNavItem-id-${by.panelNavLinkId}`, {
-              timeout: TIMEOUT_CHECK,
-            });
-          }
+          await testSubjects.existOrFail(`~nav-item-id-${by.panelNavLinkId}`, {
+            timeout: TIMEOUT_CHECK,
+          });
         } else {
           expect(await getByVisibleText('~nav-item', by.text)).not.be(null);
         }
@@ -267,117 +222,32 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
       },
       async clickPanelLink(navId: string) {
-        if (await isV2()) {
-          // TODO: find a better way without trying to collapse every time
-          // https://github.com/elastic/kibana/issues/236242
-          await collapseMoreIfNeeded();
-          // TODO: find a better way without trying to dismiss feedback every time
-          // https://github.com/elastic/kibana/issues/236242
-          await this.feedbackCallout.dismiss();
-          // TODO: properly distinguish between panel link and main nav link
-          // https://github.com/elastic/kibana/issues/236242
-          await testSubjects.click(`~nav-item-id-${navId}`);
-        } else {
-          await testSubjects.click(`~panelNavItem-id-${navId}`);
-        }
+        // TODO: find a better way without trying to collapse every time
+        // https://github.com/elastic/kibana/issues/236242
+        await collapseMoreIfNeeded();
+        // TODO: find a better way without trying to dismiss feedback every time
+        // https://github.com/elastic/kibana/issues/236242
+        await this.feedbackCallout.dismiss();
+        // TODO: properly distinguish between panel link and main nav link
+        // https://github.com/elastic/kibana/issues/236242
+        await testSubjects.click(`~nav-item-id-${navId}`);
       },
-      /**
-       * @deprecated - new side nav doesn't have accordion sections
-       * @param sectionId
-       */
-      async expectSectionExists(sectionId: NavigationId) {
-        if (await noopIfV2()) return;
-        log.debug('SolutionNavigation.sidenav.expectSectionExists', sectionId);
 
-        await testSubjects.existOrFail(getSectionIdTestSubj(sectionId), { timeout: TIMEOUT_CHECK });
-      },
-      /**
-       * @deprecated - new side nav doesn't have accordion sections
-       * @param sectionId
-       */
-      async isSectionOpen(sectionId: NavigationId) {
-        await this.expectSectionExists(sectionId);
-
-        const collapseBtn = await testSubjects.find(`~accordionArrow-${sectionId}`);
-        const isExpanded = await collapseBtn.getAttribute('aria-expanded');
-        return isExpanded === 'true';
-      },
-      /**
-       * @deprecated - new side nav doesn't have accordion sections
-       * @param sectionId
-       */
-      async expectSectionOpen(sectionId: NavigationId) {
-        log.debug('SolutionNavigation.sidenav.expectSectionOpen', sectionId);
-        if (await noopIfV2()) return;
-        await this.expectSectionExists(sectionId);
-        await retry.waitFor(`section ${sectionId} to be open`, async () => {
-          const isOpen = await this.isSectionOpen(sectionId);
-          return isOpen;
-        });
-      },
-      /**
-       * @deprecated - new side nav doesn't have accordion sections
-       * @param sectionId
-       */
-      async expectSectionClosed(sectionId: NavigationId) {
-        if (await noopIfV2()) return;
-        await this.expectSectionExists(sectionId);
-        await retry.waitFor(`section ${sectionId} to be closed`, async () => {
-          const isOpen = await this.isSectionOpen(sectionId);
-          return !isOpen;
-        });
-      },
-      /**
-       * @deprecated - new side nav doesn't have accordion sections
-       * @param sectionId
-       */
-      async openSection(sectionId: NavigationId) {
-        log.debug('SolutionNavigation.sidenav.openSection', sectionId);
-        if (await noopIfV2()) return;
-        await this.expectSectionExists(sectionId);
-        const isOpen = await this.isSectionOpen(sectionId);
-        if (isOpen) return;
-        const collapseBtn = await testSubjects.find(`~accordionArrow-${sectionId}`, TIMEOUT_CHECK);
-        await collapseBtn.click();
-        await this.expectSectionOpen(sectionId);
-      },
-      /**
-       * @deprecated - new side nav doesn't have accordion sections
-       * @param sectionId
-       */
-      async closeSection(sectionId: NavigationId) {
-        await this.expectSectionExists(sectionId);
-        if (await noopIfV2()) return;
-        const isOpen = await this.isSectionOpen(sectionId);
-        if (!isOpen) return;
-        const collapseBtn = await testSubjects.find(`~accordionArrow-${sectionId}`, TIMEOUT_CHECK);
-        await collapseBtn.click();
-        await this.expectSectionClosed(sectionId);
-      },
       async expectPanelExists(sectionId: NavigationId) {
         log.debug('SolutionNavigation.sidenav.expectPanelExists', sectionId);
-        await testSubjects.existOrFail(`~side-navigation-panel_${sectionId}`, {
+        await testSubjects.existOrFail(`~kbnChromeNav-sidePanel_${sectionId}`, {
           timeout: TIMEOUT_CHECK,
         });
       },
       async isPanelOpen(sectionId: NavigationId) {
-        if (await this.isV2()) {
-          try {
-            const panel = await testSubjects.find(
-              `~side-navigation-panel_${sectionId}`,
-              TIMEOUT_CHECK
-            );
-            return !!panel;
-          } catch (e) {
-            return false;
-          }
-        } else {
-          try {
-            const panel = await testSubjects.find(`~sideNavPanel-id-${sectionId}`, TIMEOUT_CHECK);
-            return !!panel;
-          } catch (err) {
-            return false;
-          }
+        try {
+          const panel = await testSubjects.find(
+            `~kbnChromeNav-sidePanel_${sectionId}`,
+            TIMEOUT_CHECK
+          );
+          return !!panel;
+        } catch (e) {
+          return false;
         }
       },
       async openPanel(sectionId: NavigationId) {
@@ -390,18 +260,8 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
 
         await panelOpenerBtn.click();
       },
-      async closePanel(sectionId: NavigationId) {
-        log.debug('SolutionNavigation.sidenav.closePanel', sectionId);
-
-        const isOpen = await this.isPanelOpen(sectionId);
-        if (!isOpen) return;
-
-        const panelOpenerBtn = await testSubjects.find(`~nav-item-id-${sectionId}`, TIMEOUT_CHECK);
-
-        await panelOpenerBtn.click();
-      },
       async isCollapsed() {
-        const selector = (await this.isV2()) ? 'sideNavCollapseButton' : 'euiCollapsibleNavButton';
+        const selector = 'sideNavCollapseButton';
         const collapseNavBtn = await testSubjects.find(selector, TIMEOUT_CHECK);
         return (await collapseNavBtn.getAttribute('aria-expanded')) === 'false';
       },
@@ -421,9 +281,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
             shouldBeCollapsed ? 'Collapsing' : 'Expanding'
           );
 
-          const selector = (await this.isV2())
-            ? 'sideNavCollapseButton'
-            : 'euiCollapsibleNavButton';
+          const selector = 'sideNavCollapseButton';
           const collapseNavBtn = await testSubjects.find(selector, TIMEOUT_CHECK);
           await collapseNavBtn.click();
         }
@@ -483,12 +341,10 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           await browser.refresh();
         },
         async getFeedbackTestSubjectId() {
-          return (await isV2()) ? 'feedbackSnippetPanel' : 'sideNavfeedbackCallout';
+          return 'feedbackSnippetPanel';
         },
         async getFeedbackDismissTestSubjectId() {
-          return (await isV2())
-            ? 'feedbackSnippetPanel > feedbackSnippetPanelDismiss'
-            : 'sideNavfeedbackCallout > euiDismissCalloutButton';
+          return 'feedbackSnippetPanel > sideNavigationFeedbackPanelDismiss';
         },
         async expectExists() {
           await testSubjects.existOrFail(await this.getFeedbackTestSubjectId(), {
@@ -496,13 +352,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           });
         },
         async expectMissing() {
-          return (await isV2())
-            ? await testSubjects.existOrFail('feedbackSnippetButton', {
-                timeout: TIMEOUT_CHECK,
-              })
-            : await testSubjects.missingOrFail(await this.getFeedbackTestSubjectId(), {
-                timeout: TIMEOUT_CHECK,
-              });
+          return await testSubjects.existOrFail('sideNavigationFeedbackButtonSurveyLink', {
+            timeout: TIMEOUT_CHECK,
+          });
         },
         async dismiss() {
           // TODO: find a better way without trying to collapse every time
@@ -569,34 +421,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           const texts = await Promise.all(breadcrumbs.map((b) => b.getVisibleText()));
           expect(expectedBreadcrumbTexts).to.eql(texts);
         });
-      },
-    },
-    recent: {
-      async expectExists() {
-        await testSubjects.existOrFail('nav-item-recentlyAccessed', { timeout: TIMEOUT_CHECK });
-      },
-      async expectHidden() {
-        await testSubjects.missingOrFail('nav-item-recentlyAccessed', { timeout: TIMEOUT_CHECK });
-      },
-      async expectLinkExists(text: string) {
-        await this.expectExists();
-        let foundLink: WebElementWrapper | null = null;
-        await retry.try(async () => {
-          foundLink = await getByVisibleText(
-            async () =>
-              (
-                await testSubjects.find('nav-item-recentlyAccessed', TIMEOUT_CHECK)
-              ).findAllByTagName('a'),
-            text
-          );
-          expect(!!foundLink).to.be(true);
-        });
-
-        return foundLink!;
-      },
-      async clickLink(text: string) {
-        const link = await this.expectLinkExists(text);
-        await link!.click();
       },
     },
 

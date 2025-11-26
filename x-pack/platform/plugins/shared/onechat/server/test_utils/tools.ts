@@ -13,10 +13,10 @@ import type {
   ExecutableToolHandlerFn,
   ToolHandlerFn,
   ToolProvider,
+  InternalToolDefinition,
 } from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../services/tools/types';
 import type { ToolRegistry } from '../services/tools/tool_registry';
-import type { InternalToolDefinition } from '../services/tools/tool_provider';
 
 export type ToolProviderMock = jest.Mocked<ToolProvider>;
 export type ToolRegistryMock = jest.Mocked<ToolRegistry>;
@@ -45,7 +45,7 @@ export const createToolRegistryMock = (): ToolRegistryMock => {
 
 export const createToolsServiceStartMock = (): ToolsServiceStartMock => {
   return {
-    getToolTypeInfo: jest.fn(),
+    getToolDefinitions: jest.fn().mockImplementation(() => []),
     getRegistry: jest.fn().mockImplementation(() => createToolRegistryMock()),
   };
 };
@@ -87,6 +87,7 @@ export const createMockedTool = (parts: Partial<MockedTool> = {}): MockedTool =>
     tags: ['tag-1', 'tag-2'],
     getSchema: jest.fn(async () => z.object({})),
     getHandler: jest.fn(parts.getHandler),
+    isAvailable: jest.fn(),
     ...parts,
   };
 };

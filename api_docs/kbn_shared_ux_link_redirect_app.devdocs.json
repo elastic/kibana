@@ -28,138 +28,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/header/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/header/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/header/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/sidenav_v2/navigation/redirect_app_links.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/sidenav_v2/navigation/redirect_app_links.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/sidenav_v2/navigation/redirect_app_links.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/application.tsx"
-          },
-          {
             "plugin": "management",
             "path": "src/platform/plugins/shared/management/public/components/management_app/management_app.tsx"
           },
@@ -230,30 +98,6 @@
           {
             "plugin": "savedObjectsManagement",
             "path": "src/platform/plugins/shared/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/tag_filter_panel.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/tag_filter_panel.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/tag_filter_panel.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/item_details.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/item_details.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/item_details.tsx"
           },
           {
             "plugin": "visualizations",
@@ -456,42 +300,6 @@
             "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
           },
           {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
           },
@@ -744,6 +552,18 @@
             "path": "x-pack/solutions/search/plugins/search_assistant/public/components/nav_control/index.tsx"
           },
           {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
             "plugin": "cloudSecurityPosture",
             "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/plugin.tsx"
           },
@@ -757,39 +577,15 @@
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/manage_data/manage_data.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "dataViewManagement",
@@ -814,86 +610,6 @@
           {
             "plugin": "visTypeTimeseries",
             "path": "src/platform/plugins/shared/vis_types/timeseries/public/application/components/vis_types/table/vis.js"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/app_link_test/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/app_link_test/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/app_link_test/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/core_history_block/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/core_history_block/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/core_history_block/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/core_history_block/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/core_history_block/public/app.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "@kbn/shared-ux-card-no-data",
-            "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/no_data_card.tsx"
-          },
-          {
-            "plugin": "@kbn/shared-ux-card-no-data",
-            "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/no_data_card.tsx"
-          },
-          {
-            "plugin": "@kbn/shared-ux-card-no-data",
-            "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/no_data_card.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
           }
         ],
         "children": [
@@ -949,138 +665,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/header/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/header/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/header/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/sidenav_v2/navigation/redirect_app_links.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/sidenav_v2/navigation/redirect_app_links.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/sidenav_v2/navigation/redirect_app_links.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/application.tsx"
-          },
-          {
             "plugin": "management",
             "path": "src/platform/plugins/shared/management/public/components/management_app/management_app.tsx"
           },
@@ -1151,30 +735,6 @@
           {
             "plugin": "savedObjectsManagement",
             "path": "src/platform/plugins/shared/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/tag_filter_panel.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/tag_filter_panel.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/tag_filter_panel.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/item_details.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/item_details.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/item_details.tsx"
           },
           {
             "plugin": "visualizations",
@@ -1377,42 +937,6 @@
             "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
           },
           {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
           },
@@ -1665,6 +1189,18 @@
             "path": "x-pack/solutions/search/plugins/search_assistant/public/components/nav_control/index.tsx"
           },
           {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
             "plugin": "cloudSecurityPosture",
             "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/plugin.tsx"
           },
@@ -1678,39 +1214,15 @@
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/manage_data/manage_data.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "dataViewManagement",
@@ -1735,86 +1247,6 @@
           {
             "plugin": "visTypeTimeseries",
             "path": "src/platform/plugins/shared/vis_types/timeseries/public/application/components/vis_types/table/vis.js"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/app_link_test/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/app_link_test/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/app_link_test/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/core_history_block/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/core_history_block/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/core_history_block/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/core_history_block/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/core_history_block/public/app.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "@kbn/shared-ux-card-no-data",
-            "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/no_data_card.tsx"
-          },
-          {
-            "plugin": "@kbn/shared-ux-card-no-data",
-            "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/no_data_card.tsx"
-          },
-          {
-            "plugin": "@kbn/shared-ux-card-no-data",
-            "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/no_data_card.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
           }
         ],
         "children": [
@@ -1870,138 +1302,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/header/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/header/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/header/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/header.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/sidenav_v2/navigation/redirect_app_links.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/sidenav_v2/navigation/redirect_app_links.tsx"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-internal/src/ui/project/sidenav_v2/navigation/redirect_app_links.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx"
-          },
-          {
-            "plugin": "kibanaReact",
-            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/application.tsx"
-          },
-          {
             "plugin": "management",
             "path": "src/platform/plugins/shared/management/public/components/management_app/management_app.tsx"
           },
@@ -2072,30 +1372,6 @@
           {
             "plugin": "savedObjectsManagement",
             "path": "src/platform/plugins/shared/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/tag_filter_panel.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/tag_filter_panel.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/tag_filter_panel.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/item_details.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/item_details.tsx"
-          },
-          {
-            "plugin": "@kbn/content-management-table-list-view-table",
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/item_details.tsx"
           },
           {
             "plugin": "visualizations",
@@ -2298,42 +1574,6 @@
             "path": "x-pack/platform/plugins/shared/onechat/public/application/mount.tsx"
           },
           {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_field.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/discover_features/discover_flyout_stream_processing_link.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/app_root/index.tsx"
-          },
-          {
             "plugin": "ml",
             "path": "x-pack/platform/plugins/shared/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
           },
@@ -2586,6 +1826,18 @@
             "path": "x-pack/solutions/search/plugins/search_assistant/public/components/nav_control/index.tsx"
           },
           {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
+            "plugin": "cloudDefend",
+            "path": "x-pack/solutions/security/plugins/cloud_defend/public/plugin.tsx"
+          },
+          {
             "plugin": "cloudSecurityPosture",
             "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/plugin.tsx"
           },
@@ -2599,39 +1851,15 @@
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "workplaceAIApp",
-            "path": "x-pack/solutions/workplace_ai/plugins/workplace_ai_app/public/application/mount.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/add_data/add_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/manage_data/manage_data.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/manage_data/manage_data.tsx"
+            "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/application/mount.tsx"
           },
           {
             "plugin": "dataViewManagement",
@@ -2656,86 +1884,6 @@
           {
             "plugin": "visTypeTimeseries",
             "path": "src/platform/plugins/shared/vis_types/timeseries/public/application/components/vis_types/table/vis.js"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/app_link_test/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/app_link_test/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/app_link_test/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/core_history_block/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/core_history_block/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/core_history_block/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/core_history_block/public/app.tsx"
-          },
-          {
-            "plugin": "@kbn/test-suites-src",
-            "path": "src/platform/test/plugin_functional/plugins/core_history_block/public/app.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "@kbn/shared-ux-card-no-data",
-            "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/no_data_card.tsx"
-          },
-          {
-            "plugin": "@kbn/shared-ux-card-no-data",
-            "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/no_data_card.tsx"
-          },
-          {
-            "plugin": "@kbn/shared-ux-card-no-data",
-            "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/no_data_card.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/platform/plugins/private/kibana_overview/public/components/overview/overview.tsx"
           }
         ],
         "children": [

@@ -49,7 +49,7 @@ const EcsCompliantTabComponent: React.FC<Props> = ({ indexName, ecsCompliantFiel
     <div data-test-subj="ecsCompliantTabContent">
       {!isTimestampFieldMissing(ecsCompliantFields) ? (
         <>
-          <EuiCallOut size="s">
+          <EuiCallOut announceOnMount={false} size="s">
             <p>
               {ECS_COMPLIANT_CALLOUT({
                 fieldCount: ecsCompliantFields.length,

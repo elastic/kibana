@@ -42,7 +42,7 @@ export const DashboardLinkDestinationPicker = ({
     return {
       key: dashboard.id,
       value: dashboard,
-      label: dashboard.attributes.title,
+      label: dashboard.title,
       className: 'linksDashboardItem',
     };
   }, []);

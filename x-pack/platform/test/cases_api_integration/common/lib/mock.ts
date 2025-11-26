@@ -188,6 +188,7 @@ export const postCaseResp = (
   category: null,
   customFields: [],
   observables: [],
+  total_observables: 0,
 });
 
 export const getCaseWithoutCommentsResp = (

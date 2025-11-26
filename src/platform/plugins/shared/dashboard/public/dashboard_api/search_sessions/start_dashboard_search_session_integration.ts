@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, filter, skip } from 'rxjs';
+import { type BehaviorSubject, combineLatest, filter, skip } from 'rxjs';
 
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 
@@ -24,7 +24,8 @@ export function startDashboardSearchSessionIntegration(
   dashboardApi: DashboardApi,
   dashboardInternalApi: DashboardInternalApi,
   searchSessionSettings: DashboardCreationOptions['searchSessionSettings'],
-  setSearchSessionId: (searchSessionId: string) => void
+  setSearchSessionId: (searchSessionId: string) => void,
+  searchSessionGenerationInProgress$: BehaviorSubject<boolean>
 ) {
   if (!searchSessionSettings) return;
 
@@ -58,9 +59,12 @@ export function startDashboardSearchSessionIntegration(
     dashboardApi.isFetchPaused$,
   ])
     .pipe(
-      filter(([, isFetchPaused]) => !isFetchPaused) // don't generate new search session until fetch is unpaused
+      filter(([, isFetchPaused]) => !isFetchPaused), // don't generate new search session until fetch is unpaused
+      skip(1) // ignore first emit since search session ID is initialized
     )
     .subscribe(() => {
+      searchSessionGenerationInProgress$.next(true);
+
       const currentSearchSessionId = dashboardApi.searchSessionId$.value;
 
       const updatedSearchSessionId: string | undefined = (() => {
@@ -83,6 +87,8 @@ export function startDashboardSearchSessionIntegration(
       if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
         setSearchSessionId(updatedSearchSessionId);
       }
+
+      searchSessionGenerationInProgress$.next(false);
     });
 
   return () => {

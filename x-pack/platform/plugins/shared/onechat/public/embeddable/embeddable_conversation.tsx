@@ -5,89 +5,64 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { useEuiTheme } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
 import { Conversation } from '../application/components/conversations/conversation';
-import { ConversationHeader } from '../application/components/conversations/conversation_header';
-import { ConversationSidebar } from '../application/components/conversations/conversation_sidebar/conversation_sidebar';
+import { ConversationHeader } from '../application/components/conversations/conversation_header/conversation_header';
 
 export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = (
   props
 ) => {
   const { euiTheme } = useEuiTheme();
-
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { onClose, ariaLabelledBy } = props;
 
   const backgroundStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
-  const sidebarStyles = css`
-    ${backgroundStyles}
-    max-block-size: calc(var(--kbn-application--content-height));
-    padding: 0;
-  `;
+
   const headerHeight = `calc(${euiTheme.size.xl} * 2)`;
   const headerStyles = css`
-    ${backgroundStyles}
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    border: none;
-    block-size: ${headerHeight};
-  `;
-  const contentStyles = css`
+    height: ${headerHeight};
     ${backgroundStyles}
-    width: 100%;
-    height: 100%;
-    max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight});
+    &.euiFlyoutHeader {
+      padding-inline: 0;
+      padding-block-start: 0;
+      padding: ${euiTheme.size.base};
+    }
   `;
+  const bodyStyles = css`
+    ${backgroundStyles}
+    flex: 1;
+    padding: 0 ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base};
 
-  const labels = {
-    header: i18n.translate('xpack.onechat.conversationsView.header', {
-      defaultMessage: 'Conversation header',
-    }),
-    content: i18n.translate('xpack.onechat.conversationsView.content', {
-      defaultMessage: 'Conversation content',
-    }),
-  };
+    .euiFlyoutBody__overflow {
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .euiFlyoutBody__overflowContent {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      overflow: hidden;
+      padding: 0;
+    }
+  `;
 
   return (
     <EmbeddableConversationsProvider {...props}>
-      <KibanaPageTemplate>
-        {isSidebarOpen && (
-          <KibanaPageTemplate.Sidebar data-test-subj="onechatSidebar" css={sidebarStyles}>
-            <ConversationSidebar />
-          </KibanaPageTemplate.Sidebar>
-        )}
-        <KibanaPageTemplate.Header
-          css={headerStyles}
-          bottomBorder={false}
-          aria-label={labels.header}
-          paddingSize="m"
-        >
-          <ConversationHeader
-            isSidebarOpen={isSidebarOpen}
-            onToggleSidebar={() => {
-              setIsSidebarOpen((open) => !open);
-            }}
-          />
-        </KibanaPageTemplate.Header>
-        <KibanaPageTemplate.Section
-          paddingSize="none"
-          grow
-          contentProps={{
-            css: contentStyles,
-          }}
-          aria-label={labels.content}
-        >
-          <Conversation />
-        </KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
+      <EuiFlyoutHeader css={headerStyles}>
+        <ConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody css={bodyStyles}>
+        <Conversation />
+      </EuiFlyoutBody>
     </EmbeddableConversationsProvider>
   );
 };

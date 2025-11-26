@@ -302,6 +302,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "date",
       },
+      "kibana.alert.state": Object {
+        "array": false,
+        "required": false,
+        "type": "unmapped",
+      },
       "kibana.alert.status": Object {
         "array": false,
         "required": true,

@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { useEuiTheme, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiBadge } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiBadge,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { Condition, FilterCondition } from '@kbn/streamlang';
 import {
   getFilterOperator,
@@ -69,6 +77,7 @@ interface ConditionDisplayProps {
   showKeyword?: boolean;
   keyword?: string;
   keywordWrapper?: (children: React.ReactNode) => React.ReactNode;
+  prefix?: string;
 }
 
 export const ConditionDisplay = ({
@@ -76,9 +85,11 @@ export const ConditionDisplay = ({
   showKeyword = false,
   keyword = 'WHERE',
   keywordWrapper = (children: React.ReactNode) => children,
+  prefix,
 }: ConditionDisplayProps) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+      {prefix}
       {showKeyword && keywordWrapper(<OperatorText operator={keyword} bold />)}
       <RecursiveConditionDisplay condition={condition} />
     </EuiFlexGroup>
@@ -166,7 +177,17 @@ const RecursiveConditionDisplay = ({
     }
 
     // Fallback for any unknown condition types
-    return <BadgeItem text={JSON.stringify(condition)} />;
+    const jsonStringifiedCondition = JSON.stringify(condition);
+    return (
+      <EuiToolTip
+        content={jsonStringifiedCondition}
+        anchorClassName={css`
+          max-width: 100%;
+        `}
+      >
+        <BadgeItem text={jsonStringifiedCondition} />
+      </EuiToolTip>
+    );
   };
 
   return (

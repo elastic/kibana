@@ -2,7 +2,7 @@
   "type": "shared-browser",
   "id": "@kbn/xstate-utils",
   "owner": [
-    "@elastic/obs-ux-logs-team"
+    "@elastic/obs-onboarding-team"
   ],
   "group": "platform",
   "visibility": "shared"

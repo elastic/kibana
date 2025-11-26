@@ -11,13 +11,13 @@ import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing
 import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatestWith, debounceTime, map } from 'rxjs';
-import type { DashboardState, DashboardOptions } from '../../server/content_management';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/content_management';
+import type { DashboardState, DashboardOptions } from '../../server';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 
 export type DashboardSettings = Required<DashboardOptions> & {
   description?: DashboardState['description'];
   tags: DashboardState['tags'];
-  timeRestore: DashboardState['timeRestore'];
+  timeRestore: boolean;
   title: DashboardState['title'];
 };
 
@@ -46,7 +46,7 @@ function deserializeState(state: DashboardState) {
     ...state.options,
     description: state.description,
     tags: state.tags,
-    timeRestore: state.timeRestore,
+    timeRestore: Boolean(state.timeRange),
     title: state.title,
   };
 }
@@ -63,7 +63,6 @@ export function initializeSettingsManager(initialState: DashboardState) {
     return {
       ...(description && { description }),
       tags,
-      timeRestore,
       title,
       options,
     };
@@ -80,7 +79,12 @@ export function initializeSettingsManager(initialState: DashboardState) {
         syncTooltips$: stateManager.api.syncTooltips$,
         useMargins$: stateManager.api.useMargins$,
       },
-      setSettings: stateManager.reinitializeState,
+      setSettings: (settings: Partial<DashboardSettings>) => {
+        stateManager.reinitializeState({
+          ...stateManager.getLatestState(),
+          ...settings,
+        });
+      },
       setTags: stateManager.api.setTags,
       timeRestore$: stateManager.api.timeRestore$,
       title$: stateManager.api.title$,
@@ -106,8 +110,8 @@ export function initializeSettingsManager(initialState: DashboardState) {
             return {
               ...(description && { description }),
               ...(tags && { tags }),
-              ...(typeof timeRestore === 'boolean' && { timeRestore }),
               ...(title && { title }),
+              ...(typeof timeRestore === 'boolean' && { timeRestore }),
               ...(options && { options }),
             };
           })

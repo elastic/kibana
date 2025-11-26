@@ -261,6 +261,7 @@ export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props
           ) : (
             <>
               <EuiCallOut
+                announceOnMount
                 title={i18nTexts.validationErrors.title}
                 iconType="warning"
                 color="warning"

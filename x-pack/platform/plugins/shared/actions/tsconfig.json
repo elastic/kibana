@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -54,6 +54,8 @@
     "@kbn/licensing-types",
     "@kbn/lazy-object",
     "@kbn/zod",
+    "@kbn/connector-schemas",
+    "@kbn/connector-specs",
   ],
   "exclude": [
     "target/**/*",

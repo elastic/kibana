@@ -12,9 +12,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
 
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import { droppableTimelineProvidersPrefix } from '../../../../common/components/drag_and_drop/helpers';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
@@ -56,7 +56,7 @@ const DropTargetDataProviders = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   position: relative;
-  border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderBaseFormsControl};
+  border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderBaseProminent};
   border-radius: 5px;
   padding: ${({ theme }) => theme.euiTheme.size.s} 0;
   margin: 0px 0 0px 0;
@@ -109,9 +109,9 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
   const dispatch = useDispatch();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { browserFields: oldBrowserFields } = useSourcererDataView(SourcererScopeName.timeline);
+  const { browserFields: oldBrowserFields } = useSourcererDataView(PageScope.timeline);
 
-  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
+  const experimentalBrowserFields = useBrowserFields(PageScope.timeline);
 
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 

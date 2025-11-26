@@ -17,7 +17,10 @@ import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogr
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
-import { useProfileAccessor } from '../../../../context_awareness';
+import {
+  type ChartSectionConfigurationExtensionParams,
+  useProfileAccessor,
+} from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
   CurrentTabProvider,
@@ -138,13 +141,25 @@ type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle
 };
 
 const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
+  const dispatch = useInternalStateDispatch();
   const getChartConfigAccessor = useProfileAccessor('getChartSectionConfiguration');
+  const chartSectionConfigurationExtParams: ChartSectionConfigurationExtensionParams =
+    useMemo(() => {
+      return {
+        actions: {
+          openInNewTab: (params) =>
+            dispatch(internalStateActions.openInNewTabExtPointAction(params)),
+          updateESQLQuery: stateContainer.actions.updateESQLQuery,
+        },
+      };
+    }, [dispatch, stateContainer.actions.updateESQLQuery]);
+
   const chartSectionConfig = useMemo(
     () =>
       getChartConfigAccessor(() => ({
         replaceDefaultChart: false,
-      }))(),
-    [getChartConfigAccessor]
+      }))(chartSectionConfigurationExtParams),
+    [getChartConfigAccessor, chartSectionConfigurationExtParams]
   );
 
   useEffect(() => {
@@ -229,9 +244,12 @@ const CustomChartSectionWrapper = ({
   const setMetricsGridState = useCurrentTabAction(internalStateActions.setMetricsGridState);
   const onInitialStateChange = useCallback(
     (newMetricsGridState: Partial<UnifiedMetricsGridRestorableState>) => {
+      // Defer dispatch to next tick - ensures React render cycle is complete
+      // setTimeout(() => {
       dispatch(setMetricsGridState({ metricsGridState: newMetricsGridState }));
+      // }, 0);
     },
-    [dispatch, setMetricsGridState]
+    [setMetricsGridState, dispatch]
   );
 
   useEffect(() => {

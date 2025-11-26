@@ -11,6 +11,7 @@ import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
+import { healthStatusSchema, stateSchema, transformHealthSchema } from './health';
 
 const occurrencesBudgetingMethodSchema = t.literal('occurrences');
 const timeslicesBudgetingMethodSchema = t.literal('timeslices');
@@ -108,9 +109,19 @@ const dashboardsWithRefIdSchema = t.partial({ dashboards: t.array(t.type({ refId
 const artifactsWithIdSchema = t.partial({ artifacts: dashboardsWithIdSchema });
 const artifactsWithRefIdSchema = t.partial({ artifacts: dashboardsWithRefIdSchema });
 
-const sloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithIdSchema]);
+const healthMetadataSchema = t.partial({
+  state: stateSchema,
+  health: t.type({
+    overall: transformHealthSchema,
+    rollup: healthStatusSchema,
+    summary: healthStatusSchema,
+  }),
+});
 
+const sloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithIdSchema]);
 const storedSloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithRefIdSchema]);
+
+const sloDefinitionWithHealthSchema = t.intersection([sloDefinitionSchema, healthMetadataSchema]);
 
 export {
   budgetingMethodSchema,
@@ -120,6 +131,7 @@ export {
   optionalSettingsSchema,
   settingsSchema,
   sloDefinitionSchema,
+  sloDefinitionWithHealthSchema,
   storedSloDefinitionSchema,
   sloIdSchema,
   tagsSchema,

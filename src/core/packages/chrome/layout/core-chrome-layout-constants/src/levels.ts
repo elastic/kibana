@@ -16,9 +16,11 @@ export const layoutLevels = {
   header: 100,
   footer: 100,
 
+  // 999 is chosen to be the same as old EuiCollapsibleNavBeta for backwards compatibility
+  navigation: 999,
+
   // Interactive layout components that need higher priority than euiFlyout (1000)
   sidebar: 1050,
-  navigation: 1050,
   banner: 1050,
 
   // Application-level bars that appear within main content

@@ -10,7 +10,6 @@
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { Parser } from '@kbn/esql-ast';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
@@ -21,7 +20,7 @@ export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvid
 
 export const METRICS_DATA_SOURCE_PROFILE_ID = 'metrics-data-source-profile';
 // FIXME: could kbn-esql-ast provide a union type with existing commands?
-const SUPPORTED_ESQL_COMMANDS = new Set(['from', 'ts', 'limit', 'sort']);
+const SUPPORTED_ESQL_COMMANDS = new Set(['ts', 'limit', 'sort']);
 export const createMetricsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): MetricsExperienceDataSourceProfileProvider => ({
@@ -33,37 +32,18 @@ export const createMetricsDataSourceProfileProvider = (
     ),
   },
   resolve: async ({ query, rootContext }) => {
-    const metricsClient = services.metricsContextService.getMetricsExperienceClient();
-    if (!metricsClient || !isQuerySupported(query) || !isSolutionValid(rootContext.solutionType)) {
+    if (!isQuerySupported(query) || !isSolutionValid(rootContext.solutionType)) {
       return { isMatch: false };
     }
-
-    const indexPattern = getIndexPatternFromESQLQuery(query.esql);
-    if (!services.metricsContextService.isMetricsIndexPattern(indexPattern)) {
-      return { isMatch: false };
-    }
-
-    const timeRange = getTimeRange();
-    const { indexPatternMetadata } = await metricsClient.getIndexPatternMetadata({
-      indexPattern,
-      from: timeRange.from.toISOString(),
-      to: timeRange.to.toISOString(),
-    });
 
     return {
-      isMatch: Object.values(indexPatternMetadata).some((meta) => meta.hasTimeSeriesFields),
+      isMatch: true,
       context: {
         category: DataSourceCategory.Metrics,
       },
     };
   },
 });
-
-function getTimeRange() {
-  const to = new Date();
-  const from = new Date(to.getTime() - 15 * 60 * 1000); // 15 minutes
-  return { from, to };
-}
 
 function isSolutionValid(solutionType: SolutionType) {
   return [

@@ -147,7 +147,12 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
               />
             </EuiFormRow>
             {currentWarnings.length ? (
-              <EuiCallOut title="Validation warnings" color="warning" iconType="warning">
+              <EuiCallOut
+                announceOnMount
+                title="Validation warnings"
+                color="warning"
+                iconType="warning"
+              >
                 <p>Here the list of warnings:</p>
                 <ul>
                   {currentWarnings.map((message) => (
