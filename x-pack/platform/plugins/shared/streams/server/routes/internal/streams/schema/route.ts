@@ -19,6 +19,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
+import { normalizeGeoPointsInObject } from '../../../../lib/streams/helpers/normalize_geo_points';
 
 const UNMAPPED_SAMPLE_SIZE = 500;
 const FIELD_SIMULATION_TIMEOUT = '1s';
@@ -85,7 +86,18 @@ export const unmappedFieldsRoute = createServerRoute({
     }
 
     const unmappedFields = Array.from(sourceFields)
-      .filter((field) => !mappedFields.has(field))
+      .filter((field) => {
+        if (mappedFields.has(field)) return false;
+
+        // Skip if field is a subfield of a mapped field (e.g. location.lat when location is mapped)
+        for (const mappedField of mappedFields) {
+          if (field.startsWith(`${mappedField}.`)) {
+            return false;
+          }
+        }
+
+        return true;
+      })
       .sort();
 
     return { unmappedFields };
@@ -139,18 +151,45 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       return [field];
     });
 
-    const propertiesForSample = Object.fromEntries(
-      userFieldDefinitions.map((field) => [field.name, { type: 'keyword' as const }])
-    );
+    const propertiesForSample: Record<string, { type: 'keyword' }> = {};
+    userFieldDefinitions.forEach((field) => {
+      propertiesForSample[field.name] = { type: 'keyword' as const };
+
+      if (field.type === 'geo_point') {
+        propertiesForSample[`${field.name}.lat`] = { type: 'keyword' as const };
+        propertiesForSample[`${field.name}.lon`] = { type: 'keyword' as const };
+      }
+    });
+
+    const filterConditions = userFieldDefinitions.map((field) => {
+      if (field.type === 'geo_point') {
+        return {
+          bool: {
+            should: [
+              { exists: { field: field.name } },
+              {
+                bool: {
+                  filter: [
+                    { exists: { field: `${field.name}.lat` } },
+                    { exists: { field: `${field.name}.lon` } },
+                  ],
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+      }
+
+      return { exists: { field: field.name } };
+    });
 
     const documentSamplesSearchBody = {
       // Add keyword runtime mappings so we can pair with exists, this is to attempt to "miss" less documents for the simulation.
       runtime_mappings: propertiesForSample,
       query: {
         bool: {
-          filter: Object.keys(propertiesForSample).map((field) => ({
-            exists: { field },
-          })),
+          filter: filterConditions,
         },
       },
       size: FIELD_SIMILATION_SAMPLE_SIZE,
@@ -178,18 +217,72 @@ export const schemaFieldsSimulationRoute = createServerRoute({
 
     const fieldDefinitionKeys = Object.keys(propertiesForSimulation);
 
-    const sampleResultsAsSimulationDocs = sampleResults.hits.hits.map((hit) => ({
-      // For wired streams direct writes to child streams are not allowed, we must use the "logs" index.
-      _index: params.path.name.startsWith(`${LOGS_ROOT_STREAM_NAME}.`)
-        ? LOGS_ROOT_STREAM_NAME
-        : params.path.name,
-      _id: hit._id,
-      _source: Object.fromEntries(
-        Object.entries(getFlattenedObject(hit._source as SampleDocument)).filter(
-          ([k]) => fieldDefinitionKeys.includes(k) || k === '@timestamp'
-        )
-      ),
-    }));
+    const geoPointFields = new Set(
+      userFieldDefinitions.filter((field) => field.type === 'geo_point').map((field) => field.name)
+    );
+
+    const sampleResultsAsSimulationDocs = sampleResults.hits.hits.map((hit) => {
+      const normalized = normalizeGeoPointsInObject(hit._source as SampleDocument, geoPointFields);
+      const flattenedSource = getFlattenedObject(normalized);
+
+      const filteredEntries = Object.entries(flattenedSource).filter(([k]) => {
+        if (k === '@timestamp') return true;
+
+        if (fieldDefinitionKeys.includes(k)) return true;
+
+        const latMatch = k.match(/^(.+)\.lat$/);
+        const lonMatch = k.match(/^(.+)\.lon$/);
+        if (
+          (latMatch && geoPointFields.has(latMatch[1])) ||
+          (lonMatch && geoPointFields.has(lonMatch[1]))
+        ) {
+          return true;
+        }
+
+        return false;
+      });
+
+      const sourceWithGeoPoints: Record<string, any> = {};
+      const processedGeoFields = new Set<string>();
+
+      for (const [key, value] of filteredEntries) {
+        const latMatch = key.match(/^(.+)\.lat$/);
+        const lonMatch = key.match(/^(.+)\.lon$/);
+
+        if (latMatch && geoPointFields.has(latMatch[1])) {
+          const baseField = latMatch[1];
+          if (!processedGeoFields.has(baseField)) {
+            const lonKey = `${baseField}.lon`;
+            const lonValue = flattenedSource[lonKey];
+            if (lonValue !== undefined) {
+              sourceWithGeoPoints[baseField] = { lat: value, lon: lonValue };
+              processedGeoFields.add(baseField);
+            }
+          }
+        } else if (lonMatch && geoPointFields.has(lonMatch[1])) {
+          const baseField = lonMatch[1];
+          if (!processedGeoFields.has(baseField)) {
+            const latKey = `${baseField}.lat`;
+            const latValue = flattenedSource[latKey];
+            if (latValue !== undefined) {
+              sourceWithGeoPoints[baseField] = { lat: latValue, lon: value };
+              processedGeoFields.add(baseField);
+            }
+          }
+        } else {
+          // Not a geo_point component, add as-is
+          sourceWithGeoPoints[key] = value;
+        }
+      }
+
+      return {
+        _index: params.path.name.startsWith(`${LOGS_ROOT_STREAM_NAME}.`)
+          ? LOGS_ROOT_STREAM_NAME
+          : params.path.name,
+        _id: hit._id,
+        _source: sourceWithGeoPoints,
+      };
+    });
 
     const simulation = await simulateIngest(
       sampleResultsAsSimulationDocs,
@@ -216,51 +309,13 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       };
     }
 
-    // Convert the field definitions to a format that can be used in runtime mappings (match_only_text -> keyword)
-    const propertiesCompatibleWithRuntimeMappings = Object.fromEntries(
-      userFieldDefinitions.map((field) => [
-        field.name,
-        {
-          type: field.type === 'match_only_text' ? 'keyword' : field.type,
-          ...(field.format ? { format: field.format } : {}),
-        },
-      ])
-    );
-
-    const runtimeFieldsSearchBody = {
-      runtime_mappings: propertiesCompatibleWithRuntimeMappings,
-      size: FIELD_SIMILATION_SAMPLE_SIZE,
-      fields: params.body.field_definitions.map((field) => field.name),
-      _source: false,
-      track_total_hits: false,
-      terminate_after: FIELD_SIMILATION_SAMPLE_SIZE,
-      timeout: FIELD_SIMULATION_TIMEOUT,
-    };
-
-    // This gives us a "fields" representation rather than _source from the simulation
-    const runtimeFieldsResult = await scopedClusterClient.asCurrentUser.search({
-      index: params.path.name,
-      query: {
-        ids: {
-          values: sampleResults.hits.hits.map((hit) => hit._id) as string[],
-        },
-      },
-      ...runtimeFieldsSearchBody,
-    });
-
     return {
       status: 'success',
       simulationError: null,
-      documentsWithRuntimeFieldsApplied: runtimeFieldsResult.hits.hits.map((hit, index) => {
-        if (!hit.fields) {
-          return { ignored_fields: simulation.docs[index].doc.ignored_fields || [] };
-        }
+      documentsWithRuntimeFieldsApplied: simulation.docs.map((doc: any) => {
         return {
-          values: Object.keys(hit.fields).reduce<SampleDocument>((acc, field) => {
-            acc[field] = hit.fields![field][0];
-            return acc;
-          }, {}),
-          ignored_fields: simulation.docs[index].doc.ignored_fields || [],
+          values: doc.doc._source,
+          ignored_fields: doc.doc.ignored_fields || [],
         };
       }),
     };
