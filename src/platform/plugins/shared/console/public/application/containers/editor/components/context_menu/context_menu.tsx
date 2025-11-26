@@ -10,13 +10,14 @@
 import React, { useState, useEffect } from 'react';
 import {
   EuiButtonIcon,
+  EuiCode,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiBadge,
+  EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { NotificationsStart } from '@kbn/core/public';
@@ -303,10 +304,10 @@ export const ContextMenu = ({
             defaultMessage="Auto indent"
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow" data-test-subj="consoleMenuAutoIndentShortcut">
-            Ctrl/Cmd + I
-          </EuiBadge>
+        <EuiFlexItem grow={false} data-test-subj="consoleMenuAutoIndentShortcut">
+          <EuiText size="xs">
+            <EuiCode>Ctrl/Cmd</EuiCode> + <EuiCode>I</EuiCode>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiContextMenuItem>,
@@ -323,10 +324,10 @@ export const ContextMenu = ({
             defaultMessage="Open API reference"
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow" data-test-subj="consoleMenuOpenDocsShortcut">
-            Ctrl/Cmd + /
-          </EuiBadge>
+        <EuiFlexItem grow={false} data-test-subj="consoleMenuOpenDocsShortcut">
+          <EuiText size="xs">
+            <EuiCode>Ctrl/Cmd</EuiCode> + <EuiCode>/</EuiCode>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiContextMenuItem>,

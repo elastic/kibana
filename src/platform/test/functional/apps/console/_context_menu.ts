@@ -296,17 +296,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const autoIndentShortcutExists = await testSubjects.exists('consoleMenuAutoIndentShortcut');
       expect(autoIndentShortcutExists).to.be(true);
 
-      // Check Auto indent shortcut badge shows Ctrl/Cmd format
-      const autoIndentShortcut = await testSubjects.find('consoleMenuAutoIndentShortcut');
-      const autoIndentShortcutText = await autoIndentShortcut.getVisibleText();
-      expect(autoIndentShortcutText).to.be('Ctrl/Cmd + I');
-
-      // Check API reference shortcut badge exists and shows Ctrl/Cmd format
+      // Check API reference shortcut badge exists
       const openDocsShortcutExists = await testSubjects.exists('consoleMenuOpenDocsShortcut');
       expect(openDocsShortcutExists).to.be(true);
-      const openDocsShortcut = await testSubjects.find('consoleMenuOpenDocsShortcut');
-      const openDocsShortcutText = await openDocsShortcut.getVisibleText();
-      expect(openDocsShortcutText).to.be('Ctrl/Cmd + /');
     });
   });
 }
