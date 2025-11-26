@@ -178,7 +178,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
           </EuiText>
         ) : (
           <EuiScreenReaderOnly>
-            <EuiText>{displayLabel}</EuiText>
+            <EuiText>{children}</EuiText>
           </EuiScreenReaderOnly>
         )}
       </>

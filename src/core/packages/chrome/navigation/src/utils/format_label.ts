@@ -57,7 +57,7 @@ const TITLE_CASE_MAP = new Map(TITLE_CASE_GLOSSARY.map((entry) => [entry.toLower
  */
 export const formatLabel = (children: ReactNode): [ReactNode, boolean] => {
   if (!children || typeof children !== 'string') {
-    return [children, false];
+    return [children, true];
   }
 
   const normalized = children.toLowerCase().trim();
