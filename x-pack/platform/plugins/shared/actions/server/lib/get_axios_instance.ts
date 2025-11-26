@@ -12,6 +12,7 @@ import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
+import { getBeforeRedirectFn } from './before_redirect';
 
 export type ConnectorInfo = Omit<ActionInfo, 'rawAction'>;
 
@@ -44,6 +45,7 @@ export const getAxiosInstanceWithAuth = ({
         maxContentLength,
         // should we allow a way for a connector type to specify a timeout override?
         timeout: settingsTimeout,
+        beforeRedirect: getBeforeRedirectFn(configurationUtilities),
       });
 
       // create a request interceptor to inject custom http/https agents based on the URL

@@ -3842,6 +3842,88 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.SuggestionOrderingEngine",
+        "type": "Class",
+        "tags": [],
+        "label": "SuggestionOrderingEngine",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/sorting/suggestion_ordering_engine.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.SuggestionOrderingEngine.sort",
+            "type": "Function",
+            "tags": [],
+            "label": "sort",
+            "description": [
+              "\nSorts suggestions based on their inferred category and context.\nLower priority number = appears first in list."
+            ],
+            "signature": [
+              "(suggestions: ",
+              "ISuggestionItem",
+              "[], context: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.SortingContext",
+                "text": "SortingContext"
+              },
+              ") => ",
+              "ISuggestionItem",
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/sorting/suggestion_ordering_engine.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.SuggestionOrderingEngine.sort.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "suggestions",
+                "description": [],
+                "signature": [
+                  "ISuggestionItem",
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/sorting/suggestion_ordering_engine.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.SuggestionOrderingEngine.sort.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.SortingContext",
+                    "text": "SortingContext"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/sorting/suggestion_ordering_engine.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.Walker",
         "type": "Class",
         "tags": [],
@@ -8596,7 +8678,8 @@
         "description": [],
         "signature": [
           "(node: unknown) => node is ",
-          "ESQLUnaryExpression"
+          "ESQLUnaryExpression",
+          "<string>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
         "deprecated": false,
@@ -12311,6 +12394,47 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.SortingContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "SortingContext",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/sorting/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.SortingContext.command",
+            "type": "string",
+            "tags": [],
+            "label": "command",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/sorting/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.SortingContext.location",
+            "type": "string",
+            "tags": [],
+            "label": "location",
+            "description": [
+              "Optional specific location/clause within the command (e.g., 'BY' for STATS BY clause)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/sorting/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.ValidationErrors",
         "type": "Interface",
         "tags": [],
@@ -14423,6 +14547,18 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.SuggestionCategory",
+        "type": "Enum",
+        "tags": [],
+        "label": "SuggestionCategory",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/sorting/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -16149,6 +16285,27 @@
             "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.asCompletionItem.category",
+            "type": "string",
+            "tags": [],
+            "label": "category",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.SuggestionCategory",
+                "text": "SuggestionCategory"
+              },
+              ".LANGUAGE_KEYWORD"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -16879,6 +17036,27 @@
             "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.minMaxValueCompleteItem.category",
+            "type": "string",
+            "tags": [],
+            "label": "category",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.SuggestionCategory",
+                "text": "SuggestionCategory"
+              },
+              ".VALUE"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -16948,6 +17126,27 @@
             "tags": [],
             "label": "sortText",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.noneValueCompleteItem.category",
+            "type": "string",
+            "tags": [],
+            "label": "category",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.SuggestionCategory",
+                "text": "SuggestionCategory"
+              },
+              ".VALUE"
+            ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
             "deprecated": false,
             "trackAdoption": false
