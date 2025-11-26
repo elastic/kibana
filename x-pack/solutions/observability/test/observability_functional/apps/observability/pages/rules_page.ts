@@ -434,31 +434,22 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe('Custom threshold rule with combined data view', () => {
-      const LOGS_DATA_VIEW_TITLE = 'logs-*';
-      const LOGS_DATA_VIEW_ID = 'logs-data-view-id';
-      const LOGS_DATA_VIEW_NAME = 'Logs';
-      const METRICS_DATA_VIEW_TITLE = 'metrics-*';
-      const METRICS_DATA_VIEW_ID = 'metrics-data-view-id';
-      const METRICS_DATA_VIEW_NAME = 'Metrics';
-      const COMBINED_DATA_VIEW_PATTERN = 'logs-*,metrics-*';
-      const CUSTOM_THRESHOLD_RULE_NAME = 'Custom threshold rule with combined data view';
+    describe('Custom threshold rule with ad-hoc data view', () => {
+      const AD_HOC_DATA_VIEW_PATTERN = '.alerts-*';
+      const CUSTOM_THRESHOLD_RULE_NAME = 'Custom threshold rule with ad-hoc data view';
+      // A dummy data view is needed so the "Explore matching indices" button appears
+      // (the button only shows when dataViewsList.length > 0)
+      const DUMMY_DATA_VIEW_ID = 'dummy-data-view-for-test';
+      const DUMMY_DATA_VIEW_TITLE = 'dummy-pattern-*';
 
       before(async () => {
+        // Create a dummy data view so the data view list is not empty
         const logger = getService('log');
-        // Create two separate data views
         await observability.alerts.common.createDataView({
           supertest,
-          id: LOGS_DATA_VIEW_ID,
-          name: LOGS_DATA_VIEW_NAME,
-          title: LOGS_DATA_VIEW_TITLE,
-          logger,
-        });
-        await observability.alerts.common.createDataView({
-          supertest,
-          id: METRICS_DATA_VIEW_ID,
-          name: METRICS_DATA_VIEW_NAME,
-          title: METRICS_DATA_VIEW_TITLE,
+          id: DUMMY_DATA_VIEW_ID,
+          name: 'Dummy Data View',
+          title: DUMMY_DATA_VIEW_TITLE,
           logger,
         });
       });
@@ -468,20 +459,17 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         if (rule) {
           await deleteRuleById(rule.id);
         }
+
+        // Clean up the dummy data view
         const logger = getService('log');
         await observability.alerts.common.deleteDataView({
           supertest,
-          id: LOGS_DATA_VIEW_ID,
-          logger,
-        });
-        await observability.alerts.common.deleteDataView({
-          supertest,
-          id: METRICS_DATA_VIEW_ID,
+          id: DUMMY_DATA_VIEW_ID,
           logger,
         });
       });
 
-      it('should create a custom threshold rule with a combined data view', async () => {
+      it('should create a custom threshold rule with an ad-hoc data view', async () => {
         await navigateAndOpenRuleTypeModal();
 
         // Select custom threshold rule type
@@ -496,17 +484,21 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         // Set rule name
         await testSubjects.setValue('ruleDetailsNameInput', CUSTOM_THRESHOLD_RULE_NAME);
 
-        // Select the combined data view by typing the combined pattern
+        // Type the pattern to trigger "Explore matching indices" button
         await testSubjects.click('selectDataViewExpression');
-        await testSubjects.setValue('indexPattern-switcher--input', COMBINED_DATA_VIEW_PATTERN);
+        await testSubjects.setValue('indexPattern-switcher--input', AD_HOC_DATA_VIEW_PATTERN);
 
-        // Click the "Explore matching indices" button to create an ad-hoc data view
-        await testSubjects.existOrFail('explore-matching-indices-button');
+        // Wait for the "Explore matching indices" button to appear (async index check with 250ms debounce)
+        await retry.waitFor('Explore matching indices button to appear', async () =>
+          testSubjects.exists('explore-matching-indices-button')
+        );
+
+        // Click the button to create an ad-hoc data view
         await testSubjects.click('explore-matching-indices-button');
 
         await retry.waitFor('data view selection to happen', async () => {
           const dataViewSelector = await testSubjects.find('selectDataViewExpression');
-          return (await dataViewSelector.getVisibleText()).includes(COMBINED_DATA_VIEW_PATTERN);
+          return (await dataViewSelector.getVisibleText()).includes(AD_HOC_DATA_VIEW_PATTERN);
         });
 
         // Save the rule
@@ -518,10 +510,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         // Verify the rule was created correctly
         const rule = await getRuleByName(CUSTOM_THRESHOLD_RULE_NAME);
         expect(rule).not.to.be(undefined);
-        // The ad-hoc data view should have the combined pattern as its title
+        // The ad-hoc data view should have the pattern as its title
         const searchConfigIndex = rule.params.searchConfiguration.index;
-        // Verify the data view is an ad-hoc data view with the combined pattern
-        expect(searchConfigIndex.title).to.eql(COMBINED_DATA_VIEW_PATTERN);
+        expect(searchConfigIndex.title).to.eql(AD_HOC_DATA_VIEW_PATTERN);
       });
     });
   });
