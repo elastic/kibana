@@ -44,7 +44,6 @@ export function getESQLForLayer(
   const timeZone = getUserTimeZone((key) => uiSettings.get(key), true);
   const utcOffset = moment.tz(timeZone).utcOffset() / 60;
   if (utcOffset !== 0) {
-    console.log('ESQL: no non-UTC support');
     return;
   }
 
@@ -56,18 +55,13 @@ export function getESQLForLayer(
         ('sourceField' in col && indexPattern.getFieldByName(col.sourceField)?.runtime)
     )
   ) {
-    console.log('ESQL: no formula, time shift, or runtime fields support');
     return;
   }
 
   // indexPattern.title is the actual es pattern
   let esqlCompose = from(indexPattern.title);
 
-  const esql = [`FROM ${indexPattern.title}`];
   if (indexPattern.timeFieldName) {
-    esql.push(
-      `WHERE ${indexPattern.timeFieldName} >= ?_tstart AND ${indexPattern.timeFieldName} <= ?_tend`
-    );
     esqlCompose = esqlCompose.pipe(
       where(`${indexPattern.timeFieldName} >= ?_tstart AND ${indexPattern.timeFieldName} <= ?_tend`)
     );
@@ -88,12 +82,10 @@ export function getESQLForLayer(
     ([_, col]) => !col.isBucketed
   );
 
-  console.log('metricEsAggsEntries LENGTH', metricEsAggsEntries.length);
   const metrics = metricEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
     if (!def.toESQL) {
-      console.log(`ESQL: no toESQL implementation for ${col.operationType}`);
       return undefined;
     }
 
@@ -106,7 +98,6 @@ export function getESQLForLayer(
       indexPattern.timeFieldName;
 
     if (wrapInTimeFilter) {
-      console.log('ESQL: reducing time range is not supported');
       return undefined;
     }
 
@@ -164,7 +155,6 @@ export function getESQLForLayer(
     );
 
     if (!metricESQL) {
-      console.log(`ESQL: toESQL returned nothing for ${col.operationType}`);
       return undefined;
     }
 
@@ -184,16 +174,13 @@ export function getESQLForLayer(
   });
 
   if (metrics.some((m) => !m)) {
-    console.log('ESQL: some metrics could not be converted');
     return;
   }
-  console.log('metrics LENGTH', metrics.length);
 
   const buckets = bucketEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
     if (!def.toESQL) {
-      console.log(`ESQL: no toESQL implementation for ${col.operationType}`);
       return undefined;
     }
 
@@ -305,27 +292,13 @@ export function getESQLForLayer(
   if (buckets.length > 0) {
     if (metrics.length > 0) {
       const stats = metrics.join(', ');
-      esql.push(`STATS ${stats} BY ${buckets.join(', ')}`);
       esqlCompose = esqlCompose.pipe(statsComposer(`${stats} BY ${buckets.join(', ')}`));
     }
 
     if (buckets.some((b) => !b || b.includes('undefined'))) {
-      console.log('ESQL: some buckets could not be converted');
       return;
     }
 
-    const sorts = bucketEsAggsEntries.map(([colId, col], index) => {
-      const aggId = String(index);
-      let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-        ? `col_${index}-${aggId}`
-        : `col_${index}_${aggId}`;
-
-      if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
-        esAggsId = col.sourceField;
-      }
-
-      return `${esAggsId} ASC`;
-    });
     const sortsCompose = bucketEsAggsEntries.map(([colId, col], index) => {
       const aggId = String(index);
       let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
@@ -339,17 +312,13 @@ export function getESQLForLayer(
       return { [esAggsId]: SortOrder.Asc };
     });
 
-    esql.push(`SORT ${sorts.join(', ')}`);
     esqlCompose = esqlCompose.pipe(sort(...sortsCompose));
   } else {
     if (metrics.length > 0) {
       const stats = metrics.join(', ');
-      esql.push(`STATS ${stats}`);
       esqlCompose = esqlCompose.pipe(statsComposer(stats));
     }
   }
-
-  console.log('esql', esqlCompose.toString());
 
   let finalEsqlCompose;
 
@@ -360,12 +329,8 @@ export function getESQLForLayer(
       .map((part) => part.trim())
       .join(' | ');
   } catch (e) {
-    console.log('==== ESQL-COMPOSER error: error generating final ESQL', e);
     return;
   }
-
-  console.log('OLD SCHOOL ESQL:', esql.join(' | '));
-  console.log('NEW SCHOOL ESQL:', finalEsqlCompose);
 
   return {
     esql: finalEsqlCompose,
