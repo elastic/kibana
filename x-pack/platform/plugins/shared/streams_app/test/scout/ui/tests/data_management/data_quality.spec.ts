@@ -9,14 +9,8 @@ import { expect } from '@kbn/scout';
 import { test } from '../../fixtures';
 
 test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices }) => {
-    await apiServices.streams.enable();
-  });
-
   test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
-    // Clear existing rules
-    await apiServices.streams.clearStreamChildren('logs');
     // Create a test stream with routing rules first
     await apiServices.streams.forkStream('logs', 'logs.nginx', {
       field: 'service.name',
@@ -26,8 +20,9 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.streams.gotoDataQualityTab('logs.nginx');
   });
 
-  test.afterAll(async ({ apiServices }) => {
-    await apiServices.streams.disable();
+  test.afterEach(async ({ apiServices }) => {
+    // Clear existing rules
+    await apiServices.streams.clearStreamChildren('logs');
   });
 
   test('should show data quality metrics', async ({ page }) => {
