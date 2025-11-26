@@ -282,81 +282,81 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
       const {
         anomalyThreshold,
         machineLearningJobId,
-        threatIndex: _removedThreatIndex,
-        threatQueryBar: _removedThreatQueryBar,
-        threatMapping: _removedThreatMapping,
-        eqlOptions: _eqlOptions,
-        newTermsFields: removedNewTermsFields,
-        historyWindowSize: removedHistoryWindowSize,
+        threatIndex,
+        threatQueryBar,
+        threatMapping,
+        eqlOptions,
+        newTermsFields,
+        historyWindowSize,
         ...thresholdRuleFields
       } = fields;
       return thresholdRuleFields;
     case 'threat_match':
       const {
-        anomalyThreshold: _removedAnomalyThreshold,
-        machineLearningJobId: _removedMachineLearningJobId,
-        threshold: _removedThreshold,
-        eqlOptions: __eqlOptions,
-        newTermsFields: _removedNewTermsFields,
-        historyWindowSize: _removedHistoryWindowSize,
+        anomalyThreshold,
+        machineLearningJobId,
+        threshold,
+        eqlOptions,
+        newTermsFields,
+        historyWindowSize,
         ...threatMatchRuleFields
       } = fields;
       return threatMatchRuleFields;
     case 'query':
     case 'saved_query':
       const {
-        anomalyThreshold: _a,
-        machineLearningJobId: _m,
-        threshold: _t,
-        threatIndex: __removedThreatIndex,
-        threatQueryBar: __removedThreatQueryBar,
-        threatMapping: __removedThreatMapping,
-        eqlOptions: ___eqlOptions,
-        newTermsFields: __removedNewTermsFields,
-        historyWindowSize: __removedHistoryWindowSize,
+        anomalyThreshold,
+        machineLearningJobId,
+        threshold,
+        threatIndex,
+        threatQueryBar,
+        threatMapping,
+        eqlOptions,
+        newTermsFields,
+        historyWindowSize,
         ...queryRuleFields
       } = fields;
       return queryRuleFields;
     case 'eql':
       const {
-        anomalyThreshold: __a,
-        machineLearningJobId: __m,
-        threshold: __t,
-        threatIndex: ___removedThreatIndex,
-        threatQueryBar: ___removedThreatQueryBar,
-        threatMapping: ___removedThreatMapping,
-        newTermsFields: ___removedNewTermsFields,
-        historyWindowSize: ___removedHistoryWindowSize,
+        anomalyThreshold,
+        machineLearningJobId,
+        threshold,
+        threatIndex,
+        threatQueryBar,
+        threatMapping,
+        newTermsFields,
+        historyWindowSize,
         ...eqlRuleFields
       } = fields;
       return eqlRuleFields;
 
     case 'new_terms':
       const {
-        anomalyThreshold: ___a,
-        machineLearningJobId: ___m,
-        threshold: ___t,
-        threatIndex: ____removedThreatIndex,
-        threatQueryBar: ____removedThreatQueryBar,
-        threatMapping: ____removedThreatMapping,
-        eqlOptions: ____eqlOptions,
+        anomalyThreshold,
+        machineLearningJobId,
+        threshold,
+        threatIndex,
+        threatQueryBar,
+        threatMapping,
+        eqlOptions,
         ...newTermsRuleFields
       } = fields;
       return newTermsRuleFields;
 
     case 'esql':
       const {
-        anomalyThreshold: _esql_a,
-        machineLearningJobId: _esql_m,
-        threshold: _esql_t,
-        threatIndex: _esql_removedThreatIndex,
-        threatQueryBar: _esql_removedThreatQueryBar,
-        threatMapping: _esql_removedThreatMapping,
-        newTermsFields: _esql_removedNewTermsFields,
-        historyWindowSize: _esql_removedHistoryWindowSize,
-        eqlOptions: _esql__eqlOptions,
-        index: _esql_index,
-        dataViewId: _esql_dataViewId,
+        anomalyThreshold,
+        machineLearningJobId,
+        threshold,
+        threatIndex,
+        threatQueryBar,
+        threatMapping,
+        newTermsFields,
+        historyWindowSize,
+        eqlOptions,
+        index,
+        dataViewId,
         ...esqlRuleFields
       } = fields;
       return esqlRuleFields;

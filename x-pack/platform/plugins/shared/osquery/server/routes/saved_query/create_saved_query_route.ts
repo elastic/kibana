@@ -59,7 +59,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           snapshot,
           removed,
           timeout,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           ecs_mapping,
         } = request.body;
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -72,7 +74,6 @@ describe('task manager telemetry', () => {
             document__test__: 32,
           },
           unrecognized: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 4,
           },
         },
@@ -213,7 +214,6 @@ describe('task manager telemetry', () => {
             document__test__: 32,
           },
           unrecognized: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             logs__alert__document__count: 4,
           },
         },

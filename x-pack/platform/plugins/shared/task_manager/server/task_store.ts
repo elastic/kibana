@@ -995,7 +995,6 @@ export class TaskStore {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     const { sort, ...rest } = opts;
     try {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { total, updated, version_conflicts } = await this.esClient.updateByQuery(
         {
           index: this.index,

@@ -200,7 +200,6 @@ export const push = async (
       }),
     ]);
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email, profile_uid } = user;
     const pushedDate = new Date().toISOString();
     const externalServiceResponse = pushRes.data as ExternalServiceResponse;

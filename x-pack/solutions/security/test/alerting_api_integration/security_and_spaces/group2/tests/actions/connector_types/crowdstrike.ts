@@ -212,7 +212,6 @@ export default function createCrowdstrikeTests({ getService }: FtrProviderContex
             isAllowedSubAction ? 'allow' : 'deny'
           } execute of ${crowdstrikeSubAction}`, async () => {
             const {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               body: { status, message, connector_id, statusCode, error },
             } = await executeSubAction({
               supertest: supertestWithoutAuth,

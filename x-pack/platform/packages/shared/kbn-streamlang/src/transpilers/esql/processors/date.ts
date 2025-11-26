@@ -50,15 +50,7 @@ const buildDateParseExpressions = (
 };
 
 export function convertDateProcessorToESQL(processor: DateProcessor): ESQLAstCommand[] {
-  const {
-    from,
-    to,
-    formats, // eslint-disable-next-line @typescript-eslint/naming-convention
-    output_format,
-    timezone,
-    locale,
-    where,
-  } = processor;
+  const { from, to, formats, output_format, timezone, locale, where } = processor;
   const fromColumn = Builder.expression.column(from);
   // In case ES has mapped fromColumn as datetime, we need to convert to string first for DATE_PARSE
   const fromAsString = Builder.expression.func.call('TO_STRING', [fromColumn]);
