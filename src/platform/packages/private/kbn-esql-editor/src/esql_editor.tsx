@@ -108,6 +108,9 @@ const triggerControl = async (
   });
 };
 
+// Store action disposables outside component to clean up on re-render
+const registeredActionDisposables: monaco.IDisposable[] = [];
+
 // React.memo is applied inside the withRestorableState HOC (called below)
 const ESQLEditorInternal = function ESQLEditor({
   query,
@@ -144,8 +147,6 @@ const ESQLEditorInternal = function ESQLEditor({
   const containerRef = useRef<HTMLElement>(null);
 
   const datePickerOpenStatusRef = useRef<boolean>(false);
-  const onQuerySubmitRef = useRef<(source: QuerySource) => void>(() => {});
-  const isVisorOpenRef = useRef(false);
 
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
@@ -404,24 +405,31 @@ const ESQLEditorInternal = function ESQLEditor({
     });
   });
 
-  // Keep refs in sync for addCommand callbacks
-  onQuerySubmitRef.current = onQuerySubmit;
-  isVisorOpenRef.current = isVisorOpen;
+  // Dispose previous actions, then register new ones
+  registeredActionDisposables.forEach((d) => d.dispose());
+  registeredActionDisposables.length = 0;
 
-  useEffect(() => {
-    editor1.current?.addCommand(
-      // eslint-disable-next-line no-bitwise
-      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-      () => onQuerySubmitRef.current(QuerySource.MANUAL)
+  if (editor1.current) {
+    registeredActionDisposables.push(
+      editor1.current.addAction({
+        id: 'esql.submit',
+        label: 'Submit ES|QL Query',
+        // eslint-disable-next-line no-bitwise
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+        run: () => onQuerySubmit(QuerySource.MANUAL),
+      })
     );
 
-    editor1.current?.addCommand(
-      // eslint-disable-next-line no-bitwise
-      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
-      () => setIsVisorOpen(!isVisorOpenRef.current)
+    registeredActionDisposables.push(
+      editor1.current.addAction({
+        id: 'esql.toggleVisor',
+        label: 'Toggle ES|QL Visor',
+        // eslint-disable-next-line no-bitwise
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK],
+        run: () => setIsVisorOpen(!isVisorOpen),
+      })
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editor1.current]);
+  }
 
   const styles = esqlEditorStyles(
     theme.euiTheme,
