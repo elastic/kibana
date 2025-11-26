@@ -66,9 +66,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     manualEvents$.next(event);
   };
 
+  const processedConversation = await prepareConversation({
+    nextInput,
+    previousRounds: conversation?.rounds ?? [],
+    attachmentsService: attachments,
+  });
+
   const selectedTools = await selectTools({
-    input: nextInput,
-    conversation,
+    conversation: processedConversation,
     toolProvider,
     agentConfiguration,
     attachmentsService: attachments,
@@ -98,11 +103,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const cycleLimit = 10;
   const graphRecursionLimit = getRecursionLimit(cycleLimit);
 
-  const processedConversation = await prepareConversation({
-    nextInput,
-    previousRounds: conversation?.rounds ?? [],
-    attachmentsService: attachments,
-  });
   const initialMessages = conversationToLangchainMessages({
     conversation: processedConversation,
   });
