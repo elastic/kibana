@@ -8,10 +8,20 @@
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 
+const testIndexName = `index-test-${Math.random()}`;
+
 test.describe('Home page', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsIndexManagementUser();
     await pageObjects.indexManagement.goto();
+  });
+
+  test.afterAll(async ({ esClient }) => {
+    try {
+      await esClient.indices.delete({ index: testIndexName });
+    } catch (e: any) {
+      log.debug(`Index cleanup failed for ${testIndexName}: ${e.message}`);
+    }
   });
 
   test('Loads the app and renders the indices tab by default', async ({
@@ -43,21 +53,12 @@ test.describe('Home page', { tag: ['@ess'] }, () => {
     await expect(page.testSubj.locator('indexTable')).toBeVisible();
   });
 
-  test('Indices - can create an index', async ({ pageObjects, esClient, log }) => {
-    const testIndexName = `index-test-${Math.random()}`;
-
+  test('Indices - can create an index', async ({ pageObjects }) => {
     await pageObjects.indexManagement.clickCreateIndexButton();
     await pageObjects.indexManagement.setCreateIndexName(testIndexName);
     await pageObjects.indexManagement.setCreateIndexMode('Lookup');
     await pageObjects.indexManagement.clickCreateIndexSaveButton();
-    await pageObjects.indexManagement.expectIndexToExist(testIndexName);
-
-    // Cleanup
-    try {
-      await esClient.indices.delete({ index: testIndexName });
-    } catch (e: any) {
-      log.debug(`Index cleanup failed for ${testIndexName}: ${e.message}`);
-    }
+    expect(await pageObjects.indexManagement.indexLinkVisible(testIndexName)).toBe(true);
   });
 
   test('Data streams - renders the data streams tab', async ({ pageObjects, page }) => {

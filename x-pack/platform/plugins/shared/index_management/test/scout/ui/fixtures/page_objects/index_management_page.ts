@@ -38,31 +38,23 @@ export class IndexManagement extends AbstractPageObject {
   }
 
   async setCreateIndexName(value: string) {
-    const nameField = this.page.testSubj.locator('createIndexNameFieldText');
-    await nameField.waitFor({ state: 'visible' });
-    await nameField.fill(value);
+    await this.page.testSubj.fill('createIndexNameFieldText', value);
   }
 
   async setCreateIndexMode(value: string) {
-    const modeField = this.page.testSubj.locator('indexModeField');
-    await modeField.waitFor({ state: 'visible' });
-    await modeField.click();
+    await this.page.testSubj.click('indexModeField');
     await this.page.testSubj.locator(`indexMode${value}Option`).click();
   }
 
   async clickCreateIndexSaveButton() {
     const saveButton = this.page.testSubj.locator('createIndexSaveButton');
-    await saveButton.waitFor({ state: 'visible' });
     await saveButton.click();
     // Wait for modal to close
     await saveButton.waitFor({ state: 'hidden', timeout: 30000 });
   }
 
-  async expectIndexToExist(indexName: string) {
-    // Wait for the table to be visible
-    const table = this.page.locator('table');
-    await table.waitFor({ state: 'visible' });
-    this.page.getByText(indexName);
+  async indexLinkVisible(indexName: string) {
+    return this.page.getByRole('button').getByText(indexName).isVisible();
   }
 
   async toggleHiddenIndices() {
