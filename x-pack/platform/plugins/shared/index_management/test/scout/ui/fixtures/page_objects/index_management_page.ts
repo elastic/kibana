@@ -128,7 +128,6 @@ export class IndexManagement extends AbstractPageObject {
         .locator('input')
         .fill('test-index-pattern');
 
-      // Click Next button
       await this.clickNextButton();
     },
   };
