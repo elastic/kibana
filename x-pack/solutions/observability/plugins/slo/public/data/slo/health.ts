@@ -30,30 +30,10 @@ export const anUnhealthyTransformHealth: TransformHealthResponse = {
   stateMatches: true,
 };
 
-export const aFailedTransformHealth: TransformHealthResponse = {
-  isProblematic: true,
-  missing: false,
-  status: 'healthy',
-  state: 'failed',
-  stateMatches: false,
-};
-
 export const aConflictingTransformHealth: TransformHealthResponse = {
   isProblematic: true,
   missing: false,
   status: 'healthy',
   state: 'stopped',
   stateMatches: false,
-};
-
-export const aHealthySLOHealth = {
-  isProblematic: false,
-  rollup: aHealthyTransformHealth,
-  summary: aHealthyTransformHealth,
-};
-
-export const anUnhealthySLOHealth = {
-  isProblematic: true,
-  rollup: anUnhealthyTransformHealth,
-  summary: aHealthyTransformHealth,
 };
