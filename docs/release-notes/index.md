@@ -21,6 +21,67 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+## 9.2.2 [kibana-9.2.2-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.2.2-features-enhancements]
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.2.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+
+### Fixes [kibana-9.2.2-fixes]
+
+**Alerting and cases**:
+* Catch connector errors but do not interrupt the case creation flow [#244188]({{kib-pull}}244188).
+* Improve IBM error message [#244012]({{kib-pull}}244012).
+* Fixes auto extraction in event bulk actions [#242325]({{kib-pull}}242325).
+* Fixes a bug that caused the alerts tables pagination to be stuck in the Rule pages [#242275]({{kib-pull}}242275).
+
+**Dashboards and Visualizations**:
+* Use max_value instead of infinity [#243572]({{kib-pull}}243572).
+* Fixes Can not save Dashboard after switching a Dashboard Link to an External Link [#243134]({{kib-pull}}243134).
+* Fixes deselecting (blank) option from options list [#242036]({{kib-pull}}242036).
+
+**Data ingestion and Fleet**:
+* Use long expiration for upgrade agents [#243443]({{kib-pull}}243443).
+* Fixes retrying stuck agents in auto upgrade logic [#243326]({{kib-pull}}243326).
+* Adds retry behavior for `/api/fleet/agents` when transient issues with ES are encountered [#243105]({{kib-pull}}243105).
+* Fixes docker image in Add agent k8s manifest [#242691]({{kib-pull}}242691).
+
+**Discover**:
+* Fixes truncation for longer text in table [#241440]({{kib-pull}}241440).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.2.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes favicon CSS specifity [#243351]({{kib-pull}}243351).
+
+**Machine Learning**:
+* Inference/AI Connector and Inference endpoint creation: ensure deleted text in form is not sent as empty string [#244059]({{kib-pull}}244059).
+* Data frame analytics: Fixes wizard for data view with runtime fields [#242557]({{kib-pull}}242557).
+* Fixes import and improves validation for Anomaly Detection and Data Frame Analytics jobs [#242263]({{kib-pull}}242263).
+
+**Search**:
+* Fixes a case on Index management page where screen reader text was different than visible one [#243802]({{kib-pull}}243802).
+* Fixed a case of keyboard focus getting trapped in pages using document preview [#243791]({{kib-pull}}243791).
+* 🌊 🐞 Prevent retention page crash for certain ILM policies [#243826]({{kib-pull}}243826).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixes a crash on UI Streams > retention page when a stream has defined an index lifecycle (ILM) policy that omits expected lifecycle phases or all of it phases starts at `0`.
+* Ignore resource_already_exists_exception for value list creation hook [#243642]({{kib-pull}}243642).
+* Show AI log assistant with fallback message fields [#243437]({{kib-pull}}243437).
+* Disable custom suggestion on embedded console [#241516]({{kib-pull}}241516).
+
 ## 9.2.1 [kibana-9.2.1-release-notes]
 
 % ::::{NOTE}
