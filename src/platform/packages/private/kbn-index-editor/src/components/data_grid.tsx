@@ -49,8 +49,8 @@ interface ESQLDataGridProps {
 }
 
 const DEFAULT_INITIAL_ROW_HEIGHT = 1;
-const DEFAULT_ROWS_PER_PAGE = 100;
-const ROWS_PER_PAGE_OPTIONS = [50, 100, 250, 500];
+const DEFAULT_ROWS_PER_PAGE = 50;
+const ROWS_PER_PAGE_OPTIONS = [25, 50, 100];
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const { euiTheme } = useEuiTheme();
@@ -226,11 +226,15 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   );
 
   const gridToolbar = useMemo(() => {
+    // Count all rows with at least one field (to avoid counting empty rows)
+    const rowsCount = rows.reduce((acc, row) => {
+      return Object.keys(row.flattened).length > 0 ? acc + 1 : acc;
+    }, 0);
     return getGridToolbar({
-      rowsCount: props.totalHits,
+      rowsCount,
       onOpenIndexInDiscover: props.onOpenIndexInDiscover,
     });
-  }, [props.onOpenIndexInDiscover, props.totalHits]);
+  }, [props.onOpenIndexInDiscover, rows]);
 
   const trailingControlColumns = useMemo(() => {
     return [getAddColumnControl(indexEditorTelemetryService)];
