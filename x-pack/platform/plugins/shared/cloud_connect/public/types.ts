@@ -31,6 +31,26 @@ export interface CloudConnectedAppComponentProps {
   history: AppMountParameters['history'];
 }
 
+// Service types
+export interface ServiceMetadata {
+  documentation_url?: string;
+  service_url?: string;
+  connect_url?: string;
+}
+
+export interface CloudService {
+  enabled: boolean;
+  support?: {
+    supported: boolean;
+    minimum_stack_version?: string;
+    valid_license_types?: string[];
+  };
+  config?: {
+    region_id?: string;
+  };
+  metadata?: ServiceMetadata;
+}
+
 export interface ClusterDetails {
   id: string;
   name: string;
@@ -49,24 +69,7 @@ export interface ClusterDetails {
     uid: string;
   };
   services: {
-    auto_ops?: {
-      enabled: boolean;
-      supported: boolean;
-      config?: { region_id?: string };
-      metadata?: {
-        documentation_url?: string;
-        service_url?: string;
-        connect_url?: string;
-      };
-    };
-    eis?: {
-      enabled: boolean;
-      supported: boolean;
-      config?: { region_id?: string };
-      metadata?: {
-        documentation_url?: string;
-        service_url?: string;
-      };
-    };
+    auto_ops?: CloudService;
+    eis?: CloudService;
   };
 }

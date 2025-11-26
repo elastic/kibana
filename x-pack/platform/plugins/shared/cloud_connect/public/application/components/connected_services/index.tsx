@@ -27,39 +27,9 @@ import { ServicesSection } from './services_section';
 import { MigrationSection } from './migration_section';
 import { DisconnectClusterModal } from './disconnect_cluster_modal';
 import { apiService } from '../../../lib/api';
+import type { ClusterDetails } from '../../../types';
 
 export { useClusterConnection } from './use_cluster_connection';
-
-interface ClusterDetails {
-  id: string;
-  name: string;
-  metadata: {
-    created_at: string;
-    created_by: string;
-    organization_id: string;
-  };
-  self_managed_cluster: {
-    id: string;
-    name: string;
-    version: string;
-  };
-  license: {
-    type: string;
-    uid: string;
-  };
-  services: {
-    auto_ops?: {
-      enabled: boolean;
-      supported: boolean;
-      config?: { region_id?: string };
-    };
-    eis?: {
-      enabled: boolean;
-      supported: boolean;
-      config?: { region_id?: string };
-    };
-  };
-}
 
 export interface ConnectedServicesPageProps {
   clusterDetails: ClusterDetails;

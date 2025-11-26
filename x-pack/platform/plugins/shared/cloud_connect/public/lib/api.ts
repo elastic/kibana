@@ -62,7 +62,6 @@ export class ApiService {
     this.client = httpClient;
   }
 
-  // GET /internal/cloud_connect/config
   public useLoadConfig() {
     return this.useRequest<CloudConnectConfig>({
       path: `${API_BASE_PATH}/config`,
@@ -70,7 +69,6 @@ export class ApiService {
     });
   }
 
-  // GET /internal/cloud_connect/cluster_details
   public useLoadClusterDetails() {
     return this.useRequest<ClusterDetails>({
       path: `${API_BASE_PATH}/cluster_details`,
@@ -78,7 +76,6 @@ export class ApiService {
     });
   }
 
-  // POST /internal/cloud_connect/authenticate
   public async authenticate(apiKey: string) {
     return await this.sendRequest<AuthenticateResponse>({
       path: `${API_BASE_PATH}/authenticate`,
@@ -87,7 +84,6 @@ export class ApiService {
     });
   }
 
-  // PUT /internal/cloud_connect/cluster_details
   public async updateServices(services: Record<string, { enabled: boolean }>) {
     return await this.sendRequest<UpdateServicesResponse>({
       path: `${API_BASE_PATH}/cluster_details`,
@@ -96,7 +92,6 @@ export class ApiService {
     });
   }
 
-  // DELETE /internal/cloud_connect/cluster
   public async disconnectCluster() {
     return await this.sendRequest<DisconnectClusterResponse>({
       path: `${API_BASE_PATH}/cluster`,

@@ -12,30 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { ServiceCard } from './details_card';
 import { DisableServiceModal } from './disable_service_modal';
 import { useServiceActions } from './use_service_actions';
-
-interface ServiceMetadata {
-  documentation_url?: string;
-  service_url?: string;
-  connect_url?: string;
-}
-
-interface Service {
-  enabled: boolean;
-  support?: {
-    supported: boolean;
-    minimum_stack_version?: string;
-    valid_license_types?: string[];
-  };
-  config?: {
-    region_id?: string;
-  };
-  metadata?: ServiceMetadata;
-}
+import type { CloudService } from '../../../../types';
 
 interface ServicesSectionProps {
   services: {
-    auto_ops?: Service;
-    eis?: Service;
+    auto_ops?: CloudService;
+    eis?: CloudService;
   };
   onServiceUpdate: (serviceKey: string, enabled: boolean) => void;
 }

@@ -31,7 +31,6 @@ const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
 };
 
 export const CloudConnectedApp = (core: CoreStart, params: AppMountParameters) => {
-  // Initialize the API service with the HTTP client
   apiService.setup(core.http);
 
   ReactDOM.render(

@@ -11,7 +11,7 @@ import { EuiTitle, EuiSpacer, EuiCard, EuiFlexGroup, EuiFlexItem } from '@elasti
 import { COLUMN_SIZE } from '../constants';
 
 interface ServiceCardsProps {
-  hasPermissions: boolean;
+  hasPermissions?: boolean;
 }
 
 export const ServiceCards: React.FC<ServiceCardsProps> = ({ hasPermissions }) => {
