@@ -298,7 +298,6 @@
     "kibanaSavedObjectMeta.searchSourceJSON",
     "optionsJSON",
     "panelsJSON",
-    "projectRouting",
     "refreshInterval",
     "refreshInterval.display",
     "refreshInterval.pause",

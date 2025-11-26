@@ -13,7 +13,6 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV1 } from './schema/v1';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV2 } from './schema/v2';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV3 } from './schema/v3';
-import { dashboardAttributesSchema as dashboardAttributesSchemaV4 } from './schema/v4';
 
 import type { DashboardSavedObjectTypeMigrationsDeps } from './migrations/dashboard_saved_object_migrations';
 import { createDashboardSavedObjectTypeMigrations } from './migrations/dashboard_saved_object_migrations';
@@ -83,20 +82,6 @@ export const createDashboardSavedObjectType = ({
         create: dashboardAttributesSchemaV3,
       },
     },
-    4: {
-      changes: [
-        {
-          type: 'mappings_addition',
-          addedMappings: {
-            project_routing: { type: 'keyword', index: false, doc_values: false },
-          },
-        },
-      ],
-      schemas: {
-        forwardCompatibility: dashboardAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
-        create: dashboardAttributesSchemaV4,
-      },
-    },
   },
   mappings: {
     dynamic: false,
@@ -134,7 +119,6 @@ export const createDashboardSavedObjectType = ({
       timeTo: { type: 'keyword', index: false, doc_values: false },
       title: { type: 'text' },
       version: { type: 'integer' },
-      project_routing: { type: 'keyword', index: false, doc_values: false },
     },
   },
   schemas: {
