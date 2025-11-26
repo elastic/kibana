@@ -52,7 +52,7 @@ export class SecurityAIAssistantEvaluationChatClient {
   }): Promise<{ messages: ChatMessage[]; errors: unknown[] }> {
     this.log.info('Calling Security Assistant chat complete');
 
-    const messages = normalizeMessages(messagesArg!);
+    const messages = normalizeMessages(messagesArg);
 
     const response = await this.fetch<ChatCompleteResponse>(
       ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,

@@ -86,12 +86,10 @@ export const getRequestBody = ({
 }): AttackDiscoveryPostInternalRequestBody => ({
   alertsIndexPattern: alertsIndexPattern ?? '',
   anonymizationFields: anonymizationFields?.data ?? [],
-  langSmithProject: isEmpty(traceOptions?.langSmithProject)
+  tracingProject: isEmpty(traceOptions?.langSmithProject)
     ? undefined
     : traceOptions?.langSmithProject,
-  langSmithApiKey: isEmpty(traceOptions?.langSmithApiKey)
-    ? undefined
-    : traceOptions?.langSmithApiKey,
+  tracingApiKey: isEmpty(traceOptions?.langSmithApiKey) ? undefined : traceOptions?.langSmithApiKey,
   replacements: {}, // no need to re-use replacements in the current implementation
   size,
   subAction: 'invokeAI', // non-streaming

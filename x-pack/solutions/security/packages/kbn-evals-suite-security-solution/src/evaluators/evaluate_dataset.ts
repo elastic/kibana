@@ -29,11 +29,24 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
   return {
     name: 'Criteria',
     kind: 'LLM' as const,
-    evaluate: async ({ input, output, expected, metadata }: any) => {
+    evaluate: async ({
+      input,
+      output,
+      expected,
+      metadata,
+    }: {
+      input: Record<string, unknown>;
+      output: Record<string, unknown>;
+      expected?: { criteria?: string[] };
+      metadata?: Record<string, unknown> | null;
+    }) => {
       const criteria = expected?.criteria ?? [];
-      const result = await evaluators
-        .criteria(criteria)
-        .evaluate({ input, expected, output, metadata });
+      const result = await evaluators.criteria(criteria).evaluate({
+        input,
+        expected,
+        output,
+        metadata,
+      });
 
       return result;
     },

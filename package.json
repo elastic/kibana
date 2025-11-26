@@ -95,6 +95,7 @@
     "**/util": "^0.12.5",
     "**/yauzl": "^3.2.0",
     "**/zod": "^3.25.76",
+    "@arizeai/phoenix-client/@opentelemetry/exporter-trace-otlp-proto/@opentelemetry/resources": "^2.0.0",
     "@aws-sdk/client-bedrock-agent-runtime": "^3.879.0",
     "@aws-sdk/client-bedrock-runtime": "^3.879.0",
     "@aws-sdk/client-kendra": "3.879.0",

@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { EsClient } from '@kbn/scout-oblt';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
 } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
+
+interface KnowledgeBaseStatus {
+  is_setup_available?: boolean;
+  elser_exists?: boolean;
+}
 
 export class SecurityKnowledgeBaseClient {
   constructor(
@@ -24,7 +29,7 @@ export class SecurityKnowledgeBaseClient {
   async ensureInstalled(): Promise<void> {
     this.log.info('Ensuring Security Knowledge Base is installed');
 
-    const status = await this.fetch<any>(
+    const status = await this.fetch<KnowledgeBaseStatus>(
       ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', ''),
       {
         method: 'GET',
