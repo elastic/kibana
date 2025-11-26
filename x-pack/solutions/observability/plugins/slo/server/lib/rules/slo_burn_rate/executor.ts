@@ -413,20 +413,13 @@ async function checkSliAndSourceData(
       const dataAgeMinutes = (now.getTime() - earliestTimestamp.getTime()) / (1000 * 60);
       const minimumAgeMinutes = 30 + 10; // 30 min minimum presence + 10 min transform lag buffer
 
-      // Check if there's sufficient document count in the recent window
-      // This ensures data is actively flowing and not sparse
-      // We use a minimum threshold to distinguish sparse data from active data
-      // For sparse data (e.g., 1 doc every 30 min), recent window might have 0-1 docs
-      // For active data, recent window should have multiple docs
-      const minimumRecentDocCount = 3; // Minimum documents in last 20 minutes to consider data "active"
-
       // Only alert if:
       // 1. Earliest data is old enough (data has been present for a while)
-      // 2. Recent window has sufficient document count (data is actively flowing, not sparse)
-      // This prevents false positives from sparse data or data that just stopped
-      if (dataAgeMinutes >= minimumAgeMinutes && recentDataCount.count >= minimumRecentDocCount) {
-        // Source data has been consistently present for at least 30 minutes AND is still actively flowing
-        // (latest data within last 20 minutes), but no SLI data exists - trigger "no data" alert
+      // 2. Recent window has any documents (data is still flowing, even if sparse)
+      // This prevents false positives when data just started coming (transform needs time to catch up)
+      if (dataAgeMinutes >= minimumAgeMinutes) {
+        // Source data has been consistently present for at least 40 minutes AND there's recent data
+        // (within last 20 minutes), but no SLI data exists - trigger "no data" alert
         const reason = i18n.translate('xpack.slo.alerting.burnRate.noSliDataReason', {
           defaultMessage:
             'No SLI data generated for SLO {sloName} in the past hour. Source data exists but transform may not be running correctly.',
@@ -473,10 +466,8 @@ async function checkSliAndSourceData(
 
         return false; // No SLI data, "no data" alert triggered
       } else {
-        // Source data exists but either:
-        // 1. Earliest document is less than 40 minutes old (data just started coming)
-        // 2. Recent window (last 20 minutes) has insufficient document count (data is sparse)
-        // In both cases, give transform time to catch up or wait for more data
+        // Source data exists but earliest document is less than 40 minutes old (data just started coming)
+        // Give transform time to catch up before alerting
         // Proceed with evaluation without alerting to avoid false positives
         return true;
       }
