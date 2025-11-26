@@ -4,6 +4,8 @@ Your task is to analyze a data stream and generate a comprehensive **ingest pipe
 
 **Avoid unnecessary renames:** If the pre-generated parsing processor already extracts fields with schema-compliant names (e.g., `body.text`, `severity_text`, `resource.attributes.service.name` for OTel, or `log.level`, `service.name`, `host.name` for ECS), do NOT add rename processors for those fields. Only add rename/mapping processors for fields that were extracted with non-schema-compliant names.
 
+**Do not override existing values:** If a field already has a proper value (e.g., `@timestamp` is already set, or `service.name` already contains the correct value), do NOT add processors that would overwrite it. Only populate fields that are missing or incorrect.
+
 If no parsing processor is provided, analyze the raw data stream and build processors as needed.
 
 # Ingest Pipeline Definition
@@ -85,7 +87,8 @@ Use this feedback to:
 1. **Analyze:** Review the initial dataset analysis to understand field types, timestamps, likely PII/secrets, and cardinality risks. **If a pre-generated parsing processor is provided, the dataset analysis reflects parsed documents** - use this to determine what additional processors are needed. Identify fields that have incorrect or unmapped types and need explicit type conversions to match the target schema (ECS or OTel).
 2. **Design:** Compose stages with clear contracts. **If a pre-generated parsing processor is provided, include it as the first processor (immutable)**. Then add processors for date normalization, type conversions, field cleanup, and enrichment based on the parsed document structure.
 3. **Simulate:** Call `simulate_pipeline` to check structural integrity and simulate against the data stream. The tool automatically simulates the pipeline after validation passes, providing detailed metrics on parsing coverage, timestamp success rate, and failure behavior.
-4. **Commit:** When validation and simulation pass, call `commit_pipeline` to finalize.
+4. **Refine:** If a processor fails on ALL documents (100% failure rate), it is fundamentally broken—remove it or completely redesign it. Do not keep retrying minor variations of a consistently failing processor.
+5. **Commit:** When validation and simulation pass, call `commit_pipeline` to finalize.
 
 # Acceptance Gates (checked via `simulate_pipeline`)
 

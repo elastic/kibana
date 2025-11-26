@@ -55,19 +55,21 @@ export async function suggestProcessingPipeline({
     mappedFields
   );
 
+  const input = {
+    stream: definition,
+    fields_schema: isOtel
+      ? `OpenTelemetry (OTel) semantic convention for log records`
+      : 'Elastic Common Schema (ECS)',
+    pipeline_schema: JSON.stringify(getPipelineDefinitionJsonSchema(pipelineDefinitionSchema)),
+    initial_dataset_analysis: JSON.stringify(simulationMetrics),
+    parsing_processor: parsingProcessor ? JSON.stringify(parsingProcessor) : undefined,
+  };
+
   // Invoke the reasoning agent to suggest the ingest pipeline
   const response = await executeAsReasoningAgent({
     inferenceClient,
     prompt: SuggestIngestPipelinePrompt,
-    input: {
-      stream: definition,
-      fields_schema: isOtel
-        ? `OpenTelemetry (OTel) semantic convention for log records`
-        : 'Elastic Common Schema (ECS)',
-      pipeline_schema: JSON.stringify(getPipelineDefinitionJsonSchema(pipelineDefinitionSchema)),
-      initial_dataset_analysis: JSON.stringify(simulationMetrics),
-      parsing_processor: parsingProcessor ? JSON.stringify(parsingProcessor) : undefined,
-    },
+    input,
     maxSteps,
     toolCallbacks: {
       simulate_pipeline: async (toolCall) => {
@@ -92,10 +94,30 @@ export async function suggestProcessingPipeline({
           mappedFields
         );
 
+        // Collect unique errors from simulation
+        const uniqueErrors = getUniqueDocumentErrors(simulateResult);
+
+        // 3. Validate parse rate - if below 80%, mark as invalid
+        const parseRate = metrics.parse_rate;
+        if (parseRate < 80) {
+          return {
+            response: {
+              valid: false,
+              errors: [
+                `Parse rate is too low: ${parseRate.toFixed(
+                  2
+                )}% (minimum required: 80%). The pipeline is not extracting fields from enough documents. Review the processors and ensure they handle the document structure correctly.`,
+                ...uniqueErrors,
+              ],
+              metrics,
+            },
+          };
+        }
+
         return {
           response: {
             valid: true,
-            errors: undefined,
+            errors: uniqueErrors.length > 0 ? uniqueErrors : undefined,
             metrics,
           },
         };
@@ -134,6 +156,41 @@ export async function suggestProcessingPipeline({
   }
 
   return commitPipeline.data as StreamlangDSL;
+}
+
+function getUniqueDocumentErrors(simulationResult: ProcessingSimulationResponse): string[] {
+  if (!simulationResult.documents || simulationResult.documents.length === 0) {
+    return [];
+  }
+
+  // Collect all unique error messages
+  const errorMap = new Map<string, { count: number; type: string; exampleDoc?: any }>();
+
+  for (const doc of simulationResult.documents) {
+    if (doc.errors && doc.errors.length > 0) {
+      for (const error of doc.errors) {
+        const key = `${error.type}: ${error.message}`;
+        if (!errorMap.has(key)) {
+          errorMap.set(key, {
+            count: 1,
+            type: error.type,
+            exampleDoc: doc.value,
+          });
+        } else {
+          errorMap.get(key)!.count++;
+        }
+      }
+    }
+  }
+
+  // Format errors with counts and example context
+  const uniqueErrors: string[] = [];
+  for (const [errorKey, errorInfo] of errorMap.entries()) {
+    const countStr = errorInfo.count > 1 ? ` (occurred in ${errorInfo.count} documents)` : '';
+    uniqueErrors.push(`${errorKey}${countStr}`);
+  }
+
+  return uniqueErrors;
 }
 
 async function getMappedFields(esClient: ElasticsearchClient, index: string) {

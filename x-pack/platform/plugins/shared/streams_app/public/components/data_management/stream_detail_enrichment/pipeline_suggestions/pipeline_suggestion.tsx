@@ -155,11 +155,13 @@ const ActionBlock = ({
       : undefined;
 
   const parsedRate = processorMetrics?.parsed_rate;
-  const hasErrors = processorMetrics && processorMetrics.errors.length > 0;
+  const failedRate = processorMetrics?.failed_rate;
 
   const formatter = getPercentageFormatter();
   const formattedParsedRate =
     parsedRate !== undefined && parsedRate > 0 ? formatter.format(parsedRate) : null;
+  const formattedFailedRate =
+    failedRate !== undefined && failedRate > 0 ? formatter.format(failedRate) : null;
 
   return (
     <EuiPanel
@@ -201,14 +203,11 @@ const ActionBlock = ({
                         })}
                       </EuiText>
                     )}
-                    {hasErrors && (
+                    {formattedFailedRate && (
                       <EuiText size="xs" color="danger">
-                        {i18n.translate('xpack.streams.processingSuggestion.stepHasErrors', {
-                          defaultMessage: '{count} error{plural}',
-                          values: {
-                            count: processorMetrics.errors.length,
-                            plural: processorMetrics.errors.length > 1 ? 's' : '',
-                          },
+                        {i18n.translate('xpack.streams.processingSuggestion.stepFailedRate', {
+                          defaultMessage: '{percentage} failed',
+                          values: { percentage: formattedFailedRate },
                         })}
                       </EuiText>
                     )}

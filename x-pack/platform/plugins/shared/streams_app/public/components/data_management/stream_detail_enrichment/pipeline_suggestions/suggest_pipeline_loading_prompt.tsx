@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiProgress,
   EuiSkeletonText,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -24,33 +23,34 @@ export interface SuggestPipelineLoadingPromptProps {
 export function SuggestPipelineLoadingPrompt({ onCancel }: SuggestPipelineLoadingPromptProps) {
   return (
     <>
-      <EuiProgress size="xs" color="primary" />
-      <EuiSpacer size="l" />
-      <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
-        <EuiFlexItem>
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.streams.stepsEditor.loadingDashboardsLabel', {
-              defaultMessage: 'Analysing your data...',
-            })}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSkeletonText lines={3} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSkeletonText lines={3} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSkeletonText lines={3} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiLink onClick={onCancel}>
-            {i18n.translate('xpack.streams.stepsEditor.cancelLabel', {
-              defaultMessage: 'Cancel',
-            })}
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
+          <EuiFlexItem>
+            <EuiText size="s" color="subdued">
+              {i18n.translate('xpack.streams.stepsEditor.loadingDashboardsLabel', {
+                defaultMessage: 'Analysing your data...',
+              })}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiSkeletonText lines={3} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiSkeletonText lines={3} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiSkeletonText lines={3} />
+          </EuiFlexItem>
+          <EuiProgress size="xs" color="accent" />
+          <EuiFlexItem>
+            <EuiLink onClick={onCancel}>
+              {i18n.translate('xpack.streams.stepsEditor.cancelLabel', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </>
   );
 }
