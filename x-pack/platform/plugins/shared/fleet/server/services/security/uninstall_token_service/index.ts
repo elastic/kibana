@@ -35,6 +35,7 @@ import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import type { Logger } from '@kbn/logging';
 
+import { ALL_SPACES_ID } from '../../../../common/constants';
 import { catchAndSetErrorStackTrace } from '../../../errors/utils';
 
 import type { AgentPolicySOAttributes } from '../../../types';
@@ -68,10 +69,10 @@ interface UninstallTokenSOAggregation {
 
 function getNamespaceFiltering(namespace: string) {
   if (namespace === DEFAULT_NAMESPACE_STRING) {
-    return `(${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:default) or (not ${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:*)`;
+    return `(${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:"${ALL_SPACES_ID}") or (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:default) or (not ${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:*)`;
   }
 
-  return `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:${namespace}`;
+  return `(${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:${namespace}) or (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:"${ALL_SPACES_ID}")`;
 }
 
 export interface UninstallTokenInvalidError {
