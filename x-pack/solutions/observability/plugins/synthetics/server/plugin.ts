@@ -11,6 +11,7 @@ import type {
   Plugin as PluginType,
   Logger,
   SavedObjectsClientContract,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
@@ -114,6 +115,14 @@ export class Plugin implements PluginType {
       coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
     );
 
+    const getMaintenanceWindowClientInternal = (request: KibanaRequest) => {
+      if (!pluginsStart.maintenanceWindows) {
+        return;
+      }
+
+      return pluginsStart.maintenanceWindows?.getMaintenanceWindowClientInternal(request);
+    };
+
     if (this.server) {
       this.server.coreStart = coreStart;
       this.server.pluginsStart = pluginsStart;
@@ -123,6 +132,7 @@ export class Plugin implements PluginType {
       this.server.savedObjectsClient = this.savedObjectsClient;
       this.server.spaces = pluginsStart.spaces;
       this.server.isElasticsearchServerless = coreStart.elasticsearch.getCapabilities().serverless;
+      this.server.getMaintenanceWindowClientInternal = getMaintenanceWindowClientInternal;
     }
     this.syncPrivateLocationMonitorsTask?.start().catch((e) => {
       this.logger.error('Failed to start sync private location monitors task', { error: e });
