@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiBasicTable,
   EuiComboBox,
@@ -20,8 +20,15 @@ import {
   EuiLink,
   EuiAvatar,
   EuiToolTip,
+  EuiText,
+  EuiHorizontalRule,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn, OnTimeChangeProps, EuiComboBoxOptionOption } from '@elastic/eui';
+import type {
+  EuiBasicTableColumn,
+  OnTimeChangeProps,
+  EuiComboBoxOptionOption,
+  CriteriaWithPagination,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import dateMath from '@kbn/datemath';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
@@ -34,6 +41,9 @@ import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
 import { TechPreviewTitle } from '../common/tech_preview';
 
+const DEFAULT_PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
+
 export const MonitoringList: React.FC = () => {
   const { createOnechatUrl } = useNavigation();
   const { euiTheme } = useEuiTheme();
@@ -41,10 +51,13 @@ export const MonitoringList: React.FC = () => {
   const [start, setStart] = useState<string>('now-7d');
   const [end, setEnd] = useState<string>('now');
   const [selectedUsers, setSelectedUsers] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const onTimeChange = ({ start: newStart, end: newEnd }: OnTimeChangeProps) => {
     setStart(newStart);
     setEnd(newEnd);
+    setPageIndex(0); // Reset to first page when date filter changes
   };
 
   // Parse dateMath expressions to absolute dates using Kibana's dateMath utility
@@ -128,6 +141,36 @@ export const MonitoringList: React.FC = () => {
       total_tool_calls: totalToolCalls,
     };
   }, [data?.aggregates, filteredConversations, selectedUsers.length]);
+
+  // Pagination logic
+  const totalItemCount = filteredConversations.length;
+  const startIndex = pageIndex * pageSize;
+  const paginatedConversations = useMemo(() => {
+    return filteredConversations.slice(startIndex, startIndex + pageSize);
+  }, [filteredConversations, startIndex, pageSize]);
+
+  const onTableChange = useCallback(({ page }: CriteriaWithPagination<ConversationSummary>) => {
+    if (page) {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    }
+  }, []);
+
+  // Reset to first page when filters change
+  const handleUserFilterChange = useCallback((options: Array<EuiComboBoxOptionOption<string>>) => {
+    setSelectedUsers(options);
+    setPageIndex(0);
+  }, []);
+
+  const pagination = useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+      totalItemCount,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
+    }),
+    [pageIndex, pageSize, totalItemCount]
+  );
 
   const columns: Array<EuiBasicTableColumn<ConversationSummary>> = [
     {
@@ -231,7 +274,7 @@ export const MonitoringList: React.FC = () => {
               singleSelection={{ asPlainText: true }}
               options={userOptions}
               selectedOptions={selectedUsers}
-              onChange={setSelectedUsers}
+              onChange={handleUserFilterChange}
               isClearable
             />
           </EuiFlexItem>
@@ -294,12 +337,27 @@ export const MonitoringList: React.FC = () => {
         )}
 
         {/* Conversations Table */}
+        <EuiText size="xs">
+          <FormattedMessage
+            id="xpack.onechat.monitoring.resultsCount"
+            defaultMessage="Showing {start}-{end} of {total} conversations"
+            values={{
+              start: <strong>{totalItemCount > 0 ? startIndex + 1 : 0}</strong>,
+              end: <strong>{Math.min(startIndex + pageSize, totalItemCount)}</strong>,
+              total: totalItemCount,
+            }}
+          />
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiHorizontalRule margin="none" style={{ height: 2 }} />
         <EuiBasicTable
           tableCaption={labels.monitoring.title}
-          items={filteredConversations}
+          items={paginatedConversations}
           columns={columns}
           loading={loading}
           tableLayout="auto"
+          pagination={pagination}
+          onChange={onTableChange}
         />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
