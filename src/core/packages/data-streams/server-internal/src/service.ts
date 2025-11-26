@@ -25,6 +25,7 @@ import type {
 } from '@kbn/core-data-streams-server';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { DataStreamsConfig, config, type DataStreamsConfigType } from './config';
 
 interface StartDeps {
   elasticsearch: InternalElasticsearchServiceStart;
@@ -33,7 +34,7 @@ interface StartDeps {
 /** @internal */
 export class DataStreamsService implements CoreService<DataStreamsSetup, DataStreamsStart> {
   private readonly logger: Logger;
-
+  private config?: DataStreamsConfig;
   private readonly dataStreamDefinitions: Map<string, AnyDataStreamDefinition> = new Map();
 
   private readonly dataStreamClients: Map<string, undefined | AnyIDataStreamClient> = new Map();
@@ -43,6 +44,11 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
   }
 
   setup() {
+    const dataStreamsConfig = this.coreContext.configService.atPathSync<DataStreamsConfigType>(
+      config.path
+    );
+    this.config = new DataStreamsConfig(dataStreamsConfig);
+
     return {
       registerDataStream: (dataStreamDefinition: AnyDataStreamDefinition) => {
         if (this.dataStreamDefinitions.has(dataStreamDefinition.name)) {
@@ -96,7 +102,15 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
 
   async start({ elasticsearch }: StartDeps): Promise<DataStreamsStart> {
     const elasticsearchClient = elasticsearch.client.asInternalUser;
-    await this.initializeAllDataStreams(elasticsearchClient);
+    const skipInitialization = this.config?.migrations.skip;
+    if (skipInitialization) {
+      this.logger.warn(
+        'Skipping eager initialization and migrations of all data streams on startup.'
+      );
+    } else {
+      this.logger.debug('Initializing all data streams');
+      await this.initializeAllDataStreams(elasticsearchClient);
+    }
 
     return {
       initializeClient: async <
