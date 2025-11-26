@@ -69,6 +69,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
@@ -136,6 +137,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
@@ -220,6 +222,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-xyz'],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
@@ -305,6 +308,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-xyz'],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
@@ -384,6 +388,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
@@ -482,6 +487,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
@@ -545,6 +551,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
@@ -648,6 +655,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
@@ -756,6 +764,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
@@ -844,6 +853,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
@@ -949,6 +959,7 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING]: false,
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
@@ -1002,7 +1013,7 @@ for (const flattened of [true, false]) {
         legacyAlert.scheduleActions('default');
 
         const result = buildOngoingAlert<{}, {}, {}, 'default', 'recovered'>({
-          alert: existingAlert,
+          alert: existingFlattenedNewAlert,
           legacyAlert,
           rule: alertRule,
           ruleData,
@@ -1019,7 +1030,7 @@ for (const flattened of [true, false]) {
         legacyAlert.scheduleActions('default');
 
         const result = buildOngoingAlert<{}, {}, {}, 'default', 'recovered'>({
-          alert: existingAlert,
+          alert: existingFlattenedNewAlert,
           legacyAlert,
           rule: alertRule,
           ruleData: {
@@ -1039,7 +1050,7 @@ for (const flattened of [true, false]) {
         legacyAlert.scheduleActions('default');
 
         const result = buildOngoingAlert<{}, {}, {}, 'default', 'recovered'>({
-          alert: existingAlert,
+          alert: existingFlattenedNewAlert,
           legacyAlert,
           rule: alertRule,
           ruleData: {
@@ -1059,7 +1070,7 @@ for (const flattened of [true, false]) {
         legacyAlert.scheduleActions('default');
 
         const result = buildOngoingAlert<{}, {}, {}, 'default', 'recovered'>({
-          alert: existingAlert,
+          alert: existingFlattenedNewAlert,
           legacyAlert,
           rule: alertRule,
           isImproving: null,

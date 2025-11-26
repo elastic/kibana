@@ -81,6 +81,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
@@ -156,6 +157,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
@@ -225,6 +227,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
@@ -331,6 +334,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
@@ -400,6 +404,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
@@ -513,6 +518,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
@@ -624,6 +630,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
@@ -734,6 +741,7 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        // @ts-ignore
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
@@ -789,7 +797,7 @@ for (const flattened of [true, false]) {
         legacyAlert.scheduleActions('default');
 
         const result = buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
-          alert: existingAlert,
+          alert: existingFlattenedActiveAlert,
           legacyAlert,
           rule: alertRule,
           ruleData,
@@ -806,7 +814,7 @@ for (const flattened of [true, false]) {
         legacyAlert.scheduleActions('default');
 
         const result = buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
-          alert: existingAlert,
+          alert: existingFlattenedActiveAlert,
           legacyAlert,
           rule: alertRule,
           ruleData: {
@@ -826,7 +834,7 @@ for (const flattened of [true, false]) {
         legacyAlert.scheduleActions('default');
 
         const result = buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
-          alert: existingAlert,
+          alert: existingFlattenedActiveAlert,
           legacyAlert,
           rule: alertRule,
           ruleData: {
@@ -846,7 +854,7 @@ for (const flattened of [true, false]) {
         legacyAlert.scheduleActions('default');
 
         const result = buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
-          alert: existingAlert,
+          alert: existingFlattenedActiveAlert,
           legacyAlert,
           rule: alertRule,
           recoveryActionGroup: 'recovered',
