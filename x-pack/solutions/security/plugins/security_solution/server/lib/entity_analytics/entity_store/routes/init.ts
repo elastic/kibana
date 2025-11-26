@@ -63,7 +63,7 @@ export const initEntityEngineRoute = (
         const entityStoreClient = secSol.getEntityStoreDataClient();
 
         if (request.query.esqlPoc) {
-          await secSol.getEntityStoreEsqlService().startTask();
+          await secSol.getEntityStoreEsqlService().startTask(request.body);
           return response.ok();
         }
 

@@ -13,8 +13,8 @@ import { buildIndexPatternsByEngine } from '../utils';
 import type { EntityDescription } from '../entity_definitions/types';
 import { generateLatestIndex } from './latest_index';
 import type { FieldDescription } from '../installation/types';
+import type { EntityStoreEsqlConfig } from './config';
 
-const MAX_PAGE_SIZE = 10000;
 const DEFAULT_FIELDS = ['@timestamp', `entity.id`];
 
 const RECENT_DATA_PREFIX = 'recent';
@@ -26,7 +26,8 @@ export const buildESQLQuery = async (
   appClient: AppClient,
   dataViewsService: DataViewsService,
   fromDateISO: string,
-  toDateISO: string
+  toDateISO: string,
+  config: EntityStoreEsqlConfig
 ): Promise<string> => {
   const indexPatterns = await buildIndexPatternsByEngine(
     namespace,
@@ -55,7 +56,7 @@ export const buildESQLQuery = async (
     ${mergedFieldStats(description)},
     ${customFieldEvalLogic()}
   | KEEP ${fieldsToKeep(description)}
-  | LIMIT ${MAX_PAGE_SIZE}`;
+  | LIMIT ${config.maxPageSearchSize}`;
 };
 
 function entityIdFiler({ identityField }: EntityDescription) {

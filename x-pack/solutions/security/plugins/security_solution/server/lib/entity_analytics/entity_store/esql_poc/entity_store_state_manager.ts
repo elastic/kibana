@@ -7,6 +7,7 @@
 
 import type { SavedObject, SavedObjectsClientContract, SavedObjectsType } from '@kbn/core/server';
 import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store';
+import type { EntityStoreEsqlConfig } from './config';
 
 // Saved Object Type and Mapping
 export const ENTITY_STORE_EXECUTION_TIME_SO = 'entity-store-esql-execution-time';
@@ -14,6 +15,7 @@ export const ENTITY_STORE_EXECUTION_TIME_SO = 'entity-store-esql-execution-time'
 export interface EntityStoreStateAttributes {
   entityType: EntityType;
   lastExecutionTimeISO: string | null;
+  config: EntityStoreEsqlConfig;
 }
 
 export async function getEntityStoreState(
@@ -22,12 +24,31 @@ export async function getEntityStoreState(
   namespace: string
 ): Promise<EntityStoreStateAttributes> {
   const id = getEntityTypeSavedObjectId(entityType, namespace);
-  try {
-    const so = await soClient.get<EntityStoreStateAttributes>(ENTITY_STORE_EXECUTION_TIME_SO, id);
-    return so.attributes;
-  } catch (e) {
-    return { entityType, lastExecutionTimeISO: null };
-  }
+  const so = await soClient.get<EntityStoreStateAttributes>(ENTITY_STORE_EXECUTION_TIME_SO, id);
+  return so.attributes;
+}
+
+export async function createEntityStoreState(
+  soClient: SavedObjectsClientContract,
+  entityType: EntityType,
+  namespace: string,
+  config: EntityStoreEsqlConfig
+) {
+  const id = getEntityTypeSavedObjectId(entityType, namespace);
+  await soClient.create<EntityStoreStateAttributes>(
+    ENTITY_STORE_EXECUTION_TIME_SO,
+    { entityType, lastExecutionTimeISO: null, config },
+    { id, overwrite: true }
+  );
+}
+
+export async function deleteEntityStoreState(
+  soClient: SavedObjectsClientContract,
+  entityType: EntityType,
+  namespace: string
+) {
+  const id = getEntityTypeSavedObjectId(entityType, namespace);
+  await soClient.delete(ENTITY_STORE_EXECUTION_TIME_SO, id);
 }
 
 export async function updateEntityStoreLastExecutionTime(
@@ -37,29 +58,10 @@ export async function updateEntityStoreLastExecutionTime(
   lastExecutionTimeISO: string
 ): Promise<void> {
   const id = getEntityTypeSavedObjectId(entityType, namespace);
-  try {
-    await soClient.create<EntityStoreStateAttributes>(
-      ENTITY_STORE_EXECUTION_TIME_SO,
-      { entityType, lastExecutionTimeISO },
-      { id, overwrite: true }
-    );
-  } catch (createError) {
-    try {
-      await soClient.update<EntityStoreStateAttributes>(ENTITY_STORE_EXECUTION_TIME_SO, id, {
-        entityType,
-        lastExecutionTimeISO,
-      });
-    } catch (updateError) {
-      throw new Error(
-        `Failed to update entity store latest execution time for type ${entityType}, (${JSON.stringify(
-          {
-            createError,
-            updateError,
-          }
-        )})`
-      );
-    }
-  }
+  await soClient.update<EntityStoreStateAttributes>(ENTITY_STORE_EXECUTION_TIME_SO, id, {
+    entityType,
+    lastExecutionTimeISO,
+  });
 }
 
 export async function getEntityStoreLastExecutionTime(
@@ -87,6 +89,12 @@ export const EntityStoreESQLSOType: SavedObjectsType = {
     dynamic: false,
     properties: {
       lastExecutionTimeISO: { type: 'date' },
+      config: {
+        type: 'object',
+        properties: {
+          maxPageSearchSize: { type: 'integer' },
+        },
+      },
     },
   },
   management: {
@@ -96,5 +104,22 @@ export const EntityStoreESQLSOType: SavedObjectsType = {
       return `EntityDefinition: [${savedObject.attributes.entityType}]`;
     },
   },
-  modelVersions: {},
+  modelVersions: {
+    '1': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            lastExecutionTimeISO: { type: 'date' },
+            config: {
+              type: 'object',
+              properties: {
+                maxPageSearchSize: { type: 'integer' },
+              },
+            },
+          },
+        },
+      ],
+    },
+  },
 };

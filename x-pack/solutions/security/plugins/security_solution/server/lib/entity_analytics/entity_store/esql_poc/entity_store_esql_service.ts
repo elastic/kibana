@@ -17,12 +17,15 @@ import {
 import { buildESQLQuery } from './esql_builder';
 import type { AppClient } from '../../../../client';
 import {
-  getEntityStoreLastExecutionTime,
+  createEntityStoreState,
+  deleteEntityStoreState,
+  getEntityStoreState,
   updateEntityStoreLastExecutionTime,
 } from './entity_store_state_manager';
 import type { ApiKeyManager } from '../auth/api_key';
 import { executeEsqlQuery } from './esql_executer';
 import { storeEntityStoreDocs } from './elasticsearch_store_results';
+import type { EntityStoreEsqlConfig } from './config';
 
 const defaultLookback = () => moment().utc().subtract(1, 'minute').toISOString();
 
@@ -56,13 +59,19 @@ export class EntityStoreESQLService {
     this.taskManager = taskManager;
   }
 
-  public async startTask() {
+  public async startTask(config: EntityStoreEsqlConfig) {
     if (!this.taskManager) {
       this.logger.warn(`[Entity Store ESQL] no task manager configured, skipping`);
       return;
     }
 
     await this.apiKeyGenerator.generate();
+
+    await Promise.all(
+      Object.values(EntityType.Values).map(async (entityType) => {
+        return createEntityStoreState(this.soClient, entityType, this.namespace, config);
+      })
+    );
 
     await startEntityStoreESQLExecuteTask(this.namespace, this.taskManager, this.logger);
   }
@@ -74,6 +83,12 @@ export class EntityStoreESQLService {
     }
 
     await removeEntityStoreESQLExecuteTask(this.namespace, this.taskManager, this.logger);
+
+    await Promise.all(
+      Object.values(EntityType.Values).map(async (entityType) => {
+        return deleteEntityStoreState(this.soClient, entityType, this.namespace);
+      })
+    );
   }
 
   public async runEntityStoreCycleForAllEntities() {
@@ -87,9 +102,8 @@ export class EntityStoreESQLService {
   }
 
   async runEntityStoreCycle(type: EntityType) {
-    const lastExecutionTime =
-      (await getEntityStoreLastExecutionTime(this.soClient, type, this.namespace)) ||
-      defaultLookback();
+    const state = await getEntityStoreState(this.soClient, type, this.namespace);
+    const lastExecutionTime = state.lastExecutionTimeISO || defaultLookback();
 
     const now = moment().toISOString();
 
@@ -103,8 +117,12 @@ export class EntityStoreESQLService {
       this.appClient,
       this.dataViews,
       lastExecutionTime || defaultLookback(),
-      now
+      now,
+      state.config
     );
+
+    this.logger.debug(`[Entity Store ESQL] [${type}-${this.namespace}] running query 
+      ${query}`);
 
     const docs = await executeEsqlQuery(this.esClient, query, this.logger);
 
