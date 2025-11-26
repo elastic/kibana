@@ -15,10 +15,10 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
   const warnings: string[] = [];
   const { controlGroupInput, references, panels, ...rest } = dashboardState;
   if (controlGroupInput) {
-    warnings.push(`Dropped unmapped key, controlGroupInput, from dashboard`);
+    warnings.push(`Dropped unmapped key 'controlGroupInput' from dashboard`);
   }
   if (references) {
-    warnings.push(`Dropped unmapped key, references, from dashboard`);
+    warnings.push(`Dropped unmapped key 'references' from dashboard`);
   }
 
   function isMappedPanelType(panel: DashboardPanel) {
@@ -31,16 +31,27 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
     return Boolean(transforms?.schema);
   }
 
-  const mappedPanels = panels
+  function removeEnhancements(panel: DashboardPanel) {
+    const { enhancements, ...restOfConfig } = panel.config as { enhancements?: unknown };
+    if (enhancements) {
+      warnings.push(`Dropped unmapped panel config key 'enhancements' from panel ${panel.uid}`);
+    }
+    return {
+      ...panel,
+      config: restOfConfig,
+    };
+  }
+
+  const mappedPanels = (panels ?? [])
+    .filter((panel) => isDashboardSection(panel) || isMappedPanelType(panel))
     .map((panel) => {
-      if (!isDashboardSection(panel)) return panel;
+      if (!isDashboardSection(panel)) return removeEnhancements(panel);
       const { panels: sectionPanels, ...restOfSection } = panel;
       return {
         ...restOfSection,
-        panels: sectionPanels.filter(isMappedPanelType),
+        panels: sectionPanels.filter(isMappedPanelType).map(removeEnhancements),
       };
-    })
-    .filter((panel) => isDashboardSection(panel) || isMappedPanelType(panel));
+    });
 
   return {
     data: {
@@ -60,20 +71,26 @@ export function throwOnUnmappedKeys(dashboardState: DashboardState) {
     throw new Error('references key is not supported by dashboard REST endpoints.');
   }
 
-  function throwOnUnknownPanel(panel: DashboardPanel) {
+  function throwOnUnmappedPanelKeys(panel: DashboardPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
     if (!transforms?.schema) {
       throw new Error(
         `Panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
       );
     }
+
+    if ((panel.config as { enhancements?: unknown }).enhancements) {
+      throw new Error(
+        'enhancements panel config key is not supported by dashboard REST endpoints.'
+      );
+    }
   }
 
-  dashboardState.panels.forEach((panel) => {
+  dashboardState.panels?.forEach((panel) => {
     if (isDashboardSection(panel)) {
-      panel.panels.forEach(throwOnUnknownPanel);
+      panel.panels.forEach(throwOnUnmappedPanelKeys);
     } else {
-      throwOnUnknownPanel(panel);
+      throwOnUnmappedPanelKeys(panel);
     }
   });
 }

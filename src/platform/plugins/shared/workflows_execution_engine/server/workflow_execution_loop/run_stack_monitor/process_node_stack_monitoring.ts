@@ -51,7 +51,7 @@ export async function processNodeStackMonitoring(
 
     if (typeof (nodeImplementation as unknown as MonitorableNode).monitor === 'function') {
       const monitored = nodeImplementation as unknown as MonitorableNode;
-      await monitored.monitor(monitoredStepExecutionRuntime);
+      await Promise.resolve(monitored.monitor(monitoredStepExecutionRuntime));
     }
   }
 
