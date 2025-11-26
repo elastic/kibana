@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { BulkMuteUnmuteAlertsRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/bulk_mute_unmute';
+import type { BulkMuteUnmuteAlertsRequestBodyV1 } from '../..';
 
-export const transformBulkMuteAlertsBody = (
+export const transformBulkMuteUnmuteAlertsBody = (
   body: BulkMuteUnmuteAlertsRequestBodyV1
 ): Record<string, string[]> => {
   return body.reduce<Record<string, string[]>>((acc, item) => {

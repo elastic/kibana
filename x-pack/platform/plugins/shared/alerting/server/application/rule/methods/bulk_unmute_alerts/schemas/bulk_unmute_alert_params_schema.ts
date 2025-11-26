@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { transformBulkMuteAlertsBody } from './transform_bulk_mute_alerts_body/latest';
+import { schema } from '@kbn/config-schema';
 
-export { transformBulkMuteAlertsBody as transformBulkMuteAlertsBodyV1 } from './transform_bulk_mute_alerts_body/v1';
+export const bulkUnmuteAlertsParamsSchema = schema.object({
+  ruleId: schema.string(),
+  alertInstanceIds: schema.arrayOf(schema.string()),
+});

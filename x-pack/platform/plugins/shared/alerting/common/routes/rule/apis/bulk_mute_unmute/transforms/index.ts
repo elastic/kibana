@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { transformBulkMuteAlertsBody } from './v1';
+export { transformBulkMuteUnmuteAlertsBody } from './transform_bulk_mute_unmute_alerts_body/latest';
+
+export { transformBulkMuteUnmuteAlertsBody as transformBulkMuteUnmuteAlertsBodyV1 } from './transform_bulk_mute_unmute_alerts_body/v1';

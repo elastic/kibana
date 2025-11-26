@@ -27,6 +27,8 @@ const createRulesClientMock = () => {
     disableRule: jest.fn(),
     enableRule: jest.fn(),
     updateRuleApiKey: jest.fn(),
+    bulkMuteInstances: jest.fn(),
+    bulkUnmuteInstances: jest.fn(),
     muteAll: jest.fn(),
     unmuteAll: jest.fn(),
     muteInstance: jest.fn(),

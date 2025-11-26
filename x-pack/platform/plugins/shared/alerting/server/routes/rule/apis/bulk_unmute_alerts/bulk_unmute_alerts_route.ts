@@ -14,21 +14,23 @@ import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import type { BulkMuteUnmuteAlertsRequestBodyV1 } from '../../../../../common/routes/rule/apis/bulk_mute_unmute';
-import { transformBulkMuteUnmuteAlertsBodyV1 } from '../../../../../common/routes/rule/apis/bulk_mute_unmute';
-import { bulkMuteUnmuteAlertsBodySchemaV1 } from '../../../../../common/routes/rule/apis/bulk_mute_unmute';
+import {
+  bulkMuteUnmuteAlertsBodySchemaV1,
+  transformBulkMuteUnmuteAlertsBodyV1,
+} from '../../../../../common/routes/rule/apis/bulk_mute_unmute';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
-export const bulkMuteAlertsRoute = (
+export const bulkUnmuteAlertsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.post(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/alerts/_bulk_mute`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/alerts/_bulk_unmute`,
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'internal',
-        summary: `Bulk mute alerts`,
+        summary: `Bulk unmute alerts`,
       },
       validate: {
         body: bulkMuteUnmuteAlertsBodySchemaV1,
@@ -40,13 +42,13 @@ export const bulkMuteAlertsRoute = (
         const rulesClient = await alertingContext.getRulesClient();
         const body: BulkMuteUnmuteAlertsRequestBodyV1 = req.body;
 
-        const alertsToMuteByRule = transformBulkMuteUnmuteAlertsBodyV1(body);
+        const alertsToUnmuteByRule = transformBulkMuteUnmuteAlertsBodyV1(body);
 
         try {
           await pMap(
-            Object.entries(alertsToMuteByRule),
+            Object.entries(alertsToUnmuteByRule),
             async ([ruleId, alertInstanceIds]) => {
-              await rulesClient.bulkMuteInstances({ ruleId, alertInstanceIds });
+              await rulesClient.bulkUnmuteInstances({ ruleId, alertInstanceIds });
             },
             { concurrency: 10 }
           );
