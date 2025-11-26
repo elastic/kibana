@@ -28,6 +28,6 @@ export class DataStreamsConfig {
   public migrations: TypeOf<typeof dataStreamsSchema>['migrations'];
 
   constructor(rawConfig: DataStreamsConfigType) {
-    this.migrations = rawConfig.migrations;
+    this.migrations = rawConfig.migrations || {};
   }
 }
