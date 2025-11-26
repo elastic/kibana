@@ -40,6 +40,9 @@ export const CloudConnectApiKeyType: SavedObjectsType = {
   modelVersions: {
     '1': {
       changes: [],
+      schemas: {
+        forwardCompatibility: (attrs: any) => attrs,
+      },
     },
   },
 };
