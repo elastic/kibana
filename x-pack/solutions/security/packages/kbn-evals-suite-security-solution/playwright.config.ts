@@ -10,5 +10,3 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 export default createPlaywrightEvalsConfig({
   testDir: Path.join(__dirname, './evals'),
 });
-
-

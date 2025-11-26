@@ -19,19 +19,21 @@ import { getLlmType } from '../../../routes/utils';
 import type { PhoenixConfig } from '../../../routes/evaluate/utils';
 
 // Mock Phoenix experiment
-const mockRunExperiment = jest.fn(async ({ task }: { task: (params: unknown) => Promise<unknown> }) => {
-  // Simulate calling the task with example input
-  await task({
-    input: {
-      overrides: {
-        errors: ['test-error'],
+const mockRunExperiment = jest.fn(
+  async ({ task }: { task: (params: unknown) => Promise<unknown> }) => {
+    // Simulate calling the task with example input
+    await task({
+      input: {
+        overrides: {
+          errors: ['test-error'],
+        },
       },
-    },
-    output: {},
-    metadata: {},
-  });
-  return { experimentId: 'test-experiment-id' };
-});
+      output: {},
+      metadata: {},
+    });
+    return { experimentId: 'test-experiment-id' };
+  }
+);
 
 jest.mock('@arizeai/phoenix-client/experiments', () => ({
   runExperiment: (params: { task: (params: unknown) => Promise<unknown> }) =>

@@ -8,7 +8,10 @@
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { EsClient } from '@kbn/scout-oblt';
-import { API_VERSIONS, ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL } from '@kbn/elastic-assistant-common';
+import {
+  API_VERSIONS,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
+} from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
 
 export class SecurityKnowledgeBaseClient {
@@ -21,10 +24,13 @@ export class SecurityKnowledgeBaseClient {
   async ensureInstalled(): Promise<void> {
     this.log.info('Ensuring Security Knowledge Base is installed');
 
-    const status = await this.fetch<any>(ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', ''), {
-      method: 'GET',
-      version: API_VERSIONS.public.v1,
-    });
+    const status = await this.fetch<any>(
+      ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', ''),
+      {
+        method: 'GET',
+        version: API_VERSIONS.public.v1,
+      }
+    );
 
     if (status?.is_setup_available && status?.elser_exists) {
       this.log.success('Knowledge base is already installed');
@@ -54,5 +60,3 @@ export class SecurityKnowledgeBaseClient {
     });
   }
 }
-
-
