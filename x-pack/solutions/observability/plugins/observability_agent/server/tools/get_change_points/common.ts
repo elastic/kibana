@@ -5,49 +5,9 @@
  * 2.0.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { AggregationsAutoDateHistogramAggregation } from '@elastic/elasticsearch/lib/api/types';
-
-export const OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID = 'observability.get_log_change_points';
-export const OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID =
-  'observability.get_metric_change_points';
 
 export const dateHistogram: AggregationsAutoDateHistogramAggregation = {
   field: '@timestamp',
   buckets: 100,
 };
-
-export const getFilters = ({
-  start,
-  end,
-  kqlFilter,
-}: {
-  start: string;
-  end: string;
-  kqlFilter?: string;
-}) => {
-  const filters = [
-    {
-      range: {
-        '@timestamp': {
-          gte: start,
-          lt: end,
-        },
-      },
-    },
-  ];
-  return [...filters, ...(kqlFilter ? [toElasticsearchQuery(fromKueryExpression(kqlFilter))] : [])];
-};
-
-export interface ChangePoint {
-  key: string;
-  over_time: Array<{ x: number; y: number | null }>;
-  changes: {
-    time: string;
-    type: string;
-    change_point?: number;
-    r_value?: number;
-    trend?: string;
-    p_value?: number;
-  };
-}

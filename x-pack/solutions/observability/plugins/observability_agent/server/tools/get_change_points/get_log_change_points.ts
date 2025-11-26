@@ -7,7 +7,6 @@
 
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { orderBy } from 'lodash';
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
@@ -19,21 +18,19 @@ import type {
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
 } from '../../types';
-import { getFilters, dateHistogram, type ChangePoint } from './common';
-import { getTypedSearch } from '../../utils/get_typed_search';
+import { dateHistogram } from './common';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { getTotalHits } from '../../utils/get_total_hits';
+import { type Bucket, getChangePoints, searchChangePoints } from '../../utils/get_change_points';
+import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 
 export const OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID = 'observability.get_log_change_points';
 
-interface ChangePointResult {
-  type: {
-    indeterminable?: boolean;
-    [key: string]: any;
-  };
-  bucket?: {
-    key: string | number;
-    key_as_string?: string;
+interface AggregationsResponse {
+  sampler?: {
+    groups?: {
+      buckets?: Bucket[];
+    };
   };
 }
 
@@ -42,109 +39,85 @@ function getProbability(totalHits: number): number {
   return probability > 0.5 ? 1 : probability;
 }
 
-export async function getLogChangePoint({
+async function getLogChangePoint({
+  name,
   index,
-  filters,
+  start,
+  end,
+  kqlFilter: kuery,
   field,
   esClient,
 }: {
+  name: string;
   index: string;
-  filters: QueryDslQueryContainer[];
+  start: string;
+  end: string;
+  kqlFilter?: string;
   field: string;
   esClient: IScopedClusterClient;
 }) {
-  try {
-    const countDocumentsResponse = await esClient.asCurrentUser.search({
-      size: 0,
-      track_total_hits: true,
-      index,
-      query: {
-        bool: {
-          filter: filters,
-        },
+  const countDocumentsResponse = await esClient.asCurrentUser.search({
+    size: 0,
+    track_total_hits: true,
+    index,
+    query: {
+      bool: {
+        filter: [...timeRangeFilter('@timestamp', { start, end }), ...kqlFilter(kuery)],
       },
-    });
+    },
+  });
 
-    const totalHits = getTotalHits(countDocumentsResponse);
+  const totalHits = getTotalHits(countDocumentsResponse);
 
-    if (totalHits === 0) {
-      return [];
-    }
+  if (totalHits === 0) {
+    return [];
+  }
 
-    const search = getTypedSearch(esClient.asCurrentUser);
-
-    const response = await search({
-      index,
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: filters,
-        },
+  const aggregations = {
+    sampler: {
+      random_sampler: {
+        probability: getProbability(totalHits),
       },
       aggs: {
-        sampler: {
-          random_sampler: {
-            probability: getProbability(totalHits),
+        groups: {
+          categorize_text: {
+            field,
+            size: 1000,
           },
           aggs: {
-            groups: {
-              categorize_text: {
-                field,
-                size: 1000,
-              },
-              aggs: {
-                over_time: {
-                  auto_date_histogram: dateHistogram,
-                },
-                changes: {
-                  change_point: {
-                    buckets_path: 'over_time>_count',
-                  },
-                  // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
-                } as AggregationsAggregationContainer,
-              },
+            over_time: {
+              auto_date_histogram: dateHistogram,
             },
+            changes: {
+              change_point: {
+                buckets_path: 'over_time>_count',
+              },
+              // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
+            } as AggregationsAggregationContainer,
           },
         },
       },
-    });
+    },
+  };
+  const response = await searchChangePoints({
+    esClient,
+    index,
+    start,
+    end,
+    kqlFilter: kuery,
+    aggregations,
+  });
 
-    const buckets = response.aggregations?.sampler?.groups?.buckets;
+  const buckets = (response.aggregations as AggregationsResponse)?.sampler?.groups?.buckets;
 
-    if (!buckets || !Array.isArray(buckets)) {
-      return [];
-    }
-
-    const series = buckets.reduce((acc, group) => {
-      const changes = group.changes as ChangePointResult;
-
-      // filter out indeterminable changes
-      if (!changes || changes.type?.indeterminable === true || !changes.bucket?.key) {
-        return acc;
-      }
-
-      const changePoint = {
-        key: group.key,
-        pattern: group.regex,
-        over_time: group.over_time.buckets.map((bucket) => ({
-          x: new Date(bucket.key).getTime(),
-          y: bucket.doc_count,
-        })),
-        changes: {
-          time: new Date(changes.bucket!.key).toISOString(),
-          type: Object.keys(changes.type)[0] as string,
-          ...(Object.values(changes.type)[0] as Record<string, any>),
-        },
-      };
-
-      return [...acc, changePoint];
-    }, [] as (ChangePoint & { pattern: string })[]);
-
-    return series;
-  } catch (error) {
-    throw error;
+  if (!buckets) {
+    return [];
   }
+
+  return await getChangePoints({
+    name,
+    buckets,
+  });
 }
 
 const getLogChangePointsSchema = z.object({
@@ -203,23 +176,22 @@ export function createObservabilityGetLogChangePointsTool({
 
         const logIndexPatterns = await getLogsIndices({ core, logger });
 
-        const logChangePoints = await Promise.all([
-          ...logs.map(async (log) => {
-            const changePoints = await getLogChangePoint({
+        const logChangePoints = await Promise.all(
+          logs.map(async (log) => {
+            return await getLogChangePoint({
+              name: log.name,
               index: log.index || logIndexPatterns.join(','),
               esClient,
-              filters: getFilters({ start, end, kqlFilter: log.kqlFilter }),
+              start,
+              end,
+              kqlFilter: log.kqlFilter,
               field: log.field ?? 'message',
             });
-            return changePoints.map((changePoint) => ({
-              name: log.name,
-              ...changePoint,
-            }));
-          }),
-        ]);
+          })
+        );
 
         const allLogChangePoints = orderBy(logChangePoints.flat(), [
-          (item) => ('p_value' in item.changes ? item.changes.p_value : Number.POSITIVE_INFINITY),
+          (item) => item.changes.p_value ?? Number.POSITIVE_INFINITY,
         ]).slice(0, 25);
 
         return {
