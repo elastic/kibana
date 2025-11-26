@@ -33,6 +33,17 @@ case "$ES_ZONE_COUNT" in
     ;;
 esac
 
+ES_HOT_TIER_MEMORY_SIZE=${ES_HOT_TIER_MEMORY_SIZE:-2048}
+case "$ES_HOT_TIER_MEMORY_SIZE" in
+  1024|2048|4096|8192|16384|32768)
+    echo "--- Elasticsearch hot tier memory size: ${ES_HOT_TIER_MEMORY_SIZE}MB"
+    ;;
+  *)
+    echo "Error: ES_HOT_TIER_MEMORY_SIZE must be one of: 1024, 2048, 4096, 8192, 16384, 32768. Got: $ES_HOT_TIER_MEMORY_SIZE"
+    exit 1
+    ;;
+esac
+
 echo "--- Download Kibana Distribution"
 
 mkdir -p ./target
@@ -99,7 +110,8 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; the
     .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'" |
     .resources.integrations_server[0].plan.integrations_server.version = "'$VERSION'" |
     .resources.kibana[0].plan.cluster_topology[0].size.value = '$KIBANA_MEMORY_SIZE' |
-    (.resources.elasticsearch[0].plan.cluster_topology[] | select(.zone_count != null) | .zone_count) = '$ES_ZONE_COUNT'
+    (.resources.elasticsearch[0].plan.cluster_topology[] | select(.zone_count != null) | .zone_count) = '$ES_ZONE_COUNT' |
+    (.resources.elasticsearch[0].plan.cluster_topology[] | select(.id == "hot_content") | .size.value) = '$ES_HOT_TIER_MEMORY_SIZE'
     ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
 
   echo "Creating deployment..."
@@ -140,7 +152,8 @@ else
   ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
     .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
     (.. | select(.version? != null).version) = "'$VERSION'" |
-    (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.zone_count != null) | .zone_count) = '$ES_ZONE_COUNT'
+    (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.zone_count != null) | .zone_count) = '$ES_ZONE_COUNT' |
+    (.resources.elasticsearch[0].plan.cluster_topology[]? | select(.id == "hot_content") | .size.value) = '$ES_HOT_TIER_MEMORY_SIZE'
     ' > /tmp/deploy.json
 
   echo "Updating deployment..."
