@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { chunk, uniqBy } from 'lodash';
-import pMap from 'p-map';
 import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsTermsAggregateBase,
@@ -21,10 +19,10 @@ import { PREBUILT_RULE_ASSETS_SO_TYPE } from './prebuilt_rule_assets_type';
 import type { RuleVersionSpecifier } from '../rule_versions/rule_version_specifier';
 import type { BasicRuleInfo } from '../basic_rule_info';
 
-const RULE_ASSET_ATTRIBUTES = `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes`;
+// TODO: Remove this temporary debug variable
+const TEMPORARY_DEBUG_USE_RUNTIME_MAPPINGS = true;
+
 const MAX_PREBUILT_RULES_COUNT = 10_000;
-const ES_MAX_CLAUSE_COUNT = 1024;
-const ES_MAX_CONCURRENT_REQUESTS = 2;
 
 export interface IPrebuiltRuleAssetsClient {
   fetchLatestAssets: () => Promise<PrebuiltRuleAsset[]>;
@@ -150,16 +148,29 @@ export const createPrebuiltRuleAssetsClient = (
           (rule) => `${PREBUILT_RULE_ASSETS_SO_TYPE}:${rule.rule_id}_${rule.version}`
         );
 
+        const savedObjectSortParameter = transformSortParameter(sort);
+
         const searchResult = await savedObjectsClient.search<SavedObjectsRawDocSource, unknown>({
           type: PREBUILT_RULE_ASSETS_SO_TYPE,
           namespaces: ['default'], // TODO: Check if this parameter is applicable
-          size: 10000,
+          size: MAX_PREBUILT_RULES_COUNT,
+          runtime_mappings: TEMPORARY_DEBUG_USE_RUNTIME_MAPPINGS
+            ? {
+                [`${PREBUILT_RULE_ASSETS_SO_TYPE}.severity_rank`]: {
+                  type: 'long',
+                  script: {
+                    source: `emit(params.rank.getOrDefault(doc['${PREBUILT_RULE_ASSETS_SO_TYPE}.severity'].value, 0))`,
+                    params: { rank: { low: 20, medium: 40, high: 60, critical: 80 } },
+                  },
+                },
+              }
+            : undefined,
           query: {
             terms: {
               _id: soIds,
             },
           },
-          sort: sort?.map((s) => {
+          sort: savedObjectSortParameter?.map((s) => {
             return { [s.field]: s.order };
           }),
           _source: [
@@ -182,47 +193,45 @@ export const createPrebuiltRuleAssetsClient = (
       });
     },
 
-    fetchAssetsByVersion: (
-      versions: RuleVersionSpecifier[],
-      sort?: { field: string; order: 'asc' | 'desc' }[]
-    ): Promise<PrebuiltRuleAsset[]> => {
-      // TODO: This also needs to use `.search`, otherwise it may mess up the sorting.
+    fetchAssetsByVersion: (versions: RuleVersionSpecifier[]): Promise<PrebuiltRuleAsset[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchAssetsByVersion', async () => {
         if (versions.length === 0) {
           // NOTE: without early return it would build incorrect filter and fetch all existing saved objects
           return [];
         }
 
-        const filters = createChunkedFilters({
-          items: versions,
-          mapperFn: (versionSpecifier) =>
-            `(${RULE_ASSET_ATTRIBUTES}.rule_id: ${versionSpecifier.rule_id} AND ${RULE_ASSET_ATTRIBUTES}.version: ${versionSpecifier.version})`,
-          clausesPerItem: 4,
+        const soIds = versions.map(
+          (version) => `${PREBUILT_RULE_ASSETS_SO_TYPE}:${version.rule_id}_${version.version}`
+        );
+
+        const searchResult = await savedObjectsClient.search<SavedObjectsRawDocSource, unknown>({
+          type: PREBUILT_RULE_ASSETS_SO_TYPE,
+          namespaces: ['default'], // TODO: Check if this parameter is applicable
+          size: MAX_PREBUILT_RULES_COUNT,
+          query: {
+            terms: {
+              _id: soIds,
+            },
+          },
         });
 
-        const sortField = sort?.[0]?.field;
-        const sortOrder = sort?.[0]?.order;
+        const ruleAssets = searchResult.hits.hits.map((hit) => {
+          const savedObject = hit._source[PREBUILT_RULE_ASSETS_SO_TYPE];
+          return savedObject;
+        });
 
-        const ruleAssets = await chunkedFetch(async (filter) => {
-          // Usage of savedObjectsClient.bulkGet() is ~25% more performant and
-          // simplifies deduplication but too many tests get broken.
-          // See https://github.com/elastic/kibana/issues/218198
-          const findResult = await savedObjectsClient.find<PrebuiltRuleAsset>({
-            type: PREBUILT_RULE_ASSETS_SO_TYPE,
-            filter,
-            perPage: MAX_PREBUILT_RULES_COUNT,
-            sortField,
-            sortOrder,
-          });
+        const ruleAssetsMap = new Map<string, PrebuiltRuleAsset>();
+        for (const asset of ruleAssets) {
+          const key = `${PREBUILT_RULE_ASSETS_SO_TYPE}:${asset.rule_id}_${asset.version}`;
+          ruleAssetsMap.set(key, asset);
+        }
 
-          return findResult.saved_objects.map((so) => so.attributes);
-        }, filters);
+        // Preserve the input order by mapping over the input versions array
+        const orderedRuleAssets = soIds
+          .map((soId) => ruleAssetsMap.get(soId))
+          .filter((asset): asset is PrebuiltRuleAsset => asset !== undefined); // TODO: Decide if we need to handle this
 
-        // Rule assets may have duplicates we have to get rid of.
-        // In particular prebuilt rule assets package v8.17.1 has duplicates.
-        const uniqueRuleAssets = uniqBy(ruleAssets, 'rule_id');
-
-        return validatePrebuiltRuleAssets(uniqueRuleAssets);
+        return validatePrebuiltRuleAssets(orderedRuleAssets);
       });
     },
 
@@ -248,7 +257,7 @@ export const createPrebuiltRuleAssetsClient = (
           aggs: {
             unique_tags: {
               terms: {
-                field: 'security-rule.tags',
+                field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.tags`,
                 size: 10000,
                 order: { _key: 'asc' },
               },
@@ -266,49 +275,15 @@ export const createPrebuiltRuleAssetsClient = (
   };
 };
 
-/**
- * Creates an array of KQL filter strings for a collection of items.
- * Uses chunking to ensure that the number of filter clauses does not exceed the ES "too_many_clauses" limit.
- * See: https://github.com/elastic/kibana/pull/223240
- *
- * @param {object} options
- * @param {T[]} options.items - Array of items to create filters for.
- * @param {(item: T) => string} options.mapperFn - A function that maps an item to a filter string.
- * @param {number} options.clausesPerItem - Number of Elasticsearch clauses generated per item. Determined empirically by converting a KQL filter into a Query DSL query.
- * More complex filters will result in more clauses. Info about clauses in docs: https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl#query-dsl
- * @returns {string[]} An array of filter strings
- */
-function createChunkedFilters<T>({
-  items,
-  mapperFn,
-  clausesPerItem,
-}: {
-  items: T[];
-  mapperFn: (item: T) => string;
-  clausesPerItem: number;
-}): string[] {
-  return chunk(items, ES_MAX_CLAUSE_COUNT / clausesPerItem).map((singleChunk) =>
-    singleChunk.map(mapperFn).join(' OR ')
-  );
-}
-
-/**
- * Fetches objects using a provided function.
- * If filters are provided fetches concurrently in chunks.
- *
- * @param {(filter?: string) => Promise<T[]>} chunkFetchFn - Function that fetches a chunk.
- * @param {string[]} [filters] - An optional array of filter strings. If provided, `chunkFetchFn` will be called for each filter concurrently.
- * @returns {Promise<T[]>} A promise that resolves to an array of fetched objects.
- */
-function chunkedFetch<T>(
-  chunkFetchFn: (filter?: string) => Promise<T[]>,
-  filters?: string[]
-): Promise<T[]> {
-  if (filters?.length) {
-    return pMap(filters, chunkFetchFn, {
-      concurrency: ES_MAX_CONCURRENT_REQUESTS,
-    }).then((results) => results.flat());
-  }
-
-  return chunkFetchFn();
+function transformSortParameter(sort?: { field: string; order: 'asc' | 'desc' }[]) {
+  const soSortFields = {
+    name: `${PREBUILT_RULE_ASSETS_SO_TYPE}.name.keyword`,
+    severity: TEMPORARY_DEBUG_USE_RUNTIME_MAPPINGS
+      ? `${PREBUILT_RULE_ASSETS_SO_TYPE}.severity_rank`
+      : `${PREBUILT_RULE_ASSETS_SO_TYPE}.mapped_params.severity`,
+    risk_score: `${PREBUILT_RULE_ASSETS_SO_TYPE}.risk_score`,
+  };
+  return sort?.map((s) => {
+    return { field: soSortFields[s.field], order: s.order };
+  });
 }
