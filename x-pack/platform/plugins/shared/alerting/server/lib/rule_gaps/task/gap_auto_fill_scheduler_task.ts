@@ -301,28 +301,28 @@ function addChunkResultsToAggregation(
 ): Map<string, AggregatedByRuleEntry> {
   const nextAggregated = new Map(aggregatedByRule);
 
-  for (const r of chunkResults) {
-    const existing = nextAggregated.get(r.ruleId);
+  for (const chunk of chunkResults) {
+    const existing = nextAggregated.get(chunk.ruleId);
     if (!existing) {
-      nextAggregated.set(r.ruleId, {
-        ruleId: r.ruleId,
-        processedGaps: r.processedGaps,
-        status: r.status,
-        error: r.error,
+      nextAggregated.set(chunk.ruleId, {
+        ruleId: chunk.ruleId,
+        processedGaps: chunk.processedGaps,
+        status: chunk.status,
+        error: chunk.error,
       });
-    } else {
-      let combinedStatus = existing.status;
-      if (r.status === GapFillSchedulePerRuleStatus.ERROR) {
-        combinedStatus = GapFillSchedulePerRuleStatus.ERROR;
-      }
-
-      nextAggregated.set(r.ruleId, {
-        ruleId: r.ruleId,
-        processedGaps: existing.processedGaps + (r.processedGaps ?? 0),
-        status: combinedStatus,
-        error: existing.error ?? r.error,
-      });
+      continue;
     }
+    let combinedStatus = existing.status;
+    if (chunk.status === GapFillSchedulePerRuleStatus.ERROR) {
+      combinedStatus = GapFillSchedulePerRuleStatus.ERROR;
+    }
+
+    nextAggregated.set(chunk.ruleId, {
+      ruleId: chunk.ruleId,
+      processedGaps: existing.processedGaps + (chunk.processedGaps ?? 0),
+      status: combinedStatus,
+      error: existing.error ?? chunk.error,
+    });
   }
 
   return nextAggregated;
