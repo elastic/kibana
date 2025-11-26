@@ -14,7 +14,7 @@ import {
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
-import { INTERNAL_ALERTING_GAPS_API_PATH } from '../../../../../types';
+import { INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH } from '../../../../../types';
 import { transformToGapAutoFillSchedulerResponseBodyV1 } from '../transforms/transform_response';
 import { transformRequestV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
@@ -25,7 +25,7 @@ export const updateAutoFillSchedulerRoute = (
 ) => {
   router.put(
     {
-      path: `${INTERNAL_ALERTING_GAPS_API_PATH}/auto_fill_scheduler/{id}`,
+      path: `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/{id}`,
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
