@@ -11,7 +11,7 @@ tags:
     description: |
       The Kibana Upgrade Assistant API helps you prepare for the next major Elasticsearch release.
       > warn
-      > This is a Kibana REST API (not an Elasticsearch API) and must target your Kibana URL:
+      > This is a Kibana REST API (not an Elasticsearch API) and requests must target your Kibana URL:
       > * Self-managed URL pattern: `https://localhost:5601`
       > * Elastic Cloud URL pattern: `https://your-deployment.kb.us-east-1.aws.elastic.cloud:9243`
     x-displayName: Upgrade assistant
