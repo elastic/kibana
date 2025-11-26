@@ -30,7 +30,7 @@ describe('computeHealth', () => {
       mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
         transforms: [],
         count: 0,
-      } as TransformGetTransformStatsResponse);
+      });
 
       const results = await computeHealth(items, { scopedClusterClient: mockScopedClusterClient });
 

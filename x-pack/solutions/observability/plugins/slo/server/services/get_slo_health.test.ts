@@ -34,6 +34,10 @@ describe('GetSLOHealth', () => {
   it('filters out items without definition', async () => {
     const slo = createSLO();
     mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+    mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
+      transforms: [],
+      count: 0,
+    });
 
     const result = await getSLOHealth.execute({
       list: [
@@ -71,6 +75,10 @@ describe('GetSLOHealth', () => {
     const slo1 = createSLO({ id: 'slo_1' });
     const slo2 = createSLO({ id: 'slo_2', enabled: false });
     mockRepository.findAllByIds.mockResolvedValueOnce([slo1, slo2]);
+    mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
+      transforms: [],
+      count: 0,
+    });
 
     await getSLOHealth.execute({
       list: [

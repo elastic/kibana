@@ -61,6 +61,10 @@ describe('FindSLODefinitions with Health validation', () => {
         page: 1,
         perPage: 100,
       });
+      mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
+        transforms: [],
+        count: 0,
+      });
 
       await findSLODefinitions.execute({
         includeHealth: true,
