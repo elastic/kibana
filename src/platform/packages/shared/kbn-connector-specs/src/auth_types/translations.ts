@@ -9,6 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const API_KEY_HEADER_AUTHENTICATION_LABEL = i18n.translate(
+  'connectorSpecs.apiKeyHeaderAuthentication.label',
+  {
+    defaultMessage: 'API key header authentication',
+  }
+);
+
 export const API_KEY_AUTH_LABEL = i18n.translate('connectorSpecs.apiKeyAuth.label', {
   defaultMessage: 'API key',
 });

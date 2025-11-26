@@ -14,17 +14,19 @@ import type { AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
 const HEADER_FIELD_DEFAULT = 'Api-Key';
-const authSchema = z.object({
-  headerField: z
-    .string()
-    .min(1, { message: i18n.HEADER_AUTH_REQUIRED_MESSAGE })
-    .default(HEADER_FIELD_DEFAULT)
-    .meta({ label: i18n.HEADER_AUTH_LABEL, sensitive: true }),
-  apiKey: z
-    .string()
-    .min(1, { message: i18n.API_KEY_AUTH_REQUIRED_MESSAGE })
-    .meta({ label: i18n.API_KEY_AUTH_LABEL, sensitive: true }),
-});
+const authSchema = z
+  .object({
+    headerField: z
+      .string()
+      .min(1, { message: i18n.HEADER_AUTH_REQUIRED_MESSAGE })
+      .default(HEADER_FIELD_DEFAULT)
+      .meta({ label: i18n.HEADER_AUTH_LABEL, sensitive: true }),
+    apiKey: z
+      .string()
+      .min(1, { message: i18n.API_KEY_AUTH_REQUIRED_MESSAGE })
+      .meta({ label: i18n.API_KEY_AUTH_LABEL, sensitive: true }),
+  })
+  .meta({ label: i18n.API_KEY_HEADER_AUTHENTICATION_LABEL });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 type NormalizedAuthSchemaType = Record<string, string>;

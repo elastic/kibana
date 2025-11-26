@@ -99,14 +99,6 @@ describe('Widget Registry', () => {
       );
     });
 
-    it('should throw error for z.object() without explicit widget', () => {
-      const schema = z.object({ name: z.string() });
-
-      expect(() => getWidgetComponent(schema)).toThrow(
-        /No widget found for schema type: ZodObject/
-      );
-    });
-
     it('should throw error for z.array() without explicit widget', () => {
       const schema = z.array(z.string());
 

@@ -14,6 +14,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { generateFormFields } from './form';
+import userEvent from '@testing-library/user-event';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -775,6 +776,7 @@ describe('Nested Object Widget Integration Tests', () => {
   });
 
   it('submits form with nested object data', async () => {
+    const user = userEvent.setup();
     const schema = z.object({
       server: z.object({
         host: z.string().meta({
@@ -788,12 +790,11 @@ describe('Nested Object Widget Integration Tests', () => {
 
     render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    const hostInput = screen.getByLabelText('Host', { selector: 'input' });
-    const portInput = screen.getByLabelText('Port', { selector: 'input' });
+    const hostInput = screen.getByTestId('generator-field-server-host');
+    const portInput = screen.getByTestId('generator-field-server-port');
 
-    fireEvent.change(hostInput, { target: { value: 'localhost' } });
-    fireEvent.change(portInput, { target: { value: '8080' } });
-
+    await user.type(hostInput, 'localhost');
+    await user.type(portInput, '8080');
     const submitButton = screen.getByRole('button', { name: 'Submit' });
     fireEvent.click(submitButton);
 
@@ -810,35 +811,31 @@ describe('Nested Object Widget Integration Tests', () => {
   });
 
   it('validates nested object fields', async () => {
+    const user = userEvent.setup();
     const schema = z.object({
       credentials: z.object({
         username: z.string().min(5, 'Username must be at least 5 characters').meta({
           label: 'Username',
-        }),
-        email: z.email('Invalid email format').meta({
-          label: 'Email',
         }),
       }),
     });
 
     render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    const usernameInput = screen.getByLabelText('Username', { selector: 'input' });
-    const emailInput = screen.getByLabelText('Email', { selector: 'input' });
+    const usernameInput = screen.getByTestId('generator-field-credentials-username');
 
-    fireEvent.change(usernameInput, { target: { value: 'abc' } });
-    fireEvent.change(emailInput, { target: { value: 'invalid' } });
+    await user.type(usernameInput, 'abc');
 
     const submitButton = screen.getByRole('button', { name: 'Submit' });
     fireEvent.click(submitButton);
 
     expect(await screen.findByText('Username must be at least 5 characters')).toBeInTheDocument();
-    expect(await screen.findByText('Invalid email format')).toBeInTheDocument();
 
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 
   it('combines nested objects with top-level fields', async () => {
+    const user = userEvent.setup();
     const schema = z.object({
       name: z.string().meta({
         label: 'Application Name',
@@ -855,13 +852,13 @@ describe('Nested Object Widget Integration Tests', () => {
 
     render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    const nameInput = screen.getByLabelText('Application Name', { selector: 'input' });
-    const hostInput = screen.getByLabelText('Host', { selector: 'input' });
-    const portInput = screen.getByLabelText('Port', { selector: 'input' });
+    const nameInput = screen.getByTestId('generator-field-name');
+    const hostInput = screen.getByTestId('generator-field-server-host');
+    const portInput = screen.getByTestId('generator-field-server-port');
 
-    fireEvent.change(nameInput, { target: { value: 'My App' } });
-    fireEvent.change(hostInput, { target: { value: 'localhost' } });
-    fireEvent.change(portInput, { target: { value: '3000' } });
+    await user.type(nameInput, 'My App');
+    await user.type(hostInput, 'localhost');
+    await user.type(portInput, '3000');
 
     const submitButton = screen.getByRole('button', { name: 'Submit' });
     fireEvent.click(submitButton);

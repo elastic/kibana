@@ -5,24 +5,38 @@ Object {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": Object {
+    "config": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "url": Object {
+          "minLength": 1,
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "url",
+      ],
+      "type": "object",
+    },
     "secrets": Object {
       "anyOf": Array [
         Object {
           "additionalProperties": false,
-          "label": "Basic Authentication",
+          "label": "Basic authentication",
           "properties": Object {
             "authType": Object {
               "const": "basic",
               "type": "string",
             },
             "password": Object {
-              "description": "Password",
+              "label": "Password",
+              "minLength": 1,
               "sensitive": true,
               "type": "string",
             },
             "username": Object {
-              "description": "Username",
-              "sensitive": true,
+              "label": "Username",
+              "minLength": 1,
               "type": "string",
             },
           },
@@ -35,7 +49,7 @@ Object {
         },
         Object {
           "additionalProperties": false,
-          "label": "API Key Header Authentication",
+          "label": "API key header authentication",
           "properties": Object {
             "authType": Object {
               "const": "api_key_header",
@@ -57,13 +71,9 @@ Object {
       ],
       "label": "Authentication",
     },
-    "url": Object {
-      "minLength": 1,
-      "type": "string",
-    },
   },
   "required": Array [
-    "url",
+    "config",
     "secrets",
   ],
   "type": "object",
