@@ -95,21 +95,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const gridData = await dataGrid.getDataGridTableData();
         expect(gridData.columns).to.eql([
           'Select column',
+          'Actions columnActions', // Add row control column
           'Keywordcustomer_first_name',
           'Keywordcustomer_full_name',
           'Keywordcustomer_gender',
           'Numbercustomer_id',
           'Keywordcustomer_last_name',
           'Keywordemail',
+          '', // Add column control column
         ]);
         expect(gridData.rows[0]).to.eql([
           '', // toggles column
+          '', // Add row control column
           'Elyssa',
           'Elyssa Underwood',
           'FEMALE',
           27,
           'Underwood',
           'elyssa@underwood-family.zzz',
+          '', // Add column control column
         ]);
       });
 
@@ -287,32 +291,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // Edit cell values
-      await indexEditor.setCellValue(0, 1, 'Jasmin');
-      await indexEditor.setCellValue(0, 2, 'Jasmin Upperwood');
+      await indexEditor.setCellValue(0, 2, 'Jasmin');
+      await indexEditor.setCellValue(0, 3, 'Jasmin Upperwood');
 
-      await indexEditor.setCellValue(1, 1, 'Philip');
-      await indexEditor.setCellValue(1, 2, 'Philip Tompsoon');
+      await indexEditor.setCellValue(1, 2, 'Philip');
+      await indexEditor.setCellValue(1, 3, 'Philip Tompsoon');
 
       // Add a new row with some values and delete it
       await indexEditor.addRow(0);
-      await indexEditor.setCellValue(0, 1, 'New Name');
-      await indexEditor.setCellValue(0, 2, 'New Name Surname');
+      await indexEditor.setCellValue(1, 2, 'New Name');
+      await indexEditor.setCellValue(1, 3, 'New Name Surname');
       expect((await dataGrid.getDocTableRows()).length).to.be(3);
 
-      await indexEditor.deleteRow(0);
+      await indexEditor.deleteRow(1);
       expect((await dataGrid.getDocTableRows()).length).to.be(2);
 
       // Add a new row with some values
-      await indexEditor.addRow(1);
-      await indexEditor.setCellValue(1, 1, 'Pedro');
-      await indexEditor.setCellValue(1, 2, 'Pedro Fernandez');
+      await indexEditor.addRow(0);
+      await indexEditor.setCellValue(1, 2, 'Pedro');
+      await indexEditor.setCellValue(1, 3, 'Pedro Fernandez');
       expect((await dataGrid.getDocTableRows()).length).to.be(3);
 
       // Add a new column
       await indexEditor.addColumn('age', 'integer');
-      await indexEditor.setCellValue(0, 7, '30');
-      await indexEditor.setCellValue(1, 7, '40');
-      await indexEditor.setCellValue(2, 7, '25');
+      await indexEditor.setCellValue(0, 8, '30');
+      await indexEditor.setCellValue(1, 8, '40');
+      await indexEditor.setCellValue(2, 8, '25');
 
       // Try to exit without saving changes
       await indexEditor.closeIndexEditor();
@@ -333,7 +337,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             customer_id: '27',
             customer_last_name: 'Underwood',
             email: 'elyssa@underwood-family.zzz',
-            age: 40,
+            age: 30,
           },
           {
             customer_first_name: 'Philip',
@@ -347,7 +351,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           {
             customer_first_name: 'Pedro',
             customer_full_name: 'Pedro Fernandez',
-            age: 30,
+            age: 40,
           },
         ]);
         await indexEditor.verifyIndexMappings(INDEX_NAME_EDITION, {
@@ -376,7 +380,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Manually set content
       await indexEditor.setColumn(`my_column`, 'text', 0);
-      await indexEditor.setCellValue(0, 1, `value`);
+      await indexEditor.setCellValue(0, 2, `value`);
 
       // Save changes
       await indexEditor.saveChanges();

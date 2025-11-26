@@ -72,6 +72,8 @@ export const AddColumnPopover = ({
       if (columnName && !validationError) {
         closePopover();
         saveColumn();
+        setColumnName('');
+        setColumnType(null);
       } else {
         telemetryService.trackEditInteraction({
           actionType: 'add_column',
@@ -79,7 +81,15 @@ export const AddColumnPopover = ({
         });
       }
     },
-    [columnName, validationError, closePopover, saveColumn, telemetryService]
+    [
+      columnName,
+      validationError,
+      closePopover,
+      saveColumn,
+      setColumnName,
+      setColumnType,
+      telemetryService,
+    ]
   );
 
   const errorMessage = useMemo(() => {
