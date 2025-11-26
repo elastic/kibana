@@ -2350,6 +2350,20 @@
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.AssistantResponse.structured_output",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "structured_output",
+            "description": [],
+            "signature": [
+              "object | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3045,6 +3059,22 @@
             "label": "message_content",
             "description": [
               "full text content of the message"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.MessageCompleteEventData.structured_output",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "structured_output",
+            "description": [
+              "optional structured data"
+            ],
+            "signature": [
+              "object | undefined"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
@@ -6136,7 +6166,7 @@
           "\nIds of built-in onechat tools"
         ],
         "signature": [
-          "{ readonly indexExplorer: string; readonly search: string; readonly listIndices: string; readonly getIndexMapping: string; readonly getDocumentById: string; readonly generateEsql: string; readonly executeEsql: string; readonly createVisualization: string; }"
+          "{ readonly indexExplorer: string; readonly search: string; readonly listIndices: string; readonly getIndexMapping: string; readonly getDocumentById: string; readonly generateEsql: string; readonly executeEsql: string; readonly createVisualization: string; readonly task: string; }"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
         "deprecated": false,
