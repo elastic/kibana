@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskInstance,
@@ -18,10 +18,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pMap from 'p-map';
 import moment from 'moment';
-import { MaintenanceWindowClient } from '@kbn/alerting-plugin/server/maintenance_window_client';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { isEmpty } from 'lodash';
-import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
 import { registerCleanUpTask } from './private_location/clean_up_task';
 import type { SyntheticsServerSetup } from '../types';
 import {
@@ -672,15 +670,14 @@ export class SyntheticsService {
   }
 
   async getMaintenanceWindows() {
-    const { savedObjects } = this.server.coreStart;
-    const soClient = savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE]);
+    const maintenanceWindowClient = this.server.getMaintenanceWindowClientInternal(
+      {} as KibanaRequest
+    );
 
-    const maintenanceWindowClient = new MaintenanceWindowClient({
-      savedObjectsClient: soClient,
-      getUserName: async () => '',
-      uiSettings: this.server.coreStart.uiSettings.asScopedToClient(soClient),
-      logger: this.logger,
-    });
+    if (!maintenanceWindowClient) {
+      return [];
+    }
+
     const mws = await maintenanceWindowClient.find({
       page: 0,
       perPage: 1000,

@@ -2014,6 +2014,11 @@ components:
         category_2_score:
           format: double
           type: number
+        category_3_count:
+          type: integer
+        category_3_score:
+          format: double
+          type: number
         criticality_level:
           $ref: '#/components/schemas/AssetCriticalityLevel'
         criticality_modifier:
@@ -2038,10 +2043,15 @@ components:
           items:
             $ref: '#/components/schemas/RiskScoreInput'
           type: array
+        is_privileged_user:
+          type: boolean
         notes:
           items:
             type: string
           type: array
+        privileged_user_modifier:
+          format: double
+          type: number
       required:
         - '@timestamp'
         - id_field
