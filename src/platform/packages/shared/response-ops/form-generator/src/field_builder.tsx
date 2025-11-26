@@ -90,17 +90,24 @@ export const getFieldsFromSchema = <T extends z.ZodRawShape>({
   formConfig: FormConfig;
 }) => {
   const fields: FieldDefinition[] = [];
-
   const isFormOrParentDisabled = formConfig.disabled || getMeta(schema).disabled;
 
   Object.keys(schema.shape).forEach((key) => {
     const fieldSchema = schema.shape[key] as z.ZodType;
+    const fieldMeta = getMeta(fieldSchema);
+    const path = rootPath ? `${rootPath}.${key}` : key;
+
     // If the form or parent schema is disabled, propagate that to the field schema
-    if (isFormOrParentDisabled && getMeta(fieldSchema).disabled !== false) {
+    if (isFormOrParentDisabled && fieldMeta.disabled !== false) {
       addMeta(fieldSchema, { disabled: true });
     }
-    const path = rootPath ? `${rootPath}.${key}` : key;
-    const field = getFieldFromSchema({ schema: fieldSchema, path, formConfig });
+
+    const field = getFieldFromSchema({
+      schema: fieldSchema,
+      path,
+      formConfig,
+    });
+
     fields.push(field);
   });
 
@@ -111,12 +118,12 @@ interface RenderFieldProps {
   field: FieldDefinition;
 }
 export const renderField = ({ field }: RenderFieldProps) => {
-  const { schema, validate, path, formConfig } = field;
+  const { schema, validate, path, formConfig, defaultValue } = field;
 
   const WidgetComponent = getWidgetComponent(schema);
 
   // getWidgetComponent might update meta information, therefore we get the meta after calling it
-  const meta = getMeta(schema);
+  const { label, helpText, disabled, placeholder } = getMeta(schema);
 
   return (
     <React.Fragment key={path}>
@@ -126,7 +133,7 @@ export const renderField = ({ field }: RenderFieldProps) => {
         schema={schema}
         formConfig={formConfig}
         fieldConfig={{
-          defaultValue: field.defaultValue,
+          defaultValue,
           validations: [
             {
               validator: validate,
@@ -134,12 +141,12 @@ export const renderField = ({ field }: RenderFieldProps) => {
           ],
         }}
         fieldProps={{
-          label: meta.label,
-          helpText: meta.helpText,
+          label,
+          helpText,
           fullWidth: true,
           euiFieldProps: {
-            disabled: formConfig.disabled || meta.disabled,
-            placeholder: meta.placeholder,
+            disabled: formConfig.disabled || disabled,
+            placeholder,
             ['data-test-subj']: `generator-field-${path.replace(/\./g, '-')}`,
           },
         }}
