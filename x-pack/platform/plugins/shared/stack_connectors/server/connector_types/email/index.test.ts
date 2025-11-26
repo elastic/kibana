@@ -341,7 +341,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsSmtp });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [oauthTokenUrl] value 'http://auth.example.com' is not in the allowedHosts configuration"`
+      `"error validating connector type config: [oauthTokenUrl]: host name value for 'http://auth.example.com' is not in the allowedHosts configuration"`
     );
   });
 
@@ -1621,7 +1621,7 @@ function validateEmailAddressesImpl(
   return 'stub for actual message';
 }
 
-function getActionsConfigUtils(overrides: Partial<ActionsConfig>): ActionsConfigurationUtilities {
-  const config = actionsConfigSchema.validate(overrides);
-  return getActionsConfigurationUtilities(config);
+function getActionsConfigUtils(config: Partial<ActionsConfig>): ActionsConfigurationUtilities {
+  const validatedConfig = actionsConfigSchema.validate(config);
+  return getActionsConfigurationUtilities(validatedConfig);
 }

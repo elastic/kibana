@@ -101,12 +101,10 @@ function validateConfig(
   }
 
   const { oauthTokenUrl } = config;
-  if (oauthTokenUrl) {
-    if (!configurationUtilities.isUriAllowed(oauthTokenUrl)) {
-      throw new Error(
-        `[oauthTokenUrl] value '${oauthTokenUrl}' is not in the allowedHosts configuration`
-      );
-    }
+  if (oauthTokenUrl && !configurationUtilities.isUriAllowed(oauthTokenUrl)) {
+    throw new Error(
+      `[oauthTokenUrl]: host name value for '${oauthTokenUrl}' is not in the allowedHosts configuration`
+    );
   }
 
   // If service is set as JSON_TRANSPORT_SERVICE or EXCHANGE, host/port are ignored, when the email is sent.
