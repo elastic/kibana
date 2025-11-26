@@ -59,7 +59,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
                       {i18n.translate(
                         'xpack.cloudConnect.onboarding.pageDescription.learnMoreLinkText',
                         {
-                          defaultMessage: 'Learn more.',
+                          defaultMessage: 'Learn more',
                         }
                       )}
                     </EuiLink>
