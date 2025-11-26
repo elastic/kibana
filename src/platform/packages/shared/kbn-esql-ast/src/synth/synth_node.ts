@@ -35,7 +35,7 @@ export class SynthNode {
 
     node = Object.assign(new SynthNode(), node);
 
-    return node;
+    return node as N & SynthNode;
   }
 
   toString(this: ESQLProperNode) {
