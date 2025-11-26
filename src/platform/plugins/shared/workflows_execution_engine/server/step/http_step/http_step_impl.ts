@@ -122,15 +122,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
 
     // Apply fetcher options if provided
     if (fetcherOptions && Object.keys(fetcherOptions).length > 0) {
-      const {
-        skip_ssl_verification,
-
-        follow_redirects,
-
-        max_redirects,
-
-        keep_alive,
-      } = fetcherOptions;
+      const { skip_ssl_verification, follow_redirects, max_redirects, keep_alive } = fetcherOptions;
 
       // Configure HTTPS agent for SSL and keep-alive options
       const httpsAgentOptions: https.AgentOptions = {};

@@ -67,7 +67,6 @@ export const calculateThreeWayRuleFieldsDiff = (
   isRuleCustomized: boolean = false
 ): ThreeWayRuleFieldsDiff => {
   const commonFieldsDiff = calculateCommonFieldsDiff(ruleVersions, isRuleCustomized);
-
   const { base_version, current_version, target_version } = ruleVersions;
   const hasBaseVersion = base_version !== MissingVersion;
 

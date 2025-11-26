@@ -132,13 +132,9 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     metadata,
     tags,
     version,
-
     estimated_operations,
-
     estimated_heap_memory_usage_bytes,
-
     default_field_map,
-
     license_level,
     pipelines,
     description,

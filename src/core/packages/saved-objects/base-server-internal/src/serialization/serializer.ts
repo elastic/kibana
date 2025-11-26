@@ -151,7 +151,6 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       originId,
       attributes,
       migrationVersion,
-
       updated_at,
       updated_by: updatedBy,
       created_at: createdAt,

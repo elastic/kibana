@@ -59,7 +59,6 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           snapshot,
           removed,
           timeout,
-
           ecs_mapping,
         } = request.body;
 

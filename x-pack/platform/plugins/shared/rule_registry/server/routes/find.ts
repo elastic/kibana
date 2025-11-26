@@ -55,11 +55,9 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
           consumers,
           index,
           query,
-
           search_after,
           size,
           sort,
-
           track_total_hits,
           _source,
         } = request.body;

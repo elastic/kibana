@@ -68,7 +68,6 @@ function normalize(
     defaultSortOptions = JSON.parse(defaultSortOptions) as FieldSortOptions;
   }
   // Don't include unmapped_type for _score field
-
   const { unmapped_type, ...otherSortOptions } = defaultSortOptions;
   return {
     [sortField]: {

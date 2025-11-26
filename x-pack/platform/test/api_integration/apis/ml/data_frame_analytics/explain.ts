@@ -98,7 +98,6 @@ export default ({ getService }: FtrProviderContext) => {
             .set(getCommonRequestHeader('1'))
             .send(testConfig.config);
           ml.api.assertResponseStatusCode(200, status, body);
-
           expect(body).to.have.property('field_selection');
 
           const { memory_estimation, field_selection } = body;

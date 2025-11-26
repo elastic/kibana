@@ -16,13 +16,9 @@ export function fromDateHistogramLensApiToLensState(
 ): DateHistogramIndexPatternColumn {
   const {
     field,
-
     suggested_interval,
-
     use_original_time_range,
-
     include_empty_rows,
-
     drop_partial_intervals,
     label,
   } = options;

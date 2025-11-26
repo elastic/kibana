@@ -122,7 +122,6 @@ export const formatExceptionItemForUpdate = (
     tie_breaker_id,
     updated_at,
     updated_by,
-
     ...fieldsToUpdate
   } = exceptionItem;
   return {
