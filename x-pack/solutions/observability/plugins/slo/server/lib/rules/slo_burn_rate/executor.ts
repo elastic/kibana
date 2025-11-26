@@ -26,9 +26,8 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { upperCase } from 'lodash';
-import type { AlertsClient } from '@kbn/alerting-plugin/server';
+import type { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { GetTimeRange } from '@kbn/alerting-plugin/server';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
   ALERT_ACTION,
@@ -36,7 +35,6 @@ import {
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
   NO_SLI_DATA_ACTIONS_ID,
-  SLI_DESTINATION_INDEX_PATTERN,
   SLO_RESOURCES_VERSION_MAJOR,
   SUPPRESSED_PRIORITY_ACTION,
 } from '../../../../common/constants';
@@ -313,11 +311,23 @@ export const getRuleExecutor = (basePath: IBasePath) =>
 async function checkSliAndSourceData(
   esClient: ElasticsearchClient,
   slo: SLODefinition,
-  alertsClient: AlertsClient,
+  alertsClient: PublicAlertsClient<
+    BurnRateAlert,
+    BurnRateAlertState,
+    BurnRateAlertContext,
+    BurnRateAllowedActionGroups
+  >,
   spaceId: string,
   basePath: IBasePath,
   startedAt: Date,
-  getTimeRange: GetTimeRange,
+  getTimeRange: RuleExecutorOptions<
+    BurnRateRuleParams,
+    BurnRateRuleTypeState,
+    BurnRateAlertState,
+    BurnRateAlertContext,
+    BurnRateAllowedActionGroups,
+    BurnRateAlert
+  >['getTimeRange'],
   logger: Logger,
   dataViews: DataViewsContract
 ): Promise<boolean> {
@@ -369,7 +379,9 @@ async function checkSliAndSourceData(
     // Get the earliest timestamp and document count in recent windows to verify:
     // 1. When source data first appeared (earliest) - to verify it's been present for at least 30 minutes
     // 2. Document count in recent window - to verify data is actively flowing (not sparse)
-    const timestampField = slo.indicator.params.timestampField || '@timestamp';
+    // Note: timestampField exists on all indicator params that use buildSourceDataQuery
+    const timestampField =
+      (slo.indicator.params as { timestampField?: string }).timestampField || '@timestamp';
     const now = new Date(dateEnd);
     const recentWindowStart = new Date(now.getTime() - 20 * 60 * 1000); // Last 20 minutes
 
@@ -403,7 +415,11 @@ async function checkSliAndSourceData(
       }),
     ]);
 
-    const earliestTimestampValue = sourceDataResponse.aggregations?.earliest_timestamp?.value;
+    const earliestTimestampValue =
+      sourceDataResponse.aggregations?.earliest_timestamp &&
+      'value' in sourceDataResponse.aggregations.earliest_timestamp
+        ? sourceDataResponse.aggregations.earliest_timestamp.value
+        : undefined;
 
     if (earliestTimestampValue && recentDataCount.count > 0) {
       const earliestTimestamp = new Date(earliestTimestampValue);
