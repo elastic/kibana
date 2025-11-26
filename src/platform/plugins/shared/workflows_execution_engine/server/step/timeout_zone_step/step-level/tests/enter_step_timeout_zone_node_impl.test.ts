@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
-import { EnterStepTimeoutZoneNodeImpl } from '../enter_step_timeout_zone_node_impl';
-import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
-
 // Mock parseDuration function
 jest.mock('../../../../utils', () => ({
   parseDuration: jest.fn(),
 }));
 
+import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
 import { parseDuration } from '../../../../utils';
+import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
+import { EnterStepTimeoutZoneNodeImpl } from '../enter_step_timeout_zone_node_impl';
 
 const mockParseDuration = parseDuration as jest.MockedFunction<typeof parseDuration>;
 
@@ -125,7 +124,7 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
       } as any as StepExecutionRuntime;
     });
 
-    it('should not throw error when within timeout limit', async () => {
+    it('should not throw error when within timeout limit', () => {
       const startTime = new Date().getTime() - 10000; // 10 seconds ago
       mockParseDuration.mockReturnValue(30000); // 30 seconds
 
@@ -134,11 +133,11 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       };
 
-      await expect(impl.monitor(monitoredContextMock)).resolves.not.toThrow();
+      expect(() => impl.monitor(monitoredContextMock)).not.toThrow();
       expect(monitoredContextMock.abortController.abort).not.toHaveBeenCalled();
     });
 
-    it('should throw error and abort when timeout exceeded', async () => {
+    it('should throw error and abort when timeout exceeded', () => {
       const startTime = new Date().getTime() - 40000; // 40 seconds ago (exceeds 30s timeout)
       mockParseDuration.mockReturnValue(30000); // 30 seconds
 
@@ -148,7 +147,7 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
       };
 
       try {
-        await impl.monitor(monitoredContextMock);
+        impl.monitor(monitoredContextMock);
         fail('Expected monitor to throw error');
       } catch (error: any) {
         expect(error.message).toMatch(
@@ -168,14 +167,9 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       };
 
-      try {
-        await impl.monitor(monitoredContextMock);
-        fail('Expected monitor to throw error');
-      } catch (error: any) {
-        expect(error.message).toMatch(
-          'TimeoutError: Step execution exceeded the configured timeout of 30s.'
-        );
-      }
+      expect(() => impl.monitor(monitoredContextMock)).toThrow(
+        'TimeoutError: Step execution exceeded the configured timeout of 30s.'
+      );
     });
 
     it('should handle different timeout formats', async () => {
@@ -189,11 +183,11 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       };
 
-      await expect(impl.monitor(monitoredContextMock)).resolves.not.toThrow();
+      expect(() => impl.monitor(monitoredContextMock)).not.toThrow();
       expect(monitoredContextMock.abortController.abort).not.toHaveBeenCalled();
     });
 
-    it('should use step execution from step execution runtime directly', async () => {
+    it('should use step execution from step execution runtime directly', () => {
       const startTime = new Date().getTime() - 10000;
       mockParseDuration.mockReturnValue(30000); // 30 seconds
 
@@ -202,18 +196,18 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       };
 
-      await impl.monitor(monitoredContextMock);
+      impl.monitor(monitoredContextMock);
 
       // The implementation uses stepExecutionRuntime.stepExecution directly
       expect(stepExecutionRuntimeMock.stepExecution).toBeDefined();
     });
 
-    it('should handle missing step execution', async () => {
+    it('should handle missing step execution', () => {
       // Remove stepExecution to simulate null/undefined
       (stepExecutionRuntimeMock as any).stepExecution = null;
 
       try {
-        await impl.monitor(monitoredContextMock);
+        impl.monitor(monitoredContextMock);
         fail('Expected monitor to throw error');
       } catch (error: any) {
         expect(error.message).toEqual("Cannot read properties of null (reading 'startedAt')");
@@ -231,14 +225,9 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
       };
 
       // Should exceed the 30s timeout and report 50 (seconds but labeled as "ms" due to bug)
-      try {
-        await impl.monitor(monitoredContextMock);
-        fail('Expected monitor to throw error');
-      } catch (error: any) {
-        expect(error.message).toBe(
-          'TimeoutError: Step execution exceeded the configured timeout of 30s.'
-        );
-      }
+      expect(() => impl.monitor(monitoredContextMock)).toThrow(
+        'TimeoutError: Step execution exceeded the configured timeout of 30s.'
+      );
     });
   });
 });

@@ -8,13 +8,18 @@
 import type { Streams, Feature } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MessageRole, type BoundInferenceClient } from '@kbn/inference-common';
-import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
+import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { fromKueryExpression } from '@kbn/es-query';
 import { GenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
 
+interface Query {
+  kql: string;
+  title: string;
+  category: SignificantEventType;
+}
 /**
  * Generate significant event definitions, based on:
  * - the description of the feature (or stream if feature is undefined)
@@ -28,7 +33,7 @@ export async function generateSignificantEvents({
   end,
   esClient,
   inferenceClient,
-  logger,
+  signal,
 }: {
   stream: Streams.all.Definition;
   feature?: Feature;
@@ -36,13 +41,10 @@ export async function generateSignificantEvents({
   end: number;
   esClient: ElasticsearchClient;
   inferenceClient: BoundInferenceClient;
+  signal: AbortSignal;
   logger: Logger;
 }): Promise<{
-  queries: Array<{
-    title: string;
-    kql: string;
-    category: SignificantEventType;
-  }>;
+  queries: Query[];
 }> {
   const analysis = await describeDataset({
     start,
@@ -55,9 +57,7 @@ export async function generateSignificantEvents({
   const response = await executeAsReasoningAgent({
     input: {
       name: feature?.name || stream.name,
-      dataset_analysis: JSON.stringify(
-        sortAndTruncateAnalyzedFields(analysis, { dropEmpty: true })
-      ),
+      dataset_analysis: JSON.stringify(formatDocumentAnalysis(analysis, { dropEmpty: true })),
       description: feature?.description || stream.description,
     },
     maxSteps: 4,
@@ -89,12 +89,16 @@ export async function generateSignificantEvents({
         };
       },
     },
+    abortSignal: signal,
   });
 
   const queries = response.input.flatMap((message) => {
-    if (message.role === MessageRole.Assistant) {
-      return message.toolCalls.flatMap((toolCall) => {
-        return toolCall.function.arguments.queries;
+    if (message.role === MessageRole.Tool) {
+      return message.response.queries.flatMap((query) => {
+        if (query.valid) {
+          return [query.query];
+        }
+        return [];
       });
     }
     return [];

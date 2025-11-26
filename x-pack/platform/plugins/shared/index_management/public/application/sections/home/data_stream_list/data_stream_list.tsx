@@ -263,6 +263,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         {enableProjectLevelRetentionChecks && projectLevelRetentionCallout && (
           <>
             <EuiCallOut
+              announceOnMount
               onDismiss={() => setprojectLevelRetentionCallout(false)}
               data-test-subj="projectLevelRetentionCallout"
               title={i18n.translate(

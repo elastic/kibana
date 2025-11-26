@@ -8,6 +8,16 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nStrings = {
+  alertDetections: {
+    title: i18n.translate('securitySolutionPackages.navLinks.alertDetections', {
+      defaultMessage: 'Detections',
+    }),
+    views: {
+      title: i18n.translate('securitySolutionPackages.navLinks.rules.views', {
+        defaultMessage: 'Views',
+      }),
+    },
+  },
   rules: {
     title: i18n.translate('securitySolutionPackages.navLinks.rules', {
       defaultMessage: 'Rules',
@@ -35,11 +45,6 @@ export const i18nStrings = {
     badgeTooltip: i18n.translate('securitySolutionPackages.navLinks.workflows.badgeTooltip', {
       defaultMessage:
         'This functionality is experimental and not supported. It may change or be removed at any time.',
-    }),
-  },
-  launchpad: {
-    title: i18n.translate('securitySolutionPackages.navLinks.launchpad', {
-      defaultMessage: 'Security launchpad',
     }),
   },
   assets: {
@@ -196,9 +201,6 @@ export const i18nStrings = {
       title: i18n.translate('securitySolutionPackages.navLinks.mngt.access', {
         defaultMessage: 'Access',
       }),
-      usersAndRoles: i18n.translate('securitySolutionPackages.navLinks.mngt.usersAndRoles', {
-        defaultMessage: 'Manage organization members',
-      }),
     },
     alertsAndInsights: {
       title: i18n.translate('securitySolutionPackages.navLinks.mngt.alertsAndInsights', {
@@ -276,6 +278,11 @@ export const i18nStrings = {
     title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.title', {
       defaultMessage: 'Stack Management',
     }),
+    home: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.home', {
+        defaultMessage: 'Home',
+      }),
+    },
     serverlessTitle: i18n.translate(
       'securitySolutionPackages.navLinks.stackManagement_v2.serverlessTitle',
       { defaultMessage: 'Admin and Settings' }

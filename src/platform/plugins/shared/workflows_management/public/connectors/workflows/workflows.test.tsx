@@ -54,7 +54,7 @@ describe('Workflows Connector', () => {
         },
       };
 
-      const result = await connectorTypeModel.validateParams(actionParams);
+      const result = await connectorTypeModel.validateParams(actionParams, null);
 
       expect(result).toEqual({
         errors: {
@@ -71,7 +71,7 @@ describe('Workflows Connector', () => {
         },
       };
 
-      const result = await connectorTypeModel.validateParams(actionParams);
+      const result = await connectorTypeModel.validateParams(actionParams, null);
 
       expect((result.errors as any)['subActionParams.workflowId']).toContain(
         'Workflow ID is required.'
@@ -86,7 +86,7 @@ describe('Workflows Connector', () => {
         },
       } as any;
 
-      const result = await connectorTypeModel.validateParams(actionParams);
+      const result = await connectorTypeModel.validateParams(actionParams, null);
 
       expect((result.errors as any)['subActionParams.workflowId']).toContain(
         'Workflow ID is required.'
@@ -101,7 +101,7 @@ describe('Workflows Connector', () => {
         },
       } as any;
 
-      const result = await connectorTypeModel.validateParams(actionParams);
+      const result = await connectorTypeModel.validateParams(actionParams, null);
 
       expect((result.errors as any)['subActionParams.workflowId']).toContain(
         'Workflow ID is required.'
@@ -113,7 +113,7 @@ describe('Workflows Connector', () => {
         subAction: 'run',
       } as any;
 
-      const result = await connectorTypeModel.validateParams(actionParams);
+      const result = await connectorTypeModel.validateParams(actionParams, null);
 
       expect((result.errors as any)['subActionParams.workflowId']).toContain(
         'Workflow ID is required.'
@@ -128,7 +128,7 @@ describe('Workflows Connector', () => {
         },
       };
 
-      const result = await connectorTypeModel.validateParams(actionParams);
+      const result = await connectorTypeModel.validateParams(actionParams, null);
 
       expect(result).toEqual({
         errors: {
@@ -145,7 +145,7 @@ describe('Workflows Connector', () => {
         },
       };
 
-      const result = await connectorTypeModel.validateParams(actionParams);
+      const result = await connectorTypeModel.validateParams(actionParams, null);
 
       expect(result).toEqual({
         errors: {
@@ -162,7 +162,7 @@ describe('Workflows Connector', () => {
         },
       };
 
-      const result = await connectorTypeModel.validateParams(actionParams);
+      const result = await connectorTypeModel.validateParams(actionParams, null);
 
       expect((result.errors as any)['subActionParams.workflowId']).toContain(
         'Workflow ID is required.'

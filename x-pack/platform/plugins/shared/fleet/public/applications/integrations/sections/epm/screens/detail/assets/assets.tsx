@@ -178,6 +178,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   } else if (!canReadPackageSettings) {
     content = (
       <EuiCallOut
+        announceOnMount
         color="warning"
         title={
           <FormattedMessage
@@ -220,6 +221,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       !assetsInstalledInCurrentSpace ? (
         <>
           <EuiCallOut
+            announceOnMount
             heading="h2"
             title={
               <FormattedMessage

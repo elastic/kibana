@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger, KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow } from '@kbn/workflows';
+import { getReadableFrequency, getReadableInterval } from '../lib/rrule_logging_utils';
 import type { WorkflowTrigger } from '../lib/schedule_utils';
 import { convertWorkflowScheduleToTaskSchedule, getScheduledTriggers } from '../lib/schedule_utils';
-import { getReadableFrequency, getReadableInterval } from '../lib/rrule_logging_utils';
 
 export interface WorkflowTaskSchedulerParams {
   workflowId: string;
@@ -27,14 +27,14 @@ export class WorkflowTaskScheduler {
   ) {}
 
   /**
-   * Schedules tasks for all enabled scheduled triggers in a workflow
+   * Schedules tasks for all scheduled triggers in a workflow
    */
   async scheduleWorkflowTasks(
     workflow: EsWorkflow,
     spaceId: string,
     request?: KibanaRequest
   ): Promise<string[]> {
-    const scheduledTriggers = getScheduledTriggers(workflow.definition.triggers);
+    const scheduledTriggers = getScheduledTriggers(workflow.definition?.triggers ?? []);
     const scheduledTaskIds: string[] = [];
 
     for (const trigger of scheduledTriggers) {
@@ -144,7 +144,7 @@ export class WorkflowTaskScheduler {
     // First, unschedule all existing tasks
     await this.unscheduleWorkflowTasks(workflow.id);
 
-    // Then, schedule new tasks for enabled scheduled triggers
+    // Then, schedule new tasks for scheduled triggers
     await this.scheduleWorkflowTasks(workflow, spaceId, request);
   }
 }

@@ -9,16 +9,19 @@
 import { i18n } from '@kbn/i18n';
 import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
+import { validate } from './validate';
 import type { ICommandContext } from '../../types';
 
 const setCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
+  validate,
 };
 
 export const setCommand = {
   name: 'set',
   methods: setCommandMethods,
   metadata: {
+    type: 'header' as const,
     description: i18n.translate('kbn-esql-ast.esql.definitions.setDoc', {
       defaultMessage: 'Sets a query setting',
     }),

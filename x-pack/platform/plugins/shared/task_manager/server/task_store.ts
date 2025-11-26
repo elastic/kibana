@@ -37,6 +37,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-s
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { nodeBuilder } from '@kbn/es-query';
+import type { IBasePath } from '@kbn/core/server';
 import type { RequestTimeoutsConfig } from './config';
 import type { Result } from './lib/result_type';
 import { asOk, asErr, unwrap } from './lib/result_type';
@@ -59,8 +60,7 @@ import { TaskValidator } from './task_validator';
 import { claimSort } from './queries/mark_available_tasks_as_claimed';
 import { MAX_PARTITIONS } from './lib/task_partitioner';
 import type { ErrorOutput } from './lib/bulk_operation_buffer';
-import { MsearchError } from './lib/msearch_error';
-import { BulkUpdateError } from './lib/bulk_update_error';
+import { BulkUpdateError, MsearchError } from './lib/errors';
 import { TASK_SO_NAME } from './saved_objects';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
 import { getFirstRunAt } from './lib/get_first_run_at';
@@ -82,6 +82,7 @@ export interface StoreOpts {
   canEncryptSavedObjects?: boolean;
   esoClient?: EncryptedSavedObjectsClient;
   getIsSecurityEnabled: () => boolean;
+  basePath: IBasePath;
 }
 
 export interface SearchOpts {
@@ -114,6 +115,7 @@ export interface FetchResult {
 
 export interface BulkUpdateOpts {
   validate: boolean;
+  mergeAttributes?: boolean;
 }
 
 export type BulkUpdateResult = Result<ConcreteTaskInstance, ErrorOutput>;
@@ -152,6 +154,7 @@ export class TaskStore {
   private canEncryptSavedObjects?: boolean;
   private getIsSecurityEnabled: () => boolean;
   private logger: Logger;
+  private basePath: IBasePath;
 
   /**
    * Constructs a new TaskStore.
@@ -182,6 +185,7 @@ export class TaskStore {
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
     this.getIsSecurityEnabled = opts.getIsSecurityEnabled;
     this.logger = opts.logger;
+    this.basePath = opts.basePath;
   }
 
   public registerEncryptedSavedObjectsClient(client: EncryptedSavedObjectsClient) {
@@ -224,7 +228,12 @@ export class TaskStore {
 
     let userScopeAndApiKey;
     try {
-      userScopeAndApiKey = await getApiKeyAndUserScope(taskInstances, request, this.security);
+      userScopeAndApiKey = await getApiKeyAndUserScope(
+        taskInstances,
+        request,
+        this.security,
+        this.basePath
+      );
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -509,7 +518,7 @@ export class TaskStore {
    */
   public async bulkUpdate(
     docs: ConcreteTaskInstance[],
-    { validate }: BulkUpdateOpts
+    { validate, mergeAttributes = true }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
@@ -522,6 +531,7 @@ export class TaskStore {
             id: doc.id,
             version: doc.version,
             attributes: taskInstanceToAttributes(taskInstance, doc.id),
+            mergeAttributes,
           });
         } catch (e) {
           this.logger.error(

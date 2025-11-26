@@ -20,13 +20,18 @@ import {
   type ArchiveIterator,
   type ArchiveEntry,
 } from '../../../../../../common/types/models/epm';
+import type { EsAssetReference } from '../../../../../types';
 import { updateEsAssetReferences } from '../../es_assets_reference';
 import type { KnowledgeBaseItem } from '../../../../../../common/types/models/epm';
 import { licenseService } from '../../../../license';
+import { appContextService } from '../../../../app_context';
 export const KNOWLEDGE_BASE_PATH = 'docs/knowledge_base/';
+export const DOCS_PATH_PATTERN = '/docs/';
+export const KNOWLEDGE_BASE_FOLDER = 'knowledge_base/';
 
 /**
  * Extract knowledge base files directly from the package archive
+ * This includes all .md files from the docs/ folder (including docs/knowledge_base/)
  */
 async function extractKnowledgeBaseFromArchive(
   archiveIterator: ArchiveIterator,
@@ -39,12 +44,25 @@ async function extractKnowledgeBaseFromArchive(
     async (entry: ArchiveEntry) => {
       if (entry.buffer) {
         const content = entry.buffer.toString('utf8');
-        const knowledgeBaseIndex = entry.path.indexOf(KNOWLEDGE_BASE_PATH);
-        // remove the leading path (docs/knowledge_base/) so we aren't storing it in the field in ES
-        const fileName =
-          knowledgeBaseIndex >= 0
-            ? entry.path.substring(knowledgeBaseIndex + KNOWLEDGE_BASE_PATH.length)
-            : path.basename(entry.path);
+
+        // Determine the filename based on the path
+        let fileName: string;
+        const docsIndex = entry.path.indexOf(DOCS_PATH_PATTERN);
+
+        if (docsIndex >= 0) {
+          // Extract path relative to docs/ folder
+          const pathAfterDocs = entry.path.substring(docsIndex + DOCS_PATH_PATTERN.length);
+
+          // If it's in knowledge_base subfolder, remove that prefix too for backward compatibility
+          if (pathAfterDocs.startsWith(KNOWLEDGE_BASE_FOLDER)) {
+            fileName = pathAfterDocs.substring(KNOWLEDGE_BASE_FOLDER.length);
+          } else {
+            fileName = pathAfterDocs;
+          }
+        } else {
+          // Fallback to basename
+          fileName = path.basename(entry.path);
+        }
 
         knowledgeBaseItems.push({
           fileName,
@@ -52,13 +70,15 @@ async function extractKnowledgeBaseFromArchive(
         });
       }
     },
-    (entryPath: string) => entryPath.includes(KNOWLEDGE_BASE_PATH) && entryPath.endsWith('.md')
+    (entryPath: string) => entryPath.includes(DOCS_PATH_PATTERN) && entryPath.endsWith('.md')
   );
 
   return knowledgeBaseItems;
 }
 
-export async function stepSaveKnowledgeBase(context: InstallContext): Promise<void> {
+export async function stepSaveKnowledgeBase(
+  context: InstallContext
+): Promise<{ esReferences: EsAssetReference[] }> {
   const { packageInstallContext, esClient, savedObjectsClient, logger } = context;
   const { packageInfo, archiveIterator } = packageInstallContext;
 
@@ -68,11 +88,20 @@ export async function stepSaveKnowledgeBase(context: InstallContext): Promise<vo
     `Knowledge base step: Starting for package ${packageInfo.name}@${packageInfo.version}`
   );
 
+  // Check if knowledge base installation is enabled via experimental feature flag
+  const experimentalFeatures = appContextService.getExperimentalFeatures();
+  if (!experimentalFeatures.installIntegrationsKnowledge) {
+    logger.debug(
+      `Knowledge base step: Skipping knowledge base save - installIntegrationsKnowledge experimental feature is disabled`
+    );
+    return { esReferences };
+  }
+
   // Check if user has appropriate license for knowledge base functionality
   // You can adjust the license requirement as needed (e.g., isGoldPlus(), isPlatinum(), isEnterprise())
   if (!licenseService.isEnterprise()) {
     logger.debug(`Knowledge base step: Skipping knowledge base save - requires Enterprise license`);
-    return;
+    return { esReferences };
   }
 
   // Extract knowledge base content directly from the archive
@@ -117,8 +146,8 @@ export async function stepSaveKnowledgeBase(context: InstallContext): Promise<vo
       throw new FleetError(`Error saving knowledge base content: ${error}`);
     }
   }
-  // Update context with the new esReferences
-  context.esReferences = esReferences;
+
+  return { esReferences };
 }
 
 export async function cleanupKnowledgeBaseStep(context: InstallContext) {

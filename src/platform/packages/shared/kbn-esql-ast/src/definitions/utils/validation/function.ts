@@ -23,7 +23,13 @@ import type {
   ICommandContext,
   Location,
 } from '../../../commands_registry/types';
-import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction, ESQLMessage } from '../../../types';
+import type {
+  ESQLAst,
+  ESQLAstAllCommands,
+  ESQLAstItem,
+  ESQLFunction,
+  ESQLMessage,
+} from '../../../types';
 import type { FunctionDefinition, SupportedDataType } from '../../types';
 import { getExpressionType, getMatchingSignatures } from '../expressions';
 import { ColumnValidator } from './column';
@@ -36,7 +42,7 @@ export function validateFunction({
   callbacks,
 }: {
   fn: ESQLFunction;
-  parentCommand: ESQLCommand;
+  parentCommand: ESQLAstAllCommands;
   ast: ESQLAst;
   context: ICommandContext;
   callbacks: ICommandCallbacks;
@@ -56,7 +62,7 @@ class FunctionValidator {
 
   constructor(
     private readonly fn: ESQLFunction,
-    private readonly parentCommand: ESQLCommand,
+    private readonly parentCommand: ESQLAstAllCommands,
     private readonly ast: ESQLAst,
     private readonly context: ICommandContext,
     private readonly callbacks: ICommandCallbacks,

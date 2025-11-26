@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -38,7 +38,7 @@
     "@kbn/share-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/file-upload-plugin",
-    "@kbn/discover-utils"
+    "@kbn/discover-utils",
   ],
   "exclude": [
     "target/**/*",

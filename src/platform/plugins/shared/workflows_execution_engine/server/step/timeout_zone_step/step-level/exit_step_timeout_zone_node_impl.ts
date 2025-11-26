@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { NodeImplementation } from '../../node_implementation';
-import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { NodeImplementation } from '../../node_implementation';
 
 export class ExitStepTimeoutZoneNodeImpl implements NodeImplementation {
   constructor(
@@ -17,8 +17,8 @@ export class ExitStepTimeoutZoneNodeImpl implements NodeImplementation {
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
-  public async run(): Promise<void> {
-    await this.stepExecutionRuntime.finishStep();
+  public run(): void {
+    this.stepExecutionRuntime.finishStep();
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import type {
   ConnectorStep,
   EsWorkflowExecution,
@@ -17,13 +18,35 @@ import type {
 } from '@kbn/workflows';
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { WorkflowGraph } from '@kbn/workflows/graph';
+import type { WorkflowTemplatingEngine } from '../../templating_engine';
+import type { ContextDependencies } from '../types';
 import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
+
+const cloudSetupMock = cloudMock.createSetup();
+const dependencies: ContextDependencies = {
+  cloudSetup: cloudSetupMock,
+};
 
 jest.mock('../../utils', () => ({
   buildStepExecutionId: jest.fn().mockImplementation((executionId, stepId, path) => {
     return `${stepId}_generated`;
   }),
+  getKibanaUrl: jest.fn().mockReturnValue('http://localhost:5601'),
+  buildWorkflowExecutionUrl: jest
+    .fn()
+    .mockImplementation((kibanaUrl, spaceId, workflowId, executionId, stepExecutionId) => {
+      const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
+      const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
+      const params = new URLSearchParams({
+        executionId,
+        tab: 'executions',
+      });
+      if (stepExecutionId) {
+        params.set('stepExecutionId', stepExecutionId);
+      }
+      return `${baseUrl}?${params.toString()}`;
+    }),
 }));
 
 describe('WorkflowContextManager', () => {
@@ -48,6 +71,8 @@ describe('WorkflowContextManager', () => {
     workflowExecutionState.getLatestStepExecution = jest
       .fn()
       .mockReturnValue({} as EsWorkflowStepExecution);
+    const templatingEngineMock = {} as unknown as WorkflowTemplatingEngine;
+    templatingEngineMock.render = jest.fn().mockImplementation((template) => template);
 
     // Provide a dummy esClient as required by ContextManagerInit
     const esClient = {
@@ -60,11 +85,13 @@ describe('WorkflowContextManager', () => {
     } as any;
 
     const underTest = new WorkflowContextManager({
+      templateEngine: templatingEngineMock,
       node: fakeNode as AtomicGraphNode,
       stackFrames: fakeStackFrames,
       workflowExecutionGraph,
       workflowExecutionState,
       esClient,
+      dependencies,
     });
 
     return {
@@ -72,6 +99,7 @@ describe('WorkflowContextManager', () => {
       workflowExecutionState,
       underTest,
       esClient,
+      templatingEngineMock,
     };
   }
 
@@ -514,6 +542,78 @@ describe('WorkflowContextManager', () => {
       const context = testContainer.underTest.getContext();
       expect(context.foreach).toBeUndefined();
     });
+
+    it('should override foreach context', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        scopeStack: [] as StackFrame[],
+        context: {
+          inputs: {
+            remainingKey: 'some string',
+            overridenKey: true,
+          },
+          contextOverride: {
+            foreach: {
+              item: 'fake',
+              index: 200,
+              total: 100500,
+            },
+          },
+        } as Record<string, any>,
+      } as EsWorkflowExecution);
+
+      const context = testContainer.underTest.getContext();
+      expect(context.foreach).toEqual({
+        item: 'fake',
+        index: 200,
+        total: 100500,
+      });
+    });
+
+    it('should not override foreach context if contextOverride.foreach is not present', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        scopeStack: [
+          {
+            stepId: 'outerForeachStep',
+            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
+          },
+        ] as StackFrame[],
+        context: {
+          contextOverride: {
+            foreach: {
+              item: 'fake',
+              index: 200,
+              total: 100500,
+            },
+          },
+        } as Record<string, any>,
+      } as EsWorkflowExecution);
+      testContainer.workflowExecutionState.getStepExecution = jest
+        .fn()
+        .mockImplementation((stepExecutionId) => {
+          if (stepExecutionId === 'outerForeachStep_generated') {
+            return {
+              stepType: 'foreach',
+              state: {
+                items: ['item1', 'item2', 'item3'],
+                index: 0,
+                item: 'item1',
+                total: 3,
+              },
+            };
+          }
+          return undefined;
+        });
+
+      const context = testContainer.underTest.getContext();
+      expect(context.foreach).toEqual({
+        items: ['item1', 'item2', 'item3'],
+        index: 0,
+        item: 'item1',
+        total: 3,
+      });
+    });
   });
 
   describe('steps context', () => {
@@ -647,6 +747,138 @@ describe('WorkflowContextManager', () => {
           error: null,
         })
       );
+    });
+  });
+
+  describe('renderValueAccordingToContext', () => {
+    const workflow: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      description: 'A test workflow',
+      enabled: true,
+      consts: {
+        API_URL: 'https://api.example.com',
+        TIMEOUT: 5000,
+      },
+      triggers: [],
+      steps: [
+        {
+          name: 'fetchData',
+          type: 'console',
+          with: {
+            message: 'Fetching data',
+          },
+        } as ConnectorStep,
+        {
+          name: 'processData',
+          type: 'console',
+          with: {
+            message: 'Processing data',
+          },
+        } as ConnectorStep,
+      ],
+    };
+    let testContainer: ReturnType<typeof createTestContainer>;
+
+    beforeEach(() => {
+      testContainer = createTestContainer(workflow);
+      fakeNode.id = 'processData';
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        id: 'exec-123',
+        workflowId: 'workflow-456',
+        spaceId: 'space-789',
+        scopeStack: [] as StackFrame[],
+        startedAt: new Date('2023-01-01T00:00:00Z').toISOString(),
+        context: {
+          inputs: {
+            userId: 'user-123',
+            count: 10,
+          },
+        } as Record<string, any>,
+      } as EsWorkflowExecution);
+
+      testContainer.workflowExecutionState.getLatestStepExecution = jest
+        .fn()
+        .mockImplementation((stepId) => {
+          if (stepId === 'fetchData') {
+            return {
+              state: { status: 'completed' },
+              output: { data: ['item1', 'item2'], total: 2 },
+              error: null,
+            };
+          }
+          return undefined;
+        });
+    });
+
+    describe('string rendering', () => {
+      it('should render a string with multiple template expressions', () => {
+        testContainer.templatingEngineMock.render = jest
+          .fn()
+          .mockImplementation((template) => `rendered(${template})`);
+        const result = testContainer.underTest.renderValueAccordingToContext(
+          'Workflow {{workflow.name}} in space {{workflow.spaceId}}'
+        );
+        expect(result).toBe('rendered(Workflow {{workflow.name}} in space {{workflow.spaceId}})');
+      });
+
+      it('should provide rendering function with step context', () => {
+        testContainer.underTest.renderValueAccordingToContext(
+          'Workflow {{workflow.name}} in space {{workflow.spaceId}}'
+        );
+        const renderArgs = (testContainer.templatingEngineMock.render as jest.Mock).mock
+          .calls[0][1];
+        expect(renderArgs).toEqual(
+          expect.objectContaining({
+            execution: {
+              id: 'exec-123',
+              isTestRun: false,
+              startedAt: new Date('2023-01-01T00:00:00.000Z'),
+              url: 'http://localhost:5601/s/space-789/app/workflows/workflow-456?executionId=exec-123&tab=executions',
+            },
+            workflow: {
+              id: 'workflow-456',
+              name: 'Test Workflow',
+              enabled: true,
+              spaceId: 'space-789',
+            },
+            kibanaUrl: 'http://localhost:5601',
+            consts: {
+              API_URL: 'https://api.example.com',
+              TIMEOUT: 5000,
+            },
+            event: undefined,
+            inputs: {
+              userId: 'user-123',
+              count: 10,
+            },
+            steps: {
+              fetchData: {
+                input: undefined,
+                output: {
+                  data: ['item1', 'item2'],
+                  total: 2,
+                },
+                error: null,
+                status: 'completed',
+              },
+            },
+          })
+        );
+      });
+
+      it('should provide rendering function with object having templates', () => {
+        testContainer.underTest.renderValueAccordingToContext({
+          str: 'Some object',
+        });
+        expect(testContainer.templatingEngineMock.render).toHaveBeenCalledWith(
+          {
+            str: 'Some object',
+          },
+          expect.anything()
+        );
+      });
     });
   });
 });

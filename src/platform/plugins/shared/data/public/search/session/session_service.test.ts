@@ -11,7 +11,7 @@ import type { ISessionService } from './session_service';
 import { SessionService } from './session_service';
 import { coreMock } from '@kbn/core/public/mocks';
 import { first, take, toArray } from 'rxjs';
-import { getSessionsClientMock } from './mocks';
+import { getSearchSessionEBTManagerMock, getSessionsClientMock } from './mocks';
 import { BehaviorSubject } from 'rxjs';
 import { SearchSessionState } from './search_session_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
@@ -89,6 +89,7 @@ describe('Session service', () => {
           },
           ...rest,
         ]),
+      getSearchSessionEBTManagerMock(),
       sessionsClient,
       nowProvider,
       usageCollector,
@@ -175,7 +176,7 @@ describe('Session service', () => {
       const complete = sessionService.trackSearch({ abort, poll }).complete;
       complete();
 
-      await sessionService.cancel();
+      await sessionService.cancel({ source: 'test' });
 
       expect(abort).toBeCalledTimes(3);
     });
@@ -313,7 +314,7 @@ describe('Session service', () => {
         restoreState: {},
       }),
     });
-    await sessionService.save();
+    await sessionService.save({ entryPoint: 'test' });
 
     expect(sessionService.getSearchOptions(someOtherId)).toEqual({
       isStored: false,
@@ -353,9 +354,9 @@ describe('Session service', () => {
 
   test('enableStorage() enables storage capabilities', async () => {
     sessionService.start();
-    await expect(() => sessionService.save()).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"No info provider for current session"`
-    );
+    await expect(() =>
+      sessionService.save({ entryPoint: 'test' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"No info provider for current session"`);
 
     expect(sessionService.isSessionStorageReady()).toBe(false);
 
@@ -370,7 +371,7 @@ describe('Session service', () => {
 
     expect(sessionService.isSessionStorageReady()).toBe(true);
 
-    await expect(() => sessionService.save()).resolves;
+    await expect(() => sessionService.save({ entryPoint: 'test' })).resolves;
 
     sessionService.clear();
     expect(sessionService.isSessionStorageReady()).toBe(false);
@@ -406,7 +407,9 @@ describe('Session service', () => {
       },
     });
     sessionService.start();
-    await expect(() => sessionService.save()).rejects.toMatchInlineSnapshot(`[Error: Haha]`);
+    await expect(() => sessionService.save({ entryPoint: 'test' })).rejects.toMatchInlineSnapshot(
+      `[Error: Haha]`
+    );
   });
 
   test('save() triggers search polling to extend searches', async () => {
@@ -427,13 +430,13 @@ describe('Session service', () => {
     search1.complete();
 
     const search2 = sessionService.trackSearch({ poll, abort });
-    search2.error();
+    search2.error(new Error());
 
     sessionService.trackSearch({ poll, abort });
 
     expect(poll).toHaveBeenCalledTimes(0);
 
-    await sessionService.save();
+    await sessionService.save({ entryPoint: 'test' });
 
     expect(poll).toHaveBeenCalledTimes(2); // for completed and in-progress
   });
@@ -457,7 +460,7 @@ describe('Session service', () => {
 
     expect(onSavingSession).toHaveBeenCalledTimes(0);
 
-    await sessionService.save();
+    await sessionService.save({ entryPoint: 'test' });
 
     expect(onSavingSession).toHaveBeenCalledTimes(1);
   });
@@ -483,7 +486,7 @@ describe('Session service', () => {
 
     expect(onSavingSession).toHaveBeenCalledTimes(0);
 
-    const searchSession = await sessionService.save();
+    const searchSession = await sessionService.save({ entryPoint: 'test' });
 
     expect(searchSession.attributes.name).toBe(mockSavedObject.attributes.name);
   });
@@ -503,9 +506,9 @@ describe('Session service', () => {
 
     test('save() throws', async () => {
       sessionService.start();
-      await expect(() => sessionService.save()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"No access to search sessions"`
-      );
+      await expect(() =>
+        sessionService.save({ entryPoint: 'test' })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"No access to search sessions"`);
     });
   });
 
@@ -521,7 +524,7 @@ describe('Session service', () => {
       }),
     });
     sessionService.start();
-    await sessionService.save();
+    await sessionService.save({ entryPoint: 'test' });
     await expect(sessionService.renameCurrentSession('New name')).resolves.toBeUndefined();
     expect(toastService.addError).toHaveBeenCalledWith(
       renameError,
@@ -660,7 +663,7 @@ describe('Session service', () => {
 
         const firstSessionId = sessionService.start();
         // We need to store the search so poll gets called when the search is completed and we can assert on it
-        await sessionService.save();
+        await sessionService.save({ entryPoint: 'test' });
 
         const poll = jest.fn().mockResolvedValue(undefined);
         const { complete } = sessionService.trackSearch({

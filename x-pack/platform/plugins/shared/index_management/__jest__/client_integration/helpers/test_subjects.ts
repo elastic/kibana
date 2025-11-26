@@ -118,4 +118,5 @@ export type TestSubjects =
   | 'noIndicesMessage'
   | 'clearIndicesSearch'
   | 'usingMaxRetention'
-  | 'componentTemplatesLink';
+  | 'componentTemplatesLink'
+  | 'configureFailureStoreButton';

@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { Meta, StoryObj } from '@storybook/react';
 import type { SafeParseReturnType } from '@kbn/zod';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 
 const meta: Meta<typeof WorkflowStepExecutionTree> = {
   component: WorkflowStepExecutionTree,
@@ -122,6 +122,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
       workflowDefinition: definition,
       yaml,
       status: ExecutionStatus.COMPLETED,
+      isTestRun: false,
       triggeredBy: 'manual',
       startedAt: '2025-09-02T20:43:57.441Z',
       finishedAt: '2025-09-02T20:44:15.945Z',
@@ -137,12 +138,10 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           stepExecutionIndex: 0,
           workflowRunId: 'db38b255-ec34-4048-8b77-776081cb3a97',
           workflowId: '61025f92-5e23-4327-9e39-b1fb8585b710',
-          output: [
-            {
-              result:
-                '[{"name":"Brad","surname":"Pitt"},{"name":"Angelina","surname":"Jolie"},{"name":"Leonardo","surname":"DiCaprio"},{"name":"Scarlett","surname":"Johansson"}]',
-            },
-          ],
+          output: {
+            result:
+              '[{"name":"Brad","surname":"Pitt"},{"name":"Angelina","surname":"Jolie"},{"name":"Leonardo","surname":"DiCaprio"},{"name":"Scarlett","surname":"Johansson"}]',
+          },
           input: {
             input:
               '- Output JSON array with multiple object\n- Each item in the array must follow { "name": "Luisa", "surname": "Sampton" } structure\n- Generate random count of elements from 3 to 5\n- Generate some famous name and surname (Brad Pitt, etc)\n- Don\'t include anything else except JSON into the response\n- It MUST!!! be just raw JSON string, no formatting, no anything else\n',
@@ -476,7 +475,6 @@ export const Empty = {
 
 export const Loading: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
-    isLoading: true,
     error: null,
     selectedId: null,
   },
@@ -484,7 +482,6 @@ export const Loading: StoryObj<typeof WorkflowStepExecutionTree> = {
 
 export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
-    isLoading: false,
     error: null,
     execution: {
       id: 'db38b255-ec34-4048-8b77-776081cb3a97',
@@ -493,6 +490,7 @@ export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionTre
       workflowDefinition: definition,
       yaml,
       status: ExecutionStatus.RUNNING,
+      isTestRun: false,
       triggeredBy: 'manual',
       startedAt: '2025-09-02T20:43:57.441Z',
       finishedAt: '2025-09-02T20:44:15.945Z',
@@ -505,7 +503,6 @@ export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionTre
 
 export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
-    isLoading: false,
     error: null,
     execution: {
       id: 'db38b255-ec34-4048-8b77-776081cb3a97',
@@ -514,6 +511,7 @@ export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionTree> = {
       workflowDefinition: definition,
       yaml,
       status: ExecutionStatus.COMPLETED,
+      isTestRun: false,
       triggeredBy: 'manual',
       startedAt: '2025-09-02T20:43:57.441Z',
       finishedAt: '2025-09-02T20:44:15.945Z',
@@ -525,7 +523,6 @@ export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionTree> = {
 
 export const ErrorStory: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
-    isLoading: false,
     error: new Error('Internal server error'),
     selectedId: null,
   },

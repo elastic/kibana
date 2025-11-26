@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { internalEsqlRoutes } from './internal/esql/route';
 import { dashboardRoutes } from './dashboards/route';
 import { crudRoutes } from './streams/crud/route';
 import { enablementRoutes } from './streams/enablement/route';
@@ -24,10 +23,13 @@ import { significantEventsRoutes } from './streams/significant_events/route';
 import { queryRoutes } from './queries/route';
 import { ruleRoutes } from './rules/route';
 import { failureStoreRoutes } from './internal/streams/failure_store/route';
+import { internalIngestRoutes } from './internal/streams/ingest/route';
+import { connectorRoutes } from './internal/connectors/route';
+import { attachmentRoutes } from './attachments/route';
+import { internalAttachmentRoutes } from './internal/attachments/route';
 
 export const streamsRouteRepository = {
   // internal APIs
-  ...internalEsqlRoutes,
   ...internalDashboardRoutes,
   ...internalCrudRoutes,
   ...internalManagementRoutes,
@@ -36,6 +38,9 @@ export const streamsRouteRepository = {
   ...internalProcessingRoutes,
   ...failureStoreRoutes,
   ...internalFeaturesRoutes,
+  ...internalIngestRoutes,
+  ...connectorRoutes,
+  ...internalAttachmentRoutes,
   // public APIs
   ...dashboardRoutes,
   ...crudRoutes,
@@ -47,6 +52,7 @@ export const streamsRouteRepository = {
   ...significantEventsRoutes,
   ...queryRoutes,
   ...ruleRoutes,
+  ...attachmentRoutes,
 };
 
 export type StreamsRouteRepository = typeof streamsRouteRepository;

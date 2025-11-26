@@ -123,8 +123,8 @@ function categorizeAssets(assetDirs: string[]) {
 
   for (const { path, category } of assets) {
     if (category === 'euiTheme') {
-      // only track v8.light theme
-      if (path.includes('v8.light')) {
+      // only track borealis.light theme
+      if (path.includes('borealis.light')) {
         add('css', path);
       }
       continue;

@@ -152,7 +152,8 @@ xpack.index_management.enableMappingsSourceFieldSection: false
 xpack.index_management.enableTogglingDataRetention: false
 # Disable project level rentention checks in DSL form from Index Management UI
 xpack.index_management.enableProjectLevelRetentionChecks: false
-
+# Forbid disabling failure store lifecycle from Index Management UI
+xpack.index_management.enableFailureStoreRetentionDisabling: false
 # Disable Manage Processors UI in Ingest Pipelines
 xpack.ingest_pipelines.enableManageProcessors: false
 
@@ -298,7 +299,6 @@ xpack.genAiSettings:
   showSpacesIntegration: false
   showAiAssistantsVisibilitySetting: false
 
-## Feature flags overrides
-feature_flags.overrides:
-  # Serverless uses old side nav for now, while classic already rolling out new side nav
-  core.chrome.projectSideNav: 'v1'
+# Cross Project Search
+cps.enabled: true
+cps.cpsEnabled: false

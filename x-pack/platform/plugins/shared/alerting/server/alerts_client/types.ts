@@ -22,6 +22,7 @@ import type {
   ALERT_UUID,
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { Alert as LegacyAlert } from '../alert/alert';
 import type {
   AlertInstanceContext,
@@ -36,7 +37,6 @@ import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_
 import type { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import type { PublicAlertFactory } from '../alert/create_alert_factory';
-import type { MaintenanceWindow } from '../application/maintenance_window/types';
 
 export interface AlertRuleData {
   consumer: string;
@@ -64,6 +64,16 @@ export interface AlertRule {
   [SPACE_IDS]: string[];
 }
 
+export interface AlertsToUpdateWithLastScheduledActions {
+  [alertId: string]: {
+    group: string;
+    date: string;
+    throttling?: { [key: string]: { date: string } };
+  };
+}
+
+export type AlertsToUpdateWithMaintenanceWindows = Record<string, string[]>;
+
 export interface IAlertsClient<
   AlertData extends RuleAlertData,
   State extends AlertInstanceState,
@@ -84,10 +94,15 @@ export interface IAlertsClient<
     type: 'recovered' | 'trackedRecoveredAlerts'
   ): Record<string, LegacyAlert<State, Context, RecoveryActionGroupId>> | {};
   persistAlerts(): Promise<void>;
-  updatePersistedAlertsWithMaintenanceWindowIds(): Promise<{
-    alertIds: string[];
-    maintenanceWindowIds: string[];
-  } | null>;
+  getAlertsToUpdateWithMaintenanceWindows(): Promise<AlertsToUpdateWithMaintenanceWindows>;
+  getAlertsToUpdateWithLastScheduledActions(): AlertsToUpdateWithLastScheduledActions;
+  updatePersistedAlerts({
+    alertsToUpdateWithMaintenanceWindows,
+    alertsToUpdateWithLastScheduledActions,
+  }: {
+    alertsToUpdateWithMaintenanceWindows: AlertsToUpdateWithMaintenanceWindows;
+    alertsToUpdateWithLastScheduledActions: AlertsToUpdateWithLastScheduledActions;
+  }): Promise<void>;
   isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
   getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean): {

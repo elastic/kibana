@@ -26,17 +26,24 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { EmbeddableRegistryDefinition, EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import { setupSavedObjects } from './saved_objects';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
 import type { CustomVisualizationMigrations } from './migrations/types';
 import { LensAppLocatorDefinition } from '../common/locator/locator';
-import { LENS_CONTENT_TYPE, LENS_ITEM_LATEST_VERSION } from '../common/constants';
+import {
+  LENS_CONTENT_TYPE,
+  LENS_EMBEDDABLE_TYPE,
+  LENS_ITEM_LATEST_VERSION,
+} from '../common/constants';
 import { LensStorage } from './content_management';
 import { registerLensAPIRoutes } from './api/routes';
+import { fetchLensFeatureFlags } from '../common';
+import { getLensTransforms } from '../common/transforms';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
@@ -105,13 +112,37 @@ export class LensServerPlugin
       DataViewPersistableStateService.getAllMigrations.bind(DataViewPersistableStateService),
       this.customVisualizationMigrations
     );
-    plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
+
+    plugins.embeddable.registerEmbeddableFactory(
+      lensEmbeddableFactory() as unknown as EmbeddableRegistryDefinition
+    );
+    const builder = new LensConfigBuilder();
+
+    plugins.embeddable.registerTransforms(
+      LENS_EMBEDDABLE_TYPE,
+      getLensTransforms({
+        builder,
+        transformEnhancementsIn: plugins.embeddable.transformEnhancementsIn,
+        transformEnhancementsOut: plugins.embeddable.transformEnhancementsOut,
+      })
+    );
 
     registerLensAPIRoutes({
       http: core.http,
       contentManagement: plugins.contentManagement,
+      builder,
       logger: this.logger,
     });
+
+    core
+      .getStartServices()
+      .then(async ([{ featureFlags }]) => {
+        const flags = await fetchLensFeatureFlags(featureFlags);
+        builder.setEnabled(flags.apiFormat);
+      })
+      .catch((error) => {
+        this.logger.error(error);
+      });
 
     return {
       lensEmbeddableFactory,

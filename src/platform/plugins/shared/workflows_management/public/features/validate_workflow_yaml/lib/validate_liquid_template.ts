@@ -8,8 +8,8 @@
  */
 
 import { Liquid } from 'liquidjs';
-import type { YamlValidationResult } from '../model/types';
 import { extractLiquidErrorPosition } from './extract_liquid_error_position';
+import type { YamlValidationResult } from '../model/types';
 
 // Lazy initialization - only create when needed
 let liquidInstance: Liquid | null = null;
@@ -19,6 +19,10 @@ function getLiquidInstance(): Liquid {
     liquidInstance = new Liquid({
       strictFilters: true,
       strictVariables: false, // Allow undefined variables during validation
+    });
+    // register filters, for validation purposes only
+    liquidInstance.registerFilter('json_parse', (value: unknown): unknown => {
+      return value;
     });
   }
   return liquidInstance;

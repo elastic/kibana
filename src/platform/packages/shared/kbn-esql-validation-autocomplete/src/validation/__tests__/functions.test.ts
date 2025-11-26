@@ -140,7 +140,7 @@ describe('function validation', () => {
 
         it('accepts nulls by default', async () => {
           const { expectErrors } = await setup();
-          expectErrors('FROM a_index | EVAL TEST(NULL)', []);
+          await expectErrors('FROM a_index | EVAL TEST(NULL)', []);
         });
       });
 
@@ -295,11 +295,13 @@ describe('function validation', () => {
 
           const { expectErrors } = await setup();
 
-          expectErrors('FROM a_index | EVAL TEST(missingColumn)', [
+          await expectErrors('FROM a_index | EVAL TEST(missingColumn)', [
             'Unknown column "missingColumn"',
           ]);
 
-          expectErrors('FROM a_index | EVAL foo=missingColumn', ['Unknown column "missingColumn"']);
+          await expectErrors('FROM a_index | EVAL foo=missingColumn', [
+            'Unknown column "missingColumn"',
+          ]);
         });
 
         describe('inline casts', () => {
@@ -1071,6 +1073,16 @@ describe('function validation', () => {
           'FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(WrongField)',
           ['Unknown column "WrongField"']
         );
+      });
+
+      describe('operators in STATS WHERE context', () => {
+        it('should allow IS NOT NULL operator in STATS WHERE clause when validation is applied', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('FROM index | STATS COUNT() WHERE unknownField IS NOT NULL', [
+            'Unknown column "unknownField"',
+          ]);
+        });
       });
     });
   });

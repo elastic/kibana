@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { useKibana } from '../../common/lib/kibana';
 import { loadRuleTemplate } from '../lib/rule_template_api/get_rule_template';

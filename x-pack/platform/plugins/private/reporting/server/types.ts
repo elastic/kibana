@@ -11,7 +11,7 @@ import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { ReportSource, UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
@@ -59,6 +59,7 @@ export interface ReportingSetupDeps {
   actions: ActionsPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   features: FeaturesPluginSetup;
+  licensing: LicensingPluginSetup;
   screenshotMode: ScreenshotModePluginSetup;
   taskManager: TaskManagerSetupContract;
   security?: SecurityPluginSetup;
@@ -137,6 +138,8 @@ export interface ListScheduledReportApiJSON {
   space_id: string;
   title: RawScheduledReport['title'];
 }
+
+export type ScheduledReportApiJson = ListScheduledReportApiJSON;
 
 export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];

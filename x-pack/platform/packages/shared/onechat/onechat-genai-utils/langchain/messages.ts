@@ -12,6 +12,7 @@ import { isAIMessage } from '@langchain/core/messages';
 import type { RunToolReturn } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
 import { isArray } from 'lodash';
+import { cleanPrompt } from '../prompts';
 
 /**
  * Extract the text content from a langchain message or chunk.
@@ -90,12 +91,18 @@ export const generateFakeToolCallId = () => {
   return v4().substr(0, 6);
 };
 
-export const createUserMessage = (content: string): HumanMessage => {
-  return new HumanMessage({ content });
+export const createUserMessage = (
+  content: string,
+  { clean = false }: { clean?: boolean } = {}
+): HumanMessage => {
+  return new HumanMessage({ content: clean ? cleanPrompt(content) : content });
 };
 
-export const createAIMessage = (content: string): AIMessage => {
-  return new AIMessage({ content });
+export const createAIMessage = (
+  content: string,
+  { clean = false }: { clean?: boolean } = {}
+): AIMessage => {
+  return new AIMessage({ content: clean ? cleanPrompt(content) : content });
 };
 
 export const createToolResultMessage = ({
@@ -111,15 +118,17 @@ export const createToolResultMessage = ({
   });
 };
 
-export const createToolCallMessage = (toolCall: ToolCall, message?: string): AIMessage => {
+export const createToolCallMessage = (
+  toolCallOrCalls: ToolCall | ToolCall[],
+  message?: string
+): AIMessage => {
+  const toolCalls = isArray(toolCallOrCalls) ? toolCallOrCalls : [toolCallOrCalls];
   return new AIMessage({
     content: message ?? '',
-    tool_calls: [
-      {
-        id: toolCall.toolCallId,
-        name: toolCall.toolName,
-        args: toolCall.args,
-      },
-    ],
+    tool_calls: toolCalls.map((toolCall) => ({
+      id: toolCall.toolCallId,
+      name: toolCall.toolName,
+      args: toolCall.args,
+    })),
   });
 };

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiLink, EuiIcon, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 export function ContentWithInspectCta({
   url,
@@ -17,20 +17,20 @@ export function ContentWithInspectCta({
   url: string;
   textSize: 's' | 'xs';
   content: string;
-}): React.ReactElement {
+}) {
   return (
-    <EuiFlexGroup
-      alignItems="flexStart"
-      justifyContent="spaceBetween"
-      gutterSize="xs"
-      responsive={true}
-    >
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiText size={textSize}>{content}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiLink data-test-subj="sloHealthCalloutInspectLink" href={url}>
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="spaceBetween"
+            gutterSize="xs"
+            responsive={false}
+          >
             <EuiFlexItem grow={false}>
               <EuiIcon type="inspect" color="danger" />
             </EuiFlexItem>

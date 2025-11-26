@@ -72,7 +72,7 @@ import type {
 } from '../../common/types';
 import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { LegendSize } from '@kbn/chart-expressions-common';
 import type { LayerCellValueActions } from '../types';
 import { EuiThemeProvider } from '@elastic/eui';
 import { getFieldFormatsRegistry } from '@kbn/field-formats-plugin/public/mocks';

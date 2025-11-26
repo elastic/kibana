@@ -35,6 +35,22 @@ paths:
                     type: string
                 enable_reset_to_zero:
                   type: boolean
+                filters:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      entity_types:
+                        type: array
+                        items:
+                          type: string
+                          enum: [host, user, service]
+                      filter:
+                        type: string
+                        description: KQL filter string
+                    required:
+                      - entity_types
+                      - filter
       responses:
         "200":
           description: Successful response

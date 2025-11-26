@@ -23,18 +23,17 @@ import {
 
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { sendEmail } from './send_email';
+import type { EmailConnectorType, EmailConnectorTypeExecutorOptions } from '.';
 import type {
   ActionParamsType,
-  EmailConnectorType,
-  EmailConnectorTypeExecutorOptions,
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
-} from '.';
+} from '@kbn/connector-schemas/email';
 import { getConnectorType } from '.';
 import type { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { AdditionalEmailServices } from '../../../common';
-import { serviceParamValueToKbnSettingMap } from '../../../common/email/constants';
+import { serviceParamValueToKbnSettingMap } from '@kbn/connector-schemas/email';
 
 const sendEmailMock = sendEmail as jest.Mock;
 
@@ -43,6 +42,19 @@ const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: EmailConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+
+const getConfig = (overrides?: {}) => ({
+  service: 'gmail',
+  from: 'bob@example.com',
+  host: null,
+  port: null,
+  secure: false,
+  hasAuth: true,
+  tenantId: null,
+  clientId: null,
+  oauthTokenUrl: null,
+  ...overrides,
+});
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -152,14 +164,14 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [from]: expected value of type [string] but got [undefined]"`
+      `"error validating connector type config: Field \\"from\\": Required"`
     );
 
     // no service or host/port
     expect(() => {
       validateConfig(connectorType, baseConfig, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [host]/[port] is required"`
+      `"error validating connector type config: [host]/[port] is required"`
     );
 
     // host but no port
@@ -170,14 +182,14 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [port] is required"`
+      `"error validating connector type config: [port] is required"`
     );
 
     // port but no host
     expect(() => {
       validateConfig(connectorType, { ...baseConfig, port: 8080 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [host] is required"`
+      `"error validating connector type config: [host] is required"`
     );
 
     // invalid service
@@ -191,7 +203,7 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [service] value 'bad-nodemailer-service' is not valid"`
+      `"error validating connector type config: [service] value 'bad-nodemailer-service' is not valid"`
     );
 
     // invalid exchange_server no clientId and no tenantId
@@ -205,7 +217,7 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [clientId]/[tenantId] is required"`
+      `"error validating connector type config: [clientId]/[tenantId] is required"`
     );
 
     // invalid exchange_server no clientId
@@ -220,7 +232,7 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [clientId] is required"`
+      `"error validating connector type config: [clientId] is required"`
     );
 
     // invalid exchange_server no tenantId
@@ -235,7 +247,7 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [tenantId] is required"`
+      `"error validating connector type config: [tenantId] is required"`
     );
   });
 
@@ -289,13 +301,13 @@ describe('config validation', () => {
         configurationUtilities: configUtils,
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the allowedHosts configuration"`
+      `"error validating connector type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the allowedHosts configuration"`
     );
 
     expect(() => {
       validateConfig(connectorType, notAllowedHosts2, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [host] value 'smtp.gmail.com' is not in the allowedHosts configuration"`
+      `"error validating connector type config: [host] value 'smtp.gmail.com' is not in the allowedHosts configuration"`
     );
   });
 
@@ -313,7 +325,7 @@ describe('config validation', () => {
         { configurationUtilities: configUtils }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [from]: stub for actual message"`
+      `"error validating connector type config: [from]: stub for actual message"`
     );
     expect(configUtils.validateEmailAddresses).toHaveBeenNthCalledWith(1, ['badmail'], {
       isSender: true,
@@ -459,9 +471,11 @@ describe('params validation', () => {
     // empty object
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [subject]: expected value of type [string] but got [undefined]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: 2 errors:
+       [1]: Field \\"subject\\": Required;
+       [2]: Field \\"message\\": Required"
+    `);
   });
 
   test('params validation for emails calls validateEmailAddresses', async () => {
@@ -494,14 +508,12 @@ describe('params validation', () => {
     expect(() => {
       validateConfig(
         connectorType,
-        {
+        getConfig({
           service: AdditionalEmailServices.AWS_SES,
-          from: 'bob@example.com',
           host: 'wrong-host',
           port: 123,
           secure: true,
-          hasAuth: true,
-        },
+        }),
         { configurationUtilities }
       );
     }).not.toThrowError();
@@ -519,18 +531,16 @@ describe('params validation', () => {
     expect(() =>
       validateConfig(
         connectorType,
-        {
+        getConfig({
           service: 'other',
-          from: 'bob@example.com',
           host: 'wrong-host',
           port: 123,
           secure: true,
-          hasAuth: true,
-        },
+        }),
         { configurationUtilities: configUtils }
       )
     ).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [service]: \\"other\\" is not in the list of enabled email services: google-mail,elastic-cloud"`
+      `"error validating connector type config: [service]: \\"other\\" is not in the list of enabled email services: google-mail,elastic-cloud"`
     );
   });
 
@@ -541,14 +551,12 @@ describe('params validation', () => {
     expect(() =>
       validateConfig(
         connectorType,
-        {
+        getConfig({
           service: 'other',
-          from: 'bob@example.com',
           host: 'wrong-host',
           port: 123,
           secure: true,
-          hasAuth: true,
-        },
+        }),
         { configurationUtilities: configUtils }
       )
     ).not.toThrowError();
@@ -563,14 +571,12 @@ describe('params validation', () => {
     expect(() =>
       validateConfig(
         connectorType,
-        {
+        getConfig({
           service: 'elastic_cloud',
-          from: 'bob@example.com',
           host: 'dockerhost',
           port: 10025,
-          secure: false,
           hasAuth: false,
-        },
+        }),
         { configurationUtilities: configUtils }
       )
     ).not.toThrowError();
@@ -1405,87 +1411,171 @@ describe('execute()', () => {
       secure: true,
     });
   });
+
+  const LongString = ''.padEnd(1000, 'x');
+  const MaxEmailBodyLength = 100;
+
+  test('message parameter is trimmed to the maximum allowed length', async () => {
+    const mockedActionsConfig = actionsConfigMock.create();
+    mockedActionsConfig.getMaxEmailBodyLength = jest.fn().mockReturnValue(MaxEmailBodyLength);
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      params: {
+        ...executorOptions.params,
+        message: LongString,
+      },
+      configurationUtilities: mockedActionsConfig,
+      config,
+      secrets,
+    };
+
+    sendEmailMock.mockReset();
+    await connectorType.executor(customExecutorOptions);
+
+    const additionalTextWeAdded = 273; // determined manually looking at the output
+    expect(sendEmailMock.mock.calls[0][1].content.message.length).toBe(
+      MaxEmailBodyLength + additionalTextWeAdded
+    );
+
+    const expectedMessage = `connector "some-id" email parameter message length 1000 exceeds xpack.actions.email.maximum_body_length bytes (100) and has been trimmed`;
+    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+  });
+
+  test('message parameter is trimmed to 0 length if configured', async () => {
+    const mockedActionsConfig = actionsConfigMock.create();
+    mockedActionsConfig.getMaxEmailBodyLength = jest.fn().mockReturnValue(0);
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      params: {
+        ...executorOptions.params,
+        message: LongString,
+      },
+      configurationUtilities: mockedActionsConfig,
+      config,
+      secrets,
+    };
+
+    sendEmailMock.mockReset();
+    await connectorType.executor(customExecutorOptions);
+
+    const additionalTextWeAdded = 271; // determined manually looking at the output
+    expect(sendEmailMock.mock.calls[0][1].content.message.length).toBe(additionalTextWeAdded);
+
+    const expectedMessage = `connector "some-id" email parameter message length 1000 exceeds xpack.actions.email.maximum_body_length bytes (0) and has been trimmed`;
+    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+  });
+
+  test('messageHTML parameter is trimmed to the maximum allowed length', async () => {
+    const mockedActionsConfig = actionsConfigMock.create();
+    mockedActionsConfig.getMaxEmailBodyLength = jest.fn().mockReturnValue(MaxEmailBodyLength);
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.NOTIFICATION, source: null },
+      params: {
+        ...executorOptions.params,
+        message: 'hallo',
+        messageHTML: LongString,
+      },
+      configurationUtilities: mockedActionsConfig,
+      config,
+      secrets,
+    };
+
+    sendEmailMock.mockReset();
+    await connectorType.executor(customExecutorOptions);
+
+    const additionalTextWeAdded = 233; // determined manually looking at the output
+    expect(sendEmailMock.mock.calls[0][1].content.messageHTML.length).toBe(
+      MaxEmailBodyLength + additionalTextWeAdded
+    );
+
+    const expectedMessage = `connector "some-id" email parameter messageHTML length 1000 exceeds xpack.actions.email.maximum_body_length bytes (100) and has been trimmed`;
+    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+  });
+
+  test('messageHTML parameter is trimmed to 0 length if configured', async () => {
+    const mockedActionsConfig = actionsConfigMock.create();
+    mockedActionsConfig.getMaxEmailBodyLength = jest.fn().mockReturnValue(0);
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      source: { type: ActionExecutionSourceType.NOTIFICATION, source: null },
+      params: {
+        ...executorOptions.params,
+        message: 'hallo',
+        messageHTML: LongString,
+      },
+      configurationUtilities: mockedActionsConfig,
+      config,
+      secrets,
+    };
+
+    sendEmailMock.mockReset();
+    await connectorType.executor(customExecutorOptions);
+
+    const additionalTextWeAdded = 231; // determined manually looking at the output
+    expect(sendEmailMock.mock.calls[0][1].content.messageHTML.length).toBe(additionalTextWeAdded);
+
+    const expectedMessage = `connector "some-id" email parameter messageHTML length 1000 exceeds xpack.actions.email.maximum_body_length bytes (0) and has been trimmed`;
+    expect(mockedLogger.warn).toBeCalledWith(expectedMessage);
+  });
 });
 
 describe('validateConfig AWS SES specific checks', () => {
   const awsSesHost = 'email-smtp.us-east-1.amazonaws.com';
   const awsSesPort = 465;
-  const awsSesConfig = {
-    host: awsSesHost,
-    port: awsSesPort,
-    secure: true,
-  };
+
+  const getSesConfig = (overrides?: {}) => ({
+    ...getConfig({
+      service: AdditionalEmailServices.AWS_SES,
+      host: awsSesHost,
+      port: awsSesPort,
+      secure: true,
+    }),
+    ...overrides,
+  });
 
   let configUtilsWithSes: jest.Mocked<ActionsConfigurationUtilities>;
 
   beforeEach(() => {
     configUtilsWithSes = {
       ...actionsConfigMock.create(),
-      getAwsSesConfig: jest.fn(() => awsSesConfig),
+      getAwsSesConfig: jest.fn(() => getSesConfig()),
     } as unknown as jest.Mocked<ActionsConfigurationUtilities>;
   });
 
   test('throws if both host and port do not match AWS SES config', () => {
-    const config = {
-      service: AdditionalEmailServices.AWS_SES,
-      from: 'bob@example.com',
-      host: 'wrong-host',
-      port: 123,
-      secure: true,
-      hasAuth: true,
-    };
+    const config = getSesConfig({ host: 'wrong-host', port: 123 });
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [ses.host]/[ses.port] does not match with the configured AWS SES host/port combination"`
+      `"error validating connector type config: [ses.host]/[ses.port] does not match with the configured AWS SES host/port combination"`
     );
   });
 
   test('throws if host does not match AWS SES config', () => {
-    const config = {
-      service: AdditionalEmailServices.AWS_SES,
-      from: 'bob@example.com',
-      host: 'wrong-host',
-      port: awsSesPort,
-      secure: true,
-      hasAuth: true,
-    };
+    const config = getSesConfig({ host: 'wrong-host' });
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [ses.host] does not match with the configured AWS SES host"`
+      `"error validating connector type config: [ses.host] does not match with the configured AWS SES host"`
     );
   });
 
   test('throws if port does not match AWS SES config', () => {
-    const config = {
-      service: AdditionalEmailServices.AWS_SES,
-      from: 'bob@example.com',
-      host: awsSesHost,
-      port: 123,
-      secure: true,
-      hasAuth: true,
-    };
+    const config = getSesConfig({ port: 123 });
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [ses.port] does not match with the configured AWS SES port"`
+      `"error validating connector type config: [ses.port] does not match with the configured AWS SES port"`
     );
   });
 
   test('throws if secure is not true for AWS SES', () => {
-    const config = {
-      service: AdditionalEmailServices.AWS_SES,
-      from: 'bob@example.com',
-      host: awsSesHost,
-      port: awsSesPort,
-      secure: false,
-      hasAuth: true,
-    };
+    const config = getSesConfig({ secure: false });
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [ses.secure] must be true for AWS SES"`
+      `"error validating connector type config: [ses.secure] must be true for AWS SES"`
     );
   });
 });

@@ -110,4 +110,8 @@ export type {
   MlAnomalyResultType,
   MlPartitionFieldsType,
   MlRecordForInfluencer,
+  CriteriaField,
+  Influencer,
 } from './types';
+
+export { validateCustomFilterFields } from './alerting/custom_filter_validation';

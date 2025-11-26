@@ -23,20 +23,23 @@ import type { ReactExpressionRendererProps } from '@kbn/expressions-plugin/publi
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public';
-import { DOC_TYPE } from '../../../common/constants';
-import { createEmptyLensState } from '../helper';
 import type {
+  Datasource,
+  DatasourceMap,
+  Visualization,
+  VisualizationMap,
   ExpressionWrapperProps,
-  LensApi,
-  LensEmbeddableStartServices,
   LensInternalApi,
   LensRendererProps,
   LensRuntimeState,
   LensSerializedState,
-} from '../types';
+} from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
+import { DOC_TYPE } from '../../../common/constants';
+import { createEmptyLensState } from '../helper';
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
-import type { Datasource, DatasourceMap, Visualization, VisualizationMap } from '../../types';
 import { initializeInternalApi } from '../initializers/initialize_internal_api';
+import type { LensEmbeddableStartServices } from '../types';
 
 function getDefaultLensApiMock() {
   const LensApiMock: LensApi = {
@@ -76,6 +79,7 @@ function getDefaultLensApiMock() {
     checkForDuplicateTitle: jest.fn().mockResolvedValue(false),
     /** New embeddable api inherited methods */
     serializeState: jest.fn(),
+    getLegacySerializedState: jest.fn(),
     saveToLibrary: jest.fn(async () => 'saved-id'),
     onEdit: jest.fn(),
     getEditPanel: jest.fn(async () => <div data-test-subj="editLensFlyout" />),
@@ -94,7 +98,6 @@ function getDefaultLensApiMock() {
     updateAttributes: jest.fn(),
     updateSavedObjectId: jest.fn(),
     updateOverrides: jest.fn(),
-    updateAbortController: jest.fn(),
     getSerializedStateByReference: jest.fn(),
     getSerializedStateByValue: jest.fn(),
     getTriggerCompatibleActions: jest.fn(),

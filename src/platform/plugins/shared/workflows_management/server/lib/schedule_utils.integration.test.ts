@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  convertWorkflowScheduleToTaskSchedule,
-  convertRRuleToTaskSchedule,
-} from './schedule_utils';
 import { Frequency } from '@kbn/rrule';
+import {
+  convertRRuleToTaskSchedule,
+  convertWorkflowScheduleToTaskSchedule,
+} from './schedule_utils';
 
 /**
  * Integration test to verify RRule scheduling works end-to-end with TaskManager
@@ -321,7 +321,19 @@ describe('RRule Scheduling Integration', () => {
         taskType: 'workflow:scheduled',
         schedule,
         params: {
-          workflowId: 'test-workflow',
+          workflow: {
+            id: 'test-workflow',
+            name: 'Test Workflow',
+            enabled: true,
+            definition: {
+              triggers: [trigger],
+              steps: [],
+              name: 'Test Workflow',
+              enabled: false,
+              version: '1',
+            },
+            yaml: '',
+          },
           spaceId: 'default',
           triggerType: 'scheduled',
         },

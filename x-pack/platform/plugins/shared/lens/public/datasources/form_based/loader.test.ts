@@ -12,12 +12,13 @@ import {
   extractReferences,
   injectReferences,
 } from './loader';
-import type { FormBasedPersistedState, FormBasedPrivateState } from './types';
 import type {
+  FormBasedPersistedState,
+  FormBasedPrivateState,
   DateHistogramIndexPatternColumn,
   FormulaIndexPatternColumn,
   TermsIndexPatternColumn,
-} from './operations';
+} from '@kbn/lens-common';
 import { sampleIndexPatterns } from '../../data_views_service/mocks';
 
 const createMockStorage = (lastData?: Record<string, string>) => {

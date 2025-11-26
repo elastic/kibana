@@ -41,7 +41,7 @@ import { updateRuleApiKeyRoute } from './rule/apis/update_api_key/update_rule_ap
 import { bulkEditInternalRulesRoute } from './rule/apis/bulk_edit/bulk_edit_rules_route';
 import { snoozeRuleInternalRoute, snoozeRuleRoute } from './rule/apis/snooze';
 import { unsnoozeRuleRoute, unsnoozeRuleInternalRoute } from './rule/apis/unsnooze';
-import { runSoonRoute } from './run_soon';
+import { runSoonRoute } from './rule/apis/run_soon';
 import { bulkDeleteRulesRoute } from './rule/apis/bulk_delete/bulk_delete_rules_route';
 import { bulkEnableRulesRoute } from './rule/apis/bulk_enable/bulk_enable_rules_route';
 import { bulkDisableRulesRoute } from './rule/apis/bulk_disable/bulk_disable_rules_route';
@@ -52,24 +52,6 @@ import { getRuleTagsRoute } from './rule/apis/tags/get_rule_tags';
 import { getScheduleFrequencyRoute } from './rule/apis/get_schedule_frequency';
 import { bulkUntrackAlertsRoute } from './rule/apis/bulk_untrack';
 import { bulkUntrackAlertsByQueryRoute } from './rule/apis/bulk_untrack_by_query';
-
-import { createMaintenanceWindowRoute as createMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/create/create_maintenance_window_route';
-import { getMaintenanceWindowRoute as getMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/get/get_maintenance_window_route';
-import { updateMaintenanceWindowRoute as updateMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/update/update_maintenance_window_route';
-import { deleteMaintenanceWindowRoute as deleteMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/delete/delete_maintenance_window_route';
-import { findMaintenanceWindowsRoute as findMaintenanceWindowsRouteInternal } from './maintenance_window/apis/internal/find/find_maintenance_windows_route';
-import { archiveMaintenanceWindowRoute as archiveMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/archive/archive_maintenance_window_route';
-import { finishMaintenanceWindowRoute as finishMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/finish/finish_maintenance_window_route';
-import { getActiveMaintenanceWindowsRoute as getActiveMaintenanceWindowsRouteInternal } from './maintenance_window/apis/internal/get_active/get_active_maintenance_windows_route';
-import { bulkGetMaintenanceWindowRoute as bulkGetMaintenanceWindowRouteInternal } from './maintenance_window/apis/internal/bulk_get/bulk_get_maintenance_windows_route';
-
-import { getMaintenanceWindowRoute } from './maintenance_window/apis/external/get/get_maintenance_window_route';
-import { createMaintenanceWindowRoute } from './maintenance_window/apis/external/create/create_maintenance_window_route';
-import { deleteMaintenanceWindowRoute } from './maintenance_window/apis/external/delete/delete_maintenance_window_route';
-import { archiveMaintenanceWindowRoute } from './maintenance_window/apis/external/archive/archive_maintenance_window_route';
-import { unarchiveMaintenanceWindowRoute } from './maintenance_window/apis/external/unarchive/unarchive_maintenance_window_route';
-import { updateMaintenanceWindowRoute } from './maintenance_window/apis/external/update/update_maintenance_window_route';
-import { findMaintenanceWindowsRoute } from './maintenance_window/apis/external/find/find_maintenance_windows_route';
 
 import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggestion_rules';
 import { registerFieldsRoute } from './suggestions/fields_rules';
@@ -163,27 +145,6 @@ export function defineRoutes(opts: RouteOptions) {
   alertDeleteScheduleRoute(router, licenseState, core);
   alertDeleteLastRunRoute(router, licenseState);
 
-  if (alertingConfig.maintenanceWindow.enabled) {
-    // Maintenance Window - Internal APIs
-    createMaintenanceWindowRouteInternal(router, licenseState);
-    getMaintenanceWindowRouteInternal(router, licenseState);
-    updateMaintenanceWindowRouteInternal(router, licenseState);
-    deleteMaintenanceWindowRouteInternal(router, licenseState);
-    findMaintenanceWindowsRouteInternal(router, licenseState);
-    archiveMaintenanceWindowRouteInternal(router, licenseState);
-    finishMaintenanceWindowRouteInternal(router, licenseState);
-    getActiveMaintenanceWindowsRouteInternal(router, licenseState);
-    bulkGetMaintenanceWindowRouteInternal(router, licenseState);
-
-    // Maintenance Window - External APIs
-    getMaintenanceWindowRoute(router, licenseState);
-    createMaintenanceWindowRoute(router, licenseState);
-    deleteMaintenanceWindowRoute(router, licenseState);
-    archiveMaintenanceWindowRoute(router, licenseState);
-    unarchiveMaintenanceWindowRoute(router, licenseState);
-    updateMaintenanceWindowRoute(router, licenseState);
-    findMaintenanceWindowsRoute(router, licenseState);
-  }
   // backfill APIs
   scheduleBackfillRoute(router, licenseState);
   getBackfillRoute(router, licenseState);

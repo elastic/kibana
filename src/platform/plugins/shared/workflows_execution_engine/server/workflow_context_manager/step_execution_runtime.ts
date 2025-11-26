@@ -10,11 +10,12 @@
 import type { EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import type { RunStepResult } from '../step/node_implementation';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { WorkflowContextManager } from './workflow_context_manager';
+import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import type { RunStepResult } from '../step/node_implementation';
+import { parseDuration } from '../utils';
+import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
@@ -101,11 +102,13 @@ export class StepExecutionRuntime {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public getCurrentStepState(): Record<string, any> | undefined {
     return this.workflowExecutionState.getStepExecution(this.stepExecutionId)?.state;
   }
 
-  public async setCurrentStepState(state: Record<string, any> | undefined): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public setCurrentStepState(state: Record<string, any> | undefined): void {
     const stepId = this.node.stepId;
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
@@ -114,7 +117,7 @@ export class StepExecutionRuntime {
     });
   }
 
-  public async startStep(input?: Record<string, any>): Promise<void> {
+  public startStep(): void {
     const stepId = this.node.stepId;
     const stepStartedAt = new Date();
 
@@ -126,15 +129,23 @@ export class StepExecutionRuntime {
       topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
       status: ExecutionStatus.RUNNING,
       startedAt: stepStartedAt.toISOString(),
-      input,
     } as Partial<EsWorkflowStepExecution>;
 
     this.workflowExecutionState.upsertStep(stepExecution);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.logStepStart(stepId, stepExecution.id!);
-    await this.workflowExecutionState.flushStepChanges();
   }
 
-  public async finishStep(stepOutput?: Record<string, any>): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public setInput(input: Record<string, any>): void {
+    this.workflowExecutionState.upsertStep({
+      id: this.stepExecutionId,
+      input,
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public finishStep(stepOutput?: Record<string, any>): void {
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
@@ -153,7 +164,7 @@ export class StepExecutionRuntime {
     this.logStepComplete(stepExecutionUpdate);
   }
 
-  public async failStep(error: Error | string): Promise<void> {
+  public failStep(error: Error | string): void {
     // if there is a last step execution, fail it
     // if not, create a new step execution with fail
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
@@ -175,18 +186,60 @@ export class StepExecutionRuntime {
       error: String(error),
     });
     this.workflowExecutionState.upsertStep(stepExecutionUpdate);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.logStepFail(stepExecutionUpdate.id!, error);
   }
 
-  public async setWaitStep(): Promise<void> {
+  /**
+   * Attempts to enter a wait state for the step execution based on a relative delay duration.
+   * If the step is already in a wait state, it exits the wait state instead.
+   *
+   * @param delay - The delay duration as a string (e.g., "5s", "1m", "2h").
+   * @returns A boolean indicating whether the step has entered a wait state (true) or exited it (false).
+   */
+  public tryEnterDelay(delay: string): boolean {
+    return this.tryEnterWaitUntil(new Date(new Date().getTime() + parseDuration(delay)));
+  }
+
+  /**
+   * Attempts to enter a wait state for the step execution until a specific absolute date/time.
+   * If the step is already in a wait state, it exits the wait state instead.
+   *
+   * When entering a wait state, the step execution is marked with `ExecutionStatus.WAITING` and
+   * the `resumeAt` timestamp is stored in the step's state. The workflow can then resume execution
+   * at or after the specified time.
+   *
+   * @param resumeDate - The absolute date/time when execution should resume (Date object).
+   * @returns A boolean indicating whether the step has entered a wait state (true) or exited it (false).
+   */
+  public tryEnterWaitUntil(resumeDate: Date): boolean {
+    const resumeAt = this.stepExecution?.state?.resumeAt;
+
+    if (resumeAt) {
+      // already in wait state
+      const newState = { ...(this.stepExecution?.state || {}) };
+      delete newState.resumeAt;
+      this.workflowExecutionState.upsertStep({
+        id: this.stepExecutionId,
+        state: Object.keys(newState).length ? newState : undefined,
+      });
+      return false; // was already waiting, now exiting wait state
+    }
+
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
+      stepId: this.node.stepId,
+      stepType: this.node.stepType,
+      scopeStack: this.workflowExecution.scopeStack,
+      topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
+      startedAt: this.stepExecution?.startedAt || new Date().toISOString(),
       status: ExecutionStatus.WAITING,
+      state: {
+        ...(this.stepExecution?.state || {}),
+        resumeAt: resumeDate.toISOString(),
+      },
     });
-
-    this.workflowExecutionState.updateWorkflowExecution({
-      status: ExecutionStatus.WAITING,
-    });
+    return true; // successfully entered wait state
   }
 
   private logStepStart(stepId: string, stepExecutionId: string): void {

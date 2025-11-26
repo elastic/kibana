@@ -351,7 +351,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         loadMoreSubject,
         deselectOption: (key: string | undefined) => {
           const field = api.field$.getValue();
-          if (!key || !field) {
+          if (key == null || !field) {
             api.setBlockingError(
               new Error(OptionsListStrings.control.getInvalidSelectionMessage())
             );
@@ -379,7 +379,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         },
         makeSelection: (key: string | undefined, showOnlySelected: boolean) => {
           const field = api.field$.getValue();
-          if (!key || !field) {
+          if (key == null || !field) {
             api.setBlockingError(
               new Error(OptionsListStrings.control.getInvalidSelectionMessage())
             );

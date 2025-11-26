@@ -26,6 +26,7 @@ import {
   executeActionSubFeature,
   scanActionSubFeature,
   workflowInsightsSubFeature,
+  socManagementSubFeature,
 } from '../kibana_sub_features';
 import type { SubFeatureReplacements } from '../../types';
 import { addSubFeatureReplacements } from '../../utils';
@@ -71,6 +72,7 @@ const replacements: Partial<Record<SecuritySubFeatureId, SubFeatureReplacements>
   [SecuritySubFeatureId.fileOperations]: [{ feature: SECURITY_FEATURE_ID_V4 }],
   [SecuritySubFeatureId.executeAction]: [{ feature: SECURITY_FEATURE_ID_V4 }],
   [SecuritySubFeatureId.scanAction]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.socManagement]: [{ feature: SECURITY_FEATURE_ID_V4 }],
 };
 
 /**
@@ -91,6 +93,7 @@ export const getSecurityV2SubFeaturesMap = ({
   const securitySubFeaturesList: Array<[SecuritySubFeatureId, SubFeatureConfig]> = [
     [SecuritySubFeatureId.endpointList, endpointListSubFeature()],
     [SecuritySubFeatureId.workflowInsights, workflowInsightsSubFeature()],
+    [SecuritySubFeatureId.socManagement, socManagementSubFeature()],
     [
       SecuritySubFeatureId.globalArtifactManagement,
       globalArtifactManagementSubFeature(experimentalFeatures),
@@ -118,19 +121,12 @@ export const getSecurityV2SubFeaturesMap = ({
         subFeature = addSubFeatureReplacements(subFeature, featureReplacements);
       }
 
-      // If the feature is space-aware, we need to set false to the requireAllSpaces flag and remove the privilegesTooltip
-      if (experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-        subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
-      }
+      // Space awareness is now always enabled - set requireAllSpaces to false and remove privilegesTooltip
+      subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
 
       return [id, subFeature];
     })
   );
-
-  // Remove disabled experimental features
-  if (!experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-    securitySubFeaturesMap.delete(SecuritySubFeatureId.globalArtifactManagement);
-  }
 
   return Object.freeze(securitySubFeaturesMap);
 };

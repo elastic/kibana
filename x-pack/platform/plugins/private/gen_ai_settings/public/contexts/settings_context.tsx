@@ -17,7 +17,7 @@ import { isEmpty } from 'lodash';
 import type { IUiSettingsClient, UiSettingsType } from '@kbn/core/public';
 import { normalizeSettings } from '@kbn/management-settings-utilities';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
@@ -109,6 +109,24 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
     },
     refetchOnWindowFocus: true,
   });
+
+  // Subscribe to UI settings changes to update in real-time when values change
+  React.useEffect(() => {
+    if (!settings?.client) {
+      return;
+    }
+
+    const subscription = settings.client.getUpdate$().subscribe(({ key }) => {
+      // If the changed setting is one we're tracking, invalidate the query to refetch
+      if (settingsKeys.includes(key)) {
+        queryClient.invalidateQueries({ queryKey: ['settingsFields', settingsKeys] });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [settings?.client, settingsKeys, queryClient]);
 
   const saveSingleSettingMutation = useMutation({
     mutationFn: async ({

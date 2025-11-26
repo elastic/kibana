@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -12,16 +12,28 @@
     "@kbn/core",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
-    "@kbn/i18n",
-    "@kbn/usage-collection-plugin",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/i18n",
     "@kbn/console-plugin",
+    "@kbn/share-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/config-schema",
+    "@kbn/search-shared-ui",
+    "@kbn/search-code-examples",
+    "@kbn/try-in-console",
     "@kbn/search-navigation",
     "@kbn/cloud-plugin",
     "@kbn/serverless",
     "@kbn/analytics",
     "@kbn/config-schema",
+    "@kbn/search-shared-ui",
+    "@kbn/search-code-examples",
+    "@kbn/search-api-keys-components",
+    "@kbn/react-query",
+    "@kbn/doc-links",
+    "@kbn/cloud",
+    "@kbn/deeplinks-search",
   ],
   "exclude": [
     "target/**/*"
