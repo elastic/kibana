@@ -8,8 +8,10 @@
 import type { SiemReadinessRoutesDeps } from './types';
 import { postReadinessTaskRoute } from './routes/post_readiness_task';
 import { getLatestReadinessTaskRoute } from './routes/get_latest_readiness_tasks';
+import { getReadinessCategoriesRoute } from './routes/get_readiness_categories';
 
 export const registerSiemReadinessRoutes = ({ router, logger }: SiemReadinessRoutesDeps) => {
   postReadinessTaskRoute(router, logger);
   getLatestReadinessTaskRoute(router, logger);
+  getReadinessCategoriesRoute(router, logger);
 };

@@ -8,14 +8,16 @@
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { TaskSource, SiemReadinessTask } from './types';
+import type { TaskSource, SiemReadinessTask, CategoriesResponse } from './types';
 import {
   GET_LATEST_SIEM_READINESS_TASKS_API_PATH,
   POST_SIEM_READINESS_TASK_API_PATH,
+  GET_SIEM_READINESS_CATEGORIES_API_PATH,
 } from './constants';
 import { validateTask } from './validate_task';
 
 const GET_LATEST_TASKS_QUERY_KEY = ['latest-readiness-tasks'];
+const GET_READINESS_CATEGORIES_QUERY_KEY = ['readiness-categories'];
 
 export const useReadinessTasks = () => {
   const { http } = useKibana<CoreStart>().services;
@@ -31,6 +33,7 @@ export const useReadinessTasks = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: GET_LATEST_TASKS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: GET_READINESS_CATEGORIES_QUERY_KEY });
     },
   });
 
@@ -41,8 +44,16 @@ export const useReadinessTasks = () => {
     },
   });
 
+  const getReadinessCategories = useQuery({
+    queryKey: GET_READINESS_CATEGORIES_QUERY_KEY,
+    queryFn: () => {
+      return http.get<CategoriesResponse>(GET_SIEM_READINESS_CATEGORIES_API_PATH);
+    },
+  });
+
   return {
     logReadinessTask,
     getLatestTasks,
+    getReadinessCategories,
   };
 };
