@@ -67,5 +67,5 @@ export const CONNECT_BUTTON = i18n.translate('xpack.cloudConnect.wizard.connectB
 });
 
 export const API_KEY_PLACEHOLDER = i18n.translate('xpack.cloudConnect.wizard.apiKeyPlaceholder', {
-  defaultMessage: 'Paste your cloud connected API key',
+  defaultMessage: 'Paste your Cloud Connect API key',
 });
