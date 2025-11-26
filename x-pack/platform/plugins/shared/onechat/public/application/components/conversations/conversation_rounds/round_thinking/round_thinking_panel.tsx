@@ -72,7 +72,7 @@ export const RoundThinkingPanel = ({
     <>
       <EuiFlexGroup direction="column" responsive={false} css={containerStyles}>
         {/* Thinking Panel Title */}
-        <EuiFlexGroup direction="row" justifyContent="spaceBetween">
+        <EuiFlexGroup direction="row" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <p>{displayTitle}</p>
@@ -94,7 +94,7 @@ export const RoundThinkingPanel = ({
         {!isLoading && (
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
             <EuiHorizontalRule margin="none" />
-            <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
               <EuiFlexItem grow={false}>
                 <ThinkingTimeDisplay timeToFirstToken={rawRound.time_to_first_token} />
               </EuiFlexItem>

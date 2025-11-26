@@ -36,7 +36,7 @@ export const ToolCallDisplay: React.FC<ToolCallDisplayProps> = ({ step, icon }) 
   const toolLinkId = `tool-link-${toolId}`;
 
   return (
-    <ThinkingItemLayout icon={icon}>
+    <ThinkingItemLayout icon={icon} accordionContent={step.params}>
       <EuiText size="s">
         <p role="status" aria-label={labels.toolCall}>
           <FormattedMessage
