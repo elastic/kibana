@@ -13,7 +13,7 @@ import type {
   MonitoringEntitySource,
 } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
-import type { AfterKey } from './privileged_status_match';
+import type { AfterKey } from './types';
 import type { PrivMonBulkUser } from '../../../../types';
 import { makeIntegrationOpsBuilder } from '../../../bulk/upsert';
 import { errorsMsg, getErrorFromBulkResponse } from '../../utils';
@@ -77,14 +77,10 @@ export const buildPrivilegedSearchBody = (
 ): Omit<estypes.SearchRequest, 'index'> => {
   // this will get called multiple times with the same matchers during pagination
   const script = memoize(buildMatcherScript, (v) => hash(v))(matchers);
-  const query = timeGte
-    ? {
-        range: { '@timestamp': { gte: timeGte, lte: 'now' } },
-      }
-    : { match_all: {} };
+  const hasTimeField = Boolean(timeGte); // TODO: will change later, the bulk ops for index does include timestamp field for LATER ops.
   return {
     size: 0,
-    query,
+    query: buildQueryForTimeRange(timeGte),
     aggs: {
       privileged_user_status_since_last_run: {
         composite: {
@@ -96,10 +92,10 @@ export const buildPrivilegedSearchBody = (
           latest_doc_for_user: {
             top_hits: {
               size: 1,
-              sort: [{ '@timestamp': { order: 'desc' as estypes.SortOrder } }],
+              sort: buildSortForTimeField(hasTimeField),
               script_fields: { 'user.is_privileged': { script } },
               _source: {
-                includes: ['@timestamp', 'user.name', ...extractMatcherFields(matchers)],
+                includes: buildSourceIncludes(hasTimeField, matchers),
               },
             },
           },
@@ -139,4 +135,36 @@ export const applyPrivilegedUpdates = async ({
   } catch (error) {
     dataClient.log('error', `Error applying privileged updates: ${error.message}`);
   }
+};
+
+const buildQueryForTimeRange = (timeGte?: string): estypes.QueryDslQueryContainer =>
+  timeGte
+    ? {
+        range: { '@timestamp': { gte: timeGte, lte: 'now' } },
+      }
+    : { match_all: {} };
+
+const buildSortForTimeField = (hasTimeField: boolean): estypes.Sort =>
+  hasTimeField
+    ? [
+        {
+          '@timestamp': {
+            order: 'desc',
+            unmapped_type: 'date',
+          },
+        },
+      ]
+    : [
+        {
+          _doc: { order: 'desc' },
+        },
+      ];
+
+const buildSourceIncludes = (hasTimeField: boolean, matchers: Matcher[]): string[] => {
+  const fields = [
+    hasTimeField ? '@timestamp' : undefined,
+    'user.name',
+    ...extractMatcherFields(matchers),
+  ];
+  return fields.filter((field): field is string => Boolean(field));
 };
