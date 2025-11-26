@@ -11,10 +11,8 @@ import { useCallback, useState } from 'react';
 import type YAML from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
-import {
-  formatMonacoYamlMarker,
-  SUPPRESS_MARKER,
-} from '../../../widgets/workflow_yaml_editor/lib/format_monaco_yaml_marker';
+import { filterMonacoYamlMarkers } from './filter_monaco_yaml_markers';
+import { formatMonacoYamlMarker } from './format_monaco_yaml_marker';
 import type { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { getSeverityString } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { isYamlValidationMarkerOwner, type YamlValidationResult } from '../model/types';
@@ -50,8 +48,8 @@ export function useMonacoMarkersChangedInterceptor({
       owner: string,
       markers: monaco.editor.IMarkerData[]
     ) => {
-      return markers
-        .map((marker) => {
+      return filterMonacoYamlMarkers(markers, editorModel, yamlDocumentRef.current).map(
+        (marker) => {
           if (owner === 'yaml') {
             return formatMonacoYamlMarker(
               marker,
@@ -61,8 +59,8 @@ export function useMonacoMarkersChangedInterceptor({
             );
           }
           return marker;
-        })
-        .filter((marker): marker is monaco.editor.IMarkerData => marker !== SUPPRESS_MARKER); // Filter out suppressed markers (dynamic values that should bypass validation)
+        }
+      );
     },
     [workflowYamlSchema, yamlDocumentRef]
   );
@@ -71,7 +69,7 @@ export function useMonacoMarkersChangedInterceptor({
     (
       _editorModel: monaco.editor.ITextModel,
       owner: string,
-      markers: monaco.editor.IMarker[] | monaco.editor.IMarkerData[]
+      markers: monaco.editor.IMarkerData[]
     ) => {
       const errors: YamlValidationResult[] = [];
       for (const marker of markers) {

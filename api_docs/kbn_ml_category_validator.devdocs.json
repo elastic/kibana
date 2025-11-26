@@ -530,23 +530,6 @@
       },
       {
         "parentPluginId": "@kbn/ml-category-validator",
-        "id": "def-common.MEDIAN_LINE_LENGTH_LIMIT",
-        "type": "number",
-        "tags": [],
-        "label": "MEDIAN_LINE_LENGTH_LIMIT",
-        "description": [
-          "\nThe limit for the median line length of category examples."
-        ],
-        "signature": [
-          "400"
-        ],
-        "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-category-validator",
         "id": "def-common.NULL_COUNT_PERCENT_LIMIT",
         "type": "number",
         "tags": [],
@@ -628,19 +611,6 @@
             "label": "[VALIDATION_RESULT.TOKEN_COUNT]",
             "description": [
               "/**\n   * More than {tokenCount} tokens per example were found in over {percentage}% of the loaded examples.\n   */"
-            ],
-            "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-category-validator",
-            "id": "def-common.VALIDATION_CHECK_DESCRIPTION.VALIDATION_RESULT.MEDIAN_LINE_LENGTH",
-            "type": "string",
-            "tags": [],
-            "label": "[VALIDATION_RESULT.MEDIAN_LINE_LENGTH]",
-            "description": [
-              "/**\n   * The median line length of the loaded examples was less than {medianCharCount} characters.\n   */"
             ],
             "path": "x-pack/platform/packages/private/ml/category_validator/common/constants/categorization.ts",
             "deprecated": false,

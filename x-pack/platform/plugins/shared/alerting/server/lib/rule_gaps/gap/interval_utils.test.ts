@@ -18,7 +18,7 @@ import {
   clampIntervals,
   clipDateInterval,
 } from './interval_utils';
-import type { Interval, StringInterval } from '../types';
+import type { Interval, StringInterval } from '../../../application/gaps/types/intervals';
 
 describe('interval_utils', () => {
   describe('getOverlap', () => {

@@ -97,7 +97,7 @@ export const useDiscoverHistogram = (
       unifiedHistogramApi?.state$
     )?.subscribe((changes) => {
       const { lensRequestAdapter, ...stateChanges } = changes;
-      const appState = stateContainer.appState.getState();
+      const appState = stateContainer.appState.get();
       const oldState = {
         hideChart: appState.hideChart,
         interval: appState.interval,

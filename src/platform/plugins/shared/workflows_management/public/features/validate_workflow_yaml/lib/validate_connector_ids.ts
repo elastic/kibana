@@ -8,7 +8,6 @@
  */
 
 import type { ConnectorTypeInfo } from '@kbn/workflows';
-import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
 import { getConnectorInstancesForType } from '../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
 import type { ConnectorIdItem, YamlValidationResult } from '../model/types';
 
@@ -36,8 +35,12 @@ export function validateConnectorIds(
     ];
   }
 
-  for (const connectorIdItem of connectorIdItems) {
-    const connectorType = (getCachedDynamicConnectorTypes() ?? {})[connectorIdItem.connectorType];
+  const notReferenceConnectorIds = connectorIdItems.filter(
+    (item) => !item.key?.startsWith('${{') || !item.key.endsWith('}}')
+  );
+
+  for (const connectorIdItem of notReferenceConnectorIds) {
+    const connectorType = dynamicConnectorTypes[connectorIdItem.connectorType];
     const displayName = connectorType?.displayName ?? connectorIdItem.connectorType;
     const instances = getConnectorInstancesForType(
       connectorIdItem.connectorType,

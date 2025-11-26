@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -27,6 +27,8 @@
     "@kbn/core-execution-context-browser-mocks",
     "@kbn/shared-ux-router",
     "@kbn/core-chrome-layout-constants",
-    "@kbn/shared-ux-error-boundary"
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/core-base-browser-internal",
+    "@kbn/react-kibana-context-env"
   ]
 }

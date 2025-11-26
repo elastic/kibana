@@ -157,16 +157,19 @@ export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
   status: ExecutionStatus;
+  isTestRun: boolean;
   startedAt: string;
   finishedAt: string;
   workflowId?: string;
   workflowName?: string;
   workflowDefinition: WorkflowYaml;
+  /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
+  context?: Record<string, unknown>;
 }
 
 export type WorkflowExecutionListItemDto = Omit<
@@ -176,13 +179,9 @@ export type WorkflowExecutionListItemDto = Omit<
 
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
-  _pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    next?: string;
-    prev?: string;
-  };
+  page: number;
+  size: number;
+  total: number;
 }
 
 // TODO: convert to actual elastic document spec
@@ -225,8 +224,8 @@ export const UpdateWorkflowCommandSchema = z.object({
 
 export const SearchWorkflowCommandSchema = z.object({
   triggerType: z.string().optional(),
-  limit: z.number().default(100),
-  page: z.number().default(0),
+  size: z.number().default(100),
+  page: z.number().default(1),
   createdBy: z.array(z.string()).optional(),
   // bool or number transformed to boolean
   enabled: z.array(z.union([z.boolean(), z.number().transform((val) => val === 1)])).optional(),
@@ -300,13 +299,9 @@ export interface WorkflowListItemDto {
 }
 
 export interface WorkflowListDto {
-  _pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    next?: string;
-    prev?: string;
-  };
+  page: number;
+  size: number;
+  total: number;
   results: WorkflowListItemDto[];
 }
 export interface WorkflowExecutionEngineModel
@@ -371,8 +366,6 @@ export interface ConnectorTypeInfo {
   subActions: ConnectorSubAction[];
 }
 
-export type ConnectorTypeInfoMinimal = Pick<ConnectorTypeInfo, 'actionTypeId' | 'displayName'>;
-
 export interface ConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
@@ -431,7 +424,7 @@ export interface EnhancedInternalConnectorContract extends InternalConnectorCont
 export type ConnectorContractUnion = DynamicConnectorContract | EnhancedInternalConnectorContract;
 
 export interface WorkflowsSearchParams {
-  limit: number;
+  size: number;
   page: number;
   query?: string;
   createdBy?: string[];

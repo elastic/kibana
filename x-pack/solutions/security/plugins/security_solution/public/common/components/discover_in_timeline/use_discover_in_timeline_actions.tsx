@@ -142,7 +142,13 @@ export const useDiscoverInTimelineActions = (
         }
       } else {
         const defaultState = defaultDiscoverAppState();
-        discoverStateContainer.current?.appState.resetToState(defaultState);
+        discoverStateContainer.current?.internalState.dispatch(
+          discoverStateContainer.current.injectCurrentTab(
+            discoverStateContainer.current.internalStateActions.resetAppState
+          )({
+            appState: defaultState,
+          })
+        );
         await discoverStateContainer.current?.appState.replaceUrlState({});
         setDiscoverAppState(defaultState);
         const discoverState = discoverStateContainer.current;
