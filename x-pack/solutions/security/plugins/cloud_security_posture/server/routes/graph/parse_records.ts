@@ -231,7 +231,7 @@ const createGroupedActorAndTargetNodes = (
     hostIps: string[];
     label?: string;
   } =
-    targetIdsCount > 0
+    targetIdsCount > 0 && targetNodeId
       ? {
           id: targetNodeId,
           type: targetEntityType,
