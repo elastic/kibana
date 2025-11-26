@@ -95,6 +95,7 @@ export const processingGrokSuggestionRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<GrokSuggestionResponse> => {
     const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
     if (!isAvailableForTier) {
@@ -116,6 +117,7 @@ export const processingGrokSuggestionRoute = createServerRoute({
         scopedClusterClient,
         fieldsMetadataClient,
         signal: getRequestAbortSignal(request),
+        logger,
       })
     ).pipe(
       map((grokProcessor) => ({
@@ -149,6 +151,7 @@ export const processingDissectSuggestionRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<DissectSuggestionResponse> => {
     const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
     if (!isAvailableForTier) {
@@ -170,6 +173,7 @@ export const processingDissectSuggestionRoute = createServerRoute({
         scopedClusterClient,
         fieldsMetadataClient,
         signal: getRequestAbortSignal(request),
+        logger,
       })
     ).pipe(
       map((dissectProcessor) => ({

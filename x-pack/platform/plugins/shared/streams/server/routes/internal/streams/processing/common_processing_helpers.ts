@@ -71,7 +71,7 @@ export async function callInferenceWithPrompt<
   });
 
   if (!('toolCalls' in response) || response.toolCalls.length === 0) {
-    throw new Error('Expected at least one tool call in LLM response');
+    throw new Error('The LLM response did not contain any tool calls');
   }
 
   const toolCall = response.toolCalls[0] as {
