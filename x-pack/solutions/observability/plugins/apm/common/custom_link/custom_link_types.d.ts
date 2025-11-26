@@ -27,6 +27,7 @@ export interface CustomLinkES {
 export type FilterKey = (typeof FILTER_OPTIONS)[number];
 
 export interface Filter {
+  id?: string;
   key: FilterKey | '';
   value: string;
 }

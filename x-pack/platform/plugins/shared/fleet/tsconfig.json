@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -125,5 +125,6 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/react-query",
+    "@kbn/fs"
   ]
 }
