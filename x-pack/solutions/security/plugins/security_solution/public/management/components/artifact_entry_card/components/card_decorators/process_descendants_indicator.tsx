@@ -18,7 +18,7 @@ export interface CardDecoratorLabels {
   versionInfo: string;
 }
 
-interface ProcessDescendantsIndicatorProps extends ArtifactEntryCardDecoratorProps {
+export interface ProcessDescendantsIndicatorProps extends ArtifactEntryCardDecoratorProps {
   labels: CardDecoratorLabels;
   processDescendantsTag: string;
 }
