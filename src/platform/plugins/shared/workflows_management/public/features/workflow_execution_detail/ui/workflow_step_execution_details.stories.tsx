@@ -43,7 +43,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionDetails> = {
         url: 'https://api.abuseipdb.com/api/v2/check?ipAddress=',
         timeout: 30000,
       },
-      completedAt: '2025-09-01T17:34:54.965Z',
+      finishedAt: '2025-09-01T17:34:54.965Z',
       executionTimeMs: 423,
       error: 'HTTP Error: 422 Unprocessable Entity',
     },
