@@ -38,8 +38,9 @@ export const AddPrebuiltRulesTable = React.memo(() => {
       selectedRules,
       isUpgradingSecurityPackages,
       pagination,
+      sortingOptions,
     },
-    actions: { setPagination, selectRules },
+    actions: { setPagination, setSortingOptions, selectRules },
   } = useAddPrebuiltRulesTableContext();
 
   const rulesColumns = useAddPrebuiltRulesTableColumns();
@@ -52,9 +53,20 @@ export const AddPrebuiltRulesTable = React.memo(() => {
         page: index + 1,
         perPage: size,
       });
+
+      if (sort) {
+        setSortingOptions([
+          {
+            field: sort.field,
+            order: sort.direction,
+          },
+        ]);
+      }
     },
-    [setPagination]
+    [setPagination, setSortingOptions]
   );
+
+  console.log('dbg pagination.page - 1', pagination.page - 1);
 
   return (
     <>
@@ -105,6 +117,12 @@ export const AddPrebuiltRulesTable = React.memo(() => {
                   selectable: () => true,
                   onSelectionChange: selectRules,
                   initialSelected: selectedRules,
+                }}
+                sorting={{
+                  sort: {
+                    field: sortingOptions[0].field,
+                    direction: sortingOptions[0].order,
+                  },
                 }}
                 itemId="rule_id"
                 data-test-subj="add-prebuilt-rules-table"

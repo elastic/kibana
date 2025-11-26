@@ -13,16 +13,18 @@ import { FindRulesSortField } from '../../rule_management';
 import { ReviewPrebuiltRuleInstallationFilter } from '../common/review_prebuilt_rules_installation_filter';
 
 export type ReviewRuleInstallationSort = z.infer<typeof ReviewRuleInstallationSort>;
-export const ReviewRuleInstallationSort = z.object({
-  /**
-   * Field to sort by
-   */
-  field: FindRulesSortField.optional(), // TODO: Check if we want a narrower type?
-  /**
-   * Sort order
-   */
-  order: SortOrder.optional(),
-});
+export const ReviewRuleInstallationSort = z.array(
+  z.object({
+    /**
+     * Field to sort by
+     */
+    field: z.string().optional(), // TODO: Check if we want a narrower type?
+    /**
+     * Sort order
+     */
+    order: SortOrder.optional(),
+  })
+);
 
 export type ReviewRuleInstallationRequestBody = z.infer<typeof ReviewRuleInstallationRequestBody>;
 export const ReviewRuleInstallationRequestBody = z
