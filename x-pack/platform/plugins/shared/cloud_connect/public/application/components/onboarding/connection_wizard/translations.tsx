@@ -37,7 +37,7 @@ export const getStep2Description = (docLinksSecureSavedObject: string) => (
         <EuiLink href={docLinksSecureSavedObject} target="_blank">
           <FormattedMessage
             id="xpack.cloudConnect.wizard.step2.encryptionKeyLink"
-            defaultMessage="an encryption key"
+            defaultMessage="encryption key"
           />
         </EuiLink>
       ),
