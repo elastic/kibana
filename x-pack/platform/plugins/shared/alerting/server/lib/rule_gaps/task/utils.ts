@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { groupBy } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { RulesClientApi } from '../../../types';
@@ -141,14 +142,9 @@ export async function filterGapsWithOverlappingBackfills(
 
   const actionsClient = await rulesClientContext.getActionsClient();
   const backfillClient = rulesClientContext.backfillClient;
-  const gapsByRuleId = new Map<string, Gap[]>();
-  for (const gap of gaps) {
-    const gapsForRule = gapsByRuleId.get(gap.ruleId) ?? [];
-    gapsForRule.push(gap);
-    gapsByRuleId.set(gap.ruleId, gapsForRule);
-  }
+  const gapsByRuleId = groupBy(gaps, 'ruleId');
 
-  for (const [ruleId, ruleGaps] of gapsByRuleId.entries()) {
+  for (const [ruleId, ruleGaps] of Object.entries(gapsByRuleId)) {
     const overlappingBackfills = await backfillClient.findOverlappingBackfills({
       ruleId,
       ranges: ruleGaps.map((gap) => ({ start: gap.range.gte, end: gap.range.lte })),
