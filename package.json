@@ -1869,7 +1869,7 @@
     "license-checker": "^25.0.1",
     "lighthouse": "^12.8.2",
     "listr2": "^8.2.5",
-    "lmdb": "^3.4.3",
+    "lmdb": "^3.4.4",
     "marge": "^1.0.1",
     "micromatch": "^4.0.8",
     "mini-css-extract-plugin": "2.9.1",
