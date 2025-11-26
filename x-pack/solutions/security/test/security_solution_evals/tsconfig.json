@@ -20,7 +20,8 @@
     "@kbn/es-archiver",
     "@kbn/test",
     "@kbn/test-suites-xpack-platform",
-    "@kbn/core-http-common"
+    "@kbn/core-http-common",
+    "@kbn/ml-plugin"
   ]
 }
 
