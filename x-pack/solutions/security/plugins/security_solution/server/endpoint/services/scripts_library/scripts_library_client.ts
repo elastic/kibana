@@ -16,7 +16,10 @@ import type {
 import { v4 as uuidV4 } from 'uuid';
 import assert from 'assert';
 import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
-import { SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
+import {
+  ENDPOINT_DEFAULT_PAGE_SIZE,
+  SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE,
+} from '../../../../common/endpoint/constants';
 import type { HapiReadableStream } from '../../../types';
 import {
   SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME,
@@ -228,7 +231,12 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     throw new ScriptLibraryError('Not implemented', 501);
   }
 
-  public async list(options: ListScriptsRequestQuery = {}): Promise<EndpointScriptListApiResponse> {
+  public async list({
+    page = 1,
+    pageSize = ENDPOINT_DEFAULT_PAGE_SIZE,
+    sortField = 'name',
+    sortDirection = 'asc',
+  }: ListScriptsRequestQuery = {}): Promise<EndpointScriptListApiResponse> {
     throw new ScriptLibraryError('Not implemented', 501);
   }
 
