@@ -53,6 +53,7 @@ export function AssistantProvider({
     productDocBase,
     elasticAssistantSharedState,
     settings,
+    aiAssistantManagementSelection,
   } = useKibana().services;
 
   const inferenceEnabled = useInferenceEnabled();
@@ -121,6 +122,7 @@ export function AssistantProvider({
     openChatTrigger$,
     settings,
     completeOpenChat,
+    chatExperience$: aiAssistantManagementSelection.chatExperience$,
   });
 
   useEffect(() => {
