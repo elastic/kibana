@@ -34,4 +34,20 @@ test.describe('runA11yScan', { tag: ['@svlSecurity', '@ess'] }, () => {
     // Basic page should have no serious/critical violations
     expect(violations).toHaveLength(0);
   });
+
+  test('returns violations related to the CSS "include" selector only', async ({ page }) => {
+    await page.setContent(`
+      <main>
+        <h1>AXE Core check for basic accessible markup</h1>
+        <form>
+          <label>Email</label>
+          <input id="email" type="email" />
+        </form>
+      </main>
+    `);
+
+    const { violations } = await page.checkA11y({ include: ['form'] });
+
+    expect(violations).toHaveLength(1);
+  });
 });
