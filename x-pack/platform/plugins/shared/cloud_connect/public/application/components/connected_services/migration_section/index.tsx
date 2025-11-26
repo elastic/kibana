@@ -72,7 +72,7 @@ export const MigrationSection: React.FC = () => {
             <h2>
               <FormattedMessage
                 id="xpack.cloudConnect.connectedServices.migration.title"
-                defaultMessage="Move your self-managed workloads to the Elastic Cloud"
+                defaultMessage="Move your self-managed workloads to Elastic Cloud"
               />
             </h2>
           </EuiTitle>
