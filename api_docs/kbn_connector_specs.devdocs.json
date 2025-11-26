@@ -265,40 +265,6 @@
         "children": [
           {
             "parentPluginId": "@kbn/connector-specs",
-            "id": "def-common.ActionContext.auth",
-            "type": "Object",
-            "tags": [],
-            "label": "auth",
-            "description": [],
-            "signature": [
-              "{ [key: string]: unknown; method: string; headers: Record<string, string>; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/connector-specs",
-            "id": "def-common.ActionContext.log",
-            "type": "Object",
-            "tags": [],
-            "label": "log",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "common",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-common.Logger",
-                "text": "Logger"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/connector-specs",
             "id": "def-common.ActionContext.client",
             "type": "Function",
             "tags": [],
@@ -334,6 +300,40 @@
             "description": [],
             "signature": [
               "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionContext.log",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionContext.secrets",
+            "type": "Object",
+            "tags": [],
+            "label": "secrets",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "deprecated": false,
@@ -565,6 +565,20 @@
             "description": [],
             "signature": [
               "{ [x: string]: unknown; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeDef.overrides",
+            "type": "Object",
+            "tags": [],
+            "label": "overrides",
+            "description": [],
+            "signature": [
+              "{ meta?: Record<string, Record<string, unknown>> | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "deprecated": false,
