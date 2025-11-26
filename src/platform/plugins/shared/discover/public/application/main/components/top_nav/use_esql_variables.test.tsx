@@ -28,7 +28,6 @@ class MockControlGroupRendererApi {
   constructor() {
     this.inputSubject = new BehaviorSubject<Record<string, ControlPanelsState> | null>(null);
     this.addNewPanel = jest.fn();
-    this.esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
   }
 
   getInput$() {
@@ -38,17 +37,6 @@ class MockControlGroupRendererApi {
   // Method to simulate new input coming from the API
   simulateInput(input: Record<string, ControlPanelsState>) {
     this.inputSubject.next(input);
-    this.esqlVariables$.next(
-      (
-        Object.values(
-          input.initialChildControlState
-        ) as unknown as Array<OptionsListESQLControlState>
-      ).map(({ variableName, selectedOptions, variableType }) => ({
-        key: variableName,
-        value: selectedOptions,
-        type: variableType as ESQLVariableType,
-      }))
-    );
   }
 }
 
@@ -153,8 +141,8 @@ describe('useESQLVariables', () => {
 
       // Assert dispatches happened
       await waitFor(() => {
-        const dispatchCalls = dispatchSpy.mock.calls;
         expect(dispatchSpy).toHaveBeenCalledTimes(2);
+        const dispatchCalls = dispatchSpy.mock.calls;
         dispatchCalls.forEach((call) => {
           const action = call[0] as { type: string; payload?: unknown };
           if (action.type === 'internalState/setControlGroupState') {
