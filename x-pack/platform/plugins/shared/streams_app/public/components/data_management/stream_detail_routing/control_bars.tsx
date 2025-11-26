@@ -193,11 +193,13 @@ export const EditSuggestedRuleControls = ({
   onAccept,
   nameError,
   conditionError,
+  isStreamNameValid,
 }: {
   onSave?: () => void;
   onAccept: () => void;
   nameError?: string;
   conditionError?: string;
+  isStreamNameValid: boolean;
 }) => {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { cancelChanges } = useStreamRoutingEvents();
@@ -224,7 +226,7 @@ export const EditSuggestedRuleControls = ({
         <PrivilegesTooltip hasPrivileges={hasPrivileges}>
           <UpdateAndAcceptButton
             isLoading={false}
-            isDisabled={isUpdateDisabled}
+            isDisabled={isUpdateDisabled || !isStreamNameValid}
             onClick={handleAccept}
           />
         </PrivilegesTooltip>

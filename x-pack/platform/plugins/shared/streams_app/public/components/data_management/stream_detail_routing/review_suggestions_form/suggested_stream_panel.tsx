@@ -30,7 +30,7 @@ import {
 } from '../state_management/stream_routing_state_machine/use_stream_routing';
 import { SelectablePanel } from './selectable_panel';
 import { ConditionPanel, VerticalRule } from '../../shared';
-import { StreamNameFormRow } from '../stream_name_form_row';
+import { StreamNameFormRow, useChildStreamInput } from '../stream_name_form_row';
 import { RoutingConditionEditor } from '../routing_condition_editor';
 import { processCondition } from '../utils';
 import { EditSuggestedRuleControls } from '../control_bars';
@@ -62,6 +62,7 @@ export function SuggestedStreamPanel({
     routingSnapshot.context.editingSuggestionIndex === index;
 
   const currentSuggestion = isEditing && editedSuggestion ? editedSuggestion : partition;
+  const { isStreamNameValid } = useChildStreamInput(currentSuggestion.name);
   const matchRate = useMatchRate(definition, currentSuggestion);
 
   const selectedPreview = useStreamSamplesSelector((snapshot) => snapshot.context.selectedPreview);
@@ -135,6 +136,7 @@ export function SuggestedStreamPanel({
             onAccept={() => reviewSuggestedRule(currentSuggestion.name || partition.name)}
             nameError={nameError}
             conditionError={conditionError}
+            isStreamNameValid={isStreamNameValid}
           />
         </EuiFlexGroup>
       </SelectablePanel>
