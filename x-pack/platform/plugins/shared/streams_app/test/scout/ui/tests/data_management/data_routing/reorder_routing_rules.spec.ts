@@ -15,10 +15,6 @@ test.describe(
   'Stream data routing - reordering routing rules',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    test.beforeAll(async ({ apiServices }) => {
-      await apiServices.streams.enable();
-    });
-
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing rules
@@ -38,7 +34,6 @@ test.describe(
     test.afterAll(async ({ apiServices }) => {
       // Clear existing rules
       await apiServices.streams.clearStreamChildren('logs');
-      await apiServices.streams.disable();
     });
 
     test('should reorder routing rules via drag and drop', async ({ pageObjects }) => {

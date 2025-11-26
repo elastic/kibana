@@ -12,10 +12,6 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
 test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices }) => {
-    await apiServices.streams.enable();
-  });
-
   test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     // Clear existing rules
@@ -32,11 +28,11 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
   test.afterAll(async ({ apiServices }) => {
     // Clear existing rules
     await apiServices.streams.clearStreamChildren('logs');
-    await apiServices.streams.disable();
   });
 
   test('should edit an existing routing rule', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+    const rountingRuleName = 'logs.edit-test';
+    await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
 
     // Update condition
     await pageObjects.streams.fillConditionEditor({ value: 'updated-service' });
@@ -56,7 +52,8 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
   });
 
   test('should cancel editing routing rule', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+    const rountingRuleName = 'logs.edit-test';
+    await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
 
     // Update and cancel changes
     await pageObjects.streams.fillConditionEditor({ value: 'updated-service' });

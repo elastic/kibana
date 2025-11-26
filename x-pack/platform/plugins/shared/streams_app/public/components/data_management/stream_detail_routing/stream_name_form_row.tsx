@@ -117,7 +117,7 @@ export function StreamNameFormRow({
                 })}
               </span>
             </EuiScreenReaderOnly>
-            <EuiTextTruncate text={prefix} truncation="start" />
+            <EuiTextTruncate text={prefix} truncation="start" data-test-subj={`streamNamePrefix`} />
           </EuiFormLabel>,
         ]}
       />

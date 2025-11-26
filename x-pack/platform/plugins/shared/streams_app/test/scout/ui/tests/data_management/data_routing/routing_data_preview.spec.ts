@@ -13,8 +13,7 @@ import { test } from '../../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 
 test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.enable();
+  test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     // Generate logs data only
     await logsSynthtraceEsClient.clean();
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
@@ -27,10 +26,9 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.switchToColumnsView();
   });
 
-  test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+  test.afterAll(async ({ logsSynthtraceEsClient }) => {
     // Clear synthtrace data
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
   });
 
   test('should show preview during rule creation', async ({ pageObjects }) => {
