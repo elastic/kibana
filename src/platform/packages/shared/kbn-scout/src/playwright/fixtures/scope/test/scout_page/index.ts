@@ -116,6 +116,13 @@ export type ScoutPage = Page & {
      * @returns A Promise that resolves once the text has been cleared.
      */
     clearInput: (selector: string) => Promise<void>;
+    /**
+     * Drags an element with the source selector to the element with the target selector.
+     * @param sourceSelector The selector for the source element to drag (supports 'data-test-subj' attributes).
+     * @param targetSelector The selector for the target element to drop onto (supports 'data-test-subj' attributes).
+     * @returns A Promise that resolves once the drag operation is complete.
+     */
+    dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>;
   };
 };
 
