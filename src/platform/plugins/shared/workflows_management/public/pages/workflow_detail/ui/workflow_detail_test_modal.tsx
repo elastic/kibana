@@ -11,6 +11,7 @@ import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import {
+  selectHasChanges,
   selectIsTestModalOpen,
   selectWorkflowDefinition,
   selectWorkflowId,
@@ -34,11 +35,13 @@ export const WorkflowDetailTestModal = () => {
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
   const definition = useSelector(selectWorkflowDefinition);
   const workflowId = useSelector(selectWorkflowId);
+  const workflow = useSelector(selectWorkflowDefinition);
+  const hasChanges = useSelector(selectHasChanges);
 
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
   const runWorkflow = useAsyncThunk(runWorkflowThunk);
 
-  const isTestRun = !workflowId;
+  const isTestRun = !workflowId || !workflow?.enabled || hasChanges;
 
   const handleRunWorkflow = useCallback(
     async (inputs: Record<string, unknown>) => {
