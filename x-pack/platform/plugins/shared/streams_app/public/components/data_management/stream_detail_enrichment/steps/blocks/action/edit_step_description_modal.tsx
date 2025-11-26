@@ -63,7 +63,7 @@ export const EditStepDescriptionModal: React.FC<EditStepDescriptionModalProps> =
     onSave(value);
   };
 
-  const isEditMode = Boolean(step.description && step.description.trim().length > 0);
+  const isEditMode = Boolean(step.description?.trim());
   const title = isEditMode ? EDIT_DESCRIPTION_MENU_LABEL : ADD_DESCRIPTION_MENU_LABEL;
   const helpText = DESCRIPTION_HELP_TEXT;
 

@@ -38,12 +38,6 @@ export const stepMachine = setup({
           parentId: context.step.parentId,
         };
 
-        if (isActionBlock(context.step) && isActionBlock(nextStep)) {
-          if (context.step.description && !nextStep.description) {
-            nextStep.description = context.step.description;
-          }
-        }
-
         return {
           step: nextStep,
           resources: params.resources,

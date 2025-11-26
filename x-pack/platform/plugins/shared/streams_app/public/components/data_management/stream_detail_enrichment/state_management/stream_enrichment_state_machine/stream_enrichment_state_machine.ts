@@ -505,6 +505,12 @@ export const streamEnrichmentMachine = setup({
                 idle: {
                   entry: [{ type: 'sendStepsEventToSimulator' }],
                   on: {
+                    'step.change': {
+                      actions: [
+                        { type: 'reassignSteps' },
+                        { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
+                      ],
+                    },
                     'step.edit': {
                       guard: 'hasSimulatePrivileges',
                       target: 'editing',
