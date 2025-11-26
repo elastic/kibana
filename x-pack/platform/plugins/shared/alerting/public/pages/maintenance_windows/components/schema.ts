@@ -10,8 +10,8 @@ import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { RecurringSchedule } from '@kbn/response-ops-recurring-schedule-form/types';
 import { getRecurringScheduleFormSchema } from '@kbn/response-ops-recurring-schedule-form/schemas/recurring_schedule_form_schema';
+import type { ScopedQueryAttributes } from '@kbn/maintenance-windows-plugin/common';
 import * as i18n from '../translations';
-import type { ScopedQueryAttributes } from '../../../../common';
 
 const { emptyField } = fieldValidators;
 
