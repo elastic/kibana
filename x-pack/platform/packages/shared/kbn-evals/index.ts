@@ -5,23 +5,30 @@
  * 2.0.
  */
 export { evaluate } from './src/evaluate';
-export type { DefaultEvaluators, Evaluator, EvaluatorParams, EvaluationResult } from './src/types';
+export type {
+  DefaultEvaluators,
+  Evaluator,
+  EvaluatorParams,
+  EvaluationResult,
+  ReportDisplayOptions,
+} from './src/types';
 export type { EvaluationCriterion } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
 export type { KibanaPhoenixClient } from './src/kibana_phoenix_client/client';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
-export type { EvaluationDataset, EvaluationWorkerFixtures } from './src/types';
-
+export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
+export { withEvaluatorSpan } from './src/utils/tracing';
 export {
-  createDefaultTerminalReporter,
-  createEvaluationReportTable,
-  formatReportData,
   type EvaluationReporter,
-  type EvaluationReport,
-  type EvaluationTableOptions,
-} from './src/utils/report_model_score';
-
+  createDefaultTerminalReporter,
+} from './src/utils/reporting/evaluation_reporter';
+export type {
+  EvaluatorDisplayOptions,
+  EvaluatorDisplayGroup,
+} from './src/utils/reporting/report_table';
+export { formatReportData } from './src/utils/report_model_score';
+export { createTable } from './src/utils/reporting/report_table';
 export {
   EvaluationScoreRepository,
   type EvaluationScoreDocument,
@@ -36,3 +43,4 @@ export type {
 } from './src/utils/evaluation_stats';
 
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
+export { createSpanLatencyEvaluator } from './src/evaluators/trace_based';
