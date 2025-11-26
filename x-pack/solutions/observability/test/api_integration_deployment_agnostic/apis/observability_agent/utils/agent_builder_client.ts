@@ -10,6 +10,7 @@ import type {
   ChatResponse,
 } from '@kbn/onechat-plugin/common/http_api/chat';
 import type { Conversation } from '@kbn/onechat-common';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import type { SupertestWithRoleScopeType } from '../../../services';
 
 export function createAgentBuilderApiClient(supertest: SupertestWithRoleScopeType) {
@@ -28,7 +29,21 @@ export function createAgentBuilderApiClient(supertest: SupertestWithRoleScopeTyp
         .set('kbn-xsrf', 'true');
       return res.body;
     },
+
+    async executeTool<ResultType extends Omit<ToolResult, 'tool_result_id'>>({
+      id,
+      params,
+    }: {
+      id: string;
+      params: Record<string, any>;
+    }): Promise<ResultType[]> {
+      const res = await supertest
+        .post('/api/agent_builder/tools/_execute')
+        .set('kbn-xsrf', 'true')
+        .send({ tool_id: id, tool_params: params });
+      return res.body.results;
+    },
   };
 }
 
-export type ObservabilityAgentBuilderApiClient = ReturnType<typeof createAgentBuilderApiClient>;
+export type AgentBuilderApiClient = ReturnType<typeof createAgentBuilderApiClient>;

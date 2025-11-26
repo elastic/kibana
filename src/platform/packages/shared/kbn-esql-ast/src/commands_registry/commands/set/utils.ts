@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
 import type { ISuggestionItem } from '../../types';
 
 const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
@@ -36,20 +35,6 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
   ];
 };
 
-// time_zone setting completions
-const getTimeZoneCompletionItems = (): ISuggestionItem[] => {
-  return TIMEZONE_OPTIONS.map((tz) => ({
-    label: tz,
-    text: tz,
-    kind: 'Value',
-    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.set.timeZoneDoc', {
-      defaultMessage: 'Set the time zone for the query',
-    }),
-    sortText: '1',
-  }));
-};
-
 export const COMPLETIONS_BY_SETTING_NAME: Record<string, ISuggestionItem[]> = {
   project_routing: getProjectRoutingCommonCompletionItems(),
-  time_zone: getTimeZoneCompletionItems(),
 };

@@ -1637,6 +1637,17 @@ module.exports = {
         'playwright/valid-title': 'error',
         // Scout has a its own runtime validator for test tags
         'playwright/valid-test-tags': 'off',
+        // Check all function arguments to catch unused destructured params
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          {
+            vars: 'all',
+            args: 'all',
+            ignoreRestSiblings: true, // Ignore unused vars when destructuring with rest operator
+            varsIgnorePattern: '^_', // Allow _ prefix for intentionally unused variables
+            argsIgnorePattern: '^_', // Allow _ prefix for intentionally unused args
+          },
+        ],
       },
     },
     {
@@ -1835,6 +1846,12 @@ module.exports = {
         '@typescript-eslint/no-non-null-assertion': 'error',
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-unused-vars': 'error',
+      },
+    },
+    {
+      files: ['src/platform/packages/shared/kbn-connector-specs/src/icons/**/*.{ts,tsx}'],
+      rules: {
+        'import/no-default-export': 'off',
       },
     },
 
@@ -2686,6 +2703,40 @@ module.exports = {
       ],
       rules: {
         '@kbn/eslint/deployment_agnostic_test_context': 'error',
+      },
+    },
+
+    {
+      // Restrict fs imports in production code (exclude test files, scripts, etc.)
+      files: [
+        'src/platform/plugins/shared/**/*.ts',
+        'x-pack/solutions/**/*.ts',
+        'x-pack/plugins/**/*.ts',
+      ],
+      excludedFiles: [
+        '**/*.{test,spec}.ts',
+        '**/*.test.ts',
+        '**/test/**',
+        '**/tests/**',
+        '**/__tests__/**',
+        '**/scripts/**',
+        '**/e2e/**',
+        '**/cypress/**',
+        '**/ftr_e2e/**',
+        '**/.storybook/**',
+        '**/json_schemas/**',
+        // Can use fs for telemetry collection
+        'src/platform/plugins/shared/telemetry/**',
+      ],
+      rules: {
+        '@kbn/eslint/require_kbn_fs': [
+          'warn',
+          {
+            restrictedMethods: ['writeFile', 'writeFileSync', 'createWriteStream'],
+            disallowedMessage:
+              'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
+          },
+        ],
       },
     },
   ],

@@ -1252,7 +1252,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> & Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> & Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -1274,7 +1274,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+          " | undefined>; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",

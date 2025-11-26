@@ -6,17 +6,19 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import type { AttachmentTypeRegistry } from '../attachment_type_registry';
 import { createTextAttachmentType } from './text';
+import { createEsqlAttachmentType } from './esql';
 import { createScreenContextAttachmentType } from './screen_context';
+import type { AttachmentServiceSetup } from '../types';
 
-export const registerAttachmentTypes = ({ registry }: { registry: AttachmentTypeRegistry }) => {
-  const attachmentTypes: AttachmentTypeDefinition<any>[] = [
+export const registerAttachmentTypes = ({ registry }: { registry: AttachmentServiceSetup }) => {
+  const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
     createTextAttachmentType(),
     createScreenContextAttachmentType(),
+    createEsqlAttachmentType(),
   ];
 
   attachmentTypes.forEach((attachmentType) => {
-    registry.register(attachmentType);
+    registry.registerType(attachmentType);
   });
 };
