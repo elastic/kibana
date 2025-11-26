@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createFlagError } from '@kbn/dev-cli-errors';
+import type { FlagOptions, FlagsReader } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import path from 'path';
-import type { FlagOptions, FlagsReader } from '@kbn/dev-cli-runner';
-import { createFlagError } from '@kbn/dev-cli-errors';
+import { validateAndProcessTestFiles } from '../../common/utils';
 import { SERVER_FLAG_OPTIONS, parseServerFlags } from '../../servers';
 import type { CliSupportedServerModes } from '../../types';
 import { validatePlaywrightConfig } from './config_validator';
-import { validateAndProcessTestFiles } from '../../common/utils';
 
 export interface RunTestsOptions {
   configPath: string;
@@ -24,7 +24,6 @@ export interface RunTestsOptions {
   testFiles?: string[];
   esFrom: 'serverless' | 'source' | 'snapshot' | undefined;
   installDir: string | undefined;
-  serversConfig: string | undefined;
   logsDir: string | undefined;
 }
 

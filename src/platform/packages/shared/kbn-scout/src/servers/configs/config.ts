@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Schema } from 'joi';
-import * as Url from 'url';
-import Path from 'path';
-import { cloneDeepWith, get, has, toPath } from 'lodash';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { Schema } from 'joi';
+import { cloneDeepWith, get, has, toPath } from 'lodash';
+import Path from 'path';
+import * as Url from 'url';
+import type { ScoutServerConfig, ScoutTestConfig } from '../../types';
 import { schema } from './schema';
-import type { ScoutServerConfig, ScoutTestConfig } from '../types';
 import { formatCurrentDate, getProjectType } from './utils/utils';
 
 const $values = Symbol('values');

@@ -8,7 +8,7 @@
  */
 
 import { defaultConfig } from './serverless.base.config';
-import type { ScoutServerConfig } from '../../../types';
+import type { ScoutServerConfig } from '../../../../types';
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
@@ -16,16 +16,21 @@ export const servers: ScoutServerConfig = {
     ...defaultConfig.esTestCluster,
     serverArgs: [
       ...defaultConfig.esTestCluster.serverArgs,
-      'xpack.security.authc.api_key.cache.max_keys=70000',
+      'xpack.apm_data.enabled=true',
+      'serverless.project_type=observability',
+      'serverless.observability.tier=logs_essentials',
     ],
   },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      '--serverless=security',
+      '--serverless=oblt',
       '--coreApp.allowDynamicConfigOverrides=true',
-      `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
+      '--xpack.uptime.service.manifestUrl=mockDevUrl',
+      `--pricing.tiers.products=${JSON.stringify([
+        { name: 'observability', tier: 'logs_essentials' },
+      ])}`,
     ],
   },
 };
