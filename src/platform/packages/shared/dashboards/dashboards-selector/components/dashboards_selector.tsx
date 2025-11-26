@@ -87,7 +87,6 @@ export function DashboardsSelector({
     }
 
     try {
-      // Fetch dashboards by their IDs directly instead of fetching all dashboards
       const dashboardIds = dashboardsFormData.map((dashboard) => dashboard.id);
       const dashboards = await getDashboardsById(uiActions, dashboardIds);
 
