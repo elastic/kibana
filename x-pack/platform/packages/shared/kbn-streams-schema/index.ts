@@ -11,6 +11,7 @@ export { Ingest } from './src/models/ingest';
 export { WiredIngest } from './src/models/ingest/wired';
 export { ClassicIngest } from './src/models/ingest/classic';
 export { Group } from './src/models/group';
+export { Query } from './src/models/query';
 
 export {
   type RoutingDefinition,

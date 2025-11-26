@@ -9,13 +9,17 @@ import { Streams } from '@kbn/streams-schema';
 
 export function getStreamTypeFromDefinition(
   definition: Streams.all.Definition
-): 'wired' | 'classic' | 'unknown' {
+): 'wired' | 'classic' | 'query' | 'unknown' {
   if (Streams.WiredStream.Definition.is(definition)) {
     return 'wired';
   }
 
   if (Streams.ClassicStream.Definition.is(definition)) {
     return 'classic';
+  }
+
+  if (Streams.QueryStream.Definition.is(definition)) {
+    return 'query';
   }
 
   return 'unknown';

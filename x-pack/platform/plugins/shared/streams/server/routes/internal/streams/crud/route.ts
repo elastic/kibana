@@ -60,7 +60,7 @@ export const listStreamsRoute = createServerRoute({
     });
 
     const enrichedStreams = streams.reduce<ListStreamDetail[]>((acc, { stream }) => {
-      if (Streams.GroupStream.Definition.is(stream)) {
+      if (Streams.GroupStream.Definition.is(stream) || Streams.QueryStream.Definition.is(stream)) {
         acc.push({ stream });
         return acc;
       }
