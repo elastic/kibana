@@ -7,129 +7,157 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 
-import { CreateClassicStreamFlyout, type IndexTemplate } from './create_classic_stream_flyout';
+import { CreateClassicStreamFlyout } from './create_classic_stream_flyout';
 
-const MOCK_TEMPLATES: IndexTemplate[] = [
+const MOCK_TEMPLATES: TemplateDeserialized[] = [
   {
     name: 'behavioral_analytics-events-default',
     ilmPolicy: { name: 'profiling-60-days' },
-    showIlmBadge: true,
     indexPatterns: ['behavioral_analytics-events-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    _kbnMeta: { type: 'managed', hasDatastream: true },
   },
   {
     name: 'ilm-history-7',
     ilmPolicy: { name: 'logs' },
-    showIlmBadge: true,
     indexPatterns: ['ilm-history-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    _kbnMeta: { type: 'managed', hasDatastream: true },
   },
   {
     name: 'logs-activemq.audit',
-    ilmPolicy: { name: '14d' },
-    showIlmBadge: false,
     indexPatterns: ['logs-activemq.audit-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    lifecycle: { enabled: true, value: 14, unit: 'd' },
+    _kbnMeta: { type: 'managed', hasDatastream: true },
   },
   {
     name: 'logs-activemq.log',
-    ilmPolicy: { name: '30d' },
-    showIlmBadge: false,
     indexPatterns: ['logs-activemq.log-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    lifecycle: { enabled: true, value: 30, unit: 'd' },
+    _kbnMeta: { type: 'default', hasDatastream: true },
   },
   {
     name: 'logs-akamai.siem',
-    ilmPolicy: { name: '30d' },
-    showIlmBadge: false,
     indexPatterns: ['logs-akamai.siem-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    lifecycle: { enabled: true, value: 30, unit: 'd' },
+    _kbnMeta: { type: 'default', hasDatastream: true },
   },
   {
     name: 'logs-apache.access',
     ilmPolicy: { name: '.alerts-ilm-policy' },
-    showIlmBadge: true,
     indexPatterns: ['logs-apache.access-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    _kbnMeta: { type: 'default', hasDatastream: true },
   },
   {
     name: 'logs-apache.error',
     ilmPolicy: { name: '.alerts-ilm-policy' },
-    showIlmBadge: true,
     indexPatterns: ['logs-apache.error-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    _kbnMeta: { type: 'managed', hasDatastream: true },
   },
   {
     name: 'logs-apm.app@template',
-    ilmPolicy: { name: '30d' },
-    showIlmBadge: false,
     indexPatterns: ['logs-apm.app-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    lifecycle: { enabled: true, value: 30, unit: 'd' },
+    _kbnMeta: { type: 'managed', hasDatastream: true },
   },
   {
     name: 'logs-apm.error@template',
-    ilmPolicy: { name: '30d' },
-    showIlmBadge: false,
     indexPatterns: ['logs-apm.error-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    lifecycle: { enabled: true, value: 30, unit: 'd' },
+    _kbnMeta: { type: 'managed', hasDatastream: true },
   },
   {
     name: 'logs-auditd.log',
     ilmPolicy: { name: 'profiling-60-days' },
-    showIlmBadge: true,
     indexPatterns: ['logs-auditd.log-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    _kbnMeta: { type: 'default', hasDatastream: true },
   },
   {
     name: 'logs-auditd_manager.auditd',
     ilmPolicy: { name: 'logs' },
-    showIlmBadge: true,
     indexPatterns: ['logs-auditd_manager.auditd-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    _kbnMeta: { type: 'managed', hasDatastream: true },
   },
   {
     name: 'logs-cloud_security_posture.findings',
-    ilmPolicy: { name: '30d' },
-    showIlmBadge: false,
     indexPatterns: ['logs-cloud_security_posture.findings-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    lifecycle: { enabled: true, value: 30, unit: 'd' },
+    _kbnMeta: { type: 'default', hasDatastream: true },
   },
   {
     name: 'logs-cloud_security_posture.scores',
-    ilmPolicy: { name: '90d' },
-    showIlmBadge: false,
     indexPatterns: ['logs-cloud_security_posture.scores-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    lifecycle: { enabled: true, value: 90, unit: 'd' },
+    _kbnMeta: { type: 'managed', hasDatastream: true },
   },
   {
     name: 'logs-cloud_security_posture.vulnerabilities',
-    ilmPolicy: { name: '30d' },
-    showIlmBadge: false,
     indexPatterns: ['logs-cloud_security_posture.vulnerabilities-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    lifecycle: { enabled: true, value: 30, unit: 'd' },
+    _kbnMeta: { type: 'default', hasDatastream: true },
   },
   {
     name: 'logs-docker.container_logs',
     ilmPolicy: { name: '.monitoring-8-ilm-policy' },
-    showIlmBadge: true,
     indexPatterns: ['logs-docker.container_logs-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    _kbnMeta: { type: 'default', hasDatastream: true },
   },
   {
     name: 'logs-elastic_agent',
     ilmPolicy: { name: 'profiling-60-days' },
-    showIlmBadge: true,
     indexPatterns: ['logs-elastic_agent-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    _kbnMeta: { type: 'managed', hasDatastream: true },
   },
   {
     name: 'logs-elastic_agent.apm_server',
     ilmPolicy: { name: 'profiling-60-days' },
-    showIlmBadge: true,
     indexPatterns: ['logs-elastic_agent.apm_server-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    _kbnMeta: { type: 'managed', hasDatastream: true },
   },
   {
     name: 'logs-elastic_agent.auditbeat',
     ilmPolicy: { name: 'logs' },
-    showIlmBadge: true,
     indexPatterns: ['logs-elastic_agent.auditbeat-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    _kbnMeta: { type: 'managed', hasDatastream: true },
   },
   {
     name: 'logs-elastic_agent.cloud_defend',
     ilmPolicy: { name: '.alerts-ilm-policy' },
-    showIlmBadge: true,
     indexPatterns: ['logs-elastic_agent.cloud_defend-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    _kbnMeta: { type: 'managed', hasDatastream: true },
   },
   {
     name: 'logs-elastic_agent.cloudbeat',
-    ilmPolicy: { name: '90d' },
-    showIlmBadge: false,
     indexPatterns: ['logs-elastic_agent.cloudbeat-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    lifecycle: { enabled: true, value: 90, unit: 'd' },
+    _kbnMeta: { type: 'default', hasDatastream: true },
+  },
+  {
+    name: 'logs-infinite-retention',
+    indexPatterns: ['logs-infinite-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    lifecycle: { enabled: true, infiniteDataRetention: true },
+    _kbnMeta: { type: 'default', hasDatastream: true },
   },
 ];
 
@@ -141,7 +169,6 @@ const meta: Meta<typeof CreateClassicStreamFlyout> = {
 export default meta;
 type Story = StoryObj<typeof CreateClassicStreamFlyout>;
 
-// Use a render function to manage the template selection state
 const PrimaryStory = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 

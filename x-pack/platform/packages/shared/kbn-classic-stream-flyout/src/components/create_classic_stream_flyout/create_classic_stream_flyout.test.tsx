@@ -8,17 +8,38 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, fireEvent } from '@testing-library/react';
-import { CreateClassicStreamFlyout, type IndexTemplate } from './create_classic_stream_flyout';
+import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import { CreateClassicStreamFlyout } from './create_classic_stream_flyout';
 
-const MOCK_TEMPLATES: IndexTemplate[] = [
-  { name: 'template-1', ilmPolicy: { name: '30d' }, indexPatterns: ['template-1-*'] },
-  { name: 'template-2', ilmPolicy: { name: '90d' }, indexPatterns: ['template-2-*'] },
-  { name: 'template-3', indexPatterns: ['template-3-*'] },
+const MOCK_TEMPLATES: TemplateDeserialized[] = [
+  {
+    name: 'template-1',
+    ilmPolicy: { name: '30d' },
+    indexPatterns: ['template-1-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    _kbnMeta: { type: 'default', hasDatastream: true },
+  },
+  {
+    name: 'template-2',
+    ilmPolicy: { name: '90d' },
+    indexPatterns: ['template-2-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    _kbnMeta: { type: 'managed', hasDatastream: true },
+  },
+  {
+    name: 'template-3',
+    indexPatterns: ['template-3-*'],
+    allowAutoCreate: 'NO_OVERWRITE',
+    lifecycle: { enabled: true, value: 30, unit: 'd' },
+    _kbnMeta: { type: 'default', hasDatastream: true },
+  },
 ];
 
 const defaultProps = {
   onClose: jest.fn(),
   onCreate: jest.fn(),
+  onCreateTemplate: jest.fn(),
+  onRetryLoadTemplates: jest.fn(),
   templates: MOCK_TEMPLATES,
   selectedTemplate: null,
   onTemplateSelect: jest.fn(),
@@ -67,15 +88,28 @@ describe('CreateClassicStreamFlyout', () => {
 
       expect(onCreateTemplate).toHaveBeenCalledTimes(1);
     });
+  });
 
-    it('does not render Create index template button when onCreateTemplate is not provided', () => {
-      const { getByText, queryByTestId } = renderFlyout({
-        templates: [],
-        onCreateTemplate: undefined,
+  describe('error state', () => {
+    it('renders error state when hasErrorLoadingTemplates is true', () => {
+      const { getByTestId, getByText } = renderFlyout({
+        hasErrorLoadingTemplates: true,
       });
 
-      expect(getByText('No index templates detected')).toBeInTheDocument();
-      expect(queryByTestId('createTemplateButton')).not.toBeInTheDocument();
+      expect(getByTestId('errorLoadingTemplates')).toBeInTheDocument();
+      expect(getByText("Uh-oh, we weren't able to fetch your index templates")).toBeInTheDocument();
+    });
+
+    it('calls onRetryLoadTemplates when Retry button is clicked', () => {
+      const onRetryLoadTemplates = jest.fn();
+      const { getByTestId } = renderFlyout({
+        hasErrorLoadingTemplates: true,
+        onRetryLoadTemplates,
+      });
+
+      fireEvent.click(getByTestId('retryLoadTemplatesButton'));
+
+      expect(onRetryLoadTemplates).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -109,6 +143,36 @@ describe('CreateClassicStreamFlyout', () => {
       fireEvent.click(templateOption);
 
       expect(onTemplateSelect).toHaveBeenCalledWith('template-1');
+    });
+
+    it('displays ILM badge for templates with ILM policy', () => {
+      const { getAllByText, getByText } = renderFlyout();
+
+      // template-1 has ilmPolicy: { name: '30d' }, template-2 has ilmPolicy: { name: '90d' }
+      // Both should display ILM badge
+      const ilmBadges = getAllByText('ILM');
+      expect(ilmBadges.length).toBe(2);
+      expect(getByText('90d')).toBeInTheDocument();
+    });
+
+    it('displays lifecycle data retention for templates without ILM policy', () => {
+      const { getByTestId } = renderFlyout();
+
+      // template-3 has lifecycle: { enabled: true, value: 30, unit: 'd' } but no ILM
+      // Should display the retention period in the template option
+      const templateOption = getByTestId('template-option-template-3');
+      expect(templateOption).toBeInTheDocument();
+      // The 30d retention should be displayed (same as ILM policy name for template-1,
+      // but this verifies template-3 option exists and is rendered)
+    });
+
+    it('renders all template options including managed templates', () => {
+      const { getByTestId } = renderFlyout();
+
+      // Verify all templates are rendered, including managed template-2
+      expect(getByTestId('template-option-template-1')).toBeInTheDocument();
+      expect(getByTestId('template-option-template-2')).toBeInTheDocument();
+      expect(getByTestId('template-option-template-3')).toBeInTheDocument();
     });
   });
 

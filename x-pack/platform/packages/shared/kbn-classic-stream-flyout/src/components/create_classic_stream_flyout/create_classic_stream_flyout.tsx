@@ -18,9 +18,13 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import { css } from '@emotion/react';
 import { SelectTemplateStep } from './select_template_step';
 
 enum ClassicStreamStep {
@@ -28,30 +32,28 @@ enum ClassicStreamStep {
   NAME_AND_CONFIRM = 'name_and_confirm',
 }
 
-/**
- * Simplified template interface for the flyout.
- * Contains the essential fields needed for template selection.
- */
-export interface IndexTemplate {
-  name: string;
-  ilmPolicy?: {
-    name: string;
-  };
-  indexPatterns?: string[];
-  /** Whether to show the ILM badge. If false, only the policy name is displayed. */
-  showIlmBadge?: boolean;
-}
+const flyoutBodyStyles = css({
+  '.euiFlyoutBody__overflow': {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  '.euiFlyoutBody__overflowContent': {
+    display: 'flex',
+    flexDirection: 'column',
+    flexGrow: 1,
+    padding: 0,
+  },
+});
 
 interface CreateClassicStreamFlyoutProps {
   onClose: () => void;
   onCreate: () => void;
-  onCreateTemplate?: () => void;
-  templates: IndexTemplate[];
+  onCreateTemplate: () => void;
+  templates: TemplateDeserialized[];
   selectedTemplate: string | null;
   onTemplateSelect: (templateName: string | null) => void;
-  isLoadingTemplates?: boolean;
   hasErrorLoadingTemplates?: boolean;
-  onRetryLoadTemplates?: () => void;
+  onRetryLoadTemplates: () => void;
 }
 
 export const CreateClassicStreamFlyout = ({
@@ -61,7 +63,6 @@ export const CreateClassicStreamFlyout = ({
   templates,
   selectedTemplate,
   onTemplateSelect,
-  isLoadingTemplates = false,
   hasErrorLoadingTemplates = false,
   onRetryLoadTemplates,
 }: CreateClassicStreamFlyoutProps) => {
@@ -99,7 +100,6 @@ export const CreateClassicStreamFlyout = ({
     [isFirstStep]
   );
 
-  // Render the content for the current step
   const renderCurrentStepContent = () => {
     switch (currentStep) {
       case ClassicStreamStep.SELECT_TEMPLATE:
@@ -109,7 +109,6 @@ export const CreateClassicStreamFlyout = ({
             selectedTemplate={selectedTemplate}
             onTemplateSelect={onTemplateSelect}
             onCreateTemplate={onCreateTemplate}
-            isLoadingTemplates={isLoadingTemplates}
             hasErrorLoadingTemplates={hasErrorLoadingTemplates}
             onRetryLoadTemplates={onRetryLoadTemplates}
           />
@@ -140,20 +139,10 @@ export const CreateClassicStreamFlyout = ({
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody
-        css={{
-          '.euiFlyoutBody__overflow': {
-            display: 'flex',
-            flexDirection: 'column',
-          },
-          '.euiFlyoutBody__overflowContent': {
-            display: 'flex',
-            flexDirection: 'column',
-            flexGrow: 1,
-          },
-        }}
-      >
+      <EuiFlyoutBody css={flyoutBodyStyles}>
         <EuiStepsHorizontal size="xs" steps={steps} />
+        <EuiHorizontalRule margin="none" />
+        <EuiSpacer size="s" />
         {renderCurrentStepContent()}
       </EuiFlyoutBody>
 
