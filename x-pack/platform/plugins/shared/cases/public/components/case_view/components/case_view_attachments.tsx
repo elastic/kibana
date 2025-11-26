@@ -6,7 +6,14 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSelectable,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
 import { useCaseViewNavigation } from '../../../common/navigation';
@@ -77,17 +84,18 @@ export const CaseViewAttachments = ({
     <>
       <EuiFlexItem grow={6}>
         <CaseViewTabs caseData={caseData} activeTab={activeTab} />
+        <EuiSpacer size="m" />
         <EuiFlexGroup direction="row" responsive={false} data-test-subj="case-view-attachments">
-          <EuiFlexItem grow={1} css={{ maxWidth: '18rem' }}>
+          <EuiFlexItem grow={1} css={{ minWidth: '18rem', maxWidth: '18rem' }}>
             <EuiSelectable singleSelection options={tabAsSelectableOptions}>
               {(list) => list}
             </EuiSelectable>
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
-            <EuiTitle size="s">
+            <EuiTitle size="xs">
               <h3>{translateTitle(activeTab)}</h3>
             </EuiTitle>
-            <EuiSpacer />
+            <EuiHorizontalRule margin="s" />
             {children}
           </EuiFlexItem>
         </EuiFlexGroup>

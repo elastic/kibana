@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiSpacer, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
+import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCaseViewNavigation } from '../../common/navigation';
@@ -93,11 +93,6 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
     ));
   }, [activeTab, caseData.id, attachmentTabs, navigateToCaseView, oneAttachmentsTabEnabled, tabs]);
 
-  return (
-    <>
-      <EuiTabs data-test-subj="case-view-tabs">{renderTabs()}</EuiTabs>
-      <EuiSpacer size="l" />
-    </>
-  );
+  return <EuiTabs data-test-subj="case-view-tabs">{renderTabs()}</EuiTabs>;
 });
 CaseViewTabs.displayName = 'CaseViewTabs';
