@@ -10,6 +10,7 @@ import {
   assign,
   enqueueActions,
   forwardTo,
+  fromPromise,
   setup,
   sendTo,
   stopChild,
@@ -72,6 +73,7 @@ import {
 import { setupGrokCollectionActor } from './setup_grok_collection_actor';
 import { selectPreviewRecords } from '../simulation_state_machine/selectors';
 import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
+import { type SuggestPipelineInputMinimal } from './suggest_pipeline_actor';
 
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
 export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;
@@ -91,6 +93,9 @@ export const streamEnrichmentMachine = setup({
     setupGrokCollection: getPlaceholderFor(setupGrokCollectionActor),
     stepMachine: getPlaceholderFor(() => stepMachine),
     simulationMachine: getPlaceholderFor(() => simulationMachine),
+    suggestPipeline: fromPromise<StreamlangDSL, SuggestPipelineInputMinimal>(
+      async () => ({} as StreamlangDSL) // Placeholder
+    ),
   },
   actions: {
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
@@ -265,6 +270,13 @@ export const streamEnrichmentMachine = setup({
         dataSourceRef.send({ type: 'dataSource.refresh' })
       );
     },
+    /* Pipeline suggestion actions */
+    storeSuggestedPipeline: assign((_, params: { pipeline: StreamlangDSL }) => ({
+      suggestedPipeline: params.pipeline,
+      showSuggestion: true,
+    })),
+    hideSuggestion: assign({ showSuggestion: false }),
+    clearSuggestion: assign({ suggestedPipeline: undefined, showSuggestion: false }),
     /* @ts-expect-error The error is thrown because the type of the event is not inferred correctly when using enqueueActions during setup */
     sendStepsEventToSimulator: enqueueActions(
       ({ context, enqueue }, params?: { type: StreamEnrichmentEvent['type'] }) => {
@@ -326,6 +338,8 @@ export const streamEnrichmentMachine = setup({
     initialStepRefs: [],
     stepRefs: [],
     urlState: defaultEnrichmentUrlState,
+    suggestedPipeline: undefined,
+    showSuggestion: false,
     simulatorRef: spawn('simulationMachine', {
       id: 'simulator',
       input: {
@@ -620,6 +634,90 @@ export const streamEnrichmentMachine = setup({
                 },
               },
             },
+            pipelineSuggestion: {
+              initial: 'idle',
+              states: {
+                idle: {
+                  on: {
+                    'suggestion.generate': 'generatingSuggestion',
+                  },
+                },
+                generatingSuggestion: {
+                  invoke: {
+                    id: 'suggestPipelineActor',
+                    src: 'suggestPipeline',
+                    input: ({ context, event }) => {
+                      if (
+                        event.type !== 'suggestion.generate' &&
+                        event.type !== 'suggestion.regenerate'
+                      ) {
+                        throw new Error('Invalid event type for suggestion generation');
+                      }
+                      // Get preview documents from simulator
+                      const documents = getActiveDataSourceSamples(context);
+
+                      return {
+                        streamName: context.definition.stream.name,
+                        connectorId: event.connectorId,
+                        documents,
+                      };
+                    },
+                    onDone: {
+                      target: 'viewingSuggestion',
+                      actions: [
+                        {
+                          type: 'storeSuggestedPipeline',
+                          params: ({ event }) => ({ pipeline: event.output }),
+                        },
+                        {
+                          type: 'resetSteps',
+                          params: ({ event }) => ({ steps: event.output.steps }),
+                        },
+                      ],
+                    },
+                    onError: {
+                      target: 'idle',
+                    },
+                  },
+                  on: {
+                    'suggestion.cancel': {
+                      target: 'idle',
+                      actions: [
+                        cancel('suggestPipelineActor'),
+                        { type: 'clearSuggestion' },
+                        { type: 'resetSteps', params: () => ({ steps: [] }) },
+                        { type: 'sendStepsEventToSimulator' },
+                      ],
+                    },
+                  },
+                },
+                viewingSuggestion: {
+                  entry: [{ type: 'sendStepsEventToSimulator' }],
+                  on: {
+                    'suggestion.accept': {
+                      target: 'idle',
+                      actions: [{ type: 'hideSuggestion' }],
+                    },
+                    'suggestion.dismiss': {
+                      target: 'idle',
+                      actions: [
+                        { type: 'clearSuggestion' },
+                        { type: 'resetSteps', params: () => ({ steps: [] }) },
+                        { type: 'sendStepsEventToSimulator' },
+                      ],
+                    },
+                    'suggestion.regenerate': {
+                      target: 'generatingSuggestion',
+                      actions: [
+                        { type: 'clearSuggestion' },
+                        { type: 'resetSteps', params: () => ({ steps: [] }) },
+                        { type: 'sendStepsEventToSimulator' },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -652,6 +750,18 @@ export const createStreamEnrichmentMachineImplementations = ({
         toasts: core.notifications.toasts,
       })
     ),
+    suggestPipeline: fromPromise(async ({ input, signal }) => {
+      const { suggestPipelineLogic } = await import('./suggest_pipeline_actor');
+      return suggestPipelineLogic({
+        streamName: input.streamName,
+        connectorId: input.connectorId,
+        documents: input.documents,
+        signal,
+        streamsRepositoryClient,
+        telemetryClient,
+        notifications: core.notifications,
+      });
+    }),
   },
   actions: {
     refreshDefinition,

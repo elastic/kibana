@@ -35,6 +35,7 @@ import type {
   Simulation,
   ProcessorMetrics,
 } from '../state_management/simulation_state_machine/types';
+import { getPercentageFormatter } from '../../../../util/formatters';
 
 export interface PipelineSuggestionProps {
   aiFeatures: AIFeatures;
@@ -156,6 +157,10 @@ const ActionBlock = ({
   const parsedRate = processorMetrics?.parsed_rate;
   const hasErrors = processorMetrics && processorMetrics.errors.length > 0;
 
+  const formatter = getPercentageFormatter();
+  const formattedParsedRate =
+    parsedRate !== undefined && parsedRate > 0 ? formatter.format(parsedRate) : null;
+
   return (
     <EuiPanel
       hasShadow={false}
@@ -188,11 +193,11 @@ const ActionBlock = ({
                 </EuiText>
                 {!isSimulating && processorMetrics && (
                   <>
-                    {parsedRate !== undefined && parsedRate > 0 && (
+                    {formattedParsedRate && (
                       <EuiText size="xs" color="success">
                         {i18n.translate('xpack.streams.processingSuggestion.stepParsedRate', {
-                          defaultMessage: '{percentage}% success',
-                          values: { percentage: (parsedRate * 100).toFixed(0) },
+                          defaultMessage: '{percentage} success',
+                          values: { percentage: formattedParsedRate },
                         })}
                       </EuiText>
                     )}

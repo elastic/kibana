@@ -183,6 +183,7 @@ You now submit a corrected pipeline that keeps the pre-generated parsing process
 ### Parsing & Normalisation Guidelines
 
 * **Pre-generated parsing processor:** If a parsing processor (GROK or DISSECT) is provided, you must include it as the first processor in your pipeline and cannot modify it. The dataset analysis reflects documents that have already been parsed by this processor.
+* **Avoid unnecessary renames:** If the pre-generated parsing processor already extracts fields with schema-compliant names (e.g., `body.text`, `severity_text`, `resource.attributes.service.name` for OTel, or `log.level`, `service.name`, `host.name` for ECS), do NOT add rename processors for those fields. Only add rename/mapping processors for fields that were extracted with non-schema-compliant names and need to be moved to the correct location.
 * **If no parsing processor provided:** Analyze the raw data structure and continue building processors as needed for date normalization, type conversions, and cleanup.
 * **Type conversion for schema compliance:** Ensure all extracted fields have the correct types as defined in the target schema. Add explicit type conversions for fields that are extracted as strings but should be numbers, booleans, IPs, dates, etc. Handle unmapped or invalid types by converting them to schema-compliant types.
 * **Timestamp discipline:** One authoritative `@timestamp` in UTC; normalize timestamps extracted by the parsing processor; keep original as needed; record `event.ingested`.
@@ -206,12 +207,32 @@ You now submit a corrected pipeline that keeps the pre-generated parsing process
 
 When a pre-generated parsing processor is provided, focus on post-parsing steps:
 
+**For ECS Schema:**
+
 * **Application Logs (mixed):** After parsing extracts fields, normalize `log.level`, map `service.name`, extract `error.*`, `trace.id`; add date processors for timestamps; optional `user_agent`/`geoip` enrichment.
 * **HTTP Access Logs:** After parsing extracts `http.*`, `url.*`, `source.ip`, `response.status_code`, add type conversions for numeric fields (bytes, latency); derive `event.category: web`.
 * **Syslog/Network:** After parsing extracts fields, normalize `host.*`, `process.*`, `event.severity`, `event.code`; add date processors; normalize facility/severity.
 * **KV/Config Logs:** After parsing extracts key-value pairs, map stable keys to ECS; add type conversions as needed.
 * **Metrics-in-Logs:** After parsing extracts numeric fields, normalize units; avoid exploding high-cardinality labels unless required.
 * **Security/Audit:** After parsing extracts fields, preserve actor/subject, result, action; ensure `event.category`/`event.type`; mask identities as required.
+
+**For OTel Schema:**
+
+* **Application Logs (mixed):** After parsing extracts fields, normalize `severity_text` (map from log levels like INFO, ERROR), map to `resource.attributes.service.name`, extract `attributes.error.*`, `trace_id`, `span_id`; add date processors for `@timestamp`; map log message to `body.text` (NOT `message`).
+* **HTTP Access Logs:** After parsing extracts HTTP fields, map to `attributes.http.method`, `attributes.http.status_code`, `attributes.http.url`; add type conversions for numeric fields (`attributes.http.status_code` → long); map source IP to `resource.attributes.host.ip` or `attributes.net.peer.ip`.
+* **Syslog/Network:** After parsing extracts fields, normalize `resource.attributes.host.name`, `resource.attributes.host.ip`; map severity to `severity_text` and `severity_number`; add date processors for `@timestamp`.
+* **KV/Config Logs:** After parsing extracts key-value pairs, map infrastructure fields to `resource.attributes.*` and event-specific fields to `attributes.*`; add type conversions as needed.
+* **Metrics-in-Logs:** After parsing extracts numeric metrics, normalize units; store in `attributes.*`; avoid exploding high-cardinality labels unless required.
+* **Security/Audit:** After parsing extracts fields, preserve actor/subject in `attributes.*`, result/action in `attributes.*`; mask identities as required.
+
+**Critical OTel Field Mappings:**
+
+- Log message content → `body.text` (NOT `message`)
+- Log level → `severity_text` (NOT `log.level`)
+- Service name → `resource.attributes.service.name` (NOT `service.name` at root)
+- Hostname → `resource.attributes.host.name` (NOT `host.name` at root)
+- Event-specific data → `attributes.*` (NOT root-level fields)
+- Infrastructure data → `resource.attributes.*`
 
 ---
 

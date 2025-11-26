@@ -47,6 +47,7 @@ export const useStreamEnrichmentEvents = () => {
 
   return useMemo(
     () => ({
+      service, // Expose service for direct access when needed
       resetSteps: (steps: StreamlangDSL['steps']) => {
         service.send({ type: 'step.resetSteps', steps });
       },

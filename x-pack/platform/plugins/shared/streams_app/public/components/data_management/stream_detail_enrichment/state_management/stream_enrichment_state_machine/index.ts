@@ -6,4 +6,5 @@
  */
 
 export * from './use_stream_enrichment';
+export * from './use_pipeline_suggestions';
 export type * from './types';

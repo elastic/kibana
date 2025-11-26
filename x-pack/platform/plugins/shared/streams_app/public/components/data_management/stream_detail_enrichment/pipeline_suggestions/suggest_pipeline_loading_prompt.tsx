@@ -8,11 +8,12 @@
 import React from 'react';
 import {
   EuiText,
-  EuiEmptyPrompt,
-  EuiLoadingLogo,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiProgress,
+  EuiSkeletonText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -22,26 +23,34 @@ export interface SuggestPipelineLoadingPromptProps {
 
 export function SuggestPipelineLoadingPrompt({ onCancel }: SuggestPipelineLoadingPromptProps) {
   return (
-    <EuiEmptyPrompt
-      icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
-      body={
-        <EuiFlexGroup direction="column" responsive={false} alignItems="center" gutterSize="l">
-          <EuiFlexItem>
-            <EuiText>
-              {i18n.translate('xpack.streams.stepsEditor.loadingDashboardsLabel', {
-                defaultMessage: 'Analysing your data...',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiLink onClick={onCancel}>
-              {i18n.translate('xpack.streams.stepsEditor.cancelLabel', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-    />
+    <>
+      <EuiProgress size="xs" color="primary" />
+      <EuiSpacer size="l" />
+      <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
+        <EuiFlexItem>
+          <EuiText size="s" color="subdued">
+            {i18n.translate('xpack.streams.stepsEditor.loadingDashboardsLabel', {
+              defaultMessage: 'Analysing your data...',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSkeletonText lines={3} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSkeletonText lines={3} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSkeletonText lines={3} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiLink onClick={onCancel}>
+            {i18n.translate('xpack.streams.stepsEditor.cancelLabel', {
+              defaultMessage: 'Cancel',
+            })}
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }

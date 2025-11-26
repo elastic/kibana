@@ -26,7 +26,7 @@ import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_
 import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
 import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 import { StepsEditor } from './steps_editor';
-import { useSuggestPipeline } from './pipeline_suggestions/use_suggest_pipeline';
+import { useSuggestPipeline } from './state_management/stream_enrichment_state_machine/use_pipeline_suggestions';
 import { selectFieldsInSamples } from './state_management/simulation_state_machine/selectors';
 import type { SchemaEditorField } from '../schema_editor/types';
 import { isFieldUncommitted } from '../schema_editor/utils';

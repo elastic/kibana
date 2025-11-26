@@ -49,6 +49,8 @@ export interface StreamEnrichmentContextType {
   grokCollection: GrokCollection;
   simulatorRef: SimulationActorRef;
   urlState: EnrichmentUrlState;
+  suggestedPipeline?: StreamlangDSL;
+  showSuggestion: boolean;
 }
 
 export type StreamEnrichmentEvent =
@@ -88,4 +90,9 @@ export type StreamEnrichmentEvent =
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
   | { type: 'step.resetSteps'; steps: StreamlangDSL['steps'] }
   | { type: 'url.initialized'; urlState: EnrichmentUrlState }
-  | { type: 'url.sync' };
+  | { type: 'url.sync' }
+  | { type: 'suggestion.generate'; connectorId: string }
+  | { type: 'suggestion.cancel' }
+  | { type: 'suggestion.accept' }
+  | { type: 'suggestion.dismiss' }
+  | { type: 'suggestion.regenerate'; connectorId: string };

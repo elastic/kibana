@@ -2,6 +2,8 @@ Your task is to analyze a data stream and generate a comprehensive **ingest pipe
 
 **Important:** If a pre-generated parsing processor (GROK or DISSECT) is provided, you must include it as the first processor in your pipeline and cannot modify it. The dataset analysis you receive will reflect documents that have already been parsed by this processor. Your job is to add additional processors after the parsing step to normalize timestamps, convert types, clean up temporary fields, and enrich where valuable.
 
+**Avoid unnecessary renames:** If the pre-generated parsing processor already extracts fields with schema-compliant names (e.g., `body.text`, `severity_text`, `resource.attributes.service.name` for OTel, or `log.level`, `service.name`, `host.name` for ECS), do NOT add rename processors for those fields. Only add rename/mapping processors for fields that were extracted with non-schema-compliant names.
+
 If no parsing processor is provided, analyze the raw data stream and build processors as needed.
 
 # Ingest Pipeline Definition
@@ -21,11 +23,30 @@ An **ingest pipeline** is a composition of logical stages and routing rules that
 
 When a pre-generated parsing processor is provided, focus on post-parsing steps:
 
+**For ECS Schema:**
+
 * **Application Logs (mixed):** After parsing extracts fields, normalize `log.level`, map `service.name`, extract `error.*`, `trace.id`; add date processors for timestamps; optional `user_agent`/`geoip` enrichment.
 * **HTTP Access Logs:** After parsing extracts `http.*`, `url.*`, `source.ip`, `response.status_code`, add type conversions for numeric fields (bytes, latency); derive `event.category: web`.
 * **Infrastructure / Syslog:** After parsing extracts fields, normalize `host.*`, `process.*`, `event.severity`, `event.code`; add date processors; normalize facility/severity.
 * **Security / Audit:** After parsing extracts fields, preserve actor/subject, result, action; ensure `event.category`/`event.type`; mask identities as required.
 * **Metrics-in-Logs:** After parsing extracts numeric metrics, normalize units; control label cardinality; avoid unnecessary array explosions.
+
+**For OTel Schema:**
+
+* **Application Logs (mixed):** After parsing extracts fields, normalize `severity_text` (map from log levels like INFO, ERROR), map to `resource.attributes.service.name`, extract `attributes.error.*`, `trace_id`, `span_id`; add date processors for `@timestamp`; map log message to `body.text` (NOT `message`).
+* **HTTP Access Logs:** After parsing extracts HTTP fields, map to `attributes.http.method`, `attributes.http.status_code`, `attributes.http.url`; add type conversions for numeric fields (`attributes.http.status_code` → long); map source IP to `resource.attributes.host.ip` or `attributes.net.peer.ip`.
+* **Infrastructure / Syslog:** After parsing extracts fields, normalize `resource.attributes.host.name`, `resource.attributes.host.ip`; map severity to `severity_text` and `severity_number`; add date processors for `@timestamp`.
+* **Security / Audit:** After parsing extracts fields, preserve actor/subject in `attributes.*`, result/action in `attributes.*`; mask identities as required.
+* **Metrics-in-Logs:** After parsing extracts numeric metrics, normalize units; store in `attributes.*`; control label cardinality; avoid unnecessary array explosions.
+
+**Critical OTel Field Mappings:**
+
+- Log message content → `body.text` (NOT `message`)
+- Log level → `severity_text` (NOT `log.level`)
+- Service name → `resource.attributes.service.name` (NOT `service.name` at root)
+- Hostname → `resource.attributes.host.name` (NOT `host.name` at root)
+- Event-specific data → `attributes.*` (NOT root-level fields)
+- Infrastructure data → `resource.attributes.*`
 
 **Guiding principle:** create ingest pipelines that produce the **fields users actually need** for their specific stream, while remaining performant, governable, and resilient to format drift.
 

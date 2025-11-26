@@ -18,7 +18,7 @@ import {
 import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
-import type { useSuggestPipeline } from './pipeline_suggestions/use_suggest_pipeline';
+import type { useSuggestPipeline } from './state_management/stream_enrichment_state_machine/use_pipeline_suggestions';
 import { GenerateSuggestionButton } from '../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { PipelineSuggestion } from './pipeline_suggestions/pipeline_suggestion';
@@ -74,9 +74,7 @@ export const StepsEditor = React.memo(({ suggestionState }: StepsEditorProps) =>
       return (
         <SuggestPipelineLoadingPrompt
           onCancel={() => {
-            suggestionState.abortController.abort();
-            suggestionState.abortController.refresh();
-            suggestionState.clearSuggestedSteps();
+            suggestionState.cancelSuggestion();
           }}
         />
       );
