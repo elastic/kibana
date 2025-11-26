@@ -8,11 +8,9 @@
 import React, { useState, useMemo } from 'react';
 import {
   EuiBasicTable,
-  EuiButton,
-  EuiFieldText,
+  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiPanel,
   EuiSpacer,
   EuiStat,
@@ -23,9 +21,9 @@ import {
   EuiAvatar,
   EuiToolTip,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn, OnTimeChangeProps } from '@elastic/eui';
+import type { EuiBasicTableColumn, OnTimeChangeProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
+import dateMath from '@kbn/datemath';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import moment from 'moment';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -42,48 +40,26 @@ export const MonitoringList: React.FC = () => {
 
   const [start, setStart] = useState<string>('now-7d');
   const [end, setEnd] = useState<string>('now');
-  const [userFilter, setUserFilter] = useState<string>('');
+  const [selectedUsers, setSelectedUsers] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
 
   const onTimeChange = ({ start: newStart, end: newEnd }: OnTimeChangeProps) => {
     setStart(newStart);
     setEnd(newEnd);
   };
 
-  // Parse dateMath expressions to absolute dates
-  const parseDate = (dateString: string): string => {
-    // Handle 'now' and relative dates like 'now-7d', 'now-30d', etc.
-    if (dateString === 'now') {
-      return moment().toISOString();
-    }
-    if (dateString.startsWith('now-')) {
-      const match = dateString.match(/now-(\d+)([smhdwMy])/);
-      if (match) {
-        const [, amount, unit] = match;
-        return moment()
-          .subtract(parseInt(amount, 10), unit as moment.unitOfTime.DurationConstructor)
-          .toISOString();
-      }
-    }
-    if (dateString.startsWith('now+')) {
-      const match = dateString.match(/now\+(\d+)([smhdwMy])/);
-      if (match) {
-        const [, amount, unit] = match;
-        return moment()
-          .add(parseInt(amount, 10), unit as moment.unitOfTime.DurationConstructor)
-          .toISOString();
-      }
-    }
-    // Absolute date
-    return moment(dateString).toISOString();
+  // Parse dateMath expressions to absolute dates using Kibana's dateMath utility
+  const parseDate = (dateString: string, roundUp: boolean = false): string => {
+    const parsed = dateMath.parse(dateString, { roundUp });
+    return parsed?.toISOString() ?? moment().toISOString();
   };
 
+  // Query params for fetching - only date filtering on backend
   const queryParams = useMemo(
     () => ({
-      start: parseDate(start),
-      end: parseDate(end),
-      user: userFilter || undefined,
+      start: parseDate(start, false),
+      end: parseDate(end, true),
     }),
-    [start, end, userFilter]
+    [start, end]
   );
 
   const {
@@ -98,6 +74,60 @@ export const MonitoringList: React.FC = () => {
   const handleRefresh = () => {
     refetchQuery();
   };
+
+  // Extract unique users from ALL conversations (date-filtered) for the combobox
+  const userOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
+    if (!data?.conversations) return [];
+    const uniqueUsers = new Map<string, string>();
+    data.conversations.forEach((conv) => {
+      const username = conv.user.username || conv.user.id;
+      uniqueUsers.set(username, username);
+    });
+    return Array.from(uniqueUsers.values())
+      .sort((a, b) => a.localeCompare(b))
+      .map((username) => ({
+        label: username,
+        value: username,
+      }));
+  }, [data?.conversations]);
+
+  // Filter conversations by selected user (client-side)
+  const filteredConversations = useMemo(() => {
+    if (!data?.conversations) return [];
+    if (selectedUsers.length === 0) return data.conversations;
+
+    const selectedUsername = selectedUsers[0].value;
+    return data.conversations.filter((conv) => {
+      const username = conv.user.username || conv.user.id;
+      return username === selectedUsername;
+    });
+  }, [data?.conversations, selectedUsers]);
+
+  // Recalculate aggregates based on filtered conversations
+  const filteredAggregates = useMemo(() => {
+    if (selectedUsers.length === 0 && data?.aggregates) {
+      return data.aggregates;
+    }
+
+    let totalTokensIn = 0;
+    let totalTokensOut = 0;
+    let totalMessages = 0;
+    let totalToolCalls = 0;
+
+    filteredConversations.forEach((conv) => {
+      totalTokensIn += conv.tokens_in;
+      totalTokensOut += conv.tokens_out;
+      totalMessages += conv.rounds_count;
+      totalToolCalls += conv.tool_calls_count;
+    });
+
+    return {
+      total_tokens_in: totalTokensIn,
+      total_tokens_out: totalTokensOut,
+      total_messages: totalMessages,
+      total_tool_calls: totalToolCalls,
+    };
+  }, [data?.aggregates, filteredConversations, selectedUsers.length]);
 
   const columns: Array<EuiBasicTableColumn<ConversationSummary>> = [
     {
@@ -182,38 +212,29 @@ export const MonitoringList: React.FC = () => {
       />
       <KibanaPageTemplate.Section>
         {/* Filters */}
-        <EuiPanel paddingSize="l" hasShadow={false} hasBorder>
-          <EuiFlexGroup alignItems="flexEnd" gutterSize="m">
-            <EuiFlexItem grow={2}>
-              <EuiSuperDatePicker
-                start={start}
-                end={end}
-                onTimeChange={onTimeChange}
-                onRefresh={handleRefresh}
-                showUpdateButton={false}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={1}>
-              <EuiFormRow label={labels.monitoring.userFilterLabel} fullWidth>
-                <EuiFieldText
-                  value={userFilter}
-                  onChange={(e) => setUserFilter(e.target.value)}
-                  placeholder={i18n.translate('xpack.onechat.monitoring.userFilterPlaceholder', {
-                    defaultMessage: 'Filter by username',
-                  })}
-                  fullWidth
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton onClick={handleRefresh} isLoading={loading} fill iconType="refresh">
-                {i18n.translate('xpack.onechat.monitoring.applyFiltersButton', {
-                  defaultMessage: 'Apply filters',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiSuperDatePicker
+              start={start}
+              end={end}
+              onTimeChange={onTimeChange}
+              onRefresh={handleRefresh}
+              showUpdateButton
+              isLoading={loading}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ minWidth: 250 }}>
+            <EuiComboBox
+              prepend={labels.monitoring.authorLabel}
+              placeholder={labels.monitoring.userFilterLabel}
+              singleSelection={{ asPlainText: true }}
+              options={userOptions}
+              selectedOptions={selectedUsers}
+              onChange={setSelectedUsers}
+              isClearable
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
         <EuiSpacer size="l" />
 
@@ -222,36 +243,36 @@ export const MonitoringList: React.FC = () => {
           <>
             <EuiFlexGroup gutterSize="l">
               <EuiFlexItem>
-                <EuiPanel hasBorder>
+                <EuiPanel hasBorder color="subdued">
                   <EuiStat
-                    title={data.aggregates.total_tokens_in.toLocaleString()}
+                    title={filteredAggregates.total_tokens_in.toLocaleString()}
                     description={labels.monitoring.totalTokensIn}
                     titleSize="m"
                   />
                 </EuiPanel>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiPanel hasBorder>
+                <EuiPanel hasBorder color="subdued">
                   <EuiStat
-                    title={data.aggregates.total_tokens_out.toLocaleString()}
+                    title={filteredAggregates.total_tokens_out.toLocaleString()}
                     description={labels.monitoring.totalTokensOut}
                     titleSize="m"
                   />
                 </EuiPanel>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiPanel hasBorder>
+                <EuiPanel hasBorder color="subdued">
                   <EuiStat
-                    title={data.aggregates.total_messages.toLocaleString()}
+                    title={filteredAggregates.total_messages.toLocaleString()}
                     description={labels.monitoring.totalMessages}
                     titleSize="m"
                   />
                 </EuiPanel>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiPanel hasBorder>
+                <EuiPanel hasBorder color="subdued">
                   <EuiStat
-                    title={data.aggregates.total_tool_calls.toLocaleString()}
+                    title={filteredAggregates.total_tool_calls.toLocaleString()}
                     description={labels.monitoring.totalToolCalls}
                     titleSize="m"
                   />
@@ -273,7 +294,7 @@ export const MonitoringList: React.FC = () => {
 
         {/* Conversations Table */}
         <EuiBasicTable
-          items={data?.conversations || []}
+          items={filteredConversations}
           columns={columns}
           loading={loading}
           tableLayout="auto"

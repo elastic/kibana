@@ -363,7 +363,7 @@ export const MonitoringDetail: React.FC = () => {
           pageTitle={<TechPreviewTitle title={labels.monitoring.detailTitle} />}
         />
         <KibanaPageTemplate.Section>
-          <EuiPanel hasBorder>
+          <EuiPanel hasBorder color="subdued">
             <EuiText textAlign="center" color="subdued">
               {i18n.translate('xpack.onechat.monitoring.loadingMessage', {
                 defaultMessage: 'Loading conversation...',
@@ -430,7 +430,7 @@ export const MonitoringDetail: React.FC = () => {
         {/* Title, Author, and Agent Stats */}
         <EuiFlexGroup gutterSize="l">
           <EuiFlexItem>
-            <EuiPanel hasBorder>
+            <EuiPanel hasBorder color="subdued">
               <EuiStat
                 title={conversation.title || conversation.id}
                 description={labels.monitoring.conversationLabel}
@@ -440,7 +440,7 @@ export const MonitoringDetail: React.FC = () => {
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiPanel hasBorder>
+            <EuiPanel hasBorder color="subdued">
               <EuiStat
                 title={
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -462,7 +462,7 @@ export const MonitoringDetail: React.FC = () => {
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiPanel hasBorder>
+            <EuiPanel hasBorder color="subdued">
               <EuiStat
                 title={
                   <EuiLink
@@ -486,7 +486,7 @@ export const MonitoringDetail: React.FC = () => {
         {/* Summary Stats */}
         <EuiFlexGroup gutterSize="l">
           <EuiFlexItem>
-            <EuiPanel hasBorder>
+            <EuiPanel hasBorder color="subdued">
               <EuiStat
                 title={totalTokensIn.toLocaleString()}
                 description={labels.monitoring.totalInputTokensLabel}
@@ -495,7 +495,7 @@ export const MonitoringDetail: React.FC = () => {
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiPanel hasBorder>
+            <EuiPanel hasBorder color="subdued">
               <EuiStat
                 title={totalTokensOut.toLocaleString()}
                 description={labels.monitoring.totalOutputTokensLabel}
@@ -504,7 +504,7 @@ export const MonitoringDetail: React.FC = () => {
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiPanel hasBorder>
+            <EuiPanel hasBorder color="subdued">
               <EuiStat
                 title={conversation.rounds.length}
                 description={labels.monitoring.roundsLabel}
@@ -513,7 +513,7 @@ export const MonitoringDetail: React.FC = () => {
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiPanel hasBorder>
+            <EuiPanel hasBorder color="subdued">
               <EuiStat
                 title={metadata.total_tool_calls}
                 description={labels.monitoring.totalToolCalls}

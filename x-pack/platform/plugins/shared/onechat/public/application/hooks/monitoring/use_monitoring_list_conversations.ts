@@ -23,7 +23,11 @@ export const useMonitoringListConversations = (
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: queryKeys.monitoring.conversations.list(params),
     queryFn: () => {
-      return monitoringService.listConversations(params);
+      return monitoringService.listConversations({
+        startDate: params.start,
+        endDate: params.end,
+        userName: params.user,
+      });
     },
   });
 
