@@ -1871,6 +1871,33 @@ describe('functions arg suggestions', () => {
       expect(labels).toContain(',');
     });
 
+    it('suggests comma after fourth argument (value position) in CASE', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = CASE(integerField > 10, textField, integerField < 5, integerField /'
+      );
+
+      expect(suggestions.map(({ label }) => label)).toContain(',');
+    });
+
+    it('does NOT suggest comma in CASE condition position with non-boolean field', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = CASE(booleanField, textField, textField /'
+      );
+
+      expect(suggestions.map(({ label }) => label)).not.toContain(',');
+    });
+
+    it('suggests comma in CASE condition position with boolean expression', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = CASE(booleanField, textField, integerField > 10 /'
+      );
+
+      expect(suggestions.map(({ label }) => label)).toContain(',');
+    });
+
     it('suggests only numeric fields and not operators in POW second parameter', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | EVAL result = POW(integerField, /');

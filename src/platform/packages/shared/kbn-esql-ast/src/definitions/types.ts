@@ -225,6 +225,8 @@ export interface Signature {
   minParams?: number;
   returnType: FunctionReturnType;
   license?: LicenseType;
+  repeatingParams?: FunctionParameter[];
+  trailingParam?: FunctionParameter;
 }
 
 export interface FunctionDefinition {

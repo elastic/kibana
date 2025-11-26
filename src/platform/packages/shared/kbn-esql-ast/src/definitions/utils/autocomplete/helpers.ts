@@ -397,17 +397,12 @@ function getValidFunctionSignaturesForPreviousArgs(
   // or BUCKET(longField, 2, /) => all signatures with (longField, integer, ...)
   const relevantFuncSignatures = fnDefinition.signatures.filter(
     (s) =>
-      s.params?.length >= argIndex &&
-      s.params
-        .slice(0, argIndex)
-        .every(({ type: dataType }, idx) =>
-          argMatchesParamType(
-            enrichedArgs[idx].dataType,
-            dataType,
-            isLiteral(enrichedArgs[idx]),
-            true
-          )
-        )
+      (s.params?.length >= argIndex || s.minParams != null || !!s.repeatingParams?.length) &&
+      enrichedArgs.slice(0, argIndex).every((arg, idx) => {
+        const param = getParamAtPosition(s, idx);
+
+        return param && argMatchesParamType(arg.dataType, param.type, isLiteral(arg), true);
+      })
   );
   return relevantFuncSignatures;
 }
@@ -437,14 +432,22 @@ function getCompatibleParamDefs(
   );
 
   // Then, get the compatible types to suggest for the next argument
+  const paramsAtPosition = relevantFuncSignatures
+    .map((signature) => getParamAtPosition(signature, argIndex))
+    .filter((param): param is NonNullable<ReturnType<typeof getParamAtPosition>> => param != null);
+
+  // Include trailingParam for signatures with repeatingParams when argIndex is beyond params
+  const trailingParams = relevantFuncSignatures
+    .map(({ repeatingParams, params, trailingParam }) =>
+      !!repeatingParams?.length && argIndex >= params.length ? trailingParam : null
+    )
+    .filter((param): param is NonNullable<ReturnType<typeof getParamAtPosition>> => param != null);
+
   const compatibleTypesToSuggestForArg = uniqBy(
-    relevantFuncSignatures
-      .map((signature) => getParamAtPosition(signature, argIndex))
-      .filter(
-        (param): param is NonNullable<ReturnType<typeof getParamAtPosition>> => param != null
-      ),
+    [...paramsAtPosition, ...trailingParams],
     (param) => `${param.type}-${param.constantOnly}`
   );
+
   return compatibleTypesToSuggestForArg;
 }
 

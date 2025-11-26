@@ -29,6 +29,11 @@ export const extraFunctions: FunctionDefinition[] = [
           { name: 'condition', type: 'boolean' },
           { name: 'value', type: 'any' },
         ],
+        repeatingParams: [
+          { name: 'condition', type: 'boolean' },
+          { name: 'value', type: 'any' },
+        ],
+        trailingParam: { name: 'default', type: 'any' },
         minParams: 2,
         returnType: 'unknown',
       },

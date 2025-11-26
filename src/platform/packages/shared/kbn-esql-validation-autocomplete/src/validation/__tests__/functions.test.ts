@@ -1086,4 +1086,21 @@ describe('function validation', () => {
       });
     });
   });
+
+  describe('CASE function validation', () => {
+    it('rejects CASE with non-boolean first argument', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors('FROM index | EVAL result = CASE(textField, keywordField)', [
+        getNoValidCallSignatureError('case', ['text', 'keyword']),
+      ]);
+    });
+
+    it('rejects CASE with non-boolean third argument (condition position)', async () => {
+      const { expectErrors } = await setup();
+      await expectErrors(
+        'FROM index | EVAL result = CASE(booleanField, textField, textField, keywordField)',
+        [getNoValidCallSignatureError('case', ['boolean', 'text', 'text', 'keyword'])]
+      );
+    });
+  });
 });

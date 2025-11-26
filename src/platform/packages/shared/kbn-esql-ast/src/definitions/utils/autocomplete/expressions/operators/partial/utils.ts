@@ -13,6 +13,7 @@ import type {
   ESQLUnknownItem,
   ESQLSingleAstItem,
 } from '../../../../../../types';
+import { isColumn } from '../../../../../../ast/is';
 import type { PartialOperatorDetection } from '../../types';
 import { endsWithInOrNotInToken, endsWithIsOrIsNotToken, endsWithLikeOrRlikeToken } from '../utils';
 import { Builder } from '../../../../../../builder';
@@ -41,7 +42,7 @@ function createSyntheticInfixOperatorNode(
   const hasOpenParen = /\(\s*$/.test(innerText);
 
   const right = hasOpenParen ? createEmptyListNode(textLength) : createPlaceholderNode(textLength);
-  const left = leftOperand ?? extractFieldFromText(innerText, fieldPattern);
+  const left = isColumn(leftOperand) ? leftOperand : extractFieldFromText(innerText, fieldPattern);
 
   return {
     type: 'function',

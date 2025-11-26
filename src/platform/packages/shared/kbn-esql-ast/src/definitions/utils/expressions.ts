@@ -117,13 +117,12 @@ export function getExpressionType(
     if (fnDefinition.name === 'case' && root.args.length) {
       /**
        * The CASE function doesn't fit our system of function definitions
-       * and needs special handling. This is imperfect, but it's a start because
-       * at least we know that the final argument to case will never be a conditional
-       * expression, always a result expression.
+       * and needs special handling. Since CASE uses repeatingParams with
+       * alternating (condition, value) pairs, we infer the return type from
+       * the last argument which is always a value (either from a pair or as default).
        *
-       * One problem with this is that if a false case is not provided, the return type
-       * will be null, which we aren't detecting. But this is ok because we consider
-       * userDefinedColumns and fields to be nullable anyways and account for that during validation.
+       * Note: If no default is provided and no condition matches, the return type
+       * will be null. We consider fields nullable anyway during validation.
        */
       return getExpressionType(root.args[root.args.length - 1], columns);
     }
@@ -199,7 +198,7 @@ export function getMatchingSignatures(
     }
 
     return givenTypes.every((givenType, index) => {
-      const param = getParamAtPosition(sig, index);
+      const param = getParamAtPosition(sig, index, givenTypes.length);
       if (!param) {
         return false;
       }
@@ -285,15 +284,44 @@ function matchesArity(signature: FunctionDefinition['signatures'][number], arity
  * Takes into account variadic functions (minParams), returning the last
  * parameter if the position is greater than the number of parameters.
  *
+ * For functions with repeating parameter patterns (like CASE), it cycles
+ * through `repeatingParams` after the initial `params` are exhausted.
+ *
+ * If `trailingParam` is defined and we're at the last position with an
+ * odd argument count, returns the trailing param (e.g., CASE default value).
+ *
  * @param signature
  * @param position
+ * @param totalArgs - Optional total number of arguments (needed for trailingParam detection)
  * @returns
  */
 export function getParamAtPosition(
-  { params, minParams }: FunctionDefinition['signatures'][number],
-  position: number
+  { params, minParams, repeatingParams, trailingParam }: FunctionDefinition['signatures'][number],
+  position: number,
+  totalArgs?: number
 ) {
-  return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
+  if (params.length > position) {
+    return params[position];
+  }
+
+  if (repeatingParams && repeatingParams.length > 0) {
+    // Check if this is the trailing param position
+    // For CASE: if totalArgs is odd and we're at the last position, it's the default value
+    if (
+      trailingParam &&
+      totalArgs !== undefined &&
+      position === totalArgs - 1 &&
+      (totalArgs - params.length) % repeatingParams.length !== 0
+    ) {
+      return trailingParam;
+    }
+
+    const repeatIndex = (position - params.length) % repeatingParams.length;
+
+    return repeatingParams[repeatIndex];
+  }
+
+  return minParams ? params[params.length - 1] : null;
 }
 
 // #endregion signature matching

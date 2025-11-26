@@ -13,7 +13,7 @@ import type {
   FunctionParameter,
   Signature,
 } from '../../../types';
-import { argMatchesParamType } from '../../expressions';
+import { argMatchesParamType, getParamAtPosition } from '../../expressions';
 import type { FunctionParameterContext } from './types';
 import { getValidSignaturesAndTypesToSuggestNext } from '../helpers';
 import type { ESQLFunction } from '../../../../types';
@@ -327,8 +327,19 @@ export class SignatureAnalyzer {
     hasMoreParams: boolean;
     isVariadic: boolean;
   } {
+    const repeatingSignature = this.signatures.find(
+      ({ repeatingParams }) => repeatingParams?.length
+    );
+
+    const param =
+      repeatingSignature && getParamAtPosition(repeatingSignature, this.currentParameterIndex);
+
+    const typeMatches = param
+      ? argMatchesParamType(expressionType, param.type, isLiteral, false)
+      : this.isCurrentTypeCompatible(expressionType, isLiteral);
+
     return {
-      typeMatches: this.isCurrentTypeCompatible(expressionType, isLiteral),
+      typeMatches,
       isLiteral,
       hasMoreParams: this.hasMoreParams,
       isVariadic: this.isVariadic,
