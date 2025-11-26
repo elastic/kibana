@@ -47,7 +47,6 @@ export const Default: StoryObj<typeof WorkflowStepExecutionDetails> = {
       executionTimeMs: 423,
       error: 'HTTP Error: 422 Unprocessable Entity',
     },
-    isLoading: false,
     workflowExecutionId: 'e2387d33-d626-42f0-a402-c379d4d30d42',
   },
 };
