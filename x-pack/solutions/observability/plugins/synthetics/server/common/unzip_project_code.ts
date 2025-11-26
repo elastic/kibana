@@ -6,7 +6,7 @@
  */
 
 import { join } from 'path';
-import { writeFile } from 'fs/promises';
+import { writeFile, deleteFile } from '@kbn/fs';
 import os from 'os';
 import AdmZip from 'adm-zip';
 
@@ -20,8 +20,8 @@ export function generateTempPath() {
 
 export async function unzipFile(content: string) {
   const decoded = Buffer.from(content, 'base64');
-  const pathToZip = generateTempPath();
-  await writeFile(pathToZip, decoded);
+  const pathAtVolume = `synthetics/${generateUniqueId()}`;
+  const { path: pathToZip } = await writeFile(pathAtVolume, decoded);
   const zip = new AdmZip(pathToZip);
   const zipEntries = zip.getEntries();
 
@@ -31,5 +31,8 @@ export async function unzipFile(content: string) {
     const entryData = entry.getData().toString();
     allData += entryData;
   }
+
+  await deleteFile(pathAtVolume);
+
   return allData;
 }
