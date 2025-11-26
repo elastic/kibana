@@ -143,42 +143,50 @@ const fieldSpecSchema = schema.object(fieldSpecSchemaFields, {
   unknowns: 'ignore',
 });
 
-export const dataViewSpecSchema = schema.object({
-  title: schema.string(),
-  version: schema.maybe(schema.string()),
-  id: schema.maybe(schema.string()),
-  type: schema.maybe(schema.string()),
-  timeFieldName: schema.maybe(schema.string()),
-  sourceFilters: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        value: schema.string(),
-        clientId: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-      })
-    )
-  ),
-  fields: schema.maybe(schema.recordOf(schema.string(), fieldSpecSchema)),
-  typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-  fieldFormats: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),
-  fieldAttrs: schema.maybe(
-    schema.recordOf(
-      schema.string(),
-      schema.object({
-        customLabel: schema.maybe(schema.string()),
-        customDescription: schema.maybe(
-          schema.string({
-            maxLength: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
-          })
-        ),
-        count: schema.maybe(schema.number()),
-      })
-    )
-  ),
-  allowNoIndex: schema.maybe(schema.boolean()),
-  runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSchema)),
-  name: schema.maybe(schema.string()),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
-  allowHidden: schema.maybe(schema.boolean()),
-});
+export const dataViewSpecSchema = schema.object(
+  {
+    title: schema.string(),
+    version: schema.maybe(schema.string()),
+    id: schema.maybe(schema.string()),
+    type: schema.maybe(schema.string()),
+    timeFieldName: schema.maybe(schema.string()),
+    sourceFilters: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          value: schema.string(),
+          clientId: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
+        })
+      )
+    ),
+    fields: schema.maybe(schema.recordOf(schema.string(), fieldSpecSchema)),
+    typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    fieldFormats: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),
+    fieldAttrs: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.object({
+          customLabel: schema.maybe(schema.string()),
+          customDescription: schema.maybe(
+            schema.string({
+              maxLength: MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
+            })
+          ),
+          count: schema.maybe(schema.number()),
+        })
+      )
+    ),
+    allowNoIndex: schema.maybe(schema.boolean()),
+    runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSchema)),
+    name: schema.maybe(schema.string()),
+    namespaces: schema.maybe(schema.arrayOf(schema.string())),
+    allowHidden: schema.maybe(schema.boolean()),
+  },
+  {
+    // Allow and ignore unknown properties to make the schema resilient to new properties
+    // added by the data-views plugin (e.g. 'managed'). This prevents validation errors
+    // when the DataViewSpec type is extended but our schema hasn't been updated yet.
+    unknowns: 'ignore',
+  }
+);
 
 export type DataViewSpec = TypeOf<typeof dataViewSpecSchema>;
