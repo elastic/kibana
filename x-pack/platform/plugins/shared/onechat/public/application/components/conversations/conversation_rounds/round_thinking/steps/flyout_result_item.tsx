@@ -15,10 +15,10 @@ import { i18n } from '@kbn/i18n';
 import { ThinkingItemLayout } from './thinking_item_layout';
 
 const labels = {
-  toolResponse: i18n.translate('xpack.onechat.thinking.toolResponseLabel', {
+  toolResponse: i18n.translate('xpack.onechat.flyoutResultItem.toolResponseLabel', {
     defaultMessage: 'Tool response',
   }),
-  inspectResponse: i18n.translate('xpack.onechat.thinking.inspectResponseLabel', {
+  inspectResponse: i18n.translate('xpack.onechat.flyoutResultItem.inspectResponseLabel', {
     defaultMessage: 'Inspect tool response details',
   }),
 };
@@ -46,12 +46,12 @@ export const FlyoutResultItem: React.FC<FlyoutResultItemProps> = ({
       <EuiText size="s">
         <p id={responseId} role="status" aria-label={labels.toolResponse}>
           <FormattedMessage
-            id="xpack.onechat.thinking.toolCallThinkingItem"
+            id="xpack.onechat.flyoutResultItem.toolCallThinkingItem"
             defaultMessage="Tool {tool} returned response. {inspectResponse}"
             values={{
               tool: (
                 <EuiCode
-                  aria-label={i18n.translate('xpack.onechat.thinking.toolName', {
+                  aria-label={i18n.translate('xpack.onechat.flyoutResultItem.toolName', {
                     defaultMessage: 'Tool {toolId}',
                     values: { toolId: step.tool_id },
                   })}
@@ -67,7 +67,7 @@ export const FlyoutResultItem: React.FC<FlyoutResultItemProps> = ({
                   aria-label={labels.inspectResponse}
                   role="button"
                 >
-                  {i18n.translate('xpack.onechat.conversation.roundResultsButton', {
+                  {i18n.translate('xpack.onechat.flyoutResultItem.roundResultsButton', {
                     defaultMessage: 'Inspect response',
                   })}
                 </EuiLink>
