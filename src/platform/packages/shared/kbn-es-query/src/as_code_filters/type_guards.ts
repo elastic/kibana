@@ -139,6 +139,18 @@ export function isConditionFilter(filter: AsCodeFilter): filter is AsCodeConditi
 }
 
 /**
+ * Type guard to check if a condition filter has a range operator
+ * Range filters are the only condition filters that can have a negate property
+ */
+export function isRangeConditionFilter(
+  filter: AsCodeFilter
+): filter is AsCodeConditionFilter & { condition: { operator: 'range' }; negate?: boolean } {
+  return (
+    isConditionFilter(filter) && 'condition' in filter && filter.condition.operator === 'range'
+  );
+}
+
+/**
  * Type guard to check if filter has a group property
  */
 export function isGroupFilter(filter: AsCodeFilter): filter is AsCodeGroupFilter {

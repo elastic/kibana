@@ -150,5 +150,7 @@ export type { ExecutionContextSearch } from './src/expressions/types';
 export {
   // Conversion utilities
   fromStoredFilter,
+  fromStoredFilters,
   toStoredFilter,
+  toStoredFilters,
 } from './src/as_code_filters';

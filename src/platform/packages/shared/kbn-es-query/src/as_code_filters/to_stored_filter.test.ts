@@ -11,6 +11,7 @@ import type { AsCodeFilter } from '@kbn/es-query-server';
 import type { StoredFilter } from './types';
 import { toStoredFilter } from './to_stored_filter';
 import { fromStoredFilter } from './from_stored_filter';
+import { isRangeConditionFilter } from './type_guards';
 import { FilterStateStore } from '../..';
 import { spatialFilterFixture } from '../__fixtures__/spatial_filter';
 
@@ -577,6 +578,56 @@ describe('toStoredFilter', () => {
       // Should have bool/should structure
       expect(storedFilter.query).toHaveProperty('bool.should');
       expect(storedFilter.query?.bool?.should).toHaveLength(3);
+    });
+
+    it('should preserve negate property for negated range filters through round-trip', () => {
+      // Range filters do NOT have an opposition operator (unlike IS/IS_NOT, EXISTS/NOT_EXISTS)
+      // so negate must be preserved through round-trip conversion
+      const originalFilter: StoredFilter = {
+        $state: { store: FilterStateStore.APP_STATE },
+        meta: {
+          disabled: false,
+          negate: true, // CRITICAL: Must be preserved
+          type: 'range',
+          key: 'bytes',
+          field: 'bytes',
+          params: { gte: 1000, lte: 5000 },
+          index: 'test-index',
+        },
+        query: {
+          range: {
+            bytes: { gte: 1000, lte: 5000 },
+          },
+        },
+      };
+
+      // Convert to AsCodeFilter
+      const asCodeFilter = fromStoredFilter(originalFilter);
+      expect(asCodeFilter).toBeDefined();
+
+      // Verify negate is preserved
+      if (asCodeFilter && isRangeConditionFilter(asCodeFilter)) {
+        expect(asCodeFilter.negate).toBe(true);
+      }
+
+      // Verify it's a condition filter with range operator
+      expect('condition' in asCodeFilter!).toBe(true);
+      if ('condition' in asCodeFilter!) {
+        expect(asCodeFilter!.condition.operator).toBe('range');
+        expect(asCodeFilter!.condition.field).toBe('bytes');
+        if ('value' in asCodeFilter!.condition) {
+          expect(asCodeFilter!.condition.value).toEqual({ gte: 1000, lte: 5000 });
+        }
+      }
+
+      // Convert back to StoredFilter
+      const roundTripFilter = toStoredFilter(asCodeFilter!) as StoredFilter;
+
+      // CRITICAL: negate must be preserved through round-trip
+      expect(roundTripFilter.meta.negate).toBe(true);
+      expect(roundTripFilter.meta.type).toBe('range');
+      expect(roundTripFilter.meta.key).toBe('bytes');
+      expect(roundTripFilter.query?.range?.bytes).toEqual({ gte: 1000, lte: 5000 });
     });
   });
 

@@ -500,3 +500,24 @@ function convertFromDSLFilter(
     },
   };
 }
+
+/**
+ * Convert array of AsCode filters to stored filters, filtering out conversion failures
+ *
+ * This helper encapsulates the common pattern of converting an array of AsCode filters
+ * and filtering out any that fail to convert (return undefined).
+ *
+ * @param filters Array of AsCode filters to convert
+ * @param logger Optional logger for conversion warnings
+ * @returns Array of successfully converted stored filters (undefined values filtered out), or undefined if input is undefined
+ *
+ * @public
+ */
+export function toStoredFilters(
+  filters: AsCodeFilter[] | undefined,
+  logger?: Logger
+): StoredFilter[] | undefined {
+  return filters
+    ?.map((f) => toStoredFilter(f, logger))
+    .filter((f): f is StoredFilter => f !== undefined);
+}

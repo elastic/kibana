@@ -119,7 +119,7 @@ const commonBasePropertiesSchema = schema.object({
 });
 
 /**
- * Base properties for DSL and group filters (includes negate)
+ * Base properties for range, DSL and group filters (includes negate)
  * Negate is semantically meaningful for DSL/group filters where it applies to the entire filter/group
  */
 const basePropertiesWithNegateSchema = commonBasePropertiesSchema.extends({
@@ -207,7 +207,16 @@ const existsConditionSchema = conditionFieldSchema.extends({
 });
 
 /**
- * Discriminated union schema for simple filter conditions with proper operator/value type combinations
+ * Discriminated union schema for simple filter conditions
+ * These operators encode negation in the operator itself (is_not, not_exists, is_not_one_of)
+ */
+const standardConditionSchema = schema.oneOf(
+  [singleConditionSchema, oneOfConditionSchema, existsConditionSchema],
+  { meta: { description: 'A filter condition with negation encoded in the operator' } }
+);
+
+/**
+ * Full condition schema including range (for internal use in groups)
  */
 const conditionSchema = schema.oneOf(
   [singleConditionSchema, oneOfConditionSchema, rangeConditionSchema, existsConditionSchema],
@@ -224,14 +233,32 @@ interface RecursiveType {
 }
 
 /**
- * Schema for condition filters
- * Note: Uses commonBasePropertiesSchema WITHOUT negate since negation is encoded in the operator
- * (is_not, is_not_one_of, not_exists)
+ * Schema for condition filters with operators that have opposition operators
+ * These use negation operators (is_not, is_not_one_of, not_exists) instead of negate property
  */
-export const asCodeConditionFilterSchema = commonBasePropertiesSchema.extends(
+const asCodeStandardConditionFilterSchema = commonBasePropertiesSchema.extends(
   {
-    condition: conditionSchema,
+    condition: standardConditionSchema,
   },
+  { meta: { description: 'Standard condition filter' } }
+);
+
+/**
+ * Schema for range condition filters
+ * Range filters need negate property since RANGE operator has no opposition operator
+ */
+const asCodeRangeConditionFilterSchema = basePropertiesWithNegateSchema.extends(
+  {
+    condition: rangeConditionSchema,
+  },
+  { meta: { description: 'Range condition filter with optional negate property' } }
+);
+
+/**
+ * Discriminated union schema combining all condition filter types
+ */
+export const asCodeConditionFilterSchema = schema.oneOf(
+  [asCodeStandardConditionFilterSchema, asCodeRangeConditionFilterSchema],
   { meta: { description: 'Condition filter' } }
 );
 
