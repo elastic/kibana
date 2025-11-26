@@ -66,18 +66,6 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(({ children, isCollapsed
     if (node) {
       const elements = getFocusableElements(node);
       updateTabIndices(elements);
-
-      // Add aria-describedby with keyboard navigation instructions to the first focusable element only
-      if (elements.length > 0) {
-        const firstElement = elements[0];
-        const existingDescribedBy = firstElement.getAttribute('aria-describedby');
-        if (!existingDescribedBy?.includes(footerNavigationInstructionsId)) {
-          const enhancedDescribedBy = existingDescribedBy
-            ? `${footerNavigationInstructionsId} ${existingDescribedBy}`
-            : footerNavigationInstructionsId;
-          firstElement.setAttribute('aria-describedby', enhancedDescribedBy);
-        }
-      }
     }
   };
 
