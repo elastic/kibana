@@ -13,13 +13,12 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiSpacer,
   EuiSplitPanel,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { ToolCallStep } from '@kbn/onechat-common';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 const labels = {
@@ -54,12 +53,8 @@ const Accordion = ({ children, accordionContent }: AccordionProps) => {
       forceState={isOpen ? 'open' : 'closed'}
       onToggle={(open) => setIsOpen(open)}
     >
-      <EuiPanel
-        color="plain"
-        css={css`
-          padding-left: 0px;
-        `}
-      >
+      <>
+        <EuiSpacer size="m" />
         <EuiSplitPanel.Outer hasBorder hasShadow={false}>
           <EuiSplitPanel.Inner color="plain" grow={false} paddingSize="m">
             <EuiText size="s">
@@ -72,7 +67,7 @@ const Accordion = ({ children, accordionContent }: AccordionProps) => {
             </EuiCodeBlock>
           </EuiSplitPanel.Inner>
         </EuiSplitPanel.Outer>
-      </EuiPanel>
+      </>
     </EuiAccordion>
   );
 };
