@@ -25,7 +25,7 @@ import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 
-const chatAgentGraphName = 'default-onechat-agent';
+const chatAgentGraphName = 'onechat-deep-agent';
 
 export type RunChatAgentParams = Omit<RunAgentParams, 'mode'> & {
   browserApiTools?: BrowserApiToolMetadata[];
