@@ -25,6 +25,7 @@ import type {
 } from '@kbn/core-data-streams-server';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { firstValueFrom } from 'rxjs';
 import { DataStreamsConfig, config, type DataStreamsConfigType } from './config';
 
 interface StartDeps {
@@ -43,10 +44,11 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
     this.logger = this.coreContext.logger.get('data-streams');
   }
 
-  setup() {
-    const dataStreamsConfig = this.coreContext.configService.atPathSync<DataStreamsConfigType>(
-      config.path
+  async setup() {
+    const dataStreamsConfig = await firstValueFrom(
+      this.coreContext.configService.atPath<DataStreamsConfigType>(config.path)
     );
+
     this.config = new DataStreamsConfig(dataStreamsConfig);
 
     return {
