@@ -9,9 +9,13 @@ import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import type { AssetReference } from '@kbn/fleet-plugin/common/types';
-import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
+import {
+  FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+  FLEET_INSTALL_FORMAT_VERSION,
+} from '@kbn/fleet-plugin/server/constants';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
+import { cleanFleetIndices } from '../space_awareness/helpers';
 
 function checkErrorWithResponseDataOrThrow(err: any) {
   if (!err?.response?.data) {
@@ -60,6 +64,56 @@ export default function (providerContext: FtrProviderContext) {
         pkgName,
         es,
         kibanaServer,
+      });
+    });
+
+    describe('global assets', () => {
+      before(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+
+        await cleanFleetIndices(es);
+        await fleetAndAgents.setup();
+
+        // Delete all fleet component templates and pipelines to simulate missing global assets
+        const fleetIndexTemplateNames = await es.indices
+          .getIndexTemplate({ name: '*' })
+          .then((res) =>
+            res.index_templates
+              .filter((template) => template.index_template._meta?.managed_by === 'fleet')
+              .map((template) => template.name)
+          );
+        await es.indices.deleteDataStream(
+          { name: '.logs-endpoint.*,logs-*,metrics-*' },
+          {
+            ignore: [404],
+          }
+        );
+        if (fleetIndexTemplateNames.length) {
+          await es.indices.deleteIndexTemplate({ name: fleetIndexTemplateNames.join(',') });
+        }
+        await es.cluster.deleteComponentTemplate(
+          {
+            name: FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+          },
+          {
+            ignore: [404],
+          }
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+
+        await cleanFleetIndices(es);
+      });
+
+      it('should install global assets if they are missing during package install', async () => {
+        const res = await installPackage(pkgName, pkgVersion);
+        const template = await es.cluster.getComponentTemplate({
+          name: FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+        });
+
+        expect(template.component_templates.length).to.be(1);
       });
     });
 
