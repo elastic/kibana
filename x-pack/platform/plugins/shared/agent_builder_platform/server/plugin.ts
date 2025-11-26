@@ -15,6 +15,7 @@ import type {
   AgentBuilderPlatformPluginStart,
 } from './types';
 import { registerTools } from './register_tools';
+import { registerAttachmentTypes } from './attachment_types';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -40,6 +41,10 @@ export class AgentBuilderPlatformPlugin
     setupDeps: PluginSetupDependencies
   ): AgentBuilderPlatformPluginSetup {
     registerTools({
+      coreSetup,
+      setupDeps,
+    });
+    registerAttachmentTypes({
       coreSetup,
       setupDeps,
     });
