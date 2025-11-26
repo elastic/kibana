@@ -71,6 +71,15 @@ describe('muteAll', () => {
       indices: ['.alerts-default'],
       logger: context.logger,
     });
+    expect(savedObjectsMock.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      'rule-123',
+      expect.objectContaining({
+        muteAll: true,
+        mutedInstanceIds: [],
+      }),
+      { version: '9.0.0' }
+    );
   });
 
   it('should throw Boom.badRequest for invalid params', async () => {
@@ -83,15 +92,20 @@ describe('muteAll', () => {
     );
   });
 
-  it('should not call alertsService when no alert indices exist', async () => {
+  it('should throw error when no alert indices exist', async () => {
     (context.getAlertIndicesAlias as jest.Mock).mockReturnValue([]);
+    muteAllAlertsMock.mockRejectedValueOnce(
+      new Error('Unable to mute all alerts for ruleId: rule-123 - no alert indices available')
+    );
     const validParams = {
       id: 'rule-123',
     };
 
-    await muteAll(context, validParams);
-
-    expect(muteAllAlertsMock).not.toHaveBeenCalled();
+    await expect(muteAll(context, validParams)).rejects.toThrow(
+      'Unable to mute all alerts for ruleId: rule-123 - no alert indices available'
+    );
+    expect(muteAllAlertsMock).toHaveBeenCalled();
+    expect(savedObjectsMock.update).toHaveBeenCalled();
   });
 
   it('should clear mutedInstanceIds when muting all alerts', async () => {
@@ -133,7 +147,7 @@ describe('muteAll', () => {
     global.Date = realDate;
   });
 
-  it('throws error and does not update rule when alertsService fails', async () => {
+  it('throws error when alertsService fails but rule is still updated', async () => {
     const loggerMock = loggingSystemMock.create().get();
     const muteAllAlertsErrorMock = jest
       .fn()
@@ -151,6 +165,15 @@ describe('muteAll', () => {
     };
 
     await expect(muteAll(contextWithLogger, validParams)).rejects.toThrow('ES connection failed');
-    expect(savedObjectsMock.update).not.toHaveBeenCalled();
+    // Rule is updated first, before ES call fails
+    expect(savedObjectsMock.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      'rule-123',
+      expect.objectContaining({
+        muteAll: true,
+        mutedInstanceIds: [],
+      }),
+      { version: '9.0.0' }
+    );
   });
 });
