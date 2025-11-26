@@ -348,7 +348,7 @@ function convertPhraseFilter(
     return {
       ...stripNegateProperty(baseProperties),
       condition,
-    };
+    } as AsCodeConditionFilter;
   } catch (error) {
     // If conversion fails, fall back to DSL
     return convertCustomFilter(filter, baseProperties);
@@ -364,7 +364,7 @@ function convertPhrasesFilter(
     return {
       ...stripNegateProperty(baseProperties),
       condition,
-    };
+    } as AsCodeConditionFilter;
   } catch (error) {
     // If conversion fails, fall back to DSL
     return convertCustomFilter(filter, baseProperties);
@@ -383,10 +383,13 @@ function convertRangeFilter(
 
   try {
     const condition = convertToSimpleCondition(filter);
+    // IMPORTANT: Range filters do NOT strip negate property
+    // Unlike IS/IS_NOT, EXISTS/NOT_EXISTS, IS_ONE_OF/IS_NOT_ONE_OF which have opposition operators,
+    // RANGE has no opposition operator, so negate must be preserved in base properties
     return {
-      ...stripNegateProperty(baseProperties),
+      ...baseProperties,
       condition,
-    };
+    } as AsCodeConditionFilter;
   } catch (error) {
     // If conversion fails, fall back to DSL
     return convertCustomFilter(filter, baseProperties);
@@ -402,7 +405,7 @@ function convertExistsFilter(
     return {
       ...stripNegateProperty(baseProperties),
       condition,
-    };
+    } as AsCodeConditionFilter;
   } catch (error) {
     // If conversion fails, fall back to DSL
     return convertCustomFilter(filter, baseProperties);
@@ -481,4 +484,25 @@ function validateHomogeneousArray(values: Array<string | number | boolean>, cont
       );
     }
   }
+}
+
+/**
+ * Convert array of stored filters to AsCode filters, filtering out conversion failures
+ *
+ * This helper encapsulates the common pattern of converting an array of stored filters
+ * and filtering out any that fail to convert (return undefined).
+ *
+ * @param filters Array of stored filters to convert
+ * @param logger Optional logger for conversion warnings
+ * @returns Array of successfully converted AsCode filters (undefined values filtered out), or undefined if input is undefined
+ *
+ * @public
+ */
+export function fromStoredFilters(
+  filters: unknown[] | undefined,
+  logger?: Logger
+): AsCodeFilter[] | undefined {
+  return filters
+    ?.map((f) => fromStoredFilter(f, logger))
+    .filter((f): f is AsCodeFilter => f !== undefined);
 }

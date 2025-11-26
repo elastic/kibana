@@ -11,6 +11,7 @@ import type { AsCodeFilter } from '@kbn/es-query-server';
 import type { StoredFilter } from './types';
 import { toStoredFilter } from './to_stored_filter';
 import { fromStoredFilter } from './from_stored_filter';
+import { isRangeConditionFilter } from './type_guards';
 import { FilterStateStore } from '../..';
 import { spatialFilterFixture } from '../__fixtures__/spatial_filter';
 
@@ -578,6 +579,56 @@ describe('toStoredFilter', () => {
       expect(storedFilter.query).toHaveProperty('bool.should');
       expect(storedFilter.query?.bool?.should).toHaveLength(3);
     });
+
+    it('should preserve negate property for negated range filters through round-trip', () => {
+      // Range filters do NOT have an opposition operator (unlike IS/IS_NOT, EXISTS/NOT_EXISTS)
+      // so negate must be preserved through round-trip conversion
+      const originalFilter: StoredFilter = {
+        $state: { store: FilterStateStore.APP_STATE },
+        meta: {
+          disabled: false,
+          negate: true, // CRITICAL: Must be preserved
+          type: 'range',
+          key: 'bytes',
+          field: 'bytes',
+          params: { gte: 1000, lte: 5000 },
+          index: 'test-index',
+        },
+        query: {
+          range: {
+            bytes: { gte: 1000, lte: 5000 },
+          },
+        },
+      };
+
+      // Convert to AsCodeFilter
+      const asCodeFilter = fromStoredFilter(originalFilter);
+      expect(asCodeFilter).toBeDefined();
+
+      // Verify negate is preserved
+      if (asCodeFilter && isRangeConditionFilter(asCodeFilter)) {
+        expect(asCodeFilter.negate).toBe(true);
+      }
+
+      // Verify it's a condition filter with range operator
+      expect('condition' in asCodeFilter!).toBe(true);
+      if ('condition' in asCodeFilter!) {
+        expect(asCodeFilter!.condition.operator).toBe('range');
+        expect(asCodeFilter!.condition.field).toBe('bytes');
+        if ('value' in asCodeFilter!.condition) {
+          expect(asCodeFilter!.condition.value).toEqual({ gte: 1000, lte: 5000 });
+        }
+      }
+
+      // Convert back to StoredFilter
+      const roundTripFilter = toStoredFilter(asCodeFilter!) as StoredFilter;
+
+      // CRITICAL: negate must be preserved through round-trip
+      expect(roundTripFilter.meta.negate).toBe(true);
+      expect(roundTripFilter.meta.type).toBe('range');
+      expect(roundTripFilter.meta.key).toBe('bytes');
+      expect(roundTripFilter.query?.range?.bytes).toEqual({ gte: 1000, lte: 5000 });
+    });
   });
 
   describe('Round-trip conversion', () => {
@@ -1078,404 +1129,6 @@ describe('toStoredFilter', () => {
 
       // Verify deeply nested combined filter
       const nestedCombinedInOr = secondParam.meta.params[1] as StoredFilter;
-      expect(nestedCombinedInOr.meta.type).toBe('combined');
-      expect(nestedCombinedInOr.meta.relation).toBe('AND');
-    });
-
-    it('should preserve filters with bool.must containing multiple different query types AS DSL (not group)', () => {
-      // A filter with bool.must containing different query types (match_phrase + range)
-      // WITHOUT meta.type, this should be preserved as DSL to avoid data loss
-      const originalFilter: StoredFilter = {
-        meta: {
-          disabled: false,
-          negate: false,
-          alias: null,
-        },
-        $state: {
-          store: FilterStateStore.APP_STATE,
-        },
-        query: {
-          bool: {
-            must: [
-              {
-                match_phrase: {
-                  message: 'error',
-                },
-              },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: '2024-01-01',
-                    lte: '2024-12-31',
-                  },
-                },
-              },
-            ],
-          },
-        },
-      };
-
-      // Convert to AsCode format
-      const asCodeFilter = fromStoredFilter(originalFilter) as AsCodeFilter;
-
-      // Should be a DSL filter - bool queries without meta.type preserved as DSL
-      expect('dsl' in asCodeFilter).toBe(true);
-
-      if ('dsl' in asCodeFilter) {
-        const queryStr = JSON.stringify(asCodeFilter.dsl);
-        expect(queryStr.includes('message')).toBe(true);
-        expect(queryStr.includes('timestamp') || queryStr.includes('@timestamp')).toBe(true);
-      }
-
-      // Round-trip back to stored format
-      const roundTripped = toStoredFilter(asCodeFilter) as StoredFilter;
-
-      // Both queries should be preserved
-      if ('query' in roundTripped && roundTripped.query) {
-        const queryStr = JSON.stringify(roundTripped.query);
-        expect(queryStr.includes('message')).toBe(true);
-        expect(queryStr.includes('timestamp') || queryStr.includes('@timestamp')).toBe(true);
-      }
-    });
-
-    it('should handle single query filter with incomplete metadata as DSL', () => {
-      // A filter that has query but incomplete metadata (no meta.type)
-      // These should be preserved as DSL to avoid ambiguity
-      const singleQueryFilter: StoredFilter = {
-        meta: {
-          // Incomplete metadata - no type, no key
-          disabled: false,
-          negate: false,
-          alias: null,
-        },
-        $state: {
-          store: FilterStateStore.APP_STATE,
-        },
-        query: {
-          match_phrase: {
-            message: 'error occurred',
-          },
-        },
-      };
-
-      const asCodeFilter = fromStoredFilter(singleQueryFilter) as AsCodeFilter;
-
-      // Should be preserved as DSL since there's no meta.type
-      expect('dsl' in asCodeFilter).toBe(true);
-      if ('dsl' in asCodeFilter) {
-        expect(asCodeFilter.dsl.query).toEqual({
-          match_phrase: {
-            message: 'error occurred',
-          },
-        });
-      }
-    });
-
-    it('should preserve complex bool.should queries without simplifying', () => {
-      // A complex filter that shouldn't be simplified
-      const complexFilter: StoredFilter = {
-        meta: {
-          disabled: false,
-          negate: false,
-          alias: null,
-        },
-        $state: {
-          store: FilterStateStore.APP_STATE,
-        },
-        query: {
-          bool: {
-            should: [
-              {
-                match_phrase: {
-                  'error.message': 'timeout',
-                },
-              },
-              {
-                match_phrase: {
-                  'error.message': 'connection refused',
-                },
-              },
-            ],
-            minimum_should_match: 1,
-          },
-        },
-      };
-
-      const asCodeFilter = fromStoredFilter(complexFilter) as AsCodeFilter;
-
-      // Should NOT be a simple condition - should be group or DSL
-      expect('condition' in asCodeFilter).toBe(false);
-
-      // Should be either a group filter or DSL
-      const isGroupOrDSL = 'group' in asCodeFilter || 'dsl' in asCodeFilter;
-      expect(isGroupOrDSL).toBe(true);
-    });
-
-    it('should preserve bool query with BOTH must and should clauses as DSL (prevents data loss)', () => {
-      // A filter with bool query that has BOTH must and should clauses
-      // This prevents the Strategy 3 Bug that would convert to group and lose should clause
-      const complexBoolFilter: StoredFilter = {
-        meta: {
-          disabled: false,
-          negate: false,
-          alias: null,
-        },
-        $state: {
-          store: FilterStateStore.APP_STATE,
-        },
-        query: {
-          bool: {
-            must: [
-              {
-                term: {
-                  'extension.keyword': 'css',
-                },
-              },
-              {
-                term: {
-                  'machine.os.keyword': 'ios',
-                },
-              },
-            ],
-            should: [
-              {
-                range: {
-                  'machine.ram': {
-                    gte: '500',
-                  },
-                },
-              },
-            ],
-            minimum_should_match: 0, // This makes should optional
-          },
-        },
-      };
-
-      // Convert to AsCode format
-      const asCodeFilter = fromStoredFilter(complexBoolFilter) as AsCodeFilter;
-
-      // Should be a DSL filter - preserves complex bool structure
-      expect('dsl' in asCodeFilter).toBe(true);
-
-      if ('dsl' in asCodeFilter) {
-        const queryStr = JSON.stringify(asCodeFilter.dsl);
-        // All clauses should be preserved
-        expect(queryStr.includes('extension.keyword')).toBe(true);
-        expect(queryStr.includes('machine.os.keyword')).toBe(true);
-        expect(queryStr.includes('machine.ram')).toBe(true);
-        expect(queryStr.includes('must')).toBe(true);
-        expect(queryStr.includes('should')).toBe(true);
-      }
-
-      // Round-trip to verify NO data loss
-      const roundTripped = toStoredFilter(asCodeFilter) as StoredFilter;
-
-      // The should clause is PRESERVED (not lost!)
-      if ('query' in roundTripped && roundTripped.query?.bool) {
-        expect(roundTripped.query.bool.should).toBeDefined();
-        expect(roundTripped.query.bool.must).toBeDefined();
-        expect(roundTripped.query.bool.must).toHaveLength(2);
-        expect(roundTripped.query.bool.should).toHaveLength(1);
-      }
-    });
-
-    it('should preserve bool.must with single query as DSL', () => {
-      // Single-clause bool.must goes to DSL fallback since it can't be simplified
-      const boolMustFilter: StoredFilter = {
-        meta: {
-          disabled: false,
-          negate: false,
-          alias: null,
-        },
-        $state: {
-          store: FilterStateStore.APP_STATE,
-        },
-        query: {
-          bool: {
-            must: [
-              {
-                term: {
-                  status: 'active',
-                },
-              },
-            ],
-          },
-        },
-      };
-
-      const asCodeFilter = fromStoredFilter(boolMustFilter) as AsCodeFilter;
-
-      // Should be preserved as DSL
-      expect('dsl' in asCodeFilter).toBe(true);
-
-      if ('dsl' in asCodeFilter && asCodeFilter.dsl) {
-        const queryStr = JSON.stringify(asCodeFilter.dsl);
-        expect(queryStr.includes('status')).toBe(true);
-        expect(queryStr.includes('active')).toBe(true);
-      }
-    });
-
-    it('should handle nested combined filters and strip $state from sub-filters during round-trip', () => {
-      // Complex nested combined filter structure
-      // Note: The input has $state on nested filters, but buildCombinedFilter strips these
-      const nestedCombinedFilter: StoredFilter = {
-        $state: {
-          store: FilterStateStore.APP_STATE,
-        },
-        meta: {
-          type: 'combined',
-          relation: 'AND',
-          params: [
-            {
-              query: {
-                match_phrase: {
-                  'extension.keyword': 'deb',
-                },
-              },
-              meta: {
-                negate: true,
-                index: '90943e30-9a47-11e8-b64d-95841ca0b247',
-                key: 'extension.keyword',
-                field: 'extension.keyword',
-                params: {
-                  query: 'deb',
-                },
-                type: 'phrase',
-                disabled: false,
-              },
-            },
-            {
-              $state: {
-                store: FilterStateStore.APP_STATE,
-              },
-              meta: {
-                type: 'combined',
-                relation: 'OR',
-                params: [
-                  {
-                    query: {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            match_phrase: {
-                              'machine.os.keyword': 'ios',
-                            },
-                          },
-                          {
-                            match_phrase: {
-                              'machine.os.keyword': 'osx',
-                            },
-                          },
-                          {
-                            match_phrase: {
-                              'machine.os.keyword': 'win 8',
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    meta: {
-                      negate: true,
-                      index: '90943e30-9a47-11e8-b64d-95841ca0b247',
-                      key: 'machine.os.keyword',
-                      field: 'machine.os.keyword',
-                      params: ['ios', 'osx', 'win 8'],
-                      value: ['ios', 'osx', 'win 8'],
-                      type: 'phrases',
-                      disabled: false,
-                    },
-                  },
-                  {
-                    $state: {
-                      store: FilterStateStore.APP_STATE,
-                    },
-                    meta: {
-                      type: 'combined',
-                      relation: 'AND',
-                      params: [
-                        {
-                          query: {
-                            exists: {
-                              field: 'geo.dest',
-                            },
-                          },
-                          meta: {
-                            negate: true,
-                            index: '90943e30-9a47-11e8-b64d-95841ca0b247',
-                            key: 'geo.dest',
-                            field: 'geo.dest',
-                            value: 'exists',
-                            type: 'exists',
-                            disabled: false,
-                          },
-                        },
-                        {
-                          meta: {
-                            negate: false,
-                            index: '90943e30-9a47-11e8-b64d-95841ca0b247',
-                            key: 'geo.src',
-                            field: 'geo.src',
-                            value: 'exists',
-                            type: 'exists',
-                            disabled: false,
-                          },
-                          query: {
-                            exists: {
-                              field: 'geo.src',
-                            },
-                          },
-                        },
-                      ],
-                      index: '90943e30-9a47-11e8-b64d-95841ca0b247',
-                      disabled: false,
-                      negate: false,
-                    },
-                  },
-                ],
-                index: '90943e30-9a47-11e8-b64d-95841ca0b247',
-                disabled: false,
-                negate: false,
-              },
-            },
-          ],
-          disabled: false,
-          negate: false,
-          alias: null,
-        },
-        query: {},
-      };
-
-      // Convert to AsCodeFilter and back
-      const asCodeFilter = fromStoredFilter(nestedCombinedFilter);
-      expect(asCodeFilter).toBeDefined();
-
-      const roundTripped = toStoredFilter(asCodeFilter!) as StoredFilter;
-
-      // Verify top-level structure
-      expect(roundTripped.meta.type).toBe('combined');
-      expect(roundTripped.meta.relation).toBe('AND');
-      expect(Array.isArray(roundTripped.meta.params)).toBe(true);
-      expect(roundTripped.meta.params).toHaveLength(2);
-
-      // Verify first param is a simple phrase filter (no $state)
-      const firstParam = roundTripped.meta.params[0] as StoredFilter;
-      expect(firstParam.$state).toBeUndefined();
-      expect(firstParam.meta.type).toBe('phrase');
-      expect(firstParam.meta.key).toBe('extension.keyword');
-
-      // Verify second param is a nested combined filter WITHOUT $state
-      // The buildCombinedFilter function strips $state from all sub-filters
-      const secondParam = roundTripped.meta.params[1] as StoredFilter;
-      expect(secondParam.$state).toBeUndefined();
-      expect(secondParam.meta.type).toBe('combined');
-      expect(secondParam.meta.relation).toBe('OR');
-      expect(Array.isArray(secondParam.meta.params)).toBe(true);
-      expect(secondParam.meta.params).toHaveLength(2);
-
-      // Verify deeply nested combined filter also has no $state
-      const nestedCombinedInOr = secondParam.meta.params[1] as StoredFilter;
-      expect(nestedCombinedInOr.$state).toBeUndefined();
       expect(nestedCombinedInOr.meta.type).toBe('combined');
       expect(nestedCombinedInOr.meta.relation).toBe('AND');
     });

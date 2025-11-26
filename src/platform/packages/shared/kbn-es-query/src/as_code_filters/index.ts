@@ -11,9 +11,9 @@
  * As Code Filter API
  *
  * This module provides utilities for working with As Code filters in Kibana's
- * as Code API endpoints, including type definitions and conversion utilities.
+ * as Code API endpoints.
  */
 
 // Conversion utilities
-export { fromStoredFilter } from './from_stored_filter';
-export { toStoredFilter } from './to_stored_filter';
+export { fromStoredFilter, fromStoredFilters } from './from_stored_filter';
+export { toStoredFilter, toStoredFilters } from './to_stored_filter';

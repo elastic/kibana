@@ -9,7 +9,12 @@
 
 import type { AsCodeFilter } from '@kbn/es-query-server';
 import { fromStoredFilter } from './from_stored_filter';
-import { isConditionFilter, isGroupFilter, isDSLFilter } from './type_guards';
+import {
+  isConditionFilter,
+  isGroupFilter,
+  isDSLFilter,
+  isRangeConditionFilter,
+} from './type_guards';
 import { spatialFilterFixture } from '../__fixtures__/spatial_filter';
 
 describe('fromStoredFilter', () => {
@@ -178,6 +183,47 @@ describe('fromStoredFilter', () => {
       expect(isConditionFilter(result)).toBe(true);
       if (isConditionFilter(result)) {
         expect(result.condition.operator).toBe('is_not');
+      }
+    });
+
+    it('should preserve negate property for negated range filter', () => {
+      // Range filters do NOT have an opposition operator (unlike IS/IS_NOT, EXISTS/NOT_EXISTS)
+      // so negate must be preserved in the base properties
+      const negatedRangeFilter = {
+        meta: {
+          disabled: false,
+          negate: true, // CRITICAL: This must be preserved
+          alias: null,
+          key: 'bytes',
+          field: 'bytes',
+          params: { gte: 1000, lte: 5000 },
+          type: 'range',
+          index: 'test-index',
+        },
+        query: {
+          range: {
+            bytes: { gte: 1000, lte: 5000 },
+          },
+        },
+        $state: { store: 'appState' },
+      };
+
+      const result = fromStoredFilter(negatedRangeFilter);
+
+      expect(result).toBeDefined();
+      expect(isConditionFilter(result!)).toBe(true);
+      // CRITICAL: negate property MUST be preserved for range filters
+      if (isRangeConditionFilter(result!)) {
+        expect(result.negate).toBe(true);
+      }
+
+      if (isConditionFilter(result!)) {
+        expect(result!.condition).toEqual({
+          field: 'bytes',
+          operator: 'range',
+          value: { gte: 1000, lte: 5000 },
+        });
+        expect(result!.dataViewId).toBe('test-index');
       }
     });
   });
