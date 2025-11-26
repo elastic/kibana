@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/core-elasticsearch-server-internal'
   - '@kbn/es-mappings'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/config-schema'
 tags:
   - shared-server
   - package
