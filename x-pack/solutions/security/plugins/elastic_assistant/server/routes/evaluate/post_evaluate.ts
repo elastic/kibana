@@ -456,7 +456,7 @@ export const postEvaluateRoute = (
           );
 
           // Create Phoenix client for running experiments
-          const phoenixClient = createPhoenixClient(phoenixConfig);
+          const phoenixClient = await createPhoenixClient(phoenixConfig);
 
           // Run an evaluation for each graph so they show up separately (resulting in each dataset run grouped by connector)
           await asyncForEach(

@@ -45,7 +45,7 @@ export const runEvaluations = async ({
   evaluationId: string;
 }): Promise<void> => {
   // Create Phoenix client
-  const phoenixClient = createPhoenixClient(phoenixConfig);
+  const phoenixClient = await createPhoenixClient(phoenixConfig);
 
   await asyncForEach(graphs, async ({ connector, graph, llmType, name, traceOptions }) => {
     const subject = `connector "${connector.name}" (${llmType}), running experiment "${name}"`;

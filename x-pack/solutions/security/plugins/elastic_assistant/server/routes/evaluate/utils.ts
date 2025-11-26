@@ -6,8 +6,6 @@
  */
 
 import type { PhoenixClient } from '@arizeai/phoenix-client';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { createClient } from '@arizeai/phoenix-client';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export interface PhoenixConfig {
@@ -16,9 +14,12 @@ export interface PhoenixConfig {
 }
 
 /**
- * Creates a Phoenix client from the provided configuration
+ * Creates a Phoenix client from the provided configuration.
+ * Uses dynamic import to avoid ESM/CJS compatibility issues in Jest.
  */
-export const createPhoenixClient = (config: PhoenixConfig): PhoenixClient => {
+export const createPhoenixClient = async (config: PhoenixConfig): Promise<PhoenixClient> => {
+  // eslint-disable-next-line import/no-extraneous-dependencies
+  const { createClient } = await import('@arizeai/phoenix-client');
   return createClient({ options: config });
 };
 
@@ -49,7 +50,7 @@ export const fetchPhoenixDataset = async (
   }
 
   try {
-    const client = createPhoenixClient(phoenixConfig);
+    const client = await createPhoenixClient(phoenixConfig);
 
     // First, find the dataset by name
     const datasetsResponse = await client.GET('/v1/datasets', {
@@ -104,7 +105,7 @@ export const fetchPhoenixDatasets = async ({
   phoenixConfig: PhoenixConfig;
 }): Promise<string[]> => {
   try {
-    const client = createPhoenixClient(phoenixConfig);
+    const client = await createPhoenixClient(phoenixConfig);
 
     const datasetsResponse = await client.GET('/v1/datasets', {});
 
