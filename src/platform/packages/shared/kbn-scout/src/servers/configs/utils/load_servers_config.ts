@@ -37,7 +37,9 @@ export async function loadServersConfig(
   }
 
   const clusterConfig = await readConfigFile(configPath);
+  // construct config for Playwright Test
   const scoutServerConfig = clusterConfig.getScoutTestConfig();
+  // save test config to the file
   saveScoutTestConfigOnDisk(scoutServerConfig, log);
   return clusterConfig;
 }
