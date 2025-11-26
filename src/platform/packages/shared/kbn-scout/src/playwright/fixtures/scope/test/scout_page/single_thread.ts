@@ -12,7 +12,7 @@ import type { Page } from '@playwright/test';
 import { test as base } from '@playwright/test';
 import type { ScoutPage } from '.';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
-import { keyTo, checkA11y, type RunA11yScanOptions } from '../../../../utils';
+import { keyTo, checkA11y } from '../../../../utils';
 import type { KibanaUrl, ScoutLogger } from '../../worker';
 
 /**

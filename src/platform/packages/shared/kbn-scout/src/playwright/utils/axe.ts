@@ -8,24 +8,11 @@
  */
 
 import type { Page } from '@playwright/test';
+import type { Result } from 'axe-core';
 import AxeBuilder from '@axe-core/playwright';
 import { AXE_OPTIONS, AXE_IMPACT_LEVELS } from '@kbn/axe-config';
 
 import type { KibanaUrl } from '../../..';
-
-export interface A11yViolation {
-  id: string;
-  impact?: string;
-  description: string;
-  help: string;
-  helpUrl: string;
-  nodes: Array<{
-    html: string;
-    target: string[];
-    failureSummary?: string;
-  }>;
-  url?: string;
-}
 
 export interface RunA11yScanOptions {
   /** Optional CSS selectors to exclude from scan */
@@ -34,14 +21,10 @@ export interface RunA11yScanOptions {
   timeoutMs?: number;
 }
 
-export interface RunA11yScanResult {
-  violations: A11yViolation[];
-}
-
-export const runA11yScan = async (
+const runA11yScan = async (
   page: Page,
   { exclude = [], timeoutMs = 10000 }: RunA11yScanOptions = {}
-): Promise<RunA11yScanResult> => {
+) => {
   const builder = new AxeBuilder({ page });
   builder.options(AXE_OPTIONS);
 
@@ -68,7 +51,7 @@ export const runA11yScan = async (
     clearTimeout(timeoutId);
   }
 
-  let violations = (result.violations as A11yViolation[]) || [];
+  let violations: Result[] = result.violations;
 
   if (AXE_IMPACT_LEVELS?.length) {
     const allowed = new Set(AXE_IMPACT_LEVELS);
@@ -80,22 +63,31 @@ export const runA11yScan = async (
   return { violations };
 };
 
-/**
- * Assert helper usable inside tests.
- */
 export const checkA11y = async (page: Page, kbnUrl?: KibanaUrl, options?: RunA11yScanOptions) => {
   const { violations } = await runA11yScan(page, options);
 
+  const formatA11yViolation = (v: Result): string => {
+    const nodesSection = v.nodes
+      .map((n, idx) => {
+        const selectors = n.target.join(', ');
+        const failure = n.failureSummary?.trim() || 'No failure summary provided';
+        return `  ${idx + 1}. Selectors: ${selectors}\n     Failure: ${failure}`;
+      })
+      .join('\n');
+
+    return [
+      `\nAccessibility violation detected!\n`,
+      `  Rule: ${v.id}. Impact: (${v.impact ?? 'impact unknown'})`,
+      `  Description: ${v.description}`,
+      `  Help: ${v.help}. See more: ${v.helpUrl}`,
+      `  Page: ${kbnUrl}`,
+      `  Nodes:\n${nodesSection}`,
+    ]
+      .join('\n')
+      .trim();
+  };
+
   return {
-    violations: violations.map(
-      (v) =>
-        `Accessibility violation: ${v.id} (${v.impact}): \n
-          ${v.helpUrl}\n
-          ${v.description}\n
-          ${kbnUrl} \n
-          Nodes:\n${v.nodes
-            .map((n) => `    ${n.target.join(', ')} -> ${n.failureSummary}`)
-            .join('\n')}`
-    ),
+    violations: violations.map((v) => formatA11yViolation(v)),
   };
 };

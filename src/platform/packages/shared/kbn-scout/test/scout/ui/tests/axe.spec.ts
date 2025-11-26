@@ -12,14 +12,19 @@ import { test, expect } from '../../../../src/playwright';
 test.describe('runA11yScan', { tag: ['@svlSecurity', '@ess'] }, () => {
   test('returns violations array (empty for basic accessible markup)', async ({ page }) => {
     await page.setContent(`
+      <html lang="en">
+      <head>
+        <title>AXE Core check for basic accessible markup</title>
+      </head>
       <main>
-        <h1>Title</h1>
+        <h1>AXE Core check for basic accessible markup</h1>
         <button aria-label="Close dialog">X</button>
         <form>
           <label for="email">Email</label>
           <input id="email" type="email" />
         </form>
       </main>
+      </html>
     `);
 
     const { violations } = await page.checkA11y();
