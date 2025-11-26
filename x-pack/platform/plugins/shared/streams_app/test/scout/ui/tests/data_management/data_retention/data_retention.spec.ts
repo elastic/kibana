@@ -12,10 +12,6 @@ test.describe(
   'Stream data retention - updating data retention',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    test.beforeAll(async ({ apiServices }) => {
-      await apiServices.streams.enable();
-    });
-
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing rules
@@ -30,7 +26,8 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices }) => {
-      await apiServices.streams.disable();
+      // Clear existing rules
+      await apiServices.streams.clearStreamChildren('logs');
     });
 
     test('should update a stream data retention policy successfully', async ({ page }) => {

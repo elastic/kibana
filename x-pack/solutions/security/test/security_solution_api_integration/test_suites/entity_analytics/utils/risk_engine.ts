@@ -49,6 +49,8 @@ const sanitizeScore = (score: Partial<EntityRiskScoreRecord>): Partial<EntityRis
     notes,
     category_2_count: cat2Count,
     category_2_score: cat2Score,
+    category_3_count: cat3Count,
+    category_3_score: cat3Score,
     ...rest
   } = score;
   return rest;
