@@ -14,6 +14,7 @@ export * from './find_definition';
 export * from './get';
 export * from './get_burn_rates';
 export * from './bulk_purge_rollup';
+export * from './bulk_purge_summary';
 export * from './get_slo_groupings';
 export * from './get_slo_stats_overview';
 export * from './get_preview_data';
