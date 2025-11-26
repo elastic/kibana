@@ -49,7 +49,7 @@ export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
         platformCoreTools.executeEsql
       )} tool`;
     },
-    getTools: () => [platformCoreTools.executeEsql, platformCoreTools.generateEsql],
+    getTools: () => [platformCoreTools.executeEsql],
   };
 };
 
