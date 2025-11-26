@@ -33,7 +33,11 @@ import {
   routingConverter,
 } from './utils';
 
-export const AddRoutingRuleControls = () => {
+interface AddRoutingRuleControlsProps {
+  isStreamNameValid: boolean;
+}
+
+export const AddRoutingRuleControls = ({ isStreamNameValid }: AddRoutingRuleControlsProps) => {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { cancelChanges, forkStream } = useStreamRoutingEvents();
   const [isRequestPreviewFlyoutOpen, setIsRequestPreviewFlyoutOpen] = React.useState(false);
@@ -84,7 +88,7 @@ export const AddRoutingRuleControls = () => {
             <PrivilegesTooltip hasPrivileges={hasPrivileges}>
               <SaveButton
                 isLoading={isForking}
-                isDisabled={!canForkRouting}
+                isDisabled={!canForkRouting || !isStreamNameValid}
                 onClick={() => forkStream()}
               />
             </PrivilegesTooltip>

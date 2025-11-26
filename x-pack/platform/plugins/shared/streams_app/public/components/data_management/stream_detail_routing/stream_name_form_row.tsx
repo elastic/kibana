@@ -56,6 +56,21 @@ export const getHelpText = (
   }
 };
 
+// TODO - you could make the component a bit simpler by throwing the helptext and error message stuff into this custom hook as well
+export const useIsValidStreamName = (streamName: string): boolean => {
+  const parentStreamName = useStreamsRoutingSelector((snapshot) => snapshot.context.definition)
+    .stream.name;
+  const prefix = parentStreamName + '.';
+  const partitionName = streamName.replace(prefix, '');
+
+  const isStreamNameEmpty = streamName.length <= prefix.length;
+  const isStreamNameTooLong = streamName.length > MAX_STREAM_NAME_LENGTH;
+  const isLengthValid = !isStreamNameEmpty && !isStreamNameTooLong;
+  const isDotPresent = partitionName.includes('.');
+
+  return isLengthValid && !isDotPresent;
+};
+
 export function StreamNameFormRow({
   value,
   onChange = () => {},

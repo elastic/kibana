@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { createActorContext, useSelector } from '@xstate5/react';
-import { createConsoleInspector } from '@kbn/xstate-utils';
-import { waitFor } from 'xstate5';
-import type { RoutingDefinition } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
-import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-plugin/public';
-import {
-  streamRoutingMachine,
-  createStreamRoutingMachineImplementations,
-} from './stream_routing_state_machine';
-import type { StreamRoutingInput, StreamRoutingServiceDependencies } from './types';
+import type { RoutingDefinition } from '@kbn/streams-schema';
+import { createConsoleInspector } from '@kbn/xstate-utils';
+import { createActorContext, useSelector } from '@xstate5/react';
+import React, { useEffect, useMemo } from 'react';
+import { waitFor } from 'xstate5';
+import type { PartitionSuggestion } from '../../review_suggestions_form/use_review_suggestions_form';
 import type { RoutingDefinitionWithUIAttributes } from '../../types';
 import type {
   DocumentMatchFilterOptions,
   RoutingSamplesActorRef,
   RoutingSamplesActorSnapshot,
 } from './routing_samples_state_machine';
-import type { PartitionSuggestion } from '../../review_suggestions_form/use_review_suggestions_form';
+import {
+  createStreamRoutingMachineImplementations,
+  streamRoutingMachine,
+} from './stream_routing_state_machine';
+import type { StreamRoutingInput, StreamRoutingServiceDependencies } from './types';
 
 const consoleInspector = createConsoleInspector();
 
@@ -151,23 +150,4 @@ export const useStreamSamplesSelector = <T,>(
   }
 
   return useSelector(routingSamplesRef, selector);
-};
-
-const isStreamNameValid = (streamName: string, parentStreamName: string): boolean => {
-  const prefix = parentStreamName + '.';
-  const partitionName = streamName.replace(prefix, '');
-
-  const isStreamNameEmpty = streamName.length <= prefix.length;
-  const isStreamNameTooLong = streamName.length > MAX_STREAM_NAME_LENGTH;
-  const isLengthValid = !isStreamNameEmpty && !isStreamNameTooLong;
-  const isDotPresent = partitionName.includes('.');
-
-  return isLengthValid && !isDotPresent;
-};
-
-export const useAreStreamRoutesValid = (): boolean => {
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  return routingSnapshot.context.routing.every((route) =>
-    isStreamNameValid(route.destination, routingSnapshot.context.definition.stream.name)
-  );
 };

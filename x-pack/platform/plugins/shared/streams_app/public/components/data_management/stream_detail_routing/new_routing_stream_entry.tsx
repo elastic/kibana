@@ -9,13 +9,13 @@ import { EuiFlexGroup, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
 import { AddRoutingRuleControls } from './control_bars';
+import { RoutingConditionEditor } from './routing_condition_editor';
 import {
   selectCurrentRule,
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
-import { RoutingConditionEditor } from './routing_condition_editor';
-import { StreamNameFormRow } from './stream_name_form_row';
+import { StreamNameFormRow, useIsValidStreamName } from './stream_name_form_row';
 
 export function NewRoutingStreamEntry() {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -28,6 +28,8 @@ export function NewRoutingStreamEntry() {
       panelRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, []);
+
+  const isStreamNameValid = useIsValidStreamName(currentRule.destination);
 
   return (
     <div ref={panelRef}>
@@ -51,7 +53,7 @@ export function NewRoutingStreamEntry() {
               })}
             </EuiText>
           </EuiFlexGroup>
-          <AddRoutingRuleControls />
+          <AddRoutingRuleControls isStreamNameValid={isStreamNameValid} />
         </EuiFlexGroup>
       </EuiPanel>
     </div>
