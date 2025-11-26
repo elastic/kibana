@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthTypeSpec } from '../connector_spec';
 
-const authSchema = z.object({});
+const authSchema = z.object({}).meta({ label: 'None' });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 
