@@ -11,7 +11,8 @@ export const flappingSchema = flappingSchemaV1.extends({
   enabled: schema.maybe(
     schema.boolean({
       meta: {
-        description: "Indicates whether you want to let the rule's status enter a flapping state.",
+        description:
+          'Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.',
       },
     })
   ),
