@@ -373,6 +373,8 @@
     "type"
   ],
   "entity-store-esql-execution-time": [
+    "config",
+    "config.maxPageSearchSize",
     "lastExecutionTimeISO"
   ],
   "epm-packages": [
