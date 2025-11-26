@@ -68,6 +68,10 @@ const processSloResults = (savedObjects: Array<SavedObject<SloSOAttributes>>): A
     }));
 };
 
+/**
+ * Fetches saved objects by IDs for dashboards and SLOs only.
+ * Rules use the rule client instead.
+ */
 export const getSoByIds = async ({
   soClient,
   attachmentType,
@@ -92,6 +96,10 @@ export const getSoByIds = async ({
   }
 };
 
+/**
+ * Searches for suggested saved objects for dashboards and SLOs only.
+ * Rules use the rule client instead.
+ */
 export const getSuggestedSo = async ({
   soClient,
   attachmentType,

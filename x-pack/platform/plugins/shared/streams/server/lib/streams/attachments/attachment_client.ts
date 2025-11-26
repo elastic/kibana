@@ -558,6 +558,8 @@ export class AttachmentClient {
    * @param options.tags - Optional array of tags to filter attachments by
    * @returns A promise that resolves with an array of matching attachments
    *
+   * @note Until pagination is implemented, this returns up to 1000 attachments per type.
+   *
    * @example
    * ```typescript
    * const results = await attachmentClient.getSuggestions({
