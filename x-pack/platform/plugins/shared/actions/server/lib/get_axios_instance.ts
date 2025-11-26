@@ -8,11 +8,15 @@
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
+import type { GetTokenOpts } from '@kbn/connector-specs';
 import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
+import type { ConnectorTokenClientContract } from '../types';
 import { getBeforeRedirectFn } from './before_redirect';
+import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
+import { getDeleteTokenAxiosInterceptor } from './delete_token_axios_interceptor';
 
 export type ConnectorInfo = Omit<ActionInfo, 'rawAction'>;
 
@@ -24,13 +28,20 @@ interface GetAxiosInstanceOpts {
 
 type ValidatedSecrets = Record<string, unknown>;
 
-export type GetAxiosInstanceWithAuthFn = (secrets: ValidatedSecrets) => Promise<AxiosInstance>;
+export interface GetAxiosInstanceWithAuthFnOpts {
+  connectorId: string;
+  connectorTokenClient?: ConnectorTokenClientContract;
+  secrets: ValidatedSecrets;
+}
+export type GetAxiosInstanceWithAuthFn = (
+  opts: GetAxiosInstanceWithAuthFnOpts
+) => Promise<AxiosInstance>;
 export const getAxiosInstanceWithAuth = ({
   authTypeRegistry,
   configurationUtilities,
   logger,
 }: GetAxiosInstanceOpts): GetAxiosInstanceWithAuthFn => {
-  return async (secrets: ValidatedSecrets) => {
+  return async ({ connectorId, secrets, connectorTokenClient }: GetAxiosInstanceWithAuthFnOpts) => {
     let authTypeId: string | undefined;
     try {
       authTypeId = (secrets as { authType?: string }).authType || 'none';
@@ -54,9 +65,7 @@ export const getAxiosInstanceWithAuth = ({
           const { httpAgent, httpsAgent } = getCustomAgents(
             configurationUtilities,
             logger,
-            config.url,
-            // todo - sslOverrides, needed when we support certificate based auth
-            {}
+            config.url
           );
 
           // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
@@ -67,8 +76,40 @@ export const getAxiosInstanceWithAuth = ({
         return config;
       });
 
+      // add a response interceptor to clean up saved tokens if necessary
+      if (connectorTokenClient) {
+        const { onFulfilled, onRejected } = getDeleteTokenAxiosInterceptor({
+          connectorTokenClient,
+          connectorId,
+        });
+        axiosInstance.interceptors.response.use(onFulfilled, onRejected);
+      }
+
+      const configureCtx = {
+        getToken: async (opts: GetTokenOpts) => {
+          return await getOAuthClientCredentialsAccessToken({
+            connectorId,
+            logger,
+            tokenUrl: opts.tokenUrl,
+            oAuthScope: opts.scope,
+            configurationUtilities,
+            credentials: {
+              config: {
+                clientId: opts.clientId,
+                ...(opts.additionalFields ? { additionalFields: opts.additionalFields } : {}),
+              },
+              secrets: {
+                clientSecret: opts.clientSecret,
+              },
+            },
+            connectorTokenClient,
+          });
+        },
+        logger,
+      };
+
       // use the registered auth type to configure authentication for the axios instance
-      return authType.configure(axiosInstance, secrets);
+      return await authType.configure(configureCtx, axiosInstance, secrets);
     } catch (err) {
       logger.error(
         `Error getting configured axios instance configured for auth type "${
