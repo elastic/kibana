@@ -13,6 +13,7 @@ import { getSchemaAtPath, getZodTypeName } from '../../../../common/lib/zod';
 import { getDetailedTypeDescription } from '../../../../common/lib/zod/zod_type_description';
 import { getForeachItemSchema } from '../../workflow_context/lib/get_foreach_state_schema';
 import type { VariableItem, YamlValidationResult } from '../model/types';
+import { z } from '@kbn/zod/v4';
 
 export function validateVariable(
   variableItem: VariableItem,
@@ -107,28 +108,19 @@ export function validateVariable(
 
   const zodTypeName = getZodTypeName(refSchema);
 
-  if (zodTypeName === 'string' && type === 'foreach') {
-    return {
-      ...variableItem,
-      message: `Foreach parameter should be an array or a JSON string. ${parsedPath.propertyPath} is unknown string, engine will try to parse it as JSON in runtime, but it might fail`,
-      severity: 'warning',
-      owner: 'variable-validation',
-      hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
-        refSchema
-      )}</pre>`,
-    };
-  }
-
-  if (!zodTypeName.endsWith('[]') && type === 'foreach') {
-    return {
-      ...variableItem,
-      message: `Foreach parameter should be an array or a JSON string. ${parsedPath.propertyPath} is ${zodTypeName}`,
-      severity: 'error',
-      owner: 'variable-validation',
-      hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
-        refSchema
-      )}</pre>`,
-    };
+  if (type === 'foreach') {
+    const itemSchema = getForeachItemSchema(context, key);
+    if (itemSchema instanceof z.ZodAny && itemSchema.description) {
+      return {
+        ...variableItem,
+        message: itemSchema.description,
+        severity: 'warning',
+        owner: 'variable-validation',
+        hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
+          itemSchema
+        )}</pre>`,
+      };
+    }
   }
 
   if (zodTypeName === 'any' && refSchema.description) {

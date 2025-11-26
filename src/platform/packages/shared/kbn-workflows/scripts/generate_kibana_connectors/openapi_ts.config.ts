@@ -28,6 +28,7 @@ const config: UserConfig = {
         name: '{{name}}',
       },
       metadata: true,
+      compatibilityVersion: 4,
     },
   ],
 };

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Lazy import to avoid bundling large generated file in main plugin bundle
+import { getElasticsearchConnectors } from '../spec/elasticsearch';
 
 /**
  * Builds an Elasticsearch request from connector definitions
@@ -38,14 +38,10 @@ export function buildRequestFromConnector(
   }
 
   // Lazy load the generated connectors to avoid main bundle bloat
-  const {
-    GENERATED_ELASTICSEARCH_CONNECTORS,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('../spec/elasticsearch/elasticsearch_connectors.gen');
+  const esConnectors = getElasticsearchConnectors();
 
   // Find the connector definition for this step type
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const connector = GENERATED_ELASTICSEARCH_CONNECTORS.find((c: any) => c.type === stepType);
+  const connector = esConnectors.find((c) => c.type === stepType);
 
   if (connector && connector.patterns && connector.methods) {
     // Use explicit parameter type metadata (no hardcoded keys!)

@@ -11,8 +11,8 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository.
- * Generated at: 2025-11-26T17:41:54.651Z
- * Source: elasticsearch-specification repository (582 APIs)
+ * Generated at: 2025-11-26T19:03:41.863Z
+ * Source: elasticsearch-specification repository (583 APIs)
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
@@ -708,6 +708,8 @@ import {
   inference_put_mistral_response,
   inference_put_openai_request,
   inference_put_openai_response,
+  inference_put_openshift_ai_request,
+  inference_put_openshift_ai_response,
   inference_put_request,
   inference_put_response,
   inference_put_voyageai_request,
@@ -1949,6 +1951,7 @@ const BULK_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Bulk index or delete documents`,
   description: `Bulk index or delete documents.
+
 Perform multiple \`index\`, \`create\`, \`delete\`, and \`update\` actions in a single request.
 This reduces overhead and can greatly increase indexing speed.
 
@@ -2012,6 +2015,7 @@ Some of the officially supported clients provide helpers to assist with bulk req
 * Perl: Check out \`Search::Elasticsearch::Client::5_0::Bulk\` and \`Search::Elasticsearch::Client::5_0::Scroll\`
 * Python: Check out \`elasticsearch.helpers.*\`
 * JavaScript: Check out \`client.helpers.*\`
+* Java: Check out \`co.elastic.clients.elasticsearch._helpers.bulk.BulkIngester\`
 * .NET: Check out \`BulkAllObservable\`
 * PHP: Check out bulk indexing.
 * Ruby: Check out \`Elasticsearch::Helpers::BulkHelper\`
@@ -3082,6 +3086,7 @@ const CCR_FOLLOW_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create a follower`,
   description: `Create a follower.
+
 Create a cross-cluster replication follower index that follows a specific leader index.
 When the API returns, the follower index exists and cross-cluster replication starts replicating operations from the leader index to the follower index.
 
@@ -3176,6 +3181,7 @@ const CCR_FORGET_FOLLOWER_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Forget a follower`,
   description: `Forget a follower.
+
 Remove the cross-cluster replication follower retention leases from the leader.
 
 A following index takes out retention leases on its leader index.
@@ -3313,6 +3319,7 @@ const CCR_PUT_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update auto-follow patterns`,
   description: `Create or update auto-follow patterns.
+
 Create a collection of cross-cluster replication auto-follow patterns for a remote cluster.
 Newly created indices on the remote cluster that match any of the patterns are automatically configured as follower indices.
 Indices on the remote cluster that were created before the auto-follow pattern was created will not be auto-followed even if they match the pattern.
@@ -3387,6 +3394,7 @@ const CCR_RESUME_FOLLOW_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Resume a follower`,
   description: `Resume a follower.
+
 Resume a cross-cluster replication follower index that was paused.
 The follower index could have been paused with the pause follower API.
 Alternatively it could be paused due to replication that cannot be retried due to failures during following tasks.
@@ -3482,6 +3490,7 @@ const CLEAR_SCROLL_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Clear a scrolling search`,
   description: `Clear a scrolling search.
+
 Clear the search context and results for a scrolling search.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-clear-scroll`,
@@ -3514,6 +3523,7 @@ const CLOSE_POINT_IN_TIME_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Close a point in time`,
   description: `Close a point in time.
+
 A point in time must be opened explicitly before being used in search requests.
 The \`keep_alive\` parameter tells Elasticsearch how long it should persist.
 A point in time is automatically closed when the \`keep_alive\` period has elapsed.
@@ -3542,6 +3552,7 @@ const CLUSTER_ALLOCATION_EXPLAIN_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Explain the shard allocations`,
   description: `Explain the shard allocations.
+
 Get explanations for shard allocations in the cluster.
 This API accepts the current_node, index, primary and shard parameters in the request body or in query parameters, but not in both at the same time.
 For unassigned shards, it provides an explanation for why the shard is unassigned.
@@ -3590,6 +3601,7 @@ const CLUSTER_DELETE_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete component templates`,
   description: `Delete component templates.
+
 Component templates are building blocks for constructing index templates that specify index mappings, settings, and aliases.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template`,
@@ -3615,6 +3627,7 @@ const CLUSTER_DELETE_VOTING_CONFIG_EXCLUSIONS_CONTRACT: InternalConnectorContrac
   connectorGroup: 'internal',
   summary: `Clear cluster voting config exclusions`,
   description: `Clear cluster voting config exclusions.
+
 Remove master-eligible nodes from the voting configuration exclusion list.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-post-voting-config-exclusions`,
@@ -3640,6 +3653,7 @@ const CLUSTER_EXISTS_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Check component templates`,
   description: `Check component templates.
+
 Returns information about whether a particular component template exists.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template`,
@@ -3665,6 +3679,7 @@ const CLUSTER_GET_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get component templates`,
   description: `Get component templates.
+
 Get information about component templates.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template`,
@@ -3779,6 +3794,7 @@ const CLUSTER_INFO_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get cluster info`,
   description: `Get cluster info.
+
 Returns basic information about the cluster.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-info`,
@@ -3804,6 +3820,7 @@ const CLUSTER_PENDING_TASKS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get the pending cluster tasks`,
   description: `Get the pending cluster tasks.
+
 Get information about cluster-level changes (such as create index, update mapping, allocate or fail shard) that have not yet taken effect.
 
 NOTE: This API returns a list of any pending updates to the cluster state.
@@ -3833,6 +3850,7 @@ const CLUSTER_POST_VOTING_CONFIG_EXCLUSIONS_CONTRACT: InternalConnectorContract 
   connectorGroup: 'internal',
   summary: `Update voting configuration exclusions`,
   description: `Update voting configuration exclusions.
+
 Update the cluster voting config exclusions by node IDs or node names.
 By default, if there are more than three master-eligible nodes in the cluster and you remove fewer than half of the master-eligible nodes in the cluster at once, the voting configuration automatically shrinks.
 If you want to shrink the voting configuration to contain fewer than three nodes or to remove half or more of the master-eligible nodes in the cluster at once, use this API to remove departing nodes from the voting configuration manually.
@@ -3874,6 +3892,7 @@ const CLUSTER_PUT_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update a component template`,
   description: `Create or update a component template.
+
 Component templates are building blocks for constructing index templates that specify index mappings, settings, and aliases.
 
 An index template can be composed of multiple component templates.
@@ -4002,6 +4021,7 @@ const CLUSTER_REROUTE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Reroute the cluster`,
   description: `Reroute the cluster.
+
 Manually change the allocation of individual shards in the cluster.
 For example, a shard can be moved from one node to another explicitly, an allocation can be canceled, and an unassigned shard can be explicitly allocated to a specific node.
 
@@ -4039,6 +4059,7 @@ const CLUSTER_STATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get the cluster state`,
   description: `Get the cluster state.
+
 Get comprehensive information about the state of the cluster.
 
 The cluster state is an internal data structure which keeps track of a variety of information needed by every node, including the identity and attributes of the other nodes in the cluster; cluster-wide settings; index metadata, including the mapping and settings for each index; the location and status of every shard copy in the cluster.
@@ -4102,6 +4123,7 @@ const CLUSTER_STATS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get cluster statistics`,
   description: `Get cluster statistics.
+
 Get basic index metrics (shard numbers, store size, memory usage) and information about the current nodes that form the cluster (number, roles, os, jvm versions, memory usage, cpu and installed plugins).
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-stats`,
@@ -4330,7 +4352,7 @@ const CONNECTOR_SECRET_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_delete',
   connectorGroup: 'internal',
   summary: null,
-  description: `Deletes a connector secret
+  description: `Deletes a connector secret.
 
  Documentation: null`,
   methods: ['DELETE'],
@@ -4349,7 +4371,7 @@ const CONNECTOR_SECRET_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_get',
   connectorGroup: 'internal',
   summary: null,
-  description: `Retrieves a secret stored by Connectors
+  description: `Retrieves a secret stored by Connectors.
 
  Documentation: null`,
   methods: ['GET'],
@@ -4368,7 +4390,7 @@ const CONNECTOR_SECRET_POST_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_post',
   connectorGroup: 'internal',
   summary: null,
-  description: `Creates a secret for a Connector
+  description: `Creates a secret for a Connector.
 
  Documentation: null`,
   methods: ['POST'],
@@ -4387,7 +4409,7 @@ const CONNECTOR_SECRET_PUT_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_put',
   connectorGroup: 'internal',
   summary: null,
-  description: `Creates or updates a secret for a Connector
+  description: `Creates or updates a secret for a Connector.
 
  Documentation: null`,
   methods: ['PUT'],
@@ -4434,6 +4456,7 @@ const CONNECTOR_SYNC_JOB_CHECK_IN_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Check in a connector sync job`,
   description: `Check in a connector sync job.
+
 Check in a connector sync job and set the \`last_seen\` field to the current time before updating it in the internal index.
 
 To sync data using self-managed connectors, you need to deploy the Elastic connector service on your own infrastructure.
@@ -4462,6 +4485,7 @@ const CONNECTOR_SYNC_JOB_CLAIM_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Claim a connector sync job`,
   description: `Claim a connector sync job.
+
 This action updates the job status to \`in_progress\` and sets the \`last_seen\` and \`started_at\` timestamps to the current time.
 Additionally, it can set the \`sync_cursor\` property for the sync job.
 
@@ -4521,6 +4545,7 @@ const CONNECTOR_SYNC_JOB_ERROR_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Set a connector sync job error`,
   description: `Set a connector sync job error.
+
 Set the \`error\` field for a connector sync job and set its \`status\` to \`error\`.
 
 To sync data using self-managed connectors, you need to deploy the Elastic connector service on your own infrastructure.
@@ -4625,6 +4650,7 @@ const CONNECTOR_SYNC_JOB_UPDATE_STATS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Set the connector sync job stats`,
   description: `Set the connector sync job stats.
+
 Stats include: \`deleted_document_count\`, \`indexed_document_count\`, \`indexed_document_volume\`, and \`total_document_count\`.
 You can also update \`last_seen\`.
 This API is mainly used by the connector service for updating sync job information.
@@ -4771,6 +4797,7 @@ const CONNECTOR_UPDATE_FEATURES_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Update the connector features`,
   description: `Update the connector features.
+
 Update the connector features in the connector document.
 This API can be used to control the following aspects of a connector:
 
@@ -5034,6 +5061,7 @@ const COUNT_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Count search results`,
   description: `Count search results.
+
 Get the number of documents matching a query.
 
 The query can be provided either by using a simple query string as a parameter, or by defining Query DSL within the request body.
@@ -5211,6 +5239,7 @@ const DANGLING_INDICES_DELETE_DANGLING_INDEX_CONTRACT: InternalConnectorContract
   connectorGroup: 'internal',
   summary: `Delete a dangling index`,
   description: `Delete a dangling index.
+
 If Elasticsearch encounters index data that is absent from the current cluster state, those indices are considered to be dangling.
 For example, this can happen if you delete more than \`cluster.indices.tombstones.size\` indices while an Elasticsearch node is offline.
 
@@ -5523,6 +5552,7 @@ const DELETE_SCRIPT_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete a script or search template`,
   description: `Delete a script or search template.
+
 Deletes a stored script or search template.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-delete-script`,
@@ -5548,6 +5578,7 @@ const ENRICH_DELETE_POLICY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete an enrich policy`,
   description: `Delete an enrich policy.
+
 Deletes an existing enrich policy and its enrich index.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-delete-policy`,
@@ -5573,6 +5604,7 @@ const ENRICH_EXECUTE_POLICY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Run an enrich policy`,
   description: `Run an enrich policy.
+
 Create the enrich index for an existing enrich policy.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-execute-policy`,
@@ -5598,6 +5630,7 @@ const ENRICH_GET_POLICY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get an enrich policy`,
   description: `Get an enrich policy.
+
 Returns information about an enrich policy.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-get-policy`,
@@ -5630,6 +5663,7 @@ const ENRICH_PUT_POLICY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create an enrich policy`,
   description: `Create an enrich policy.
+
 Creates an enrich policy.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-put-policy`,
@@ -5655,6 +5689,7 @@ const ENRICH_STATS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get enrich stats`,
   description: `Get enrich stats.
+
 Returns enrich coordinator statistics and information about enrich policies that are currently executing.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-stats`,
@@ -5680,6 +5715,7 @@ const EQL_DELETE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete an async EQL search`,
   description: `Delete an async EQL search.
+
 Delete an async EQL search or a stored synchronous EQL search.
 The API also deletes results for the search.
 
@@ -5705,6 +5741,7 @@ const EQL_GET_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get async EQL search results`,
   description: `Get async EQL search results.
+
 Get the current status and available results for an async EQL search or a stored synchronous EQL search.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-eql-get`,
@@ -5729,6 +5766,7 @@ const EQL_GET_STATUS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get the async EQL status`,
   description: `Get the async EQL status.
+
 Get the current status for an async EQL search or a stored synchronous EQL search without returning results.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-eql-get-status`,
@@ -5754,6 +5792,7 @@ const EQL_SEARCH_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get EQL search results`,
   description: `Get EQL search results.
+
 Returns search results for an Event Query Language (EQL) query.
 EQL assumes each document in a data stream or index corresponds to an event.
 
@@ -5814,6 +5853,7 @@ const ESQL_ASYNC_QUERY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Run an async ES|QL query`,
   description: `Run an async ES|QL query.
+
 Asynchronously run an ES|QL (Elasticsearch query language) query, monitor its progress, and retrieve results when they become available.
 
 The API accepts the same parameters and request body as the synchronous query API, along with additional async related properties.
@@ -5854,6 +5894,7 @@ const ESQL_ASYNC_QUERY_DELETE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete an async ES|QL query`,
   description: `Delete an async ES|QL query.
+
 If the query is still running, it is cancelled.
 Otherwise, the stored results are deleted.
 
@@ -5885,6 +5926,7 @@ const ESQL_ASYNC_QUERY_GET_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get async ES|QL query results`,
   description: `Get async ES|QL query results.
+
 Get the current status and available results or stored results for an ES|QL asynchronous query.
 If the Elasticsearch security features are enabled, only the user who first submitted the ES|QL query can retrieve the results using this API.
 
@@ -5938,6 +5980,7 @@ const ESQL_GET_QUERY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get a specific running ES|QL query information`,
   description: `Get a specific running ES|QL query information.
+
 Returns an object extended information about a running ES|QL query.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-get-query`,
@@ -5963,6 +6006,7 @@ const ESQL_LIST_QUERIES_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get running ES|QL queries information`,
   description: `Get running ES|QL queries information.
+
 Returns an object containing IDs and other information about the running ES|QL queries.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-list-queries`,
@@ -5988,6 +6032,7 @@ const ESQL_QUERY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Run an ES|QL query`,
   description: `Run an ES|QL query.
+
 Get search results for an ES|QL (Elasticsearch query language) query.
 
  Documentation: https://www.elastic.co/docs/explore-analyze/query-filter/languages/esql-rest`,
@@ -6116,6 +6161,7 @@ const EXPLAIN_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Explain a document match result`,
   description: `Explain a document match result.
+
 Get information about why a specific document matches, or doesn't match, a query.
 It computes a score explanation for a query and a specific document.
 
@@ -6161,6 +6207,7 @@ const FEATURES_GET_FEATURES_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get the features`,
   description: `Get the features.
+
 Get a list of features that can be included in snapshots using the \`feature_states\` field when creating a snapshot.
 You can use this API to determine which feature states to include when taking a snapshot.
 By default, all feature states are included in a snapshot if that snapshot includes the global state, or none if it does not.
@@ -6194,6 +6241,7 @@ const FEATURES_RESET_FEATURES_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Reset the features`,
   description: `Reset the features.
+
 Clear all of the state information stored in system indices by Elasticsearch features, including the security and machine learning indices.
 
 WARNING: Intended for development and testing use only. Do not reset features on a production cluster.
@@ -6293,7 +6341,7 @@ const FLEET_DELETE_SECRET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.delete_secret',
   connectorGroup: 'internal',
   summary: null,
-  description: `Deletes a secret stored by Fleet
+  description: `Deletes a secret stored by Fleet.
 
  Documentation: null`,
   methods: ['DELETE'],
@@ -6312,7 +6360,7 @@ const FLEET_GET_SECRET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.get_secret',
   connectorGroup: 'internal',
   summary: null,
-  description: `Retrieves a secret stored by Fleet
+  description: `Retrieves a secret stored by Fleet.
 
  Documentation: null`,
   methods: ['GET'],
@@ -6358,6 +6406,7 @@ const FLEET_MSEARCH_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Run multiple Fleet searches`,
   description: `Run multiple Fleet searches.
+
 Run several Fleet searches with a single API request.
 The API follows the same structure as the multi search API.
 However, similar to the Fleet search API, it supports the \`wait_for_checkpoints\` parameter.
@@ -6420,7 +6469,7 @@ const FLEET_POST_SECRET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.fleet.post_secret',
   connectorGroup: 'internal',
   summary: null,
-  description: `Creates a secret stored by Fleet
+  description: `Creates a secret stored by Fleet.
 
  Documentation: null`,
   methods: ['POST'],
@@ -6440,6 +6489,7 @@ const FLEET_SEARCH_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Run a Fleet search`,
   description: `Run a Fleet search.
+
 The purpose of the Fleet search API is to provide an API where the search will be run only
 after the provided checkpoint has been processed and is visible for searches inside of Elasticsearch.
 
@@ -6641,6 +6691,7 @@ const GET_SCRIPT_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get a script or search template`,
   description: `Get a script or search template.
+
 Retrieves a stored script or search template.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get-script`,
@@ -6763,6 +6814,7 @@ const GRAPH_EXPLORE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Explore graph analytics`,
   description: `Explore graph analytics.
+
 Extract and summarize information about the documents and terms in an Elasticsearch data stream or index.
 The easiest way to understand the behavior of this API is to use the Graph UI to explore connections.
 An initial request to the \`_explore\` API contains a seed query that identifies the documents of interest and specifies the fields that define the vertices and connections you want to include in the graph.
@@ -6798,6 +6850,7 @@ const HEALTH_REPORT_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get the cluster health`,
   description: `Get the cluster health.
+
 Get a report with the health status of an Elasticsearch cluster.
 The report contains a list of indicators that compose Elasticsearch functionality.
 
@@ -6846,6 +6899,7 @@ const ILM_DELETE_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete a lifecycle policy`,
   description: `Delete a lifecycle policy.
+
 You cannot delete policies that are currently in use. If the policy is being used to manage any indices, the request fails and returns an error.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-delete-lifecycle`,
@@ -6871,6 +6925,7 @@ const ILM_EXPLAIN_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Explain the lifecycle state`,
   description: `Explain the lifecycle state.
+
 Get the current lifecycle status for one or more indices.
 For data streams, the API retrieves the current lifecycle status for the stream's backing indices.
 
@@ -6956,6 +7011,7 @@ const ILM_MIGRATE_TO_DATA_TIERS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Migrate to data tiers routing`,
   description: `Migrate to data tiers routing.
+
 Switch the indices, ILM policies, and legacy, composable, and component templates from using custom node attributes and attribute-based allocation filters to using data tiers.
 Optionally, delete one legacy index template.
 Using node roles enables ILM to automatically move the indices between data tiers.
@@ -6993,6 +7049,7 @@ const ILM_MOVE_TO_STEP_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Move to a lifecycle step`,
   description: `Move to a lifecycle step.
+
 Manually move an index into a specific step in the lifecycle policy and run that step.
 
 WARNING: This operation can result in the loss of data. Manually moving an index into a specific step runs that step even if it has already been performed. This is a potentially destructive action and this should be considered an expert level API.
@@ -7030,6 +7087,7 @@ const ILM_PUT_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update a lifecycle policy`,
   description: `Create or update a lifecycle policy.
+
 If the specified policy exists, it is replaced and the policy version is incremented.
 
 NOTE: Only the latest version of the policy is stored, you cannot revert to previous versions.
@@ -7057,6 +7115,7 @@ const ILM_REMOVE_POLICY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Remove policies from an index`,
   description: `Remove policies from an index.
+
 Remove the assigned lifecycle policies from an index or a data stream's backing indices.
 It also stops managing the indices.
 
@@ -7083,6 +7142,7 @@ const ILM_RETRY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Retry a policy`,
   description: `Retry a policy.
+
 Retry running the lifecycle policy for an index that is in the ERROR step.
 The API sets the policy back to the step where the error occurred and runs the step.
 Use the explain lifecycle state API to determine whether an index is in the ERROR step.
@@ -7109,6 +7169,7 @@ const ILM_START_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Start the ILM plugin`,
   description: `Start the ILM plugin.
+
 Start the index lifecycle management plugin if it is currently stopped.
 ILM is started automatically when the cluster is formed.
 Restarting ILM is necessary only when it has been stopped using the stop ILM API.
@@ -7135,6 +7196,7 @@ const ILM_STOP_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Stop the ILM plugin`,
   description: `Stop the ILM plugin.
+
 Halt all lifecycle management operations and stop the index lifecycle management plugin.
 This is useful when you are performing maintenance on the cluster and need to prevent ILM from performing any actions on your indices.
 
@@ -7275,6 +7337,7 @@ PUT my-index-000001/_doc/1?version=2&version_type=external
     "id": "elkbee"
   }
 }
+\`\`\`
 
 In this example, the operation will succeed since the supplied version of 2 is higher than the current document version of 1.
 If the document was already updated and its version was set to 2 or higher, the indexing command will fail and result in a conflict (409 HTTP status code).
@@ -7363,6 +7426,7 @@ const INDICES_ANALYZE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get tokens from text analysis`,
   description: `Get tokens from text analysis.
+
 The analyze API performs analysis on a text string and returns the resulting tokens.
 
 Generating excessive amount of tokens may cause a node to run out of memory.
@@ -7451,6 +7515,7 @@ const INDICES_CLEAR_CACHE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Clear the cache`,
   description: `Clear the cache.
+
 Clear the cache of one or more indices.
 For data streams, the API clears the caches of the stream's backing indices.
 
@@ -7497,6 +7562,7 @@ const INDICES_CLONE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Clone an index`,
   description: `Clone an index.
+
 Clone an existing index into a new index.
 Each original primary shard is cloned into a new primary shard in the new index.
 
@@ -7572,6 +7638,7 @@ const INDICES_CLOSE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Close an index`,
   description: `Close an index.
+
 A closed index is blocked for read or write operations and does not allow all operations that opened indices allow.
 It is not possible to index documents or to search for documents in a closed index.
 Closed indices do not have to maintain internal data structures for indexing or searching documents, which results in a smaller overhead on the cluster.
@@ -7620,6 +7687,7 @@ const INDICES_CREATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create an index`,
   description: `Create an index.
+
 You can use the create index API to add a new index to an Elasticsearch cluster.
 When creating an index, you can specify the following:
 
@@ -7758,6 +7826,7 @@ const INDICES_DELETE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete indices`,
   description: `Delete indices.
+
 Deleting an index deletes its documents, shards, and metadata.
 It does not delete related Kibana components, such as data views, visualizations, or dashboards.
 
@@ -7794,6 +7863,7 @@ const INDICES_DELETE_ALIAS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete an alias`,
   description: `Delete an alias.
+
 Removes a data stream or index from an alias.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-alias`,
@@ -7826,6 +7896,7 @@ const INDICES_DELETE_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete data stream lifecycles`,
   description: `Delete data stream lifecycles.
+
 Removes the data stream lifecycle from a data stream, rendering it not managed by the data stream lifecycle.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-data-lifecycle`,
@@ -7851,6 +7922,7 @@ const INDICES_DELETE_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete data streams`,
   description: `Delete data streams.
+
 Deletes one or more data streams and their backing indices.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-data-stream`,
@@ -7876,6 +7948,7 @@ const INDICES_DELETE_DATA_STREAM_OPTIONS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete data stream options`,
   description: `Delete data stream options.
+
 Removes the data stream options from a data stream.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-data-stream-options`,
@@ -7901,6 +7974,7 @@ const INDICES_DELETE_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete an index template`,
   description: `Delete an index template.
+
 The provided <index-template> may contain multiple template names separated by a comma. If multiple template
 names are specified then there is no wildcard support and the provided names should match completely with
 existing templates.
@@ -7928,12 +8002,13 @@ const INDICES_DELETE_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = 
   connectorGroup: 'internal',
   summary: null,
   description: `Delete sampling configuration.
+
 Delete the sampling configuration for the specified index.
 
- Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling`,
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch#TODO`,
   methods: ['DELETE'],
   patterns: ['{index}/_sample/config'],
-  documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
+  documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch#TODO',
   parameterTypes: {
     headerParams: [],
     pathParams: [],
@@ -7948,6 +8023,7 @@ const INDICES_DELETE_TEMPLATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete a legacy index template`,
   description: `Delete a legacy index template.
+
 IMPORTANT: This documentation is about legacy index templates, which are deprecated and will be replaced by the composable templates introduced in Elasticsearch 7.8.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-template`,
@@ -7973,6 +8049,7 @@ const INDICES_DISK_USAGE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Analyze the index disk usage`,
   description: `Analyze the index disk usage.
+
 Analyze the disk usage of each field of an index or data stream.
 This API might not support indices created in previous Elasticsearch versions.
 The result of a small index can be inaccurate as some parts of an index might not be analyzed by the API.
@@ -8012,6 +8089,7 @@ const INDICES_DOWNSAMPLE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Downsample an index`,
   description: `Downsample an index.
+
 Downsamples a time series (TSDS) index and reduces its size by keeping the last value or by pre-aggregating metrics:
 
 - When running in \`aggregate\` mode, it pre-calculates and stores statistical summaries (\`min\`, \`max\`, \`sum\`, \`value_count\` and \`avg\`)
@@ -8048,6 +8126,7 @@ const INDICES_EXISTS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Check indices`,
   description: `Check indices.
+
 Check if one or more indices, index aliases, or data streams exist.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-exists`,
@@ -8139,6 +8218,7 @@ const INDICES_EXISTS_TEMPLATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Check existence of index templates`,
   description: `Check existence of index templates.
+
 Get information about whether index templates exist.
 Index templates define settings, mappings, and aliases that can be applied automatically to new indices.
 
@@ -8167,6 +8247,7 @@ const INDICES_EXPLAIN_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get the status for a data stream lifecycle`,
   description: `Get the status for a data stream lifecycle.
+
 Get information about an index or data stream's current data stream lifecycle status, such as time since index creation, time since rollover, the lifecycle configuration managing the index, or any errors encountered during lifecycle execution.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-explain-data-lifecycle`,
@@ -8192,6 +8273,7 @@ const INDICES_FIELD_USAGE_STATS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get field usage stats`,
   description: `Get field usage stats.
+
 Get field usage information for each shard and field of an index.
 Field usage statistics are automatically captured when queries are running on a cluster.
 A shard-level search request that accesses a given field, even if multiple times during that request, is counted as a single use.
@@ -8222,6 +8304,7 @@ const INDICES_FLUSH_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Flush data streams or indices`,
   description: `Flush data streams or indices.
+
 Flushing a data stream or index is the process of making sure that any data that is currently only stored in the transaction log is also permanently stored in the Lucene index.
 When restarting, Elasticsearch replays any unflushed operations from the transaction log into the Lucene index to bring it back into the state that it was in before the restart.
 Elasticsearch automatically triggers flushes as needed, using heuristics that trade off the size of the unflushed transaction log against the cost of performing each flush.
@@ -8284,6 +8367,7 @@ const INDICES_FORCEMERGE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Force a merge`,
   description: `Force a merge.
+
 Perform the force merge operation on the shards of one or more indices.
 For data streams, the API forces a merge on the shards of the stream's backing indices.
 
@@ -8375,6 +8459,7 @@ const INDICES_GET_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get index information`,
   description: `Get index information.
+
 Get information about one or more indices. For data streams, the API returns information about the
 stream’s backing indices.
 
@@ -8410,6 +8495,7 @@ const INDICES_GET_ALIAS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get aliases`,
   description: `Get aliases.
+
 Retrieves information for one or more data stream or index aliases.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-alias`,
@@ -8457,12 +8543,13 @@ const INDICES_GET_ALL_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract =
   connectorGroup: 'internal',
   summary: null,
   description: `Get all sampling configurations.
+
 Get the sampling configurations for all indices.
 
- Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling`,
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch#TODO`,
   methods: ['GET'],
   patterns: ['_sample/config'],
-  documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
+  documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch#TODO',
   parameterTypes: {
     headerParams: [],
     pathParams: [],
@@ -8503,6 +8590,7 @@ const INDICES_GET_DATA_LIFECYCLE_STATS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get data stream lifecycle stats`,
   description: `Get data stream lifecycle stats.
+
 Get statistics about the data streams that are managed by a data stream lifecycle.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-lifecycle-stats`,
@@ -8639,6 +8727,7 @@ const INDICES_GET_FIELD_MAPPING_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get mapping definitions`,
   description: `Get mapping definitions.
+
 Retrieves mapping definitions for one or more fields.
 For data streams, the API retrieves field mappings for the stream’s backing indices.
 
@@ -8674,6 +8763,7 @@ const INDICES_GET_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get index templates`,
   description: `Get index templates.
+
 Get information about one or more index templates.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-index-template`,
@@ -8709,6 +8799,7 @@ const INDICES_GET_MAPPING_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get mapping definitions`,
   description: `Get mapping definitions.
+
 For data streams, the API retrieves mappings for the stream’s backing indices.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-mapping`,
@@ -8773,10 +8864,10 @@ const INDICES_GET_SAMPLE_CONTRACT: InternalConnectorContract = {
   summary: null,
   description: `Request for a random sample of raw documents ingested into the given index or data stream.
 
- Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling`,
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch#TODO`,
   methods: ['GET'],
   patterns: ['{index}/_sample'],
-  documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
+  documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch#TODO',
   parameterTypes: {
     headerParams: [],
     pathParams: [],
@@ -8791,12 +8882,13 @@ const INDICES_GET_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: null,
   description: `Get sampling configuration.
+
 Get the sampling configuration for the specified index.
 
- Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling`,
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch#TODO`,
   methods: ['GET'],
   patterns: ['{index}/_sample/config'],
-  documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
+  documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch#TODO',
   parameterTypes: {
     headerParams: [],
     pathParams: [],
@@ -8812,10 +8904,10 @@ const INDICES_GET_SAMPLE_STATS_CONTRACT: InternalConnectorContract = {
   summary: null,
   description: `Request stats for a random sample of raw documents ingested into the given index or data stream.
 
- Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling`,
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch#TODO`,
   methods: ['GET'],
   patterns: ['{index}/_sample/stats'],
-  documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
+  documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch#TODO',
   parameterTypes: {
     headerParams: [],
     pathParams: [],
@@ -8830,6 +8922,7 @@ const INDICES_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get index settings`,
   description: `Get index settings.
+
 Get setting information for one or more indices.
 For data streams, it returns setting information for the stream's backing indices.
 
@@ -8886,6 +8979,7 @@ const INDICES_GET_TEMPLATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get legacy index templates`,
   description: `Get legacy index templates.
+
 Get information about one or more index templates.
 
 IMPORTANT: This documentation is about legacy index templates, which are deprecated and will be replaced by the composable templates introduced in Elasticsearch 7.8.
@@ -8948,6 +9042,7 @@ const INDICES_MIGRATE_TO_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Convert an index alias to a data stream`,
   description: `Convert an index alias to a data stream.
+
 Converts an index alias to a data stream.
 You must have a matching index template that is data stream enabled.
 The alias must meet the following criteria:
@@ -8982,6 +9077,7 @@ const INDICES_MODIFY_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Update data streams`,
   description: `Update data streams.
+
 Performs one or more data stream modification actions in a single atomic operation.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-modify-data-stream`,
@@ -9007,6 +9103,7 @@ const INDICES_OPEN_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Open a closed index`,
   description: `Open a closed index.
+
 For data streams, the API opens any closed backing indices.
 
 A closed index is blocked for read/write operations and does not allow all operations that opened indices allow.
@@ -9060,6 +9157,7 @@ const INDICES_PROMOTE_DATA_STREAM_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Promote a data stream`,
   description: `Promote a data stream.
+
 Promote a data stream from a replicated data stream managed by cross-cluster replication (CCR) to a regular data stream.
 
 With CCR auto following, a data stream from a remote cluster can be replicated to the local cluster.
@@ -9094,6 +9192,7 @@ const INDICES_PUT_ALIAS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update an alias`,
   description: `Create or update an alias.
+
 Adds a data stream or index to an alias.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-alias`,
@@ -9141,6 +9240,7 @@ const INDICES_PUT_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Update data stream lifecycles`,
   description: `Update data stream lifecycles.
+
 Update the data stream lifecycle of the specified data streams.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-lifecycle`,
@@ -9212,6 +9312,7 @@ const INDICES_PUT_DATA_STREAM_OPTIONS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Update data stream options`,
   description: `Update data stream options.
+
 Update the data stream options of the specified data streams.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-stream-options`,
@@ -9323,6 +9424,7 @@ const INDICES_PUT_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update an index template`,
   description: `Create or update an index template.
+
 Index templates define settings, mappings, and aliases that can be applied automatically to new indices.
 
 Elasticsearch applies templates to new indices based on an wildcard pattern that matches the index name.
@@ -9395,6 +9497,7 @@ const INDICES_PUT_MAPPING_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Update field mappings`,
   description: `Update field mappings.
+
 Add new fields to an existing data stream or index.
 You can use the update mapping API to:
 
@@ -9457,12 +9560,13 @@ const INDICES_PUT_SAMPLE_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: null,
   description: `Create or update sampling configuration.
+
 Create or update the sampling configuration for the specified index.
 
- Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling`,
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch#TODO`,
   methods: ['PUT'],
   patterns: ['{index}/_sample/config'],
-  documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/group/ingest-random-sampling',
+  documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch#TODO',
   parameterTypes: {
     headerParams: [],
     pathParams: [],
@@ -9477,6 +9581,7 @@ const INDICES_PUT_SETTINGS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Update index settings`,
   description: `Update index settings.
+
 Changes dynamic index settings in real time.
 For data streams, index setting changes are applied to all backing indices by default.
 
@@ -9628,6 +9733,7 @@ const INDICES_PUT_TEMPLATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update a legacy index template`,
   description: `Create or update a legacy index template.
+
 Index templates define settings, mappings, and aliases that can be applied automatically to new indices.
 Elasticsearch applies templates to new indices based on an index pattern that matches the index name.
 
@@ -9679,6 +9785,7 @@ const INDICES_RECOVERY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get index recovery information`,
   description: `Get index recovery information.
+
 Get information about ongoing and completed shard recoveries for one or more indices.
 For data streams, the API returns information for the stream's backing indices.
 
@@ -9738,6 +9845,7 @@ const INDICES_REFRESH_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Refresh an index`,
   description: `Refresh an index.
+
 A refresh makes recent operations performed on one or more indices available for search.
 For data streams, the API runs the refresh operation on the stream’s backing indices.
 
@@ -9799,6 +9907,7 @@ const INDICES_RELOAD_SEARCH_ANALYZERS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Reload search analyzers`,
   description: `Reload search analyzers.
+
 Reload an index's search analyzers and their resources.
 For data streams, the API reloads search analyzers and resources for the stream's backing indices.
 
@@ -9961,6 +10070,7 @@ const INDICES_RESOLVE_INDEX_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Resolve indices`,
   description: `Resolve indices.
+
 Resolve the names and/or index patterns for indices, aliases, and data streams.
 Multiple patterns and remote clusters are supported.
 
@@ -9987,6 +10097,7 @@ const INDICES_ROLLOVER_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Roll over to a new index`,
   description: `Roll over to a new index.
+
 TIP: We recommend using the index lifecycle rollover action to automate rollovers. However, Serverless does not support Index Lifecycle Management (ILM), so don't use this approach in the Serverless context.
 
 The rollover API creates a new index for a data stream or index alias.
@@ -10055,6 +10166,7 @@ const INDICES_SEGMENTS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get index segments`,
   description: `Get index segments.
+
 Get low-level information about the Lucene segments in index shards.
 For data streams, the API returns information about the stream's backing indices.
 
@@ -10088,6 +10200,7 @@ const INDICES_SHARD_STORES_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get index shard stores`,
   description: `Get index shard stores.
+
 Get store information about replica shards in one or more indices.
 For data streams, the API retrieves store information for the stream's backing indices.
 
@@ -10130,6 +10243,7 @@ const INDICES_SHRINK_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Shrink an index`,
   description: `Shrink an index.
+
 Shrink an index into a new index with fewer primary shards.
 
 Before you can shrink an index:
@@ -10192,6 +10306,7 @@ const INDICES_SIMULATE_INDEX_TEMPLATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Simulate an index`,
   description: `Simulate an index.
+
 Get the index configuration that would be applied to the specified index from an existing index template.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-simulate-index-template`,
@@ -10232,6 +10347,7 @@ const INDICES_SIMULATE_TEMPLATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Simulate an index template`,
   description: `Simulate an index template.
+
 Get the index configuration that would be applied by a particular index template.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-simulate-template`,
@@ -10275,6 +10391,7 @@ const INDICES_SPLIT_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Split an index`,
   description: `Split an index.
+
 Split an index into a new index with more primary shards.
 * Before you can split an index:
 
@@ -10338,6 +10455,7 @@ const INDICES_STATS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get index statistics`,
   description: `Get index statistics.
+
 For data streams, the API retrieves statistics for the stream's backing indices.
 
 By default, the returned statistics are index-level with \`primaries\` and \`total\` aggregations.
@@ -10404,6 +10522,7 @@ const INDICES_UPDATE_ALIASES_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update an alias`,
   description: `Create or update an alias.
+
 Adds a data stream or index to an alias.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-update-aliases`,
@@ -10429,6 +10548,7 @@ const INDICES_VALIDATE_QUERY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Validate a query`,
   description: `Validate a query.
+
 Validates a query without running it.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-validate-query`,
@@ -10487,9 +10607,8 @@ Validates a query without running it.
 const INFERENCE_CHAT_COMPLETION_UNIFIED_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.chat_completion_unified',
   connectorGroup: 'internal',
-  summary: `Perform chat completion inference on the service
-`,
-  description: `Perform chat completion inference on the service
+  summary: `Perform chat completion inference on the service`,
+  description: `Perform chat completion inference on the service.
 
 The chat completion inference API enables real-time responses for chat completion tasks by delivering answers incrementally, reducing response times during computation.
 It only works with the \`chat_completion\` task type for \`openai\` and \`elastic\` inference services.
@@ -10529,9 +10648,9 @@ If you use the \`openai\`, \`hugging_face\` or the \`elastic\` service, use the 
 const INFERENCE_COMPLETION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.completion',
   connectorGroup: 'internal',
-  summary: `Perform completion inference on the service
-`,
-  description: `Perform completion inference on the service
+  summary: `Perform completion inference on the service`,
+  description: `Perform completion inference on the service.
+
 Get responses for completion tasks.
 This API works only with the completion task type.
 
@@ -10560,9 +10679,9 @@ This API requires the \`monitor_inference\` cluster privilege (the built-in \`in
 const INFERENCE_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.delete',
   connectorGroup: 'internal',
-  summary: `Delete an inference endpoint
-`,
-  description: `Delete an inference endpoint
+  summary: `Delete an inference endpoint`,
+  description: `Delete an inference endpoint.
+
 This API requires the manage_inference cluster privilege (the built-in \`inference_admin\` role grants this privilege).
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-delete`,
@@ -10593,9 +10712,9 @@ This API requires the manage_inference cluster privilege (the built-in \`inferen
 const INFERENCE_GET_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.get',
   connectorGroup: 'internal',
-  summary: `Get an inference endpoint
-`,
-  description: `Get an inference endpoint
+  summary: `Get an inference endpoint`,
+  description: `Get an inference endpoint.
+
 This API requires the \`monitor_inference\` cluster privilege (the built-in \`inference_admin\` and \`inference_user\` roles grant this privilege).
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-get`,
@@ -10697,6 +10816,7 @@ The following integrations are available through the inference API. You can find
 * Llama (\`chat_completion\`, \`completion\`, \`text_embedding\`)
 * Mistral (\`chat_completion\`, \`completion\`, \`text_embedding\`)
 * OpenAI (\`chat_completion\`, \`completion\`, \`text_embedding\`)
+* OpenShift AI (\`chat_completion\`, \`completion\`, \`rerank\`, \`text_embedding\`)
 * VoyageAI (\`rerank\`, \`text_embedding\`)
 * Watsonx inference integration (\`text_embedding\`)
 
@@ -11361,6 +11481,32 @@ Create an inference endpoint to perform an inference task with the \`openai\` se
   }),
   outputSchema: inference_put_openai_response,
 };
+const INFERENCE_PUT_OPENSHIFT_AI_CONTRACT: InternalConnectorContract = {
+  type: 'elasticsearch.inference.put_openshift_ai',
+  connectorGroup: 'internal',
+  summary: `Create an OpenShift AI inference endpoint`,
+  description: `Create an OpenShift AI inference endpoint.
+
+Create an inference endpoint to perform an inference task with the \`openshift_ai\` service.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-openshift-ai`,
+  methods: ['PUT'],
+  patterns: ['_inference/{task_type}/{openshiftai_inference_id}'],
+  documentation:
+    'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-openshift-ai',
+  parameterTypes: {
+    headerParams: [],
+    pathParams: ['task_type', 'openshiftai_inference_id'],
+    urlParams: ['timeout'],
+    bodyParams: ['chunking_settings', 'service', 'service_settings', 'task_settings'],
+  },
+  paramsSchema: z.object({
+    ...getShapeAt(inference_put_openshift_ai_request, 'body'),
+    ...getShapeAt(inference_put_openshift_ai_request, 'path'),
+    ...getShapeAt(inference_put_openshift_ai_request, 'query'),
+  }),
+  outputSchema: inference_put_openshift_ai_response,
+};
 const INFERENCE_PUT_VOYAGEAI_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.put_voyageai',
   connectorGroup: 'internal',
@@ -11421,7 +11567,7 @@ const INFERENCE_RERANK_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.rerank',
   connectorGroup: 'internal',
   summary: `Perform reranking inference on the service`,
-  description: `Perform reranking inference on the service
+  description: `Perform reranking inference on the service.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-inference`,
   methods: ['POST'],
@@ -11445,7 +11591,7 @@ const INFERENCE_SPARSE_EMBEDDING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.sparse_embedding',
   connectorGroup: 'internal',
   summary: `Perform sparse embedding inference on the service`,
-  description: `Perform sparse embedding inference on the service
+  description: `Perform sparse embedding inference on the service.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-inference`,
   methods: ['POST'],
@@ -11468,9 +11614,9 @@ const INFERENCE_SPARSE_EMBEDDING_CONTRACT: InternalConnectorContract = {
 const INFERENCE_STREAM_COMPLETION_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.stream_completion',
   connectorGroup: 'internal',
-  summary: `Perform streaming completion inference on the service
-`,
-  description: `Perform streaming completion inference on the service
+  summary: `Perform streaming completion inference on the service`,
+  description: `Perform streaming completion inference on the service.
+
 Get real-time responses for completion tasks by delivering answers incrementally, reducing response times during computation.
 This API works only with the completion task type.
 
@@ -11500,7 +11646,7 @@ const INFERENCE_TEXT_EMBEDDING_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.inference.text_embedding',
   connectorGroup: 'internal',
   summary: `Perform text embedding inference on the service`,
-  description: `Perform text embedding inference on the service
+  description: `Perform text embedding inference on the service.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-inference`,
   methods: ['POST'],
@@ -11562,6 +11708,7 @@ const INFO_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get cluster info`,
   description: `Get cluster info.
+
 Get basic build, version, and cluster information.
 ::: In Serverless, this API is retained for backward compatibility only. Some response fields, such as the version number, should be ignored.
 
@@ -11637,6 +11784,7 @@ const INGEST_DELETE_PIPELINE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete pipelines`,
   description: `Delete pipelines.
+
 Delete one or more ingest pipelines.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-delete-pipeline`,
@@ -11662,6 +11810,7 @@ const INGEST_GEO_IP_STATS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get GeoIP statistics`,
   description: `Get GeoIP statistics.
+
 Get download statistics for GeoIP2 databases that are used with the GeoIP processor.
 
  Documentation: https://www.elastic.co/docs/reference/enrich-processor/geoip-processor`,
@@ -11787,6 +11936,7 @@ const INGEST_PROCESSOR_GROK_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Run a grok processor`,
   description: `Run a grok processor.
+
 Extract structured fields out of a single text field within a document.
 You must choose which field to extract matched fields from, as well as the grok pattern you expect will match.
 A grok pattern is like a regular expression that supports aliased expressions that can be reused.
@@ -11863,6 +12013,7 @@ const INGEST_PUT_PIPELINE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update a pipeline`,
   description: `Create or update a pipeline.
+
 Changes made using this API take effect immediately.
 
  Documentation: https://www.elastic.co/docs/manage-data/ingest/transform-enrich/ingest-pipelines`,
@@ -11943,12 +12094,14 @@ const KNN_SEARCH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.knn_search',
   connectorGroup: 'internal',
   summary: null,
-  description: `Performs a kNN search
+  description: `Run a knn search.
 
- Documentation: null`,
+NOTE: The kNN search API has been replaced by the \`knn\` option in the search API.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-knn-search`,
   methods: ['GET', 'POST'],
   patterns: ['{index}/_knn_search'],
-  documentation: null,
+  documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-knn-search',
   parameterTypes: {
     headerParams: [],
     pathParams: [],
@@ -12141,6 +12294,7 @@ const LICENSE_POST_START_TRIAL_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Start a trial`,
   description: `Start a trial.
+
 Start a 30-day trial, which gives access to all subscription features.
 
 NOTE: You are allowed to start a trial only if your cluster has not already activated a trial for the current major product version.
@@ -12171,6 +12325,7 @@ const LOGSTASH_DELETE_PIPELINE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete a Logstash pipeline`,
   description: `Delete a Logstash pipeline.
+
 Delete a pipeline that is used for Logstash Central Management.
 If the request succeeds, you receive an empty response with an appropriate status code.
 
@@ -12197,6 +12352,7 @@ const LOGSTASH_GET_PIPELINE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get Logstash pipelines`,
   description: `Get Logstash pipelines.
+
 Get pipelines that are used for Logstash Central Management.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-logstash-get-pipeline`,
@@ -12328,6 +12484,7 @@ const MIGRATION_DEPRECATIONS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get deprecation information`,
   description: `Get deprecation information.
+
 Get information about different cluster, node, and index level settings that use deprecated features that will be removed or changed in the next major version.
 
 TIP: This APIs is designed for indirect use by the Upgrade Assistant.
@@ -12363,6 +12520,7 @@ const MIGRATION_GET_FEATURE_UPGRADE_STATUS_CONTRACT: InternalConnectorContract =
   connectorGroup: 'internal',
   summary: `Get feature migration information`,
   description: `Get feature migration information.
+
 Version upgrades sometimes require changes to how features store configuration information and data in system indices.
 Check which features need to be migrated and the status of any migrations that are in progress.
 
@@ -12392,6 +12550,7 @@ const MIGRATION_POST_FEATURE_UPGRADE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Start the feature migration`,
   description: `Start the feature migration.
+
 Version upgrades sometimes require changes to how features store configuration information and data in system indices.
 This API starts the automatic migration process.
 
@@ -12940,6 +13099,7 @@ const ML_FLUSH_JOB_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Force buffered data to be processed`,
   description: `Force buffered data to be processed.
+
 The flush jobs API is only applicable when sending data for analysis using
 the post data API. Depending on the content of the buffer, then it might
 additionally calculate new results. Both flush and close operations are
@@ -13001,6 +13161,7 @@ const ML_GET_BUCKETS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get anomaly detection job results for buckets`,
   description: `Get anomaly detection job results for buckets.
+
 The API presents a chronological view of the records, grouped by bucket.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-buckets`,
@@ -13189,6 +13350,7 @@ const ML_GET_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get data frame analytics job configuration info`,
   description: `Get data frame analytics job configuration info.
+
 You can get information for multiple data frame analytics jobs in a single
 API request by using a comma-separated list of data frame analytics jobs or a
 wildcard expression.
@@ -13260,6 +13422,7 @@ const ML_GET_DATAFEED_STATS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get datafeed stats`,
   description: `Get datafeed stats.
+
 You can get statistics for multiple datafeeds in a single API request by
 using a comma-separated list of datafeeds or a wildcard expression. You can
 get statistics for all datafeeds by using \`_all\`, by specifying \`*\` as the
@@ -13297,6 +13460,7 @@ const ML_GET_DATAFEEDS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get datafeeds configuration info`,
   description: `Get datafeeds configuration info.
+
 You can get information for multiple datafeeds in a single API request by
 using a comma-separated list of datafeeds or a wildcard expression. You can
 get information for all datafeeds by using \`_all\`, by specifying \`*\` as the
@@ -13333,6 +13497,7 @@ const ML_GET_FILTERS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get filters`,
   description: `Get filters.
+
 You can get a single filter or all filters.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-filters`,
@@ -13365,6 +13530,7 @@ const ML_GET_INFLUENCERS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get anomaly detection job results for influencers`,
   description: `Get anomaly detection job results for influencers.
+
 Influencers are the entities that have contributed to, or are to blame for,
 the anomalies. Influencer results are available only if an
 \`influencer_field_name\` is specified in the job configuration.
@@ -13439,6 +13605,7 @@ const ML_GET_JOBS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get anomaly detection jobs configuration info`,
   description: `Get anomaly detection jobs configuration info.
+
 You can get information for multiple anomaly detection jobs in a single API
 request by using a group name, a comma-separated list of jobs, or a wildcard
 expression. You can get information for all anomaly detection jobs by using
@@ -13474,6 +13641,7 @@ const ML_GET_MEMORY_STATS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get machine learning memory usage info`,
   description: `Get machine learning memory usage info.
+
 Get information about how machine learning jobs and trained models are using memory,
 on each node, both within the JVM heap, and natively, outside of the JVM.
 
@@ -13645,6 +13813,7 @@ const ML_GET_RECORDS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get anomaly records for an anomaly detection job`,
   description: `Get anomaly records for an anomaly detection job.
+
 Records contain the detailed analytical results. They describe the anomalous
 activity that has been identified in the input data based on the detector
 configuration.
@@ -13725,6 +13894,7 @@ const ML_GET_TRAINED_MODELS_STATS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get trained models usage info`,
   description: `Get trained models usage info.
+
 You can get usage information for multiple trained
 models in a single API request by using a comma-separated list of model IDs or a wildcard expression.
 
@@ -13785,6 +13955,7 @@ const ML_INFO_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get machine learning information`,
   description: `Get machine learning information.
+
 Get defaults and limits used by machine learning.
 This endpoint is designed to be used by a user interface that needs to fully
 understand machine learning configurations where some options are not
@@ -13897,6 +14068,7 @@ const ML_PREVIEW_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Preview features used by data frame analytics`,
   description: `Preview features used by data frame analytics.
+
 Preview the extracted features used by a data frame analytics config.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-preview-data-frame-analytics`,
@@ -13944,6 +14116,7 @@ const ML_PREVIEW_DATAFEED_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Preview a datafeed`,
   description: `Preview a datafeed.
+
 This API returns the first "page" of search results from a datafeed.
 You can preview an existing datafeed or provide configuration details for a datafeed
 and anomaly detection job in the API. The preview shows the structure of the data
@@ -14046,6 +14219,7 @@ const ML_PUT_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create a data frame analytics job`,
   description: `Create a data frame analytics job.
+
 This API creates a data frame analytics job that performs an analysis on the
 source indices and stores the outcome in a destination index.
 By default, the query used in the source configuration is \`{"match_all": {}}\`.
@@ -14089,6 +14263,7 @@ const ML_PUT_DATAFEED_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create a datafeed`,
   description: `Create a datafeed.
+
 Datafeeds retrieve data from Elasticsearch for analysis by an anomaly detection job.
 You can associate only one datafeed with each anomaly detection job.
 The datafeed contains a query that runs at a defined interval (\`frequency\`).
@@ -14139,6 +14314,7 @@ const ML_PUT_FILTER_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create a filter`,
   description: `Create a filter.
+
 A filter contains a list of strings. It can be used by one or more anomaly detection jobs.
 Specifically, filters are referenced in the \`custom_rules\` property of detector configuration objects.
 
@@ -14208,6 +14384,7 @@ const ML_PUT_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create a trained model`,
   description: `Create a trained model.
+
 Enable you to supply a trained model that is not created by data frame analytics.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-put-trained-model`,
@@ -14245,6 +14422,7 @@ const ML_PUT_TRAINED_MODEL_ALIAS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update a trained model alias`,
   description: `Create or update a trained model alias.
+
 A trained model alias is a logical name used to reference a single trained
 model.
 You can use aliases instead of trained model identifiers to make it easier to
@@ -14309,6 +14487,7 @@ const ML_PUT_TRAINED_MODEL_VOCABULARY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create a trained model vocabulary`,
   description: `Create a trained model vocabulary.
+
 This API is supported only for natural language processing (NLP) models.
 The vocabulary is stored in the index as described in \`inference_config.*.vocabulary\` of the trained model definition.
 
@@ -14335,6 +14514,7 @@ const ML_RESET_JOB_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Reset an anomaly detection job`,
   description: `Reset an anomaly detection job.
+
 All model state and results are deleted. The job is ready to start over as if
 it had just been created.
 It is not currently possible to reset multiple jobs using wildcards or a
@@ -14363,6 +14543,7 @@ const ML_REVERT_MODEL_SNAPSHOT_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Revert to a snapshot`,
   description: `Revert to a snapshot.
+
 The machine learning features react quickly to anomalous input, learning new
 behaviors in data. Highly anomalous input increases the variance in the
 models whilst the system learns whether this is a new step-change in behavior
@@ -14394,6 +14575,7 @@ const ML_SET_UPGRADE_MODE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Set upgrade_mode for ML indices`,
   description: `Set upgrade_mode for ML indices.
+
 Sets a cluster wide upgrade_mode setting that prepares machine learning
 indices for an upgrade.
 When upgrading your cluster, in some circumstances you must restart your
@@ -14430,6 +14612,7 @@ const ML_START_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Start a data frame analytics job`,
   description: `Start a data frame analytics job.
+
 A data frame analytics job can be started and stopped multiple times
 throughout its lifecycle.
 If the destination index does not exist, it is created automatically the
@@ -14501,6 +14684,7 @@ const ML_START_TRAINED_MODEL_DEPLOYMENT_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Start a trained model deployment`,
   description: `Start a trained model deployment.
+
 It allocates the model to every machine learning node.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-start-trained-model-deployment`,
@@ -14535,6 +14719,7 @@ const ML_STOP_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Stop data frame analytics jobs`,
   description: `Stop data frame analytics jobs.
+
 A data frame analytics job can be started and stopped multiple times
 throughout its lifecycle.
 
@@ -14561,6 +14746,7 @@ const ML_STOP_DATAFEED_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Stop datafeeds`,
   description: `Stop datafeeds.
+
 A datafeed that is stopped ceases to retrieve data from Elasticsearch. A datafeed can be started and stopped
 multiple times throughout its lifecycle.
 
@@ -14635,6 +14821,7 @@ const ML_UPDATE_DATAFEED_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Update a datafeed`,
   description: `Update a datafeed.
+
 You must stop and start the datafeed for the changes to be applied.
 When Elasticsearch security features are enabled, your datafeed remembers which roles the user who updated it had at
 the time of the update and runs the query using those same roles. If you provide secondary authorization headers,
@@ -14677,6 +14864,7 @@ const ML_UPDATE_FILTER_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Update a filter`,
   description: `Update a filter.
+
 Updates the description of a filter, adds items, or removes items from the list.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-update-filter`,
@@ -14702,6 +14890,7 @@ const ML_UPDATE_JOB_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Update an anomaly detection job`,
   description: `Update an anomaly detection job.
+
 Updates certain properties of an anomaly detection job.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-update-job`,
@@ -14743,6 +14932,7 @@ const ML_UPDATE_MODEL_SNAPSHOT_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Update a snapshot`,
   description: `Update a snapshot.
+
 Updates certain properties of a snapshot.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-update-model-snapshot`,
@@ -14792,6 +14982,7 @@ const ML_UPGRADE_JOB_SNAPSHOT_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Upgrade a snapshot`,
   description: `Upgrade a snapshot.
+
 Upgrade an anomaly detection model snapshot to the latest major version.
 Over time, older snapshot formats are deprecated and removed. Anomaly
 detection jobs support only snapshots that are from the current or previous
@@ -14863,11 +15054,12 @@ const MONITORING_BULK_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: null,
   description: `Send monitoring data.
+
 This API is used by the monitoring features to send monitoring data.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch`,
   methods: ['POST', 'PUT'],
-  patterns: ['_monitoring/bulk', '_monitoring/{type}/bulk'],
+  patterns: ['_monitoring/bulk'],
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch',
   parameterTypes: {
     headerParams: [],
@@ -15095,6 +15287,7 @@ const NODES_CLEAR_REPOSITORIES_METERING_ARCHIVE_CONTRACT: InternalConnectorContr
   connectorGroup: 'internal',
   summary: `Clear the archived repositories metering`,
   description: `Clear the archived repositories metering.
+
 Clear the archived repositories metering information in the cluster.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-clear-repositories-metering-archive`,
@@ -15120,6 +15313,7 @@ const NODES_GET_REPOSITORIES_METERING_INFO_CONTRACT: InternalConnectorContract =
   connectorGroup: 'internal',
   summary: `Get cluster repositories metering`,
   description: `Get cluster repositories metering.
+
 Get repositories metering information for a cluster.
 This API exposes monotonically non-decreasing counters and it is expected that clients would durably store the information needed to compute aggregations over a period of time.
 Additionally, the information exposed by this API is volatile, meaning that it will not be present after node restarts.
@@ -15147,6 +15341,7 @@ const NODES_HOT_THREADS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get the hot threads for nodes`,
   description: `Get the hot threads for nodes.
+
 Get a breakdown of the hot threads on each selected node in the cluster.
 The output is plain text with a breakdown of the top hot threads for each node.
 
@@ -15277,6 +15472,7 @@ const NODES_STATS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get node statistics`,
   description: `Get node statistics.
+
 Get statistics for nodes in a cluster.
 By default, all stats are returned. You can limit the returned information by using metrics.
 
@@ -15473,6 +15669,7 @@ const PING_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Ping the cluster`,
   description: `Ping the cluster.
+
 Get information about whether the cluster is running.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-cluster`,
@@ -15496,7 +15693,7 @@ const PROFILING_FLAMEGRAPH_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.flamegraph',
   connectorGroup: 'internal',
   summary: null,
-  description: `Extracts a UI-optimized structure to render flamegraphs from Universal Profiling
+  description: `Returns basic information about the status of Universal Profiling.
 
  Documentation: https://www.elastic.co/guide/en/observability/current/universal-profiling.html`,
   methods: ['POST'],
@@ -15515,7 +15712,7 @@ const PROFILING_STACKTRACES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.stacktraces',
   connectorGroup: 'internal',
   summary: null,
-  description: `Extracts raw stacktrace information from Universal Profiling
+  description: `Extracts raw stacktrace information from Universal Profiling.
 
  Documentation: https://www.elastic.co/guide/en/observability/current/universal-profiling.html`,
   methods: ['POST'],
@@ -15534,7 +15731,7 @@ const PROFILING_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.status',
   connectorGroup: 'internal',
   summary: null,
-  description: `Returns basic information about the status of Universal Profiling
+  description: `Returns basic information about the status of Universal Profiling.
 
  Documentation: https://www.elastic.co/guide/en/observability/current/universal-profiling.html`,
   methods: ['GET'],
@@ -15573,10 +15770,11 @@ const PROJECT_TAGS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: null,
   description: `Get tags.
+
 Get the tags that are defined for the project.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-project-tags`,
-  methods: ['GET'],
+  methods: ['GET', 'POST'],
   patterns: ['_project/tags'],
   documentation:
     'https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-project-tags',
@@ -15594,6 +15792,7 @@ const PUT_SCRIPT_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update a script or search template`,
   description: `Create or update a script or search template.
+
 Creates or updates a stored script or search template.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-put-script`,
@@ -15640,6 +15839,7 @@ const QUERY_RULES_DELETE_RULE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete a query rule`,
   description: `Delete a query rule.
+
 Delete a query rule within a query ruleset.
 This is a destructive action that is only recoverable by re-adding the same rule with the create or update query rule API.
 
@@ -15666,6 +15866,7 @@ const QUERY_RULES_DELETE_RULESET_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete a query ruleset`,
   description: `Delete a query ruleset.
+
 Remove a query ruleset and its associated data.
 This is a destructive action that is not recoverable.
 
@@ -15692,6 +15893,7 @@ const QUERY_RULES_GET_RULE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get a query rule`,
   description: `Get a query rule.
+
 Get details about a query rule within a query ruleset.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-get-rule`,
@@ -15717,6 +15919,7 @@ const QUERY_RULES_GET_RULESET_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get a query ruleset`,
   description: `Get a query ruleset.
+
 Get details about a query ruleset.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-get-ruleset`,
@@ -15742,6 +15945,7 @@ const QUERY_RULES_LIST_RULESETS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get all query rulesets`,
   description: `Get all query rulesets.
+
 Get summarized information about the query rulesets.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-list-rulesets`,
@@ -15767,6 +15971,7 @@ const QUERY_RULES_PUT_RULE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update a query rule`,
   description: `Create or update a query rule.
+
 Create or update a query rule within a query ruleset.
 
 IMPORTANT: Due to limitations within pinned queries, you can only pin documents using ids or docs, but cannot use both in single rule.
@@ -15797,6 +16002,7 @@ const QUERY_RULES_PUT_RULESET_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update a query ruleset`,
   description: `Create or update a query ruleset.
+
 There is a limit of 100 rules per ruleset.
 This limit can be increased by using the \`xpack.applications.rules.max_rules_per_ruleset\` cluster setting.
 
@@ -15828,6 +16034,7 @@ const QUERY_RULES_TEST_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Test a query ruleset`,
   description: `Test a query ruleset.
+
 Evaluate match criteria against a query ruleset to identify the rules that would match that criteria.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-test`,
@@ -16109,6 +16316,7 @@ const ROLLUP_GET_JOBS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get rollup job information`,
   description: `Get rollup job information.
+
 Get the configuration, stats, and status of rollup jobs.
 
 NOTE: This API returns only active (both \`STARTED\` and \`STOPPED\`) jobs.
@@ -16145,6 +16353,7 @@ const ROLLUP_GET_ROLLUP_CAPS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get the rollup job capabilities`,
   description: `Get the rollup job capabilities.
+
 Get the capabilities of any rollup jobs that have been configured for a specific index or index pattern.
 
 This API is useful because a rollup job is often configured to rollup only a subset of fields from the source index.
@@ -16184,6 +16393,7 @@ const ROLLUP_GET_ROLLUP_INDEX_CAPS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get the rollup index capabilities`,
   description: `Get the rollup index capabilities.
+
 Get the rollup capabilities of all jobs inside of a rollup index.
 A single rollup index may store the data for multiple rollup jobs and may have a variety of capabilities depending on those jobs. This API enables you to determine:
 
@@ -16254,6 +16464,7 @@ const ROLLUP_ROLLUP_SEARCH_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Search rolled-up data`,
   description: `Search rolled-up data.
+
 The rollup search endpoint is needed because, internally, rolled-up documents utilize a different document structure than the original data.
 It rewrites standard Query DSL into a format that matches the rollup documents then takes the response and rewrites it back to what a client would expect given the original query.
 
@@ -16295,6 +16506,7 @@ const ROLLUP_START_JOB_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Start rollup jobs`,
   description: `Start rollup jobs.
+
 If you try to start a job that does not exist, an exception occurs.
 If you try to start a job that is already started, nothing happens.
 
@@ -16321,6 +16533,7 @@ const ROLLUP_STOP_JOB_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Stop rollup jobs`,
   description: `Stop rollup jobs.
+
 If you try to stop a job that does not exist, an exception occurs.
 If you try to stop a job that is already stopped, nothing happens.
 
@@ -16613,6 +16826,7 @@ const SEARCH_APPLICATION_DELETE_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnector
   connectorGroup: 'internal',
   summary: `Delete a behavioral analytics collection`,
   description: `Delete a behavioral analytics collection.
+
 The associated data stream is also deleted.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-delete-behavioral-analytics`,
@@ -16696,6 +16910,7 @@ const SEARCH_APPLICATION_LIST_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get search applications`,
   description: `Get search applications.
+
 Get information about search applications.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-get-behavioral-analytics`,
@@ -16793,6 +17008,7 @@ const SEARCH_APPLICATION_RENDER_QUERY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Render a search application query`,
   description: `Render a search application query.
+
 Generate an Elasticsearch query using the specified query parameters and the search template associated with the search application or a default template if none is specified.
 If a parameter used in the search template is not specified in \`params\`, the parameter's default value will be used.
 The API returns the specific Elasticsearch query that would be generated and run by calling the search application search API.
@@ -16822,6 +17038,7 @@ const SEARCH_APPLICATION_SEARCH_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Run a search application search`,
   description: `Run a search application search.
+
 Generate and run an Elasticsearch query that uses the specified query parameteter and the search template associated with the search application or default template.
 Unspecified template parameters are assigned their default values if applicable.
 
@@ -17117,6 +17334,7 @@ const SEARCHABLE_SNAPSHOTS_CACHE_STATS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get cache statistics`,
   description: `Get cache statistics.
+
 Get statistics about the shared cache for partially mounted indices.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-searchable-snapshots-cache-stats`,
@@ -17152,6 +17370,7 @@ const SEARCHABLE_SNAPSHOTS_CLEAR_CACHE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Clear the cache`,
   description: `Clear the cache.
+
 Clear indices and data streams from the shared cache for partially mounted indices.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-searchable-snapshots-clear-cache`,
@@ -17187,6 +17406,7 @@ const SEARCHABLE_SNAPSHOTS_MOUNT_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Mount a snapshot`,
   description: `Mount a snapshot.
+
 Mount a snapshot as a searchable snapshot index.
 Do not use this API for snapshots managed by index lifecycle management (ILM).
 Manually mounting ILM-managed snapshots can interfere with ILM processes.
@@ -17368,6 +17588,7 @@ const SECURITY_BULK_UPDATE_API_KEYS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Bulk update API keys`,
   description: `Bulk update API keys.
+
 Update the attributes for multiple API keys.
 
 IMPORTANT: It is not possible to use an API key as the authentication credential for this API. To update API keys, the owner user's credentials are required.
@@ -19579,6 +19800,7 @@ const SHUTDOWN_DELETE_NODE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: null,
   description: `Cancel node shutdown preparations.
+
 Remove a node from the shutdown list so it can resume normal operations.
 You must explicitly clear the shutdown request when a node rejoins the cluster or when a node has permanently left the cluster.
 Shutdown requests are never removed automatically by Elasticsearch.
@@ -19669,6 +19891,7 @@ const SIMULATE_INGEST_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Simulate data ingestion`,
   description: `Simulate data ingestion.
+
 Run ingest pipelines against a set of provided documents, optionally with substitute pipeline definitions, to simulate ingesting data into an index.
 
 This API is meant to be used for troubleshooting or pipeline development, as it does not actually index any data into Elasticsearch.
@@ -19737,6 +19960,7 @@ const SLM_DELETE_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete a policy`,
   description: `Delete a policy.
+
 Delete a snapshot lifecycle policy definition.
 This operation prevents any future snapshots from being taken but does not cancel in-progress snapshots or remove previously-taken snapshots.
 
@@ -19763,6 +19987,7 @@ const SLM_EXECUTE_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Run a policy`,
   description: `Run a policy.
+
 Immediately create a snapshot according to the snapshot lifecycle policy without waiting for the scheduled time.
 The snapshot policy is normally applied according to its schedule, but you might want to manually run a policy before performing an upgrade or other maintenance.
 
@@ -19789,6 +20014,7 @@ const SLM_EXECUTE_RETENTION_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Run a retention policy`,
   description: `Run a retention policy.
+
 Manually apply the retention policy to force immediate removal of snapshots that are expired according to the snapshot lifecycle policy retention rules.
 The retention policy is normally applied according to its schedule.
 
@@ -19815,6 +20041,7 @@ const SLM_GET_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get policy information`,
   description: `Get policy information.
+
 Get snapshot lifecycle policy definitions and information about the latest snapshot attempts.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-get-lifecycle`,
@@ -19847,6 +20074,7 @@ const SLM_GET_STATS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get snapshot lifecycle management statistics`,
   description: `Get snapshot lifecycle management statistics.
+
 Get global and policy-level statistics about actions taken by snapshot lifecycle management.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-slm-get-stats`,
@@ -19896,6 +20124,7 @@ const SLM_PUT_LIFECYCLE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update a policy`,
   description: `Create or update a policy.
+
 Create or update a snapshot lifecycle policy.
 If the policy already exists, this request increments the policy version.
 Only the latest version of a policy is stored.
@@ -19923,6 +20152,7 @@ const SLM_START_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Start snapshot lifecycle management`,
   description: `Start snapshot lifecycle management.
+
 Snapshot lifecycle management (SLM) starts automatically when a cluster is formed.
 Manually starting SLM is necessary only if it has been stopped using the stop SLM API.
 
@@ -19948,6 +20178,7 @@ const SLM_STOP_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Stop snapshot lifecycle management`,
   description: `Stop snapshot lifecycle management.
+
 Stop all snapshot lifecycle management (SLM) operations and the SLM plugin.
 This API is useful when you are performing maintenance on a cluster and need to prevent SLM from performing any actions on your data streams or indices.
 Stopping SLM does not stop any snapshots that are in progress.
@@ -19978,6 +20209,7 @@ const SNAPSHOT_CLEANUP_REPOSITORY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Clean up the snapshot repository`,
   description: `Clean up the snapshot repository.
+
 Trigger the review of the contents of a snapshot repository and delete any stale data not referenced by existing snapshots.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-cleanup-repository`,
@@ -20003,6 +20235,7 @@ const SNAPSHOT_CLONE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Clone a snapshot`,
   description: `Clone a snapshot.
+
 Clone part of all of a snapshot into another snapshot in the same repository.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-clone`,
@@ -20028,6 +20261,7 @@ const SNAPSHOT_CREATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create a snapshot`,
   description: `Create a snapshot.
+
 Take a snapshot of a cluster or of data streams and indices.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-create`,
@@ -20068,6 +20302,7 @@ const SNAPSHOT_CREATE_REPOSITORY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update a snapshot repository`,
   description: `Create or update a snapshot repository.
+
 IMPORTANT: If you are migrating searchable snapshots, the repository name must be identical in the source and destination clusters.
 To register a snapshot repository, the cluster's global metadata must be writeable.
 Ensure there are no cluster blocks (for example, \`cluster.blocks.read_only\` and \`clsuter.blocks.read_only_allow_delete\` settings) that prevent write access.
@@ -20132,6 +20367,7 @@ const SNAPSHOT_DELETE_REPOSITORY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete snapshot repositories`,
   description: `Delete snapshot repositories.
+
 When a repository is unregistered, Elasticsearch removes only the reference to the location where the repository is storing the snapshots.
 The snapshots themselves are left untouched and in place.
 
@@ -20372,6 +20608,7 @@ const SNAPSHOT_REPOSITORY_VERIFY_INTEGRITY_CONTRACT: InternalConnectorContract =
   connectorGroup: 'internal',
   summary: `Verify the repository integrity`,
   description: `Verify the repository integrity.
+
 Verify the integrity of the contents of a snapshot repository.
 
 This API enables you to perform a comprehensive check of the contents of a repository, looking for any anomalies in its data or metadata which might prevent you from restoring snapshots from the repository or which might cause future snapshot create or delete operations to fail.
@@ -20440,6 +20677,7 @@ const SNAPSHOT_RESTORE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Restore a snapshot`,
   description: `Restore a snapshot.
+
 Restore a snapshot of a cluster or data streams and indices.
 
 You can restore a snapshot only to a running cluster with an elected master node.
@@ -20492,6 +20730,7 @@ const SNAPSHOT_STATUS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get the snapshot status`,
   description: `Get the snapshot status.
+
 Get a detailed description of the current state for each shard participating in the snapshot.
 
 Note that this API should be used only to obtain detailed shard-level information for ongoing snapshots.
@@ -20557,6 +20796,7 @@ const SNAPSHOT_VERIFY_REPOSITORY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Verify a snapshot repository`,
   description: `Verify a snapshot repository.
+
 Check for common misconfigurations in a snapshot repository.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-verify-repository`,
@@ -20606,6 +20846,7 @@ const SQL_DELETE_ASYNC_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete an async SQL search`,
   description: `Delete an async SQL search.
+
 Delete an async SQL search or a stored synchronous SQL search.
 If the search is still running, the API cancels it.
 
@@ -20637,6 +20878,7 @@ const SQL_GET_ASYNC_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get async SQL search results`,
   description: `Get async SQL search results.
+
 Get the current status and available results for an async SQL search or stored synchronous SQL search.
 
 If the Elasticsearch security features are enabled, only the user who first submitted the SQL search can retrieve the search using this API.
@@ -20664,6 +20906,7 @@ const SQL_GET_ASYNC_STATUS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get the async SQL search status`,
   description: `Get the async SQL search status.
+
 Get the current status of an async SQL search or a stored synchronous SQL search.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-get-async-status`,
@@ -20689,6 +20932,7 @@ const SQL_QUERY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get SQL search results`,
   description: `Get SQL search results.
+
 Run an SQL request.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-query`,
@@ -20738,6 +20982,7 @@ const SQL_TRANSLATE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Translate SQL into Elasticsearch queries`,
   description: `Translate SQL into Elasticsearch queries.
+
 Translate an SQL search into a search API request containing Query DSL.
 It accepts the same request body parameters as the SQL search API, excluding \`cursor\`.
 
@@ -20919,6 +21164,7 @@ const SYNONYMS_DELETE_SYNONYM_RULE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete a synonym rule`,
   description: `Delete a synonym rule.
+
 Delete a synonym rule from a synonym set.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-delete-synonym-rule`,
@@ -20968,6 +21214,7 @@ const SYNONYMS_GET_SYNONYM_RULE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get a synonym rule`,
   description: `Get a synonym rule.
+
 Get a synonym rule from a synonym set.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-get-synonym-rule`,
@@ -20993,6 +21240,7 @@ const SYNONYMS_GET_SYNONYMS_SETS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get all synonym sets`,
   description: `Get all synonym sets.
+
 Get a summary of all defined synonym sets.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-synonyms-get-synonym`,
@@ -21018,6 +21266,7 @@ const SYNONYMS_PUT_SYNONYM_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update a synonym set`,
   description: `Create or update a synonym set.
+
 Synonyms sets are limited to a maximum of 10,000 synonym rules per set.
 If you need to manage more synonym rules, you can create multiple synonym sets.
 
@@ -21049,6 +21298,7 @@ const SYNONYMS_PUT_SYNONYM_RULE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update a synonym rule`,
   description: `Create or update a synonym rule.
+
 Create or update a synonym rule in a synonym set.
 
 If any of the synonym rules included is invalid, the API returns an error.
@@ -21119,6 +21369,7 @@ const TASKS_GET_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get task information`,
   description: `Get task information.
+
 Get information about a task currently running in the cluster.
 
 WARNING: The task management API is new and should still be considered a beta feature.
@@ -21148,6 +21399,7 @@ const TASKS_LIST_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get all tasks`,
   description: `Get all tasks.
+
 Get information about the tasks currently running on one or more nodes in the cluster.
 
 WARNING: The task management API is new and should still be considered a beta feature.
@@ -21393,6 +21645,7 @@ const TEXT_STRUCTURE_FIND_FIELD_STRUCTURE_CONTRACT: InternalConnectorContract = 
   connectorGroup: 'internal',
   summary: `Find the structure of a text field`,
   description: `Find the structure of a text field.
+
 Find the structure of a text field in an Elasticsearch index.
 
 This API provides a starting point for extracting further information from log messages already ingested into Elasticsearch.
@@ -21448,6 +21701,7 @@ const TEXT_STRUCTURE_FIND_MESSAGE_STRUCTURE_CONTRACT: InternalConnectorContract 
   connectorGroup: 'internal',
   summary: `Find the structure of text messages`,
   description: `Find the structure of text messages.
+
 Find the structure of a list of text messages.
 The messages must contain data that is suitable to be ingested into Elasticsearch.
 
@@ -21512,6 +21766,7 @@ const TEXT_STRUCTURE_FIND_STRUCTURE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Find the structure of a text file`,
   description: `Find the structure of a text file.
+
 The text file must contain data that is suitable to be ingested into Elasticsearch.
 
 This API provides a starting point for ingesting data into Elasticsearch in a format that is suitable for subsequent use with other Elastic Stack functionality.
@@ -21568,6 +21823,7 @@ const TEXT_STRUCTURE_TEST_GROK_PATTERN_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Test a Grok pattern`,
   description: `Test a Grok pattern.
+
 Test a Grok pattern on one or more lines of text.
 The API indicates whether the lines match the pattern together with the offsets and lengths of the matched substrings.
 
@@ -21648,6 +21904,7 @@ const TRANSFORM_GET_TRANSFORM_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get transforms`,
   description: `Get transforms.
+
 Get configuration information for transforms.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-get-transform`,
@@ -21706,6 +21963,7 @@ const TRANSFORM_PREVIEW_TRANSFORM_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Preview a transform`,
   description: `Preview a transform.
+
 Generates a preview of the results that you will get when you create a transform with the same configuration.
 
 It returns a maximum of 100 results. The calculations are based on all the current data in the source index. It also
@@ -21767,6 +22025,7 @@ const TRANSFORM_PUT_TRANSFORM_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create a transform`,
   description: `Create a transform.
+
 Creates a transform.
 
 A transform copies data from source indices, transforms it, and persists it into an entity-centric destination index. You can also think of the destination index as a two-dimensional tabular data structure (known as
@@ -21880,6 +22139,7 @@ const TRANSFORM_SET_UPGRADE_MODE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Set upgrade_mode for transform indices`,
   description: `Set upgrade_mode for transform indices.
+
 Sets a cluster wide upgrade_mode setting that prepares transform
 indices for an upgrade.
 When upgrading your cluster, in some circumstances you must restart your
@@ -21955,6 +22215,7 @@ const TRANSFORM_STOP_TRANSFORM_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Stop transforms`,
   description: `Stop transforms.
+
 Stops one or more transforms.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-stop-transform`,
@@ -21980,6 +22241,7 @@ const TRANSFORM_UPDATE_TRANSFORM_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Update a transform`,
   description: `Update a transform.
+
 Updates certain properties of a transform.
 
 All updated properties except \`description\` do not take effect until after the transform starts the next checkpoint,
@@ -22122,6 +22384,7 @@ const UPDATE_BY_QUERY_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Update documents`,
   description: `Update documents.
+
 Updates documents that match the specified query.
 If no query is specified, performs an update on every document in the data stream or index without modifying the source, which is useful for picking up mapping changes.
 
@@ -22297,6 +22560,7 @@ const WATCHER_ACK_WATCH_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Acknowledge a watch`,
   description: `Acknowledge a watch.
+
 Acknowledging a watch enables you to manually throttle the execution of the watch's actions.
 
 The acknowledgement state of an action is stored in the \`status.actions.<id>.ack.state\` structure.
@@ -22353,6 +22617,7 @@ const WATCHER_ACTIVATE_WATCH_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Activate a watch`,
   description: `Activate a watch.
+
 A watch can be either active or inactive.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-activate-watch`,
@@ -22385,6 +22650,7 @@ const WATCHER_DEACTIVATE_WATCH_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Deactivate a watch`,
   description: `Deactivate a watch.
+
 A watch can be either active or inactive.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-deactivate-watch`,
@@ -22417,6 +22683,7 @@ const WATCHER_DELETE_WATCH_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Delete a watch`,
   description: `Delete a watch.
+
 When the watch is removed, the document representing the watch in the \`.watches\` index is gone and it will never be run again.
 
 Deleting a watch does not delete any watch execution records related to this watch from the watch history.
@@ -22448,6 +22715,7 @@ const WATCHER_EXECUTE_WATCH_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Run a watch`,
   description: `Run a watch.
+
 This API can be used to force execution of the watch outside of its triggering logic or to simulate the watch execution for debugging purposes.
 
 For testing and debugging purposes, you also have fine-grained control on how the watch runs.
@@ -22516,6 +22784,7 @@ const WATCHER_GET_SETTINGS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get Watcher index settings`,
   description: `Get Watcher index settings.
+
 Get settings for the Watcher internal index (\`.watches\`).
 Only a subset of settings are shown, for example \`index.auto_expand_replicas\` and \`index.number_of_replicas\`.
 
@@ -22566,6 +22835,7 @@ const WATCHER_PUT_WATCH_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Create or update a watch`,
   description: `Create or update a watch.
+
 When a watch is registered, a new document that represents the watch is added to the \`.watches\` index and its trigger is immediately registered with the relevant trigger engine.
 Typically for the \`schedule\` trigger, the scheduler is the trigger engine.
 
@@ -22617,6 +22887,7 @@ const WATCHER_QUERY_WATCHES_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Query watches`,
   description: `Query watches.
+
 Get all registered watches in a paginated manner and optionally filter watches by a query.
 
 Note that only the \`_id\` and \`metadata.*\` fields are queryable or sortable.
@@ -22651,6 +22922,7 @@ const WATCHER_START_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Start the watch service`,
   description: `Start the watch service.
+
 Start the Watcher service if it is not already running.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-start`,
@@ -22676,6 +22948,7 @@ const WATCHER_STATS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get Watcher statistics`,
   description: `Get Watcher statistics.
+
 This API always returns basic metrics.
 You retrieve more metrics by using the metric parameter.
 
@@ -22709,6 +22982,7 @@ const WATCHER_STOP_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Stop the watch service`,
   description: `Stop the watch service.
+
 Stop the Watcher service if it is running.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-stop`,
@@ -22734,6 +23008,7 @@ const WATCHER_UPDATE_SETTINGS_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Update Watcher index settings`,
   description: `Update Watcher index settings.
+
 Update settings for the Watcher internal index (\`.watches\`).
 Only a subset of settings can be modified.
 This includes \`index.auto_expand_replicas\`, \`index.number_of_replicas\`, \`index.routing.allocation.exclude.*\`,
@@ -22764,6 +23039,7 @@ const XPACK_INFO_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get information`,
   description: `Get information.
+
 The information provided by the API includes:
 
 * Build information including the build number and timestamp.
@@ -22792,6 +23068,7 @@ const XPACK_USAGE_CONTRACT: InternalConnectorContract = {
   connectorGroup: 'internal',
   summary: `Get usage information`,
   description: `Get usage information.
+
 Get information about the features that are currently enabled and available under the current license.
 The API also provides some usage statistics.
 
@@ -23076,6 +23353,7 @@ export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
   INFERENCE_PUT_LLAMA_CONTRACT,
   INFERENCE_PUT_MISTRAL_CONTRACT,
   INFERENCE_PUT_OPENAI_CONTRACT,
+  INFERENCE_PUT_OPENSHIFT_AI_CONTRACT,
   INFERENCE_PUT_VOYAGEAI_CONTRACT,
   INFERENCE_PUT_WATSONX_CONTRACT,
   INFERENCE_RERANK_CONTRACT,

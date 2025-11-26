@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getKibanaConnectors } from '../spec/kibana';
+
 // Lazy import to avoid bundling large generated file in main plugin bundle
 
 /**
@@ -56,12 +58,11 @@ export function buildKibanaRequestFromAction(
   }
 
   // Lazy load the generated connectors to avoid main bundle bloat
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { GENERATED_KIBANA_CONNECTORS } = require('../spec/kibana/kibana_connectors.gen');
+  const kibanaConnectors = getKibanaConnectors();
 
   // Find the connector definition for this action type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const connector = GENERATED_KIBANA_CONNECTORS.find((c: any) => c.type === actionType);
+  const connector = kibanaConnectors.find((c: any) => c.type === actionType);
 
   if (connector && connector.patterns && connector.methods) {
     // Use explicit parameter type metadata (no hardcoded keys!)
