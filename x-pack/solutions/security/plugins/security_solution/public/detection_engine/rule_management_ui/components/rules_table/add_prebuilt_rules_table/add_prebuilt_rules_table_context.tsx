@@ -9,7 +9,10 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useIsMutating } from '@kbn/react-query';
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
+import type {
+  ReviewRuleInstallationSort,
+  RuleSignatureId,
+} from '../../../../../../common/api/detection_engine';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
@@ -135,6 +138,13 @@ export const AddPrebuiltRulesTableContextProvider = ({
     perPage: RULES_TABLE_INITIAL_PAGE_SIZE,
   });
 
+  const [sortingOptions, setSortingOptions] = useState<ReviewRuleInstallationSort>([
+    {
+      field: 'name',
+      order: 'asc',
+    },
+  ]);
+
   const { data: prebuiltRulesStatus } = useFetchPrebuiltRulesStatusQuery();
 
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
@@ -161,10 +171,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
       page: pagination.page,
       per_page: pagination.perPage,
       filter: {},
-      sort: {
-        field: 'name',
-        order: 'asc',
-      },
+      sort: sortingOptions,
     },
     {
       refetchInterval: 60000, // Refetch available rules for installation every minute
@@ -297,6 +304,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const actions = useMemo(
     () => ({
       setPagination,
+      setSortingOptions,
       setFilterOptions,
       installAllRules,
       installOneRule,
@@ -305,7 +313,15 @@ export const AddPrebuiltRulesTableContextProvider = ({
       selectRules: setSelectedRules,
       openRulePreview,
     }),
-    [setPagination, installAllRules, installOneRule, installSelectedRules, refetch, openRulePreview]
+    [
+      setPagination,
+      setSortingOptions,
+      installAllRules,
+      installOneRule,
+      installSelectedRules,
+      refetch,
+      openRulePreview,
+    ]
   );
 
   const providerValue = useMemo<AddPrebuiltRulesContextType>(() => {
@@ -329,6 +345,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
           ...pagination,
           total: total ?? 0,
         },
+        sortingOptions,
       },
       actions,
     };
@@ -348,6 +365,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     dataUpdatedAt,
     pagination,
     total,
+    sortingOptions,
     actions,
   ]);
 
