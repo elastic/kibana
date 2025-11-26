@@ -13,6 +13,7 @@ import moment from 'moment';
 import {
   ACTION_RESPONSES_DATA_STREAM_INDEX,
   ACTION_RESPONSES_INDEX,
+  ACTION_EXPIRATION,
 } from '../../../../../../common/constants';
 import type { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
 import { getQueryFilter } from '../../../../../utils/build_query';
@@ -41,7 +42,10 @@ export const buildActionResultsQuery = ({
             range: {
               started_at: {
                 gte: startDate,
-                lte: moment(startDate).clone().add(30, 'minutes').toISOString(),
+                lte: moment(startDate)
+                  .clone()
+                  .add(ACTION_EXPIRATION.SEARCH_WINDOW_MINUTES, 'minutes')
+                  .toISOString(),
               },
             },
           },

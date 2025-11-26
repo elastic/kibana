@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { OSQUERY_INTEGRATION_NAME, BASE_PATH } from './constants';
+export { OSQUERY_INTEGRATION_NAME, BASE_PATH, ACTION_EXPIRATION } from './constants';
 export {
   allowedExperimentalValues,
   parseExperimentalConfigValue,

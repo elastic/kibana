@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash';
 import moment from 'moment/moment';
 import { buildIndexNameWithNamespace } from '../../../../utils/build_index_name_with_namespace';
 import { getQueryFilter } from '../../../../utils/build_query';
-import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
+import { OSQUERY_INTEGRATION_NAME, ACTION_EXPIRATION } from '../../../../../common';
 import type { ResultsRequestOptions } from '../../../../../common/search_strategy';
 
 export const buildResultsQuery = ({
@@ -37,7 +37,10 @@ export const buildResultsQuery = ({
             range: {
               '@timestamp': {
                 gte: startDate,
-                lte: moment(startDate).clone().add(30, 'minutes').toISOString(),
+                lte: moment(startDate)
+                  .clone()
+                  .add(ACTION_EXPIRATION.SEARCH_WINDOW_MINUTES, 'minutes')
+                  .toISOString(),
               },
             },
           },

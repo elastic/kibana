@@ -34,3 +34,56 @@ export enum QUERY_TIMEOUT {
   DEFAULT = 60, // 60 seconds
   MAX = 60 * 60 * 24, // 24 hours
 }
+
+/**
+ * Action expiration timeout configuration.
+ * This controls how long Kibana waits for all agents to respond.
+ */
+export const ACTION_EXPIRATION = {
+  /** Minimum timeout in minutes (for small queries on few agents) */
+  MIN_MINUTES: 5,
+  /** Maximum timeout in minutes (cap to prevent excessively long waits) */
+  MAX_MINUTES: 50,
+  /** Buffer added to query timeout to account for Fleet delivery delays */
+  BUFFER_MINUTES: 2,
+  /** Minutes added per 1000 agents to account for Fleet batching */
+  MINUTES_PER_1K_AGENTS: 2,
+  /**
+   * Search window for querying results (must be >= MAX_MINUTES + buffer).
+   * Used in ES queries to filter results by time range from action start.
+   */
+  SEARCH_WINDOW_MINUTES: 55,
+} as const;
+
+/**
+ * Calculates dynamic action expiration timeout based on query complexity and agent count.
+ *
+ * The timeout is the maximum of:
+ * 1. Query timeout + buffer (to ensure query has time to complete)
+ * 2. Scaled agent count (to account for Fleet distribution delays)
+ * 3. Minimum timeout (to handle edge cases)
+ *
+ * @param queryTimeoutSeconds - Maximum query timeout in seconds (default 60)
+ * @param agentCount - Number of agents targeted
+ * @returns Timeout in minutes, capped at MAX_MINUTES
+ *
+ * @example
+ * // 100 agents, 60s query → 5 min (minimum)
+ * // 5000 agents, 60s query → 5 min (agent scaling)
+ * // 100 agents, 10min query → 12 min (query timeout + buffer)
+ * // 50000 agents, 60s query → 50 min (capped at max)
+ */
+export const calculateActionExpirationMinutes = (
+  queryTimeoutSeconds: number = QUERY_TIMEOUT.DEFAULT,
+  agentCount: number
+): number => {
+  const queryTimeoutMinutes = Math.ceil(queryTimeoutSeconds / 60);
+
+  const fromQueryTimeout = queryTimeoutMinutes + ACTION_EXPIRATION.BUFFER_MINUTES;
+  const fromAgentCount = Math.ceil(agentCount / 1000) * ACTION_EXPIRATION.MINUTES_PER_1K_AGENTS;
+
+  return Math.min(
+    ACTION_EXPIRATION.MAX_MINUTES,
+    Math.max(fromQueryTimeout, fromAgentCount, ACTION_EXPIRATION.MIN_MINUTES)
+  );
+};
