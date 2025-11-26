@@ -111,6 +111,7 @@ mapped_pages:
 | Name | Description |
 | --- | --- |
 | [actions](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/actions/README.md) | The Kibana actions plugin provides a framework to create executable actions. You can: |
+| [agentBuilderPlatform](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder_platform/README.md) | Contains the platform-owned agent builder entities |
 | [aiops](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/aiops/README.md) | The plugin provides APIs and components for AIOps features, including the “Log rate analysis” UI, maintained by the ML team. |
 | [alerting](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/alerting/README.md) | The Kibana Alerting plugin provides a common place to set up rules. You can: |
 | [apm](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/readme.md) | This plugin provides access to App Monitoring features provided by Elastic. It allows you to monitor your software services and applications in real-time; visualize detailed performance information on your services, identify and analyze errors, and monitor host-level and APM agent-specific metrics like JVM and Go runtime metrics. |
