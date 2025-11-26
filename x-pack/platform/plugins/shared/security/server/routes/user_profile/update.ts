@@ -46,7 +46,7 @@ const userProfileUpdateSchema = schema.object({
       contrastMode: schema.maybe(
         schema.oneOf([schema.literal('system'), schema.literal('standard'), schema.literal('high')])
       ),
-      solutionNavOptOut: schema.maybe(schema.boolean()),
+      'solutionNavigationTour:completed': schema.maybe(schema.boolean()),
     })
   ),
 });
