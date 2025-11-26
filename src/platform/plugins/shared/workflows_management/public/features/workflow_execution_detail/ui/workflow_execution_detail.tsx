@@ -32,7 +32,7 @@ export interface WorkflowExecutionDetailProps {
 
 export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = React.memo(
   ({ executionId, onClose }) => {
-    const { workflowExecution, isLoading, error } = useWorkflowExecutionPolling(executionId);
+    const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
 
     const { activeTab, setSelectedStepExecution, selectedStepExecutionId } = useWorkflowUrlState();
     const [sidebarWidth = DefaultSidebarWidth, setSidebarWidth] = useLocalStorage(
@@ -106,7 +106,6 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
             <WorkflowStepExecutionDetails
               workflowExecutionId={executionId}
               stepExecution={selectedStepExecution}
-              isLoading={isLoading}
             />
           }
           minFlexPanelSize={200}
