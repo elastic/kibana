@@ -7,8 +7,10 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { ToolType } from '@kbn/onechat-common';
 import type { ToolEventHandlerFn } from './events';
 import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
+import type { InternalToolDefinition } from '../tools/internal';
 
 /**
  * Return type for tool invocation APIs.
@@ -27,14 +29,39 @@ export interface RunToolReturn {
  * Represents a runner, which is the entry point to execute all onechat primitives,
  * such as tools or agents.
  *
+ * This version is not scoped to a given request, and is the version exposed from the plugin's contract.
+ */
+export interface Runner {
+  /**
+   * Execute a tool (based on its ID).
+   */
+  runTool: RunToolFn;
+  /**
+   * Execute an internal tool definition.
+   */
+  runInternalTool: RunInternalToolFn;
+  /**
+   * Execute an agent;
+   */
+  runAgent: RunAgentFn;
+}
+
+/**
+ * Represents a runner, which is the entry point to execute all onechat primitives,
+ * such as tools or agents.
+ *
  * This version is pre-scoped to a given request, meaning APIs don't need to be passed
  * down a request object.
  */
 export interface ScopedRunner {
   /**
-   * Execute a tool.
+   * Execute a tool (based on its ID).
    */
   runTool: ScopedRunToolFn;
+  /**
+   * Execute an internal tool definition.
+   */
+  runInternalTool: ScopedRunInternalToolFn;
   /**
    * Execute an agent
    */
@@ -46,6 +73,13 @@ export interface ScopedRunner {
  */
 export type ScopedRunToolFn = <TParams = Record<string, unknown>>(
   params: ScopedRunnerRunToolsParams<TParams>
+) => Promise<RunToolReturn>;
+
+/**
+ * Public onechat API to execute a tools.
+ */
+export type ScopedRunInternalToolFn = <TParams = Record<string, unknown>>(
+  params: ScopedRunnerRunInternalToolParams<TParams>
 ) => Promise<RunToolReturn>;
 
 /**
@@ -102,11 +136,23 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
   defaultConnectorId?: string;
 }
 
+export type RunInternalToolParams<TParams = Record<string, unknown>> = Omit<
+  RunToolParams<TParams>,
+  'toolId'
+> & {
+  tool: InternalToolDefinition<ToolType, any, any>;
+};
+
 /**
  * Params for {@link ScopedRunner.runTool}
  */
 export type ScopedRunnerRunToolsParams<TParams = Record<string, unknown>> = Omit<
   RunToolParams<TParams>,
+  'request'
+>;
+
+export type ScopedRunnerRunInternalToolParams<TParams = Record<string, unknown>> = Omit<
+  RunInternalToolParams<TParams>,
   'request'
 >;
 
@@ -117,16 +163,6 @@ export type RunToolFn = <TParams = Record<string, unknown>>(
   params: RunToolParams<TParams>
 ) => Promise<RunToolReturn>;
 
-/**
- * Public onechat runner.
- */
-export interface Runner {
-  /**
-   * Execute a tool.
-   */
-  runTool: RunToolFn;
-  /**
-   * Execute an agent;
-   */
-  runAgent: RunAgentFn;
-}
+export type RunInternalToolFn = <TParams = Record<string, unknown>>(
+  params: RunInternalToolParams<TParams>
+) => Promise<RunToolReturn>;
