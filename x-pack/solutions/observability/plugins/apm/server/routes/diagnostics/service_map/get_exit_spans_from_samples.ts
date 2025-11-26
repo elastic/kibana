@@ -92,7 +92,7 @@ export async function getExitSpans({
 
     const parentId = fields?.[PARENT_ID];
 
-    if (!fields || !parentId || !parentSpans.has(parentId)) {
+    if (!fields || !parentId || !parentSpans.get(parentId)) {
       return;
     }
 
