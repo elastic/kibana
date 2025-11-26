@@ -91,9 +91,11 @@ async function unmuteAllWithOCC(context: RulesClientContext, params: UnmuteAllRu
     updateOptions
   );
 
-  await context.alertsService?.unmuteAllAlerts({
-    ruleId: id,
-    indices,
-    logger: context.logger,
-  });
+  if (indices && indices.length > 0) {
+    await context.alertsService?.unmuteAllAlerts({
+      ruleId: id,
+      indices,
+      logger: context.logger,
+    });
+  }
 }

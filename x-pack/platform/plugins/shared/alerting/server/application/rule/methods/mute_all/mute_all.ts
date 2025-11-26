@@ -91,9 +91,11 @@ async function muteAllWithOCC(context: RulesClientContext, params: MuteAllRulePa
     updateOptions
   );
 
-  await context.alertsService?.muteAllAlerts({
-    ruleId: id,
-    indices,
-    logger: context.logger,
-  });
+  if (indices && indices.length > 0) {
+    await context.alertsService?.muteAllAlerts({
+      ruleId: id,
+      indices,
+      logger: context.logger,
+    });
+  }
 }

@@ -90,11 +90,13 @@ async function unmuteInstanceWithOCC(
       }),
     });
 
-    await context.alertsService?.unmuteAlertInstance({
-      ruleId,
-      alertInstanceId,
-      indices,
-      logger: context.logger,
-    });
+    if (indices && indices.length > 0) {
+      await context.alertsService?.unmuteAlertInstance({
+        ruleId,
+        alertInstanceId,
+        indices,
+        logger: context.logger,
+      });
+    }
   }
 }
