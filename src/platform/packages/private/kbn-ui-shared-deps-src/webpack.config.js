@@ -20,7 +20,7 @@ const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
 const { distDir: UiSharedDepsSrcDistDir } = require('./src/definitions');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
-const DOMPURIFY_SRC = require.resolve('dompurify/purify.js');
+const DOMPURIFY_SRC = require.resolve('dompurify/dist/purify.js');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
 const useEuiAmsterdamRelease = process.env.EUI_AMSTERDAM === 'true';
