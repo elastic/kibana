@@ -10,6 +10,7 @@ import type { SampleDocument } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isEqual, omit } from 'lodash';
 import { useSelector } from '@xstate5/react';
+import moment from 'moment';
 import type {
   DataSourceInput,
   DataSourceContext,
@@ -96,8 +97,13 @@ export const dataSourceMachine = setup({
 
       const documentsTimestamps = context.data
         .map((doc) => doc['@timestamp'])
-        .filter((timestamp): timestamp is string => typeof timestamp === 'string')
-        .map((timestamp) => new Date(timestamp).getTime());
+        .filter(
+          (timestamp): timestamp is string | number =>
+            typeof timestamp === 'string' || typeof timestamp === 'number'
+        )
+        .map((timestamp) => moment(timestamp))
+        .filter((momentDate) => momentDate.isValid())
+        .map((momentDate) => momentDate.toDate().getTime());
 
       if (documentsTimestamps.length === 0) {
         return { hasOutdatedDocuments: false };
