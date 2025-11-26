@@ -5,66 +5,116 @@
  * 2.0.
  */
 
-import type { Example } from 'langsmith';
-import { Client } from 'langsmith';
+import type { PhoenixClient } from '@arizeai/phoenix-client';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { createClient } from '@arizeai/phoenix-client';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { isLangSmithEnabled } from '@kbn/langchain/server/tracers/langsmith';
-import { isEmpty } from 'lodash';
+
+export interface PhoenixConfig {
+  baseUrl: string;
+  headers: Record<string, string>;
+}
 
 /**
- * Fetches a dataset from LangSmith. Note that `client` will use env vars unless langSmithApiKey is specified
- *
- * @param datasetName
- * @param logger
- * @param langSmithApiKey
+ * Creates a Phoenix client from the provided configuration
  */
-export const fetchLangSmithDataset = async (
+export const createPhoenixClient = (config: PhoenixConfig): PhoenixClient => {
+  return createClient({ options: config });
+};
+
+/**
+ * Phoenix dataset example structure
+ */
+export interface PhoenixDatasetExample {
+  id: string;
+  input: Record<string, unknown>;
+  output: Record<string, unknown> | null;
+  metadata: Record<string, unknown>;
+}
+
+/**
+ * Fetches a dataset from Phoenix by name
+ *
+ * @param datasetName - The name of the dataset to fetch
+ * @param logger - Logger instance
+ * @param phoenixConfig - Phoenix configuration (baseUrl, headers)
+ */
+export const fetchPhoenixDataset = async (
   datasetName: string | undefined,
   logger: Logger,
-  langSmithApiKey?: string
-): Promise<Example[]> => {
-  if (datasetName === undefined || (langSmithApiKey == null && !isLangSmithEnabled())) {
-    throw new Error('LangSmith dataset name not provided or LangSmith not enabled');
+  phoenixConfig: PhoenixConfig
+): Promise<PhoenixDatasetExample[]> => {
+  if (datasetName === undefined) {
+    throw new Error('Phoenix dataset name not provided');
   }
 
   try {
-    const client = new Client({ apiKey: langSmithApiKey });
+    const client = createPhoenixClient(phoenixConfig);
 
-    const examples = [];
-    for await (const example of client.listExamples({ datasetName })) {
-      examples.push(example);
+    // First, find the dataset by name
+    const datasetsResponse = await client.GET('/v1/datasets', {
+      params: {
+        query: {
+          name: datasetName,
+        },
+      },
+    });
+
+    if (!datasetsResponse.data?.data.length) {
+      logger.warn(`No Phoenix dataset found with name: ${datasetName}`);
+      return [];
     }
 
-    return examples;
+    const dataset = datasetsResponse.data.data[0];
+
+    // Fetch examples for the dataset
+    const examplesResponse = await client.GET('/v1/datasets/{id}/examples', {
+      params: {
+        path: {
+          id: dataset.id,
+        },
+      },
+    });
+
+    const examples = examplesResponse.data?.data.examples ?? [];
+
+    return examples.map((example) => ({
+      id: example.id,
+      input: example.input as Record<string, unknown>,
+      output: example.output as Record<string, unknown> | null,
+      metadata: (example.metadata as Record<string, unknown>) ?? {},
+    }));
   } catch (e) {
-    logger.error(`Error fetching dataset from LangSmith: ${e.message}`);
+    logger.error(`Error fetching dataset from Phoenix: ${e.message}`);
     return [];
   }
 };
 
 /**
- * Fetches all LangSmith datasets.  Note that `client` will use env vars unless langSmithApiKey is specified
+ * Fetches all Phoenix dataset names
  *
- * @param logger
- * @param langSmithApiKey
+ * @param logger - Logger instance
+ * @param phoenixConfig - Phoenix configuration (baseUrl, headers)
  */
-export const fetchLangSmithDatasets = async ({
+export const fetchPhoenixDatasets = async ({
   logger,
-  langSmithApiKey,
+  phoenixConfig,
 }: {
   logger: Logger;
-  langSmithApiKey?: string;
+  phoenixConfig: PhoenixConfig;
 }): Promise<string[]> => {
   try {
-    const client = new Client(!isEmpty(langSmithApiKey) ? { apiKey: langSmithApiKey } : undefined);
-    const datasets = [];
-    for await (const dataset of client.listDatasets()) {
-      datasets.push(dataset);
+    const client = createPhoenixClient(phoenixConfig);
+
+    const datasetsResponse = await client.GET('/v1/datasets', {});
+
+    if (!datasetsResponse.data?.data) {
+      return [];
     }
 
-    return datasets.map((d) => d.name).sort();
+    return datasetsResponse.data.data.map((d) => d.name).sort();
   } catch (e) {
-    logger.debug(`Error fetching datasets from LangSmith: ${e.message}`);
+    logger.debug(`Error fetching datasets from Phoenix: ${e.message}`);
     return [];
   }
 };

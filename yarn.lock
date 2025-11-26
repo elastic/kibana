@@ -6591,6 +6591,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-security-solution@link:x-pack/solutions/security/packages/kbn-evals-suite-security-solution":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-streams@link:x-pack/platform/packages/shared/kbn-evals-suite-streams":
   version "0.0.0"
   uid ""

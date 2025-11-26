@@ -8,8 +8,6 @@
 import type { IRouter, KibanaRequest, IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { asyncForEach } from '@kbn/std';
-import { Client } from 'langsmith';
-import { evaluate } from 'langsmith/evaluation';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
@@ -49,8 +47,10 @@ import type { AssistantToolParams, ElasticAssistantRequestHandlerContext } from 
 import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
 import {
   createOrUpdateEvaluationResults,
+  createPhoenixClient,
   EvaluationStatus,
-  fetchLangSmithDataset,
+  fetchPhoenixDataset,
+  type PhoenixConfig,
   setupEvaluationIndex,
 } from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
@@ -126,28 +126,32 @@ export const postEvaluateRoute = (
           const {
             alertsIndexPattern,
             datasetName,
-            evaluatorConnectorId,
             graphs: graphNames,
-            langSmithApiKey,
-            langSmithProject,
+            tracingApiKey,
             connectorIds,
             size,
             replacements,
             runName = evaluationId,
           } = request.body;
 
-          const dataset = await fetchLangSmithDataset(datasetName, logger, langSmithApiKey);
+          // Build Phoenix config from environment variables / kibana.dev.yml
+          const phoenixConfig: PhoenixConfig = {
+            baseUrl: process.env.PHOENIX_BASE_URL ?? 'http://localhost:6006',
+            headers: tracingApiKey ? { Authorization: `Bearer ${tracingApiKey}` } : {},
+          };
+
+          const dataset = await fetchPhoenixDataset(datasetName, logger, phoenixConfig);
 
           if (dataset.length === 0) {
             return response.badRequest({
-              body: { message: `No LangSmith dataset found for name: ${datasetName}` },
+              body: { message: `No Phoenix dataset found for name: ${datasetName}` },
             });
           }
 
           logger.info('postEvaluateRoute:');
           logger.info(`request.query:\n${JSON.stringify(request.query, null, 2)}`);
           logger.info(
-            `request.body:\n${JSON.stringify(omit(['langSmithApiKey'], request.body), null, 2)}`
+            `request.body:\n${JSON.stringify(omit(['tracingApiKey'], request.body), null, 2)}`
           );
           logger.info(`Evaluation ID: ${evaluationId}`);
 
@@ -237,10 +241,8 @@ export const postEvaluateRoute = (
                 kbDataClient,
                 esClientInternalUser,
                 evaluationId,
-                evaluatorConnectorId,
-                langSmithApiKey,
-                langSmithProject,
                 logger,
+                phoenixConfig,
                 runName,
                 size,
               });
@@ -282,10 +284,8 @@ export const postEvaluateRoute = (
                 esClient,
                 esClientInternalUser,
                 evaluationId,
-                evaluatorConnectorId,
-                langSmithApiKey,
-                langSmithProject,
                 logger,
+                phoenixConfig,
                 runName,
                 size,
               });
@@ -455,13 +455,21 @@ export const postEvaluateRoute = (
             })
           );
 
+          // Create Phoenix client for running experiments
+          const phoenixClient = createPhoenixClient(phoenixConfig);
+
           // Run an evaluation for each graph so they show up separately (resulting in each dataset run grouped by connector)
           await asyncForEach(
             graphs,
             async ({ name, graph, llmType, isOssModel, connectorId, contentReferencesStore }) => {
               // Wrapper function for invoking the graph (to parse different input/output formats)
-              const predict = async (evaluationInput: { input: string }) => {
-                logger.debug(`input:\n ${JSON.stringify(evaluationInput, null, 2)}`);
+              const task = async (example: {
+                input: Record<string, unknown>;
+                output?: Record<string, unknown> | null;
+                metadata?: Record<string, unknown> | null;
+              }) => {
+                const input = example.input as { input: string };
+                logger.debug(`input:\n ${JSON.stringify(input, null, 2)}`);
 
                 const defaultSystemPrompt = await localGetPrompt({
                   actionsClient,
@@ -479,7 +487,7 @@ export const postEvaluateRoute = (
                     prompt: defaultSystemPrompt,
                     contentReferencesStore,
                     kbClient: dataClients?.kbDataClient,
-                    conversationMessages: [new HumanMessage(evaluationInput.input)],
+                    conversationMessages: [new HumanMessage(input.input)],
                     logger,
                     formattedTime: getFormattedTime({
                       uiSettingsDateFormatTimezone: await ctx.core.uiSettings.client.get<string>(
@@ -503,7 +511,7 @@ export const postEvaluateRoute = (
                     isStream: false,
                     isOssModel,
                     messages: chatPrompt.messages,
-                  }, // TODO: Update to use the correct input format per dataset type
+                  },
                   {
                     runName,
                     tags: ['evaluation'],
@@ -513,17 +521,36 @@ export const postEvaluateRoute = (
                   }
                 );
                 const lastMessage = result.messages[result.messages.length - 1];
-                return lastMessage.text;
+                return { response: lastMessage.text };
               };
 
-              evaluate(predict, {
-                data: datasetName ?? '',
-                evaluators: [], // Evals to be managed in LangSmith for now
-                experimentPrefix: name,
-                client: new Client({ apiKey: langSmithApiKey }),
-                // prevent rate limiting and unexpected multiple experiment runs
-                maxConcurrency: 3,
-              })
+              // Run Phoenix experiment
+              const experiments = await import('@arizeai/phoenix-client/experiments');
+
+              experiments
+                .runExperiment({
+                  client: phoenixClient,
+                  dataset: {
+                    datasetId: datasetName ?? '',
+                    // If dataset doesn't exist by ID, try to find/create by name
+                  },
+                  experimentName: `${name} - ${evaluationId}`,
+                  task,
+                  experimentMetadata: {
+                    runId: evaluationId,
+                    runName,
+                    connectorId,
+                    llmType,
+                    graphType: 'assistant',
+                  },
+                  evaluators: [], // Evaluators to be configured in Phoenix or added here
+                  logger: {
+                    error: logger.error.bind(logger),
+                    info: logger.info.bind(logger),
+                    log: logger.info.bind(logger),
+                  },
+                  concurrency: 3, // prevent rate limiting
+                })
                 .then((output) => {
                   void createOrUpdateEvaluationResults({
                     evaluationResults: [{ id: evaluationId, status: EvaluationStatus.COMPLETE }],

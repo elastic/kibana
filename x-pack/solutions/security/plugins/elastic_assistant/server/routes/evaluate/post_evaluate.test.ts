@@ -19,7 +19,7 @@ const defaultBody: PostEvaluateRequestBodyInput = {
   graphs: ['graphs'],
   connectorIds: ['id1', 'id2'],
   runName: undefined,
-  langSmithApiKey: undefined,
+  tracingApiKey: undefined,
 };
 
 describe('Post Evaluate Route', () => {

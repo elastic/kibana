@@ -111,8 +111,8 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             insightType,
             apiConfig,
             anonymizationFields,
-            langSmithApiKey,
-            langSmithProject,
+            tracingApiKey,
+            tracingProject,
             replacements,
           } = request.body;
 
@@ -151,8 +151,8 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             apiConfig,
             connectorTimeout: CONNECTOR_TIMEOUT,
             esClient,
-            langSmithProject,
-            langSmithApiKey,
+            tracingProject,
+            tracingApiKey,
             latestReplacements,
             logger,
             onNewReplacements,

@@ -7,7 +7,6 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import type { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
@@ -17,34 +16,42 @@ import type { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_disco
 import type { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
 import { mockExperimentConnector } from './__mocks__/mock_experiment_connector';
 import { getLlmType } from '../../../routes/utils';
+import type { PhoenixConfig } from '../../../routes/evaluate/utils';
 
-jest.mock('@kbn/langchain/server', () => ({
-  ...jest.requireActual('@kbn/langchain/server'),
-
-  ActionsClientLlm: jest.fn(),
-}));
-
-jest.mock('langsmith/evaluation', () => ({
-  evaluate: jest.fn(async (predict: Function) =>
-    predict({
+// Mock Phoenix experiment
+const mockRunExperiment = jest.fn(async ({ task }: { task: (params: unknown) => Promise<unknown> }) => {
+  // Simulate calling the task with example input
+  await task({
+    input: {
       overrides: {
         errors: ['test-error'],
       },
-    })
-  ),
-}));
-
-jest.mock('./helpers/get_custom_evaluator', () => ({
-  getCustomEvaluator: jest.fn(),
-}));
-
-jest.mock('./helpers/get_evaluator_llm', () => {
-  const mockLlm = jest.fn() as unknown as ActionsClientLlm;
-
-  return {
-    getEvaluatorLlm: jest.fn().mockResolvedValue(mockLlm),
-  };
+    },
+    output: {},
+    metadata: {},
+  });
+  return { experimentId: 'test-experiment-id' };
 });
+
+jest.mock('@arizeai/phoenix-client/experiments', () => ({
+  runExperiment: (params: { task: (params: unknown) => Promise<unknown> }) =>
+    mockRunExperiment(params),
+}));
+
+jest.mock('@kbn/langchain/server', () => ({
+  ...jest.requireActual('@kbn/langchain/server'),
+  ActionsClientLlm: jest.fn(),
+}));
+
+jest.mock('../../../routes/evaluate/utils', () => ({
+  createOrUpdateEvaluationResults: jest.fn(),
+  createPhoenixClient: jest.fn(() => ({
+    getDataset: jest.fn(),
+    createDataset: jest.fn(),
+  })),
+  EvaluationStatus: { COMPLETE: 'complete' },
+}));
+
 const actionsClient = {
   get: jest.fn(),
 } as unknown as ActionsClient;
@@ -52,13 +59,16 @@ const alertsIndexPattern = 'test-alerts-index-pattern';
 const connectorTimeout = 1000;
 const datasetName = 'test-dataset';
 const evaluationId = 'test-evaluation-id';
-const evaluatorConnectorId = 'test-evaluator-connector-id';
-const langSmithApiKey = 'test-api-key';
-const langSmithProject = 'test-lang-smith-project';
+const tracingApiKey = 'test-api-key';
 const logger = loggerMock.create();
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
 const mockEsClientInternalUser = elasticsearchServiceMock.createElasticsearchClient();
 const runName = 'test-run-name';
+
+const phoenixConfig: PhoenixConfig = {
+  baseUrl: 'http://localhost:6006',
+  headers: { Authorization: 'Bearer test-phoenix-api-key' },
+};
 
 const connectors = [
   {
@@ -95,7 +105,7 @@ const graphs: Array<{
     projectName,
     tracers: [
       ...getLangSmithTracer({
-        apiKey: langSmithApiKey,
+        apiKey: tracingApiKey,
         projectName,
         logger,
       }),
@@ -103,7 +113,7 @@ const graphs: Array<{
   };
 
   const graph = {
-    invoke: jest.fn().mockResolvedValue({}),
+    invoke: jest.fn().mockResolvedValue({ insights: [] }),
   } as unknown as DefaultAttackDiscoveryGraph;
 
   return {
@@ -125,7 +135,7 @@ const attackDiscoveryGraphs: AttackDiscoveryGraphMetadata[] = [
 describe('evaluateAttackDiscovery', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('evaluates the attack discovery graphs', async () => {
+  it('evaluates the attack discovery graphs using Phoenix', async () => {
     await evaluateAttackDiscovery({
       actionsClient,
       attackDiscoveryGraphs,
@@ -136,23 +146,24 @@ describe('evaluateAttackDiscovery', () => {
       esClient: mockEsClient,
       esClientInternalUser: mockEsClientInternalUser,
       evaluationId,
-      evaluatorConnectorId,
-      langSmithApiKey,
-      langSmithProject,
       logger,
+      phoenixConfig,
       runName,
       size: 20,
     });
 
+    // Verify that the Phoenix runExperiment was called
+    expect(mockRunExperiment).toHaveBeenCalled();
+
+    // Verify the graph was invoked with expected overrides
     expect(graphs[0].graph.invoke).toHaveBeenCalledWith(
       {
         errors: ['test-error'],
       },
-      {
-        callbacks: [...graphs[0].traceOptions.tracers],
-        runName: graphs[0].name,
-        tags: ['evaluation', graphs[0].llmType ?? ''],
-      }
+      expect.objectContaining({
+        runName: expect.stringContaining(runName),
+        tags: expect.arrayContaining(['evaluation']),
+      })
     );
   });
 });

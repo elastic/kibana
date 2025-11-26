@@ -50,8 +50,8 @@ export const ExecuteConnectorRequestBody = z.object({
   allowReplacement: z.array(z.string()).optional(),
   replacements: Replacements,
   size: z.number().optional(),
-  langSmithProject: z.string().optional(),
-  langSmithApiKey: z.string().optional(),
+  tracingProject: z.string().optional(),
+  tracingApiKey: z.string().optional(),
   screenContext: ScreenContext.optional(),
   /**
    * System prompt, will be appended to default system prompt. Different from conversation system prompt, which is retrieved on the server

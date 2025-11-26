@@ -12,7 +12,6 @@ import type { Logger } from '@kbn/core/server';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { ActionsClientLlm } from '@kbn/langchain/server';
-import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { asyncForEach } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -22,7 +21,11 @@ import type { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
 import type { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_discovery_graph';
 import { getLlmType } from '../../../routes/utils';
 import { runEvaluations } from './run_evaluations';
-import { createOrUpdateEvaluationResults, EvaluationStatus } from '../../../routes/evaluate/utils';
+import {
+  createOrUpdateEvaluationResults,
+  EvaluationStatus,
+  type PhoenixConfig,
+} from '../../../routes/evaluate/utils';
 
 interface ConnectorWithPrompts extends Connector {
   prompts: CombinedPrompts;
@@ -38,10 +41,8 @@ export const evaluateAttackDiscovery = async ({
   esClient,
   esClientInternalUser,
   evaluationId,
-  evaluatorConnectorId,
-  langSmithApiKey,
-  langSmithProject,
   logger,
+  phoenixConfig,
   runName,
   size,
 }: {
@@ -55,10 +56,8 @@ export const evaluateAttackDiscovery = async ({
   esClient: ElasticsearchClient;
   esClientInternalUser: ElasticsearchClient;
   evaluationId: string;
-  evaluatorConnectorId: string | undefined;
-  langSmithApiKey: string | undefined;
-  langSmithProject: string | undefined;
   logger: Logger;
+  phoenixConfig: PhoenixConfig;
   runName: string;
   size: number;
 }): Promise<void> => {
@@ -76,15 +75,10 @@ export const evaluateAttackDiscovery = async ({
     }> = connectors.map((connector) => {
       const llmType = getLlmType(connector.actionTypeId);
 
+      // Trace options - tracers can be empty for Phoenix (tracing handled separately)
       const traceOptions = {
-        projectName: langSmithProject,
-        tracers: [
-          ...getLangSmithTracer({
-            apiKey: langSmithApiKey,
-            projectName: langSmithProject,
-            logger,
-          }),
-        ],
+        projectName: undefined,
+        tracers: [] as LangChainTracer[],
       };
 
       const llm = new ActionsClientLlm({
@@ -122,13 +116,11 @@ export const evaluateAttackDiscovery = async ({
 
     // run the evaluations for each graph:
     await runEvaluations({
-      actionsClient,
-      connectorTimeout,
-      evaluatorConnectorId,
       datasetName,
       graphs,
-      langSmithApiKey,
       logger,
+      phoenixConfig,
+      evaluationId,
     });
   });
 

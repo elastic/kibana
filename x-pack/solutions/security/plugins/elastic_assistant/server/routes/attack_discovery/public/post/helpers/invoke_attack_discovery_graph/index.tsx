@@ -35,8 +35,8 @@ export const invokeAttackDiscoveryGraph = async ({
   end,
   esClient,
   filter,
-  langSmithProject,
-  langSmithApiKey,
+  tracingProject,
+  tracingApiKey,
   latestReplacements,
   logger,
   onNewReplacements,
@@ -52,8 +52,8 @@ export const invokeAttackDiscoveryGraph = async ({
   end?: string;
   esClient: ElasticsearchClient;
   filter?: Record<string, unknown>;
-  langSmithProject?: string;
-  langSmithApiKey?: string;
+  tracingProject?: string;
+  tracingApiKey?: string;
   latestReplacements: Replacements;
   logger: Logger;
   onNewReplacements: (newReplacements: Replacements) => void;
@@ -71,11 +71,11 @@ export const invokeAttackDiscoveryGraph = async ({
   const tags = [ATTACK_DISCOVERY_TAG, llmType, model].flatMap((tag) => tag ?? []);
 
   const traceOptions = {
-    projectName: langSmithProject,
+    projectName: tracingProject,
     tracers: [
       ...getLangSmithTracer({
-        apiKey: langSmithApiKey,
-        projectName: langSmithProject,
+        apiKey: tracingApiKey,
+        projectName: tracingProject,
         logger,
       }),
     ],

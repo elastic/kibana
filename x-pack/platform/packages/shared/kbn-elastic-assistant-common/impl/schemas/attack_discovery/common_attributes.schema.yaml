@@ -355,10 +355,10 @@ components:
               }
             }
             ```
-        langSmithProject:
+        tracingProject:
           type: string
           x-internal: true
-        langSmithApiKey:
+        tracingApiKey:
           type: string
           x-internal: true
         model:

@@ -1,0 +1,51 @@
+{
+  "name": "security: custom knowledge",
+  "description": "Assistant uses KB to answer questions",
+  "examples": [
+    {
+      "input": {
+        "question": "Based on my saved knowledge, in my network configuration which ports in Switch01 are configured to access ports in VLAN1?"
+      },
+      "output": {
+        "reference": "Based on the provided configuration, the following ports on Switch01 are configured as access ports in VLAN 1:\n\n- **FastEthernet0/1**\n- **FastEthernet0/2**\n- **FastEthernet0/3**"
+      },
+      "metadata": {
+        "dataset_split": ["base"]
+      }
+    },
+    {
+      "input": {
+        "question": "Based on my saved knowledge, are there any security concerns in the network configuration related to remote access?"
+      },
+      "output": {
+        "reference": "Yes, there are security concerns in the configuration of Switch01 related to remote access. Here are the key issues:\n\n1. **Use of Telnet for Remote Access:**\n   ```plaintext\n   line vty 0 4\n    login\n    transport input telnet\n   ```\n   - Telnet is used for remote access, which is not secure as it transmits data, including passwords, in plain text. This makes it susceptible to interception and eavesdropping by attackers.\n\n### Recommendations:\n1. **Use SSH Instead of Telnet:**\n   - SSH (Secure Shell) provides encrypted communication, which is much more secure than Telnet. To configure SSH, you need to generate RSA keys and configure the VTY lines to use SSH.\n\n   Here are the steps to configure SSH:\n\n   ```plaintext\n   hostname Switch01\n   ip domain-name yourdomain.com\n   crypto key generate rsa modulus 2048\n   ip ssh version 2\n   line vty 0 4\n    login local\n    transport input ssh\n   ```\n\n   - Ensure you have a local user account configured for SSH login:\n   ```plaintext\n   username admin privilege 15 secret <secure_password>\n   ```\n\nBy switching from Telnet to SSH, you can significantly enhance the security of remote access to your network switch."
+      },
+      "metadata": {
+        "dataset_split": ["base"]
+      }
+    },
+    {
+      "input": {
+        "question": "Based my saved knowledge, what is the playbook for detecting port scans?"
+      },
+      "output": {
+        "reference": "Based on the knowledge provided, here is the playbook for detecting port scans:\n\n### Threat Hunting Playbook for Portscans on Windows Hosts Running SentinelOne\n\n#### Overview:\nPort scanning is a technique used by attackers to identify open ports and services available on a networked device. By identifying open ports, attackers can determine potential vulnerabilities to exploit. Common tools used for port scanning include `nmap` and `PortQry`. Detecting port scanning activities is crucial for identifying potential reconnaissance activities by attackers and preventing subsequent attacks.\n\n#### Why Hunt for Portscans?\n1. **Early Detection of Reconnaissance:** Port scans are often the first step in an attack. Detecting them early can help prevent further exploitation.\n2. **Identifying Misconfigurations:** Port scans can reveal unintended open ports that may indicate misconfigurations.\n3. **Compliance and Security Posture:** Regularly monitoring for port scans helps maintain a strong security posture and ensures compliance with security policies.\n\n#### ES|QL Query:\n```esql\nFROM logs-*\nMETADATA _id, _index, _version\n| WHERE process.name in (\"nmap.exe\", \"PortQry.exe\") and (process.command_line LIKE \"*-p*\" OR process.command_line LIKE \"*-r*\")\n| mv_expand process.args\n| WHERE (process.args LIKE \"*-*\" OR process.args LIKE \"*:*\") AND NOT process.args LIKE \"-*\" AND NOT process.args LIKE \"?:*\" AND NOT process.args LIKE \"*.*.*.*-*\"\n| DISSECT process.args \"%{startp}:%{destp}\"\n| DISSECT process.args \"%{startp2}-%{destp2}\"\n| GROK process.command_line \"%{GREEDYDATA:content}%{IP:destination.ip}\"\n| EVAL startp = to_integer(startp), destp = to_integer(destp), startp2 = to_integer(startp2), destp2 = to_integer(destp2)\n| EVAL portcount = CASE( process.name == \"nmap.exe\", destp2-startp2, destp-startp )\n| WHERE portcount > 50\n| KEEP @timestamp,_id,_index,_version,user.name,host.hostname,process.name,portcount,process.command_line,destination.ip\n| LIMIT 10000\n```\n\n#### Saved Threat Hunting Timeline:\n[:mag_right: ES|QL - Port Scan]()\n\n#### SentinelOne Console:\n[SentinelOne Console]()\n\n#### Steps for Threat Hunting:\n1. **Run the ES|QL Query:** Execute the provided ES|QL query in Elastic Security to identify potential port scanning activities.\n2. **Analyze Results:** Review the results for any suspicious activities. Pay close attention to the `process.name`, `user.name`, `host.hostname`, `portcount`, and `destination.ip`.\n3. **Investigate Further:**\n   - **Process Command Line:** Check the command line arguments for any unusual patterns or large port ranges.\n   - **User Context:** Identify if the user associated with the process should be performing such activities.\n   - **Host Context:** Determine if the host is expected to run port scanning tools.\n4. **Correlate with Other Data:** Cross-reference with other logs and alerts to identify any related activities or anomalies.\n5. **Take Action:** If malicious activity is confirmed, follow your incident response procedures to contain and mitigate the threat.\n\nBy following this playbook, you can effectively hunt for and identify port scanning activities on your Windows hosts running SentinelOne, helping to secure your environment against potential threats."
+      },
+      "metadata": {
+        "dataset_split": ["base"]
+      }
+    },
+    {
+      "input": {
+        "question": "Based on my saved knowledge, where is host \"srv-win-east\" located?"
+      },
+      "output": {
+        "reference": "Host \"srv-win-east\" is located in the New York City data center."
+      },
+      "metadata": {
+        "dataset_split": ["base"]
+      }
+    }
+  ]
+}
+

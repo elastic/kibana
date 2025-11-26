@@ -9,28 +9,30 @@ import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import type { Logger } from '@kbn/logging';
 import type { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { Client } from 'langsmith';
-import { evaluate } from 'langsmith/evaluation';
+import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import { asyncForEach } from '@kbn/std';
 
 import type { DefaultDefendInsightsGraph } from '../../graphs/default_defend_insights_graph';
+import type { DefendInsightsGraphState } from '../../../langchain/graphs';
 import { getDefendInsightsGraphInputOverrides } from '../helpers/get_graph_input_overrides';
-import { getDefendInsightsCustomEvaluator } from '../helpers/get_custom_evaluator';
+import { createPhoenixClient, type PhoenixConfig } from '../../../../routes/evaluate/utils';
+import { createPolicyResponseFailureEvaluator } from '../helpers/get_custom_evaluator/customPolicyResponseFailureEvaluator';
 
 /**
  * Runs an evaluation for each graph so they show up separately (resulting in
  * each dataset run grouped by connector)
  */
 export const runDefendInsightsEvaluations = async ({
-  evaluatorConnectorId,
   datasetName,
+  evaluationId,
   graphs,
-  langSmithApiKey,
-  logger,
   insightType,
+  logger,
+  phoenixConfig,
 }: {
-  evaluatorConnectorId: string | undefined;
   datasetName: string;
+  evaluationId: string;
   graphs: Array<{
     connector: Connector;
     graph: DefaultDefendInsightsGraph;
@@ -41,26 +43,27 @@ export const runDefendInsightsEvaluations = async ({
       tracers: LangChainTracer[];
     };
   }>;
-  langSmithApiKey: string | undefined;
-  logger: Logger;
   insightType: DefendInsightType;
-}): Promise<void> =>
-  asyncForEach(graphs, async ({ connector, graph, llmType, name, traceOptions }) => {
+  logger: Logger;
+  phoenixConfig: PhoenixConfig;
+}): Promise<void> => {
+  // Create Phoenix client
+  const phoenixClient = createPhoenixClient(phoenixConfig);
+
+  await asyncForEach(graphs, async ({ connector, graph, llmType, name, traceOptions }) => {
     const subject = `connector "${connector.name}" (${llmType}), running experiment "${name}"`;
 
     try {
-      logger.info(
-        () =>
-          `Evaluating ${subject} with dataset "${datasetName}" and evaluator "${evaluatorConnectorId}"`
-      );
+      logger.info(() => `Evaluating ${subject} with dataset "${datasetName}" using Phoenix`);
 
-      const predict = async (input: unknown) => {
-        logger.debug(() => `Raw example Input for ${subject}":\n ${input}`);
+      const task = async (example: Example): Promise<TaskOutput> => {
+        const { input } = example;
+        logger.debug(() => `Raw example Input for ${subject}":\n ${JSON.stringify(input)}`);
 
         // The example `Input` may have overrides for the initial state of the graph:
         const overrides = getDefendInsightsGraphInputOverrides(input);
 
-        return graph.invoke(
+        const result = (await graph.invoke(
           {
             ...overrides,
           },
@@ -69,17 +72,60 @@ export const runDefendInsightsEvaluations = async ({
             runName: name,
             tags: ['evaluation', llmType ?? ''],
           }
-        );
+        )) as unknown as DefendInsightsGraphState;
+
+        return result as TaskOutput;
       };
 
-      const customEvaluator = getDefendInsightsCustomEvaluator({ insightType });
+      // Run Phoenix experiment
+      const experiments = await import('@arizeai/phoenix-client/experiments');
 
-      const evalOutput = await evaluate(predict, {
-        client: new Client({ apiKey: langSmithApiKey }),
-        data: datasetName ?? '',
-        evaluators: [customEvaluator],
-        experimentPrefix: name,
-        maxConcurrency: 5, // prevents rate limiting
+      const evalOutput = await experiments.runExperiment({
+        client: phoenixClient,
+        dataset: {
+          datasetId: datasetName,
+        },
+        experimentName: `${name} - ${evaluationId}`,
+        task,
+        experimentMetadata: {
+          evaluationId,
+          connectorId: connector.id,
+          connectorName: connector.name,
+          llmType,
+          graphType: 'defend-insights',
+          insightType,
+        },
+        evaluators: [
+          // Structural validation evaluator
+          {
+            name: `defend_insights_structure_${insightType}`,
+            kind: 'CODE' as const,
+            evaluate: ({ output }: { output: unknown }) => {
+              // Basic structural validation
+              const hasInsights = output && typeof output === 'object' && 'insights' in output;
+              const insightsArray = hasInsights
+                ? (output as DefendInsightsGraphState).insights
+                : null;
+              const hasValidInsights = insightsArray && insightsArray.length > 0;
+
+              return {
+                score: hasValidInsights ? 1 : 0,
+                label: hasValidInsights ? 'PASS' : 'FAIL',
+                explanation: hasValidInsights
+                  ? `Generated ${insightsArray.length} defend insight(s) for ${insightType}`
+                  : `No defend insights generated for ${insightType}`,
+              };
+            },
+          },
+          // Domain-specific policy response failure evaluator (validates against expected output)
+          createPolicyResponseFailureEvaluator(),
+        ],
+        logger: {
+          error: logger.error.bind(logger),
+          info: logger.info.bind(logger),
+          log: logger.info.bind(logger),
+        },
+        concurrency: 5, // prevents rate limiting
       });
 
       logger.info(() => `Evaluation complete for ${subject}`);
@@ -91,3 +137,4 @@ export const runDefendInsightsEvaluations = async ({
       logger.error(`Error evaluating ${subject}: ${e}`);
     }
   });
+};

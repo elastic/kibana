@@ -5,7 +5,7 @@
  * 2.0.
  */
 export { evaluate } from './src/evaluate';
-export type { DefaultEvaluators } from './src/types';
+export type { DefaultEvaluators, Evaluator, EvaluatorParams, EvaluationResult } from './src/types';
 export type { EvaluationCriterion } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
 export type { KibanaPhoenixClient } from './src/kibana_phoenix_client/client';

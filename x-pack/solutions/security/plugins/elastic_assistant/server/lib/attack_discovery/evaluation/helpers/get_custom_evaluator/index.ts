@@ -5,66 +5,85 @@
  * 2.0.
  */
 
-import type { ActionsClientLlm } from '@kbn/langchain/server';
-import { PromptTemplate } from '@langchain/core/prompts';
-import type { EvaluationResult } from 'langsmith/evaluation';
-import type { Run, Example } from 'langsmith/schemas';
-import type { CriteriaLike } from 'langchain/evaluation';
-import { loadEvaluator } from 'langchain/evaluation';
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { Evaluator } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 
-import { getExampleAttackDiscoveriesWithReplacements } from './get_example_attack_discoveries_with_replacements';
-import { getRunAttackDiscoveriesWithReplacements } from './get_run_attack_discoveries_with_replacements';
-
-export interface GetCustomEvaluatorOptions {
-  /**
-   * Examples:
-   *  - "conciseness"
-   *  - "relevance"
-   *  - "correctness"
-   *  - "detail"
-   */
-  criteria: CriteriaLike;
-  /**
-   * The evaluation score will use this key
-   */
-  key: string;
-  /**
-   * LLm to use for evaluation
-   */
-  llm: ActionsClientLlm;
-  /**
-   * A prompt template that uses the {input}, {submission}, and {reference} variables
-   */
-  template: string;
+export interface AttackDiscoveryOutput {
+  insights?: AttackDiscovery[] | null;
+  attackDiscoveries?: AttackDiscovery[] | null;
 }
 
-export type CustomEvaluator = (
-  rootRun: Run,
-  example: Example | undefined
-) => Promise<EvaluationResult>;
+/**
+ * Validates that the output contains attack discoveries
+ */
+function hasValidAttackDiscoveries(output: unknown): output is AttackDiscoveryOutput {
+  if (!output || typeof output !== 'object') {
+    return false;
+  }
 
-export const getCustomEvaluator =
-  ({ criteria, key, llm, template }: GetCustomEvaluatorOptions): CustomEvaluator =>
-  async (rootRun, example) => {
-    const chain = await loadEvaluator('labeled_criteria', {
-      criteria,
-      chainOptions: {
-        prompt: PromptTemplate.fromTemplate(template),
-      },
-      llm,
-    });
+  const outputObj = output as AttackDiscoveryOutput;
+  const discoveries = outputObj.insights ?? outputObj.attackDiscoveries;
 
-    const exampleAttackDiscoveriesWithReplacements =
-      getExampleAttackDiscoveriesWithReplacements(example);
+  return Array.isArray(discoveries) && discoveries.length > 0;
+}
 
-    const runAttackDiscoveriesWithReplacements = getRunAttackDiscoveriesWithReplacements(rootRun);
+/**
+ * Creates a Phoenix-compatible evaluator for attack discovery structural validation.
+ *
+ * This evaluator validates:
+ * - Output contains insights or attackDiscoveries array
+ * - Array has at least one discovery
+ * - Each discovery has required fields (title, summary)
+ */
+export function createAttackDiscoveryStructureEvaluator(): Evaluator {
+  return {
+    name: 'attack_discovery_structure',
+    kind: 'CODE',
+    evaluate: async ({ output }) => {
+      if (!hasValidAttackDiscoveries(output)) {
+        return {
+          score: 0,
+          label: 'FAIL',
+          explanation: 'No attack discoveries generated',
+        };
+      }
 
-    // NOTE: res contains a score, as well as the reasoning for the score
-    const res = await chain.evaluateStrings({
-      input: '', // empty for now, but this could be the alerts, i.e. JSON.stringify(rootRun.outputs?.anonymizedAlerts, null, 2),
-      prediction: JSON.stringify(runAttackDiscoveriesWithReplacements, null, 2),
-      reference: JSON.stringify(exampleAttackDiscoveriesWithReplacements, null, 2),
-    });
+      const outputObj = output as AttackDiscoveryOutput;
+      const discoveries = outputObj.insights ?? outputObj.attackDiscoveries ?? [];
 
-    return { key, score: res.score };
+      // Validate each discovery has required fields
+      const invalidDiscoveries = discoveries.filter(
+        (d) => !d.title || !d.summaryMarkdown || !d.entitySummaryMarkdown
+      );
+
+      if (invalidDiscoveries.length > 0) {
+        return {
+          score: 0.5,
+          label: 'PARTIAL',
+          explanation: `Generated ${discoveries.length} discovery(ies) but ${invalidDiscoveries.length} missing required fields`,
+          metadata: {
+            totalDiscoveries: discoveries.length,
+            invalidCount: invalidDiscoveries.length,
+          },
+        };
+      }
+
+      return {
+        score: 1,
+        label: 'PASS',
+        explanation: `Generated ${discoveries.length} valid attack discovery(ies)`,
+        metadata: {
+          totalDiscoveries: discoveries.length,
+        },
+      };
+    },
   };
+}
+
+/**
+ * @deprecated Provided for backward compatibility with existing test mocks.
+ * Use createAttackDiscoveryStructureEvaluator() for Phoenix-compatible evaluator.
+ */
+export const getCustomEvaluator = (): unknown => {
+  return createAttackDiscoveryStructureEvaluator();
+};

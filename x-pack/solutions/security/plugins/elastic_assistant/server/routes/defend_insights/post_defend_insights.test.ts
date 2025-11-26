@@ -79,8 +79,8 @@ describe('postDefendInsightsRoute', () => {
       anonymizationFields: [],
       replacements: {},
       model: 'gpt-4',
-      langSmithProject: 'langSmithProject',
-      langSmithApiKey: 'langSmithApiKey',
+      tracingProject: 'tracingProject',
+      tracingApiKey: 'tracingApiKey',
       ...overrides,
     };
   }

@@ -19,14 +19,14 @@ export const getEvaluatorLlm = async ({
   connectorTimeout,
   evaluatorConnectorId,
   experimentConnector,
-  langSmithApiKey,
+  tracingApiKey,
   logger,
 }: {
   actionsClient: PublicMethodsOf<ActionsClient>;
   connectorTimeout: number;
   evaluatorConnectorId: string | undefined;
   experimentConnector: Connector;
-  langSmithApiKey: string | undefined;
+  tracingApiKey: string | undefined;
   logger: Logger;
 }): Promise<ActionsClientLlm> => {
   const evaluatorConnector =
@@ -46,7 +46,7 @@ export const getEvaluatorLlm = async ({
     projectName: 'evaluators',
     tracers: [
       ...getLangSmithTracer({
-        apiKey: langSmithApiKey,
+        apiKey: tracingApiKey,
         projectName: 'evaluators',
         logger,
       }),

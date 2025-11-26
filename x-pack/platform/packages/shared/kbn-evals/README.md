@@ -2,7 +2,9 @@
 
 `@kbn/evals` contains utilities for writing offline evaluation suites against LLM-based workflows in Kibana.
 
-This package is built on top of `@kbn/scout` and the `@kbn/inference-*` packages. It bundles three main entry-points:
+This package is built on top of `@kbn/scout` and the `@kbn/inference-*` packages, using [Phoenix](https://phoenix.arize.com/) as the evaluation backend for running experiments, storing datasets, and tracking results. Results can also be exported to Elasticsearch.
+
+## Main Entry Points
 
 1. `createPlaywrightEvalsConfig` – helper that returns a ready-made Playwright config for evaluation suites. It automatically:
 
@@ -14,7 +16,12 @@ This package is built on top of `@kbn/scout` and the `@kbn/inference-*` packages
    - an Inference Client that is pre-bound to a Kibana connector
    - a (Kibana-flavored) Phoenix client to run experiments
 
-3. `scripts/generate_schema` – one-off script that (re)generates typed GraphQL artifacts for the Phoenix schema using `@graphql/codegen`. The artifacts are currently not in use because we only have a single query, but the script is useful if we add more queries.
+3. `KibanaPhoenixClient` – a wrapper around the `@arizeai/phoenix-client` that provides:
+   - Dataset synchronization (create/update datasets)
+   - Experiment execution with evaluators
+   - Integration with Kibana's inference tracing
+
+4. `scripts/generate_schema` – one-off script that (re)generates typed GraphQL artifacts for the Phoenix schema using `@graphql/codegen`. The artifacts are currently not in use because we only have a single query, but the script is useful if we add more queries.
 
 ## Writing an evaluation test
 
@@ -72,18 +79,64 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, phoenix
 | `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets |
 | `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)          |
 
+## Writing Custom Evaluators
+
+Evaluators are functions that score LLM outputs. The package exports types for creating Phoenix-compatible evaluators:
+
+```ts
+import type { Evaluator, EvaluatorParams, EvaluationResult } from '@kbn/evals';
+
+const myEvaluator: Evaluator = {
+  name: 'my_custom_evaluator',
+  kind: 'CODE',
+  evaluate: async ({ input, output, expected, metadata }: EvaluatorParams) => {
+    // Your evaluation logic here
+    const isCorrect = output === expected;
+    
+    return {
+      score: isCorrect ? 1 : 0,
+      label: isCorrect ? 'PASS' : 'FAIL',
+      explanation: isCorrect ? 'Output matches expected' : 'Output does not match expected',
+    };
+  },
+};
+```
+
+### Evaluator Types
+
+| Type | Description |
+| ---- | ----------- |
+| `Evaluator` | A Phoenix-compatible evaluator with `name`, `kind`, and `evaluate` function |
+| `EvaluatorParams` | Parameters passed to the evaluate function: `input`, `output`, `expected`, `metadata` |
+| `EvaluationResult` | Result object with `score` (number), optional `label` (string), and optional `explanation` (string) |
+
 ## Running the suite
 
-Make sure that you've configured a Phoenix exporter in `kibana.dev.yml`:
+### Phoenix Configuration
+
+The evaluation system uses Phoenix for experiment tracking and dataset management. Configure Phoenix in `kibana.dev.yml`:
 
 ```yaml
 telemetry.tracing.exporters:
   phoenix:
-    base_url: 'https://<my-phoenix-host>'
-    public_url: 'https://<my-phoenix-host>'
-    project_name: '<my-name>'
-    api_key: '<my-api-key>'
+    base_url: 'https://<my-phoenix-host>'   # Phoenix API endpoint
+    public_url: 'https://<my-phoenix-host>' # Phoenix UI URL (for links in logs)
+    project_name: '<my-project-name>'       # Project name for tracing
+    api_key: '<my-api-key>'                 # Phoenix API key (Bearer token)
 ```
+
+The configuration is loaded via `getPhoenixConfig()` which reads from Kibana's telemetry config and constructs a `PhoenixConfig`:
+
+```ts
+interface PhoenixConfig {
+  baseUrl: string;
+  headers: {
+    Authorization: string; // "Bearer <api_key>"
+  };
+}
+```
+
+### Creating a Playwright Config
 
 Create a Playwright config that delegates to the helper:
 
@@ -217,6 +270,20 @@ evaluate('compare model performance', async ({ evaluationAnalysisService }) => {
 });
 ```
 
+## Environment Variables
+
+The evaluation system supports several environment variables for configuration:
+
+| Variable | Description | Example |
+| -------- | ----------- | ------- |
+| `EVALUATION_CONNECTORS` | Comma-separated list of connector IDs to run tests against (defaults to all) | `bedrock-claude,azure-gpt4o` |
+| `EVALUATION_CONNECTOR_ID` | Connector ID to use for LLM-as-a-judge evaluations | `bedrock-claude` |
+| `EVALUATION_REPETITIONS` | Number of times to repeat each evaluation example | `3` |
+| `SELECTED_EVALUATORS` | Comma-separated list of evaluator names to run | `Factuality,Relevance` |
+| `LOG_LEVEL` | Log level for evaluation output | `debug`, `info`, `warning`, `error` |
+
+**Note:** Connector discovery uses `@kbn/gen-ai-functional-testing` which reads connectors from `kibana.yml`/`kibana.dev.yml` or the `KIBANA_TESTING_AI_CONNECTORS` environment variable.
+
 ### LLM-as-a-judge
 
 Some of the evals will use LLM-as-a-judge. For consistent results, you should specify `EVALUATION_CONNECTOR_ID` as an environment variable, in order for the evaluations to always be judged by the same LLM:
@@ -225,13 +292,23 @@ Some of the evals will use LLM-as-a-judge. For consistent results, you should sp
 EVALUATION_CONNECTOR_ID=bedrock-claude node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
 ```
 
-### Testing a specific connector
+### Testing specific connectors
 
-The helper will spin up one `local` project per available connector so results are isolated per model. Each project is named after the connector id. To run the evaluations only for a specific connector, use `--project`:
+The helper will spin up one `local` project per available connector so results are isolated per model. Each project is named after the connector id.
+
+**Option 1: Using `--project` flag** (runs a single connector):
 
 ```bash
 node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts --project azure-gpt4o
 ```
+
+**Option 2: Using `EVALUATION_CONNECTORS` env var** (runs multiple specific connectors):
+
+```bash
+EVALUATION_CONNECTORS=bedrock-claude,azure-gpt4o node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
+```
+
+If `EVALUATION_CONNECTORS` is not set, all discovered connectors will be used.
 
 ### Selecting specific evaluators
 

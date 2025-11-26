@@ -8,6 +8,5 @@
 export const EVALUATOR_ERRORS = {
   INVALID_OUTPUT_STRUCTURE:
     'Invalid output structure: expected {results: [{ name: string; requiredPaths: string[]; optionalPaths: string[]; excludedPaths: string[]; }]}',
-  NO_RESULTS: "No results found in the run's output",
-  GROUPS_COUNT: 'Number of insight groups does not match number of requirements',
-};
+  NO_RESULTS: 'No results returned from the LLM',
+} as const;

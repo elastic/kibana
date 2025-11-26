@@ -52,16 +52,44 @@ export async function createConnectorFixture({
 
   log.info(`Creating connector`);
 
-  await fetch({
-    path: `/api/actions/connector/${connectorWithUuid.id}`,
-    method: 'POST',
-    body: JSON.stringify({
-      config: connectorWithUuid.config,
-      connector_type_id: connectorWithUuid.actionTypeId,
-      name: connectorWithUuid.name,
-      secrets: connectorWithUuid.secrets,
-    }),
-  });
+  // Ensure config and secrets are objects, not undefined
+  const config = connectorWithUuid.config ?? {};
+  const secrets = connectorWithUuid.secrets ?? {};
+
+  if (!connectorWithUuid.actionTypeId) {
+    throw new Error(`Connector ${predefinedConnector.id} is missing required field 'actionTypeId'`);
+  }
+  if (!connectorWithUuid.name) {
+    throw new Error(`Connector ${predefinedConnector.id} is missing required field 'name'`);
+  }
+
+  try {
+    await fetch({
+      path: `/api/actions/connector/${connectorWithUuid.id}`,
+      method: 'POST',
+      body: JSON.stringify({
+        config,
+        connector_type_id: connectorWithUuid.actionTypeId,
+        name: connectorWithUuid.name,
+        secrets,
+      }),
+    });
+  } catch (error) {
+    log.error(
+      `Failed to create connector ${predefinedConnector.id}. Connector definition: ${JSON.stringify(
+        {
+          id: predefinedConnector.id,
+          name: connectorWithUuid.name,
+          actionTypeId: connectorWithUuid.actionTypeId,
+          hasConfig: !!config && Object.keys(config).length > 0,
+          hasSecrets: !!secrets && Object.keys(secrets).length > 0,
+        },
+        null,
+        2
+      )}`
+    );
+    throw error;
+  }
 
   await use(connectorWithUuid);
 
