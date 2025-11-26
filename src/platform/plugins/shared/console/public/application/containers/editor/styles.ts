@@ -20,18 +20,13 @@ export const useActionStyles = () => {
       top: 0;
       // Adjust for possible scrollbars
       right: ${euiTheme.size.base};
-      height: ${euiTheme.size.l};
+      height: ${euiTheme.size.xl};
       background-color: ${euiTheme.colors.emptyShade};
       border-radius: ${euiTheme.size.xs};
       box-shadow: 0 0 calc(${euiTheme.size.xs} * 0.5) calc(${euiTheme.size.xs} * 0.5)
         ${euiTheme.colors.lightShade};
       padding-top: calc(${euiTheme.size.base} * 0.1);
       overflow-y: auto;
-
-      button {
-        height: calc(${euiTheme.size.base} * 1.1);
-        width: calc(${euiTheme.size.base} * 1.1);
-      }
     `,
   };
 };
