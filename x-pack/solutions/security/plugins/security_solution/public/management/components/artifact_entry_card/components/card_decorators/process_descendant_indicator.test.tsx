@@ -18,7 +18,7 @@ import {
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
 import { EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS } from '../../../../pages/event_filters/view/translations';
-import { TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS } from '../../../../pages/trusted_apps/view/translations';
+import { TRUSTED_APPS_PROCESS_DESCENDANT_DECORATOR_LABELS } from '../../../../pages/trusted_apps/view/translations';
 
 describe('ProcessDescendantIndicator', () => {
   let appTestContext: AppContextTestRender;
@@ -70,7 +70,7 @@ describe('ProcessDescendantIndicator', () => {
   it('should display indication if Trusted App is for process descendants', () => {
     render({
       item: getProcessDescendantTrustedApp(),
-      labels: TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS,
+      labels: TRUSTED_APPS_PROCESS_DESCENDANT_DECORATOR_LABELS,
     });
 
     expect(renderResult.getByTestId('test-processDescendantsIndication')).toBeInTheDocument();

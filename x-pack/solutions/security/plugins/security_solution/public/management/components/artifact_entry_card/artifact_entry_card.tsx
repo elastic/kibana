@@ -52,15 +52,8 @@ export interface ArtifactEntryCardProps extends CommonArtifactEntryCardProps {
   hideComments?: boolean;
 }
 
-export interface CardDecoratorLabels {
-  title: string;
-  tooltipText: string;
-  versionInfo: string;
-}
-
 export interface ArtifactEntryCardDecoratorProps extends CommonProps {
   item: MaybeImmutable<AnyArtifact>;
-  labels?: CardDecoratorLabels;
 }
 
 /**

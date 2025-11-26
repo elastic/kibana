@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { ProcessDescendantsIndicator } from '../../../../components/artifact_entry_card/components/card_decorators/process_descendants_indicator';
 import { UnsavedChangesConfirmModal } from './unsaved_changes_confirm_modal';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -65,6 +64,8 @@ import type { PolicyDetailsRouteState } from '../../../../../../common/endpoint/
 import { useHostIsolationExceptionsAccess } from '../../../../hooks/artifacts/use_host_isolation_exceptions_access';
 import { TrustedDevicesApiClient } from '../../../trusted_devices/service/api_client';
 import { POLICY_ARTIFACT_TRUSTED_DEVICES_LABELS } from './trusted_devices_translations';
+import { TrustedAppsCardDecorator } from '../../../trusted_apps/view/trusted_apps_list';
+import { EventFiltersCardDecorator } from '../../../event_filters/view/event_filters_list';
 
 enum PolicyTabKeys {
   SETTINGS = 'settings',
@@ -316,7 +317,7 @@ export const PolicyTabs = React.memo(() => {
                   getArtifactPath={getTrustedAppsListPath}
                   getPolicyArtifactsPath={getPolicyDetailsArtifactsListPath}
                   canWriteArtifact={canWriteTrustedApplications}
-                  CardDecorator={ProcessDescendantsIndicator}
+                  CardDecorator={TrustedAppsCardDecorator}
                 />
               </>
             ),
@@ -369,7 +370,7 @@ export const PolicyTabs = React.memo(() => {
                   getArtifactPath={getEventFiltersListPath}
                   getPolicyArtifactsPath={getPolicyEventFiltersPath}
                   canWriteArtifact={canWriteEventFilters}
-                  CardDecorator={ProcessDescendantsIndicator}
+                  CardDecorator={EventFiltersCardDecorator}
                 />
               </>
             ),

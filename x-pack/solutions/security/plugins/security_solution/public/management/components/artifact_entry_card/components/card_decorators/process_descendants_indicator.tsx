@@ -11,23 +11,23 @@ import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { isProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
 import { ProcessDescendantsIconTip } from '../../../process_descendant_icontip';
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
-import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoint/service/artifacts';
 
-export const ProcessDescendantsIndicator = memo<ArtifactEntryCardDecoratorProps>(
-  ({ item, 'data-test-subj': dataTestSubj, labels, ...commonProps }) => {
+export interface CardDecoratorLabels {
+  title: string;
+  tooltipText: string;
+  versionInfo: string;
+}
+
+interface ProcessDescendantsIndicatorProps extends ArtifactEntryCardDecoratorProps {
+  labels: CardDecoratorLabels;
+  processDescendantsTag: string;
+}
+
+export const ProcessDescendantsIndicator = memo<ProcessDescendantsIndicatorProps>(
+  ({ item, 'data-test-subj': dataTestSubj, labels, processDescendantsTag, ...commonProps }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const isEventFiltersProcessDescendantsEnabled = isProcessDescendantsEnabled(
-      item as ExceptionListItemSchema
-    );
-    const isTrustedAppsProcessDescendantsEnabled = isProcessDescendantsEnabled(
-      item as ExceptionListItemSchema,
-      TRUSTED_PROCESS_DESCENDANTS_TAG
-    );
 
-    if (
-      labels &&
-      (isEventFiltersProcessDescendantsEnabled || isTrustedAppsProcessDescendantsEnabled)
-    ) {
+    if (isProcessDescendantsEnabled(item as ExceptionListItemSchema, processDescendantsTag)) {
       return (
         <>
           <EuiText {...commonProps} data-test-subj={getTestId('processDescendantsIndication')}>

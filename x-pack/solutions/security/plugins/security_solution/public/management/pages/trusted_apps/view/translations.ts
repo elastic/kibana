@@ -71,7 +71,7 @@ export const SELECT_OS_LABEL = i18n.translate('xpack.securitySolution.trustedApp
   defaultMessage: 'Select operating system',
 });
 
-export const TRUSTED_APP_PROCESS_DESCENDANTS = i18n.translate(
+export const TRUSTED_APPS_PROCESS_DESCENDANTS = i18n.translate(
   'xpack.securitySolution.trustedApps.processDescendants.label',
   {
     defaultMessage: 'Process Descendants',
@@ -85,7 +85,7 @@ export const TRUSTED_APPLICATIONS = i18n.translate(
   }
 );
 
-export const TRUSTED_APP_PROCESS_DESCENDANT_DECORATOR_LABELS = {
+export const TRUSTED_APPS_PROCESS_DESCENDANT_DECORATOR_LABELS = {
   title: i18n.translate('xpack.securitySolution.trustedApps.cardDecorator.title', {
     defaultMessage: 'Trusting descendants of process',
   }),
