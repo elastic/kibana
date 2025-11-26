@@ -255,11 +255,17 @@ export const PrivMonUtils = (
   };
 
   async function runSync() {
-    await scheduleMonitoringEngineNow({ ignoreConflict: true });
+    log.info('[runSync] Starting sync...');
+    log.info('[runSync] Scheduling monitoring engine now...');
+    const scheduleResult = await scheduleMonitoringEngineNow({ ignoreConflict: true });
+    log.info(`[runSync] Schedule result status: ${scheduleResult.status}`);
+    log.info('[runSync] Waiting for sync task to run...');
     await waitForSyncTaskRun();
+    log.info('[runSync] Sync task completed');
   }
 
   async function setTimestamp(id: string, ts: string, indexPattern: string) {
+    log.info(`[setTimestamp] Setting timestamp for ID ${id} in index ${indexPattern} to ${ts}`);
     return updateIntegrationsUserTimeStamp({
       id,
       timestamp: ts,
@@ -312,25 +318,64 @@ export const PrivMonUtils = (
   };
 
   const expectUserCount = async (n: number) => {
-    const users = (await api.listPrivMonUsers({ query: {} })).body;
+    log.info(`[expectUserCount] Fetching users, expecting count: ${n}`);
+    const res = await api.listPrivMonUsers({ query: {} });
+    const users = res.body;
+    log.info(`[expectUserCount] Actual user count: ${users.length}, Expected: ${n}`);
+    log.info(`[expectUserCount] User names: ${users.map((u: any) => u.user?.name).join(', ')}`);
     expect(users.length).toBe(n);
     return users;
   };
 
   async function getLastProcessedMarker(indexPattern: string) {
+    log.info(`[getLastProcessedMarker] Fetching last processed marker for index ${indexPattern}`);
     const res = await api.listEntitySources({ query: {} });
+    log.info(
+      `[getLastProcessedMarker] listEntitySources response: ${JSON.stringify(res.body, null, 2)}`
+    );
     const integration = res.body.find(
       (i: any) => i?.type === 'entity_analytics_integration' && i?.indexPattern === indexPattern
     );
-    return integration?.integrations?.syncData?.lastUpdateProcessed as string | undefined;
+    const marker = integration?.integrations?.syncData?.lastUpdateProcessed as string | undefined;
+    log.info(
+      `[getLastProcessedMarker] Found integration: ${JSON.stringify(
+        {
+          id: integration?.id,
+          name: integration?.name,
+          type: integration?.type,
+          indexPattern: integration?.indexPattern,
+          syncData: integration?.integrations?.syncData,
+        },
+        null,
+        2
+      )}`
+    );
+    log.info(`[getLastProcessedMarker] Last processed marker: ${marker}`);
+    return marker;
   }
 
   const getSyncData = async (indexPattern: string) => {
+    log.info(`[getSyncData] Fetching sync data for index ${indexPattern}`);
     const res = await api.listEntitySources({ query: {} });
+    log.info(`[getSyncData] listEntitySources response: ${JSON.stringify(res.body, null, 2)}`);
     const integration = res.body.find(
       (i: any) => i?.type === 'entity_analytics_integration' && i?.indexPattern === indexPattern
     );
-    return integration?.integrations?.syncData;
+    const syncData = integration?.integrations?.syncData;
+    log.info(
+      `[getSyncData] Found integration: ${JSON.stringify(
+        {
+          id: integration?.id,
+          name: integration?.name,
+          type: integration?.type,
+          indexPattern: integration?.indexPattern,
+        },
+        null,
+        2
+      )}`
+    );
+    log.info(`[getSyncData] Sync data: ${JSON.stringify(syncData, null, 2)}`);
+    return syncData;
   };
 
   const setIntegrationUserPrivilege = async ({
@@ -343,13 +388,13 @@ export const PrivMonUtils = (
     indexPattern: string;
   }) => {
     const rolesParam = isPrivileged ? ['Help Desk Administrator'] : [];
-    await es.updateByQuery({
+    const query = {
       index: indexPattern,
       refresh: true,
-      conflicts: 'proceed',
+      conflicts: 'proceed' as const,
       query: { ids: { values: [id] } },
       script: {
-        lang: 'painless',
+        lang: 'painless' as const,
         source: `
       if (ctx._source.user == null) ctx._source.user = new HashMap();
       ctx._source.user.is_privileged = params.new_privileged_status;
@@ -360,7 +405,42 @@ export const PrivMonUtils = (
     `,
         params: { new_privileged_status: isPrivileged, roles: rolesParam },
       },
-    });
+    };
+    log.info(
+      `[setIntegrationUserPrivilege] Setting privilege for ID ${id} to ${isPrivileged} in index ${indexPattern}`
+    );
+    log.info(
+      `[setIntegrationUserPrivilege] Executing updateByQuery: ${JSON.stringify(query, null, 2)}`
+    );
+    const result = await es.updateByQuery(query);
+    log.info(`[setIntegrationUserPrivilege] Update result: ${JSON.stringify(result, null, 2)}`);
+
+    // Verify the update by reading the document
+    try {
+      const verifyResult = await es.search({
+        index: indexPattern,
+        query: { ids: { values: [id] } },
+        size: 1,
+      });
+      if (verifyResult.hits.hits.length > 0) {
+        log.info(
+          `[setIntegrationUserPrivilege] Verified document after update: ${JSON.stringify(
+            {
+              id: verifyResult.hits.hits[0]._id,
+              'user.name': verifyResult.hits.hits[0]._source?.user?.name,
+              'user.is_privileged': verifyResult.hits.hits[0]._source?.user?.is_privileged,
+              'user.roles': verifyResult.hits.hits[0]._source?.user?.roles,
+              'user.entity.attributes.Privileged':
+                verifyResult.hits.hits[0]._source?.user?.entity?.attributes?.Privileged,
+            },
+            null,
+            2
+          )}`
+        );
+      }
+    } catch (error) {
+      log.error(`[setIntegrationUserPrivilege] Error verifying update:`, error);
+    }
   };
 
   const getIntegrationMonitoringSource = async (
@@ -426,17 +506,50 @@ export const PrivMonUtils = (
     timestamp: string;
     indexPattern: string;
   }) => {
-    await es.updateByQuery({
+    const query = {
       index: indexPattern,
       refresh: true,
-      conflicts: 'proceed',
+      conflicts: 'proceed' as const,
       query: { ids: { values: [id] } },
       script: {
-        lang: 'painless',
+        lang: 'painless' as const,
         source: "ctx._source['@timestamp'] = params.newTimestamp",
         params: { newTimestamp: timestamp },
       },
-    });
+    };
+    log.info(
+      `[updateIntegrationsUserTimeStamp] Executing updateByQuery for ID ${id}: ${JSON.stringify(
+        query,
+        null,
+        2
+      )}`
+    );
+    const result = await es.updateByQuery(query);
+    log.info(`[updateIntegrationsUserTimeStamp] Update result: ${JSON.stringify(result, null, 2)}`);
+
+    // Verify the update by reading the document
+    try {
+      const verifyResult = await es.search({
+        index: indexPattern,
+        query: { ids: { values: [id] } },
+        size: 1,
+      });
+      if (verifyResult.hits.hits.length > 0) {
+        log.info(
+          `[updateIntegrationsUserTimeStamp] Verified document after update: ${JSON.stringify(
+            {
+              id: verifyResult.hits.hits[0]._id,
+              '@timestamp': verifyResult.hits.hits[0]._source?.['@timestamp'],
+              'user.name': verifyResult.hits.hits[0]._source?.user?.name,
+            },
+            null,
+            2
+          )}`
+        );
+      }
+    } catch (error) {
+      log.error(`[updateIntegrationsUserTimeStamp] Error verifying update:`, error);
+    }
   };
 
   /**
