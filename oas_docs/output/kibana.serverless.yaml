@@ -893,7 +893,8 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        WARNING: This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.
+        > warn
+        > This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.
       operationId: post-agent-builder-a2a-agentid
       parameters:
         - description: The unique identifier of the agent to send the A2A task to.
@@ -1927,7 +1928,8 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        WARNING: This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.
+        > warn
+        > This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.
       operationId: post-agent-builder-mcp
       parameters: []
       requestBody:
@@ -2498,17 +2500,17 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/agent_builder/tools/{id}:
+  /api/agent_builder/tools/{toolId}:
     delete:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/tools/{id}</span></div>
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/tools/{toolId}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_onechat.
-      operationId: delete-agent-builder-tools-id
+      operationId: delete-agent-builder-tools-toolid
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -2519,7 +2521,7 @@ paths:
             type: string
         - description: The unique identifier of the tool to delete.
           in: path
-          name: id
+          name: toolId
           required: true
           schema:
             type: string
@@ -2544,16 +2546,16 @@ paths:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/tools/{id}</span></div>
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/tools/{toolId}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_onechat.
-      operationId: get-agent-builder-tools-id
+      operationId: get-agent-builder-tools-toolid
       parameters:
         - description: The unique identifier of the tool to retrieve.
           in: path
-          name: id
+          name: toolId
           required: true
           schema:
             type: string
@@ -2667,7 +2669,6 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/agent_builder/tools/{toolId}:
     put:
       description: |-
         **Spaces method and path for this operation:**
@@ -48465,6 +48466,7 @@ paths:
                       - upcoming
                       - finished
                       - archived
+                      - disabled
                     type: string
                   title:
                     description: The name of the maintenance window.
@@ -48522,7 +48524,7 @@ paths:
           required: false
           schema:
             type: string
-        - description: The status of the maintenance window. One of "running", "upcoming", "finished" or "archived".
+        - description: The status of the maintenance window. One of "running", "upcoming", "finished", "archived", or "disabled".
           in: query
           name: status
           required: false
@@ -48533,6 +48535,7 @@ paths:
                   - finished
                   - upcoming
                   - archived
+                  - disabled
                 type: string
               - items:
                   enum:
@@ -48540,6 +48543,7 @@ paths:
                     - finished
                     - upcoming
                     - archived
+                    - disabled
                   type: string
                 type: array
         - description: The page number to return.
@@ -48664,6 +48668,7 @@ paths:
                             - upcoming
                             - finished
                             - archived
+                            - disabled
                           type: string
                         title:
                           description: The name of the maintenance window.
@@ -48866,6 +48871,7 @@ paths:
                       - upcoming
                       - finished
                       - archived
+                      - disabled
                     type: string
                   title:
                     description: The name of the maintenance window.
@@ -49115,6 +49121,7 @@ paths:
                       - upcoming
                       - finished
                       - archived
+                      - disabled
                     type: string
                   title:
                     description: The name of the maintenance window.
@@ -49276,6 +49283,7 @@ paths:
                       - upcoming
                       - finished
                       - archived
+                      - disabled
                     type: string
                   title:
                     description: The name of the maintenance window.
@@ -49435,6 +49443,7 @@ paths:
                       - upcoming
                       - finished
                       - archived
+                      - disabled
                     type: string
                   title:
                     description: The name of the maintenance window.
@@ -51662,6 +51671,100 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/security_ai_assistant/knowledge_base:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Read a single KB
+      operationId: GetKnowledgeBase
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                KnowledgeBaseReadResponse200Example2:
+                  summary: A response that returns information about the knowledge base.
+                  value:
+                    defend_insights_exists: true
+                    elser_exists: false
+                    is_setup_available: true
+                    is_setup_in_progress: true
+                    product_documentation_status: installed
+                    security_labs_exists: false
+                    user_data_exists: true
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseReadResponse200'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse400'
+          description: Generic Error
+      summary: Read a KnowledgeBase
+      tags:
+        - Security AI Assistant API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      operationId: PostKnowledgeBase
+      parameters:
+        - description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
+          example: elser-model-001
+          in: query
+          name: modelId
+          required: false
+          schema:
+            type: string
+        - description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
+          example: true
+          in: query
+          name: ignoreSecurityLabs
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                KnowledgeBaseResponse200Example2:
+                  summary: A response that indicates that the request was successful.
+                  value:
+                    success: true
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              examples:
+                KnowledgeBaseResponse400Example2:
+                  summary: A response for a request that failed due to an invalid query parameter value.
+                  value: |
+                    statusCode: 400 error: Bad Request message: "[request query]: ignoreSecurityLabs: Invalid enum value. Expected 'true' | 'false', received 'yes', ignoreSecurityLabs: Expected boolean, received string"
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse400'
+          description: Generic Error
+      summary: Create a KnowledgeBase
+      tags:
+        - Security AI Assistant API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/security_ai_assistant/knowledge_base/{resource}:
     get:
       description: |-
@@ -51671,71 +51774,41 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Read a single KB
+        Read a knowledge base with a specific resource identifier.
       operationId: ReadKnowledgeBase
       parameters:
         - description: The KnowledgeBase `resource` value.
           example: kb12345
           in: path
           name: resource
+          required: true
           schema:
             type: string
       responses:
         '200':
           content:
             application/json:
+              examples:
+                KnowledgeBaseReadResponse200Example1:
+                  summary: A response that returns information about the knowledge base.
+                  value:
+                    defend_insights_exists: true
+                    elser_exists: false
+                    is_setup_available: true
+                    is_setup_in_progress: true
+                    product_documentation_status: installed
+                    security_labs_exists: false
+                    user_data_exists: true
               schema:
-                type: object
-                properties:
-                  defend_insights_exists:
-                    description: Indicates if Defend Insights documentation exists in the KnowledgeBase.
-                    example: true
-                    type: boolean
-                  elser_exists:
-                    description: Indicates if the ELSER model exists for the KnowledgeBase.
-                    example: true
-                    type: boolean
-                  is_setup_available:
-                    description: Indicates if the setup process is available for the KnowledgeBase.
-                    example: true
-                    type: boolean
-                  is_setup_in_progress:
-                    description: Indicates if the setup process is currently in progress.
-                    example: false
-                    type: boolean
-                  product_documentation_status:
-                    description: The status of the product documentation in the KnowledgeBase.
-                    example: complete
-                    type: string
-                  security_labs_exists:
-                    description: Indicates if Security Labs documentation exists in the KnowledgeBase.
-                    example: true
-                    type: boolean
-                  user_data_exists:
-                    description: Indicates if user data exists in the KnowledgeBase.
-                    example: false
-                    type: boolean
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseReadResponse200'
           description: Indicates a successful call.
         '400':
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    description: A short description of the error.
-                    example: Bad Request
-                    type: string
-                  message:
-                    description: A detailed error message.
-                    example: Invalid resource ID provided.
-                    type: string
-                  statusCode:
-                    description: The HTTP status code of the error.
-                    example: 400
-                    type: number
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse400'
           description: Generic Error
-      summary: Read a KnowledgeBase
+      summary: Read a KnowledgeBase for a resource
       tags:
         - Security AI Assistant API
       x-metaTags:
@@ -51749,13 +51822,14 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a KnowledgeBase
+        Create a knowledge base with a specific resource identifier.
       operationId: CreateKnowledgeBase
       parameters:
         - description: The KnowledgeBase `resource` value.
           example: kb12345
           in: path
           name: resource
+          required: true
           schema:
             type: string
         - description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
@@ -51777,29 +51851,26 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                KnowledgeBaseResponse200Example1:
+                  summary: A response that indicates that the request was successful.
+                  value:
+                    success: true
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse'
           description: Indicates a successful call.
         '400':
           content:
             application/json:
+              examples:
+                KnowledgeBaseResponse400Example1:
+                  summary: A response for a request that failed due to an invalid query parameter value.
+                  value: |
+                    statusCode: 400 error: Bad Request message: "[request query]: ignoreSecurityLabs: Invalid enum value. Expected 'true' | 'false', received 'yes', ignoreSecurityLabs: Expected boolean, received string"
               schema:
-                type: object
-                properties:
-                  error:
-                    description: A short description of the error.
-                    example: Bad Request
-                    type: string
-                  message:
-                    description: A detailed error message.
-                    example: Invalid resource ID provided.
-                    type: string
-                  statusCode:
-                    description: The HTTP status code of the error.
-                    example: 400
-                    type: number
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse400'
           description: Generic Error
-      summary: Create a KnowledgeBase
+      summary: Create a KnowledgeBase for a resource
       tags:
         - Security AI Assistant API
       x-metaTags:
@@ -71997,6 +72068,37 @@ components:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
       discriminator:
         propertyName: type
+    Security_AI_Assistant_API_KnowledgeBaseReadResponse200:
+      type: object
+      properties:
+        defend_insights_exists:
+          description: Indicates if Defend Insights documentation exists in the KnowledgeBase.
+          example: true
+          type: boolean
+        elser_exists:
+          description: Indicates if the ELSER model exists for the KnowledgeBase.
+          example: true
+          type: boolean
+        is_setup_available:
+          description: Indicates if the setup process is available for the KnowledgeBase.
+          example: true
+          type: boolean
+        is_setup_in_progress:
+          description: Indicates if the setup process is currently in progress.
+          example: false
+          type: boolean
+        product_documentation_status:
+          description: The status of the product documentation in the KnowledgeBase.
+          example: complete
+          type: string
+        security_labs_exists:
+          description: Indicates if Security Labs documentation exists in the KnowledgeBase.
+          example: true
+          type: boolean
+        user_data_exists:
+          description: Indicates if user data exists in the KnowledgeBase.
+          example: false
+          type: boolean
     Security_AI_Assistant_API_KnowledgeBaseResource:
       description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc.
       enum:
@@ -72013,6 +72115,21 @@ components:
           description: Identify the success of the method execution.
           example: true
           type: boolean
+    Security_AI_Assistant_API_KnowledgeBaseResponse400:
+      type: object
+      properties:
+        error:
+          description: A short description of the error.
+          example: Bad Request
+          type: string
+        message:
+          description: A detailed error message.
+          example: Invalid resource ID provided.
+          type: string
+        statusCode:
+          description: The HTTP status code of the error.
+          example: 400
+          type: number
     Security_AI_Assistant_API_Message:
       description: AI assistant conversation message.
       type: object
@@ -88319,6 +88436,10 @@ components:
         timeWindowUnit:
           $ref: '#/components/schemas/timewindowunit'
     params_property_infra_inventory:
+      title: Inventory
+      description: |
+        The parameters for the infrastructure inventory rule. These parameters are appropriate when `rule_type_id` is `metrics.alert.inventory.threshold`.
+      type: object
       properties:
         criteria:
           type: array
@@ -88431,7 +88552,9 @@ components:
           type: boolean
     params_property_log_threshold:
       oneOf:
-        - title: Count
+        - title: Log threshold count
+          description: |
+            The parameters for a log threshold rule that counts the number of log entries that match the criteria. These parameters are appropriate when `rule_type_id` is `logs.alert.document.count`.
           type: object
           required:
             - count
@@ -88509,7 +88632,9 @@ components:
               type: array
               items:
                 type: string
-        - title: Ratio
+        - title: Log threshold ratio
+          description: |
+            The parameters for a log threshold rule that calculates the ratio of log entries that match the criteria. These parameters are appropriate when `rule_type_id` is `logs.alert.document.count`.
           type: object
           required:
             - count
@@ -88592,6 +88717,10 @@ components:
               items:
                 type: string
     params_property_infra_metric_threshold:
+      title: Metric threshold
+      description: |
+        The parameters for the metric threshold rule. These parameters are appropriate when `rule_type_id` is `metrics.alert.threshold`.
+      type: object
       properties:
         criteria:
           type: array
@@ -88851,6 +88980,10 @@ components:
               type: string
               example: m
     params_property_synthetics_uptime_tls:
+      title: Synthetics TLS certificate
+      description: |
+        The parameters for the synthetics TLS certificate rule. These parameters are appropriate when `rule_type_id` is `xpack.uptime.alerts.tls`.
+      type: object
       properties:
         search:
           type: string
@@ -88859,6 +88992,10 @@ components:
         certAgeThreshold:
           type: number
     params_property_synthetics_monitor_status:
+      title: Synthetics monitor status
+      description: |
+        The parameters for the Synthetics monitor status rule. These parameters are appropriate when `rule_type_id` is `xpack.uptime.alerts.monitorStatus`.
+      type: object
       required:
         - numTimes
         - shouldCheckStatus

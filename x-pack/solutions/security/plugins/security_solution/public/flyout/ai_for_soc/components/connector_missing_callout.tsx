@@ -9,11 +9,6 @@ import React, { memo, useCallback } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { useNavigateTo } from '@kbn/security-solution-navigation';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../common/lib/kibana';
-import {
-  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE,
-} from '../../../../common/constants';
 
 const MISSING_CONNECTOR = i18n.translate('xpack.securitySolution.alertSummary.missingConnector', {
   defaultMessage: 'Missing connector',
@@ -56,21 +51,14 @@ export interface ConnectorMissingCalloutProps {
  */
 export const ConnectorMissingCallout = memo(
   ({ canSeeAdvancedSettings }: ConnectorMissingCalloutProps) => {
-    const { featureFlags } = useKibana().services;
-    const useNewDefaultConnector = featureFlags.getBooleanValue(
-      AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-      AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE
-    );
     const { navigateTo } = useNavigateTo();
     const goToKibanaSettings = useCallback(
       () =>
         navigateTo({
           appId: 'management',
-          path: useNewDefaultConnector
-            ? '/ai/genAiSettings'
-            : '/kibana/settings?query=defaultAIConnector',
+          path: '/ai/genAiSettings',
         }),
-      [navigateTo, useNewDefaultConnector]
+      [navigateTo]
     );
 
     return (
