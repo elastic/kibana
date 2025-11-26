@@ -296,7 +296,7 @@ describe('useESQLVariables', () => {
       expect(mockOnTextLangQueryChange).not.toHaveBeenCalled();
     });
 
-    it('should handle numeric type coercion for ESQL variable` values', async () => {
+    it('should handle numeric type coercion for ESQL variable values', async () => {
       const stateContainer = getStateContainer();
       const dispatchSpy = jest.spyOn(stateContainer.internalState, 'dispatch');
 
