@@ -89,7 +89,8 @@
     "@kbn/ebt-tools",
     "@kbn/presentation-util",
     "@kbn/discover-utils",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/maintenance-windows-plugin"
   ],
   "exclude": ["target/**/*"]
 }

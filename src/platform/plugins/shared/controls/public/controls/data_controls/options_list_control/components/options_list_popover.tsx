@@ -24,7 +24,11 @@ const optionsListPopoverStyles = {
   }),
 };
 
-export const OptionsListPopover = () => {
+export const OptionsListPopover = ({
+  disableMultiValueEmptySelection = false,
+}: {
+  disableMultiValueEmptySelection?: boolean;
+}) => {
   const { componentApi, displaySettings } = useOptionsListContext();
   const [field, availableOptions, invalidSelections, loading] = useBatchedPublishingSubjects(
     componentApi.field$,
@@ -44,6 +48,7 @@ export const OptionsListPopover = () => {
         <OptionsListPopoverActionBar
           showOnlySelected={showOnlySelected}
           setShowOnlySelected={setShowOnlySelected}
+          disableMultiValueEmptySelection={disableMultiValueEmptySelection}
         />
       )}
       <div

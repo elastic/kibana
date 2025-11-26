@@ -166,6 +166,10 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
             // Get current selection state, not initial state
             const current = componentApi.selectedOptions$.value || [];
             const isSelected = current.includes(key);
+            // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
+            if (isSelected && current.length === 1) {
+              return;
+            }
             const newSelection = isSelected ? current.filter((k) => k !== key) : [...current, key];
             selections.internalApi.setSelectedOptions(newSelection);
           }
@@ -178,7 +182,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
           selections.internalApi.setSelectedOptions(keys);
         },
         deselectAll: () => {
-          selections.internalApi.setSelectedOptions([]);
+          // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
         },
         loadMoreSubject: new BehaviorSubject<void>(undefined),
         fieldFormatter: new BehaviorSubject((v: string) => v),
@@ -200,7 +204,10 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
               },
             }}
           >
-            <OptionsListControl />
+            <OptionsListControl
+              // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
+              disableMultiValueEmptySelection={true}
+            />
           </OptionsListControlContext.Provider>
         ),
       };

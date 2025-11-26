@@ -147,7 +147,11 @@
     "@kbn/core-chrome-browser",
     "@kbn/react-query",
     "@kbn/core-chrome-layout-constants",
-    "@kbn/control-group-renderer"
+    "@kbn/control-group-renderer",
+    "@kbn/zod",
+    "@kbn/onechat-server",
+    "@kbn/onechat-common",
+    "@kbn/onechat-plugin"
   ],
   "exclude": ["target/**/*"]
 }

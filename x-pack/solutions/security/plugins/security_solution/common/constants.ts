@@ -310,6 +310,14 @@ export const DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/users/_find` as const;
 
 /**
+ * Extended alerts routes
+ */
+export const DETECTION_ENGINE_UNIFIED_ALERTS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/unified_alerts` as const;
+export const DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL =
+  `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/search` as const;
+
+/**
  * Telemetry detection endpoint for any previews requested of what data we are
  * providing through UI/UX and for e2e tests.
  *   curl http//localhost:5601/internal/security_solution/telemetry

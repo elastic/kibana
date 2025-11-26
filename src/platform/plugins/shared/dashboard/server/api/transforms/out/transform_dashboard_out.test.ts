@@ -38,7 +38,23 @@ describe('transformDashboardOut', () => {
     },
   ];
 
-  test('should not supply defaults for missing properties', () => {
+  test('should not supply defaults for optional top level properties', () => {
+    const input: DashboardSavedObjectAttributes = {
+      description: '',
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{}',
+      },
+      optionsJSON: '{}',
+      panelsJSON: '',
+      timeRestore: false,
+      title: 'my title',
+    };
+    expect(transformDashboardOut(input)).toEqual<DashboardState>({
+      title: 'my title',
+    });
+  });
+
+  test('should not supply defaults for optional nested properties', () => {
     const input: DashboardSavedObjectAttributes = {
       controlGroupInput: {
         panelsJSON: JSON.stringify({ foo: controlGroupInputControlsSo }),

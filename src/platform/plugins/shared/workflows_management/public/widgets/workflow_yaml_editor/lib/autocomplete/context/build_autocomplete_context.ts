@@ -49,8 +49,7 @@ export function buildAutocompleteContext({
   const absoluteOffset = model.getOffsetAt(position);
   const { lineNumber } = position;
   const line = model.getLineContent(lineNumber);
-  const wordUntil = model.getWordUntilPosition(position);
-  const word = model.getWordAtPosition(position) || wordUntil;
+  const word = model.getWordAtPosition(position) || model.getWordUntilPosition(position);
   const { startColumn, endColumn } = word;
 
   const focusedStepInfo: StepInfo | null = focusedStepId
