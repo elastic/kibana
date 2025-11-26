@@ -157,7 +157,7 @@ export const useExceptionsListCard = ({
             setShowIncludeExpiredExceptionsModal(CHECK_EXCEPTION_TTL_ACTION_TYPES.EXPORT);
           }
         },
-        disabled: !canReadExceptions,
+        disabled: listType === ExceptionListTypeEnum.ENDPOINT ? false : !canReadExceptions,
       },
       {
         key: 'Duplicate',
