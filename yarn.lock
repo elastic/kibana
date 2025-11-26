@@ -7251,6 +7251,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/maintenance-windows-plugin@link:x-pack/platform/plugins/shared/maintenance_windows":
+  version "0.0.0"
+  uid ""
+
 "@kbn/managed-content-badge@link:src/platform/packages/private/kbn-managed-content-badge":
   version "0.0.0"
   uid ""
