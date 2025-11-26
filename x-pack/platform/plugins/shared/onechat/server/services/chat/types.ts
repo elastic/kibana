@@ -6,7 +6,12 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { AgentCapabilities, ChatEvent, RawRoundInput } from '@kbn/onechat-common';
+import type {
+  AgentCapabilities,
+  AgentConfigurationOverrides,
+  ChatEvent,
+  RawRoundInput,
+} from '@kbn/onechat-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 
@@ -61,4 +66,9 @@ export interface ChatConverseParams {
    * These tools will be registered as LLM tools with browser.* namespace.
    */
   browserApiTools?: BrowserApiToolMetadata[];
+  /**
+   * Optional runtime configuration overrides.
+   * These override the stored agent configuration for this execution only.
+   */
+  configurationOverrides?: AgentConfigurationOverrides;
 }

@@ -12,6 +12,7 @@ import type {
   RawRoundInput,
   ChatAgentEvent,
   AgentCapabilities,
+  AgentConfigurationOverrides,
 } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -119,6 +120,11 @@ export interface AgentParams {
    * If not provided, uses a default schema.
    */
   outputSchema?: Record<string, unknown>;
+  /**
+   * Optional runtime configuration overrides.
+   * These override the stored agent configuration for this execution only.
+   */
+  configurationOverrides?: AgentConfigurationOverrides;
 }
 
 export interface AgentResponse {

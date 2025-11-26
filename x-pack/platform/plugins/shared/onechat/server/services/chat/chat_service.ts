@@ -71,6 +71,7 @@ class ChatServiceImpl implements ChatService {
     nextInput,
     autoCreateConversationWithId = false,
     browserApiTools,
+    configurationOverrides,
   }: ChatConverseParams): Observable<ChatEvent> {
     const { trackingService } = this.dependencies;
     const requestId = trackingService?.trackQueryStart();
@@ -123,6 +124,7 @@ class ChatServiceImpl implements ChatService {
             defaultConnectorId: context.selectedConnectorId,
             agentService: this.dependencies.agentService,
             browserApiTools,
+            configurationOverrides,
           });
 
           // Generate title (for CREATE) or use existing title (for UPDATE)
