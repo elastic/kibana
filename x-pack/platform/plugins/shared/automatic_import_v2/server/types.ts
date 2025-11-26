@@ -25,6 +25,7 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -51,6 +52,7 @@ export interface AutomaticImportV2PluginStart {
 export interface AutomaticImportV2PluginSetupDependencies {
   actions: ActionsPluginSetup;
   spaces?: SpacesPluginSetup;
+  features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
 }
 export interface AutomaticImportV2PluginStartDependencies {
