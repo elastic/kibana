@@ -240,6 +240,11 @@ export const metricOperationDefinitionSchema = schema.oneOf([
   percentileRanksOperationSchema,
 ]);
 
+export const fieldMetricOrFormulaOperationDefinitionSchema = schema.oneOf([
+  fieldMetricOperationsSchema,
+  formulaOperationDefinitionSchema,
+]);
+
 export type LensApiAllMetricOperations = typeof metricOperationDefinitionSchema.type;
 export type LensApiReferableMetricOperations =
   | LensApiCountMetricOperation
