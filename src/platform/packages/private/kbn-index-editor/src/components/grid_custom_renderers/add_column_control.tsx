@@ -8,10 +8,12 @@
  */
 import React, { useState } from 'react';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, findElementBySelectorOrRef } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AddColumnPopover } from './add_column_popover';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
+
+const ADD_COLUMN_ACTION_ID = 'add-column';
 
 const addColumnText = i18n.translate('indexEditor.dataGrid.addColumn', {
   defaultMessage: 'Add Column',
@@ -20,7 +22,7 @@ const addColumnText = i18n.translate('indexEditor.dataGrid.addColumn', {
 export const getAddColumnControl = (
   telemetryService: IndexEditorTelemetryService
 ): EuiDataGridControlColumn => ({
-  id: 'add-column',
+  id: ADD_COLUMN_ACTION_ID,
   width: 40,
   headerCellRender: () => <AddColumnControl telemetryService={telemetryService} />,
   headerCellProps: {
@@ -50,6 +52,21 @@ const AddColumnControl: React.FC<AddColumnControlProps> = ({ telemetryService })
             aria-label={addColumnText}
             data-test-subj="indexEditorAddColumnButton"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            onKeyDown={(e: React.KeyboardEvent) => {
+              // Focus back to the cell when pressing Escape
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                requestAnimationFrame(() => {
+                  const headerWrapper = findElementBySelectorOrRef(
+                    `[data-test-subj="dataGridHeaderCell-${ADD_COLUMN_ACTION_ID}"]`
+                  );
+                  if (headerWrapper) {
+                    headerWrapper.focus();
+                  }
+                });
+              }
+            }}
           />
         </EuiToolTip>
       }
