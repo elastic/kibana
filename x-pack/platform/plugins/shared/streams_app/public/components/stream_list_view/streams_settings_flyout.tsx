@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -35,6 +35,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
@@ -59,6 +60,7 @@ export function StreamsSettingsFlyout({
 
   const {
     ui: { manage: canManageWiredKibana },
+    features: { significantEvents },
   } = useStreamsPrivileges();
 
   const [canManageWiredElasticsearch, setCanManageWiredElasticsearch] =
@@ -138,6 +140,16 @@ export function StreamsSettingsFlyout({
       setLoading(false);
     }
   };
+
+  const [isChangingSignificantEvents, setIsChangingSignificantEvents] = React.useState(false);
+  const toggleSignificantEvents = useCallback(async () => {
+    setIsChangingSignificantEvents(true);
+    await core.uiSettings.set(
+      OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+      !significantEvents?.enabled
+    );
+    setIsChangingSignificantEvents(false);
+  }, [core.uiSettings, significantEvents?.enabled]);
 
   // Shipper button group state
   const shipperButtonGroupPrefix = useGeneratedHtmlId({ prefix: 'shipperButtonGroup' });
@@ -284,6 +296,63 @@ output.elasticsearch:
               )}
             </EuiFormRow>
           </EuiDescribedFormGroup>
+
+          {significantEvents?.available && (
+            <EuiDescribedFormGroup
+              fullWidth
+              descriptionFlexItemProps={{ grow: 2 }}
+              title={
+                <h3>
+                  <EuiFlexGroup gutterSize="s">
+                    {i18n.translate('xpack.streams.streamsListView.significantEventsTitle', {
+                      defaultMessage: 'Significant events',
+                    })}
+                    <EuiBetaBadge
+                      label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
+                        defaultMessage: 'Technical Preview',
+                      })}
+                      tooltipContent={i18n.translate(
+                        'xpack.streams.streamsListView.betaBadgeDescription',
+                        {
+                          defaultMessage:
+                            'This functionality is experimental and not supported. It may change or be removed at any time.',
+                        }
+                      )}
+                      alignment="middle"
+                      size="s"
+                    />
+                  </EuiFlexGroup>
+                </h3>
+              }
+              description={
+                <p>
+                  {i18n.translate('xpack.streams.streamsListView.significantEventsDescription', {
+                    defaultMessage:
+                      'Significant events enable you to automatically detect and highlight important occurrences in your log data, helping you quickly identify issues and trends.',
+                  })}
+                </p>
+              }
+            >
+              <EuiFormRow fullWidth>
+                <EuiSwitch
+                  label={i18n.translate(
+                    'xpack.streams.streamsListView.enableSignificantEventsSwitchLabel',
+                    {
+                      defaultMessage: 'Enable Significant events',
+                    }
+                  )}
+                  checked={Boolean(significantEvents?.enabled)}
+                  onChange={toggleSignificantEvents}
+                  data-test-subj="streamsSignificantEventsSwitch"
+                  disabled={
+                    core.uiSettings.isOverridden(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS) ||
+                    isChangingSignificantEvents
+                  }
+                />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
+          )}
+
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiText size="xs">
               <h3>
@@ -382,7 +451,14 @@ output.elasticsearch:
                         id="xpack.streams.streamsListView.shipperConfigCurlDescription"
                         defaultMessage="Send data to the {logsEndpoint} endpoint using the {bulkApiLink}. Refer to the following example for more information:"
                         values={{
-                          logsEndpoint: <code>/logs/</code>,
+                          logsEndpoint: (
+                            <code>
+                              {i18n.translate(
+                                'xpack.streams.streamsSettingsFlyout.code.logsLabel',
+                                { defaultMessage: '/logs/' }
+                              )}
+                            </code>
+                          ),
                           bulkApiLink: (
                             <EuiLink
                               href="https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk"
@@ -390,7 +466,10 @@ output.elasticsearch:
                               rel="noopener noreferrer"
                               external
                             >
-                              Bulk API
+                              {i18n.translate(
+                                'xpack.streams.streamsSettingsFlyout.bulkAPILinkLabel',
+                                { defaultMessage: 'Bulk API' }
+                              )}
                             </EuiLink>
                           ),
                         }}
