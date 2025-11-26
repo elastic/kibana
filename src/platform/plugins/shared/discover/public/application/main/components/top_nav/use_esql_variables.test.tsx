@@ -17,7 +17,6 @@ import type { ESQLControlVariable, ESQLVariableType, EsqlControlType } from '@kb
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import React from 'react';
 import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
-import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 
 // Mock ControlGroupRendererApi
 class MockControlGroupRendererApi {
