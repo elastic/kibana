@@ -49,10 +49,7 @@ export type ControlGroupRendererApi = ControlsRendererParentApi &
      */
     getInput: () => ControlGroupRuntimeState;
 
-    openAddDataControlFlyout: (options?: {
-      controlStateTransform?: ControlStateTransform;
-      editorConfig?: ControlGroupEditorConfig;
-    }) => void;
+    openAddDataControlFlyout: () => void;
   };
 
 /**
@@ -105,6 +102,7 @@ export interface ControlGroupRuntimeState<
 
 export interface ControlGroupCreationOptions {
   initialState?: Partial<ControlGroupRuntimeState>;
+  getEditorOptions?: () => { editorConfig?: ControlGroupEditorConfig };
 }
 
 export type ControlGroupStateBuilder = typeof controlGroupStateBuilder;

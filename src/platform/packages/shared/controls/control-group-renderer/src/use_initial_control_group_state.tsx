@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import type { BehaviorSubject } from 'rxjs';
 
 import type { ControlGroupRendererProps } from './control_group_renderer';
@@ -17,13 +17,20 @@ import type { ControlGroupCreationOptions, ControlPanelsState } from './types';
 export const useInitialControlGroupState = (
   getCreationOptions: ControlGroupRendererProps['getCreationOptions'],
   lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<ControlPanelsState>>
-) => {
-  const [initialState, setInitialState] = useState<ControlGroupCreationOptions | undefined>();
+): {
+  initialState: ControlGroupCreationOptions['initialState'];
+  getEditorOptions: React.MutableRefObject<ControlGroupCreationOptions['getEditorOptions']>;
+} => {
+  const [initialState, setInitialState] = useState<
+    ControlGroupCreationOptions['initialState'] | undefined
+  >();
+  const getEditorOptions = useRef<ControlGroupCreationOptions['getEditorOptions']>();
 
   useEffect(() => {
     let cancelled = false;
     getCreationOptions(controlGroupStateBuilder).then((creationOptions) => {
       if (cancelled) return;
+      getEditorOptions.current = creationOptions.getEditorOptions;
       const ignoreParentSettings = creationOptions.initialState?.ignoreParentSettings;
       const controls = Object.entries(
         creationOptions?.initialState?.initialChildControlState ?? {}
@@ -44,8 +51,8 @@ export const useInitialControlGroupState = (
 
       lastSavedState$Ref.current.next(controls);
       setInitialState({
-        ...creationOptions,
-        initialState: { ...creationOptions.initialState, initialChildControlState: controls },
+        ...creationOptions.initialState,
+        initialChildControlState: controls,
       });
     });
     return () => {
@@ -54,5 +61,5 @@ export const useInitialControlGroupState = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return initialState;
+  return { initialState, getEditorOptions };
 };

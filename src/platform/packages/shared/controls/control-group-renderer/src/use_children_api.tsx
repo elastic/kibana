@@ -38,7 +38,7 @@ import {
 import type { ControlGroupCreationOptions, ControlPanelsState } from './types';
 
 export const useChildrenApi = (
-  state: ControlGroupCreationOptions | undefined,
+  state: ControlGroupCreationOptions['initialState'] | undefined,
   lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<ControlPanelsState>>
 ) => {
   const children$Ref = useRef(new BehaviorSubject<{ [id: string]: DefaultEmbeddableApi }>({}));

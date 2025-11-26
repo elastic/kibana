@@ -75,10 +75,13 @@ export const ControlGroupRenderer = ({
   const lastSavedState$Ref = useRef(new BehaviorSubject<ControlPanelsState>({}));
 
   /** Creation options management */
-  const initialState = useInitialControlGroupState(getCreationOptions, lastSavedState$Ref);
+  const { initialState, getEditorOptions } = useInitialControlGroupState(
+    getCreationOptions,
+    lastSavedState$Ref
+  );
   const input$ = useMemo(() => {
     if (!initialState) return;
-    return new BehaviorSubject<Partial<ControlGroupRuntimeState>>(initialState.initialState ?? {});
+    return new BehaviorSubject<Partial<ControlGroupRuntimeState>>(initialState ?? {});
   }, [initialState]);
 
   const { childrenApi, currentChildState$Ref } = useChildrenApi(initialState, lastSavedState$Ref);
@@ -101,12 +104,13 @@ export const ControlGroupRenderer = ({
       ...layoutApi,
       ...searchApi,
       ...propsApi,
+      getEditorConfig: getEditorOptions.current,
       disabledActionIds$,
       setDisabledActionIds: (ids: string[] | undefined) => {
         disabledActionIds$.next(ids);
       },
     };
-  }, [childrenApi, layoutApi, searchApi, propsApi]);
+  }, [childrenApi, layoutApi, searchApi, propsApi, getEditorOptions]);
 
   useEffect(() => {
     if (!parentApi || !input$) return;
@@ -174,22 +178,14 @@ export const ControlGroupRenderer = ({
       },
     };
 
-    const openAddDataControlFlyout: ControlGroupRendererApi['openAddDataControlFlyout'] = async (
-      options
-    ) => {
-      const action = await uiActions.getAction('createControl');
-      action.execute({
-        embeddable: {
-          ...publicApi,
-          getEditorConfig: () => {
-            return {
-              ...(options?.editorConfig ?? {}),
-              controlStateTransform: options?.controlStateTransform,
-            };
-          },
-        },
-      } as EmbeddableApiContext & ActionExecutionMeta); // casting because we don't need a trigger for this action
-    };
+    const openAddDataControlFlyout: ControlGroupRendererApi['openAddDataControlFlyout'] =
+      async () => {
+        const action = await uiActions.getAction('createControl');
+        action.execute({
+          embeddable: publicApi,
+        } as EmbeddableApiContext & ActionExecutionMeta); // casting because we don't need a trigger for this action
+      };
+
     onApiAvailable({
       ...publicApi,
       openAddDataControlFlyout,

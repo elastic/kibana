@@ -21,7 +21,7 @@ import type { ControlGroupCreationOptions, ControlPanelsState } from './types';
 import type { useChildrenApi } from './use_children_api';
 
 export const useLayoutApi = (
-  state: ControlGroupCreationOptions | undefined,
+  state: ControlGroupCreationOptions['initialState'] | undefined,
   childrenApi: ReturnType<typeof useChildrenApi>['childrenApi'],
   lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<ControlPanelsState>>
 ) => {
@@ -55,7 +55,7 @@ export const useLayoutApi = (
     if (!state || !childrenApi) return;
 
     layout$Ref.current.next({
-      controls: getControlsLayout(state.initialState?.initialChildControlState),
+      controls: getControlsLayout(state?.initialChildControlState),
     });
 
     return {

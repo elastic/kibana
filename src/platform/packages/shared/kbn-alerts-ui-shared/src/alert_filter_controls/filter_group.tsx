@@ -16,6 +16,7 @@ import {
   type ControlGroupRuntimeState,
   type ControlGroupStateBuilder,
   type ControlStateTransform,
+  type ControlGroupEditorConfig,
 } from '@kbn/control-group-renderer';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { controlGroupStateBuilder } from '@kbn/control-group-renderer/src/control_group_state_builder';
@@ -284,6 +285,31 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     });
   }, [getStoredControlState, controlsFromUrl, defaultControlsObj, defaultControls]);
 
+  const newControlStateTransform: ControlStateTransform = useCallback(
+    (newInput, controlType) => {
+      // for any new controls, we want to avoid
+      // default placeholder
+      let result = newInput;
+      if (controlType === OPTIONS_LIST_CONTROL) {
+        result = {
+          ...newInput,
+          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
+        };
+
+        if ((newInput as DataControlState).fieldName in defaultControlsObj) {
+          result = {
+            ...result,
+            ...defaultControlsObj[(newInput as DataControlState).fieldName],
+            //  title should not be overridden by the initial controls, hence the hardcoding
+            title: newInput.title ?? result.title,
+          };
+        }
+      }
+      return result;
+    },
+    [defaultControlsObj]
+  );
+
   const getCreationOptions: ControlGroupRendererProps['getCreationOptions'] = useCallback(
     async ({ addOptionsListControl }: ControlGroupStateBuilder) => {
       const initialState: ControlGroupRuntimeState = {
@@ -314,9 +340,18 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       });
       return {
         initialState,
+        getEditorOptions: (): ControlGroupEditorConfig => {
+          return {
+            defaultDataViewId: dataViewId ?? undefined,
+            hideDataViewSelector: true,
+            hideAdditionalSettings: true,
+            fieldFilterPredicate: (f) => f.type !== 'number',
+            controlStateTransform: newControlStateTransform,
+          };
+        },
       } as ControlGroupCreationOptions;
     },
-    [dataViewId, selectControlsWithPriority]
+    [dataViewId, selectControlsWithPriority, newControlStateTransform]
   );
 
   const discardChangesHandler = useCallback(async () => {
@@ -371,42 +406,9 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     setShowFiltersChangedBanner(false);
   }, [switchToViewMode, upsertPersistableControls]);
 
-  const newControlStateTransform: ControlStateTransform = useCallback(
-    (newInput, controlType) => {
-      // for any new controls, we want to avoid
-      // default placeholder
-      let result = newInput;
-      if (controlType === OPTIONS_LIST_CONTROL) {
-        result = {
-          ...newInput,
-          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
-        };
-
-        if ((newInput as DataControlState).fieldName in defaultControlsObj) {
-          result = {
-            ...result,
-            ...defaultControlsObj[(newInput as DataControlState).fieldName],
-            //  title should not be overridden by the initial controls, hence the hardcoding
-            title: newInput.title ?? result.title,
-          };
-        }
-      }
-      return result;
-    },
-    [defaultControlsObj]
-  );
-
   const addControlsHandler = useCallback(() => {
-    controlGroup?.openAddDataControlFlyout({
-      controlStateTransform: newControlStateTransform,
-      editorConfig: {
-        defaultDataViewId: dataViewId ?? undefined,
-        hideDataViewSelector: true,
-        hideAdditionalSettings: true,
-        fieldFilterPredicate: (f) => f.type !== 'number',
-      },
-    });
-  }, [controlGroup, dataViewId, newControlStateTransform]);
+    controlGroup?.openAddDataControlFlyout();
+  }, [controlGroup]);
 
   if (!spaceId) {
     return <FilterGroupLoading />;
