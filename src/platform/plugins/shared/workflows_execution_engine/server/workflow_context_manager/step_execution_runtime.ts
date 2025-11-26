@@ -196,6 +196,10 @@ export class StepExecutionRuntime {
     await this.stepLogger?.flushEvents();
   }
 
+  public async flushEventLogs(): Promise<void> {
+    await this.stepLogger?.flushEvents();
+  }
+
   /**
    * Attempts to enter a wait state for the step execution based on a relative delay duration.
    * If the step is already in a wait state, it exits the wait state instead.

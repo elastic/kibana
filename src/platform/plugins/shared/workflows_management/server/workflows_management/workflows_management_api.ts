@@ -416,4 +416,8 @@ export class WorkflowsManagementApi {
   private isStepExecution(params: StepLogsParams | ExecutionLogsParams): params is StepLogsParams {
     return 'stepExecutionId' in params;
   }
+
+  private isStepExecution(params: StepLogsParams | ExecutionLogsParams): params is StepLogsParams {
+    return 'stepExecutionId' in params;
+  }
 }
