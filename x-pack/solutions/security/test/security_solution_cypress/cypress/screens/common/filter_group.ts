@@ -77,6 +77,4 @@ export const FILTER_GROUP_CONTROL_ACTION_EDIT = (idx: number) => {
   return `[data-test-subj="control-action-${idx}-editPanel"]`;
 };
 
-export const FILTER_GROUP_CONTROL_CONFIRM_BTN = `[data-test-subj="confirmModalConfirmButton"]`;
-
 export const FILTER_GROUP_CHANGED_BANNER = `[data-test-subj="filter-group--changed-banner"]`;
