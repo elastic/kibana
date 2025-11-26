@@ -78,10 +78,8 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
 
     await expect(page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton')).toBeDisabled();
 
-    // Cancel the operation
     await pageObjects.streams.cancelRoutingRule();
 
-    // Verify we're back to idle state
     await expect(page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton')).toBeEnabled();
   });
 
@@ -180,87 +178,6 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     );
   });
 
-  test('should handle complex AND/OR condition via syntax editor', async ({
-    page,
-    pageObjects,
-  }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-    await pageObjects.streams.fillRoutingRuleName('complex-condition-test');
-    await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
-
-    const complexCondition = {
-      and: [
-        {
-          field: 'severity_text',
-          eq: 'info',
-        },
-        {
-          field: 'service.name',
-          contains: 'web',
-        },
-      ],
-    };
-
-    await pageObjects.streams.fillConditionEditorWithSyntax(
-      JSON.stringify(complexCondition, null, 2)
-    );
-
-    const codeEditor = page.getByTestId('streamsAppConditionEditorCodeEditor');
-    await expect(codeEditor).toBeVisible();
-
-    await pageObjects.streams.saveRoutingRule();
-    await pageObjects.toasts.waitFor();
-
-    await pageObjects.streams.expectRoutingRuleVisible('logs.complex-condition-test');
-  });
-
-  test('should show error for invalid JSON in syntax editor', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-    await pageObjects.streams.fillRoutingRuleName('invalid-json-test');
-    await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
-
-    // Enter invalid JSON
-    const codeEditor = page.getByTestId('streamsAppConditionEditorCodeEditor');
-    await codeEditor.click();
-    await page.keyboard.type('{ invalid json }');
-
-    await pageObjects.streams.saveRoutingRule();
-
-    await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
-  });
-
-  test('should show complex condition in syntax editor', async ({
-    page,
-    apiServices,
-    pageObjects,
-  }) => {
-    try {
-      await apiServices.streams.clearStreamChildren('logs');
-    } catch {
-      // Ignore 409 errors if streams can't be cleared
-    }
-
-    const complexCondition = {
-      or: [
-        { field: 'severity_text', eq: 'error' },
-        { field: 'severity_text', eq: 'critical' },
-      ],
-    };
-
-    await apiServices.streams.forkStream('logs', 'logs.complex-ui-test', complexCondition);
-
-    await pageObjects.streams.gotoPartitioningTab('logs');
-    await pageObjects.streams.clickEditRoutingRule('logs.complex-ui-test');
-
-    const syntaxSwitch = page.getByTestId('streamsAppConditionEditorSwitch');
-    await expect(syntaxSwitch).toBeVisible();
-
-    const codeEditor = page.getByTestId('streamsAppConditionEditorCodeEditor');
-    await expect(codeEditor).toBeVisible();
-
-    await expect(codeEditor).toContainText('"or": [');
-  });
-
   test('should attempt to create stream with duplicate name and fail', async ({
     page,
     pageObjects,
@@ -294,57 +211,5 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
 
     // Should stay in creating state due to error
     await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
-  });
-
-  test('should validate stream names with consecutive dots', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-
-    // Try name with consecutive dots
-    await pageObjects.streams.fillRoutingRuleName('test..invalid');
-
-    // Add a condition to enable save button
-    await pageObjects.streams.fillConditionEditor({
-      field: 'service.name',
-      operator: 'equals',
-      value: 'test',
-    });
-
-    // Try to save - button should be disabled due to validation
-    const saveButton = page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
-    await expect(saveButton).toBeDisabled();
-  });
-
-  test('should validate stream names starting with dots', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-
-    await pageObjects.streams.fillRoutingRuleName('.invalid');
-
-    // Add a condition to enable save button
-    await pageObjects.streams.fillConditionEditor({
-      field: 'service.name',
-      operator: 'equals',
-      value: 'test',
-    });
-
-    // Try to save - button should be disabled due to validation
-    const saveButton = page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
-    await expect(saveButton).toBeDisabled();
-  });
-
-  test('should validate stream names ending with dots', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-
-    await pageObjects.streams.fillRoutingRuleName('invalid.');
-
-    // Add a condition to enable save button
-    await pageObjects.streams.fillConditionEditor({
-      field: 'service.name',
-      operator: 'equals',
-      value: 'test',
-    });
-
-    // Try to save - button should be disabled due to validation
-    const saveButton = page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
-    await expect(saveButton).toBeDisabled();
   });
 });

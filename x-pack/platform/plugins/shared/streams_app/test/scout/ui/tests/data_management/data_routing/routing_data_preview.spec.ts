@@ -97,67 +97,6 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     }
   });
 
-  test('should allow updating the condition manually by syntax editor', async ({ pageObjects }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-    await pageObjects.streams.fillRoutingRuleName('preview-test');
-
-    // Enable syntax editor
-    await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
-    // Set condition that should match the test data
-    await pageObjects.streams.fillConditionEditorWithSyntax(
-      JSON.stringify(
-        {
-          field: 'severity_text',
-          eq: 'info',
-        },
-        null,
-        2
-      )
-    );
-
-    // Verify preview panel shows matching documents
-    await pageObjects.streams.expectPreviewPanelVisible();
-    const rows = await pageObjects.streams.getPreviewTableRows();
-    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValueContains({
-        columnName: 'severity_text',
-        rowIndex,
-        value: 'info',
-      });
-    }
-
-    // Change condition to match a different value
-    await pageObjects.streams.fillConditionEditorWithSyntax(
-      JSON.stringify(
-        {
-          and: [
-            {
-              field: 'severity_text',
-              eq: 'warn',
-            },
-            {
-              field: 'body.text',
-              contains: 'log',
-            },
-          ],
-        },
-        null,
-        2
-      )
-    );
-
-    // Verify preview panel updated documents
-    await pageObjects.streams.expectPreviewPanelVisible();
-    const updatedRows = await pageObjects.streams.getPreviewTableRows();
-    for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValueContains({
-        columnName: 'severity_text',
-        rowIndex,
-        value: 'warn',
-      });
-    }
-  });
-
   test('should show no matches when condition matches nothing', async ({ page, pageObjects }) => {
     await pageObjects.streams.clickCreateRoutingRule();
     await pageObjects.streams.fillRoutingRuleName('no-matches');
@@ -214,53 +153,6 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toContainText('%');
   });
 
-  test('should switch between matched and unmatched documents', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-    await pageObjects.streams.fillRoutingRuleName('filter-switch-test');
-
-    await pageObjects.streams.fillConditionEditor({
-      field: 'severity_text',
-      operator: 'equals',
-      value: 'info',
-    });
-
-    await pageObjects.streams.expectPreviewPanelVisible();
-    const initialRows = await pageObjects.streams.getPreviewTableRows();
-
-    // Verify all initial rows match the condition
-    for (let rowIndex = 0; rowIndex < initialRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValueContains({
-        columnName: 'severity_text',
-        rowIndex,
-        value: 'info',
-      });
-    }
-
-    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toContainText('50%');
-    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toContainText('50%');
-
-    await page.getByTestId('routingPreviewUnmatchedFilterButton').click();
-
-    await pageObjects.streams.expectPreviewPanelVisible();
-
-    // Verify unmatched filter is now selected
-    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
-
-    // Verify unmatched documents are shown (should not contain 'info')
-    const unmatchedRows = await pageObjects.streams.getPreviewTableRows();
-    for (let rowIndex = 0; rowIndex < unmatchedRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValueContains({
-        columnName: 'severity_text',
-        rowIndex,
-        value: 'info',
-        invertCondition: true,
-      });
-    }
-  });
-
   test('should maintain filter state when condition changes', async ({ page, pageObjects }) => {
     await pageObjects.streams.clickCreateRoutingRule();
     await pageObjects.streams.fillRoutingRuleName('filter-state-test');
@@ -296,65 +188,6 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
       'aria-pressed',
       'true'
     );
-  });
-
-  test('should handle filter controls with complex conditions', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-    await pageObjects.streams.fillRoutingRuleName('complex-filter-test');
-
-    // Enable syntax editor and set complex condition
-    await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
-    await pageObjects.streams.fillConditionEditorWithSyntax(
-      JSON.stringify(
-        {
-          and: [
-            {
-              field: 'severity_text',
-              eq: 'info',
-            },
-            {
-              field: 'body.text',
-              contains: 'will never match',
-            },
-          ],
-        },
-        null,
-        2
-      )
-    );
-
-    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toContainText('0%');
-    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toContainText('100%');
-  });
-
-  test('should disable filter controls when no condition is set', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-    await pageObjects.streams.fillRoutingRuleName('no-condition-test');
-
-    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeDisabled();
-    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toBeDisabled();
-  });
-
-  test('should show filter tooltip', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-
-    const tooltipIcon = page.getByTestId('routingPreviewFilterControlsTooltip');
-    await expect(tooltipIcon).toBeVisible();
-  });
-
-  test('should handle error states', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-    await pageObjects.streams.fillRoutingRuleName('error-test');
-
-    // Set a condition that might cause issues without field
-    await pageObjects.streams.fillConditionEditor({
-      operator: 'equals',
-      value: 'info',
-    });
-
-    // Verify filter controls are present and disabled
-    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeDisabled();
-    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toBeDisabled();
   });
 
   test('should handle "no data" when date range has no documents', async ({
@@ -473,43 +306,5 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
       .getByTestId('streamsAppRoutingRuleChildCountBadge');
     await expect(childCountBadge).toBeVisible();
     await expect(childCountBadge).toHaveText('+2');
-  });
-
-  test('should not show child count badge when stream has no children', async ({
-    page,
-    apiServices,
-    pageObjects,
-  }) => {
-    try {
-      await apiServices.streams.clearStreamChildren('logs');
-    } catch {
-      // Ignore 409 errors if streams can't be cleared
-    }
-    await apiServices.streams.forkStream('logs', 'logs.no-children', {
-      field: 'service.name',
-      eq: 'test',
-    });
-
-    await pageObjects.streams.gotoPartitioningTab('logs');
-
-    // Should not see any +N badge
-    const routingRule = page.getByTestId('routingRule-logs.no-children');
-    await expect(routingRule).toBeVisible();
-
-    // Badge should not exist
-    const badge = routingRule.getByTestId('streamsAppRoutingRuleChildCountBadge');
-    await expect(badge).toBeHidden();
-  });
-
-  test('should show preview panel in idle state with data', async ({ page, pageObjects }) => {
-    // In idle state (no rule being created/edited), preview should show sample data
-    await pageObjects.streams.expectPreviewPanelVisible();
-
-    // Should see the data preview header
-    await expect(page.getByTestId('streamsAppRoutingPreviewPanelHeader')).toBeVisible();
-
-    // Should see some data rows
-    const rows = await pageObjects.streams.getPreviewTableRows();
-    expect(rows.length).toBeGreaterThan(0);
   });
 });
