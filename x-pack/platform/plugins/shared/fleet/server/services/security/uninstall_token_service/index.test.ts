@@ -19,6 +19,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 
 import { errors } from '@elastic/elasticsearch';
 
+import { ALL_SPACES_ID } from '../../../../common/constants';
 import { UninstallTokenError } from '../../../../common/errors';
 
 import type { AgentPolicy } from '../../../../common';
@@ -319,7 +320,7 @@ describe('UninstallTokenService', () => {
           expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith(
             {
               type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-              filter: `((${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:test) or (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:"*")) and (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${so.id}")`,
+              filter: `((${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:test) or (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:"${ALL_SPACES_ID}")) and (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${so.id}")`,
               perPage: SO_SEARCH_LIMIT,
             }
           );
@@ -458,7 +459,7 @@ describe('UninstallTokenService', () => {
 
           expect(soClientMock.createPointInTimeFinder).toHaveBeenCalledWith(
             expect.objectContaining({
-              filter: `(${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:test) or (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:"*")`,
+              filter: `(${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:test) or (${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.namespaces:"${ALL_SPACES_ID}")`,
             })
           );
         });
