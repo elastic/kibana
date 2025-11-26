@@ -88,7 +88,7 @@ export const createDashboardSavedObjectType = ({
         {
           type: 'mappings_addition',
           addedMappings: {
-            projectRouting: { type: 'keyword', index: false, doc_values: false },
+            project_routing: { type: 'keyword', index: false, doc_values: false },
           },
         },
       ],
@@ -134,7 +134,7 @@ export const createDashboardSavedObjectType = ({
       timeTo: { type: 'keyword', index: false, doc_values: false },
       title: { type: 'text' },
       version: { type: 'integer' },
-      projectRouting: { type: 'keyword', index: false, doc_values: false },
+      project_routing: { type: 'keyword', index: false, doc_values: false },
     },
   },
   schemas: {

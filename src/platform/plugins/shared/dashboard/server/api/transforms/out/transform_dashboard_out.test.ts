@@ -222,32 +222,32 @@ describe('transformDashboardOut', () => {
     });
   });
 
-  describe('projectRouting', () => {
-    test('should include projectRouting when it is a string', () => {
+  describe('project_routing', () => {
+    test('should include project_routing when it is a string', () => {
       const input: DashboardSavedObjectAttributes = {
         panelsJSON: JSON.stringify([]),
         optionsJSON: JSON.stringify({}),
         kibanaSavedObjectMeta: {},
         title: 'my title',
         description: 'my description',
-        projectRouting: '_alias:_origin',
+        project_routing: '_alias:_origin',
       };
       const result = transformDashboardOut(input);
-      expect(result.projectRouting).toBe('_alias:_origin');
+      expect(result.project_routing).toBe('_alias:_origin');
     });
 
-    test('should not include projectRouting when it is undefined', () => {
+    test('should not include project_routing when it is undefined', () => {
       const input: DashboardSavedObjectAttributes = {
         panelsJSON: JSON.stringify([]),
         optionsJSON: JSON.stringify({}),
         kibanaSavedObjectMeta: {},
         title: 'my title',
         description: 'my description',
-        // projectRouting is undefined
+        // project_routing is undefined
       };
       const result = transformDashboardOut(input);
-      expect(result.projectRouting).toBeUndefined();
-      expect(result).not.toHaveProperty('projectRouting');
+      expect(result.project_routing).toBeUndefined();
+      expect(result).not.toHaveProperty('project_routing');
     });
   });
 });

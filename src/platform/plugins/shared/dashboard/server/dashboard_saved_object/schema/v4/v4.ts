@@ -14,7 +14,7 @@ export * from '../v3/v3';
 
 export const dashboardAttributesSchema = dashboardAttributesSchemaV3.extends(
   {
-    projectRouting: schema.maybe(schema.string()),
+    project_routing: schema.maybe(schema.string()),
   },
   { unknowns: 'ignore' }
 );

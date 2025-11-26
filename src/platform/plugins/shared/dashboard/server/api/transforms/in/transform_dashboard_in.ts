@@ -40,6 +40,7 @@ export const transformDashboardIn = (
       references: incomingReferences,
       tags,
       timeRange,
+      project_routing,
       ...rest
     } = dashboardState;
 
@@ -90,6 +91,7 @@ export const transformDashboardIn = (
         ? { timeFrom: timeRange.from, timeTo: timeRange.to, timeRestore: true }
         : { timeRestore: false }),
       kibanaSavedObjectMeta: { searchSourceJSON },
+      ...(project_routing !== undefined && { project_routing }),
     };
     return {
       attributes,

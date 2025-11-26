@@ -50,7 +50,7 @@ function deserializeState(state: DashboardState) {
     description: state.description,
     tags: state.tags,
     timeRestore: Boolean(state.timeRange),
-    projectRoutingRestore: Boolean(state.projectRouting),
+    projectRoutingRestore: Boolean(state.project_routing),
     title: state.title,
   };
 }

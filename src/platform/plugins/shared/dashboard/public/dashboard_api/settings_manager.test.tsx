@@ -113,10 +113,10 @@ describe('initializeSettingsManager', () => {
       expect(settings.projectRoutingRestore).toBe(false);
     });
 
-    test('Should set projectRoutingRestore to true when projectRouting is a string', () => {
+    test('Should set projectRoutingRestore to true when project_routing is a string', () => {
       const state: DashboardState = {
         ...getSampleDashboardState(),
-        projectRouting: '_alias:_origin',
+        project_routing: '_alias:_origin',
       };
       const settingsManager = initializeSettingsManager(state);
       const settings = settingsManager.api.getSettings();

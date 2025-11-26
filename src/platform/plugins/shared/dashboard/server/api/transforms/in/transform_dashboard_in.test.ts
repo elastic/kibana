@@ -164,4 +164,25 @@ describe('transformDashboardIn', () => {
       }
     `);
   });
+
+  it('should transform project_routing to attributes', () => {
+    const dashboardState: DashboardState = {
+      title: 'title',
+      project_routing: '_alias:_origin',
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output.error).toBeNull();
+    expect(output.attributes?.project_routing).toBe('_alias:_origin');
+  });
+
+  it('should not include project_routing in attributes when it is undefined', () => {
+    const dashboardState: DashboardState = {
+      title: 'title',
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output.error).toBeNull();
+    expect(output.attributes).not.toHaveProperty('project_routing');
+  });
 });

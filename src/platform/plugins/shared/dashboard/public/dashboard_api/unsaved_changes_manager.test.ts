@@ -77,7 +77,7 @@ const unifiedSearchManagerMock = {
 } as unknown as ReturnType<typeof initializeUnifiedSearchManager>;
 const projectRoutingManagerMock = {
   internalApi: {
-    startComparing$: () => new BehaviorSubject<Partial<Pick<DashboardState, 'projectRouting'>>>({}),
+    startComparing$: () => new BehaviorSubject<Partial<Pick<DashboardState, 'project_routing'>>>({}),
   },
 } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
 const getReferences = () => [];
@@ -184,7 +184,7 @@ describe('unsavedChangesManager', () => {
   describe('projectRouting changes', () => {
     it('should detect projectRouting changes as unsaved changes', (done) => {
       const projectRoutingChanges$ = new BehaviorSubject<
-        Partial<Pick<DashboardState, 'projectRouting'>>
+        Partial<Pick<DashboardState, 'project_routing'>>
       >({});
       const customProjectRoutingManagerMock = {
         internalApi: {
@@ -210,7 +210,7 @@ describe('unsavedChangesManager', () => {
       });
 
       // Simulate projectRouting change
-      projectRoutingChanges$.next({ projectRouting: '_alias:_origin' });
+      projectRoutingChanges$.next({ project_routing: '_alias:_origin' });
     });
 
     it('should have unsaved changes when projectRouting is different from saved value', (done) => {
@@ -219,7 +219,7 @@ describe('unsavedChangesManager', () => {
         projectRouting: '_alias:_origin',
       };
       const projectRoutingChanges$ = new BehaviorSubject<
-        Partial<Pick<DashboardState, 'projectRouting'>>
+        Partial<Pick<DashboardState, 'project_routing'>>
       >({});
       const customProjectRoutingManagerMock = {
         internalApi: {
@@ -245,7 +245,7 @@ describe('unsavedChangesManager', () => {
       });
 
       // Change to different value
-      projectRoutingChanges$.next({ projectRouting: 'ALL' });
+      projectRoutingChanges$.next({ project_routing: 'ALL' });
     });
   });
 });
