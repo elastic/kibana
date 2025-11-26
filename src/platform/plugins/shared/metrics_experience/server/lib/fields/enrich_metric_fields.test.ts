@@ -15,15 +15,14 @@ import { extractDimensions } from '../dimensions/extract_dimensions';
 import type { Logger } from '@kbn/core/server';
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import { normalizeUnit } from './normalize_unit';
-import type { estypes } from '@elastic/elasticsearch';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { termsQuery } from '@kbn/es-query';
+
 jest.mock('../dimensions/extract_dimensions');
 jest.mock('./normalize_unit');
 
 const extractDimensionsMock = extractDimensions as jest.MockedFunction<typeof extractDimensions>;
-const msearchMock = jest.fn() as jest.MockedFunction<TracedElasticsearchClient['msearch']>;
-const esClientMock = { msearch: msearchMock } as unknown as TracedElasticsearchClient;
+const esqlMock = jest.fn() as jest.MockedFunction<TracedElasticsearchClient['esql']>;
+const esClientMock = { esql: esqlMock } as unknown as TracedElasticsearchClient;
 const normalizeUnitMock = normalizeUnit as jest.MockedFunction<typeof normalizeUnit>;
 const timeRangeFixture: EpochTimeRange = { from: Date.now() - 300_000, to: Date.now() };
 
@@ -49,23 +48,23 @@ describe('enrichMetricFields', () => {
     ...overrides,
   });
 
-  const createMsearchResponse = (
-    index: string,
-    fields: Record<string, string[]> = {},
-    totalHits: number = 1
-  ) => ({
-    responses: [
-      {
-        hits: {
-          hits: totalHits > 0 ? [{ fields, _index: index, _source: {} }] : [],
-          total: { value: totalHits, relation: 'eq' as const },
-        },
-        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-        took: 1,
-        timed_out: false,
-      },
-    ],
-  });
+  // Helper to create ES|QL response format
+  const createEsqlResponse = (fields: Record<string, any> = {}, totalHits: number = 1) => {
+    if (totalHits === 0) {
+      return {
+        columns: [],
+        values: [],
+      };
+    }
+
+    const columns = Object.keys(fields).map((name) => ({ name, type: 'keyword' }));
+    const values = [Object.values(fields)];
+
+    return {
+      columns,
+      values,
+    };
+  };
 
   const createFieldCaps = (
     fieldName: string = TEST_HOST_FIELD,
@@ -105,51 +104,50 @@ describe('enrichMetricFields', () => {
   });
 
   describe('data availability', () => {
-    const testCases = [
-      {
-        description: 'marks noData true when no sample docs exist',
-        mockResponse: createMsearchResponse(TEST_INDEX_METRICS, {}, 0),
-        expectedResult: {
-          dimensions: [],
-          index: TEST_INDEX_METRICS,
-          name: TEST_METRIC_NAME,
-          noData: true,
-          type: 'long',
-        },
-      },
-      {
-        description: 'marks noData false when sample docs exist',
-        mockResponse: createMsearchResponse(TEST_INDEX_METRICS, {
-          [TEST_HOST_FIELD]: [TEST_HOST_VALUE],
-        }),
-        setupFieldCaps: true,
-        expectedResult: {
-          index: TEST_INDEX_METRICS,
-          name: TEST_METRIC_NAME,
-          noData: false,
-          dimensions: [{ name: TEST_HOST_FIELD, type: 'keyword' }],
-        },
-      },
-    ];
+    it('marks noData true when no sample docs exist', async () => {
+      const metricFields = [createMetricField()];
+      esqlMock.mockResolvedValue(createEsqlResponse({}, 0));
 
-    testCases.forEach(({ description, mockResponse, setupFieldCaps, expectedResult }) => {
-      it(description, async () => {
-        const metricFields = [createMetricField()];
-        msearchMock.mockResolvedValue(mockResponse);
+      const result = await enrichMetricFields({
+        esClient: esClientMock,
+        metricFields,
+        indexFieldCapsMap,
+        logger,
+        timerange: timeRangeFixture,
+      });
 
-        if (setupFieldCaps) {
-          indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
-        }
+      expect(result[0]).toMatchObject({
+        dimensions: [],
+        index: TEST_INDEX_METRICS,
+        name: TEST_METRIC_NAME,
+        noData: true,
+        type: 'long',
+      });
+    });
 
-        const result = await enrichMetricFields({
-          esClient: esClientMock,
-          metricFields,
-          indexFieldCapsMap,
-          logger,
-          timerange: timeRangeFixture,
-        });
+    it('marks noData false when sample docs exist', async () => {
+      const metricFields = [createMetricField()];
+      esqlMock.mockResolvedValue(
+        createEsqlResponse({
+          [TEST_HOST_FIELD]: TEST_HOST_VALUE,
+        })
+      );
 
-        expect(result[0]).toMatchObject(expectedResult);
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+
+      const result = await enrichMetricFields({
+        esClient: esClientMock,
+        metricFields,
+        indexFieldCapsMap,
+        logger,
+        timerange: timeRangeFixture,
+      });
+
+      expect(result[0]).toMatchObject({
+        index: TEST_INDEX_METRICS,
+        name: TEST_METRIC_NAME,
+        noData: false,
+        dimensions: [{ name: TEST_HOST_FIELD, type: 'keyword' }],
       });
     });
 
@@ -159,13 +157,14 @@ describe('enrichMetricFields', () => {
         createMetricField(TEST_METRIC_NAME, TEST_INDEX_METRICBEAT),
       ];
 
-      msearchMock.mockResolvedValue({
-        responses: [
-          ...createMsearchResponse(TEST_INDEX_METRICS, { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
-            .responses,
-          ...createMsearchResponse(TEST_INDEX_METRICBEAT, {}).responses,
-        ],
-      });
+      // Mock responses for both queries
+      esqlMock
+        .mockResolvedValueOnce(
+          createEsqlResponse({
+            [TEST_HOST_FIELD]: TEST_HOST_VALUE,
+          })
+        )
+        .mockResolvedValueOnce(createEsqlResponse({}, 0));
 
       indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
       indexFieldCapsMap.set(TEST_INDEX_METRICBEAT, createFieldCaps());
@@ -196,9 +195,28 @@ describe('enrichMetricFields', () => {
           index: TEST_INDEX_METRICBEAT,
           name: 'system.cpu.utilization',
           type: 'long',
-          noData: false,
+          noData: true,
         },
       ]);
+    });
+
+    it('handles errors gracefully and marks fields as noData', async () => {
+      const metricFields = [createMetricField()];
+      esqlMock.mockRejectedValue(new Error('ES|QL query failed'));
+
+      const result = await enrichMetricFields({
+        esClient: esClientMock,
+        metricFields,
+        indexFieldCapsMap,
+        logger,
+        timerange: timeRangeFixture,
+      });
+
+      expect(result[0]).toMatchObject({
+        dimensions: [],
+        noData: true,
+      });
+      expect(logger.warn).toHaveBeenCalled();
     });
   });
 
@@ -207,8 +225,10 @@ describe('enrichMetricFields', () => {
       const metricFields = [createMetricField()];
       const filters: DimensionFilters = {};
 
-      msearchMock.mockResolvedValue(
-        createMsearchResponse(TEST_INDEX_METRICS, { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
+      esqlMock.mockResolvedValue(
+        createEsqlResponse({
+          [TEST_HOST_FIELD]: TEST_HOST_VALUE,
+        })
       );
 
       indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
@@ -222,18 +242,12 @@ describe('enrichMetricFields', () => {
         filters,
       });
 
-      const msearchCall = msearchMock.mock.calls[0][1];
-      const body = msearchCall?.body as NonNullable<Array<estypes.SearchRequest>>;
-
-      const queryFilter = body[1].query?.bool?.filter;
-      expect(queryFilter).toEqual(
-        expect.arrayContaining([
-          { exists: { field: TEST_METRIC_NAME } },
-          expect.objectContaining({ range: expect.any(Object) }),
-        ])
+      expect(esqlMock).toHaveBeenCalledWith(
+        'sample_metrics_documents',
+        expect.objectContaining({
+          query: expect.stringContaining('FROM'),
+        })
       );
-
-      expect(queryFilter).toHaveLength(2);
     });
 
     it('applies single dimension filter with single value', async () => {
@@ -242,8 +256,10 @@ describe('enrichMetricFields', () => {
         [TEST_HOST_FIELD]: [TEST_HOST_VALUE],
       };
 
-      msearchMock.mockResolvedValue(
-        createMsearchResponse(TEST_INDEX_METRICS, { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
+      esqlMock.mockResolvedValue(
+        createEsqlResponse({
+          [TEST_HOST_FIELD]: TEST_HOST_VALUE,
+        })
       );
 
       indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
@@ -257,19 +273,12 @@ describe('enrichMetricFields', () => {
         filters,
       });
 
-      const msearchCall = msearchMock.mock.calls[0][1];
-      const body = msearchCall?.body as NonNullable<Array<estypes.SearchRequest>>;
+      const esqlCall = esqlMock.mock.calls[0];
+      const query = esqlCall[1]?.query as string;
 
-      expect(body[0]).toEqual({ index: TEST_INDEX_METRICS });
-      expect(body[1]?.query?.bool?.filter).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            bool: expect.objectContaining({
-              should: expect.arrayContaining([...termsQuery(TEST_HOST_FIELD, [TEST_HOST_VALUE])]),
-            }),
-          }),
-        ])
-      );
+      // Verify the query contains the filter
+      expect(query).toContain('WHERE');
+      expect(query).toContain(TEST_HOST_FIELD);
     });
 
     it('applies single dimension filter with multiple values', async () => {
@@ -278,8 +287,10 @@ describe('enrichMetricFields', () => {
         [TEST_HOST_FIELD]: ['host-1', 'host-2', 'host-3'],
       };
 
-      msearchMock.mockResolvedValue(
-        createMsearchResponse(TEST_INDEX_METRICS, { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
+      esqlMock.mockResolvedValue(
+        createEsqlResponse({
+          [TEST_HOST_FIELD]: TEST_HOST_VALUE,
+        })
       );
 
       indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
@@ -293,21 +304,13 @@ describe('enrichMetricFields', () => {
         filters,
       });
 
-      const msearchCall = msearchMock.mock.calls[0][1];
-      const body = msearchCall?.body as NonNullable<Array<estypes.SearchRequest>>;
+      const esqlCall = esqlMock.mock.calls[0];
+      const query = esqlCall[1]?.query as string;
 
-      expect(body[0]).toEqual({ index: TEST_INDEX_METRICS });
-      expect(body[1]?.query?.bool?.filter).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            bool: expect.objectContaining({
-              should: expect.arrayContaining([
-                ...termsQuery(TEST_HOST_FIELD, ['host-1', 'host-2', 'host-3']),
-              ]),
-            }),
-          }),
-        ])
-      );
+      // Verify the query contains the filter with IN clause
+      expect(query).toContain('WHERE');
+      expect(query).toContain(TEST_HOST_FIELD);
+      expect(query).toContain('IN');
     });
 
     it('applies multiple dimension filters with mapping mismatch', async () => {
@@ -324,16 +327,17 @@ describe('enrichMetricFields', () => {
         'attribute.cpu': ['1', '2', 'cpu0', 'cpu1'],
       };
 
-      msearchMock.mockResolvedValue({
-        responses: [
-          ...createMsearchResponse(TEST_INDEX_METRICS, {
-            'attribute.cpu': ['cpu0', 'cpu1'],
-          }).responses,
-          ...createMsearchResponse(TEST_INDEX_METRICBEAT, {
-            'attribute.cpu': ['1', '2'],
-          }).responses,
-        ],
-      });
+      esqlMock
+        .mockResolvedValueOnce(
+          createEsqlResponse({
+            'attribute.cpu': 'cpu0',
+          })
+        )
+        .mockResolvedValueOnce(
+          createEsqlResponse({
+            'attribute.cpu': '1',
+          })
+        );
 
       indexFieldCapsMap.set(
         TEST_INDEX_METRICS,
@@ -353,36 +357,101 @@ describe('enrichMetricFields', () => {
         filters,
       });
 
-      const msearchCall = msearchMock.mock.calls[0][1];
-      const body = msearchCall?.body as NonNullable<Array<estypes.SearchRequest>>;
+      // Verify both queries were called with filters
+      expect(esqlMock).toHaveBeenCalledTimes(2);
+      const query1 = (esqlMock.mock.calls[0][1]?.query as string) || '';
+      const query2 = (esqlMock.mock.calls[1][1]?.query as string) || '';
 
-      expect(body).toHaveLength(4);
+      expect(query1).toContain('attribute.cpu');
+      expect(query2).toContain('attribute.cpu');
+    });
+  });
 
-      expect(body[0]).toEqual({ index: TEST_INDEX_METRICS });
-      expect(body[1]?.query?.bool?.filter).toEqual(
-        expect.arrayContaining([
-          { exists: { field: 'system.cpu.utilization' } },
-          expect.objectContaining({
-            bool: expect.objectContaining({
-              should: expect.arrayContaining([
-                { terms: { 'attribute.cpu': ['1', '2', 'cpu0', 'cpu1'] } },
-              ]),
-            }),
-          }),
-        ])
+  describe('WHERE clause support', () => {
+    it('extracts and applies WHERE clause from ESQL query', async () => {
+      const metricFields = [createMetricField()];
+      const query = 'FROM metrics-* | WHERE status == "active"';
+
+      esqlMock.mockResolvedValue(
+        createEsqlResponse({
+          [TEST_HOST_FIELD]: TEST_HOST_VALUE,
+        })
       );
 
-      expect(body[2]).toEqual({ index: TEST_INDEX_METRICBEAT });
-      expect(body[3]?.query?.bool?.filter).toEqual(
-        expect.arrayContaining([
-          { exists: { field: 'system.cpu.utilization' } },
-          expect.objectContaining({
-            bool: expect.objectContaining({
-              should: expect.arrayContaining([{ terms: { 'attribute.cpu': [1, 2] } }]),
-            }),
-          }),
-        ])
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+
+      await enrichMetricFields({
+        esClient: esClientMock,
+        metricFields,
+        indexFieldCapsMap,
+        logger,
+        timerange: timeRangeFixture,
+        query,
+      });
+
+      const esqlCall = esqlMock.mock.calls[0];
+      const generatedQuery = esqlCall[1]?.query as string;
+
+      // Verify the WHERE clause was extracted and appended
+      expect(generatedQuery).toContain('WHERE status == "active"');
+    });
+
+    it('combines WHERE clause with dimension filters', async () => {
+      const metricFields = [createMetricField()];
+      const query = 'FROM metrics-* | WHERE environment == "production"';
+      const filters: DimensionFilters = {
+        [TEST_HOST_FIELD]: ['host-1'],
+      };
+
+      esqlMock.mockResolvedValue(
+        createEsqlResponse({
+          [TEST_HOST_FIELD]: TEST_HOST_VALUE,
+        })
       );
+
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+
+      await enrichMetricFields({
+        esClient: esClientMock,
+        metricFields,
+        indexFieldCapsMap,
+        logger,
+        timerange: timeRangeFixture,
+        filters,
+        query,
+      });
+
+      const esqlCall = esqlMock.mock.calls[0];
+      const generatedQuery = esqlCall[1]?.query as string;
+
+      // Verify both the dimension filter and WHERE clause are present
+      expect(generatedQuery).toContain(TEST_HOST_FIELD);
+      expect(generatedQuery).toContain('WHERE environment == "production"');
+    });
+
+    it('handles query without WHERE clause', async () => {
+      const metricFields = [createMetricField()];
+      const query = 'FROM metrics-*';
+
+      esqlMock.mockResolvedValue(
+        createEsqlResponse({
+          [TEST_HOST_FIELD]: TEST_HOST_VALUE,
+        })
+      );
+
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+
+      await enrichMetricFields({
+        esClient: esClientMock,
+        metricFields,
+        indexFieldCapsMap,
+        logger,
+        timerange: timeRangeFixture,
+        query,
+      });
+
+      // Should not throw error
+      expect(esqlMock).toHaveBeenCalled();
     });
   });
 
@@ -391,12 +460,13 @@ describe('enrichMetricFields', () => {
       const metricFields = [createMetricField()];
       normalizeUnitMock.mockReturnValue('percent');
 
-      msearchMock.mockResolvedValue(
-        createMsearchResponse(TEST_INDEX_METRICS, {
-          [TEST_HOST_FIELD]: [TEST_HOST_VALUE],
-          unit: ['1'],
+      esqlMock.mockResolvedValue(
+        createEsqlResponse({
+          [TEST_HOST_FIELD]: TEST_HOST_VALUE,
+          unit: '1',
         })
       );
+
       indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
 
       const result = await enrichMetricFields({
@@ -426,9 +496,12 @@ describe('enrichMetricFields', () => {
 
       normalizeUnitMock.mockReturnValue('ms');
 
-      msearchMock.mockResolvedValue(
-        createMsearchResponse(TEST_INDEX_METRICS, { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
+      esqlMock.mockResolvedValue(
+        createEsqlResponse({
+          [TEST_HOST_FIELD]: TEST_HOST_VALUE,
+        })
       );
+
       indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
 
       const result = await enrichMetricFields({
@@ -449,6 +522,63 @@ describe('enrichMetricFields', () => {
           unit: 'ms',
         }),
       ]);
+    });
+  });
+
+  describe('batching and concurrency', () => {
+    it('processes multiple metrics in batches', async () => {
+      // Create 25 metric fields (more than FIELDS_PER_BATCH which is 20)
+      const metricFields = Array.from({ length: 25 }, (_, i) =>
+        createMetricField(`metric.${i}`, TEST_INDEX_METRICS)
+      );
+
+      esqlMock.mockResolvedValue(
+        createEsqlResponse({
+          [TEST_HOST_FIELD]: TEST_HOST_VALUE,
+        })
+      );
+
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+
+      await enrichMetricFields({
+        esClient: esClientMock,
+        metricFields,
+        indexFieldCapsMap,
+        logger,
+        timerange: timeRangeFixture,
+      });
+
+      // All 25 queries should have been executed
+      expect(esqlMock).toHaveBeenCalledTimes(25);
+    });
+
+    it('handles partial batch failures gracefully', async () => {
+      const metricFields = [
+        createMetricField('metric.1'),
+        createMetricField('metric.2'),
+        createMetricField('metric.3'),
+      ];
+
+      esqlMock
+        .mockResolvedValueOnce(createEsqlResponse({ [TEST_HOST_FIELD]: TEST_HOST_VALUE }))
+        .mockRejectedValueOnce(new Error('Query failed'))
+        .mockResolvedValueOnce(createEsqlResponse({ [TEST_HOST_FIELD]: TEST_HOST_VALUE }));
+
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+
+      const result = await enrichMetricFields({
+        esClient: esClientMock,
+        metricFields,
+        indexFieldCapsMap,
+        logger,
+        timerange: timeRangeFixture,
+      });
+
+      // Should return results for all fields
+      expect(result).toHaveLength(3);
+      expect(result[0].noData).toBe(false);
+      expect(result[1].noData).toBe(true); // Failed query
+      expect(result[2].noData).toBe(false);
     });
   });
 });

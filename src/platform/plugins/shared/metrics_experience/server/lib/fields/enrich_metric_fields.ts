@@ -73,24 +73,19 @@ function buildMetricMetadataMapFromEsql(
       continue;
     }
 
-    const dimensions: string[] = [];
-    let unitFromSample: string | undefined;
-
-    // Iterate through the fields in the hit
-    columns.forEach((fieldName, index) => {
-      if (!dimensionsSet.has(fieldName)) {
-        return;
+    // Extract dimension field names that have values in the sample
+    const dimensions = columns.filter((fieldName, index) => {
+      if (!dimensionsSet.has(fieldName) || fieldName === semconvFlat.unit.name) {
+        return false;
       }
-
       const value = values[0][index];
-      if (fieldName === semconvFlat.unit.name) {
-        if (typeof value === 'string') {
-          unitFromSample = value;
-        }
-      } else if (value !== null && value !== undefined) {
-        dimensions.push(fieldName);
-      }
+      return value !== null && value !== undefined;
     });
+
+    // Extract unit value from the sample if present and valid
+    const unitIndex = columns.indexOf(semconvFlat.unit.name);
+    const unitValue = unitIndex !== -1 ? values[0][unitIndex] : undefined;
+    const unitFromSample = typeof unitValue === 'string' ? unitValue : undefined;
 
     entries.set(mapKey, {
       dimensions,
@@ -161,43 +156,40 @@ async function executeEsqlQueriesForChunk(
   filterConditions: QueryOperator[],
   logger: Logger
 ): Promise<EsqlQueryResult[]> {
-  // Execute each metric field query in the chunk
-  const results = await Promise.all(
-    metricFields.map(async (metricField) => {
-      try {
-        const query = buildEsqlQuery(metricField, filterConditions);
+  // Build filter once for all queries in this chunk
+  const dateRangeFilter = {
+    bool: {
+      filter: dateRangeQuery(from, to),
+    },
+  };
 
-        const response = await esClient.esql('sample_metrics_documents', {
-          query,
-          filter: {
-            bool: {
-              filter: [...dateRangeQuery(from, to)],
-            },
-          },
-        });
+  const executeQuery = async (metricField: MetricField): Promise<EsqlQueryResult> => {
+    try {
+      const query = buildEsqlQuery(metricField, filterConditions);
+      const response = await esClient.esql('sample_metrics_documents', {
+        query,
+        filter: dateRangeFilter,
+      });
 
-        return {
-          metricField,
-          columns: response.columns.map((column) => column.name),
-          values: response.values,
-        };
-      } catch (error) {
-        logger.warn(
-          `Error executing ES|QL query for metric ${metricField.name}: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-        return {
-          metricField,
-          columns: [],
-          values: [],
-          error: error instanceof Error ? error : new Error(String(error)),
-        };
-      }
-    })
-  );
+      return {
+        metricField,
+        columns: response.columns.map((column) => column.name),
+        values: response.values,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.warn(`Error executing ES|QL query for metric ${metricField.name}: ${errorMessage}`);
 
-  return results;
+      return {
+        metricField,
+        columns: [],
+        values: [],
+        error: error instanceof Error ? error : new Error(errorMessage),
+      };
+    }
+  };
+
+  return Promise.all(metricFields.map(executeQuery));
 }
 
 export async function sampleMetricMetadata({

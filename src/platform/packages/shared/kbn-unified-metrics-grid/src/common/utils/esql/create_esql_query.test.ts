@@ -233,6 +233,108 @@ TS metrics-*
     );
   });
 
+  describe('WHERE clause from Discover query', () => {
+    it('should append WHERE clause from Discover ESQL query', () => {
+      const query = createESQLQuery({
+        metric: mockMetric,
+        requestParams: {
+          query: {
+            esql: 'FROM metrics-* | WHERE host.name == "prod-server"',
+          },
+        } as any,
+      });
+
+      expect(query).toBe(
+        `
+        TS metrics-*
+          | WHERE host.name == "prod-server"
+          | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+        `.trim()
+      );
+    });
+
+    it('should append WHERE clause with dimensions', () => {
+      const query = createESQLQuery({
+        metric: mockMetric,
+        dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
+        requestParams: {
+          query: {
+            esql: 'FROM metrics-* | WHERE region == "us-west"',
+          },
+        } as any,
+      });
+
+      expect(query).toBe(
+        `
+        TS metrics-*
+          | WHERE region == "us-west"
+          | WHERE \`host.name\` IS NOT NULL
+          | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`
+        `.trim()
+      );
+    });
+
+    it('should append WHERE clause with filters', () => {
+      const query = createESQLQuery({
+        metric: mockMetric,
+        filters: {
+          'host.name': ['host-1', 'host-2'],
+        },
+        requestParams: {
+          query: {
+            esql: 'FROM metrics-* | WHERE status == "active"',
+          },
+        } as any,
+      });
+
+      expect(query).toBe(
+        `
+        TS metrics-*
+          | WHERE \`host.name\`::STRING IN ("host-1", "host-2")
+          | WHERE status == "active"
+          | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+        `.trim()
+      );
+    });
+
+    it('should handle queries without WHERE clause', () => {
+      const query = createESQLQuery({
+        metric: mockMetric,
+        requestParams: {
+          query: {
+            esql: 'FROM metrics-*',
+          },
+        } as any,
+      });
+
+      expect(query).toBe(
+        `
+        TS metrics-*
+          | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+        `.trim()
+      );
+    });
+
+    it('should handle complex WHERE conditions', () => {
+      const query = createESQLQuery({
+        metric: mockMetric,
+        requestParams: {
+          query: {
+            esql: 'FROM metrics-* | WHERE cpu.usage > 80 AND memory.usage < 90',
+          },
+        } as any,
+      });
+
+      expect(query).toBe(
+        `
+        TS metrics-*
+          | WHERE cpu.usage > 80 AND memory.usage < 90
+          | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+        `.trim()
+      );
+    });
+  });
+
   describe('special character escaping', () => {
     const mockMetricWithSpecialChars: MetricField = {
       name: 'cpu.usage',

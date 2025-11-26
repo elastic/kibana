@@ -18,14 +18,14 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { Walker, Parser, BasicPrettyPrinter } from '@kbn/esql-ast';
-import type { AggregateQuery } from '@kbn/es-query';
 import { DIMENSIONS_COLUMN } from './constants';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 
-interface CreateESQLQueryParams extends Pick<ChartSectionProps, 'requestParams'> {
+interface CreateESQLQueryParams {
   metric: MetricField;
   dimensions?: Dimension[];
   filters?: DimensionFilters;
+  requestParams?: Pick<ChartSectionProps, 'requestParams'>['requestParams'];
 }
 
 const separator = '\u203A'.normalize('NFC');
@@ -66,6 +66,7 @@ function castFieldIfNeeded(fieldName: string, fieldType: string | undefined): st
  * @param metric - The full metric field object, including dimension type information.
  * @param dimensions - An array of selected dimension names.
  * @param filters - A map of field names to arrays of values to filter by.
+ * @param requestParams - The request parameters from the chart section used to extract the WHERE clause.
  * @returns A complete ESQL query string.
  */
 export function createESQLQuery({
@@ -74,12 +75,13 @@ export function createESQLQuery({
   filters = {},
   requestParams,
 }: CreateESQLQueryParams) {
-  const { query: discoverQuery } = requestParams;
-
-  const whereCommand = Walker.find(
-    Parser.parse((discoverQuery as AggregateQuery).esql).root,
-    (node) => node.type === 'command' && node.name === 'where'
-  );
+  const whereCommand =
+    requestParams?.query && 'esql' in requestParams.query
+      ? Walker.find(
+          Parser.parse(requestParams.query.esql).root,
+          (node) => node.type === 'command' && node.name === 'where'
+        )
+      : undefined;
 
   const { name: metricField, instrument, index } = metric;
   const source = timeseries(index);
