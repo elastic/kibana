@@ -14,6 +14,7 @@ import { css } from '@emotion/react';
 
 import { SecondaryMenu } from '../secondary_menu';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
+import { formatLabel } from '../../utils/format_label';
 
 export interface ItemProps
   extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'isHighlighted' | 'href'> {
@@ -33,18 +34,23 @@ export const Item: FC<ItemProps> = ({
   isCurrent,
   ...props
 }) => {
+  const [displayLabel, isGlossaryTerm] = formatLabel(children);
+
   const itemStyle = css`
     align-items: center;
     display: flex;
     justify-content: space-between;
     width: 100%;
   `;
+
   const labelStyles = css`
     display: inline-block;
-    &::first-letter {
+    ${!isGlossaryTerm &&
+    `&::first-letter {
       text-transform: uppercase;
-    }
+    }`}
   `;
+
   const nestedMenuItemTestSubjPrefix = `${NAVIGATION_SELECTOR_PREFIX}-nestedMenuItem`;
 
   return (
@@ -58,7 +64,7 @@ export const Item: FC<ItemProps> = ({
       testSubjPrefix={nestedMenuItemTestSubjPrefix}
     >
       <div css={itemStyle}>
-        <span css={labelStyles}>{children}</span>
+        <span css={labelStyles}>{displayLabel}</span>
       </div>
     </SecondaryMenu.Item>
   );

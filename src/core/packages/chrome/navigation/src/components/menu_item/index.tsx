@@ -15,6 +15,7 @@ import { css } from '@emotion/react';
 
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
+import { formatLabel } from '../../utils/format_label';
 
 interface MenuItemBaseProps {
   children: ReactNode;
@@ -65,6 +66,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     const { euiTheme } = euiThemeContext;
 
     const isSingleWord = typeof children === 'string' && !children.includes(' ');
+    const [displayLabel, isGlossaryTerm] = formatLabel(children);
 
     const iconWrapperClassName = `${NAVIGATION_SELECTOR_PREFIX}-iconWrapper`;
 
@@ -157,10 +159,10 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       overflow: hidden;
       max-width: 100%;
       padding: 0 ${euiTheme.size.s};
-
-      &::first-letter {
+      ${!isGlossaryTerm &&
+      `&::first-letter {
         text-transform: uppercase;
-      }
+      }`}
     `;
 
     const content = (
@@ -172,11 +174,11 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         </div>
         {isLabelVisible ? (
           <EuiText size="xs" textAlign="center" css={labelStyles}>
-            {children}
+            {displayLabel}
           </EuiText>
         ) : (
           <EuiScreenReaderOnly>
-            <EuiText>{children}</EuiText>
+            <EuiText>{displayLabel}</EuiText>
           </EuiScreenReaderOnly>
         )}
       </>
