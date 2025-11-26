@@ -156,7 +156,7 @@ export function findAstPosition(ast: ESQLAstAllCommands[], offset: number) {
  * @returns
  */
 export function getBracketsToClose(text: string) {
-  const stack = [];
+  const stack: string[] = [];
   const pairs: Record<string, string> = { '"""': '"""', '/*': '*/', '(': ')', '[': ']', '"': '"' };
   const pairsReversed: Record<string, string> = {
     '"""': '"""',
@@ -167,12 +167,20 @@ export function getBracketsToClose(text: string) {
   };
 
   for (let i = 0; i < text.length; i++) {
+    const isInsideString = stack.some((item) => item === '"' || item === '"""');
+
     for (const openBracket in pairs) {
       if (!Object.hasOwn(pairs, openBracket)) {
         continue;
       }
 
       const substr = text.slice(i, i + openBracket.length);
+
+      // Skip comment markers (/* and */) when inside a string
+      if (isInsideString && (openBracket === '/*' || substr === '*/')) {
+        continue;
+      }
+
       if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
         stack.pop();
         break;
