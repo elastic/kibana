@@ -66,7 +66,12 @@ const EXCLUDED_MODULES = [
   '@emotion/*',
   'styled-components',
   'enzyme',
+  'chalk',
 ];
+
+// Packages whose files should never be transformed
+// Files within these packages will be skipped entirely
+const EXCLUDED_PACKAGES = ['kbn-es'];
 
 // Test file detection patterns
 const TEST_DIR_PATTERN = /(^|\/)(__tests__|__test__)(\/|$)/;
@@ -82,6 +87,17 @@ function isExcludedModule(modulePath) {
     const regex = new RegExp(`^${pattern.replace(/\*/g, '.*')}$`);
     return regex.test(modulePath);
   });
+}
+
+/**
+ * Check if a file is within an excluded package
+ * @param {string} filename - The filename being transformed
+ * @returns {boolean} True if the file is in an excluded package
+ */
+function isExcludedKbnPackage(filename) {
+  return EXCLUDED_PACKAGES.some(
+    (pkg) => filename.includes(`/${pkg}/`) || filename.includes(`\\${pkg}\\`)
+  );
 }
 
 /**
@@ -102,6 +118,11 @@ module.exports = function lazyRequirePlugin({ types: t }) {
 
         // Skip transformation for mock files - they need immediate access to all imports
         if (isMockRelated(filename) || isTestFile) {
+          return;
+        }
+
+        // Skip transformation for files in excluded packages (e.g., packages that use mockFs)
+        if (isExcludedKbnPackage(filename)) {
           return;
         }
 
