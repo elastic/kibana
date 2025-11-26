@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import { createRulesPageHelpers } from './helpers';
 
 const RULE_ALERT_INDEX_PATTERN = '.alerts-stack.alerts-*';
 
@@ -20,38 +21,16 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
   const RULE_ENDPOINT = '/api/alerting/rule';
-  const INTERNAL_RULE_ENDPOINT = '/internal/alerting/rules';
 
   const PageObjects = getPageObjects(['header']);
+
+  const { getRuleByName, deleteRuleById, navigateAndOpenRuleTypeModal } =
+    createRulesPageHelpers(getService);
 
   async function createRule(rule: any): Promise<string> {
     const ruleResponse = await supertest.post(RULE_ENDPOINT).set('kbn-xsrf', 'foo').send(rule);
     expect(ruleResponse.status).to.eql(200);
     return ruleResponse.body.id;
-  }
-
-  async function getRuleByName(name: string) {
-    const {
-      body: { data: rules },
-    } = await supertest
-      .post(`${INTERNAL_RULE_ENDPOINT}/_find`)
-      .set('kbn-xsrf', 'kibana')
-      .send({
-        search: name,
-        search_fields: ['name'],
-      })
-      .expect(200);
-
-    return rules.find((rule: any) => rule.name === name);
-  }
-
-  async function deleteRuleById(ruleId: string) {
-    await supertest
-      .patch(`${INTERNAL_RULE_ENDPOINT}/_bulk_delete`)
-      .set('kbn-xsrf', 'foo')
-      .send({ ids: [ruleId] })
-      .expect(200);
-    return true;
   }
 
   const getRulesList = async (tableRows: any[]) => {
@@ -94,23 +73,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     this.tags('includeFirefox');
 
     const observability = getService('observability');
-
-    const navigateAndOpenRuleTypeModal = async () => {
-      await observability.alerts.common.navigateToRulesPage();
-      await retry.waitFor(
-        'Create Rule button is visible',
-        async () => await testSubjects.exists('createRuleButton')
-      );
-      await retry.waitFor(
-        'Create Rule button is enabled',
-        async () => await testSubjects.isEnabled('createRuleButton')
-      );
-      await observability.alerts.rulesPage.clickCreateRuleButton();
-      await retry.waitFor(
-        'Rule Type Modal is visible',
-        async () => await testSubjects.exists('ruleTypeModal')
-      );
-    };
 
     before(async () => {
       await esArchiver.load(
@@ -431,91 +393,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await observability.alerts.common.navigateToRulesPage();
         await testSubjects.missingOrFail('rule-row');
-      });
-    });
-
-    describe('Custom threshold rule with ad-hoc data view', () => {
-      const AD_HOC_DATA_VIEW_PATTERN = '.alerts-*';
-      const CUSTOM_THRESHOLD_RULE_NAME = 'Custom threshold rule with ad-hoc data view';
-      // A dummy data view is needed so the "Explore matching indices" button appears
-      // (the button only shows when dataViewsList.length > 0)
-      const DUMMY_DATA_VIEW_ID = 'dummy-data-view-for-test';
-      const DUMMY_DATA_VIEW_TITLE = 'dummy-pattern-*';
-
-      before(async () => {
-        // Create a dummy data view so the data view list is not empty
-        const logger = getService('log');
-        await observability.alerts.common.createDataView({
-          supertest,
-          id: DUMMY_DATA_VIEW_ID,
-          name: 'Dummy Data View',
-          title: DUMMY_DATA_VIEW_TITLE,
-          logger,
-        });
-      });
-
-      after(async () => {
-        const rule = await getRuleByName(CUSTOM_THRESHOLD_RULE_NAME);
-        if (rule) {
-          await deleteRuleById(rule.id);
-        }
-
-        // Clean up the dummy data view
-        const logger = getService('log');
-        await observability.alerts.common.deleteDataView({
-          supertest,
-          id: DUMMY_DATA_VIEW_ID,
-          logger,
-        });
-      });
-
-      it('should create a custom threshold rule with an ad-hoc data view', async () => {
-        await navigateAndOpenRuleTypeModal();
-
-        // Select custom threshold rule type
-        await observability.alerts.rulesPage.clickOnObservabilityCategory();
-        await observability.alerts.rulesPage.clickOnCustomThresholdRule();
-
-        await retry.waitFor(
-          'Rule form is visible',
-          async () => await testSubjects.exists('ruleForm')
-        );
-
-        // Set rule name
-        await testSubjects.setValue('ruleDetailsNameInput', CUSTOM_THRESHOLD_RULE_NAME);
-
-        // Type the pattern to trigger "Explore matching indices" button
-        await testSubjects.click('selectDataViewExpression');
-        await testSubjects.setValue('indexPattern-switcher--input', AD_HOC_DATA_VIEW_PATTERN);
-
-        // Wait for the "Explore matching indices" button to appear (async index check with 250ms debounce)
-        await retry.waitFor('Explore matching indices button to appear', async () =>
-          testSubjects.exists('explore-matching-indices-button')
-        );
-
-        // Click the button to create an ad-hoc data view
-        await testSubjects.click('explore-matching-indices-button');
-
-        await retry.waitFor('data view selection to happen', async () => {
-          const dataViewSelector = await testSubjects.find('selectDataViewExpression');
-          return (await dataViewSelector.getVisibleText()).includes(AD_HOC_DATA_VIEW_PATTERN);
-        });
-
-        // Save the rule
-        await testSubjects.click('rulePageFooterSaveButton');
-        await testSubjects.click('confirmModalConfirmButton');
-
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        // Verify the rule was created correctly
-        let rule: Awaited<ReturnType<typeof getRuleByName>>;
-        await retry.waitFor('rule to be created', async () => {
-          rule = await getRuleByName(CUSTOM_THRESHOLD_RULE_NAME);
-          return rule !== undefined;
-        });
-        // The ad-hoc data view should have the pattern as its title
-        const searchConfigIndex = rule!.params.searchConfiguration.index;
-        expect(searchConfigIndex.title).to.eql(AD_HOC_DATA_VIEW_PATTERN);
       });
     });
   });
