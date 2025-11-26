@@ -7,19 +7,21 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { SpanLinksCount } from '../waterfall_helpers/waterfall_helpers';
 
-type Props = SpanLinksCount & {
+interface Props {
+  incomingCount: number;
+  outgoingCount: number;
   id: string;
   onClick?: (flyoutDetailTab: string) => unknown;
-};
+}
 
-export function SpanLinksBadge({ linkedParents, linkedChildren, id, onClick }: Props) {
-  if (!linkedParents && !linkedChildren) {
+const SPAN_LINKS_FLYOUT_TAB = 'span_links';
+
+export function SpanLinksBadge({ outgoingCount, incomingCount, id, onClick }: Props) {
+  if (!outgoingCount && !incomingCount) {
     return null;
   }
-  const spanLinksFlyoutTab = 'span_links';
-  const total = linkedParents + linkedChildren;
+  const total = outgoingCount + incomingCount;
   return (
     <EuiToolTip
       title={i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.title', {
@@ -29,15 +31,15 @@ export function SpanLinksBadge({ linkedParents, linkedChildren, id, onClick }: P
       content={
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
-            {i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.linkedChildren', {
-              defaultMessage: '{linkedChildren} incoming',
-              values: { linkedChildren },
+            {i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.incomingCount', {
+              defaultMessage: '{incomingCount} incoming',
+              values: { incomingCount },
             })}
           </EuiFlexItem>
           <EuiFlexItem>
-            {i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.linkedParents', {
-              defaultMessage: '{linkedParents} outgoing',
-              values: { linkedParents },
+            {i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.outgoingCount', {
+              defaultMessage: '{outgoingCount} outgoing',
+              values: { outgoingCount },
             })}
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -50,7 +52,7 @@ export function SpanLinksBadge({ linkedParents, linkedChildren, id, onClick }: P
           ? {
               onClick: (e: any) => {
                 e.stopPropagation();
-                onClick(spanLinksFlyoutTab);
+                onClick(SPAN_LINKS_FLYOUT_TAB);
               },
               onClickAriaLabel: i18n.translate('xpack.apm.waterfall.spanLinks.badgeAriaLabel', {
                 defaultMessage: 'Open span links details',

@@ -8,36 +8,39 @@
 import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { EventOutcome, StatusCode } from '@kbn/apm-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import type { StatusCode, EventOutcome } from '@kbn/apm-types';
 import type { APMConfig } from '../..';
 import {
   AT_TIMESTAMP,
   DURATION,
+  EVENT_OUTCOME,
+  KIND,
+  OTEL_SPAN_LINKS_TRACE_ID,
   PARENT_ID,
   PROCESSOR_EVENT,
+  SERVICE_NAME,
   SPAN_DURATION,
   SPAN_ID,
+  SPAN_LINKS_TRACE_ID,
   SPAN_NAME,
+  SPAN_SUBTYPE,
+  SPAN_TYPE,
   STATUS_CODE,
+  TIMESTAMP_US,
   TRACE_ID,
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
-  TIMESTAMP_US,
-  EVENT_OUTCOME,
-  SPAN_TYPE,
-  SPAN_SUBTYPE,
-  KIND,
-  SERVICE_NAME,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
+import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
+import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
+import { getSpanLinksCountById } from '../span_links/get_linked_children';
 import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
 import { getUnifiedTraceErrors, type UnifiedTraceErrors } from './get_unified_trace_errors';
-import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
-import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 
 const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
@@ -58,6 +61,8 @@ const optionalFields = asMutableArray([
   SPAN_TYPE,
   SPAN_SUBTYPE,
   KIND,
+  OTEL_SPAN_LINKS_TRACE_ID,
+  SPAN_LINKS_TRACE_ID,
 ] as const);
 
 export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
@@ -159,9 +164,15 @@ export async function getUnifiedTraceItems({
     { skipProcessorEventFilter: true }
   );
 
-  const [unifiedTraceErrors, unifiedTraceItems] = await Promise.all([
+  const [unifiedTraceErrors, unifiedTraceItems, incomingSpanLinksCountById] = await Promise.all([
     unifiedTraceErrorsPromise,
     unifiedTracePromise,
+    getSpanLinksCountById({
+      traceId,
+      apmEventClient,
+      start,
+      end,
+    }),
   ]);
 
   const errorsByDocId = getErrorsByDocId(unifiedTraceErrors);
@@ -189,6 +200,11 @@ export async function getUnifiedTraceItems({
           parentId: event[PARENT_ID],
           serviceName: event[SERVICE_NAME],
           type: event[SPAN_SUBTYPE] || event[SPAN_TYPE] || event[KIND],
+          spanLinksCount: {
+            incoming: incomingSpanLinksCountById[id] ?? 0,
+            outgoing:
+              event[SPAN_LINKS_TRACE_ID]?.length || event[OTEL_SPAN_LINKS_TRACE_ID]?.length || 0,
+          },
         } satisfies TraceItem;
       })
       .filter((_) => _) as TraceItem[],
