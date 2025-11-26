@@ -30,18 +30,30 @@ export class DataViewsService extends FtrService {
     changeTimestampField, // optionally override default timestamp field
   }: DataViewOptions) {
     await this.testSubjects.existOrFail('indexPatternEditorFlyout');
-    await this.testSubjects.existOrFail('createIndexPatternStatusMessage');
-
-    if (!name.includes(':')) {
-      await this.retry.waitFor('data view list loaded', async () => {
-        return await this.testSubjects.exists('createIndexPatternStep1IndicesList');
-      });
-    }
 
     await this.testSubjects.setValue('createIndexPatternTitleInput', name, {
       clearWithKeyboard: true,
       typeCharByChar: true,
     });
+
+    await this.retry.waitFor('data view name input to be valid', async () => {
+      const input = await this.testSubjects.find('createIndexPatternTitleInput');
+
+      const [isValidating, isInvalid] = await Promise.all([
+        input.getAttribute('data-is-validating'),
+        input.getAttribute('aria-invalid'),
+      ]);
+
+      if (isValidating === '0' && isInvalid === 'true') {
+        await this.testSubjects.setValue('createIndexPatternTitleInput', name, {
+          clearWithKeyboard: true,
+          typeCharByChar: true,
+        });
+      }
+
+      return isValidating === '0' && isInvalid !== 'true';
+    });
+
     if (hasTimeField) {
       await this.retry.waitFor('timestamp field loaded', async () => {
         const timestampField = await this.testSubjects.find('timestampField');
