@@ -527,7 +527,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "csp-rule-template|8.4.0: 862e3ddd97570d5cbda3d174eb5a854b0052705a",
         "=================================================================",
         "dashboard|global: f8f112248a59cc016bffb9d5f55c481064351400",
-        "dashboard|mappings: f9ce5712184581b906ead52d034791e1ced3647c",
+        "dashboard|mappings: 46e1ed9a411c9e5ef958543dd94040eacfc2de78",
         "dashboard|schemas: 5a64501668f4095f1d4e27fa8c909c061915ac54",
         "dashboard|10.3.0: d50961f3d79bb3aef3bb706385b9ffaef7e5d101c1581b9de1bc4156922c49b9",
         "dashboard|10.2.0: 0258c1a01c045333d28c35ca5baf8366a72a0e55f6474741f5124c8f035cbbb7",
