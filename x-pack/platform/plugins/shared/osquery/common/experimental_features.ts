@@ -11,10 +11,12 @@
  */
 export const allowedExperimentalValues = Object.freeze({
   /**
-   * Placeholder feature flag for testing experimental features infrastructure.
-   * This should be removed once the first real experimental feature is added.
+   * Enables hybrid action results that combines Fleet responses index with
+   * the results index for more accurate agent response tracking.
+   * This addresses cases where Fleet Server doesn't create action records
+   * for all agents, but results are still submitted.
    */
-  _placeholder: false,
+  hybridActionResults: true,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

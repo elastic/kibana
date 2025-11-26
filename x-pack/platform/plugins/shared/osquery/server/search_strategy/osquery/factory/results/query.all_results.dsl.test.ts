@@ -8,6 +8,7 @@
 import moment from 'moment/moment';
 import { buildResultsQuery } from './query.all_results.dsl';
 import { Direction, type ResultsRequestOptions } from '../../../../../common/search_strategy';
+import { ACTION_EXPIRATION } from '../../../../../common/constants';
 
 // Mock the utility functions
 
@@ -147,7 +148,10 @@ describe('buildResultsQuery', () => {
 
     it('should build query with time range filter', () => {
       const startDate = '2024-01-01T00:00:00.000Z';
-      const expectedEndDate = moment(startDate).clone().add(30, 'minutes').toISOString();
+      const expectedEndDate = moment(startDate)
+        .clone()
+        .add(ACTION_EXPIRATION.SEARCH_WINDOW_MINUTES, 'minutes')
+        .toISOString();
 
       const options: ResultsRequestOptions = {
         actionId: 'action-time',
@@ -216,7 +220,10 @@ describe('buildResultsQuery', () => {
 
     it('should build query with all options combined', () => {
       const startDate = '2024-06-15T10:30:00.000Z';
-      const expectedEndDate = moment(startDate).clone().add(30, 'minutes').toISOString();
+      const expectedEndDate = moment(startDate)
+        .clone()
+        .add(ACTION_EXPIRATION.SEARCH_WINDOW_MINUTES, 'minutes')
+        .toISOString();
 
       const options: ResultsRequestOptions = {
         actionId: 'action-full',

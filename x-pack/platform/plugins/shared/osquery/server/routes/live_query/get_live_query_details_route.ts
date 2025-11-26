@@ -30,6 +30,7 @@ import {
   getLiveQueryDetailsRequestQuerySchema,
 } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { adjustAggregationsForExpiration } from '../../utils/aggregations';
 
 export const getLiveQueryDetailsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -94,8 +95,14 @@ export const getLiveQueryDetailsRoute = (
             )
           );
 
-          const isCompleted = expired || (responseData && every(responseData, ['pending', 0]));
-          const agentByActionIdStatusMap = mapKeys(responseData, 'action_id');
+          // Adjust aggregations for expiration: move pending to failed when expired
+          const adjustedResponseData = responseData.map((data) =>
+            adjustAggregationsForExpiration(data, expired)
+          );
+
+          const isCompleted =
+            expired || (adjustedResponseData && every(adjustedResponseData, ['pending', 0]));
+          const agentByActionIdStatusMap = mapKeys(adjustedResponseData, 'action_id');
 
           return response.ok({
             body: {

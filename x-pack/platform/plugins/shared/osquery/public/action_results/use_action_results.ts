@@ -13,6 +13,7 @@ import { useKibana } from '../common/lib/kibana';
 import type { ResultEdges, Direction } from '../../common/search_strategy';
 import { API_VERSIONS, ACTION_RESPONSES_INDEX } from '../../common/constants';
 import { getAgentIdFromFields } from '../../common/utils/agent_fields';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
@@ -32,6 +33,7 @@ export interface UseActionResults {
   actionId: string;
   activePage: number;
   startDate?: string;
+  expiration?: string;
   agentIds?: string[];
   direction: Direction;
   limit: number;
@@ -65,10 +67,12 @@ export const useActionResults = ({
   sortField,
   kuery,
   startDate,
+  expiration,
   isLive = false,
 }: UseActionResults) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
+  const hybridEnabled = useIsExperimentalFeatureEnabled('hybridActionResults');
 
   const currentPageAgentIds = useMemo(() => {
     const startIndex = activePage * limit;
@@ -78,7 +82,7 @@ export const useActionResults = ({
   }, [agentIds, activePage, limit]);
 
   return useQuery<ActionResultsResponse, Error, ActionResultsArgs>(
-    ['actionResults', { actionId, activePage, limit, direction, sortField }],
+    ['actionResults', { actionId, activePage, limit, direction, sortField, expiration }],
     () =>
       http.get<ActionResultsResponse>(`/api/osquery/action_results/${actionId}`, {
         version: API_VERSIONS.public.v1,
@@ -89,6 +93,7 @@ export const useActionResults = ({
           sortOrder: direction,
           ...(kuery && { kuery }),
           ...(startDate && { startDate }),
+          ...(expiration && { expiration }),
           ...(currentPageAgentIds.length > 0 && {
             agentIds: currentPageAgentIds.join(','),
           }),
@@ -97,29 +102,38 @@ export const useActionResults = ({
       }),
     {
       select: (response) => {
-        // Server already filtered by agentIds - build set of responded agents
-        const respondedAgentIds = new Set(
-          response.edges
-            .map((edge) => getAgentIdFromFields(edge.fields))
-            .filter((id): id is string => id !== undefined)
-        );
+        if (hybridEnabled) {
+          // HYBRID MODE: Server provides complete edges with status
+          return {
+            edges: response.edges,
+            aggregations: response.aggregations,
+            inspect: response.inspect || { dsl: [], response: [] },
+          };
+        } else {
+          // LEGACY MODE: Client generates placeholder edges for missing agents
+          const respondedAgentIds = new Set(
+            response.edges
+              .map((edge) => getAgentIdFromFields(edge.fields))
+              .filter((id): id is string => id !== undefined)
+          );
 
-        const placeholderEdges = currentPageAgentIds
-          .filter((agentId) => agentId && !respondedAgentIds.has(agentId))
-          .map((agentId) => ({
-            _index: `${ACTION_RESPONSES_INDEX}-default`,
-            _id: `placeholder-${agentId}`,
-            _source: {},
-            fields: { agent_id: [agentId] },
-          }));
+          const placeholderEdges = currentPageAgentIds
+            .filter((agentId) => agentId && !respondedAgentIds.has(agentId))
+            .map((agentId) => ({
+              _index: `${ACTION_RESPONSES_INDEX}-default`,
+              _id: `placeholder-${agentId}`,
+              _source: {},
+              fields: { agent_id: [agentId] },
+            }));
 
-        const mergedEdges = [...response.edges, ...placeholderEdges] as ResultEdges;
+          const mergedEdges = [...response.edges, ...placeholderEdges] as ResultEdges;
 
-        return {
-          edges: mergedEdges,
-          aggregations: response.aggregations,
-          inspect: response.inspect || { dsl: [], response: [] },
-        };
+          return {
+            edges: mergedEdges,
+            aggregations: response.aggregations,
+            inspect: response.inspect || { dsl: [], response: [] },
+          };
+        }
       },
       initialData: {
         edges: [],

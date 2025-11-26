@@ -16,7 +16,11 @@ import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertSOQueriesToPack } from '../../routes/pack/utils';
-import { ACTIONS_INDEX, QUERY_TIMEOUT } from '../../../common/constants';
+import {
+  ACTIONS_INDEX,
+  QUERY_TIMEOUT,
+  calculateActionExpirationMinutes,
+} from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
 import { CustomHttpRequestError } from '../../common/error';
@@ -80,10 +84,55 @@ export const createActionHandler = async (
     );
   }
 
+  // Build queries first to determine max query timeout for dynamic expiration
+  const queries = packSO
+    ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
+        const replacedQuery = replacedQueries(packQuery.query, alertData);
+
+        return pickBy(
+          {
+            action_id: uuidv4(),
+            id: packQueryId,
+            ...replacedQuery,
+            ...(error ? { error } : {}),
+            ecs_mapping: packQuery.ecs_mapping,
+            version: packQuery.version,
+            platform: packQuery.platform,
+            timeout: packQuery.timeout,
+            agents: selectedAgents,
+          },
+          (value) => !isEmpty(value) || isNumber(value)
+        );
+      })
+    : await createDynamicQueries({
+        params,
+        alertData,
+        agents: selectedAgents,
+        osqueryContext,
+        error,
+        spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
+        spaceScopedClient: spaceScopedInternalSavedObjectsClient,
+      });
+
+  // Calculate dynamic expiration based on max query timeout and agent count
+  // This ensures sufficient time for:
+  // 1. Query execution on agents (respects query timeout)
+  // 2. Fleet action distribution to all agents (scales with agent count)
+  // 3. Results propagation through data streams (buffer time)
+  const maxQueryTimeoutSeconds = queries.reduce(
+    (max, query) => Math.max(max, (query.timeout as number) || QUERY_TIMEOUT.DEFAULT),
+    QUERY_TIMEOUT.DEFAULT
+  );
+  const expirationMinutes = calculateActionExpirationMinutes(
+    maxQueryTimeoutSeconds,
+    selectedAgents.length
+  );
+  const expiration = moment().add(expirationMinutes, 'minutes').toISOString();
+
   const osqueryAction = {
     action_id: uuidv4(),
     '@timestamp': moment().toISOString(),
-    expiration: moment().add(15, 'minutes').toISOString(),
+    expiration,
     type: 'INPUT_ACTION',
     input_type: 'osquery',
     alert_ids: params.alert_ids,
@@ -102,34 +151,7 @@ export const createActionHandler = async (
       ? some(packSO?.references, ['type', 'osquery-pack-asset'])
       : undefined,
     space_id: options.space?.id ?? DEFAULT_SPACE_ID,
-    queries: packSO
-      ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
-          const replacedQuery = replacedQueries(packQuery.query, alertData);
-
-          return pickBy(
-            {
-              action_id: uuidv4(),
-              id: packQueryId,
-              ...replacedQuery,
-              ...(error ? { error } : {}),
-              ecs_mapping: packQuery.ecs_mapping,
-              version: packQuery.version,
-              platform: packQuery.platform,
-              timeout: packQuery.timeout,
-              agents: selectedAgents,
-            },
-            (value) => !isEmpty(value) || isNumber(value)
-          );
-        })
-      : await createDynamicQueries({
-          params,
-          alertData,
-          agents: selectedAgents,
-          osqueryContext,
-          error,
-          spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
-          spaceScopedClient: spaceScopedInternalSavedObjectsClient,
-        }),
+    queries,
   };
 
   const fleetActions = !error
@@ -138,7 +160,7 @@ export const createActionHandler = async (
         (query) => ({
           action_id: query.action_id,
           '@timestamp': moment().toISOString(),
-          expiration: moment().add(15, 'minutes').toISOString(),
+          expiration, // Dynamic expiration based on query timeout and agent count
           type: 'INPUT_ACTION',
           input_type: 'osquery',
           agents: query.agents,

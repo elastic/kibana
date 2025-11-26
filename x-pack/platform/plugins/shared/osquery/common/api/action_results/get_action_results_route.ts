@@ -11,6 +11,7 @@ import { Direction } from '../../search_strategy';
 
 export const getActionResultsRequestQuerySchema = t.type({
   startDate: t.union([t.string, t.undefined]),
+  expiration: t.union([t.string, t.undefined]),
   page: t.union([toNumberRt, t.undefined]),
   pageSize: t.union([toNumberRt, t.undefined]),
   sort: t.union([t.string, t.undefined]),

@@ -19,6 +19,7 @@ import { useKibana } from '../common/lib/kibana';
 import { API_VERSIONS } from '../../common/constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { getAgentIdFromFields } from '../../common/utils/agent_fields';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 
 interface ActionResultsSummaryProps {
   actionId: string;
@@ -97,15 +98,19 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   const setErrorToast = useErrorToast();
   const [pageIndex, setPageIndex] = useState(DEFAULT_PAGE_INDEX);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const hybridEnabled = useIsExperimentalFeatureEnabled('hybridActionResults');
 
+  // For legacy mode: calculate if action has expired
   const expired = useMemo(
     () => (!expirationDate ? false : new Date(expirationDate) < new Date()),
     [expirationDate]
   );
+
   const [isLive, setIsLive] = useState(true);
   const { data } = useActionResults({
     actionId,
     startDate,
+    expiration: expirationDate,
     activePage: pageIndex,
     agentIds,
     limit: pageSize,
@@ -164,35 +169,26 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     return map;
   }, [agentsData]);
 
-  // Enrich edges with error states immutably
+  // Enrich edges with skipped error if action had an error
   const enrichedEdges = useMemo(
     () =>
-      data.edges.map((edge) => {
-        // If edge already has error/completed state, return as-is
-        if (edge.fields?.error || edge.fields?.['error.skipped'] || edge.fields?.completed_at) {
-          return edge;
-        }
-
-        // Create new edge with error fields if needed
-        const fields = { ...(edge.fields || {}) };
-
-        if (error) {
-          fields['error.skipped'] = [error];
-          fields.error = [error];
-        } else if (expired && !edge.fields?.completed_at) {
-          const expiredMessage = i18n.translate(
-            'xpack.osquery.liveQueryActionResults.table.expiredErrorText',
-            {
-              defaultMessage: 'The action request timed out.',
+      error
+        ? data.edges.map((edge) => {
+            if (edge.fields?.error || edge.fields?.['error.skipped']) {
+              return edge;
             }
-          );
-          fields['error.keyword'] = [expiredMessage];
-          fields.error = [expiredMessage];
-        }
 
-        return { ...edge, fields };
-      }),
-    [data.edges, error, expired]
+            return {
+              ...edge,
+              fields: {
+                ...(edge.fields || {}),
+                'error.skipped': [error],
+                error: [error],
+              },
+            };
+          })
+        : data.edges,
+    [data.edges, error]
   );
 
   const renderAgentIdColumn = useCallback(
@@ -215,7 +211,24 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     },
     [agentNameMap, application]
   );
-  const renderRowsColumn = useCallback((rowsCount: number | undefined) => rowsCount ?? '-', []);
+  const renderRowsColumn = useCallback(
+    (_: unknown, item: ResultEdge) => {
+      if (hybridEnabled) {
+        // HYBRID MODE: Use server-provided row_count
+        const rowCount = item.fields?.row_count?.[0];
+
+        return typeof rowCount === 'number' ? rowCount : '-';
+      } else {
+        // LEGACY MODE: Use _source.action_response.osquery.count
+        const source = item._source as { action_response?: { osquery?: { count?: number } } };
+        const rowCount = source?.action_response?.osquery?.count;
+
+        return typeof rowCount === 'number' ? rowCount : '-';
+      }
+    },
+    [hybridEnabled]
+  );
+
   const renderStatusColumn = useCallback(
     (_: unknown, item: ResultEdge) => {
       if (item.fields?.['error.skipped']) {
@@ -224,27 +237,54 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         });
       }
 
-      if (!item.fields?.completed_at) {
-        return expired
-          ? i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredStatusText', {
-              defaultMessage: 'expired',
-            })
-          : i18n.translate('xpack.osquery.liveQueryActionResults.table.pendingStatusText', {
-              defaultMessage: 'pending',
-            });
-      }
+      if (hybridEnabled) {
+        // HYBRID MODE: Use server-provided status
+        const status = item.fields?.status?.[0];
+        if (!status) return '-';
 
-      if (item.fields?.['error.keyword']) {
-        return i18n.translate('xpack.osquery.liveQueryActionResults.table.errorStatusText', {
-          defaultMessage: 'error',
+        const statusMap: Record<string, string> = {
+          success: i18n.translate('xpack.osquery.liveQueryActionResults.table.successStatusText', {
+            defaultMessage: 'success',
+          }),
+          error: i18n.translate('xpack.osquery.liveQueryActionResults.table.errorStatusText', {
+            defaultMessage: 'error',
+          }),
+          pending: i18n.translate('xpack.osquery.liveQueryActionResults.table.pendingStatusText', {
+            defaultMessage: 'pending',
+          }),
+          expired: i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredStatusText', {
+            defaultMessage: 'expired',
+          }),
+          skipped: i18n.translate('xpack.osquery.liveQueryActionResults.table.skippedStatusText', {
+            defaultMessage: 'skipped',
+          }),
+        };
+
+        return statusMap[status] || '-';
+      } else {
+        // LEGACY MODE: Calculate status client-side
+        if (!item.fields?.completed_at) {
+          return expired
+            ? i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredStatusText', {
+                defaultMessage: 'expired',
+              })
+            : i18n.translate('xpack.osquery.liveQueryActionResults.table.pendingStatusText', {
+                defaultMessage: 'pending',
+              });
+        }
+
+        if (item.fields?.['error.keyword']) {
+          return i18n.translate('xpack.osquery.liveQueryActionResults.table.errorStatusText', {
+            defaultMessage: 'error',
+          });
+        }
+
+        return i18n.translate('xpack.osquery.liveQueryActionResults.table.successStatusText', {
+          defaultMessage: 'success',
         });
       }
-
-      return i18n.translate('xpack.osquery.liveQueryActionResults.table.successStatusText', {
-        defaultMessage: 'success',
-      });
     },
-    [expired]
+    [hybridEnabled, expired]
   );
 
   const columns = useMemo(
@@ -316,14 +356,29 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     // Only update if agentIds length hasn't changed during render (prevents race conditions)
     if (currentAgentCountRef.current === agentIds?.length) {
       setIsLive(() => {
-        if (!agentIds?.length || expired || error) return false;
+        if (!agentIds?.length || error) return false;
 
-        return data.aggregations.totalResponded !== agentIds?.length;
+        if (hybridEnabled) {
+          // HYBRID MODE: Stop polling when no agents are pending
+          return data.aggregations.pending > 0;
+        } else {
+          // LEGACY MODE: Stop polling when expired or all agents responded
+          if (expired) return false;
+
+          return data.aggregations.totalResponded !== agentIds?.length;
+        }
       });
     }
 
     currentAgentCountRef.current = agentIds?.length;
-  }, [agentIds?.length, data.aggregations.totalResponded, error, expired]);
+  }, [
+    agentIds?.length,
+    data.aggregations.pending,
+    data.aggregations.totalResponded,
+    error,
+    expired,
+    hybridEnabled,
+  ]);
 
   return (
     <div css={statusTableCss}>

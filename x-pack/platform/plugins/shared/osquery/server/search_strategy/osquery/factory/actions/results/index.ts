@@ -37,8 +37,18 @@ export const actionResults: OsqueryFactory<OsqueryQueries.actionResults> = {
   // @ts-expect-error update types
   parse: async (
     options,
-    response: ActionResultsStrategyResponse
-  ): Promise<ActionResultsStrategyResponse> => {
+    response: ActionResultsStrategyResponse & {
+      resultsAgentIds?: Set<string>;
+      resultsAgentBuckets?: Array<{ key: string; doc_count: number }>;
+      resultsTotalDocs?: number;
+    }
+  ): Promise<
+    ActionResultsStrategyResponse & {
+      resultsAgentIds?: Set<string>;
+      resultsAgentBuckets?: Array<{ key: string; doc_count: number }>;
+      resultsTotalDocs?: number;
+    }
+  > => {
     const inspect = {
       dsl: [inspectStringifyObject(buildActionResultsQuery(options))],
     };
@@ -47,6 +57,9 @@ export const actionResults: OsqueryFactory<OsqueryQueries.actionResults> = {
       ...response,
       inspect,
       edges: response.rawResponse.hits.hits,
+      resultsAgentIds: response.resultsAgentIds,
+      resultsAgentBuckets: response.resultsAgentBuckets,
+      resultsTotalDocs: response.resultsTotalDocs,
     };
   },
 };

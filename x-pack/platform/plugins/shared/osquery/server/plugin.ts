@@ -95,7 +95,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       .then(([{ elasticsearch }, depsStart]) => {
         const osquerySearchStrategy = osquerySearchStrategyProvider(
           depsStart.data,
-          elasticsearch.client
+          elasticsearch.client,
+          experimentalFeatures
         );
 
         plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);

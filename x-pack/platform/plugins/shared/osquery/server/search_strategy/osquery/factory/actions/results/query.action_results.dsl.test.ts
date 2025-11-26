@@ -11,6 +11,7 @@ import {
   Direction,
   type ActionResultsRequestOptions,
 } from '../../../../../../common/search_strategy';
+import { ACTION_EXPIRATION } from '../../../../../../common/constants';
 
 jest.mock('../../../../../utils/build_query', () => ({
   getQueryFilter: jest.fn(({ filter }: { filter: string }) => ({
@@ -182,7 +183,10 @@ describe('buildActionResultsQuery', () => {
 
     it('should build query with time range filter', () => {
       const startDate = '2024-03-15T14:20:00.000Z';
-      const expectedEndDate = moment(startDate).clone().add(30, 'minutes').toISOString();
+      const expectedEndDate = moment(startDate)
+        .clone()
+        .add(ACTION_EXPIRATION.SEARCH_WINDOW_MINUTES, 'minutes')
+        .toISOString();
 
       const options: ActionResultsRequestOptions = {
         actionId: 'action-time-range',
@@ -249,7 +253,10 @@ describe('buildActionResultsQuery', () => {
 
     it('should build query with all options combined', () => {
       const startDate = '2024-07-01T08:45:00.000Z';
-      const expectedEndDate = moment(startDate).clone().add(30, 'minutes').toISOString();
+      const expectedEndDate = moment(startDate)
+        .clone()
+        .add(ACTION_EXPIRATION.SEARCH_WINDOW_MINUTES, 'minutes')
+        .toISOString();
 
       const options: ActionResultsRequestOptions = {
         actionId: 'action-comprehensive',

@@ -18,7 +18,7 @@ import type {
   GetActionResultsRequestParamsSchema,
   GetActionResultsRequestQuerySchema,
 } from '../../../common/api/action_results/get_action_results_route';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, ACTION_RESPONSES_INDEX } from '../../../common/constants';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
@@ -28,6 +28,7 @@ import type {
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { isActionExpired, adjustAggregationsForExpiration } from '../../utils/aggregations';
 
 export const getActionResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -120,21 +121,137 @@ export const getActionResultsRoute = (
             )
           );
 
-          const responseAgg = res.rawResponse?.aggregations?.aggs.responses_by_action_id;
-          const totalResponded = responseAgg?.doc_count ?? 0;
-          const totalRowCount = responseAgg?.rows_count?.value ?? 0;
+          const responseAgg = res.rawResponse?.aggregations?.aggs.responses_by_action_id as
+            | {
+                doc_count: number;
+                rows_count?: { value: number };
+                responses: { buckets: Array<{ key: string; doc_count: number }> };
+                unique_agent_ids?: { buckets: Array<{ key: string; doc_count: number }> };
+              }
+            | undefined;
+
           const aggsBuckets = responseAgg?.responses.buckets;
+          const isExpired = isActionExpired(request.query.expiration);
+          const hybridEnabled = osqueryContext.experimentalFeatures.hybridActionResults;
 
-          const aggregations = {
-            totalRowCount,
-            totalResponded,
-            successful: aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0,
-            failed: aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0,
-            pending: Math.max(0, totalAgentCount - totalResponded),
-          };
+          let aggregations;
+          let processedEdges;
 
-          // Return only real responses - placeholders will be generated client-side
-          const processedEdges = res.edges;
+          if (hybridEnabled) {
+            // HYBRID MODE: Combine Fleet responses with results index data
+            // Use results index total docs as source of truth
+            const resultsTotalDocs =
+              'resultsTotalDocs' in res ? (res.resultsTotalDocs as number) : undefined;
+            const totalRowCount = resultsTotalDocs ?? responseAgg?.rows_count?.value ?? 0;
+
+            // Extract Fleet responded agent IDs from aggregation (supports 15k+ agents)
+            const fleetAgentBuckets = responseAgg?.unique_agent_ids?.buckets ?? [];
+            const respondedAgentIds = new Set(fleetAgentBuckets.map((b) => b.key));
+
+            // Build agent-to-rowCount map from results aggregation
+            const agentRowCounts = new Map<string, number>();
+            if ('resultsAgentBuckets' in res && Array.isArray(res.resultsAgentBuckets)) {
+              (res.resultsAgentBuckets as Array<{ key: string; doc_count: number }>).forEach(
+                (bucket) => {
+                  agentRowCounts.set(bucket.key, bucket.doc_count);
+                }
+              );
+            }
+
+            // Calculate inferred successful: agents with results but no Fleet response
+            const inferredSuccessfulCount = Array.from(agentRowCounts.keys()).filter(
+              (agentId) => !respondedAgentIds.has(agentId)
+            ).length;
+
+            // Calculate aggregations with hybrid data
+            const fleetSuccessful =
+              aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0;
+            const fleetFailed =
+              aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0;
+            const totalResponded = respondedAgentIds.size + inferredSuccessfulCount;
+
+            const rawAggregations = {
+              totalRowCount,
+              totalResponded,
+              successful: fleetSuccessful + inferredSuccessfulCount,
+              failed: fleetFailed,
+              pending: Math.max(0, totalAgentCount - totalResponded),
+            };
+
+            aggregations = adjustAggregationsForExpiration(rawAggregations, isExpired);
+
+            // Enrich real response edges with status and row_count
+            const enrichedRealEdges = res.edges.map((edge) => {
+              const agentId = edge.fields?.agent_id?.[0];
+              const hasError = edge.fields?.['error.keyword'] || edge.fields?.error;
+              const hasCompleted = edge.fields?.completed_at;
+
+              let status: 'success' | 'error' | 'pending' | 'expired';
+              if (hasError) {
+                status = 'error';
+              } else if (hasCompleted) {
+                status = 'success';
+              } else if (isExpired) {
+                status = 'expired';
+              } else {
+                status = 'pending';
+              }
+
+              return {
+                ...edge,
+                fields: {
+                  ...edge.fields,
+                  status: [status],
+                  row_count: agentId ? [agentRowCounts.get(agentId) ?? 0] : [0],
+                },
+              };
+            });
+
+            // Build placeholder edges for missing agents on current page
+            const placeholderEdges = agentIds
+              .filter((id) => !respondedAgentIds.has(id))
+              .map((agentId) => {
+                const rowCount = agentRowCounts.get(agentId) ?? 0;
+                const hasResults = agentRowCounts.has(agentId);
+                const status = hasResults ? 'success' : isExpired ? 'expired' : 'pending';
+
+                return {
+                  _index: `${ACTION_RESPONSES_INDEX}-default`,
+                  _id: `placeholder-${agentId}`,
+                  _source: {
+                    agent_id: agentId,
+                    action_response: { osquery: { count: rowCount } },
+                  },
+                  fields: {
+                    agent_id: [agentId],
+                    status: [status],
+                    row_count: [rowCount],
+                    ...(hasResults && { completed_at: [new Date().toISOString()] }),
+                    ...(status === 'expired' && {
+                      error: ['The action request timed out.'],
+                      'error.keyword': ['The action request timed out.'],
+                    }),
+                  },
+                };
+              });
+
+            processedEdges = [...enrichedRealEdges, ...placeholderEdges];
+          } else {
+            // LEGACY MODE: Use only Fleet responses (original behavior)
+            const totalResponded = responseAgg?.doc_count ?? 0;
+            const totalRowCount = responseAgg?.rows_count?.value ?? 0;
+
+            aggregations = {
+              totalRowCount,
+              totalResponded,
+              successful: aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0,
+              failed: aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0,
+              pending: Math.max(0, totalAgentCount - totalResponded),
+            };
+
+            // Return edges as-is (client will generate placeholders)
+            processedEdges = res.edges;
+          }
 
           const totalPages = Math.ceil(totalAgentCount / pageSize);
 

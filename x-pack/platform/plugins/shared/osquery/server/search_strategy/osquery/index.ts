@@ -5,12 +5,22 @@
  * 2.0.
  */
 
-import { map, mergeMap, forkJoin, from, of } from 'rxjs';
-import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
+import { map, mergeMap, forkJoin, from, of, lastValueFrom } from 'rxjs';
+import type {
+  ISearchStrategy,
+  PluginStart,
+  SearchStrategyDependencies,
+} from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { CoreStart } from '@kbn/core/server';
-import { ACTION_RESPONSES_DATA_STREAM_INDEX, ACTIONS_INDEX } from '../../../common/constants';
+import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
+import {
+  ACTION_RESPONSES_DATA_STREAM_INDEX,
+  ACTIONS_INDEX,
+  RESULTS_DATA_STREAM_INDEX,
+} from '../../../common/constants';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type {
   FactoryQueryTypes,
   StrategyResponseType,
@@ -19,10 +29,94 @@ import type {
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 import { osqueryFactory } from './factory';
 import type { OsqueryFactory } from './factory/types';
+import {
+  buildResultsAgentsQuery,
+  COMPOSITE_AGGREGATION_BATCH_SIZE,
+} from './factory/actions/results/query.results_agents.dsl';
+
+interface CompositeAgentBucket {
+  key: { agent_id: string };
+  doc_count: number;
+}
+
+interface ResultsAgentsData {
+  agentIds: Set<string>;
+  agentBuckets: Array<{ key: string; doc_count: number }>;
+  totalDocs: number;
+}
+
+interface ResultsAgentsAggregations {
+  unique_agents?: {
+    buckets: CompositeAgentBucket[];
+    after_key?: { agent_id: string };
+  };
+}
+
+/**
+ * Fetches all unique agent IDs from results index using composite aggregation pagination.
+ * Handles unlimited agent counts by paginating through results.
+ */
+async function fetchAllResultsAgents(
+  es: PluginStart['search']['searchAsInternalUser'],
+  queryParams: { actionId: string; startDate?: string; integrationNamespaces?: string[] },
+  options: ISearchOptions,
+  deps: SearchStrategyDependencies
+): Promise<ResultsAgentsData> {
+  const agentIds = new Set<string>();
+  const agentBuckets: Array<{ key: string; doc_count: number }> = [];
+  let totalDocs = 0;
+  let afterKey: { agent_id: string } | undefined;
+
+  // Paginate through all composite aggregation pages
+  do {
+    const response = (await lastValueFrom(
+      es.search(
+        {
+          params: buildResultsAgentsQuery({
+            ...queryParams,
+            afterKey,
+          }),
+        },
+        options,
+        deps
+      )
+    )) as IKibanaSearchResponse<{
+      hits: { total?: number | { value: number } };
+      aggregations?: ResultsAgentsAggregations;
+    }>;
+
+    // Get total docs from first request only
+    if (totalDocs === 0) {
+      const hitsTotal = response.rawResponse.hits?.total;
+      totalDocs = typeof hitsTotal === 'number' ? hitsTotal : hitsTotal?.value ?? 0;
+    }
+
+    // Extract agent IDs from composite aggregation buckets
+    const buckets = response.rawResponse.aggregations?.unique_agents?.buckets;
+
+    if (buckets && buckets.length > 0) {
+      for (const bucket of buckets) {
+        const agentId = bucket.key.agent_id;
+        agentIds.add(agentId);
+        agentBuckets.push({ key: agentId, doc_count: bucket.doc_count });
+      }
+
+      // Get after_key for next page
+      afterKey = response.rawResponse.aggregations?.unique_agents?.after_key;
+    } else {
+      afterKey = undefined;
+    }
+
+    // Continue until no more pages (after_key is undefined) or we hit the batch size limit
+  } while (afterKey && agentBuckets.length < COMPOSITE_AGGREGATION_BATCH_SIZE * 100); // Safety limit: 1M agents
+
+  return { agentIds, agentBuckets, totalDocs };
+}
 
 export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
-  esClient: CoreStart['elasticsearch']['client']
+  esClient: CoreStart['elasticsearch']['client'],
+  experimentalFeatures: ExperimentalFeatures
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
   let es: typeof data.search.searchAsInternalUser;
 
@@ -43,8 +137,11 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
           allow_no_indices: false,
           expand_wildcards: 'all',
         }),
+        resultsIndexExists: esClient.asInternalUser.indices.exists({
+          index: `${RESULTS_DATA_STREAM_INDEX}*`,
+        }),
       }).pipe(
-        mergeMap(({ actionsIndexExists, newDataStreamIndexExists }) => {
+        mergeMap(({ actionsIndexExists, newDataStreamIndexExists, resultsIndexExists }) => {
           const strictRequest = {
             factoryQueryType: request.factoryQueryType,
             kuery: request.kuery,
@@ -58,6 +155,9 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             ...('spaceId' in request ? { spaceId: request.spaceId } : {}),
             ...('integrationNamespaces' in request
               ? { integrationNamespaces: request.integrationNamespaces }
+              : {}),
+            ...('useNewDataStream' in request
+              ? { useNewDataStream: request.useNewDataStream }
               : {}),
           } as StrategyRequestType<T>;
 
@@ -90,32 +190,87 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
 
           return searchLegacyIndex$.pipe(
             mergeMap((legacyIndexResponse) => {
-              if (
-                request.factoryQueryType === OsqueryQueries.actionResults &&
-                newDataStreamIndexExists
-              ) {
-                const dataStreamDsl = queryFactory.buildDsl({
-                  ...strictRequest,
-                  componentTemplateExists: actionsIndexExists,
-                  useNewDataStream: true,
-                } as StrategyRequestType<T>);
+              if (request.factoryQueryType === OsqueryQueries.actionResults) {
+                // For action results, run parallel queries for data stream comparison
+                // and optionally results aggregation (when hybrid feature is enabled)
+                const dataStreamQuery$ = newDataStreamIndexExists
+                  ? from(
+                      es.search(
+                        {
+                          ...strictRequest,
+                          params: queryFactory.buildDsl({
+                            ...strictRequest,
+                            componentTemplateExists: actionsIndexExists,
+                            useNewDataStream: true,
+                          } as StrategyRequestType<T>),
+                        },
+                        options,
+                        deps
+                      )
+                    )
+                  : of(null);
 
-                return from(
-                  es.search(
-                    {
-                      ...strictRequest,
-                      params: dataStreamDsl,
-                    },
-                    options,
-                    deps
-                  )
-                ).pipe(
-                  map((newDataStreamIndexResponse) => {
-                    if (newDataStreamIndexResponse.rawResponse.hits.total) {
-                      return newDataStreamIndexResponse;
+                // Query results index for unique agent IDs (for hybrid merge)
+                // Only when hybridActionResults feature flag is enabled
+                // Uses composite aggregation with pagination for unlimited agent scale
+                const resultsAgentsQuery$ =
+                  experimentalFeatures.hybridActionResults && resultsIndexExists
+                    ? from(
+                        fetchAllResultsAgents(
+                          es,
+                          {
+                            actionId: 'actionId' in strictRequest ? strictRequest.actionId : '',
+                            startDate:
+                              'startDate' in strictRequest ? strictRequest.startDate : undefined,
+                            integrationNamespaces:
+                              'integrationNamespaces' in strictRequest
+                                ? strictRequest.integrationNamespaces
+                                : undefined,
+                          },
+                          options,
+                          deps
+                        )
+                      )
+                    : of(null);
+
+                return forkJoin({
+                  dataStreamResponse: dataStreamQuery$,
+                  resultsAgentsData: resultsAgentsQuery$,
+                }).pipe(
+                  map(({ dataStreamResponse, resultsAgentsData }) => {
+                    // Extract agent IDs and total docs from results aggregation (hybrid mode only)
+                    const resultsAgentIds = resultsAgentsData?.agentIds ?? new Set<string>();
+                    const resultsAgentBuckets = resultsAgentsData?.agentBuckets ?? [];
+                    const resultsTotalDocs = resultsAgentsData?.totalDocs ?? 0;
+
+                    // Compare hit counts and select best response
+                    let selectedResponse = legacyIndexResponse;
+                    if (dataStreamResponse) {
+                      const newTotal =
+                        typeof dataStreamResponse.rawResponse.hits.total === 'number'
+                          ? dataStreamResponse.rawResponse.hits.total
+                          : dataStreamResponse.rawResponse.hits.total?.value ?? 0;
+                      const legacyTotal =
+                        typeof legacyIndexResponse.rawResponse.hits.total === 'number'
+                          ? legacyIndexResponse.rawResponse.hits.total
+                          : legacyIndexResponse.rawResponse.hits.total?.value ?? 0;
+
+                      if (newTotal > legacyTotal) {
+                        selectedResponse = dataStreamResponse;
+                      }
                     }
 
-                    return legacyIndexResponse;
+                    // Attach results data for hybrid merge (only when feature enabled)
+                    if (experimentalFeatures.hybridActionResults) {
+                      return {
+                        ...selectedResponse,
+                        resultsAgentIds,
+                        resultsAgentBuckets,
+                        resultsTotalDocs,
+                      };
+                    }
+
+                    return selectedResponse;
                   })
                 );
               }
