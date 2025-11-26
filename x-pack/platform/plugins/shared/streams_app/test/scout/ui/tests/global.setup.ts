@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
+import { globalSetupHook } from '@kbn/scout';
 
-// eslint-disable-next-line import/no-default-export
-export default createPlaywrightConfig({
-  testDir: './tests',
-  runGlobalSetup: true,
+globalSetupHook('Setup environment for streams tests', async ({ apiServices, log }) => {
+  log.debug('[setup] Enabling streams...');
+  await apiServices.streams.enable();
 });
