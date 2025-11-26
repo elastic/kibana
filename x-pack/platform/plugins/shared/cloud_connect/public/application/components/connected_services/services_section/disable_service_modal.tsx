@@ -53,7 +53,7 @@ export const DisableServiceModal: React.FC<DisableServiceModalProps> = ({
       <p>
         <FormattedMessage
           id="xpack.cloudConnect.services.disable.modalDescription"
-          defaultMessage="Disabling this service will permanently remove all related set-up and configuration from your cluster. You can re-enable it later, but your progress will be lost."
+          defaultMessage="Disabling this service will permanently remove all related setup and configuration from your cluster. You can re-enable it later, but your progress will be lost."
         />
       </p>
     </EuiConfirmModal>
