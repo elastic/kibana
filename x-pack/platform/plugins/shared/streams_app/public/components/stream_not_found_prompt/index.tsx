@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../hooks/use_kibana';
+import { StreamsAppPageTemplate } from '../streams_app_page_template';
 
 interface StreamNotFoundPromptProps {
   streamName: string;
@@ -27,9 +28,8 @@ export function StreamNotFoundPrompt({ streamName }: StreamNotFoundPromptProps) 
   };
 
   return (
-    <EuiPageTemplate.EmptyPrompt
+    <StreamsAppPageTemplate.EmptyPrompt
       data-test-subj="streamNotFoundPrompt"
-      color="subdued"
       iconType="search"
       title={
         <h2>
