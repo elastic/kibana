@@ -43,7 +43,6 @@ export function SuggestedStreamPanel({
   index,
   onEdit,
   onSave,
-  isDisabled = false,
 }: {
   definition: Streams.WiredStream.GetResponse;
   partition: PartitionSuggestion;
@@ -52,7 +51,6 @@ export function SuggestedStreamPanel({
   index: number;
   onEdit(index: number, suggestion: PartitionSuggestion): void;
   onSave?: () => void;
-  isDisabled?: boolean;
 }) {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { changeSuggestionName, changeSuggestionCondition, reviewSuggestedRule } =
@@ -173,7 +171,6 @@ export function SuggestedStreamPanel({
             defaultMessage: 'Edit',
           })}
           data-test-subj={`suggestionEditButton-${currentSuggestion.name}`}
-          disabled={isDisabled}
         />
       </EuiFlexGroup>
       <EuiSpacer size="s" />
@@ -184,7 +181,6 @@ export function SuggestedStreamPanel({
           <EuiButtonEmpty
             iconType={isSelected ? 'eyeClosed' : 'eye'}
             isSelected={isSelected}
-            disabled={isDisabled}
             size="s"
             onClick={() => onPreview(!isSelected)}
             aria-label={i18n.translate(
@@ -223,7 +219,6 @@ export function SuggestedStreamPanel({
                 size="s"
                 onClick={() => reviewSuggestedRule(currentSuggestion.name || partition.name)}
                 fill
-                disabled={isDisabled}
               >
                 {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.accept', {
                   defaultMessage: 'Accept',

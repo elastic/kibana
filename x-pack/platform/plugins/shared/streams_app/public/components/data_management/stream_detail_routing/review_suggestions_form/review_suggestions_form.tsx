@@ -123,7 +123,7 @@ export function ReviewSuggestionsForm({
           )}
         </EuiText>
         <EuiSpacer size="m" />
-        {isEditingOrReorderingStreams && (
+        {isEditingOrReorderingStreams ? (
           <>
             <EuiCallOut
               size="s"
@@ -135,37 +135,39 @@ export function ReviewSuggestionsForm({
             />
             <EuiSpacer size="m" />
           </>
+        ) : (
+          <>
+            {suggestions.map((partition, index) => (
+              <NestedView key={partition.name} last={index === suggestions.length - 1}>
+                <SuggestedStreamPanel
+                  definition={definition}
+                  partition={partition}
+                  index={index}
+                  onPreview={(toggle) => previewSuggestion(index, toggle)}
+                  onDismiss={() => rejectSuggestion(index, selectedPreviewName === partition.name)}
+                  onEdit={editSuggestion}
+                  onSave={handleSave}
+                />
+                <EuiSpacer size="s" />
+              </NestedView>
+            ))}
+            <EuiSpacer size="m" />
+            <GenerateSuggestionButton
+              iconType="refresh"
+              size="s"
+              onClick={onRegenerate}
+              isLoading={isLoadingSuggestions}
+              aiFeatures={aiFeatures}
+            >
+              {i18n.translate(
+                'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
+                {
+                  defaultMessage: 'Regenerate',
+                }
+              )}
+            </GenerateSuggestionButton>
+          </>
         )}
-        {suggestions.map((partition, index) => (
-          <NestedView key={partition.name} last={index === suggestions.length - 1}>
-            <SuggestedStreamPanel
-              definition={definition}
-              partition={partition}
-              index={index}
-              onPreview={(toggle) => previewSuggestion(index, toggle)}
-              onDismiss={() => rejectSuggestion(index, selectedPreviewName === partition.name)}
-              onEdit={editSuggestion}
-              onSave={handleSave}
-              isDisabled={isEditingOrReorderingStreams}
-            />
-            <EuiSpacer size="s" />
-          </NestedView>
-        ))}
-        <EuiSpacer size="m" />
-        <GenerateSuggestionButton
-          iconType="refresh"
-          size="s"
-          onClick={onRegenerate}
-          isLoading={isLoadingSuggestions}
-          aiFeatures={aiFeatures}
-        >
-          {i18n.translate(
-            'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
-            {
-              defaultMessage: 'Regenerate',
-            }
-          )}
-        </GenerateSuggestionButton>
       </EuiCallOut>
     </>
   );
