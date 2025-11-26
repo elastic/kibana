@@ -151,7 +151,7 @@ export const MonitoringList: React.FC = () => {
         const date = moment(createdAt).toDate();
         return (
           <EuiToolTip content={moment(createdAt).format('MMMM D, YYYY @ HH:mm:ss.SSS')}>
-            <span>
+            <span tabIndex={0}>
               <FormattedRelative value={date} />
             </span>
           </EuiToolTip>
@@ -225,6 +225,7 @@ export const MonitoringList: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false} style={{ minWidth: 250 }}>
             <EuiComboBox
+              aria-label={labels.monitoring.userFilterLabel}
               prepend={labels.monitoring.authorLabel}
               placeholder={labels.monitoring.userFilterLabel}
               singleSelection={{ asPlainText: true }}
@@ -287,13 +288,14 @@ export const MonitoringList: React.FC = () => {
         {/* Error Message */}
         {error && (
           <>
-            <EuiCallOut title={error} color="danger" iconType="error" />
+            <EuiCallOut title={error} color="danger" iconType="error" announceOnMount />
             <EuiSpacer size="l" />
           </>
         )}
 
         {/* Conversations Table */}
         <EuiBasicTable
+          tableCaption={labels.monitoring.title}
           items={filteredConversations}
           columns={columns}
           loading={loading}

@@ -393,6 +393,7 @@ export const MonitoringDetail: React.FC = () => {
         />
         <KibanaPageTemplate.Section>
           <EuiCallOut
+            announceOnMount
             title={
               error ||
               i18n.translate('xpack.onechat.monitoring.conversationNotFound', {
