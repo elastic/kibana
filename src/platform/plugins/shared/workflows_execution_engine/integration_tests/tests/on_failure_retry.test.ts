@@ -144,10 +144,10 @@ steps:
 
             const firstToSecondDelay =
               new Date(secondExecution.startedAt).getTime() -
-              new Date(firstExecution.completedAt!).getTime();
+              new Date(firstExecution.finishedAt!).getTime();
             const secondToThirdDelay =
               new Date(thirdExecution.startedAt).getTime() -
-              new Date(secondExecution.completedAt!).getTime();
+              new Date(secondExecution.finishedAt!).getTime();
 
             // Each delay should be at least 1000ms (1s)
             expect(firstToSecondDelay).toBeGreaterThanOrEqual(1000);

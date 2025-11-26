@@ -117,7 +117,7 @@ steps:
           expect(failingStepExecutions.length).toBe(1);
           expect(finalStepExecutions.length).toBe(1);
 
-          const failingStepCompletedAt = new Date(failingStepExecutions[0].completedAt!).getTime();
+          const failingStepCompletedAt = new Date(failingStepExecutions[0].finishedAt!).getTime();
           const finalStepStartedAt = new Date(finalStepExecutions[0].startedAt).getTime();
 
           expect(finalStepStartedAt).toBeGreaterThanOrEqual(failingStepCompletedAt);

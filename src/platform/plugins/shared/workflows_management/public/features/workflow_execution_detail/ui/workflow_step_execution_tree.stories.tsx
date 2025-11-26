@@ -147,7 +147,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
             input:
               '- Output JSON array with multiple object\n- Each item in the array must follow { "name": "Luisa", "surname": "Sampton" } structure\n- Generate random count of elements from 3 to 5\n- Generate some famous name and surname (Brad Pitt, etc)\n- Don\'t include anything else except JSON into the response\n- It MUST!!! be just raw JSON string, no formatting, no anything else\n',
           },
-          completedAt: '2025-09-02T20:44:01.245Z',
+          finishedAt: '2025-09-02T20:44:01.245Z',
           executionTimeMs: 3779,
           scopeStack: [],
         },
@@ -169,7 +169,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
             message:
               '[{&quot;name&quot;:&quot;Brad&quot;,&quot;surname&quot;:&quot;Pitt&quot;},{&quot;name&quot;:&quot;Angelina&quot;,&quot;surname&quot;:&quot;Jolie&quot;},{&quot;name&quot;:&quot;Leonardo&quot;,&quot;surname&quot;:&quot;DiCaprio&quot;},{&quot;name&quot;:&quot;Scarlett&quot;,&quot;surname&quot;:&quot;Johansson&quot;}]',
           },
-          completedAt: '2025-09-02T20:44:02.167Z',
+          finishedAt: '2025-09-02T20:44:02.167Z',
           executionTimeMs: 25,
           scopeStack: [],
         },
@@ -189,7 +189,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: '-------------------hellow-------',
           },
-          completedAt: '2025-09-02T20:44:03.627Z',
+          finishedAt: '2025-09-02T20:44:03.627Z',
           executionTimeMs: 456,
           scopeStack: [],
         },
@@ -229,7 +229,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
               },
             ],
           },
-          completedAt: '2025-09-02T20:44:14.522Z',
+          finishedAt: '2025-09-02T20:44:14.522Z',
           executionTimeMs: 9289,
           scopeStack: [],
         },
@@ -249,7 +249,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Scarlett Johansson',
           },
-          completedAt: '2025-09-02T20:44:12.694Z',
+          finishedAt: '2025-09-02T20:44:12.694Z',
           executionTimeMs: 96,
           scopeStack: [
             {
@@ -274,7 +274,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Leonardo DiCaprio',
           },
-          completedAt: '2025-09-02T20:44:10.491Z',
+          finishedAt: '2025-09-02T20:44:10.491Z',
           executionTimeMs: 35,
           scopeStack: [
             {
@@ -299,7 +299,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Angelina Jolie',
           },
-          completedAt: '2025-09-02T20:44:08.423Z',
+          finishedAt: '2025-09-02T20:44:08.423Z',
           executionTimeMs: 27,
           scopeStack: [
             {
@@ -324,7 +324,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Brad Pitt',
           },
-          completedAt: '2025-09-02T20:44:06.293Z',
+          finishedAt: '2025-09-02T20:44:06.293Z',
           executionTimeMs: 28,
           scopeStack: [
             {
@@ -349,7 +349,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Scarlett Johansson',
           },
-          completedAt: '2025-09-02T20:44:13.895Z',
+          finishedAt: '2025-09-02T20:44:13.895Z',
           executionTimeMs: 415,
           scopeStack: [
             {
@@ -374,7 +374,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Leonardo DiCaprio',
           },
-          completedAt: '2025-09-02T20:44:11.823Z',
+          finishedAt: '2025-09-02T20:44:11.823Z',
           executionTimeMs: 401,
           scopeStack: [
             {
@@ -399,7 +399,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Angelina Jolie',
           },
-          completedAt: '2025-09-02T20:44:09.756Z',
+          finishedAt: '2025-09-02T20:44:09.756Z',
           executionTimeMs: 393,
           scopeStack: [
             {
@@ -424,7 +424,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: 'Brad Pitt',
           },
-          completedAt: '2025-09-02T20:44:07.692Z',
+          finishedAt: '2025-09-02T20:44:07.692Z',
           executionTimeMs: 392,
           scopeStack: [
             {
@@ -449,7 +449,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
           input: {
             message: '--------------------------',
           },
-          completedAt: '2025-09-02T20:44:15.945Z',
+          finishedAt: '2025-09-02T20:44:15.945Z',
           executionTimeMs: 392,
           scopeStack: [],
         },
