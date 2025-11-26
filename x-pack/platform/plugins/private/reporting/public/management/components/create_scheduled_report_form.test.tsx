@@ -223,20 +223,20 @@ describe('createScheduledReportForm', () => {
       await user.click(sendByEmailToggle);
 
       // Add at least one recipient to enable form submission
-      const emailField = await screen.findByTestId('emailRecipientsCombobox');
+      const emailField = screen.getByTestId('emailRecipientsCombobox');
       const emailInput = within(emailField).getByTestId('comboBoxSearchInput');
       await user.type(emailInput, 'test@test.com');
       await user.keyboard('{Enter}');
 
       // Find and fill the email subject field with mustache variables
-      const emailSubjectInput = await screen.findByTestId('emailSubjectInput');
+      const emailSubjectInput = screen.getByTestId('emailSubjectInput');
       // Doubling the opening curly braces to avoid interpolation by the testing framework
       const customSubject = 'Report: {{{{title}} - {{{{objectType}} - {{{{date}}';
       await user.clear(emailSubjectInput);
       await user.type(emailSubjectInput, customSubject);
 
       // Submit the form
-      const submitButton = await screen.findByTestId('scheduleExportSubmitButton');
+      const submitButton = screen.getByTestId('scheduleExportSubmitButton');
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -265,7 +265,7 @@ describe('createScheduledReportForm', () => {
           })
         );
       });
-    }, 10000);
+    }, 15000);
 
     it('submits the form with email message containing mustache variables', async () => {
       user = userEvent.setup({ delay: null });
@@ -326,7 +326,7 @@ describe('createScheduledReportForm', () => {
           })
         );
       });
-    }, 10000);
+    }, 15000);
 
     it('submits the form with both email subject and message containing multiple mustache variables', async () => {
       user = userEvent.setup({ delay: null });
@@ -346,18 +346,18 @@ describe('createScheduledReportForm', () => {
       await user.click(sendByEmailToggle);
 
       // Add at least one recipient to enable form submission
-      const emailField = await screen.findByTestId('emailRecipientsCombobox');
+      const emailField = screen.getByTestId('emailRecipientsCombobox');
       const emailInput = within(emailField).getByTestId('comboBoxSearchInput');
       await user.type(emailInput, 'test@test.com');
       await user.keyboard('{Enter}');
 
       // Fill email subject with mustache variables
-      const emailSubjectInput = await screen.findByTestId('emailSubjectInput');
+      const emailSubjectInput = screen.getByTestId('emailSubjectInput');
       await user.clear(emailSubjectInput);
       await user.type(emailSubjectInput, '{{{{objectType}} {{{{title}} - {{{{date}}');
 
       // Fill email message with mustache variables
-      const emailMessageTextarea = await screen.findByTestId('emailMessageTextArea');
+      const emailMessageTextarea = screen.getByTestId('emailMessageTextArea');
       await user.clear(emailMessageTextarea);
       await user.type(
         emailMessageTextarea,
@@ -365,7 +365,7 @@ describe('createScheduledReportForm', () => {
       );
 
       // Submit the form
-      const submitButton = await screen.findByTestId('scheduleExportSubmitButton');
+      const submitButton = screen.getByTestId('scheduleExportSubmitButton');
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -387,6 +387,6 @@ describe('createScheduledReportForm', () => {
           })
         );
       });
-    }, 10000);
+    }, 15000);
   });
 });

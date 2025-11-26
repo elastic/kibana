@@ -41,6 +41,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
     };
 
     before(async () => {
+      await reportingFunctional.loginReportingManager();
       await reportingFunctional.initEcommerce();
     });
 
