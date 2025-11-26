@@ -37,7 +37,7 @@ export function WiredAdvancedView({
         </>
       )}
 
-      {significantEvents?.available && (
+      {significantEvents?.enabled && (
         <>
           <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
           <EuiSpacer />
