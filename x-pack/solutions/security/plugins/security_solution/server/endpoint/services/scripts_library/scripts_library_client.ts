@@ -12,6 +12,7 @@ import type {
   Logger,
   SavedObjectsClientContract,
   SavedObject,
+  SavedObjectsFindOptions,
 } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
 import assert from 'assert';
@@ -236,7 +237,12 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     pageSize = ENDPOINT_DEFAULT_PAGE_SIZE,
     sortField = 'name',
     sortDirection = 'asc',
+    kuery,
   }: ListScriptsRequestQuery = {}): Promise<EndpointScriptListApiResponse> {
+    const filter: SavedObjectsFindOptions['filter'] = kuery;
+
+    // TODO:PT need to convert `kuery` to KueryNode and ensure all property names are prefixed with SO type
+
     const soFindResults = await this.soClient
       .find<ScriptsLibrarySavedObjectAttributes>({
         type: SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
@@ -244,6 +250,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
         page,
         sortField,
         sortOrder: sortDirection,
+        filter,
       })
       .catch(catchAndWrapError.withMessage('Failed to search for scripts'));
 

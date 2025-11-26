@@ -24,8 +24,7 @@ export const ListScriptsRequestSchema = {
         ])
       ),
       sortDirection: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
-
-      // TODO:PT add filters or perhaps support for `kuery`
+      kuery: schema.maybe(schema.string()),
     })
   ),
 };
