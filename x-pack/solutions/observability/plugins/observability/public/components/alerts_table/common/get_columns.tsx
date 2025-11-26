@@ -98,9 +98,12 @@ export const getColumns = (
       initialWidth: 150,
     },
     {
-      displayAsText: i18n.translate('xpack.observability.alertsTGrid.tagsColumnDescription', {
-        defaultMessage: 'Workflow Tags',
-      }),
+      displayAsText: i18n.translate(
+        'xpack.observability.alertsTGrid.workflowTagsColumnDescription',
+        {
+          defaultMessage: 'Workflow Tags',
+        }
+      ),
       id: ALERT_WORKFLOW_TAGS,
       initialWidth: 150,
     },
