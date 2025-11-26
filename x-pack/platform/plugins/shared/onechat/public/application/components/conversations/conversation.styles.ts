@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 const maxConversationWidthStyles = css`
@@ -21,3 +22,15 @@ export const fullWidthAndHeightStyles = css`
   width: 100%;
   height: 100%;
 `;
+
+export const useConversationBorderRadius = (size: 's' | 'm') => {
+  const { euiTheme } = useEuiTheme();
+  let borderRadius = euiTheme.border.radius.small;
+  if (size === 'm') {
+    // Non-standard EUI border radius
+    borderRadius = '6px';
+  }
+  return css`
+    border-radius: ${borderRadius};
+  `;
+};

@@ -5,28 +5,49 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHighlight,
-  EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { AgentDefinition } from '@kbn/onechat-common';
-import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { AgentDefinition } from '@kbn/onechat-common';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
-import { labels } from '../../../../../utils/i18n';
-import { AgentAvatar } from '../../../../common/agent_avatar';
+import { useAgentOptions } from './use_agent_options';
+
+const AGENT_OPTION_ROW_HEIGHT = 88;
+
+const selectAgentAriaLabel = i18n.translate(
+  'xpack.onechat.conversationInput.agentSelector.selectAgent.ariaLabel',
+  {
+    defaultMessage: 'Select an agent',
+  }
+);
+const createAgentAriaLabel = i18n.translate(
+  'xpack.onechat.conversationInput.agentSelector.createAgent.ariaLabel',
+  {
+    defaultMessage: 'Create an agent',
+  }
+);
+const manageAgentsAriaLabel = i18n.translate(
+  'xpack.onechat.conversationInput.agentSelector.manageAgents.ariaLabel',
+  {
+    defaultMessage: 'Manage agents',
+  }
+);
+const agentSearchPlaceholder = i18n.translate(
+  'xpack.onechat.conversationInput.agentSelector.search.placeholder',
+  { defaultMessage: 'Search agents' }
+);
 
 const agentSelectId = 'agentBuilderAgentSelect';
 
@@ -49,47 +70,34 @@ const AgentSelectButton: React.FC<AgentSelectButtonProps> = ({ selectedAgentName
   </EuiButtonEmpty>
 );
 
-const AgentOptionPrepend: React.FC<{ agent: AgentDefinition }> = ({ agent }) => {
-  const { euiTheme } = useEuiTheme();
-  const panelStyles = css`
-    background-color: ${euiTheme.colors.backgroundBaseSubdued};
-  `;
+const AgentPopoverTitle: React.FC<{ search: ReactNode }> = ({ search }) => {
+  const { createOnechatUrl } = useNavigation();
+  const createAgentHref = createOnechatUrl(appPaths.agents.new);
+  const manageAgentsHref = createOnechatUrl(appPaths.agents.list);
   return (
-    <EuiPanel css={panelStyles} hasShadow={false}>
-      <AgentAvatar size="s" agent={agent} />
-    </EuiPanel>
+    <EuiPopoverTitle paddingSize="s">
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={true}>{search}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="plus"
+            color="text"
+            aria-label={createAgentAriaLabel}
+            href={createAgentHref}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="gear"
+            color="text"
+            aria-label={manageAgentsAriaLabel}
+            href={manageAgentsHref}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPopoverTitle>
   );
 };
-
-type AgentOptionData = EuiSelectableOption<{ agent?: AgentDefinition }>;
-
-const AgentOption: React.FC<{ agent?: AgentDefinition; searchValue: string }> = ({
-  agent,
-  searchValue,
-}) => {
-  if (!agent) {
-    return null;
-  }
-  return (
-    <>
-      <EuiText size="s" color="subdued">
-        <h4>
-          <EuiHighlight search={searchValue}>{agent.name}</EuiHighlight>
-        </h4>
-        <p>
-          <EuiHighlight search={searchValue}>{agent.description}</EuiHighlight>
-        </p>
-      </EuiText>
-    </>
-  );
-};
-
-const AGENT_OPTION_ROW_HEIGHT = 88;
-
-const agentSearchPlaceholder = i18n.translate(
-  'xpack.onechat.conversationInput.agentSelector.search.placeholder',
-  { defaultMessage: 'Search agents' }
-);
 
 interface AgentSelectDropdownProps {
   selectedAgent?: AgentDefinition;
@@ -103,33 +111,17 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
   agents = [],
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { createOnechatUrl } = useNavigation();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const options = useMemo(
-    () =>
-      agents.map((agent) => {
-        let checked: 'on' | undefined;
-        if (agent.id === selectedAgent?.id) {
-          checked = 'on';
-        }
-        const option: AgentOptionData = {
-          key: agent.id,
-          label: agent.name,
-          searchableLabel: `${agent.name} ${agent.description}`,
-          checked,
-          prepend: <AgentOptionPrepend agent={agent} />,
-          data: { agent },
-        };
-        return option;
-      }),
-    [agents, selectedAgent?.id]
-  );
 
   const panelStyles = css`
     inline-size: calc(${euiTheme.size.xxxl} * 10);
   `;
+
+  const { agentOptions, renderAgentOption } = useAgentOptions({
+    agents,
+    selectedAgentId: selectedAgent?.id,
+  });
 
   return (
     <EuiPopover
@@ -147,10 +139,10 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
     >
       <EuiSelectable
         id={agentSelectId}
-        aria-label={labels.conversations.selectAgentAriaLabel}
+        aria-label={selectAgentAriaLabel}
         searchable
         searchProps={{ placeholder: agentSearchPlaceholder }}
-        options={options}
+        options={agentOptions}
         onChange={(_options, _event, changedOption) => {
           const { checked, key: agentId } = changedOption;
           const isChecked = checked === 'on';
@@ -160,34 +152,14 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
           }
         }}
         singleSelection
-        renderOption={({ agent }, searchValue) => {
-          return <AgentOption agent={agent} searchValue={searchValue} />;
-        }}
+        renderOption={(option, searchValue) =>
+          renderAgentOption({ agent: option.agent, searchValue })
+        }
         listProps={{ isVirtualized: true, rowHeight: AGENT_OPTION_ROW_HEIGHT }}
       >
         {(list, search) => (
           <div>
-            <EuiPopoverTitle paddingSize="s">
-              <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={true}>{search}</EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="plus"
-                    color="text"
-                    aria-label={labels.conversations.createAnAgent}
-                    href={createOnechatUrl(appPaths.agents.new)}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="gear"
-                    color="text"
-                    aria-label={labels.conversations.manageAgents}
-                    href={createOnechatUrl(appPaths.agents.list)}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPopoverTitle>
+            <AgentPopoverTitle search={search} />
             {list}
           </div>
         )}

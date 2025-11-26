@@ -10,15 +10,14 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
+import { useConversationBorderRadius } from '../conversation.styles';
 
 const INPUT_MIN_HEIGHT = '150px';
-// Non-standard EUI border radius
-const INPUT_BORDER_RADIUS = '6px';
 const useInputBorderStyles = () => {
   const { euiTheme } = useEuiTheme();
   return css`
     border: ${euiTheme.border.thin};
-    border-radius: ${INPUT_BORDER_RADIUS};
+    ${useConversationBorderRadius('m')}
     border-color: ${euiTheme.colors.borderBaseSubdued};
     &:focus-within[aria-disabled='false'] {
       border-color: ${euiTheme.colors.primary};
