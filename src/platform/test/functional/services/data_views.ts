@@ -31,9 +31,13 @@ export class DataViewsService extends FtrService {
   }: DataViewOptions) {
     await this.testSubjects.existOrFail('indexPatternEditorFlyout');
     await this.testSubjects.existOrFail('createIndexPatternStatusMessage');
-    await this.retry.waitFor('data view list loaded', async () => {
-      return await this.testSubjects.exists('createIndexPatternStep1IndicesList');
-    });
+
+    if (!name.includes(':')) {
+      await this.retry.waitFor('data view list loaded', async () => {
+        return await this.testSubjects.exists('createIndexPatternStep1IndicesList');
+      });
+    }
+
     await this.testSubjects.setValue('createIndexPatternTitleInput', name, {
       clearWithKeyboard: true,
       typeCharByChar: true,
