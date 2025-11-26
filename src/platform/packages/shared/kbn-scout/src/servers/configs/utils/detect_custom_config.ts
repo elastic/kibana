@@ -33,7 +33,7 @@ export function detectCustomConfigDir(playwrightConfigPath: string): string | nu
  * Returns the root directory where the config file should be located.
  * @param playwrightConfigPath path to the playwright config file
  * @param mode The server mode (e.g., 'serverless=es', 'stateful')
- * @returns The root directory path for the config (e.g., 'default/serverless', 'custom/uiam_local/stateful')
+ * @returns The root directory path for the config (e.g., 'default/serverless', 'custom/uiam_local/serverless')
  */
 export function getConfigRootDir(
   playwrightConfigPath: string,
@@ -44,13 +44,7 @@ export function getConfigRootDir(
   // Check if playwright path indicates a custom config
   const customConfigDir = detectCustomConfigDir(playwrightConfigPath);
 
-  if (customConfigDir) {
-    // Custom config: custom/<config_name>/<mode>
-    const modeDir = mode === 'stateful' ? 'stateful' : 'serverless';
-    return path.join(baseDir, 'custom', customConfigDir, modeDir);
-  }
-
-  // Default config: default/<mode>
   const modeDir = mode === 'stateful' ? 'stateful' : 'serverless';
-  return path.join(baseDir, 'default', modeDir);
+
+  return path.join(baseDir, customConfigDir ? 'custom' : 'default', customConfigDir || '', modeDir);
 }
