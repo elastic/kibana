@@ -5,11 +5,6 @@
 
 const eslintConfigPrettierRules = require('eslint-config-prettier').rules;
 
-// The current implementation excluded all the variables matching the regexp.
-// We should remove it as soon as multiple underscores are supported by the linter.
-// https://github.com/typescript-eslint/typescript-eslint/issues/1712
-// Due to the same reason we have to duplicate the "filter" option for "default" and other "selectors".
-const allowedNameRegexp = '^(UNSAFE_|_{1,3})|_{1,3}$';
 module.exports = {
   overrides: [
     {
@@ -87,10 +82,8 @@ module.exports = {
             {
               selector: 'default',
               format: ['camelCase', 'PascalCase', 'UPPER_CASE', 'snake_case'],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false,
-              },
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
             },
             {
               selector: 'variable',
@@ -99,18 +92,26 @@ module.exports = {
                 'UPPER_CASE', // const SOMETHING = ...
                 'PascalCase', // React.FunctionComponent =
               ],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false,
-              },
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
+            },
+            {
+              selector: 'variable',
+              modifiers: ['destructured'],
+              format: [
+                'camelCase',
+                'snake_case', // response properties from ES
+                'UPPER_CASE', // const SOMETHING = ...
+                'PascalCase', // React.FunctionComponent =
+              ],
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
             },
             {
               selector: 'parameter',
               format: ['camelCase', 'PascalCase'],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false,
-              },
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
             },
             {
               selector: 'memberLike',
@@ -120,10 +121,8 @@ module.exports = {
                 'snake_case', // keys in elasticsearch requests / responses
                 'UPPER_CASE',
               ],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false,
-              },
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
             },
             {
               selector: 'function',
@@ -131,10 +130,8 @@ module.exports = {
                 'camelCase',
                 'PascalCase', // React.FunctionComponent =
               ],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false,
-              },
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
             },
             {
               selector: 'typeLike',
