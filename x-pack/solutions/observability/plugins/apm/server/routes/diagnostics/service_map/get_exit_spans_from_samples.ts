@@ -90,7 +90,9 @@ export async function getExitSpans({
   const apmExitSpans = compactMap(hits, (hit) => {
     const fields = hit?.fields && accessKnownApmEventFields(hit.fields);
 
-    if (!fields) {
+    const parentId = fields?.[PARENT_ID];
+
+    if (!fields || !parentId || !parentSpans.has(parentId)) {
       return;
     }
 
