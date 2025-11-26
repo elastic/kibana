@@ -19,7 +19,6 @@ export type { CloudConnectedPluginSetup, CloudConnectedPluginStart };
 export class CloudConnectedPlugin
   implements Plugin<CloudConnectedPluginSetup, CloudConnectedPluginStart, CloudConnectedSetupDeps>
 {
-
   public setup(core: CoreSetup, plugins: CloudConnectedSetupDeps): CloudConnectedPluginSetup {
     // Skip plugin registration if running on Elastic Cloud.
     // This plugin is only for self-managed clusters connecting to Cloud services
