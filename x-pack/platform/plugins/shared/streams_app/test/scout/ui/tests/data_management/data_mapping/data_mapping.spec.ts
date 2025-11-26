@@ -13,7 +13,6 @@ import { generateLogsData } from '../../../fixtures/generators';
 
 test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.enable();
     // Clear existing rules
     await apiServices.streams.clearStreamChildren('logs');
     // Create a test stream with routing rules first
@@ -34,8 +33,8 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
   });
 
   test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    await apiServices.streams.clearStreamChildren('logs');
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
   });
 
   test('should display a list of stream mappings', async ({ page, pageObjects }) => {
