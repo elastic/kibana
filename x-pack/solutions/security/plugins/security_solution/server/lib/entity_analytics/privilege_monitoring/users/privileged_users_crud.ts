@@ -7,13 +7,14 @@
 
 import { merge } from 'lodash';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   UpdatePrivMonUserRequestBody,
   MonitoredUserDoc,
   CreatePrivMonUserRequestBody,
   CreatePrivMonUserResponse,
 } from '../../../../../common/api/entity_analytics';
-import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
+
 import type { PrivMonUserSource } from '../types';
 
 // Helper function to upsert a single API label into the merged labels array
@@ -57,12 +58,18 @@ const mergeApiLabels = (
   return mergedLabels;
 };
 
-export const createPrivilegedUsersCrudService = ({
-  deps,
-  index,
-}: PrivilegeMonitoringDataClient) => {
-  const esClient = deps.clusterClient.asCurrentUser;
+export type PrivmonUserCrudService = ReturnType<typeof createPrivilegedUsersCrudService>;
+interface PrivmonUserCrudDeps {
+  esClient: ElasticsearchClient;
+  index: string;
+  logger: Logger;
+}
 
+export const createPrivilegedUsersCrudService = ({
+  esClient,
+  index,
+  logger,
+}: PrivmonUserCrudDeps) => {
   const create = async (
     user: CreatePrivMonUserRequestBody,
     source: PrivMonUserSource,
@@ -72,7 +79,7 @@ export const createPrivilegedUsersCrudService = ({
     // 1. If user exists: Update existing user with new labels and sources
     // 2. If user doesn't exist: Create a new user
 
-    deps.logger.info(`Maximum supported number of privileged users allowed: ${maxUsersAllowed}`);
+    logger.info(`Maximum supported number of privileged users allowed: ${maxUsersAllowed}`);
     const timestamp = new Date().toISOString();
     // Check if user already exists by username
     const username = user.user?.name;
