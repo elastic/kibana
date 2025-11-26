@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
 import { McpClient } from './client';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StreamableHTTPClientTransport, StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import {
+  StreamableHTTPClientTransport,
+  StreamableHTTPError,
+} from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
 import type { ClientDetails, CallToolParams } from './types';
 import type { ServerCapabilities } from '@modelcontextprotocol/sdk/types';
@@ -32,11 +36,15 @@ type MockListToolsResponse = MockListToolsResult | MockListToolsError;
 
 interface MockCallToolResult {
   isError: false;
-  content: Array<{
-    type: string;
-    text?: string | null | number | object;
-    [key: string]: unknown;
-  } | null | undefined>;
+  content: Array<
+    | {
+        type: string;
+        text?: string | null | number | object;
+        [key: string]: unknown;
+      }
+    | null
+    | undefined
+  >;
 }
 
 interface MockCallToolError {
@@ -50,28 +58,30 @@ type MockCallToolResponse = MockCallToolResult | MockCallToolError;
 jest.mock('@modelcontextprotocol/sdk/client/index.js');
 jest.mock('@modelcontextprotocol/sdk/client/streamableHttp.js', () => {
   const StreamableHTTPClientTransportMock = jest.fn();
+  class MockStreamableHTTPError extends Error {
+    public code: number;
+    constructor(code: number, message?: string) {
+      super(`Streamable HTTP error: ${message}`);
+      this.name = 'StreamableHTTPError';
+      this.code = code;
+    }
+  }
   return {
     StreamableHTTPClientTransport: StreamableHTTPClientTransportMock,
-    StreamableHTTPError: class StreamableHTTPError extends Error {
-      public code: number;
-      constructor(code: number, message?: string) {
-        super(`Streamable HTTP error: ${message}`);
-        this.name = 'StreamableHTTPError';
-        this.code = code;
-      }
-    },
+    StreamableHTTPError: MockStreamableHTTPError,
   };
 });
 jest.mock('@modelcontextprotocol/sdk/client/auth.js', () => {
   const actual = jest.requireActual('@modelcontextprotocol/sdk/client/auth.js');
+  class MockUnauthorizedError extends Error {
+    constructor(message?: string) {
+      super(message);
+      this.name = 'UnauthorizedError';
+    }
+  }
   return {
     ...actual,
-    UnauthorizedError: class UnauthorizedError extends Error {
-      constructor(message?: string) {
-        super(message);
-        this.name = 'UnauthorizedError';
-      }
-    },
+    UnauthorizedError: MockUnauthorizedError,
   };
 });
 
@@ -79,12 +89,16 @@ describe('McpClient', () => {
   let mockClient: {
     connect: jest.MockedFunction<(transport: StreamableHTTPClientTransport) => Promise<void>>;
     close: jest.MockedFunction<() => Promise<void>>;
-    listTools: jest.MockedFunction<(params?: { cursor?: string }) => Promise<MockListToolsResponse>>;
-    callTool: jest.MockedFunction<(params: {
-      name: string;
-      _meta: Record<string, unknown>;
-      arguments: Record<string, unknown>;
-    }) => Promise<MockCallToolResponse>>;
+    listTools: jest.MockedFunction<
+      (params?: { cursor?: string }) => Promise<MockListToolsResponse>
+    >;
+    callTool: jest.MockedFunction<
+      (params: {
+        name: string;
+        _meta: Record<string, unknown>;
+        arguments: Record<string, unknown>;
+      }) => Promise<MockCallToolResponse>
+    >;
     getServerCapabilities: jest.MockedFunction<() => ServerCapabilities | undefined>;
   };
   let mockTransport: StreamableHTTPClientTransport;
@@ -111,9 +125,12 @@ describe('McpClient', () => {
 
     mockTransport = {} as StreamableHTTPClientTransport;
 
-    (Client as jest.MockedClass<typeof Client>).mockImplementation(() => mockClient as unknown as Client);
-    (StreamableHTTPClientTransport as jest.MockedClass<typeof StreamableHTTPClientTransport>)
-      .mockImplementation(() => mockTransport);
+    (Client as jest.MockedClass<typeof Client>).mockImplementation(
+      () => mockClient as unknown as Client
+    );
+    (
+      StreamableHTTPClientTransport as jest.MockedClass<typeof StreamableHTTPClientTransport>
+    ).mockImplementation(() => mockTransport);
 
     clientDetails = {
       name: 'test-client',
@@ -253,14 +270,18 @@ describe('McpClient', () => {
       const error = new Error('Generic error');
       mockClient.connect.mockRejectedValue(error);
 
-      await expect(client.connect()).rejects.toThrow('Error connecting to MCP client: Generic error');
+      await expect(client.connect()).rejects.toThrow(
+        'Error connecting to MCP client: Generic error'
+      );
     });
 
     it('handles non-Error objects', async () => {
       const client = new McpClient(clientDetails);
       mockClient.connect.mockRejectedValue('String error');
 
-      await expect(client.connect()).rejects.toThrow('Error connecting to MCP client: String error');
+      await expect(client.connect()).rejects.toThrow(
+        'Error connecting to MCP client: String error'
+      );
     });
 
     it('handles error objects without message property', async () => {
@@ -268,7 +289,9 @@ describe('McpClient', () => {
       const error = { code: 500, status: 'error' };
       mockClient.connect.mockRejectedValue(error);
 
-      await expect(client.connect()).rejects.toThrow('Error connecting to MCP client: [object Object]');
+      await expect(client.connect()).rejects.toThrow(
+        'Error connecting to MCP client: [object Object]'
+      );
     });
   });
 
@@ -514,9 +537,7 @@ describe('McpClient', () => {
         arguments: {},
       });
 
-      expect(result.content).toEqual([
-        { type: 'text', text: 'Text result' },
-      ]);
+      expect(result.content).toEqual([{ type: 'text', text: 'Text result' }]);
     });
 
     it('filters out resource_link content parts', async () => {
@@ -535,9 +556,7 @@ describe('McpClient', () => {
         arguments: {},
       });
 
-      expect(result.content).toEqual([
-        { type: 'text', text: 'Text result' },
-      ]);
+      expect(result.content).toEqual([{ type: 'text', text: 'Text result' }]);
     });
 
     it('handles empty content array', async () => {
@@ -614,9 +633,7 @@ describe('McpClient', () => {
         arguments: {},
       });
 
-      expect(result.content).toEqual([
-        { type: 'text', text: 'Valid text' },
-      ]);
+      expect(result.content).toEqual([{ type: 'text', text: 'Valid text' }]);
     });
 
     it('filters out text parts with non-string text', async () => {
@@ -636,9 +653,7 @@ describe('McpClient', () => {
         arguments: {},
       });
 
-      expect(result.content).toEqual([
-        { type: 'text', text: 'Valid text' },
-      ]);
+      expect(result.content).toEqual([{ type: 'text', text: 'Valid text' }]);
     });
 
     it('throws error when response has isError', async () => {
@@ -649,9 +664,9 @@ describe('McpClient', () => {
         error: 'Tool execution failed',
       });
 
-      await expect(
-        client.callTool({ name: 'test-tool', arguments: {} })
-      ).rejects.toThrow('Error calling tool test-tool: Tool execution failed');
+      await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
+        'Error calling tool test-tool: Tool execution failed'
+      );
     });
 
     it('handles error response with non-string error', async () => {
@@ -662,17 +677,17 @@ describe('McpClient', () => {
         error: { message: 'Error message', code: 500 },
       });
 
-      await expect(
-        client.callTool({ name: 'test-tool', arguments: {} })
-      ).rejects.toThrow('Error calling tool test-tool: [object Object]');
+      await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
+        'Error calling tool test-tool: [object Object]'
+      );
     });
 
     it('throws error when not connected', async () => {
       const client = new McpClient(clientDetails);
 
-      await expect(
-        client.callTool({ name: 'test-tool', arguments: {} })
-      ).rejects.toThrow('MCP client not connected');
+      await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
+        'MCP client not connected'
+      );
     });
 
     it('handles malformed content array gracefully', async () => {
@@ -693,9 +708,7 @@ describe('McpClient', () => {
         arguments: {},
       });
 
-      expect(result.content).toEqual([
-        { type: 'text', text: 'Valid' },
-      ]);
+      expect(result.content).toEqual([{ type: 'text', text: 'Valid' }]);
     });
   });
 });

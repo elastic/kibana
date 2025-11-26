@@ -7,9 +7,19 @@
 
 import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StreamableHTTPClientTransport, StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import { ClientDetails, CallToolParams, CallToolResponse, ContentPart, ListToolsResponse, Tool } from './types';
-import { ServerCapabilities } from '@modelcontextprotocol/sdk/types';
+import {
+  StreamableHTTPClientTransport,
+  StreamableHTTPError,
+} from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import type { ServerCapabilities } from '@modelcontextprotocol/sdk/types';
+import type {
+  ClientDetails,
+  CallToolParams,
+  CallToolResponse,
+  ContentPart,
+  ListToolsResponse,
+  Tool,
+} from './types';
 
 /**
  * McpClient is a wrapper around the MCP client SDK.
@@ -23,20 +33,17 @@ export class McpClient {
   public connected: boolean = false;
 
   constructor(clientDetails: ClientDetails, customHeaders?: Record<string, string>) {
-    this.transport = new StreamableHTTPClientTransport(
-      new URL(clientDetails.url),
-      {
-        requestInit: {
-          headers: customHeaders ?? {},
-        },
-        reconnectionOptions: {
-          maxRetries: 3,
-          reconnectionDelayGrowFactor: 1.5,
-          initialReconnectionDelay: 1000,
-          maxReconnectionDelay: 10000,
-        },
+    this.transport = new StreamableHTTPClientTransport(new URL(clientDetails.url), {
+      requestInit: {
+        headers: customHeaders ?? {},
       },
-    );
+      reconnectionOptions: {
+        maxRetries: 3,
+        reconnectionDelayGrowFactor: 1.5,
+        initialReconnectionDelay: 1000,
+        maxReconnectionDelay: 10000,
+      },
+    });
 
     this.client = new Client({
       name: clientDetails.name,
@@ -49,7 +56,6 @@ export class McpClient {
    * @returns {Promise<{ connected: boolean; capabilities?: ServerCapabilities }>} The connected status and capabilities.
    */
   async connect(): Promise<{ connected: boolean; capabilities?: ServerCapabilities }> {
-
     if (!this.connected) {
       try {
         await this.client.connect(this.transport);
@@ -72,7 +78,6 @@ export class McpClient {
       connected: this.connected,
       capabilities,
     };
-
   }
 
   /**
@@ -145,15 +150,20 @@ export class McpClient {
       throw new Error(`Error calling tool ${params.name}: ${response.error}`);
     }
 
-    const content = response.content as Array<{ type: string; text?: string; [key: string]: unknown } | null | undefined>;
+    const content = response.content as Array<
+      { type: string; text?: string; [key: string]: unknown } | null | undefined
+    >;
     const textParts = content
-      .filter((part): part is { type: 'text'; text: string } =>
-        part != null && part.type === 'text' && typeof part.text === 'string'
+      .filter(
+        (part): part is { type: 'text'; text: string } =>
+          part != null && part.type === 'text' && typeof part.text === 'string'
       )
-      .map((part): ContentPart => ({
-        type: 'text',
-        text: part.text,
-      }));
+      .map(
+        (part): ContentPart => ({
+          type: 'text',
+          text: part.text,
+        })
+      );
 
     return {
       content: textParts,
