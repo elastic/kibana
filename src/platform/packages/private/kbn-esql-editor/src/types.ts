@@ -49,11 +49,6 @@ export interface ESQLEditorProps {
     query?: AggregateQuery,
     abortController?: AbortController
   ) => Promise<void>;
-  /** If it is true, the editor displays the message @timestamp found
-   * The text based queries are relying on adhoc dataviews which
-   * can have an @timestamp timefield or nothing
-   */
-  detectedTimestamp?: string;
   /** Array of errors */
   errors?: Error[];
   /** Warning string as it comes from ES */
@@ -78,8 +73,6 @@ export interface ESQLEditorProps {
   disableSubmitAction?: boolean;
   /** when set to true enables query cancellation **/
   allowQueryCancellation?: boolean;
-  /** hide @timestamp info **/
-  hideTimeFilterInfo?: boolean;
   /** hide query history **/
   hideQueryHistory?: boolean;
   /** hide quick search **/

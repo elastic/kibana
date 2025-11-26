@@ -113,7 +113,6 @@ const ESQLEditorInternal = function ESQLEditor({
   query,
   onTextLangQueryChange,
   onTextLangQuerySubmit,
-  detectedTimestamp,
   errors: serverErrors,
   warning: serverWarning,
   isLoading,
@@ -124,7 +123,6 @@ const ESQLEditorInternal = function ESQLEditor({
   disableSubmitAction,
   dataTestSubj,
   allowQueryCancellation,
-  hideTimeFilterInfo,
   hideQueryHistory,
   hasOutline,
   displayDocumentationAsFlyout,
@@ -1236,7 +1234,6 @@ const ESQLEditorInternal = function ESQLEditor({
         />
       )}
       <EditorFooter
-        lines={editorModel.current?.getLineCount() || 1}
         styles={{
           bottomContainer: styles.bottomContainer,
           historyContainer: styles.historyContainer,
@@ -1245,11 +1242,9 @@ const ESQLEditorInternal = function ESQLEditor({
         onErrorClick={onErrorClick}
         onUpdateAndSubmitQuery={onUpdateAndSubmitQuery}
         updateQuery={onQueryUpdate}
-        detectedTimestamp={detectedTimestamp}
         hideRunQueryText={hideRunQueryText}
         editorIsInline={editorIsInline}
         isSpaceReduced={isSpaceReduced}
-        hideTimeFilterInfo={hideTimeFilterInfo}
         {...editorMessages}
         isHistoryOpen={isHistoryOpen}
         setIsHistoryOpen={onClickQueryHistory}

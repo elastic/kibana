@@ -115,29 +115,6 @@ describe('ESQLEditor', () => {
     expect(getByTestId('ESQLEditor-date-info')).toHaveTextContent('@timestamp not found');
   });
 
-  it('should not render the date info if hideTimeFilterInfo is set to true', async () => {
-    const newProps = {
-      ...props,
-      hideTimeFilterInfo: true,
-    };
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
-    expect(queryByTestId('ESQLEditor-date-info')).not.toBeInTheDocument();
-  });
-
-  it('should render the date info with @timestamp found if detectedTimestamp is given', async () => {
-    const newProps = {
-      ...props,
-      detectedTimestamp: '@timestamp',
-    };
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
-    expect(queryByTestId('ESQLEditor-date-info')).toHaveTextContent('@timestamp found');
-  });
-
-  it('should  render the limit information', async () => {
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
-    expect(queryByTestId('ESQLEditor-limit-info')).toHaveTextContent('LIMIT 1000 rows');
-  });
-
   it('should not render the query history action if hideQueryHistory is set to true', async () => {
     const newProps = {
       ...props,

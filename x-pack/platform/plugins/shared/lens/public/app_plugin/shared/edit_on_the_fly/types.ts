@@ -83,9 +83,6 @@ export interface EditConfigPanelProps {
   onApply?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Cancel button handler */
   onCancel?: () => void;
-  // in cases where the embeddable is not filtered by time
-  // (e.g. through unified search) set this property to true
-  hideTimeFilterInfo?: boolean;
   // Lens panels allow read-only "edit" where the user can look and tweak the existing chart, without
   // persisting the changes. This is useful for dashboards where the user wants to see the configuration behind
   isReadOnly?: boolean;

@@ -877,11 +877,6 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderTextLangEditor() {
-      const adHocDataview = props.indexPatterns?.[0];
-      let detectedTimestamp;
-      if (adHocDataview && typeof adHocDataview !== 'string') {
-        detectedTimestamp = adHocDataview?.timeFieldName;
-      }
       return (
         isQueryLangSelected &&
         props.query &&
@@ -891,7 +886,6 @@ export const QueryBarTopRow = React.memo(
             onTextLangQueryChange={props.onTextLangQueryChange}
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
-            detectedTimestamp={detectedTimestamp}
             expandToFitQueryOnMount
             onTextLangQuerySubmit={async () =>
               onSubmit({

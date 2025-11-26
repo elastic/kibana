@@ -18,14 +18,13 @@ import {
 } from '@elastic/eui';
 import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
-import { getLimitFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   LanguageDocumentationFlyout,
   LanguageDocumentationInline,
 } from '@kbn/language-documentation';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';
@@ -39,7 +38,6 @@ const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
 
 interface EditorFooterProps {
-  lines: number;
   styles: {
     bottomContainer: Interpolation<Theme>;
     historyContainer: Interpolation<Theme>;
@@ -47,7 +45,6 @@ interface EditorFooterProps {
   code: string;
   errors?: MonacoMessage[];
   warnings?: MonacoMessage[];
-  detectedTimestamp?: string;
   onErrorClick: (error: MonacoMessage) => void;
   onUpdateAndSubmitQuery: (newQuery: string, querySource: QuerySource) => void;
   updateQuery: (qs: string) => void;
@@ -61,7 +58,6 @@ interface EditorFooterProps {
   hideRunQueryText?: boolean;
   editorIsInline?: boolean;
   isSpaceReduced?: boolean;
-  hideTimeFilterInfo?: boolean;
   hideQueryHistory?: boolean;
   hideQuickSearch?: boolean;
   displayDocumentationAsFlyout?: boolean;
@@ -70,18 +66,15 @@ interface EditorFooterProps {
 }
 
 export const EditorFooter = memo(function EditorFooter({
-  lines,
   styles,
   errors,
   warnings,
-  detectedTimestamp,
   onErrorClick,
   onUpdateAndSubmitQuery,
   updateQuery,
   hideRunQueryText,
   editorIsInline,
   isSpaceReduced,
-  hideTimeFilterInfo,
   resizableContainerButton,
   resizableContainerHeight,
   isHistoryOpen,
@@ -111,8 +104,6 @@ export const EditorFooter = memo(function EditorFooter({
     setIsHistoryOpen(false);
   }, [isLanguageComponentOpen, setIsHistoryOpen, setIsLanguageComponentOpen]);
 
-  const limit = useMemo(() => getLimitFromESQLQuery(code), [code]);
-
   return (
     <EuiFlexGroup
       gutterSize="none"
@@ -140,58 +131,7 @@ export const EditorFooter = memo(function EditorFooter({
               `}
             >
               <QueryWrapComponent code={code} updateQuery={updateQuery} />
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-footer-lines">
-                  <p>
-                    {i18n.translate('esqlEditor.query.lineCount', {
-                      defaultMessage: '{count} {count, plural, one {line} other {lines}}',
-                      values: { count: lines },
-                    })}
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-              {/* If there is no space and no @timestamp detected hide the information */}
-              {(detectedTimestamp || !isSpaceReduced) && !hideTimeFilterInfo && (
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-date-info">
-                        <p>
-                          {isSpaceReduced
-                            ? '@timestamp'
-                            : detectedTimestamp
-                            ? i18n.translate('esqlEditor.query.timestampDetected', {
-                                defaultMessage: '{detectedTimestamp} found',
-                                values: { detectedTimestamp },
-                              })
-                            : i18n.translate('esqlEditor.query.timestampNotDetected', {
-                                defaultMessage: '@timestamp not found',
-                              })}
-                        </p>
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-limit-info">
-                      <p>
-                        {isSpaceReduced
-                          ? i18n.translate('esqlEditor.query.limitInfoReduced', {
-                              defaultMessage: 'LIMIT {limit}',
-                              values: { limit },
-                            })
-                          : i18n.translate('esqlEditor.query.limitInfo', {
-                              defaultMessage: 'LIMIT {limit} rows',
-                              values: { limit },
-                            })}
-                      </p>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
+              {/* <EuiFlexItem grow={false} /> */}
               {errors && errors.length > 0 && (
                 <ErrorsWarningsFooterPopover
                   isPopoverOpen={isErrorPopoverOpen}
