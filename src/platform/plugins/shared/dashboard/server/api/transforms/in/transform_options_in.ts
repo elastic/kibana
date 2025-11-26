@@ -24,7 +24,7 @@ export function transformOptionsIn(options: DashboardState['options']): string {
   Object.keys(apiOptions).forEach((key) => {
     const apiKey = key as keyof typeof apiOptions;
     const soKey = APIToSavedObjectOptionsKeys[apiKey];
-    if (apiOptions[apiKey] !== undefined) savedObjectOptions[soKey] = apiOptions[apiKey];
+    if (soKey) savedObjectOptions[soKey] = apiOptions[apiKey];
   });
   return JSON.stringify(savedObjectOptions);
 }

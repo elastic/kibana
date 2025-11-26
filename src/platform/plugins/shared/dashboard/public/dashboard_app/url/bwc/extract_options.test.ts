@@ -11,9 +11,9 @@ import { extractOptions } from './extract_options';
 
 describe('extractOptions', () => {
   test('should extract options from options key', () => {
-    expect(extractOptions({ options: { hidePanelTitles: true } })).toMatchInlineSnapshot(`
+    expect(extractOptions({ options: { hide_panel_titles: true } })).toMatchInlineSnapshot(`
       Object {
-        "hidePanelTitles": true,
+        "hide_panel_titles": true,
       }
     `);
   });
@@ -21,7 +21,7 @@ describe('extractOptions', () => {
   test('should extract options from top level keys', () => {
     expect(extractOptions({ hidePanelTitles: true })).toMatchInlineSnapshot(`
       Object {
-        "hidePanelTitles": true,
+        "hide_panel_titles": true,
       }
     `);
   });

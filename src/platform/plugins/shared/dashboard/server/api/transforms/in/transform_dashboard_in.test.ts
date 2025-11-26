@@ -114,7 +114,7 @@ describe('transformDashboardIn', () => {
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",
           },
-          "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"syncColors\\":false,\\"syncTooltips\\":false,\\"syncCursor\\":true}",
+          "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"syncColors\\":false,\\"syncCursor\\":true,\\"syncTooltips\\":false}",
           "panelsJSON": "[]",
           "timeRestore": false,
           "title": "title",
