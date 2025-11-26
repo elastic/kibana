@@ -269,7 +269,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               settings: {},
               wired: {
                 fields: {
-                  'severity_text': {
+                  severity_text: {
                     type: 'keyword',
                     ignore_above: 1024,
                   },
