@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { FailureStoreFormData } from '@kbn/failure-store-modal';
 import { FailureStoreModal } from '@kbn/failure-store-modal';
 
 import type { DataStream } from '../../../../../../common';
@@ -29,15 +30,17 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
 
   const {
     services: { notificationService },
+    config: { enableFailureStoreRetentionDisabling },
   } = useAppContext();
 
-  const handleSaveModal = async (data: {
-    failureStoreEnabled: boolean;
-    customRetentionPeriod?: string;
-  }) => {
+  const handleSaveModal = async (data: FailureStoreFormData) => {
     return updateDSFailureStore([dataStream.name], {
       dsFailureStore: data.failureStoreEnabled,
-      customRetentionPeriod: data.customRetentionPeriod,
+      customRetentionPeriod:
+        'customRetentionPeriod' in data && data.customRetentionPeriod
+          ? data.customRetentionPeriod
+          : undefined,
+      retentionDisabled: 'retentionDisabled' in data && data.retentionDisabled,
     }).then(({ data: responseData, error }) => {
       if (responseData) {
         if (responseData.warning) {
@@ -82,7 +85,9 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
         failureStoreEnabled: dataStream?.failureStoreEnabled ?? false,
         customRetentionPeriod: dataStream?.failureStoreRetention?.customRetentionPeriod,
         defaultRetentionPeriod: dataStream?.failureStoreRetention?.defaultRetentionPeriod,
+        retentionDisabled: dataStream?.failureStoreRetention?.retentionDisabled ?? false,
       }}
+      canShowDisableLifecycle={enableFailureStoreRetentionDisabling}
     />
   );
 };
