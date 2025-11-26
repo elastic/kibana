@@ -13,9 +13,11 @@ import React from 'react';
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type {
+  ControlGroupCreationOptions,
   ControlGroupRendererApi,
   ControlGroupRuntimeState,
 } from '@kbn/control-group-renderer';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { ControlGroupOutput } from './mocks/data';
 import { initialInputData, sampleOutputData } from './mocks/data';
 import {
@@ -38,7 +40,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FilterGroupProps } from './types';
 
 const controlGroupMock = getControlGroupMock();
-
 const updateControlGroupInputMock = (newState: ControlGroupRuntimeState) => {
   act(() => {
     controlGroupMock.getInput.mockReturnValue(newState);
@@ -50,8 +51,12 @@ const updateControlGroupOutputMock = (newOutput: ControlGroupOutput) => {
   controlGroupFilterOutputMock$.next(newOutput.filters);
 };
 
+let creationOptions: Partial<ControlGroupCreationOptions> | undefined;
 const mockControlGroupRenderer = getMockedControlGroupRenderer(
-  controlGroupMock as unknown as ControlGroupRendererApi
+  controlGroupMock as unknown as ControlGroupRendererApi,
+  (options) => {
+    creationOptions = options;
+  }
 );
 
 jest.mock('@kbn/control-group-renderer', () => ({
@@ -205,15 +210,6 @@ describe(' Filter Group Component ', () => {
     });
 
     it('should call controlGroupTransform which returns object WITHOUT placeholder when type != OPTION_LIST_CONTROL on opening Flyout', async () => {
-      const returnValueWatcher = jest.fn();
-      (controlGroupMock as unknown as ControlGroupRendererApi).openAddDataControlFlyout = jest
-        .fn()
-        .mockImplementationOnce(({ controlStateTransform }) => {
-          if (controlStateTransform) {
-            const returnValue = controlStateTransform({}, 'NOT_OPTIONS_LIST_CONTROL');
-            returnValueWatcher(returnValue);
-          }
-        });
       render(<TestComponent />);
       // delete some panels
       const newInputData = {
@@ -234,21 +230,18 @@ describe(' Filter Group Component ', () => {
 
       fireEvent.click(screen.getByTestId(TEST_IDS.ADD_CONTROL));
 
-      expect(returnValueWatcher.mock.calls[0][0].displaySettings).toBe(undefined);
+      const result = creationOptions!
+        .getEditorConfig?.()
+        ?.controlStateTransform?.({}, 'NOT_OPTIONS_LIST_CONTROL');
+      expect((result as OptionsListDSLControlState)?.displaySettings).toBe(undefined);
     });
 
     it('should call controlGroupTransform which returns object WITH correct placeholder value when type = OPTION_LIST_CONTROL on opening Flyout', async () => {
-      const returnValueWatcher = jest.fn();
-      (controlGroupMock as unknown as ControlGroupRendererApi).openAddDataControlFlyout = jest
-        .fn()
-        .mockImplementationOnce(({ controlStateTransform }) => {
-          if (controlStateTransform) {
-            const returnValue = controlStateTransform({}, OPTIONS_LIST_CONTROL);
-            returnValueWatcher(returnValue);
-          }
-        });
-
       render(<TestComponent />);
+      await waitFor(() => {
+        expect(creationOptions).toBeDefined();
+      });
+
       // delete some panels
       const newInputData = {
         ...initialInputData,
@@ -269,7 +262,10 @@ describe(' Filter Group Component ', () => {
 
       fireEvent.click(screen.getByTestId(TEST_IDS.ADD_CONTROL));
 
-      expect(returnValueWatcher.mock.calls[0][0].displaySettings).toMatchObject(
+      const result = creationOptions!
+        .getEditorConfig?.()
+        ?.controlStateTransform?.({}, OPTIONS_LIST_CONTROL);
+      expect((result as OptionsListDSLControlState)?.displaySettings).toMatchObject(
         expect.objectContaining({
           placeholder: '',
         })

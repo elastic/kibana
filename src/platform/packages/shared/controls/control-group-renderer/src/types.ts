@@ -22,6 +22,7 @@ import type { AppliesFilters, AppliesTimeslice } from '@kbn/presentation-publish
 import type { controlGroupStateBuilder } from './control_group_state_builder';
 
 export type ControlGroupRendererApi = ControlsRendererParentApi &
+  HasEditorConfig &
   Pick<AppliesFilters, 'appliedFilters$'> &
   PublishesESQLVariables &
   AppliesTimeslice & {

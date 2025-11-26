@@ -407,6 +407,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   }, [switchToViewMode, upsertPersistableControls]);
 
   const addControlsHandler = useCallback(() => {
+    console.log('add', controlGroup);
     controlGroup?.openAddDataControlFlyout();
   }, [controlGroup]);
 
