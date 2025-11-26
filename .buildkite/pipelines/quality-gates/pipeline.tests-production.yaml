@@ -34,4 +34,5 @@ steps:
           TARGET_ENV: production
           SERVICE: kbn-alert-quality-gate 
           CHECK_ALERTS: true
+          CHECK_ALERTS_OF_UPDATED_CLUSTERS: true
     soft_fail: true
