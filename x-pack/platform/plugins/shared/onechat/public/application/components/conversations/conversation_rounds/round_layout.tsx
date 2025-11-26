@@ -56,7 +56,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="l"
+      gutterSize="m"
       aria-label={labels.container}
       css={roundContainerStyles}
     >

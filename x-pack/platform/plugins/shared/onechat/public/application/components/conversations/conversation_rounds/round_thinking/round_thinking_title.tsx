@@ -72,7 +72,7 @@ export const RoundThinkingTitle = ({ isLoading, hasSteps, onShow }: RoundThinkin
       </EuiFlexGroup>
       {hasSteps && (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty color="text" onClick={onShow}>
+          <EuiButtonEmpty color="text" onClick={onShow} data-test-subj="agentBuilderThinkingToggle">
             {showButtonLabel}
           </EuiButtonEmpty>
         </EuiFlexItem>

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiSplitPanel, EuiText } from '@elastic/eui';
+import { EuiCodeBlock, EuiSplitPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { QueryResult } from '@kbn/onechat-common/tools/tool_result';
+import { css } from '@emotion/react';
 
 const labels = {
   title: i18n.translate('xpack.onechat.round.thinking.steps.queryResultStep.title', {
@@ -18,17 +19,26 @@ const labels = {
 interface QueryResultStepProps {
   result: QueryResult;
 }
-export const QueryResultStep: React.FC<QueryResultStepProps> = ({ result: { data } }) => (
-  <EuiSplitPanel.Outer hasBorder hasShadow={false}>
-    <EuiSplitPanel.Inner color="plain" grow={false} paddingSize="m">
-      <EuiText size="s">
-        <strong>{labels.title}</strong>
-      </EuiText>
-    </EuiSplitPanel.Inner>
-    <EuiSplitPanel.Inner paddingSize="none">
-      <EuiCodeBlock language="esql" isCopyable paddingSize="m" lineNumbers>
-        {data.esql}
-      </EuiCodeBlock>
-    </EuiSplitPanel.Inner>
-  </EuiSplitPanel.Outer>
-);
+export const QueryResultStep: React.FC<QueryResultStepProps> = ({ result: { data } }) => {
+  const { euiTheme } = useEuiTheme();
+  // We add padding left to make tool result artifacts appear inline with the text of the progression step above it
+  const paddingLeftStyles = css`
+    padding-left: ${euiTheme.size.xl};
+  `;
+  return (
+    <div css={paddingLeftStyles}>
+      <EuiSplitPanel.Outer hasBorder hasShadow={false}>
+        <EuiSplitPanel.Inner color="plain" grow={false} paddingSize="m">
+          <EuiText size="s">
+            <strong>{labels.title}</strong>
+          </EuiText>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner paddingSize="none">
+          <EuiCodeBlock language="esql" isCopyable paddingSize="m" lineNumbers>
+            {data.esql}
+          </EuiCodeBlock>
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+    </div>
+  );
+};

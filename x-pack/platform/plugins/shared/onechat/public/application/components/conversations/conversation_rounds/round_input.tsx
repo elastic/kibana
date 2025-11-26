@@ -46,7 +46,7 @@ export const RoundInput = ({ input }: RoundInputProps) => {
   return (
     <EuiPanel
       css={inputContainerStyles}
-      paddingSize="l"
+      paddingSize="m"
       hasShadow={false}
       hasBorder={false}
       aria-label={labels.userMessage}

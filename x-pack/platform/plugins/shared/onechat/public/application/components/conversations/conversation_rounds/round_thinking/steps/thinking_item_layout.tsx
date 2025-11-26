@@ -17,9 +17,11 @@ import {
   EuiSplitPanel,
   EuiText,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { ToolCallStep } from '@kbn/onechat-common';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 const labels = {
   parameters: i18n.translate('xpack.onechat.round.thinking.steps.thinkingItemLayout.parameters', {
@@ -81,6 +83,7 @@ export const ThinkingItemLayout: React.FC<ThinkingItemLayoutProps> = ({
   icon,
   accordionContent,
 }) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup
       direction="row"
@@ -88,7 +91,16 @@ export const ThinkingItemLayout: React.FC<ThinkingItemLayoutProps> = ({
       alignItems={accordionContent ? undefined : 'center'}
       responsive={false}
     >
-      {icon && <EuiFlexItem grow={false}>{icon}</EuiFlexItem>}
+      {icon && (
+        <EuiFlexItem
+          css={css`
+            padding-top: ${accordionContent ? euiTheme.size.xs : '0px'};
+          `}
+          grow={false}
+        >
+          {icon}
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         {accordionContent ? (
           <Accordion children={children} accordionContent={accordionContent} />

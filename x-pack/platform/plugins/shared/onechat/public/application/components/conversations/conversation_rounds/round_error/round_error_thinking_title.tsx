@@ -37,7 +37,7 @@ export const RoundErrorThinkingTitle = ({ onClick }: RoundErrorThinkingTitleProp
     background-color: ${euiTheme.colors.backgroundBaseDanger};
     ${roundedBorderRadiusStyles}
     border: 1px solid ${euiTheme.colors.borderBaseDanger};
-    padding: ${euiTheme.size.base};
+    padding: ${euiTheme.size.m};
     width: 100%;
   `;
 
