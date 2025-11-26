@@ -102,7 +102,7 @@ export interface ControlGroupRuntimeState<
 
 export interface ControlGroupCreationOptions {
   initialState?: Partial<ControlGroupRuntimeState>;
-  getEditorOptions?: () => { editorConfig?: ControlGroupEditorConfig };
+  getEditorConfig?: () => ControlGroupEditorConfig | undefined;
 }
 
 export type ControlGroupStateBuilder = typeof controlGroupStateBuilder;

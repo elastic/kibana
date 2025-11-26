@@ -19,18 +19,18 @@ export const useInitialControlGroupState = (
   lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<ControlPanelsState>>
 ): {
   initialState: ControlGroupCreationOptions['initialState'];
-  getEditorOptions: React.MutableRefObject<ControlGroupCreationOptions['getEditorOptions']>;
+  getEditorConfig: React.MutableRefObject<ControlGroupCreationOptions['getEditorConfig']>;
 } => {
   const [initialState, setInitialState] = useState<
     ControlGroupCreationOptions['initialState'] | undefined
   >();
-  const getEditorOptions = useRef<ControlGroupCreationOptions['getEditorOptions']>();
+  const getEditorConfig = useRef<ControlGroupCreationOptions['getEditorConfig']>();
 
   useEffect(() => {
     let cancelled = false;
     getCreationOptions(controlGroupStateBuilder).then((creationOptions) => {
       if (cancelled) return;
-      getEditorOptions.current = creationOptions.getEditorOptions;
+      getEditorConfig.current = creationOptions.getEditorConfig;
       const ignoreParentSettings = creationOptions.initialState?.ignoreParentSettings;
       const controls = Object.entries(
         creationOptions?.initialState?.initialChildControlState ?? {}
@@ -61,5 +61,5 @@ export const useInitialControlGroupState = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { initialState, getEditorOptions };
+  return { initialState, getEditorConfig };
 };

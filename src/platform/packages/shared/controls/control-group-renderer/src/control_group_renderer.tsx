@@ -75,7 +75,7 @@ export const ControlGroupRenderer = ({
   const lastSavedState$Ref = useRef(new BehaviorSubject<ControlPanelsState>({}));
 
   /** Creation options management */
-  const { initialState, getEditorOptions } = useInitialControlGroupState(
+  const { initialState, getEditorConfig } = useInitialControlGroupState(
     getCreationOptions,
     lastSavedState$Ref
   );
@@ -104,13 +104,13 @@ export const ControlGroupRenderer = ({
       ...layoutApi,
       ...searchApi,
       ...propsApi,
-      getEditorConfig: getEditorOptions.current,
+      getEditorConfig: getEditorConfig.current,
       disabledActionIds$,
       setDisabledActionIds: (ids: string[] | undefined) => {
         disabledActionIds$.next(ids);
       },
     };
-  }, [childrenApi, layoutApi, searchApi, propsApi, getEditorOptions]);
+  }, [childrenApi, layoutApi, searchApi, propsApi, getEditorConfig]);
 
   useEffect(() => {
     if (!parentApi || !input$) return;

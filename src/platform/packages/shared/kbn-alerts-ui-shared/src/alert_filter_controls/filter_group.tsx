@@ -340,7 +340,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       });
       return {
         initialState,
-        getEditorOptions: (): ControlGroupEditorConfig => {
+        getEditorConfig: (): ControlGroupEditorConfig => {
           return {
             defaultDataViewId: dataViewId ?? undefined,
             hideDataViewSelector: true,
