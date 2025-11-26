@@ -32305,6 +32305,17 @@
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AGENT_POLICY_API_ROUTES.CLEANUP_REVISIONS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "CLEANUP_REVISIONS_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

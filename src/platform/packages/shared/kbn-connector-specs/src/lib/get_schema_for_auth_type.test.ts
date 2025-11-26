@@ -14,6 +14,7 @@ describe('getSchemaForAuthType()', () => {
   test('correctly returns schema for auth type definition when only type ID is provided', () => {
     const schema = getSchemaForAuthType('basic');
     expect(z.toJSONSchema(schema)).toMatchSnapshot();
+    expect(schema.meta()).toEqual({ label: 'Basic Authentication' });
   });
 
   test('correctly returns schema for auth type definition when defaults are provided', () => {
@@ -24,6 +25,32 @@ describe('getSchemaForAuthType()', () => {
       },
     });
     expect(z.toJSONSchema(schema)).toMatchSnapshot();
+    expect(schema.shape['custom-api-key-field'].meta()).toEqual({
+      label: 'API Key',
+      sensitive: true,
+    });
+    expect(schema.meta()).toEqual({ label: 'API Key Header Authentication' });
+  });
+
+  test('correctly returns schema for auth type definition when defaults and meta overrides are provided', () => {
+    const schema = getSchemaForAuthType({
+      type: 'api_key_header',
+      defaults: {
+        headerField: 'custom-api-key-field',
+      },
+      overrides: {
+        meta: {
+          'custom-api-key-field': { label: 'Custom API Key Label', placeholder: 'enter a key!' },
+        },
+      },
+    });
+    expect(z.toJSONSchema(schema)).toMatchSnapshot();
+    expect(schema.shape['custom-api-key-field'].meta()).toEqual({
+      label: 'Custom API Key Label',
+      placeholder: 'enter a key!',
+      sensitive: true,
+    });
+    expect(schema.meta()).toEqual({ label: 'API Key Header Authentication' });
   });
 
   test('ignores defaults for key that is not in auth type schema', () => {
