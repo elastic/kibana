@@ -193,7 +193,7 @@ const getLensProps = ({
   getTimeRange: () => TimeRange;
   lastReloadRequestTime?: number;
 }): LensProps => ({
-  id: `metricsExperienceLensComponent-${attributes.title}`,
+  id: 'metricsExperienceLensComponent',
   viewMode: 'view',
   timeRange: getTimeRange(),
   attributes,

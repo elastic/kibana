@@ -40,7 +40,7 @@ describe('useLensProps', () => {
     },
   ];
   let discoverFetch$: BehaviorSubject<UnifiedHistogramInputMessage>;
-  const getTimeRange = (): TimeRange => ({ from: 'now-1h', to: 'now' });
+  const getTimeRange = (): TimeRange => ({ from: 'now-15m', to: 'now' });
 
   const createMockChartRef = () => {
     return React.createRef<HTMLDivElement>();
@@ -200,6 +200,7 @@ describe('useLensProps', () => {
         searchSessionId: undefined,
         timeRange: getTimeRange(),
         viewMode: 'view',
+        lastReloadRequestTime: expect.any(Number),
       });
     });
   });
