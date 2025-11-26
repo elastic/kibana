@@ -52,6 +52,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Record #0');
       });
 
+      it('should update the ES|QL query when clicking custom "Update ES|QL query" button', async () => {
+        const state = kbnRison.encode({
+          dataSource: { type: 'esql' },
+          query: { esql: 'from my-example-logs | sort @timestamp desc' },
+        });
+        await common.navigateToActualUrl('discover', `?_a=${state}`, {
+          ensureCurrentUrl: false,
+        });
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.clickRowToggle({ rowIndex: 0, defaultTabId: 'doc_view_example' });
+        await testSubjects.click('exampleDataSourceProfileDocViewUpdateEsqlQuery');
+        await discover.waitUntilTabIsLoaded();
+        expect(await unifiedTabs.getTabLabels()).to.eql(['Untitled']);
+        expect(await unifiedTabs.getSelectedTabLabel()).to.be('Untitled');
+        expect(await esql.getEsqlEditorQuery()).to.be('FROM my-example-logs | LIMIT 5');
+      });
+
       it('should open a new tab when clicking custom "Open new tab" button', async () => {
         const state = kbnRison.encode({
           dataSource: { type: 'esql' },
