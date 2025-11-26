@@ -222,7 +222,6 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                     hasBorder
                     selectable={{
                       isSelected: selectedType.chatExperience === AIChatExperience.Agents,
-                      // selectedType.assistant === AIAssistantType.Never, // TODO: should I change it to never?
                       onClick: () =>
                         handleSelect({
                           chatExperience: AIChatExperience.Agents,
@@ -239,7 +238,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                     // TODO: change icon to AI Agent icon
                     icon={<EuiIcon size="xxl" type="agent" />}
                     data-test-subj="aiAssistantAgentCard"
-                    isDisabled={!isSecurityAIAssistantEnabled}
+                    isDisabled={!isSecurityAIAssistantEnabled && !isObservabilityAIAssistantEnabled}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -261,7 +260,10 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                   <EuiButton
                     onClick={onApply}
                     fill
-                    isDisabled={selectedType.assistant === AIAssistantType.Default}
+                    isDisabled={
+                      selectedType.assistant === AIAssistantType.Default &&
+                      selectedType.chatExperience === AIChatExperience.Classic
+                    }
                     data-test-subj="aiAssistantApplyButton"
                   >
                     {i18n.translate('aiAssistantManagementSelection.headerButton.applyLabel', {

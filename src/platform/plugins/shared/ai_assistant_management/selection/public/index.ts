@@ -16,6 +16,7 @@ import type {
 } from './plugin';
 
 export { AIAssistantType } from '../common/ai_assistant_type';
+export { AIChatExperience } from '../common/ai_chat_experience';
 
 export type {
   AIAssistantManagementSelectionPluginPublicSetup,

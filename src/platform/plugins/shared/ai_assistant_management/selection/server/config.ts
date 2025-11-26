@@ -36,5 +36,6 @@ export const config: PluginConfigDescriptor<AIAssistantManagementSelectionConfig
   schema: configSchema,
   exposeToBrowser: {
     preferredAIAssistantType: true,
+    preferredChatExperience: true,
   },
 };
