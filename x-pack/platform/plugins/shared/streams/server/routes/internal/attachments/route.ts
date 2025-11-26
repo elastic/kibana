@@ -53,13 +53,11 @@ const suggestAttachmentsRoute = createServerRoute({
       body: { tags },
     } = params;
 
-    const suggestions = (
-      await attachmentClient.getSuggestions({
-        attachmentTypes: query.attachmentType ? [query.attachmentType] : undefined,
-        query: query.query,
-        tags,
-      })
-    ).attachments;
+    const suggestions = await attachmentClient.getSuggestions({
+      attachmentTypes: query.attachmentType ? [query.attachmentType] : undefined,
+      query: query.query,
+      tags,
+    });
 
     return {
       suggestions,

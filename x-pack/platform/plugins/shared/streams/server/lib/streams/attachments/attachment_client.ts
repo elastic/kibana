@@ -556,9 +556,7 @@ export class AttachmentClient {
    * @param options.query - Search query string to match against attachment titles/names
    * @param options.attachmentTypes - Optional array of attachment types to search (searches all if not provided)
    * @param options.tags - Optional array of tags to filter attachments by
-   * @returns A promise that resolves with search results
-   * @returns result.attachments - Array of matching attachments (up to 100)
-   * @returns result.hasMore - Whether there are more results available beyond the returned set
+   * @returns A promise that resolves with an array of matching attachments
    *
    * @example
    * ```typescript
@@ -577,8 +575,9 @@ export class AttachmentClient {
     query: string;
     attachmentTypes?: AttachmentType[];
     tags?: string[];
-  }): Promise<{ hasMore: boolean; attachments: Attachment[] }> {
-    const perPage = 101;
+  }): Promise<Attachment[]> {
+    // TODO: Implement pagination
+    const perPage = 1000;
 
     // Search all types if none specified, otherwise only search the requested types
     const typesToSearch = attachmentTypes || [...ATTACHMENT_TYPES];
@@ -591,12 +590,9 @@ export class AttachmentClient {
       })
     );
 
-    const suggestions = (await Promise.all(suggestionsPromises)).flat();
+    const results = await Promise.all(suggestionsPromises);
 
-    return {
-      attachments: suggestions,
-      hasMore: suggestions.length > perPage - 1,
-    };
+    return results.flat();
   }
 
   /**

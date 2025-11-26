@@ -54,6 +54,7 @@ export const useAttachmentsFetch = ({
         name,
         dashboards: attachmentCounts.dashboard || 0,
         rules: attachmentCounts.rule,
+        slos: attachmentCounts.slo,
       });
 
       return response;

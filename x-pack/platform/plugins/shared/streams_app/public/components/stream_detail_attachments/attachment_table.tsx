@@ -14,14 +14,16 @@ import type {
 } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import {
+  ruleDetailsLocatorID,
+  sloDetailsLocatorID,
+  type SloDetailsLocatorParams,
+  type RuleDetailsLocatorParams,
+} from '@kbn/deeplinks-observability';
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service/locators';
 import { useKibana } from '../../hooks/use_kibana';
 import { tagListToReferenceList } from './to_reference_list';
 import { useTimefilter } from '../../hooks/use_timefilter';
-
-// TODO: They are both solution constants, how can I import them here?
-const RULE_DETAILS_LOCATOR_ID = 'RULE_DETAILS_LOCATOR';
-const SLO_DETAILS_LOCATOR_ID = 'SLO_DETAILS_LOCATOR';
 
 const ATTACHMENT_TYPE_LABELS: Record<AttachmentType, string> = {
   dashboard: i18n.translate('xpack.streams.attachmentTable.attachmentTypeDashboard', {
@@ -53,11 +55,11 @@ const ATTACHMENT_URL_GETTERS: Record<
     );
   },
   rule: (redirectId, locatorsService) => {
-    const ruleLocator = locatorsService.get(RULE_DETAILS_LOCATOR_ID);
+    const ruleLocator = locatorsService.get<RuleDetailsLocatorParams>(ruleDetailsLocatorID);
     return ruleLocator?.getRedirectUrl({ ruleId: redirectId }) || '';
   },
   slo: (redirectId, locatorsService) => {
-    const sloLocator = locatorsService.get(SLO_DETAILS_LOCATOR_ID);
+    const sloLocator = locatorsService.get<SloDetailsLocatorParams>(sloDetailsLocatorID);
     return sloLocator?.getRedirectUrl({ sloId: redirectId }) || '';
   },
 };
