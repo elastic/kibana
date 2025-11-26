@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getTimeReporter } from '@kbn/ci-stats-reporter';
-import { getFlags } from '@kbn/dev-cli-runner';
-import type { ProcRunner } from '@kbn/dev-proc-runner';
-import { withProcRunner } from '@kbn/dev-proc-runner';
-import { REPO_ROOT } from '@kbn/repo-info';
+import { resolve } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { pickLevelFromFlags } from '@kbn/tooling-log';
-import { resolve } from 'path';
-import { silence } from '../../common';
-import { loadServersConfig } from '../../config';
+import type { ProcRunner } from '@kbn/dev-proc-runner';
+import { withProcRunner } from '@kbn/dev-proc-runner';
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { getFlags } from '@kbn/dev-cli-runner';
 import { runElasticsearch, runKibanaServer } from '../../servers';
-import { getExtraKbnOpts } from '../../servers/run_kibana_server';
-import type { ScoutPlaywrightProjects } from '../types';
-import { execPromise, getPlaywrightGrepTag } from '../utils';
+import { loadServersConfig } from '../../config';
+import { silence } from '../../common';
 import type { RunTestsOptions } from './flags';
+import { getExtraKbnOpts } from '../../servers/run_kibana_server';
+import { getPlaywrightGrepTag, execPromise } from '../utils';
+import type { ScoutPlaywrightProjects } from '../types';
 
 export const getPlaywrightProject = (
   testTarget: RunTestsOptions['testTarget'],

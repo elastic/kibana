@@ -8,12 +8,12 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import fs from 'fs';
 import path from 'path';
+import fs from 'fs';
 import type { CliSupportedServerModes } from '../../types';
-import type { Config } from '../config';
-import { readConfigFile } from '../loader';
 import { getConfigFilePath } from './get_config_file';
+import { readConfigFile } from '../loader';
+import type { Config } from '../config';
 import { saveScoutTestConfigOnDisk } from './save_scout_test_config';
 
 /**

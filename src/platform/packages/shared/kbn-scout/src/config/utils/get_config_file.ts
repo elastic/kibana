@@ -29,6 +29,6 @@ export const getConfigFilePath = (config: CliSupportedServerModes): string => {
     baseDir,
     'default',
     'serverless',
-    `${type.replace(/[.-]/g, '_')}.serverless.config.ts`
+    `${type.replace(/[-]/g, '_')}.serverless.config.ts`
   );
 };

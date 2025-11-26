@@ -33,7 +33,7 @@ describe('getConfigFilePath', () => {
     expect(result).toBe(expectedPath);
   });
 
-  it('should convert hyphens and dots to underscores in serverless type', () => {
+  it('should convert hyphens to underscores in serverless type', () => {
     const config = 'serverless=oblt-logs-essentials';
     const expectedPath = join(
       CONFIG_ROOT,

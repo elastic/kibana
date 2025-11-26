@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Fs from 'fs';
-import { join, resolve } from 'path';
+import { resolve, join } from 'path';
 import { format as formatUrl } from 'url';
+import Fs from 'fs';
 
 import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
-import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
-import { REPO_ROOT } from '@kbn/repo-info';
 import {
-  defineDockerServersConfig,
   fleetPackageRegistryDockerImage,
+  defineDockerServersConfig,
   getDockerFileMountPath,
 } from '@kbn/test';
+import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../types';
-import { JWKS_PATH, SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH } from '../../constants';
+import { SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH, JWKS_PATH } from '../../constants';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
 const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
