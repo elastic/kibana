@@ -2636,26 +2636,35 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.6.0.tgz#e1d72f3969049dd07ca96736119c08e7ac24f748"
   integrity sha512-XWCgM8TkpMDcX8OX8v0ocm0zI2cuxbRrGVtMcSFqLN8VWP/7JjVuw8Dg1Jo3cvMqXK/2YbfcREgzuCqvPD28+w==
 
-"@elastic/eui-theme-borealis@5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-5.0.0.tgz#a6bacd76a8d54fe33b623f2fc93f64ae4fd976b8"
-  integrity sha512-87LIeV/KQPB4aBe08/r//7uSOqDdnaSa4e3rAaxSwwQT1dXku/00uwXOWYgZ52otjzF+4t6vTmyqdgQGnLurNQ==
+"@elastic/eui-theme-borealis@file:./eui_theme_borealis_11.tgz":
+  version "5.1.0"
+  resolved "file:./eui_theme_borealis_11.tgz#ede646bbbac02f220bc2102c0b3a6618cbc75f5e"
+  dependencies:
+    "@elastic/eui-theme-common" "7.1.0"
+    chroma-js "^2.4.2"
 
-"@elastic/eui-theme-common@7.0.0":
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-7.0.0.tgz#9550ea1b575f0e3052a6f40977e686d9ea44a9f0"
-  integrity sha512-zt4F4wwlUUaAV38B2ESbVUL5AMeGHozq7Xw2tYBgz/FXkYGGTMBsLIwBm7lPipEGjQ7N7Nkjff9l3h635yLdrQ==
+"@elastic/eui-theme-common@7.1.0":
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-7.1.0.tgz#d349389f4b14d8a666c9352ec85a5a17c9771e6d"
+  integrity sha512-o5h3ph8N3izD+tQOu/KM2kB0jRfzb8+nZwKWnCKkpA9jmm2hBf8QCC51MWtj69pUpsJah3YFSz6WlYVAOuF+iA==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@109.1.0":
-  version "109.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-109.1.0.tgz#d4d6896d574277e6aa96e2c566b0eb1627271159"
-  integrity sha512-V34RKiM8v0b8ken4HK+bl0lEjbrw7tGLv+5srBlqrH2OmfP2bIh5qcB7pxnRD6cuTgXoolJYE+JhTIiQC679+w==
+"@elastic/eui-theme-common@file:./eui_theme_common_11.tgz":
+  version "7.1.0"
+  resolved "file:./eui_theme_common_11.tgz#9a62a280a296259ecbb05b1d4b77a1b3cf164cd7"
   dependencies:
-    "@elastic/eui-theme-common" "7.0.0"
+    "@types/lodash" "^4.14.202"
+    chroma-js "^2.4.2"
+    lodash "^4.17.21"
+
+"@elastic/eui@file:./eui_dynamic_z_index.tgz":
+  version "109.2.0"
+  resolved "file:./eui_dynamic_z_index.tgz#8c91d9c4720dcfcb84f4356b2ff95fe823882117"
+  dependencies:
+    "@elastic/eui-theme-common" "7.1.0"
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -2688,6 +2697,7 @@
     unified "^9.2.2"
     unist-util-visit "^2.0.3"
     url-parse "^1.5.10"
+    use-sync-external-store "^1.6.0"
     uuid "^8.3.0"
     vfile "^4.2.1"
 
@@ -33589,6 +33599,11 @@ use-sync-external-store@^1.0.0, use-sync-external-store@^1.2.0, use-sync-externa
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.4.0.tgz#adbc795d8eeb47029963016cefdf89dc799fcebc"
   integrity sha512-9WXSPC5fMv61vaupRkCKCxsPxBocVnwakBEkMIHHpkTTg6icbJtg6jzgtLDm4bl3cSHAca52rYWih0k4K3PfHw==
+
+use-sync-external-store@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.6.0.tgz#b174bfa65cb2b526732d9f2ac0a408027876f32d"
+  integrity sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==
 
 use@^2.0.0:
   version "2.0.2"
