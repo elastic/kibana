@@ -59,7 +59,7 @@ class DataTableFormatClass extends Component<
   DataTableFormatProps & EuiTablePersistInjectedProps<DatatableRow>,
   DataTableFormatState
 > {
-  static propTypes = {
+  static propTypes: Record<string, PropTypes.Validator<unknown>> = {
     data: PropTypes.object.isRequired,
     uiSettings: PropTypes.object.isRequired,
     fieldFormats: PropTypes.object.isRequired,
@@ -217,7 +217,6 @@ class DataTableFormatClass extends Component<
   }
 }
 
-// @ts-expect-error upgrade typescript v5.9.3
 export const DataTableFormat = withEuiTablePersist(DataTableFormatClass, {
   tableId: 'inspectorDataTable',
   pageSizeOptions: PAGE_SIZE_OPTIONS,

@@ -29,6 +29,7 @@ import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mock
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { selectTabRuntimeState } from '../state_management/redux';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -137,8 +138,7 @@ describe('test fetchAll', () => {
       { _id: '1', _index: 'logs' },
       { _id: '2', _index: 'logs' },
     ];
-    // @ts-expect-error upgrade typescript v5.9.3
-    searchSource.getField('index')!.isTimeBased = () => false;
+    searchSource.getField('index')!.isTimeBased = (() => false) as DataView['isTimeBased'];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue({ records: documents });
 
@@ -162,8 +162,7 @@ describe('test fetchAll', () => {
 
   test('should use charts query to fetch total hit count when chart is visible', async () => {
     const collect = subjectCollector(subjects.totalHits$);
-    // @ts-expect-error upgrade typescript v5.9.3
-    searchSource.getField('index')!.isTimeBased = () => true;
+    searchSource.getField('index')!.isTimeBased = (() => true) as DataView['isTimeBased'];
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,
     });
@@ -185,8 +184,7 @@ describe('test fetchAll', () => {
   test('should only fail totalHits$ query not main$ for error from that query', async () => {
     const collectTotalHits = subjectCollector(subjects.totalHits$);
     const collectMain = subjectCollector(subjects.main$);
-    // @ts-expect-error upgrade typescript v5.9.3
-    searchSource.getField('index')!.isTimeBased = () => false;
+    searchSource.getField('index')!.isTimeBased = (() => false) as DataView['isTimeBased'];
     const hits = [{ _id: '1', _index: 'logs' }];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue({ records: documents });
@@ -220,8 +218,7 @@ describe('test fetchAll', () => {
 
   test('should not set COMPLETE if an ERROR has been set on main$', async () => {
     const collectMain = subjectCollector(subjects.main$);
-    // @ts-expect-error upgrade typescript v5.9.3
-    searchSource.getField('index')!.isTimeBased = () => false;
+    searchSource.getField('index')!.isTimeBased = (() => false) as DataView['isTimeBased'];
     mockFetchDocuments.mockRejectedValue({ msg: 'This query failed' });
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,

@@ -10,7 +10,7 @@
 import { getForceNowFromUrl } from './get_force_now_from_url';
 const originalLocation = window.location;
 afterAll(() => {
-  // @ts-expect-error upgrade typescript v5.9.3
+  // @ts-ignore
   window.location = originalLocation;
 });
 
