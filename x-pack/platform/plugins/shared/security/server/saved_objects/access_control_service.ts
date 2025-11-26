@@ -51,13 +51,6 @@ export class AccessControlService {
       return false;
     }
 
-    // Note: We will ultimately have to check privileges even if there is no
-    // current user because we will need to support actions via HTTP APIs,
-    // like import
-    if (!accessControl.owner || !currentUser) {
-      return false;
-    }
-
     const actionsIgnoringDefaultMode = new Set([
       SecurityAction.CREATE,
       SecurityAction.BULK_CREATE,
@@ -75,7 +68,7 @@ export class AccessControlService {
       return false;
     }
 
-    return accessControl.owner !== currentUser.profile_uid;
+    return !currentUser || accessControl.owner !== currentUser.profile_uid;
   }
 
   getObjectsRequiringPrivilegeCheck({

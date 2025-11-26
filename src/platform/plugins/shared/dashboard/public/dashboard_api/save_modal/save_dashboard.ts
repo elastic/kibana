@@ -20,9 +20,6 @@ export const saveDashboard = async ({
   references,
   accessMode,
 }: SaveDashboardProps): Promise<SaveDashboardReturn> => {
-  /**
-   * Save the saved object using the content management
-   */
   const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
 
   try {

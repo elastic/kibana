@@ -2113,6 +2113,53 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
+      it('sets the default mode when setting the ownership of an object without access control metadata', async () => {
+        const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
+
+        const createResponse = await supertestWithoutAuth
+          .post('/access_control_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set(
+            'Authorization',
+            `Basic ${Buffer.from(`${adminTestUser.username}:${adminTestUser.password}`).toString(
+              'base64'
+            )}`
+          )
+          .send({ type: ACCESS_CONTROL_TYPE })
+          .expect(200);
+        const objectId = createResponse.body.id;
+
+        expect(createResponse.body).not.to.have.property('accessControl');
+
+        const { cookie: adminCookie } = await loginAsKibanaAdmin();
+
+        let getResponse = await supertestWithoutAuth
+          .get(`/access_control_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .expect(200);
+        expect(getResponse.body).not.to.have.property('accessControl');
+
+        await supertestWithoutAuth
+          .put('/access_control_objects/change_owner')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .send({
+            objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
+            newOwnerProfileUid: simpleUserProfileUid,
+          })
+          .expect(200);
+
+        getResponse = await supertestWithoutAuth
+          .get(`/access_control_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .expect(200);
+
+        expect(getResponse.body.accessControl).to.have.property('owner', simpleUserProfileUid);
+        expect(getResponse.body.accessControl).to.have.property('accessMode', 'default');
+      });
+
       describe('partial bulk change ownership', () => {
         it('should allow bulk transfer ownership of allowed objects', async () => {
           const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
@@ -2324,6 +2371,103 @@ export default function ({ getService }: FtrProviderContext) {
           'description',
           'updated description'
         );
+      });
+
+      it('sets the current user as the owner when setting the mode of an object without access control metadata', async () => {
+        const createResponse = await supertestWithoutAuth
+          .post('/access_control_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set(
+            'Authorization',
+            `Basic ${Buffer.from(`${adminTestUser.username}:${adminTestUser.password}`).toString(
+              'base64'
+            )}`
+          )
+          .send({ type: ACCESS_CONTROL_TYPE })
+          .expect(200);
+        const objectId = createResponse.body.id;
+
+        expect(createResponse.body).not.to.have.property('accessControl');
+
+        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
+
+        let getResponse = await supertestWithoutAuth
+          .get(`/access_control_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .expect(200);
+        expect(getResponse.body).not.to.have.property('accessControl');
+
+        await supertestWithoutAuth
+          .put('/access_control_objects/change_access_mode')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .send({
+            objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
+            newAccessMode: 'write_restricted',
+          })
+          .expect(200);
+
+        getResponse = await supertestWithoutAuth
+          .get(`/access_control_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .expect(200);
+
+        expect(getResponse.body.accessControl).to.have.property('owner', adminProfileUid);
+        expect(getResponse.body.accessControl).to.have.property('accessMode', 'write_restricted');
+      });
+
+      describe('partial bulk change access mode', () => {
+        it('should allow change access mode of allowed objects', async () => {
+          const { cookie: ownerCookie } = await loginAsObjectOwner('test_user', 'changeme');
+          const firstCreate = await supertestWithoutAuth
+            .post('/access_control_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', ownerCookie.cookieString())
+            .send({ type: ACCESS_CONTROL_TYPE, isWriteRestricted: true })
+            .expect(200);
+          const firstObjectId = firstCreate.body.id;
+
+          const secondCreate = await supertestWithoutAuth
+            .post('/access_control_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', ownerCookie.cookieString())
+            .send({ type: NON_ACCESS_CONTROL_TYPE })
+            .expect(200);
+          const secondObjectId = secondCreate.body.id;
+
+          const respsetModeResponse = await supertestWithoutAuth
+            .put('/access_control_objects/change_access_mode')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', ownerCookie.cookieString())
+            .send({
+              objects: [
+                { id: firstObjectId, type: firstCreate.body.type },
+                { id: secondObjectId, type: secondCreate.body.type },
+              ],
+              newAccessMode: 'default',
+            })
+            .expect(200);
+          expect(respsetModeResponse.body.objects).to.have.length(2);
+          respsetModeResponse.body.objects.forEach(
+            (object: { id: string; type: string; error?: any }) => {
+              if (object.type === ACCESS_CONTROL_TYPE) {
+                expect(object).to.have.property('id', firstObjectId);
+              }
+              if (object.type === NON_ACCESS_CONTROL_TYPE) {
+                expect(object).to.have.property('id', secondObjectId);
+                expect(object).to.have.property('error');
+                expect(object.error).to.have.property('output');
+                expect(object.error.output).to.have.property('payload');
+                expect(object.error.output.payload).to.have.property('message');
+                expect(object.error.output.payload.message).to.contain(
+                  `The type ${NON_ACCESS_CONTROL_TYPE} does not support access control: Bad Request`
+                );
+              }
+            }
+          );
+        });
       });
     });
 

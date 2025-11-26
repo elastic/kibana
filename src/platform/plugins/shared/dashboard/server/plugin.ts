@@ -127,7 +127,7 @@ export class DashboardPlugin
 
     registerRoutes(core.http);
 
-    registerAccessControl({
+    void registerAccessControl({
       http: core.http,
       isAccessControlEnabled: core.savedObjects.isAccessControlEnabled(),
       getStartServices: () =>

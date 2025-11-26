@@ -311,7 +311,7 @@ export const changeObjectAccessControl = async (
         updated_at: time,
         updated_by: currentUserProfileUid,
         accessControl: {
-          ...(currentSource?.accessControl || {}),
+          ...(currentSource?.accessControl || { accessMode: 'default' }),
           owner: newOwnerProfileUid,
         },
       };
@@ -320,7 +320,7 @@ export const changeObjectAccessControl = async (
         updated_at: time,
         updated_by: currentUserProfileUid,
         accessControl: {
-          ...(currentSource?.accessControl || {}),
+          ...(currentSource?.accessControl || { owner: currentUserProfileUid }),
           accessMode: accessMode ?? 'default',
         },
       };
