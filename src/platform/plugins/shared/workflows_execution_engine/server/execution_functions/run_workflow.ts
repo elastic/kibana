@@ -8,7 +8,7 @@
  */
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { LogsRepository } from '../repositories/logs_repository';
@@ -26,7 +26,6 @@ export async function runWorkflow({
   stepExecutionRepository,
   logsRepository,
   coreStart,
-  unscopedEsClient,
   actions,
   taskManager,
   logger,
@@ -38,7 +37,6 @@ export async function runWorkflow({
   spaceId: string;
   taskAbortController: AbortController;
   coreStart: CoreStart;
-  unscopedEsClient: ElasticsearchClient;
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
   logsRepository?: LogsRepository;
@@ -49,7 +47,7 @@ export async function runWorkflow({
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
 }): Promise<void> {
-  const logsRepositoryToUse = logsRepository ?? new LogsRepository(unscopedEsClient);
+  const logsRepositoryToUse = logsRepository ?? new LogsRepository(coreStart.dataStreams);
   const {
     workflowRuntime,
     stepExecutionRuntimeFactory,
