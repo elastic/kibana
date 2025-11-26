@@ -2647,11 +2647,19 @@ describe('Alerts Service', () => {
             index: ['.alerts-default'],
             conflicts: 'proceed',
             refresh: true,
+            ignore_unavailable: true,
             query: {
               bool: {
                 must: [
-                  { term: { 'kibana.alert.instance.id': 'alert-1' } },
-                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'kibana.alert.instance.id': 'alert-1' } },
+                        { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                      ],
+                    },
+                  },
+                  { term: { 'kibana.alert.status': 'active' } },
                 ],
               },
             },
@@ -2731,11 +2739,19 @@ describe('Alerts Service', () => {
             index: ['.alerts-default'],
             conflicts: 'proceed',
             refresh: true,
+            ignore_unavailable: true,
             query: {
               bool: {
                 must: [
-                  { term: { 'kibana.alert.instance.id': 'alert-1' } },
-                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                  {
+                    bool: {
+                      must: [
+                        { term: { 'kibana.alert.instance.id': 'alert-1' } },
+                        { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                      ],
+                    },
+                  },
+                  { term: { 'kibana.alert.status': 'active' } },
                 ],
               },
             },
@@ -2813,8 +2829,14 @@ describe('Alerts Service', () => {
             index: ['.alerts-default'],
             conflicts: 'proceed',
             refresh: true,
+            ignore_unavailable: true,
             query: {
-              term: { 'kibana.alert.rule.uuid': 'rule-1' },
+              bool: {
+                must: [
+                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                  { term: { 'kibana.alert.status': 'active' } },
+                ],
+              },
             },
             script: {
               source: `ctx._source['kibana.alert.muted'] = true;`,
@@ -2889,8 +2911,14 @@ describe('Alerts Service', () => {
             index: ['.alerts-default'],
             conflicts: 'proceed',
             refresh: true,
+            ignore_unavailable: true,
             query: {
-              term: { 'kibana.alert.rule.uuid': 'rule-1' },
+              bool: {
+                must: [
+                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                  { term: { 'kibana.alert.status': 'active' } },
+                ],
+              },
             },
             script: {
               source: `ctx._source['kibana.alert.muted'] = false;`,

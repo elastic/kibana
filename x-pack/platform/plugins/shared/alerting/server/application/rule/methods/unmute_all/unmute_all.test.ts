@@ -100,7 +100,7 @@ describe('unmuteAll', () => {
     expect(unmuteAllAlertsMock).not.toHaveBeenCalled();
   });
 
-  it('throws error and does not update rule when alertsService fails', async () => {
+  it('throws error but still updates rule when alertsService fails', async () => {
     const loggerMock = loggingSystemMock.create().get();
     const unmuteAllAlertsErrorMock = jest
       .fn()
@@ -121,6 +121,6 @@ describe('unmuteAll', () => {
     };
 
     await expect(unmuteAll(contextWithLogger, validParams)).rejects.toThrow('ES connection failed');
-    expect(partiallyUpdateRuleMock).not.toHaveBeenCalled();
+    expect(partiallyUpdateRuleMock).toHaveBeenCalled();
   });
 });

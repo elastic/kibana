@@ -92,19 +92,15 @@ describe('muteAll', () => {
     );
   });
 
-  it('should throw error when no alert indices exist', async () => {
+  it('should not call alertsService when no alert indices exist', async () => {
     (context.getAlertIndicesAlias as jest.Mock).mockReturnValue([]);
-    muteAllAlertsMock.mockRejectedValueOnce(
-      new Error('Unable to mute all alerts for ruleId: rule-123 - no alert indices available')
-    );
     const validParams = {
       id: 'rule-123',
     };
 
-    await expect(muteAll(context, validParams)).rejects.toThrow(
-      'Unable to mute all alerts for ruleId: rule-123 - no alert indices available'
-    );
-    expect(muteAllAlertsMock).toHaveBeenCalled();
+    await muteAll(context, validParams);
+
+    expect(muteAllAlertsMock).not.toHaveBeenCalled();
     expect(savedObjectsMock.update).toHaveBeenCalled();
   });
 
