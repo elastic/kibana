@@ -28,8 +28,8 @@ export const StepExecutionTimelineStateful = ({
   } = useWorkflowExecutionLogs({
     executionId,
     stepExecutionId,
-    limit: 100, // Get more logs without pagination
-    offset: 0,
+    size: 100, // Get more logs without pagination
+    page: 1,
     enabled: true,
     sortOrder: 'asc',
   });

@@ -3373,6 +3373,21 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.MOVING_ATTACKS_CALLOUT_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "MOVING_ATTACKS_CALLOUT_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"movingAttacksCallout\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.PromptContextTemplate",
         "type": "Type",
         "tags": [],
