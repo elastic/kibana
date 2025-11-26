@@ -15,7 +15,7 @@ import {
   GapAutoFillSchedulerAuditAction,
 } from '../../../../rules_client/common/audit_events';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { GAP_AUTO_FILL_SCHEDULER_TASK_TYPE } from '../../../../lib/rule_gaps/types/scheduler';
+import { GAP_AUTO_FILL_SCHEDULER_TASK_TYPE } from '../../../gaps/types/scheduler';
 import { transformSavedObjectToGapAutoFillSchedulerResult } from '../../transforms';
 import type { GapAutoFillSchedulerResponse } from '../../result/types';
 import { updateGapAutoFillSchedulerSchema } from './schemas';
