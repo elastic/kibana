@@ -47,8 +47,8 @@ export function SloManagementSearchBar({ onRefresh }: Props) {
       query={{ query: state.search, language: 'text' }}
       onQuerySubmit={({ query: value }) => {
         onStateChange({ ...state, search: value?.query ? (value?.query as string) : '' });
+        onRefresh();
       }}
-      onRefresh={onRefresh}
       renderQueryInputAppend={() => (
         <>
           <EuiComboBox
