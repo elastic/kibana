@@ -9,9 +9,10 @@ import { chunk, uniqBy } from 'lodash';
 import pMap from 'p-map';
 import type {
   AggregationsMultiBucketAggregateBase,
+  AggregationsTermsAggregateBase,
   AggregationsTopHitsAggregate,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsRawDocSource } from '@kbn/core/server';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
@@ -28,9 +29,14 @@ const ES_MAX_CONCURRENT_REQUESTS = 2;
 export interface IPrebuiltRuleAssetsClient {
   fetchLatestAssets: () => Promise<PrebuiltRuleAsset[]>;
 
-  fetchLatestVersions(ruleIds?: string[]): Promise<BasicRuleInfo[]>;
+  fetchLatestVersions(
+    ruleIds?: string[],
+    sort?: { field: string; order: 'asc' | 'desc' }[] // TODO: Check if a type for this exists already
+  ): Promise<BasicRuleInfo[]>;
 
   fetchAssetsByVersion(versions: RuleVersionSpecifier[]): Promise<PrebuiltRuleAsset[]>;
+
+  fetchTagsByVersion(versions: RuleVersionSpecifier[]): Promise<string[]>;
 }
 
 export const createPrebuiltRuleAssetsClient = (
@@ -80,68 +86,89 @@ export const createPrebuiltRuleAssetsClient = (
       });
     },
 
-    fetchLatestVersions: (ruleIds?: string[]): Promise<BasicRuleInfo[]> => {
+    fetchLatestVersions: (
+      ruleIds?: string[],
+      sort?: { field: string; order: 'asc' | 'desc' }[]
+    ): Promise<BasicRuleInfo[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestVersions', async () => {
+        // TODO: Check if we need to check for an empty ruleIds array.
         if (ruleIds && ruleIds.length === 0) {
           return [];
         }
 
-        const fetchLatestVersionInfo = async (filter?: string) => {
-          const findResult = await savedObjectsClient.find<
-            PrebuiltRuleAsset,
-            {
-              rules: AggregationsMultiBucketAggregateBase<{
-                latest_version: AggregationsTopHitsAggregate;
-              }>;
-            }
-          >({
-            type: PREBUILT_RULE_ASSETS_SO_TYPE,
-            filter,
-            aggs: {
-              rules: {
+        const latestRuleIdsSearchResult = await savedObjectsClient.search<
+          SavedObjectsRawDocSource,
+          unknown
+        >({
+          type: PREBUILT_RULE_ASSETS_SO_TYPE,
+          namespaces: ['default'], // TODO: Check if this parameter has to change depending on space
+          _source: false,
+          size: 0,
+          query: ruleIds
+            ? {
                 terms: {
-                  field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id`,
-                  size: MAX_PREBUILT_RULES_COUNT,
+                  [`${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`]: ruleIds,
                 },
-                aggs: {
-                  latest_version: {
-                    top_hits: {
-                      size: 1,
-                      sort: [
-                        {
-                          [`${PREBUILT_RULE_ASSETS_SO_TYPE}.version`]: 'desc',
-                        },
-                      ],
-                      _source: [
-                        `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
-                        `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,
-                        `${PREBUILT_RULE_ASSETS_SO_TYPE}.type`,
-                      ],
-                    },
+              }
+            : undefined,
+          aggs: {
+            rules: {
+              terms: {
+                field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
+                size: MAX_PREBUILT_RULES_COUNT,
+              },
+              aggs: {
+                latest_version: {
+                  top_hits: {
+                    size: 1,
+                    sort: [
+                      {
+                        [`${PREBUILT_RULE_ASSETS_SO_TYPE}.version`]: 'desc',
+                      },
+                    ],
+                    _source: [
+                      `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
+                      `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,
+                    ],
                   },
                 },
               },
             },
-          });
+          },
+        });
 
-          const aggregatedBuckets = findResult.aggregations?.rules?.buckets ?? [];
-          invariant(Array.isArray(aggregatedBuckets), 'Expected buckets to be an array');
-
-          return aggregatedBuckets;
-        };
-
-        const filters = ruleIds
-          ? createChunkedFilters({
-              items: ruleIds,
-              mapperFn: (ruleId) => `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id: ${ruleId}`,
-              clausesPerItem: 2,
-            })
-          : undefined;
-
-        const buckets = await chunkedFetch(fetchLatestVersionInfo, filters);
-
-        const latestVersions = buckets.map((bucket) => {
+        const latestRuleIds = latestRuleIdsSearchResult.aggregations.rules.buckets.map((bucket) => {
           const hit = bucket.latest_version.hits.hits[0];
+          const soAttributes = hit._source[PREBUILT_RULE_ASSETS_SO_TYPE];
+          return {
+            rule_id: soAttributes.rule_id,
+            version: soAttributes.version,
+          };
+        });
+
+        const soIds = latestRuleIds.map(
+          (rule) => `${PREBUILT_RULE_ASSETS_SO_TYPE}:${rule.rule_id}_${rule.version}`
+        );
+
+        const searchResult = await savedObjectsClient.search<SavedObjectsRawDocSource, unknown>({
+          type: PREBUILT_RULE_ASSETS_SO_TYPE,
+          namespaces: ['default'], // TODO: Check if this parameter is applicable
+          size: 10000,
+          query: {
+            terms: {
+              _id: soIds,
+            },
+          },
+          sort: sort?.map((s) => {
+            return { [s.field]: s.order };
+          }),
+          _source: [
+            `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
+            `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,
+          ],
+        });
+
+        const latestVersions = searchResult.hits.hits.map((hit) => {
           const soAttributes = hit._source[PREBUILT_RULE_ASSETS_SO_TYPE];
           const versionInfo: BasicRuleInfo = {
             rule_id: soAttributes.rule_id,
@@ -155,7 +182,11 @@ export const createPrebuiltRuleAssetsClient = (
       });
     },
 
-    fetchAssetsByVersion: (versions: RuleVersionSpecifier[]): Promise<PrebuiltRuleAsset[]> => {
+    fetchAssetsByVersion: (
+      versions: RuleVersionSpecifier[],
+      sort?: { field: string; order: 'asc' | 'desc' }[]
+    ): Promise<PrebuiltRuleAsset[]> => {
+      // TODO: This also needs to use `.search`, otherwise it may mess up the sorting.
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchAssetsByVersion', async () => {
         if (versions.length === 0) {
           // NOTE: without early return it would build incorrect filter and fetch all existing saved objects
@@ -169,6 +200,9 @@ export const createPrebuiltRuleAssetsClient = (
           clausesPerItem: 4,
         });
 
+        const sortField = sort?.[0]?.field;
+        const sortOrder = sort?.[0]?.order;
+
         const ruleAssets = await chunkedFetch(async (filter) => {
           // Usage of savedObjectsClient.bulkGet() is ~25% more performant and
           // simplifies deduplication but too many tests get broken.
@@ -177,6 +211,8 @@ export const createPrebuiltRuleAssetsClient = (
             type: PREBUILT_RULE_ASSETS_SO_TYPE,
             filter,
             perPage: MAX_PREBUILT_RULES_COUNT,
+            sortField,
+            sortOrder,
           });
 
           return findResult.saved_objects.map((so) => so.attributes);
@@ -187,6 +223,44 @@ export const createPrebuiltRuleAssetsClient = (
         const uniqueRuleAssets = uniqBy(ruleAssets, 'rule_id');
 
         return validatePrebuiltRuleAssets(uniqueRuleAssets);
+      });
+    },
+
+    fetchTagsByVersion: (versions: RuleVersionSpecifier[]): Promise<string[]> => {
+      return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchTagsByVersion', async () => {
+        const soIds = versions.map(
+          (version) => `${PREBUILT_RULE_ASSETS_SO_TYPE}:${version.rule_id}_${version.version}`
+        );
+
+        const searchResult = await savedObjectsClient.search<
+          SavedObjectsRawDocSource,
+          { unique_tags: AggregationsTermsAggregateBase<{ key: string; doc_count: number }> }
+        >({
+          type: PREBUILT_RULE_ASSETS_SO_TYPE,
+          namespaces: ['default'], // TODO: Check if this parameter has to change depending on space
+          _source: false,
+          size: 0,
+          query: {
+            terms: {
+              _id: soIds,
+            },
+          },
+          aggs: {
+            unique_tags: {
+              terms: {
+                field: 'security-rule.tags',
+                size: 10000,
+                order: { _key: 'asc' },
+              },
+            },
+          },
+        });
+
+        const buckets = searchResult.aggregations?.unique_tags?.buckets || [];
+        invariant(Array.isArray(buckets), 'Expected buckets to be an array');
+
+        const tags = buckets.map((bucket) => bucket.key);
+        return tags;
       });
     },
   };

@@ -1,0 +1,67 @@
+/* ruleAssetsClient.fetchLatestVersions() - Without rule ids passed in */
+{
+    "from": 0,
+    "size": 20,
+    "seq_no_primary_term": true,
+    "aggs": {
+        "rules": {
+            "terms": {
+                "field": "security-rule.rule_id",
+                "size": 10000
+            },
+            "aggs": {
+                "latest_version": {
+                    "top_hits": {
+                        "size": 1,
+                        "sort": [
+                            {
+                                "security-rule.version": "desc"
+                            }
+                        ],
+                        "_source": [
+                            "security-rule.rule_id",
+                            "security-rule.version",
+                            "security-rule.type"
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "query": {
+        "bool": {
+            "filter": [
+                {
+                    "bool": {
+                        "should": [
+                            {
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "term": {
+                                                "type": "security-rule"
+                                            }
+                                        }
+                                    ],
+                                    "must_not": [
+                                        {
+                                            "exists": {
+                                                "field": "namespace"
+                                            }
+                                        },
+                                        {
+                                            "exists": {
+                                                "field": "namespaces"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "minimum_should_match": 1
+                    }
+                }
+            ]
+        }
+    }
+}
