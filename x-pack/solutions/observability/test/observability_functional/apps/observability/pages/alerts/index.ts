@@ -10,8 +10,8 @@ import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach } from '../../helpers';
 
-const TOTAL_ALERTS_CELL_COUNT = 440;
-const RECOVERED_ALERTS_CELL_COUNT = 330;
+const TOTAL_ALERTS_CELL_COUNT = 480;
+const RECOVERED_ALERTS_CELL_COUNT = 360;
 const ACTIVE_ALERTS_CELL_COUNT = 120;
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
