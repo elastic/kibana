@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
+import { globalSetupHook } from '@kbn/scout';
 
-export default createPlaywrightConfig({
-  testDir: './parallel_tests',
-  workers: 2,
-  runGlobalSetup: true,
+globalSetupHook('Setup environment for streams tests', async ({ apiServices, log }) => {
+  log.debug('[setup] Enabling streams...');
+  await apiServices.streams.enable();
 });
