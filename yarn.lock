@@ -7131,6 +7131,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/kubernetes-security-plugin@link:x-pack/solutions/security/plugins/kubernetes_security":
+  version "0.0.0"
+  uid ""
+
 "@kbn/langchain@link:x-pack/platform/packages/shared/kbn-langchain":
   version "0.0.0"
   uid ""
