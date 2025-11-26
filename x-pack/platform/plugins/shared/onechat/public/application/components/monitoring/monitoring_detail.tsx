@@ -585,6 +585,19 @@ export const MonitoringDetail: React.FC = () => {
               />
             </EuiPanel>
           </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiPanel hasBorder color="subdued">
+              <EuiStat
+                title={`${(
+                  conversation.rounds.reduce((sum, r) => sum + r.time_to_first_token, 0) /
+                  conversation.rounds.length /
+                  1000
+                ).toFixed(2)}s`}
+                description={labels.monitoring.avgThinkingTimeLabel}
+                titleSize="s"
+              />
+            </EuiPanel>
+          </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiSpacer size="l" />

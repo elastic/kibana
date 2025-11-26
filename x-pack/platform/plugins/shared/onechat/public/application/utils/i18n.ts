@@ -378,7 +378,7 @@ export const labels = {
       defaultMessage: 'Started at',
     }),
     timeToFirstTokenLabel: i18n.translate('xpack.onechat.monitoring.timeToFirstTokenLabel', {
-      defaultMessage: 'Time to first token',
+      defaultMessage: 'Thinking time',
     }),
     timeToLastTokenLabel: i18n.translate('xpack.onechat.monitoring.timeToLastTokenLabel', {
       defaultMessage: 'Total duration',
@@ -393,6 +393,9 @@ export const labels = {
     }),
     generationTimeLabel: i18n.translate('xpack.onechat.monitoring.generationTimeLabel', {
       defaultMessage: 'Generation time',
+    }),
+    avgThinkingTimeLabel: i18n.translate('xpack.onechat.monitoring.avgThinkingTimeLabel', {
+      defaultMessage: 'Avg. round thinking time',
     }),
     backToListLabel: i18n.translate('xpack.onechat.monitoring.backToListLabel', {
       defaultMessage: 'Back to conversations',
