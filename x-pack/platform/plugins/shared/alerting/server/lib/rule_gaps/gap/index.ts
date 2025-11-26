@@ -5,10 +5,9 @@
  * 2.0.
  */
 import type { InternalFields } from '@kbn/event-log-plugin/server/es/cluster_client_adapter';
+import type { GapBase, Interval, StringInterval } from '../../../application/gaps/types';
 import type { GapStatus } from '../../../../common/constants';
 import { gapStatus } from '../../../../common/constants';
-
-import type { Interval, StringInterval, GapBase } from '../types';
 
 import {
   mergeIntervals,

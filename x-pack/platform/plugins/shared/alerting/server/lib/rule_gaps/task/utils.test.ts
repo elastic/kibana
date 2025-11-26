@@ -11,7 +11,7 @@ import { backfillClientMock } from '../../../backfill_client/backfill_client.moc
 import { rulesClientMock } from '../../../rules_client.mock';
 import type { RulesClientContext } from '../../../rules_client/types';
 import { Gap } from '../gap';
-import { GAP_AUTO_FILL_STATUS } from '../types/scheduler';
+import { GAP_AUTO_FILL_STATUS } from '../../../application/gaps/types/scheduler';
 import {
   resultsFromMap,
   formatConsolidatedSummary,
@@ -22,7 +22,7 @@ import {
   type AggregatedByRuleEntry,
 } from './utils';
 import type { GapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
-import { GapFillSchedulePerRuleStatus } from '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
+import { GapFillSchedulePerRuleStatus } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
 
 describe('gap auto fill task utils', () => {
   describe('resultsFromMap and formatConsolidatedSummary', () => {

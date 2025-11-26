@@ -31,7 +31,7 @@ describe('createAutoFillSchedulerRoute', () => {
     gap_fill_range: '24h',
     max_backfills: 100,
     num_retries: 3,
-    scope: 'internal',
+    scope: ['internal'],
     rule_types: [{ type: 'test-rule-type', consumer: 'test-consumer' }],
   };
 
@@ -48,6 +48,8 @@ describe('createAutoFillSchedulerRoute', () => {
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
     scheduledTaskId: 'task-id',
+    scope: ['internal'],
+    ruleTypes: [{ type: 'test-rule-type', consumer: 'test-consumer' }],
   };
 
   test('should call create gap fill auto scheduler with proper parameters', async () => {
@@ -73,7 +75,7 @@ describe('createAutoFillSchedulerRoute', () => {
         gapFillRange: '24h',
         maxBackfills: 100,
         numRetries: 3,
-        scope: 'internal',
+        scope: ['internal'],
         ruleTypes: [{ type: 'test-rule-type', consumer: 'test-consumer' }],
         request: expect.any(Object),
       })
@@ -87,6 +89,8 @@ describe('createAutoFillSchedulerRoute', () => {
         schedule: { interval: '1h' },
         gap_fill_range: '24h',
         max_backfills: 100,
+        scope: ['internal'],
+        rule_types: [{ type: 'test-rule-type', consumer: 'test-consumer' }],
         num_retries: 3,
         created_by: 'test-user',
         updated_by: 'test-user',

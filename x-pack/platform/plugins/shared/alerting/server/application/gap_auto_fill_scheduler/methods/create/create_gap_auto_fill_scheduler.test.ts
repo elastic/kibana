@@ -89,6 +89,31 @@ function getParams(
   };
 }
 
+const getSavedObject = (id: string = 'gap-1'): SavedObject<GapAutoFillSchedulerSO> => ({
+  id,
+  type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+  attributes: {
+    id,
+    name: 'auto-fill',
+    enabled: true,
+    schedule: { interval: '1h' },
+    gapFillRange: 'now-1d',
+    maxBackfills: 100,
+    numRetries: 3,
+    scope: ['scope-1'],
+    ruleTypes: [
+      { type: 'test-rule-type1', consumer: 'test-consumer' },
+      { type: 'test-rule-type2', consumer: 'test-consumer' },
+    ],
+    ruleTypeConsumerPairs: ['test-rule-type1:test-consumer', 'test-rule-type2:test-consumer'],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+  },
+  references: [],
+});
+
 describe('createGapFillAutoScheduler()', () => {
   let rulesClient: RulesClient;
 
@@ -103,30 +128,7 @@ describe('createGapFillAutoScheduler()', () => {
       page: 1,
     });
 
-    const soCreated: SavedObject<GapAutoFillSchedulerSO> = {
-      id: 'gap-1',
-      type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-      attributes: {
-        id: 'gap-1',
-        name: 'auto-fill',
-        enabled: true,
-        schedule: { interval: '1h' },
-        gapFillRange: 'now-1d',
-        maxBackfills: 100,
-        numRetries: 3,
-        ruleTypes: [
-          { type: 'test-rule-type1', consumer: 'test-consumer' },
-          { type: 'test-rule-type2', consumer: 'test-consumer' },
-        ],
-        ruleTypeConsumerPairs: ['test-rule-type1:test-consumer', 'test-rule-type2:test-consumer'],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        createdBy: 'elastic',
-        updatedBy: 'elastic',
-      },
-      references: [],
-    };
-    unsecuredSavedObjectsClient.create.mockResolvedValue(soCreated);
+    unsecuredSavedObjectsClient.create.mockResolvedValue(getSavedObject());
 
     const scheduledTask: TaskInstanceWithId = {
       id: 'task-1',
@@ -135,31 +137,6 @@ describe('createGapFillAutoScheduler()', () => {
       state: {},
     };
     taskManager.ensureScheduled.mockResolvedValue(scheduledTask);
-
-    const soUpdated: SavedObject<GapAutoFillSchedulerSO> = {
-      id: 'gap-1',
-      type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-      attributes: {
-        id: 'gap-1',
-        name: 'auto-fill',
-        enabled: true,
-        schedule: { interval: '1h' },
-        gapFillRange: 'now-1d',
-        maxBackfills: 100,
-        numRetries: 3,
-        ruleTypes: [
-          { type: 'test-rule-type1', consumer: 'test-consumer' },
-          { type: 'test-rule-type2', consumer: 'test-consumer' },
-        ],
-        ruleTypeConsumerPairs: ['test-rule-type1:test-consumer', 'test-rule-type2:test-consumer'],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        createdBy: 'elastic',
-        updatedBy: 'elastic',
-      },
-      references: [],
-    };
-    unsecuredSavedObjectsClient.update.mockResolvedValue(soUpdated);
 
     const soFetched: SavedObject<GapAutoFillSchedulerSO> = {
       id: 'gap-1',
@@ -172,6 +149,7 @@ describe('createGapFillAutoScheduler()', () => {
         gapFillRange: 'now-1d',
         maxBackfills: 100,
         numRetries: 3,
+        scope: ['scope-1'],
         ruleTypes: [
           { type: 'test-rule-type1', consumer: 'test-consumer' },
           { type: 'test-rule-type2', consumer: 'test-consumer' },
@@ -187,7 +165,7 @@ describe('createGapFillAutoScheduler()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValue(soFetched);
   });
 
-  test('succeeds creating and scheduling task without updating SO with task id', async () => {
+  test('succeeds creating and scheduling task', async () => {
     const params = getParams();
     const result = await rulesClient.createGapAutoFillScheduler(params);
 
@@ -217,6 +195,29 @@ describe('createGapFillAutoScheduler()', () => {
     expect(result).toEqual(
       transformSavedObjectToGapAutoFillSchedulerResult({
         savedObject: await unsecuredSavedObjectsClient.create.mock.results[0].value,
+      })
+    );
+  });
+
+  test('succeeds creating and scheduling task with custom id', async () => {
+    const params = getParams({ id: 'custom-gap-id' });
+    const soWithCustomId: SavedObject<GapAutoFillSchedulerSO> = getSavedObject('custom-gap-id');
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce(soWithCustomId);
+
+    const result = await rulesClient.createGapAutoFillScheduler(params);
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      expect.objectContaining({ name: 'auto-fill' }),
+      expect.objectContaining({ id: 'custom-gap-id' })
+    );
+    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'custom-gap-id' }),
+      expect.any(Object)
+    );
+    expect(result).toEqual(
+      transformSavedObjectToGapAutoFillSchedulerResult({
+        savedObject: soWithCustomId,
       })
     );
   });

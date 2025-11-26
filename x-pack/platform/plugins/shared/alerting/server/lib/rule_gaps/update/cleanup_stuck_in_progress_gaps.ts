@@ -13,7 +13,7 @@ import type { Gap } from '../gap';
 import { findGapsSearchAfter } from '../find_gaps';
 import { updateGapsInEventLog } from './update_gaps_in_event_log';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
-import { getRuleIdsWithGaps } from '../../../application/rule/methods/get_rule_ids_with_gaps/get_rule_ids_with_gaps';
+import { getRuleIdsWithGaps } from '../../../application/gaps/methods/get_rule_ids_with_gaps/get_rule_ids_with_gaps';
 import { filterGapsWithOverlappingBackfills } from '../task/utils';
 import { prepareGapsForUpdate } from './utils';
 
@@ -56,6 +56,7 @@ export const cleanupStuckInProgressGaps = async ({
       start: startDate.toISOString(),
       end: now.toISOString(),
       hasInProgressIntervals: true,
+      maxRulesToFetch: MAX_RULES_TO_PROCESS,
     });
 
     if (allRuleIds.length === 0) {
@@ -63,16 +64,13 @@ export const cleanupStuckInProgressGaps = async ({
       return;
     }
 
-    const ruleIdsToProcess = allRuleIds.slice(0, MAX_RULES_TO_PROCESS);
-    logger.debug(
-      `Processing ${ruleIdsToProcess.length} rules (out of ${allRuleIds.length} total) for stuck gap cleanup`
-    );
+    logger.debug(`Processing ${allRuleIds.length} rules for stuck gap cleanup`);
 
     const gapsResponse = await findGapsSearchAfter({
       eventLogClient,
       logger,
       params: {
-        ruleIds: ruleIdsToProcess,
+        ruleIds: allRuleIds,
         start: startDate.toISOString(),
         end: now.toISOString(),
         perPage: MAX_GAPS_TO_PROCESS,

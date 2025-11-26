@@ -10,7 +10,7 @@ import type { BackfillSchedule } from '../../../application/backfill/result/type
 import { parseDuration } from '../../../../common';
 import { clipDateInterval } from '../gap/interval_utils';
 import type { Gap } from '../gap';
-import type { GapBase } from '../types';
+import type { GapBase } from '../../../application/gaps/types';
 
 export interface ScheduledItem {
   from: Date;

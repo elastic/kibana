@@ -95,6 +95,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
             gap_fill_range: 'now-30d',
             max_backfills: 100,
             num_retries: 1,
+            scope: ['test-scope'],
             rule_types: [
               {
                 type: 'test.patternFiringAutoRecoverFalse',
@@ -206,6 +207,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
               max_backfills: 100,
               enabled: true,
               num_retries: 1,
+              scope: ['test-scope'],
               rule_types: [
                 { type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' },
               ],
@@ -304,6 +306,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
               gap_fill_range: 'now-30d',
               max_backfills: 100,
               enabled: true,
+              scope: ['test-scope'],
               num_retries: 1,
               rule_types: [
                 { type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' },
@@ -373,6 +376,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
             schedule: { interval: '' },
             gapFillRange: 'now-30d',
             maxBackfills: 100,
+            scope: ['test-scope'],
             numRetries: 1,
             ruleTypes: [{ type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' }],
           } as Record<string, unknown>;
@@ -401,6 +405,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
             gap_fill_range: 'now-30d',
             max_backfills: 100,
             num_retries: 1,
+            scope: ['test-scope'],
             rule_types: [
               {
                 type: 'test.patternFiringAutoRecoverFalse',
@@ -437,6 +442,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
             gap_fill_range: 'now-30d',
             max_backfills: 100,
             num_retries: 1,
+            scope: ['test-scope'],
             rule_types: [
               {
                 type: 'test.patternFiringAutoRecoverFalse',
@@ -477,6 +483,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
             gap_fill_range: 'now-30d',
             max_backfills: 100,
             num_retries: 1,
+            scope: ['test-scope'],
             rule_types: [
               {
                 type: 'test.patternFiringAutoRecoverFalse',
@@ -533,6 +540,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
               gap_fill_range: 'now-30d',
               max_backfills: 10,
               num_retries: 1,
+              scope: ['test-scope'],
               rule_types: [
                 { type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' },
               ],
@@ -550,10 +558,12 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
               gap_fill_range: 'now-30d',
               max_backfills: 10,
               num_retries: 1,
+              scope: ['test-scope'],
               rule_types: [
                 { type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' },
               ],
             });
+
           expect(dup.statusCode).to.eql(409);
 
           // different type succeeds
@@ -567,6 +577,7 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
               gap_fill_range: 'now-30d',
               max_backfills: 10,
               num_retries: 1,
+              scope: ['test-scope'],
               rule_types: [{ type: 'test.always-firing', consumer: 'alertsFixture' }],
             });
           expect(diffType.statusCode).to.eql(200);

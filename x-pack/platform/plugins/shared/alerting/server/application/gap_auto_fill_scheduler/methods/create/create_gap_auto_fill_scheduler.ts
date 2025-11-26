@@ -20,7 +20,7 @@ import {
   gapAutoFillSchedulerAuditEvent,
   GapAutoFillSchedulerAuditAction,
 } from '../../../../rules_client/common/audit_events';
-import { GAP_AUTO_FILL_SCHEDULER_TASK_TYPE } from '../../../../lib/rule_gaps/types/scheduler';
+import { GAP_AUTO_FILL_SCHEDULER_TASK_TYPE } from '../../../gaps/types/scheduler';
 
 export async function createGapAutoFillScheduler(
   context: RulesClientContext,
@@ -89,7 +89,7 @@ Payload summary: ${JSON.stringify(otherParams, (key, value) =>
       }
     }
 
-    const createdBy = await context.getUserName?.();
+    const createdBy = await context.getUserName();
 
     const now = new Date().toISOString();
     const attributes = transformGapAutoFillSchedulerCreateParamToSavedObject(params, {
@@ -133,7 +133,13 @@ Payload summary: ${JSON.stringify(otherParams, (key, value) =>
       context.logger.error(
         `Failed to schedule task for gap auto fill scheduler ${so.id}. Will attempt to delete the saved object.`
       );
-      await soClient.delete(GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE, so.id);
+      try {
+        await soClient.delete(GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE, so.id);
+      } catch (deleteError) {
+        context.logger.error(
+          `Failed to delete gap auto fill saved object for gap auto fill scheduler ${so.id}.`
+        );
+      }
       throw e;
     }
 

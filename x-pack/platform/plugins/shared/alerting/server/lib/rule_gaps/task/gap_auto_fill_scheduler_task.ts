@@ -12,8 +12,8 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import dateMath from '@kbn/datemath';
 import { findGapsSearchAfter } from '../find_gaps';
-import { processGapsBatch } from '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch';
-import { GapFillSchedulePerRuleStatus } from '../../../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
+import { processGapsBatch } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch';
+import { GapFillSchedulePerRuleStatus } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
 
 import type { RulesClientApi } from '../../../types';
 import { gapStatus } from '../../../../common/constants';
@@ -24,7 +24,7 @@ import {
   DEFAULT_GAPS_PER_PAGE,
   DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
   GAP_AUTO_FILL_STATUS,
-} from '../types/scheduler';
+} from '../../../application/gaps/types/scheduler';
 import { backfillInitiator } from '../../../../common/constants';
 import type { RulesClientContext } from '../../../rules_client/types';
 import type { AggregatedByRuleEntry } from './utils';
@@ -42,6 +42,254 @@ import { cleanupStuckInProgressGaps } from '../update/cleanup_stuck_in_progress_
 // Circuit breaker to prevent infinite pagination loops when fetching gaps
 const GAP_FETCH_MAX_ITERATIONS = 1000;
 
+export enum SchedulerLoopState {
+  COMPLETED = 'completed',
+  CAPACITY_EXHAUSTED = 'capacity_exhausted',
+  CANCELLED = 'cancelled',
+}
+
+interface ProcessRuleBatchesResult {
+  aggregatedByRule: Map<string, AggregatedByRuleEntry>;
+  state: SchedulerLoopState;
+}
+
+interface ProcessGapsForRulesResult {
+  aggregatedByRule: Map<string, AggregatedByRuleEntry>;
+  remainingBackfills: number;
+  state: SchedulerLoopState;
+}
+
+type LoggerMessageBuilder = (message: string) => string;
+
+export async function processRuleBatches({
+  abortController,
+  gapsPerPage,
+  gapFetchMaxIterations,
+  logger,
+  loggerMessage,
+  logEvent,
+  remainingBackfills,
+  ruleIds,
+  rulesBatchSize,
+  rulesClient,
+  rulesClientContext,
+  sortOrder,
+  startISO,
+  endISO,
+  taskInstanceId,
+}: {
+  abortController: AbortController;
+  gapsPerPage: number;
+  gapFetchMaxIterations: number;
+  logger: Logger;
+  loggerMessage: LoggerMessageBuilder;
+  logEvent: ReturnType<typeof createGapAutoFillSchedulerEventLogger>;
+  remainingBackfills: number;
+  ruleIds: string[];
+  rulesBatchSize: number;
+  rulesClient: RulesClientApi;
+  rulesClientContext: RulesClientContext;
+  sortOrder: 'asc' | 'desc';
+  startISO: string;
+  endISO: string;
+  taskInstanceId: string;
+}): Promise<ProcessRuleBatchesResult> {
+  let aggregatedByRule = new Map<string, AggregatedByRuleEntry>();
+
+  for (let startIdx = 0; startIdx < ruleIds.length; startIdx += rulesBatchSize) {
+    if (remainingBackfills <= 0) {
+      return { aggregatedByRule, state: SchedulerLoopState.CAPACITY_EXHAUSTED };
+    }
+
+    if (
+      await handleCancellation({
+        abortController,
+        aggregatedByRule,
+        logEvent,
+      })
+    ) {
+      return { aggregatedByRule, state: SchedulerLoopState.CANCELLED };
+    }
+
+    const currentRuleIds = ruleIds.slice(startIdx, startIdx + rulesBatchSize);
+    const { data: rules } = await rulesClient.find({
+      options: {
+        page: 1,
+        perPage: currentRuleIds.length,
+        filter: `alert.attributes.enabled:true AND (${currentRuleIds
+          .map((id) => `alert.id: ("alert:${id}")`)
+          .join(' OR ')})`,
+      },
+    });
+
+    const toProcessRuleIds = rules.map((rule) => rule.id).slice(0, remainingBackfills);
+    if (!toProcessRuleIds.length) {
+      continue;
+    }
+
+    const gapsResult = await processGapsForRules({
+      abortController,
+      aggregatedByRule,
+      endISO,
+      gapsPerPage,
+      gapFetchMaxIterations,
+      logger,
+      loggerMessage,
+      logEvent,
+      remainingBackfills,
+      rulesClientContext,
+      sortOrder,
+      startISO,
+      taskInstanceId,
+      toProcessRuleIds,
+    });
+
+    aggregatedByRule = gapsResult.aggregatedByRule;
+    remainingBackfills = gapsResult.remainingBackfills;
+
+    if (gapsResult.state !== SchedulerLoopState.COMPLETED) {
+      return {
+        aggregatedByRule,
+        state: gapsResult.state,
+      };
+    }
+  }
+
+  return { aggregatedByRule, state: SchedulerLoopState.COMPLETED };
+}
+
+export async function processGapsForRules({
+  abortController,
+  aggregatedByRule,
+  endISO,
+  gapsPerPage,
+  gapFetchMaxIterations,
+  logger,
+  loggerMessage,
+  logEvent,
+  remainingBackfills,
+  rulesClientContext,
+  sortOrder,
+  startISO,
+  taskInstanceId,
+  toProcessRuleIds,
+}: {
+  abortController: AbortController;
+  aggregatedByRule: Map<string, AggregatedByRuleEntry>;
+  endISO: string;
+  gapsPerPage: number;
+  gapFetchMaxIterations: number;
+  logger: Logger;
+  loggerMessage: LoggerMessageBuilder;
+  logEvent: ReturnType<typeof createGapAutoFillSchedulerEventLogger>;
+  remainingBackfills: number;
+  rulesClientContext: RulesClientContext;
+  sortOrder: 'asc' | 'desc';
+  startISO: string;
+  taskInstanceId: string;
+  toProcessRuleIds: string[];
+}): Promise<ProcessGapsForRulesResult> {
+  let aggregated = new Map(aggregatedByRule);
+
+  let searchAfter: SortResults[] | undefined;
+  let pitId: string | undefined;
+  let gapFetchIterationCount = 0;
+
+  while (true) {
+    if (gapFetchIterationCount >= gapFetchMaxIterations) {
+      logger.debug(
+        loggerMessage('Circuit breaker triggered: reached maximum number of gap fetch iterations')
+      );
+      break;
+    }
+    gapFetchIterationCount++;
+
+    if (
+      await handleCancellation({
+        abortController,
+        aggregatedByRule: aggregated,
+        logEvent,
+      })
+    ) {
+      return {
+        aggregatedByRule: aggregated,
+        remainingBackfills,
+        state: SchedulerLoopState.CANCELLED,
+      };
+    }
+
+    const {
+      data: gapsPage,
+      searchAfter: nextSearchAfter,
+      pitId: nextPitId,
+    } = await findGapsSearchAfter({
+      eventLogClient: await rulesClientContext.getEventLogClient(),
+      logger,
+      params: {
+        ruleIds: toProcessRuleIds,
+        start: startISO,
+        end: endISO,
+        perPage: gapsPerPage,
+        sortField: '@timestamp',
+        sortOrder,
+        statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
+        searchAfter,
+        pitId,
+        hasUnfilledIntervals: true,
+      },
+    });
+
+    pitId = nextPitId ?? pitId;
+    searchAfter = nextSearchAfter;
+
+    if (!gapsPage.length) {
+      break;
+    }
+
+    const filteredGaps = await filterGapsWithOverlappingBackfills(
+      gapsPage,
+      rulesClientContext,
+      (message) => logger.warn(loggerMessage(message))
+    );
+
+    if (filteredGaps.length) {
+      const sortedGaps = filteredGaps.sort((a, b) => a.range.gte.getTime() - b.range.gte.getTime());
+
+      const { results: chunkResults } = await processGapsBatch(rulesClientContext, {
+        gapsBatch: sortedGaps,
+        range: { start: startISO, end: endISO },
+        initiator: backfillInitiator.SYSTEM,
+        initiatorId: taskInstanceId,
+      });
+
+      aggregated = addChunkResultsToAggregation(aggregated, chunkResults);
+
+      const chunkScheduledCount = chunkResults.reduce(
+        (count, result) =>
+          result.status === GapFillSchedulePerRuleStatus.SUCCESS ? count + 1 : count,
+        0
+      );
+
+      if (chunkScheduledCount > 0) {
+        remainingBackfills = Math.max(remainingBackfills - chunkScheduledCount, 0);
+        if (remainingBackfills <= 0) {
+          return {
+            aggregatedByRule: aggregated,
+            remainingBackfills,
+            state: SchedulerLoopState.CAPACITY_EXHAUSTED,
+          };
+        }
+      }
+    }
+
+    if (gapsPage.length < gapsPerPage) {
+      break;
+    }
+  }
+
+  return { aggregatedByRule: aggregated, remainingBackfills, state: SchedulerLoopState.COMPLETED };
+}
+
 function addChunkResultsToAggregation(
   aggregatedByRule: Map<string, AggregatedByRuleEntry>,
   chunkResults: Array<{
@@ -50,11 +298,13 @@ function addChunkResultsToAggregation(
     status: GapFillSchedulePerRuleStatus;
     error?: string;
   }>
-): void {
+): Map<string, AggregatedByRuleEntry> {
+  const nextAggregated = new Map(aggregatedByRule);
+
   for (const r of chunkResults) {
-    const existing = aggregatedByRule.get(r.ruleId);
+    const existing = nextAggregated.get(r.ruleId);
     if (!existing) {
-      aggregatedByRule.set(r.ruleId, {
+      nextAggregated.set(r.ruleId, {
         ruleId: r.ruleId,
         processedGaps: r.processedGaps,
         status: r.status,
@@ -66,7 +316,7 @@ function addChunkResultsToAggregation(
         combinedStatus = GapFillSchedulePerRuleStatus.ERROR;
       }
 
-      aggregatedByRule.set(r.ruleId, {
+      nextAggregated.set(r.ruleId, {
         ruleId: r.ruleId,
         processedGaps: existing.processedGaps + (r.processedGaps ?? 0),
         status: combinedStatus,
@@ -74,6 +324,8 @@ function addChunkResultsToAggregation(
       });
     }
   }
+
+  return nextAggregated;
 }
 
 /**
@@ -154,6 +406,8 @@ export function registerGapAutoFillSchedulerTask({
               if (!startDate) {
                 throw new Error(`Invalid gapFillRange: ${config.gapFillRange}`);
               }
+              const startISO = startDate.toISOString();
+              const endISO = now.toISOString();
 
               // Cleanup stuck in-progress gaps
               try {
@@ -183,18 +437,18 @@ export function registerGapAutoFillSchedulerTask({
                 await logEvent({
                   status: GAP_AUTO_FILL_STATUS.SKIPPED,
                   results: [],
-                  message: `Skipped execution: no capacity remaining to schedule gap fills (${capacityCheckInitial.currentCount}/${capacityCheckInitial.maxBackfills})`,
+                  message: `Skipped execution: gap auto-fill capacity limit reached. This task can schedule at most ${capacityCheckInitial.maxBackfills} gap backfills at a time, and existing backfills must finish before new ones can be scheduled.`,
                 });
                 return { state: {} };
               }
 
               // Step 3: Fetch rule IDs with gaps
-              let remainingBackfills = capacityCheckInitial.remainingCapacity;
+              const remainingBackfills = capacityCheckInitial.remainingCapacity;
               // newest gap first
               const sortOrder = 'desc';
               const { ruleIds } = await rulesClient.getRuleIdsWithGaps({
-                start: startDate.toISOString(),
-                end: now.toISOString(),
+                start: startISO,
+                end: endISO,
                 sortOrder,
                 hasUnfilledIntervals: true,
                 ruleTypes: config.ruleTypes,
@@ -209,160 +463,43 @@ export function registerGapAutoFillSchedulerTask({
                 return { state: {} };
               }
 
-              const aggregatedByRule = new Map<
-                string,
-                {
-                  ruleId: string;
-                  processedGaps: number;
-                  status: GapFillSchedulePerRuleStatus;
-                  error?: string;
-                }
-              >();
-
               // Step 4: Process rules in batches
-              for (
-                let startIdx = 0;
-                startIdx < ruleIds.length;
-                startIdx += DEFAULT_RULES_BATCH_SIZE
-              ) {
-                // Stop early if we've reached capacity
-                if (remainingBackfills <= 0) {
-                  const consolidated = resultsFromMap(aggregatedByRule);
-                  await logEvent({
-                    status: GAP_AUTO_FILL_STATUS.SUCCESS,
-                    results: consolidated,
-                    message: `Stopped early: no backfill capacity remaining | ${formatConsolidatedSummary(
-                      consolidated
-                    )}`,
-                  });
-                  return { state: {} };
-                }
-                if (
-                  await handleCancellation({
-                    abortController,
-                    aggregatedByRule,
-                    logEvent,
-                  })
-                ) {
-                  return { state: {} };
-                }
+              const gapFillsResult = await processRuleBatches({
+                abortController,
+                gapsPerPage: DEFAULT_GAPS_PER_PAGE,
+                gapFetchMaxIterations: GAP_FETCH_MAX_ITERATIONS,
+                logger,
+                loggerMessage,
+                logEvent,
+                remainingBackfills,
+                ruleIds,
+                rulesBatchSize: DEFAULT_RULES_BATCH_SIZE,
+                rulesClient,
+                rulesClientContext,
+                sortOrder,
+                startISO,
+                endISO,
+                taskInstanceId: taskInstance.id,
+              });
 
-                const currentRuleIds = ruleIds.slice(startIdx, startIdx + DEFAULT_RULES_BATCH_SIZE);
+              const aggregatedByRule = gapFillsResult.aggregatedByRule;
 
-                // we need to find the rules that are enabled and
-                // and check for rule types and consumers that are supported
-                const { data: rules } = await rulesClient.find({
-                  options: {
-                    page: 1,
-                    perPage: currentRuleIds.length,
-                    filter: `alert.attributes.enabled:true AND (${currentRuleIds
-                      .map((id) => `alert.id: ("alert:${id}")`)
-                      .join(' OR ')})`,
-                  },
+              if (gapFillsResult.state === SchedulerLoopState.CAPACITY_EXHAUSTED) {
+                const consolidated = resultsFromMap(aggregatedByRule);
+                await logEvent({
+                  status: GAP_AUTO_FILL_STATUS.SUCCESS,
+                  results: consolidated,
+                  message: `Stopped early: gap auto-fill capacity limit reached. This task can schedule at most ${
+                    capacityCheckInitial.maxBackfills
+                  } gap backfills at a time, and existing backfills must finish before new ones can be scheduled. | ${formatConsolidatedSummary(
+                    consolidated
+                  )}`,
                 });
+                return { state: {} };
+              }
 
-                const toProcessRuleIds = rules.map((rule) => rule.id).slice(0, remainingBackfills);
-
-                if (!toProcessRuleIds.length) {
-                  continue;
-                }
-
-                let searchAfter: SortResults[] | undefined;
-                let pitId: string | undefined;
-                let scheduledBackfillsCount = 0;
-
-                const gapsPerPage = DEFAULT_GAPS_PER_PAGE;
-                let gapFetchIterationCount = 0;
-
-                while (true) {
-                  if (gapFetchIterationCount >= GAP_FETCH_MAX_ITERATIONS) {
-                    logger.debug(
-                      loggerMessage(
-                        `Circuit breaker triggered: reached maximum number of gap fetch iterations`
-                      )
-                    );
-                    break;
-                  }
-                  gapFetchIterationCount++;
-
-                  if (
-                    await handleCancellation({
-                      abortController,
-                      aggregatedByRule,
-                      logEvent,
-                    })
-                  ) {
-                    return { state: {} };
-                  }
-
-                  const {
-                    data: gapsPage,
-                    searchAfter: nextSearchAfter,
-                    pitId: nextPitId,
-                  } = await findGapsSearchAfter({
-                    eventLogClient: await rulesClientContext.getEventLogClient(),
-                    logger,
-                    params: {
-                      ruleIds: toProcessRuleIds,
-                      start: startDate.toISOString(),
-                      end: now.toISOString(),
-                      perPage: gapsPerPage,
-                      sortField: '@timestamp',
-                      sortOrder,
-                      statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
-                      searchAfter,
-                      pitId,
-                      hasUnfilledIntervals: true,
-                    },
-                  });
-
-                  pitId = nextPitId ?? pitId;
-                  searchAfter = nextSearchAfter;
-
-                  if (!gapsPage.length) {
-                    break;
-                  }
-
-                  const filteredGaps = await filterGapsWithOverlappingBackfills(
-                    gapsPage,
-                    rulesClientContext,
-                    (message) => logger.warn(loggerMessage(message))
-                  );
-
-                  // there are no gaps to process in this page
-                  if (!filteredGaps.length) {
-                    // if the page is not full, we've reached the end for this batch
-                    if (gapsPage.length < gapsPerPage) {
-                      break;
-                    }
-                    continue;
-                  }
-
-                  const sortedGaps = filteredGaps.sort(
-                    (a, b) => a.range.gte.getTime() - b.range.gte.getTime()
-                  );
-                  const { results: chunkResults } = await processGapsBatch(rulesClientContext, {
-                    gapsBatch: sortedGaps,
-                    range: { start: startDate.toISOString(), end: now.toISOString() },
-                    initiator: backfillInitiator.SYSTEM,
-                    initiatorId: taskInstance.id,
-                  });
-                  addChunkResultsToAggregation(aggregatedByRule, chunkResults);
-                  chunkResults.forEach((result) => {
-                    if (result.status === GapFillSchedulePerRuleStatus.SUCCESS) {
-                      scheduledBackfillsCount++;
-                    }
-                  });
-
-                  // If fewer than gapsPerPage gaps returned, we've reached the end for this batch
-                  if (gapsPage.length < gapsPerPage) {
-                    break;
-                  }
-                }
-
-                if (scheduledBackfillsCount > 0) {
-                  remainingBackfills = Math.max(remainingBackfills - scheduledBackfillsCount, 0);
-                }
+              if (gapFillsResult.state === SchedulerLoopState.CANCELLED) {
+                return { state: {} };
               }
 
               // Step 5: Finalize and log results
