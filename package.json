@@ -713,6 +713,7 @@
     "@kbn/logs-overview": "link:x-pack/platform/packages/shared/logs-overview",
     "@kbn/logs-shared-plugin": "link:x-pack/platform/plugins/shared/logs_shared",
     "@kbn/logstash-plugin": "link:x-pack/platform/plugins/private/logstash",
+    "@kbn/maintenance-windows-plugin": "link:x-pack/platform/plugins/shared/maintenance_windows",
     "@kbn/managed-content-badge": "link:src/platform/packages/private/kbn-managed-content-badge",
     "@kbn/management-cards-navigation": "link:src/platform/packages/shared/kbn-management/cards_navigation",
     "@kbn/management-plugin": "link:src/platform/plugins/shared/management",
