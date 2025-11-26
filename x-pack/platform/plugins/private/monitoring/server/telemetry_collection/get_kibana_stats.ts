@@ -99,10 +99,8 @@ export function getUsageStats(rawStats: estypes.SearchResponse<KibanaUsageStats>
       dashboard,
       visualization,
       search,
-
       index_pattern,
       graph_workspace,
-
       xpack,
       ...pluginsTop
     } = currUsage;

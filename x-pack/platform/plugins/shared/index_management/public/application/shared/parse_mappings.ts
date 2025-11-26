@@ -29,12 +29,10 @@ export const parseMappings = (
     dynamic,
     properties,
     runtime,
-
     numeric_detection,
     date_detection,
     dynamic_date_formats,
     dynamic_templates,
-
     subobjects,
   } = mappingsDefinition;
 

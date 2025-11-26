@@ -40,7 +40,6 @@ export const createContainerWithEndpointEntries = async (
   }
 
   // create the endpoint exception list container
-
   const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
     description: 'endpoint description',
     list_id: 'endpoint_list',

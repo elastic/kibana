@@ -25,7 +25,6 @@ export const dynamicSerializer = (field: Field): Field => {
 
   const dynamic =
     field.dynamic_toggle === true ? true : field.dynamic_strict === true ? 'strict' : false;
-
   const { dynamic_toggle, dynamic_strict, ...rest } = field;
 
   return {

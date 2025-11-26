@@ -597,7 +597,6 @@ export function transformOutputToFullPolicyOutput(
     if (!isShipperDisabled) {
       shipperDiskQueueData = buildShipperQueueData(shipper);
     }
-
     const {
       loadbalance,
       compression_level,

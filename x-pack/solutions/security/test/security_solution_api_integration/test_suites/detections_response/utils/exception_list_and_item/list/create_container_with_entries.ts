@@ -32,7 +32,6 @@ export const createContainerWithEntries = async (
     return [];
   }
   // Create the rule exception list container
-
   const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
     description: 'some description',
     list_id: 'some-list-id',

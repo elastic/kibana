@@ -818,7 +818,6 @@ export default function (providerContext: FtrProviderContext) {
             description: 'Test',
           })
           .expect(200);
-
         const { id, updated_at, version, ...newPolicy } = item;
 
         expect(newPolicy).to.eql({
@@ -1330,7 +1329,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
-
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
@@ -1391,7 +1389,6 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
-
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
@@ -1552,7 +1549,6 @@ export default function (providerContext: FtrProviderContext) {
             force: true,
           })
           .expect(200);
-
         const { id, updated_at, version, ...newPolicy } = updatedPolicy;
         createdPolicyIds.push(updatedPolicy.id);
 

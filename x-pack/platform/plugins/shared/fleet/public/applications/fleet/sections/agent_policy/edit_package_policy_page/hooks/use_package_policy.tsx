@@ -241,13 +241,11 @@ export function usePackagePolicyWithRelatedData(
             revision,
             inputs,
             vars,
-
             created_by,
             created_at,
             updated_by,
             updated_at,
             secret_references,
-
             ...restOfPackagePolicy
           } = basePolicy;
 
