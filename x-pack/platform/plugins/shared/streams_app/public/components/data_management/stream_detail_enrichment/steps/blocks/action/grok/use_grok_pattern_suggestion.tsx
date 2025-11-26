@@ -133,15 +133,13 @@ export function useGrokPatternSuggestion(abortController: ReturnType<typeof useA
     // If all promises failed, throw an aggregate error, otherwise ignore errors and continue with fulfilled results
     if (grokProcessors.length === 0) {
       finishTrackingAndReport(0, [0]);
-      
+
       // Don't show error toast for abort errors - they're expected when user cancels
-      const hasNonAbortError = aggregateError.errors.some(
-        (error) => !isRequestAbortedError(error)
-      );
+      const hasNonAbortError = aggregateError.errors.some((error) => !isRequestAbortedError(error));
       if (hasNonAbortError) {
         showErrorToast(notifications, aggregateError);
       }
-      
+
       throw aggregateError;
     }
 
