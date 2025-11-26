@@ -331,6 +331,15 @@ export function MachineLearningStackManagementJobsProvider(
       });
     },
 
+    async assertDatafeedWarnings(expectedNumberOfJobs: number) {
+      const warningElements = await testSubjects.findAll('mlJobImportJobDatafeedWarning');
+
+      expect(warningElements.length).to.eql(
+        expectedNumberOfJobs,
+        `Expected ${expectedNumberOfJobs} datafeed warnings (got ${warningElements.length})`
+      );
+    },
+
     async importJobs() {
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobMgmtImportImportButton', {
         timeout: 5000,
