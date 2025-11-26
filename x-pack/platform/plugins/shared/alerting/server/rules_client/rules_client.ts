@@ -67,6 +67,8 @@ import { muteInstance } from '../application/rule/methods/mute_alert/mute_instan
 import { unmuteAll } from '../application/rule/methods/unmute_all';
 import { muteAll } from '../application/rule/methods/mute_all';
 import { unmuteInstance } from '../application/rule/methods/unmute_alert/unmute_instance';
+import { bulkMuteInstances } from '../application/rule/methods/bulk_mute_alerts/bulk_mute_instances';
+import type { BulkMuteAlertsParams } from '../application/rule/methods/bulk_mute_alerts/types';
 import type { RunSoonParams } from '../application/rule/methods/run_soon';
 import { runSoon } from '../application/rule/methods/run_soon';
 import { listRuleTypes } from '../application/rule/methods/rule_types/rule_types';
@@ -208,6 +210,8 @@ export class RulesClient {
   public muteAll = (options: { id: string }) => muteAll(this.context, options);
   public unmuteAll = (options: { id: string }) => unmuteAll(this.context, options);
   public muteInstance = (options: MuteAlertParams) => muteInstance(this.context, options);
+  public bulkMuteInstances = (options: BulkMuteAlertsParams) =>
+    bulkMuteInstances(this.context, options);
   public unmuteInstance = (options: UnmuteAlertParams) => unmuteInstance(this.context, options);
 
   public bulkUntrackAlerts = (options: BulkUntrackBody) => bulkUntrackAlerts(this.context, options);
