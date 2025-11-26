@@ -59,9 +59,9 @@ export const RoundThinkingTitle = ({ isLoading, hasSteps, onShow }: RoundThinkin
         min-height: ${MIN_HEIGHT};
       `}
     >
-      <EuiFlexGroup gutterSize="s" direction="row" alignItems="center">
+      <EuiFlexGroup gutterSize="s" direction="row" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <RoundIcon isLoading={isLoading} isError={false} />
+          <RoundIcon isLoading={isLoading} />
         </EuiFlexItem>
         <EuiText size="s" color="subdued" css={clampTextStyles}>
           <p>{thinkingButtonLabel}</p>
