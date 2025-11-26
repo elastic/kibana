@@ -34,6 +34,7 @@ import {
   AVAILABLE_LANGUAGES,
   KIBANA_API_PREFIX,
 } from '../../../../../../common/constants';
+import { KEYS } from '../../../../components/shortcuts_popover/keys';
 
 interface Props {
   getRequests: () => Promise<EditorRequest[]>;
@@ -306,7 +307,7 @@ export const ContextMenu = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false} data-test-subj="consoleMenuAutoIndentShortcut">
           <EuiText size="xs">
-            <EuiCode>Ctrl/Cmd</EuiCode> + <EuiCode>I</EuiCode>
+            <EuiCode>{KEYS.keyCtrlCmd}</EuiCode> + <EuiCode>{KEYS.keyI}</EuiCode>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -326,7 +327,7 @@ export const ContextMenu = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false} data-test-subj="consoleMenuOpenDocsShortcut">
           <EuiText size="xs">
-            <EuiCode>Ctrl/Cmd</EuiCode> + <EuiCode>/</EuiCode>
+            <EuiCode>{KEYS.keyCtrlCmd}</EuiCode> + <EuiCode>{KEYS.keySlash}</EuiCode>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
