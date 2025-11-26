@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { isEqual, memoize, debounce } from 'lodash';
+import { isEqual, memoize } from 'lodash';
 import { Global, css } from '@emotion/react';
 import { getESQLQueryColumns, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
@@ -144,6 +144,9 @@ const ESQLEditorInternal = function ESQLEditor({
   const containerRef = useRef<HTMLElement>(null);
 
   const datePickerOpenStatusRef = useRef<boolean>(false);
+  const onQuerySubmitRef = useRef<(source: QuerySource) => void>(() => {});
+  const isVisorOpenRef = useRef(false);
+
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
   const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection } =
@@ -207,14 +210,10 @@ const ESQLEditorInternal = function ESQLEditor({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
-  // Debounce onChange to reduce parent re-renders during typing.
-  // Without debounce, every keystroke triggers SearchBar.setState() causing
-  // re-render of SearchBar and all its children
-  const onQueryUpdate = useMemo(
-    () =>
-      debounce((value: string) => {
-        onTextLangQueryChange({ esql: value } as AggregateQuery);
-      }, 100),
+  const onQueryUpdate = useCallback(
+    (value: string) => {
+      onTextLangQueryChange({ esql: value } as AggregateQuery);
+    },
     [onTextLangQueryChange]
   );
 
@@ -403,17 +402,24 @@ const ESQLEditorInternal = function ESQLEditor({
     });
   });
 
-  editor1.current?.addCommand(
-    // eslint-disable-next-line no-bitwise
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-    () => onQuerySubmit(QuerySource.MANUAL)
-  );
+  // Keep refs in sync for addCommand callbacks
+  onQuerySubmitRef.current = onQuerySubmit;
+  isVisorOpenRef.current = isVisorOpen;
 
-  editor1.current?.addCommand(
-    // eslint-disable-next-line no-bitwise
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
-    () => setIsVisorOpen(!isVisorOpen)
-  );
+  useEffect(() => {
+    editor1.current?.addCommand(
+      // eslint-disable-next-line no-bitwise
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+      () => onQuerySubmitRef.current(QuerySource.MANUAL)
+    );
+
+    editor1.current?.addCommand(
+      // eslint-disable-next-line no-bitwise
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
+      () => setIsVisorOpen(!isVisorOpenRef.current)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor1.current]);
 
   const styles = esqlEditorStyles(
     theme.euiTheme,
