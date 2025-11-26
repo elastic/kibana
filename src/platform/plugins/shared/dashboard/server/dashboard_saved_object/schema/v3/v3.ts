@@ -34,5 +34,5 @@ export const dashboardAttributesSchema = dashboardAttributesSchemaV2.extends(
   {
     sections: schema.maybe(schema.arrayOf(sectionSchema)),
   },
-  { unknowns: 'allow' }
+  { unknowns: 'ignore' }
 );
