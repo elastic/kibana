@@ -22,6 +22,7 @@ import { css } from '@emotion/react';
 import { RoundFlyout } from './round_flyout';
 import { RoundSteps } from './steps/round_steps';
 import { ThinkingTimeDisplay } from './thinking_time_display';
+import { roundedBorderRadiusStyles } from '../../conversation.styles';
 
 const rawResponseButtonLabel = i18n.translate('xpack.onechat.conversation.rawResponseButton', {
   defaultMessage: 'View JSON',
@@ -56,7 +57,7 @@ export const RoundThinkingPanel = ({
 
   const containerStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
-    border-radius: ${euiTheme.border.radius.medium};
+    ${roundedBorderRadiusStyles}
     border: 1px solid ${euiTheme.colors.borderStrongPrimary};
     padding: ${euiTheme.size.base};
     ${useEuiShadow('l')};
