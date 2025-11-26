@@ -126,7 +126,7 @@ describe('migrations v2 model', () => {
     knownTypes: ['dashboard', 'config'],
     latestMappingsVersions: {
       config: '10.3.0',
-      dashboard: '10.4.0',
+      dashboard: '10.3.0',
     },
     hashToVersionMap: {
       'config|someHash': '10.1.0',

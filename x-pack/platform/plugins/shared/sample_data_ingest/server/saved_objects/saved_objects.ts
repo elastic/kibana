@@ -83,7 +83,7 @@ export const getSavedObjects = (sampleType: DatasetSampleType): SavedObject[] =>
         ],
         managed: false,
         coreMigrationVersion: '8.8.0',
-        typeMigrationVersion: '10.4.0',
+        typeMigrationVersion: '10.3.0',
       },
     ],
   }[sampleType]);
