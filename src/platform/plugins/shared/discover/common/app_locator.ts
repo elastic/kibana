@@ -124,7 +124,7 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    */
   isAlertResults?: boolean;
   /**
-   *
+   * Optionally add some ESQL controls
    */
   esqlControls?: ControlPanelsState<ESQLControlState> & SerializableRecord;
 }

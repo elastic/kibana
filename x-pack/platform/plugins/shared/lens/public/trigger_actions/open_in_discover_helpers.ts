@@ -92,13 +92,21 @@ function getEsqlControls(embeddable: LensApi) {
   const controlGroupApi = parentApi.controlGroupApi$.getValue();
   if (!controlGroupApi) return null;
 
-  const children = parentApi.controlGroupApi$.getValue()?.children$?.getValue();
-  if (!children) return null;
+  const serializedState = controlGroupApi.serializeState?.();
+  if (!serializedState) return null;
 
-  return Object.keys(children).reduce((acc, id) => {
-    const rawState = controlGroupApi.getSerializedStateForChild?.(id)?.rawState;
-    if (!rawState) return acc;
-    return { ...acc, [id]: rawState };
+  return serializedState.rawState.controls.reduce((acc, control) => {
+    if (!control.id) return acc;
+    return {
+      ...acc,
+      [control.id]: {
+        ...control.controlConfig,
+        type: control.type,
+        grow: control.grow,
+        order: control.order,
+        width: control.width,
+      },
+    };
   }, {});
 }
 
