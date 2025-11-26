@@ -15,7 +15,6 @@ import {
   allSet,
   detectionRulesInstalled,
   installedPackages,
-  savedSearches,
 } from './trial_companion_nba_detectors';
 import { TrialCompanionMilestoneRepositoryImpl } from './trial_companion_milestone_repository';
 import type {
@@ -56,7 +55,7 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
     this.logger.debug('Starting health diagnostic service');
     const soClient = start.savedObjects.getUnsafeInternalClient();
     this.detectors.push(
-      savedSearches(this.logger, start.esClient, soClient, this.usageCollection), // TODO - fix me
+      // savedSearches(this.logger, start.esClient, soClient, this.usageCollection), // TODO - fix me
       installedPackages(this.logger, start.packageService),
       detectionRulesInstalled(this.logger, start.esClient, soClient, this.usageCollection),
       allSet(this.logger)
