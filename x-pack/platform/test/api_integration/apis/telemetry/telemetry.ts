@@ -55,7 +55,6 @@ function updateClusterUuidInLogstashStats(
   clusterUuid: string,
   payload: Array<Record<string, any>>
 ) {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   return payload.map(({ stack_stats, ...item }) => {
     const { logstash } = stack_stats;
     if (logstash) {

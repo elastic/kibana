@@ -159,7 +159,6 @@ function mergeAndSortFields(fields: Field[], dataStreamFields: Field[]): Field[]
   return flattenObjectsList(mergedFields);
 }
 
-/* eslint-disable @typescript-eslint/naming-convention */
 /**
  * Creates a package manifest dictionary.
  *
@@ -228,7 +227,6 @@ function createPackageManifestDict(
   }
   return data;
 }
-/* eslint-enable @typescript-eslint/naming-convention */
 
 /**
  * Render the package manifest for an integration.

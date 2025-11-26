@@ -118,7 +118,7 @@ module.exports = {
             },
             {
               selector: 'parameter',
-              format: ['camelCase', 'PascalCase'],
+              format: ['camelCase', 'PascalCase', 'snake_case'],
               leadingUnderscore: 'allowSingleOrDouble',
               trailingUnderscore: 'allowSingleOrDouble',
             },

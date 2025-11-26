@@ -66,7 +66,6 @@ export const convertSOQueriesToPack = (
 ) =>
   reduce(
     queries,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     (acc, { id: queryId, ecs_mapping, query, platform, ...rest }, key) => {
       const index = queryId ? queryId : key;
       acc[index] = {
@@ -91,7 +90,6 @@ export const convertSOQueriesToPackConfig = (
 ) =>
   reduce(
     queries,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     (acc, { id: queryId, ecs_mapping, query, platform, removed, snapshot, ...rest }, key) => {
       const resultType = snapshot === false ? { removed, snapshot } : {};
       const index = queryId ? queryId : key;
