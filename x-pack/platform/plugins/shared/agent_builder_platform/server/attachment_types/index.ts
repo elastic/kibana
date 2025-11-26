@@ -6,12 +6,25 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
+import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { createTextAttachmentType } from './text';
 import { createEsqlAttachmentType } from './esql';
 import { createScreenContextAttachmentType } from './screen_context';
-import type { AttachmentServiceSetup } from '../types';
+import type {
+  AgentBuilderPlatformPluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies,
+} from '../types';
 
-export const registerAttachmentTypes = ({ registry }: { registry: AttachmentServiceSetup }) => {
+export const registerAttachmentTypes = ({
+  coreSetup,
+  setupDeps,
+}: {
+  coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
+  setupDeps: PluginSetupDependencies;
+}) => {
+  const { onechat } = setupDeps;
+
   const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
     createTextAttachmentType(),
     createScreenContextAttachmentType(),
@@ -19,6 +32,6 @@ export const registerAttachmentTypes = ({ registry }: { registry: AttachmentServ
   ];
 
   attachmentTypes.forEach((attachmentType) => {
-    registry.registerType(attachmentType);
+    onechat.attachments.registerType(attachmentType);
   });
 };
