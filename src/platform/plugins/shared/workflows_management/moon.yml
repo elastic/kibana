@@ -76,6 +76,7 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/safer-lodash-set'
+  - '@kbn/connector-specs'
 tags:
   - plugin
   - prod
