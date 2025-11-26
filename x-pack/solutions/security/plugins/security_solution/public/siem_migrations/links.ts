@@ -50,10 +50,7 @@ const subLinks: LinkItem[] = [
     ),
     landingIcon: IconDashboards,
     path: SIEM_MIGRATIONS_DASHBOARDS_PATH,
-    // dashboard page requires both the Security:Read and Dashboard:Read privileges
-    capabilities: [
-      [`dashboard_v2.show`, SECURITY_UI_SHOW_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`],
-    ],
+    capabilities: [[`dashboard_v2.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
     skipUrlState: true,
     hideTimeline: true,
     hideWhenExperimentalKey: 'siemMigrationsDisabled',
