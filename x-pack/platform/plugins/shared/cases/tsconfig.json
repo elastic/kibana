@@ -91,7 +91,6 @@
     "@kbn/dev-utils",
     "@kbn/tooling-log",
     "@kbn/setup-node-env",
-    "@kbn/core-notifications-browser-mocks",
     "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
