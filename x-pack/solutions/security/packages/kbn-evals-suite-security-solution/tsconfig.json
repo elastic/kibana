@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -19,11 +19,10 @@
   "kbn_references": [
     "@kbn/evals",
     "@kbn/tooling-log",
-    "@kbn/ai-assistant-common",
     "@kbn/core",
-    "@kbn/core-http-browser",
     "@kbn/scout-oblt",
-    "@kbn/elastic-assistant-common"
+    "@kbn/elastic-assistant-common",
+    "@kbn/zod"
   ]
 }
 
