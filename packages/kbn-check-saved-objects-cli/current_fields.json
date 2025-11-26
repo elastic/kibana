@@ -1263,6 +1263,13 @@
   ],
   "telemetry": [],
   "threshold-explorer-view": [],
+  "trial-companion-nba-milestone": [
+    "milestoneId"
+  ],
+  "trial-companion-nba-milestone-user-seen": [
+    "milestoneIds",
+    "userId"
+  ],
   "ui-metric": [
     "count"
   ],
