@@ -251,6 +251,11 @@ export const metricOperationDefinitionSchema = schema.oneOf([
 ]);
 
 export type LensApiAllMetricOperations = TypeOf<typeof metricOperationDefinitionSchema>;
+export const fieldMetricOrFormulaOperationDefinitionSchema = schema.oneOf([
+  fieldMetricOperationsSchema,
+  formulaOperationDefinitionSchema,
+]);
+
 export type LensApiReferableMetricOperations =
   | LensApiCountMetricOperation
   | LensApiUniqueCountMetricOperation
