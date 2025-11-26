@@ -19,13 +19,13 @@ export interface UseInfiniteOverviewTrendsRequestsParams {
 
 export const useInfiniteOverviewTrendsRequests = ({
   monitorsSortedByStatus,
-  sliceToFetch: visibleIndices,
+  sliceToFetch,
   numOfColumns,
 }: UseInfiniteOverviewTrendsRequestsParams) => {
-  const monitorsToFetchTrendsFor = visibleIndices
+  const monitorsToFetchTrendsFor = sliceToFetch
     ? monitorsSortedByStatus.slice(
-        visibleIndices.startIndex * numOfColumns,
-        (visibleIndices.endIndex + 1) * numOfColumns
+        sliceToFetch.startIndex * numOfColumns,
+        (sliceToFetch.endIndex + 1) * numOfColumns
       )
     : [];
   useOverviewTrendsRequests(monitorsToFetchTrendsFor);
