@@ -16,6 +16,10 @@ import type {
   SavedObjectsServiceStart,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 
 // Mock the AutomaticImportSamplesIndexService
 jest.mock('./samples_index/index_service', () => {
@@ -33,6 +37,8 @@ describe('AutomaticImportSetupService', () => {
   let mockSavedObjectsSetup: jest.Mocked<SavedObjectsServiceSetup>;
   let mockSavedObjectsStart: jest.Mocked<SavedObjectsServiceStart>;
   let mockSecurity: SecurityServiceStart;
+  let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
+  let mockTaskManagerStart: jest.Mocked<TaskManagerStartContract>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -42,10 +48,23 @@ describe('AutomaticImportSetupService', () => {
     mockSavedObjectsStart = savedObjectsServiceMock.createStartContract();
     mockSecurity = securityMock.createStart() as unknown as SecurityServiceStart;
 
+    // Mock TaskManager contracts
+    mockTaskManagerSetup = {
+      registerTaskDefinitions: jest.fn(),
+    } as unknown as jest.Mocked<TaskManagerSetupContract>;
+
+    mockTaskManagerStart = {
+      schedule: jest.fn(),
+      runSoon: jest.fn(),
+      get: jest.fn(),
+      ensureScheduled: jest.fn(),
+    } as unknown as jest.Mocked<TaskManagerStartContract>;
+
     service = new AutomaticImportService(
       mockLoggerFactory,
       Promise.resolve(mockEsClient),
-      mockSavedObjectsSetup
+      mockSavedObjectsSetup,
+      mockTaskManagerSetup
     );
   });
 
@@ -80,7 +99,7 @@ describe('AutomaticImportSetupService', () => {
 
   describe('initialize', () => {
     it('should create internal repository and initialize saved object service', async () => {
-      await service.initialize(mockSecurity, mockSavedObjectsStart);
+      await service.initialize(mockSecurity, mockSavedObjectsStart, mockTaskManagerStart);
 
       expect(mockSavedObjectsStart.createInternalRepository).toHaveBeenCalledTimes(1);
       expect((service as any).security).toBe(mockSecurity);
@@ -90,20 +109,20 @@ describe('AutomaticImportSetupService', () => {
     it('should set security reference', async () => {
       expect((service as any).security).toBeNull();
 
-      await service.initialize(mockSecurity, mockSavedObjectsStart);
+      await service.initialize(mockSecurity, mockSavedObjectsStart, mockTaskManagerStart);
 
       expect((service as any).security).toBe(mockSecurity);
     });
 
     it('should create savedObjectService with correct parameters', async () => {
-      await service.initialize(mockSecurity, mockSavedObjectsStart);
+      await service.initialize(mockSecurity, mockSavedObjectsStart, mockTaskManagerStart);
 
       const savedObjectService = (service as any).savedObjectService;
       expect(savedObjectService).toBeDefined();
     });
 
     it('should use internal repository from createInternalRepository', async () => {
-      await service.initialize(mockSecurity, mockSavedObjectsStart);
+      await service.initialize(mockSecurity, mockSavedObjectsStart, mockTaskManagerStart);
 
       expect(mockSavedObjectsStart.createInternalRepository).toHaveBeenCalled();
     });
@@ -186,7 +205,7 @@ describe('AutomaticImportSetupService', () => {
       expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory, expect.any(Promise));
 
       expect(mockSavedObjectsSetup.registerType).toHaveBeenCalledTimes(2);
-      await service.initialize(mockSecurity, mockSavedObjectsStart);
+      await service.initialize(mockSecurity, mockSavedObjectsStart, mockTaskManagerStart);
       expect(mockSavedObjectsStart.createInternalRepository).toHaveBeenCalled();
 
       // Stop the service
@@ -216,7 +235,7 @@ describe('AutomaticImportSetupService', () => {
     it('should complete full lifecycle: construct -> initialize -> stop', async () => {
       expect((service as any).savedObjectService).toBeNull();
 
-      await service.initialize(mockSecurity, mockSavedObjectsStart);
+      await service.initialize(mockSecurity, mockSavedObjectsStart, mockTaskManagerStart);
       expect((service as any).savedObjectService).toBeDefined();
 
       // Stop

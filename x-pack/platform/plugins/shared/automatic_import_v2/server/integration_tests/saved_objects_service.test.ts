@@ -255,7 +255,7 @@ describe('AutomaticImportSavedObjectService', () => {
           metadata: {},
         };
 
-        await expect(savedObjectService.updateIntegration(updateData, '0.0.0')).rejects.toThrow();
+        await expect(savedObjectService.updateIntegration(updateData, '1.0.0')).rejects.toThrow();
       });
 
       it('should throw error when integration_id is missing', async () => {
@@ -267,7 +267,7 @@ describe('AutomaticImportSavedObjectService', () => {
           metadata: {},
         };
 
-        await expect(savedObjectService.updateIntegration(invalidData, '0.0.0')).rejects.toThrow(
+        await expect(savedObjectService.updateIntegration(invalidData, '1.0.0')).rejects.toThrow(
           'Integration ID is required'
         );
       });
@@ -610,7 +610,7 @@ describe('AutomaticImportSavedObjectService', () => {
         expect(result.id).toBe('test-data-stream-1');
         expect(result.attributes.created_by).toBe('test-user');
         expect(result.attributes.metadata?.created_at).toBeDefined();
-        expect(result.attributes.metadata?.version).toBe('0.0.0');
+        expect(result.attributes.metadata?.version).toBe('1.0.0');
 
         const updatedIntegration = await savedObjectService.getIntegration('test-ds-integration-1');
         expect(updatedIntegration.attributes.data_stream_count).toBe(1);
@@ -746,14 +746,14 @@ describe('AutomaticImportSavedObjectService', () => {
             metadata: { sample_count: 250 },
             result: { ingest_pipeline: 'updated-pipeline' },
           },
-          '0.0.0',
+          '1.0.0',
           undefined,
           { version: created.version! }
         );
 
         expect(result.attributes.job_info?.status).toBe(TASK_STATUSES.completed);
         expect(result.attributes.metadata?.sample_count).toBe(250);
-        expect(result.attributes.metadata?.version).toBe('0.0.1');
+        expect(result.attributes.metadata?.version).toBe('1.0.1');
 
         await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-update-data-stream');
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'update-ds-integration');
@@ -774,7 +774,7 @@ describe('AutomaticImportSavedObjectService', () => {
         };
 
         await expect(
-          savedObjectService.updateDataStream(updateData, '0.0.0', undefined, { version: '1' })
+          savedObjectService.updateDataStream(updateData, '1.0.0', undefined, { version: '1' })
         ).rejects.toThrow();
       });
 
@@ -792,7 +792,7 @@ describe('AutomaticImportSavedObjectService', () => {
         } as DataStreamAttributes;
 
         await expect(
-          savedObjectService.updateDataStream(invalidData, '0.0.0', undefined, { version: '1' })
+          savedObjectService.updateDataStream(invalidData, '1.0.0', undefined, { version: '1' })
         ).rejects.toThrow('Integration ID is required');
       });
 
@@ -810,7 +810,7 @@ describe('AutomaticImportSavedObjectService', () => {
         } as DataStreamAttributes;
 
         await expect(
-          savedObjectService.updateDataStream(invalidData, '0.0.0', undefined, { version: '1' })
+          savedObjectService.updateDataStream(invalidData, '1.0.0', undefined, { version: '1' })
         ).rejects.toThrow('Data stream ID is required');
       });
 
@@ -832,16 +832,16 @@ describe('AutomaticImportSavedObjectService', () => {
 
         await savedObjectService.updateDataStream(
           { ...dataStreamData, metadata: { sample_count: 200 } },
-          '0.0.0'
+          '1.0.0'
         );
 
         await expect(
           savedObjectService.updateDataStream(
             { ...dataStreamData, metadata: { sample_count: 300 } },
-            '0.0.0'
+            '1.0.0'
           )
         ).rejects.toThrow(
-          'Version conflict: Data stream test-app-version-conflict-ds has been updated. Expected version 0.0.0, but current version is 0.0.1'
+          'Version conflict: Data stream test-app-version-conflict-ds has been updated. Expected version 1.0.0, but current version is 1.0.1'
         );
 
         await savedObjectsClient.delete(
@@ -872,11 +872,11 @@ describe('AutomaticImportSavedObjectService', () => {
 
         const updated = await savedObjectService.updateDataStream(
           { ...dataStreamData, metadata: { sample_count: 200 } },
-          '0.0.0',
+          '1.0.0',
           'major'
         );
 
-        expect(updated.attributes.metadata?.version).toBe('1.0.0');
+        expect(updated.attributes.metadata?.version).toBe('2.0.0');
 
         await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-ds-major-version');
         await savedObjectsClient.delete(
@@ -903,11 +903,11 @@ describe('AutomaticImportSavedObjectService', () => {
 
         const updated = await savedObjectService.updateDataStream(
           { ...dataStreamData, metadata: { sample_count: 200 } },
-          '0.0.0',
+          '1.0.0',
           'minor'
         );
 
-        expect(updated.attributes.metadata?.version).toBe('0.1.0');
+        expect(updated.attributes.metadata?.version).toBe('1.1.0');
 
         await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-ds-minor-version');
         await savedObjectsClient.delete(
@@ -932,17 +932,17 @@ describe('AutomaticImportSavedObjectService', () => {
 
         await savedObjectService.insertDataStream(mockRequest, dataStreamData);
 
-        await savedObjectService.updateDataStream({ ...dataStreamData }, '0.0.0', 'minor');
+        await savedObjectService.updateDataStream({ ...dataStreamData }, '1.0.0', 'minor');
 
-        await savedObjectService.updateDataStream({ ...dataStreamData }, '0.1.0', 'patch');
+        await savedObjectService.updateDataStream({ ...dataStreamData }, '1.1.0', 'patch');
 
         const updated = await savedObjectService.updateDataStream(
           { ...dataStreamData },
-          '0.1.1',
+          '1.1.1',
           'major'
         );
 
-        expect(updated.attributes.metadata?.version).toBe('1.0.0');
+        expect(updated.attributes.metadata?.version).toBe('2.0.0');
 
         await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-ds-major-reset');
         await savedObjectsClient.delete(
@@ -967,17 +967,17 @@ describe('AutomaticImportSavedObjectService', () => {
 
         await savedObjectService.insertDataStream(mockRequest, dataStreamData);
 
-        await savedObjectService.updateDataStream({ ...dataStreamData }, '0.0.0', 'patch');
+        await savedObjectService.updateDataStream({ ...dataStreamData }, '1.0.0', 'patch');
 
-        await savedObjectService.updateDataStream({ ...dataStreamData }, '0.0.1', 'patch');
+        await savedObjectService.updateDataStream({ ...dataStreamData }, '1.0.1', 'patch');
 
         const updated = await savedObjectService.updateDataStream(
           { ...dataStreamData },
-          '0.0.2',
+          '1.0.2',
           'minor'
         );
 
-        expect(updated.attributes.metadata?.version).toBe('0.1.0');
+        expect(updated.attributes.metadata?.version).toBe('1.1.0');
 
         await savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, 'test-ds-minor-reset');
         await savedObjectsClient.delete(
@@ -1296,7 +1296,7 @@ describe('AutomaticImportSavedObjectService', () => {
             ingest_pipeline: 'completed-pipeline',
           },
         },
-        dataStream1.attributes.metadata?.version || '0.0.0',
+        dataStream1.attributes.metadata?.version || '1.0.0',
         undefined,
         { version: dataStream1.version! }
       );
