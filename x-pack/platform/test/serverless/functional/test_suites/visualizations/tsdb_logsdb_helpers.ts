@@ -469,6 +469,7 @@ export function setupScenarioRunner(
         beforeEach(async () => {
           await lens.switchDataPanelIndexPattern(dataViewName);
           await lens.removeLayer();
+          await lens.ensureLayerTabIsActive();
         });
 
         testingFn(indexes);

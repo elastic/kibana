@@ -265,40 +265,6 @@
         "children": [
           {
             "parentPluginId": "@kbn/connector-specs",
-            "id": "def-common.ActionContext.auth",
-            "type": "Object",
-            "tags": [],
-            "label": "auth",
-            "description": [],
-            "signature": [
-              "{ [key: string]: unknown; method: string; headers: Record<string, string>; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/connector-specs",
-            "id": "def-common.ActionContext.log",
-            "type": "Object",
-            "tags": [],
-            "label": "log",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/logging",
-                "scope": "common",
-                "docId": "kibKbnLoggingPluginApi",
-                "section": "def-common.Logger",
-                "text": "Logger"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/connector-specs",
             "id": "def-common.ActionContext.client",
             "type": "Function",
             "tags": [],
@@ -334,6 +300,40 @@
             "description": [],
             "signature": [
               "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionContext.log",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionContext.secrets",
+            "type": "Object",
+            "tags": [],
+            "label": "secrets",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "deprecated": false,
@@ -530,6 +530,205 @@
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.AuthTypeDef",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthTypeDef",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeDef.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeDef.defaults",
+            "type": "Object",
+            "tags": [],
+            "label": "defaults",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeDef.overrides",
+            "type": "Object",
+            "tags": [],
+            "label": "overrides",
+            "description": [],
+            "signature": [
+              "{ meta?: Record<string, Record<string, unknown>> | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.AuthTypeSpec",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthTypeSpec",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.AuthTypeSpec",
+            "text": "AuthTypeSpec"
+          },
+          "<T>"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeSpec.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeSpec.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "ZodObject",
+              "<Record<string, ",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>>, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeSpec.normalizeSchema",
+            "type": "Function",
+            "tags": [],
+            "label": "normalizeSchema",
+            "description": [],
+            "signature": [
+              "((defaults?: Record<string, unknown> | undefined) => ",
+              "ZodObject",
+              "<Record<string, ",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>>, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.AuthTypeSpec.normalizeSchema.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "defaults",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown> | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeSpec.configure",
+            "type": "Function",
+            "tags": [],
+            "label": "configure",
+            "description": [],
+            "signature": [
+              "(axiosInstance: ",
+              "AxiosInstance",
+              ", secret: T) => ",
+              "AxiosInstance"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.AuthTypeSpec.configure.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "axiosInstance",
+                "description": [],
+                "signature": [
+                  "AxiosInstance"
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.AuthTypeSpec.configure.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "secret",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -789,16 +988,40 @@
           },
           {
             "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorSpec.authTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "authTypes",
+            "description": [],
+            "signature": [
+              "(string | ",
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.AuthTypeDef",
+                "text": "AuthTypeDef"
+              },
+              ")[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
             "id": "def-common.ConnectorSpec.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
             "description": [],
             "signature": [
-              "ZodType",
-              "<unknown, unknown, ",
+              "ZodObject",
+              "<",
               "node_modules/zod/v4/core/schemas",
-              "$ZodTypeInternals<unknown, unknown>>"
+              "$ZodLooseShape, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "deprecated": false,
@@ -1681,84 +1904,31 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.NormalizedAuthType",
+        "type": "Type",
+        "tags": [],
+        "label": "NormalizedAuthType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.AuthTypeSpec",
+            "text": "AuthTypeSpec"
+          },
+          "<Record<string, unknown>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
-      {
-        "parentPluginId": "@kbn/connector-specs",
-        "id": "def-common.BasicAuthSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "BasicAuthSchema",
-        "description": [
-          "\nHTTP Basic Authentication\nUse for: Username + Password auth (Jira, etc.)"
-        ],
-        "signature": [
-          "ZodObject",
-          "<{ method: any; credentials: ",
-          "ZodObject",
-          "<{ username: ",
-          "ZodString",
-          "; password: ",
-          "ZodString",
-          "; }, ",
-          "node_modules/zod/v4/core/schemas",
-          "$strip>; }, ",
-          "node_modules/zod/v4/core/schemas",
-          "$strip>"
-        ],
-        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/connector-specs",
-        "id": "def-common.BearerAuthSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "BearerAuthSchema",
-        "description": [
-          "\nBearer Token Authentication\nUse for: OAuth tokens, API tokens sent as \"Authorization: Bearer <token>\""
-        ],
-        "signature": [
-          "ZodObject",
-          "<{ method: any; token: ",
-          "ZodString",
-          "; }, ",
-          "node_modules/zod/v4/core/schemas",
-          "$strip>"
-        ],
-        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/connector-specs",
-        "id": "def-common.HeaderAuthSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "HeaderAuthSchema",
-        "description": [
-          "\nHeader-based authentication (generic)\nUse for: API keys, custom headers (X-API-Key, etc.)"
-        ],
-        "signature": [
-          "ZodObject",
-          "<{ method: any; headers: ",
-          "ZodRecord",
-          "<",
-          "ZodString",
-          ", ",
-          "ZodString",
-          ">; }, ",
-          "node_modules/zod/v4/core/schemas",
-          "$strip>"
-        ],
-        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/connector-specs",
         "id": "def-common.RETRY_GATEWAY_ERRORS",
