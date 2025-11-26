@@ -76,6 +76,6 @@ function toPagination(params: FindSLODefinitionsParams): Pagination {
 
   return {
     page: !isNaN(page) && page >= 1 ? page : DEFAULT_PAGE,
-    perPage: !isNaN(perPage) && perPage >= 1 ? perPage : DEFAULT_PER_PAGE,
+    perPage: !isNaN(perPage) && perPage >= 0 ? perPage : DEFAULT_PER_PAGE,
   };
 }

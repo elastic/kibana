@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { FindSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type {
+  FindSLODefinitionsResponse,
+  FindSLOResponse,
+  SLOWithSummaryResponse,
+} from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -77,6 +81,69 @@ export const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
   updatedAt: now,
   version: 2,
   meta: {},
+};
+
+export const emptySloDefinitionList: FindSLODefinitionsResponse = {
+  results: [],
+  page: 1,
+  perPage: 25,
+  total: 0,
+};
+
+export const sloDefinitionList: FindSLODefinitionsResponse = {
+  results: [
+    {
+      ...baseSlo,
+      id: '1f1c6ee7-433f-4b56-b727-5682262e0d7d',
+      indicator: buildCustomKqlIndicator(),
+      timeWindow: buildRollingTimeWindow(),
+    },
+    {
+      ...baseSlo,
+      id: '1f1c6ee7-433f-4b56-b727-5682262e0d7e',
+      indicator: buildApmAvailabilityIndicator(),
+      timeWindow: buildCalendarAlignedTimeWindow(),
+    },
+    {
+      ...baseSlo,
+      id: 'c0f8d669-9177-4706-9098-f397a88173a6',
+      indicator: buildApmAvailabilityIndicator(),
+      timeWindow: buildCalendarAlignedTimeWindow(),
+    },
+    {
+      ...baseSlo,
+      id: 'c0f8d669-9277-4706-9098-f397a88173a6',
+      timeWindow: buildRollingTimeWindow({ duration: '7d' }),
+    },
+    {
+      ...baseSlo,
+      id: 'c0f8d669-9177-4706-9098-f397a88173a7',
+      summary: buildNoDataSummary(),
+    },
+    {
+      ...baseSlo,
+      id: 'c0f8d669-9177-4706-9098-f397a88173b7',
+      indicator: buildApmAvailabilityIndicator(),
+      timeWindow: buildCalendarAlignedTimeWindow(),
+    },
+    {
+      ...baseSlo,
+      id: 'c0f8d669-9177-4706-9098-f397a88173a8',
+      budgetingMethod: 'timeslices',
+      timeWindow: buildCalendarAlignedTimeWindow(),
+      objective: buildTimeslicesObjective(),
+    },
+    {
+      ...baseSlo,
+      id: 'c0f8d669-9177-4706-9098-f397a88173a9',
+      objective: buildOccurrencesObjective(),
+      timeWindow: buildCalendarAlignedTimeWindow(),
+      indicator: buildApmAvailabilityIndicator(),
+    },
+  ],
+  page: 1,
+  perPage: 25,
+  total: 8,
 };
 
 export const sloList: FindSLOResponse = {
