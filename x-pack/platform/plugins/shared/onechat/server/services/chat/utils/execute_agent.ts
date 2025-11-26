@@ -12,7 +12,6 @@ import type {
   Conversation,
   ChatAgentEvent,
   AgentCapabilities,
-  AgentConfigurationOverrides,
 } from '@kbn/onechat-common';
 import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type { AgentsServiceStart } from '../../agents';
@@ -27,7 +26,6 @@ export const executeAgent$ = ({
   abortSignal,
   defaultConnectorId,
   browserApiTools,
-  configurationOverrides,
 }: {
   agentId: string;
   request: KibanaRequest;
@@ -38,7 +36,6 @@ export const executeAgent$ = ({
   abortSignal?: AbortSignal;
   defaultConnectorId?: string;
   browserApiTools?: BrowserApiToolMetadata[];
-  configurationOverrides?: AgentConfigurationOverrides;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     agentService
@@ -52,7 +49,6 @@ export const executeAgent$ = ({
           conversation,
           capabilities,
           browserApiTools,
-          configurationOverrides,
         },
         onEvent: (event) => {
           observer.next(event);
