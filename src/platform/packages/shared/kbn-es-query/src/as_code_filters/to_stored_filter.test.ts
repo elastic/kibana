@@ -256,7 +256,7 @@ describe('toStoredFilter', () => {
 
     it('should handle scripted phrase filter with complex script', () => {
       const scriptedFilter: StoredFilter = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
+        $state: { store: FilterStateStore.APP_STATE },
         meta: {
           field: 'bytes_per_second',
           type: 'phrase',
@@ -424,7 +424,7 @@ describe('toStoredFilter', () => {
 
     it('should handle date range created from time picker', () => {
       const timePickerFilter: StoredFilter = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
+        $state: { store: FilterStateStore.APP_STATE },
         meta: {
           field: '@timestamp',
           type: 'range',

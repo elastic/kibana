@@ -25,7 +25,7 @@ import type {
   AsCodeDSLFilter,
 } from '@kbn/es-query-server';
 import type { Logger } from '@kbn/logging';
-import { ASCODE_FILTER_OPERATOR } from '@kbn/es-query-constants';
+import { ASCODE_FILTER_OPERATOR, FilterStateStore } from '@kbn/es-query-constants';
 import type { StoredFilter } from './types';
 import { migrateFilter } from '../es_query/migrate_filter';
 import { FilterConversionError } from './errors';
@@ -63,6 +63,11 @@ export function fromStoredFilter(storedFilter: unknown, logger?: Logger): AsCode
 
     // Cast to StoredFilter for type-safe access
     const filter = storedFilter as StoredFilter;
+
+    // Skip pinned filters (globalState) - these are UI-level state and should not be persisted in AsCodeFilter format
+    if (filter.$state?.store === FilterStateStore.GLOBAL_STATE) {
+      return undefined;
+    }
 
     const normalizedFilter = (
       isLegacyFilter(filter) ? migrateFilter(filter) : filter
