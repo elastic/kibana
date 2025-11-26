@@ -597,12 +597,7 @@ describe('CsvESQLGenerator', () => {
         mockLogger,
         stream
       );
-      const result = await generateCsv.generateData();
-      expect(result.warnings).toMatchInlineSnapshot(`
-        Array [
-          "This search has exceeded the recommended row limit (500). This limit can be configured in kibana.yml, but increasing it may impact performance.",
-        ]
-      `);
+      await generateCsv.generateData();
 
       expect(mockDataClient.search).toHaveBeenCalledWith(
         {
