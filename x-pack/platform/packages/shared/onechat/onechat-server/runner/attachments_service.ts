@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import type { AttachmentInput } from '@kbn/onechat-common/attachments';
-import type { AttachmentRepresentation } from '../attachments';
+import type { AttachmentBoundedTool, AttachmentTypeDefinition } from '../attachments';
+import type { ExecutableTool } from './tool_provider';
 
+/**
+ * Service to access attachment types definitions.
+ */
 export interface AttachmentsService {
-  format(attachment: AttachmentInput): Promise<AttachmentRepresentation>;
+  /**
+   * Returns the full definition for an attachment type
+   */
+  getTypeDefinition(type: string): AttachmentTypeDefinition | undefined;
+  /**
+   * Convert an attachment-scoped tool to a generic executable tool
+   */
+  convertAttachmentTool(tool: AttachmentBoundedTool): ExecutableTool;
 }

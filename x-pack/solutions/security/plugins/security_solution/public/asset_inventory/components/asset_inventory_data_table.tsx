@@ -334,18 +334,18 @@ export const AssetInventoryDataTable = ({
     () =>
       filterManager && dataView
         ? (clickedField, values, operation) => {
-            const newFilters = generateFilters(
-              filterManager,
-              clickedField,
-              values,
-              operation,
-              dataView
-            );
-            filterManager.addFilters(newFilters);
-            setUrlQuery({
-              filters: filterManager.getFilters(),
-            });
-          }
+          const newFilters = generateFilters(
+            filterManager,
+            clickedField,
+            values,
+            operation,
+            dataView
+          );
+          filterManager.addFilters(newFilters);
+          setUrlQuery({
+            filters: filterManager.getFilters(),
+          });
+        }
         : undefined,
     [dataView, filterManager, setUrlQuery]
   );

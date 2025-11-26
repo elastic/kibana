@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getFixtures } from './get_fixtures';
+export type { FixtureTemplate, ModelVersionFixtures, ModelVersionSchemaProperty } from './types';
+export { getLatestTypeFixtures } from './get_latest_type_fixtures';

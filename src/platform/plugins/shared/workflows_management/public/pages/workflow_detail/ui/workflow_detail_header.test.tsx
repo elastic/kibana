@@ -130,7 +130,10 @@ describe('WorkflowDetailHeader', () => {
       activeTab: 'workflow',
       setActiveTab: jest.fn(),
     });
-    mockUseSaveYaml.mockReturnValue(jest.fn());
+    mockUseSaveYaml.mockReturnValue([
+      jest.fn(),
+      { isLoading: false, error: null, result: undefined },
+    ]);
     mockUseUpdateWorkflow.mockReturnValue(jest.fn());
     mockUseMemoCss.mockReturnValue(jest.fn());
   });
