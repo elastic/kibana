@@ -7,21 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { load as loadYaml } from 'js-yaml';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
-import { BuildkiteClient } from '#pipeline-utils';
-import type { BuildkiteCommandStep } from '#pipeline-utils';
+import { emitPipeline, getPipeline } from '#pipeline-utils';
 
 (async () => {
-  const bk = new BuildkiteClient();
+  const pipeline: string[] = [];
 
   try {
-    const pipelineYml = loadYaml(
-      readFileSync(resolve(__dirname, './fips-temp.yml'), 'utf8')
-    ) as BuildkiteCommandStep[];
+    pipeline.push(getPipeline('.buildkite/pipelines/fips.yml', false));
 
-    bk.uploadSteps(pipelineYml);
+    emitPipeline(pipeline);
   } catch (ex) {
     console.error('Error while generating the pipeline steps: ' + ex.message, ex);
     process.exit(1);
