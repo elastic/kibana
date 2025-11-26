@@ -33,6 +33,7 @@ export function transformDashboardOut(
     timeTo,
     title,
     version,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     project_routing,
   } = attributes;
   // Extract tag references

@@ -40,6 +40,7 @@ export const transformDashboardIn = (
       references: incomingReferences,
       tags,
       timeRange,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       project_routing,
       ...rest
     } = dashboardState;

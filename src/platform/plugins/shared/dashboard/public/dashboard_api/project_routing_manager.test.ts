@@ -22,16 +22,15 @@ jest.mock('../services/kibana_services', () => {
 });
 
 describe('projectRouting', () => {
-  const createLastSavedState = (project_routing?: string) =>
+  const createLastSavedState = (projectRouting?: string) =>
     new BehaviorSubject<DashboardState>({
-      ...getSampleDashboardState(),
-      ...(project_routing !== undefined && { project_routing }),
+      ...getSampleDashboardState({ project_routing: projectRouting }),
     });
 
   const initManager = (projectRoutingRestore: boolean, initialProjectRouting?: string) => {
     const projectRoutingRestore$ = new BehaviorSubject<boolean>(projectRoutingRestore);
     const dashboardState = initialProjectRouting
-      ? { ...getSampleDashboardState(), project_routing: initialProjectRouting }
+      ? { ...getSampleDashboardState({ project_routing: initialProjectRouting }) }
       : getSampleDashboardState();
 
     return {
