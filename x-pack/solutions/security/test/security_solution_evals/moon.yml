@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/test-suites-xpack-platform'
   - '@kbn/core-http-common'
+  - '@kbn/ml-plugin'
 tags:
   - functional-tests
   - package
