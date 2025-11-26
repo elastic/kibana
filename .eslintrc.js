@@ -2712,6 +2712,7 @@ module.exports = {
         'src/platform/plugins/shared/**/*.ts',
         'x-pack/solutions/**/*.ts',
         'x-pack/plugins/**/*.ts',
+        'x-pack/platform/plugins/shared/**/*.ts',
       ],
       excludedFiles: [
         '**/*.{test,spec}.ts',
@@ -2727,6 +2728,7 @@ module.exports = {
         '**/json_schemas/**',
         // Can use fs for telemetry collection
         'src/platform/plugins/shared/telemetry/**',
+        'x-pack/solutions/security/packages/test-api-clients/**',
       ],
       rules: {
         '@kbn/eslint/require_kbn_fs': [
