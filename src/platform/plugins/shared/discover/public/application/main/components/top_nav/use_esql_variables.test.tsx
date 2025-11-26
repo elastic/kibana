@@ -23,7 +23,6 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 class MockControlGroupRendererApi {
   inputSubject: BehaviorSubject<Record<string, ControlPanelsState> | null>;
   addNewPanel: jest.Mock;
-  esqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
 
   constructor() {
     this.inputSubject = new BehaviorSubject<Record<string, ControlPanelsState> | null>(null);
