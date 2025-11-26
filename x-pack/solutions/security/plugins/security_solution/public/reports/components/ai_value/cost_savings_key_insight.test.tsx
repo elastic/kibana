@@ -186,7 +186,7 @@ describe('CostSavingsKeyInsight', () => {
     render(<CostSavingsKeyInsight {...defaultProps} />, { wrapper });
 
     await waitFor(() => {
-      expect(mockSetInsightInExportContext).toHaveBeenCalledWith('');
+      expect(mockSetInsightInExportContext).toHaveBeenCalledWith('Test result');
     });
   });
 

@@ -84,7 +84,7 @@ describe('CostSavingsMetric', () => {
     beforeEach(() => {
       // Force it into export mode
       useAIValueExportContextMock.mockReturnValue({
-        forwardedState: {},
+        isExportMode: true,
       });
     });
 
