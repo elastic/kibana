@@ -48,6 +48,8 @@ import type { ConfigType } from './config';
 import { createConfig } from './config';
 import { initUiSettings } from './ui_settings';
 import { registerDeprecations } from './deprecations';
+import { createGetAlertsSkill } from './skills/get_alerts_skill';
+import { registerSkill } from '@kbn/onechat-server';
 import {
   APP_ID,
   APP_UI_ID,
@@ -230,6 +232,16 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins: SecuritySolutionPluginSetupDependencies
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
+
+    // Register get_alerts skill synchronously (skills registry is global and available immediately)
+    try {
+      const getAlertsSkill = createGetAlertsSkill({ coreSetup: core });
+      registerSkill(getAlertsSkill);
+      this.logger.info('Registered security.get_alerts skill');
+    } catch (error) {
+      // Skills registry might not be available, log but don't fail
+      this.logger.debug(`Could not register get_alerts skill: ${error}`);
+    }
 
     const { appClientFactory, productFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;

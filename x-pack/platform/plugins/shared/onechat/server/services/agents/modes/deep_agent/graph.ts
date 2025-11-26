@@ -15,7 +15,8 @@ import { AgentExecutionErrorCode as ErrCodes } from '@kbn/onechat-common/agents'
 import { createAgentExecutionError } from '@kbn/onechat-common/base/errors';
 import type { AgentEventEmitter } from '@kbn/onechat-server';
 import { createReasoningEvent, extractTextContent } from '@kbn/onechat-genai-utils/langchain';
-import { createDeepAgent } from '@kbn/securitysolution-deep-agent';
+import { createDeepAgent, createSkillsMiddleware } from '@kbn/securitysolution-deep-agent';
+import type { SkillsRegistry } from '@kbn/onechat-server';
 import type { ResolvedConfiguration } from '../types';
 import { convertError, isRecoverableError } from '../utils/errors';
 import { getActPrompt, getAnswerPrompt } from './prompts';
@@ -42,6 +43,9 @@ export const createAgentGraph = ({
   capabilities,
   logger,
   events,
+  skillsService,
+  request,
+  toolHandlerContext,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
@@ -49,6 +53,15 @@ export const createAgentGraph = ({
   configuration: ResolvedConfiguration;
   logger: Logger;
   events: AgentEventEmitter;
+  skillsService?: {
+    getRegistry: (opts: { request: import('@kbn/core-http-server').KibanaRequest }) => Promise<{
+      get: (skillId: string) => Promise<any>;
+      list: (opts?: { category?: string }) => Promise<any[]>;
+      search: (query: string, category?: string) => any[];
+    }>;
+  } | (() => SkillsRegistry);
+  request?: import('@kbn/core-http-server').KibanaRequest;
+  toolHandlerContext?: import('@kbn/onechat-server').ToolHandlerContext;
 }) => {
   // Extract the system prompt from getActPrompt for the deep agent
   const researchPromptMessages = getActPrompt({
@@ -61,11 +74,40 @@ export const createAgentGraph = ({
   const firstMessage = researchPromptMessages[0];
   const systemPrompt = Array.isArray(firstMessage) ? (firstMessage[1] as string) : '';
 
+  // Build middleware array
+  const middleware = [];
+
+  // Add skills middleware if request is available
+  // For Solution 2, skillsService will be a function that returns the simple registry
+  // For Solution 1, skillsService will be the full service with getRegistry method
+  if (request) {
+    middleware.push(
+      createSkillsMiddleware({
+        getSkillsRegistry: async (req) => {
+          // If skillsService is a function, it's the simple registry getter (Solution 2)
+          if (typeof skillsService === 'function') {
+            return Promise.resolve(skillsService());
+          }
+          // If skillsService has getRegistry, use it (Solution 1)
+          if (skillsService?.getRegistry) {
+            return skillsService.getRegistry({ request: req });
+          }
+          // Fallback: use the simple registry directly (Solution 2)
+          const { getSkillsRegistry } = await import('@kbn/onechat-server');
+          return Promise.resolve(getSkillsRegistry());
+        },
+        getRequest: () => request,
+        getToolHandlerContext: () => toolHandlerContext,
+      })
+    );
+  }
+
   // Create the deep agent instance for research
   const deepAgentInstance = createDeepAgent({
     systemPrompt,
     model: chatModel,
     tools,
+    middleware,
   });
 
   const deepAgent = async (state: StateType) => {
@@ -74,12 +116,15 @@ export const createAgentGraph = ({
     }
     try {
       // Invoke the deep agent with initial messages
-      const result = await deepAgentInstance.invoke({
-        messages: state.initialMessages,
-        files: {}
-      }, {
-        recursionLimit: 100,
-      });
+      const result = await deepAgentInstance.invoke(
+        {
+          messages: state.initialMessages,
+          files: {},
+        },
+        {
+          recursionLimit: 100,
+        }
+      );
 
       // Extract the final message from the deep agent result
       const messages = result.messages as BaseMessage[];

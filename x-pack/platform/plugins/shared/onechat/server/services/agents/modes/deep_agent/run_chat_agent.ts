@@ -11,6 +11,8 @@ import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langch
 import type { ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
 import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/onechat-server';
+import { ChatEventType } from '@kbn/onechat-common';
+import type { InternalToolProgressEvent } from '@kbn/onechat-server/runner';
 import {
   addRoundCompleteEvent,
   extractRound,
@@ -24,6 +26,7 @@ import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
+import { getSkillsRegistry } from '@kbn/onechat-server';
 
 const chatAgentGraphName = 'onechat-deep-agent';
 
@@ -52,7 +55,7 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     browserApiTools,
     startTime = new Date(),
   },
-  { logger, request, modelProvider, toolProvider, attachments, events }
+  { logger, request, modelProvider, toolProvider, attachments, events, skillsService, esClient, runner, resultStore }
 ) => {
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -105,6 +108,36 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     conversation: processedConversation,
   });
 
+  // Get skills registry if available (from Solution 1) or use simple registry (Solution 2)
+  const skillsServiceOrRegistry = skillsService || (() => getSkillsRegistry());
+
+  // Create tool handler context for skills
+  // Create a tool event emitter that converts tool progress events to agent events
+  const toolEventEmitter: import('@kbn/onechat-server').ToolEventEmitter = {
+    reportProgress: (progressMessage: string) => {
+      // Convert tool progress event to agent event format
+      const toolProgressEvent: InternalToolProgressEvent = {
+        type: ChatEventType.toolProgress,
+        data: {
+          message: progressMessage,
+        },
+      };
+      // Emit as agent event (tool progress events are compatible)
+      eventEmitter(toolProgressEvent as any);
+    },
+  };
+
+  const toolHandlerContext: import('@kbn/onechat-server').ToolHandlerContext = {
+    request,
+    esClient,
+    modelProvider,
+    toolProvider,
+    runner,
+    resultStore: resultStore.asReadonly ? resultStore.asReadonly() : resultStore,
+    logger,
+    events: toolEventEmitter,
+  };
+
   const agentGraph = createAgentGraph({
     logger,
     events: { emit: eventEmitter },
@@ -112,6 +145,9 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     tools: allTools,
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
+    skillsService: skillsServiceOrRegistry,
+    request,
+    toolHandlerContext,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);

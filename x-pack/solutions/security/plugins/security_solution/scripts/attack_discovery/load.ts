@@ -341,20 +341,52 @@ const checkDeleteIndices = async ({ esClient, log }: { esClient: Client; log: To
   await promptDeletion('logs-endpoint.events.insights.*', 'data');
   await promptDeletion('insights-alerts-*', 'alerts');
 };
+
+const discoverAvailableEpisodes = (): string[] => {
+  try {
+    const files = fs.readdirSync(DIRECTORY_PATH);
+    const episodeNumbers = new Set<string>();
+
+    // Extract episode numbers from files matching patterns like ep*data.ndjson.gz or ep*alerts.ndjson.gz
+    files.forEach((file) => {
+      const match = file.match(/ep(\d+)(?:data|alerts)\.ndjson\.gz/);
+      if (match) {
+        episodeNumbers.add(match[1]);
+      }
+    });
+
+    return Array.from(episodeNumbers).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+  } catch (error) {
+    return [];
+  }
+};
+
 export const loadAttackDiscoveryData = async ({
   kbnClient,
   esClient,
   log,
+  episodes,
 }: {
   kbnClient: KbnClient;
   esClient: Client;
   log: ToolingLog;
+  episodes?: string[];
 }) => {
   await checkRuleExistsAndStatus({ kbnClient, log });
   await checkDeleteIndices({ esClient, log });
   await createPipeline({ esClient, log });
 
-  for (const epNum of ['1', '2']) {
+  // If episodes not specified, discover all available episodes
+  const episodesToLoad = episodes && episodes.length > 0 ? episodes : discoverAvailableEpisodes();
+
+  if (episodesToLoad.length === 0) {
+    log.warning('No episodes found to load.');
+    return null;
+  }
+
+  log.info(`Loading episodes: ${episodesToLoad.join(', ')}`);
+
+  for (const epNum of episodesToLoad) {
     await processFilesForEpisode({ esClient, epNum, log });
   }
 

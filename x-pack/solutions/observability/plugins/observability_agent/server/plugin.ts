@@ -16,6 +16,8 @@ import { registerObservabilityAgent } from './agent/register_observability_agent
 import { registerTools } from './tools/register_tools';
 import { getIsObservabilityAgentEnabled } from './utils/get_is_obs_agent_enabled';
 import { OBSERVABILITY_AGENT_FEATURE_FLAG } from '../common/constants';
+import { createGetAlertsSkill } from './skills/get_alerts_skill';
+import { registerSkill } from '@kbn/onechat-server';
 import type {
   ObservabilityAgentPluginSetup,
   ObservabilityAgentPluginSetupDependencies,
@@ -42,6 +44,15 @@ export class ObservabilityAgentPlugin
     core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>,
     plugins: ObservabilityAgentPluginSetupDependencies
   ): ObservabilityAgentPluginSetup {
+    // Register get_alerts skill synchronously (skills registry is global and available immediately)
+    try {
+      const getAlertsSkill = createGetAlertsSkill({ coreSetup: core });
+      registerSkill(getAlertsSkill);
+      this.logger.info('Registered observability.get_alerts skill');
+    } catch (error) {
+      this.logger.error(`Error registering get_alerts skill: ${error}`);
+    }
+
     getIsObservabilityAgentEnabled(core)
       .then((isObservabilityAgentEnabled) => {
         if (!isObservabilityAgentEnabled) {
