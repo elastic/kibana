@@ -1434,7 +1434,7 @@
     "zod-to-json-schema": "^3.23.0"
   },
   "devDependencies": {
-    "@apidevtools/swagger-parser": "^12.0.0",
+    "@apidevtools/swagger-parser": "^12.1.0",
     "@arizeai/phoenix-client": "^2.3.4",
     "@babel/cli": "^7.24.7",
     "@babel/core": "^7.24.7",
@@ -1698,7 +1698,7 @@
     "@parcel/watcher": "^2.5.1",
     "@playwright/test": "1.53.1",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
-    "@redocly/cli": "^1.34.5",
+    "@redocly/cli": "^2.11.0",
     "@seriousme/openapi-schema-validator": "^2.4.1",
     "@statoscope/webpack-plugin": "^5.28.2",
     "@storybook/addon-a11y": "^8.6.3",
