@@ -38,14 +38,14 @@ export function AlertControlsProvider({ getService }: FtrProviderContext) {
       const elementToHover = await this.getControlElementById(controlId);
       await retry.try(async () => {
         await elementToHover.moveMouseTo();
-        await testSubjects.existOrFail(`control-action-${controlId}-erase`);
+        await testSubjects.existOrFail(`control-action-${controlId}-clearControl`);
       });
     },
 
     async clearControlSelections(controlId: string) {
       log.debug(`clearing all selections from control ${controlId}`);
       await this.hoverOverExistingControl(controlId);
-      await testSubjects.click(`control-action-${controlId}-erase`);
+      await testSubjects.click(`control-action-${controlId}-clearControl`);
     },
 
     async optionsListOpenPopover(controlId: string) {

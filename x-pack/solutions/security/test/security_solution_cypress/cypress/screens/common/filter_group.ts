@@ -70,11 +70,11 @@ export const FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS = {
 };
 
 export const FILTER_GROUP_CONTROL_ACTION_DELETE = (idx: number) => {
-  return `[data-test-subj="control-action-${idx}-delete"]`;
+  return `[data-test-subj="control-action-${idx}-deletePanel"]`;
 };
 
 export const FILTER_GROUP_CONTROL_ACTION_EDIT = (idx: number) => {
-  return `[data-test-subj="control-action-${idx}-edit"]`;
+  return `[data-test-subj="control-action-${idx}-editPanel"]`;
 };
 
 export const FILTER_GROUP_CONTROL_CONFIRM_BTN = `[data-test-subj="confirmModalConfirmButton"]`;

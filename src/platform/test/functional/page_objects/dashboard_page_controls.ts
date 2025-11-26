@@ -296,7 +296,7 @@ export class DashboardPageControls extends FtrService {
     const elementToHover = await this.getControlElementById(controlId);
     await this.retry.try(async () => {
       await elementToHover.moveMouseTo();
-      await this.testSubjects.existOrFail(`control-action-${controlId}-delete`);
+      await this.testSubjects.existOrFail(`control-action-${controlId}-deletePanel`);
     });
   }
 
@@ -304,27 +304,27 @@ export class DashboardPageControls extends FtrService {
     const elementToClick = await this.getControlElementById(controlId);
     await this.retry.try(async () => {
       await elementToClick.click();
-      await this.testSubjects.existOrFail(`control-action-${controlId}-delete`);
+      await this.testSubjects.existOrFail(`control-action-${controlId}-deletePanel`);
     });
   }
 
   public async editExistingControl(controlId: string) {
     this.log.debug(`Opening control editor for control: ${controlId}`);
     await this.hoverOverExistingControl(controlId);
-    await this.testSubjects.click(`control-action-${controlId}-edit`);
+    await this.testSubjects.click(`control-action-${controlId}-editPanel`);
   }
 
   public async removeExistingControl(controlId: string) {
     this.log.debug(`Removing control: ${controlId}`);
     await this.hoverOverExistingControl(controlId);
-    await this.testSubjects.click(`control-action-${controlId}-delete`);
+    await this.testSubjects.click(`control-action-${controlId}-deletePanel`);
     await this.common.clickConfirmOnModal();
   }
 
   public async clearControlSelections(controlId: string) {
     this.log.debug(`clearing all selections from control ${controlId}`);
     await this.hoverOverExistingControl(controlId);
-    await this.testSubjects.click(`control-action-${controlId}-erase`);
+    await this.testSubjects.click(`control-action-${controlId}-clearControl`);
   }
 
   public async verifyControlType(controlId: string, expectedType: string) {
