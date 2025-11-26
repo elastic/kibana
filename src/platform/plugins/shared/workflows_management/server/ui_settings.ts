@@ -22,7 +22,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
         defaultMessage: 'Elastic Workflows',
       }),
       schema: schema.boolean(),
-      value: false,
+      value: true,
       readonly: false,
       technicalPreview: true,
       requiresPageReload: true,
