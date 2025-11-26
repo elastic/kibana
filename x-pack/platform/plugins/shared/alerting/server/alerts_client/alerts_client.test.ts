@@ -844,7 +844,6 @@ describe('Alerts Client', () => {
                 kibana: {
                   alert: {
                     instance: { id: '1' },
-                    muted: false,
                     start: '2023-03-28T12:27:28.159Z',
                     uuid: 'abc',
                   },
@@ -858,6 +857,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MUTED]: false,
                 [ALERT_PENDING_RECOVERED_COUNT]: 0,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
@@ -1173,7 +1173,6 @@ describe('Alerts Client', () => {
                 kibana: {
                   alert: {
                     instance: { id: '2' },
-                    muted: false,
                     start: '2023-03-28T02:27:28.159Z',
                     uuid: 'def',
                   },
@@ -1187,6 +1186,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MUTED]: false,
                 [ALERT_PENDING_RECOVERED_COUNT]: 0,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
@@ -1227,7 +1227,6 @@ describe('Alerts Client', () => {
                 kibana: {
                   alert: {
                     instance: { id: '1' },
-                    muted: false,
                     rule: omit(rule, 'execution'),
                     uuid: 'abc',
                   },
@@ -1242,6 +1241,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_MUTED]: false,
                 [ALERT_PENDING_RECOVERED_COUNT]: 0,
                 [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_SEVERITY_IMPROVING]: true,
