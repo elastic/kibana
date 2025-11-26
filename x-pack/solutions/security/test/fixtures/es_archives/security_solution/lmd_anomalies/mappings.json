@@ -4,10 +4,12 @@
     "index": ".ml-anomalies-lmd",
     "aliases": {
       ".ml-anomalies-.write-lmd_high_count_remote_file_transfer": {
-        "is_hidden": true
+        "is_hidden": true,
+        "is_write_index": true
       },
       ".ml-anomalies-.write-lmd_high_file_size_remote_file_transfer": {
-        "is_hidden": true
+        "is_hidden": true,
+        "is_write_index": true
       },
       ".ml-anomalies-lmd_high_count_remote_file_transfer": {
         "filter": {

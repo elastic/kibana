@@ -18,6 +18,8 @@ import {
 import { getCommonRequestHeader } from '@kbn/test-suites-xpack-platform/functional/services/ml/common_api';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { ML_GROUP_ID } from '@kbn/security-solution-plugin/common/constants';
+import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import { isJobStarted } from '@kbn/security-solution-plugin/common/machine_learning/helpers';
 
 interface ModuleJob {
   id: string;
@@ -103,24 +105,109 @@ export const forceStartDatafeeds = async ({
     .set(getCommonRequestHeader('1'))
     .send({
       datafeedIds: jobIds.map((jobId) => `datafeed-${jobId}`),
-      start: Date.now(), // Use Date.now() to get full Unix timestamp in milliseconds
-      // TODO: check if we need to use date.now().getutcMilliseconds()
+      start: Date.now(),
     })
     .expect(rspCode);
 
   return body;
 };
 
+export const getJobsSummary = async ({
+  jobIds,
+  supertest,
+}: {
+  jobIds: string[];
+  supertest: supertest.Agent;
+}): Promise<MlSummaryJob[]> => {
+  const { body } = await supertest
+    .post(`/internal/ml/jobs/jobs_summary`)
+    .set(getCommonRequestHeader('1'))
+    .send({
+      jobIds,
+    });
+
+  return body.filter((job: MlSummaryJob) => jobIds.includes(job.id));
+};
+
+export const waitForAllJobsToStart = async ({
+  jobIds,
+  supertest,
+  log,
+}: {
+  jobIds: string[];
+  supertest: supertest.Agent;
+  log: ToolingLog;
+}): Promise<MlSummaryJob[]> => {
+  const timeoutMs = 5 * 60 * 1000; // 5 minutes in milliseconds
+  const startTime = Date.now();
+
+  log.info(`Waiting for ${jobIds.length} job(s) to start: ${jobIds.join(', ')}`);
+
+  return pRetry(
+    async () => {
+      // Check if we've exceeded the timeout
+      const elapsed = Date.now() - startTime;
+      if (elapsed > timeoutMs) {
+        throw new Error(`waitForAllJobsToStart exceeded timeout of ${timeoutMs}ms`);
+      }
+
+      const jobs = await getJobsSummary({ jobIds, supertest });
+
+      // Check if all jobs are found
+      if (jobs.length !== jobIds.length) {
+        const foundJobIds = jobs.map((job) => job.id);
+        const missingJobIds = jobIds.filter((id) => !foundJobIds.includes(id));
+        const errorMsg = `Not all jobs found. Missing: ${missingJobIds.join(', ')}. Expected ${
+          jobIds.length
+        }, found ${jobs.length}`;
+        log.warning(errorMsg);
+        throw new Error(errorMsg);
+      }
+
+      // Check if all jobs are started
+      const notStartedJobs = jobs.filter((job) => !isJobStarted(job.jobState, job.datafeedState));
+      const startedCount = jobs.length - notStartedJobs.length;
+
+      if (notStartedJobs.length > 0) {
+        const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+        log.info(
+          `[${elapsedSeconds}s] Status: ${startedCount}/${
+            jobs.length
+          } jobs started. Waiting for: ${notStartedJobs.map((job) => job.id).join(', ')}`
+        );
+        const jobStates = notStartedJobs.map(
+          (job) => `${job.id} (jobState: ${job.jobState}, datafeedState: ${job.datafeedState})`
+        );
+        throw new Error(`Not all jobs are started. Jobs not started: ${jobStates.join(', ')}`);
+      }
+
+      const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+      log.info(`[${elapsedSeconds}s] All ${jobs.length} job(s) are now started!`);
+      return jobs;
+    },
+    {
+      retries: 100, // High number of retries to allow for the 5 minute timeout
+      minTimeout: 2000, // 2 seconds minimum between retries
+      maxTimeout: 10000, // 10 seconds maximum between retries
+      factor: 1.5, // Exponential backoff factor
+      onFailedAttempt: (error) => {
+        const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+        log.debug(
+          `[${elapsedSeconds}s] Retry attempt ${error.attemptNumber} failed. ${error.retriesLeft} retries left. Error: ${error.message}`
+        );
+      },
+    }
+  );
+};
+
 export const installIntegrationAndCreatePolicy = async ({
   kbnClient,
-  log,
   integrationName,
   supertest,
   namespace = 'default',
 }: {
   kbnClient: KbnClient;
   supertest: supertest.Agent;
-  log: ToolingLog;
   integrationName: string;
   namespace?: string;
 }): Promise<{

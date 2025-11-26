@@ -3,7 +3,8 @@
   "value": {
     "aliases": {
       ".ml-anomalies-.write-v3_linux_anomalous_network_activity": {
-        "is_hidden": true
+        "is_hidden": true,
+        "is_write_index": true
       },
       ".ml-anomalies-v3_linux_anomalous_network_activity": {
         "filter": {
@@ -595,6 +596,7 @@
   "value": {
     "aliases": {
       ".ml-anomalies-.write-rare_process_by_host_linux_ecs": {
+        "is_write_index": true
       },
       ".ml-anomalies-rare_process_by_host_linux_ecs": {
         "filter": {

@@ -4,16 +4,16 @@
     "index": ".ml-anomalies-security_auth",
     "aliases": {
       ".ml-anomalies-.write-auth_rare_source_ip_for_a_user": {
-        "is_hidden": true
+        "is_hidden": true,
+        "is_write_index": true
       },
       ".ml-anomalies-.write-suspicious_login_activity": {
-        "is_hidden": true
+        "is_hidden": true,
+        "is_write_index": true
       },
       ".ml-anomalies-.write-auth_rare_user": {
-        "is_hidden": true
-      },
-      ".ml-anomalies-.write-auth_high_count_logon_events": {
-        "is_hidden": true
+        "is_hidden": true,
+        "is_write_index": true
       },
       ".ml-anomalies-auth_rare_source_ip_for_a_user": {
         "filter": {
@@ -40,16 +40,6 @@
           "term": {
             "job_id": {
               "value": "auth_rare_user"
-            }
-          }
-        },
-        "is_hidden": true
-      },
-      ".ml-anomalies-auth_high_count_logon_events": {
-        "filter": {
-          "term": {
-            "job_id": {
-              "value": "auth_high_count_logon_events"
             }
           }
         },

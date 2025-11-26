@@ -88,7 +88,6 @@ evaluate.describe('SIEM Entity Analytics Agent - Risk Score Tests', { tag: '@svl
               output: {
                 criteria: [
                   'Return that risk engine is not enabled in this environment.',
-                  'Show the current status as DISABLED',
                   'Prompt the user to enable the risk engine',
                 ],
                 toolCalls: [

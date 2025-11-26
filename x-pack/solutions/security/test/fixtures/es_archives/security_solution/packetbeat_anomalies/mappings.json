@@ -4,7 +4,8 @@
     "index": ".ml-anomalies-packetbeat",
     "aliases": {
       ".ml-anomalies-.write-packetbeat_rare_server_domain": {
-        "is_hidden": true
+        "is_hidden": true,
+        "is_write_index": true
       },
       ".ml-anomalies-packetbeat_rare_server_domain": {
         "filter": {

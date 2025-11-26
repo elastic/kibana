@@ -4,7 +4,8 @@
     "index": ".ml-anomalies-pad",
     "aliases": {
       ".ml-anomalies-.write-pad_linux_rare_process_executed_by_user": {
-        "is_hidden": true
+        "is_hidden": true,
+        "is_write_index": true
       },
       ".ml-anomalies-pad_linux_rare_process_executed_by_user": {
         "filter": {

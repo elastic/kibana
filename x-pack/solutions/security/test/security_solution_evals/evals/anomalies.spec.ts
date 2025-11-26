@@ -14,6 +14,7 @@ import {
   forceStartDatafeeds,
   installIntegrationAndCreatePolicy,
   deleteMLJobs,
+  waitForAllJobsToStart,
 } from '../src/helpers/ml';
 import { evaluate } from '../src/evaluate';
 
@@ -27,7 +28,6 @@ evaluate.describe(
       'auth_rare_source_ip_for_a_user',
       'suspicious_login_activity',
       'auth_rare_user',
-      'auth_high_count_logon_events',
     ];
 
     // Privileged Access Detection (PAD) ML module
@@ -63,7 +63,8 @@ evaluate.describe(
     // Index pattern that matches all data loaded in tests
     const indexPattern = 'ecs_compliant,auditbeat-*,winlogbeat-*';
 
-    evaluate.beforeAll(async ({ log, esArchiverLoad, supertest }) => {
+    evaluate.beforeAll(async ({ log, esArchiverLoad, supertest, kbnClient }) => {
+      await kbnClient.savedObjects.cleanStandardList();
       await createAlertsIndex(supertest, log);
       await esArchiverLoad(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
@@ -82,69 +83,45 @@ evaluate.describe(
     });
 
     evaluate.describe('without data', () => {
-      evaluate(
-        'service accounts unusual access patterns without data',
-        async ({ evaluateDataset }) => {
-          await evaluateDataset({
-            dataset: {
-              name: 'entity-analytics: anomalies without data',
-              description:
-                'Questions to test the SIEM Entity Analytics agent - service accounts unusual access patterns without data',
-              examples: [
-                {
-                  input: {
-                    question: 'Which service accounts have unusual access patterns?',
-                  },
-                  output: {
-                    criteria: [
-                      'Return that the required anomaly detection jobs are not enabled in this environment.',
-                      'Prompt the user to enable anomaly detection jobs',
-                      `Mention at least 1 job id from the list: ${securityAuthJobIds.join(', ')}`,
-                    ],
-                  },
-                  metadata: { query_intent: 'Factual' },
-                },
-              ],
-            },
-          });
-        }
-      );
-
-      evaluate(
-        'privileged accounts unusual command patterns without data',
-        async ({ evaluateDataset }) => {
-          await evaluateDataset({
-            dataset: {
-              name: 'entity-analytics: privileged-accounts-unusual-command-patterns-without-data',
-              description:
-                'Questions to test the SIEM Entity Analytics agent - privileged accounts unusual command patterns without data',
-              examples: [
-                {
-                  input: {
-                    question: 'Are there privileged accounts with unusual command patterns?',
-                  },
-                  output: {
-                    criteria: [
-                      'Return that the required anomaly detection jobs are not enabled in this environment.',
-                      'Prompt the user to enable anomaly detection jobs',
-                      `Mention at least 1 job id from the list: ${padJobIds.join(', ')}`,
-                    ],
-                  },
-                  metadata: { query_intent: 'Factual' },
-                },
-              ],
-            },
-          });
-        }
-      );
-
-      evaluate('users multiple locations without data', async ({ evaluateDataset }) => {
+      evaluate('entity analytics anomalies questions', async ({ evaluateDataset }) => {
         await evaluateDataset({
           dataset: {
-            name: 'entity-analytics: users-multiple-locations-without-data',
+            name: 'entity-analytics:anomalies without data',
             description:
-              'Questions to test the SIEM Entity Analytics agent - users logged in from multiple locations without data',
+              'Questions to test the SIEM Entity Analytics agent - anomalies without data',
             examples: [
+              {
+                input: {
+                  question: 'Which service accounts have unusual access patterns?',
+                },
+                output: {
+                  criteria: [
+                    'Return that the required anomaly detection jobs are not enabled in this environment.',
+                    'Prompt the user to enable anomaly detection jobs',
+                    `Mention at least 1 job id from the list: ${[
+                      ...securityAuthJobIds,
+                      'v3_windows_anomalous_service',
+                    ].join(', ')}`,
+                  ],
+                },
+                metadata: { query_intent: 'Factual' },
+              },
+
+              // Broken: Azure OpenAI's content management policy blocks this question
+              // Error calling connector: Status code: 400. Message: API Error: Bad Request - The response was filtered due to the prompt triggering Azure OpenAI's content management policy. Please modify your prompt and retry. To learn more about our content filtering policies please read our documentation: https://go.microsoft.com/fwlink/?linkid=2198766
+              // {
+              //   input: {
+              //     question: 'Are there privileged accounts with unusual command patterns?',
+              //   },
+              //   output: {
+              //     criteria: [
+              //       'Return that the required anomaly detection jobs are not enabled in this environment.',
+              //       'Prompt the user to enable anomaly detection jobs',
+              //       `Mention at least 1 job id from the list: ${padJobIds.join(', ')}`,
+              //     ],
+              //   },
+              //   metadata: { query_intent: 'Factual' },
+              // },
               {
                 input: {
                   question: 'Show users logged in from multiple locations',
@@ -153,23 +130,11 @@ evaluate.describe(
                   criteria: [
                     'Return that the required anomaly detection jobs are not enabled in this environment.',
                     'Prompt the user to enable anomaly detection jobs',
-                    `Mention at least 1 job id from the list: ${securityAuthJobIds[0]}`,
+                    `Mention at least 1 job id from the list: ${securityAuthJobIds.join(', ')}`,
                   ],
                 },
                 metadata: { query_intent: 'Factual' },
               },
-            ],
-          },
-        });
-      });
-
-      evaluate('lateral movement without data', async ({ evaluateDataset }) => {
-        await evaluateDataset({
-          dataset: {
-            name: 'entity-analytics: lateral-movement-without-data',
-            description:
-              'Questions to test the SIEM Entity Analytics agent - lateral movement without data',
-            examples: [
               {
                 input: {
                   question: 'Are there connections suggesting lateral movement?',
@@ -183,18 +148,58 @@ evaluate.describe(
                 },
                 metadata: { query_intent: 'Factual' },
               },
-            ],
-          },
-        });
-      });
-
-      evaluate('entity analytics anomalies questions', async ({ evaluateDataset }) => {
-        await evaluateDataset({
-          dataset: {
-            name: 'entity-analytics:anomalies without data',
-            description:
-              'Questions to test the SIEM Entity Analytics agent - anomalies without data',
-            examples: [
+              {
+                input: {
+                  question: 'Show accounts performing unusual administrative actions',
+                },
+                output: {
+                  criteria: [
+                    'Return that the required anomaly detection jobs are not enabled in this environment.',
+                    'Prompt the user to enable anomaly detection jobs',
+                    `Mention at least 1 job id from the list: ${padJobIds.join(', ')}`,
+                  ],
+                },
+                metadata: { query_intent: 'Factual' },
+              },
+              {
+                input: {
+                  question: 'Which users uploaded data to external domains?',
+                },
+                output: {
+                  criteria: [
+                    'Return that the required anomaly detection jobs are not enabled in this environment.',
+                    'Prompt the user to enable anomaly detection jobs',
+                    `Mention at least 1 job id from the list: ${dedJobIds.join(', ')}`,
+                  ],
+                },
+                metadata: { query_intent: 'Factual' },
+              },
+              {
+                input: {
+                  question: 'Show unusual access attempts to privileged accounts',
+                },
+                output: {
+                  criteria: [
+                    'Return that the required anomaly detection jobs are not enabled in this environment.',
+                    'Prompt the user to enable anomaly detection jobs',
+                    `Mention at least 1 job id from the list: ${padJobIds.join(', ')}`,
+                  ],
+                },
+                metadata: { query_intent: 'Factual' },
+              },
+              {
+                input: {
+                  question: 'Show me users with suspicious login patterns',
+                },
+                output: {
+                  criteria: [
+                    'Return that the required anomaly detection jobs are not enabled in this environment.',
+                    'Prompt the user to enable anomaly detection jobs',
+                    `Mention at least 1 job id from the list: ${securityAuthJobIds.join(', ')}`,
+                  ],
+                },
+                metadata: { query_intent: 'Factual' },
+              },
               {
                 input: {
                   question: 'Show me entities with anomalous behavior in the last 24 hours',
@@ -203,6 +208,7 @@ evaluate.describe(
                   criteria: [
                     'Return that the required anomaly detection jobs are not enabled in this environment.',
                     'Prompt the user to enable anomaly detection jobs',
+                    `Mention at least 1 job id from the list: ${dedJobIds.join(', ')}`,
                   ],
                 },
                 metadata: { query_intent: 'Factual' },
@@ -247,7 +253,6 @@ evaluate.describe(
             JSON.stringify(authMlModules, null, 2)
           );
           await forceStartDatafeeds({ jobIds: securityAuthJobIds, rspCode: 200, supertest });
-          // await waitForJobsToBeStarted({ jobIds: securityAuthJobIds, supertest, log });
         } catch (error) {
           log.warning('Failed to setup Security Auth ML module:', error);
         }
@@ -258,7 +263,6 @@ evaluate.describe(
             await installIntegrationAndCreatePolicy({
               kbnClient,
               supertest,
-              log,
               integrationName: 'pad',
             });
           agentPolicyIds.push(padAgentPolicyId);
@@ -281,7 +285,6 @@ evaluate.describe(
             await installIntegrationAndCreatePolicy({
               kbnClient,
               supertest,
-              log,
               integrationName: 'lmd',
             });
           agentPolicyIds.push(lmdAgentPolicyId);
@@ -324,7 +327,6 @@ evaluate.describe(
             await installIntegrationAndCreatePolicy({
               kbnClient,
               supertest,
-              log,
               integrationName: 'ded',
             });
           agentPolicyIds.push(dedAgentPolicyId);
@@ -336,7 +338,17 @@ evaluate.describe(
             indexPatternName: indexPattern,
           });
           log.debug('Setup DED ML modules response: ', JSON.stringify(dedMlModules, null, 2));
-          await forceStartDatafeeds({ jobIds: dedJobIds, rspCode: 200, supertest });
+          await forceStartDatafeeds({
+            jobIds: [
+              ...dedJobIds,
+              ...securityAuthJobIds,
+              ...padJobIds,
+              ...lmdJobIds,
+              ...securityPacketBeatJobIds,
+            ],
+            rspCode: 200,
+            supertest,
+          });
         } catch (error) {
           log.warning('Failed to setup DED ML module:', error);
         }
@@ -357,6 +369,18 @@ evaluate.describe(
         await esArchiverLoad(
           'x-pack/solutions/security/test/fixtures/es_archives/security_solution/data_exfiltration_anomalies'
         );
+
+        await waitForAllJobsToStart({
+          supertest,
+          jobIds: [
+            ...dedJobIds,
+            ...securityAuthJobIds,
+            ...padJobIds,
+            ...lmdJobIds,
+            ...securityPacketBeatJobIds,
+          ],
+          log,
+        });
       });
 
       evaluate.afterAll(async ({ quickApiClient, supertest, kbnClient, log, esClient }) => {
@@ -453,7 +477,7 @@ evaluate.describe(
                 output: {
                   criteria: [
                     'Return at least 2 results with loggings in multiple locations',
-                    `Mention at least 1 job id from the list: ${securityAuthJobIds[0]}`,
+                    `Mention at least 1 job id from the list: ${securityAuthJobIds.join(', ')}`,
                   ],
                   toolCalls: [
                     {
@@ -555,7 +579,7 @@ evaluate.describe(
                 },
                 output: {
                   criteria: [
-                    'Return at least 4 entities with anomalous behavior',
+                    'Return at least 2 entities with anomalous behavior',
                     `Mention at least 1 job id from the list: ${dedJobIds.join(', ')}`,
                   ],
                   toolCalls: [

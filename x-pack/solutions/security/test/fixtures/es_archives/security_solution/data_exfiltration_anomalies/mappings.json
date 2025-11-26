@@ -4,25 +4,32 @@
     "index": ".ml-anomalies-shared",
     "aliases": {
       ".ml-anomalies-.write-ded_high_bytes_written_to_external_device": {
-        "is_hidden": true
+        "is_hidden": true,
+        "is_write_index": true
       },
       ".ml-anomalies-.write-ded_high_bytes_written_to_external_device_airdrop": {
-        "is_hidden": true
+        "is_hidden": true,
+        "is_write_index": true
       },
       ".ml-anomalies-.write-ded_high_sent_bytes_destination_geo_country_iso_code": {
-        "is_hidden": true
+        "is_hidden": true,
+        "is_write_index": true
       },
       ".ml-anomalies-.write-ded_high_sent_bytes_destination_ip": {
-        "is_hidden": true
+        "is_hidden": true,
+        "is_write_index": true
       },
       ".ml-anomalies-.write-ded_high_sent_bytes_destination_port": {
-        "is_hidden": true
+        "is_hidden": true,
+        "is_write_index": true
       },
       ".ml-anomalies-.write-ded_high_sent_bytes_destination_region_name": {
-        "is_hidden": true
+        "is_hidden": true,
+        "is_write_index": true
       },
       ".ml-anomalies-.write-ded_rare_process_writing_to_external_device": {
-        "is_hidden": true
+        "is_hidden": true,
+        "is_write_index": true
       },
       ".ml-anomalies-ded_high_bytes_written_to_external_device": {
         "filter": {

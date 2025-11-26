@@ -395,48 +395,6 @@
   "type": "doc",
   "value": {
     "index": ".ml-anomalies-security_auth",
-    "id": "auth_high_count_logon_events_record_1761555600000_3600_0_5",
-    "source": {
-      "job_id": "auth_high_count_logon_events",
-      "result_type": "record",
-      "probability": 0.001,
-      "record_score": 75.2,
-      "initial_record_score": 75.2,
-      "bucket_span": 3600,
-      "detector_index": 0,
-      "is_interim": false,
-      "timestamp": 1761555600000,
-      "function": "count",
-      "function_description": "count",
-      "typical": [
-        5.0
-      ],
-      "actual": [
-        150.0
-      ],
-      "influencers": [
-        {
-          "influencer_field_name": "user.name",
-          "influencer_field_values": [
-            "privileged-account-1"
-          ]
-        }
-      ],
-      "user.name": [
-        "privileged-account-1"
-      ],
-      "host.name": [
-        "auth-server-01"
-      ]
-    },
-    "type": "_doc"
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "index": ".ml-anomalies-security_auth",
     "id": "v3_windows_anomalous_service_record_1761555600000_900_0_8",
     "source": {
       "job_id": "v3_windows_anomalous_service",
