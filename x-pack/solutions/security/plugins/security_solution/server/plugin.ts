@@ -878,12 +878,18 @@ export class Plugin implements ISecuritySolutionPlugin {
         } as LogMeta);
       });
 
-      this.trialCompanionMilestoneService.start({
-        taskManager: plugins.taskManager,
-        packageService,
-        savedObjects: core.savedObjects,
-        esClient: esInternalUserClient,
-      });
+      this.trialCompanionMilestoneService
+        .start({
+          taskManager: plugins.taskManager,
+          packageService,
+          savedObjects: core.savedObjects,
+          esClient: esInternalUserClient,
+        })
+        .catch((e) => {
+          this.logger.warn('Error starting trialCompanionMilestoneService', {
+            error: e.message,
+          } as LogMeta);
+        });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not started.');
     }
