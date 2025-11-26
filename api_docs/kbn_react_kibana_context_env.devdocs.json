@@ -1,0 +1,86 @@
+{
+  "id": "@kbn/react-kibana-context-env",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/react-kibana-context-env",
+        "id": "def-common.CoreEnvContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "CoreEnvContextProvider",
+        "description": [
+          "\nThe environment context provider"
+        ],
+        "signature": [
+          "React.ProviderExoticComponent<React.ProviderProps<",
+          "CoreEnv",
+          " | undefined>>"
+        ],
+        "path": "src/platform/packages/shared/react/kibana_context/env/core_env_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-env",
+            "id": "def-common.CoreEnvContextProvider.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-context-env",
+        "id": "def-common.useCoreEnv",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "useCoreEnv",
+        "description": [
+          "\nHook to access the environment context"
+        ],
+        "signature": [
+          "() => ",
+          "CoreEnv"
+        ],
+        "path": "src/platform/packages/shared/react/kibana_context/env/core_env_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
