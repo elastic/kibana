@@ -9,7 +9,13 @@ import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport, StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { ClientDetails, CallToolParams, CallToolResponse, ContentPart, ListToolsResponse, Tool } from './types';
+import { ServerCapabilities } from '@modelcontextprotocol/sdk/types';
 
+/**
+ * McpClient is a wrapper around the MCP client SDK.
+ * It provides a simple interface for connecting to an MCP client,
+ * listing tools, and calling tools.
+ */
 export class McpClient {
   private client: Client;
   private transport: StreamableHTTPClientTransport;
@@ -38,7 +44,12 @@ export class McpClient {
     });
   }
 
-  async connect(): Promise<boolean> {
+  /**
+   * Connect to the MCP client and return the connected status and capabilities.
+   * @returns {Promise<{ connected: boolean; capabilities?: ServerCapabilities }>} The connected status and capabilities.
+   */
+  async connect(): Promise<{ connected: boolean; capabilities?: ServerCapabilities }> {
+
     if (!this.connected) {
       try {
         await this.client.connect(this.transport);
@@ -54,9 +65,20 @@ export class McpClient {
         }
       }
     }
-    return this.connected;
+    // return the full list of capabilities as a by-product of the initialization handshake
+    const capabilities = this.client.getServerCapabilities();
+
+    return {
+      connected: this.connected,
+      capabilities,
+    };
+
   }
 
+  /**
+   * Disconnect from the MCP client and return the disconnected status.
+   * @returns {Promise<boolean>} The disconnected status.
+   */
   async disconnect(): Promise<boolean> {
     if (this.connected) {
       await this.client.close();
@@ -65,6 +87,10 @@ export class McpClient {
     return this.connected;
   }
 
+  /**
+   * List the tools available on the MCP client.
+   * @returns {Promise<ListToolsResponse>} The list of tools.
+   */
   async listTools(): Promise<ListToolsResponse> {
     if (this.connected) {
       const getNextPage = async (cursor?: string): Promise<Tool[]> => {
@@ -100,6 +126,11 @@ export class McpClient {
     throw new Error('MCP client not connected');
   }
 
+  /**
+   * Call a tool on the MCP client.
+   * @param {CallToolParams} params - The parameters for the tool call.
+   * @returns {Promise<CallToolResponse>} The response from the tool call.
+   */
   async callTool(params: CallToolParams): Promise<CallToolResponse> {
     if (!this.connected) {
       throw new Error('MCP client not connected');

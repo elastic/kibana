@@ -10,6 +10,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport, StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
 import type { ClientDetails, CallToolParams } from './types';
+import type { ServerCapabilities } from '@modelcontextprotocol/sdk/types';
 
 // Type definitions for SDK responses
 interface MockListToolsResult {
@@ -35,7 +36,7 @@ interface MockCallToolResult {
     type: string;
     text?: string | null | number | object;
     [key: string]: unknown;
-  }>;
+  } | null | undefined>;
 }
 
 interface MockCallToolError {
@@ -84,6 +85,7 @@ describe('McpClient', () => {
       _meta: Record<string, unknown>;
       arguments: Record<string, unknown>;
     }) => Promise<MockCallToolResponse>>;
+    getServerCapabilities: jest.MockedFunction<() => ServerCapabilities | undefined>;
   };
   let mockTransport: StreamableHTTPClientTransport;
   let clientDetails: ClientDetails;
@@ -92,6 +94,7 @@ describe('McpClient', () => {
   const createConnectedClient = async (): Promise<McpClient> => {
     const client = new McpClient(clientDetails);
     mockClient.connect.mockResolvedValue(undefined);
+    mockClient.getServerCapabilities.mockReturnValue(undefined);
     await client.connect();
     return client;
   };
@@ -103,6 +106,7 @@ describe('McpClient', () => {
       close: jest.fn(),
       listTools: jest.fn(),
       callTool: jest.fn(),
+      getServerCapabilities: jest.fn(),
     };
 
     mockTransport = {} as StreamableHTTPClientTransport;
@@ -180,25 +184,50 @@ describe('McpClient', () => {
     it('connects successfully when not already connected', async () => {
       const client = new McpClient(clientDetails);
       mockClient.connect.mockResolvedValue(undefined);
+      const mockCapabilities: ServerCapabilities = {
+        tools: {},
+      };
+      mockClient.getServerCapabilities.mockReturnValue(mockCapabilities);
 
       const result = await client.connect();
 
       expect(mockClient.connect).toHaveBeenCalledWith(mockTransport);
-      expect(result).toBe(true);
+      expect(result).toEqual({
+        connected: true,
+        capabilities: mockCapabilities,
+      });
       expect(client.connected).toBe(true);
+    });
+
+    it('returns undefined capabilities when not available', async () => {
+      const client = new McpClient(clientDetails);
+      mockClient.connect.mockResolvedValue(undefined);
+      mockClient.getServerCapabilities.mockReturnValue(undefined);
+
+      const result = await client.connect();
+
+      expect(result).toEqual({
+        connected: true,
+        capabilities: undefined,
+      });
     });
 
     it('does not reconnect if already connected', async () => {
       const client = new McpClient(clientDetails);
       mockClient.connect.mockResolvedValue(undefined);
+      mockClient.getServerCapabilities.mockReturnValue(undefined);
 
       await client.connect();
       jest.clearAllMocks();
+      mockClient.getServerCapabilities.mockReturnValue(undefined);
 
       const result = await client.connect();
 
       expect(mockClient.connect).not.toHaveBeenCalled();
-      expect(result).toBe(true);
+      expect(result).toEqual({
+        connected: true,
+        capabilities: undefined,
+      });
     });
 
     it('throws StreamableHTTPError with formatted message', async () => {
@@ -207,8 +236,7 @@ describe('McpClient', () => {
       mockClient.connect.mockRejectedValue(error);
 
       // The SDK formats the message as "Streamable HTTP error: Connection failed"
-      // Our client adds "Streamable HTTP error: " prefix, so the final message is:
-      // "StreamableHTTP error: Streamable HTTP error: Connection failed"
+      // Our client just passes through the message without adding a prefix
       await expect(client.connect()).rejects.toThrow('Streamable HTTP error: Connection failed');
     });
 
