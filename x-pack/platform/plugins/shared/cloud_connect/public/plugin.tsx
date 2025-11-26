@@ -6,12 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  AppMountParameters,
-  CoreSetup,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type {
   CloudConnectedPluginSetup,
@@ -24,7 +19,6 @@ export type { CloudConnectedPluginSetup, CloudConnectedPluginStart };
 export class CloudConnectedPlugin
   implements Plugin<CloudConnectedPluginSetup, CloudConnectedPluginStart, CloudConnectedSetupDeps>
 {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: CloudConnectedSetupDeps): CloudConnectedPluginSetup {
     // Skip plugin registration if running on Elastic Cloud.

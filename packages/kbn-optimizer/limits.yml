@@ -12,6 +12,7 @@ pageLoadAssetSize:
   cases: 153204
   charts: 40269
   cloud: 10648
+  cloudConnect: 4810
   cloudDataMigration: 5687
   cloudDefend: 7718
   cloudExperiments: 103984
