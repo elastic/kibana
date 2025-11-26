@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   EuiButtonEmpty,
@@ -27,6 +27,9 @@ import {
   EuiAvatar,
   useEuiTheme,
   type EuiBadgeProps,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
 } from '@elastic/eui';
 import { Chart, Settings, BarSeries, Axis, Tooltip } from '@elastic/charts';
 import { css } from '@emotion/react';
@@ -35,12 +38,16 @@ import moment from 'moment';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { ConversationRound, ToolCallStep, ToolResult } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common';
+import { useLoadConnectors } from '@kbn/elastic-assistant';
 import { useMonitoringGetConversation } from '../../hooks/monitoring';
 import { useOnechatAgentById } from '../../hooks/agents/use_agent_by_id';
 import { useNavigation } from '../../hooks/use_navigation';
+import { useKibana } from '../../hooks/use_kibana';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
 import { TechPreviewTitle } from '../common/tech_preview';
+
+const RESPONSE_TRUNCATE_LENGTH = 500;
 
 const getResultTypeLabel = (type: ToolResultType): string => {
   switch (type) {
@@ -91,6 +98,14 @@ export const MonitoringDetail: React.FC = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
   const { createOnechatUrl } = useNavigation();
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { http, settings },
+  } = useKibana();
+
+  const [flyoutContent, setFlyoutContent] = useState<{
+    title: string;
+    message: string;
+  } | null>(null);
 
   const {
     conversation,
@@ -99,6 +114,23 @@ export const MonitoringDetail: React.FC = () => {
   } = useMonitoringGetConversation(conversationId);
 
   const { agent } = useOnechatAgentById(conversation?.agent_id);
+
+  // Load connectors to get names
+  const { data: connectors } = useLoadConnectors({
+    http,
+    settings,
+    inferenceEnabled: true,
+  });
+
+  const getConnectorName = useCallback(
+    (connectorId: string): string => {
+      const connector = connectors?.find((c) => c.id === connectorId);
+      return connector?.name || connectorId;
+    },
+    [connectors]
+  );
+
+  const closeFlyout = useCallback(() => setFlyoutContent(null), []);
 
   const error = queryError ? labels.monitoring.loadConversationErrorMessage : null;
 
@@ -177,7 +209,11 @@ export const MonitoringDetail: React.FC = () => {
     ).toFixed(2);
 
     return (
-      <EuiTimelineItem key={round.id} icon="dot" verticalAlign="top">
+      <EuiTimelineItem
+        key={round.id}
+        icon={<EuiAvatar name={String(index + 1)} size="m" color="subdued" />}
+        verticalAlign="top"
+      >
         <EuiPanel hasBorder paddingSize="l">
           <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
             <EuiFlexItem grow={false}>
@@ -197,7 +233,9 @@ export const MonitoringDetail: React.FC = () => {
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">{round.model_usage.connector_id}</EuiBadge>
+                    <EuiBadge color="hollow">
+                      {getConnectorName(round.model_usage.connector_id)}
+                    </EuiBadge>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
@@ -239,7 +277,7 @@ export const MonitoringDetail: React.FC = () => {
             <h4>{labels.monitoring.userInputLabel}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiPanel hasBorder paddingSize="m" color="subdued">
+          <EuiPanel hasBorder paddingSize="m">
             <EuiText size="s">{round.input.message}</EuiText>
           </EuiPanel>
 
@@ -254,7 +292,32 @@ export const MonitoringDetail: React.FC = () => {
           <EuiSpacer size="s" />
           <EuiPanel hasBorder paddingSize="m" color="subdued">
             <EuiText size="s">
-              <EuiMarkdownFormat textSize="s">{round.response.message}</EuiMarkdownFormat>
+              {round.response.message.length > RESPONSE_TRUNCATE_LENGTH ? (
+                <>
+                  <EuiMarkdownFormat textSize="s">
+                    {`${round.response.message.slice(0, RESPONSE_TRUNCATE_LENGTH)}...`}
+                  </EuiMarkdownFormat>
+                  <EuiSpacer size="s" />
+                  <EuiButtonEmpty
+                    size="xs"
+                    onClick={() =>
+                      setFlyoutContent({
+                        title: i18n.translate('xpack.onechat.monitoring.agentResponseTitle', {
+                          defaultMessage: 'Agent Response - Round {roundNumber}',
+                          values: { roundNumber: index + 1 },
+                        }),
+                        message: round.response.message,
+                      })
+                    }
+                  >
+                    {i18n.translate('xpack.onechat.monitoring.showFullResponse', {
+                      defaultMessage: 'Show full response',
+                    })}
+                  </EuiButtonEmpty>
+                </>
+              ) : (
+                <EuiMarkdownFormat textSize="s">{round.response.message}</EuiMarkdownFormat>
+              )}
             </EuiText>
           </EuiPanel>
 
@@ -538,7 +601,7 @@ export const MonitoringDetail: React.FC = () => {
                 {Object.entries(metadata.connector_usage).map(([connectorId, usage]) => (
                   <EuiFlexItem key={connectorId} grow={false}>
                     <EuiPanel color="subdued" paddingSize="m">
-                      <EuiBadge color="hollow">{connectorId}</EuiBadge>
+                      <EuiBadge color="hollow">{getConnectorName(connectorId)}</EuiBadge>
                       <EuiSpacer size="s" />
                       <EuiText size="xs" color="subdued">
                         <div>
@@ -563,6 +626,24 @@ export const MonitoringDetail: React.FC = () => {
           {conversation.rounds.map((round, index) => renderRound(round, index))}
         </EuiTimeline>
       </KibanaPageTemplate.Section>
+
+      {/* Flyout for full agent response */}
+      {flyoutContent && (
+        <EuiFlyout onClose={closeFlyout} size="m" aria-labelledby="agentResponseFlyoutTitle">
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2 id="agentResponseFlyoutTitle">{flyoutContent.title}</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <EuiPanel color="subdued" paddingSize="m">
+              <EuiText size="xs">
+                <EuiMarkdownFormat textSize="xs">{flyoutContent.message}</EuiMarkdownFormat>
+              </EuiText>
+            </EuiPanel>
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      )}
     </KibanaPageTemplate>
   );
 };

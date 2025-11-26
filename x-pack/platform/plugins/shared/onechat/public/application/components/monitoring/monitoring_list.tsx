@@ -104,16 +104,27 @@ export const MonitoringList: React.FC = () => {
       }));
   }, [data?.conversations]);
 
-  // Filter conversations by selected user (client-side)
+  // Filter conversations by selected user (client-side) and sort by most recent
   const filteredConversations = useMemo(() => {
     if (!data?.conversations) return [];
-    if (selectedUsers.length === 0) return data.conversations;
 
-    const selectedUsername = selectedUsers[0].value;
-    return data.conversations.filter((conv) => {
-      const username = conv.user.username || conv.user.id;
-      return username === selectedUsername;
-    });
+    let conversations = [...data.conversations];
+
+    // Filter by user if selected
+    if (selectedUsers.length > 0) {
+      const selectedUsername = selectedUsers[0].value;
+      conversations = conversations.filter((conv) => {
+        const username = conv.user.username || conv.user.id;
+        return username === selectedUsername;
+      });
+    }
+
+    // Sort by created_at descending (most recent first)
+    conversations.sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+
+    return conversations;
   }, [data?.conversations, selectedUsers]);
 
   // Recalculate aggregates based on filtered conversations
