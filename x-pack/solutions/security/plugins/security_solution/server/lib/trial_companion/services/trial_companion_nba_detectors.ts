@@ -12,12 +12,11 @@ import type {
   UsageCollectionSetup,
 } from '@kbn/usage-collection-plugin/server';
 import type { DetectorF } from '../types';
-import type { MilestoneID } from '../../../../common/trial_companion/types';
-import { Milestones } from '../../../../common/trial_companion/types';
+import { Milestone } from '../../../../common/trial_companion/types';
 
 // M1 - data
 export const installedPackages = (logger: Logger, packageService: PackageService): DetectorF => {
-  return async (): Promise<MilestoneID | undefined> => {
+  return async (): Promise<Milestone | undefined> => {
     try {
       logger.debug('verifyNonDefaultPackagesInstalled: Fetching Fleet packages');
 
@@ -45,7 +44,7 @@ export const installedPackages = (logger: Logger, packageService: PackageService
       );
 
       if (nonDefaultPackages.length === 0) {
-        return Milestones.M1;
+        return Milestone.M1;
       }
       return undefined;
     } catch (error) {
@@ -57,9 +56,9 @@ export const installedPackages = (logger: Logger, packageService: PackageService
 
 // M7 - for testing / demo purposes
 export const allSet = (logger: Logger): DetectorF => {
-  return async (): Promise<MilestoneID | undefined> => {
+  return async (): Promise<Milestone | undefined> => {
     logger.info('allSet: all conditions met for the highest milestone');
-    return Milestones.M7;
+    return Milestone.M7;
   };
 };
 
@@ -70,7 +69,7 @@ export const detectionRulesInstalled = (
   soClient: SavedObjectsClientContract,
   usageCollection?: UsageCollectionSetup
 ): DetectorF => {
-  return async (): Promise<MilestoneID | undefined> => {
+  return async (): Promise<Milestone | undefined> => {
     const collectorContext = {
       esClient,
       soClient,
@@ -121,7 +120,7 @@ export const detectionRulesInstalled = (
       logger.debug(
         `verifyEnabledSecurityRulesCount: Rules count - custom: ${customEnabled}, elastic: ${elasticEnabled}, total: ${rulesCount}`
       );
-      return rulesCount > 0 ? undefined : Milestones.M3;
+      return rulesCount > 0 ? undefined : Milestone.M3;
     } catch (error) {
       logger.error(
         `verifyEnabledSecurityRulesCount: Error fetching security solution telemetry: ${error}`
@@ -138,7 +137,7 @@ export const savedSearches = (
   soClient: SavedObjectsClientContract,
   usageCollection?: UsageCollectionSetup
 ): DetectorF => {
-  return async (): Promise<MilestoneID | undefined> => {
+  return async (): Promise<Milestone | undefined> => {
     const collectorContext = {
       esClient,
       soClient,

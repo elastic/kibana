@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../types';
-import type { MilestoneID } from '../../../common/trial_companion/types';
+import type { Milestone } from '../../../common/trial_companion/types';
 
 export interface TrialCompanionRoutesDeps {
   router: SecuritySolutionPluginRouter;
@@ -15,8 +15,8 @@ export interface TrialCompanionRoutesDeps {
 }
 
 export interface NBAMilestone {
-  milestoneId: MilestoneID;
+  milestoneId: Milestone;
   savedObjectId: string;
 }
 
-export type DetectorF = () => Promise<MilestoneID | undefined>;
+export type DetectorF = () => Promise<Milestone | undefined>;

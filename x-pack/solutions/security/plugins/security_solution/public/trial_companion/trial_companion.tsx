@@ -14,7 +14,7 @@ import { useKibana } from '../common/lib/kibana';
 import { useGetNBA } from './hooks/use_get_nba';
 import { postNBAUserSeen } from './api';
 import { ALL_NBA } from '../../common/trial_companion/constants';
-import type { MilestoneID, NBA, NBAAction } from '../../common/trial_companion/types';
+import type { Milestone, NBA, NBAAction } from '../../common/trial_companion/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props {}
@@ -23,7 +23,7 @@ export const TrialCompanion: React.FC<Props> = () => {
   const { overlays, ...startServices } = useKibana().services;
   const bannerId = useRef<string | undefined>();
   const [count, setCount] = useState(0);
-  const [previousMilestone, setPreviousMilestone] = useState<MilestoneID | undefined>(undefined);
+  const [previousMilestone, setPreviousMilestone] = useState<Milestone | undefined>(undefined);
 
   const { value, error, loading } = useGetNBA([count]);
   window.console.log('TrialNotification useGetNotification:', error, loading, value); // TODO: remove
@@ -46,19 +46,21 @@ export const TrialCompanion: React.FC<Props> = () => {
     };
 
     const onSeenBanner = () => {
-      postNBAUserSeen(milestoneId);
+      if (milestoneId) {
+        postNBAUserSeen(milestoneId);
+      }
       removeBanner();
     };
 
     if (!loading && milestoneId && (!bannerId.current || milestoneId !== previousMilestone)) {
-      const nba: NBA = ALL_NBA.get(milestoneId);
+      const nba: NBA | undefined = ALL_NBA.get(milestoneId);
       window.console.log(`nba: ${JSON.stringify(nba)}`);
       if (!nba) {
         window.console.warn('No NBA found for milestoneId:', milestoneId);
         return;
       }
 
-      let onViewButton: () => void | undefined;
+      let onViewButton: (() => void) | undefined;
       let viewButtonText: string | undefined;
 
       if (nba.apps && nba.apps.length > 0) {

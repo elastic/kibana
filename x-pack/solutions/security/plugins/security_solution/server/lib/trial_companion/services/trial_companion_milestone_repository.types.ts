@@ -6,10 +6,10 @@
  */
 
 import type { NBAMilestone } from '../types';
-import type { MilestoneID } from '../../../../common/trial_companion/types';
+import type { Milestone } from '../../../../common/trial_companion/types';
 
 export interface TrialCompanionMilestoneRepository {
   getCurrent(): Promise<NBAMilestone | undefined>;
-  create(id: MilestoneID): Promise<NBAMilestone>;
+  create(id: Milestone): Promise<NBAMilestone>;
   update(milestone: NBAMilestone): Promise<void>;
 }

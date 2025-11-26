@@ -14,7 +14,7 @@ interface Props {
   message: string;
   viewButtonText: string | undefined;
   onSeenBanner: () => void;
-  onViewButton: () => void | undefined;
+  onViewButton: (() => void) | undefined;
 }
 export const NBANotification: React.FC<Props> = ({
   title,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { TrialCompanionMilestoneRepositoryImpl } from './trial_companion_milestone_repository';
-import type { MilestoneID } from '../../../../common/trial_companion/types';
+import type { Milestone } from '../../../../common/trial_companion/types';
 import type { TrialCompanionUserNBAService } from './trial_companion_user_nba_service.types';
 import type { TrialCompanionMilestoneRepository } from './trial_companion_milestone_repository.types';
 import type { NBAUserSeenSavedObjectAttributes } from '../saved_objects';
@@ -25,7 +25,7 @@ export class TrialCompanionUserNBAServiceImpl implements TrialCompanionUserNBASe
     this.repo = new TrialCompanionMilestoneRepositoryImpl(logger, soClient);
   }
 
-  public async markAsSeen(milestoneId: MilestoneID, userId: string): Promise<void> {
+  public async markAsSeen(milestoneId: Milestone, userId: string): Promise<void> {
     const currentSO = await this.getUserNBAStatus(userId);
     const current = currentSO?.attributes;
 
@@ -49,7 +49,7 @@ export class TrialCompanionUserNBAServiceImpl implements TrialCompanionUserNBASe
     }
   }
 
-  public async nextNBA(userId: string): Promise<MilestoneID | undefined> {
+  public async nextNBA(userId: string): Promise<Milestone | undefined> {
     const milestone = await this.repo.getCurrent();
     this.logger.info(`Fetched current milestone: ${JSON.stringify(milestone)}`);
     const userStatus = await this.getUserNBAStatus(userId);

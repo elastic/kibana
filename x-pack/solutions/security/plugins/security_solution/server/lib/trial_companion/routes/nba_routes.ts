@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import type {
+  IKibanaResponse,
+  KibanaResponseFactory,
+  Logger,
+  RequestHandler,
+} from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes';
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { type Either, left, match, right } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/function';
@@ -28,15 +34,22 @@ interface NBAContext {
   username: string;
 }
 
+const NBARouteSchema = {
+  body: schema.object({
+    milestoneId: schema.number(), // TODO: oneOf plus iterate over ALL_NBA keys
+  }),
+};
+
+type NBASeenRouteRequestBody = TypeOf<typeof NBARouteSchema.body>;
+
 export const registerGetNBARoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .get({
       path: TRIAL_COMPANION_NBA_URL,
       access: 'internal',
+      summary: 'Get Trial Companion NBA for a user',
       options: {
-        access: 'internal',
-        tag: ['api'],
-        summary: 'Get Trial Companion NBA for a user',
+        tags: ['api'],
       },
       security: {
         authz: {
@@ -58,10 +71,9 @@ export const registerPostNBASeenRoute = (router: SecuritySolutionPluginRouter, l
     .post({
       path: TRIAL_COMPANION_NBA_URL,
       access: 'internal',
+      summary: 'Save Trial Companion NBA seen action (aka dismiss)',
       options: {
-        access: 'internal',
-        tag: ['api'],
-        summary: 'Save Trial Companion NBA seen action (aka dismiss)',
+        tags: ['api'],
       },
       security: {
         authz: {
@@ -73,11 +85,7 @@ export const registerPostNBASeenRoute = (router: SecuritySolutionPluginRouter, l
       {
         version: '1',
         validate: {
-          request: {
-            body: schema.object({
-              milestoneId: schema.number(), // TODO: oneOf plus iterate over ALL_NBA keys
-            }),
-          },
+          request: NBARouteSchema,
         },
       },
       postNBAUserSeen(logger)
@@ -94,11 +102,7 @@ export const registerPostNBAActionRoute = (
 const postNBAUserSeen =
   (
     logger: Logger
-  ): ((
-    context: SecuritySolutionRequestHandlerContext,
-    request: KibanaRequest,
-    response: KibanaResponseFactory
-  ) => Promise<IKibanaResponse>) =>
+  ): RequestHandler<never, never, NBASeenRouteRequestBody, SecuritySolutionRequestHandlerContext> =>
   async (context, request, response) => {
     const siemResponse = buildSiemResponse(response);
     const { milestoneId } = request.body;
@@ -117,7 +121,7 @@ const postNBAUserSeen =
       return pipe(
         nbaContextOrResponse,
         match(
-          (e: IKibanaResponse) => e,
+          async (e: IKibanaResponse) => e,
           async (s: NBAContext) => {
             await s.nbaService.markAsSeen(milestoneId, s.username);
             return response.ok({});
@@ -135,13 +139,7 @@ const postNBAUserSeen =
   };
 
 const getCurrentNBAForUser =
-  (
-    logger: Logger
-  ): ((
-    context: SecuritySolutionRequestHandlerContext,
-    request: KibanaRequest,
-    response: KibanaResponseFactory
-  ) => Promise<IKibanaResponse>) =>
+  (logger: Logger): RequestHandler<never, never, never, SecuritySolutionRequestHandlerContext> =>
   async (context, request, response) => {
     const siemResponse = buildSiemResponse(response);
 
@@ -155,7 +153,7 @@ const getCurrentNBAForUser =
       return pipe(
         nbaContextOrResponse,
         match(
-          (e: IKibanaResponse) => e,
+          async (e: IKibanaResponse) => e,
           async (s: NBAContext) => {
             const currentMilestoneId = await s.nbaService.nextNBA(s.username);
             if (!currentMilestoneId) {

@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { MilestoneID, NBA, NBAAction } from './types';
-import { Milestones } from './types';
+import type { NBA, NBAAction } from './types';
+import { Milestone } from './types';
 
 export const TRIAL_COMPANION_NBA_URL = '/internal/security_solution/trial_companion/nba';
 export const TRIAL_COMPANION_NBA_ACTION_URL =
@@ -17,18 +17,13 @@ const SUFFIX_MESSAGE = 'message';
 const SUFFIX_TITLE = 'title';
 const SUFFIX_ACTION = 'action';
 
-function translateNBA(milestone: MilestoneID, message: string, suffix: string) {
+function translateNBA(milestone: Milestone, message: string, suffix: string) {
   return i18n.translate(`xpack.securitySolution.trialCompanion.nba.m${milestone}.${suffix}`, {
     defaultMessage: message,
   });
 }
 
-function toNBA(
-  milestoneId: MilestoneID,
-  message: string,
-  title: string,
-  actions?: NBAAction[]
-): NBA {
+function toNBA(milestoneId: Milestone, message: string, title: string, actions?: NBAAction[]): NBA {
   const apps: NBAAction[] | undefined = actions?.map((a) => {
     return {
       app: a.app,
@@ -43,7 +38,7 @@ function toNBA(
 }
 
 const NBA_M1: NBA = toNBA(
-  Milestones.M1,
+  Milestone.M1,
   'Start with quick, low-friction sources; we’ll confirm when data arrives.',
   'Add data from integrations',
   [
@@ -55,7 +50,7 @@ const NBA_M1: NBA = toNBA(
 );
 
 const NBA_M2: NBA = toNBA(
-  Milestones.M2,
+  Milestone.M2,
   'Run a few queries and save the view so you can come back fast.',
   'Explore your data',
   [
@@ -67,7 +62,7 @@ const NBA_M2: NBA = toNBA(
 );
 
 const NBA_M3: NBA = toNBA(
-  Milestones.M3,
+  Milestone.M3,
   'Preview low-noise rules matched to your dataset before enabling.',
   'Preview & enable rules',
   [
@@ -79,7 +74,7 @@ const NBA_M3: NBA = toNBA(
 );
 
 const NBA_M4: NBA = toNBA(
-  Milestones.M4,
+  Milestone.M4,
   'Invite a teammate and collaborate on the investigations.',
   'Keep momentum — collaborate',
   [
@@ -91,7 +86,7 @@ const NBA_M4: NBA = toNBA(
 );
 
 const NBA_M5: NBA = toNBA(
-  Milestones.M5,
+  Milestone.M5,
   'Walk a guided triage with tools like AI Assistant and Attack Discovery.',
   'Investigate your first alert',
   [
@@ -103,7 +98,7 @@ const NBA_M5: NBA = toNBA(
 ); // TODO: Try Attack Discovery - it is flayout
 
 const NBA_M6: NBA = toNBA(
-  Milestones.M6,
+  Milestone.M6,
   'Capture findings and next steps to operationalize your trial. Connect ticketing (Jira/ServiceNow).',
   'Create Case',
   [
@@ -115,17 +110,17 @@ const NBA_M6: NBA = toNBA(
 );
 
 const NBA_M7: NBA = toNBA(
-  Milestones.M7,
+  Milestone.M7,
   'Congratulations! You’ve completed all the steps to get started with Security.',
   'You’re all set!'
 );
 
-export const ALL_NBA = new Map<MilestoneID, NBA>([
-  [Milestones.M1, NBA_M1],
-  [Milestones.M2, NBA_M2],
-  [Milestones.M3, NBA_M3],
-  [Milestones.M4, NBA_M4],
-  [Milestones.M5, NBA_M5],
-  [Milestones.M6, NBA_M6],
-  [Milestones.M7, NBA_M7],
+export const ALL_NBA = new Map<Milestone, NBA>([
+  [Milestone.M1, NBA_M1],
+  [Milestone.M2, NBA_M2],
+  [Milestone.M3, NBA_M3],
+  [Milestone.M4, NBA_M4],
+  [Milestone.M5, NBA_M5],
+  [Milestone.M6, NBA_M6],
+  [Milestone.M7, NBA_M7],
 ]);

@@ -7,10 +7,10 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { MilestoneID } from '../../../../common/trial_companion/types';
+import type { Milestone } from '../../../../common/trial_companion/types';
 
 export interface NBASavedObjectAttributes {
-  milestoneId: MilestoneID;
+  milestoneId: Milestone;
 }
 
 export const NBA_SAVED_OBJECT_TYPE = 'trial-companion-nba-milestone';

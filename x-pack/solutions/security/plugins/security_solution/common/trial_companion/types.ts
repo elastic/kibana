@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-export enum Milestones {
+export enum Milestone {
   M1 = 1,
-  M2,
-  M3,
-  M4,
-  M5,
-  M6,
-  M7,
+  M2 = 2,
+  M3 = 3,
+  M4 = 4,
+  M5 = 5,
+  M6 = 6,
+  M7 = 7,
 }
-
-export type MilestoneID = keyof typeof Milestones;
 
 export interface NBAAction {
   app: string;

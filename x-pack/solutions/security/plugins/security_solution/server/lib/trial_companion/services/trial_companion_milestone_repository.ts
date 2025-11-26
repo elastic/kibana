@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { MilestoneID } from '../../../../common/trial_companion/types';
+import type { Milestone } from '../../../../common/trial_companion/types';
 import type { NBAMilestone } from '../types';
 import type { TrialCompanionMilestoneRepository } from './trial_companion_milestone_repository.types';
 import type { NBASavedObjectAttributes } from '../saved_objects';
@@ -14,7 +15,7 @@ import { NBA_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 function toMilestone(result: SavedObject<NBASavedObjectAttributes>): NBAMilestone {
   return {
-    milestoneId: result.attributes.milestoneId as MilestoneID,
+    milestoneId: result.attributes.milestoneId as Milestone,
     savedObjectId: result.id,
   } as NBAMilestone;
 }
@@ -28,7 +29,7 @@ export class TrialCompanionMilestoneRepositoryImpl implements TrialCompanionMile
     this.soClient = soClient;
   }
 
-  async create(id: MilestoneID): Promise<NBAMilestone> {
+  async create(id: Milestone): Promise<NBAMilestone> {
     const response = await this.soClient.create<NBASavedObjectAttributes>(NBA_SAVED_OBJECT_TYPE, {
       milestoneId: id,
     });

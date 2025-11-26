@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { MilestoneID } from '../../common/trial_companion/types';
+import type { Milestone } from '../../common/trial_companion/types';
 import { TRIAL_COMPANION_NBA_URL } from '../../common/trial_companion/constants';
 import { KibanaServices } from '../common/lib/kibana';
 
 export interface GetNBAResponse {
-  milestoneId?: MilestoneID;
+  milestoneId?: Milestone;
 }
 
 export const getNBA = async (): Promise<GetNBAResponse> => {
   return KibanaServices.get().http.get<GetNBAResponse>(TRIAL_COMPANION_NBA_URL, { version: '1' });
 };
 
-export const postNBAUserSeen = async (milestoneId: MilestoneID): Promise<void> => {
+export const postNBAUserSeen = async (milestoneId: Milestone): Promise<void> => {
   const body = {
     milestoneId,
   };

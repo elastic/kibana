@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { MilestoneID } from '../../../../common/trial_companion/types';
+import type { Milestone } from '../../../../common/trial_companion/types';
 
 export interface TrialCompanionUserNBAService {
-  markAsSeen(milestoneId: MilestoneID, userId: string): Promise<void>;
-  nextNBA(userId: string): Promise<MilestoneID | undefined>;
+  markAsSeen(milestoneId: Milestone, userId: string): Promise<void>;
+  nextNBA(userId: string): Promise<Milestone | undefined>;
 }
