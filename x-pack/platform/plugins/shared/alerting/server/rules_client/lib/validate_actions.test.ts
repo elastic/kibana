@@ -343,7 +343,7 @@ describe('validateActions', () => {
       {
         id: 'test.workflowsConnector',
         name: 'Foobar',
-        subFeature: 'workflows',
+        supportedFeatureIds: ['workflows'],
       },
     ]);
     await expect(

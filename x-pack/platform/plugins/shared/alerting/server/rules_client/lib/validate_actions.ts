@@ -23,7 +23,7 @@ export type ValidateActionsData = Pick<RawRule, 'notifyWhen' | 'throttle' | 'sch
 };
 
 const isWorkflowsOnlyConnectorType = ({ supportedFeatureIds }: ConnectorType): boolean =>
-  supportedFeatureIds.length === 1 && supportedFeatureIds[0] === 'workflows';
+  supportedFeatureIds?.length === 1 && supportedFeatureIds[0] === 'workflows';
 
 export async function validateActions(
   context: RulesClientContext,
