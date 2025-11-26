@@ -228,8 +228,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('GET /internal/streams/doc_counts/degraded', () => {
-      // TODO: Fix this test
-      it.skip('returns degraded document counts (documents with _ignored field)', async () => {
+      it('returns degraded document counts (documents with _ignored field)', async () => {
         // Get the root logs stream and update it with routing rules
         const rootStream = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
           params: { path: { name: 'logs' } },
@@ -270,7 +269,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               settings: {},
               wired: {
                 fields: {
-                  'attributes.log.level': {
+                  'severity_text': {
                     type: 'keyword',
                     ignore_above: 1024,
                   },
