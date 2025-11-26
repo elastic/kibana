@@ -36,3 +36,22 @@ export interface ScheduleBackfillProps {
   ruleIds: string[];
   timeRange: TimeRange;
 }
+
+export interface GapAutoFillSchedulerBase {
+  id: string;
+  name: string;
+  scope: string[];
+  schedule: { interval: string };
+  ruleTypes: { type: string; consumer: string }[];
+  gapFillRange: string;
+  maxBackfills: number;
+  numRetries: number;
+  enabled: boolean;
+}
+
+export type GapAutoFillSchedulerResponse = GapAutoFillSchedulerBase & {
+  createdBy: string | null;
+  updatedBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+};

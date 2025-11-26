@@ -213,3 +213,67 @@ export const BACKFILLS_TABLE_COLUMN_ACTION = i18n.translate(
     defaultMessage: 'Action',
   }
 );
+
+// Rule Settings modal
+export const RULE_SETTINGS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.title',
+  {
+    defaultMessage: 'Rule settings',
+  }
+);
+
+export const GAP_AUTO_FILL_HEADER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.autoGapFillHeader',
+  {
+    defaultMessage: 'Auto gap fill settings',
+  }
+);
+
+export const GAP_AUTO_FILL_TOGGLE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.autoGapFillToggle',
+  {
+    defaultMessage: 'Enable auto gap fill',
+  }
+);
+
+export const GAP_AUTO_FILL_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.autoGapFillDescription',
+  {
+    defaultMessage: 'Detected run gaps will be automatically filled.',
+  }
+);
+
+export const RUN_SCHEDULE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.runScheduleLabel',
+  {
+    defaultMessage: 'Run schedule',
+  }
+);
+
+export const AUTO_GAP_FILL_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.save',
+  {
+    defaultMessage: 'Auto gap fill',
+  }
+);
+
+export const AUTO_GAP_FILL_TOAST_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.saveSuccessToastText',
+  {
+    defaultMessage: 'Auto gap fill settings updated successfully',
+  }
+);
+
+export const RULE_SETTINGS_MODAL_CANCEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.cancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const RULE_SETTINGS_MODAL_SAVE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleSettings.save',
+  {
+    defaultMessage: 'Save',
+  }
+);

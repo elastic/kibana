@@ -7,17 +7,17 @@
 import React, { useState, useEffect } from 'react';
 
 import {
+  EuiBadge,
   EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFilterButton,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiText,
-  EuiContextMenuPanel,
   EuiPopover,
-  EuiContextMenuItem,
-  EuiBadge,
-  EuiFilterButton,
-  EuiFilterGroup,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 
@@ -28,6 +28,7 @@ import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gap
 import { defaultRangeValue, GapRangeValue } from '../../constants';
 import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry/events/manual_rule_run/types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { GapAutoFillStatus } from './gap_auto_fill_status';
 
 export const RulesWithGapsOverviewPanel = () => {
   const {
@@ -173,6 +174,10 @@ export const RulesWithGapsOverviewPanel = () => {
               {i18n.RULE_GAPS_OVERVIEW_PANEL_SHOW_RULES_WITH_GAPS_LABEL}
             </EuiFilterButton>
           </EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem />
+        <EuiFlexItem grow={false}>
+          <GapAutoFillStatus />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

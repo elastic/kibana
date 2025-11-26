@@ -47,3 +47,31 @@ export const RULE_GAPS_OVERVIEW_PANEL_TOOLTIP_TEXT = i18n.translate(
     defaultMessage: 'Rules with unfilled gaps / Rules with gaps being filled now',
   }
 );
+
+export const RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.autoGapFillStatusLabel',
+  {
+    defaultMessage: 'Auto gap fill status:',
+  }
+);
+
+export const RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_ON = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.autoGapFillStatusOn',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_OFF = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.autoGapFillStatusOff',
+  {
+    defaultMessage: 'Off',
+  }
+);
+
+export const RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_LOADING = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.autoGapFillStatusLoading',
+  {
+    defaultMessage: 'Loading',
+  }
+);

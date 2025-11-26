@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
@@ -38,10 +38,13 @@ import {
   CREATE_NEW_RULE_TOUR_ANCHOR,
   RuleFeatureTour,
 } from '../../components/rules_table/feature_tour/rules_feature_tour';
+import { RuleSettingsModal } from '../../../rule_gaps/components/rule_settings_modal';
+import { useGapAutoFillCapabilities } from '../../../rule_gaps/logic/use_gap_auto_fill_capabilities';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
+  const [isRuleSettingsModalOpen, openRuleSettingsModal, closeRuleSettingsModal] = useBoolState();
   const kibanaServices = useKibana().services;
   const { navigateToApp } = kibanaServices.application;
 
@@ -62,6 +65,7 @@ const RulesPageComponent: React.FC = () => {
     needsIndex: needsListsIndex,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
+  const { canAccessGapAutoFill } = useGapAutoFillCapabilities();
 
   const isDoesNotMatchForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
     'doesNotMatchForIndicatorMatchRuleEnabled'
@@ -105,6 +109,15 @@ const RulesPageComponent: React.FC = () => {
         <SecuritySolutionPageWrapper>
           <HeaderPage title={i18n.PAGE_TITLE}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+              {canAccessGapAutoFill && (
+                <EuiButtonEmpty
+                  data-test-subj="rules-settings-button"
+                  iconType="gear"
+                  onClick={openRuleSettingsModal}
+                >
+                  {i18n.RULE_SETTINGS_TITLE}
+                </EuiButtonEmpty>
+              )}
               <EuiFlexItem grow={false}>
                 <AddElasticRulesButton isDisabled={!canUserCRUD || loading} />
               </EuiFlexItem>
@@ -151,6 +164,9 @@ const RulesPageComponent: React.FC = () => {
               {isDoesNotMatchForIndicatorMatchRuleEnabled && <RuleFeatureTour />}
             </EuiFlexGroup>
           </HeaderPage>
+          {isRuleSettingsModalOpen && canAccessGapAutoFill && (
+            <RuleSettingsModal isOpen={isRuleSettingsModalOpen} onClose={closeRuleSettingsModal} />
+          )}
           <RuleUpdateCallouts shouldShowUpdateRulesCallout={true} />
           <EuiSpacer size="s" />
           <MaintenanceWindowCallout
