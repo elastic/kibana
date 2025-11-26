@@ -10,8 +10,7 @@ import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.enable();
+  test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
   });
 
@@ -24,8 +23,8 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
   });
 
   test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    await apiServices.streams.clearStreamProcessors('logs-generic-default');
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
   });
 
   test('should create a new processor successfully', async ({ pageObjects }) => {
@@ -73,9 +72,7 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
   }) => {
     await pageObjects.streams.clickAddProcessor();
 
-    await expect(
-      page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton')
-    ).toBeDisabled();
+    await expect(page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton')).toBeHidden();
 
     // Cancel the operation
     await pageObjects.streams.clickCancelProcessorChanges();
