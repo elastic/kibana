@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import {
   EuiSuperSelect,
   EuiFormRow,
@@ -13,6 +13,8 @@ import {
   EuiFlexItem,
   EuiText,
   EuiTextTruncate,
+  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -24,6 +26,7 @@ import {
 import type { CloudConnectorCredentials, CloudProviders } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from '../utils';
+import { CloudConnectorPoliciesFlyout } from '../cloud_connector_policies_flyout';
 
 interface CloudConnectorSelectorProps {
   provider: CloudProviders;
@@ -39,6 +42,8 @@ export const CloudConnectorSelector = ({
   setCredentials,
 }: CloudConnectorSelectorProps) => {
   const { data: cloudConnectors = [] } = useGetCloudConnectors(provider);
+  const [flyoutConnectorId, setFlyoutConnectorId] = useState<string | null>(null);
+  const [selectKey, setSelectKey] = useState(0);
 
   const label = (
     <FormattedMessage
@@ -46,6 +51,23 @@ export const CloudConnectorSelector = ({
       defaultMessage="Cloud Connector Name"
     />
   );
+
+  const handleOpenFlyout = useCallback((e: React.MouseEvent, connectorId: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setFlyoutConnectorId(connectorId);
+    // Force dropdown to close by re-rendering the select
+    setSelectKey((prev) => prev + 1);
+  }, []);
+
+  const handleCloseFlyout = useCallback(() => {
+    setFlyoutConnectorId(null);
+  }, []);
+
+  // Find the connector for the flyout
+  const flyoutConnector = useMemo(() => {
+    return cloudConnectors.find((c) => c.id === flyoutConnectorId);
+  }, [cloudConnectors, flyoutConnectorId]);
 
   // Create super select options with custom display
   const selectOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
@@ -60,26 +82,84 @@ export const CloudConnectorSelector = ({
 
       return {
         value: connector.id,
-        inputDisplay: connector.name,
-        dropdownDisplay: (
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem>
-              <strong>
-                <EuiTextTruncate text={connector.name} />
-              </strong>
+        inputDisplay: (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem>{connector.name}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate(
+                  'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.editConnectorTooltip',
+                  {
+                    defaultMessage: 'View and edit connector details',
+                  }
+                )}
+              >
+                <EuiButtonIcon
+                  iconType="pencil"
+                  aria-label={i18n.translate(
+                    'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.editConnectorAriaLabel',
+                    {
+                      defaultMessage: 'Edit {name}',
+                      values: { name: connector.name },
+                    }
+                  )}
+                  color="text"
+                  size="s"
+                  onClick={(e) => handleOpenFlyout(e, connector.id)}
+                  data-test-subj={`cloudConnectorEditIcon-${connector.id}`}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
-            {identifier && (
-              <EuiFlexItem>
-                <EuiText size="s" color="subdued">
-                  <EuiTextTruncate text={identifier} />
-                </EuiText>
-              </EuiFlexItem>
-            )}
+          </EuiFlexGroup>
+        ),
+        dropdownDisplay: (
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem>
+              <EuiFlexGroup direction="column" gutterSize="none">
+                <EuiFlexItem>
+                  <strong>
+                    <EuiTextTruncate text={connector.name} />
+                  </strong>
+                </EuiFlexItem>
+                {identifier && (
+                  <EuiFlexItem>
+                    <EuiText size="s" color="subdued">
+                      <EuiTextTruncate text={identifier} />
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate(
+                  'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.viewDetailsTooltip',
+                  {
+                    defaultMessage: 'View connector details and usage',
+                  }
+                )}
+              >
+                <EuiButtonIcon
+                  iconType="iInCircle"
+                  aria-label={i18n.translate(
+                    'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.viewDetailsAriaLabel',
+                    {
+                      defaultMessage: 'View details for {name}',
+                      values: { name: connector.name },
+                    }
+                  )}
+                  color="primary"
+                  size="s"
+                  onClick={(e) => handleOpenFlyout(e, connector.id)}
+                  data-test-subj={`cloudConnectorInfoIcon-${connector.id}`}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
           </EuiFlexGroup>
         ),
       };
     });
-  }, [cloudConnectors, provider]);
+  }, [cloudConnectors, provider, handleOpenFlyout]);
 
   // Find currently selected value
   const selectedValue = useMemo(() => {
@@ -124,21 +204,34 @@ export const CloudConnectorSelector = ({
       : AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ;
 
   return (
-    <EuiFormRow label={label} fullWidth>
-      <EuiSuperSelect
-        options={selectOptions}
-        valueOfSelected={selectedValue}
-        onChange={handleChange}
-        fullWidth
-        placeholder={i18n.translate(
-          'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.reusableConnectorSelect.placeholder',
-          {
-            defaultMessage: 'Select a cloud connector',
-          }
-        )}
-        hasDividers
-        data-test-subj={testSubj}
-      />
-    </EuiFormRow>
+    <>
+      <EuiFormRow label={label} fullWidth>
+        <EuiSuperSelect
+          key={selectKey}
+          options={selectOptions}
+          valueOfSelected={selectedValue}
+          onChange={handleChange}
+          fullWidth
+          placeholder={i18n.translate(
+            'securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.reusableConnectorSelect.placeholder',
+            {
+              defaultMessage: 'Select a cloud connector',
+            }
+          )}
+          hasDividers
+          data-test-subj={testSubj}
+        />
+      </EuiFormRow>
+
+      {flyoutConnector && (
+        <CloudConnectorPoliciesFlyout
+          cloudConnectorId={flyoutConnector.id}
+          cloudConnectorName={flyoutConnector.name}
+          cloudConnectorVars={flyoutConnector.vars}
+          provider={provider}
+          onClose={handleCloseFlyout}
+        />
+      )}
+    </>
   );
 };

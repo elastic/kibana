@@ -184,3 +184,47 @@ export const UpdateCloudConnectorResponseSchema = schema.object({
     updated_at: schema.string(),
   }),
 });
+
+export const GetCloudConnectorUsageRequestSchema = {
+  params: schema.object({
+    cloudConnectorId: schema.string({
+      meta: { description: 'The unique identifier of the cloud connector.' },
+    }),
+  }),
+  query: schema.object({
+    page: schema.maybe(
+      schema.number({
+        min: 1,
+        meta: { description: 'The page number for pagination.' },
+      })
+    ),
+    perPage: schema.maybe(
+      schema.number({
+        min: 1,
+        meta: { description: 'The number of items per page.' },
+      })
+    ),
+  }),
+};
+
+export const GetCloudConnectorUsageResponseSchema = schema.object({
+  items: schema.arrayOf(
+    schema.object({
+      id: schema.string(),
+      name: schema.string(),
+      package: schema.maybe(
+        schema.object({
+          name: schema.string(),
+          title: schema.string(),
+          version: schema.string(),
+        })
+      ),
+      policy_ids: schema.arrayOf(schema.string()),
+      created_at: schema.string(),
+      updated_at: schema.string(),
+    })
+  ),
+  total: schema.number(),
+  page: schema.number(),
+  perPage: schema.number(),
+});
