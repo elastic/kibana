@@ -31,7 +31,7 @@ export const STEP_2_TITLE = i18n.translate('xpack.cloudConnect.wizard.step2.titl
 export const getStep2Description = (docLinksSecureSavedObject: string) => (
   <FormattedMessage
     id="xpack.cloudConnect.wizard.step2.description"
-    defaultMessage="Configure {encryptionKeyLink} in Kibana before moving to the next step."
+    defaultMessage="Configure an {encryptionKeyLink} in Kibana."
     values={{
       encryptionKeyLink: (
         <EuiLink href={docLinksSecureSavedObject} target="_blank">
