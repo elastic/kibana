@@ -72,47 +72,50 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
     [analystHourlyRate, colors.backgroundBaseSuccess, minutesPerAlert, signalIndexName]
   );
 
-  const Visualization = (
-    <div
-      css={css`
-        height: 100%;
-        > * {
-          height: 100% !important;
-        }
-        .echMetricText__icon .euiIcon {
-          fill: ${colors.success};
-        }
-        .echMetricText {
-          padding: 8px 16px 60px;
-        }
-        p.echMetricText__value {
-          color: ${colors.success};
-          font-size: 48px !important;
-          padding: 10px 0;
-        }
-        .euiPanel,
-        .embPanel__hoverActions > span {
-          background: ${colors.backgroundBaseSuccess};
-        }
-        .embPanel__hoverActionsAnchor {
-          --internalBorderStyle: 1px solid ${colors.success}!important;
-        }
-      `}
-    >
-      <VisualizationEmbeddable
-        data-test-subj="cost-savings-metric"
-        getLensAttributes={getLensAttributes}
-        timerange={timerange}
-        id={`${ID}-metric`}
-        inspectTitle={i18n.COST_SAVINGS_TREND}
-        scopeId={PageScope.alerts}
-        withActions={[
-          VisualizationContextMenuActions.addToExistingCase,
-          VisualizationContextMenuActions.addToNewCase,
-          VisualizationContextMenuActions.inspect,
-        ]}
-      />
-    </div>
+  const Visualization = useMemo(
+    () => (
+      <div
+        css={css`
+          height: 100%;
+          > * {
+            height: 100% !important;
+          }
+          .echMetricText__icon .euiIcon {
+            fill: ${colors.success};
+          }
+          .echMetricText {
+            padding: 8px 16px 60px;
+          }
+          p.echMetricText__value {
+            color: ${colors.success};
+            font-size: 48px !important;
+            padding: 10px 0;
+          }
+          .euiPanel,
+          .embPanel__hoverActions > span {
+            background: ${colors.backgroundBaseSuccess};
+          }
+          .embPanel__hoverActionsAnchor {
+            --internalBorderStyle: 1px solid ${colors.success}!important;
+          }
+        `}
+      >
+        <VisualizationEmbeddable
+          data-test-subj="cost-savings-metric"
+          getLensAttributes={getLensAttributes}
+          timerange={timerange}
+          id={`${ID}-metric`}
+          inspectTitle={i18n.COST_SAVINGS_TREND}
+          scopeId={PageScope.alerts}
+          withActions={[
+            VisualizationContextMenuActions.addToExistingCase,
+            VisualizationContextMenuActions.addToNewCase,
+            VisualizationContextMenuActions.inspect,
+          ]}
+        />
+      </div>
+    ),
+    [getLensAttributes, timerange, colors.success, colors.backgroundBaseSuccess]
   );
 
   if (isExportMode) {

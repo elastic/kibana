@@ -138,7 +138,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
           data-test-subj="executiveSummaryMainInfo"
         >
           <span>
-            <EuiText size="s">
+            <EuiText size="s" color="subdued">
               {isLoading ? (
                 <EuiSkeletonText lines={3} size="s" isLoading={true} />
               ) : hasAttackDiscoveries ? (

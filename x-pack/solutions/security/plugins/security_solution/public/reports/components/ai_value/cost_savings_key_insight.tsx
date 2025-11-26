@@ -87,7 +87,7 @@ interface ViewProps {
 
 const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight, isLoading }) => {
   const {
-    euiTheme: { size },
+    euiTheme: { size, colors },
   } = useEuiTheme();
   return (
     <div
@@ -101,6 +101,10 @@ const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight, isLoading }) 
         border-radius: ${size.s};
         padding: ${size.base};
         min-height: 200px;
+
+        .keyInsightMarkdown {
+          color: ${colors.textSubdued};
+        }
       `}
     >
       <span>
@@ -123,7 +127,7 @@ const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight, isLoading }) 
         <EuiSpacer size="m" />
 
         {insight && !isLoading ? (
-          <Markdown markdown={insight} />
+          <Markdown markdown={insight} className="keyInsightMarkdown" />
         ) : (
           <EuiSkeletonText lines={3} size="s" isLoading={true} />
         )}
