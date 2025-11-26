@@ -7,12 +7,16 @@
 
 import type { Logger } from '@kbn/core/server';
 
+import type { ElasticAssistantPluginSetupDependencies } from '../types';
 import { findSecurityAIPromptsRoute } from './security_ai_prompts/find_prompts';
 import { findAlertSummaryRoute } from './alert_summary/find_route';
 import { findAttackDiscoveriesInternalRoute } from './attack_discovery/internal/get/find_attack_discoveries_internal';
 import { findAttackDiscoveriesRoute } from './attack_discovery/public/get/find_attack_discoveries';
 import { postAttackDiscoveryGenerateRoute } from './attack_discovery/public/post/post_attack_discovery_generate';
 import { postAttackDiscoveryInternalRoute } from './attack_discovery/internal/post/post_attack_discovery_internal';
+import { getThreatHuntingPrioritiesRoute } from './threat_hunting_priorities/public/get/get_threat_hunting_priorities';
+import { getThreatHuntingPrioritiesEventsRoute } from './threat_hunting_priorities/public/get/get_threat_hunting_priorities_events';
+import { postThreatHuntingPrioritiesGenerateRoute } from './threat_hunting_priorities/public/post/post_threat_hunting_priorities_generate';
 import { postAttackDiscoveryBulkRoute } from './attack_discovery/public/post/post_attack_discovery_bulk';
 import { postAttackDiscoveryBulkInternalRoute } from './attack_discovery/internal/post/post_attack_discovery_bulk_internal';
 import type { ElasticAssistantPluginRouter } from '../types';
@@ -73,7 +77,9 @@ import { updateAnonymizationFieldsRoute } from './test_internal/update_anonymiza
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
-  config: ConfigSchema
+  config: ConfigSchema,
+  kibanaVersion: string,
+  ml: ElasticAssistantPluginSetupDependencies['ml']
 ) => {
   /** PUBLIC */
   // Chat
@@ -146,6 +152,11 @@ export const registerRoutes = (
 
   postAttackDiscoveryGenerateRoute(router);
   postAttackDiscoveryInternalRoute(router);
+
+  // Threat Hunting Priorities
+  getThreatHuntingPrioritiesRoute(router);
+  getThreatHuntingPrioritiesEventsRoute(router);
+  postThreatHuntingPrioritiesGenerateRoute(router, kibanaVersion, ml);
 
   // Attack Discovery Schedules
   createAttackDiscoverySchedulesRoute(router);

@@ -9,6 +9,8 @@ import type {
   ClusterPutComponentTemplateRequest,
   MappingDynamicMapping,
   Metadata,
+  AggregationsAggregationContainer,
+  AggregationsCompositeAggregateKey,
 } from '@elastic/elasticsearch/lib/api/types';
 import {
   createOrUpdateComponentTemplate,
@@ -33,6 +35,10 @@ import {
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
 } from '../../../../common/entity_analytics/risk_engine';
+import type {
+  GetRiskScoreSpikesResponse,
+  SpikeEntity,
+} from '../../../../common/api/entity_analytics';
 import {
   createTransform,
   deleteTransform,
@@ -57,6 +63,29 @@ interface RiskScoringDataClientOpts {
   namespace: string;
   soClient: SavedObjectsClientContract;
   auditLogger?: AuditLogger | undefined;
+}
+
+interface ServiceBucketKey {
+  'service.name': string;
+}
+
+interface HostBucketKey {
+  'host.name': string;
+}
+
+interface UserBucketKey {
+  'user.name': string;
+}
+interface SpikeAggResult {
+  after_key: AggregationsCompositeAggregateKey;
+  buckets: Array<{
+    key: ServiceBucketKey | HostBucketKey | UserBucketKey;
+    baseline_score: { baseline: { value: number | null } };
+    recent_score: { recent: { value: number } };
+    score_spike?: {
+      value: number;
+    };
+  }>;
 }
 
 export class RiskScoreDataClient {
@@ -369,5 +398,187 @@ export class RiskScoreDataClient {
         }),
       },
     });
+  }
+  private getRiskScoreField = (identifierField: string): string => {
+    switch (identifierField) {
+      case 'user.name':
+        return 'user.risk.calculated_score_norm';
+      case 'host.name':
+        return 'host.risk.calculated_score_norm';
+      case 'service.name':
+        return 'service.risk.calculated_score_norm';
+      default:
+        throw new Error(`Unknown identifier field: ${identifierField}`);
+    }
+  };
+
+  private buildRiskSpikeAggForIdentifier = (
+    identifierField: string,
+    afterKey?: AggregationsCompositeAggregateKey
+  ): AggregationsAggregationContainer => {
+    const scoreField = this.getRiskScoreField(identifierField);
+
+    return {
+      composite: {
+        size: 1000,
+        after: afterKey,
+        sources: [
+          {
+            [identifierField]: {
+              terms: {
+                field: identifierField,
+              },
+            },
+          },
+        ],
+      },
+      aggs: {
+        baseline_score: {
+          filter: {
+            range: {
+              '@timestamp': {
+                gte: 'now-24h',
+                lt: 'now-6h',
+              },
+            },
+          },
+          aggs: {
+            baseline: {
+              avg: {
+                field: scoreField,
+              },
+            },
+          },
+        },
+        recent_score: {
+          filter: {
+            range: {
+              '@timestamp': {
+                gte: 'now-6h',
+                lt: 'now',
+              },
+            },
+          },
+          aggs: {
+            recent: {
+              max: {
+                field: scoreField,
+              },
+            },
+          },
+        },
+        score_spike: {
+          bucket_script: {
+            buckets_path: {
+              baseline: 'baseline_score>baseline',
+              recent: 'recent_score>recent',
+            },
+            script: 'params.recent - params.baseline',
+          },
+        },
+      },
+    };
+  };
+
+  async getRiskScoreSpikes({
+    countPerCategory = 25,
+  }: {
+    countPerCategory?: number;
+  }): Promise<GetRiskScoreSpikesResponse> {
+    const esClient = this.options.esClient;
+    const namespace = this.options.namespace;
+
+    let userAfterKey: AggregationsCompositeAggregateKey | undefined;
+    let hostAfterKey: AggregationsCompositeAggregateKey | undefined;
+    let serviceAfterKey: AggregationsCompositeAggregateKey | undefined;
+
+    const SCORE_SPIKE_THRESHOLD = 30; // if a user has a score spike > 30, add to spikesAboveBaseline
+    const HIGH_NEW_SCORE_THRESHOLD = 70; // if a user has a first score > 70, add to newScoreSpikes
+
+    const newScoreSpikes: SpikeEntity[] = []; // top 25 spikes sorted by recent_score desc where score_spike doesn't exist AND recent_score > 70
+    const spikesAboveBaseline: SpikeEntity[] = []; // top 25 spikes sorted by score_spike desc where score_spike > 30
+
+    const processBuckets = (
+      buckets: SpikeAggResult['buckets'],
+      identifierField: 'user.name' | 'host.name' | 'service.name'
+    ) => {
+      buckets.forEach((bucket) => {
+        const {
+          key,
+          baseline_score: baselineScore,
+          recent_score: recentScore,
+          score_spike: scoreSpike,
+        } = bucket;
+        const identifierValue = key[identifierField as keyof typeof key];
+
+        if (
+          baselineScore.baseline.value &&
+          scoreSpike &&
+          scoreSpike?.value > SCORE_SPIKE_THRESHOLD
+        ) {
+          spikesAboveBaseline.push({
+            spike: scoreSpike.value,
+            identifierKey: identifierField,
+            identifier: identifierValue,
+            baseline: baselineScore.baseline.value,
+          });
+        } else if (!scoreSpike && recentScore.recent.value > HIGH_NEW_SCORE_THRESHOLD) {
+          newScoreSpikes.push({
+            spike: recentScore.recent.value,
+            identifierKey: identifierField,
+            identifier: identifierValue,
+            baseline: 0,
+          });
+        }
+      });
+    };
+
+    do {
+      const query = {
+        index: getRiskScoreTimeSeriesIndex(namespace),
+        size: 0,
+        aggs: {
+          users: this.buildRiskSpikeAggForIdentifier('user.name', userAfterKey),
+          hosts: this.buildRiskSpikeAggForIdentifier('host.name', hostAfterKey),
+          services: this.buildRiskSpikeAggForIdentifier('service.name', serviceAfterKey),
+        },
+      };
+
+      // console.log(JSON.stringify(query));
+
+      const response = await esClient.search(query);
+
+      // console.log(JSON.stringify(response));
+
+      const {
+        users: { buckets: userBuckets, after_key: latestUserAfterKey },
+        hosts: { buckets: hostBuckets, after_key: latestHostAfterKey },
+        services: { buckets: serviceBuckets, after_key: latestServiceAfterKey },
+      } = response.aggregations as unknown as {
+        users: SpikeAggResult;
+        hosts: SpikeAggResult;
+        services: SpikeAggResult;
+      };
+
+      userAfterKey = latestUserAfterKey;
+      hostAfterKey = latestHostAfterKey;
+      serviceAfterKey = latestServiceAfterKey;
+
+      processBuckets(userBuckets, 'user.name');
+      processBuckets(hostBuckets, 'host.name');
+      processBuckets(serviceBuckets, 'service.name');
+    } while (userAfterKey || hostAfterKey || serviceAfterKey);
+
+    // Sort the spikes by recent_score desc and trim to 25
+    newScoreSpikes.sort((a, b) => b.spike - a.spike);
+    newScoreSpikes.splice(countPerCategory);
+
+    spikesAboveBaseline.sort((a, b) => b.spike - a.spike);
+    spikesAboveBaseline.splice(countPerCategory);
+
+    return {
+      newScoreSpikes,
+      spikesAboveBaseline,
+    };
   }
 }

@@ -135,7 +135,7 @@ export class ElasticAssistantPlugin
     );
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
-    registerRoutes(router, this.logger, this.config);
+    registerRoutes(router, this.logger, this.config, this.kibanaVersion, plugins.ml);
 
     // The featureFlags service is not available in the core setup, so we need
     // to wait for the start services to be available to read the feature flags.
