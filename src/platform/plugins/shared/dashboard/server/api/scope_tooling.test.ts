@@ -106,9 +106,104 @@ describe('stripUnmappedKeys', () => {
     `);
   });
 
+  it('should drop panel enhancements', () => {
+    mockGetTransforms.mockImplementation(() => {
+      return {
+        schema: schema.object({
+          foo: schema.string(),
+        }),
+      };
+    });
+    const dashboardState = {
+      title: 'my dashboard',
+      panels: [
+        {
+          config: {
+            title: 'panel',
+            enhancements: {},
+          },
+          grid: {
+            h: 15,
+            w: 24,
+            x: 0,
+            y: 0,
+          },
+          type: 'typeWithSchema',
+          uid: 'panel1',
+        },
+        {
+          grid: { y: 0 },
+          panels: [
+            {
+              config: {
+                title: 'panel in section',
+                enhancements: {},
+              },
+              grid: {
+                h: 15,
+                w: 24,
+                x: 0,
+                y: 0,
+              },
+              type: 'typeWithSchema',
+              uid: 'panelInSection1',
+            },
+          ],
+          title: 'section 1',
+        },
+      ],
+    };
+    expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
+      Object {
+        "data": Object {
+          "panels": Array [
+            Object {
+              "config": Object {
+                "title": "panel",
+              },
+              "grid": Object {
+                "h": 15,
+                "w": 24,
+                "x": 0,
+                "y": 0,
+              },
+              "type": "typeWithSchema",
+              "uid": "panel1",
+            },
+            Object {
+              "grid": Object {
+                "y": 0,
+              },
+              "panels": Array [
+                Object {
+                  "config": Object {
+                    "title": "panel in section",
+                  },
+                  "grid": Object {
+                    "h": 15,
+                    "w": 24,
+                    "x": 0,
+                    "y": 0,
+                  },
+                  "type": "typeWithSchema",
+                  "uid": "panelInSection1",
+                },
+              ],
+              "title": "section 1",
+            },
+          ],
+          "title": "my dashboard",
+        },
+        "warnings": Array [
+          "Dropped unmapped panel config key 'enhancements' from panel panel1",
+          "Dropped unmapped panel config key 'enhancements' from panel panelInSection1",
+        ],
+      }
+    `);
+  });
+
   it('should drop references', () => {
     const dashboardState = {
-      panels: [],
       title: 'my dashboard',
       references: [],
     };
@@ -119,7 +214,7 @@ describe('stripUnmappedKeys', () => {
           "title": "my dashboard",
         },
         "warnings": Array [
-          "Dropped unmapped key, references, from dashboard",
+          "Dropped unmapped key 'references' from dashboard",
         ],
       }
     `);
@@ -128,7 +223,6 @@ describe('stripUnmappedKeys', () => {
   it('should drop controlGroupInput', () => {
     const dashboardState = {
       controlGroupInput: {} as unknown as DashboardState['controlGroupInput'],
-      panels: [],
       title: 'my dashboard',
     };
     expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
@@ -138,7 +232,7 @@ describe('stripUnmappedKeys', () => {
           "title": "my dashboard",
         },
         "warnings": Array [
-          "Dropped unmapped key, controlGroupInput, from dashboard",
+          "Dropped unmapped key 'controlGroupInput' from dashboard",
         ],
       }
     `);
@@ -174,7 +268,7 @@ describe('throwOnUnmappedKeys', () => {
     expect(() => throwOnUnmappedKeys(dashboardState)).not.toThrow();
   });
 
-  it('should throw dashboard contains a panel without a schema', () => {
+  it('should throw when dashboard contains a panel without a schema', () => {
     const dashboardState = {
       title: 'my dashboard',
       panels: [
@@ -195,19 +289,43 @@ describe('throwOnUnmappedKeys', () => {
     expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
   });
 
-  it('should throw dashboard contains references', () => {
+  it('should throw when dashboard contains a panel with enhancements', () => {
+    mockGetTransforms.mockImplementation(() => {
+      return {
+        schema: schema.object({}),
+      };
+    });
     const dashboardState = {
-      panels: [],
+      title: 'my dashboard',
+      panels: [
+        {
+          config: {
+            enhancements: {},
+          },
+          grid: {
+            h: 15,
+            w: 24,
+            x: 0,
+            y: 0,
+          },
+          type: 'typeWithSchema',
+        },
+      ],
+    };
+    expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
+  });
+
+  it('should throw when dashboard contains references', () => {
+    const dashboardState = {
       title: 'my dashboard',
       references: [],
     };
     expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
   });
 
-  it('should throw dashboard contains controlGroupInput', () => {
+  it('should throw when dashboard contains controlGroupInput', () => {
     const dashboardState = {
       controlGroupInput: {} as unknown as DashboardState['controlGroupInput'],
-      panels: [],
       title: 'my dashboard',
     };
     expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
