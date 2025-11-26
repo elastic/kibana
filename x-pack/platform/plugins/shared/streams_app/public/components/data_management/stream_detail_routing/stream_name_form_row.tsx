@@ -56,41 +56,34 @@ export const getHelpText = (
   }
 };
 
-// TODO - you could make the component a bit simpler by throwing the helptext and error message stuff into this custom hook as well
-export const useIsValidStreamName = (streamName: string): boolean => {
+interface ChildStreamInputHookResponse {
+  isStreamNameValid: boolean;
+  prefix: string;
+  partitionName: string;
+  helpText: string | undefined;
+  dotErrorMessage: JSX.Element | undefined;
+}
+
+/**
+ * Custom hook that handles computations necessary for child stream input component instances.
+ * @param streamName The name of the child stream
+ * @param readOnly Whether the input value is read only.
+ * @returns stream name validity, prefix, partitionName, help and error texts necessary for the child stream input.
+ */
+export const useChildStreamInput = (
+  streamName: string,
+  readOnly: boolean = false
+): ChildStreamInputHookResponse => {
+  const router = useStreamsAppRouter();
   const parentStreamName = useStreamsRoutingSelector((snapshot) => snapshot.context.definition)
     .stream.name;
+
   const prefix = parentStreamName + '.';
   const partitionName = streamName.replace(prefix, '');
+  const rootChild = partitionName.split('.')[0];
 
   const isStreamNameEmpty = streamName.length <= prefix.length;
   const isStreamNameTooLong = streamName.length > MAX_STREAM_NAME_LENGTH;
-  const isLengthValid = !isStreamNameEmpty && !isStreamNameTooLong;
-  const isDotPresent = partitionName.includes('.');
-
-  return isLengthValid && !isDotPresent;
-};
-
-export function StreamNameFormRow({
-  value,
-  onChange = () => {},
-  readOnly = false,
-  autoFocus = false,
-  error,
-  isInvalid = false,
-}: StreamNameFormRowProps) {
-  const router = useStreamsAppRouter();
-  const descriptionId = useGeneratedHtmlId();
-
-  const parentStreamName = useStreamsRoutingSelector((snapshot) => snapshot.context.definition)
-    .stream.name;
-
-  const prefix = parentStreamName + '.';
-  const partitionName = value.replace(prefix, '');
-  const rootChild = partitionName.split('.')[0];
-
-  const isStreamNameEmpty = value.length <= prefix.length;
-  const isStreamNameTooLong = value.length > MAX_STREAM_NAME_LENGTH;
   const isLengthValid = !isStreamNameEmpty && !isStreamNameTooLong;
 
   const helpText = getHelpText(isStreamNameEmpty, isStreamNameTooLong, readOnly);
@@ -115,6 +108,27 @@ export function StreamNameFormRow({
     />
   ) : undefined;
 
+  return {
+    isStreamNameValid: isLengthValid && !isDotPresent,
+    prefix,
+    partitionName,
+    helpText,
+    dotErrorMessage,
+  };
+};
+
+export function StreamNameFormRow({
+  value,
+  onChange = () => {},
+  readOnly = false,
+  autoFocus = false,
+  error,
+  isInvalid = false,
+}: StreamNameFormRowProps) {
+  const descriptionId = useGeneratedHtmlId();
+  const { isStreamNameValid, prefix, partitionName, helpText, dotErrorMessage } =
+    useChildStreamInput(value, readOnly);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPartitionName = e.target.value;
 
@@ -133,11 +147,11 @@ export function StreamNameFormRow({
       }
       helpText={helpText}
       describedByIds={[descriptionId]}
-      isInvalid={isInvalid || isDotPresent || !isLengthValid}
+      isInvalid={isInvalid || !isStreamNameValid}
       error={error || dotErrorMessage}
     >
       <EuiFieldText
-        isInvalid={isInvalid || isDotPresent || !isLengthValid}
+        isInvalid={isInvalid || !isStreamNameValid}
         data-test-subj="streamsAppRoutingStreamEntryNameField"
         value={partitionName}
         fullWidth
