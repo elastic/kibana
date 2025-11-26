@@ -30,7 +30,10 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { ScriptsLibraryClient } from './services/scripts_library';
 import { EndpointError } from '../../common/endpoint/errors';
-import { installScriptsLibraryIndexTemplates } from './lib/scripts_library';
+import {
+  installScriptsLibraryIndexTemplates,
+  SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+} from './lib/scripts_library';
 import type { ReferenceDataClientInterface } from './lib/reference_data';
 import { ReferenceDataClient } from './lib/reference_data';
 import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
@@ -119,13 +122,21 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotSetUpError();
     }
 
+    this.startDependencies = dependencies;
+    this.security = dependencies.security;
+
+    const isScriptsLibraryEnabled =
+      this.startDependencies.experimentalFeatures.responseActionsScriptLibraryManagement;
+
+    if (isScriptsLibraryEnabled) {
+      SavedObjectsClientFactory.addSavedObjectHiddenType(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE);
+    }
+
     const savedObjectsFactory = new SavedObjectsClientFactory(
       dependencies.savedObjectsServiceStart,
       this.setupDependencies.httpServiceSetup
     );
 
-    this.startDependencies = dependencies;
-    this.security = dependencies.security;
     this.savedObjectsFactoryService = savedObjectsFactory;
     this.fleetServicesFactory = new EndpointFleetServicesFactory(
       dependencies.fleetStartServices,
