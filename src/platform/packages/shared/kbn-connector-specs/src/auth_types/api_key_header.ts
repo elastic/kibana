@@ -37,6 +37,7 @@ export const ApiKeyHeaderAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'api_key_header',
   schema: authSchema,
   normalizeSchema: (defaults?: Record<string, unknown>) => {
+    const existingMeta = authSchema.meta() ?? {};
     const schemaToUse = z.object({
       ...authSchema.shape,
     });
@@ -52,7 +53,7 @@ export const ApiKeyHeaderAuth: AuthTypeSpec<AuthSchemaType> = {
       });
     }
 
-    return schemaToUse;
+    return schemaToUse.meta(existingMeta);
   },
   configure: (axiosInstance: AxiosInstance, secret: NormalizedAuthSchemaType): AxiosInstance => {
     // set global defaults

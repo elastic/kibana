@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const API_KEY_AUTH_LABEL = i18n.translate('connectorSpecs.apiKeyAuth.label', {
-  defaultMessage: 'API Key',
+  defaultMessage: 'API key',
 });
 
 export const API_KEY_AUTH_REQUIRED_MESSAGE = i18n.translate(
@@ -21,7 +21,7 @@ export const API_KEY_AUTH_REQUIRED_MESSAGE = i18n.translate(
 );
 
 export const HEADER_AUTH_LABEL = i18n.translate('connectorSpecs.headerAuth.label', {
-  defaultMessage: 'API Key Header Field',
+  defaultMessage: 'API key header Field',
 });
 
 export const HEADER_AUTH_REQUIRED_MESSAGE = i18n.translate(
@@ -32,7 +32,7 @@ export const HEADER_AUTH_REQUIRED_MESSAGE = i18n.translate(
 );
 
 export const BASIC_AUTH_LABEL = i18n.translate('connectorSpecs.basicAuth.label', {
-  defaultMessage: 'Basic Authentication',
+  defaultMessage: 'Basic authentication',
 });
 
 export const BASIC_AUTH_USERNAME_LABEL = i18n.translate('connectorSpecs.basicAuth.username.label', {
@@ -58,7 +58,7 @@ export const BASIC_AUTH_PASSWORD_REQUIRED_MESSAGE = i18n.translate(
 );
 
 export const BEARER_AUTH_LABEL = i18n.translate('connectorSpecs.authType.bearerAuth.label', {
-  defaultMessage: 'Bearer Token',
+  defaultMessage: 'Bearer token',
 });
 
 export const BEARER_AUTH_REQUIRED_MESSAGE = i18n.translate(

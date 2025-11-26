@@ -19,8 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import type { RulesParams } from '@kbn/observability-plugin/public';
-import { rulesLocatorID } from '@kbn/observability-plugin/public';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
@@ -77,7 +76,7 @@ export const IndicesConfigurationPanel = ({
     },
   } = useKibanaContextForPlugin();
 
-  const rulesLocator = locators.get<RulesParams>(rulesLocatorID);
+  const rulesLocator = locators.get<RulesLocatorParams>(rulesLocatorID);
   const viewAffectedRulesLink = rulesLocator?.useUrl({
     type: [METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, METRIC_THRESHOLD_ALERT_TYPE_ID],
   });

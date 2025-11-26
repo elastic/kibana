@@ -9,6 +9,7 @@ Object {
       "anyOf": Array [
         Object {
           "additionalProperties": false,
+          "label": "Basic Authentication",
           "properties": Object {
             "authType": Object {
               "const": "basic",
@@ -34,6 +35,7 @@ Object {
         },
         Object {
           "additionalProperties": false,
+          "label": "API Key Header Authentication",
           "properties": Object {
             "authType": Object {
               "const": "api_key_header",
@@ -53,6 +55,7 @@ Object {
           "type": "object",
         },
       ],
+      "label": "Authentication",
     },
     "url": Object {
       "minLength": 1,

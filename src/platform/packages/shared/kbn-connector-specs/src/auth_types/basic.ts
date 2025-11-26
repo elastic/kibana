@@ -17,7 +17,7 @@ const authSchema = z
     username: z
       .string()
       .min(1, { message: i18n.BASIC_AUTH_USERNAME_REQUIRED_MESSAGE })
-      .meta({ sensitive: true, label: i18n.BASIC_AUTH_USERNAME_LABEL }),
+      .meta({ label: i18n.BASIC_AUTH_USERNAME_LABEL }),
     password: z
       .string()
       .min(1, { message: i18n.BASIC_AUTH_PASSWORD_REQUIRED_MESSAGE })
