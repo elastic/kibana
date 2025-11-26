@@ -1,5 +1,10 @@
 # @kbn-doc-linker partial
 
+title: Synthetics monitor status
+description: >
+  The parameters for the Synthetics monitor status rule.
+  These parameters are appropriate when `rule_type_id` is `xpack.uptime.alerts.monitorStatus`.
+type: object
 required:
   - numTimes
   - shouldCheckStatus

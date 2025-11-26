@@ -137,13 +137,6 @@ export class WorkflowExecutionState {
       ...changes,
       id: this.workflowExecution.id,
     });
-
-    const fetchedWorkflowExecution =
-      await this.workflowExecutionRepository.getWorkflowExecutionById(
-        this.workflowExecution.id,
-        this.workflowExecution.spaceId
-      );
-    this.workflowExecution = fetchedWorkflowExecution!;
   }
 
   private createStep(step: Partial<EsWorkflowStepExecution>) {
