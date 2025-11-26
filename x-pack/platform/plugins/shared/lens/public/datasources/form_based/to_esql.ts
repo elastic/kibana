@@ -320,21 +320,13 @@ export function getESQLForLayer(
     }
   }
 
-  let finalEsqlCompose;
-
   try {
-    finalEsqlCompose = esqlCompose
-      .toString()
-      .split(' | ')
-      .map((part) => part.trim())
-      .join(' | ');
+    return {
+      esql: esqlCompose.toString(),
+      partialRows,
+      esAggsIdMap,
+    };
   } catch (e) {
     return;
   }
-
-  return {
-    esql: finalEsqlCompose,
-    partialRows,
-    esAggsIdMap,
-  };
 }
