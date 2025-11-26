@@ -238,6 +238,7 @@ export function getDashboardApi({
         references,
         saveOptions: {},
         lastSavedId: savedObjectId$.value,
+        accessMode: accessControlManager.api.accessControl$.value?.accessMode,
       });
 
       if (saveResult?.error) return;
