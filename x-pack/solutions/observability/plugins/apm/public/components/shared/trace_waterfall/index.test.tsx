@@ -22,6 +22,7 @@ describe('convertTreeToList', () => {
     skew: 0,
     color: 'red',
     errors: [],
+    spanLinksCount: { incoming: 0, outgoing: 0 },
   };
   const itemB: TraceWaterfallItem = {
     id: 'b',
@@ -36,6 +37,7 @@ describe('convertTreeToList', () => {
     skew: 0,
     color: 'blue',
     errors: [],
+    spanLinksCount: { incoming: 0, outgoing: 0 },
   };
   const itemC: TraceWaterfallItem = {
     id: 'c',
@@ -50,6 +52,7 @@ describe('convertTreeToList', () => {
     skew: 0,
     color: 'green',
     errors: [],
+    spanLinksCount: { incoming: 0, outgoing: 0 },
   };
   const itemD: TraceWaterfallItem = {
     id: 'd',
@@ -64,6 +67,7 @@ describe('convertTreeToList', () => {
     skew: 0,
     color: 'yellow',
     errors: [],
+    spanLinksCount: { incoming: 0, outgoing: 0 },
   };
 
   const treeMap = {

@@ -24,6 +24,7 @@ describe('groupByParent', () => {
         duration: 100,
         serviceName: 'svcA',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '2',
@@ -38,6 +39,7 @@ describe('groupByParent', () => {
         duration: 50,
         serviceName: 'svcB',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '3',
@@ -52,6 +54,7 @@ describe('groupByParent', () => {
         duration: 30,
         serviceName: 'svcC',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '4',
@@ -66,6 +69,7 @@ describe('groupByParent', () => {
         duration: 10,
         serviceName: 'svcD',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
     ];
 
@@ -92,6 +96,7 @@ describe('groupByParent', () => {
         duration: 100,
         serviceName: 'svcA',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
     ];
 
@@ -115,6 +120,7 @@ describe('groupByParent', () => {
         duration: 50,
         serviceName: 'svcB',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '3',
@@ -129,6 +135,7 @@ describe('groupByParent', () => {
         duration: 30,
         serviceName: 'svcC',
         errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
     ];
 
