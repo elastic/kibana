@@ -45,7 +45,7 @@ interface Props {
   updateAdvancedSettingsHasErrors: (hasErrors: boolean) => void;
   setInvalidSpaceError: (hasErrors: boolean) => void;
 }
-const AgentPolicyFormContext = React.createContext<
+export const AgentPolicyFormContext = React.createContext<
   | {
       agentPolicy: Partial<NewAgentPolicy | AgentPolicy> & { [key: string]: any };
       updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
@@ -147,6 +147,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
                 agentPolicy={agentPolicy}
                 updateAgentPolicy={updateAgentPolicy}
                 validation={validation}
+                setInvalidSpaceError={setInvalidSpaceError}
               />
               <>
                 <EuiSpacer size="xl" />
@@ -173,6 +174,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
               agentPolicy={agentPolicy}
               updateAgentPolicy={updateAgentPolicy}
               validation={validation}
+              setInvalidSpaceError={setInvalidSpaceError}
               disabled={isDisabled}
             />
             <>
