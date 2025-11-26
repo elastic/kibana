@@ -214,7 +214,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         )}
       </EuiDescribedFormGroup>
     ),
-    [agentPolicy, updateAgentPolicy, policyHasElasticDefend, disabled, authz.fleet.allAgents]
+    [
+      agentPolicy.id,
+      agentPolicy.is_protected,
+      policyHasElasticDefend,
+      updateAgentPolicy,
+      disabled,
+      authz.fleet.allAgents,
+    ]
   );
 
   const AgentTamperProtectionSection = useMemo(() => {
