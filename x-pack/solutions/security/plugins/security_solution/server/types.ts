@@ -11,6 +11,7 @@ import type {
   CustomRequestHandlerContext,
   IRouter,
   KibanaRequest,
+  Logger,
 } from '@kbn/core/server';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
@@ -69,6 +70,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
   getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
   getAuditLogger: () => AuditLogger | undefined;
+  getLogger: () => Logger;
   getDataViewsService: () => DataViewsService;
   getEntityStoreApiKeyManager: () => EntityStoreApiKeyManager;
   getExceptionListClient: () => ExceptionListClient | null;
