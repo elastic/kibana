@@ -29,6 +29,7 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type { TabState } from '../application/main/state_management/redux';
 
 /**
  * Supports extending the Discover app menu
@@ -96,6 +97,23 @@ export interface AppMenuExtensionParams {
    * The authorized alerting rule type IDs for the current user
    */
   authorizedRuleTypeIds: string[];
+}
+
+export interface ChartSectionConfigurationExtensionParams {
+  /**
+   * Available actions for the chart section configuration
+   */
+  actions: {
+    /**
+     * Opens a new tab
+     * @param params The parameters for the open in new tab action
+     */
+    openInNewTab?: (params: OpenInNewTabParams) => void;
+    /**
+     * Updates the current ES|QL query
+     */
+    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+  };
 }
 
 /**
@@ -332,6 +350,24 @@ export interface AdditionalCellAction {
 }
 
 /**
+ * Parameters passed to the open in new tab action
+ */
+export interface OpenInNewTabParams {
+  /**
+   * The query to open in the new tab
+   */
+  query?: TabState['appState']['query'];
+  /**
+   * The label of the new tab
+   */
+  tabLabel?: string;
+  /**
+   * The time range to open in the new tab
+   */
+  timeRange?: TabState['globalState']['timeRange'];
+}
+
+/**
  * The core profile interface for Discover context awareness.
  * Each of the available methods map to a specific extension point in the Discover application.
  */
@@ -381,7 +417,9 @@ export interface Profile {
    * This allows modifying the chart section with a custom component
    * @returns The custom configuration for the chart
    */
-  getChartSectionConfiguration: () => ChartSectionConfiguration;
+  getChartSectionConfiguration: (
+    params: ChartSectionConfigurationExtensionParams
+  ) => ChartSectionConfiguration;
 
   /**
    * Data grid

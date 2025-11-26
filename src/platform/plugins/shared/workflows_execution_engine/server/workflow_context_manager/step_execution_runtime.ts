@@ -14,6 +14,7 @@ import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
+import { parseDuration } from '../utils';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 
 interface StepExecutionRuntimeInit {
@@ -107,7 +108,7 @@ export class StepExecutionRuntime {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async setCurrentStepState(state: Record<string, any> | undefined): Promise<void> {
+  public setCurrentStepState(state: Record<string, any> | undefined): void {
     const stepId = this.node.stepId;
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
@@ -116,7 +117,7 @@ export class StepExecutionRuntime {
     });
   }
 
-  public async startStep(): Promise<void> {
+  public startStep(): void {
     const stepId = this.node.stepId;
     const stepStartedAt = new Date();
 
@@ -133,11 +134,10 @@ export class StepExecutionRuntime {
     this.workflowExecutionState.upsertStep(stepExecution);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.logStepStart(stepId, stepExecution.id!);
-    await this.workflowExecutionState.flushStepChanges();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async setInput(input: Record<string, any>): Promise<void> {
+  public setInput(input: Record<string, any>): void {
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
       input,
@@ -145,18 +145,18 @@ export class StepExecutionRuntime {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async finishStep(stepOutput?: Record<string, any>): Promise<void> {
+  public finishStep(stepOutput?: Record<string, any>): void {
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
       status: ExecutionStatus.COMPLETED,
-      completedAt: new Date().toISOString(),
+      finishedAt: new Date().toISOString(),
       output: stepOutput,
     } as Partial<EsWorkflowStepExecution>;
 
     if (startedStepExecution?.startedAt) {
       stepExecutionUpdate.executionTimeMs =
-        new Date(stepExecutionUpdate.completedAt as string).getTime() -
+        new Date(stepExecutionUpdate.finishedAt as string).getTime() -
         new Date(startedStepExecution.startedAt).getTime();
     }
 
@@ -164,7 +164,7 @@ export class StepExecutionRuntime {
     this.logStepComplete(stepExecutionUpdate);
   }
 
-  public async failStep(error: Error | string): Promise<void> {
+  public failStep(error: Error | string): void {
     // if there is a last step execution, fail it
     // if not, create a new step execution with fail
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
@@ -172,14 +172,14 @@ export class StepExecutionRuntime {
       id: this.stepExecutionId,
       status: ExecutionStatus.FAILED,
       scopeStack: this.stackFrames,
-      completedAt: new Date().toISOString(),
+      finishedAt: new Date().toISOString(),
       output: null,
       error: String(error),
     } as Partial<EsWorkflowStepExecution>;
 
     if (startedStepExecution && startedStepExecution.startedAt) {
       stepExecutionUpdate.executionTimeMs =
-        new Date(stepExecutionUpdate.completedAt as string).getTime() -
+        new Date(stepExecutionUpdate.finishedAt as string).getTime() -
         new Date(startedStepExecution.startedAt).getTime();
     }
     this.workflowExecutionState.updateWorkflowExecution({
@@ -190,15 +190,56 @@ export class StepExecutionRuntime {
     this.logStepFail(stepExecutionUpdate.id!, error);
   }
 
-  public async setWaitStep(): Promise<void> {
+  /**
+   * Attempts to enter a wait state for the step execution based on a relative delay duration.
+   * If the step is already in a wait state, it exits the wait state instead.
+   *
+   * @param delay - The delay duration as a string (e.g., "5s", "1m", "2h").
+   * @returns A boolean indicating whether the step has entered a wait state (true) or exited it (false).
+   */
+  public tryEnterDelay(delay: string): boolean {
+    return this.tryEnterWaitUntil(new Date(new Date().getTime() + parseDuration(delay)));
+  }
+
+  /**
+   * Attempts to enter a wait state for the step execution until a specific absolute date/time.
+   * If the step is already in a wait state, it exits the wait state instead.
+   *
+   * When entering a wait state, the step execution is marked with `ExecutionStatus.WAITING` and
+   * the `resumeAt` timestamp is stored in the step's state. The workflow can then resume execution
+   * at or after the specified time.
+   *
+   * @param resumeDate - The absolute date/time when execution should resume (Date object).
+   * @returns A boolean indicating whether the step has entered a wait state (true) or exited it (false).
+   */
+  public tryEnterWaitUntil(resumeDate: Date): boolean {
+    const resumeAt = this.stepExecution?.state?.resumeAt;
+
+    if (resumeAt) {
+      // already in wait state
+      const newState = { ...(this.stepExecution?.state || {}) };
+      delete newState.resumeAt;
+      this.workflowExecutionState.upsertStep({
+        id: this.stepExecutionId,
+        state: Object.keys(newState).length ? newState : undefined,
+      });
+      return false; // was already waiting, now exiting wait state
+    }
+
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
+      stepId: this.node.stepId,
+      stepType: this.node.stepType,
+      scopeStack: this.workflowExecution.scopeStack,
+      topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
+      startedAt: this.stepExecution?.startedAt || new Date().toISOString(),
       status: ExecutionStatus.WAITING,
+      state: {
+        ...(this.stepExecution?.state || {}),
+        resumeAt: resumeDate.toISOString(),
+      },
     });
-
-    this.workflowExecutionState.updateWorkflowExecution({
-      status: ExecutionStatus.WAITING,
-    });
+    return true; // successfully entered wait state
   }
 
   private logStepStart(stepId: string, stepExecutionId: string): void {

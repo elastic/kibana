@@ -239,7 +239,7 @@
               },
               ">>; get: (sessionId: string) => Promise<",
               "SearchSessionSavedObject",
-              ">; delete: (sessionId: string) => Promise<void>; find: (opts: Omit<",
+              ">; delete: (sessionId: string) => Promise<void>; extend: (sessionId: string, expires: string) => Promise<void>; find: (opts: Omit<",
               "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
               {
@@ -249,7 +249,7 @@
                 "section": "def-common.SearchSessionsFindResponse",
                 "text": "SearchSessionsFindResponse"
               },
-              ">; extend: (sessionId: string, expires: string) => Promise<void>; rename: (sessionId: string, newName: string) => Promise<void>; }"
+              ">; rename: (sessionId: string, newName: string) => Promise<void>; }"
             ],
             "path": "src/platform/plugins/shared/data/public/search/types.ts",
             "deprecated": false,
@@ -806,7 +806,7 @@
               },
               ">>; get: (sessionId: string) => Promise<",
               "SearchSessionSavedObject",
-              ">; delete: (sessionId: string) => Promise<void>; find: (opts: Omit<",
+              ">; delete: (sessionId: string) => Promise<void>; extend: (sessionId: string, expires: string) => Promise<void>; find: (opts: Omit<",
               "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
               {
@@ -816,7 +816,7 @@
                 "section": "def-common.SearchSessionsFindResponse",
                 "text": "SearchSessionsFindResponse"
               },
-              ">; extend: (sessionId: string, expires: string) => Promise<void>; rename: (sessionId: string, newName: string) => Promise<void>; }"
+              ">; rename: (sessionId: string, newName: string) => Promise<void>; }"
             ],
             "path": "src/platform/plugins/shared/data/public/search/types.ts",
             "deprecated": false,
@@ -1211,7 +1211,7 @@
           },
           ">>; get: (sessionId: string) => Promise<",
           "SearchSessionSavedObject",
-          ">; delete: (sessionId: string) => Promise<void>; find: (opts: Omit<",
+          ">; delete: (sessionId: string) => Promise<void>; extend: (sessionId: string, expires: string) => Promise<void>; find: (opts: Omit<",
           "SavedObjectsFindOptions",
           ", \"type\">) => Promise<",
           {
@@ -1221,7 +1221,7 @@
             "section": "def-common.SearchSessionsFindResponse",
             "text": "SearchSessionsFindResponse"
           },
-          ">; extend: (sessionId: string, expires: string) => Promise<void>; rename: (sessionId: string, newName: string) => Promise<void>; }"
+          ">; rename: (sessionId: string, newName: string) => Promise<void>; }"
         ],
         "path": "src/platform/plugins/shared/data/public/search/session/sessions_client.ts",
         "deprecated": false,
@@ -1445,7 +1445,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>"
+                  "Readonly<{} & { search: Readonly<{} & { asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
                 "deprecated": false,
@@ -2722,9 +2722,9 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ page?: number | undefined; filter?: any; aggs?: Record<string, ",
+                  "{ search?: string | undefined; page?: number | undefined; filter?: any; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
+                  "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; sortField?: string | undefined; sortOrder?: ",
                   "SortOrder",
                   " | undefined; hasReference?: ",
                   "SavedObjectsFindOptionsReference",
@@ -6763,7 +6763,19 @@
                   },
                   "; history: ",
                   "SearchRequest",
-                  "<Record<string, any>>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+                  "<Record<string, any>>[]; fetch: (options?: ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
+                  },
+                  ") => Promise<",
+                  "SearchResponse",
+                  "<unknown, Record<string, ",
+                  "AggregationsAggregate",
+                  ">>>; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -6913,19 +6925,7 @@
                   "SearchResponse",
                   "<T, Record<string, ",
                   "AggregationsAggregate",
-                  ">>>>; fetch: (options?: ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.SearchSourceSearchOptions",
-                    "text": "SearchSourceSearchOptions"
-                  },
-                  ") => Promise<",
-                  "SearchResponse",
-                  "<unknown, Record<string, ",
-                  "AggregationsAggregate",
-                  ">>>; onRequestStart: (handler: (searchSource: ",
+                  ">>>>; onRequestStart: (handler: (searchSource: ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -33749,7 +33749,19 @@
           },
           "; history: ",
           "SearchRequest",
-          "<Record<string, any>>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+          "<Record<string, any>>[]; fetch: (options?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
+          },
+          ") => Promise<",
+          "SearchResponse",
+          "<unknown, Record<string, ",
+          "AggregationsAggregate",
+          ">>>; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -33899,19 +33911,7 @@
           "SearchResponse",
           "<T, Record<string, ",
           "AggregationsAggregate",
-          ">>>>; fetch: (options?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSourceSearchOptions",
-            "text": "SearchSourceSearchOptions"
-          },
-          ") => Promise<",
-          "SearchResponse",
-          "<unknown, Record<string, ",
-          "AggregationsAggregate",
-          ">>>; onRequestStart: (handler: (searchSource: ",
+          ">>>>; onRequestStart: (handler: (searchSource: ",
           {
             "pluginId": "data",
             "scope": "common",
