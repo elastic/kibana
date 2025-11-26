@@ -126,7 +126,7 @@ export const TrustedAppsCardDecorator = memo<ArtifactEntryCardDecoratorProps>(
         item={item}
         data-test-subj={dataTestSubj}
         labels={TRUSTED_APPS_PROCESS_DESCENDANT_DECORATOR_LABELS}
-        processDescendantsTag = {TRUSTED_PROCESS_DESCENDANTS_TAG}
+        processDescendantsTag={TRUSTED_PROCESS_DESCENDANTS_TAG}
       />
     );
   }
