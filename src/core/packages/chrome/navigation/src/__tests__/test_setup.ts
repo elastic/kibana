@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { configure } from '@testing-library/react';
+
+configure({ asyncUtilTimeout: 9000 });
+
 const originalResizeObserver = global.ResizeObserver;
 const originalScrollIntoView = Element.prototype.scrollIntoView;
 const originalClientHeightDescriptor = Object.getOwnPropertyDescriptor(
