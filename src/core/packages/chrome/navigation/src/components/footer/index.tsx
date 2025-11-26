@@ -17,7 +17,7 @@ import { FooterItem } from './item';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
-import { NAVIGATION_SELECTOR_PREFIX } from '@kbn/core-chrome-navigation/src/constants';
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
 const getWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolean) => css`
   align-items: center;

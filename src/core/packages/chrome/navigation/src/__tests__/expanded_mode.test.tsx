@@ -412,7 +412,9 @@ describe('Expanded mode', () => {
 
         expect(mlHeading).toBeInTheDocument();
 
-        let anomalyExplorerLink = await within(popover).findByTestId(nestedMenuItemId('anomaly-explorer'));
+        let anomalyExplorerLink = await within(popover).findByTestId(
+          nestedMenuItemId('anomaly-explorer')
+        );
 
         await user.click(anomalyExplorerLink);
 
@@ -514,7 +516,9 @@ describe('Expanded mode', () => {
 
         expect(mlHeader).toBeInTheDocument();
 
-        const resultExplorerLink = await within(popover).findByTestId(nestedMenuItemId('result-explorer'));
+        const resultExplorerLink = await within(popover).findByTestId(
+          nestedMenuItemId('result-explorer')
+        );
 
         const expectedSubItemHref =
           securityMock.navItems.primaryItems[11].sections?.[2].items[0].href;
