@@ -136,8 +136,6 @@ import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 
-const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
-
 function normalizeKuery(savedObjectType: string, kuery: string) {
   if (savedObjectType === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE) {
     return _normalizeKuery(
@@ -1013,13 +1011,11 @@ class AgentPolicyService {
     }
 
     if (existingAgentPolicy.is_managed && !options?.force) {
-      Object.entries(agentPolicy)
-        .filter(([key]) => !KEY_EDITABLE_FOR_MANAGED_POLICIES.includes(key))
-        .forEach(([key, val]) => {
-          if (!isEqual(existingAgentPolicy[key as keyof AgentPolicy], val)) {
-            throw new HostedAgentPolicyRestrictionRelatedError(`Cannot update ${key}`);
-          }
-        });
+      Object.entries(agentPolicy).forEach(([key, val]) => {
+        if (!isEqual(existingAgentPolicy[key as keyof AgentPolicy], val)) {
+          throw new HostedAgentPolicyRestrictionRelatedError(`Cannot update ${key}`);
+        }
+      });
     }
     const { monitoring_enabled: monitoringEnabled } = agentPolicy;
     const packagesToInstall = [];
