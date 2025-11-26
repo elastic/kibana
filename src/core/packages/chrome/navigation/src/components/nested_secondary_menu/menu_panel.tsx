@@ -104,7 +104,7 @@ export const Panel: FC<PanelProps> = ({ children, id, title }) => {
           <p id={panelNavigationInstructionsId}>{navigationInstructions}</p>
         </EuiScreenReaderOnly>
         <EuiScreenReaderOnly>
-          <span id={panelEnterSubmenuInstructionsId}>{enterSubmenuInstructions}</span>
+          <p id={panelEnterSubmenuInstructionsId}>{enterSubmenuInstructions}</p>
         </EuiScreenReaderOnly>
         {renderChildren()}
       </SecondaryMenu>

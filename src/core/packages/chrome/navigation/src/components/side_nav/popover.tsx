@@ -230,28 +230,32 @@ export const Popover = ({
     };
   }, [clearHoverTimeout, handleClose]);
 
-  const enhancedTrigger = useMemo(
-    () => {
-      const existingDescribedBy = trigger.props['aria-describedby'];
-      const popoverDescribedBy =
-        hasContent && !isSidePanelOpen ? popoverEnterAndExitInstructionsId : undefined;
-      const finalDescribedBy = [existingDescribedBy, popoverDescribedBy].filter(Boolean).join(' ');
+  const enhancedTrigger = useMemo(() => {
+    const existingDescribedBy = trigger.props['aria-describedby'];
+    const popoverDescribedBy =
+      hasContent && !isSidePanelOpen ? popoverEnterAndExitInstructionsId : undefined;
+    const finalDescribedBy = [existingDescribedBy, popoverDescribedBy].filter(Boolean).join(' ');
 
-      return cloneElement(trigger, {
-        ref: triggerRef,
-        'aria-haspopup': hasContent,
-        'aria-expanded': hasContent ? isOpen : undefined,
-        'aria-describedby': finalDescribedBy || undefined,
-        onClick: (e: MouseEvent) => {
-          trigger.props.onClick?.(e);
-          handleTriggerClick();
-        },
-        onKeyDown: handleTriggerKeyDown,
-      });
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [trigger, hasContent, isOpen, popoverEnterAndExitInstructionsId, handleTriggerKeyDown]
-  );
+    return cloneElement(trigger, {
+      ref: triggerRef,
+      'aria-haspopup': hasContent,
+      'aria-expanded': hasContent ? isOpen : undefined,
+      'aria-describedby': finalDescribedBy || undefined,
+      onClick: (e: MouseEvent) => {
+        trigger.props.onClick?.(e);
+        handleTriggerClick();
+      },
+      onKeyDown: handleTriggerKeyDown,
+    });
+  }, [
+    trigger,
+    hasContent,
+    isOpen,
+    handleTriggerKeyDown,
+    handleTriggerClick,
+    isSidePanelOpen,
+    popoverEnterAndExitInstructionsId,
+  ]);
 
   const wrapperStyles = css`
     width: 100%;
@@ -281,11 +285,11 @@ export const Popover = ({
     >
       {hasContent && !isSidePanelOpen && (
         <EuiScreenReaderOnly>
-          <span id={popoverEnterAndExitInstructionsId}>
+          <p id={popoverEnterAndExitInstructionsId}>
             {i18n.translate('core.ui.chrome.sideNavigation.popoverInstruction', {
               defaultMessage: 'Press Enter to go to the submenu.',
             })}
-          </span>
+          </p>
         </EuiScreenReaderOnly>
       )}
       <EuiPopover
