@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
 import type { DashboardState } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
 
@@ -98,24 +97,21 @@ describe('transformDashboardIn', () => {
     `);
   });
 
-  it('should handle missing optional state keys', () => {
+  it('should not provide default values for optional properties', () => {
     const dashboardState: DashboardState = {
       title: 'title',
-      description: 'my description',
-      panels: [],
-      options: DEFAULT_DASHBOARD_OPTIONS,
     };
 
     const output = transformDashboardIn(dashboardState);
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
-          "description": "my description",
+          "description": "",
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",
           },
-          "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"syncColors\\":false,\\"syncCursor\\":true,\\"syncTooltips\\":false}",
-          "panelsJSON": "[]",
+          "optionsJSON": "{}",
+          "panelsJSON": "",
           "timeRestore": false,
           "title": "title",
         },
@@ -128,7 +124,6 @@ describe('transformDashboardIn', () => {
   it('should return error when passed tag references', () => {
     const dashboardState: DashboardState = {
       title: 'title',
-      panels: [],
       references: [
         {
           name: 'someTagRef',
@@ -143,6 +138,28 @@ describe('transformDashboardIn', () => {
       Object {
         "attributes": null,
         "error": [Error: Tag references are not supported. Pass tags in with 'data.tags'],
+        "references": null,
+      }
+    `);
+  });
+
+  it('should return error when passed search source references', () => {
+    const dashboardState: DashboardState = {
+      title: 'title',
+      references: [
+        {
+          id: 'fizzle-1234',
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+          type: 'index-pattern',
+        },
+      ],
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output).toMatchInlineSnapshot(`
+      Object {
+        "attributes": null,
+        "error": [Error: Search source references are not supported. Pass filters in with injected references'],
         "references": null,
       }
     `);

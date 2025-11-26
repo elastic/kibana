@@ -18,7 +18,7 @@ import { getDashboardCRUResponseBody } from '../saved_object_utils';
 export async function update(
   requestCtx: RequestHandlerContext,
   id: string,
-  searchBody: DashboardUpdateRequestBody
+  updateBody: DashboardUpdateRequestBody
 ): Promise<DashboardUpdateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
@@ -26,7 +26,7 @@ export async function update(
     attributes: soAttributes,
     references: soReferences,
     error: transformInError,
-  } = transformDashboardIn(searchBody.data);
+  } = transformDashboardIn(updateBody.data);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
