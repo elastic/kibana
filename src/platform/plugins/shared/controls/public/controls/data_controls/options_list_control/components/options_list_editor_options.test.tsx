@@ -8,10 +8,9 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { act, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { OptionsListControlState } from '@kbn/controls-schemas';
 
