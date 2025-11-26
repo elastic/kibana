@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as mappings from './mappings';
+export { WorkflowEventLoggerService } from './workflow_event_logger_service';
 
-const testCases = Object.entries(mappings).sort(([a], [b]) => a.localeCompare(b));
-
-test.each(testCases)(
-  'Snapshot for %s mapping helper, do not change lightly or risk changing live mappings!',
-  (name, fn) => {
-    expect(fn()).toMatchSnapshot();
-  }
-);
+export type {
+  WorkflowEventLoggerContext,
+  WorkflowEventLoggerOptions,
+  IWorkflowEventLogger,
+  IWorkflowEventLoggerService,
+  ExecutionLogsParams,
+  StepLogsParams,
+  LogsByLevelParams,
+  SearchLogsParams,
+} from './types';

@@ -78,6 +78,8 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   public async run(): Promise<void> {
     let input: any;
     this.stepExecutionRuntime.startStep();
+    // flush event logs after start step
+    await this.stepExecutionRuntime.flushEventLogs();
 
     try {
       input = await this.getInput();
@@ -98,6 +100,9 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       const result = this.handleFailure(input, error);
       this.stepExecutionRuntime.failStep(result.error);
     }
+
+    // flush event logs after finishing the step
+    await this.stepExecutionRuntime.flushEventLogs();
 
     this.workflowExecutionRuntime.navigateToNextNode();
   }
