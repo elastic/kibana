@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 import { platformCoreTools } from '@kbn/onechat-common/tools';
 
 /**
@@ -14,8 +15,8 @@ import { platformCoreTools } from '@kbn/onechat-common/tools';
 export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   // platform core tools are registered from the agent builder plugin so will trigger a review anyway
   ...Object.values(platformCoreTools),
-  // Security
-  'security.entity_analytics.threat_hunting',
+  // Security Solution
+  `${internalNamespaces.security}.entity_analytics.threat_hunting`,
 
   // Observability
   'observability.get_data_sources',
@@ -32,7 +33,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
  */
 export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = [
   'observability.agent',
-  'security.entity_analytics.agent',
+  `${internalNamespaces.security}.entity_analytics.agent`,
 ];
 
 export const isAllowedBuiltinTool = (toolName: string) => {
