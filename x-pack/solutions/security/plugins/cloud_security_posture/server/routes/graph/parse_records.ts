@@ -124,16 +124,17 @@ const generateEntityLabel = (
   idsCount: number,
   entityNodeId: string,
   entityType: string,
-  entityName: string | null | undefined,
+  entityName: string | string[] | null | undefined,
   entitySubType: string | null | undefined
 ): string => {
   // Single non-enriched entity: show the group ID (which is the entity ID for single entities)
   if (idsCount === 1 && entityType === NON_ENRICHED_ENTITY_TYPE_SINGULAR) {
     return entityNodeId;
   }
-  // Single enriched entity: show the name
+  // Single enriched entity: show the name (extract first element if array)
   if (idsCount === 1 && entityType !== NON_ENRICHED_ENTITY_TYPE_SINGULAR) {
-    return entityName || '';
+    const name = Array.isArray(entityName) ? entityName[0] : entityName;
+    return name || '';
   }
   // Multiple entities with subtype: show the subtype
   if (idsCount > 1 && entitySubType) {

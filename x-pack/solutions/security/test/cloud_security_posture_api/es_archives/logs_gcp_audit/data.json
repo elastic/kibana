@@ -854,3 +854,88 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "multivalue-event-1",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T13:00:00.000Z",
+      "actor": {
+        "entity": {
+          "id": [
+            "actor-mv-1",
+            "actor-mv-2"
+          ]
+        }
+      },
+      "client": {
+        "user": {
+          "email": "multivalue@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "test.multivalue.action",
+        "agent_id_status": "missing",
+        "category": [
+          "session",
+          "network"
+        ],
+        "id": "multivalue-event-1",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "access",
+          "allowed"
+        ]
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "ip": [
+          "10.0.0.5"
+        ],
+        "user": [
+          "multivalue@example.com"
+        ]
+      },
+      "service": {
+        "name": "test.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.5"
+      },
+      "target": {
+        "entity": {
+          "id": [
+            "target-mv-1",
+            "target-mv-2",
+            "target-mv-3"
+          ]
+        }
+      },
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "test-client/1.0.0"
+      }
+    }
+  }
+}

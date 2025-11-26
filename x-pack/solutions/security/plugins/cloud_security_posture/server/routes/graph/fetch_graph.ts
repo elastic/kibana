@@ -176,6 +176,8 @@ const buildEsqlQuery = ({
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
+| MV_EXPAND actor.entity.id
+| MV_EXPAND target.entity.id
 ${
   isEnrichPolicyExists
     ? `

@@ -520,6 +520,86 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      it('handles multi-value actor and target entity IDs with MV_EXPAND', async () => {
+        const response = await postGraph(supertest, {
+          query: {
+            indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+            originEventIds: [{ id: 'multivalue-event-1', isAlert: false }],
+            start: '2024-09-01T00:00:00Z',
+            end: '2024-09-02T00:00:00Z',
+          },
+        }).expect(result(200));
+
+        // After MV_EXPAND, the Cartesian product of 2 actors × 3 targets = 6 records
+        // These are grouped by MD5 hash into 2 entity nodes (one for actors, one for targets)
+        // and 1 label node representing all 6 relationships
+        expect(response.body).to.have.property('nodes');
+        expect(response.body).to.have.property('edges');
+
+        // Filter entity nodes (non-label nodes) - should be 2 (one actor group, one target group)
+        const entityNodes = response.body.nodes.filter(
+          (node: NodeDataModel) => node.shape !== 'label'
+        );
+        expect(entityNodes).to.have.length(
+          2,
+          'Should have 2 entity nodes (actor and target groups)'
+        );
+
+        // Find actor node (should have count: 2 for 2 actor IDs)
+        const actorNode = entityNodes.find((node: EntityNodeDataModel) => node.count === 2);
+        expect(actorNode).to.not.be(undefined);
+        expect(actorNode).to.have.property('shape', 'rectangle');
+        expect(actorNode).to.have.property('color', 'primary');
+        expect(actorNode).to.have.property('tag', 'Entities');
+        expect(actorNode).to.have.property('icon', 'magnifyWithExclamation');
+
+        // Find target node (should have count: 3 for 3 target IDs)
+        const targetNode = entityNodes.find((node: EntityNodeDataModel) => node.count === 3);
+        expect(targetNode).to.not.be(undefined);
+        expect(targetNode).to.have.property('shape', 'rectangle');
+        expect(targetNode).to.have.property('color', 'primary');
+        expect(targetNode).to.have.property('tag', 'Entities');
+        expect(targetNode).to.have.property('icon', 'magnifyWithExclamation');
+
+        // Verify label node exists for the action with count of 6 (2 actors × 3 targets)
+        const labelNodes = response.body.nodes.filter(
+          (node: LabelNodeDataModel) => node.shape === 'label'
+        );
+        expect(labelNodes).to.have.length(
+          1,
+          'Should have 1 label node representing all relationships'
+        );
+
+        const labelNode = labelNodes[0];
+        expect(labelNode).to.have.property('label', 'test.multivalue.action');
+        expect(labelNode).to.have.property('color', 'primary');
+        expect(labelNode).to.have.property('count', 6); // 2 actors × 3 targets = 6 relationships
+        expect(labelNode).to.have.property('uniqueEventsCount', 1); // 1 source event
+
+        // Verify edges connect actor group -> label -> target group
+        // Expected: 1 actor->label edge + 1 label->target edge = 2 edges
+        expect(response.body.edges).to.have.length(
+          2,
+          'Should have 2 edges (actor group -> label -> target group)'
+        );
+
+        // Verify edge from actor to label
+        const actorToLabelEdge = response.body.edges.find(
+          (edge: EdgeDataModel) => edge.source === actorNode!.id && edge.target === labelNode.id
+        );
+        expect(actorToLabelEdge).to.not.be(undefined);
+        expect(actorToLabelEdge).to.have.property('color', 'subdued');
+        expect(actorToLabelEdge).to.have.property('type', 'solid');
+
+        // Verify edge from label to target
+        const labelToTargetEdge = response.body.edges.find(
+          (edge: EdgeDataModel) => edge.source === labelNode.id && edge.target === targetNode!.id
+        );
+        expect(labelToTargetEdge).to.not.be(undefined);
+        expect(labelToTargetEdge).to.have.property('color', 'subdued');
+        expect(labelToTargetEdge).to.have.property('type', 'solid');
+      });
+
       it('should support more than 1 originEventIds', async () => {
         const response = await postGraph(supertest, {
           query: {
