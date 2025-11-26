@@ -120,6 +120,7 @@ dependsOn:
   - '@kbn/dashboards-selector'
   - '@kbn/deeplinks-management'
   - '@kbn/react-query'
+  - '@kbn/deeplinks-observability'
 tags:
   - plugin
   - prod

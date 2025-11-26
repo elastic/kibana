@@ -9,7 +9,7 @@
 
 import type { EnterContinueNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../../../workflow_event_logger';
 import { EnterContinueNodeImpl } from '../enter_continue_node_impl';
 
 describe('EnterContinueNodeImpl', () => {
