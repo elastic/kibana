@@ -23,12 +23,12 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { isEqual, memoize } from 'lodash';
 import { Global, css } from '@emotion/react';
-import { getESQLQueryColumns } from '@kbn/esql-utils';
+import { getESQLQueryColumns, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
-import type { FieldType } from '@kbn/esql-ast';
+import { type FieldType } from '@kbn/esql-ast';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
 import {
@@ -303,20 +303,22 @@ const ESQLEditorInternal = function ESQLEditor({
     }
   }, [code, fixedQuery]);
 
-  // Enable the variables service if the feature is supported in the consumer app
+  // If variables are passed to the editor, sync them with the variables service.
+  // This ensures that the latest variables are always available for suggestions.
+  // The "Create control" suggestion is also enabled/disabled here based on the supportsControls flag
   useEffect(() => {
+    const variables = variablesService?.esqlVariables;
+    if (!isEqual(variables, esqlVariables)) {
+      variablesService?.clearVariables();
+      esqlVariables?.forEach((variable) => {
+        variablesService?.addVariable(variable);
+      });
+    }
+    // Enable or disable suggestions based on whether Create control suggestion is supported
     if (controlsContext?.supportsControls) {
-      variablesService?.enableSuggestions();
-
-      const variables = variablesService?.esqlVariables;
-      if (!isEqual(variables, esqlVariables)) {
-        variablesService?.clearVariables();
-        esqlVariables?.forEach((variable) => {
-          variablesService?.addVariable(variable);
-        });
-      }
+      variablesService?.enableCreateControlSuggestion();
     } else {
-      variablesService?.disableSuggestions();
+      variablesService?.disableCreateControlSuggestion();
     }
   }, [variablesService, controlsContext, esqlVariables]);
 
@@ -547,9 +549,20 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const canCreateLookupIndex = useCanCreateLookupIndex();
 
+  // Extract source command and build minimal query with cluster prefixes
+  const minimalQuery = useMemo(() => {
+    const prefix = code.match(/\b(FROM|TS)\b/i)?.[1]?.toUpperCase();
+    const indexPattern = getIndexPatternFromESQLQuery(code);
+
+    return prefix && indexPattern ? `${prefix} ${indexPattern}` : '';
+  }, [code]);
+
+  const minimalQueryRef = useRef(minimalQuery);
+  minimalQueryRef.current = minimalQuery;
+
   const getJoinIndices = useCallback<Required<ESQLCallbacks>['getJoinIndices']>(
     async (cacheOptions) => {
-      const remoteClusters = getRemoteClustersFromESQLQuery(code);
+      const remoteClusters = getRemoteClustersFromESQLQuery(minimalQueryRef.current);
       let result: IndicesAutocompleteResult = { indices: [] };
       if (kibana.services?.esql?.getJoinIndicesAutocomplete) {
         result = await kibana.services.esql.getJoinIndicesAutocomplete.call(
@@ -559,7 +572,7 @@ const ESQLEditorInternal = function ESQLEditor({
       }
       return result;
     },
-    [code, kibana?.services?.esql?.getJoinIndicesAutocomplete]
+    [kibana?.services?.esql?.getJoinIndicesAutocomplete]
   );
 
   const telemetryCallbacks = useMemo<ESQLTelemetryCallbacks>(
@@ -583,7 +596,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const esqlCallbacks = useMemo<ESQLCallbacks>(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
-        clearCacheWhenOld(dataSourcesCache, fixedQuery);
+        clearCacheWhenOld(dataSourcesCache, minimalQueryRef.current);
         const getLicense = kibana.services?.esql?.getLicense;
         const sources = await memoizedSources(core, getLicense).result;
         return sources;
@@ -641,7 +654,7 @@ const ESQLEditorInternal = function ESQLEditor({
         return variablesService?.esqlVariables;
       },
       canSuggestVariables: () => {
-        return variablesService?.areSuggestionsEnabled ?? false;
+        return variablesService?.isCreateControlSuggestionEnabled ?? false;
       },
       getJoinIndices,
       getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
@@ -688,7 +701,6 @@ const ESQLEditorInternal = function ESQLEditor({
     favoritesClient,
     kibana.services?.esql,
     dataSourcesCache,
-    fixedQuery,
     memoizedSources,
     core,
     esqlFieldsCache,
@@ -697,7 +709,7 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedFieldsFromESQL,
     abortController,
     variablesService?.esqlVariables,
-    variablesService?.areSuggestionsEnabled,
+    variablesService?.isCreateControlSuggestionEnabled,
     histogramBarTarget,
     activeSolutionId,
     canCreateLookupIndex,
