@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { fromStoredFilter } from '@kbn/es-query';
+import { fromStoredFilters } from '@kbn/es-query';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import type { DashboardState } from '../../types';
@@ -43,7 +43,7 @@ export function transformSearchSourceOut(
   }
 
   try {
-    const filters = searchSource.filter?.map(fromStoredFilter);
+    const filters = fromStoredFilters(searchSource.filter, logger);
     const query = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
     return { filters, query };
   } catch (error) {
