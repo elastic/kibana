@@ -131,14 +131,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
   return (
     <div ref={ref}>
       <EuiFlexGroup gutterSize="s" direction="column">
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <strong>{step.action.toUpperCase()}</strong>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
+        <strong>{step.action.toUpperCase()}</strong>
         <EuiFlexItem>
           <FormProvider {...methods}>
             <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
