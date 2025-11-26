@@ -11,7 +11,7 @@ import React from 'react';
 import { ElasticAssistantTestProviders } from '../../utils/elastic_assistant_test_providers.mock';
 import { elasticAssistantSharedStateMock } from '@kbn/elastic-assistant-shared-state-plugin/public/mocks';
 import { firstValueFrom, Subject } from 'rxjs';
-import type { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
+import type { AIAssistantType, AIChatExperience } from '@kbn/ai-assistant-management-plugin/public';
 import {
   applicationServiceMock,
   httpServiceMock,
@@ -28,7 +28,10 @@ describe('AssistantProvider', () => {
     const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
     const notifications = notificationServiceMock.createStartContract();
 
-    const openChatTrigger$ = new Subject<{ assistant: AIAssistantType }>();
+    const openChatTrigger$ = new Subject<{
+      chatExperience: AIChatExperience;
+      assistant: AIAssistantType;
+    }>();
 
     render(
       <AssistantProvider openChatTrigger$={openChatTrigger$} completeOpenChat={() => {}}>

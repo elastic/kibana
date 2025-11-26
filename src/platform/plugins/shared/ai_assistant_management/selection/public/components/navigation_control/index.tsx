@@ -236,6 +236,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                     )}
                     titleSize="xs"
                     // TODO: change icon to AI Agent icon
+                    // USE: x-pack/solutions/workplaceai/plugins/serverless_workplace_ai/public/assets/robot.svg
                     icon={<EuiIcon size="xxl" type="agent" />}
                     data-test-subj="aiAssistantAgentCard"
                     isDisabled={!isSecurityAIAssistantEnabled && !isObservabilityAIAssistantEnabled}
