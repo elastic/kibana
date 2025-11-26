@@ -24,6 +24,7 @@ export interface GroupedNode {
   data: {
     id: string;
     'span.type': string;
+    'span.subtype'?: string;
     label: string;
     groupedConnections: GroupedConnection[];
   };
