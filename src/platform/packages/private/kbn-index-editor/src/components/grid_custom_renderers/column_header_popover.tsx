@@ -205,7 +205,7 @@ export const ColumnHeaderPopover = ({
             docLinks={docLinks}
           />
         </EuiFormRow>
-        {columnType && (
+        {(columnType || columnName.length > 0) && (
           <EuiPopoverFooter>
             <EuiFormRow
               label={i18n.translate('indexEditor.columnHeaderEdit.columnNameLabel', {
