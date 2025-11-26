@@ -16,6 +16,7 @@ import { transformControlGroupIn } from './transform_control_group_in';
 import { transformSearchSourceIn } from './transform_search_source_in';
 import { transformTagsIn } from './transform_tags_in';
 import { transformOptionsIn } from './transform_options_in';
+import { isSearchSourceReference } from '../out/transform_references_out';
 
 export const transformDashboardIn = (
   dashboardState: DashboardState
@@ -46,17 +47,34 @@ export const transformDashboardIn = (
       ...rest
     } = dashboardState;
 
-    const tagReferences = transformTagsIn({
-      tags,
-      references: incomingReferences,
-    });
-
-    // TODO - remove once all references are provided server side
-    const nonTagIncomingReferences = (incomingReferences ?? []).filter(
-      ({ type }) => type !== tagSavedObjectTypeName
+    // TODO remove when references are removed from API
+    const hasTagReference = (incomingReferences ?? []).some(
+      ({ type }) => type === tagSavedObjectTypeName
     );
+    if (hasTagReference) {
+      throw new Error(`Tag references are not supported. Pass tags in with 'data.tags'`);
+    }
+    // TODO remove when references are removed from API
+    const hasSearchSourceReference = (incomingReferences ?? []).some(isSearchSourceReference);
+    if (hasSearchSourceReference) {
+      throw new Error(
+        `Search source references are not supported. Pass filters in with injected references'`
+      );
+    }
 
-    const { panelsJSON, sections, references: panelReferences } = transformPanelsIn(panels);
+    const tagReferences = transformTagsIn(tags);
+
+    const {
+      panelsJSON,
+      sections,
+      references: panelReferences,
+    } = panels
+      ? transformPanelsIn(panels)
+      : {
+          panelsJSON: '',
+          sections: undefined,
+          references: [],
+        };
 
     const { searchSourceJSON, references: searchSourceReferences } = transformSearchSourceIn(
       filters,
@@ -70,9 +88,7 @@ export const transformDashboardIn = (
         controlGroupInput: transformControlGroupIn(controlGroupInput),
       }),
       optionsJSON: transformOptionsIn(options),
-      ...(panels && {
-        panelsJSON,
-      }),
+      panelsJSON,
       ...(refresh_interval && { refreshInterval: refresh_interval }),
       ...(sections?.length && { sections }),
       ...(time_range
@@ -84,7 +100,7 @@ export const transformDashboardIn = (
       attributes,
       references: [
         ...tagReferences,
-        ...nonTagIncomingReferences,
+        ...(incomingReferences ?? []),
         ...panelReferences,
         ...searchSourceReferences,
       ],

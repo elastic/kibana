@@ -18,7 +18,6 @@ describe('initializeSettingsManager', () => {
     test('Should set syncCursor to false when value not provided', () => {
       const settingsManager = initializeSettingsManager({
         title: 'dashboard 1',
-        panels: [],
       });
       expect(settingsManager.api.getSettings().sync_colors).toBe(false);
     });
@@ -26,7 +25,6 @@ describe('initializeSettingsManager', () => {
     test('Should set sync_tooltips to false when value not provided', () => {
       const settingsManager = initializeSettingsManager({
         title: 'dashboard 1',
-        panels: [],
       });
       expect(settingsManager.api.getSettings().sync_tooltips).toBe(false);
     });
@@ -36,7 +34,6 @@ describe('initializeSettingsManager', () => {
     test('Should not overwrite settings when setting partial state', () => {
       const settingsManager = initializeSettingsManager({
         title: 'dashboard 1',
-        panels: [],
         options: {
           ...DEFAULT_DASHBOARD_OPTIONS,
           use_margins: false,
