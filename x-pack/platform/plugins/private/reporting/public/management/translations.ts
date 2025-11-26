@@ -232,20 +232,6 @@ export const SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_LABEL = i18n.translate(
   }
 );
 
-export const SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_DEFAULT_VALUE = i18n.translate(
-  'xpack.reporting.scheduledReportingForm.emailSubjectDefaultValue',
-  {
-    defaultMessage: "'{{title}}'-'{{date}}' scheduled report",
-  }
-);
-
-export const SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_DEFAULT_VALUE = i18n.translate(
-  'xpack.reporting.scheduledReportingForm.emailMessageDefaultValue',
-  {
-    defaultMessage: 'Your scheduled report is attached for you to download or share.',
-  }
-);
-
 export const SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_LABEL = i18n.translate(
   'xpack.reporting.scheduledReportingForm.emailMessageLabel',
   {

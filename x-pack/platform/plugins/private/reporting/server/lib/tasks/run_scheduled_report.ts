@@ -13,6 +13,10 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { ScheduleType } from '@kbn/reporting-server';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { EXPORT_TYPE_SCHEDULED } from '@kbn/reporting-common';
+import {
+  SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_DEFAULT_VALUE,
+  SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_DEFAULT_VALUE,
+} from '../../../common/translations';
 import type { ScheduledReportTaskParams, ScheduledReportTaskParamsWithoutSpaceId } from '.';
 import { SCHEDULED_REPORTING_EXECUTE_TYPE } from '.';
 import type { SavedReport } from '../store';
@@ -150,12 +154,18 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
           objectType: scheduledReport.attributes.meta.objectType,
           date: scheduledReport.attributes.schedule?.rrule?.dtstart,
         } satisfies ScheduledReportTemplateVariables;
-        const subject = email.subject
-          ? renderMustacheString(this.logger, email.subject, templateVariables, 'none')
-          : `${title}-${runAt.toISOString()} scheduled report`;
-        const message = email.message
-          ? renderMustacheString(this.logger, email.message, templateVariables, 'markdown')
-          : 'Your scheduled report is attached for you to download or share.';
+        const subject = renderMustacheString(
+          this.logger,
+          email.subject ?? SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_DEFAULT_VALUE,
+          templateVariables,
+          'none'
+        );
+        const message = renderMustacheString(
+          this.logger,
+          email.message ?? SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_DEFAULT_VALUE,
+          templateVariables,
+          'markdown'
+        );
 
         await this.emailNotificationService.notify({
           reporting: this.opts.reporting,
