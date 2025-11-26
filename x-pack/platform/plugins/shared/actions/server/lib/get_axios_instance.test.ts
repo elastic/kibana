@@ -151,7 +151,7 @@ describe('getAxiosInstance', () => {
 
   test('returns axios instance configured for oauth client credentials auth when connector token client is undefined', async () => {
     (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
-      tokenType: 'access_token',
+      tokenType: 'Bearer',
       accessToken: 'brandnewaccesstoken',
       expiresIn: 1000,
     });
@@ -182,7 +182,7 @@ describe('getAxiosInstance', () => {
     expect(result!.defaults.auth).toBeUndefined();
     expect(result!.defaults.headers.common).toEqual(
       expect.objectContaining({
-        Authorization: 'access_token brandnewaccesstoken',
+        Authorization: 'Bearer brandnewaccesstoken',
       })
     );
 
@@ -204,7 +204,7 @@ describe('getAxiosInstance', () => {
         id: '1',
         connectorId: '123',
         tokenType: 'access_token',
-        token: 'testtokenvalue',
+        token: 'Bearer testtokenvalue',
         createdAt: new Date('2021-01-01T08:00:00.000Z').toISOString(),
         expiresAt: new Date('2021-01-02T13:00:00.000Z').toISOString(),
       },
@@ -232,7 +232,7 @@ describe('getAxiosInstance', () => {
     expect(result!.defaults.auth).toBeUndefined();
     expect(result!.defaults.headers.common).toEqual(
       expect.objectContaining({
-        Authorization: 'testtokenvalue',
+        Authorization: 'Bearer testtokenvalue',
       })
     );
 

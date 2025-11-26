@@ -10,13 +10,19 @@
 import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
+import * as i18n from './translations';
 
 const authSchema = z.object({
-  tokenUrl: z.string().meta({ sensitive: true }).url(),
-  clientId: z.string().meta({ sensitive: true }),
-  clientSecret: z.string().meta({ sensitive: true }),
-  scope: z.string().meta({ sensitive: true }).optional(),
-  additionalFields: z.string().nullish(),
+  tokenUrl: z.url().meta({ label: i18n.OAUTH_TOKEN_URL_LABEL }),
+  clientId: z
+    .string()
+    .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
+    .meta({ label: i18n.OAUTH_CLIENT_ID_LABEL }),
+  scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
+  clientSecret: z
+    .string()
+    .min(1, { message: i18n.OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE })
+    .meta({ label: i18n.OAUTH_CLIENT_SECRET_LABEL, sensitive: true }),
 });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
@@ -32,15 +38,6 @@ export const OAuth: AuthTypeSpec<AuthSchemaType> = {
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
   ): Promise<AxiosInstance> => {
-    let parsedAdditionalFields;
-    try {
-      parsedAdditionalFields = secret.additionalFields
-        ? JSON.parse(secret.additionalFields)
-        : undefined;
-    } catch (error) {
-      ctx.logger.error(`error parsing additional fields - ${error.message}`);
-    }
-
     let token;
     try {
       token = await ctx.getToken({
@@ -48,7 +45,6 @@ export const OAuth: AuthTypeSpec<AuthSchemaType> = {
         scope: secret.scope,
         clientId: secret.clientId,
         clientSecret: secret.clientSecret,
-        ...(parsedAdditionalFields ? { additionalFields: parsedAdditionalFields } : {}),
       });
     } catch (error) {
       throw new Error(`Unable to retrieve/refresh the access token: ${error.message}`);
