@@ -77,7 +77,8 @@ const unifiedSearchManagerMock = {
 } as unknown as ReturnType<typeof initializeUnifiedSearchManager>;
 const projectRoutingManagerMock = {
   internalApi: {
-    startComparing$: () => new BehaviorSubject<Partial<Pick<DashboardState, 'project_routing'>>>({}),
+    startComparing$: () =>
+      new BehaviorSubject<Partial<Pick<DashboardState, 'project_routing'>>>({}),
   },
 } as unknown as ReturnType<typeof initializeProjectRoutingManager>;
 const getReferences = () => [];
