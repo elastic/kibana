@@ -39,6 +39,7 @@
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/features-plugin",
     "@kbn/fleet-plugin",
+    "@kbn/kubernetes-security-plugin",
     "@kbn/licensing-plugin",
     "@kbn/lists-plugin",
     "@kbn/maps-plugin",
