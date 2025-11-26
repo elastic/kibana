@@ -15,6 +15,7 @@ import { calculateRiskScores } from './calculate_risk_scores';
 import type { CalculateAndPersistScoresParams } from '../types';
 import { calculateScoresWithESQL } from './calculate_esql_risk_scores';
 import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
+import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privileged_users_crud';
 
 export type CalculationResults = RiskScoresCalculationResponse & {
   entities: Record<EntityType, string[]>;
@@ -23,6 +24,7 @@ export type CalculationResults = RiskScoresCalculationResponse & {
 export const calculateAndPersistRiskScores = async (
   params: CalculateAndPersistScoresParams & {
     assetCriticalityService: AssetCriticalityService;
+    privmonUserCrudService: PrivmonUserCrudService;
     esClient: ElasticsearchClient;
     logger: Logger;
     spaceId: string;
