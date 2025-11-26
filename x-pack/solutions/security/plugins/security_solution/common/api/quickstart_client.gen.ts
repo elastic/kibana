@@ -109,6 +109,10 @@ import type {
   SetAlertsStatusRequestBodyInput,
   SetAlertsStatusResponse,
 } from './detection_engine/signals/set_signal_status/set_signals_status_route.gen';
+import type {
+  SearchUnifiedAlertsRequestBodyInput,
+  SearchUnifiedAlertsResponse,
+} from './detection_engine/unified_alerts/search/search_route.gen';
 import type { SuggestUserProfilesRequestQueryInput } from './detection_engine/users/suggest_user_profiles_route.gen';
 import type { EndpointFileDownloadRequestParamsInput } from './endpoint/actions/file_download/file_download.gen';
 import type {
@@ -2802,6 +2806,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Find and/or aggregate detection and attack alerts that match the given query.
+   */
+  async searchUnifiedAlerts(props: SearchUnifiedAlertsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SearchUnifiedAlerts`);
+    return this.kbnClient
+      .request<SearchUnifiedAlertsResponse>({
+        path: '/internal/detection_engine/unified_alerts/search',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
     * Assign users to detection alerts, and unassign them from alerts.
 > info
 > You cannot add and remove the same assignee in the same request.
@@ -3539,6 +3559,9 @@ export interface SearchAlertsProps {
 }
 export interface SearchPrivilegesIndicesProps {
   query: SearchPrivilegesIndicesRequestQueryInput;
+}
+export interface SearchUnifiedAlertsProps {
+  body: SearchUnifiedAlertsRequestBodyInput;
 }
 export interface SetAlertAssigneesProps {
   body: SetAlertAssigneesRequestBodyInput;

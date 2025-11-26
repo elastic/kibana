@@ -12,3 +12,10 @@ export type {
   AttachmentValidationResult,
   AgentFormattedAttachment,
 } from './type_definition';
+export type {
+  AttachmentBoundedTool,
+  BuiltinAttachmentBoundedTool,
+  IndexSearchAttachmentBoundedTool,
+  WorkflowAttachmentBoundedTool,
+  StaticEsqlAttachmentBoundedTool,
+} from './tools';
