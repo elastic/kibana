@@ -992,7 +992,6 @@ export class TaskStore {
   public async aggregate<TSearchRequest extends AggregationOpts>({
     aggs,
     query,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     runtime_mappings,
     size = 0,
   }: TSearchRequest): Promise<estypes.SearchResponse<ConcreteTaskInstance>> {
@@ -1015,7 +1014,6 @@ export class TaskStore {
 
   public async updateByQuery(
     opts: UpdateByQuerySearchOpts = {},
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     { max_docs: max_docs }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
