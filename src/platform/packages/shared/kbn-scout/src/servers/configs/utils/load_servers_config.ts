@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fs from 'fs';
 import type { ToolingLog } from '@kbn/tooling-log';
+import fs from 'fs';
 import type { CliSupportedServerModes } from '../../../types';
-import { getConfigFilePath } from './get_config_file';
-import { readConfigFile } from '../loader';
 import type { Config } from '../config';
+import { readConfigFile } from '../loader';
+import { getConfigFilePath } from './get_config_file';
 import { saveScoutTestConfigOnDisk } from './save_scout_test_config';
-import { getConfigRootDir } from './detect_custom_config';
 
 /**
  * Loads server configuration based on the mode, creates "kbn-test" compatible Config
@@ -22,16 +21,14 @@ import { getConfigRootDir } from './detect_custom_config';
  * to the disk.
  * @param mode server local run mode
  * @param log Logger instance to report errors or debug information.
- * @param playwrightConfigPath Path to the playwright config file for auto-detecting custom configs
+ * @param configRootDir The root directory where the config file is located (e.g., 'servers/configs/default/serverless' or 'servers/configs/custom/uiam_local/serverless')
  * @returns "kbn-test" compatible Config instance
  */
 export async function loadServersConfig(
   mode: CliSupportedServerModes,
   log: ToolingLog,
-  playwrightConfigPath: string
+  configRootDir: string
 ): Promise<Config> {
-  // Determine the config root directory based on playwright path and mode
-  const configRootDir = getConfigRootDir(playwrightConfigPath, mode);
   const configPath = getConfigFilePath(configRootDir, mode);
 
   // Validate that the config file exists

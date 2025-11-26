@@ -17,7 +17,7 @@ import { pickLevelFromFlags } from '@kbn/tooling-log';
 import { resolve } from 'path';
 import { silence } from '../../common';
 import { runElasticsearch, runKibanaServer } from '../../servers';
-import { loadServersConfig } from '../../servers/configs';
+import { getConfigRootDir, loadServersConfig } from '../../servers/configs';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
 import type { ScoutPlaywrightProjects } from '../types';
 import { execPromise, getPlaywrightGrepTag } from '../utils';
@@ -94,7 +94,8 @@ async function runLocalServersAndTests(
   cmdArgs: string[],
   env: Record<string, string> = {}
 ) {
-  const config = await loadServersConfig(options.mode, log, options.configPath);
+  const configRootDir = getConfigRootDir(options.configPath, options.mode);
+  const config = await loadServersConfig(options.mode, log, configRootDir);
   const abortCtrl = new AbortController();
 
   const onEarlyExit = (msg: string) => {

@@ -52,6 +52,7 @@ describe('parseServerFlags', () => {
       mode: 'serverless=oblt',
       esFrom: undefined,
       installDir: undefined,
+      configDir: undefined,
       logsDir: undefined,
     });
   });
@@ -68,6 +69,24 @@ describe('parseServerFlags', () => {
       mode: 'stateful',
       esFrom: 'snapshot',
       installDir: undefined,
+      configDir: undefined,
+      logsDir: undefined,
+    });
+  });
+
+  it(`should parse config-dir flag`, () => {
+    const flags = new FlagsReader({
+      stateful: true,
+      logToFile: false,
+      'config-dir': 'uiam_local',
+    });
+    const result = parseServerFlags(flags);
+
+    expect(result).toEqual({
+      mode: 'stateful',
+      esFrom: undefined,
+      installDir: undefined,
+      configDir: 'uiam_local',
       logsDir: undefined,
     });
   });

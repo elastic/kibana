@@ -13,7 +13,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
 import { silence } from '../common';
 import { getPlaywrightGrepTag } from '../playwright/utils';
-import { loadServersConfig } from './configs';
+import { getConfigRootDir, loadServersConfig } from './configs';
 import type { StartServerOptions } from './flags';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
@@ -24,8 +24,10 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
 
   await withProcRunner(log, async (procs) => {
     // Use a default path that resolves to default configs (contains 'scout/' not 'scout_')
+    // If configDir is provided, it will override the default path detection
     const defaultPlaywrightPath = 'default/scout/ui/playwright.config.ts';
-    const config = await loadServersConfig(options.mode, log, defaultPlaywrightPath);
+    const configRootDir = getConfigRootDir(defaultPlaywrightPath, options.mode, options.configDir);
+    const config = await loadServersConfig(options.mode, log, configRootDir);
     const pwGrepTag = getPlaywrightGrepTag(options.mode);
 
     const shutdownEs = await runElasticsearch({

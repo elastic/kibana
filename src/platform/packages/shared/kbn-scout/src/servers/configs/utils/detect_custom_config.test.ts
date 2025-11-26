@@ -98,4 +98,37 @@ describe('getConfigRootDir', () => {
     expect(result).toContain('stateful');
     expect(result).not.toContain('default');
   });
+
+  it('should return custom root when configDir is explicitly provided for serverless', () => {
+    const defaultPlaywrightPath = 'default/scout/ui/playwright.config.ts';
+    const mode = 'serverless=es' as CliSupportedServerModes;
+    const result = getConfigRootDir(defaultPlaywrightPath, mode, 'uiam_local');
+
+    expect(result).toContain('custom');
+    expect(result).toContain('uiam_local');
+    expect(result).toContain('serverless');
+    expect(result).not.toContain('default');
+  });
+
+  it('should return custom root when configDir is explicitly provided for stateful', () => {
+    const defaultPlaywrightPath = 'default/scout/ui/playwright.config.ts';
+    const mode = 'stateful' as CliSupportedServerModes;
+    const result = getConfigRootDir(defaultPlaywrightPath, mode, 'uiam_local');
+
+    expect(result).toContain('custom');
+    expect(result).toContain('uiam_local');
+    expect(result).toContain('stateful');
+    expect(result).not.toContain('default');
+  });
+
+  it('should prioritize configDir over playwright path detection', () => {
+    const playwrightPath = 'x-pack/solutions/security/test/scout_other/ui/playwright.config.ts';
+    const mode = 'serverless=es' as CliSupportedServerModes;
+    const result = getConfigRootDir(playwrightPath, mode, 'uiam_local');
+
+    expect(result).toContain('custom');
+    expect(result).toContain('uiam_local');
+    expect(result).not.toContain('other');
+    expect(result).toContain('serverless');
+  });
 });
