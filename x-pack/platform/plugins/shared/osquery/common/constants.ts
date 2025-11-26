@@ -48,7 +48,7 @@ export const ACTION_EXPIRATION = {
   /** Buffer added to query timeout to account for Fleet delivery delays */
   BUFFER_MINUTES: 2,
   /** Minutes added per 1000 agents to account for Fleet batching */
-  MINUTES_PER_1K_AGENTS: 1,
+  MINUTES_PER_1K_AGENTS: 2,
   /**
    * Search window for querying results (must be >= MAX_MINUTES + buffer).
    * Used in ES queries to filter results by time range from action start.
@@ -70,7 +70,7 @@ export const ACTION_EXPIRATION = {
  *
  * @example
  * // 100 agents, 60s query → 5 min (minimum)
- * // 5000 agents, 60s query → 5 min (agent scaling)
+ * // 5000 agents, 60s query → 10 min (agent scaling)
  * // 100 agents, 10min query → 12 min (query timeout + buffer)
  * // 50000 agents, 60s query → 50 min (capped at max)
  */
