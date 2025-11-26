@@ -11,10 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { flattenObjectNestedLast } from '@kbn/object-utils';
+import type { FlattenRecord } from '@kbn/streams-schema';
 import {
   useSimulatorSelector,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
+import { hasValidMessageFieldsForSuggestion } from './utils';
 import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
@@ -32,6 +35,15 @@ export interface StepsEditorProps {
 export const StepsEditor = React.memo(({ suggestionState }: StepsEditorProps) => {
   const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
+  const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
+
+  // Check if samples have valid message fields for pipeline suggestion
+  const hasValidMessageFields = useMemo(() => {
+    const flattenedSamples = samples.map(
+      (sample) => flattenObjectNestedLast(sample.document) as FlattenRecord
+    );
+    return hasValidMessageFieldsForSuggestion(flattenedSamples);
+  }, [samples]);
 
   const errors = useMemo(() => {
     if (!simulation) {
@@ -109,7 +121,7 @@ export const StepsEditor = React.memo(({ suggestionState }: StepsEditorProps) =>
         <RootSteps stepRefs={stepRefs} />
       ) : (
         <NoStepsEmptyPrompt>
-          {aiFeatures && aiFeatures.enabled ? (
+          {aiFeatures && aiFeatures.enabled && hasValidMessageFields ? (
             <SuggestPipelinePanel>
               <GenerateSuggestionButton
                 aiFeatures={aiFeatures}

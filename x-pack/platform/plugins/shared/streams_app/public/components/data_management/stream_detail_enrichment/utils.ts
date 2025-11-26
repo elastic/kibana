@@ -114,6 +114,27 @@ export const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFiel
   return mostCommonField ? mostCommonField[0] : '';
 };
 
+/**
+ * Checks if the sample documents have valid message fields with actual content
+ * that can be used for pipeline suggestion generation.
+ */
+export const hasValidMessageFieldsForSuggestion = (sampleDocs: FlattenRecord[]): boolean => {
+  if (!sampleDocs || sampleDocs.length === 0) {
+    return false;
+  }
+
+  // Check if any of the prioritized content fields exist with non-empty values
+  const docsWithValidFields = sampleDocs.filter((doc) => {
+    return PRIORITIZED_CONTENT_FIELDS.some((fieldName) => {
+      const value = doc[fieldName];
+      return value !== undefined && value !== null && String(value).trim().length > 0;
+    });
+  });
+
+  // Require at least 50% of documents to have valid message fields
+  return docsWithValidFields.length >= sampleDocs.length * 0.5;
+};
+
 const defaultConvertProcessorFormState = (): ConvertFormState => ({
   action: 'convert' as const,
   from: '',
