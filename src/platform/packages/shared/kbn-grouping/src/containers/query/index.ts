@@ -111,7 +111,7 @@ export const getGroupingQuery = ({
           bucket_truncate: {
             bucket_sort: {
               sort,
-              from: pageNumber,
+              from: pageNumber ?? 0,
               size,
             },
           },

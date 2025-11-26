@@ -73,14 +73,15 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
         const rawIdentifier = get(identifierField, record);
         const identifierCandidates = toArray(rawIdentifier);
 
+        // Extract valid identifier once and reuse
+        const validIdentifier = identifierCandidates.find(
+          (value): value is string => typeof value === 'string' && value.length > 0
+        );
+
         // Use entity.name as primary display name (same as used in the name column)
         // Fall back to identifier or entity.id if name is not available
-        const displayName =
-          record.entity?.name ||
-          identifierCandidates.find(
-            (value): value is string => typeof value === 'string' && value.length > 0
-          ) ||
-          record.entity?.id;
+        const displayName = record.entity?.name || validIdentifier || record.entity?.id;
+        const timelineIdentifier = validIdentifier;
 
         const flyoutKey = EntityPanelKeyByType[entityType];
 
@@ -98,10 +99,6 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
             },
           });
         };
-
-        const timelineIdentifier = identifierCandidates.find(
-          (value): value is string => typeof value === 'string' && value.length > 0
-        );
         const canRenderTimelineActions = entityThreatHuntingEnabled && timelineIdentifier != null;
 
         if (!flyoutKey && !canRenderTimelineActions) {
@@ -218,7 +215,25 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       width: '10%',
       render: (entity: Entity) => {
         const entityType = getEntityType(entity);
-        const riskScore = get(EntityTypeToScoreField[entityType], entity);
+
+        // Try multiple field paths to find the risk score
+        // Entity Store may have risk at entity.risk.calculated_score_norm
+        // or at the type-specific path (user.risk.calculated_score_norm, etc.)
+        const candidateFields = [
+          EntityTypeToScoreField[entityType], // e.g., user.risk.calculated_score_norm
+          'entity.risk.calculated_score_norm', // Fallback to entity-level risk
+        ];
+
+        const riskScore = candidateFields.reduce<number | undefined>((acc, fieldPath) => {
+          if (acc != null) {
+            return acc;
+          }
+          const value = get(fieldPath, entity);
+          if (value != null && typeof value === 'number') {
+            return value;
+          }
+          return acc;
+        }, undefined);
 
         if (riskScore != null) {
           return (
@@ -240,7 +255,25 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
       width: '10%',
       render: (entity: Entity) => {
         const entityType = getEntityType(entity);
-        const riskLevel = get(EntityTypeToLevelField[entityType], entity);
+
+        // Try multiple field paths to find the risk level
+        // Entity Store may have risk at entity.risk.calculated_level
+        // or at the type-specific path (user.risk.calculated_level, etc.)
+        const candidateFields = [
+          EntityTypeToLevelField[entityType], // e.g., user.risk.calculated_level
+          'entity.risk.calculated_level', // Fallback to entity-level risk
+        ];
+
+        const riskLevel = candidateFields.reduce<string | undefined>((acc, fieldPath) => {
+          if (acc != null) {
+            return acc;
+          }
+          const value = get(fieldPath, entity);
+          if (value != null && typeof value === 'string') {
+            return value;
+          }
+          return acc;
+        }, undefined);
 
         if (riskLevel != null) {
           return <RiskScoreLevel severity={riskLevel} />;

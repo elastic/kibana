@@ -12,6 +12,7 @@ import {
   ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
+  ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
@@ -62,7 +63,7 @@ const threatHuntingLinks: LinkItem = {
     }
   ),
   landingImage: eaOverviewPageImg,
-  path: ENTITY_ANALYTICS_OVERVIEW_PATH,
+  path: ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.threatHunting', {
       defaultMessage: 'Threat hunting',

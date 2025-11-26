@@ -16,6 +16,7 @@ import {
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
+  ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
@@ -132,9 +133,7 @@ EntityAnalyticsPrivilegedUserMonitoringContainer.displayName =
   'EntityAnalyticsPrivilegedUserMonitoringContainer';
 
 export const EntityAnalyticsOverviewContent: React.FC = React.memo(() => {
-  const isThreatHuntingEnabled = useIsExperimentalFeatureEnabled('entityThreatHuntingEnabled');
-
-  return isThreatHuntingEnabled ? <ThreatHuntingHomePage /> : <OverviewDashboard />;
+  return <OverviewDashboard />;
 });
 EntityAnalyticsOverviewContent.displayName = 'EntityAnalyticsOverviewContent';
 
@@ -145,12 +144,26 @@ const EntityAnalyticsOverviewWrapper = () => (
 );
 
 const EntityAnalyticsOverviewContainer: React.FC = React.memo(() => {
+  const isThreatHuntingEnabled = useIsExperimentalFeatureEnabled('entityThreatHuntingEnabled');
+
   return (
     <Routes>
       <Route
         path={ENTITY_ANALYTICS_OVERVIEW_PATH}
         exact
-        component={EntityAnalyticsOverviewWrapper}
+        render={({ location }) =>
+          isThreatHuntingEnabled ? (
+            <Redirect
+              to={{
+                ...location,
+                pathname: ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
+                search: location.search,
+              }}
+            />
+          ) : (
+            <EntityAnalyticsOverviewWrapper />
+          )
+        }
       />
       <Route component={NotFoundPage} />
     </Routes>
@@ -158,6 +171,27 @@ const EntityAnalyticsOverviewContainer: React.FC = React.memo(() => {
 });
 
 EntityAnalyticsOverviewContainer.displayName = 'EntityAnalyticsOverviewContainer';
+
+const ThreatHuntingHomePageWrapper = () => (
+  <PluginTemplateWrapper>
+    <ThreatHuntingHomePage />
+  </PluginTemplateWrapper>
+);
+
+const ThreatHuntingHomePageContainer: React.FC = React.memo(() => {
+  return (
+    <Routes>
+      <Route
+        path={ENTITY_ANALYTICS_THREAT_HUNTING_PATH}
+        exact
+        component={ThreatHuntingHomePageWrapper}
+      />
+      <Route component={NotFoundPage} />
+    </Routes>
+  );
+});
+
+ThreatHuntingHomePageContainer.displayName = 'ThreatHuntingHomePageContainer';
 
 export const routes = [
   {
@@ -196,6 +230,13 @@ export const routes = [
     path: ENTITY_ANALYTICS_OVERVIEW_PATH,
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsOverviewContainer,
+      SecurityPageName.entityAnalyticsOverview
+    ),
+  },
+  {
+    path: ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
+    component: withSecurityRoutePageWrapper(
+      ThreatHuntingHomePageContainer,
       SecurityPageName.entityAnalyticsOverview
     ),
   },

@@ -31,7 +31,13 @@ interface AggregationBucket {
 }
 
 export const kpiRiskScore: SecuritySolutionFactory<EntityRiskQueries.kpi> = {
-  buildDsl: (options) => buildKpiRiskScoreQuery(options),
+  buildDsl: (options) => {
+    // Validate that at least one of entity or entities is provided
+    if (!options.entity && (!options.entities || options.entities.length === 0)) {
+      throw new Error('Either entity or entities must be provided');
+    }
+    return buildKpiRiskScoreQuery(options);
+  },
   parse: async (
     options,
     response: IEsSearchResponse<unknown>
@@ -52,7 +58,16 @@ export const kpiRiskScore: SecuritySolutionFactory<EntityRiskQueries.kpi> = {
       (entityType) => EntityTypeToLevelField[entityType] !== RiskScoreFields.unsupported
     );
 
-    const entitiesToProcess = supportedEntities.length > 0 ? supportedEntities : requestedEntities;
+    // If no supported entities, return empty result early
+    if (supportedEntities.length === 0) {
+      return {
+        ...response,
+        kpiRiskScore: {} as Record<RiskSeverity, number>,
+        inspect,
+      };
+    }
+
+    const entitiesToProcess = supportedEntities;
 
     const accumulateBuckets = (
       accumulator: Record<RiskSeverity, number>,

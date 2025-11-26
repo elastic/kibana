@@ -42,7 +42,12 @@ export const buildKpiRiskScoreQuery = ({
     (entityType) => EntityTypeToLevelField[entityType] !== RiskScoreFields.unsupported
   );
 
-  const aggregatedEntities = supportedEntities.length > 0 ? supportedEntities : providedEntities;
+  // If no supported entities, return base query without aggregations
+  if (supportedEntities.length === 0) {
+    return baseQuery;
+  }
+
+  const aggregatedEntities = supportedEntities;
 
   const baseQuery: ISearchRequestParams = {
     index: defaultIndex,
@@ -64,6 +69,7 @@ export const buildKpiRiskScoreQuery = ({
   const buildAggregationForEntity = (entityType: EntityType): AggregationsAggregationContainer => ({
     terms: {
       field: EntityTypeToLevelField[entityType],
+      size: 10, // Explicitly set size to cover all risk severity levels (Unknown, Low, Moderate, High, Critical)
     },
     aggs: {
       unique_entries: {
