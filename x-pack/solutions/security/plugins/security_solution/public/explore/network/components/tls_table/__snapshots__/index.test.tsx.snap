@@ -202,7 +202,7 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
       data-test-subj="paginated-basic-table"
     >
       <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
         id="__table_generated-id"
         tabindex="-1"
       >

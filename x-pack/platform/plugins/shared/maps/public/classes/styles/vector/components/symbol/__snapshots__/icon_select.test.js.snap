@@ -27,7 +27,7 @@ exports[`Should render icon select 1`] = `
     }
     closePopover={[Function]}
     display="block"
-    hasArrow={true}
+    hasArrow={false}
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="s"
@@ -111,7 +111,7 @@ exports[`Should render icon select with custom icons 1`] = `
     }
     closePopover={[Function]}
     display="block"
-    hasArrow={true}
+    hasArrow={false}
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="s"

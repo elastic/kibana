@@ -198,7 +198,7 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
         data-test-subj="mlCalendarEventsTable"
       >
         <table
-          class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+          class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
           id="__table_generated-id"
           tabindex="-1"
         >
@@ -635,7 +635,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
         data-test-subj="mlCalendarEventsTable"
       >
         <table
-          class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+          class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
           id="__table_generated-id"
           tabindex="-1"
         >

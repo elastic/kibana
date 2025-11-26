@@ -202,7 +202,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
       data-test-subj="paginated-basic-table"
     >
       <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
         id="__table_generated-id"
         tabindex="-1"
       >
@@ -1011,7 +1011,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
       data-test-subj="paginated-basic-table"
     >
       <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
         id="__table_generated-id"
         tabindex="-1"
       >

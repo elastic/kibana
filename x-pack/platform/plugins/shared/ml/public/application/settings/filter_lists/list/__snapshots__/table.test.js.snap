@@ -93,7 +93,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
       data-test-subj="mlFilterListsTable"
     >
       <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
         id="__table_generated-id"
         tabindex="-1"
       >
@@ -661,7 +661,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
       data-test-subj="mlFilterListsTable"
     >
       <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
         id="__table_generated-id"
         tabindex="-1"
       >
