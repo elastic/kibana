@@ -75,7 +75,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
                 <p>
                   <FormattedMessage
                     id="xpack.cloudConnect.onboarding.noPermissionsDescription"
-                    defaultMessage="Only Admins can establish connection. Reach out to your Admin to get started."
+                    defaultMessage="You must have All privileges granted to connect a cluster to Elastic Cloud. Contact your admin to get started." 
                   />
                 </p>
               </EuiText>
