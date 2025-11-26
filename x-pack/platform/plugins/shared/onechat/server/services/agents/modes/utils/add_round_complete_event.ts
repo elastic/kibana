@@ -113,6 +113,7 @@ const createRoundFromEvents = ({
 
       const toolProgress = toolProgressions
         .filter((progressEvent) => progressEvent.tool_call_id === toolCall.tool_call_id)
+        .filter((progressEvent) => progressEvent.transient !== true)
         .map((progress) => ({
           message: progress.message,
         }));

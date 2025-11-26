@@ -161,12 +161,14 @@ const labels = {
 
 const getProgressionItems = ({ step, stepIndex }: { step: ToolCallStep; stepIndex: number }) => {
   return (
-    step.progression?.map((progress, index) => (
-      <ToolProgressDisplay
-        key={`step-${stepIndex}-${step.tool_id}-progress-${index}`}
-        progress={progress}
-      />
-    )) ?? []
+    step.progression
+      ?.filter((progress) => progress.transient !== true)
+      .map((progress, index) => (
+        <ToolProgressDisplay
+          key={`step-${stepIndex}-${step.tool_id}-progress-${index}`}
+          progress={progress}
+        />
+      )) ?? []
   );
 };
 

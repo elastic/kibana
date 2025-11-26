@@ -65,6 +65,8 @@ export const isBrowserToolCallEvent = (
 export interface ToolProgressEventData {
   tool_call_id: string;
   message: string;
+  /** if true, will not be persisted or displayed in the thinking panel, only as "current thinking" **/
+  transient?: boolean;
 }
 
 export type ToolProgressEvent = ChatEventBase<ChatEventType.toolProgress, ToolProgressEventData>;
