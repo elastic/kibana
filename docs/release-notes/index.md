@@ -228,19 +228,19 @@ For the Elastic Security 9.1.8 release information, refer to [Elastic Security S
 ### Fixes [kibana-9.1.8-fixes]
 
 **Alerting and cases**:
-* Catch connector errors but do not interrupt the case creation flow [#244188]({{kib-pull}}244188).
-* Fixes a bug that caused the alerts tables pagination to be stuck in the Rule pages [#242275]({{kib-pull}}242275).
-* Fetch the tracked alerts without depending on the task state [#235253]({{kib-pull}}235253).
+* Captures connector errors without interrupting the case creation flow. Issues with connectors can be resolved on the case details page  [#244188]({{kib-pull}}244188).
+* Fixes pagnition for the alerts table, which was getting stuck on rule details pages [#242275]({{kib-pull}}242275).
+* Fetches tracked alerts without depending on the task state [#235253]({{kib-pull}}235253).
 
 **Dashboards and Visualizations**:
-* Fixes deselecting (blank) option from options list [#242036]({{kib-pull}}242036).
+* Fixes error that occurs when you deselect the **(blank)** option from the filter controls menu [#242036]({{kib-pull}}242036).
 
 **Data ingestion and Fleet**:
-* Use long expiration for upgrade agents [#243443]({{kib-pull}}243443).
-* Fixes retrying stuck agents in auto upgrade logic [#243326]({{kib-pull}}243326).
-* Adds retry behavior for `/api/fleet/agents` when transient issues with ES are encountered [#243105]({{kib-pull}}243105).
-* Fixes docker image in Add agent k8s manifest [#242691]({{kib-pull}}242691).
-* Fixes fleet policy name uniqueness not being consistently enforced across spaces when name or space changes occur [#239631]({{kib-pull}}239631).
+* Uses long expiration for upgrading agents [#243443]({{kib-pull}}243443).
+* Fixes retrying agents stuck in auto-upgrade logic [#243326]({{kib-pull}}243326).
+* Adds retry behavior for `/api/fleet/agents` when transient issues with {{es}} are encountered [#243105]({{kib-pull}}243105).
+* Fixes Docker image in the add agent Kubernetes manifest [#242691]({{kib-pull}}242691).
+* Fixes {{fleet}} policy name uniqueness not being consistently enforced across spaces when name or space changes occur [#239631]({{kib-pull}}239631).
 * Fixes `ignore_above` mapping for `flattened` fields [#238890]({{kib-pull}}238890).
 
 **Elastic Observability solution**:
@@ -253,15 +253,12 @@ For the Elastic Security 9.1.8 release information, refer to [Elastic Security S
 * Fixes favicon CSS specifity [#243351]({{kib-pull}}243351).
 
 **Machine Learning**:
-* Inference/AI Connector and Inference endpoint creation: ensure deleted text in form is not sent as empty string [#244059]({{kib-pull}}244059).
+* Ensures deleted text in AI connector or Inference endpoint forms are not sent as empty strings [#244059]({{kib-pull}}244059).
 * Fixes import and improves validation for Anomaly Detection and Data Frame Analytics jobs [#242263]({{kib-pull}}242263).
 
 **Search**:
-* Fixes a case on Index management page where screen reader text was different than visible one [#243802]({{kib-pull}}243802).
-* Fixed a case of keyboard focus getting trapped in pages using document preview [#243791]({{kib-pull}}243791).
-* Ignore resource_already_exists_exception for value list creation hook [#243642]({{kib-pull}}243642).
-* Show AI log assistant with fallback message fields [#243437]({{kib-pull}}243437).
-
+* Fixes a case on Index management page where screen reader text was different than visible text [#243802]({{kib-pull}}243802).
+* Fixed a case of keyboard focus getting trapped on pages using document preview [#243791]({{kib-pull}}243791).
 
 ## 9.1.7 [kibana-9.1.7-release-notes]
 
