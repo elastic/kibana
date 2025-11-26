@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RootSchema, SchemaArray } from '@elastic/ebt';
+import type { RootSchema, SchemaArray, SchemaObject } from '@elastic/ebt';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIGrokSuggestionLatencyProps,
@@ -289,6 +289,32 @@ const streamsSchemaUpdatedSchema: RootSchema<StreamsSchemaUpdatedProps> = {
   },
 };
 
+const countByTypes: SchemaObject<{ system: number; infrastructure: number; technology: number }> = {
+  _meta: {
+    description: 'The count of identified features grouped by type',
+  },
+  properties: {
+    system: {
+      type: 'long',
+      _meta: {
+        description: 'The count of identified system features',
+      },
+    },
+    infrastructure: {
+      type: 'long',
+      _meta: {
+        description: 'The count of identified infrastructure features',
+      },
+    },
+    technology: {
+      type: 'long',
+      _meta: {
+        description: 'The count of identified technology features',
+      },
+    },
+  },
+};
+
 const streamsSignificantEventsSuggestionsGeneratedSchema: RootSchema<StreamsSignificantEventsSuggestionsGeneratedEventProps> =
   {
     duration_ms: {
@@ -316,6 +342,7 @@ const streamsSignificantEventsSuggestionsGeneratedSchema: RootSchema<StreamsSign
         description: 'The number of significant event queries generated',
       },
     },
+    count_by_feature_type: countByTypes,
     features_selected: {
       type: 'long',
       _meta: {
@@ -349,6 +376,7 @@ const streamsSignificantEventsCreatedSchema: RootSchema<StreamsSignificantEvents
       description: 'The number of significant events created',
     },
   },
+  count_by_feature_type: countByTypes,
   stream_type: {
     type: 'keyword',
     _meta: {
@@ -371,6 +399,7 @@ const streamsFeatureIdentificationIdentifiedSchema: RootSchema<StreamsFeatureIde
         description: 'The number of features identified',
       },
     },
+    count_by_type: countByTypes,
     input_tokens_used: {
       type: 'long',
       _meta: {
@@ -405,6 +434,7 @@ const streamsFeatureIdentificationSavedSchema: RootSchema<StreamsFeatureIdentifi
         description: 'The number of features saved',
       },
     },
+    count_by_type: countByTypes,
     stream_type: {
       type: 'keyword',
       _meta: {
@@ -427,6 +457,7 @@ const streamsFeatureIdentificationDeletedSchema: RootSchema<StreamsFeatureIdenti
         description: 'The number of features deleted',
       },
     },
+    count_by_type: countByTypes,
     stream_type: {
       type: 'keyword',
       _meta: {

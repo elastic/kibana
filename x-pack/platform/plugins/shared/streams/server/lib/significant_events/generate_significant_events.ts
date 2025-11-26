@@ -51,7 +51,9 @@ export async function generateSignificantEventDefinitions(
     queries: queries.map((query) => ({
       title: query.title,
       kql: query.kql,
-      feature: feature ? { name: feature.name, filter: feature?.filter } : undefined,
+      feature: feature
+        ? { name: feature.name, filter: feature?.filter, type: feature.type }
+        : undefined,
     })),
     tokensUsed,
   };

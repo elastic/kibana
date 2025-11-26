@@ -82,6 +82,7 @@ interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
   input_tokens_used: number;
   output_tokens_used: number;
   count: number;
+  count_by_feature_type: Record<string, number>;
   features_selected: number;
   features_total: number;
   stream_name: string;
@@ -90,12 +91,14 @@ interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
 
 interface StreamsSignificantEventsCreatedProps {
   count: number;
+  count_by_feature_type: Record<string, number>;
   stream_name: string;
   stream_type: StreamType;
 }
 
 interface StreamsFeatureIdentificationIdentifiedProps {
   count: number;
+  count_by_type: Record<string, number>;
   input_tokens_used: number;
   output_tokens_used: number;
   stream_name: string;
@@ -104,12 +107,14 @@ interface StreamsFeatureIdentificationIdentifiedProps {
 
 interface StreamsFeatureIdentificationSavedProps {
   count: number;
+  count_by_type: Record<string, number>;
   stream_name: string;
   stream_type: StreamType;
 }
 
 interface StreamsFeatureIdentificationDeletedProps {
   count: number;
+  count_by_type: Record<string, number>;
   stream_name: string;
   stream_type: StreamType;
 }

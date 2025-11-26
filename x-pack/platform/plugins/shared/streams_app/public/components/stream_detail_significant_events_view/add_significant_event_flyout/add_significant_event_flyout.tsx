@@ -115,6 +115,11 @@ export function AddSignificantEventFlyout({
 
   const generateQueries = useCallback(() => {
     let numberOfGeneratedQueries = 0;
+    const numberOfGeneratedQueriesByFeature: Record<string, number> = {
+      system: 0,
+      infrastructure: 0,
+      technology: 0,
+    };
     let inputTokensUsed = 0;
     let outputTokensUsed = 0;
     const connector = aiFeatures?.genAiConnectors.selectedConnector;
@@ -132,6 +137,7 @@ export function AddSignificantEventFlyout({
           generate(connector, feature).pipe(
             concatMap(({ queries: nextQueries, tokensUsed }) => {
               numberOfGeneratedQueries += nextQueries.length;
+              numberOfGeneratedQueriesByFeature[feature.type] += nextQueries.length;
               inputTokensUsed += tokensUsed.prompt;
               outputTokensUsed += tokensUsed.completion;
 
@@ -187,6 +193,7 @@ export function AddSignificantEventFlyout({
             input_tokens_used: inputTokensUsed,
             output_tokens_used: outputTokensUsed,
             count: numberOfGeneratedQueries,
+            count_by_feature_type: numberOfGeneratedQueriesByFeature,
             features_selected: selectedFeatures.length,
             features_total: features.length,
             stream_name: definition.name,

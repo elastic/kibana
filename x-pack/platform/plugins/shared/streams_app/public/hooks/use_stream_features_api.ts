@@ -60,6 +60,17 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
 
       telemetryClient.trackFeaturesIdentified({
         count: identifiedFeatures.features.length,
+        count_by_type: identifiedFeatures.features.reduce<Record<string, number>>(
+          (acc, feature) => {
+            acc[feature.type] = (acc[feature.type] || 0) + 1;
+            return acc;
+          },
+          {
+            system: 0,
+            technology: 0,
+            infrastructure: 0,
+          }
+        ),
         stream_name: definition.name,
         stream_type: getStreamTypeFromDefinition(definition),
         input_tokens_used: identifiedFeatures.tokensUsed.prompt,
@@ -71,6 +82,17 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
     addFeaturesToStream: async (features: Feature[]) => {
       telemetryClient.trackFeaturesSaved({
         count: features.length,
+        count_by_type: features.reduce<Record<string, number>>(
+          (acc, feature) => {
+            acc[feature.type] = (acc[feature.type] || 0) + 1;
+            return acc;
+          },
+          {
+            system: 0,
+            technology: 0,
+            infrastructure: 0,
+          }
+        ),
         stream_name: definition.name,
         stream_type: getStreamTypeFromDefinition(definition),
       });
@@ -94,6 +116,10 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
     removeFeaturesFromStream: async (features: Pick<Feature, 'type' | 'name'>[]) => {
       telemetryClient.trackFeaturesDeleted({
         count: features.length,
+        count_by_type: features.reduce<Record<string, number>>((acc, feature) => {
+          acc[feature.type] = (acc[feature.type] || 0) + 1;
+          return acc;
+        }, {}),
         stream_name: definition.name,
         stream_type: getStreamTypeFromDefinition(definition),
       });
