@@ -40,6 +40,7 @@ test.describe('Index template wizard - Mappings step', { tag: ['@ess'] }, () => 
     pageObjects,
   }) => {
     // Add a mapping field
+    await page.testSubj.locator('addFieldButton').click();
     // Select Numeric type
     await pageObjects.indexManagement.setComboBox('fieldType', 'Numeric');
 
@@ -59,6 +60,7 @@ test.describe('Index template wizard - Mappings step', { tag: ['@ess'] }, () => 
     pageObjects,
   }) => {
     // Add a mapping field
+    await page.testSubj.locator('addFieldButton').click();
     // Select Range type
     await pageObjects.indexManagement.setComboBox('fieldType', 'Range');
 

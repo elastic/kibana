@@ -123,5 +123,5 @@ export type TestSubjects =
   | 'settingsTabBtn'
   | 'mappingsTabBtn'
   | 'aliasesTabBtn'
-  | 'previewTabBtn';
+  | 'previewTabBtn'
   | 'configureFailureStoreButton';
