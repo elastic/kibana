@@ -8,6 +8,7 @@
  */
 
 import type { AsCodeFilter } from '@kbn/es-query-server';
+import { FilterStateStore } from '@kbn/es-query-constants';
 import { fromStoredFilter } from './from_stored_filter';
 import {
   isConditionFilter,
@@ -45,6 +46,29 @@ describe('fromStoredFilter', () => {
 
       const resultUndefined = fromStoredFilter(undefined);
       expect(resultUndefined).toBeUndefined();
+    });
+
+    it('should skip pinned filters (globalState)', () => {
+      // Pinned filters are UI-level state and should not be persisted in AsCodeFilter format
+      const pinnedFilter = {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'status',
+          field: 'status',
+          type: 'phrase',
+        },
+        query: {
+          match_phrase: {
+            status: 'active',
+          },
+        },
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+      };
+
+      const result = fromStoredFilter(pinnedFilter);
+      expect(result).toBeUndefined();
     });
   });
 
@@ -140,7 +164,7 @@ describe('fromStoredFilter', () => {
           type: 'match_all',
         },
         match_all: {},
-        $state: { store: 'globalState' },
+        $state: { store: FilterStateStore.APP_STATE },
       };
 
       const result = fromStoredFilter(legacyMatchAllFilter) as AsCodeFilter;
@@ -607,7 +631,7 @@ describe('fromStoredFilter', () => {
   describe('Base properties extraction', () => {
     it('should extract disabled and label properties', () => {
       const storedFilter = {
-        $state: { store: 'globalState' },
+        $state: { store: FilterStateStore.APP_STATE },
         meta: {
           key: 'status',
           type: 'phrase',
