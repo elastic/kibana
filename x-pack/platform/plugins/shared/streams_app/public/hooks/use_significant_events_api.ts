@@ -105,8 +105,8 @@ export function useSignificantEventsApi({
             },
             query: {
               connectorId,
-              from: new Date(start).toString(),
-              to: new Date(end).toString(),
+              from: new Date(start).toISOString(),
+              to: new Date(end).toISOString(),
             },
             body: {
               feature,
