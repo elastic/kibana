@@ -14,7 +14,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const es = getService('es');
   const dataUsageAppUrl = 'management/data/data_usage';
-  const toasts = getService('toasts');
 
   const navigateAndVerify = async (expectedVisible: boolean) => {
     await pageObjects.common.navigateToApp('management');
