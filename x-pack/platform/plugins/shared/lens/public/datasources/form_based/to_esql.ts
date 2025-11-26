@@ -285,7 +285,7 @@ export function getESQLForLayer(
       esqlCompose = esqlCompose.pipe(stats(`${metrics.join(', ')} BY ${buckets.join(', ')}`));
     }
 
-    const sortsCompose = bucketEsAggsEntries.map(([colId, col], index) => {
+    const sorts = bucketEsAggsEntries.map(([colId, col], index) => {
       const aggId = String(index);
       let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
         ? `col_${index}-${aggId}`
@@ -298,7 +298,7 @@ export function getESQLForLayer(
       return { [esAggsId]: SortOrder.Asc };
     });
 
-    esqlCompose = esqlCompose.pipe(sort(...sortsCompose));
+    esqlCompose = esqlCompose.pipe(sort(...sorts));
   } else {
     if (metrics.length > 0) {
       esqlCompose = esqlCompose.pipe(stats(metrics.join(', ')));
