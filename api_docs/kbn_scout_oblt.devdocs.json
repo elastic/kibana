@@ -913,6 +913,123 @@
       },
       {
         "parentPluginId": "@kbn/scout-oblt",
+        "id": "def-common.EuiFieldTextWrapper",
+        "type": "Class",
+        "tags": [],
+        "label": "EuiFieldTextWrapper",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/field_text.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.EuiFieldTextWrapper.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [
+              "\nCreate a new EuiFieldTextWrapper instance.\nnew EuiFieldTextWrapper(page, { dataTestSubj: 'myFieldText' })\nnew EuiFieldTextWrapper(page, 'div.euiFormControlLayout') // backward compatibility\nnew EuiFieldTextWrapper(page, { locator: 'role=textbox[name=\"I am a text field\"]' })"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/field_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.EuiFieldTextWrapper.Unnamed.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "page",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.ScoutPage",
+                    "text": "ScoutPage"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/field_text.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.EuiFieldTextWrapper.Unnamed.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "SelectorInput"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/field_text.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.EuiFieldTextWrapper.fill",
+            "type": "Function",
+            "tags": [],
+            "label": "fill",
+            "description": [],
+            "signature": [
+              "(value: string) => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/field_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.EuiFieldTextWrapper.fill.$1",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/field_text.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.EuiFieldTextWrapper.getValue",
+            "type": "Function",
+            "tags": [],
+            "label": "getValue",
+            "description": [],
+            "signature": [
+              "() => Promise<string>"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/field_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-oblt",
         "id": "def-common.EuiSelectableWrapper",
         "type": "Class",
         "tags": [],
@@ -1942,7 +2059,7 @@
         "tags": [],
         "label": "browserAuthFixture",
         "description": [
-          "\nThe \"browserAuth\" fixture simplifies the process of logging into Kibana with\ndifferent roles during tests. It uses the \"samlAuth\" fixture to create an authentication session\nfor the specified role and the \"context\" fixture to update the cookie with the role-scoped session."
+          "\nThe \"browserAuth\" fixture simplifies the process of logging into Kibana with\ndifferent roles during tests. It uses the \"samlAuth\" fixture to create an authentication session\nfor the specified role and the \"context\" fixture to update the cookie with the role-scoped session.\n\nCustom roles created via loginWithCustomRole are persisted for the worker lifetime and cleaned up\nby the worker-scoped samlAuth fixture, avoiding unnecessary role creation/deletion overhead per test."
         ],
         "signature": [
           "TestType",
