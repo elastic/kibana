@@ -100,24 +100,6 @@ describe('Options list sorting button', () => {
   });
 
   describe('custom search options', () => {
-    test('do not show custom search options when `allowExpensiveQueries` is false', async () => {
-      const allowExpensiveQueries$ = new BehaviorSubject<boolean>(false);
-      const componentApi = { allowExpensiveQueries$ };
-      const component = mountComponent({
-        initialState: getMockedState(),
-        field: { type: 'string' } as DataViewField,
-        componentApi,
-      });
-      expect(
-        component.queryByTestId('optionsListControl__searchOptionsRadioGroup')
-      ).not.toBeInTheDocument();
-
-      act(() => allowExpensiveQueries$.next(true));
-      expect(
-        component.queryByTestId('optionsListControl__searchOptionsRadioGroup')
-      ).toBeInTheDocument();
-    });
-
     test('string field has three custom search options', async () => {
       const component = mountComponent({
         initialState: getMockedState(),
