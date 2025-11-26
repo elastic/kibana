@@ -1417,7 +1417,7 @@
     "rxjs": "^7.8.2",
     "safe-squel": "^5.12.5",
     "seedrandom": "^3.0.5",
-    "semver": "^7.7.2",
+    "semver": "^7.7.3",
     "snakecase-keys": "^8.0.1",
     "source-map-support": "^0.5.21",
     "stats-lite": "^2.2.0",
