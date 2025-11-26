@@ -11687,7 +11687,7 @@
     json-schema-traverse "^1.0.0"
     require-from-string "^2.0.2"
 
-"@redocly/cli@^2.11.0":
+"@redocly/cli@^2.11.1":
   version "2.11.1"
   resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-2.11.1.tgz#6b3c0431c6afa9ad66755d265ef7135d5e7e86a1"
   integrity sha512-doNs+sdrFzzXmyf1yIeJbPh8OChacHWkvTE9N0QbuCmnYQ4k0v1IMP20qsitkwR+fK8O1hXSnFnSTVvIunMVVw==
