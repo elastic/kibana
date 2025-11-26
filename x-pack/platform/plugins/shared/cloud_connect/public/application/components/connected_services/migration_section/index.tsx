@@ -15,8 +15,8 @@ import {
   EuiButton,
   EuiPanel,
 } from '@elastic/eui';
-import { useCloudConnectedAppContext } from '../../../app_context';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useCloudConnectedAppContext } from '../../../app_context';
 
 export const MigrationSection: React.FC = () => {
   const { docLinks } = useCloudConnectedAppContext();

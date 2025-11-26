@@ -142,11 +142,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
             defaultMessage="This cluster is connected to an Elastic Cloud organization. {learnMore}"
             values={{
               learnMore: (
-                <EuiLink
-                  href={docLinks.links.cloud.cloudConnect}
-                  target="_blank"
-                  external
-                >
+                <EuiLink href={docLinks.links.cloud.cloudConnect} target="_blank" external>
                   <FormattedMessage
                     id="xpack.cloudConnect.connectedServices.learnMore"
                     defaultMessage="Learn more"
