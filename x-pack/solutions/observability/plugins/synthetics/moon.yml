@@ -128,6 +128,8 @@ dependsOn:
   - '@kbn/observability-synthetics-test-data'
   - '@kbn/connector-schemas'
   - '@kbn/react-query'
+  - '@kbn/maintenance-windows-plugin'
+  - '@kbn/fs'
 tags:
   - plugin
   - prod
