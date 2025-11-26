@@ -1364,6 +1364,8 @@
       "@kbn/logs-shared-plugin/*": ["x-pack/platform/plugins/shared/logs_shared/*"],
       "@kbn/logstash-plugin": ["x-pack/platform/plugins/private/logstash"],
       "@kbn/logstash-plugin/*": ["x-pack/platform/plugins/private/logstash/*"],
+      "@kbn/maintenance-windows-plugin": ["x-pack/platform/plugins/shared/maintenance_windows"],
+      "@kbn/maintenance-windows-plugin/*": ["x-pack/platform/plugins/shared/maintenance_windows/*"],
       "@kbn/managed-content-badge": ["src/platform/packages/private/kbn-managed-content-badge"],
       "@kbn/managed-content-badge/*": ["src/platform/packages/private/kbn-managed-content-badge/*"],
       "@kbn/managed-vscode-config": ["packages/kbn-managed-vscode-config"],

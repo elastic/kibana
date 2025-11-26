@@ -138,7 +138,8 @@
     "@kbn/deeplinks-management",
     "@kbn/observability-nav-icons",
     "@kbn/react-query",
-    "@kbn/content-management-utils"
+    "@kbn/content-management-utils",
+    "@kbn/maintenance-windows-plugin"
   ],
   "exclude": ["target/**/*"]
 }
