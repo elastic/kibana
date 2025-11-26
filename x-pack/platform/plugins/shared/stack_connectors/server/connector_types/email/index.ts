@@ -100,6 +100,15 @@ function validateConfig(
     throw new Error(`[from]: ${invalidEmailsMessage}`);
   }
 
+  const { oauthTokenUrl } = config;
+  if (oauthTokenUrl) {
+    if (!configurationUtilities.isUriAllowed(oauthTokenUrl)) {
+      throw new Error(
+        `[oauthTokenUrl] value '${oauthTokenUrl}' is not in the allowedHosts configuration`
+      );
+    }
+  }
+
   // If service is set as JSON_TRANSPORT_SERVICE or EXCHANGE, host/port are ignored, when the email is sent.
   // Note, not currently making these message translated, as will be
   // emitted alongside messages from @kbn/config-schema, which does not

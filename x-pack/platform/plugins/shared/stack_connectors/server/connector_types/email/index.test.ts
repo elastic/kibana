@@ -14,6 +14,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { getActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { configSchema as actionsConfigSchema } from '@kbn/actions-plugin/server/config';
 import {
   validateConfig,
   validateConnector,
@@ -34,6 +36,7 @@ import type { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { AdditionalEmailServices } from '../../../common';
 import { serviceParamValueToKbnSettingMap } from '@kbn/connector-schemas/email';
+import type { ActionsConfig } from '@kbn/actions-plugin/server/config';
 
 const sendEmailMock = sendEmail as jest.Mock;
 
@@ -308,6 +311,37 @@ describe('config validation', () => {
       validateConfig(connectorType, notAllowedHosts2, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating connector type config: [host] value 'smtp.gmail.com' is not in the allowedHosts configuration"`
+    );
+  });
+
+  test('config validation handles oauthTokenUrl in allowedHosts', () => {
+    const configUtilsAny = getActionsConfigUtils({});
+    const configUtilsSmtp = getActionsConfigUtils({
+      allowedHosts: ['smtp.example.com'],
+    });
+    const configUtilsSmtpAuth = getActionsConfigUtils({
+      allowedHosts: ['smtp.example.com', 'auth.example.com'],
+    });
+
+    const config = getConfig({
+      service: undefined,
+      host: 'smtp.example.com',
+      port: 35,
+      oauthTokenUrl: 'http://auth.example.com',
+    });
+
+    expect(
+      validateConfig(connectorType, config, { configurationUtilities: configUtilsAny })
+    ).toBeTruthy();
+
+    expect(
+      validateConfig(connectorType, config, { configurationUtilities: configUtilsSmtpAuth })
+    ).toBeTruthy();
+
+    expect(() => {
+      validateConfig(connectorType, config, { configurationUtilities: configUtilsSmtp });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating connector type config: [oauthTokenUrl] value 'http://auth.example.com' is not in the allowedHosts configuration"`
     );
   });
 
@@ -1585,4 +1619,9 @@ function validateEmailAddressesImpl(
   options?: ValidateEmailAddressesOptions
 ): string | undefined {
   return 'stub for actual message';
+}
+
+function getActionsConfigUtils(overrides: Partial<ActionsConfig>): ActionsConfigurationUtilities {
+  const config = actionsConfigSchema.validate(overrides);
+  return getActionsConfigurationUtilities(config);
 }
