@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import * as i18n from './translations';
-import { MaintenanceWindowStatus } from '../../../common';
 
 export const STATUS_DISPLAY = {
   [MaintenanceWindowStatus.Running]: { color: 'primary', label: i18n.TABLE_STATUS_RUNNING },
