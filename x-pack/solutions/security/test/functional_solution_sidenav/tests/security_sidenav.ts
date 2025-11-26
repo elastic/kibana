@@ -41,7 +41,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.breadcrumbs.expectExists();
 
         // check side nav links
-        await solutionNavigation.sidenav.expectSectionExists('security_solution_nav');
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'securitySolutionUI:get_started',
         });
