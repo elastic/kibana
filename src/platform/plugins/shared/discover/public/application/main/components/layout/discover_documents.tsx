@@ -86,6 +86,7 @@ import {
   useGetDocumentViewRenderer,
   type DiscoverGridFlyoutProps,
 } from './helpers/render_document_view';
+import { useReadCascadeConfig } from './cascaded_documents/hooks/config';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
@@ -174,6 +175,8 @@ function DiscoverDocumentsComponent({
   const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords({
     stateContainer,
   });
+
+  const cascadeConfig = useReadCascadeConfig();
 
   const setAppState = useCallback<UseColumnsProps['setAppState']>(
     ({ settings, ...rest }) => {
@@ -509,6 +512,7 @@ function DiscoverDocumentsComponent({
             viewModeToggle={viewModeToggle}
             onCascadeGroupingChange={stateContainer.actions.onCascadeGroupingChange}
             onFullScreenChange={setIsDataGridFullScreen}
+            cascadeConfig={cascadeConfig}
           />
         </CellActionsProvider>
       </div>
