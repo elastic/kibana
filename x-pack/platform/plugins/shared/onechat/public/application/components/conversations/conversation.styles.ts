@@ -21,3 +21,8 @@ export const fullWidthAndHeightStyles = css`
   width: 100%;
   height: 100%;
 `;
+
+const ROUNDED_BORDER_RADIUS = '6px';
+export const roundedBorderRadiusStyles = css`
+  border-radius: ${ROUNDED_BORDER_RADIUS};
+`;
