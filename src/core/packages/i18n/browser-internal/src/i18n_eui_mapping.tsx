@@ -805,6 +805,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiFlyoutMenu.history': i18n.translate('core.euiFlyoutMenu.history', {
       defaultMessage: 'History',
     }),
+    'euiFlyoutManaged.defaultTitle': i18n.translate('core.euiFlyoutManaged.defaultTitle', {
+      defaultMessage: 'Unknown Flyout',
+    }),
     'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {
       defaultMessage: 'Please address the highlighted errors.',
     }),
