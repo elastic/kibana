@@ -63,9 +63,6 @@ const styles = {
 
 const DELAY_FOR_HIDING_SPINNER = 500;
 
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
-const COMMAND_KEY = isMac ? '⌘' : 'Ctrl';
-
 const getLanguageLabelByValue = (value: string) => {
   return AVAILABLE_LANGUAGES.find((lang) => lang.value === value)?.label || DEFAULT_LANGUAGE;
 };
@@ -308,7 +305,7 @@ export const ContextMenu = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiBadge color="hollow" data-test-subj="consoleMenuAutoIndentShortcut">
-            {COMMAND_KEY} + I
+            Ctrl/Cmd + I
           </EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -328,7 +325,7 @@ export const ContextMenu = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiBadge color="hollow" data-test-subj="consoleMenuOpenDocsShortcut">
-            {COMMAND_KEY} + /
+            Ctrl/Cmd + /
           </EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>

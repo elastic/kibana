@@ -296,23 +296,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const autoIndentShortcutExists = await testSubjects.exists('consoleMenuAutoIndentShortcut');
       expect(autoIndentShortcutExists).to.be(true);
 
-      // Get Auto indent shortcut badge text
+      // Check Auto indent shortcut badge shows Ctrl/Cmd format
       const autoIndentShortcut = await testSubjects.find('consoleMenuAutoIndentShortcut');
       const autoIndentShortcutText = await autoIndentShortcut.getVisibleText();
+      expect(autoIndentShortcutText).to.be('Ctrl/Cmd + I');
 
-      // Check it shows either Cmd+I (Mac) or Ctrl+I (Windows/Linux)
-      expect(autoIndentShortcutText).to.match(/^(⌘|Ctrl) \+ I$/);
-
-      // Check API reference shortcut badge exists
+      // Check API reference shortcut badge exists and shows Ctrl/Cmd format
       const openDocsShortcutExists = await testSubjects.exists('consoleMenuOpenDocsShortcut');
       expect(openDocsShortcutExists).to.be(true);
-
-      // Get API reference shortcut badge text
       const openDocsShortcut = await testSubjects.find('consoleMenuOpenDocsShortcut');
       const openDocsShortcutText = await openDocsShortcut.getVisibleText();
-
-      // Check it shows either Cmd+/ (Mac) or Ctrl+/ (Windows/Linux)
-      expect(openDocsShortcutText).to.match(/^(⌘|Ctrl) \+ \/$/);
+      expect(openDocsShortcutText).to.be('Ctrl/Cmd + /');
     });
   });
 }
