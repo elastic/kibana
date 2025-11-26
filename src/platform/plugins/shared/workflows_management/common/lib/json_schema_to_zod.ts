@@ -12,31 +12,114 @@ import type { JSONSchema7 } from 'json-schema';
 import { z } from '@kbn/zod';
 
 /**
+ * Converts a JSON Schema string type to a Zod string schema
+ */
+function convertStringSchema(jsonSchema: JSONSchema7): z.ZodType {
+  // Apply enum if present (enum takes precedence over other validations)
+  if (jsonSchema.enum && Array.isArray(jsonSchema.enum) && jsonSchema.enum.length > 0) {
+    // z.enum requires at least one element
+    return z.enum(jsonSchema.enum as [string, ...string[]]);
+  }
+
+  let schema = z.string();
+
+  // Apply minLength constraint
+  if (typeof jsonSchema.minLength === 'number') {
+    schema = schema.min(jsonSchema.minLength);
+  }
+
+  // Apply maxLength constraint
+  if (typeof jsonSchema.maxLength === 'number') {
+    schema = schema.max(jsonSchema.maxLength);
+  }
+
+  // Apply pattern (regex) constraint
+  if (typeof jsonSchema.pattern === 'string') {
+    schema = schema.regex(new RegExp(jsonSchema.pattern));
+  }
+
+  // Apply format validation
+  if (jsonSchema.format === 'email') {
+    schema = schema.email();
+  } else if (jsonSchema.format === 'date-time') {
+    schema = schema.datetime();
+  } else if (jsonSchema.format === 'date') {
+    schema = schema.date();
+  } else if (jsonSchema.format === 'uri' || jsonSchema.format === 'url') {
+    schema = schema.url();
+  }
+
+  return schema;
+}
+
+/**
+ * Converts a JSON Schema number/integer type to a Zod number schema
+ */
+function convertNumberSchema(jsonSchema: JSONSchema7): z.ZodType {
+  let schema = z.number();
+
+  // Apply minimum constraint
+  if (typeof jsonSchema.minimum === 'number') {
+    schema = jsonSchema.exclusiveMinimum
+      ? schema.gt(jsonSchema.minimum)
+      : schema.gte(jsonSchema.minimum);
+  }
+
+  // Apply maximum constraint
+  if (typeof jsonSchema.maximum === 'number') {
+    schema = jsonSchema.exclusiveMaximum
+      ? schema.lt(jsonSchema.maximum)
+      : schema.lte(jsonSchema.maximum);
+  }
+
+  // Apply integer constraint
+  if (jsonSchema.type === 'integer') {
+    schema = schema.int();
+  }
+
+  return schema;
+}
+
+/**
+ * Converts a JSON Schema object type to a Zod object schema
+ */
+function convertObjectSchema(
+  jsonSchema: JSONSchema7,
+  convertRecursive: (schema: JSONSchema7) => z.ZodType
+): z.ZodType {
+  if (!jsonSchema.properties) {
+    return z.object({});
+  }
+
+  const shape: Record<string, z.ZodType> = {};
+  for (const [key, propSchema] of Object.entries(jsonSchema.properties)) {
+    const prop = propSchema as JSONSchema7;
+    let zodProp = convertRecursive(prop);
+
+    // Check if required - use the parent schema's required array
+    const isRequired = jsonSchema.required?.includes(key) ?? false;
+
+    // Apply default if present (default() automatically makes the field optional)
+    if (prop.default !== undefined) {
+      zodProp = zodProp.default(prop.default);
+    } else if (!isRequired) {
+      // Only apply optional if no default and not required
+      // (default() already makes it optional, so we don't need both)
+      zodProp = zodProp.optional();
+    }
+
+    shape[key] = zodProp;
+  }
+  return z.object(shape);
+}
+
+/**
  * Recursively converts a JSON Schema object to a Zod object schema
  * This is a fallback when @n8n/json-schema-to-zod fails
  */
 function convertJsonSchemaToZodRecursive(jsonSchema: JSONSchema7): z.ZodType {
   if (jsonSchema.type === 'object' && jsonSchema.properties) {
-    const shape: Record<string, z.ZodType> = {};
-    for (const [key, propSchema] of Object.entries(jsonSchema.properties)) {
-      const prop = propSchema as JSONSchema7;
-      let zodProp = convertJsonSchemaToZodRecursive(prop);
-
-      // Check if required - use the parent schema's required array
-      const isRequired = jsonSchema.required?.includes(key) ?? false;
-
-      // Apply default if present (default() automatically makes the field optional)
-      if (prop.default !== undefined) {
-        zodProp = zodProp.default(prop.default);
-      } else if (!isRequired) {
-        // Only apply optional if no default and not required
-        // (default() already makes it optional, so we don't need both)
-        zodProp = zodProp.optional();
-      }
-
-      shape[key] = zodProp;
-    }
-    return z.object(shape);
+    return convertObjectSchema(jsonSchema, convertJsonSchemaToZodRecursive);
   }
 
   if (jsonSchema.type === 'array' && jsonSchema.items) {
@@ -45,66 +128,11 @@ function convertJsonSchemaToZodRecursive(jsonSchema: JSONSchema7): z.ZodType {
   }
 
   if (jsonSchema.type === 'string') {
-    // Apply enum if present (enum takes precedence over other validations)
-    if (jsonSchema.enum && Array.isArray(jsonSchema.enum) && jsonSchema.enum.length > 0) {
-      // z.enum requires at least one element
-      return z.enum(jsonSchema.enum as [string, ...string[]]);
-    }
-
-    let schema = z.string();
-
-    // Apply minLength constraint
-    if (typeof jsonSchema.minLength === 'number') {
-      schema = schema.min(jsonSchema.minLength);
-    }
-
-    // Apply maxLength constraint
-    if (typeof jsonSchema.maxLength === 'number') {
-      schema = schema.max(jsonSchema.maxLength);
-    }
-
-    // Apply pattern (regex) constraint
-    if (typeof jsonSchema.pattern === 'string') {
-      schema = schema.regex(new RegExp(jsonSchema.pattern));
-    }
-
-    // Apply format validation
-    if (jsonSchema.format === 'email') {
-      schema = schema.email();
-    } else if (jsonSchema.format === 'date-time') {
-      schema = schema.datetime();
-    } else if (jsonSchema.format === 'date') {
-      schema = schema.date();
-    } else if (jsonSchema.format === 'uri' || jsonSchema.format === 'url') {
-      schema = schema.url();
-    }
-
-    return schema;
+    return convertStringSchema(jsonSchema);
   }
 
   if (jsonSchema.type === 'number' || jsonSchema.type === 'integer') {
-    let schema = z.number();
-
-    // Apply minimum constraint
-    if (typeof jsonSchema.minimum === 'number') {
-      schema = jsonSchema.exclusiveMinimum
-        ? schema.gt(jsonSchema.minimum)
-        : schema.gte(jsonSchema.minimum);
-    }
-
-    // Apply maximum constraint
-    if (typeof jsonSchema.maximum === 'number') {
-      schema = jsonSchema.exclusiveMaximum
-        ? schema.lt(jsonSchema.maximum)
-        : schema.lte(jsonSchema.maximum);
-    }
-
-    // Apply integer constraint
-    if (jsonSchema.type === 'integer') {
-      schema = schema.int();
-    }
-
-    return schema;
+    return convertNumberSchema(jsonSchema);
   }
 
   if (jsonSchema.type === 'boolean') {

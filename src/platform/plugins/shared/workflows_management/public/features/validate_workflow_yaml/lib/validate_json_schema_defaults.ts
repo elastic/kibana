@@ -101,8 +101,143 @@ export function validateJsonSchemaDefaults(
     buildPropertyMap(definitions as Record<string, JSONSchema7>, ['inputs', 'definitions']);
   }
 
-  // Visit all scalar nodes in the YAML document to find default values
+  /**
+   * Extracts property key and name from a YAML path
+   */
+  function extractPropertyPath(
+    path: Array<string | number>
+  ): { propertyKey: string; propertyName: string } | null {
+    const isInProperties = path[1] === 'properties';
+    const isInDefinitions = path[1] === 'definitions' || path[1] === '$defs';
 
+    if (!isInProperties && !isInDefinitions) {
+      return null;
+    }
+
+    let propertyKey: string;
+    let propertyName: string;
+    let filteredPath: string[];
+
+    if (isInProperties) {
+      const propertyPath = path.slice(2, -1);
+      filteredPath = propertyPath
+        .filter((segment) => segment !== 'properties')
+        .map((segment) => String(segment));
+      propertyKey = filteredPath.length > 0 ? `inputs.properties.${filteredPath.join('.')}` : '';
+      propertyName = filteredPath[filteredPath.length - 1] as string;
+    } else {
+      const definitionName = String(path[2]);
+      const propertyPath = path.slice(4, -1);
+      filteredPath = propertyPath
+        .filter((segment) => segment !== 'properties')
+        .map((segment) => String(segment));
+      propertyKey = `inputs.definitions.${definitionName}.${filteredPath.join('.')}`;
+      propertyName = filteredPath[filteredPath.length - 1] || definitionName;
+    }
+
+    return { propertyKey, propertyName };
+  }
+
+  /**
+   * Finds property info by key or name fallback
+   */
+  function findPropertyInfo(
+    propertyKey: string,
+    propertyName: string
+  ): { schema: JSONSchema7; fullPath: string[] } | null {
+    let propertyInfo = propertySchemas.get(propertyKey);
+
+    // Fallback: try matching by property name if exact path not found
+    if (!propertyInfo) {
+      for (const [mapKey, mapValue] of propertySchemas.entries()) {
+        if (mapKey.endsWith(`.${propertyName}`) || mapKey === propertyName) {
+          propertyInfo = mapValue;
+          break;
+        }
+      }
+    }
+
+    return propertyInfo || null;
+  }
+
+  /**
+   * Calculates line/column positions from byte offsets
+   */
+  function calculatePosition(
+    startOffset: number,
+    endOffset: number,
+    doc: Document
+  ): { startLine: number; startCol: number; endLine: number; endCol: number } {
+    if (model) {
+      const startPos = model.getPositionAt(startOffset);
+      const endPos = model.getPositionAt(endOffset);
+      return {
+        startLine: startPos.lineNumber,
+        startCol: startPos.column,
+        endLine: endPos.lineNumber,
+        endCol: endPos.column,
+      };
+    }
+
+    // Fallback to manual calculation
+    const text = doc.toString();
+    let line = 1;
+    let column = 1;
+    let startLine = 1;
+    let startCol = 1;
+    let endLine = 1;
+    let endCol = 1;
+
+    for (let i = 0; i < text.length; i++) {
+      if (i === startOffset) {
+        startLine = line;
+        startCol = column;
+      }
+      if (i === endOffset) {
+        endLine = line;
+        endCol = column;
+        break;
+      }
+      if (text[i] === '\n') {
+        line++;
+        column = 1;
+      } else {
+        column++;
+      }
+    }
+
+    return { startLine, startCol, endLine, endCol };
+  }
+
+  /**
+   * Creates a validation error for an invalid default value
+   */
+  function createValidationError(
+    propertyKey: string,
+    propertyName: string,
+    schema: JSONSchema7,
+    errorMessage: string,
+    startLine: number,
+    startCol: number,
+    endLine: number,
+    endCol: number
+  ): YamlValidationResult {
+    return {
+      id: `default-${propertyKey}-${startLine}-${startCol}`,
+      startLineNumber: startLine,
+      startColumn: startCol,
+      endLineNumber: endLine,
+      endColumn: endCol,
+      message: `Invalid default value for ${propertyName}: ${errorMessage}`,
+      severity: 'error',
+      owner: 'json-schema-default-validation',
+      hoverMessage: `Default value does not match the property's constraints (type: ${
+        schema.type
+      }, format: ${schema.format || 'none'}, pattern: ${schema.pattern || 'none'})`,
+    };
+  }
+
+  // Visit all scalar nodes in the YAML document to find default values
   visit(yamlDocument, {
     Scalar(key, node, ancestors) {
       if (!node.range) {
@@ -132,63 +267,13 @@ export function validateJsonSchemaDefaults(
         return;
       }
 
-      const isInProperties = path[1] === 'properties';
-      const isInDefinitions = path[1] === 'definitions' || path[1] === '$defs';
-
-      if (!isInProperties && !isInDefinitions) {
+      const pathInfo = extractPropertyPath(path);
+      if (!pathInfo) {
         return;
       }
 
-      // Extract the property path
-      // For properties: ['inputs', 'properties', 'email', 'default'] -> 'email'
-      // For nested: ['inputs', 'properties', 'analyst', 'properties', 'name', 'default'] -> 'analyst.name'
-      // For definitions: ['inputs', 'definitions', 'UserSchema', 'properties', 'email', 'default'] -> 'definitions.UserSchema.properties.email'
-      let propertyKey: string;
-      let propertyName: string;
-      let filteredPath: string[];
-
-      if (isInProperties) {
-        // Remove 'inputs', 'properties', and 'default' from the path
-        // Also remove intermediate 'properties' keys for nested objects
-        // Path example: ['inputs', 'properties', 'analyst', 'properties', 'name', 'default']
-        // After slice(2, -1): ['analyst', 'properties', 'name']
-        // After filter: ['analyst', 'name']
-        const propertyPath = path.slice(2, -1); // ['analyst', 'properties', 'name'] or ['email']
-
-        // Filter out 'properties' keys (they're structural, not part of the property name)
-        // Convert to strings since property names are always strings
-        filteredPath = propertyPath
-          .filter((segment) => segment !== 'properties')
-          .map((segment) => String(segment));
-        // Match the key format used in buildPropertyMap: 'inputs.properties.analyst.name'
-        propertyKey = filteredPath.length > 0 ? `inputs.properties.${filteredPath.join('.')}` : '';
-        propertyName = filteredPath[filteredPath.length - 1] as string;
-      } else {
-        // For definitions, we need to find which property references this definition
-        // The path is: ['inputs', 'definitions', 'UserSchema', 'properties', 'email', 'default']
-        const definitionName = String(path[2]);
-        const propertyPath = path.slice(4, -1); // Remove 'inputs', 'definitions', definitionName, 'properties', and 'default'
-        // Filter out 'properties' keys for nested objects in definitions
-        // Convert to strings since property names are always strings
-        filteredPath = propertyPath
-          .filter((segment) => segment !== 'properties')
-          .map((segment) => String(segment));
-        propertyKey = `inputs.definitions.${definitionName}.${filteredPath.join('.')}`;
-        propertyName = filteredPath[filteredPath.length - 1] || definitionName;
-      }
-
-      let propertyInfo = propertySchemas.get(propertyKey);
-
-      // Fallback: try matching by property name if exact path not found
-      if (!propertyInfo && filteredPath.length > 0) {
-        for (const [mapKey, mapValue] of propertySchemas.entries()) {
-          if (mapKey.endsWith(`.${propertyName}`) || mapKey === propertyName) {
-            propertyInfo = mapValue;
-            break;
-          }
-        }
-      }
-
+      const { propertyKey, propertyName } = pathInfo;
+      const propertyInfo = findPropertyInfo(propertyKey, propertyName);
       if (!propertyInfo) {
         return;
       }
@@ -198,68 +283,26 @@ export function validateJsonSchemaDefaults(
       const result = zodSchema.safeParse(node.value);
 
       if (!result.success) {
-        // Convert byte offsets to line/column
-        // Use Monaco's model.getPositionAt if available for accurate conversion
-        // Otherwise fall back to manual calculation
         const [startOffset, endOffset] = node.range;
-        let startLine: number;
-        let startCol: number;
-        let endLine: number;
-        let endCol: number;
-
-        if (model) {
-          // Use Monaco's built-in conversion for accuracy
-          const startPos = model.getPositionAt(startOffset);
-          const endPos = model.getPositionAt(endOffset);
-          startLine = startPos.lineNumber;
-          startCol = startPos.column;
-          endLine = endPos.lineNumber;
-          endCol = endPos.column;
-        } else {
-          // Fallback to manual calculation
-          const text = yamlDocument.toString();
-          let line = 1;
-          let column = 1;
-          startLine = 1;
-          startCol = 1;
-          endLine = 1;
-          endCol = 1;
-
-          for (let i = 0; i < text.length; i++) {
-            if (i === startOffset) {
-              startLine = line;
-              startCol = column;
-            }
-            if (i === endOffset) {
-              endLine = line;
-              endCol = column;
-              break;
-            }
-            if (text[i] === '\n') {
-              line++;
-              column = 1;
-            } else {
-              column++;
-            }
-          }
-        }
-
+        const { startLine, startCol, endLine, endCol } = calculatePosition(
+          startOffset,
+          endOffset,
+          yamlDocument
+        );
         const errorMessage = result.error.issues.map((issue) => issue.message).join(', ');
-        const schema = propertyInfo.schema;
 
-        errors.push({
-          id: `default-${propertyKey}-${startLine}-${startCol}`,
-          startLineNumber: startLine,
-          startColumn: startCol,
-          endLineNumber: endLine,
-          endColumn: endCol,
-          message: `Invalid default value for ${propertyName}: ${errorMessage}`,
-          severity: 'error',
-          owner: 'json-schema-default-validation',
-          hoverMessage: `Default value does not match the property's constraints (type: ${
-            schema.type
-          }, format: ${schema.format || 'none'}, pattern: ${schema.pattern || 'none'})`,
-        });
+        errors.push(
+          createValidationError(
+            propertyKey,
+            propertyName,
+            propertyInfo.schema,
+            errorMessage,
+            startLine,
+            startCol,
+            endLine,
+            endCol
+          )
+        );
       }
     },
   });
