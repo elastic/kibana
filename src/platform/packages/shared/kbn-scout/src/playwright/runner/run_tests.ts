@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolve } from 'path';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { pickLevelFromFlags } from '@kbn/tooling-log';
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
+import { getFlags } from '@kbn/dev-cli-runner';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { withProcRunner } from '@kbn/dev-proc-runner';
-import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { getFlags } from '@kbn/dev-cli-runner';
-import { runElasticsearch, runKibanaServer } from '../../servers';
-import { loadServersConfig } from '../../config';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { pickLevelFromFlags } from '@kbn/tooling-log';
+import { resolve } from 'path';
 import { silence } from '../../common';
-import type { RunTestsOptions } from './flags';
+import { loadServersConfig } from '../../config';
+import { runElasticsearch, runKibanaServer } from '../../servers';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
-import { getPlaywrightGrepTag, execPromise } from '../utils';
 import type { ScoutPlaywrightProjects } from '../types';
+import { execPromise, getPlaywrightGrepTag } from '../utils';
+import type { RunTestsOptions } from './flags';
 
 export const getPlaywrightProject = (
   testTarget: RunTestsOptions['testTarget'],
@@ -94,7 +94,7 @@ async function runLocalServersAndTests(
   cmdArgs: string[],
   env: Record<string, string> = {}
 ) {
-  const config = await loadServersConfig(options.mode, log);
+  const config = await loadServersConfig(options.mode, log, options.serversConfig);
   const abortCtrl = new AbortController();
 
   const onEarlyExit = (msg: string) => {

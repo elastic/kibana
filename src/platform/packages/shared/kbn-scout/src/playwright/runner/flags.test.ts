@@ -107,6 +107,7 @@ describe('parseTestFlags', () => {
       headed: false,
       esFrom: undefined,
       installDir: undefined,
+      serversConfig: undefined,
       logsDir: undefined,
     });
   });
@@ -130,6 +131,7 @@ describe('parseTestFlags', () => {
       headed: true,
       esFrom: 'snapshot',
       installDir: undefined,
+      serversConfig: undefined,
       logsDir: undefined,
     });
   });
@@ -168,6 +170,7 @@ describe('parseTestFlags', () => {
       headed: false,
       esFrom: undefined,
       installDir: undefined,
+      serversConfig: undefined,
       logsDir: undefined,
     });
   });
@@ -191,6 +194,54 @@ describe('parseTestFlags', () => {
       headed: true,
       esFrom: 'snapshot',
       installDir: undefined,
+      serversConfig: undefined,
+      logsDir: undefined,
+    });
+  });
+
+  it(`should parse serversConfig flag with serverless for local target`, async () => {
+    const flags = new FlagsReader({
+      config: '/path/to/config',
+      stateful: false,
+      serverless: 'security',
+      logToFile: false,
+      headed: false,
+      serversConfig: 'security.serverless.uiam.config.ts',
+    });
+    validatePlaywrightConfigMock.mockResolvedValueOnce();
+    const result = await parseTestFlags(flags);
+
+    expect(result).toEqual({
+      mode: 'serverless=security',
+      configPath: '/path/to/config',
+      testTarget: 'local',
+      headed: false,
+      esFrom: undefined,
+      installDir: undefined,
+      serversConfig: 'security.serverless.uiam.config.ts',
+      logsDir: undefined,
+    });
+  });
+
+  it(`should parse serversConfig flag with stateful for local target`, async () => {
+    const flags = new FlagsReader({
+      config: '/path/to/config',
+      stateful: true,
+      logToFile: false,
+      headed: false,
+      serversConfig: 'custom.stateful.config.ts',
+    });
+    validatePlaywrightConfigMock.mockResolvedValueOnce();
+    const result = await parseTestFlags(flags);
+
+    expect(result).toEqual({
+      mode: 'stateful',
+      configPath: '/path/to/config',
+      testTarget: 'local',
+      headed: false,
+      esFrom: undefined,
+      installDir: undefined,
+      serversConfig: 'custom.stateful.config.ts',
       logsDir: undefined,
     });
   });
@@ -230,6 +281,7 @@ describe('parseTestFlags', () => {
         testFiles: [testFile],
         esFrom: undefined,
         installDir: undefined,
+        serversConfig: undefined,
         logsDir: undefined,
       });
     });
@@ -266,6 +318,7 @@ describe('parseTestFlags', () => {
         testFiles,
         esFrom: undefined,
         installDir: undefined,
+        serversConfig: undefined,
         logsDir: undefined,
       });
     });

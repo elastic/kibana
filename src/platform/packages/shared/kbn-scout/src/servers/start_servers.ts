@@ -24,7 +24,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
   const reportTime = getTimeReporter(log, 'scripts/scout_start_servers');
 
   await withProcRunner(log, async (procs) => {
-    const config = await loadServersConfig(options.mode, log);
+    const config = await loadServersConfig(options.mode, log, options.serversConfig);
     const pwGrepTag = getPlaywrightGrepTag(options.mode);
 
     const shutdownEs = await runElasticsearch({

@@ -52,6 +52,7 @@ describe('parseServerFlags', () => {
       mode: 'serverless=oblt',
       esFrom: undefined,
       installDir: undefined,
+      serversConfig: undefined,
       logsDir: undefined,
     });
   });
@@ -68,6 +69,42 @@ describe('parseServerFlags', () => {
       mode: 'stateful',
       esFrom: 'snapshot',
       installDir: undefined,
+      serversConfig: undefined,
+      logsDir: undefined,
+    });
+  });
+
+  it(`should parse serversConfig flag with serverless`, () => {
+    const flags = new FlagsReader({
+      stateful: false,
+      serverless: 'security',
+      logToFile: false,
+      serversConfig: 'security.serverless.uiam.config.ts',
+    });
+    const result = parseServerFlags(flags);
+
+    expect(result).toEqual({
+      mode: 'serverless=security',
+      esFrom: undefined,
+      installDir: undefined,
+      serversConfig: 'security.serverless.uiam.config.ts',
+      logsDir: undefined,
+    });
+  });
+
+  it(`should parse serversConfig flag with stateful`, () => {
+    const flags = new FlagsReader({
+      stateful: true,
+      logToFile: false,
+      serversConfig: 'custom.stateful.config.ts',
+    });
+    const result = parseServerFlags(flags);
+
+    expect(result).toEqual({
+      mode: 'stateful',
+      esFrom: undefined,
+      installDir: undefined,
+      serversConfig: 'custom.stateful.config.ts',
       logsDir: undefined,
     });
   });

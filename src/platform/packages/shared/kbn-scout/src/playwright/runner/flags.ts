@@ -24,6 +24,7 @@ export interface RunTestsOptions {
   testFiles?: string[];
   esFrom: 'serverless' | 'source' | 'snapshot' | undefined;
   installDir: string | undefined;
+  serversConfig: string | undefined;
   logsDir: string | undefined;
 }
 
