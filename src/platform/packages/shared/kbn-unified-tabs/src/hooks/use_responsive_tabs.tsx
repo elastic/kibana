@@ -38,11 +38,15 @@ export const useResponsiveTabs = ({
 }: UseResponsiveTabsProps) => {
   const { euiTheme } = useEuiTheme();
   const dimensions = useResizeObserver(tabsContainerWithPlusElement);
-  const tabsSizeConfig = useMemo(
-    () =>
-      calculateResponsiveTabs({ items, containerWidth: dimensions.width, hasReachedMaxItemsCount }),
-    [items, dimensions.width, hasReachedMaxItemsCount]
-  );
+  const tabsSizeConfig = useMemo(() => {
+    const horizontalGap = parseInt(euiTheme.size.s, 10); // matches gap between tabs
+    return calculateResponsiveTabs({
+      items,
+      containerWidth: dimensions.width,
+      hasReachedMaxItemsCount,
+      horizontalGap,
+    });
+  }, [items, dimensions.width, hasReachedMaxItemsCount, euiTheme.size.s]);
 
   const [scrollState, setScrollState] = useState<ScrollState>();
 
