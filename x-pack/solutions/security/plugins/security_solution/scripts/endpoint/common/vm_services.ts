@@ -213,7 +213,7 @@ interface CreateUtmVmOptions extends BaseVmCreateOptions {
   name: string;
   log?: ToolingLog;
   /** OS type for the VM */
-  os: 'windows' | 'darwin';
+  os: 'windows' | 'darwin' | 'linux';
   /** UTM VM name to clone from (must exist in UTM) */
   templateVm?: string;
   /** Agent download info */
@@ -303,18 +303,34 @@ To create a Windows template in UTM:
     );
   }
 
+  // Give UTM time to register the cloned VM before trying to start it
+  log.info('Waiting for UTM to register the cloned VM (5 seconds)...');
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+
   // Start the VM
   try {
     log.info(`Starting UTM VM: ${name}`);
-    await execa(UTMCTL_PATH, ['start', name]);
+    const startResult = await execa(UTMCTL_PATH, ['start', name]);
+    log.verbose(`Start command output:`, startResult);
     log.verbose(`VM [${name}] started successfully`);
 
     // Wait for VM to boot and guest agent to be ready
     log.info('Waiting for VM to boot and guest agent to be ready (30 seconds)...');
     await new Promise((resolve) => setTimeout(resolve, 30000));
-  } catch (e) {
-    log.error(`Failed to start UTM VM: ${e.message}`);
-    throw e;
+  } catch (e: unknown) {
+    const error = e as Error & { stdout?: string; stderr?: string };
+    log.error(`Failed to start UTM VM: ${error.message}`);
+    if (error.stdout) {
+      log.error(`stdout: ${error.stdout}`);
+    }
+    if (error.stderr) {
+      log.error(`stderr: ${error.stderr}`);
+    }
+    throw new Error(
+      `Failed to start UTM VM '${name}'. The VM was cloned successfully but failed to start.\n\n` +
+        `Try starting it manually in UTM app to see if there are any errors.\n` +
+        `Error: ${error.message}`
+    );
   }
 
   const vmClient = createUtmHostVmClient(name, os, log);
@@ -608,21 +624,39 @@ export const generateVmName = (
 };
 
 /**
- * Checks if the count of VM running under Multipass is greater than the `threshold` passed on
+ * Checks if the count of VMs running under Multipass and UTM is greater than the `threshold` passed on
  * input and if so, it will return a message indicate so. Useful to remind users of the amount of
- * VM currently running.
+ * VMs currently running.
  * @param threshold
  */
 export const getMultipassVmCountNotice = async (threshold: number = 1): Promise<string> => {
-  const listOfVMs = await findVm('multipass');
+  const listOfMultipassVMs = await findVm('multipass');
+  const listOfUtmVMs = await findVm('utm');
 
-  if (listOfVMs.data.length > threshold) {
+  const totalVMs = listOfMultipassVMs.data.length + listOfUtmVMs.data.length;
+
+  if (totalVMs > threshold) {
+    const vmDetails = [];
+    if (listOfMultipassVMs.data.length > 0) {
+      vmDetails.push(`${listOfMultipassVMs.data.length} Multipass`);
+    }
+    if (listOfUtmVMs.data.length > 0) {
+      vmDetails.push(`${listOfUtmVMs.data.length} UTM`);
+    }
+
+    const viewCommands = [];
+    if (listOfMultipassVMs.data.length > 0) {
+      viewCommands.push(chalk.cyan('multipass list'));
+    }
+    if (listOfUtmVMs.data.length > 0) {
+      viewCommands.push(chalk.cyan('/Applications/UTM.app/Contents/MacOS/utmctl list'));
+    }
+
     return `-----------------------------------------------------------------
-${chalk.red('NOTE:')} ${chalk.bold(
-      chalk.red(`You currently have ${chalk.red(listOfVMs.data.length)} VMs running.`)
-    )}
+${chalk.red('NOTE:')} ${chalk.bold(chalk.red(`You currently have ${chalk.red(totalVMs)} VMs running.`))}
+      ${vmDetails.join(' + ')}
       Remember to delete those no longer being used.
-      View running VMs: ${chalk.cyan('multipass list')}
+      View running VMs: ${viewCommands.join(' or ')}
   -----------------------------------------------------------------
 `;
   }

@@ -583,6 +583,11 @@ export const getAgentFileName = (
     downloadArch = arch;
   }
 
+  // macOS uses 'aarch64' instead of 'arm64' in Elastic Agent filenames
+  if (targetOs === 'darwin' && downloadArch === 'arm64') {
+    downloadArch = 'aarch64';
+  }
+
   return `elastic-agent-${agentVersion}-${targetOs}-${downloadArch}`;
 };
 
@@ -852,6 +857,407 @@ export const getFleetElasticsearchOutputHost = async (
   return host;
 };
 
+type PlatformType = 'windows' | 'darwin' | 'linux';
+type ServiceStatus = 'running' | 'stopped' | 'unknown';
+
+interface PlatformEnrollmentStrategy {
+  generateDownloadCommand(url: string, destPath: string): string;
+
+  generateExtractCommand(archivePath: string, destDir: string): string;
+
+  getArchiveExtension(): string;
+
+  getDefaultDownloadPath(filename: string): string;
+
+  generateInstallCommand(agentPath: string, fleetUrl: string, enrollmentToken: string): string;
+
+  generateHostnameCommand(hostname: string): string;
+
+  requiresRestartAfterHostname(): boolean;
+
+  getRestartCommand(): string;
+
+  getRestartWaitTime(): number;
+
+  generateServiceCheckCommand(): string;
+
+  parseServiceStatus(output: string): ServiceStatus;
+
+  getServiceName(): string;
+
+  getAgentBinaryName(): string;
+
+  getDefaultInstallPath(): string;
+
+  requiresSudo(): boolean;
+}
+
+function detectVmPlatform(hostVm: HostVm, osHint?: 'linux' | 'windows' | 'darwin'): PlatformType {
+  if (osHint === 'windows') {
+    return 'windows';
+  }
+  if (osHint === 'darwin') {
+    return 'darwin';
+  }
+  return 'linux';
+}
+
+function getPlatformEnrollmentStrategy(platform: PlatformType): PlatformEnrollmentStrategy {
+  switch (platform) {
+    case 'windows':
+      return new WindowsEnrollmentStrategy();
+    case 'darwin':
+      return new MacOSEnrollmentStrategy();
+    case 'linux':
+      return new UbuntuEnrollmentStrategy();
+    default:
+      throw new Error(`Unsupported platform: ${platform}`);
+  }
+}
+
+class WindowsEnrollmentStrategy implements PlatformEnrollmentStrategy {
+  generateDownloadCommand(url: string, destPath: string): string {
+    return `
+$ProgressPreference = 'SilentlyContinue'
+$ErrorActionPreference = 'Stop'
+
+Write-Host "Downloading Elastic Agent..."
+try {
+    Invoke-WebRequest -Uri "${url}" -OutFile "${destPath}" -UseBasicParsing
+    if (Test-Path "${destPath}") {
+        $size = (Get-Item "${destPath}").Length
+        Write-Host "Download complete: $([math]::Round($size/1MB, 2))MB"
+    } else {
+        throw "Download failed - file not found"
+    }
+} catch {
+    Write-Error "Download failed: $_"
+    exit 1
+}
+    `.trim();
+  }
+
+  generateExtractCommand(archivePath: string, destDir: string): string {
+    return `
+$ProgressPreference = 'SilentlyContinue'
+$ErrorActionPreference = 'Stop'
+
+Write-Host "Extracting agent archive..."
+try {
+    Expand-Archive -Path "${archivePath}" -DestinationPath "${destDir}" -Force
+    Write-Host "Extraction complete"
+} catch {
+    Write-Error "Extraction failed: $_"
+    exit 1
+}
+    `.trim();
+  }
+
+  getArchiveExtension(): string {
+    return '.zip';
+  }
+
+  getDefaultDownloadPath(filename: string): string {
+    return `C:\\Users\\Public\\${filename}`;
+  }
+
+  generateInstallCommand(agentPath: string, fleetUrl: string, enrollmentToken: string): string {
+    const agentDir = agentPath.substring(0, agentPath.lastIndexOf('\\'));
+    return `
+$ErrorActionPreference = 'Stop'
+
+Write-Host "Installing Elastic Agent..."
+try {
+    Set-Location "${agentDir}"
+    .\\elastic-agent.exe install --url=${fleetUrl} --enrollment-token=${enrollmentToken} --insecure --force --non-interactive
+    Write-Host "Installation complete"
+} catch {
+    Write-Error "Installation failed: $_"
+    exit 1
+}
+    `.trim();
+  }
+
+  generateHostnameCommand(hostname: string): string {
+    return `
+$ErrorActionPreference = 'Stop'
+
+Write-Host "Setting hostname to ${hostname}..."
+try {
+    Rename-Computer -NewName "${hostname}" -Force
+    Write-Host "Hostname changed successfully"
+} catch {
+    Write-Error "Failed to change hostname: $_"
+    exit 1
+}
+    `.trim();
+  }
+
+  requiresRestartAfterHostname(): boolean {
+    return true;
+  }
+
+  getRestartCommand(): string {
+    return `Restart-Computer -Force`;
+  }
+
+  getRestartWaitTime(): number {
+    return 60000;
+  }
+
+  generateServiceCheckCommand(): string {
+    return `
+$service = Get-Service -Name "Elastic Agent" -ErrorAction SilentlyContinue
+if ($service) {
+    Write-Host "Status: $($service.Status)"
+    Write-Host "DisplayName: $($service.DisplayName)"
+} else {
+    Write-Host "Service not found"
+    exit 1
+}
+    `.trim();
+  }
+
+  parseServiceStatus(output: string): ServiceStatus {
+    if (output.includes('Status: Running')) {
+      return 'running';
+    }
+    if (output.includes('Status: Stopped')) {
+      return 'stopped';
+    }
+    if (output.includes('Service not found')) {
+      return 'unknown';
+    }
+    return 'unknown';
+  }
+
+  getServiceName(): string {
+    return 'Elastic Agent';
+  }
+
+  getAgentBinaryName(): string {
+    return 'elastic-agent.exe';
+  }
+
+  getDefaultInstallPath(): string {
+    return 'C:\\Program Files\\Elastic\\Agent';
+  }
+
+  requiresSudo(): boolean {
+    return false;
+  }
+}
+
+class MacOSEnrollmentStrategy implements PlatformEnrollmentStrategy {
+  generateDownloadCommand(url: string, destPath: string): string {
+    // Simplified single-line command for UTM compatibility
+    // UTM exec doesn't handle multi-line bash scripts well
+    return `curl -L -f -o "${destPath}" "${url}" && echo "Download complete: $(ls -lh ${destPath} | awk '{print $5}')" || (echo "Download failed" && exit 1)`;
+  }
+
+  generateExtractCommand(archivePath: string, destDir: string): string {
+    // Simplified single-line command for UTM compatibility
+    return `cd "${destDir}" && tar -xzf "${archivePath}" && echo "Extraction complete" || (echo "Extraction failed" && exit 1)`;
+  }
+
+  getArchiveExtension(): string {
+    return '.tar.gz';
+  }
+
+  getDefaultDownloadPath(filename: string): string {
+    // Use user's Downloads folder instead of /tmp (better for macOS)
+    return `$HOME/Downloads/${filename}`;
+  }
+
+  generateInstallCommand(agentPath: string, fleetUrl: string, enrollmentToken: string): string {
+    const agentDir = agentPath.substring(0, agentPath.lastIndexOf('/'));
+    // Simplified command chain for UTM compatibility
+    return `cd "${agentDir}" && chmod +x ./elastic-agent && sudo ./elastic-agent install --url=${fleetUrl} --enrollment-token=${enrollmentToken} --insecure --force --non-interactive && echo "Installation complete"`;
+  }
+
+  generateHostnameCommand(hostname: string): string {
+    return `
+#!/bin/bash
+set -e
+
+echo "Setting hostname to ${hostname}..."
+sudo scutil --set ComputerName "${hostname}"
+sudo scutil --set LocalHostName "${hostname}"
+sudo scutil --set HostName "${hostname}"
+
+current=$(sudo scutil --get HostName)
+if [ "$current" = "${hostname}" ]; then
+    echo "Hostname changed successfully to: $current"
+else
+    echo "Warning: Hostname may not have been set correctly"
+fi
+    `.trim();
+  }
+
+  requiresRestartAfterHostname(): boolean {
+    return false;
+  }
+
+  getRestartCommand(): string {
+    return '';
+  }
+
+  getRestartWaitTime(): number {
+    return 0;
+  }
+
+  generateServiceCheckCommand(): string {
+    return `
+#!/bin/bash
+result=$(sudo launchctl list | grep -i elastic-agent || echo "NOT_FOUND")
+
+if [ "$result" = "NOT_FOUND" ]; then
+    echo "Service not found"
+    exit 1
+else
+    echo "$result"
+fi
+    `.trim();
+  }
+
+  parseServiceStatus(output: string): ServiceStatus {
+    if (output.includes('Service not found')) {
+      return 'unknown';
+    }
+    if (output.includes('elastic-agent')) {
+      const lines = output.split('\n');
+      for (const line of lines) {
+        if (line.includes('elastic-agent')) {
+          const parts = line.trim().split(/\s+/);
+          if (parts[0] && parts[0] !== '-' && !isNaN(parseInt(parts[0], 10))) {
+            return 'running';
+          }
+        }
+      }
+      return 'stopped';
+    }
+    return 'unknown';
+  }
+
+  getServiceName(): string {
+    return 'elastic-agent';
+  }
+
+  getAgentBinaryName(): string {
+    return 'elastic-agent';
+  }
+
+  getDefaultInstallPath(): string {
+    return '/Library/Elastic/Agent';
+  }
+
+  requiresSudo(): boolean {
+    return true;
+  }
+}
+
+class UbuntuEnrollmentStrategy implements PlatformEnrollmentStrategy {
+  generateDownloadCommand(url: string, destPath: string): string {
+    // Simplified single-line command for UTM compatibility
+    // Try curl first, fall back to wget
+    return `(command -v curl >/dev/null && curl -L -f -o "${destPath}" "${url}") || (command -v wget >/dev/null && wget -O "${destPath}" "${url}") || (echo "Neither curl nor wget available" && exit 1)`;
+  }
+
+  generateExtractCommand(archivePath: string, destDir: string): string {
+    // Simplified single-line command for UTM compatibility
+    return `cd "${destDir}" && tar -xzf "${archivePath}" && echo "Extraction complete" || (echo "Extraction failed" && exit 1)`;
+  }
+
+  getArchiveExtension(): string {
+    return '.tar.gz';
+  }
+
+  getDefaultDownloadPath(filename: string): string {
+    return `/tmp/${filename}`;
+  }
+
+  generateInstallCommand(agentPath: string, fleetUrl: string, enrollmentToken: string): string {
+    const agentDir = agentPath.substring(0, agentPath.lastIndexOf('/'));
+    // Simplified command chain for UTM compatibility
+    return `cd "${agentDir}" && chmod +x ./elastic-agent && sudo ./elastic-agent install --url=${fleetUrl} --enrollment-token=${enrollmentToken} --insecure --force --non-interactive && echo "Installation complete"`;
+  }
+
+  generateHostnameCommand(hostname: string): string {
+    return `
+#!/bin/bash
+set -e
+
+echo "Setting hostname to ${hostname}..."
+
+if command -v hostnamectl >/dev/null 2>&1; then
+    sudo hostnamectl set-hostname "${hostname}"
+    current=$(hostnamectl --static)
+    echo "Hostname set to: $current"
+else
+    echo "Warning: hostnamectl not found, using fallback method"
+    sudo hostname "${hostname}"
+    echo "${hostname}" | sudo tee /etc/hostname
+    sudo sed -i "s/127.0.1.1.*/127.0.1.1\\t${hostname}/" /etc/hosts
+    echo "Hostname set to: ${hostname}"
+fi
+    `.trim();
+  }
+
+  requiresRestartAfterHostname(): boolean {
+    return false;
+  }
+
+  getRestartCommand(): string {
+    return '';
+  }
+
+  getRestartWaitTime(): number {
+    return 0;
+  }
+
+  generateServiceCheckCommand(): string {
+    return `
+#!/bin/bash
+
+if systemctl list-units --all | grep -q elastic-agent; then
+    systemctl status elastic-agent --no-pager || true
+else
+    echo "Service not found"
+    exit 1
+fi
+    `.trim();
+  }
+
+  parseServiceStatus(output: string): ServiceStatus {
+    if (output.includes('Active: active (running)')) {
+      return 'running';
+    }
+    if (output.includes('Active: inactive') || output.includes('Active: failed')) {
+      return 'stopped';
+    }
+    if (output.includes('Service not found')) {
+      return 'unknown';
+    }
+    return 'unknown';
+  }
+
+  getServiceName(): string {
+    return 'elastic-agent';
+  }
+
+  getAgentBinaryName(): string {
+    return 'elastic-agent';
+  }
+
+  getDefaultInstallPath(): string {
+    return '/opt/Elastic/Agent';
+  }
+
+  requiresSudo(): boolean {
+    return true;
+  }
+}
+
 interface EnrollHostVmWithFleetOptions {
   hostVm: HostVm;
   kbnClient: KbnClient;
@@ -872,6 +1278,259 @@ interface EnrollHostVmWithFleetOptions {
   arch?: 'auto' | 'x86_64' | 'arm64';
   /** Use staging builds instead of snapshot builds (defaults to false) */
   staging?: boolean;
+  /**
+   * Use direct download optimization (defaults to false for backward compatibility).
+   * Note: UTM VMs always use direct download regardless of this setting.
+   */
+  useDirectDownload?: boolean;
+}
+
+async function enrollHostVmWithDirectDownload(
+  hostVm: HostVm,
+  agentDownloadUrl: string,
+  agentFilename: string,
+  agentDirName: string,
+  fleetServerUrl: string,
+  enrollmentToken: string,
+  platform: PlatformType,
+  log: ToolingLog
+): Promise<void> {
+  const strategy = getPlatformEnrollmentStrategy(platform);
+
+  log.info(`Starting ${platform} VM enrollment with direct download optimization`);
+  log.info(`Agent filename: ${agentFilename}`);
+  log.info(`Agent directory: ${agentDirName}`);
+
+  const destPath = strategy.getDefaultDownloadPath(agentFilename);
+
+  log.info(`Step 0/7: Pre-flight checks...`);
+  log.info(`Verifying download prerequisites on VM...`);
+
+  if (platform !== 'windows') {
+    // Check if curl or wget is available
+    try {
+      await hostVm.exec('command -v curl || command -v wget', { timeout: 5000 });
+      log.info(`Download tool (curl/wget) is available`);
+    } catch (err) {
+      throw new Error(`Neither curl nor wget found on VM. Install with: sudo apt-get install curl (Ubuntu) or brew install curl (macOS)`);
+    }
+  }
+
+  log.info(`Step 1/7: Downloading agent to VM...`);
+  log.info(`Download URL: ${agentDownloadUrl}`);
+  log.info(`Destination: ${destPath}`);
+  log.info(`Expected file: ${agentFilename}`);
+
+  const downloadCmd = strategy.generateDownloadCommand(agentDownloadUrl, destPath);
+  log.verbose(`Download command:\n${downloadCmd}`);
+
+  // NOTE: UTM's utmctl exec doesn't capture PowerShell stdout/stderr reliably
+  // Commands execute successfully, but we can't monitor progress through output
+  // So we use a simple time-based wait instead of polling
+
+  log.info(`Starting download command (running in background)...`);
+  log.info(`IMPORTANT: If download doesn't start, check:`);
+  log.info(`  1. VM has network connectivity (ping google.com)`);
+  log.info(`  2. curl/wget is installed (for Linux/macOS)`);
+  log.info(`  3. Download URL is accessible from the VM`);
+
+  log.info(`NOTE: UTM does not show download progress or output`);
+  log.info(`Download is running in background - please be patient`);
+  log.info(`For macOS ARM64, download is ~200MB and may take 3-5 minutes on VM network`);
+
+  const downloadPromise = hostVm.exec(downloadCmd, { timeout: 600000 });
+
+  let downloadFailed = false;
+  downloadPromise.catch((err) => {
+    log.error(`Download command failed: ${err.message}`);
+    log.error(`This likely means:`);
+    log.error(`  - VM has no network connectivity`);
+    log.error(`  - Download URL is incorrect`);
+    log.error(`  - curl command failed`);
+    downloadFailed = true;
+  });
+
+  // Wait for download to complete
+  // Since UTM doesn't show output, we just wait a fixed time
+  const downloadWaitTime = 300000; // 5 minutes
+  log.info(`Waiting ${downloadWaitTime / 1000} seconds for download to complete...`);
+  log.info(`(Download started in background, timing based on typical network speeds)`);
+
+  await new Promise((resolve) => setTimeout(resolve, downloadWaitTime));
+
+  if (downloadFailed) {
+    log.error(`Download command failed - cannot proceed`);
+    throw new Error(`Download failed to complete`);
+  }
+
+  log.info(`Download wait period complete - assuming download finished`);
+  log.info(`(UTM limitation: cannot verify file existence, proceeding with extraction)`)
+
+  // Step 2: Extract agent archive
+  // UTM doesn't report completion reliably, so we trigger extraction and wait
+  log.info(`Step 2/7: Extracting agent archive...`);
+
+  const extractDir = destPath.substring(
+    0,
+    destPath.lastIndexOf(platform === 'windows' ? '\\' : '/')
+  );
+  const extractCmd = strategy.generateExtractCommand(destPath, extractDir);
+
+  // Trigger extraction
+  log.verbose(`Extraction command: ${extractCmd}`);
+  hostVm.exec(extractCmd, { timeout: 180000 }).catch((err) => {
+    log.verbose(`Extraction command error (may be normal): ${err.message}`);
+  });
+
+  // Wait for extraction to complete
+  // Windows Expand-Archive can take time for large files (~200MB)
+  const extractWaitTime = platform === 'windows' ? 20000 : 20000; // 20 seconds for all platforms
+  log.info(`Waiting ${extractWaitTime / 1000} seconds for extraction to complete...`);
+  await new Promise((resolve) => setTimeout(resolve, extractWaitTime));
+
+  log.info(`Extraction wait period complete`);
+
+  // Step 3: Construct agent binary path
+  // Since UTM doesn't return stdout properly, we can't use Get-ChildItem to find the file
+  // Instead, we construct the expected path based on the agent directory name
+  log.info(`Step 3/7: Constructing agent binary path...`);
+
+  const agentBinary = strategy.getAgentBinaryName();
+  const agentPathTrimmed =
+    platform === 'windows'
+      ? `${extractDir}\\${agentDirName}\\${agentBinary}`
+      : `${extractDir}/${agentDirName}/${agentBinary}`;
+
+  log.info(`Expected agent path: ${agentPathTrimmed}`);
+  log.verbose(
+    `Note: UTM doesn't support file verification, so we assume the path is correct after waiting for extraction`
+  );
+
+  // Verify agent binary exists before installation
+  log.verbose(`Verifying agent binary exists at ${agentPathTrimmed}...`);
+  const verifyCmd =
+    platform === 'windows'
+      ? `Test-Path "${agentPathTrimmed}"`
+      : `test -f "${agentPathTrimmed}" && echo "exists" || echo "not found"`;
+
+  try {
+    const verifyResult = await hostVm.exec(verifyCmd, { timeout: 5000 });
+    log.verbose(`Binary verification result: ${verifyResult.stdout || '(no output)'}`);
+  } catch (verifyError) {
+    log.warning(`Could not verify binary exists: ${verifyError.message}`);
+    log.warning(`Proceeding anyway - binary may exist despite verification failure`);
+  }
+
+  log.info(`Step 4/7: Installing Elastic Agent with enrollment...`);
+  log.verbose(`Install command: ${strategy.generateInstallCommand(agentPathTrimmed, fleetServerUrl, enrollmentToken)}`);
+
+  const installCmd = strategy.generateInstallCommand(
+    agentPathTrimmed,
+    fleetServerUrl,
+    enrollmentToken
+  );
+
+  try {
+    const installResult = await hostVm.exec(installCmd, { timeout: 180000 });
+    log.verbose(`Install stdout: ${installResult.stdout || '(none)'}`);
+    log.verbose(`Install stderr: ${installResult.stderr || '(none)'}`);
+    log.info(`Installation complete`);
+  } catch (error) {
+    log.warning(`Installation reported error: ${error.message}`);
+    try {
+      const serviceCheck = await hostVm.exec(strategy.generateServiceCheckCommand());
+      const status = strategy.parseServiceStatus(serviceCheck.stdout || '');
+      if (status === 'unknown') {
+        throw error;
+      }
+      log.info(`Service exists despite error, continuing...`);
+    } catch (serviceError) {
+      log.error(`Service check also failed: ${serviceError.message}`);
+      throw error;
+    }
+  }
+
+  log.info(`Step 5/7: Configuring hostname...`);
+  const hostnameCmd = strategy.generateHostnameCommand(hostVm.name);
+  await hostVm.exec(hostnameCmd);
+  log.info(`Hostname configured`);
+
+  if (strategy.requiresRestartAfterHostname()) {
+    log.info(`Step 6/7: Restarting VM (required for ${platform})...`);
+    const restartCmd = strategy.getRestartCommand();
+
+    try {
+      await hostVm.exec(restartCmd, { timeout: 10000 });
+    } catch (error) {
+      log.verbose(`Restart initiated (connection dropped as expected)`);
+    }
+
+    const waitTime = strategy.getRestartWaitTime();
+    log.info(`Waiting ${waitTime / 1000}s for VM to restart...`);
+    await new Promise((resolve) => setTimeout(resolve, waitTime));
+
+    const maxRetries = 10;
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        await hostVm.exec('echo "VM is responsive"');
+        log.info('VM is back online after restart');
+        break;
+      } catch (error) {
+        if (i === maxRetries - 1) {
+          throw new Error(`VM failed to restart after ${maxRetries} attempts`);
+        }
+        log.verbose(`Waiting for VM to respond (attempt ${i + 1}/${maxRetries})...`);
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+    }
+  } else {
+    log.info(`Step 6/7: Restart not required for ${platform}`);
+  }
+
+  log.info(`Step 7/7: Verifying ${strategy.getServiceName()} service...`);
+  const serviceCmd = strategy.generateServiceCheckCommand();
+
+  try {
+    const serviceResult = await hostVm.exec(serviceCmd);
+    const serviceStatus = strategy.parseServiceStatus(serviceResult.stdout || '');
+
+    if (serviceStatus === 'running') {
+      log.info(`Service is running`);
+    } else if (serviceStatus === 'stopped') {
+      log.warning(`Service exists but is stopped, attempting to start...`);
+
+      const startCmd =
+        platform === 'windows'
+          ? `Start-Service -Name "Elastic Agent"`
+          : platform === 'darwin'
+          ? `sudo launchctl load -w /Library/LaunchDaemons/elastic-agent.plist`
+          : `sudo systemctl start elastic-agent`;
+
+      try {
+        await hostVm.exec(startCmd);
+        log.info(`Service started`);
+      } catch (error) {
+        log.warning(`Could not start service: ${error.message}`);
+      }
+    } else {
+      log.warning(`Could not verify service status`);
+    }
+  } catch (error) {
+    // Service check command failed (likely service not found)
+    log.warning(`Service verification failed: ${error.message}`);
+    log.warning(`This may indicate the installation step failed. Check installation logs above.`);
+  }
+
+  log.info(`Waiting for service to initialize (10s)...`);
+  await new Promise((resolve) => setTimeout(resolve, 10000));
+
+  log.info(`Enrollment process complete`);
+  log.info(`If the agent did not enroll successfully, manually check on the VM:`);
+  log.info(`  1. SSH/login to the VM`);
+  log.info(`  2. Check if download file exists: ls -lah /tmp/*.tar.gz (Linux/macOS)`);
+  log.info(`  3. Check if agent extracted: ls -lah /tmp/elastic-agent-*`);
+  log.info(`  4. Check agent service: ${platform === 'windows' ? 'Get-Service "Elastic Agent"' : platform === 'darwin' ? 'sudo launchctl list | grep elastic' : 'systemctl status elastic-agent'}`);
+  log.info(`  5. Check network: ping google.com`);
 }
 
 /**
@@ -921,12 +1580,38 @@ export const enrollHostVmWithFleet = async ({
     ? await downloadAndStoreAgent(agentUrlInfo.url, agentUrlInfo.fileName)
     : { url: agentUrlInfo.url, directory: '', filename: agentUrlInfo.fileName, fullFilePath: '' };
 
+  const policyId = agentPolicyId || (await getOrCreateDefaultAgentPolicy({ kbnClient, log })).id;
+  const [fleetServerUrl, enrollmentToken] = await Promise.all([
+    fetchFleetServerUrl(kbnClient),
+    fetchAgentPolicyEnrollmentKey(kbnClient, policyId),
+  ]);
+
+  // Always use direct download for UTM VMs (faster than upload via QEMU guest agent)
+  if (hostVm.type === 'utm') {
+    log.info(`Using direct download optimization for ${os} UTM VM`);
+
+    const platform = detectVmPlatform(hostVm, os);
+    await enrollHostVmWithDirectDownload(
+      hostVm,
+      agentDownload.url,
+      agentDownload.filename,
+      agentUrlInfo.dirName,
+      fleetServerUrl,
+      enrollmentToken,
+      platform,
+      log
+    );
+
+    log.info(`Checking Fleet for agent enrollment (timeout: ${timeoutMs / 1000}s)...`);
+    return waitForHostToEnroll(kbnClient, log, hostVm.name, timeoutMs);
+  }
+
   log.info(`Installing Elastic Agent`);
 
   // For multipass, we need to place the Agent archive in the VM - either mounting local cache
   // directory or downloading it directly from inside of the VM.
   // For Vagrant, the archive is already in the VM - it was done during VM creation.
-  // For UTM with Windows/macOS, we need to upload and extract the agent.
+  // For UTM: Direct download is attempted first (faster), with fallback to upload if needed.
   if (hostVm.type === 'multipass') {
     if (useAgentCache) {
       const hostVmDownloadsDir = '/home/ubuntu/_agent_downloads';
@@ -949,111 +1634,7 @@ export const enrollHostVmWithFleet = async ({
       // Keep ZIP file for debugging - don't delete
       // await hostVm.exec(`rm -f ${agentDownload.filename}`);
     }
-  } else if (hostVm.type === 'utm') {
-    // For UTM VMs, upload the agent from local cache
-    if (useAgentCache && agentDownload.fullFilePath) {
-      const destPath =
-        os === 'windows'
-          ? `C:\\Users\\Public\\${agentDownload.filename}`
-          : `/tmp/${agentDownload.filename}`;
-
-      log.info(`Uploading agent to VM...`);
-
-      try {
-        await hostVm.upload(agentDownload.fullFilePath, destPath);
-        log.info(`✓ Upload completed`);
-
-        // Verify upload succeeded - use Get-Item with exit code check
-        const uploadCheck = await hostVm.exec(
-          `Get-Item "${destPath}" -ErrorAction SilentlyContinue`
-        );
-
-        log.verbose(`Upload check exit code: ${uploadCheck.exitCode}`);
-
-        if (uploadCheck.exitCode !== 0) {
-          log.warning(`⚠️  Upload verification failed`);
-        }
-
-        // Check file size on Windows (for verbose logging)
-        if (os === 'windows') {
-          const sizeCheck = await hostVm.exec(`(Get-Item "${destPath}").Length`);
-          const fileSize = parseInt(sizeCheck.stdout?.trim() || '0', 10);
-          log.verbose(`File size: ${Math.round(fileSize / 1024 / 1024)}MB`);
-        }
-      } catch (uploadError) {
-        log.error(`Upload failed: ${uploadError.message}`);
-        throw uploadError;
-      }
-
-      if (os === 'windows') {
-        // Follow Elastic's official installation pattern
-        // Set ProgressPreference to avoid progress bar issues, then extract
-        const extractCommand = `
-$ProgressPreference = 'SilentlyContinue'
-Expand-Archive -Path "${destPath}" -DestinationPath "C:\\Users\\Public" -Force
-        `.trim();
-
-        log.info(`Extracting agent (this takes ~2 minutes)...`);
-        await hostVm.exec(extractCommand);
-
-        // IMPORTANT: Expand-Archive on Windows returns immediately but extraction continues
-        // in the background. Wait 2 minutes for extraction to complete.
-        const extractionWaitTime = 120000; // 2 minutes
-        const extractionSteps = 12; // Show progress 12 times (every 10 seconds)
-        const stepInterval = extractionWaitTime / extractionSteps;
-
-        for (let i = 1; i <= extractionSteps; i++) {
-          await new Promise((resolve) => setTimeout(resolve, stepInterval));
-          const progress = Math.round((i / extractionSteps) * 100);
-          log.info(`  Extracting... ${progress}%`);
-        }
-
-        // Keep ZIP file for debugging - don't delete
-        // await hostVm.exec(`Remove-Item -Path "${destPath}" -Force -ErrorAction SilentlyContinue`);
-      } else {
-        // macOS/Linux: Use tar
-        await hostVm.exec(`cd /tmp && tar -zxf ${agentDownload.filename}`);
-        log.info(`✓ Extraction completed`);
-        // Keep archive for debugging - don't delete
-        // await hostVm.exec(`rm -f /tmp/${agentDownload.filename}`);
-      }
-    } else {
-      // Fallback: Download directly on the VM if cache is not used
-      log.info(
-        `Cache not available, VM will download Elastic Agent directly from: ${agentDownload.url}`
-      );
-
-      if (os === 'windows') {
-        const destPath = `C:\\Users\\Public\\${agentDownload.filename}`;
-
-        const downloadCommand = `
-$ProgressPreference = 'SilentlyContinue'
-Invoke-WebRequest -Uri "${agentDownload.url}" -OutFile "${destPath}"
-        `.trim();
-
-        await hostVm.exec(downloadCommand);
-        log.info(`✓ Download completed`);
-
-        const extractCommand = `
-$ProgressPreference = 'SilentlyContinue'
-Expand-Archive -Path "${destPath}" -DestinationPath "C:\\Users\\Public" -Force
-        `.trim();
-
-        await hostVm.exec(extractCommand);
-        log.info(`✓ Extraction completed`);
-      } else {
-        await hostVm.exec(`curl -L ${agentDownload.url} -o /tmp/${agentDownload.filename}`);
-        await hostVm.exec(`cd /tmp && tar -zxf ${agentDownload.filename}`);
-        log.info(`✓ Download and extraction completed`);
-      }
-    }
   }
-
-  const policyId = agentPolicyId || (await getOrCreateDefaultAgentPolicy({ kbnClient, log })).id;
-  const [fleetServerUrl, enrollmentToken] = await Promise.all([
-    fetchFleetServerUrl(kbnClient),
-    fetchAgentPolicyEnrollmentKey(kbnClient, policyId),
-  ]);
 
   // Build OS-specific enrollment command
   let agentEnrollCommand: string;

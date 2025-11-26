@@ -194,10 +194,23 @@ const runCli: RunFn = async ({ log, flags }) => {
     log.info(`${EMOJIS.CLOCK} Checking for existing Osquery VMs...`);
     const allVmNames = await findVm(vmType, undefined, log);
 
+    // Only match VMs with the requested OS type
+    const osNameForPattern = vmOs === 'linux' ? 'ubuntu' : vmOs === 'darwin' ? 'macos' : vmOs;
     const osqueryVmPattern = new RegExp(
-      `^${systemUsername}-osquery-\\d+(?:-(?:ubuntu|macos|windows|linux|darwin)-\\d+|-\\d+)?$`
+      `^${systemUsername}-osquery-\\d+(?:-${osNameForPattern}-\\d+|-\\d+)?$`
     );
-    const matchingVmNames = allVmNames.data.filter((vmName) => osqueryVmPattern.test(vmName));
+    const matchingVmNames = allVmNames.data.filter((vmName) => {
+      const matches = osqueryVmPattern.test(vmName);
+      // For more specific filtering, also check if VM name contains the OS identifier
+      if (matches && vmName.includes('-')) {
+        const parts = vmName.split('-');
+        // If VM has an OS identifier in the name, it must match the requested OS
+        if (parts.includes('ubuntu') || parts.includes('macos') || parts.includes('windows')) {
+          return parts.includes(osNameForPattern);
+        }
+      }
+      return matches;
+    });
 
     if (matchingVmNames.length > 0) {
       log.info(`${EMOJIS.SUCCESS} Found ${matchingVmNames.length} existing Osquery VM(s)`);
@@ -332,7 +345,7 @@ const runCli: RunFn = async ({ log, flags }) => {
             memory: '1G',
             disk: '8G',
             log,
-            os: vmOs as 'windows' | 'darwin',
+            os: vmOs as 'windows' | 'darwin' | 'linux',
             templateVm,
           };
         } else {
@@ -353,69 +366,8 @@ const runCli: RunFn = async ({ log, flags }) => {
           log.info(`${EMOJIS.SUCCESS} VM ${vmIndex}/${vmCount} created successfully: ${vmName}`);
         }
 
-        // For Windows VMs, rename the computer to match the VM name
-        if (vmOs === 'windows') {
-          try {
-            if (verbose) {
-              log.info(`${EMOJIS.CLOCK} Setting Windows computer hostname to: ${vmName}`);
-            }
-
-            // Rename the computer using PowerShell
-            const renameCommand = `Rename-Computer -NewName "${vmName}" -Force`;
-            await vm.exec(renameCommand);
-
-            if (verbose) {
-              log.info(`${EMOJIS.SUCCESS} Rename command executed`);
-              log.info(`${EMOJIS.CLOCK} Restarting VM to apply new hostname...`);
-            }
-
-            // Restart the computer to apply the new name
-            await vm.exec('Restart-Computer -Force');
-
-            // Wait for the VM to shut down and restart
-            if (verbose) {
-              log.info(`${EMOJIS.CLOCK} Waiting for VM to restart (60 seconds)...`);
-            }
-            await new Promise((resolve) => setTimeout(resolve, 60000));
-
-            // Wait for the VM to be accessible again
-            const maxRetries = 12; // 2 minutes total (12 * 10 seconds)
-            let retries = 0;
-            let vmReady = false;
-
-            while (retries < maxRetries && !vmReady) {
-              try {
-                // Test if VM is accessible by running a simple command
-                const testResult = await vm.exec('echo "ready"', { silent: true });
-                if (testResult.exitCode === 0) {
-                  vmReady = true;
-                  if (verbose) {
-                    log.info(`${EMOJIS.SUCCESS} VM is back online with new hostname`);
-                  }
-                }
-              } catch (error) {
-                // VM not ready yet, will retry
-              }
-
-              if (!vmReady) {
-                retries++;
-                if (verbose && retries % 3 === 0) {
-                  log.info(`   Waiting for VM to be accessible... (${retries}/${maxRetries})`);
-                }
-                await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait 10 seconds between retries
-              }
-            }
-
-            if (!vmReady) {
-              log.warning(
-                `${EMOJIS.WARNING} VM did not come back online within expected time, but continuing anyway...`
-              );
-            }
-          } catch (error) {
-            log.warning(`${EMOJIS.WARNING} Error renaming Windows computer: ${error.message}`);
-            log.warning(`   Continuing with original hostname...`);
-          }
-        }
+        // Note: Hostname configuration is handled during Fleet enrollment
+        // (see enrollHostVmWithFleet in fleet_services.ts)
 
         return { success: true as const, vm, policy, reused: false, vmIndex };
       } catch (error) {
