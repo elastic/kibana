@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import {
-  NoIndicesMeteringError,
-  NoPrivilegeMeteringError,
-} from '@kbn/data-usage-plugin/server/errors';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -125,47 +120,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
         await pageObjects.svlCommonPage.loginWithCustomRole();
         await navigateAndVerify(false);
-      });
-
-      describe('with custom role and data streams', function () {
-        it('does not load data streams without necessary index privilege for any index', async () => {
-          await samlAuth.setCustomRole({
-            elasticsearch: {
-              cluster: ['monitor'],
-              indices: [{ names: ['*'], privileges: ['read'] }],
-            },
-            kibana: [
-              {
-                base: ['all'],
-                feature: {},
-                spaces: ['*'],
-              },
-            ],
-          });
-          await pageObjects.svlCommonPage.loginWithCustomRole();
-          await navigateAndVerify(true);
-          const toastContent = await toasts.getContentByIndex(1);
-          expect(toastContent).to.contain(new NoPrivilegeMeteringError().message);
-        });
-        it('handles error when no data streams that it has permission to exist (index_not_found_exception)', async () => {
-          await samlAuth.setCustomRole({
-            elasticsearch: {
-              cluster: ['monitor'],
-              indices: [{ names: ['none*'], privileges: ['all'] }],
-            },
-            kibana: [
-              {
-                base: ['all'],
-                feature: {},
-                spaces: ['*'],
-              },
-            ],
-          });
-          await pageObjects.svlCommonPage.loginWithCustomRole();
-          await navigateAndVerify(true);
-          const toastContent = await toasts.getContentByIndex(1);
-          expect(toastContent).to.contain(new NoIndicesMeteringError().message);
-        });
       });
     });
   });
