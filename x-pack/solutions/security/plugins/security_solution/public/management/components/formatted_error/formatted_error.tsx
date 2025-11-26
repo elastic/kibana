@@ -15,7 +15,7 @@ export interface ObjectContentProps {
 
 export const ObjectContent = memo<ObjectContentProps>(({ data }) => {
   return (
-    <EuiText size="s">
+    <div>
       {Object.entries(data).map(([key, value]) => {
         return (
           <div key={key} className="eui-textBreakWord">
@@ -25,7 +25,7 @@ export const ObjectContent = memo<ObjectContentProps>(({ data }) => {
           </div>
         );
       })}
-    </EuiText>
+    </div>
   );
 });
 ObjectContent.displayName = 'ObjectContent';
@@ -53,7 +53,11 @@ export const FormattedError = memo<FormattedErrorProps>(
         );
       }
 
-      return <EuiText data-test-subj={dataTestSubj}>{content}</EuiText>;
+      return (
+        <EuiText size="relative" data-test-subj={dataTestSubj}>
+          {content}
+        </EuiText>
+      );
     }, [dataTestSubj, error]);
   }
 );

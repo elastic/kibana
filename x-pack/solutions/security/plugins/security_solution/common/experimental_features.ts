@@ -50,6 +50,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointMemoryDump: false,
 
   /**
+   * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
+   * Release: 9.4
+   */
+  responseActionsScriptLibraryManagement: false,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -63,6 +69,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enable resetting risk scores to zero for outdated entities
    */
   enableRiskScoreResetToZero: true,
+
+  /**
+   * Enable privmon modifier in risk scoring calculation
+   */
+  enableRiskScorePrivmonModifier: false,
 
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
@@ -179,6 +190,14 @@ export const allowedExperimentalValues = Object.freeze({
    * Protects all the work related to the attacks and alerts alignment effort
    */
   attacksAlertsAlignment: false,
+  /**
+   *  Enables the QRadar rules import feature
+   */
+  qradarRulesMigration: false,
+  /**
+   * Enables the Kubernetes Dashboard in Security Solution
+   */
+  kubernetesEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

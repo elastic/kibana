@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -41,10 +41,6 @@
     "@kbn/core-custom-branding-common",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-analytics-browser",
-    "@kbn/default-nav-analytics",
-    "@kbn/default-nav-ml",
-    "@kbn/default-nav-management",
-    "@kbn/default-nav-devtools",
     "@kbn/shared-ux-router",
     "@kbn/core-http-browser-internal",
     "@kbn/core-base-browser-internal",

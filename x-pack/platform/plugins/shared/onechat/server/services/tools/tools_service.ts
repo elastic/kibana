@@ -18,7 +18,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import {
   createBuiltinToolRegistry,
-  registerBuiltinTools,
   createBuiltinProviderFn,
   type BuiltinToolRegistry,
 } from './builtin';
@@ -26,7 +25,6 @@ import type { ToolsServiceSetup, ToolsServiceStart } from './types';
 import { getToolTypeDefinitions } from './tool_types';
 import { createPersistedProviderFn } from './persisted';
 import { createToolRegistry } from './tool_registry';
-import { getToolTypeInfo } from './utils';
 
 export interface ToolsServiceSetupDeps {
   logger: Logger;
@@ -51,7 +49,6 @@ export class ToolsService {
 
   setup(deps: ToolsServiceSetupDeps): ToolsServiceSetup {
     this.setupDeps = deps;
-    registerBuiltinTools({ registry: this.builtinRegistry });
 
     return {
       register: (reg) => {
@@ -80,8 +77,6 @@ export class ToolsService {
     const builtinProviderFn = createBuiltinProviderFn({
       registry: this.builtinRegistry,
       toolTypes,
-      uiSettings,
-      savedObjects,
     });
     const persistedProviderFn = createPersistedProviderFn({
       logger,
@@ -100,12 +95,14 @@ export class ToolsService {
         request,
         builtinProvider,
         persistedProvider,
+        uiSettings,
+        savedObjects,
       });
     };
 
     return {
       getRegistry,
-      getToolTypeInfo: () => getToolTypeInfo(toolTypes),
+      getToolDefinitions: () => toolTypes,
     };
   }
 }

@@ -17,6 +17,8 @@ import { act } from '@testing-library/react';
  * @returns A cleanup function to restore the original dimensions.
  */
 export const resizeWindow = (width: number, height: number) => {
+  if (typeof window === 'undefined') return;
+
   const originalInnerWidth = window.innerWidth;
   const originalInnerHeight = window.innerHeight;
 
@@ -31,6 +33,7 @@ export const resizeWindow = (width: number, height: number) => {
   return () => {
     window.innerWidth = originalInnerWidth;
     window.innerHeight = originalInnerHeight;
+
     act(() => {
       window.dispatchEvent(new Event('resize'));
     });
