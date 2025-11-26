@@ -29,7 +29,8 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   describe('Log Correlation', () => {
-    it('Emits "trace.id" into the logs', async () => {
+    // TODO: see https://github.com/elastic/kibana/pull/243499
+    it.skip('Emits "trace.id" into the logs', async () => {
       if (isPrWithLabel('"ci:collect-apm"')) {
         log.warning(`Skipping test as APM is enabled in FTR, which breaks this test`);
         return;

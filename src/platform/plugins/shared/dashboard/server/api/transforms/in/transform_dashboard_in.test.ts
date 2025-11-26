@@ -66,7 +66,7 @@ describe('transformDashboardIn', () => {
       },
     };
 
-    const output = transformDashboardIn({ dashboardState });
+    const output = transformDashboardIn(dashboardState);
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
@@ -106,7 +106,7 @@ describe('transformDashboardIn', () => {
       options: DEFAULT_DASHBOARD_OPTIONS,
     };
 
-    const output = transformDashboardIn({ dashboardState });
+    const output = transformDashboardIn(dashboardState);
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
@@ -121,6 +121,52 @@ describe('transformDashboardIn', () => {
         },
         "error": null,
         "references": Array [],
+      }
+    `);
+  });
+
+  it('should return error when passed tag references', () => {
+    const dashboardState: DashboardState = {
+      title: 'title',
+      panels: [],
+      references: [
+        {
+          name: 'someTagRef',
+          type: 'tag',
+          id: '1',
+        },
+      ],
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output).toMatchInlineSnapshot(`
+      Object {
+        "attributes": null,
+        "error": [Error: Tag references are not supported. Pass tags in with 'data.tags'],
+        "references": null,
+      }
+    `);
+  });
+
+  it('should return error when passed search source references', () => {
+    const dashboardState: DashboardState = {
+      title: 'title',
+      panels: [],
+      references: [
+        {
+          id: 'fizzle-1234',
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+          type: 'index-pattern',
+        },
+      ],
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output).toMatchInlineSnapshot(`
+      Object {
+        "attributes": null,
+        "error": [Error: Search source references are not supported. Pass filters in with injected references'],
+        "references": null,
       }
     `);
   });
