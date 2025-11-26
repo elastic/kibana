@@ -9,7 +9,7 @@ import * as React from 'react';
 import type { AppMockRenderer } from '../../../lib/test_utils';
 import { createAppMockRenderer } from '../../../lib/test_utils';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
-import { MaintenanceWindowStatus } from '../../../../common';
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 
 jest.mock('../../../utils/kibana_react');
 
