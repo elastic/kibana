@@ -20,7 +20,6 @@ import type {
   ExitForeachNode,
   ExitNormalPathNode,
   ExitRetryNode,
-  GraphNodeUnion,
   HttpGraphNode,
   WorkflowGraph,
 } from '@kbn/workflows/graph';
@@ -31,6 +30,7 @@ import {
   isExitWorkflowTimeoutZone,
 } from '@kbn/workflows/graph';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
+import { CustomStepImpl } from './custom_step_impl';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { HttpStepImpl } from './http_step';
@@ -64,6 +64,7 @@ import type { ConnectorExecutor } from '../connector_executor';
 import type { UrlValidator } from '../lib/url_validator';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import type { ContextDependencies } from '../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 
@@ -74,17 +75,21 @@ export class NodesFactory {
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
     private urlValidator: UrlValidator,
     private workflowGraph: WorkflowGraph,
-    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory
+    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
+    private dependencies: ContextDependencies
   ) {}
 
-  // eslint-disable-next-line complexity
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
-    const node = stepExecutionRuntime.node;
-    const stepLogger = stepExecutionRuntime.stepLogger;
+    const genericStepNode = this.createGenericStepNode(stepExecutionRuntime);
+    if (genericStepNode) {
+      return genericStepNode;
+    }
+
+    const { node } = stepExecutionRuntime;
 
     // Handle elasticsearch.* and kibana.* actions
     if (node.stepType && node.stepType.startsWith('elasticsearch.')) {
-      this.workflowLogger.logInfo(`Creating Elasticsearch action step: ${node.stepType}`, {
+      this.workflowLogger.logDebug(`Creating Elasticsearch action step: ${node.stepType}`, {
         event: { action: 'internal-action-creation', outcome: 'success' },
         tags: ['step-factory', 'elasticsearch', 'internal-action'],
       });
@@ -98,7 +103,7 @@ export class NodesFactory {
     }
 
     if (node.stepType && node.stepType.startsWith('kibana.')) {
-      this.workflowLogger.logInfo(`Creating Kibana action step: ${node.stepType}`, {
+      this.workflowLogger.logDebug(`Creating Kibana action step: ${node.stepType}`, {
         event: { action: 'internal-action-creation', outcome: 'success' },
         tags: ['step-factory', 'kibana', 'internal-action'],
       });
@@ -111,6 +116,34 @@ export class NodesFactory {
       );
     }
 
+    // Check for custom registered step types first
+    const { workflowsExtensions } = this.dependencies;
+    if (node.stepType && workflowsExtensions.hasStep(node.stepType)) {
+      const stepDefinition = workflowsExtensions.getStep(node.stepType);
+      if (stepDefinition) {
+        this.workflowLogger.logDebug(`Creating custom registered step: ${node.stepType}`, {
+          event: { action: 'custom-step-creation', outcome: 'success' },
+          tags: ['step-handler', 'custom-step', 'extension'],
+        });
+        return new CustomStepImpl(
+          node as AtomicGraphNode,
+          stepDefinition,
+          stepExecutionRuntime,
+          this.connectorExecutor,
+          this.workflowRuntime,
+          this.workflowLogger
+        );
+      }
+    }
+
+    throw new Error(`Unknown node type: ${node.stepType}`);
+  }
+
+  private createGenericStepNode(
+    stepExecutionRuntime: StepExecutionRuntime
+  ): NodeImplementation | undefined {
+    const node = stepExecutionRuntime.node;
+    const stepLogger = stepExecutionRuntime.stepLogger;
     switch (node.type) {
       case 'enter-foreach':
         return new EnterForeachNodeImpl(
@@ -233,7 +266,7 @@ export class NodesFactory {
           this.workflowRuntime
         );
       default:
-        throw new Error(`Unknown node type: ${(node as GraphNodeUnion).stepType}`);
+        return undefined;
     }
   }
 }

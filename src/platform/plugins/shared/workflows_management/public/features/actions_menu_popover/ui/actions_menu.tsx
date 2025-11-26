@@ -25,6 +25,7 @@ import React, { useMemo, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../hooks/use_kibana';
 import { getBaseConnectorType } from '../../../shared/ui/step_icons/get_base_connector_type';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { flattenOptions, getActionOptions } from '../lib/get_action_options';
@@ -44,7 +45,11 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
   const styles = useMemoCss(componentStyles);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const { euiTheme } = useEuiTheme();
-  const defaultOptions = useMemo(() => getActionOptions(euiTheme), [euiTheme]);
+  const { workflowsExtensions } = useKibana().services;
+  const defaultOptions = useMemo(
+    () => getActionOptions(euiTheme, workflowsExtensions),
+    [euiTheme, workflowsExtensions]
+  );
   const flatOptions = useMemo(() => flattenOptions(defaultOptions), [defaultOptions]);
 
   const [options, setOptions] = useState<ActionOptionData[]>(defaultOptions);

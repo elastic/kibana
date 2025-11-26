@@ -9351,6 +9351,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/workflows-extensions-example@link:examples/workflows_extensions_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-extensions@link:src/platform/plugins/shared/workflows_extensions":
+  version "0.0.0"
+  uid ""
+
 "@kbn/workflows-management-plugin@link:src/platform/plugins/shared/workflows_management":
   version "0.0.0"
   uid ""

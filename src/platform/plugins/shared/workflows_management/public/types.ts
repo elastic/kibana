@@ -20,6 +20,7 @@ import type {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsPublicPluginSetup {}
@@ -40,6 +41,7 @@ export interface WorkflowsPublicPluginStartDependencies {
   data: DataPublicPluginStart;
   spaces: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  workflowsExtensions: WorkflowsExtensionsPublicPluginStart;
 }
 
 export interface WorkflowsPublicPluginStartAdditionalServices {

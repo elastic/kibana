@@ -9,12 +9,16 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import { getAllConnectors } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
 import type { ActionConnectorGroup, ActionOptionData } from '../types';
 import { isActionGroup } from '../types';
 
-export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[] {
+export function getActionOptions(
+  euiTheme: UseEuiTheme['euiTheme'],
+  workflowsExtensions: WorkflowsExtensionsPublicPluginStart
+): ActionOptionData[] {
   const connectors = getAllConnectors();
   const triggersGroup: ActionOptionData = {
     iconType: 'bolt',
@@ -211,6 +215,15 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
       }
     }
   }
+
+  workflowsExtensions.getRegisteredSteps().forEach((step) => {
+    kibanaGroup.options.push({
+      id: step.id,
+      label: step.label,
+      description: step.description,
+      iconType: step.icon,
+    });
+  });
 
   return [
     triggersGroup,
