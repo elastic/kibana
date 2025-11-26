@@ -18,6 +18,5 @@
     "@kbn/data-forge",
     "@kbn/test",
     "@kbn/server-route-repository",
-    "@kbn/fleet-plugin",
   ]
 }
