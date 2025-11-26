@@ -17,7 +17,7 @@ import {
   formatConsolidatedSummary,
   checkBackfillCapacity,
   filterGapsWithOverlappingBackfills,
-  handleCancellation,
+  isCancelled,
   getGapAutoFillRunOutcome,
   type AggregatedByRuleEntry,
 } from './utils';
@@ -134,34 +134,12 @@ describe('gap auto fill task utils', () => {
     });
   });
 
-  describe('handleCancellation', () => {
-    it('logs a success event with consolidated results when cancelled', async () => {
-      const aggregated = new Map<string, AggregatedByRuleEntry>([
-        [
-          'rule-1',
-          {
-            ruleId: 'rule-1',
-            processedGaps: 2,
-            status: GapFillSchedulePerRuleStatus.SUCCESS,
-          },
-        ],
-      ]);
-      const logEvent = jest.fn();
-
+  describe('isCancelled', () => {
+    it('returns true when the abort controller is aborted', async () => {
       const abortController = new AbortController();
       abortController.abort();
-      const res = await handleCancellation({
-        abortController,
-        aggregatedByRule: aggregated,
-        logEvent: logEvent as unknown as GapAutoFillSchedulerEventLogger,
-      });
-
+      const res = isCancelled(abortController);
       expect(res).toBe(true);
-      expect(logEvent).toHaveBeenCalledTimes(1);
-      const arg = logEvent.mock.calls[0][0];
-      expect(arg.status).toBe(GAP_AUTO_FILL_STATUS.SUCCESS);
-      expect(String(arg.message)).toContain('cancelled by timeout');
-      expect(String(arg.message)).toContain('processed 2 gap');
     });
   });
 
