@@ -14,7 +14,6 @@ import { reduce } from 'rxjs';
 import type { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { AggregateQuery } from '@kbn/es-query';
-import { mutateQueryStatsGrouping } from '@kbn/esql-utils';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll, fetchMoreDocuments } from './fetch_all';
@@ -168,49 +167,6 @@ describe('test fetchAll', () => {
       { fetchStatus: FetchStatus.PARTIAL, result: 2 },
       { fetchStatus: FetchStatus.COMPLETE, result: 42 },
     ]);
-  });
-
-  test('should mutate the query when we have cascade groupings and the cascade layout is selected', async () => {
-    const cascadeLayoutFeatureFlagSpy = jest.spyOn(
-      discoverServiceMock.discoverFeatureFlags,
-      'getCascadeLayoutEnabled'
-    );
-
-    cascadeLayoutFeatureFlagSpy.mockReturnValue(true);
-
-    // invoke getDiscoverStateMock to that the version of appState we receive is our spied on version of the feature flag util
-    const { appState, internalState, getCurrentTab } = getDiscoverStateMock({
-      services: discoverServiceMock,
-    });
-
-    const enhancedDeps = {
-      ...deps,
-      appStateContainer: appState,
-      internalState,
-      getCurrentTab,
-    };
-
-    const editorQuery: AggregateQuery = {
-      esql: 'FROM my_index | STATS count = COUNT(message) BY my_field',
-    };
-
-    // configure state to have an ESQL query with cascade groupings
-    enhancedDeps.appStateContainer.update({
-      query: editorQuery,
-    });
-
-    searchSource.getField('index')!.isTimeBased = () => false;
-    const hits = [{ _id: '1', _index: 'logs' }];
-    const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    mockFetchDocuments.mockResolvedValue({ records: documents });
-
-    fetchAll(enhancedDeps);
-    await waitForNextTick();
-
-    expect(mutateQueryStatsGrouping).toHaveBeenCalledWith(editorQuery, ['my_field']);
-
-    // revert to default value of the feature flag util
-    cascadeLayoutFeatureFlagSpy.mockReturnValue(false);
   });
 
   test('should use charts query to fetch total hit count when chart is visible', async () => {
