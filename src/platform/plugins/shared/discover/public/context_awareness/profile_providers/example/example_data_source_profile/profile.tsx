@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiLink, EuiFlyout, EuiPanel } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiLink,
+  EuiFlyout,
+  EuiFlexGroup,
+  EuiSpacer,
+  EuiCodeBlock,
+  EuiTitle,
+  EuiButton,
+} from '@elastic/eui';
 import type { RowControlColumn } from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
@@ -76,8 +85,10 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
     getDocViewer:
       (prev, { context }) =>
       (params) => {
+        const openInNewTab = params.actions.openInNewTab;
         const recordId = params.record.id;
         const prevValue = prev(params);
+
         return {
           title: `Record #${recordId}`,
           docViewsRegistry: (registry) => {
@@ -86,12 +97,42 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               title: 'Example',
               order: 0,
               component: () => (
-                <EuiPanel color="transparent" hasShadow={false}>
-                  <div data-test-subj="exampleDataSourceProfileDocView">Example Doc View</div>
-                  <pre data-test-subj="exampleDataSourceProfileDocViewRecord">
-                    {context.formatRecord(params.record.flattened)}
-                  </pre>
-                </EuiPanel>
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiFlexGroup direction="column" gutterSize="s">
+                    <EuiFlexGroup
+                      direction="row"
+                      gutterSize="s"
+                      justifyContent="spaceBetween"
+                      alignItems="flexEnd"
+                    >
+                      <EuiTitle size="xs">
+                        <h3 data-test-subj="exampleDataSourceProfileDocView">Example doc view</h3>
+                      </EuiTitle>
+                      {openInNewTab && (
+                        <EuiButton
+                          color="text"
+                          size="s"
+                          onClick={() => {
+                            openInNewTab({
+                              tabLabel: 'My new tab',
+                              query: { esql: 'FROM my-example-logs | LIMIT 5' },
+                            });
+                          }}
+                          data-test-subj="exampleDataSourceProfileDocViewOpenNewTab"
+                        >
+                          Open new tab
+                        </EuiButton>
+                      )}
+                    </EuiFlexGroup>
+                    <EuiCodeBlock
+                      language="json"
+                      data-test-subj="exampleDataSourceProfileDocViewRecord"
+                    >
+                      {context.formatRecord(params.record.flattened)}
+                    </EuiCodeBlock>
+                  </EuiFlexGroup>
+                </>
               ),
             });
 

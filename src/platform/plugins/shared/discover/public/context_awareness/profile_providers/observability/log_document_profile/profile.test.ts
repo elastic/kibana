@@ -171,6 +171,7 @@ describe('logDocumentProfileProvider', () => {
         { context: RESOLUTION_MATCH.context }
       );
       const docViewer = getDocViewer({
+        actions: {},
         record: buildDataTableRecord({}),
       });
       const registry = new DocViewsRegistry();

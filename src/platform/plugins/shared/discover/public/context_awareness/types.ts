@@ -137,6 +137,20 @@ export interface DocViewerExtension {
  */
 export interface DocViewerExtensionParams {
   /**
+   * Available actions for the doc viewer extension
+   */
+  actions: {
+    /**
+     * Opens a new tab
+     * @param params The parameters for the open in new tab action
+     */
+    openInNewTab?: (params: OpenInNewTabParams) => void;
+    /**
+     * Updates the current ES|QL query
+     */
+    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+  };
+  /**
    * The record being displayed in the doc viewer
    */
   record: DataTableRecord;
