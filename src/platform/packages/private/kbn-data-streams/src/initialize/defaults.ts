@@ -7,25 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AnyDataStreamDefinition } from './types';
+import { defaultsDeep } from 'lodash';
+import type { AnyDataStreamDefinition, DataStreamDefinition } from '../types';
 
 /**
  * Do not change these defaults lightly... They applied to all data streams and may
  * result in a large number of updated data streams when this code is released.
  */
-export const defaultDataStreamDefinition: () => Partial<AnyDataStreamDefinition> = () => ({
-  hidden: true,
-  template: {
-    priority: 100,
-    _meta: {
-      managed: true,
-      userAgent: '@kbn/data-streams',
+export function applyDefaults(def: AnyDataStreamDefinition): AnyDataStreamDefinition {
+  const defaultDataStreamDefinition: Partial<DataStreamDefinition<any, any>> = {
+    hidden: true,
+    template: {
+      priority: 100,
+      _meta: {
+        managed: true,
+        userAgent: '@kbn/data-streams',
+      },
+      mappings: {
+        dynamic: false,
+      },
+      settings: {
+        hidden: true,
+      },
     },
-    mappings: {
-      dynamic: false,
-    },
-    settings: {
-      hidden: true,
-    },
-  },
-});
+  };
+
+  return defaultsDeep(def, defaultDataStreamDefinition);
+}
