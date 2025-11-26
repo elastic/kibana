@@ -54,7 +54,9 @@ export class IndexManagement extends AbstractPageObject {
   }
 
   async indexLinkVisible(indexName: string) {
-    return this.page.getByRole('button').getByText(indexName).isVisible();
+    const indexButton = this.page.getByRole('button').getByText(indexName);
+    await indexButton.waitFor({ state: 'visible', timeout: 30000 }); // necessary since this can be slow in CI
+    return indexButton.isVisible();
   }
 
   async toggleHiddenIndices() {
@@ -98,9 +100,7 @@ export class IndexManagement extends AbstractPageObject {
     await input.fill(value);
 
     // Wait for and click the option
-    const option = this.page.locator(`[role="option"]`).filter({ hasText: value });
-    await option.waitFor({ state: 'visible' });
-    await option.click();
+    await this.page.locator(`[role="option"]`).filter({ hasText: value }).click();
   }
 
   async changeMappingsEditorTab(tab: 'fields' | 'advancedOptions' | 'templates') {
