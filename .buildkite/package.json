@@ -12,7 +12,7 @@
     "adm-zip": "^0.5.16",
     "axios": "^1.8.3",
     "globby": "^11.1.0",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "minimatch": "^5.0.1",
     "minimist": "^1.2.8",
     "p-limit": "^3.1.0",

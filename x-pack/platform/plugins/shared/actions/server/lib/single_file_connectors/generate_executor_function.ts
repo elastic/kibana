@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { AxiosInstance } from 'axios';
 import type {
@@ -15,6 +16,17 @@ import type { ExecutorParams } from '../../sub_action_framework/types';
 
 type RecordUnknown = Record<string, unknown>;
 
+function errorResultUnexpectedError(actionId: string): ConnectorTypeExecutorResult<void> {
+  const errMessage = i18n.translate('xpack.actions.singleFileConnector.unexpectedErrorMessage', {
+    defaultMessage: 'error calling connector, unexpected error',
+  });
+  return {
+    status: 'error',
+    message: errMessage,
+    actionId,
+  };
+}
+
 export const generateExecutorFunction = ({
   actions,
   getAxiosInstanceWithAuth,
@@ -24,10 +36,9 @@ export const generateExecutorFunction = ({
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
-  ): Promise<ConnectorTypeExecutorResult<RecordUnknown | {}>> {
-    const { actionId, params, secrets, logger } = execOptions;
+  ): Promise<ConnectorTypeExecutorResult<unknown>> {
+    const { actionId, config, params, secrets, logger } = execOptions;
     const { subAction, subActionParams } = params as ExecutorParams;
-    let data = null;
 
     const axiosInstance = await getAxiosInstanceWithAuth({ ...secrets });
 
@@ -42,14 +53,20 @@ export const generateExecutorFunction = ({
       log: logger,
       client: axiosInstance,
       secrets,
+      config,
     };
 
-    // @ts-ignore
-    const res = await actions[subAction].handler(actionContext, subActionParams);
+    try {
+      let data = {};
+      const res = await actions[subAction].handler(actionContext, subActionParams);
 
-    if (res != null) {
-      data = res;
+      if (res != null) {
+        data = res;
+      }
+
+      return { status: 'ok', data, actionId };
+    } catch (error) {
+      logger.error(`error on ${actionId} event: ${error}`);
+      return errorResultUnexpectedError(actionId);
     }
-
-    return { status: 'ok', data: data ?? {}, actionId };
   };
