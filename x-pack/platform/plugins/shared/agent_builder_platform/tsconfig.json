@@ -26,5 +26,7 @@
     "@kbn/zod",
     "@kbn/management-settings-ids",
     "@kbn/onechat-plugin",
+    "@kbn/core-lifecycle-server",
+    "@kbn/esql-validation-autocomplete",
   ]
 }
