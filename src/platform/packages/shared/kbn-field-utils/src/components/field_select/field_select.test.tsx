@@ -28,7 +28,7 @@ describe('FieldSelect', () => {
     render(<FieldSelect selectedType="keyword" onTypeChange={mockOnTypeChange} />);
     const comboBox = screen.getByTestId('fieldTypeSelect');
     expect(comboBox).toBeInTheDocument();
-    expect(screen.getByText('Keyword')).toBeInTheDocument();
+    expect(screen.getByText('keyword')).toBeInTheDocument();
   });
 
   it('should call onTypeChange when a type is selected', async () => {
