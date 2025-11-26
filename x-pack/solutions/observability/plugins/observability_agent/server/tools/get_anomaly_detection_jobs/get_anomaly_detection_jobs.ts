@@ -10,12 +10,17 @@ import { ToolType } from '@kbn/onechat-common';
 import type { ErrorResult } from '@kbn/onechat-common/tools/tool_result';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import type Ml from '@elastic/elasticsearch/lib/api/api/ml';
+import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type {
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
+  ObservabilityAgentPluginSetupDependencies,
 } from '../../types';
+
+type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;
 
 export const OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID =
   'observability.get_anomaly_detection_jobs';
@@ -71,9 +76,11 @@ const getAnomalyDetectionJobsSchema = z.object({
 
 export function createGetAnomalyDetectionJobsTool({
   core,
+  plugins,
   logger,
 }: {
   core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
+  plugins: ObservabilityAgentPluginSetupDependencies;
   logger: Logger;
 }): StaticToolRegistration<typeof getAnomalyDetectionJobsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getAnomalyDetectionJobsSchema> = {
@@ -90,14 +97,25 @@ export function createGetAnomalyDetectionJobsTool({
         start: rangeStart = DEFAULT_TIME_RANGE.start,
         end: rangeEnd = DEFAULT_TIME_RANGE.end,
       },
-      { esClient }
+      { esClient, request }
     ): Promise<{
       results: (GetAnomalyDetectionJobsToolResult | Omit<ErrorResult, 'tool_result_id'>)[];
     }> => {
-      const mlClient = esClient.asCurrentUser.ml;
+      const scopedEsClient = esClient.asCurrentUser;
+      const mlClient = scopedEsClient.ml;
 
       try {
-        const mlJobs = await getMlJobs({ mlClient, jobIds, jobsLimit, rangeStart, rangeEnd });
+        const mlJobs = await getMlJobs({
+          core,
+          plugins,
+          mlClient,
+          request,
+          logger,
+          jobIds,
+          jobsLimit,
+          rangeStart,
+          rangeEnd,
+        });
         if (!mlJobs.length) {
           return {
             results: [
@@ -146,29 +164,46 @@ export function createGetAnomalyDetectionJobsTool({
 }
 
 async function getMlJobs({
+  core,
+  plugins,
   mlClient,
+  request,
+  logger,
   jobIds = [],
   jobsLimit,
   rangeStart,
   rangeEnd,
 }: {
+  core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
+  plugins: ObservabilityAgentPluginSetupDependencies;
   mlClient: Ml;
+  request: KibanaRequest;
+  logger: Logger;
   jobIds?: string[];
   jobsLimit: number;
   rangeStart: string;
   rangeEnd: string;
 }) {
+  const [coreStart] = await core.getStartServices();
+  const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+  const mlSystem = plugins.ml?.mlSystemProvider(request, savedObjectsClient);
+
+  if (!mlSystem) {
+    throw new Error('Machine Learning plugin is unavailable.');
+  }
+
   const { jobs = [] } = await mlClient.getJobs({ job_id: jobIds.join(',') }).catch((error) => {
     if (error.statusCode === 404) {
       return { jobs: [] };
     }
+    logger.error(`Error retrieving ML jobs: ${error.message}`);
     throw error;
   });
 
   return Promise.all(
     jobs.slice(0, jobsLimit).map(async (job) => {
       const topAnomalies = await getTopAnomalyRecords({
-        mlClient,
+        mlSystem,
         jobId: job.job_id,
         start: rangeStart,
         end: rangeEnd,
@@ -191,25 +226,54 @@ async function getMlJobs({
 }
 
 async function getTopAnomalyRecords({
-  mlClient,
+  mlSystem,
   jobId,
   start,
   end,
 }: {
-  mlClient: Ml;
+  mlSystem: MlSystem;
   jobId: string;
   start: string;
   end: string;
 }) {
-  const { records = [] } = await mlClient.getRecords({
-    job_id: jobId,
-    desc: true,
-    sort: 'record_score',
-    exclude_interim: true,
-    page: { size: 100 },
-    start,
-    end,
-  });
+  const response = await mlSystem.mlAnomalySearch<MlAnomalyRecordDoc>(
+    {
+      track_total_hits: false,
+      size: 100,
+      sort: [{ record_score: { order: 'desc' as const } }],
+      query: {
+        bool: {
+          filter: [
+            { term: { job_id: jobId } },
+            { term: { result_type: 'record' } },
+            { term: { is_interim: false } },
+            {
+              range: {
+                timestamp: { gte: start, lte: end },
+              },
+            },
+          ],
+        },
+      },
+      _source: [
+        'timestamp',
+        'record_score',
+        'by_field_name',
+        'by_field_value',
+        'partition_field_name',
+        'partition_field_value',
+        'field_name',
+        'anomaly_score_explanation',
+        'typical',
+        'actual',
+      ],
+    },
+    [jobId]
+  );
+
+  const records = response.hits.hits
+    .map((hit) => hit._source)
+    .filter((record): record is MlAnomalyRecordDoc => record !== undefined);
 
   return records.map((record) => ({
     timestamp: record.timestamp,
