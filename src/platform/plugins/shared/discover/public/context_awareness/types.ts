@@ -99,6 +99,23 @@ export interface AppMenuExtensionParams {
   authorizedRuleTypeIds: string[];
 }
 
+export interface ChartSectionConfigurationExtensionParams {
+  /**
+   * Available actions for the chart section configuration
+   */
+  actions: {
+    /**
+     * Opens a new tab
+     * @param params The parameters for the open in new tab action
+     */
+    openInNewTab?: (params: OpenInNewTabParams) => void;
+    /**
+     * Updates the current ES|QL query
+     */
+    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+  };
+}
+
 /**
  * Supports customizing the Discover document viewer flyout
  */
@@ -400,7 +417,9 @@ export interface Profile {
    * This allows modifying the chart section with a custom component
    * @returns The custom configuration for the chart
    */
-  getChartSectionConfiguration: () => ChartSectionConfiguration;
+  getChartSectionConfiguration: (
+    params: ChartSectionConfigurationExtensionParams
+  ) => ChartSectionConfiguration;
 
   /**
    * Data grid
