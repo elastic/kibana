@@ -7,7 +7,8 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { ProcessDescendantsIndicator, ProcessDescendantsIndicatorProps } from './process_descendants_indicator';
+import type { ProcessDescendantsIndicatorProps } from './process_descendants_indicator';
+import { ProcessDescendantsIndicator } from './process_descendants_indicator';
 import type { AnyArtifact } from '../../types';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
@@ -26,19 +27,19 @@ describe('ProcessDescendantIndicator', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
 
   const getStandardEventFilter: () => AnyArtifact = () =>
-  ({
-    tags: [GLOBAL_ARTIFACT_TAG],
-  } as Partial<AnyArtifact> as AnyArtifact);
+    ({
+      tags: [GLOBAL_ARTIFACT_TAG],
+    } as Partial<AnyArtifact> as AnyArtifact);
 
   const getProcessDescendantEventFilter: () => AnyArtifact = () =>
-  ({
-    tags: [GLOBAL_ARTIFACT_TAG, FILTER_PROCESS_DESCENDANTS_TAG],
-  } as Partial<AnyArtifact> as AnyArtifact);
+    ({
+      tags: [GLOBAL_ARTIFACT_TAG, FILTER_PROCESS_DESCENDANTS_TAG],
+    } as Partial<AnyArtifact> as AnyArtifact);
 
   const getProcessDescendantTrustedApp: () => AnyArtifact = () =>
-  ({
-    tags: [GLOBAL_ARTIFACT_TAG, TRUSTED_PROCESS_DESCENDANTS_TAG],
-  } as Partial<AnyArtifact> as AnyArtifact);
+    ({
+      tags: [GLOBAL_ARTIFACT_TAG, TRUSTED_PROCESS_DESCENDANTS_TAG],
+    } as Partial<AnyArtifact> as AnyArtifact);
 
   beforeEach(() => {
     appTestContext = createAppRootMockRenderer();
@@ -47,11 +48,9 @@ describe('ProcessDescendantIndicator', () => {
       labels: EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS,
       processDescendantsTag: FILTER_PROCESS_DESCENDANTS_TAG,
       'data-test-subj': 'test',
-    }
+    };
     render = () => {
-      renderResult = appTestContext.render(
-        <ProcessDescendantsIndicator {...props} />
-      );
+      renderResult = appTestContext.render(<ProcessDescendantsIndicator {...props} />);
       return renderResult;
     };
   });
