@@ -7,10 +7,33 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { EuiText } from '@elastic/eui';
+import { EuiSkeletonText, EuiText } from '@elastic/eui';
+import type { OverviewTrend } from '../../../../../../../../../common/types';
 import { formatDuration } from '../../../../../../utils/formatting';
 import { selectOverviewTrends } from '../../../../../../state';
 import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
+
+const getDurationToDisplay = (trendData: OverviewTrend | 'loading' | null | undefined) => {
+  if (trendData === 'loading') {
+    return (
+      <EuiSkeletonText
+        lines={1}
+        ariaWrapperProps={{
+          style: {
+            height: '16px',
+            width: '50px',
+          },
+        }}
+      />
+    );
+  }
+
+  if (!trendData || (!trendData.median && trendData.median !== 0)) {
+    return '--';
+  }
+
+  return formatDuration(trendData.median);
+};
 
 export const MonitorsDuration = ({
   monitor,
@@ -20,11 +43,9 @@ export const MonitorsDuration = ({
   onClickDuration: () => void;
 }) => {
   const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
-  const isLoading = trendData === 'loading';
-  const duration = isLoading || !trendData?.median ? 0 : trendData.median;
   return (
     <EuiText size="s" onClick={onClickDuration}>
-      {isLoading ? '--' : formatDuration(duration)}
+      {getDurationToDisplay(trendData)}
     </EuiText>
   );
 };
