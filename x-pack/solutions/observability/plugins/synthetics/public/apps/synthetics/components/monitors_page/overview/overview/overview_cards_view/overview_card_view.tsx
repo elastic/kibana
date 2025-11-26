@@ -48,14 +48,14 @@ export const OverviewCardView = ({
   const trendData = useSelector(selectOverviewTrends);
   const { view } = useSelector(selectOverviewState);
   const [rowCount, setRowCount] = useState(5);
-  const [visibleIndices, setVisibleIndices] = useState<{
-    visibleStartIndex: number;
-    visibleEndIndex: number;
+  const [sliceToFetch, setSliceToFetch] = useState<{
+    startIndex: number;
+    endIndex: number;
   } | null>(null);
 
   useInfiniteOverviewTrendsRequests({
     monitorsSortedByStatus,
-    visibleIndices,
+    sliceToFetch,
     numOfColumns: rowCount,
   });
 
@@ -91,7 +91,7 @@ export const OverviewCardView = ({
                   }
                   itemCount={listItems.length}
                   loadMoreItems={(start, stop: number) =>
-                    setVisibleIndices({ visibleStartIndex: start, visibleEndIndex: stop })
+                    setSliceToFetch({ startIndex: start, endIndex: stop })
                   }
                   minimumBatchSize={MIN_BATCH_SIZE}
                   threshold={LIST_THRESHOLD}

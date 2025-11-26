@@ -10,22 +10,22 @@ import { useOverviewTrendsRequests } from './use_overview_trends_requests';
 
 export interface UseInfiniteOverviewTrendsRequestsParams {
   monitorsSortedByStatus: OverviewStatusMetaData[];
-  visibleIndices: {
-    visibleStartIndex: number;
-    visibleEndIndex: number;
+  sliceToFetch: {
+    startIndex: number;
+    endIndex: number;
   } | null;
   numOfColumns: number;
 }
 
 export const useInfiniteOverviewTrendsRequests = ({
   monitorsSortedByStatus,
-  visibleIndices,
+  sliceToFetch: visibleIndices,
   numOfColumns,
 }: UseInfiniteOverviewTrendsRequestsParams) => {
   const monitorsToFetchTrendsFor = visibleIndices
     ? monitorsSortedByStatus.slice(
-        visibleIndices.visibleStartIndex * numOfColumns,
-        (visibleIndices.visibleEndIndex + 1) * numOfColumns
+        visibleIndices.startIndex * numOfColumns,
+        (visibleIndices.endIndex + 1) * numOfColumns
       )
     : [];
   useOverviewTrendsRequests(monitorsToFetchTrendsFor);

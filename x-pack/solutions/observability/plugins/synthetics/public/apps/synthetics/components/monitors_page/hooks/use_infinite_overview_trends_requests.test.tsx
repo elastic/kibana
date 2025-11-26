@@ -61,7 +61,7 @@ describe('useInfiniteOverviewTrendsRequests', () => {
       () =>
         useInfiniteOverviewTrendsRequests({
           monitorsSortedByStatus,
-          visibleIndices: null,
+          sliceToFetch: null,
           numOfColumns: 3,
         }),
       { wrapper: WrappedHelper }
@@ -77,9 +77,9 @@ describe('useInfiniteOverviewTrendsRequests', () => {
       () =>
         useInfiniteOverviewTrendsRequests({
           monitorsSortedByStatus,
-          visibleIndices: {
-            visibleStartIndex: 1,
-            visibleEndIndex: 3,
+          sliceToFetch: {
+            startIndex: 1,
+            endIndex: 3,
           },
           numOfColumns: 3,
         }),
@@ -101,9 +101,9 @@ describe('useInfiniteOverviewTrendsRequests', () => {
       () =>
         useInfiniteOverviewTrendsRequests({
           monitorsSortedByStatus,
-          visibleIndices: {
-            visibleStartIndex: 0,
-            visibleEndIndex: 2,
+          sliceToFetch: {
+            startIndex: 0,
+            endIndex: 2,
           },
           numOfColumns: 4,
         }),
@@ -122,9 +122,9 @@ describe('useInfiniteOverviewTrendsRequests', () => {
       () =>
         useInfiniteOverviewTrendsRequests({
           monitorsSortedByStatus,
-          visibleIndices: {
-            visibleStartIndex: 2,
-            visibleEndIndex: 2,
+          sliceToFetch: {
+            startIndex: 2,
+            endIndex: 2,
           },
           numOfColumns: 5,
         }),
@@ -145,9 +145,9 @@ describe('useInfiniteOverviewTrendsRequests', () => {
       () =>
         useInfiniteOverviewTrendsRequests({
           monitorsSortedByStatus,
-          visibleIndices: {
-            visibleStartIndex: 2,
-            visibleEndIndex: 10,
+          sliceToFetch: {
+            startIndex: 2,
+            endIndex: 10,
           },
           numOfColumns: 2,
         }),
@@ -165,9 +165,9 @@ describe('useInfiniteOverviewTrendsRequests', () => {
       () =>
         useInfiniteOverviewTrendsRequests({
           monitorsSortedByStatus: [],
-          visibleIndices: {
-            visibleStartIndex: 0,
-            visibleEndIndex: 5,
+          sliceToFetch: {
+            startIndex: 0,
+            endIndex: 5,
           },
           numOfColumns: 3,
         }),
@@ -184,9 +184,9 @@ describe('useInfiniteOverviewTrendsRequests', () => {
       () =>
         useInfiniteOverviewTrendsRequests({
           monitorsSortedByStatus,
-          visibleIndices: {
-            visibleStartIndex: 3,
-            visibleEndIndex: 5,
+          sliceToFetch: {
+            startIndex: 3,
+            endIndex: 5,
           },
           numOfColumns: 1,
         }),
@@ -205,9 +205,9 @@ describe('useInfiniteOverviewTrendsRequests', () => {
       () =>
         useInfiniteOverviewTrendsRequests({
           monitorsSortedByStatus,
-          visibleIndices: {
-            visibleStartIndex: 0,
-            visibleEndIndex: 1,
+          sliceToFetch: {
+            startIndex: 0,
+            endIndex: 1,
           },
           numOfColumns: 10,
         }),
@@ -226,9 +226,9 @@ describe('useInfiniteOverviewTrendsRequests', () => {
       () =>
         useInfiniteOverviewTrendsRequests({
           monitorsSortedByStatus,
-          visibleIndices: {
-            visibleStartIndex: 20,
-            visibleEndIndex: 25,
+          sliceToFetch: {
+            startIndex: 20,
+            endIndex: 25,
           },
           numOfColumns: 2,
         }),
