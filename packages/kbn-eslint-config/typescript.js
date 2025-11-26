@@ -5,9 +5,6 @@
 
 const eslintConfigPrettierRules = require('eslint-config-prettier').rules;
 
-// UNSAFE_* variables can use any format
-const allowedNameRegexp = '^UNSAFE_';
-
 module.exports = {
   overrides: [
     {
@@ -84,13 +81,18 @@ module.exports = {
             'error',
             {
               selector: 'default',
-              filter: {
-                regex: allowedNameRegexp,
-                match: false,
-              },
               format: ['camelCase', 'PascalCase', 'UPPER_CASE', 'snake_case'],
               leadingUnderscore: 'allowSingleOrDouble',
               trailingUnderscore: 'allowSingleOrDouble',
+            },
+            {
+              selector: 'classMethod',
+              filter: {
+                regex: '^UNSAFE_',
+                match: true,
+              },
+              prefix: ['UNSAFE_'],
+              format: ['camelCase'],
             },
             {
               selector: 'variable',
@@ -117,21 +119,6 @@ module.exports = {
             {
               selector: 'parameter',
               format: ['camelCase', 'PascalCase'],
-              leadingUnderscore: 'allowSingleOrDouble',
-              trailingUnderscore: 'allowSingleOrDouble',
-            },
-            {
-              selector: 'memberLike',
-              filter: {
-                regex: allowedNameRegexp,
-                match: false,
-              },
-              format: [
-                'camelCase',
-                'PascalCase',
-                'snake_case', // keys in elasticsearch requests / responses
-                'UPPER_CASE',
-              ],
               leadingUnderscore: 'allowSingleOrDouble',
               trailingUnderscore: 'allowSingleOrDouble',
             },
