@@ -59,7 +59,7 @@ export const SIGN_UP_BUTTON = i18n.translate('xpack.cloudConnect.wizard.signUpBu
 });
 
 export const LOGIN_BUTTON = i18n.translate('xpack.cloudConnect.wizard.loginButton', {
-  defaultMessage: 'Login',
+  defaultMessage: 'Log in',
 });
 
 export const CONNECT_BUTTON = i18n.translate('xpack.cloudConnect.wizard.connectButton', {
