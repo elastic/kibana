@@ -125,12 +125,12 @@ exports[`Expanded mode should render the side navigation 1`] = `
           class="css-1y7bpvk-wrapperStyles"
           role="none"
         >
-          <span
+          <p
             class="emotion-euiScreenReaderOnly"
             id="popover-enter-exit-instructions_generated-id"
           >
             Press Enter to go to the submenu.
-          </span>
+          </p>
           <div
             class="euiPopover emotion-euiPopover-block"
           >
@@ -243,12 +243,12 @@ exports[`Expanded mode should render the side navigation 1`] = `
           class="css-1y7bpvk-wrapperStyles"
           role="none"
         >
-          <span
+          <p
             class="emotion-euiScreenReaderOnly"
             id="popover-enter-exit-instructions_generated-id"
           >
             Press Enter to go to the submenu.
-          </span>
+          </p>
           <div
             class="euiPopover emotion-euiPopover-block"
           >
