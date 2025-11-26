@@ -734,6 +734,7 @@
     "@kbn/maps-ems-plugin": "link:src/platform/plugins/private/maps_ems",
     "@kbn/maps-plugin": "link:x-pack/platform/plugins/shared/maps",
     "@kbn/maps-vector-tile-utils": "link:x-pack/platform/packages/private/maps/vector_tile_utils",
+    "@kbn/mcp-connector-common": "link:x-pack/platform/packages/shared/kbn-mcp-connector-common",
     "@kbn/metrics": "link:src/platform/packages/private/opentelemetry/kbn-metrics",
     "@kbn/metrics-config": "link:src/platform/packages/private/opentelemetry/kbn-metrics-config",
     "@kbn/metrics-data-access-plugin": "link:x-pack/solutions/observability/plugins/metrics_data_access",

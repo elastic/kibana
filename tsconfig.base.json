@@ -1418,6 +1418,8 @@
       "@kbn/maps-plugin/*": ["x-pack/platform/plugins/shared/maps/*"],
       "@kbn/maps-vector-tile-utils": ["x-pack/platform/packages/private/maps/vector_tile_utils"],
       "@kbn/maps-vector-tile-utils/*": ["x-pack/platform/packages/private/maps/vector_tile_utils/*"],
+      "@kbn/mcp-connector-common": ["x-pack/platform/packages/shared/kbn-mcp-connector-common"],
+      "@kbn/mcp-connector-common/*": ["x-pack/platform/packages/shared/kbn-mcp-connector-common/*"],
       "@kbn/mcp-dev-server": ["src/platform/packages/shared/kbn-mcp-dev-server"],
       "@kbn/mcp-dev-server/*": ["src/platform/packages/shared/kbn-mcp-dev-server/*"],
       "@kbn/metrics": ["src/platform/packages/private/opentelemetry/kbn-metrics"],
