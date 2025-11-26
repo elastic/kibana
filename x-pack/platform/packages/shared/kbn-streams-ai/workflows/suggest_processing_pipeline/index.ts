@@ -114,6 +114,18 @@ export async function suggestProcessingPipeline({
           };
         }
 
+        // 4. Validate processor failure rates - each processor should have < 20% failure rate
+        const processorFailures = validateProcessorFailureRates(simulateResult);
+        if (processorFailures.length > 0) {
+          return {
+            response: {
+              valid: false,
+              errors: [...processorFailures, ...uniqueErrors],
+              metrics,
+            },
+          };
+        }
+
         return {
           response: {
             valid: true,
@@ -155,7 +167,48 @@ export async function suggestProcessingPipeline({
     return null;
   }
 
-  return commitPipeline.data as StreamlangDSL;
+  // Add customIdentifier to each step for proper tracking in simulations
+  const pipelineWithIdentifiers = addCustomIdentifiersToSteps(commitPipeline.data as StreamlangDSL);
+
+  return pipelineWithIdentifiers;
+}
+
+/**
+ * Adds customIdentifier to each step in the pipeline for proper tracking.
+ * This ensures processors are tracked correctly in simulation results.
+ */
+function addCustomIdentifiersToSteps(pipeline: StreamlangDSL): StreamlangDSL {
+  return {
+    ...pipeline,
+    steps: pipeline.steps.map((step, index) => ({
+      ...step,
+      customIdentifier: step.customIdentifier || `${index}`,
+    })),
+  };
+}
+
+/**
+ * Validates that each processor has a failure rate below 20%.
+ * Returns an array of error messages for processors that exceed the threshold.
+ */
+function validateProcessorFailureRates(simulationResult: ProcessingSimulationResponse): string[] {
+  const errors: string[] = [];
+  const maxFailureRate = 0.2; // 20%
+
+  if (!simulationResult.processors_metrics) {
+    return errors;
+  }
+
+  for (const [processorId, metrics] of Object.entries(simulationResult.processors_metrics)) {
+    if (metrics.failed_rate > maxFailureRate) {
+      const failurePercentage = (metrics.failed_rate * 100).toFixed(2);
+      errors.push(
+        `Processor "${processorId}" has a failure rate of ${failurePercentage}% (maximum allowed: 20%). This processor is failing on too many documents. Review the processor configuration and ensure it handles the document structure correctly.`
+      );
+    }
+  }
+
+  return errors;
 }
 
 function getUniqueDocumentErrors(simulationResult: ProcessingSimulationResponse): string[] {
