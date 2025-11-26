@@ -143,6 +143,7 @@ describe('WorkflowStepExecutionTree', () => {
     status: ExecutionStatus.RUNNING,
     startedAt: '2024-01-01T10:00:00Z',
     finishedAt: '',
+    error: null,
     workflowId: 'workflow-123',
     workflowName: 'Test Workflow',
     workflowDefinition: {

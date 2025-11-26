@@ -159,6 +159,7 @@ export interface WorkflowExecutionDto {
   status: ExecutionStatus;
   isTestRun: boolean;
   startedAt: string;
+  error: ExecutionError | null;
   finishedAt: string;
   workflowId?: string;
   workflowName?: string;
