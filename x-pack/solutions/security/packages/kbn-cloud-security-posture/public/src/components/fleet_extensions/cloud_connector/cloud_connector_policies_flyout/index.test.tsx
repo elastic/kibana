@@ -6,11 +6,15 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
+import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { UseQueryResult } from '@kbn/react-query';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CloudConnectorPoliciesFlyout } from '.';
+import type { CloudConnectorUsageItem } from '../hooks/use_cloud_connector_usage';
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
 import { useUpdateCloudConnector } from '../hooks/use_update_cloud_connector';
 
@@ -41,7 +45,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
     onClose: mockOnClose,
   };
 
-  const mockUsageData = [
+  const mockUsageData: CloudConnectorUsageItem[] = [
     {
       id: 'policy-1',
       name: 'Test Policy 1',
@@ -71,19 +75,19 @@ describe('CloudConnectorPoliciesFlyout', () => {
           navigateToApp: mockNavigateToApp,
         },
       },
-    } as any);
+    } as unknown as ReturnType<typeof useKibana>);
 
     mockUseCloudConnectorUsage.mockReturnValue({
-      data: mockUsageData,
+      data: { items: mockUsageData, total: mockUsageData.length, page: 1, perPage: 10 },
       isLoading: false,
       error: null,
-    } as any);
+    } as unknown as UseQueryResult<{ items: CloudConnectorUsageItem[]; total: number; page: number; perPage: number }>);
 
     const mockMutate = jest.fn();
     mockUseUpdateCloudConnector.mockReturnValue({
       mutate: mockMutate,
       isLoading: false,
-    } as any);
+    } as unknown as ReturnType<typeof useUpdateCloudConnector>);
 
     mockOnClose.mockClear();
     mockNavigateToApp.mockClear();
@@ -95,27 +99,32 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
   const renderFlyout = (props = {}) => {
     return render(
-      <QueryClientProvider client={queryClient}>
-        <CloudConnectorPoliciesFlyout {...defaultProps} {...props} />
-      </QueryClientProvider>
+      <I18nProvider>
+        <QueryClientProvider client={queryClient}>
+          <CloudConnectorPoliciesFlyout {...defaultProps} {...props} />
+        </QueryClientProvider>
+      </I18nProvider>
     );
   };
 
   it('should render flyout with connector name and ARN', () => {
     renderFlyout();
 
-    expect(screen.getByText('Test Connector')).toBeInTheDocument();
-    expect(screen.getByText(/Role ARN:/)).toBeInTheDocument();
     expect(
-      screen.getByText('arn:aws:iam::123456789012:role/TestRole', { exact: false })
-    ).toBeInTheDocument();
+      screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.TITLE)
+    ).toHaveTextContent('Test Connector');
+    expect(
+      screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IDENTIFIER_TEXT)
+    ).toHaveTextContent('Role ARN: arn:aws:iam::123456789012:role/TestRole');
   });
 
   it('should render usage table with policies', async () => {
     renderFlyout();
 
     await waitFor(() => {
-      expect(screen.getByTestId('cloudConnectorPoliciesTable')).toBeInTheDocument();
+      expect(
+        screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICIES_TABLE)
+      ).toBeInTheDocument();
     });
 
     expect(screen.getByText('Test Policy 1')).toBeInTheDocument();
@@ -124,13 +133,16 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
   it('should show empty state when no policies use the connector', () => {
     mockUseCloudConnectorUsage.mockReturnValue({
-      data: [],
+      data: { items: [], total: 0, page: 1, perPage: 10 },
       isLoading: false,
       error: null,
-    } as any);
+    } as unknown as UseQueryResult<{ items: CloudConnectorUsageItem[]; total: number; page: number; perPage: number }>);
 
     renderFlyout();
 
+    expect(
+      screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.EMPTY_STATE)
+    ).toBeInTheDocument();
     expect(screen.getByText('No integrations using this connector')).toBeInTheDocument();
   });
 
@@ -139,7 +151,7 @@ describe('CloudConnectorPoliciesFlyout', () => {
       data: undefined,
       isLoading: true,
       error: null,
-    } as any);
+    } as unknown as UseQueryResult<{ items: CloudConnectorUsageItem[]; total: number; page: number; perPage: number }>);
 
     renderFlyout();
 
@@ -151,10 +163,13 @@ describe('CloudConnectorPoliciesFlyout', () => {
       data: undefined,
       isLoading: false,
       error: new Error('Failed to fetch'),
-    } as any);
+    } as unknown as UseQueryResult<{ items: CloudConnectorUsageItem[]; total: number; page: number; perPage: number }>);
 
     renderFlyout();
 
+    expect(
+      screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.ERROR_STATE)
+    ).toBeInTheDocument();
     expect(screen.getByText('Failed to load policies')).toBeInTheDocument();
   });
 
@@ -162,8 +177,10 @@ describe('CloudConnectorPoliciesFlyout', () => {
     const user = userEvent.setup();
     renderFlyout();
 
-    const nameInput = screen.getByTestId('cloudConnectorNameInput');
-    const saveButton = screen.getByTestId('cloudConnectorSaveNameButton');
+    const nameInput = screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT);
+    const saveButton = screen.getByTestId(
+      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SAVE_NAME_BUTTON
+    );
 
     expect(saveButton).toBeDisabled();
 
@@ -179,12 +196,14 @@ describe('CloudConnectorPoliciesFlyout', () => {
     mockUseUpdateCloudConnector.mockReturnValue({
       mutate: mockMutate,
       isLoading: false,
-    } as any);
+    } as unknown as ReturnType<typeof useUpdateCloudConnector>);
 
     renderFlyout();
 
-    const nameInput = screen.getByTestId('cloudConnectorNameInput');
-    const saveButton = screen.getByTestId('cloudConnectorSaveNameButton');
+    const nameInput = screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT);
+    const saveButton = screen.getByTestId(
+      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SAVE_NAME_BUTTON
+    );
 
     await user.clear(nameInput);
     await user.type(nameInput, 'New Name');
@@ -201,7 +220,9 @@ describe('CloudConnectorPoliciesFlyout', () => {
       expect(screen.getByText('Test Policy 1')).toBeInTheDocument();
     });
 
-    const policyLink = screen.getByTestId('cloudConnectorPolicyLink');
+    const policyLink = screen.getByTestId(
+      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICY_LINK
+    );
     await user.click(policyLink);
 
     expect(mockNavigateToApp).toHaveBeenCalledWith('fleet', {
@@ -227,8 +248,8 @@ describe('CloudConnectorPoliciesFlyout', () => {
       },
     });
 
-    expect(screen.getByText(/Subscription ID:/)).toBeInTheDocument();
-    expect(screen.getByText('subscription-123', { exact: false })).toBeInTheDocument();
+    expect(
+      screen.getByTestId(CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IDENTIFIER_TEXT)
+    ).toHaveTextContent('Cloud Connector ID: subscription-123');
   });
 });
-

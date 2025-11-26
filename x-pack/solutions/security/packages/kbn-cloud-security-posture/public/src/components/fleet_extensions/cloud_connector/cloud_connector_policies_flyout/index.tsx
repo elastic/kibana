@@ -31,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common';
 import type { CloudProviders } from '../types';
 import { useCloudConnectorUsage } from '../hooks/use_cloud_connector_usage';
 import { useUpdateCloudConnector } from '../hooks/use_update_cloud_connector';
@@ -177,7 +178,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                 e.preventDefault();
                 handleNavigateToPolicy(policyId, item.id);
               }}
-              data-test-subj="cloudConnectorPolicyLink"
+              data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICY_LINK}
             >
               {name}
             </EuiLink>
@@ -223,16 +224,25 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
       onClose={onClose}
       size="m"
       aria-labelledby={flyoutTitleId}
-      data-test-subj="cloudConnectorPoliciesFlyout"
+      data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.FLYOUT}
     >
       <EuiFlyoutHeader hasBorder={false}>
         <EuiTitle size="s">
-          <h2 id={flyoutTitleId}>{cloudConnectorName}</h2>
+          <h2
+            id={flyoutTitleId}
+            data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.TITLE}
+          >
+            {cloudConnectorName}
+          </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
+            <EuiText
+              size="s"
+              color="subdued"
+              data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.IDENTIFIER_TEXT}
+            >
               {identifierLabel}
               {': '}
               {identifier}
@@ -253,7 +263,9 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                       }
                     )}
                     size="xs"
-                    data-test-subj="cloudConnectorCopyIdentifier"
+                    data-test-subj={
+                      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.COPY_IDENTIFIER_BUTTON
+                    }
                   />
                 )}
               </EuiCopy>
@@ -277,7 +289,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             value={editedName}
             onChange={handleNameChange}
             fullWidth
-            data-test-subj="cloudConnectorNameInput"
+            data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.NAME_INPUT}
           />
         </EuiFormRow>
 
@@ -289,7 +301,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           isLoading={isUpdating}
           iconType="save"
           fill
-          data-test-subj="cloudConnectorSaveNameButton"
+          data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.SAVE_NAME_BUTTON}
         >
           <FormattedMessage
             id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.saveButton"
@@ -300,7 +312,10 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
 
       <EuiFlyoutBody>
         {/* Usage Section */}
-        <EuiText size="xs">
+        <EuiText
+          size="xs"
+          data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.USAGE_COUNT_TEXT}
+        >
           <h4>
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorPoliciesFlyout.usedByTitle"
@@ -332,6 +347,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                 />
               </p>
             }
+            data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.ERROR_STATE}
           />
         ) : isLoading ? (
           <EuiBasicTable
@@ -341,7 +357,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             pagination={pagination}
             onChange={onTableChange}
             tableCaption={tableCaption}
-            data-test-subj="cloudConnectorPoliciesTable"
+            data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICIES_TABLE}
           />
         ) : usageItems.length === 0 ? (
           <EuiEmptyPrompt
@@ -362,6 +378,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                 />
               </p>
             }
+            data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.EMPTY_STATE}
           />
         ) : (
           <EuiBasicTable
@@ -370,7 +387,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             pagination={pagination}
             onChange={onTableChange}
             tableCaption={tableCaption}
-            data-test-subj="cloudConnectorPoliciesTable"
+            data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICIES_TABLE}
           />
         )}
       </EuiFlyoutBody>

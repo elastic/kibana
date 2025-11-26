@@ -80,3 +80,17 @@ export const NAMESPACE_INPUT_TEST_SUBJ = 'namespaceInputTestId';
 // Cloud Connector test subjects
 export const AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ = 'aws-cloud-connector-super-select';
 export const AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ = 'azure-cloud-connector-super-select';
+
+export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
+  FLYOUT: 'cloudConnectorPoliciesFlyout',
+  TITLE: 'cloudConnectorPoliciesFlyoutTitle',
+  IDENTIFIER_TEXT: 'cloudConnectorIdentifierText',
+  COPY_IDENTIFIER_BUTTON: 'cloudConnectorCopyIdentifier',
+  NAME_INPUT: 'cloudConnectorNameInput',
+  SAVE_NAME_BUTTON: 'cloudConnectorSaveNameButton',
+  USAGE_COUNT_TEXT: 'cloudConnectorUsageCountText',
+  POLICIES_TABLE: 'cloudConnectorPoliciesTable',
+  POLICY_LINK: 'cloudConnectorPolicyLink',
+  EMPTY_STATE: 'cloudConnectorPoliciesEmptyState',
+  ERROR_STATE: 'cloudConnectorPoliciesErrorState',
+};
