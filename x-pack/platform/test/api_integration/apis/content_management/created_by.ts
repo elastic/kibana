@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(status).to.be(200);
         expect(body.data).to.be.ok();
-        expect(body.meta).to.not.have.key('createdBy');
+        expect(body.meta).to.not.have.key('created_by');
       });
     });
 
@@ -58,8 +58,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(createResponse.status).to.be(200);
         expect(createResponse.body.data).to.be.ok();
-        expect(createResponse.body.meta).to.have.key('createdBy');
-        expect(createResponse.body.meta.createdBy).to.be(interactiveUser.uid);
+        expect(createResponse.body.meta).to.have.key('created_by');
+        expect(createResponse.body.meta.created_by).to.be(interactiveUser.uid);
       });
     });
   });

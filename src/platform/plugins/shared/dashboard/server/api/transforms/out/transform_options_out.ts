@@ -7,15 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Writable } from '@kbn/utility-types';
 import type { DashboardState } from '../../types';
-import { DASHBOARD_API_OPTION_KEYS, DASHBOARD_SO_OPTION_KEYS } from '../constants';
+
+const savedObjectToAPIOptionsKeys = {
+  hidePanelTitles: 'hide_panel_titles',
+  useMargins: 'use_margins',
+  syncColors: 'sync_colors',
+  syncTooltips: 'sync_tooltips',
+  syncCursor: 'sync_cursor',
+} as const;
+type ParsedSavedObjectOptions = { [key in keyof typeof savedObjectToAPIOptionsKeys]: boolean };
 
 export function transformOptionsOut(optionsJSON: string): Required<DashboardState>['options'] {
-  const options = JSON.parse(optionsJSON);
-  const knownOptions: { [key: string]: unknown } = {};
-  Object.keys(options).forEach((soKey, index) => {
-    const apiKey = DASHBOARD_API_OPTION_KEYS[index];
-    if (DASHBOARD_SO_OPTION_KEYS.includes(soKey)) knownOptions[apiKey] = options[soKey];
+  const options = JSON.parse(optionsJSON) as ParsedSavedObjectOptions;
+  const apiOptions: Writable<Required<DashboardState>['options']> = {};
+  Object.keys(options).forEach((key) => {
+    const savedObjectKey = key as keyof ParsedSavedObjectOptions;
+    const apiKey = savedObjectToAPIOptionsKeys[savedObjectKey];
+    if (apiKey) apiOptions[apiKey] = options[savedObjectKey];
   });
-  return knownOptions;
+  return apiOptions;
 }

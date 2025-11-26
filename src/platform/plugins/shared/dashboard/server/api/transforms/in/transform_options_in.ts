@@ -8,14 +8,22 @@
  */
 
 import type { DashboardState } from '../../types';
-import { DASHBOARD_API_OPTION_KEYS, DASHBOARD_SO_OPTION_KEYS } from '../constants';
+
+const APIToSavedObjectOptionsKeys = {
+  hide_panel_titles: 'hidePanelTitles',
+  use_margins: 'useMargins',
+  sync_colors: 'syncColors',
+  sync_tooltips: 'syncTooltips',
+  sync_cursor: 'syncCursor',
+} as const;
 
 export function transformOptionsIn(options: DashboardState['options']): string {
   const apiOptions = options ?? {};
   const savedObjectOptions: { [key: string]: unknown } = {};
 
-  DASHBOARD_API_OPTION_KEYS.forEach((apiKey, index) => {
-    const soKey = DASHBOARD_SO_OPTION_KEYS[index];
+  Object.keys(apiOptions).forEach((key) => {
+    const apiKey = key as keyof typeof apiOptions;
+    const soKey = APIToSavedObjectOptionsKeys[apiKey];
     if (apiOptions[apiKey] !== undefined) savedObjectOptions[soKey] = apiOptions[apiKey];
   });
   return JSON.stringify(savedObjectOptions);

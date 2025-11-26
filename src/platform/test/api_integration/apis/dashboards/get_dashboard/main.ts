@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Does not return unsupported options from the saved object
       expect(response.body.data.options).to.be(undefined);
-      expect(response.body.data.refreshInterval).to.not.have.keys(['display']);
+      expect(response.body.data.refresh_interval).to.not.have.keys(['display']);
     });
 
     it('should return 404 with a non-existing dashboard', async () => {

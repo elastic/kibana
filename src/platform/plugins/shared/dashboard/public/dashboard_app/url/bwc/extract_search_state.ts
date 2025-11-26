@@ -28,12 +28,22 @@ export function extractSearchState(state: {
     searchState.query = migrateLegacyQuery(state.query);
   }
 
+  // Refresh interval could be passed in with snake_case or camelCase
   if (state.refreshInterval && typeof state.refreshInterval === 'object') {
     searchState.refresh_interval = state.refreshInterval as DashboardState['refresh_interval'];
   }
 
+  if (state.refresh_interval && typeof state.refresh_interval === 'object') {
+    searchState.refresh_interval = state.refresh_interval as DashboardState['refresh_interval'];
+  }
+
+  // time range could be passed in with snake_case or camelCase
   if (state.timeRange && typeof state.timeRange === 'object') {
     searchState.time_range = state.timeRange as DashboardState['time_range'];
+  }
+
+  if (state.time_range && typeof state.time_range === 'object') {
+    searchState.time_range = state.time_range as DashboardState['time_range'];
   }
 
   return searchState;
