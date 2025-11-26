@@ -77,6 +77,7 @@ interface ConditionDisplayProps {
   showKeyword?: boolean;
   keyword?: string;
   keywordWrapper?: (children: React.ReactNode) => React.ReactNode;
+  prefix?: string;
 }
 
 export const ConditionDisplay = ({
@@ -84,9 +85,11 @@ export const ConditionDisplay = ({
   showKeyword = false,
   keyword = 'WHERE',
   keywordWrapper = (children: React.ReactNode) => children,
+  prefix,
 }: ConditionDisplayProps) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+      {prefix}
       {showKeyword && keywordWrapper(<OperatorText operator={keyword} bold />)}
       <RecursiveConditionDisplay condition={condition} />
     </EuiFlexGroup>
