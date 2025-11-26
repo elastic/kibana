@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.8>>
 * <<release-notes-8.19.7>>
 * <<release-notes-8.19.6>>
 * <<release-notes-8.19.5>>
@@ -113,6 +114,49 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.19.8]]
+== {kib} 8.19.8
+
+The 8.19.8 release includes the following enhancements and fixes.
+
+[float]
+[[enhancement-v8.19.8]]
+=== Enhancements
+Elastic Security solution::
+* Saves time selected in Threat intelligence insights to local storage ({kibana-pull}243571[#243571]).
+* Saves time selected in Prevalence insights to local storage ({kibana-pull}243543[#243543]).
+
+[float]
+[[fixes-v8.19.8]]
+=== Fixes
+Alerting::
+* Fixes pagination for the **Alerts** table, which was getting stuck on rule details pages ({kibana-pull}242275[#242275]).
+* Fetches tracked alerts without depending on the task state ({kibana-pull}235253[#235253]).
+Dashboards and Visualizations::
+* Fixes an error that occurs when you deselect the **(blank)** option from the filter controls menu ({kibana-pull}242036[#242036]).
+Data ingestion and Fleet::
+* Adds retry behavior for `/api/fleet/agents` when transient issues with {{es}} are encountered ({kibana-pull}243105[#243105]).
+* Fixes `ignore_above` mapping for `flattened` fields ({kibana-pull}238890[#238890]).
+Discover::
+* Fixes truncation for longer text in the Discover table ({kibana-pull}241440[#241440]).
+Elastic Observability solution::
+* Fixes AI assistant only appearing in the Log overview for documents with the `message` field ({kibana-pull}243437[#243437]).
+* Improves handling of missing `error.id` in APM errors ({kibana-pull}243638[#243638]).
+* Reverts showing transform errors across all SLO pages ({kibana-pull}243013[#243013]).
+* Fixes the Kubernetes pod query by changing the gap policy to include zeros ({kibana-pull}239596[#239596]).
+Elastic Security solution::
+* Ignores `resource_already_exists_exception` for value list creation ({kibana-pull}243642[#243642]).
+* Fixes an issue with displaying ES|QL queries in full screen mode in Timeline ({kibana-pull}243013[#243013]).
+Kibana platform::
+* Fixes the production build favicon's CSS specificity ({kibana-pull}243351[#243351]).
+Machine Learning::
+* Preserves cell selection in Anomaly Explorer when you click out of the **Alerts** popover ({kibana-pull}244183[#244183]).
+* Ensures deleted text in AI connector or Inference endpoint forms is not sent as empty strings ({kibana-pull}244059[#244059]).
+* Fixes import and improves validation for Anomaly Detection and Data Frame Analytics jobs ({kibana-pull}242263[#242263]).
+Search::
+* Fixes an issue on the **Index management** page where screen reader text was different from visible text ({kibana-pull}243802[#243802]).
+* Fixes an issue with keyboard focus getting trapped on pages using document preview ({kibana-pull}243791[#243791]).
 
 [[release-notes-8.19.7]]
 == {kib} 8.19.7
