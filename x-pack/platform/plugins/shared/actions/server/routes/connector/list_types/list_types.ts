@@ -6,7 +6,10 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { ConnectorTypesResponseV2 } from '../../../../common/routes/connector/response';
+import {
+  connectorTypeResponseSchemaV2,
+  type ConnectorTypesResponseV2,
+} from '../../../../common/routes/connector/response';
 import type { ConnectorTypesRequestQueryV1 } from '../../../../common/routes/connector/apis/connector_types';
 import { connectorTypesQuerySchemaV1 } from '../../../../common/routes/connector/apis/connector_types';
 import { transformListTypesResponseV2 } from './transforms';
@@ -35,7 +38,18 @@ export const listTypesRoute = (
         tags: ['oas-tag:connectors'],
       },
       validate: {
-        query: connectorTypesQuerySchemaV1,
+        request: {
+          query: connectorTypesQuerySchemaV1,
+        },
+        response: {
+          200: {
+            body: () => connectorTypeResponseSchemaV2,
+            description: 'Indicates a successful call.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

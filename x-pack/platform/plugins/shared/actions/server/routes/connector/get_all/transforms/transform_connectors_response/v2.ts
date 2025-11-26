@@ -6,11 +6,11 @@
  */
 
 import type { ConnectorWithExtraFindData } from '../../../../../application/connector/types';
-import type { AllConnectorsResponseV1 } from '../../../../../../common/routes/connector/response';
+import type { AllConnectorsResponseV2 } from '../../../../../../common/routes/connector/response';
 
 export const transformGetAllConnectorsResponse = (
   results: ConnectorWithExtraFindData[]
-): AllConnectorsResponseV1[] => {
+): AllConnectorsResponseV2[] => {
   return results.map(
     ({
       id,
