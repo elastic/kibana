@@ -81,8 +81,7 @@ export const calculateActionExpirationMinutes = (
   const queryTimeoutMinutes = Math.ceil(queryTimeoutSeconds / 60);
 
   const fromQueryTimeout = queryTimeoutMinutes + ACTION_EXPIRATION.BUFFER_MINUTES;
-  const fromAgentCount =
-    Math.ceil(agentCount / 1000) * ACTION_EXPIRATION.MINUTES_PER_1K_AGENTS;
+  const fromAgentCount = Math.ceil(agentCount / 1000) * ACTION_EXPIRATION.MINUTES_PER_1K_AGENTS;
 
   return Math.min(
     ACTION_EXPIRATION.MAX_MINUTES,
