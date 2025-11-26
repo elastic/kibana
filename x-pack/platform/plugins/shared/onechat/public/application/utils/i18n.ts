@@ -271,4 +271,132 @@ export const labels = {
       defaultMessage: 'Yes, abort',
     }),
   },
+  monitoring: {
+    title: i18n.translate('xpack.onechat.monitoring.title', {
+      defaultMessage: 'Agent Builder Monitoring',
+    }),
+    detailTitle: i18n.translate('xpack.onechat.monitoring.detailTitle', {
+      defaultMessage: 'Conversation Trace',
+    }),
+    // Filters
+    timeRangeLabel: i18n.translate('xpack.onechat.monitoring.timeRangeLabel', {
+      defaultMessage: 'Time range',
+    }),
+    userFilterLabel: i18n.translate('xpack.onechat.monitoring.userFilterLabel', {
+      defaultMessage: 'Filter by user',
+    }),
+    startDateLabel: i18n.translate('xpack.onechat.monitoring.startDateLabel', {
+      defaultMessage: 'Start date',
+    }),
+    endDateLabel: i18n.translate('xpack.onechat.monitoring.endDateLabel', {
+      defaultMessage: 'End date',
+    }),
+    // Aggregate metrics
+    totalTokensIn: i18n.translate('xpack.onechat.monitoring.totalTokensIn', {
+      defaultMessage: 'Total tokens in',
+    }),
+    totalTokensOut: i18n.translate('xpack.onechat.monitoring.totalTokensOut', {
+      defaultMessage: 'Total tokens out',
+    }),
+    totalMessages: i18n.translate('xpack.onechat.monitoring.totalMessages', {
+      defaultMessage: 'Total messages',
+    }),
+    totalToolCalls: i18n.translate('xpack.onechat.monitoring.totalToolCalls', {
+      defaultMessage: 'Total tool calls',
+    }),
+    // Table columns
+    conversationLabel: i18n.translate('xpack.onechat.monitoring.conversationLabel', {
+      defaultMessage: 'Conversation',
+    }),
+    createdAtLabel: i18n.translate('xpack.onechat.monitoring.createdAtLabel', {
+      defaultMessage: 'Created',
+    }),
+    authorLabel: i18n.translate('xpack.onechat.monitoring.authorLabel', {
+      defaultMessage: 'Author',
+    }),
+    tokensInLabel: i18n.translate('xpack.onechat.monitoring.tokensInLabel', {
+      defaultMessage: 'Tokens in',
+    }),
+    tokensOutLabel: i18n.translate('xpack.onechat.monitoring.tokensOutLabel', {
+      defaultMessage: 'Tokens out',
+    }),
+    roundsLabel: i18n.translate('xpack.onechat.monitoring.roundsLabel', {
+      defaultMessage: 'Rounds',
+    }),
+    // Detail view
+    userInputLabel: i18n.translate('xpack.onechat.monitoring.userInputLabel', {
+      defaultMessage: 'User input',
+    }),
+    toolExecutionLabel: i18n.translate('xpack.onechat.monitoring.toolExecutionLabel', {
+      defaultMessage: 'Tool calls',
+    }),
+    agentResponseLabel: i18n.translate('xpack.onechat.monitoring.agentResponseLabel', {
+      defaultMessage: 'Agent response',
+    }),
+    toolNameLabel: i18n.translate('xpack.onechat.monitoring.toolNameLabel', {
+      defaultMessage: 'Tool',
+    }),
+    inputParametersLabel: i18n.translate('xpack.onechat.monitoring.inputParametersLabel', {
+      defaultMessage: 'Input parameters',
+    }),
+    outputResultLabel: i18n.translate('xpack.onechat.monitoring.outputResultLabel', {
+      defaultMessage: 'Output',
+    }),
+    tokenConsumptionLabel: i18n.translate('xpack.onechat.monitoring.tokenConsumptionLabel', {
+      defaultMessage: 'Token consumption',
+    }),
+    metadataLabel: i18n.translate('xpack.onechat.monitoring.metadataLabel', {
+      defaultMessage: 'Metadata',
+    }),
+    connectorLabel: i18n.translate('xpack.onechat.monitoring.connectorLabel', {
+      defaultMessage: 'Connector',
+    }),
+    connectorUsageLabel: i18n.translate('xpack.onechat.monitoring.connectorUsageLabel', {
+      defaultMessage: 'Connector usage breakdown',
+    }),
+    roundLabel: (roundNumber: number) =>
+      i18n.translate('xpack.onechat.monitoring.roundLabel', {
+        defaultMessage: 'Round {roundNumber}',
+        values: { roundNumber },
+      }),
+    inputTokensLabel: i18n.translate('xpack.onechat.monitoring.inputTokensLabel', {
+      defaultMessage: 'Input tokens',
+    }),
+    outputTokensLabel: i18n.translate('xpack.onechat.monitoring.outputTokensLabel', {
+      defaultMessage: 'Output tokens',
+    }),
+    startedAtLabel: i18n.translate('xpack.onechat.monitoring.startedAtLabel', {
+      defaultMessage: 'Started at',
+    }),
+    timeToFirstTokenLabel: i18n.translate('xpack.onechat.monitoring.timeToFirstTokenLabel', {
+      defaultMessage: 'Time to first token',
+    }),
+    timeToLastTokenLabel: i18n.translate('xpack.onechat.monitoring.timeToLastTokenLabel', {
+      defaultMessage: 'Total duration',
+    }),
+    secondsLabel: (seconds: number) =>
+      i18n.translate('xpack.onechat.monitoring.secondsLabel', {
+        defaultMessage: '{seconds}s',
+        values: { seconds },
+      }),
+    timingBreakdownLabel: i18n.translate('xpack.onechat.monitoring.timingBreakdownLabel', {
+      defaultMessage: 'Timing breakdown',
+    }),
+    generationTimeLabel: i18n.translate('xpack.onechat.monitoring.generationTimeLabel', {
+      defaultMessage: 'Generation time',
+    }),
+    backToListLabel: i18n.translate('xpack.onechat.monitoring.backToListLabel', {
+      defaultMessage: 'Back to conversations',
+    }),
+    // Error messages
+    loadErrorMessage: i18n.translate('xpack.onechat.monitoring.loadErrorMessage', {
+      defaultMessage: 'Failed to load monitoring data',
+    }),
+    loadConversationErrorMessage: i18n.translate(
+      'xpack.onechat.monitoring.loadConversationErrorMessage',
+      {
+        defaultMessage: 'Failed to load conversation',
+      }
+    ),
+  },
 };

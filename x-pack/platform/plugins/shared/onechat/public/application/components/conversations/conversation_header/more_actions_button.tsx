@@ -28,6 +28,7 @@ import { appPaths } from '../../../utils/app_paths';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { DeleteConversationModal } from './delete_conversation_modal';
 import { RenameConversationModal } from './rename_conversation_modal';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
 const fullscreenLabels = {
   actions: i18n.translate('xpack.onechat.conversationActions.actions', {
@@ -65,6 +66,9 @@ const fullscreenLabels = {
   }),
   tools: i18n.translate('xpack.onechat.conversationActions.tools', {
     defaultMessage: 'View all tools',
+  }),
+  monitoring: i18n.translate('xpack.onechat.conversationActions.monitoring', {
+    defaultMessage: 'Monitoring',
   }),
   rename: i18n.translate('xpack.onechat.conversationTitle.rename', {
     defaultMessage: 'Rename',
@@ -107,6 +111,7 @@ export const MoreActionsButton: React.FC = () => {
   const {
     services: { application },
   } = useKibana();
+  const { showManagement } = useUiPrivileges();
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -201,6 +206,20 @@ export const MoreActionsButton: React.FC = () => {
     >
       {fullscreenLabels.tools}
     </EuiContextMenuItem>,
+    ...(showManagement
+      ? [
+          <EuiContextMenuItem
+            key="monitoring"
+            icon="visBarVerticalStacked"
+            size="s"
+            onClick={closePopover}
+            href={createOnechatUrl(appPaths.monitoring.list)}
+            data-test-subj="onechatActionsMonitoring"
+          >
+            {fullscreenLabels.monitoring}
+          </EuiContextMenuItem>,
+        ]
+      : []),
     <EuiContextMenuItem
       key="agentBuilderSettings"
       icon="gear"

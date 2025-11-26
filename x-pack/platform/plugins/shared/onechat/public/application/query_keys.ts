@@ -30,4 +30,11 @@ export const queryKeys = {
       list: () => ['tools', 'workflows', 'list'] as const,
     },
   },
+  monitoring: {
+    conversations: {
+      list: (params: { start?: string; end?: string; user?: string }) =>
+        ['monitoring', 'conversations', 'list', params] as const,
+      byId: (conversationId: string) => ['monitoring', 'conversations', conversationId] as const,
+    },
+  },
 };

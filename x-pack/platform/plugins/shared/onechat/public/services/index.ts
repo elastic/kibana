@@ -9,6 +9,7 @@ export { AgentBuilderAccessChecker } from './access';
 export { AgentService } from './agents';
 export { ChatService } from './chat';
 export { ConversationsService } from './conversations';
+export { MonitoringService } from './monitoring';
 export { NavigationService } from './navigation';
 export { ToolsService } from './tools';
 export type { OnechatInternalService } from './types';
