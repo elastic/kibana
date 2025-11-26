@@ -42,7 +42,8 @@ describe('buildEsql', () => {
       mockAppClient,
       mockDataViewsService,
       from,
-      to
+      to,
+      { maxPageSearchSize: 10 }
     );
 
     expect(utils.buildIndexPatternsByEngine).toHaveBeenCalled();
@@ -173,7 +174,7 @@ describe('buildEsql', () => {
         @timestamp,
         entity.id,
         host.name
-      | LIMIT 1000
+      | LIMIT 10
       `)
     );
   });
