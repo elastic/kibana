@@ -138,13 +138,13 @@ export const AddColumnPopover = ({
         }
       }}
     >
-      <EuiForm component="form" onSubmit={onSubmit}>
+      <EuiForm component="form" onSubmit={onSubmit} css={{ width: 300 }}>
         <EuiFormRow
           label={i18n.translate('indexEditor.columnHeaderEdit.fieldType', {
             defaultMessage: 'Select a field type',
           })}
           helpText={i18n.translate('indexEditor.columnHeaderEdit.fieldTypeHelpText', {
-            defaultMessage: `You won't be able to change the type after saving it.`,
+            defaultMessage: `You won't be able to change the type after saving the lookup index.`,
           })}
         >
           <FieldSelect
@@ -154,7 +154,7 @@ export const AddColumnPopover = ({
             docLinks={docLinks}
           />
         </EuiFormRow>
-        {columnType && (
+        {(columnType || columnName.length > 0) && (
           <EuiPopoverFooter>
             <EuiFormRow
               label={i18n.translate('indexEditor.columnHeaderEdit.columnNameLabel', {

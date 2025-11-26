@@ -114,7 +114,7 @@ export const FieldSelect = ({
           <FieldIcon type={getFieldIconType(selectedType)} label={selectedType} />
         ) : undefined
       }
-      singleSelection
+      singleSelection={{ asPlainText: true }}
       {...restOfProps}
     />
   );
