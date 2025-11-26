@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnhancedInternalConnectorContract, InternalConnectorContract } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
+import type { EnhancedInternalConnectorContract, InternalConnectorContract } from '../..';
 
 /**
  * Enhanced connector definition that extends auto-generated connectors
