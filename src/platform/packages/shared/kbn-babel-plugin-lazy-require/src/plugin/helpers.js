@@ -683,8 +683,50 @@ function forEachJestMockFactory(programPath, handler) {
 }
 
 /**
+ * Check if an expression contains jest mock function calls (jest.fn, jest.spyOn, etc.)
+ * Used to determine if a mock factory needs requireActual merging.
+ *
+ * @param {import('@babel/traverse').NodePath} nodePath - The node path to check
+ * @returns {boolean} True if the expression contains mock function calls
+ */
+function containsMockFunctionCalls(nodePath) {
+  let hasMockCalls = false;
+
+  nodePath.traverse({
+    CallExpression(callPath) {
+      const callee = callPath.node.callee;
+
+      // Check for jest.fn(), jest.spyOn(), jest.genMockFromModule(), etc.
+      if (
+        callee.type === 'MemberExpression' &&
+        callee.object.type === 'Identifier' &&
+        callee.object.name === 'jest' &&
+        callee.property.type === 'Identifier'
+      ) {
+        const methodName = callee.property.name;
+        // These methods indicate partial mocking that needs merging
+        if (
+          methodName === 'fn' ||
+          methodName === 'spyOn' ||
+          methodName === 'genMockFromModule' ||
+          methodName === 'createMockFromModule'
+        ) {
+          hasMockCalls = true;
+          callPath.stop();
+        }
+      }
+    },
+  });
+
+  return hasMockCalls;
+}
+
+/**
  * Rewrites jest mock factories that return object literals so that the
  * actual module exports are preserved while specific properties are overridden.
+ *
+ * Only transforms factories that contain mock function calls (jest.fn, jest.spyOn, etc.)
+ * to avoid breaking complete replacement mocks that don't need merging.
  *
  * @param {import('@babel/traverse').NodePath<import('@babel/types').Program>} programPath
  * @param {import('@babel/types')} t
@@ -693,6 +735,14 @@ function transformJestMockFactories(programPath, t) {
   forEachJestMockFactory(programPath, ({ modulePathNode, factoryPath }) => {
     const factoryInfo = extractFactoryObjectExpression(factoryPath, t);
     if (!factoryInfo) {
+      return;
+    }
+
+    // Skip transformation for factories that don't contain mock functions.
+    // These are likely complete replacements that don't need requireActual merging.
+    // Example: jest.mock('./foo', () => ({ bar: 'value' })) - complete replacement
+    // vs: jest.mock('./foo', () => ({ bar: jest.fn() })) - partial mock, needs merging
+    if (!containsMockFunctionCalls(factoryPath)) {
       return;
     }
 
