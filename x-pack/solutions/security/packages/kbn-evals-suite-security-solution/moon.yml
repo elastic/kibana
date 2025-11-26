@@ -21,7 +21,6 @@ dependsOn:
   - '@kbn/evals'
   - '@kbn/tooling-log'
   - '@kbn/core'
-  - '@kbn/scout-oblt'
   - '@kbn/elastic-assistant-common'
   - '@kbn/zod'
 tags:
