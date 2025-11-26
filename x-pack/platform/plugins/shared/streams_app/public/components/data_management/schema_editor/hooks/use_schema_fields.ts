@@ -101,7 +101,7 @@ export const useSchemaFields = ({
     ]);
 
     const unmappedFields: SchemaField[] =
-      unmappedFieldsValue?.unmappedFields
+      (unmappedFieldsValue?.unmappedFields ?? [])
         .filter((field) => !allFoundFieldsSet.has(field))
         .map((field) => ({
           name: field,
