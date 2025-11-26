@@ -23,7 +23,7 @@ export const ServiceCards: React.FC<ServiceCardsProps> = ({ hasPermissions }) =>
       <EuiTitle size="s">
         <h2>
           {i18n.translate('xpack.cloudConnect.serviceCards.title', {
-            defaultMessage: 'Cloud Connect services',
+            defaultMessage: 'Cloud connected services',
           })}
         </h2>
       </EuiTitle>
