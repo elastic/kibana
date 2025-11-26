@@ -14,7 +14,7 @@ export const getConfigFilePath = (config: CliSupportedServerModes): string => {
   const baseDir = path.join(__dirname, '..'); // config base directory
 
   if (config === 'stateful') {
-    return path.join(baseDir, 'stateful', 'stateful.config.ts');
+    return path.join(baseDir, 'default', 'stateful', 'stateful.config.ts');
   }
 
   const [mode, type] = config.split('=');
@@ -25,5 +25,10 @@ export const getConfigFilePath = (config: CliSupportedServerModes): string => {
     );
   }
 
-  return path.join(baseDir, 'serverless', `${type}.serverless.config.ts`);
+  return path.join(
+    baseDir,
+    'default',
+    'serverless',
+    `${type.replace(/[.-]/g, '_')}.serverless.config.ts`
+  );
 };

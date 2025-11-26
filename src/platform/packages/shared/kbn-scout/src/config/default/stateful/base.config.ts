@@ -21,8 +21,8 @@ import {
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { defineDockerServersConfig, fleetPackageRegistryDockerImage } from '@kbn/test';
-import type { ScoutServerConfig } from '../../types';
-import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../constants';
+import type { ScoutServerConfig } from '../../../types';
+import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../../constants';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
 const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];

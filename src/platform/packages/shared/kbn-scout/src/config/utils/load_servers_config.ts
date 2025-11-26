@@ -45,16 +45,13 @@ function validateCustomConfigPath(customConfigPath: string, customDir: string): 
     : `${customConfigPath}.ts`;
   const fullSuggestedPath = path.join(customDirPath, suggestedPath);
 
-  // Check if the custom directory exists
-  if (!fs.existsSync(customDirPath)) {
-    throw new Error(
-      `Custom config directory does not exist: ${customDirPath}\n` +
-        `Please ensure the directory exists and contains your custom config file.`
-    );
-  }
-
   // List available files in the 'custom' directory
-  const availableFiles = fs.readdirSync(customDirPath).filter((file) => file.endsWith('.ts'));
+  let availableFiles: string[] = [];
+  try {
+    availableFiles = fs.readdirSync(customDirPath).filter((file) => file.endsWith('.ts'));
+  } catch {
+    // If readdir fails, directory might not exist, but we'll still show the error
+  }
 
   let errorMessage = `Custom config file not found: ${fullSuggestedPath}`;
   if (availableFiles.length > 0) {

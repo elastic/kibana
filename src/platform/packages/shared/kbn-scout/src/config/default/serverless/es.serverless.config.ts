@@ -7,22 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ScoutServerConfig } from '../../../types';
 import { defaultConfig } from './serverless.base.config';
-import type { ScoutServerConfig } from '../../types';
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   esTestCluster: {
     ...defaultConfig.esTestCluster,
-    serverArgs: [...defaultConfig.esTestCluster.serverArgs, 'xpack.apm_data.enabled=true'],
+    serverArgs: [...defaultConfig.esTestCluster.serverArgs],
   },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      '--serverless=oblt',
+      '--serverless=es',
       '--coreApp.allowDynamicConfigOverrides=true',
-      '--xpack.uptime.service.manifestUrl=mockDevUrl',
     ],
   },
 };

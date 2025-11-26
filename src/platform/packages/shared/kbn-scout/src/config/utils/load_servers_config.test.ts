@@ -162,21 +162,7 @@ describe('loadServersConfig', () => {
 
   it('should throw an error if custom config file does not exist', async () => {
     const customConfigPath = 'nonexistent.config.ts';
-    (fs.existsSync as jest.Mock).mockImplementation((checkPath: string) => {
-      // Return true for the custom directory itself
-      // The directory path will end with 'custom' (no file extension)
-      // File paths will include the filename with extension
-      const normalizedPath = checkPath.replace(/\\/g, '/');
-      const pathParts = normalizedPath.split('/');
-      const lastPart = pathParts[pathParts.length - 1];
-
-      // If the last part is just 'custom' (directory), return true
-      if (lastPart === 'custom') {
-        return true; // Directory exists
-      }
-      // Otherwise it's a file path, return false (file doesn't exist)
-      return false;
-    });
+    (fs.existsSync as jest.Mock).mockReturnValue(false); // File doesn't exist
     (fs.readdirSync as jest.Mock).mockReturnValue(['other.config.ts', 'another.config.ts']);
 
     await expect(loadServersConfig(mockMode, mockLog, customConfigPath)).rejects.toThrow(
@@ -190,21 +176,7 @@ describe('loadServersConfig', () => {
 
   it('should throw an error with available files list when custom config does not exist', async () => {
     const customConfigPath = 'nonexistent.config.ts';
-    (fs.existsSync as jest.Mock).mockImplementation((checkPath: string) => {
-      // Return true for the custom directory itself
-      // The directory path will end with 'custom' (no file extension)
-      // File paths will include the filename with extension
-      const normalizedPath = checkPath.replace(/\\/g, '/');
-      const pathParts = normalizedPath.split('/');
-      const lastPart = pathParts[pathParts.length - 1];
-
-      // If the last part is just 'custom' (directory), return true
-      if (lastPart === 'custom') {
-        return true; // Directory exists
-      }
-      // Otherwise it's a file path, return false (file doesn't exist)
-      return false;
-    });
+    (fs.existsSync as jest.Mock).mockReturnValue(false); // File doesn't exist
     (fs.readdirSync as jest.Mock).mockReturnValue([
       'security.serverless.uiam.config.ts',
       'custom.stateful.config.ts',
@@ -222,24 +194,5 @@ describe('loadServersConfig', () => {
     expect(error!.message).toContain('Available config files');
     expect(error!.message).toContain('security.serverless.uiam.config.ts');
     expect(error!.message).toContain('custom.stateful.config.ts');
-  });
-
-  it('should throw an error if custom config directory does not exist', async () => {
-    const customConfigPath = 'some.config.ts';
-    (fs.existsSync as jest.Mock).mockImplementation((path: string) => {
-      // Return false for the custom directory itself
-      if (path.includes('custom') && !path.includes('.')) {
-        return false;
-      }
-      return false;
-    });
-
-    await expect(loadServersConfig(mockMode, mockLog, customConfigPath)).rejects.toThrow(
-      'Custom config directory does not exist'
-    );
-
-    expect(getConfigFilePath).not.toHaveBeenCalled();
-    expect(readConfigFile).not.toHaveBeenCalled();
-    expect(saveScoutTestConfigOnDisk).not.toHaveBeenCalled();
   });
 });

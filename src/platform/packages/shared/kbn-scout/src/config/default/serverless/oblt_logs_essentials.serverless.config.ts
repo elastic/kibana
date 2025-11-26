@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ScoutServerConfig } from '../../../types';
 import { defaultConfig } from './serverless.base.config';
-import type { ScoutServerConfig } from '../../types';
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
