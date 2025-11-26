@@ -34,7 +34,7 @@ export const gapAutoFillSchedulerBodySchema = schema.object(
     ),
   },
   {
-    validate({ gap_fill_range: gapFillRange, schedule }) {
+    validate({ gap_fill_range: gapFillRange, schedule, rule_types: ruleTypes }) {
       const now = new Date();
       const parsed = dateMath.parse(gapFillRange, { forceNow: now });
       if (!parsed || !parsed.isValid()) {
@@ -58,6 +58,16 @@ export const gapAutoFillSchedulerBodySchema = schema.object(
         }
       } catch (error) {
         return `schedule.interval is invalid: ${(error as Error).message}`;
+      }
+
+      // Duplicate check for rule_types
+      const seen = new Set<string>();
+      for (const ruleType of ruleTypes) {
+        const key = `${ruleType.type}:${ruleType.consumer}`;
+        if (seen.has(key)) {
+          return `rule_types contains duplicate entry: type="${ruleType.type}" consumer="${ruleType.consumer}"`;
+        }
+        seen.add(key);
       }
     },
   }

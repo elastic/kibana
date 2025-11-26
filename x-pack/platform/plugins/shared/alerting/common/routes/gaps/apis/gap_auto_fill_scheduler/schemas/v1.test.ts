@@ -64,4 +64,14 @@ describe('gapAutoFillSchedulerBodySchema', () => {
       `gap_fill_range cannot look back more than ${MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS} days`
     );
   });
+
+  test('rejects duplicate rule_types', () => {
+    const body = {
+      ...getBody(),
+      rule_types: [...getBody().rule_types, ...getBody().rule_types],
+    };
+    expect(() => gapAutoFillSchedulerBodySchema.validate(body)).toThrow(
+      `rule_types contains duplicate entry: type="rule-type-1" consumer="alerts"`
+    );
+  });
 });
