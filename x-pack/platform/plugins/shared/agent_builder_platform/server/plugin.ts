@@ -14,7 +14,7 @@ import type {
   AgentBuilderPlatformPluginSetup,
   AgentBuilderPlatformPluginStart,
 } from './types';
-import { registerTools } from './register_tools';
+import { registerTools } from './tools';
 import { registerAttachmentTypes } from './attachment_types';
 
 export class AgentBuilderPlatformPlugin
