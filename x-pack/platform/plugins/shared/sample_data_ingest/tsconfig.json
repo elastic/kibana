@@ -14,7 +14,6 @@
     "@kbn/logging",
     "@kbn/config-schema",
     "@kbn/product-doc-common",
-    "@kbn/utils",
     "@kbn/core-http-browser",
     "@kbn/logging-mocks",
     "@kbn/inference-common",
