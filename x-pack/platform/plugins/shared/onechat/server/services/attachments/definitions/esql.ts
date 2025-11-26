@@ -10,6 +10,7 @@ import type { EsqlAttachmentData } from '@kbn/onechat-common/attachments';
 import { AttachmentType, esqlAttachmentDataSchema } from '@kbn/onechat-common/attachments';
 import { platformCoreTools } from '@kbn/onechat-common/tools';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
+import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 
 /**
  * Creates the definition for the `text` attachment type.
@@ -43,7 +44,12 @@ export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
-    getTools: () => [platformCoreTools.executeEsql, platformCoreTools.generateEsql],
+    getAgentDescription: () => {
+      return `${AttachmentType.esql} can be executed using the ${sanitizeToolId(
+        platformCoreTools.executeEsql
+      )} tool`;
+    },
+    getTools: () => [platformCoreTools.executeEsql],
   };
 };
 

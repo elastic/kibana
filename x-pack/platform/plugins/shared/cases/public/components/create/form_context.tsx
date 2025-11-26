@@ -22,6 +22,7 @@ import { useApplication } from '../../common/lib/kibana/use_application';
 import { createFormSerializer, createFormDeserializer, getInitialCaseValue } from './utils';
 import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
 import { useBulkPostObservables } from '../../containers/use_bulk_post_observables';
+import { useAttachEventsEBT } from '../../analytics/use_attach_events_ebt';
 
 interface Props {
   afterCaseCreated?: (
@@ -55,6 +56,8 @@ export const FormContext: React.FC<Props> = ({
   const { mutateAsync: pushCaseToExternalService } = usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
 
+  const trackAttachEvents = useAttachEventsEBT();
+
   const submitCase = useCallback(
     async (data: CasePostRequest, isValid: boolean) => {
       if (isValid) {
@@ -65,12 +68,15 @@ export const FormContext: React.FC<Props> = ({
         });
 
         // add attachments to the case
+        // NOTE: this is where we add client side telemetry
         if (theCase && Array.isArray(attachments) && attachments.length > 0) {
           await createAttachments({
             caseId: theCase.id,
             caseOwner: theCase.owner,
             attachments,
           });
+
+          trackAttachEvents(window.location.pathname, attachments);
         }
 
         if (theCase && Array.isArray(observables) && observables.length > 0) {
@@ -84,10 +90,18 @@ export const FormContext: React.FC<Props> = ({
         }
 
         if (theCase?.id && data.connector.id !== 'none') {
-          await pushCaseToExternalService({
-            caseId: theCase.id,
-            connector: data.connector,
-          });
+          try {
+            await pushCaseToExternalService({
+              caseId: theCase.id,
+              connector: data.connector,
+            });
+          } catch (error) {
+            // Catch the error but do not interrupt the flow.
+            // The case has been created successfully at this point.
+            // The only thing that failed was pushing to the external service.
+            // Changes to the connector fields can be made later on by the user.
+            // They will be notified about the connector failure.
+          }
         }
 
         if (onSuccess && theCase) {
@@ -100,12 +114,13 @@ export const FormContext: React.FC<Props> = ({
       appId,
       attachments,
       postCase,
+      observables,
       afterCaseCreated,
       onSuccess,
       createAttachments,
-      pushCaseToExternalService,
-      observables,
+      trackAttachEvents,
       bulkPostObservables,
+      pushCaseToExternalService,
     ]
   );
 
