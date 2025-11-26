@@ -19,7 +19,6 @@ import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { excludeLicenseRestrictedRules } from '../../logic/utils';
-import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../logic/rule_assets/prebuilt_rule_assets_type';
 
 // TODO: Add proper sort type
 const DEFAULT_SORT = [
@@ -28,17 +27,6 @@ const DEFAULT_SORT = [
     order: 'asc',
   },
 ];
-
-function transformSortParameter(sort?: { field: string; order: 'asc' | 'desc' }[]) {
-  const soSortFields = {
-    name: `${PREBUILT_RULE_ASSETS_SO_TYPE}.name.keyword`,
-    severity: `${PREBUILT_RULE_ASSETS_SO_TYPE}.mapped_params.severity`,
-    risk_score: `${PREBUILT_RULE_ASSETS_SO_TYPE}.risk_score`,
-  };
-  return sort?.map((s) => {
-    return { field: soSortFields[s.field], order: s.order };
-  });
-}
 
 export const reviewRuleInstallationHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -56,12 +44,7 @@ export const reviewRuleInstallationHandler = async (
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
 
-    const savedObjectSortParameter = transformSortParameter(sort);
-
-    const allLatestVersions = await ruleAssetsClient.fetchLatestVersions(
-      undefined,
-      savedObjectSortParameter
-    );
+    const allLatestVersions = await ruleAssetsClient.fetchLatestVersions(undefined, sort);
     const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
     const currentRuleVersionsMap = new Map(
       currentRuleVersions.map((version) => [version.rule_id, version])
@@ -81,8 +64,7 @@ export const reviewRuleInstallationHandler = async (
     const installableVersionsPage = installableVersions.slice((page - 1) * perPage, page * perPage);
 
     const installableRuleAssetsPage = await ruleAssetsClient.fetchAssetsByVersion(
-      installableVersionsPage,
-      savedObjectSortParameter
+      installableVersionsPage
     );
 
     const body: ReviewRuleInstallationResponseBody = {
