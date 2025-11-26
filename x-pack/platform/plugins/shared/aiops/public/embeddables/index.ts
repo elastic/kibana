@@ -28,4 +28,8 @@ export const registerEmbeddables = (
     const { getLogRateAnalysisEmbeddableFactory } = await import('./log_rate_analysis');
     return getLogRateAnalysisEmbeddableFactory(core.getStartServices);
   });
+  embeddable.registerLegacyURLTransform(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, async () => {
+    const { transformOut } = await import('./log_rate_analysis');
+    return transformOut;
+  });
 };

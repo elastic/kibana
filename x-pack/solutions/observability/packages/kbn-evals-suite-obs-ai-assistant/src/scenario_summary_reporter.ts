@@ -7,13 +7,14 @@
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import {
-  type EvaluationReporter,
-  type EvaluationReport,
   type EvaluationScoreRepository,
   type DatasetScoreWithStats,
+  type ReportDisplayOptions,
   calculateOverallStats,
   formatReportData,
-  createEvaluationReportTable,
+  type EvaluationReport,
+  type EvaluationReporter,
+  createTable,
 } from '@kbn/evals';
 import chalk from 'chalk';
 import { sumBy } from 'lodash';
@@ -115,7 +116,9 @@ async function buildScenarioReport(
  * Aggregates individual datasets into scenario-level views for easier analysis
  * Datasets should follow the pattern "scenario: dataset-name" for proper grouping
  */
-export function createScenarioSummaryReporter(): EvaluationReporter {
+export function createScenarioSummaryReporter(
+  options: { reportDisplayOptions?: ReportDisplayOptions } = {}
+): EvaluationReporter {
   return async (
     scoreRepository: EvaluationScoreRepository,
     runId: string,
@@ -142,10 +145,18 @@ export function createScenarioSummaryReporter(): EvaluationReporter {
       }
 
       log.info(`\n${chalk.bold.blue('═══ SCENARIO SUMMARY ═══')}`);
-      const scenarioTable = createEvaluationReportTable(report, {
+      const evaluatorDisplayOptions = new Map(
+        options.reportDisplayOptions?.evaluatorDisplayOptions || []
+      );
+      evaluatorDisplayOptions.set('Criteria', {
+        decimalPlaces: 1,
+        statsToInclude: ['mean', 'percentage', 'stdDev'],
+      });
+      const scenarioTable = createTable(report.datasetScoresWithStats, report.repetitions, {
         firstColumnHeader: 'Scenario',
         styleRowName: (name) => chalk.bold.white(name),
-        statsToInclude: ['percentage', 'mean', 'stdDev'],
+        evaluatorDisplayOptions,
+        evaluatorDisplayGroups: options.reportDisplayOptions?.evaluatorDisplayGroups,
       });
       log.info(`\n${scenarioTable}`);
     } catch (error: any) {

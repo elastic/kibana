@@ -16,8 +16,7 @@ import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.enable();
+  test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
   });
 
@@ -31,8 +30,8 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
   });
 
   test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    await apiServices.streams.clearStreamProcessors('logs-generic-default');
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
   });
 
   test('should display default samples when no processors are configured', async ({
@@ -229,6 +228,43 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
         columnName: targetField,
         rowIndex,
         value: '1999-04-08',
+      });
+    }
+  });
+
+  test('should show dropped documents in the simulation preview', async ({ pageObjects }) => {
+    await pageObjects.streams.clickAddProcessor();
+    await pageObjects.streams.selectProcessorType('Drop document');
+    // drop 'info' logs, perhaps they create too much noise/cost for a customer
+    await pageObjects.streams.fillConditionEditor({
+      field: 'log.level',
+      operator: 'equals',
+      value: 'info',
+    });
+    await pageObjects.streams.clickSaveProcessor();
+
+    // info logs should not appear in the 'Skipped' data preview since they were dropped by the simulation
+    await pageObjects.streams.clickProcessorPreviewTab('Skipped');
+    const skippedRows = await pageObjects.streams.getPreviewTableRows();
+    expect(skippedRows.length).toBeGreaterThan(0);
+    for (let rowIndex = 0; rowIndex < skippedRows.length; rowIndex++) {
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'log.level',
+        rowIndex,
+        value: 'info',
+        invertCondition: true,
+      });
+    }
+
+    // info logs should appear in the 'Dropped' data preview since they were dropped by the simulation
+    await pageObjects.streams.clickProcessorPreviewTab('Dropped');
+    const droppedRows = await pageObjects.streams.getPreviewTableRows();
+    expect(droppedRows.length).toBeGreaterThan(0);
+    for (let rowIndex = 0; rowIndex < droppedRows.length; rowIndex++) {
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'log.level',
+        rowIndex,
+        value: 'info',
       });
     }
   });

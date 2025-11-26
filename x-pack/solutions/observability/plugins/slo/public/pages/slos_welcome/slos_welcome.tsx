@@ -16,16 +16,18 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 import { SloPermissionsCallout } from '../../components/slo/slo_permissions_callout';
-import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
+import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
+import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useKibana } from '../../hooks/use_kibana';
+import { LoadingPage } from '../loading_page';
 import illustration from './assets/illustration.svg';
 
 export function SlosWelcomePage() {
@@ -33,6 +35,7 @@ export function SlosWelcomePage() {
     application: { navigateToUrl },
     http: { basePath },
     docLinks,
+    serverless,
   } = useKibana().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -40,11 +43,10 @@ export function SlosWelcomePage() {
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
 
-  const { data: sloList } = useFetchSloList();
-  const { total } = sloList ?? { total: 0 };
+  const { data: { total } = { total: 0 }, isLoading } = useFetchSloDefinitions({ perPage: 0 });
 
   const hasSlosAndPermissions =
-    total > 0 && hasRightLicense && permissions?.hasAllReadRequested === true;
+    !isLoading && total > 0 && hasRightLicense && permissions?.hasAllReadRequested === true;
 
   const handleClickCreateSlo = () => {
     navigateToUrl(basePath.prepend(paths.sloCreate));
@@ -56,8 +58,25 @@ export function SlosWelcomePage() {
     }
   }, [basePath, navigateToUrl, hasSlosAndPermissions]);
 
+  useBreadcrumbs(
+    [
+      {
+        href: basePath.prepend(paths.slos),
+        text: i18n.translate('xpack.slo.breadcrumbs.slosLinkText', {
+          defaultMessage: 'SLOs',
+        }),
+        deepLinkId: 'slo',
+      },
+    ],
+    { serverless }
+  );
+
+  if (isLoading) {
+    return <LoadingPage dataTestSubj="sloWelcomePageLoading" />;
+  }
+
   return (
-    <ObservabilityPageTemplate data-test-subj="slosPageWelcomePrompt">
+    <ObservabilityPageTemplate data-test-subj="sloWelcomePage">
       <HeaderMenu />
       <SloOutdatedCallout />
       <SloPermissionsCallout />
@@ -143,7 +162,7 @@ export function SlosWelcomePage() {
                         fill
                         href="https://www.elastic.co/cloud/elasticsearch-service/signup"
                         target="_blank"
-                        data-test-subj="slosPageWelcomePromptSignupForCloudButton"
+                        data-test-subj="sloWelcomePageSignupForCloudButton"
                       >
                         {i18n.translate('xpack.slo.sloList.welcomePrompt.signupForCloud', {
                           defaultMessage: 'Sign up for Elastic Cloud',
@@ -155,7 +174,7 @@ export function SlosWelcomePage() {
                       <EuiButton
                         href="https://www.elastic.co/subscriptions"
                         target="_blank"
-                        data-test-subj="slosPageWelcomePromptSignupForLicenseButton"
+                        data-test-subj="sloWelcomePageSignupForLicenseButton"
                       >
                         {i18n.translate('xpack.slo.sloList.welcomePrompt.signupForLicense', {
                           defaultMessage: 'Sign up for license',
