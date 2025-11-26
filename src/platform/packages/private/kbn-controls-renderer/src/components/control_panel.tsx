@@ -163,7 +163,7 @@ export const ControlPanel = ({
         <EuiFormRow
           data-test-subj="control-frame-title"
           fullWidth
-          id={`control-title-${uuid}`}
+          id={uuid}
           aria-label={i18n.translate('controls.controlGroup.controlFrameAriaLabel', {
             defaultMessage: 'Control for ${controlTitle}',
             values: { controlTitle: panelTitle },
