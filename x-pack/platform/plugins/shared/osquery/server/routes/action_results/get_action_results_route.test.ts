@@ -507,6 +507,350 @@ describe('getActionResultsRoute', () => {
     });
   });
 
+  describe('Hybrid Mode (with results index data)', () => {
+    beforeEach(() => {
+      // Enable hybrid mode
+      mockOsqueryContext.experimentalFeatures = { hybridActionResults: true };
+    });
+
+    it('should enrich edges with status and row_count from results index', async () => {
+      const mockActionResults: ActionResultsStrategyResponse = {
+        edges: [
+          {
+            _id: 'result-1',
+            _index: '.logs-osquery_manager.action.responses',
+            _source: {},
+            fields: {
+              agent_id: ['agent-1'],
+              completed_at: ['2024-01-15T12:00:00.000Z'],
+            },
+          },
+        ],
+        total: 1,
+        rawResponse: {
+          aggregations: {
+            aggs: {
+              responses_by_action_id: {
+                doc_count: 1,
+                rows_count: { value: 0 },
+                responses: {
+                  buckets: [{ key: 'success', doc_count: 1 }],
+                },
+                unique_agent_ids: {
+                  buckets: [{ key: 'agent-1', doc_count: 1 }],
+                },
+              },
+            },
+          },
+        },
+        inspect: { dsl: [] },
+        resultsAgentBuckets: [{ key: 'agent-1', doc_count: 50 }],
+        resultsTotalDocs: 50,
+      } as unknown as ActionResultsStrategyResponse;
+
+      const mockSearchFn = createMockSearchStrategy(mockActionResults);
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: { agentIds: 'agent-1' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+
+      expect(responseBody.edges[0].fields).toMatchObject({
+        agent_id: ['agent-1'],
+        status: ['success'],
+        row_count: [50],
+      });
+    });
+
+    it('should create placeholder edges for missing agents with results', async () => {
+      const mockActionResults: ActionResultsStrategyResponse = {
+        edges: [],
+        total: 0,
+        rawResponse: {
+          aggregations: {
+            aggs: {
+              responses_by_action_id: {
+                doc_count: 0,
+                rows_count: { value: 0 },
+                responses: { buckets: [] },
+                unique_agent_ids: { buckets: [] },
+              },
+            },
+          },
+        },
+        inspect: { dsl: [] },
+        resultsAgentBuckets: [
+          { key: 'silent-agent-1', doc_count: 100 },
+          { key: 'silent-agent-2', doc_count: 200 },
+        ],
+        resultsTotalDocs: 300,
+      } as unknown as ActionResultsStrategyResponse;
+
+      const mockSearchFn = createMockSearchStrategy(mockActionResults);
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: { agentIds: 'silent-agent-1,silent-agent-2' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+
+      expect(responseBody.edges).toHaveLength(2);
+      expect(responseBody.edges[0]).toMatchObject({
+        _id: 'placeholder-silent-agent-1',
+        fields: {
+          agent_id: ['silent-agent-1'],
+          status: ['success'],
+          row_count: [100],
+        },
+      });
+      expect(responseBody.edges[1]).toMatchObject({
+        _id: 'placeholder-silent-agent-2',
+        fields: {
+          agent_id: ['silent-agent-2'],
+          status: ['success'],
+          row_count: [200],
+        },
+      });
+    });
+
+    it('should calculate hybrid aggregations combining Fleet and results data', async () => {
+      const mockActionResults: ActionResultsStrategyResponse = {
+        edges: Array(70).fill(null).map((_, i) => ({
+          _id: `result-${i}`,
+          _index: '.logs-osquery_manager.action.responses',
+          _source: {},
+          fields: { agent_id: [`fleet-agent-${i}`] },
+        })),
+        total: 70,
+        rawResponse: {
+          aggregations: {
+            aggs: {
+              responses_by_action_id: {
+                doc_count: 70,
+                rows_count: { value: 2000 },
+                responses: {
+                  buckets: [
+                    { key: 'success', doc_count: 65 },
+                    { key: 'error', doc_count: 5 },
+                  ],
+                },
+                unique_agent_ids: {
+                  buckets: Array(70).fill(null).map((_, i) => ({
+                    key: `fleet-agent-${i}`,
+                    doc_count: 1,
+                  })),
+                },
+              },
+            },
+          },
+        },
+        inspect: { dsl: [] },
+        resultsAgentBuckets: [
+          ...Array(70).fill(null).map((_, i) => ({ key: `fleet-agent-${i}`, doc_count: 30 })),
+          { key: 'inferred-1', doc_count: 50 },
+          { key: 'inferred-2', doc_count: 50 },
+          { key: 'inferred-3', doc_count: 50 },
+        ],
+        resultsTotalDocs: 2500,
+      } as unknown as ActionResultsStrategyResponse;
+
+      const mockSearchFn = createMockSearchStrategy(mockActionResults);
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          agentIds: Array(100).fill(null).map((_, i) => `agent-${i}`).join(','),
+          totalAgents: 100,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+
+      expect(responseBody.aggregations).toEqual({
+        totalRowCount: 2500,
+        totalResponded: 73, // 70 Fleet + 3 inferred
+        successful: 68, // 65 Fleet + 3 inferred
+        failed: 5,
+        pending: 27, // 100 - 73
+      });
+    });
+
+    it('should mark expired action agents as expired status', async () => {
+      const pastDate = '2020-01-01T00:00:00.000Z';
+
+      const mockActionResults: ActionResultsStrategyResponse = {
+        edges: [],
+        total: 0,
+        rawResponse: {
+          aggregations: {
+            aggs: {
+              responses_by_action_id: {
+                doc_count: 0,
+                rows_count: { value: 0 },
+                responses: { buckets: [] },
+                unique_agent_ids: { buckets: [] },
+              },
+            },
+          },
+        },
+        inspect: { dsl: [] },
+        resultsAgentBuckets: [],
+        resultsTotalDocs: 0,
+      } as unknown as ActionResultsStrategyResponse;
+
+      const mockSearchFn = createMockSearchStrategy(mockActionResults);
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          agentIds: 'expired-agent-1',
+          expiration: pastDate,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+
+      expect(responseBody.edges[0].fields.status).toEqual(['expired']);
+      expect(responseBody.aggregations).toMatchObject({
+        pending: 0,
+        failed: 1, // Moved from pending to failed
+      });
+    });
+
+    it('should handle large scale (15k+ agents) with hybrid data', async () => {
+      const fleetAgents = 10000;
+      const inferredAgents = 5000;
+
+      const mockActionResults: ActionResultsStrategyResponse = {
+        edges: Array(fleetAgents).fill(null).map((_, i) => ({
+          _id: `result-${i}`,
+          _index: '.logs-osquery_manager.action.responses',
+          _source: {},
+          fields: { agent_id: [`fleet-${i}`] },
+        })),
+        total: fleetAgents,
+        rawResponse: {
+          aggregations: {
+            aggs: {
+              responses_by_action_id: {
+                doc_count: fleetAgents,
+                rows_count: { value: 50000 },
+                responses: {
+                  buckets: [
+                    { key: 'success', doc_count: 9500 },
+                    { key: 'error', doc_count: 500 },
+                  ],
+                },
+                unique_agent_ids: {
+                  buckets: Array(fleetAgents).fill(null).map((_, i) => ({
+                    key: `fleet-${i}`,
+                    doc_count: 1,
+                  })),
+                },
+              },
+            },
+          },
+        },
+        inspect: { dsl: [] },
+        resultsAgentBuckets: [
+          ...Array(fleetAgents).fill(null).map((_, i) => ({ key: `fleet-${i}`, doc_count: 5 })),
+          ...Array(inferredAgents).fill(null).map((_, i) => ({ key: `inferred-${i}`, doc_count: 5 })),
+        ],
+        resultsTotalDocs: 75000,
+      } as unknown as ActionResultsStrategyResponse;
+
+      const mockSearchFn = createMockSearchStrategy(mockActionResults);
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          agentIds: Array(20000).fill(null).map((_, i) => `agent-${i}`).join(','),
+          totalAgents: 20000,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+
+      expect(responseBody.aggregations).toEqual({
+        totalRowCount: 75000,
+        totalResponded: 15000, // 10000 Fleet + 5000 inferred
+        successful: 14500, // 9500 Fleet + 5000 inferred
+        failed: 500,
+        pending: 5000, // 20000 - 15000
+      });
+    });
+
+    it('should handle edge case where results exist but no Fleet responses', async () => {
+      const mockActionResults: ActionResultsStrategyResponse = {
+        edges: [],
+        total: 0,
+        rawResponse: {
+          aggregations: {
+            aggs: {
+              responses_by_action_id: {
+                doc_count: 0,
+                rows_count: { value: 0 },
+                responses: { buckets: [] },
+                unique_agent_ids: { buckets: [] },
+              },
+            },
+          },
+        },
+        inspect: { dsl: [] },
+        resultsAgentBuckets: [
+          { key: 'agent-1', doc_count: 100 },
+          { key: 'agent-2', doc_count: 200 },
+          { key: 'agent-3', doc_count: 150 },
+        ],
+        resultsTotalDocs: 450,
+      } as unknown as ActionResultsStrategyResponse;
+
+      const mockSearchFn = createMockSearchStrategy(mockActionResults);
+      const mockContext = createMockContext(mockSearchFn);
+      const mockRequest = createMockRequest({
+        actionId: 'test-action-id',
+        query: {
+          agentIds: 'agent-1,agent-2,agent-3',
+          totalAgents: 3,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      const responseBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+
+      expect(responseBody.aggregations).toEqual({
+        totalRowCount: 450,
+        totalResponded: 3, // All inferred
+        successful: 3,
+        failed: 0,
+        pending: 0,
+      });
+
+      expect(responseBody.edges).toHaveLength(3);
+      expect(responseBody.edges.every((e: any) => e._id.startsWith('placeholder-'))).toBe(true);
+    });
+  });
+
   describe('Error Handling', () => {
     it('should return 500 error when search strategy throws error', async () => {
       const errorMessage = 'Elasticsearch connection failed';

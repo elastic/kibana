@@ -139,10 +139,12 @@ export const getActionResultsRoute = (
 
           if (hybridEnabled) {
             // HYBRID MODE: Combine Fleet responses with results index data
-            // Use results index total docs as source of truth
+            // Use Fleet's rows_count as primary source (canonical), fall back to results index
+            const fleetRowCount = responseAgg?.rows_count?.value ?? 0;
             const resultsTotalDocs =
-              'resultsTotalDocs' in res ? (res.resultsTotalDocs as number) : undefined;
-            const totalRowCount = resultsTotalDocs ?? responseAgg?.rows_count?.value ?? 0;
+              'resultsTotalDocs' in res ? (res.resultsTotalDocs as number) : 0;
+            // Prefer Fleet row count if available, as results index may have duplicates
+            const totalRowCount = fleetRowCount > 0 ? fleetRowCount : resultsTotalDocs;
 
             // Extract Fleet responded agent IDs from aggregation (supports 15k+ agents)
             const fleetAgentBuckets = responseAgg?.unique_agent_ids?.buckets ?? [];
@@ -181,6 +183,7 @@ export const getActionResultsRoute = (
             aggregations = adjustAggregationsForExpiration(rawAggregations, isExpired);
 
             // Enrich real response edges with status and row_count
+            // For Fleet responses, use canonical row count from action_response.osquery.count
             const enrichedRealEdges = res.edges.map((edge) => {
               const agentId = edge.fields?.agent_id?.[0];
               const hasError = edge.fields?.['error.keyword'] || edge.fields?.error;
@@ -197,12 +200,20 @@ export const getActionResultsRoute = (
                 status = 'pending';
               }
 
+              // Use Fleet's canonical row count, fall back to results index count
+              const source = edge._source as { action_response?: { osquery?: { count?: number } } };
+              const fleetRowCount = source?.action_response?.osquery?.count;
+              const rowCount =
+                typeof fleetRowCount === 'number'
+                  ? fleetRowCount
+                  : agentRowCounts.get(agentId ?? '') ?? 0;
+
               return {
                 ...edge,
                 fields: {
                   ...edge.fields,
                   status: [status],
-                  row_count: agentId ? [agentRowCounts.get(agentId) ?? 0] : [0],
+                  row_count: [rowCount],
                 },
               };
             });

@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { Criteria } from '@elastic/eui';
-import { EuiBasicTable, EuiCodeBlock, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiBasicTable, EuiCodeBlock, EuiLink, EuiSkeletonText, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
@@ -127,7 +127,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   );
 
   // Bulk fetch agent details for current page using POST (avoids URL length limits)
-  const { data: agentsData } = useQuery(
+  const { data: agentsData, isLoading: isLoadingAgentNames } = useQuery(
     ['bulkAgentDetails', currentPageAgentIds],
     async () => {
       if (currentPageAgentIds.length === 0) return { agents: [] };
@@ -193,6 +193,11 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
 
   const renderAgentIdColumn = useCallback(
     (agentId: string) => {
+      // Show skeleton while loading agent names to prevent ID-to-name flash
+      if (isLoadingAgentNames) {
+        return <EuiSkeletonText lines={1} size="s" isLoading={true} />;
+      }
+
       const agentName = agentNameMap.get(agentId) || agentId;
 
       return (
@@ -209,7 +214,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         </EuiToolTip>
       );
     },
-    [agentNameMap, application]
+    [agentNameMap, application, isLoadingAgentNames]
   );
   const renderRowsColumn = useCallback(
     (_: unknown, item: ResultEdge) => {
