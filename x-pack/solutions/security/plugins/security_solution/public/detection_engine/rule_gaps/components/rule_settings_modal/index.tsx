@@ -35,8 +35,8 @@ export interface RuleSettingsModalProps {
 }
 
 export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, onClose }) => {
-  const { canEditGapAutoFill } = useGapAutoFillCapabilities();
-  const query = useGetGapAutoFillScheduler();
+  const { canEditGapAutoFill, canAccessGapAutoFill } = useGapAutoFillCapabilities();
+  const query = useGetGapAutoFillScheduler({ enabled: canAccessGapAutoFill });
   const createMutation = useCreateGapAutoFillScheduler();
   const updateMutation = useUpdateGapAutoFillScheduler();
   const { addSuccess, addError } = useAppToasts();
@@ -70,10 +70,15 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !canAccessGapAutoFill) return null;
 
   return (
-    <EuiModal style={{ width: 600 }} onClose={onClose} aria-labelledby={i18n.RULE_SETTINGS_TITLE}>
+    <EuiModal
+      style={{ width: 600 }}
+      onClose={onClose}
+      aria-labelledby={i18n.RULE_SETTINGS_TITLE}
+      data-test-subj="rule-settings-modal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>{i18n.RULE_SETTINGS_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>

@@ -50,15 +50,20 @@ const transformGapAutoFillSchedulerResponseBody = (
 const getSchedulerId = (spaceId?: string) =>
   spaceId ? `${DEFAULT_GAP_AUTO_FILL_SCHEDULER_ID_PREFIX}-${spaceId}` : 'default';
 
-export const useGetGapAutoFillScheduler = () => {
+export const useGetGapAutoFillScheduler = (options?: { enabled?: boolean }) => {
+  const enabled = options?.enabled ?? true;
   const spaceId = useSpaceId();
   const schedulerId = getSchedulerId(spaceId);
   const queryKey = useMemo(() => ['GET', 'gap_auto_fill_scheduler', schedulerId], [schedulerId]);
 
-  return useQuery<GapAutoFillSchedulerResponse, Error>(queryKey, async ({ signal }) => {
-    const response = await getGapAutoFillScheduler({ id: schedulerId, signal });
-    return transformGapAutoFillSchedulerResponseBody(response);
-  });
+  return useQuery<GapAutoFillSchedulerResponse, Error>(
+    queryKey,
+    async ({ signal }) => {
+      const response = await getGapAutoFillScheduler({ id: schedulerId, signal });
+      return transformGapAutoFillSchedulerResponseBody(response);
+    },
+    { enabled }
+  );
 };
 
 export const useCreateGapAutoFillScheduler = () => {
