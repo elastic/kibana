@@ -18,6 +18,7 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { EntityAnalyticsHeader } from '../components/entity_analytics_header';
 import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomalies';
+import { ThreatHuntingPriorities } from '../components/threat_hunting_priorities';
 
 import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_entity_store_panels';
 import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
@@ -79,6 +80,10 @@ const EntityAnalyticsComponent = () => {
               <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
                 <EuiFlexItem>
                   <EntityAnalyticsHeader />
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  <ThreatHuntingPriorities />
                 </EuiFlexItem>
 
                 {!isEntityStoreFeatureFlagDisabled ? (
