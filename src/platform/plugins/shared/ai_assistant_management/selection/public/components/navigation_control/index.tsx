@@ -28,6 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RobotIcon } from '@kbn/ai-assistant-icon';
 import { AIChatExperience } from '../../../common/ai_chat_experience';
 import {
   PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
@@ -235,9 +236,8 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                       }
                     )}
                     titleSize="xs"
-                    // TODO: change icon to AI Agent icon
-                    // USE: x-pack/solutions/workplaceai/plugins/serverless_workplace_ai/public/assets/robot.svg
-                    icon={<EuiIcon size="xxl" type="agent" />}
+                    // TODO: change to proper agent icon when available
+                    icon={<RobotIcon size="xxl" />}
                     data-test-subj="aiAssistantAgentCard"
                     isDisabled={!isSecurityAIAssistantEnabled && !isObservabilityAIAssistantEnabled}
                   />
