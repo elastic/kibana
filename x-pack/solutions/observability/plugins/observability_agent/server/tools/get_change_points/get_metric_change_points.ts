@@ -6,8 +6,6 @@
  */
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import type { AggregateOf, AggregateOfMap } from '@kbn/es-types/src/search';
 import { orderBy } from 'lodash';
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
@@ -19,14 +17,20 @@ import type {
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
 } from '../../types';
-import { dateHistogram, getFilters, type ChangePoint } from './common';
+import { dateHistogram } from './common';
 import { getMetricsIndices } from '../../utils/get_metrics_indices';
-import { getTypedSearch } from '../../utils/get_typed_search';
+import { getChangePoints, searchChangePoints, type Bucket } from '../../utils/get_change_points';
 
 export const OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID =
   'observability.get_metric_change_points';
 
 type MetricType = 'min' | 'max' | 'sum' | 'count' | 'avg' | 'p95' | 'p99';
+
+interface AggregationsResponse {
+  groups?: {
+    buckets?: Bucket[];
+  };
+}
 
 function getMetricAggregation({ field, type }: { field?: string; type: MetricType }): {
   agg: AggregationsAggregationContainer;
@@ -104,114 +108,82 @@ function getGroupingAggregation(groupingFields: string[]) {
   };
 }
 
-export async function getMetricChangePoints({
+async function getMetricChangePoints({
+  name,
   index,
-  filters,
+  start,
+  end,
+  kqlFilter,
   groupBy,
   field,
   type,
   esClient,
 }: {
+  name: string;
   index: string;
-  filters: QueryDslQueryContainer[];
+  start: string;
+  end: string;
+  kqlFilter?: string;
   groupBy: string[];
   field?: string;
   type: MetricType;
   esClient: IScopedClusterClient;
 }) {
-  try {
-    const { agg: metricAgg, buckets_path: metricBucketsPath } = getMetricAggregation({
-      type,
-      field,
-    });
+  const { agg: metricAgg, buckets_path: metricBucketsPath } = getMetricAggregation({
+    type,
+    field,
+  });
 
-    const groupAgg = getGroupingAggregation(groupBy);
+  const groupAgg = getGroupingAggregation(groupBy);
 
-    const subAggs = {
-      over_time: {
-        auto_date_histogram: dateHistogram,
-        aggs: {
-          metric: metricAgg,
-          value: {
-            bucket_script: {
-              buckets_path: {
-                metric: `metric${metricBucketsPath ? `>${metricBucketsPath}` : ''}`,
-              },
-              script: 'params.metric',
+  const subAggs = {
+    over_time: {
+      auto_date_histogram: dateHistogram,
+      aggs: {
+        metric: metricAgg,
+        value: {
+          bucket_script: {
+            buckets_path: {
+              metric: `metric${metricBucketsPath ? `>${metricBucketsPath}` : ''}`,
             },
+            script: 'params.metric',
           },
         },
       },
-      changes: {
-        change_point: {
-          buckets_path: 'over_time>value',
-        },
-        // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
-      } as AggregationsAggregationContainer,
-    };
-
-    const search = getTypedSearch(esClient.asCurrentUser);
-
-    const response = await search({
-      index,
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: filters,
-        },
+    },
+    changes: {
+      change_point: {
+        buckets_path: 'over_time>value',
       },
-      aggs: {
-        groups: {
-          ...groupAgg,
-          aggs: subAggs,
-        },
-      },
-    });
+      // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
+    } as AggregationsAggregationContainer,
+  };
 
-    const groups = (
-      response.aggregations?.groups && 'buckets' in response.aggregations.groups
-        ? response.aggregations.groups.buckets || []
-        : []
-    ) as Array<AggregateOfMap<typeof subAggs, unknown> & { key?: string; key_as_string?: string }>;
+  const aggregations = {
+    groups: {
+      ...groupAgg,
+      aggs: subAggs,
+    },
+  };
 
-    const series = groups.reduce((acc, group) => {
-      const key = group.key ?? 'all';
+  const response = await searchChangePoints({
+    esClient,
+    index,
+    start,
+    end,
+    kqlFilter,
+    aggregations,
+  });
 
-      const changes = group.changes as AggregateOf<
-        { change_point: { buckets_path: string } },
-        unknown
-      >;
-
-      const [changeType, value] = Object.entries(changes.type)[0];
-
-      // filter out indeterminable changes
-      if (changes.type.indeterminable || !changes.bucket?.key) {
-        return acc;
-      }
-
-      const changePoint = {
-        key,
-        over_time: group.over_time.buckets.map((bucket) => {
-          return {
-            x: new Date(bucket.key_as_string).getTime(),
-            y: bucket.value?.value as number | null,
-          };
-        }),
-        changes: {
-          time: new Date(changes.bucket.key).toISOString(),
-          type: changeType,
-          ...value,
-        },
-      };
-
-      return [...acc, changePoint];
-    }, [] as ChangePoint[]);
-
-    return series;
-  } catch (error) {
-    throw error;
+  const buckets = (response.aggregations as AggregationsResponse | undefined)?.groups?.buckets;
+  if (!buckets) {
+    return [];
   }
+
+  return await getChangePoints({
+    name,
+    buckets,
+  });
 }
 
 const getMetricChangePointsSchema = z.object({
@@ -251,7 +223,7 @@ const getMetricChangePointsSchema = z.object({
       })
     )
     .describe(
-      'Analyze changes in metrics. DO NOT UNDER ANY CIRCUMSTANCES use date or metric fields for groupBy. Leave empty unless needed.'
+      'Optional keyword fields to group metrics by. DO NOT UNDER ANY CIRCUMSTANCES use high cardinality fields like date or metric fields. Leave empty unless needed.'
     ),
 });
 
@@ -278,26 +250,24 @@ export function createObservabilityGetMetricChangePointsTool({
 
         const metricIndexPatterns = await getMetricsIndices({ core, plugins, logger });
 
-        const metricChangePoints = await Promise.all([
-          ...metrics.map(async (metric) => {
-            const changePoints = await getMetricChangePoints({
+        const metricChangePoints = await Promise.all(
+          metrics.map(async (metric) => {
+            return await getMetricChangePoints({
+              name: metric.name,
               index: metric.index || metricIndexPatterns.join(','),
               esClient,
-              filters: getFilters({ start, end, kqlFilter: metric.kqlFilter }),
+              start,
+              end,
+              kqlFilter: metric.kqlFilter,
               groupBy: metric.groupBy ?? [],
               type: metric.type || 'count',
               field: metric.field,
             });
-
-            return changePoints.map((change) => ({
-              name: metric.name,
-              ...change,
-            }));
-          }),
-        ]);
+          })
+        );
 
         const allMetricChangePoints = orderBy(metricChangePoints.flat(), [
-          (item) => ('p_value' in item.changes ? item.changes.p_value : Number.POSITIVE_INFINITY),
+          (item) => item.changes.p_value ?? Number.POSITIVE_INFINITY,
         ]).slice(0, 25);
 
         return {
