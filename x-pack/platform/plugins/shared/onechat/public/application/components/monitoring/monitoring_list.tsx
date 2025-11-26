@@ -21,11 +21,12 @@ import {
   useEuiTheme,
   EuiLink,
   EuiAvatar,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, OnTimeChangeProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import moment from 'moment';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { ConversationSummary } from '../../../../common/http_api/conversations';
@@ -116,7 +117,16 @@ export const MonitoringList: React.FC = () => {
       field: 'created_at',
       name: labels.monitoring.createdAtLabel,
       dataType: 'date',
-      render: (createdAt: string) => moment(createdAt).format('MMM D, YYYY HH:mm:ss'),
+      render: (createdAt: string) => {
+        const date = moment(createdAt).toDate();
+        return (
+          <EuiToolTip content={moment(createdAt).format('MMMM D, YYYY @ HH:mm:ss.SSS')}>
+            <span>
+              <FormattedRelative value={date} />
+            </span>
+          </EuiToolTip>
+        );
+      },
     },
     {
       field: 'user.username',

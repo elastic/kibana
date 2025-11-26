@@ -314,6 +314,9 @@ export const labels = {
     authorLabel: i18n.translate('xpack.onechat.monitoring.authorLabel', {
       defaultMessage: 'Author',
     }),
+    agentLabel: i18n.translate('xpack.onechat.monitoring.agentLabel', {
+      defaultMessage: 'Agent',
+    }),
     tokensInLabel: i18n.translate('xpack.onechat.monitoring.tokensInLabel', {
       defaultMessage: 'Tokens in',
     }),
@@ -364,6 +367,12 @@ export const labels = {
     }),
     outputTokensLabel: i18n.translate('xpack.onechat.monitoring.outputTokensLabel', {
       defaultMessage: 'Output tokens',
+    }),
+    totalInputTokensLabel: i18n.translate('xpack.onechat.monitoring.totalInputTokensLabel', {
+      defaultMessage: 'Total input tokens',
+    }),
+    totalOutputTokensLabel: i18n.translate('xpack.onechat.monitoring.totalOutputTokensLabel', {
+      defaultMessage: 'Total output tokens',
     }),
     startedAtLabel: i18n.translate('xpack.onechat.monitoring.startedAtLabel', {
       defaultMessage: 'Started at',

@@ -26,18 +26,66 @@ import {
   EuiLink,
   EuiAvatar,
   useEuiTheme,
+  type EuiBadgeProps,
 } from '@elastic/eui';
 import { Chart, Settings, BarSeries, Axis, Tooltip } from '@elastic/charts';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { ConversationRound, ToolCallStep } from '@kbn/onechat-common';
+import type { ConversationRound, ToolCallStep, ToolResult } from '@kbn/onechat-common';
+import { ToolResultType } from '@kbn/onechat-common';
 import { useMonitoringGetConversation } from '../../hooks/monitoring';
+import { useOnechatAgentById } from '../../hooks/agents/use_agent_by_id';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
 import { TechPreviewTitle } from '../common/tech_preview';
+
+const getResultTypeLabel = (type: ToolResultType): string => {
+  switch (type) {
+    case ToolResultType.resource:
+      return i18n.translate('xpack.onechat.monitoring.resultType.resource', {
+        defaultMessage: 'Resource',
+      });
+    case ToolResultType.tabularData:
+      return i18n.translate('xpack.onechat.monitoring.resultType.tabularData', {
+        defaultMessage: 'Tabular Data',
+      });
+    case ToolResultType.query:
+      return i18n.translate('xpack.onechat.monitoring.resultType.query', {
+        defaultMessage: 'Query',
+      });
+    case ToolResultType.visualization:
+      return i18n.translate('xpack.onechat.monitoring.resultType.visualization', {
+        defaultMessage: 'Visualization',
+      });
+    case ToolResultType.error:
+      return i18n.translate('xpack.onechat.monitoring.resultType.error', {
+        defaultMessage: 'Error',
+      });
+    case ToolResultType.other:
+    default:
+      return i18n.translate('xpack.onechat.monitoring.resultType.other', {
+        defaultMessage: 'Other',
+      });
+  }
+};
+
+const getResultTypeColor = (type: ToolResultType): EuiBadgeProps['color'] => {
+  switch (type) {
+    case ToolResultType.error:
+      return 'warning';
+    default:
+      return 'hollow';
+  }
+};
+
+const getUniqueResultTypes = (results: ToolResult[]): ToolResultType[] => {
+  const types = new Set<ToolResultType>();
+  results.forEach((result) => types.add(result.type));
+  return Array.from(types);
+};
 
 export const MonitoringDetail: React.FC = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
@@ -49,6 +97,8 @@ export const MonitoringDetail: React.FC = () => {
     isLoading: loading,
     error: queryError,
   } = useMonitoringGetConversation(conversationId);
+
+  const { agent } = useOnechatAgentById(conversation?.agent_id);
 
   const error = queryError ? labels.monitoring.loadConversationErrorMessage : null;
 
@@ -92,7 +142,18 @@ export const MonitoringDetail: React.FC = () => {
                 <EuiSpacer size="s" />
                 <EuiAccordion
                   id={`tool-results-${idx}`}
-                  buttonContent={labels.monitoring.outputResultLabel}
+                  buttonContent={
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>{labels.monitoring.outputResultLabel}</EuiFlexItem>
+                      {getUniqueResultTypes(toolCall.results).map((resultType) => (
+                        <EuiFlexItem grow={false} key={resultType}>
+                          <EuiBadge color={getResultTypeColor(resultType)}>
+                            {getResultTypeLabel(resultType)}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  }
                   paddingSize="s"
                 >
                   <EuiCodeBlock language="json" isCopyable paddingSize="s">
@@ -121,7 +182,7 @@ export const MonitoringDetail: React.FC = () => {
           <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                {moment(round.started_at).format('HH:mm:ss')}
+                {moment(round.started_at).format('MMMM D, YYYY @ HH:mm:ss.SSS')}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -366,7 +427,7 @@ export const MonitoringDetail: React.FC = () => {
         ]}
       />
       <KibanaPageTemplate.Section>
-        {/* Title and Author Stats */}
+        {/* Title, Author, and Agent Stats */}
         <EuiFlexGroup gutterSize="l">
           <EuiFlexItem>
             <EuiPanel hasBorder>
@@ -400,6 +461,24 @@ export const MonitoringDetail: React.FC = () => {
               />
             </EuiPanel>
           </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiPanel hasBorder>
+              <EuiStat
+                title={
+                  <EuiLink
+                    href={createOnechatUrl(
+                      appPaths.agents.edit({ agentId: conversation.agent_id })
+                    )}
+                  >
+                    {agent?.name || conversation.agent_id}
+                  </EuiLink>
+                }
+                description={labels.monitoring.agentLabel}
+                titleSize="s"
+                textAlign="left"
+              />
+            </EuiPanel>
+          </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiSpacer size="l" />
@@ -410,7 +489,7 @@ export const MonitoringDetail: React.FC = () => {
             <EuiPanel hasBorder>
               <EuiStat
                 title={totalTokensIn.toLocaleString()}
-                description={labels.monitoring.inputTokensLabel}
+                description={labels.monitoring.totalInputTokensLabel}
                 titleSize="s"
               />
             </EuiPanel>
@@ -419,7 +498,7 @@ export const MonitoringDetail: React.FC = () => {
             <EuiPanel hasBorder>
               <EuiStat
                 title={totalTokensOut.toLocaleString()}
-                description={labels.monitoring.outputTokensLabel}
+                description={labels.monitoring.totalOutputTokensLabel}
                 titleSize="s"
               />
             </EuiPanel>
