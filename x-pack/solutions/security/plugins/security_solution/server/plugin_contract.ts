@@ -28,6 +28,8 @@ import type { FleetStartContract as FleetPluginStart } from '@kbn/fleet-plugin/s
 import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { OnechatPluginSetup, OnechatPluginStart } from '@kbn/onechat-plugin/server';
+import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type {
   RuleRegistryPluginSetupContract as RuleRegistryPluginSetup,
   RuleRegistryPluginStartContract as RuleRegistryPluginStart,
@@ -59,6 +61,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   features: FeaturesPluginSetup;
   lists?: ListPluginSetup;
   ml?: MlPluginSetup;
+  onechat: OnechatPluginSetup;
   ruleRegistry: RuleRegistryPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
@@ -81,6 +84,7 @@ export interface SecuritySolutionPluginStartDependencies {
   eventLog: IEventLogClientService;
   fleet?: FleetPluginStart;
   licensing: LicensingPluginStart;
+  onechat: OnechatPluginStart;
   ruleRegistry: RuleRegistryPluginStart;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
@@ -89,6 +93,7 @@ export interface SecuritySolutionPluginStartDependencies {
   share: SharePluginStart;
   actions: ActionsPluginStartContract;
   inference: InferenceServerStart;
+  llmTasks: LlmTasksPluginStart;
 }
 
 export interface SecuritySolutionPluginSetup {

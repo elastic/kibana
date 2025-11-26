@@ -20,3 +20,4 @@ xml-formatter
 dompurify
 magic-bytes.js
 @opentelemetry/exporter-trace-otlp-grpc
+@babel/plugin-bugfix-firefox-class-in-computed-class-key

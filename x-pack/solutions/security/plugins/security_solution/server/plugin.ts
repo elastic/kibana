@@ -144,8 +144,10 @@ import {
 } from '../common/threat_intelligence/constants';
 import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
-import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
+import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_analytics/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
+import { entityAnalyticsAgentCreator } from './lib/entity_analytics/agent_builder/siem_agent_creator';
+import { entityAnalyticsToolInternal } from './assistant/tools/entity_analytics/entity_analytics';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -249,6 +251,17 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService.setup(core, plugins);
 
+    if (experimentalFeatures.naturalLanguageThreatHuntingEnabled) {
+      // Register OneChat tools and agents
+      plugins.onechat.tools.register(
+        entityAnalyticsToolInternal(
+          core.getStartServices,
+          plugins.ml,
+          pluginContext.env.packageInfo.version
+        )
+      );
+      plugins.onechat.agents.register(entityAnalyticsAgentCreator());
+    }
     registerDeprecations({ core, config: this.config, logger: this.logger });
 
     registerRiskScoringTask({

@@ -91,6 +91,12 @@ export const allowedExperimentalValues = Object.freeze({
   entityThreatHuntingEnabled: false,
 
   /**
+   * Enables the experimental Threat Hunting Natural Language feature.
+   * It allows users to threat hunt using natural language with an AI Agent.
+   */
+  naturalLanguageThreatHuntingEnabled: false,
+
+  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
