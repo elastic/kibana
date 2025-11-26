@@ -14,14 +14,6 @@ import {
 import { parseRecords } from './parse_records';
 import type { GraphEdge } from './types';
 
-// Mock uuid module
-jest.mock('uuid', () => ({
-  v4: jest.fn(),
-}));
-
-import { v4 as uuidv4 } from 'uuid';
-const mockUuidv4 = uuidv4 as jest.MockedFunction<typeof uuidv4>;
-
 const mockLogger = {
   trace: jest.fn(),
   debug: jest.fn(),
@@ -30,12 +22,6 @@ const mockLogger = {
 describe('parseRecords', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Set up a sequence of predictable UUIDs
-    let counter = 0;
-    mockUuidv4.mockImplementation((() => {
-      counter += 1;
-      return `uuid-${counter}`;
-    }) as any);
   });
 
   it('returns empty nodes and edges for empty input', () => {
@@ -519,6 +505,24 @@ describe('parseRecords', () => {
 
   // Test for unknown target processing
   describe('unknown target processing', () => {
+    // Mock uuid module for unknown target tests
+    jest.mock('uuid', () => ({
+      v4: jest.fn(),
+    }));
+
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { v4: uuidv4 } = require('uuid');
+    const mockUuidv4 = uuidv4 as jest.MockedFunction<typeof uuidv4>;
+
+    beforeEach(() => {
+      // Set up a sequence of predictable UUIDs
+      let counter = 0;
+      mockUuidv4.mockImplementation((() => {
+        counter += 1;
+        return `uuid-${counter}`;
+      }) as any);
+    });
+
     it('properly processes unknown targets with processUnknownTargetGroup', () => {
       const records: GraphEdge[] = [
         {
