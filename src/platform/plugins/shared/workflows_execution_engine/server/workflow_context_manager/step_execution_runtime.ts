@@ -150,13 +150,13 @@ export class StepExecutionRuntime {
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
       status: ExecutionStatus.COMPLETED,
-      completedAt: new Date().toISOString(),
+      finishedAt: new Date().toISOString(),
       output: stepOutput,
     } as Partial<EsWorkflowStepExecution>;
 
     if (startedStepExecution?.startedAt) {
       stepExecutionUpdate.executionTimeMs =
-        new Date(stepExecutionUpdate.completedAt as string).getTime() -
+        new Date(stepExecutionUpdate.finishedAt as string).getTime() -
         new Date(startedStepExecution.startedAt).getTime();
     }
 
@@ -172,14 +172,14 @@ export class StepExecutionRuntime {
       id: this.stepExecutionId,
       status: ExecutionStatus.FAILED,
       scopeStack: this.stackFrames,
-      completedAt: new Date().toISOString(),
+      finishedAt: new Date().toISOString(),
       output: null,
       error: String(error),
     } as Partial<EsWorkflowStepExecution>;
 
     if (startedStepExecution && startedStepExecution.startedAt) {
       stepExecutionUpdate.executionTimeMs =
-        new Date(stepExecutionUpdate.completedAt as string).getTime() -
+        new Date(stepExecutionUpdate.finishedAt as string).getTime() -
         new Date(startedStepExecution.startedAt).getTime();
     }
     this.workflowExecutionState.updateWorkflowExecution({

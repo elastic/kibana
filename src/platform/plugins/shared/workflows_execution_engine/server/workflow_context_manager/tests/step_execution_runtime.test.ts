@@ -293,14 +293,14 @@ describe('StepExecutionRuntime', () => {
       });
     });
 
-    it('should correctly calculate step completedAt and executionTimeMs', () => {
-      const expectedCompletedAt = new Date('2025-08-06T00:00:02.000Z');
-      mockDateNow = expectedCompletedAt;
+    it('should correctly calculate step finishedAt and executionTimeMs', () => {
+      const expectedFinishedAt = new Date('2025-08-06T00:00:02.000Z');
+      mockDateNow = expectedFinishedAt;
       underTest.finishStep();
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
-          completedAt: expectedCompletedAt.toISOString(),
+          finishedAt: expectedFinishedAt.toISOString(),
           executionTimeMs: 2000,
         })
       );

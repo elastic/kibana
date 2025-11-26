@@ -395,9 +395,9 @@ export class WorkflowExecutionRuntimeManager {
       isTerminalStatus(workflowExecution.status)
     ) {
       const startedAt = new Date(workflowExecution.startedAt);
-      const completeDate = new Date();
-      workflowExecutionUpdate.finishedAt = completeDate.toISOString();
-      workflowExecutionUpdate.duration = completeDate.getTime() - startedAt.getTime();
+      const finishDate = new Date();
+      workflowExecutionUpdate.finishedAt = finishDate.toISOString();
+      workflowExecutionUpdate.duration = finishDate.getTime() - startedAt.getTime();
       workflowExecutionUpdate.context = buildWorkflowContext(
         this.workflowExecution,
         this.coreStart,
