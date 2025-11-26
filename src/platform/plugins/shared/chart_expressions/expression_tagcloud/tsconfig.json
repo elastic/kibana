@@ -11,7 +11,6 @@
     "../../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
-    { "path": "../tsconfig.json" },
     "@kbn/core",
     "@kbn/presentation-util-plugin",
     "@kbn/expressions-plugin",

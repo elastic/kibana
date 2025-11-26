@@ -14,7 +14,7 @@ import {
 import { Role } from '@kbn/security-plugin-types-common';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
-import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
+import { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {

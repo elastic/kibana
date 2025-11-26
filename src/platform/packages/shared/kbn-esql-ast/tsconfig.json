@@ -11,7 +11,8 @@
     "src/**/*",
     "**/*.ts",
   ],
-  "kbn_references": [],
+  "kbn_references": [
+  ],
   "exclude": [
     "target/**/*",
   ]

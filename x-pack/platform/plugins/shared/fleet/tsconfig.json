@@ -4,8 +4,6 @@
     "outDir": "target/types",
   },
   "exclude": [
-    "cypress.config.ts",
-    "cypress.config.space_awareness.ts",
     "target/**/*",
   ],
   "include": [
@@ -17,13 +15,10 @@
     "server/**/*.json",
     "scripts/**/*",
     "package.json",
-    "cypress.config.ts",
-    "cypress.config.space_awareness.ts",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
-    { "path": "../../../../../src/setup_node_env/tsconfig.json" },
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
@@ -125,6 +120,7 @@
     "@kbn/saved-search-component",
     "@kbn/logs-data-access-plugin",
     "@kbn/embeddable-plugin",
+    "@kbn/setup-node-env",
     "@kbn/react-query",
     "@kbn/fs"
   ]

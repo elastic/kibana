@@ -12,9 +12,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    {
-      "path": "../../../../../src/setup_node_env/tsconfig.json"
-    },
     // optionalPlugins from ./kibana.json
     "@kbn/lens-plugin",
     "@kbn/security-plugin",
@@ -93,7 +90,9 @@
     "@kbn/test",
     "@kbn/dev-utils",
     "@kbn/tooling-log",
-    "@kbn/react-query"
+    "@kbn/setup-node-env",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }
