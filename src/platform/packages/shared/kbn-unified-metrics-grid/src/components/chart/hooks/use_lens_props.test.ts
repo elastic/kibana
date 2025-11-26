@@ -198,16 +198,19 @@ describe('useLensProps', () => {
     });
 
     await waitFor(() => {
-      expect(result.current).toStrictEqual({
-        attributes: { attributes: {}, state: {}, visualizationType: 'lnsXY' },
-        executionContext: { description: 'metrics experience chart data' },
-        id: 'metricsExperienceLensComponent',
-        noPadding: true,
-        searchSessionId: fetchParams.searchSessionId,
-        timeRange: getTimeRange(),
-        viewMode: 'view',
-      });
+      expect(result.current).toStrictEqual(
+        expect.objectContaining({
+          attributes: { attributes: {}, state: {}, visualizationType: 'lnsXY' },
+          executionContext: { description: 'metrics experience chart data' },
+          id: 'metricsExperienceLensComponent',
+          noPadding: true,
+          searchSessionId: fetchParams.searchSessionId,
+          timeRange: fetchParams.relativeTimeRange,
+          viewMode: 'view',
+        })
+      );
     });
+    expect(result.current?.lastReloadRequestTime).toBeGreaterThan(0);
   });
 
   it('handles chartRef as null gracefully', async () => {
