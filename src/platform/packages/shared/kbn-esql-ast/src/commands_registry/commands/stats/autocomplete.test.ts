@@ -900,6 +900,21 @@ describe('STATS Autocomplete', () => {
         // Should NOT suggest comma because 2-param signature is complete
         expect(labels).not.toContain(',');
       });
+
+      test('after comma in BY with assignment should suggest fields and functions', async () => {
+        const fields = getFieldNamesByType('any');
+
+        await statsExpectSuggestions(
+          'FROM a | STATS BY col = BUCKET(@timestamp, 50, ?_tstart, ?_tend), ',
+          [
+            ' = ',
+            getDateHistogramCompletionItem().text,
+            ...fields,
+            ...getFunctionSignaturesByReturnType(Location.STATS, 'any', { scalar: true }),
+            ...allGroupingFunctions,
+          ]
+        );
+      });
     });
   });
 });

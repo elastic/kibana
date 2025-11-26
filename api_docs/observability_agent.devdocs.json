@@ -118,6 +118,21 @@
             "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgent",
+            "id": "def-server.ObservabilityAgentPluginSetupDependencies.ml",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ml",
+            "description": [],
+            "signature": [
+              "SharedServices",
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -282,6 +297,20 @@
                 "section": "def-server.DataViewsServerPluginStart",
                 "text": "DataViewsServerPluginStart"
               }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgent",
+            "id": "def-server.ObservabilityAgentPluginStartDependencies.ml",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "ml",
+            "description": [],
+            "signature": [
+              "void | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
             "deprecated": false,
