@@ -167,7 +167,7 @@ export const registerAuthenticateRoute = ({
             return response.forbidden({
               body: {
                 message:
-                  'Terms and Conditions not accepted or no Cloud Organization found. Please complete the setup in Elastic Cloud.',
+                  'Terms and Conditions not accepted or no cloud organization found. Please complete the setup in Elastic Cloud.',
               },
             });
           }
