@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
-import { getSchemaNamePrefix } from './generation_utils';
+import { getSchemaNamePrefix } from './get_schema_name_prefix';
 
 describe('getSchemaNamePrefix', () => {
   it('should return the correct schema name prefix', () => {
@@ -31,16 +30,5 @@ describe('getSchemaNamePrefix', () => {
   });
   it('should return the correct schema name prefix for a operation id with a Capital Case', () => {
     expect(getSchemaNamePrefix('SearchCapitalCase')).toBe('search_capital_case');
-  });
-});
-
-describe('little test', () => {
-  it('what z.toJsonSchema() does for a looseObject', () => {
-    const schema = z.looseObject({
-      foo: z.string(),
-      bar: z.number(),
-    });
-    const jsonSchema = z.toJSONSchema(schema);
-    console.log(jsonSchema);
   });
 });

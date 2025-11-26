@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
- * Generated at: 2025-11-24T17:35:07.313Z
+ * Generated at: 2025-11-26T17:48:16.567Z
  * Source: /oas_docs/output/kibana.yaml (undefined APIs)
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
@@ -235,6 +235,8 @@ import {
   delete_streams_name_response,
   delete_streams_name_rules_ruleid_request,
   delete_streams_name_rules_ruleid_response,
+  delete_streams_streamname_attachments_attachmenttype_attachmentid_request,
+  delete_streams_streamname_attachments_attachmenttype_attachmentid_response,
   delete_synthetic_monitor_request,
   delete_synthetic_monitor_response,
   delete_synthetic_monitors_request,
@@ -579,6 +581,8 @@ import {
   get_streams_name_significant_events_response,
   get_streams_request,
   get_streams_response,
+  get_streams_streamname_attachments_request,
+  get_streams_streamname_attachments_response,
   get_synthetic_monitor_request,
   get_synthetic_monitor_response,
   get_synthetic_monitors_request,
@@ -869,6 +873,8 @@ import {
   post_streams_name_significant_events_preview_response,
   post_streams_resync_request,
   post_streams_resync_response,
+  post_streams_streamname_attachments_bulk_request,
+  post_streams_streamname_attachments_bulk_response,
   post_synthetic_monitors_request,
   post_synthetic_monitors_response,
   post_synthetics_monitor_test_request,
@@ -939,6 +945,8 @@ import {
   put_streams_name_response,
   put_streams_name_rules_ruleid_request,
   put_streams_name_rules_ruleid_response,
+  put_streams_streamname_attachments_attachmenttype_attachmentid_request,
+  put_streams_streamname_attachments_attachmenttype_attachmentid_response,
   put_synthetic_monitor_request,
   put_synthetic_monitor_response,
   put_uptime_settings_request,
@@ -1063,10 +1071,10 @@ import {
   upsert_entities_bulk_response,
   upsert_entity_request,
   upsert_entity_response,
-} from './schemas/kibana_openapi_zod.gen';
-import type { InternalConnectorContract } from '../../types/latest';
-
-import { getZodLooseObjectFromProperty } from '../utils/zod';
+} from './kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+import type { InternalConnectorContract } from '../../../types/latest';
+import { FetcherConfigSchema } from '../../schema';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 
@@ -1091,11 +1099,12 @@ You do not need any Kibana feature privileges to run this API.`,
     urlParams: ['feature_id'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_actions_connector_types_request, 'body'),
-    getZodLooseObjectFromProperty(get_actions_connector_types_request, 'path'),
-    getZodLooseObjectFromProperty(get_actions_connector_types_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_actions_connector_types_request, 'body'),
+    ...getShapeAt(get_actions_connector_types_request, 'path'),
+    ...getShapeAt(get_actions_connector_types_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_actions_connector_types_response,
 };
 const DELETE_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
@@ -1118,11 +1127,12 @@ WARNING: When you delete a connector, it cannot be recovered.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_actions_connector_id_request, 'body'),
-    getZodLooseObjectFromProperty(delete_actions_connector_id_request, 'path'),
-    getZodLooseObjectFromProperty(delete_actions_connector_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_actions_connector_id_request, 'body'),
+    ...getShapeAt(delete_actions_connector_id_request, 'path'),
+    ...getShapeAt(delete_actions_connector_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_actions_connector_id_response,
 };
 const GET_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
@@ -1143,11 +1153,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_actions_connector_id_request, 'body'),
-    getZodLooseObjectFromProperty(get_actions_connector_id_request, 'path'),
-    getZodLooseObjectFromProperty(get_actions_connector_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_actions_connector_id_request, 'body'),
+    ...getShapeAt(get_actions_connector_id_request, 'path'),
+    ...getShapeAt(get_actions_connector_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_actions_connector_id_response,
 };
 const POST_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
@@ -1168,11 +1179,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['connector_type_id', 'name', 'config', 'secrets'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_actions_connector_id_request, 'body'),
-    getZodLooseObjectFromProperty(post_actions_connector_id_request, 'path'),
-    getZodLooseObjectFromProperty(post_actions_connector_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_actions_connector_id_request, 'body'),
+    ...getShapeAt(post_actions_connector_id_request, 'path'),
+    ...getShapeAt(post_actions_connector_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_actions_connector_id_response,
 };
 const PUT_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
@@ -1193,11 +1205,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['name', 'config', 'secrets'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_actions_connector_id_request, 'body'),
-    getZodLooseObjectFromProperty(put_actions_connector_id_request, 'path'),
-    getZodLooseObjectFromProperty(put_actions_connector_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_actions_connector_id_request, 'body'),
+    ...getShapeAt(put_actions_connector_id_request, 'path'),
+    ...getShapeAt(put_actions_connector_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_actions_connector_id_response,
 };
 const POST_ACTIONS_CONNECTOR_ID_EXECUTE_CONTRACT: InternalConnectorContract = {
@@ -1220,11 +1233,12 @@ You can use this API to test an action that involves interaction with Kibana ser
     urlParams: [],
     bodyParams: ['params'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_actions_connector_id_execute_request, 'body'),
-    getZodLooseObjectFromProperty(post_actions_connector_id_execute_request, 'path'),
-    getZodLooseObjectFromProperty(post_actions_connector_id_execute_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_actions_connector_id_execute_request, 'body'),
+    ...getShapeAt(post_actions_connector_id_execute_request, 'path'),
+    ...getShapeAt(post_actions_connector_id_execute_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_actions_connector_id_execute_response,
 };
 const GET_ACTIONS_CONNECTORS_CONTRACT: InternalConnectorContract = {
@@ -1245,11 +1259,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_actions_connectors_request, 'body'),
-    getZodLooseObjectFromProperty(get_actions_connectors_request, 'path'),
-    getZodLooseObjectFromProperty(get_actions_connectors_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_actions_connectors_request, 'body'),
+    ...getShapeAt(get_actions_connectors_request, 'path'),
+    ...getShapeAt(get_actions_connectors_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_actions_connectors_response,
 };
 const POST_AGENT_BUILDER_A2A_AGENTID_CONTRACT: InternalConnectorContract = {
@@ -1262,7 +1277,8 @@ const POST_AGENT_BUILDER_A2A_AGENTID_CONTRACT: InternalConnectorContract = {
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-WARNING: This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
+> warn
+> This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['POST'],
   patterns: ['/api/agent_builder/a2a/{agentId}'],
   documentation: null,
@@ -1272,11 +1288,12 @@ WARNING: This endpoint is designed for A2A protocol clients and should not be us
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_agent_builder_a2a_agentid_request, 'body'),
-    getZodLooseObjectFromProperty(post_agent_builder_a2a_agentid_request, 'path'),
-    getZodLooseObjectFromProperty(post_agent_builder_a2a_agentid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_agent_builder_a2a_agentid_request, 'body'),
+    ...getShapeAt(post_agent_builder_a2a_agentid_request, 'path'),
+    ...getShapeAt(post_agent_builder_a2a_agentid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_agent_builder_a2a_agentid_response,
 };
 const GET_AGENT_BUILDER_A2A_AGENTID_JSON_CONTRACT: InternalConnectorContract = {
@@ -1299,11 +1316,12 @@ Get agent discovery metadata in JSON format. Use this endpoint to provide agent 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_agent_builder_a2a_agentid_json_request, 'body'),
-    getZodLooseObjectFromProperty(get_agent_builder_a2a_agentid_json_request, 'path'),
-    getZodLooseObjectFromProperty(get_agent_builder_a2a_agentid_json_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_agent_builder_a2a_agentid_json_request, 'body'),
+    ...getShapeAt(get_agent_builder_a2a_agentid_json_request, 'path'),
+    ...getShapeAt(get_agent_builder_a2a_agentid_json_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_agent_builder_a2a_agentid_json_response,
 };
 const GET_AGENT_BUILDER_AGENTS_CONTRACT: InternalConnectorContract = {
@@ -1326,11 +1344,12 @@ List all available agents. Use this endpoint to retrieve complete agent informat
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_agent_builder_agents_request, 'body'),
-    getZodLooseObjectFromProperty(get_agent_builder_agents_request, 'path'),
-    getZodLooseObjectFromProperty(get_agent_builder_agents_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_agent_builder_agents_request, 'body'),
+    ...getShapeAt(get_agent_builder_agents_request, 'path'),
+    ...getShapeAt(get_agent_builder_agents_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_agent_builder_agents_response,
 };
 const POST_AGENT_BUILDER_AGENTS_CONTRACT: InternalConnectorContract = {
@@ -1361,11 +1380,12 @@ Create a new agent. Use this endpoint to define the agent's behavior, appearance
       'name',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_agent_builder_agents_request, 'body'),
-    getZodLooseObjectFromProperty(post_agent_builder_agents_request, 'path'),
-    getZodLooseObjectFromProperty(post_agent_builder_agents_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_agent_builder_agents_request, 'body'),
+    ...getShapeAt(post_agent_builder_agents_request, 'path'),
+    ...getShapeAt(post_agent_builder_agents_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_agent_builder_agents_response,
 };
 const DELETE_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract = {
@@ -1388,11 +1408,12 @@ Delete an agent by ID. This action cannot be undone.<br/><br/>[Required authoriz
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_agent_builder_agents_id_request, 'body'),
-    getZodLooseObjectFromProperty(delete_agent_builder_agents_id_request, 'path'),
-    getZodLooseObjectFromProperty(delete_agent_builder_agents_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_agent_builder_agents_id_request, 'body'),
+    ...getShapeAt(delete_agent_builder_agents_id_request, 'path'),
+    ...getShapeAt(delete_agent_builder_agents_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_agent_builder_agents_id_response,
 };
 const GET_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract = {
@@ -1415,11 +1436,12 @@ Get a specific agent by ID. Use this endpoint to retrieve the complete agent def
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_agent_builder_agents_id_request, 'body'),
-    getZodLooseObjectFromProperty(get_agent_builder_agents_id_request, 'path'),
-    getZodLooseObjectFromProperty(get_agent_builder_agents_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_agent_builder_agents_id_request, 'body'),
+    ...getShapeAt(get_agent_builder_agents_id_request, 'path'),
+    ...getShapeAt(get_agent_builder_agents_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_agent_builder_agents_id_response,
 };
 const PUT_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract = {
@@ -1442,11 +1464,12 @@ Update an existing agent configuration. Use this endpoint to modify any aspect o
     urlParams: [],
     bodyParams: ['avatar_color', 'avatar_symbol', 'configuration', 'description', 'labels', 'name'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_agent_builder_agents_id_request, 'body'),
-    getZodLooseObjectFromProperty(put_agent_builder_agents_id_request, 'path'),
-    getZodLooseObjectFromProperty(put_agent_builder_agents_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_agent_builder_agents_id_request, 'body'),
+    ...getShapeAt(put_agent_builder_agents_id_request, 'path'),
+    ...getShapeAt(put_agent_builder_agents_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_agent_builder_agents_id_response,
 };
 const GET_AGENT_BUILDER_CONVERSATIONS_CONTRACT: InternalConnectorContract = {
@@ -1469,11 +1492,12 @@ List all conversations for a user. Use the optional agent ID to filter conversat
     urlParams: ['agent_id'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_agent_builder_conversations_request, 'body'),
-    getZodLooseObjectFromProperty(get_agent_builder_conversations_request, 'path'),
-    getZodLooseObjectFromProperty(get_agent_builder_conversations_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_agent_builder_conversations_request, 'body'),
+    ...getShapeAt(get_agent_builder_conversations_request, 'path'),
+    ...getShapeAt(get_agent_builder_conversations_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_agent_builder_conversations_response,
 };
 const DELETE_AGENT_BUILDER_CONVERSATIONS_CONVERSATION_ID_CONTRACT: InternalConnectorContract = {
@@ -1496,20 +1520,12 @@ Delete a conversation by ID. This action cannot be undone.<br/><br/>[Required au
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(
-      delete_agent_builder_conversations_conversation_id_request,
-      'body'
-    ),
-    getZodLooseObjectFromProperty(
-      delete_agent_builder_conversations_conversation_id_request,
-      'path'
-    ),
-    getZodLooseObjectFromProperty(
-      delete_agent_builder_conversations_conversation_id_request,
-      'query'
-    ),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_agent_builder_conversations_conversation_id_request, 'body'),
+    ...getShapeAt(delete_agent_builder_conversations_conversation_id_request, 'path'),
+    ...getShapeAt(delete_agent_builder_conversations_conversation_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_agent_builder_conversations_conversation_id_response,
 };
 const GET_AGENT_BUILDER_CONVERSATIONS_CONVERSATION_ID_CONTRACT: InternalConnectorContract = {
@@ -1532,11 +1548,12 @@ Get a specific conversation by ID. Use this endpoint to retrieve the complete co
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_agent_builder_conversations_conversation_id_request, 'body'),
-    getZodLooseObjectFromProperty(get_agent_builder_conversations_conversation_id_request, 'path'),
-    getZodLooseObjectFromProperty(get_agent_builder_conversations_conversation_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_agent_builder_conversations_conversation_id_request, 'body'),
+    ...getShapeAt(get_agent_builder_conversations_conversation_id_request, 'path'),
+    ...getShapeAt(get_agent_builder_conversations_conversation_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_agent_builder_conversations_conversation_id_response,
 };
 const POST_AGENT_BUILDER_CONVERSE_CONTRACT: InternalConnectorContract = {
@@ -1567,11 +1584,12 @@ Send a message to an agent and receive a complete response. This synchronous end
       'input',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_agent_builder_converse_request, 'body'),
-    getZodLooseObjectFromProperty(post_agent_builder_converse_request, 'path'),
-    getZodLooseObjectFromProperty(post_agent_builder_converse_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_agent_builder_converse_request, 'body'),
+    ...getShapeAt(post_agent_builder_converse_request, 'path'),
+    ...getShapeAt(post_agent_builder_converse_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_agent_builder_converse_response,
 };
 const POST_AGENT_BUILDER_CONVERSE_ASYNC_CONTRACT: InternalConnectorContract = {
@@ -1778,11 +1796,12 @@ A typical conversation round emits events in this sequence:
       'input',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_agent_builder_converse_async_request, 'body'),
-    getZodLooseObjectFromProperty(post_agent_builder_converse_async_request, 'path'),
-    getZodLooseObjectFromProperty(post_agent_builder_converse_async_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_agent_builder_converse_async_request, 'body'),
+    ...getShapeAt(post_agent_builder_converse_async_request, 'path'),
+    ...getShapeAt(post_agent_builder_converse_async_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_agent_builder_converse_async_response,
 };
 const POST_AGENT_BUILDER_MCP_CONTRACT: InternalConnectorContract = {
@@ -1795,7 +1814,8 @@ const POST_AGENT_BUILDER_MCP_CONTRACT: InternalConnectorContract = {
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-WARNING: This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
+> warn
+> This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.`,
   methods: ['POST'],
   patterns: ['/api/agent_builder/mcp'],
   documentation: null,
@@ -1805,11 +1825,12 @@ WARNING: This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS C
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_agent_builder_mcp_request, 'body'),
-    getZodLooseObjectFromProperty(post_agent_builder_mcp_request, 'path'),
-    getZodLooseObjectFromProperty(post_agent_builder_mcp_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_agent_builder_mcp_request, 'body'),
+    ...getShapeAt(post_agent_builder_mcp_request, 'path'),
+    ...getShapeAt(post_agent_builder_mcp_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_agent_builder_mcp_response,
 };
 const GET_AGENT_BUILDER_TOOLS_CONTRACT: InternalConnectorContract = {
@@ -1832,11 +1853,12 @@ List all available tools. Use this endpoint to retrieve complete tool definition
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_agent_builder_tools_request, 'body'),
-    getZodLooseObjectFromProperty(get_agent_builder_tools_request, 'path'),
-    getZodLooseObjectFromProperty(get_agent_builder_tools_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_agent_builder_tools_request, 'body'),
+    ...getShapeAt(get_agent_builder_tools_request, 'path'),
+    ...getShapeAt(get_agent_builder_tools_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_agent_builder_tools_response,
 };
 const POST_AGENT_BUILDER_TOOLS_CONTRACT: InternalConnectorContract = {
@@ -1859,11 +1881,12 @@ Create a new tool. Use this endpoint to define a custom tool with specific funct
     urlParams: [],
     bodyParams: ['configuration', 'description', 'id', 'tags', 'type'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_agent_builder_tools_request, 'body'),
-    getZodLooseObjectFromProperty(post_agent_builder_tools_request, 'path'),
-    getZodLooseObjectFromProperty(post_agent_builder_tools_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_agent_builder_tools_request, 'body'),
+    ...getShapeAt(post_agent_builder_tools_request, 'path'),
+    ...getShapeAt(post_agent_builder_tools_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_agent_builder_tools_response,
 };
 const POST_AGENT_BUILDER_TOOLS_EXECUTE_CONTRACT: InternalConnectorContract = {
@@ -1886,11 +1909,12 @@ Execute a tool with parameters. Use this endpoint to run a tool directly with sp
     urlParams: [],
     bodyParams: ['connector_id', 'tool_id', 'tool_params'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_agent_builder_tools_execute_request, 'body'),
-    getZodLooseObjectFromProperty(post_agent_builder_tools_execute_request, 'path'),
-    getZodLooseObjectFromProperty(post_agent_builder_tools_execute_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_agent_builder_tools_execute_request, 'body'),
+    ...getShapeAt(post_agent_builder_tools_execute_request, 'path'),
+    ...getShapeAt(post_agent_builder_tools_execute_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_agent_builder_tools_execute_response,
 };
 const DELETE_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT: InternalConnectorContract = {
@@ -1913,11 +1937,12 @@ Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorizat
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_agent_builder_tools_toolid_request, 'body'),
-    getZodLooseObjectFromProperty(delete_agent_builder_tools_toolid_request, 'path'),
-    getZodLooseObjectFromProperty(delete_agent_builder_tools_toolid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_agent_builder_tools_toolid_request, 'body'),
+    ...getShapeAt(delete_agent_builder_tools_toolid_request, 'path'),
+    ...getShapeAt(delete_agent_builder_tools_toolid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_agent_builder_tools_toolid_response,
 };
 const GET_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT: InternalConnectorContract = {
@@ -1940,11 +1965,12 @@ Get a specific tool by ID. Use this endpoint to retrieve the complete tool defin
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_agent_builder_tools_toolid_request, 'body'),
-    getZodLooseObjectFromProperty(get_agent_builder_tools_toolid_request, 'path'),
-    getZodLooseObjectFromProperty(get_agent_builder_tools_toolid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_agent_builder_tools_toolid_request, 'body'),
+    ...getShapeAt(get_agent_builder_tools_toolid_request, 'path'),
+    ...getShapeAt(get_agent_builder_tools_toolid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_agent_builder_tools_toolid_response,
 };
 const PUT_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT: InternalConnectorContract = {
@@ -1967,11 +1993,12 @@ Update an existing tool. Use this endpoint to modify any aspect of the tool's co
     urlParams: [],
     bodyParams: ['configuration', 'description', 'tags'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_agent_builder_tools_toolid_request, 'body'),
-    getZodLooseObjectFromProperty(put_agent_builder_tools_toolid_request, 'path'),
-    getZodLooseObjectFromProperty(put_agent_builder_tools_toolid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_agent_builder_tools_toolid_request, 'body'),
+    ...getShapeAt(put_agent_builder_tools_toolid_request, 'path'),
+    ...getShapeAt(put_agent_builder_tools_toolid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_agent_builder_tools_toolid_response,
 };
 const GETALERTINGHEALTH_CONTRACT: InternalConnectorContract = {
@@ -1995,11 +2022,12 @@ You must have \`read\` privileges for the **Management > Stack Rules** feature o
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_alerting_health_request, 'body'),
-    getZodLooseObjectFromProperty(get_alerting_health_request, 'path'),
-    getZodLooseObjectFromProperty(get_alerting_health_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_alerting_health_request, 'body'),
+    ...getShapeAt(get_alerting_health_request, 'path'),
+    ...getShapeAt(get_alerting_health_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_alerting_health_response,
 };
 const GETRULETYPES_CONTRACT: InternalConnectorContract = {
@@ -2023,11 +2051,12 @@ If you have \`read\` privileges for one or more Kibana features, the API respons
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_rule_types_request, 'body'),
-    getZodLooseObjectFromProperty(get_rule_types_request, 'path'),
-    getZodLooseObjectFromProperty(get_rule_types_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_rule_types_request, 'body'),
+    ...getShapeAt(get_rule_types_request, 'path'),
+    ...getShapeAt(get_rule_types_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_rule_types_response,
 };
 const DELETE_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
@@ -2048,11 +2077,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_alerting_rule_id_request, 'body'),
-    getZodLooseObjectFromProperty(delete_alerting_rule_id_request, 'path'),
-    getZodLooseObjectFromProperty(delete_alerting_rule_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_alerting_rule_id_request, 'body'),
+    ...getShapeAt(delete_alerting_rule_id_request, 'path'),
+    ...getShapeAt(delete_alerting_rule_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_alerting_rule_id_response,
 };
 const GET_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
@@ -2073,11 +2103,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_alerting_rule_id_request, 'body'),
-    getZodLooseObjectFromProperty(get_alerting_rule_id_request, 'path'),
-    getZodLooseObjectFromProperty(get_alerting_rule_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_alerting_rule_id_request, 'body'),
+    ...getShapeAt(get_alerting_rule_id_request, 'path'),
+    ...getShapeAt(get_alerting_rule_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_alerting_rule_id_response,
 };
 const POST_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
@@ -2112,11 +2143,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       'params',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_alerting_rule_id_request, 'body'),
-    getZodLooseObjectFromProperty(post_alerting_rule_id_request, 'path'),
-    getZodLooseObjectFromProperty(post_alerting_rule_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_alerting_rule_id_request, 'body'),
+    ...getShapeAt(post_alerting_rule_id_request, 'path'),
+    ...getShapeAt(post_alerting_rule_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_alerting_rule_id_response,
 };
 const PUT_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
@@ -2148,11 +2180,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       'throttle',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_alerting_rule_id_request, 'body'),
-    getZodLooseObjectFromProperty(put_alerting_rule_id_request, 'path'),
-    getZodLooseObjectFromProperty(put_alerting_rule_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_alerting_rule_id_request, 'body'),
+    ...getShapeAt(put_alerting_rule_id_request, 'path'),
+    ...getShapeAt(put_alerting_rule_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_alerting_rule_id_response,
 };
 const POST_ALERTING_RULE_ID_DISABLE_CONTRACT: InternalConnectorContract = {
@@ -2173,11 +2206,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['untrack'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_alerting_rule_id_disable_request, 'body'),
-    getZodLooseObjectFromProperty(post_alerting_rule_id_disable_request, 'path'),
-    getZodLooseObjectFromProperty(post_alerting_rule_id_disable_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_alerting_rule_id_disable_request, 'body'),
+    ...getShapeAt(post_alerting_rule_id_disable_request, 'path'),
+    ...getShapeAt(post_alerting_rule_id_disable_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_alerting_rule_id_disable_response,
 };
 const POST_ALERTING_RULE_ID_ENABLE_CONTRACT: InternalConnectorContract = {
@@ -2198,11 +2232,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_alerting_rule_id_enable_request, 'body'),
-    getZodLooseObjectFromProperty(post_alerting_rule_id_enable_request, 'path'),
-    getZodLooseObjectFromProperty(post_alerting_rule_id_enable_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_alerting_rule_id_enable_request, 'body'),
+    ...getShapeAt(post_alerting_rule_id_enable_request, 'path'),
+    ...getShapeAt(post_alerting_rule_id_enable_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_alerting_rule_id_enable_response,
 };
 const POST_ALERTING_RULE_ID_MUTE_ALL_CONTRACT: InternalConnectorContract = {
@@ -2223,11 +2258,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_alerting_rule_id_mute_all_request, 'body'),
-    getZodLooseObjectFromProperty(post_alerting_rule_id_mute_all_request, 'path'),
-    getZodLooseObjectFromProperty(post_alerting_rule_id_mute_all_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_alerting_rule_id_mute_all_request, 'body'),
+    ...getShapeAt(post_alerting_rule_id_mute_all_request, 'path'),
+    ...getShapeAt(post_alerting_rule_id_mute_all_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_alerting_rule_id_mute_all_response,
 };
 const POST_ALERTING_RULE_ID_UNMUTE_ALL_CONTRACT: InternalConnectorContract = {
@@ -2248,11 +2284,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_alerting_rule_id_unmute_all_request, 'body'),
-    getZodLooseObjectFromProperty(post_alerting_rule_id_unmute_all_request, 'path'),
-    getZodLooseObjectFromProperty(post_alerting_rule_id_unmute_all_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_alerting_rule_id_unmute_all_request, 'body'),
+    ...getShapeAt(post_alerting_rule_id_unmute_all_request, 'path'),
+    ...getShapeAt(post_alerting_rule_id_unmute_all_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_alerting_rule_id_unmute_all_response,
 };
 const POST_ALERTING_RULE_ID_UPDATE_API_KEY_CONTRACT: InternalConnectorContract = {
@@ -2273,11 +2310,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_alerting_rule_id_update_api_key_request, 'body'),
-    getZodLooseObjectFromProperty(post_alerting_rule_id_update_api_key_request, 'path'),
-    getZodLooseObjectFromProperty(post_alerting_rule_id_update_api_key_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_alerting_rule_id_update_api_key_request, 'body'),
+    ...getShapeAt(post_alerting_rule_id_update_api_key_request, 'path'),
+    ...getShapeAt(post_alerting_rule_id_update_api_key_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_alerting_rule_id_update_api_key_response,
 };
 const POST_ALERTING_RULE_ID_SNOOZE_SCHEDULE_CONTRACT: InternalConnectorContract = {
@@ -2300,11 +2338,12 @@ When you snooze a rule, the rule checks continue to run but alerts will not gene
     urlParams: [],
     bodyParams: ['schedule'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_alerting_rule_id_snooze_schedule_request, 'body'),
-    getZodLooseObjectFromProperty(post_alerting_rule_id_snooze_schedule_request, 'path'),
-    getZodLooseObjectFromProperty(post_alerting_rule_id_snooze_schedule_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_alerting_rule_id_snooze_schedule_request, 'body'),
+    ...getShapeAt(post_alerting_rule_id_snooze_schedule_request, 'path'),
+    ...getShapeAt(post_alerting_rule_id_snooze_schedule_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_alerting_rule_id_snooze_schedule_response,
 };
 const POST_ALERTING_RULE_RULE_ID_ALERT_ALERT_ID_MUTE_CONTRACT: InternalConnectorContract = {
@@ -2325,11 +2364,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'body'),
-    getZodLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'path'),
-    getZodLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'body'),
+    ...getShapeAt(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'path'),
+    ...getShapeAt(post_alerting_rule_rule_id_alert_alert_id_mute_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_alerting_rule_rule_id_alert_alert_id_mute_response,
 };
 const POST_ALERTING_RULE_RULE_ID_ALERT_ALERT_ID_UNMUTE_CONTRACT: InternalConnectorContract = {
@@ -2350,14 +2390,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_unmute_request, 'body'),
-    getZodLooseObjectFromProperty(post_alerting_rule_rule_id_alert_alert_id_unmute_request, 'path'),
-    getZodLooseObjectFromProperty(
-      post_alerting_rule_rule_id_alert_alert_id_unmute_request,
-      'query'
-    ),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_alerting_rule_rule_id_alert_alert_id_unmute_request, 'body'),
+    ...getShapeAt(post_alerting_rule_rule_id_alert_alert_id_unmute_request, 'path'),
+    ...getShapeAt(post_alerting_rule_rule_id_alert_alert_id_unmute_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_alerting_rule_rule_id_alert_alert_id_unmute_response,
 };
 const DELETE_ALERTING_RULE_RULEID_SNOOZE_SCHEDULE_SCHEDULEID_CONTRACT: InternalConnectorContract = {
@@ -2378,20 +2416,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(
-      delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request,
-      'body'
-    ),
-    getZodLooseObjectFromProperty(
-      delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request,
-      'path'
-    ),
-    getZodLooseObjectFromProperty(
-      delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request,
-      'query'
-    ),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request, 'body'),
+    ...getShapeAt(delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request, 'path'),
+    ...getShapeAt(delete_alerting_rule_ruleid_snooze_schedule_scheduleid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_alerting_rule_ruleid_snooze_schedule_scheduleid_response,
 };
 const GET_ALERTING_RULES_FIND_CONTRACT: InternalConnectorContract = {
@@ -2424,11 +2454,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_alerting_rules_find_request, 'body'),
-    getZodLooseObjectFromProperty(get_alerting_rules_find_request, 'path'),
-    getZodLooseObjectFromProperty(get_alerting_rules_find_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_alerting_rules_find_request, 'body'),
+    ...getShapeAt(get_alerting_rules_find_request, 'path'),
+    ...getShapeAt(get_alerting_rules_find_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_alerting_rules_find_response,
 };
 const CREATEAGENTKEY_CONTRACT: InternalConnectorContract = {
@@ -2454,11 +2485,12 @@ After it is created, you can copy the API key (Base64 encoded) and use it to to 
     urlParams: [],
     bodyParams: ['name', 'privileges'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_agent_key_request, 'body'),
-    getZodLooseObjectFromProperty(create_agent_key_request, 'path'),
-    getZodLooseObjectFromProperty(create_agent_key_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_agent_key_request, 'body'),
+    ...getShapeAt(create_agent_key_request, 'path'),
+    ...getShapeAt(create_agent_key_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_agent_key_response,
 };
 const SAVEAPMSERVERSCHEMA_CONTRACT: InternalConnectorContract = {
@@ -2479,11 +2511,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['schema'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(save_apm_server_schema_request, 'body'),
-    getZodLooseObjectFromProperty(save_apm_server_schema_request, 'path'),
-    getZodLooseObjectFromProperty(save_apm_server_schema_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(save_apm_server_schema_request, 'body'),
+    ...getShapeAt(save_apm_server_schema_request, 'path'),
+    ...getShapeAt(save_apm_server_schema_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: save_apm_server_schema_response,
 };
 const CREATEANNOTATION_CONTRACT: InternalConnectorContract = {
@@ -2506,11 +2539,12 @@ Create a new annotation for a specific service.`,
     urlParams: [],
     bodyParams: ['@timestamp', 'message', 'service', 'tags'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_annotation_request, 'body'),
-    getZodLooseObjectFromProperty(create_annotation_request, 'path'),
-    getZodLooseObjectFromProperty(create_annotation_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_annotation_request, 'body'),
+    ...getShapeAt(create_annotation_request, 'path'),
+    ...getShapeAt(create_annotation_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_annotation_response,
 };
 const GETANNOTATION_CONTRACT: InternalConnectorContract = {
@@ -2533,11 +2567,12 @@ Search for annotations related to a specific service.`,
     urlParams: ['environment', 'start', 'end'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_annotation_request, 'body'),
-    getZodLooseObjectFromProperty(get_annotation_request, 'path'),
-    getZodLooseObjectFromProperty(get_annotation_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_annotation_request, 'body'),
+    ...getShapeAt(get_annotation_request, 'path'),
+    ...getShapeAt(get_annotation_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_annotation_response,
 };
 const DELETEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
@@ -2558,11 +2593,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['service'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_agent_configuration_request, 'body'),
-    getZodLooseObjectFromProperty(delete_agent_configuration_request, 'path'),
-    getZodLooseObjectFromProperty(delete_agent_configuration_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_agent_configuration_request, 'body'),
+    ...getShapeAt(delete_agent_configuration_request, 'path'),
+    ...getShapeAt(delete_agent_configuration_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_agent_configuration_response,
 };
 const GETAGENTCONFIGURATIONS_CONTRACT: InternalConnectorContract = {
@@ -2583,11 +2619,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_agent_configurations_request, 'body'),
-    getZodLooseObjectFromProperty(get_agent_configurations_request, 'path'),
-    getZodLooseObjectFromProperty(get_agent_configurations_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_agent_configurations_request, 'body'),
+    ...getShapeAt(get_agent_configurations_request, 'path'),
+    ...getShapeAt(get_agent_configurations_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_agent_configurations_response,
 };
 const CREATEUPDATEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
@@ -2608,11 +2645,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['overwrite'],
     bodyParams: ['agent_name', 'service', 'settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_update_agent_configuration_request, 'body'),
-    getZodLooseObjectFromProperty(create_update_agent_configuration_request, 'path'),
-    getZodLooseObjectFromProperty(create_update_agent_configuration_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_update_agent_configuration_request, 'body'),
+    ...getShapeAt(create_update_agent_configuration_request, 'path'),
+    ...getShapeAt(create_update_agent_configuration_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_update_agent_configuration_response,
 };
 const GETAGENTNAMEFORSERVICE_CONTRACT: InternalConnectorContract = {
@@ -2635,11 +2673,12 @@ Retrieve \`agentName\` for a service.`,
     urlParams: ['serviceName'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_agent_name_for_service_request, 'body'),
-    getZodLooseObjectFromProperty(get_agent_name_for_service_request, 'path'),
-    getZodLooseObjectFromProperty(get_agent_name_for_service_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_agent_name_for_service_request, 'body'),
+    ...getShapeAt(get_agent_name_for_service_request, 'path'),
+    ...getShapeAt(get_agent_name_for_service_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_agent_name_for_service_response,
 };
 const GETENVIRONMENTSFORSERVICE_CONTRACT: InternalConnectorContract = {
@@ -2660,11 +2699,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['serviceName'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_environments_for_service_request, 'body'),
-    getZodLooseObjectFromProperty(get_environments_for_service_request, 'path'),
-    getZodLooseObjectFromProperty(get_environments_for_service_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_environments_for_service_request, 'body'),
+    ...getShapeAt(get_environments_for_service_request, 'path'),
+    ...getShapeAt(get_environments_for_service_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_environments_for_service_response,
 };
 const SEARCHSINGLECONFIGURATION_CONTRACT: InternalConnectorContract = {
@@ -2688,11 +2728,12 @@ This endpoint enables you to search for a single agent configuration and update 
     urlParams: [],
     bodyParams: ['etag', 'mark_as_applied_by_agent', 'service'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(search_single_configuration_request, 'body'),
-    getZodLooseObjectFromProperty(search_single_configuration_request, 'path'),
-    getZodLooseObjectFromProperty(search_single_configuration_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(search_single_configuration_request, 'body'),
+    ...getShapeAt(search_single_configuration_request, 'path'),
+    ...getShapeAt(search_single_configuration_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: search_single_configuration_response,
 };
 const GETSINGLEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
@@ -2713,11 +2754,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['name', 'environment'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_single_agent_configuration_request, 'body'),
-    getZodLooseObjectFromProperty(get_single_agent_configuration_request, 'path'),
-    getZodLooseObjectFromProperty(get_single_agent_configuration_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_single_agent_configuration_request, 'body'),
+    ...getShapeAt(get_single_agent_configuration_request, 'path'),
+    ...getShapeAt(get_single_agent_configuration_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_single_agent_configuration_response,
 };
 const GETSOURCEMAPS_CONTRACT: InternalConnectorContract = {
@@ -2741,11 +2783,12 @@ Get an array of Fleet artifacts, including source map uploads. You must have \`r
     urlParams: ['page', 'perPage'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_source_maps_request, 'body'),
-    getZodLooseObjectFromProperty(get_source_maps_request, 'path'),
-    getZodLooseObjectFromProperty(get_source_maps_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_source_maps_request, 'body'),
+    ...getShapeAt(get_source_maps_request, 'path'),
+    ...getShapeAt(get_source_maps_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_source_maps_response,
 };
 const UPLOADSOURCEMAP_CONTRACT: InternalConnectorContract = {
@@ -2770,11 +2813,12 @@ The maximum payload size is \`1mb\`. If you attempt to upload a source map that 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(upload_source_map_request, 'body'),
-    getZodLooseObjectFromProperty(upload_source_map_request, 'path'),
-    getZodLooseObjectFromProperty(upload_source_map_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(upload_source_map_request, 'body'),
+    ...getShapeAt(upload_source_map_request, 'path'),
+    ...getShapeAt(upload_source_map_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: upload_source_map_response,
 };
 const DELETESOURCEMAP_CONTRACT: InternalConnectorContract = {
@@ -2798,11 +2842,12 @@ Delete a previously uploaded source map. You must have \`all\` Kibana privileges
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_source_map_request, 'body'),
-    getZodLooseObjectFromProperty(delete_source_map_request, 'path'),
-    getZodLooseObjectFromProperty(delete_source_map_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_source_map_request, 'body'),
+    ...getShapeAt(delete_source_map_request, 'path'),
+    ...getShapeAt(delete_source_map_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_source_map_response,
 };
 const DELETEASSETCRITICALITYRECORD_CONTRACT: InternalConnectorContract = {
@@ -2825,11 +2870,12 @@ Delete the asset criticality record for a specific entity.`,
     urlParams: ['id_value', 'id_field', 'refresh'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_asset_criticality_record_request, 'body'),
-    getZodLooseObjectFromProperty(delete_asset_criticality_record_request, 'path'),
-    getZodLooseObjectFromProperty(delete_asset_criticality_record_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_asset_criticality_record_request, 'body'),
+    ...getShapeAt(delete_asset_criticality_record_request, 'path'),
+    ...getShapeAt(delete_asset_criticality_record_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_asset_criticality_record_response,
 };
 const GETASSETCRITICALITYRECORD_CONTRACT: InternalConnectorContract = {
@@ -2852,11 +2898,12 @@ Get the asset criticality record for a specific entity.`,
     urlParams: ['id_value', 'id_field'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_asset_criticality_record_request, 'body'),
-    getZodLooseObjectFromProperty(get_asset_criticality_record_request, 'path'),
-    getZodLooseObjectFromProperty(get_asset_criticality_record_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_asset_criticality_record_request, 'body'),
+    ...getShapeAt(get_asset_criticality_record_request, 'path'),
+    ...getShapeAt(get_asset_criticality_record_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_asset_criticality_record_response,
 };
 const CREATEASSETCRITICALITYRECORD_CONTRACT: InternalConnectorContract = {
@@ -2882,11 +2929,12 @@ If a record already exists for the specified entity, that record is overwritten 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_asset_criticality_record_request, 'body'),
-    getZodLooseObjectFromProperty(create_asset_criticality_record_request, 'path'),
-    getZodLooseObjectFromProperty(create_asset_criticality_record_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_asset_criticality_record_request, 'body'),
+    ...getShapeAt(create_asset_criticality_record_request, 'path'),
+    ...getShapeAt(create_asset_criticality_record_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_asset_criticality_record_response,
 };
 const BULKUPSERTASSETCRITICALITYRECORDS_CONTRACT: InternalConnectorContract = {
@@ -2912,11 +2960,12 @@ If asset criticality records already exist for the specified entities, those rec
     urlParams: [],
     bodyParams: ['records'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(bulk_upsert_asset_criticality_records_request, 'body'),
-    getZodLooseObjectFromProperty(bulk_upsert_asset_criticality_records_request, 'path'),
-    getZodLooseObjectFromProperty(bulk_upsert_asset_criticality_records_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(bulk_upsert_asset_criticality_records_request, 'body'),
+    ...getShapeAt(bulk_upsert_asset_criticality_records_request, 'path'),
+    ...getShapeAt(bulk_upsert_asset_criticality_records_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: bulk_upsert_asset_criticality_records_response,
 };
 const FINDASSETCRITICALITYRECORDS_CONTRACT: InternalConnectorContract = {
@@ -2939,11 +2988,12 @@ List asset criticality records, paging, sorting and filtering as needed.`,
     urlParams: ['sort_field', 'sort_direction', 'page', 'per_page', 'kuery'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_asset_criticality_records_request, 'body'),
-    getZodLooseObjectFromProperty(find_asset_criticality_records_request, 'path'),
-    getZodLooseObjectFromProperty(find_asset_criticality_records_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_asset_criticality_records_request, 'body'),
+    ...getShapeAt(find_asset_criticality_records_request, 'path'),
+    ...getShapeAt(find_asset_criticality_records_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_asset_criticality_records_response,
 };
 const POSTATTACKDISCOVERYBULK_CONTRACT: InternalConnectorContract = {
@@ -2966,11 +3016,12 @@ Performs bulk updates on multiple Attack discoveries, including workflow status 
     urlParams: [],
     bodyParams: ['update'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_attack_discovery_bulk_request, 'body'),
-    getZodLooseObjectFromProperty(post_attack_discovery_bulk_request, 'path'),
-    getZodLooseObjectFromProperty(post_attack_discovery_bulk_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_attack_discovery_bulk_request, 'body'),
+    ...getShapeAt(post_attack_discovery_bulk_request, 'path'),
+    ...getShapeAt(post_attack_discovery_bulk_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_attack_discovery_bulk_response,
 };
 const ATTACKDISCOVERYFIND_CONTRACT: InternalConnectorContract = {
@@ -3009,11 +3060,12 @@ Find Attack discoveries that match the search criteria. Supports free text searc
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(attack_discovery_find_request, 'body'),
-    getZodLooseObjectFromProperty(attack_discovery_find_request, 'path'),
-    getZodLooseObjectFromProperty(attack_discovery_find_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(attack_discovery_find_request, 'body'),
+    ...getShapeAt(attack_discovery_find_request, 'path'),
+    ...getShapeAt(attack_discovery_find_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: attack_discovery_find_response,
 };
 const POSTATTACKDISCOVERYGENERATE_CONTRACT: InternalConnectorContract = {
@@ -3048,11 +3100,12 @@ Initiates the generation of attack discoveries by analyzing security alerts usin
       'subAction',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_attack_discovery_generate_request, 'body'),
-    getZodLooseObjectFromProperty(post_attack_discovery_generate_request, 'path'),
-    getZodLooseObjectFromProperty(post_attack_discovery_generate_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_attack_discovery_generate_request, 'body'),
+    ...getShapeAt(post_attack_discovery_generate_request, 'path'),
+    ...getShapeAt(post_attack_discovery_generate_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_attack_discovery_generate_response,
 };
 const GETATTACKDISCOVERYGENERATIONS_CONTRACT: InternalConnectorContract = {
@@ -3075,11 +3128,12 @@ Get the latest attack discovery generations metadata (that are not dismissed) fo
     urlParams: ['end', 'size', 'start'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_attack_discovery_generations_request, 'body'),
-    getZodLooseObjectFromProperty(get_attack_discovery_generations_request, 'path'),
-    getZodLooseObjectFromProperty(get_attack_discovery_generations_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_attack_discovery_generations_request, 'body'),
+    ...getShapeAt(get_attack_discovery_generations_request, 'path'),
+    ...getShapeAt(get_attack_discovery_generations_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_attack_discovery_generations_response,
 };
 const GETATTACKDISCOVERYGENERATION_CONTRACT: InternalConnectorContract = {
@@ -3102,11 +3156,12 @@ Returns a specific Attack discovery generation, including all generated Attack d
     urlParams: ['enable_field_rendering', 'with_replacements'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_attack_discovery_generation_request, 'body'),
-    getZodLooseObjectFromProperty(get_attack_discovery_generation_request, 'path'),
-    getZodLooseObjectFromProperty(get_attack_discovery_generation_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_attack_discovery_generation_request, 'body'),
+    ...getShapeAt(get_attack_discovery_generation_request, 'path'),
+    ...getShapeAt(get_attack_discovery_generation_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_attack_discovery_generation_response,
 };
 const POSTATTACKDISCOVERYGENERATIONSDISMISS_CONTRACT: InternalConnectorContract = {
@@ -3129,11 +3184,12 @@ Dismisses an attack discovery generation for the current user, indicating that i
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_attack_discovery_generations_dismiss_request, 'body'),
-    getZodLooseObjectFromProperty(post_attack_discovery_generations_dismiss_request, 'path'),
-    getZodLooseObjectFromProperty(post_attack_discovery_generations_dismiss_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_attack_discovery_generations_dismiss_request, 'body'),
+    ...getShapeAt(post_attack_discovery_generations_dismiss_request, 'path'),
+    ...getShapeAt(post_attack_discovery_generations_dismiss_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_attack_discovery_generations_dismiss_response,
 };
 const CREATEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
@@ -3156,11 +3212,12 @@ Creates a new Attack discovery schedule that analyzes security alerts at specifi
     urlParams: [],
     bodyParams: ['actions', 'enabled', 'name', 'params', 'schedule'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_attack_discovery_schedules_request, 'body'),
-    getZodLooseObjectFromProperty(create_attack_discovery_schedules_request, 'path'),
-    getZodLooseObjectFromProperty(create_attack_discovery_schedules_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_attack_discovery_schedules_request, 'body'),
+    ...getShapeAt(create_attack_discovery_schedules_request, 'path'),
+    ...getShapeAt(create_attack_discovery_schedules_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_attack_discovery_schedules_response,
 };
 const FINDATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
@@ -3183,11 +3240,12 @@ Finds Attack discovery schedules that match the search criteria. Supports pagina
     urlParams: ['page', 'per_page', 'sort_field', 'sort_direction'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_attack_discovery_schedules_request, 'body'),
-    getZodLooseObjectFromProperty(find_attack_discovery_schedules_request, 'path'),
-    getZodLooseObjectFromProperty(find_attack_discovery_schedules_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_attack_discovery_schedules_request, 'body'),
+    ...getShapeAt(find_attack_discovery_schedules_request, 'path'),
+    ...getShapeAt(find_attack_discovery_schedules_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_attack_discovery_schedules_response,
 };
 const DELETEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
@@ -3210,11 +3268,12 @@ Permanently deletes an Attack discovery schedule and all associated configuratio
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_attack_discovery_schedules_request, 'body'),
-    getZodLooseObjectFromProperty(delete_attack_discovery_schedules_request, 'path'),
-    getZodLooseObjectFromProperty(delete_attack_discovery_schedules_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_attack_discovery_schedules_request, 'body'),
+    ...getShapeAt(delete_attack_discovery_schedules_request, 'path'),
+    ...getShapeAt(delete_attack_discovery_schedules_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_attack_discovery_schedules_response,
 };
 const GETATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
@@ -3237,11 +3296,12 @@ Retrieves a specific Attack discovery schedule by its unique identifier. Returns
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_attack_discovery_schedules_request, 'body'),
-    getZodLooseObjectFromProperty(get_attack_discovery_schedules_request, 'path'),
-    getZodLooseObjectFromProperty(get_attack_discovery_schedules_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_attack_discovery_schedules_request, 'body'),
+    ...getShapeAt(get_attack_discovery_schedules_request, 'path'),
+    ...getShapeAt(get_attack_discovery_schedules_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_attack_discovery_schedules_response,
 };
 const UPDATEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
@@ -3264,11 +3324,12 @@ Updates an existing Attack discovery schedule with new configuration. All schedu
     urlParams: [],
     bodyParams: ['actions', 'name', 'params', 'schedule'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_attack_discovery_schedules_request, 'body'),
-    getZodLooseObjectFromProperty(update_attack_discovery_schedules_request, 'path'),
-    getZodLooseObjectFromProperty(update_attack_discovery_schedules_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_attack_discovery_schedules_request, 'body'),
+    ...getShapeAt(update_attack_discovery_schedules_request, 'path'),
+    ...getShapeAt(update_attack_discovery_schedules_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_attack_discovery_schedules_response,
 };
 const DISABLEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
@@ -3291,11 +3352,12 @@ Disables an Attack discovery schedule, preventing it from running according to i
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(disable_attack_discovery_schedules_request, 'body'),
-    getZodLooseObjectFromProperty(disable_attack_discovery_schedules_request, 'path'),
-    getZodLooseObjectFromProperty(disable_attack_discovery_schedules_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(disable_attack_discovery_schedules_request, 'body'),
+    ...getShapeAt(disable_attack_discovery_schedules_request, 'path'),
+    ...getShapeAt(disable_attack_discovery_schedules_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: disable_attack_discovery_schedules_response,
 };
 const ENABLEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
@@ -3318,11 +3380,12 @@ Enables a previously disabled Attack discovery schedule, allowing it to run acco
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(enable_attack_discovery_schedules_request, 'body'),
-    getZodLooseObjectFromProperty(enable_attack_discovery_schedules_request, 'path'),
-    getZodLooseObjectFromProperty(enable_attack_discovery_schedules_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(enable_attack_discovery_schedules_request, 'body'),
+    ...getShapeAt(enable_attack_discovery_schedules_request, 'path'),
+    ...getShapeAt(enable_attack_discovery_schedules_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: enable_attack_discovery_schedules_response,
 };
 const DELETECASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3346,11 +3409,12 @@ You must have \`read\` or \`all\` privileges and the \`delete\` sub-feature priv
     urlParams: ['ids'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_case_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(delete_case_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(delete_case_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_case_default_space_request, 'body'),
+    ...getShapeAt(delete_case_default_space_request, 'path'),
+    ...getShapeAt(delete_case_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_case_default_space_response,
 };
 const UPDATECASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3374,11 +3438,12 @@ You must have \`all\` privileges for the **Cases** feature in the  **Management*
     urlParams: [],
     bodyParams: ['cases'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_case_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(update_case_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(update_case_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_case_default_space_request, 'body'),
+    ...getShapeAt(update_case_default_space_request, 'path'),
+    ...getShapeAt(update_case_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_case_default_space_response,
 };
 const CREATECASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3413,11 +3478,12 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
       'title',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_case_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(create_case_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(create_case_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_case_default_space_request, 'body'),
+    ...getShapeAt(create_case_default_space_request, 'path'),
+    ...getShapeAt(create_case_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_case_default_space_response,
 };
 const FINDCASESDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3458,11 +3524,12 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_cases_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(find_cases_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(find_cases_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_cases_default_space_request, 'body'),
+    ...getShapeAt(find_cases_default_space_request, 'path'),
+    ...getShapeAt(find_cases_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_cases_default_space_response,
 };
 const GETCASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3486,11 +3553,12 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_case_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(get_case_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(get_case_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_case_default_space_request, 'body'),
+    ...getShapeAt(get_case_default_space_request, 'path'),
+    ...getShapeAt(get_case_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_case_default_space_response,
 };
 const GETCASEALERTSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3514,11 +3582,12 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_case_alerts_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(get_case_alerts_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(get_case_alerts_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_case_alerts_default_space_request, 'body'),
+    ...getShapeAt(get_case_alerts_default_space_request, 'path'),
+    ...getShapeAt(get_case_alerts_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_case_alerts_default_space_response,
 };
 const DELETECASECOMMENTSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3542,11 +3611,12 @@ Deletes all comments and alerts from a case. You must have \`all\` privileges fo
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_case_comments_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(delete_case_comments_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(delete_case_comments_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_case_comments_default_space_request, 'body'),
+    ...getShapeAt(delete_case_comments_default_space_request, 'path'),
+    ...getShapeAt(delete_case_comments_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_case_comments_default_space_response,
 };
 const UPDATECASECOMMENTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3570,11 +3640,12 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_case_comment_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(update_case_comment_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(update_case_comment_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_case_comment_default_space_request, 'body'),
+    ...getShapeAt(update_case_comment_default_space_request, 'path'),
+    ...getShapeAt(update_case_comment_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_case_comment_default_space_response,
 };
 const ADDCASECOMMENTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3598,11 +3669,12 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(add_case_comment_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(add_case_comment_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(add_case_comment_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(add_case_comment_default_space_request, 'body'),
+    ...getShapeAt(add_case_comment_default_space_request, 'path'),
+    ...getShapeAt(add_case_comment_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: add_case_comment_default_space_response,
 };
 const FINDCASECOMMENTSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3626,11 +3698,12 @@ Retrieves a paginated list of comments for a case. You must have \`read\` privil
     urlParams: ['page', 'perPage', 'sortOrder'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_case_comments_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(find_case_comments_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(find_case_comments_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_case_comments_default_space_request, 'body'),
+    ...getShapeAt(find_case_comments_default_space_request, 'path'),
+    ...getShapeAt(find_case_comments_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_case_comments_default_space_response,
 };
 const DELETECASECOMMENTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3654,11 +3727,12 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_case_comment_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(delete_case_comment_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(delete_case_comment_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_case_comment_default_space_request, 'body'),
+    ...getShapeAt(delete_case_comment_default_space_request, 'path'),
+    ...getShapeAt(delete_case_comment_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_case_comment_default_space_response,
 };
 const GETCASECOMMENTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3682,11 +3756,12 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_case_comment_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(get_case_comment_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(get_case_comment_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_case_comment_default_space_request, 'body'),
+    ...getShapeAt(get_case_comment_default_space_request, 'path'),
+    ...getShapeAt(get_case_comment_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_case_comment_default_space_response,
 };
 const PUSHCASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3710,11 +3785,12 @@ You must have \`all\` privileges for the **Actions and Connectors** feature in t
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(push_case_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(push_case_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(push_case_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(push_case_default_space_request, 'body'),
+    ...getShapeAt(push_case_default_space_request, 'path'),
+    ...getShapeAt(push_case_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: push_case_default_space_response,
 };
 const ADDCASEFILEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3740,11 +3816,12 @@ Attach a file to a case. You must have \`all\` privileges for the **Cases** feat
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(add_case_file_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(add_case_file_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(add_case_file_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(add_case_file_default_space_request, 'body'),
+    ...getShapeAt(add_case_file_default_space_request, 'path'),
+    ...getShapeAt(add_case_file_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: add_case_file_default_space_response,
 };
 const FINDCASEACTIVITYDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3768,11 +3845,12 @@ Retrives a paginated list of user activity for a case. You must have \`read\` pr
     urlParams: ['page', 'perPage', 'sortOrder', 'types'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_case_activity_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(find_case_activity_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(find_case_activity_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_case_activity_default_space_request, 'body'),
+    ...getShapeAt(find_case_activity_default_space_request, 'path'),
+    ...getShapeAt(find_case_activity_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_case_activity_default_space_response,
 };
 const GETCASESBYALERTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3796,11 +3874,12 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
     urlParams: ['owner'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_cases_by_alert_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(get_cases_by_alert_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(get_cases_by_alert_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_cases_by_alert_default_space_request, 'body'),
+    ...getShapeAt(get_cases_by_alert_default_space_request, 'path'),
+    ...getShapeAt(get_cases_by_alert_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_cases_by_alert_default_space_response,
 };
 const GETCASECONFIGURATIONDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3824,11 +3903,12 @@ Get setting details such as the closure type, custom fields, templatse, and the 
     urlParams: ['owner'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_case_configuration_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(get_case_configuration_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(get_case_configuration_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_case_configuration_default_space_request, 'body'),
+    ...getShapeAt(get_case_configuration_default_space_request, 'path'),
+    ...getShapeAt(get_case_configuration_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_case_configuration_default_space_response,
 };
 const SETCASECONFIGURATIONDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3852,11 +3932,12 @@ Case settings include external connection details, custom fields, and templates.
     urlParams: [],
     bodyParams: ['closure_type', 'connector', 'customFields', 'owner', 'templates'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(set_case_configuration_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(set_case_configuration_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(set_case_configuration_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(set_case_configuration_default_space_request, 'body'),
+    ...getShapeAt(set_case_configuration_default_space_request, 'path'),
+    ...getShapeAt(set_case_configuration_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: set_case_configuration_default_space_response,
 };
 const UPDATECASECONFIGURATIONDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3880,11 +3961,12 @@ Updates setting details such as the closure type, custom fields, templates, and 
     urlParams: [],
     bodyParams: ['closure_type', 'connector', 'customFields', 'templates', 'version'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_case_configuration_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(update_case_configuration_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(update_case_configuration_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_case_configuration_default_space_request, 'body'),
+    ...getShapeAt(update_case_configuration_default_space_request, 'path'),
+    ...getShapeAt(update_case_configuration_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_case_configuration_default_space_response,
 };
 const FINDCASECONNECTORSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3908,11 +3990,12 @@ Get information about connectors that are supported for use in cases. You must h
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_case_connectors_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(find_case_connectors_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(find_case_connectors_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_case_connectors_default_space_request, 'body'),
+    ...getShapeAt(find_case_connectors_default_space_request, 'path'),
+    ...getShapeAt(find_case_connectors_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_case_connectors_default_space_response,
 };
 const GETCASEREPORTERSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3930,11 +4013,12 @@ const GETCASEREPORTERSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
     urlParams: ['owner'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_case_reporters_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(get_case_reporters_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(get_case_reporters_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_case_reporters_default_space_request, 'body'),
+    ...getShapeAt(get_case_reporters_default_space_request, 'path'),
+    ...getShapeAt(get_case_reporters_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_case_reporters_default_space_response,
 };
 const GETCASETAGSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
@@ -3958,11 +4042,12 @@ Aggregates and returns a list of case tags. You must have read privileges for th
     urlParams: ['owner'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_case_tags_default_space_request, 'body'),
-    getZodLooseObjectFromProperty(get_case_tags_default_space_request, 'path'),
-    getZodLooseObjectFromProperty(get_case_tags_default_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_case_tags_default_space_request, 'body'),
+    ...getShapeAt(get_case_tags_default_space_request, 'path'),
+    ...getShapeAt(get_case_tags_default_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_case_tags_default_space_response,
 };
 const GETALLDATAVIEWSDEFAULT_CONTRACT: InternalConnectorContract = {
@@ -3983,11 +4068,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_all_data_views_default_request, 'body'),
-    getZodLooseObjectFromProperty(get_all_data_views_default_request, 'path'),
-    getZodLooseObjectFromProperty(get_all_data_views_default_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_all_data_views_default_request, 'body'),
+    ...getShapeAt(get_all_data_views_default_request, 'path'),
+    ...getShapeAt(get_all_data_views_default_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_all_data_views_default_response,
 };
 const CREATEDATAVIEWDEFAULTW_CONTRACT: InternalConnectorContract = {
@@ -4008,11 +4094,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['data_view', 'override'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_data_view_defaultw_request, 'body'),
-    getZodLooseObjectFromProperty(create_data_view_defaultw_request, 'path'),
-    getZodLooseObjectFromProperty(create_data_view_defaultw_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_data_view_defaultw_request, 'body'),
+    ...getShapeAt(create_data_view_defaultw_request, 'path'),
+    ...getShapeAt(create_data_view_defaultw_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_data_view_defaultw_response,
 };
 const DELETEDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
@@ -4036,11 +4123,12 @@ WARNING: When you delete a data view, it cannot be recovered.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_data_view_default_request, 'body'),
-    getZodLooseObjectFromProperty(delete_data_view_default_request, 'path'),
-    getZodLooseObjectFromProperty(delete_data_view_default_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_data_view_default_request, 'body'),
+    ...getShapeAt(delete_data_view_default_request, 'path'),
+    ...getShapeAt(delete_data_view_default_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_data_view_default_response,
 };
 const GETDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
@@ -4061,11 +4149,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_data_view_default_request, 'body'),
-    getZodLooseObjectFromProperty(get_data_view_default_request, 'path'),
-    getZodLooseObjectFromProperty(get_data_view_default_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_data_view_default_request, 'body'),
+    ...getShapeAt(get_data_view_default_request, 'path'),
+    ...getShapeAt(get_data_view_default_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_data_view_default_response,
 };
 const UPDATEDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
@@ -4086,11 +4175,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['data_view', 'refresh_fields'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_data_view_default_request, 'body'),
-    getZodLooseObjectFromProperty(update_data_view_default_request, 'path'),
-    getZodLooseObjectFromProperty(update_data_view_default_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_data_view_default_request, 'body'),
+    ...getShapeAt(update_data_view_default_request, 'path'),
+    ...getShapeAt(update_data_view_default_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_data_view_default_response,
 };
 const UPDATEFIELDSMETADATADEFAULT_CONTRACT: InternalConnectorContract = {
@@ -4114,11 +4204,12 @@ Update fields presentation metadata such as count, customLabel, customDescriptio
     urlParams: [],
     bodyParams: ['fields'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_fields_metadata_default_request, 'body'),
-    getZodLooseObjectFromProperty(update_fields_metadata_default_request, 'path'),
-    getZodLooseObjectFromProperty(update_fields_metadata_default_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_fields_metadata_default_request, 'body'),
+    ...getShapeAt(update_fields_metadata_default_request, 'path'),
+    ...getShapeAt(update_fields_metadata_default_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_fields_metadata_default_response,
 };
 const CREATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
@@ -4139,11 +4230,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['name', 'runtimeField'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_runtime_field_default_request, 'body'),
-    getZodLooseObjectFromProperty(create_runtime_field_default_request, 'path'),
-    getZodLooseObjectFromProperty(create_runtime_field_default_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_runtime_field_default_request, 'body'),
+    ...getShapeAt(create_runtime_field_default_request, 'path'),
+    ...getShapeAt(create_runtime_field_default_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_runtime_field_default_response,
 };
 const CREATEUPDATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
@@ -4164,11 +4256,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['name', 'runtimeField'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_update_runtime_field_default_request, 'body'),
-    getZodLooseObjectFromProperty(create_update_runtime_field_default_request, 'path'),
-    getZodLooseObjectFromProperty(create_update_runtime_field_default_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_update_runtime_field_default_request, 'body'),
+    ...getShapeAt(create_update_runtime_field_default_request, 'path'),
+    ...getShapeAt(create_update_runtime_field_default_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_update_runtime_field_default_response,
 };
 const DELETERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
@@ -4189,11 +4282,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_runtime_field_default_request, 'body'),
-    getZodLooseObjectFromProperty(delete_runtime_field_default_request, 'path'),
-    getZodLooseObjectFromProperty(delete_runtime_field_default_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_runtime_field_default_request, 'body'),
+    ...getShapeAt(delete_runtime_field_default_request, 'path'),
+    ...getShapeAt(delete_runtime_field_default_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_runtime_field_default_response,
 };
 const GETRUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
@@ -4214,11 +4308,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_runtime_field_default_request, 'body'),
-    getZodLooseObjectFromProperty(get_runtime_field_default_request, 'path'),
-    getZodLooseObjectFromProperty(get_runtime_field_default_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_runtime_field_default_request, 'body'),
+    ...getShapeAt(get_runtime_field_default_request, 'path'),
+    ...getShapeAt(get_runtime_field_default_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_runtime_field_default_response,
 };
 const UPDATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
@@ -4239,11 +4334,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['runtimeField'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_runtime_field_default_request, 'body'),
-    getZodLooseObjectFromProperty(update_runtime_field_default_request, 'path'),
-    getZodLooseObjectFromProperty(update_runtime_field_default_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_runtime_field_default_request, 'body'),
+    ...getShapeAt(update_runtime_field_default_request, 'path'),
+    ...getShapeAt(update_runtime_field_default_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_runtime_field_default_response,
 };
 const GETDEFAULTDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
@@ -4264,11 +4360,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_default_data_view_default_request, 'body'),
-    getZodLooseObjectFromProperty(get_default_data_view_default_request, 'path'),
-    getZodLooseObjectFromProperty(get_default_data_view_default_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_default_data_view_default_request, 'body'),
+    ...getShapeAt(get_default_data_view_default_request, 'path'),
+    ...getShapeAt(get_default_data_view_default_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_default_data_view_default_response,
 };
 const SETDEFAULTDATAILVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
@@ -4289,11 +4386,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['data_view_id', 'force'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(set_default_datail_view_default_request, 'body'),
-    getZodLooseObjectFromProperty(set_default_datail_view_default_request, 'path'),
-    getZodLooseObjectFromProperty(set_default_datail_view_default_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(set_default_datail_view_default_request, 'body'),
+    ...getShapeAt(set_default_datail_view_default_request, 'path'),
+    ...getShapeAt(set_default_datail_view_default_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: set_default_datail_view_default_response,
 };
 const SWAPDATAVIEWSDEFAULT_CONTRACT: InternalConnectorContract = {
@@ -4317,11 +4415,12 @@ Changes saved object references from one data view identifier to another. WARNIN
     urlParams: [],
     bodyParams: ['delete', 'forId', 'forType', 'fromId', 'fromType', 'toId'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(swap_data_views_default_request, 'body'),
-    getZodLooseObjectFromProperty(swap_data_views_default_request, 'path'),
-    getZodLooseObjectFromProperty(swap_data_views_default_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(swap_data_views_default_request, 'body'),
+    ...getShapeAt(swap_data_views_default_request, 'path'),
+    ...getShapeAt(swap_data_views_default_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: swap_data_views_default_response,
 };
 const PREVIEWSWAPDATAVIEWSDEFAULT_CONTRACT: InternalConnectorContract = {
@@ -4345,11 +4444,12 @@ Preview the impact of swapping saved object references from one data view identi
     urlParams: [],
     bodyParams: ['delete', 'forId', 'forType', 'fromId', 'fromType', 'toId'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(preview_swap_data_views_default_request, 'body'),
-    getZodLooseObjectFromProperty(preview_swap_data_views_default_request, 'path'),
-    getZodLooseObjectFromProperty(preview_swap_data_views_default_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(preview_swap_data_views_default_request, 'body'),
+    ...getShapeAt(preview_swap_data_views_default_request, 'path'),
+    ...getShapeAt(preview_swap_data_views_default_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: preview_swap_data_views_default_response,
 };
 const DELETEALERTSINDEX_CONTRACT: InternalConnectorContract = {
@@ -4370,11 +4470,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_alerts_index_request, 'body'),
-    getZodLooseObjectFromProperty(delete_alerts_index_request, 'path'),
-    getZodLooseObjectFromProperty(delete_alerts_index_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_alerts_index_request, 'body'),
+    ...getShapeAt(delete_alerts_index_request, 'path'),
+    ...getShapeAt(delete_alerts_index_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_alerts_index_response,
 };
 const READALERTSINDEX_CONTRACT: InternalConnectorContract = {
@@ -4395,11 +4496,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_alerts_index_request, 'body'),
-    getZodLooseObjectFromProperty(read_alerts_index_request, 'path'),
-    getZodLooseObjectFromProperty(read_alerts_index_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_alerts_index_request, 'body'),
+    ...getShapeAt(read_alerts_index_request, 'path'),
+    ...getShapeAt(read_alerts_index_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_alerts_index_response,
 };
 const CREATEALERTSINDEX_CONTRACT: InternalConnectorContract = {
@@ -4420,11 +4522,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_alerts_index_request, 'body'),
-    getZodLooseObjectFromProperty(create_alerts_index_request, 'path'),
-    getZodLooseObjectFromProperty(create_alerts_index_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_alerts_index_request, 'body'),
+    ...getShapeAt(create_alerts_index_request, 'path'),
+    ...getShapeAt(create_alerts_index_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_alerts_index_response,
 };
 const READPRIVILEGES_CONTRACT: InternalConnectorContract = {
@@ -4451,11 +4554,12 @@ detection engine rules.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_privileges_request, 'body'),
-    getZodLooseObjectFromProperty(read_privileges_request, 'path'),
-    getZodLooseObjectFromProperty(read_privileges_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_privileges_request, 'body'),
+    ...getShapeAt(read_privileges_request, 'path'),
+    ...getShapeAt(read_privileges_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_privileges_response,
 };
 const DELETERULE_CONTRACT: InternalConnectorContract = {
@@ -4486,11 +4590,12 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
     urlParams: ['id', 'rule_id'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_rule_request, 'body'),
-    getZodLooseObjectFromProperty(delete_rule_request, 'path'),
-    getZodLooseObjectFromProperty(delete_rule_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_rule_request, 'body'),
+    ...getShapeAt(delete_rule_request, 'path'),
+    ...getShapeAt(delete_rule_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_rule_response,
 };
 const READRULE_CONTRACT: InternalConnectorContract = {
@@ -4521,11 +4626,12 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
     urlParams: ['id', 'rule_id'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_rule_request, 'body'),
-    getZodLooseObjectFromProperty(read_rule_request, 'path'),
-    getZodLooseObjectFromProperty(read_rule_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_rule_request, 'body'),
+    ...getShapeAt(read_rule_request, 'path'),
+    ...getShapeAt(read_rule_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_rule_response,
 };
 const PATCHRULE_CONTRACT: InternalConnectorContract = {
@@ -4555,11 +4661,12 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(patch_rule_request, 'body'),
-    getZodLooseObjectFromProperty(patch_rule_request, 'path'),
-    getZodLooseObjectFromProperty(patch_rule_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(patch_rule_request, 'body'),
+    ...getShapeAt(patch_rule_request, 'path'),
+    ...getShapeAt(patch_rule_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: patch_rule_response,
 };
 const CREATERULE_CONTRACT: InternalConnectorContract = {
@@ -4636,11 +4743,12 @@ For detailed information on Kibana actions and alerting, and additional API call
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_rule_request, 'body'),
-    getZodLooseObjectFromProperty(create_rule_request, 'path'),
-    getZodLooseObjectFromProperty(create_rule_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_rule_request, 'body'),
+    ...getShapeAt(create_rule_request, 'path'),
+    ...getShapeAt(create_rule_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_rule_response,
 };
 const UPDATERULE_CONTRACT: InternalConnectorContract = {
@@ -4670,11 +4778,12 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_rule_request, 'body'),
-    getZodLooseObjectFromProperty(update_rule_request, 'path'),
-    getZodLooseObjectFromProperty(update_rule_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_rule_request, 'body'),
+    ...getShapeAt(update_rule_request, 'path'),
+    ...getShapeAt(update_rule_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_rule_response,
 };
 const PERFORMRULESBULKACTION_CONTRACT: InternalConnectorContract = {
@@ -4705,11 +4814,12 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
     urlParams: ['dry_run'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(perform_rules_bulk_action_request, 'body'),
-    getZodLooseObjectFromProperty(perform_rules_bulk_action_request, 'path'),
-    getZodLooseObjectFromProperty(perform_rules_bulk_action_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(perform_rules_bulk_action_request, 'body'),
+    ...getShapeAt(perform_rules_bulk_action_request, 'path'),
+    ...getShapeAt(perform_rules_bulk_action_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: perform_rules_bulk_action_response,
 };
 const EXPORTRULES_CONTRACT: InternalConnectorContract = {
@@ -4741,11 +4851,12 @@ Export detection rules to an \`.ndjson\` file. The following configuration items
     urlParams: ['exclude_export_details', 'file_name'],
     bodyParams: ['objects'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(export_rules_request, 'body'),
-    getZodLooseObjectFromProperty(export_rules_request, 'path'),
-    getZodLooseObjectFromProperty(export_rules_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(export_rules_request, 'body'),
+    ...getShapeAt(export_rules_request, 'path'),
+    ...getShapeAt(export_rules_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: export_rules_response,
 };
 const FINDRULES_CONTRACT: InternalConnectorContract = {
@@ -4777,11 +4888,12 @@ Retrieve a paginated list of detection rules. By default, the first page is retu
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_rules_request, 'body'),
-    getZodLooseObjectFromProperty(find_rules_request, 'path'),
-    getZodLooseObjectFromProperty(find_rules_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_rules_request, 'body'),
+    ...getShapeAt(find_rules_request, 'path'),
+    ...getShapeAt(find_rules_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_rules_response,
 };
 const IMPORTRULES_CONTRACT: InternalConnectorContract = {
@@ -4820,11 +4932,12 @@ Import detection rules from an \`.ndjson\` file, including actions and exception
     urlParams: ['overwrite', 'overwrite_exceptions', 'overwrite_action_connectors', 'as_new_list'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(import_rules_request, 'body'),
-    getZodLooseObjectFromProperty(import_rules_request, 'path'),
-    getZodLooseObjectFromProperty(import_rules_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(import_rules_request, 'body'),
+    ...getShapeAt(import_rules_request, 'path'),
+    ...getShapeAt(import_rules_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: import_rules_response,
 };
 const CREATERULEEXCEPTIONLISTITEMS_CONTRACT: InternalConnectorContract = {
@@ -4847,11 +4960,12 @@ Create exception items that apply to a single detection rule.`,
     urlParams: [],
     bodyParams: ['items'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_rule_exception_list_items_request, 'body'),
-    getZodLooseObjectFromProperty(create_rule_exception_list_items_request, 'path'),
-    getZodLooseObjectFromProperty(create_rule_exception_list_items_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_rule_exception_list_items_request, 'body'),
+    ...getShapeAt(create_rule_exception_list_items_request, 'path'),
+    ...getShapeAt(create_rule_exception_list_items_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_rule_exception_list_items_response,
 };
 const INSTALLPREBUILTRULESANDTIMELINES_CONTRACT: InternalConnectorContract = {
@@ -4885,11 +4999,12 @@ providing you with the most current and effective threat detection capabilities.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(install_prebuilt_rules_and_timelines_request, 'body'),
-    getZodLooseObjectFromProperty(install_prebuilt_rules_and_timelines_request, 'path'),
-    getZodLooseObjectFromProperty(install_prebuilt_rules_and_timelines_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(install_prebuilt_rules_and_timelines_request, 'body'),
+    ...getShapeAt(install_prebuilt_rules_and_timelines_request, 'path'),
+    ...getShapeAt(install_prebuilt_rules_and_timelines_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: install_prebuilt_rules_and_timelines_response,
 };
 const READPREBUILTRULESANDTIMELINESSTATUS_CONTRACT: InternalConnectorContract = {
@@ -4915,11 +5030,12 @@ This endpoint provides detailed information about the number of custom rules, in
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_prebuilt_rules_and_timelines_status_request, 'body'),
-    getZodLooseObjectFromProperty(read_prebuilt_rules_and_timelines_status_request, 'path'),
-    getZodLooseObjectFromProperty(read_prebuilt_rules_and_timelines_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_prebuilt_rules_and_timelines_status_request, 'body'),
+    ...getShapeAt(read_prebuilt_rules_and_timelines_status_request, 'path'),
+    ...getShapeAt(read_prebuilt_rules_and_timelines_status_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_prebuilt_rules_and_timelines_status_response,
 };
 const RULEPREVIEW_CONTRACT: InternalConnectorContract = {
@@ -4940,11 +5056,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['enable_logged_requests'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(rule_preview_request, 'body'),
-    getZodLooseObjectFromProperty(rule_preview_request, 'path'),
-    getZodLooseObjectFromProperty(rule_preview_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(rule_preview_request, 'body'),
+    ...getShapeAt(rule_preview_request, 'path'),
+    ...getShapeAt(rule_preview_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: rule_preview_response,
 };
 const SETALERTASSIGNEES_CONTRACT: InternalConnectorContract = {
@@ -4970,11 +5087,12 @@ Assign users to detection alerts, and unassign them from alerts.
     urlParams: [],
     bodyParams: ['assignees', 'ids'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(set_alert_assignees_request, 'body'),
-    getZodLooseObjectFromProperty(set_alert_assignees_request, 'path'),
-    getZodLooseObjectFromProperty(set_alert_assignees_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(set_alert_assignees_request, 'body'),
+    ...getShapeAt(set_alert_assignees_request, 'path'),
+    ...getShapeAt(set_alert_assignees_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: set_alert_assignees_response,
 };
 const FINALIZEALERTSMIGRATION_CONTRACT: InternalConnectorContract = {
@@ -5000,11 +5118,12 @@ finalize it.
     urlParams: [],
     bodyParams: ['migration_ids'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(finalize_alerts_migration_request, 'body'),
-    getZodLooseObjectFromProperty(finalize_alerts_migration_request, 'path'),
-    getZodLooseObjectFromProperty(finalize_alerts_migration_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(finalize_alerts_migration_request, 'body'),
+    ...getShapeAt(finalize_alerts_migration_request, 'path'),
+    ...getShapeAt(finalize_alerts_migration_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: finalize_alerts_migration_response,
 };
 const ALERTSMIGRATIONCLEANUP_CONTRACT: InternalConnectorContract = {
@@ -5034,11 +5153,12 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
     urlParams: [],
     bodyParams: ['migration_ids'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(alerts_migration_cleanup_request, 'body'),
-    getZodLooseObjectFromProperty(alerts_migration_cleanup_request, 'path'),
-    getZodLooseObjectFromProperty(alerts_migration_cleanup_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(alerts_migration_cleanup_request, 'body'),
+    ...getShapeAt(alerts_migration_cleanup_request, 'path'),
+    ...getShapeAt(alerts_migration_cleanup_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: alerts_migration_cleanup_response,
 };
 const CREATEALERTSMIGRATION_CONTRACT: InternalConnectorContract = {
@@ -5063,11 +5183,12 @@ Migrations are initiated per index. While the process is neither destructive nor
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_alerts_migration_request, 'body'),
-    getZodLooseObjectFromProperty(create_alerts_migration_request, 'path'),
-    getZodLooseObjectFromProperty(create_alerts_migration_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_alerts_migration_request, 'body'),
+    ...getShapeAt(create_alerts_migration_request, 'path'),
+    ...getShapeAt(create_alerts_migration_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_alerts_migration_response,
 };
 const READALERTSMIGRATIONSTATUS_CONTRACT: InternalConnectorContract = {
@@ -5090,11 +5211,12 @@ Retrieve indices that contain detection alerts of a particular age, along with m
     urlParams: ['from'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_alerts_migration_status_request, 'body'),
-    getZodLooseObjectFromProperty(read_alerts_migration_status_request, 'path'),
-    getZodLooseObjectFromProperty(read_alerts_migration_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_alerts_migration_status_request, 'body'),
+    ...getShapeAt(read_alerts_migration_status_request, 'path'),
+    ...getShapeAt(read_alerts_migration_status_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_alerts_migration_status_response,
 };
 const SEARCHALERTS_CONTRACT: InternalConnectorContract = {
@@ -5126,11 +5248,12 @@ Find and/or aggregate detection alerts that match the given query.`,
       'track_total_hits',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(search_alerts_request, 'body'),
-    getZodLooseObjectFromProperty(search_alerts_request, 'path'),
-    getZodLooseObjectFromProperty(search_alerts_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(search_alerts_request, 'body'),
+    ...getShapeAt(search_alerts_request, 'path'),
+    ...getShapeAt(search_alerts_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: search_alerts_response,
 };
 const SETALERTSSTATUS_CONTRACT: InternalConnectorContract = {
@@ -5153,11 +5276,12 @@ Set the status of one or more detection alerts.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(set_alerts_status_request, 'body'),
-    getZodLooseObjectFromProperty(set_alerts_status_request, 'path'),
-    getZodLooseObjectFromProperty(set_alerts_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(set_alerts_status_request, 'body'),
+    ...getShapeAt(set_alerts_status_request, 'path'),
+    ...getShapeAt(set_alerts_status_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: set_alerts_status_response,
 };
 const SETALERTTAGS_CONTRACT: InternalConnectorContract = {
@@ -5183,11 +5307,12 @@ And tags to detection alerts, and remove them from alerts.
     urlParams: [],
     bodyParams: ['ids', 'tags'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(set_alert_tags_request, 'body'),
-    getZodLooseObjectFromProperty(set_alert_tags_request, 'path'),
-    getZodLooseObjectFromProperty(set_alert_tags_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(set_alert_tags_request, 'body'),
+    ...getShapeAt(set_alert_tags_request, 'path'),
+    ...getShapeAt(set_alert_tags_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: set_alert_tags_response,
 };
 const READTAGS_CONTRACT: InternalConnectorContract = {
@@ -5210,11 +5335,12 @@ List all unique tags from all detection rules.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_tags_request, 'body'),
-    getZodLooseObjectFromProperty(read_tags_request, 'path'),
-    getZodLooseObjectFromProperty(read_tags_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_tags_request, 'body'),
+    ...getShapeAt(read_tags_request, 'path'),
+    ...getShapeAt(read_tags_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_tags_response,
 };
 const ROTATEENCRYPTIONKEY_CONTRACT: InternalConnectorContract = {
@@ -5236,11 +5362,12 @@ This functionality is in technical preview and may be changed or removed in a fu
     urlParams: ['batch_size', 'type'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(rotate_encryption_key_request, 'body'),
-    getZodLooseObjectFromProperty(rotate_encryption_key_request, 'path'),
-    getZodLooseObjectFromProperty(rotate_encryption_key_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(rotate_encryption_key_request, 'body'),
+    ...getShapeAt(rotate_encryption_key_request, 'path'),
+    ...getShapeAt(rotate_encryption_key_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: rotate_encryption_key_response,
 };
 const CREATEENDPOINTLIST_CONTRACT: InternalConnectorContract = {
@@ -5263,11 +5390,12 @@ Create the exception list for Elastic Endpoint rule exceptions. When you create 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_endpoint_list_request, 'body'),
-    getZodLooseObjectFromProperty(create_endpoint_list_request, 'path'),
-    getZodLooseObjectFromProperty(create_endpoint_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_endpoint_list_request, 'body'),
+    ...getShapeAt(create_endpoint_list_request, 'path'),
+    ...getShapeAt(create_endpoint_list_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_endpoint_list_response,
 };
 const DELETEENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
@@ -5290,11 +5418,12 @@ Delete an Elastic Endpoint exception list item, specified by the \`id\` or \`ite
     urlParams: ['id', 'item_id'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_endpoint_list_item_request, 'body'),
-    getZodLooseObjectFromProperty(delete_endpoint_list_item_request, 'path'),
-    getZodLooseObjectFromProperty(delete_endpoint_list_item_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_endpoint_list_item_request, 'body'),
+    ...getShapeAt(delete_endpoint_list_item_request, 'path'),
+    ...getShapeAt(delete_endpoint_list_item_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_endpoint_list_item_response,
 };
 const READENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
@@ -5317,11 +5446,12 @@ Get the details of an Elastic Endpoint exception list item, specified by the \`i
     urlParams: ['id', 'item_id'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_endpoint_list_item_request, 'body'),
-    getZodLooseObjectFromProperty(read_endpoint_list_item_request, 'path'),
-    getZodLooseObjectFromProperty(read_endpoint_list_item_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_endpoint_list_item_request, 'body'),
+    ...getShapeAt(read_endpoint_list_item_request, 'path'),
+    ...getShapeAt(read_endpoint_list_item_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_endpoint_list_item_response,
 };
 const CREATEENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
@@ -5354,11 +5484,12 @@ Create an Elastic Endpoint exception list item, and associate it with the Elasti
       'type',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_endpoint_list_item_request, 'body'),
-    getZodLooseObjectFromProperty(create_endpoint_list_item_request, 'path'),
-    getZodLooseObjectFromProperty(create_endpoint_list_item_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_endpoint_list_item_request, 'body'),
+    ...getShapeAt(create_endpoint_list_item_request, 'path'),
+    ...getShapeAt(create_endpoint_list_item_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_endpoint_list_item_response,
 };
 const UPDATEENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
@@ -5393,11 +5524,12 @@ Update an Elastic Endpoint exception list item, specified by the \`id\` or \`ite
       'type',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_endpoint_list_item_request, 'body'),
-    getZodLooseObjectFromProperty(update_endpoint_list_item_request, 'path'),
-    getZodLooseObjectFromProperty(update_endpoint_list_item_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_endpoint_list_item_request, 'body'),
+    ...getShapeAt(update_endpoint_list_item_request, 'path'),
+    ...getShapeAt(update_endpoint_list_item_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_endpoint_list_item_response,
 };
 const FINDENDPOINTLISTITEMS_CONTRACT: InternalConnectorContract = {
@@ -5420,11 +5552,12 @@ Get a list of all Elastic Endpoint exception list items.`,
     urlParams: ['filter', 'page', 'per_page', 'sort_field', 'sort_order'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_endpoint_list_items_request, 'body'),
-    getZodLooseObjectFromProperty(find_endpoint_list_items_request, 'path'),
-    getZodLooseObjectFromProperty(find_endpoint_list_items_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_endpoint_list_items_request, 'body'),
+    ...getShapeAt(find_endpoint_list_items_request, 'path'),
+    ...getShapeAt(find_endpoint_list_items_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_endpoint_list_items_response,
 };
 const ENDPOINTGETACTIONSLIST_CONTRACT: InternalConnectorContract = {
@@ -5458,11 +5591,12 @@ Get a list of all response actions.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(endpoint_get_actions_list_request, 'body'),
-    getZodLooseObjectFromProperty(endpoint_get_actions_list_request, 'path'),
-    getZodLooseObjectFromProperty(endpoint_get_actions_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(endpoint_get_actions_list_request, 'body'),
+    ...getShapeAt(endpoint_get_actions_list_request, 'path'),
+    ...getShapeAt(endpoint_get_actions_list_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: endpoint_get_actions_list_response,
 };
 const ENDPOINTGETACTIONSSTATUS_CONTRACT: InternalConnectorContract = {
@@ -5485,11 +5619,12 @@ Get the status of response actions for the specified agent IDs.`,
     urlParams: ['query'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(endpoint_get_actions_status_request, 'body'),
-    getZodLooseObjectFromProperty(endpoint_get_actions_status_request, 'path'),
-    getZodLooseObjectFromProperty(endpoint_get_actions_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(endpoint_get_actions_status_request, 'body'),
+    ...getShapeAt(endpoint_get_actions_status_request, 'path'),
+    ...getShapeAt(endpoint_get_actions_status_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: endpoint_get_actions_status_response,
 };
 const ENDPOINTGETACTIONSDETAILS_CONTRACT: InternalConnectorContract = {
@@ -5512,11 +5647,12 @@ Get the details of a response action using the action ID.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(endpoint_get_actions_details_request, 'body'),
-    getZodLooseObjectFromProperty(endpoint_get_actions_details_request, 'path'),
-    getZodLooseObjectFromProperty(endpoint_get_actions_details_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(endpoint_get_actions_details_request, 'body'),
+    ...getShapeAt(endpoint_get_actions_details_request, 'path'),
+    ...getShapeAt(endpoint_get_actions_details_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: endpoint_get_actions_details_response,
 };
 const ENDPOINTFILEINFO_CONTRACT: InternalConnectorContract = {
@@ -5540,11 +5676,12 @@ Get information for the specified response action file download.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(endpoint_file_info_request, 'body'),
-    getZodLooseObjectFromProperty(endpoint_file_info_request, 'path'),
-    getZodLooseObjectFromProperty(endpoint_file_info_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(endpoint_file_info_request, 'body'),
+    ...getShapeAt(endpoint_file_info_request, 'path'),
+    ...getShapeAt(endpoint_file_info_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: endpoint_file_info_response,
 };
 const ENDPOINTFILEDOWNLOAD_CONTRACT: InternalConnectorContract = {
@@ -5568,11 +5705,12 @@ Download a file associated with a response action.
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(endpoint_file_download_request, 'body'),
-    getZodLooseObjectFromProperty(endpoint_file_download_request, 'path'),
-    getZodLooseObjectFromProperty(endpoint_file_download_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(endpoint_file_download_request, 'body'),
+    ...getShapeAt(endpoint_file_download_request, 'path'),
+    ...getShapeAt(endpoint_file_download_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: endpoint_file_download_response,
 };
 const CANCELACTION_CONTRACT: InternalConnectorContract = {
@@ -5595,11 +5733,12 @@ Cancel a running or pending response action (Applies only to some agent types).`
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(cancel_action_request, 'body'),
-    getZodLooseObjectFromProperty(cancel_action_request, 'path'),
-    getZodLooseObjectFromProperty(cancel_action_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(cancel_action_request, 'body'),
+    ...getShapeAt(cancel_action_request, 'path'),
+    ...getShapeAt(cancel_action_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: cancel_action_response,
 };
 const ENDPOINTEXECUTEACTION_CONTRACT: InternalConnectorContract = {
@@ -5622,11 +5761,12 @@ Run a shell command on an endpoint.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(endpoint_execute_action_request, 'body'),
-    getZodLooseObjectFromProperty(endpoint_execute_action_request, 'path'),
-    getZodLooseObjectFromProperty(endpoint_execute_action_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(endpoint_execute_action_request, 'body'),
+    ...getShapeAt(endpoint_execute_action_request, 'path'),
+    ...getShapeAt(endpoint_execute_action_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: endpoint_execute_action_response,
 };
 const ENDPOINTGETFILEACTION_CONTRACT: InternalConnectorContract = {
@@ -5649,11 +5789,12 @@ Get a file from an endpoint.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(endpoint_get_file_action_request, 'body'),
-    getZodLooseObjectFromProperty(endpoint_get_file_action_request, 'path'),
-    getZodLooseObjectFromProperty(endpoint_get_file_action_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(endpoint_get_file_action_request, 'body'),
+    ...getShapeAt(endpoint_get_file_action_request, 'path'),
+    ...getShapeAt(endpoint_get_file_action_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: endpoint_get_file_action_response,
 };
 const ENDPOINTISOLATEACTION_CONTRACT: InternalConnectorContract = {
@@ -5676,11 +5817,12 @@ Isolate an endpoint from the network. The endpoint remains isolated until it's r
     urlParams: [],
     bodyParams: ['agent_type', 'alert_ids', 'case_ids', 'comment', 'endpoint_ids', 'parameters'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(endpoint_isolate_action_request, 'body'),
-    getZodLooseObjectFromProperty(endpoint_isolate_action_request, 'path'),
-    getZodLooseObjectFromProperty(endpoint_isolate_action_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(endpoint_isolate_action_request, 'body'),
+    ...getShapeAt(endpoint_isolate_action_request, 'path'),
+    ...getShapeAt(endpoint_isolate_action_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: endpoint_isolate_action_response,
 };
 const ENDPOINTKILLPROCESSACTION_CONTRACT: InternalConnectorContract = {
@@ -5703,11 +5845,12 @@ Terminate a running process on an endpoint.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(endpoint_kill_process_action_request, 'body'),
-    getZodLooseObjectFromProperty(endpoint_kill_process_action_request, 'path'),
-    getZodLooseObjectFromProperty(endpoint_kill_process_action_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(endpoint_kill_process_action_request, 'body'),
+    ...getShapeAt(endpoint_kill_process_action_request, 'path'),
+    ...getShapeAt(endpoint_kill_process_action_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: endpoint_kill_process_action_response,
 };
 const ENDPOINTGETPROCESSESACTION_CONTRACT: InternalConnectorContract = {
@@ -5730,11 +5873,12 @@ Get a list of all processes running on an endpoint.`,
     urlParams: [],
     bodyParams: ['agent_type', 'alert_ids', 'case_ids', 'comment', 'endpoint_ids', 'parameters'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(endpoint_get_processes_action_request, 'body'),
-    getZodLooseObjectFromProperty(endpoint_get_processes_action_request, 'path'),
-    getZodLooseObjectFromProperty(endpoint_get_processes_action_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(endpoint_get_processes_action_request, 'body'),
+    ...getShapeAt(endpoint_get_processes_action_request, 'path'),
+    ...getShapeAt(endpoint_get_processes_action_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: endpoint_get_processes_action_response,
 };
 const RUNSCRIPTACTION_CONTRACT: InternalConnectorContract = {
@@ -5757,11 +5901,12 @@ Run a script on a host. Currently supported only for some agent types.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(run_script_action_request, 'body'),
-    getZodLooseObjectFromProperty(run_script_action_request, 'path'),
-    getZodLooseObjectFromProperty(run_script_action_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(run_script_action_request, 'body'),
+    ...getShapeAt(run_script_action_request, 'path'),
+    ...getShapeAt(run_script_action_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: run_script_action_response,
 };
 const ENDPOINTSCANACTION_CONTRACT: InternalConnectorContract = {
@@ -5784,11 +5929,12 @@ Scan a specific file or directory on an endpoint for malware.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(endpoint_scan_action_request, 'body'),
-    getZodLooseObjectFromProperty(endpoint_scan_action_request, 'path'),
-    getZodLooseObjectFromProperty(endpoint_scan_action_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(endpoint_scan_action_request, 'body'),
+    ...getShapeAt(endpoint_scan_action_request, 'path'),
+    ...getShapeAt(endpoint_scan_action_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: endpoint_scan_action_response,
 };
 const ENDPOINTGETACTIONSSTATE_CONTRACT: InternalConnectorContract = {
@@ -5811,11 +5957,12 @@ Get a response actions state, which reports whether encryption is enabled.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(endpoint_get_actions_state_request, 'body'),
-    getZodLooseObjectFromProperty(endpoint_get_actions_state_request, 'path'),
-    getZodLooseObjectFromProperty(endpoint_get_actions_state_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(endpoint_get_actions_state_request, 'body'),
+    ...getShapeAt(endpoint_get_actions_state_request, 'path'),
+    ...getShapeAt(endpoint_get_actions_state_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: endpoint_get_actions_state_response,
 };
 const ENDPOINTSUSPENDPROCESSACTION_CONTRACT: InternalConnectorContract = {
@@ -5838,11 +5985,12 @@ Suspend a running process on an endpoint.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(endpoint_suspend_process_action_request, 'body'),
-    getZodLooseObjectFromProperty(endpoint_suspend_process_action_request, 'path'),
-    getZodLooseObjectFromProperty(endpoint_suspend_process_action_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(endpoint_suspend_process_action_request, 'body'),
+    ...getShapeAt(endpoint_suspend_process_action_request, 'path'),
+    ...getShapeAt(endpoint_suspend_process_action_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: endpoint_suspend_process_action_response,
 };
 const ENDPOINTUNISOLATEACTION_CONTRACT: InternalConnectorContract = {
@@ -5865,11 +6013,12 @@ Release an isolated endpoint, allowing it to rejoin a network.`,
     urlParams: [],
     bodyParams: ['agent_type', 'alert_ids', 'case_ids', 'comment', 'endpoint_ids', 'parameters'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(endpoint_unisolate_action_request, 'body'),
-    getZodLooseObjectFromProperty(endpoint_unisolate_action_request, 'path'),
-    getZodLooseObjectFromProperty(endpoint_unisolate_action_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(endpoint_unisolate_action_request, 'body'),
+    ...getShapeAt(endpoint_unisolate_action_request, 'path'),
+    ...getShapeAt(endpoint_unisolate_action_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: endpoint_unisolate_action_response,
 };
 const ENDPOINTUPLOADACTION_CONTRACT: InternalConnectorContract = {
@@ -5892,11 +6041,12 @@ Upload a file to an endpoint.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(endpoint_upload_action_request, 'body'),
-    getZodLooseObjectFromProperty(endpoint_upload_action_request, 'path'),
-    getZodLooseObjectFromProperty(endpoint_upload_action_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(endpoint_upload_action_request, 'body'),
+    ...getShapeAt(endpoint_upload_action_request, 'path'),
+    ...getShapeAt(endpoint_upload_action_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: endpoint_upload_action_response,
 };
 const GETENDPOINTMETADATALIST_CONTRACT: InternalConnectorContract = {
@@ -5917,11 +6067,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['page', 'pageSize', 'kuery', 'hostStatuses', 'sortField', 'sortDirection'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_endpoint_metadata_list_request, 'body'),
-    getZodLooseObjectFromProperty(get_endpoint_metadata_list_request, 'path'),
-    getZodLooseObjectFromProperty(get_endpoint_metadata_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_endpoint_metadata_list_request, 'body'),
+    ...getShapeAt(get_endpoint_metadata_list_request, 'path'),
+    ...getShapeAt(get_endpoint_metadata_list_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_endpoint_metadata_list_response,
 };
 const GETENDPOINTMETADATA_CONTRACT: InternalConnectorContract = {
@@ -5942,11 +6093,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_endpoint_metadata_request, 'body'),
-    getZodLooseObjectFromProperty(get_endpoint_metadata_request, 'path'),
-    getZodLooseObjectFromProperty(get_endpoint_metadata_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_endpoint_metadata_request, 'body'),
+    ...getShapeAt(get_endpoint_metadata_request, 'path'),
+    ...getShapeAt(get_endpoint_metadata_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_endpoint_metadata_response,
 };
 const GETPOLICYRESPONSE_CONTRACT: InternalConnectorContract = {
@@ -5967,11 +6119,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['query'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_policy_response_request, 'body'),
-    getZodLooseObjectFromProperty(get_policy_response_request, 'path'),
-    getZodLooseObjectFromProperty(get_policy_response_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_policy_response_request, 'body'),
+    ...getShapeAt(get_policy_response_request, 'path'),
+    ...getShapeAt(get_policy_response_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_policy_response_response,
 };
 const GETPROTECTIONUPDATESNOTE_CONTRACT: InternalConnectorContract = {
@@ -5992,11 +6145,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_protection_updates_note_request, 'body'),
-    getZodLooseObjectFromProperty(get_protection_updates_note_request, 'path'),
-    getZodLooseObjectFromProperty(get_protection_updates_note_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_protection_updates_note_request, 'body'),
+    ...getShapeAt(get_protection_updates_note_request, 'path'),
+    ...getShapeAt(get_protection_updates_note_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_protection_updates_note_response,
 };
 const CREATEUPDATEPROTECTIONUPDATESNOTE_CONTRACT: InternalConnectorContract = {
@@ -6017,11 +6171,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['note'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_update_protection_updates_note_request, 'body'),
-    getZodLooseObjectFromProperty(create_update_protection_updates_note_request, 'path'),
-    getZodLooseObjectFromProperty(create_update_protection_updates_note_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_update_protection_updates_note_request, 'body'),
+    ...getShapeAt(create_update_protection_updates_note_request, 'path'),
+    ...getShapeAt(create_update_protection_updates_note_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_update_protection_updates_note_response,
 };
 const DELETEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
@@ -6042,11 +6197,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['data'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_monitoring_engine_request, 'body'),
-    getZodLooseObjectFromProperty(delete_monitoring_engine_request, 'path'),
-    getZodLooseObjectFromProperty(delete_monitoring_engine_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_monitoring_engine_request, 'body'),
+    ...getShapeAt(delete_monitoring_engine_request, 'path'),
+    ...getShapeAt(delete_monitoring_engine_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_monitoring_engine_response,
 };
 const DISABLEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
@@ -6067,11 +6223,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(disable_monitoring_engine_request, 'body'),
-    getZodLooseObjectFromProperty(disable_monitoring_engine_request, 'path'),
-    getZodLooseObjectFromProperty(disable_monitoring_engine_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(disable_monitoring_engine_request, 'body'),
+    ...getShapeAt(disable_monitoring_engine_request, 'path'),
+    ...getShapeAt(disable_monitoring_engine_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: disable_monitoring_engine_response,
 };
 const INITMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
@@ -6092,11 +6249,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(init_monitoring_engine_request, 'body'),
-    getZodLooseObjectFromProperty(init_monitoring_engine_request, 'path'),
-    getZodLooseObjectFromProperty(init_monitoring_engine_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(init_monitoring_engine_request, 'body'),
+    ...getShapeAt(init_monitoring_engine_request, 'path'),
+    ...getShapeAt(init_monitoring_engine_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: init_monitoring_engine_response,
 };
 const SCHEDULEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
@@ -6117,11 +6275,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(schedule_monitoring_engine_request, 'body'),
-    getZodLooseObjectFromProperty(schedule_monitoring_engine_request, 'path'),
-    getZodLooseObjectFromProperty(schedule_monitoring_engine_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(schedule_monitoring_engine_request, 'body'),
+    ...getShapeAt(schedule_monitoring_engine_request, 'path'),
+    ...getShapeAt(schedule_monitoring_engine_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: schedule_monitoring_engine_response,
 };
 const PRIVMONHEALTH_CONTRACT: InternalConnectorContract = {
@@ -6142,11 +6301,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(priv_mon_health_request, 'body'),
-    getZodLooseObjectFromProperty(priv_mon_health_request, 'path'),
-    getZodLooseObjectFromProperty(priv_mon_health_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(priv_mon_health_request, 'body'),
+    ...getShapeAt(priv_mon_health_request, 'path'),
+    ...getShapeAt(priv_mon_health_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: priv_mon_health_response,
 };
 const PRIVMONPRIVILEGES_CONTRACT: InternalConnectorContract = {
@@ -6169,11 +6329,12 @@ Check if the current user has all required permissions for Privilege Monitoring`
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(priv_mon_privileges_request, 'body'),
-    getZodLooseObjectFromProperty(priv_mon_privileges_request, 'path'),
-    getZodLooseObjectFromProperty(priv_mon_privileges_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(priv_mon_privileges_request, 'body'),
+    ...getShapeAt(priv_mon_privileges_request, 'path'),
+    ...getShapeAt(priv_mon_privileges_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: priv_mon_privileges_response,
 };
 const CREATEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
@@ -6194,11 +6355,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['user'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_priv_mon_user_request, 'body'),
-    getZodLooseObjectFromProperty(create_priv_mon_user_request, 'path'),
-    getZodLooseObjectFromProperty(create_priv_mon_user_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_priv_mon_user_request, 'body'),
+    ...getShapeAt(create_priv_mon_user_request, 'path'),
+    ...getShapeAt(create_priv_mon_user_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_priv_mon_user_response,
 };
 const PRIVMONBULKUPLOADUSERSCSV_CONTRACT: InternalConnectorContract = {
@@ -6219,11 +6381,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(privmon_bulk_upload_users_c_s_v_request, 'body'),
-    getZodLooseObjectFromProperty(privmon_bulk_upload_users_c_s_v_request, 'path'),
-    getZodLooseObjectFromProperty(privmon_bulk_upload_users_c_s_v_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(privmon_bulk_upload_users_c_s_v_request, 'body'),
+    ...getShapeAt(privmon_bulk_upload_users_c_s_v_request, 'path'),
+    ...getShapeAt(privmon_bulk_upload_users_c_s_v_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: privmon_bulk_upload_users_c_s_v_response,
 };
 const DELETEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
@@ -6244,11 +6407,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_priv_mon_user_request, 'body'),
-    getZodLooseObjectFromProperty(delete_priv_mon_user_request, 'path'),
-    getZodLooseObjectFromProperty(delete_priv_mon_user_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_priv_mon_user_request, 'body'),
+    ...getShapeAt(delete_priv_mon_user_request, 'path'),
+    ...getShapeAt(delete_priv_mon_user_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_priv_mon_user_response,
 };
 const UPDATEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
@@ -6269,11 +6433,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['entity_analytics_monitoring', 'id', 'labels', 'user'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_priv_mon_user_request, 'body'),
-    getZodLooseObjectFromProperty(update_priv_mon_user_request, 'path'),
-    getZodLooseObjectFromProperty(update_priv_mon_user_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_priv_mon_user_request, 'body'),
+    ...getShapeAt(update_priv_mon_user_request, 'path'),
+    ...getShapeAt(update_priv_mon_user_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_priv_mon_user_response,
 };
 const LISTPRIVMONUSERS_CONTRACT: InternalConnectorContract = {
@@ -6294,11 +6459,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['kql'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(list_priv_mon_users_request, 'body'),
-    getZodLooseObjectFromProperty(list_priv_mon_users_request, 'path'),
-    getZodLooseObjectFromProperty(list_priv_mon_users_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(list_priv_mon_users_request, 'body'),
+    ...getShapeAt(list_priv_mon_users_request, 'path'),
+    ...getShapeAt(list_priv_mon_users_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: list_priv_mon_users_response,
 };
 const INSTALLPRIVILEGEDACCESSDETECTIONPACKAGE_CONTRACT: InternalConnectorContract = {
@@ -6319,11 +6485,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(install_privileged_access_detection_package_request, 'body'),
-    getZodLooseObjectFromProperty(install_privileged_access_detection_package_request, 'path'),
-    getZodLooseObjectFromProperty(install_privileged_access_detection_package_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(install_privileged_access_detection_package_request, 'body'),
+    ...getShapeAt(install_privileged_access_detection_package_request, 'path'),
+    ...getShapeAt(install_privileged_access_detection_package_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: install_privileged_access_detection_package_response,
 };
 const GETPRIVILEGEDACCESSDETECTIONPACKAGESTATUS_CONTRACT: InternalConnectorContract = {
@@ -6344,11 +6511,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_privileged_access_detection_package_status_request, 'body'),
-    getZodLooseObjectFromProperty(get_privileged_access_detection_package_status_request, 'path'),
-    getZodLooseObjectFromProperty(get_privileged_access_detection_package_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_privileged_access_detection_package_status_request, 'body'),
+    ...getShapeAt(get_privileged_access_detection_package_status_request, 'path'),
+    ...getShapeAt(get_privileged_access_detection_package_status_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_privileged_access_detection_package_status_response,
 };
 const INITENTITYSTORE_CONTRACT: InternalConnectorContract = {
@@ -6382,11 +6550,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       'timestampField',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(init_entity_store_request, 'body'),
-    getZodLooseObjectFromProperty(init_entity_store_request, 'path'),
-    getZodLooseObjectFromProperty(init_entity_store_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(init_entity_store_request, 'body'),
+    ...getShapeAt(init_entity_store_request, 'path'),
+    ...getShapeAt(init_entity_store_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: init_entity_store_response,
 };
 const DELETEENTITYENGINES_CONTRACT: InternalConnectorContract = {
@@ -6407,11 +6576,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['entityTypes', 'delete_data'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_entity_engines_request, 'body'),
-    getZodLooseObjectFromProperty(delete_entity_engines_request, 'path'),
-    getZodLooseObjectFromProperty(delete_entity_engines_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_entity_engines_request, 'body'),
+    ...getShapeAt(delete_entity_engines_request, 'path'),
+    ...getShapeAt(delete_entity_engines_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_entity_engines_response,
 };
 const LISTENTITYENGINES_CONTRACT: InternalConnectorContract = {
@@ -6432,11 +6602,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(list_entity_engines_request, 'body'),
-    getZodLooseObjectFromProperty(list_entity_engines_request, 'path'),
-    getZodLooseObjectFromProperty(list_entity_engines_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(list_entity_engines_request, 'body'),
+    ...getShapeAt(list_entity_engines_request, 'path'),
+    ...getShapeAt(list_entity_engines_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: list_entity_engines_response,
 };
 const DELETEENTITYENGINE_CONTRACT: InternalConnectorContract = {
@@ -6457,11 +6628,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['delete_data', 'data'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_entity_engine_request, 'body'),
-    getZodLooseObjectFromProperty(delete_entity_engine_request, 'path'),
-    getZodLooseObjectFromProperty(delete_entity_engine_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_entity_engine_request, 'body'),
+    ...getShapeAt(delete_entity_engine_request, 'path'),
+    ...getShapeAt(delete_entity_engine_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_entity_engine_response,
 };
 const GETENTITYENGINE_CONTRACT: InternalConnectorContract = {
@@ -6482,11 +6654,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_entity_engine_request, 'body'),
-    getZodLooseObjectFromProperty(get_entity_engine_request, 'path'),
-    getZodLooseObjectFromProperty(get_entity_engine_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_entity_engine_request, 'body'),
+    ...getShapeAt(get_entity_engine_request, 'path'),
+    ...getShapeAt(get_entity_engine_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_entity_engine_response,
 };
 const INITENTITYENGINE_CONTRACT: InternalConnectorContract = {
@@ -6519,11 +6692,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       'timestampField',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(init_entity_engine_request, 'body'),
-    getZodLooseObjectFromProperty(init_entity_engine_request, 'path'),
-    getZodLooseObjectFromProperty(init_entity_engine_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(init_entity_engine_request, 'body'),
+    ...getShapeAt(init_entity_engine_request, 'path'),
+    ...getShapeAt(init_entity_engine_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: init_entity_engine_response,
 };
 const STARTENTITYENGINE_CONTRACT: InternalConnectorContract = {
@@ -6544,11 +6718,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(start_entity_engine_request, 'body'),
-    getZodLooseObjectFromProperty(start_entity_engine_request, 'path'),
-    getZodLooseObjectFromProperty(start_entity_engine_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(start_entity_engine_request, 'body'),
+    ...getShapeAt(start_entity_engine_request, 'path'),
+    ...getShapeAt(start_entity_engine_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: start_entity_engine_response,
 };
 const STOPENTITYENGINE_CONTRACT: InternalConnectorContract = {
@@ -6569,11 +6744,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(stop_entity_engine_request, 'body'),
-    getZodLooseObjectFromProperty(stop_entity_engine_request, 'path'),
-    getZodLooseObjectFromProperty(stop_entity_engine_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(stop_entity_engine_request, 'body'),
+    ...getShapeAt(stop_entity_engine_request, 'path'),
+    ...getShapeAt(stop_entity_engine_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: stop_entity_engine_response,
 };
 const APPLYENTITYENGINEDATAVIEWINDICES_CONTRACT: InternalConnectorContract = {
@@ -6594,11 +6770,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(apply_entity_engine_dataview_indices_request, 'body'),
-    getZodLooseObjectFromProperty(apply_entity_engine_dataview_indices_request, 'path'),
-    getZodLooseObjectFromProperty(apply_entity_engine_dataview_indices_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(apply_entity_engine_dataview_indices_request, 'body'),
+    ...getShapeAt(apply_entity_engine_dataview_indices_request, 'path'),
+    ...getShapeAt(apply_entity_engine_dataview_indices_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: apply_entity_engine_dataview_indices_response,
 };
 const DELETESINGLEENTITY_CONTRACT: InternalConnectorContract = {
@@ -6623,11 +6800,12 @@ The entity will be immediately deleted from the latest index.  It will remain av
     urlParams: [],
     bodyParams: ['id'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_single_entity_request, 'body'),
-    getZodLooseObjectFromProperty(delete_single_entity_request, 'path'),
-    getZodLooseObjectFromProperty(delete_single_entity_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_single_entity_request, 'body'),
+    ...getShapeAt(delete_single_entity_request, 'path'),
+    ...getShapeAt(delete_single_entity_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_single_entity_response,
 };
 const UPSERTENTITY_CONTRACT: InternalConnectorContract = {
@@ -6654,11 +6832,12 @@ If the specified entity already exists, it is updated with the provided values. 
     urlParams: ['force'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(upsert_entity_request, 'body'),
-    getZodLooseObjectFromProperty(upsert_entity_request, 'path'),
-    getZodLooseObjectFromProperty(upsert_entity_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(upsert_entity_request, 'body'),
+    ...getShapeAt(upsert_entity_request, 'path'),
+    ...getShapeAt(upsert_entity_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: upsert_entity_response,
 };
 const UPSERTENTITIESBULK_CONTRACT: InternalConnectorContract = {
@@ -6684,11 +6863,12 @@ The creation is asynchronous. The time for a document to be present in the  fina
     urlParams: ['force'],
     bodyParams: ['entities'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(upsert_entities_bulk_request, 'body'),
-    getZodLooseObjectFromProperty(upsert_entities_bulk_request, 'path'),
-    getZodLooseObjectFromProperty(upsert_entities_bulk_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(upsert_entities_bulk_request, 'body'),
+    ...getShapeAt(upsert_entities_bulk_request, 'path'),
+    ...getShapeAt(upsert_entities_bulk_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: upsert_entities_bulk_response,
 };
 const LISTENTITIES_CONTRACT: InternalConnectorContract = {
@@ -6711,11 +6891,12 @@ List entities records, paging, sorting and filtering as needed.`,
     urlParams: ['sort_field', 'sort_order', 'page', 'per_page', 'filterQuery', 'entity_types'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(list_entities_request, 'body'),
-    getZodLooseObjectFromProperty(list_entities_request, 'path'),
-    getZodLooseObjectFromProperty(list_entities_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(list_entities_request, 'body'),
+    ...getShapeAt(list_entities_request, 'path'),
+    ...getShapeAt(list_entities_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: list_entities_response,
 };
 const GETENTITYSTORESTATUS_CONTRACT: InternalConnectorContract = {
@@ -6736,11 +6917,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['include_components'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_entity_store_status_request, 'body'),
-    getZodLooseObjectFromProperty(get_entity_store_status_request, 'path'),
-    getZodLooseObjectFromProperty(get_entity_store_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_entity_store_status_request, 'body'),
+    ...getShapeAt(get_entity_store_status_request, 'path'),
+    ...getShapeAt(get_entity_store_status_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_entity_store_status_response,
 };
 const DELETEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
@@ -6763,11 +6945,12 @@ Delete an exception list using the \`id\` or \`list_id\` field.`,
     urlParams: ['id', 'list_id', 'namespace_type'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_exception_list_request, 'body'),
-    getZodLooseObjectFromProperty(delete_exception_list_request, 'path'),
-    getZodLooseObjectFromProperty(delete_exception_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_exception_list_request, 'body'),
+    ...getShapeAt(delete_exception_list_request, 'path'),
+    ...getShapeAt(delete_exception_list_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_exception_list_response,
 };
 const READEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
@@ -6790,11 +6973,12 @@ Get the details of an exception list using the \`id\` or \`list_id\` field.`,
     urlParams: ['id', 'list_id', 'namespace_type'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_exception_list_request, 'body'),
-    getZodLooseObjectFromProperty(read_exception_list_request, 'path'),
-    getZodLooseObjectFromProperty(read_exception_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_exception_list_request, 'body'),
+    ...getShapeAt(read_exception_list_request, 'path'),
+    ...getShapeAt(read_exception_list_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_exception_list_response,
 };
 const CREATEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
@@ -6830,11 +7014,12 @@ An exception list groups exception items and can be associated with detection ru
       'version',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_exception_list_request, 'body'),
-    getZodLooseObjectFromProperty(create_exception_list_request, 'path'),
-    getZodLooseObjectFromProperty(create_exception_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_exception_list_request, 'body'),
+    ...getShapeAt(create_exception_list_request, 'path'),
+    ...getShapeAt(create_exception_list_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_exception_list_response,
 };
 const UPDATEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
@@ -6869,11 +7054,12 @@ Update an exception list using the \`id\` or \`list_id\` field.`,
       'version',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_exception_list_request, 'body'),
-    getZodLooseObjectFromProperty(update_exception_list_request, 'path'),
-    getZodLooseObjectFromProperty(update_exception_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_exception_list_request, 'body'),
+    ...getShapeAt(update_exception_list_request, 'path'),
+    ...getShapeAt(update_exception_list_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_exception_list_response,
 };
 const DUPLICATEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
@@ -6896,11 +7082,12 @@ Duplicate an existing exception list.`,
     urlParams: ['list_id', 'namespace_type', 'include_expired_exceptions'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(duplicate_exception_list_request, 'body'),
-    getZodLooseObjectFromProperty(duplicate_exception_list_request, 'path'),
-    getZodLooseObjectFromProperty(duplicate_exception_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(duplicate_exception_list_request, 'body'),
+    ...getShapeAt(duplicate_exception_list_request, 'path'),
+    ...getShapeAt(duplicate_exception_list_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: duplicate_exception_list_response,
 };
 const EXPORTEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
@@ -6923,11 +7110,12 @@ Export an exception list and its associated items to an NDJSON file.`,
     urlParams: ['id', 'list_id', 'namespace_type', 'include_expired_exceptions'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(export_exception_list_request, 'body'),
-    getZodLooseObjectFromProperty(export_exception_list_request, 'path'),
-    getZodLooseObjectFromProperty(export_exception_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(export_exception_list_request, 'body'),
+    ...getShapeAt(export_exception_list_request, 'path'),
+    ...getShapeAt(export_exception_list_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: export_exception_list_response,
 };
 const FINDEXCEPTIONLISTS_CONTRACT: InternalConnectorContract = {
@@ -6950,11 +7138,12 @@ Get a list of all exception list containers.`,
     urlParams: ['filter', 'namespace_type', 'page', 'per_page', 'sort_field', 'sort_order'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_exception_lists_request, 'body'),
-    getZodLooseObjectFromProperty(find_exception_lists_request, 'path'),
-    getZodLooseObjectFromProperty(find_exception_lists_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_exception_lists_request, 'body'),
+    ...getShapeAt(find_exception_lists_request, 'path'),
+    ...getShapeAt(find_exception_lists_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_exception_lists_response,
 };
 const IMPORTEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
@@ -6977,11 +7166,12 @@ Import an exception list and its associated items from an NDJSON file.`,
     urlParams: ['overwrite', 'as_new_list'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(import_exception_list_request, 'body'),
-    getZodLooseObjectFromProperty(import_exception_list_request, 'path'),
-    getZodLooseObjectFromProperty(import_exception_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(import_exception_list_request, 'body'),
+    ...getShapeAt(import_exception_list_request, 'path'),
+    ...getShapeAt(import_exception_list_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: import_exception_list_response,
 };
 const DELETEEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
@@ -7004,11 +7194,12 @@ Delete an exception list item using the \`id\` or \`item_id\` field.`,
     urlParams: ['id', 'item_id', 'namespace_type'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_exception_list_item_request, 'body'),
-    getZodLooseObjectFromProperty(delete_exception_list_item_request, 'path'),
-    getZodLooseObjectFromProperty(delete_exception_list_item_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_exception_list_item_request, 'body'),
+    ...getShapeAt(delete_exception_list_item_request, 'path'),
+    ...getShapeAt(delete_exception_list_item_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_exception_list_item_response,
 };
 const READEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
@@ -7031,11 +7222,12 @@ Get the details of an exception list item using the \`id\` or \`item_id\` field.
     urlParams: ['id', 'item_id', 'namespace_type'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_exception_list_item_request, 'body'),
-    getZodLooseObjectFromProperty(read_exception_list_item_request, 'path'),
-    getZodLooseObjectFromProperty(read_exception_list_item_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_exception_list_item_request, 'body'),
+    ...getShapeAt(read_exception_list_item_request, 'path'),
+    ...getShapeAt(read_exception_list_item_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_exception_list_item_response,
 };
 const CREATEEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
@@ -7074,11 +7266,12 @@ Create an exception item and associate it with the specified exception list.
       'type',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_exception_list_item_request, 'body'),
-    getZodLooseObjectFromProperty(create_exception_list_item_request, 'path'),
-    getZodLooseObjectFromProperty(create_exception_list_item_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_exception_list_item_request, 'body'),
+    ...getShapeAt(create_exception_list_item_request, 'path'),
+    ...getShapeAt(create_exception_list_item_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_exception_list_item_response,
 };
 const UPDATEEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
@@ -7116,11 +7309,12 @@ Update an exception list item using the \`id\` or \`item_id\` field.`,
       'type',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_exception_list_item_request, 'body'),
-    getZodLooseObjectFromProperty(update_exception_list_item_request, 'path'),
-    getZodLooseObjectFromProperty(update_exception_list_item_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_exception_list_item_request, 'body'),
+    ...getShapeAt(update_exception_list_item_request, 'path'),
+    ...getShapeAt(update_exception_list_item_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_exception_list_item_response,
 };
 const FINDEXCEPTIONLISTITEMS_CONTRACT: InternalConnectorContract = {
@@ -7152,11 +7346,12 @@ Get a list of all exception list items in the specified list.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_exception_list_items_request, 'body'),
-    getZodLooseObjectFromProperty(find_exception_list_items_request, 'path'),
-    getZodLooseObjectFromProperty(find_exception_list_items_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_exception_list_items_request, 'body'),
+    ...getShapeAt(find_exception_list_items_request, 'path'),
+    ...getShapeAt(find_exception_list_items_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_exception_list_items_response,
 };
 const READEXCEPTIONLISTSUMMARY_CONTRACT: InternalConnectorContract = {
@@ -7179,11 +7374,12 @@ Get a summary of the specified exception list.`,
     urlParams: ['id', 'list_id', 'namespace_type', 'filter'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_exception_list_summary_request, 'body'),
-    getZodLooseObjectFromProperty(read_exception_list_summary_request, 'path'),
-    getZodLooseObjectFromProperty(read_exception_list_summary_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_exception_list_summary_request, 'body'),
+    ...getShapeAt(read_exception_list_summary_request, 'path'),
+    ...getShapeAt(read_exception_list_summary_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_exception_list_summary_response,
 };
 const CREATESHAREDEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
@@ -7209,11 +7405,12 @@ An exception list groups exception items and can be associated with detection ru
     urlParams: [],
     bodyParams: ['description', 'name'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_shared_exception_list_request, 'body'),
-    getZodLooseObjectFromProperty(create_shared_exception_list_request, 'path'),
-    getZodLooseObjectFromProperty(create_shared_exception_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_shared_exception_list_request, 'body'),
+    ...getShapeAt(create_shared_exception_list_request, 'path'),
+    ...getShapeAt(create_shared_exception_list_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_shared_exception_list_response,
 };
 const GET_FEATURES_CONTRACT: InternalConnectorContract = {
@@ -7231,11 +7428,12 @@ const GET_FEATURES_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_features_request, 'body'),
-    getZodLooseObjectFromProperty(get_features_request, 'path'),
-    getZodLooseObjectFromProperty(get_features_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_features_request, 'body'),
+    ...getShapeAt(get_features_request, 'path'),
+    ...getShapeAt(get_features_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_features_response,
 };
 const GET_FLEET_AGENT_DOWNLOAD_SOURCES_CONTRACT: InternalConnectorContract = {
@@ -7258,11 +7456,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agent_download_sources_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agent_download_sources_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agent_download_sources_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agent_download_sources_request, 'body'),
+    ...getShapeAt(get_fleet_agent_download_sources_request, 'path'),
+    ...getShapeAt(get_fleet_agent_download_sources_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agent_download_sources_response,
 };
 const POST_FLEET_AGENT_DOWNLOAD_SOURCES_CONTRACT: InternalConnectorContract = {
@@ -7285,11 +7484,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['host', 'id', 'is_default', 'name', 'proxy_id', 'secrets', 'ssl'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agent_download_sources_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agent_download_sources_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agent_download_sources_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agent_download_sources_request, 'body'),
+    ...getShapeAt(post_fleet_agent_download_sources_request, 'path'),
+    ...getShapeAt(post_fleet_agent_download_sources_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agent_download_sources_response,
 };
 const DELETE_FLEET_AGENT_DOWNLOAD_SOURCES_SOURCEID_CONTRACT: InternalConnectorContract = {
@@ -7312,11 +7512,12 @@ Delete an agent binary download source by ID.<br/><br/>[Required authorization] 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_fleet_agent_download_sources_sourceid_request, 'body'),
-    getZodLooseObjectFromProperty(delete_fleet_agent_download_sources_sourceid_request, 'path'),
-    getZodLooseObjectFromProperty(delete_fleet_agent_download_sources_sourceid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_fleet_agent_download_sources_sourceid_request, 'body'),
+    ...getShapeAt(delete_fleet_agent_download_sources_sourceid_request, 'path'),
+    ...getShapeAt(delete_fleet_agent_download_sources_sourceid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_fleet_agent_download_sources_sourceid_response,
 };
 const GET_FLEET_AGENT_DOWNLOAD_SOURCES_SOURCEID_CONTRACT: InternalConnectorContract = {
@@ -7339,11 +7540,12 @@ Get an agent binary download source by ID.<br/><br/>[Required authorization] Rou
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agent_download_sources_sourceid_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agent_download_sources_sourceid_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agent_download_sources_sourceid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agent_download_sources_sourceid_request, 'body'),
+    ...getShapeAt(get_fleet_agent_download_sources_sourceid_request, 'path'),
+    ...getShapeAt(get_fleet_agent_download_sources_sourceid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agent_download_sources_sourceid_response,
 };
 const PUT_FLEET_AGENT_DOWNLOAD_SOURCES_SOURCEID_CONTRACT: InternalConnectorContract = {
@@ -7366,11 +7568,12 @@ Update an agent binary download source by ID.<br/><br/>[Required authorization] 
     urlParams: [],
     bodyParams: ['host', 'id', 'is_default', 'name', 'proxy_id', 'secrets', 'ssl'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_fleet_agent_download_sources_sourceid_request, 'body'),
-    getZodLooseObjectFromProperty(put_fleet_agent_download_sources_sourceid_request, 'path'),
-    getZodLooseObjectFromProperty(put_fleet_agent_download_sources_sourceid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_fleet_agent_download_sources_sourceid_request, 'body'),
+    ...getShapeAt(put_fleet_agent_download_sources_sourceid_request, 'path'),
+    ...getShapeAt(put_fleet_agent_download_sources_sourceid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_fleet_agent_download_sources_sourceid_response,
 };
 const GET_FLEET_AGENT_POLICIES_CONTRACT: InternalConnectorContract = {
@@ -7404,11 +7607,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agent_policies_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agent_policies_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agent_policies_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agent_policies_request, 'body'),
+    ...getShapeAt(get_fleet_agent_policies_request, 'path'),
+    ...getShapeAt(get_fleet_agent_policies_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agent_policies_response,
 };
 const POST_FLEET_AGENT_POLICIES_CONTRACT: InternalConnectorContract = {
@@ -7461,11 +7665,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       'unenroll_timeout',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agent_policies_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agent_policies_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agent_policies_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agent_policies_request, 'body'),
+    ...getShapeAt(post_fleet_agent_policies_request, 'path'),
+    ...getShapeAt(post_fleet_agent_policies_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agent_policies_response,
 };
 const POST_FLEET_AGENT_POLICIES_BULK_GET_CONTRACT: InternalConnectorContract = {
@@ -7488,11 +7693,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['format'],
     bodyParams: ['full', 'ids', 'ignoreMissing'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agent_policies_bulk_get_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agent_policies_bulk_get_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agent_policies_bulk_get_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agent_policies_bulk_get_request, 'body'),
+    ...getShapeAt(post_fleet_agent_policies_bulk_get_request, 'path'),
+    ...getShapeAt(post_fleet_agent_policies_bulk_get_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agent_policies_bulk_get_response,
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_CONTRACT: InternalConnectorContract = {
@@ -7515,11 +7721,12 @@ Get an agent policy by ID.<br/><br/>[Required authorization] Route required priv
     urlParams: ['format'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agent_policies_agentpolicyid_request, 'body'),
+    ...getShapeAt(get_fleet_agent_policies_agentpolicyid_request, 'path'),
+    ...getShapeAt(get_fleet_agent_policies_agentpolicyid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agent_policies_agentpolicyid_response,
 };
 const PUT_FLEET_AGENT_POLICIES_AGENTPOLICYID_CONTRACT: InternalConnectorContract = {
@@ -7573,11 +7780,12 @@ Update an agent policy by ID.<br/><br/>[Required authorization] Route required p
       'unenroll_timeout',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_fleet_agent_policies_agentpolicyid_request, 'body'),
-    getZodLooseObjectFromProperty(put_fleet_agent_policies_agentpolicyid_request, 'path'),
-    getZodLooseObjectFromProperty(put_fleet_agent_policies_agentpolicyid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_fleet_agent_policies_agentpolicyid_request, 'body'),
+    ...getShapeAt(put_fleet_agent_policies_agentpolicyid_request, 'path'),
+    ...getShapeAt(put_fleet_agent_policies_agentpolicyid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_fleet_agent_policies_agentpolicyid_response,
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_AUTO_UPGRADE_AGENTS_STATUS_CONTRACT: InternalConnectorContract =
@@ -7601,20 +7809,21 @@ Get auto upgrade agent status<br/><br/>[Required authorization] Route required p
       urlParams: [],
       bodyParams: [],
     },
-    paramsSchema: z.union([
-      getZodLooseObjectFromProperty(
+    paramsSchema: z.object({
+      ...getShapeAt(
         get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_request,
         'body'
       ),
-      getZodLooseObjectFromProperty(
+      ...getShapeAt(
         get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_request,
         'path'
       ),
-      getZodLooseObjectFromProperty(
+      ...getShapeAt(
         get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_request,
         'query'
       ),
-    ]),
+      fetcher: FetcherConfigSchema,
+    }),
     outputSchema: get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status_response,
   };
 const POST_FLEET_AGENT_POLICIES_AGENTPOLICYID_COPY_CONTRACT: InternalConnectorContract = {
@@ -7637,11 +7846,12 @@ Copy an agent policy by ID.<br/><br/>[Required authorization] Route required pri
     urlParams: ['format'],
     bodyParams: ['description', 'name'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agent_policies_agentpolicyid_copy_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agent_policies_agentpolicyid_copy_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agent_policies_agentpolicyid_copy_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agent_policies_agentpolicyid_copy_request, 'body'),
+    ...getShapeAt(post_fleet_agent_policies_agentpolicyid_copy_request, 'path'),
+    ...getShapeAt(post_fleet_agent_policies_agentpolicyid_copy_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agent_policies_agentpolicyid_copy_response,
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_DOWNLOAD_CONTRACT: InternalConnectorContract = {
@@ -7664,11 +7874,12 @@ Download an agent policy by ID.<br/><br/>[Required authorization] Route required
     urlParams: ['download', 'standalone', 'kubernetes'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_download_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_download_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_download_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agent_policies_agentpolicyid_download_request, 'body'),
+    ...getShapeAt(get_fleet_agent_policies_agentpolicyid_download_request, 'path'),
+    ...getShapeAt(get_fleet_agent_policies_agentpolicyid_download_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agent_policies_agentpolicyid_download_response,
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_FULL_CONTRACT: InternalConnectorContract = {
@@ -7691,11 +7902,12 @@ Get a full agent policy by ID.<br/><br/>[Required authorization] Route required 
     urlParams: ['download', 'standalone', 'kubernetes'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_full_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_full_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_full_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agent_policies_agentpolicyid_full_request, 'body'),
+    ...getShapeAt(get_fleet_agent_policies_agentpolicyid_full_request, 'path'),
+    ...getShapeAt(get_fleet_agent_policies_agentpolicyid_full_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agent_policies_agentpolicyid_full_response,
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_OUTPUTS_CONTRACT: InternalConnectorContract = {
@@ -7718,11 +7930,12 @@ Get a list of outputs associated with agent policy by policy id.<br/><br/>[Requi
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_outputs_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_outputs_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agent_policies_agentpolicyid_outputs_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agent_policies_agentpolicyid_outputs_request, 'body'),
+    ...getShapeAt(get_fleet_agent_policies_agentpolicyid_outputs_request, 'path'),
+    ...getShapeAt(get_fleet_agent_policies_agentpolicyid_outputs_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agent_policies_agentpolicyid_outputs_response,
 };
 const POST_FLEET_AGENT_POLICIES_DELETE_CONTRACT: InternalConnectorContract = {
@@ -7745,11 +7958,12 @@ Delete an agent policy by ID.<br/><br/>[Required authorization] Route required p
     urlParams: [],
     bodyParams: ['agentPolicyId', 'force'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agent_policies_delete_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agent_policies_delete_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agent_policies_delete_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agent_policies_delete_request, 'body'),
+    ...getShapeAt(post_fleet_agent_policies_delete_request, 'path'),
+    ...getShapeAt(post_fleet_agent_policies_delete_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agent_policies_delete_response,
 };
 const POST_FLEET_AGENT_POLICIES_OUTPUTS_CONTRACT: InternalConnectorContract = {
@@ -7772,11 +7986,12 @@ Get a list of outputs associated with agent policies.<br/><br/>[Required authori
     urlParams: [],
     bodyParams: ['ids'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agent_policies_outputs_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agent_policies_outputs_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agent_policies_outputs_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agent_policies_outputs_request, 'body'),
+    ...getShapeAt(post_fleet_agent_policies_outputs_request, 'path'),
+    ...getShapeAt(post_fleet_agent_policies_outputs_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agent_policies_outputs_response,
 };
 const GET_FLEET_AGENT_STATUS_CONTRACT: InternalConnectorContract = {
@@ -7797,11 +8012,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['policyId', 'policyIds', 'kuery'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agent_status_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agent_status_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agent_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agent_status_request, 'body'),
+    ...getShapeAt(get_fleet_agent_status_request, 'path'),
+    ...getShapeAt(get_fleet_agent_status_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agent_status_response,
 };
 const GET_FLEET_AGENT_STATUS_DATA_CONTRACT: InternalConnectorContract = {
@@ -7824,11 +8040,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['agentsIds', 'pkgName', 'pkgVersion', 'previewData'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agent_status_data_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agent_status_data_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agent_status_data_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agent_status_data_request, 'body'),
+    ...getShapeAt(get_fleet_agent_status_data_request, 'path'),
+    ...getShapeAt(get_fleet_agent_status_data_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agent_status_data_response,
 };
 const POST_FLEET_AGENTLESS_POLICIES_CONTRACT: InternalConnectorContract = {
@@ -7861,11 +8078,12 @@ Create an agentless policy`,
       'vars',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agentless_policies_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agentless_policies_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agentless_policies_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agentless_policies_request, 'body'),
+    ...getShapeAt(post_fleet_agentless_policies_request, 'path'),
+    ...getShapeAt(post_fleet_agentless_policies_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agentless_policies_response,
 };
 const DELETE_FLEET_AGENTLESS_POLICIES_POLICYID_CONTRACT: InternalConnectorContract = {
@@ -7888,11 +8106,12 @@ Delete an agentless policy`,
     urlParams: ['force'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_fleet_agentless_policies_policyid_request, 'body'),
-    getZodLooseObjectFromProperty(delete_fleet_agentless_policies_policyid_request, 'path'),
-    getZodLooseObjectFromProperty(delete_fleet_agentless_policies_policyid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_fleet_agentless_policies_policyid_request, 'body'),
+    ...getShapeAt(delete_fleet_agentless_policies_policyid_request, 'path'),
+    ...getShapeAt(delete_fleet_agentless_policies_policyid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_fleet_agentless_policies_policyid_response,
 };
 const GET_FLEET_AGENTS_CONTRACT: InternalConnectorContract = {
@@ -7930,11 +8149,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agents_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agents_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agents_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agents_request, 'body'),
+    ...getShapeAt(get_fleet_agents_request, 'path'),
+    ...getShapeAt(get_fleet_agents_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agents_response,
 };
 const POST_FLEET_AGENTS_CONTRACT: InternalConnectorContract = {
@@ -7957,11 +8177,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['actionIds'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agents_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agents_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agents_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agents_request, 'body'),
+    ...getShapeAt(post_fleet_agents_request, 'path'),
+    ...getShapeAt(post_fleet_agents_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agents_response,
 };
 const DELETE_FLEET_AGENTS_AGENTID_CONTRACT: InternalConnectorContract = {
@@ -7984,11 +8205,12 @@ Delete an agent by ID.<br/><br/>[Required authorization] Route required privileg
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_fleet_agents_agentid_request, 'body'),
-    getZodLooseObjectFromProperty(delete_fleet_agents_agentid_request, 'path'),
-    getZodLooseObjectFromProperty(delete_fleet_agents_agentid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_fleet_agents_agentid_request, 'body'),
+    ...getShapeAt(delete_fleet_agents_agentid_request, 'path'),
+    ...getShapeAt(delete_fleet_agents_agentid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_fleet_agents_agentid_response,
 };
 const GET_FLEET_AGENTS_AGENTID_CONTRACT: InternalConnectorContract = {
@@ -8011,11 +8233,12 @@ Get an agent by ID.<br/><br/>[Required authorization] Route required privileges:
     urlParams: ['withMetrics'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agents_agentid_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agents_agentid_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agents_agentid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agents_agentid_request, 'body'),
+    ...getShapeAt(get_fleet_agents_agentid_request, 'path'),
+    ...getShapeAt(get_fleet_agents_agentid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agents_agentid_response,
 };
 const PUT_FLEET_AGENTS_AGENTID_CONTRACT: InternalConnectorContract = {
@@ -8038,11 +8261,12 @@ Update an agent by ID.<br/><br/>[Required authorization] Route required privileg
     urlParams: [],
     bodyParams: ['tags', 'user_provided_metadata'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_fleet_agents_agentid_request, 'body'),
-    getZodLooseObjectFromProperty(put_fleet_agents_agentid_request, 'path'),
-    getZodLooseObjectFromProperty(put_fleet_agents_agentid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_fleet_agents_agentid_request, 'body'),
+    ...getShapeAt(put_fleet_agents_agentid_request, 'path'),
+    ...getShapeAt(put_fleet_agents_agentid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_fleet_agents_agentid_response,
 };
 const POST_FLEET_AGENTS_AGENTID_ACTIONS_CONTRACT: InternalConnectorContract = {
@@ -8065,11 +8289,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['action'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_actions_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_actions_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_actions_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agents_agentid_actions_request, 'body'),
+    ...getShapeAt(post_fleet_agents_agentid_actions_request, 'path'),
+    ...getShapeAt(post_fleet_agents_agentid_actions_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agents_agentid_actions_response,
 };
 const POST_FLEET_AGENTS_AGENTID_MIGRATE_CONTRACT: InternalConnectorContract = {
@@ -8092,11 +8317,12 @@ Migrate a single agent to another cluster.<br/><br/>[Required authorization] Rou
     urlParams: [],
     bodyParams: ['enrollment_token', 'settings', 'uri'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_migrate_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_migrate_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_migrate_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agents_agentid_migrate_request, 'body'),
+    ...getShapeAt(post_fleet_agents_agentid_migrate_request, 'path'),
+    ...getShapeAt(post_fleet_agents_agentid_migrate_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agents_agentid_migrate_response,
 };
 const POST_FLEET_AGENTS_AGENTID_REASSIGN_CONTRACT: InternalConnectorContract = {
@@ -8119,11 +8345,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['policy_id'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_reassign_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_reassign_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_reassign_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agents_agentid_reassign_request, 'body'),
+    ...getShapeAt(post_fleet_agents_agentid_reassign_request, 'path'),
+    ...getShapeAt(post_fleet_agents_agentid_reassign_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agents_agentid_reassign_response,
 };
 const POST_FLEET_AGENTS_AGENTID_REQUEST_DIAGNOSTICS_CONTRACT: InternalConnectorContract = {
@@ -8146,11 +8373,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['additional_metrics'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_request_diagnostics_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_request_diagnostics_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_request_diagnostics_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agents_agentid_request_diagnostics_request, 'body'),
+    ...getShapeAt(post_fleet_agents_agentid_request_diagnostics_request, 'path'),
+    ...getShapeAt(post_fleet_agents_agentid_request_diagnostics_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agents_agentid_request_diagnostics_response,
 };
 const POST_FLEET_AGENTS_AGENTID_UNENROLL_CONTRACT: InternalConnectorContract = {
@@ -8173,11 +8401,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['force', 'revoke'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_unenroll_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_unenroll_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_unenroll_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agents_agentid_unenroll_request, 'body'),
+    ...getShapeAt(post_fleet_agents_agentid_unenroll_request, 'path'),
+    ...getShapeAt(post_fleet_agents_agentid_unenroll_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agents_agentid_unenroll_response,
 };
 const POST_FLEET_AGENTS_AGENTID_UPGRADE_CONTRACT: InternalConnectorContract = {
@@ -8200,11 +8429,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['force', 'skipRateLimitCheck', 'source_uri', 'version'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_upgrade_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_upgrade_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agents_agentid_upgrade_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agents_agentid_upgrade_request, 'body'),
+    ...getShapeAt(post_fleet_agents_agentid_upgrade_request, 'path'),
+    ...getShapeAt(post_fleet_agents_agentid_upgrade_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agents_agentid_upgrade_response,
 };
 const GET_FLEET_AGENTS_AGENTID_UPLOADS_CONTRACT: InternalConnectorContract = {
@@ -8227,11 +8457,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agents_agentid_uploads_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agents_agentid_uploads_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agents_agentid_uploads_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agents_agentid_uploads_request, 'body'),
+    ...getShapeAt(get_fleet_agents_agentid_uploads_request, 'path'),
+    ...getShapeAt(get_fleet_agents_agentid_uploads_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agents_agentid_uploads_response,
 };
 const GET_FLEET_AGENTS_ACTION_STATUS_CONTRACT: InternalConnectorContract = {
@@ -8254,11 +8485,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['page', 'perPage', 'date', 'latest', 'errorSize'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agents_action_status_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agents_action_status_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agents_action_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agents_action_status_request, 'body'),
+    ...getShapeAt(get_fleet_agents_action_status_request, 'path'),
+    ...getShapeAt(get_fleet_agents_action_status_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agents_action_status_response,
 };
 const POST_FLEET_AGENTS_ACTIONS_ACTIONID_CANCEL_CONTRACT: InternalConnectorContract = {
@@ -8281,11 +8513,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agents_actions_actionid_cancel_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agents_actions_actionid_cancel_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agents_actions_actionid_cancel_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agents_actions_actionid_cancel_request, 'body'),
+    ...getShapeAt(post_fleet_agents_actions_actionid_cancel_request, 'path'),
+    ...getShapeAt(post_fleet_agents_actions_actionid_cancel_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agents_actions_actionid_cancel_response,
 };
 const GET_FLEET_AGENTS_AVAILABLE_VERSIONS_CONTRACT: InternalConnectorContract = {
@@ -8308,11 +8541,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agents_available_versions_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agents_available_versions_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agents_available_versions_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agents_available_versions_request, 'body'),
+    ...getShapeAt(get_fleet_agents_available_versions_request, 'path'),
+    ...getShapeAt(get_fleet_agents_available_versions_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agents_available_versions_response,
 };
 const POST_FLEET_AGENTS_BULK_MIGRATE_CONTRACT: InternalConnectorContract = {
@@ -8335,11 +8569,12 @@ Bulk migrate agents to another cluster.<br/><br/>[Required authorization] Route 
     urlParams: [],
     bodyParams: ['agents', 'batchSize', 'enrollment_token', 'settings', 'uri'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_migrate_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_migrate_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_migrate_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agents_bulk_migrate_request, 'body'),
+    ...getShapeAt(post_fleet_agents_bulk_migrate_request, 'path'),
+    ...getShapeAt(post_fleet_agents_bulk_migrate_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agents_bulk_migrate_response,
 };
 const POST_FLEET_AGENTS_BULK_REASSIGN_CONTRACT: InternalConnectorContract = {
@@ -8362,11 +8597,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['agents', 'batchSize', 'includeInactive', 'policy_id'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_reassign_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_reassign_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_reassign_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agents_bulk_reassign_request, 'body'),
+    ...getShapeAt(post_fleet_agents_bulk_reassign_request, 'path'),
+    ...getShapeAt(post_fleet_agents_bulk_reassign_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agents_bulk_reassign_response,
 };
 const POST_FLEET_AGENTS_BULK_REQUEST_DIAGNOSTICS_CONTRACT: InternalConnectorContract = {
@@ -8389,11 +8625,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['additional_metrics', 'agents', 'batchSize'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_request_diagnostics_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_request_diagnostics_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_request_diagnostics_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agents_bulk_request_diagnostics_request, 'body'),
+    ...getShapeAt(post_fleet_agents_bulk_request_diagnostics_request, 'path'),
+    ...getShapeAt(post_fleet_agents_bulk_request_diagnostics_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agents_bulk_request_diagnostics_response,
 };
 const POST_FLEET_AGENTS_BULK_UNENROLL_CONTRACT: InternalConnectorContract = {
@@ -8416,11 +8653,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['agents', 'batchSize', 'force', 'includeInactive', 'revoke'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_unenroll_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_unenroll_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_unenroll_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agents_bulk_unenroll_request, 'body'),
+    ...getShapeAt(post_fleet_agents_bulk_unenroll_request, 'path'),
+    ...getShapeAt(post_fleet_agents_bulk_unenroll_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agents_bulk_unenroll_response,
 };
 const POST_FLEET_AGENTS_BULK_UPDATE_AGENT_TAGS_CONTRACT: InternalConnectorContract = {
@@ -8443,11 +8681,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['agents', 'batchSize', 'includeInactive', 'tagsToAdd', 'tagsToRemove'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_update_agent_tags_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_update_agent_tags_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_update_agent_tags_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agents_bulk_update_agent_tags_request, 'body'),
+    ...getShapeAt(post_fleet_agents_bulk_update_agent_tags_request, 'path'),
+    ...getShapeAt(post_fleet_agents_bulk_update_agent_tags_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agents_bulk_update_agent_tags_response,
 };
 const POST_FLEET_AGENTS_BULK_UPGRADE_CONTRACT: InternalConnectorContract = {
@@ -8480,11 +8719,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       'version',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_upgrade_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_upgrade_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agents_bulk_upgrade_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agents_bulk_upgrade_request, 'body'),
+    ...getShapeAt(post_fleet_agents_bulk_upgrade_request, 'path'),
+    ...getShapeAt(post_fleet_agents_bulk_upgrade_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agents_bulk_upgrade_response,
 };
 const DELETE_FLEET_AGENTS_FILES_FILEID_CONTRACT: InternalConnectorContract = {
@@ -8507,11 +8747,12 @@ Delete a file uploaded by an agent.<br/><br/>[Required authorization] Route requ
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_fleet_agents_files_fileid_request, 'body'),
-    getZodLooseObjectFromProperty(delete_fleet_agents_files_fileid_request, 'path'),
-    getZodLooseObjectFromProperty(delete_fleet_agents_files_fileid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_fleet_agents_files_fileid_request, 'body'),
+    ...getShapeAt(delete_fleet_agents_files_fileid_request, 'path'),
+    ...getShapeAt(delete_fleet_agents_files_fileid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_fleet_agents_files_fileid_response,
 };
 const GET_FLEET_AGENTS_FILES_FILEID_FILENAME_CONTRACT: InternalConnectorContract = {
@@ -8534,11 +8775,12 @@ Get a file uploaded by an agent.<br/><br/>[Required authorization] Route require
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agents_files_fileid_filename_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agents_files_fileid_filename_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agents_files_fileid_filename_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agents_files_fileid_filename_request, 'body'),
+    ...getShapeAt(get_fleet_agents_files_fileid_filename_request, 'path'),
+    ...getShapeAt(get_fleet_agents_files_fileid_filename_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agents_files_fileid_filename_response,
 };
 const GET_FLEET_AGENTS_SETUP_CONTRACT: InternalConnectorContract = {
@@ -8561,11 +8803,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agents_setup_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agents_setup_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agents_setup_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agents_setup_request, 'body'),
+    ...getShapeAt(get_fleet_agents_setup_request, 'path'),
+    ...getShapeAt(get_fleet_agents_setup_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agents_setup_response,
 };
 const POST_FLEET_AGENTS_SETUP_CONTRACT: InternalConnectorContract = {
@@ -8588,11 +8831,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_agents_setup_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_agents_setup_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_agents_setup_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_agents_setup_request, 'body'),
+    ...getShapeAt(post_fleet_agents_setup_request, 'path'),
+    ...getShapeAt(post_fleet_agents_setup_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_agents_setup_response,
 };
 const GET_FLEET_AGENTS_TAGS_CONTRACT: InternalConnectorContract = {
@@ -8615,11 +8859,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['kuery', 'showInactive'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_agents_tags_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_agents_tags_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_agents_tags_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_agents_tags_request, 'body'),
+    ...getShapeAt(get_fleet_agents_tags_request, 'path'),
+    ...getShapeAt(get_fleet_agents_tags_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_agents_tags_response,
 };
 const GET_FLEET_CHECK_PERMISSIONS_CONTRACT: InternalConnectorContract = {
@@ -8640,11 +8885,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['fleetServerSetup'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_check_permissions_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_check_permissions_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_check_permissions_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_check_permissions_request, 'body'),
+    ...getShapeAt(get_fleet_check_permissions_request, 'path'),
+    ...getShapeAt(get_fleet_check_permissions_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_check_permissions_response,
 };
 const GET_FLEET_CLOUD_CONNECTORS_CONTRACT: InternalConnectorContract = {
@@ -8667,11 +8913,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['page', 'perPage', 'kuery'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_cloud_connectors_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_cloud_connectors_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_cloud_connectors_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_cloud_connectors_request, 'body'),
+    ...getShapeAt(get_fleet_cloud_connectors_request, 'path'),
+    ...getShapeAt(get_fleet_cloud_connectors_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_cloud_connectors_response,
 };
 const POST_FLEET_CLOUD_CONNECTORS_CONTRACT: InternalConnectorContract = {
@@ -8694,11 +8941,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['cloudProvider', 'name', 'vars'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_cloud_connectors_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_cloud_connectors_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_cloud_connectors_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_cloud_connectors_request, 'body'),
+    ...getShapeAt(post_fleet_cloud_connectors_request, 'path'),
+    ...getShapeAt(post_fleet_cloud_connectors_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_cloud_connectors_response,
 };
 const DELETE_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT: InternalConnectorContract = {
@@ -8721,11 +8969,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['force'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_fleet_cloud_connectors_cloudconnectorid_request, 'body'),
-    getZodLooseObjectFromProperty(delete_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
-    getZodLooseObjectFromProperty(delete_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_fleet_cloud_connectors_cloudconnectorid_request, 'body'),
+    ...getShapeAt(delete_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
+    ...getShapeAt(delete_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_fleet_cloud_connectors_cloudconnectorid_response,
 };
 const GET_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT: InternalConnectorContract = {
@@ -8748,11 +8997,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_cloud_connectors_cloudconnectorid_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_cloud_connectors_cloudconnectorid_request, 'body'),
+    ...getShapeAt(get_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
+    ...getShapeAt(get_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_cloud_connectors_cloudconnectorid_response,
 };
 const PUT_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT: InternalConnectorContract = {
@@ -8775,11 +9025,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['name', 'vars'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_fleet_cloud_connectors_cloudconnectorid_request, 'body'),
-    getZodLooseObjectFromProperty(put_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
-    getZodLooseObjectFromProperty(put_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_fleet_cloud_connectors_cloudconnectorid_request, 'body'),
+    ...getShapeAt(put_fleet_cloud_connectors_cloudconnectorid_request, 'path'),
+    ...getShapeAt(put_fleet_cloud_connectors_cloudconnectorid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_fleet_cloud_connectors_cloudconnectorid_response,
 };
 const GET_FLEET_DATA_STREAMS_CONTRACT: InternalConnectorContract = {
@@ -8802,11 +9053,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_data_streams_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_data_streams_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_data_streams_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_data_streams_request, 'body'),
+    ...getShapeAt(get_fleet_data_streams_request, 'path'),
+    ...getShapeAt(get_fleet_data_streams_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_data_streams_response,
 };
 const GET_FLEET_ENROLLMENT_API_KEYS_CONTRACT: InternalConnectorContract = {
@@ -8829,11 +9081,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['page', 'perPage', 'kuery'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_enrollment_api_keys_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_enrollment_api_keys_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_enrollment_api_keys_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_enrollment_api_keys_request, 'body'),
+    ...getShapeAt(get_fleet_enrollment_api_keys_request, 'path'),
+    ...getShapeAt(get_fleet_enrollment_api_keys_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_enrollment_api_keys_response,
 };
 const POST_FLEET_ENROLLMENT_API_KEYS_CONTRACT: InternalConnectorContract = {
@@ -8856,11 +9109,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['expiration', 'name', 'policy_id'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_enrollment_api_keys_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_enrollment_api_keys_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_enrollment_api_keys_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_enrollment_api_keys_request, 'body'),
+    ...getShapeAt(post_fleet_enrollment_api_keys_request, 'path'),
+    ...getShapeAt(post_fleet_enrollment_api_keys_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_enrollment_api_keys_response,
 };
 const DELETE_FLEET_ENROLLMENT_API_KEYS_KEYID_CONTRACT: InternalConnectorContract = {
@@ -8883,11 +9137,12 @@ Revoke an enrollment API key by ID by marking it as inactive.<br/><br/>[Required
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_fleet_enrollment_api_keys_keyid_request, 'body'),
-    getZodLooseObjectFromProperty(delete_fleet_enrollment_api_keys_keyid_request, 'path'),
-    getZodLooseObjectFromProperty(delete_fleet_enrollment_api_keys_keyid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_fleet_enrollment_api_keys_keyid_request, 'body'),
+    ...getShapeAt(delete_fleet_enrollment_api_keys_keyid_request, 'path'),
+    ...getShapeAt(delete_fleet_enrollment_api_keys_keyid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_fleet_enrollment_api_keys_keyid_response,
 };
 const GET_FLEET_ENROLLMENT_API_KEYS_KEYID_CONTRACT: InternalConnectorContract = {
@@ -8910,11 +9165,12 @@ Get an enrollment API key by ID.<br/><br/>[Required authorization] Route require
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_enrollment_api_keys_keyid_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_enrollment_api_keys_keyid_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_enrollment_api_keys_keyid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_enrollment_api_keys_keyid_request, 'body'),
+    ...getShapeAt(get_fleet_enrollment_api_keys_keyid_request, 'path'),
+    ...getShapeAt(get_fleet_enrollment_api_keys_keyid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_enrollment_api_keys_keyid_response,
 };
 const POST_FLEET_EPM_BULK_ASSETS_CONTRACT: InternalConnectorContract = {
@@ -8937,11 +9193,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['assetIds'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_epm_bulk_assets_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_epm_bulk_assets_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_epm_bulk_assets_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_epm_bulk_assets_request, 'body'),
+    ...getShapeAt(post_fleet_epm_bulk_assets_request, 'path'),
+    ...getShapeAt(post_fleet_epm_bulk_assets_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_epm_bulk_assets_response,
 };
 const GET_FLEET_EPM_CATEGORIES_CONTRACT: InternalConnectorContract = {
@@ -8964,11 +9221,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['prerelease', 'include_policy_templates'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_epm_categories_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_epm_categories_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_epm_categories_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_epm_categories_request, 'body'),
+    ...getShapeAt(get_fleet_epm_categories_request, 'path'),
+    ...getShapeAt(get_fleet_epm_categories_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_epm_categories_response,
 };
 const POST_FLEET_EPM_CUSTOM_INTEGRATIONS_CONTRACT: InternalConnectorContract = {
@@ -8991,11 +9249,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['datasets', 'force', 'integrationName'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_epm_custom_integrations_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_epm_custom_integrations_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_epm_custom_integrations_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_epm_custom_integrations_request, 'body'),
+    ...getShapeAt(post_fleet_epm_custom_integrations_request, 'path'),
+    ...getShapeAt(post_fleet_epm_custom_integrations_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_epm_custom_integrations_response,
 };
 const PUT_FLEET_EPM_CUSTOM_INTEGRATIONS_PKGNAME_CONTRACT: InternalConnectorContract = {
@@ -9018,11 +9277,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['categories', 'readMeData'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_fleet_epm_custom_integrations_pkgname_request, 'body'),
-    getZodLooseObjectFromProperty(put_fleet_epm_custom_integrations_pkgname_request, 'path'),
-    getZodLooseObjectFromProperty(put_fleet_epm_custom_integrations_pkgname_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_fleet_epm_custom_integrations_pkgname_request, 'body'),
+    ...getShapeAt(put_fleet_epm_custom_integrations_pkgname_request, 'path'),
+    ...getShapeAt(put_fleet_epm_custom_integrations_pkgname_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_fleet_epm_custom_integrations_pkgname_response,
 };
 const GET_FLEET_EPM_DATA_STREAMS_CONTRACT: InternalConnectorContract = {
@@ -9045,11 +9305,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['type', 'datasetQuery', 'sortOrder', 'uncategorisedOnly'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_epm_data_streams_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_epm_data_streams_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_epm_data_streams_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_epm_data_streams_request, 'body'),
+    ...getShapeAt(get_fleet_epm_data_streams_request, 'path'),
+    ...getShapeAt(get_fleet_epm_data_streams_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_epm_data_streams_response,
 };
 const GET_FLEET_EPM_PACKAGES_CONTRACT: InternalConnectorContract = {
@@ -9072,11 +9333,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['category', 'prerelease', 'excludeInstallStatus', 'withPackagePoliciesCount'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_epm_packages_request, 'body'),
+    ...getShapeAt(get_fleet_epm_packages_request, 'path'),
+    ...getShapeAt(get_fleet_epm_packages_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_epm_packages_response,
 };
 const POST_FLEET_EPM_PACKAGES_CONTRACT: InternalConnectorContract = {
@@ -9099,11 +9361,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['ignoreMappingUpdateErrors', 'skipDataStreamRollover'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_epm_packages_request, 'body'),
+    ...getShapeAt(post_fleet_epm_packages_request, 'path'),
+    ...getShapeAt(post_fleet_epm_packages_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_epm_packages_response,
 };
 const POST_FLEET_EPM_PACKAGES_BULK_CONTRACT: InternalConnectorContract = {
@@ -9126,11 +9389,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['prerelease'],
     bodyParams: ['force', 'packages'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_epm_packages_bulk_request, 'body'),
+    ...getShapeAt(post_fleet_epm_packages_bulk_request, 'path'),
+    ...getShapeAt(post_fleet_epm_packages_bulk_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_epm_packages_bulk_response,
 };
 const POST_FLEET_EPM_PACKAGES_BULK_ROLLBACK_CONTRACT: InternalConnectorContract = {
@@ -9153,11 +9417,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['packages'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_rollback_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_rollback_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_rollback_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_epm_packages_bulk_rollback_request, 'body'),
+    ...getShapeAt(post_fleet_epm_packages_bulk_rollback_request, 'path'),
+    ...getShapeAt(post_fleet_epm_packages_bulk_rollback_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_epm_packages_bulk_rollback_response,
 };
 const GET_FLEET_EPM_PACKAGES_BULK_ROLLBACK_TASKID_CONTRACT: InternalConnectorContract = {
@@ -9180,11 +9445,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_rollback_taskid_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_rollback_taskid_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_rollback_taskid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_epm_packages_bulk_rollback_taskid_request, 'body'),
+    ...getShapeAt(get_fleet_epm_packages_bulk_rollback_taskid_request, 'path'),
+    ...getShapeAt(get_fleet_epm_packages_bulk_rollback_taskid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_epm_packages_bulk_rollback_taskid_response,
 };
 const POST_FLEET_EPM_PACKAGES_BULK_UNINSTALL_CONTRACT: InternalConnectorContract = {
@@ -9207,11 +9473,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['force', 'packages'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_uninstall_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_uninstall_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_uninstall_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_epm_packages_bulk_uninstall_request, 'body'),
+    ...getShapeAt(post_fleet_epm_packages_bulk_uninstall_request, 'path'),
+    ...getShapeAt(post_fleet_epm_packages_bulk_uninstall_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_epm_packages_bulk_uninstall_response,
 };
 const GET_FLEET_EPM_PACKAGES_BULK_UNINSTALL_TASKID_CONTRACT: InternalConnectorContract = {
@@ -9234,11 +9501,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'body'),
+    ...getShapeAt(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'path'),
+    ...getShapeAt(get_fleet_epm_packages_bulk_uninstall_taskid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_epm_packages_bulk_uninstall_taskid_response,
 };
 const POST_FLEET_EPM_PACKAGES_BULK_UPGRADE_CONTRACT: InternalConnectorContract = {
@@ -9261,11 +9529,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['force', 'packages', 'prerelease', 'upgrade_package_policies'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_upgrade_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_upgrade_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_bulk_upgrade_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_epm_packages_bulk_upgrade_request, 'body'),
+    ...getShapeAt(post_fleet_epm_packages_bulk_upgrade_request, 'path'),
+    ...getShapeAt(post_fleet_epm_packages_bulk_upgrade_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_epm_packages_bulk_upgrade_response,
 };
 const GET_FLEET_EPM_PACKAGES_BULK_UPGRADE_TASKID_CONTRACT: InternalConnectorContract = {
@@ -9288,11 +9557,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'body'),
+    ...getShapeAt(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'path'),
+    ...getShapeAt(get_fleet_epm_packages_bulk_upgrade_taskid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_epm_packages_bulk_upgrade_taskid_response,
 };
 const DELETE_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContract = {
@@ -9315,11 +9585,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['force'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
-    getZodLooseObjectFromProperty(delete_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
-    getZodLooseObjectFromProperty(delete_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
+    ...getShapeAt(delete_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
+    ...getShapeAt(delete_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_fleet_epm_packages_pkgname_pkgversion_response,
 };
 const GET_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContract = {
@@ -9340,11 +9611,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['ignoreUnverified', 'prerelease', 'full', 'withMetadata'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
+    ...getShapeAt(get_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
+    ...getShapeAt(get_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_epm_packages_pkgname_pkgversion_response,
 };
 const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContract = {
@@ -9367,11 +9639,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['prerelease', 'ignoreMappingUpdateErrors', 'skipDataStreamRollover'],
     bodyParams: ['force', 'ignore_constraints'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
+    ...getShapeAt(post_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
+    ...getShapeAt(post_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_epm_packages_pkgname_pkgversion_response,
 };
 const PUT_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContract = {
@@ -9394,11 +9667,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['keepPoliciesUpToDate'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
-    getZodLooseObjectFromProperty(put_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
-    getZodLooseObjectFromProperty(put_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_fleet_epm_packages_pkgname_pkgversion_request, 'body'),
+    ...getShapeAt(put_fleet_epm_packages_pkgname_pkgversion_request, 'path'),
+    ...getShapeAt(put_fleet_epm_packages_pkgname_pkgversion_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_fleet_epm_packages_pkgname_pkgversion_response,
 };
 const GET_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_FILEPATH_CONTRACT: InternalConnectorContract = {
@@ -9421,20 +9695,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(
-      get_fleet_epm_packages_pkgname_pkgversion_filepath_request,
-      'body'
-    ),
-    getZodLooseObjectFromProperty(
-      get_fleet_epm_packages_pkgname_pkgversion_filepath_request,
-      'path'
-    ),
-    getZodLooseObjectFromProperty(
-      get_fleet_epm_packages_pkgname_pkgversion_filepath_request,
-      'query'
-    ),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_epm_packages_pkgname_pkgversion_filepath_request, 'body'),
+    ...getShapeAt(get_fleet_epm_packages_pkgname_pkgversion_filepath_request, 'path'),
+    ...getShapeAt(get_fleet_epm_packages_pkgname_pkgversion_filepath_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_epm_packages_pkgname_pkgversion_filepath_response,
 };
 const DELETE_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_DATASTREAM_ASSETS_CONTRACT: InternalConnectorContract =
@@ -9458,20 +9724,15 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       urlParams: ['packagePolicyId'],
       bodyParams: [],
     },
-    paramsSchema: z.union([
-      getZodLooseObjectFromProperty(
-        delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_request,
-        'body'
-      ),
-      getZodLooseObjectFromProperty(
-        delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_request,
-        'path'
-      ),
-      getZodLooseObjectFromProperty(
+    paramsSchema: z.object({
+      ...getShapeAt(delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_request, 'body'),
+      ...getShapeAt(delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_request, 'path'),
+      ...getShapeAt(
         delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_request,
         'query'
       ),
-    ]),
+      fetcher: FetcherConfigSchema,
+    }),
     outputSchema: delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets_response,
   };
 const DELETE_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_KIBANA_ASSETS_CONTRACT: InternalConnectorContract =
@@ -9495,20 +9756,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       urlParams: [],
       bodyParams: [],
     },
-    paramsSchema: z.union([
-      getZodLooseObjectFromProperty(
-        delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
-        'body'
-      ),
-      getZodLooseObjectFromProperty(
-        delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
-        'path'
-      ),
-      getZodLooseObjectFromProperty(
-        delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
-        'query'
-      ),
-    ]),
+    paramsSchema: z.object({
+      ...getShapeAt(delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request, 'body'),
+      ...getShapeAt(delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request, 'path'),
+      ...getShapeAt(delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request, 'query'),
+      fetcher: FetcherConfigSchema,
+    }),
     outputSchema: delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets_response,
   };
 const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_KIBANA_ASSETS_CONTRACT: InternalConnectorContract =
@@ -9532,20 +9785,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       urlParams: [],
       bodyParams: ['force', 'space_ids'],
     },
-    paramsSchema: z.union([
-      getZodLooseObjectFromProperty(
-        post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
-        'body'
-      ),
-      getZodLooseObjectFromProperty(
-        post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
-        'path'
-      ),
-      getZodLooseObjectFromProperty(
-        post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request,
-        'query'
-      ),
-    ]),
+    paramsSchema: z.object({
+      ...getShapeAt(post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request, 'body'),
+      ...getShapeAt(post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request, 'path'),
+      ...getShapeAt(post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_request, 'query'),
+      fetcher: FetcherConfigSchema,
+    }),
     outputSchema: post_fleet_epm_packages_pkgname_pkgversion_kibana_assets_response,
   };
 const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_RULE_ASSETS_CONTRACT: InternalConnectorContract = {
@@ -9568,20 +9813,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['force'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(
-      post_fleet_epm_packages_pkgname_pkgversion_rule_assets_request,
-      'body'
-    ),
-    getZodLooseObjectFromProperty(
-      post_fleet_epm_packages_pkgname_pkgversion_rule_assets_request,
-      'path'
-    ),
-    getZodLooseObjectFromProperty(
-      post_fleet_epm_packages_pkgname_pkgversion_rule_assets_request,
-      'query'
-    ),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_epm_packages_pkgname_pkgversion_rule_assets_request, 'body'),
+    ...getShapeAt(post_fleet_epm_packages_pkgname_pkgversion_rule_assets_request, 'path'),
+    ...getShapeAt(post_fleet_epm_packages_pkgname_pkgversion_rule_assets_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_epm_packages_pkgname_pkgversion_rule_assets_response,
 };
 const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_TRANSFORMS_AUTHORIZE_CONTRACT: InternalConnectorContract =
@@ -9603,20 +9840,21 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       urlParams: ['prerelease'],
       bodyParams: ['transforms'],
     },
-    paramsSchema: z.union([
-      getZodLooseObjectFromProperty(
+    paramsSchema: z.object({
+      ...getShapeAt(
         post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_request,
         'body'
       ),
-      getZodLooseObjectFromProperty(
+      ...getShapeAt(
         post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_request,
         'path'
       ),
-      getZodLooseObjectFromProperty(
+      ...getShapeAt(
         post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_request,
         'query'
       ),
-    ]),
+      fetcher: FetcherConfigSchema,
+    }),
     outputSchema: post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize_response,
   };
 const POST_FLEET_EPM_PACKAGES_PKGNAME_ROLLBACK_CONTRACT: InternalConnectorContract = {
@@ -9639,11 +9877,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_pkgname_rollback_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_pkgname_rollback_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_epm_packages_pkgname_rollback_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_epm_packages_pkgname_rollback_request, 'body'),
+    ...getShapeAt(post_fleet_epm_packages_pkgname_rollback_request, 'path'),
+    ...getShapeAt(post_fleet_epm_packages_pkgname_rollback_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_epm_packages_pkgname_rollback_response,
 };
 const GET_FLEET_EPM_PACKAGES_PKGNAME_STATS_CONTRACT: InternalConnectorContract = {
@@ -9666,11 +9905,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_pkgname_stats_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_pkgname_stats_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_pkgname_stats_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_epm_packages_pkgname_stats_request, 'body'),
+    ...getShapeAt(get_fleet_epm_packages_pkgname_stats_request, 'path'),
+    ...getShapeAt(get_fleet_epm_packages_pkgname_stats_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_epm_packages_pkgname_stats_response,
 };
 const GET_FLEET_EPM_PACKAGES_INSTALLED_CONTRACT: InternalConnectorContract = {
@@ -9700,11 +9940,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_installed_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_installed_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_installed_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_epm_packages_installed_request, 'body'),
+    ...getShapeAt(get_fleet_epm_packages_installed_request, 'path'),
+    ...getShapeAt(get_fleet_epm_packages_installed_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_epm_packages_installed_response,
 };
 const GET_FLEET_EPM_PACKAGES_LIMITED_CONTRACT: InternalConnectorContract = {
@@ -9727,11 +9968,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_limited_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_limited_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_epm_packages_limited_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_epm_packages_limited_request, 'body'),
+    ...getShapeAt(get_fleet_epm_packages_limited_request, 'path'),
+    ...getShapeAt(get_fleet_epm_packages_limited_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_epm_packages_limited_response,
 };
 const GET_FLEET_EPM_TEMPLATES_PKGNAME_PKGVERSION_INPUTS_CONTRACT: InternalConnectorContract = {
@@ -9754,20 +9996,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['format', 'prerelease', 'ignoreUnverified'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(
-      get_fleet_epm_templates_pkgname_pkgversion_inputs_request,
-      'body'
-    ),
-    getZodLooseObjectFromProperty(
-      get_fleet_epm_templates_pkgname_pkgversion_inputs_request,
-      'path'
-    ),
-    getZodLooseObjectFromProperty(
-      get_fleet_epm_templates_pkgname_pkgversion_inputs_request,
-      'query'
-    ),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_epm_templates_pkgname_pkgversion_inputs_request, 'body'),
+    ...getShapeAt(get_fleet_epm_templates_pkgname_pkgversion_inputs_request, 'path'),
+    ...getShapeAt(get_fleet_epm_templates_pkgname_pkgversion_inputs_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_epm_templates_pkgname_pkgversion_inputs_response,
 };
 const GET_FLEET_EPM_VERIFICATION_KEY_ID_CONTRACT: InternalConnectorContract = {
@@ -9790,11 +10024,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_epm_verification_key_id_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_epm_verification_key_id_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_epm_verification_key_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_epm_verification_key_id_request, 'body'),
+    ...getShapeAt(get_fleet_epm_verification_key_id_request, 'path'),
+    ...getShapeAt(get_fleet_epm_verification_key_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_epm_verification_key_id_response,
 };
 const GET_FLEET_FLEET_SERVER_HOSTS_CONTRACT: InternalConnectorContract = {
@@ -9817,11 +10052,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_fleet_server_hosts_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_fleet_server_hosts_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_fleet_server_hosts_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_fleet_server_hosts_request, 'body'),
+    ...getShapeAt(get_fleet_fleet_server_hosts_request, 'path'),
+    ...getShapeAt(get_fleet_fleet_server_hosts_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_fleet_server_hosts_response,
 };
 const POST_FLEET_FLEET_SERVER_HOSTS_CONTRACT: InternalConnectorContract = {
@@ -9854,11 +10090,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       'ssl',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_fleet_server_hosts_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_fleet_server_hosts_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_fleet_server_hosts_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_fleet_server_hosts_request, 'body'),
+    ...getShapeAt(post_fleet_fleet_server_hosts_request, 'path'),
+    ...getShapeAt(post_fleet_fleet_server_hosts_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_fleet_server_hosts_response,
 };
 const DELETE_FLEET_FLEET_SERVER_HOSTS_ITEMID_CONTRACT: InternalConnectorContract = {
@@ -9881,11 +10118,12 @@ Delete a Fleet Server host by ID.<br/><br/>[Required authorization] Route requir
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_fleet_fleet_server_hosts_itemid_request, 'body'),
-    getZodLooseObjectFromProperty(delete_fleet_fleet_server_hosts_itemid_request, 'path'),
-    getZodLooseObjectFromProperty(delete_fleet_fleet_server_hosts_itemid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_fleet_fleet_server_hosts_itemid_request, 'body'),
+    ...getShapeAt(delete_fleet_fleet_server_hosts_itemid_request, 'path'),
+    ...getShapeAt(delete_fleet_fleet_server_hosts_itemid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_fleet_fleet_server_hosts_itemid_response,
 };
 const GET_FLEET_FLEET_SERVER_HOSTS_ITEMID_CONTRACT: InternalConnectorContract = {
@@ -9908,11 +10146,12 @@ Get a Fleet Server host by ID.<br/><br/>[Required authorization] Route required 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_fleet_server_hosts_itemid_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_fleet_server_hosts_itemid_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_fleet_server_hosts_itemid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_fleet_server_hosts_itemid_request, 'body'),
+    ...getShapeAt(get_fleet_fleet_server_hosts_itemid_request, 'path'),
+    ...getShapeAt(get_fleet_fleet_server_hosts_itemid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_fleet_server_hosts_itemid_response,
 };
 const PUT_FLEET_FLEET_SERVER_HOSTS_ITEMID_CONTRACT: InternalConnectorContract = {
@@ -9935,11 +10174,12 @@ Update a Fleet Server host by ID.<br/><br/>[Required authorization] Route requir
     urlParams: [],
     bodyParams: ['host_urls', 'is_default', 'is_internal', 'name', 'proxy_id', 'secrets', 'ssl'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_fleet_fleet_server_hosts_itemid_request, 'body'),
-    getZodLooseObjectFromProperty(put_fleet_fleet_server_hosts_itemid_request, 'path'),
-    getZodLooseObjectFromProperty(put_fleet_fleet_server_hosts_itemid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_fleet_fleet_server_hosts_itemid_request, 'body'),
+    ...getShapeAt(put_fleet_fleet_server_hosts_itemid_request, 'path'),
+    ...getShapeAt(put_fleet_fleet_server_hosts_itemid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_fleet_fleet_server_hosts_itemid_response,
 };
 const POST_FLEET_HEALTH_CHECK_CONTRACT: InternalConnectorContract = {
@@ -9962,11 +10202,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['id'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_health_check_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_health_check_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_health_check_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_health_check_request, 'body'),
+    ...getShapeAt(post_fleet_health_check_request, 'path'),
+    ...getShapeAt(post_fleet_health_check_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_health_check_response,
 };
 const GET_FLEET_KUBERNETES_CONTRACT: InternalConnectorContract = {
@@ -9989,11 +10230,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['download', 'fleetServer', 'enrolToken'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_kubernetes_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_kubernetes_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_kubernetes_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_kubernetes_request, 'body'),
+    ...getShapeAt(get_fleet_kubernetes_request, 'path'),
+    ...getShapeAt(get_fleet_kubernetes_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_kubernetes_response,
 };
 const GET_FLEET_KUBERNETES_DOWNLOAD_CONTRACT: InternalConnectorContract = {
@@ -10016,11 +10258,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['download', 'fleetServer', 'enrolToken'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_kubernetes_download_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_kubernetes_download_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_kubernetes_download_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_kubernetes_download_request, 'body'),
+    ...getShapeAt(get_fleet_kubernetes_download_request, 'path'),
+    ...getShapeAt(get_fleet_kubernetes_download_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_kubernetes_download_response,
 };
 const POST_FLEET_LOGSTASH_API_KEYS_CONTRACT: InternalConnectorContract = {
@@ -10043,11 +10286,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_logstash_api_keys_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_logstash_api_keys_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_logstash_api_keys_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_logstash_api_keys_request, 'body'),
+    ...getShapeAt(post_fleet_logstash_api_keys_request, 'path'),
+    ...getShapeAt(post_fleet_logstash_api_keys_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_logstash_api_keys_response,
 };
 const POST_FLEET_MESSAGE_SIGNING_SERVICE_ROTATE_KEY_PAIR_CONTRACT: InternalConnectorContract = {
@@ -10070,20 +10314,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['acknowledge'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(
-      post_fleet_message_signing_service_rotate_key_pair_request,
-      'body'
-    ),
-    getZodLooseObjectFromProperty(
-      post_fleet_message_signing_service_rotate_key_pair_request,
-      'path'
-    ),
-    getZodLooseObjectFromProperty(
-      post_fleet_message_signing_service_rotate_key_pair_request,
-      'query'
-    ),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_message_signing_service_rotate_key_pair_request, 'body'),
+    ...getShapeAt(post_fleet_message_signing_service_rotate_key_pair_request, 'path'),
+    ...getShapeAt(post_fleet_message_signing_service_rotate_key_pair_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_message_signing_service_rotate_key_pair_response,
 };
 const GET_FLEET_OUTPUTS_CONTRACT: InternalConnectorContract = {
@@ -10106,11 +10342,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_outputs_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_outputs_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_outputs_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_outputs_request, 'body'),
+    ...getShapeAt(get_fleet_outputs_request, 'path'),
+    ...getShapeAt(get_fleet_outputs_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_outputs_response,
 };
 const POST_FLEET_OUTPUTS_CONTRACT: InternalConnectorContract = {
@@ -10133,11 +10370,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_outputs_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_outputs_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_outputs_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_outputs_request, 'body'),
+    ...getShapeAt(post_fleet_outputs_request, 'path'),
+    ...getShapeAt(post_fleet_outputs_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_outputs_response,
 };
 const DELETE_FLEET_OUTPUTS_OUTPUTID_CONTRACT: InternalConnectorContract = {
@@ -10160,11 +10398,12 @@ Delete output by ID.<br/><br/>[Required authorization] Route required privileges
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_fleet_outputs_outputid_request, 'body'),
-    getZodLooseObjectFromProperty(delete_fleet_outputs_outputid_request, 'path'),
-    getZodLooseObjectFromProperty(delete_fleet_outputs_outputid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_fleet_outputs_outputid_request, 'body'),
+    ...getShapeAt(delete_fleet_outputs_outputid_request, 'path'),
+    ...getShapeAt(delete_fleet_outputs_outputid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_fleet_outputs_outputid_response,
 };
 const GET_FLEET_OUTPUTS_OUTPUTID_CONTRACT: InternalConnectorContract = {
@@ -10187,11 +10426,12 @@ Get output by ID.<br/><br/>[Required authorization] Route required privileges: f
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_outputs_outputid_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_outputs_outputid_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_outputs_outputid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_outputs_outputid_request, 'body'),
+    ...getShapeAt(get_fleet_outputs_outputid_request, 'path'),
+    ...getShapeAt(get_fleet_outputs_outputid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_outputs_outputid_response,
 };
 const PUT_FLEET_OUTPUTS_OUTPUTID_CONTRACT: InternalConnectorContract = {
@@ -10214,11 +10454,12 @@ Update output by ID.<br/><br/>[Required authorization] Route required privileges
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_fleet_outputs_outputid_request, 'body'),
-    getZodLooseObjectFromProperty(put_fleet_outputs_outputid_request, 'path'),
-    getZodLooseObjectFromProperty(put_fleet_outputs_outputid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_fleet_outputs_outputid_request, 'body'),
+    ...getShapeAt(put_fleet_outputs_outputid_request, 'path'),
+    ...getShapeAt(put_fleet_outputs_outputid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_fleet_outputs_outputid_response,
 };
 const GET_FLEET_OUTPUTS_OUTPUTID_HEALTH_CONTRACT: InternalConnectorContract = {
@@ -10241,11 +10482,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_outputs_outputid_health_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_outputs_outputid_health_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_outputs_outputid_health_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_outputs_outputid_health_request, 'body'),
+    ...getShapeAt(get_fleet_outputs_outputid_health_request, 'path'),
+    ...getShapeAt(get_fleet_outputs_outputid_health_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_outputs_outputid_health_response,
 };
 const GET_FLEET_PACKAGE_POLICIES_CONTRACT: InternalConnectorContract = {
@@ -10275,11 +10517,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_package_policies_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_package_policies_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_package_policies_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_package_policies_request, 'body'),
+    ...getShapeAt(get_fleet_package_policies_request, 'path'),
+    ...getShapeAt(get_fleet_package_policies_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_package_policies_response,
 };
 const POST_FLEET_PACKAGE_POLICIES_CONTRACT: InternalConnectorContract = {
@@ -10300,11 +10543,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['format'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_package_policies_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_package_policies_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_package_policies_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_package_policies_request, 'body'),
+    ...getShapeAt(post_fleet_package_policies_request, 'path'),
+    ...getShapeAt(post_fleet_package_policies_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_package_policies_response,
 };
 const POST_FLEET_PACKAGE_POLICIES_BULK_GET_CONTRACT: InternalConnectorContract = {
@@ -10325,11 +10569,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['format'],
     bodyParams: ['ids', 'ignoreMissing'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_package_policies_bulk_get_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_package_policies_bulk_get_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_package_policies_bulk_get_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_package_policies_bulk_get_request, 'body'),
+    ...getShapeAt(post_fleet_package_policies_bulk_get_request, 'path'),
+    ...getShapeAt(post_fleet_package_policies_bulk_get_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_package_policies_bulk_get_response,
 };
 const DELETE_FLEET_PACKAGE_POLICIES_PACKAGEPOLICYID_CONTRACT: InternalConnectorContract = {
@@ -10352,11 +10597,12 @@ Delete a package policy by ID.<br/><br/>[Required authorization] Route required 
     urlParams: ['force'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_fleet_package_policies_packagepolicyid_request, 'body'),
-    getZodLooseObjectFromProperty(delete_fleet_package_policies_packagepolicyid_request, 'path'),
-    getZodLooseObjectFromProperty(delete_fleet_package_policies_packagepolicyid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_fleet_package_policies_packagepolicyid_request, 'body'),
+    ...getShapeAt(delete_fleet_package_policies_packagepolicyid_request, 'path'),
+    ...getShapeAt(delete_fleet_package_policies_packagepolicyid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_fleet_package_policies_packagepolicyid_response,
 };
 const GET_FLEET_PACKAGE_POLICIES_PACKAGEPOLICYID_CONTRACT: InternalConnectorContract = {
@@ -10379,11 +10625,12 @@ Get a package policy by ID.`,
     urlParams: ['format'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_package_policies_packagepolicyid_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_package_policies_packagepolicyid_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_package_policies_packagepolicyid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_package_policies_packagepolicyid_request, 'body'),
+    ...getShapeAt(get_fleet_package_policies_packagepolicyid_request, 'path'),
+    ...getShapeAt(get_fleet_package_policies_packagepolicyid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_package_policies_packagepolicyid_response,
 };
 const PUT_FLEET_PACKAGE_POLICIES_PACKAGEPOLICYID_CONTRACT: InternalConnectorContract = {
@@ -10406,11 +10653,12 @@ Update a package policy by ID.`,
     urlParams: ['format'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_fleet_package_policies_packagepolicyid_request, 'body'),
-    getZodLooseObjectFromProperty(put_fleet_package_policies_packagepolicyid_request, 'path'),
-    getZodLooseObjectFromProperty(put_fleet_package_policies_packagepolicyid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_fleet_package_policies_packagepolicyid_request, 'body'),
+    ...getShapeAt(put_fleet_package_policies_packagepolicyid_request, 'path'),
+    ...getShapeAt(put_fleet_package_policies_packagepolicyid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_fleet_package_policies_packagepolicyid_response,
 };
 const POST_FLEET_PACKAGE_POLICIES_DELETE_CONTRACT: InternalConnectorContract = {
@@ -10433,11 +10681,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['force', 'packagePolicyIds'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_package_policies_delete_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_package_policies_delete_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_package_policies_delete_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_package_policies_delete_request, 'body'),
+    ...getShapeAt(post_fleet_package_policies_delete_request, 'path'),
+    ...getShapeAt(post_fleet_package_policies_delete_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_package_policies_delete_response,
 };
 const POST_FLEET_PACKAGE_POLICIES_UPGRADE_CONTRACT: InternalConnectorContract = {
@@ -10460,11 +10709,12 @@ Upgrade a package policy to a newer package version.<br/><br/>[Required authoriz
     urlParams: [],
     bodyParams: ['packagePolicyIds'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_package_policies_upgrade_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_package_policies_upgrade_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_package_policies_upgrade_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_package_policies_upgrade_request, 'body'),
+    ...getShapeAt(post_fleet_package_policies_upgrade_request, 'path'),
+    ...getShapeAt(post_fleet_package_policies_upgrade_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_package_policies_upgrade_response,
 };
 const POST_FLEET_PACKAGE_POLICIES_UPGRADE_DRYRUN_CONTRACT: InternalConnectorContract = {
@@ -10487,11 +10737,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['packagePolicyIds', 'packageVersion'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_package_policies_upgrade_dryrun_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_package_policies_upgrade_dryrun_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_package_policies_upgrade_dryrun_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_package_policies_upgrade_dryrun_request, 'body'),
+    ...getShapeAt(post_fleet_package_policies_upgrade_dryrun_request, 'path'),
+    ...getShapeAt(post_fleet_package_policies_upgrade_dryrun_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_package_policies_upgrade_dryrun_response,
 };
 const GET_FLEET_PROXIES_CONTRACT: InternalConnectorContract = {
@@ -10514,11 +10765,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_proxies_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_proxies_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_proxies_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_proxies_request, 'body'),
+    ...getShapeAt(get_fleet_proxies_request, 'path'),
+    ...getShapeAt(get_fleet_proxies_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_proxies_response,
 };
 const POST_FLEET_PROXIES_CONTRACT: InternalConnectorContract = {
@@ -10550,11 +10802,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       'url',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_proxies_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_proxies_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_proxies_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_proxies_request, 'body'),
+    ...getShapeAt(post_fleet_proxies_request, 'path'),
+    ...getShapeAt(post_fleet_proxies_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_proxies_response,
 };
 const DELETE_FLEET_PROXIES_ITEMID_CONTRACT: InternalConnectorContract = {
@@ -10577,11 +10830,12 @@ Delete a proxy by ID<br/><br/>[Required authorization] Route required privileges
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_fleet_proxies_itemid_request, 'body'),
-    getZodLooseObjectFromProperty(delete_fleet_proxies_itemid_request, 'path'),
-    getZodLooseObjectFromProperty(delete_fleet_proxies_itemid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_fleet_proxies_itemid_request, 'body'),
+    ...getShapeAt(delete_fleet_proxies_itemid_request, 'path'),
+    ...getShapeAt(delete_fleet_proxies_itemid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_fleet_proxies_itemid_response,
 };
 const GET_FLEET_PROXIES_ITEMID_CONTRACT: InternalConnectorContract = {
@@ -10604,11 +10858,12 @@ Get a proxy by ID.<br/><br/>[Required authorization] Route required privileges: 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_proxies_itemid_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_proxies_itemid_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_proxies_itemid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_proxies_itemid_request, 'body'),
+    ...getShapeAt(get_fleet_proxies_itemid_request, 'path'),
+    ...getShapeAt(get_fleet_proxies_itemid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_proxies_itemid_response,
 };
 const PUT_FLEET_PROXIES_ITEMID_CONTRACT: InternalConnectorContract = {
@@ -10638,11 +10893,12 @@ Update a proxy by ID.<br/><br/>[Required authorization] Route required privilege
       'url',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_fleet_proxies_itemid_request, 'body'),
-    getZodLooseObjectFromProperty(put_fleet_proxies_itemid_request, 'path'),
-    getZodLooseObjectFromProperty(put_fleet_proxies_itemid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_fleet_proxies_itemid_request, 'body'),
+    ...getShapeAt(put_fleet_proxies_itemid_request, 'path'),
+    ...getShapeAt(put_fleet_proxies_itemid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_fleet_proxies_itemid_response,
 };
 const GET_FLEET_REMOTE_SYNCED_INTEGRATIONS_OUTPUTID_REMOTE_STATUS_CONTRACT: InternalConnectorContract =
@@ -10666,20 +10922,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       urlParams: [],
       bodyParams: [],
     },
-    paramsSchema: z.union([
-      getZodLooseObjectFromProperty(
-        get_fleet_remote_synced_integrations_outputid_remote_status_request,
-        'body'
-      ),
-      getZodLooseObjectFromProperty(
-        get_fleet_remote_synced_integrations_outputid_remote_status_request,
-        'path'
-      ),
-      getZodLooseObjectFromProperty(
-        get_fleet_remote_synced_integrations_outputid_remote_status_request,
-        'query'
-      ),
-    ]),
+    paramsSchema: z.object({
+      ...getShapeAt(get_fleet_remote_synced_integrations_outputid_remote_status_request, 'body'),
+      ...getShapeAt(get_fleet_remote_synced_integrations_outputid_remote_status_request, 'path'),
+      ...getShapeAt(get_fleet_remote_synced_integrations_outputid_remote_status_request, 'query'),
+      fetcher: FetcherConfigSchema,
+    }),
     outputSchema: get_fleet_remote_synced_integrations_outputid_remote_status_response,
   };
 const GET_FLEET_REMOTE_SYNCED_INTEGRATIONS_STATUS_CONTRACT: InternalConnectorContract = {
@@ -10702,11 +10950,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_remote_synced_integrations_status_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_remote_synced_integrations_status_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_remote_synced_integrations_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_remote_synced_integrations_status_request, 'body'),
+    ...getShapeAt(get_fleet_remote_synced_integrations_status_request, 'path'),
+    ...getShapeAt(get_fleet_remote_synced_integrations_status_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_remote_synced_integrations_status_response,
 };
 const POST_FLEET_SERVICE_TOKENS_CONTRACT: InternalConnectorContract = {
@@ -10729,11 +10978,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['remote'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_service_tokens_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_service_tokens_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_service_tokens_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_service_tokens_request, 'body'),
+    ...getShapeAt(post_fleet_service_tokens_request, 'path'),
+    ...getShapeAt(post_fleet_service_tokens_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_service_tokens_response,
 };
 const GET_FLEET_SETTINGS_CONTRACT: InternalConnectorContract = {
@@ -10756,11 +11006,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_settings_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_settings_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_settings_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_settings_request, 'body'),
+    ...getShapeAt(get_fleet_settings_request, 'path'),
+    ...getShapeAt(get_fleet_settings_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_settings_response,
 };
 const PUT_FLEET_SETTINGS_CONTRACT: InternalConnectorContract = {
@@ -10790,11 +11041,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
       'prerelease_integrations_enabled',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_fleet_settings_request, 'body'),
-    getZodLooseObjectFromProperty(put_fleet_settings_request, 'path'),
-    getZodLooseObjectFromProperty(put_fleet_settings_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_fleet_settings_request, 'body'),
+    ...getShapeAt(put_fleet_settings_request, 'path'),
+    ...getShapeAt(put_fleet_settings_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_fleet_settings_response,
 };
 const POST_FLEET_SETUP_CONTRACT: InternalConnectorContract = {
@@ -10817,11 +11069,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_fleet_setup_request, 'body'),
-    getZodLooseObjectFromProperty(post_fleet_setup_request, 'path'),
-    getZodLooseObjectFromProperty(post_fleet_setup_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_fleet_setup_request, 'body'),
+    ...getShapeAt(post_fleet_setup_request, 'path'),
+    ...getShapeAt(post_fleet_setup_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_fleet_setup_response,
 };
 const GET_FLEET_SPACE_SETTINGS_CONTRACT: InternalConnectorContract = {
@@ -10842,11 +11095,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_space_settings_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_space_settings_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_space_settings_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_space_settings_request, 'body'),
+    ...getShapeAt(get_fleet_space_settings_request, 'path'),
+    ...getShapeAt(get_fleet_space_settings_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_space_settings_response,
 };
 const PUT_FLEET_SPACE_SETTINGS_CONTRACT: InternalConnectorContract = {
@@ -10869,11 +11123,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['allowed_namespace_prefixes'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_fleet_space_settings_request, 'body'),
-    getZodLooseObjectFromProperty(put_fleet_space_settings_request, 'path'),
-    getZodLooseObjectFromProperty(put_fleet_space_settings_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_fleet_space_settings_request, 'body'),
+    ...getShapeAt(put_fleet_space_settings_request, 'path'),
+    ...getShapeAt(put_fleet_space_settings_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_fleet_space_settings_response,
 };
 const GET_FLEET_UNINSTALL_TOKENS_CONTRACT: InternalConnectorContract = {
@@ -10896,11 +11151,12 @@ List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Re
     urlParams: ['policyId', 'search', 'perPage', 'page'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_uninstall_tokens_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_uninstall_tokens_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_uninstall_tokens_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_uninstall_tokens_request, 'body'),
+    ...getShapeAt(get_fleet_uninstall_tokens_request, 'path'),
+    ...getShapeAt(get_fleet_uninstall_tokens_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_uninstall_tokens_response,
 };
 const GET_FLEET_UNINSTALL_TOKENS_UNINSTALLTOKENID_CONTRACT: InternalConnectorContract = {
@@ -10923,11 +11179,12 @@ Get one decrypted uninstall token by its ID.<br/><br/>[Required authorization] R
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_fleet_uninstall_tokens_uninstalltokenid_request, 'body'),
-    getZodLooseObjectFromProperty(get_fleet_uninstall_tokens_uninstalltokenid_request, 'path'),
-    getZodLooseObjectFromProperty(get_fleet_uninstall_tokens_uninstalltokenid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_fleet_uninstall_tokens_uninstalltokenid_request, 'body'),
+    ...getShapeAt(get_fleet_uninstall_tokens_uninstalltokenid_request, 'path'),
+    ...getShapeAt(get_fleet_uninstall_tokens_uninstalltokenid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_fleet_uninstall_tokens_uninstalltokenid_response,
 };
 const DELETELIST_CONTRACT: InternalConnectorContract = {
@@ -10953,11 +11210,12 @@ Delete a value list using the list ID.
     urlParams: ['id', 'deleteReferences', 'ignoreReferences'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_list_request, 'body'),
-    getZodLooseObjectFromProperty(delete_list_request, 'path'),
-    getZodLooseObjectFromProperty(delete_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_list_request, 'body'),
+    ...getShapeAt(delete_list_request, 'path'),
+    ...getShapeAt(delete_list_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_list_response,
 };
 const READLIST_CONTRACT: InternalConnectorContract = {
@@ -10980,11 +11238,12 @@ Get the details of a value list using the list ID.`,
     urlParams: ['id'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_list_request, 'body'),
-    getZodLooseObjectFromProperty(read_list_request, 'path'),
-    getZodLooseObjectFromProperty(read_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_list_request, 'body'),
+    ...getShapeAt(read_list_request, 'path'),
+    ...getShapeAt(read_list_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_list_response,
 };
 const PATCHLIST_CONTRACT: InternalConnectorContract = {
@@ -11007,11 +11266,12 @@ Update specific fields of an existing list using the list \`id\`.`,
     urlParams: [],
     bodyParams: ['_version', 'description', 'id', 'meta', 'name', 'version'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(patch_list_request, 'body'),
-    getZodLooseObjectFromProperty(patch_list_request, 'path'),
-    getZodLooseObjectFromProperty(patch_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(patch_list_request, 'body'),
+    ...getShapeAt(patch_list_request, 'path'),
+    ...getShapeAt(patch_list_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: patch_list_response,
 };
 const CREATELIST_CONTRACT: InternalConnectorContract = {
@@ -11043,11 +11303,12 @@ Create a new value list.`,
       'version',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_list_request, 'body'),
-    getZodLooseObjectFromProperty(create_list_request, 'path'),
-    getZodLooseObjectFromProperty(create_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_list_request, 'body'),
+    ...getShapeAt(create_list_request, 'path'),
+    ...getShapeAt(create_list_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_list_response,
 };
 const UPDATELIST_CONTRACT: InternalConnectorContract = {
@@ -11073,11 +11334,12 @@ Update a value list using the list \`id\`. The original list is replaced, and al
     urlParams: [],
     bodyParams: ['_version', 'description', 'id', 'meta', 'name', 'version'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_list_request, 'body'),
-    getZodLooseObjectFromProperty(update_list_request, 'path'),
-    getZodLooseObjectFromProperty(update_list_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_list_request, 'body'),
+    ...getShapeAt(update_list_request, 'path'),
+    ...getShapeAt(update_list_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_list_response,
 };
 const FINDLISTS_CONTRACT: InternalConnectorContract = {
@@ -11100,11 +11362,12 @@ Get a paginated subset of value lists. By default, the first page is returned, w
     urlParams: ['page', 'per_page', 'sort_field', 'sort_order', 'cursor', 'filter'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_lists_request, 'body'),
-    getZodLooseObjectFromProperty(find_lists_request, 'path'),
-    getZodLooseObjectFromProperty(find_lists_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_lists_request, 'body'),
+    ...getShapeAt(find_lists_request, 'path'),
+    ...getShapeAt(find_lists_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_lists_response,
 };
 const DELETELISTINDEX_CONTRACT: InternalConnectorContract = {
@@ -11127,11 +11390,12 @@ Delete the \`.lists\` and \`.items\` data streams.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_list_index_request, 'body'),
-    getZodLooseObjectFromProperty(delete_list_index_request, 'path'),
-    getZodLooseObjectFromProperty(delete_list_index_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_list_index_request, 'body'),
+    ...getShapeAt(delete_list_index_request, 'path'),
+    ...getShapeAt(delete_list_index_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_list_index_response,
 };
 const READLISTINDEX_CONTRACT: InternalConnectorContract = {
@@ -11154,11 +11418,12 @@ Verify that \`.lists\` and \`.items\` data streams exist.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_list_index_request, 'body'),
-    getZodLooseObjectFromProperty(read_list_index_request, 'path'),
-    getZodLooseObjectFromProperty(read_list_index_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_list_index_request, 'body'),
+    ...getShapeAt(read_list_index_request, 'path'),
+    ...getShapeAt(read_list_index_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_list_index_response,
 };
 const CREATELISTINDEX_CONTRACT: InternalConnectorContract = {
@@ -11181,11 +11446,12 @@ Create \`.lists\` and \`.items\` data streams in the relevant space.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_list_index_request, 'body'),
-    getZodLooseObjectFromProperty(create_list_index_request, 'path'),
-    getZodLooseObjectFromProperty(create_list_index_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_list_index_request, 'body'),
+    ...getShapeAt(create_list_index_request, 'path'),
+    ...getShapeAt(create_list_index_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_list_index_response,
 };
 const DELETELISTITEM_CONTRACT: InternalConnectorContract = {
@@ -11208,11 +11474,12 @@ Delete a value list item using its \`id\`, or its \`list_id\` and \`value\` fiel
     urlParams: ['id', 'list_id', 'value', 'refresh'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_list_item_request, 'body'),
-    getZodLooseObjectFromProperty(delete_list_item_request, 'path'),
-    getZodLooseObjectFromProperty(delete_list_item_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_list_item_request, 'body'),
+    ...getShapeAt(delete_list_item_request, 'path'),
+    ...getShapeAt(delete_list_item_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_list_item_response,
 };
 const READLISTITEM_CONTRACT: InternalConnectorContract = {
@@ -11235,11 +11502,12 @@ Get the details of a value list item.`,
     urlParams: ['id', 'list_id', 'value'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_list_item_request, 'body'),
-    getZodLooseObjectFromProperty(read_list_item_request, 'path'),
-    getZodLooseObjectFromProperty(read_list_item_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_list_item_request, 'body'),
+    ...getShapeAt(read_list_item_request, 'path'),
+    ...getShapeAt(read_list_item_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_list_item_response,
 };
 const PATCHLISTITEM_CONTRACT: InternalConnectorContract = {
@@ -11262,11 +11530,12 @@ Update specific fields of an existing value list item using the item \`id\`.`,
     urlParams: [],
     bodyParams: ['_version', 'id', 'meta', 'refresh', 'value'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(patch_list_item_request, 'body'),
-    getZodLooseObjectFromProperty(patch_list_item_request, 'path'),
-    getZodLooseObjectFromProperty(patch_list_item_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(patch_list_item_request, 'body'),
+    ...getShapeAt(patch_list_item_request, 'path'),
+    ...getShapeAt(patch_list_item_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: patch_list_item_response,
 };
 const CREATELISTITEM_CONTRACT: InternalConnectorContract = {
@@ -11294,11 +11563,12 @@ All value list items in the same list must be the same type. For example, each l
     urlParams: [],
     bodyParams: ['id', 'list_id', 'meta', 'refresh', 'value'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_list_item_request, 'body'),
-    getZodLooseObjectFromProperty(create_list_item_request, 'path'),
-    getZodLooseObjectFromProperty(create_list_item_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_list_item_request, 'body'),
+    ...getShapeAt(create_list_item_request, 'path'),
+    ...getShapeAt(create_list_item_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_list_item_response,
 };
 const UPDATELISTITEM_CONTRACT: InternalConnectorContract = {
@@ -11324,11 +11594,12 @@ Update a value list item using the list item ID. The original list item is repla
     urlParams: [],
     bodyParams: ['_version', 'id', 'meta', 'value'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_list_item_request, 'body'),
-    getZodLooseObjectFromProperty(update_list_item_request, 'path'),
-    getZodLooseObjectFromProperty(update_list_item_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_list_item_request, 'body'),
+    ...getShapeAt(update_list_item_request, 'path'),
+    ...getShapeAt(update_list_item_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_list_item_response,
 };
 const EXPORTLISTITEMS_CONTRACT: InternalConnectorContract = {
@@ -11351,11 +11622,12 @@ Export list item values from the specified value list.`,
     urlParams: ['list_id'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(export_list_items_request, 'body'),
-    getZodLooseObjectFromProperty(export_list_items_request, 'path'),
-    getZodLooseObjectFromProperty(export_list_items_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(export_list_items_request, 'body'),
+    ...getShapeAt(export_list_items_request, 'path'),
+    ...getShapeAt(export_list_items_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: export_list_items_response,
 };
 const FINDLISTITEMS_CONTRACT: InternalConnectorContract = {
@@ -11378,11 +11650,12 @@ Get all value list items in the specified list.`,
     urlParams: ['list_id', 'page', 'per_page', 'sort_field', 'sort_order', 'cursor', 'filter'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_list_items_request, 'body'),
-    getZodLooseObjectFromProperty(find_list_items_request, 'path'),
-    getZodLooseObjectFromProperty(find_list_items_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_list_items_request, 'body'),
+    ...getShapeAt(find_list_items_request, 'path'),
+    ...getShapeAt(find_list_items_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_list_items_response,
 };
 const IMPORTLISTITEMS_CONTRACT: InternalConnectorContract = {
@@ -11408,11 +11681,12 @@ You can import items to a new or existing list.
     urlParams: ['list_id', 'type', 'serializer', 'deserializer', 'refresh'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(import_list_items_request, 'body'),
-    getZodLooseObjectFromProperty(import_list_items_request, 'path'),
-    getZodLooseObjectFromProperty(import_list_items_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(import_list_items_request, 'body'),
+    ...getShapeAt(import_list_items_request, 'path'),
+    ...getShapeAt(import_list_items_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: import_list_items_response,
 };
 const READLISTPRIVILEGES_CONTRACT: InternalConnectorContract = {
@@ -11433,11 +11707,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_list_privileges_request, 'body'),
-    getZodLooseObjectFromProperty(read_list_privileges_request, 'path'),
-    getZodLooseObjectFromProperty(read_list_privileges_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_list_privileges_request, 'body'),
+    ...getShapeAt(read_list_privileges_request, 'path'),
+    ...getShapeAt(read_list_privileges_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_list_privileges_response,
 };
 const DELETE_LOGSTASH_PIPELINE_CONTRACT: InternalConnectorContract = {
@@ -11456,11 +11731,12 @@ If your Elasticsearch cluster is protected with basic authentication, you must h
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_logstash_pipeline_request, 'body'),
-    getZodLooseObjectFromProperty(delete_logstash_pipeline_request, 'path'),
-    getZodLooseObjectFromProperty(delete_logstash_pipeline_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_logstash_pipeline_request, 'body'),
+    ...getShapeAt(delete_logstash_pipeline_request, 'path'),
+    ...getShapeAt(delete_logstash_pipeline_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_logstash_pipeline_response,
 };
 const GET_LOGSTASH_PIPELINE_CONTRACT: InternalConnectorContract = {
@@ -11479,11 +11755,12 @@ To use this API, you must have either the \`logstash_admin\` built-in role or a 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_logstash_pipeline_request, 'body'),
-    getZodLooseObjectFromProperty(get_logstash_pipeline_request, 'path'),
-    getZodLooseObjectFromProperty(get_logstash_pipeline_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_logstash_pipeline_request, 'body'),
+    ...getShapeAt(get_logstash_pipeline_request, 'path'),
+    ...getShapeAt(get_logstash_pipeline_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_logstash_pipeline_response,
 };
 const PUT_LOGSTASH_PIPELINE_CONTRACT: InternalConnectorContract = {
@@ -11502,11 +11779,12 @@ To use this API, you must have either the \`logstash_admin\` built-in role or a 
     urlParams: [],
     bodyParams: ['description', 'pipeline', 'settings'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_logstash_pipeline_request, 'body'),
-    getZodLooseObjectFromProperty(put_logstash_pipeline_request, 'path'),
-    getZodLooseObjectFromProperty(put_logstash_pipeline_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_logstash_pipeline_request, 'body'),
+    ...getShapeAt(put_logstash_pipeline_request, 'path'),
+    ...getShapeAt(put_logstash_pipeline_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_logstash_pipeline_response,
 };
 const GET_LOGSTASH_PIPELINES_CONTRACT: InternalConnectorContract = {
@@ -11530,11 +11808,12 @@ The \`username\` property appears in the response when security is enabled and d
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_logstash_pipelines_request, 'body'),
-    getZodLooseObjectFromProperty(get_logstash_pipelines_request, 'path'),
-    getZodLooseObjectFromProperty(get_logstash_pipelines_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_logstash_pipelines_request, 'body'),
+    ...getShapeAt(get_logstash_pipelines_request, 'path'),
+    ...getShapeAt(get_logstash_pipelines_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_logstash_pipelines_response,
 };
 const POST_MAINTENANCE_WINDOW_CONTRACT: InternalConnectorContract = {
@@ -11557,11 +11836,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['enabled', 'schedule', 'scope', 'title'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_maintenance_window_request, 'body'),
-    getZodLooseObjectFromProperty(post_maintenance_window_request, 'path'),
-    getZodLooseObjectFromProperty(post_maintenance_window_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_maintenance_window_request, 'body'),
+    ...getShapeAt(post_maintenance_window_request, 'path'),
+    ...getShapeAt(post_maintenance_window_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_maintenance_window_response,
 };
 const GET_MAINTENANCE_WINDOW_FIND_CONTRACT: InternalConnectorContract = {
@@ -11584,11 +11864,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['title', 'created_by', 'status', 'page', 'per_page'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_maintenance_window_find_request, 'body'),
-    getZodLooseObjectFromProperty(get_maintenance_window_find_request, 'path'),
-    getZodLooseObjectFromProperty(get_maintenance_window_find_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_maintenance_window_find_request, 'body'),
+    ...getShapeAt(get_maintenance_window_find_request, 'path'),
+    ...getShapeAt(get_maintenance_window_find_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_maintenance_window_find_response,
 };
 const DELETE_MAINTENANCE_WINDOW_ID_CONTRACT: InternalConnectorContract = {
@@ -11611,11 +11892,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_maintenance_window_id_request, 'body'),
-    getZodLooseObjectFromProperty(delete_maintenance_window_id_request, 'path'),
-    getZodLooseObjectFromProperty(delete_maintenance_window_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_maintenance_window_id_request, 'body'),
+    ...getShapeAt(delete_maintenance_window_id_request, 'path'),
+    ...getShapeAt(delete_maintenance_window_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_maintenance_window_id_response,
 };
 const GET_MAINTENANCE_WINDOW_ID_CONTRACT: InternalConnectorContract = {
@@ -11638,11 +11920,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_maintenance_window_id_request, 'body'),
-    getZodLooseObjectFromProperty(get_maintenance_window_id_request, 'path'),
-    getZodLooseObjectFromProperty(get_maintenance_window_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_maintenance_window_id_request, 'body'),
+    ...getShapeAt(get_maintenance_window_id_request, 'path'),
+    ...getShapeAt(get_maintenance_window_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_maintenance_window_id_response,
 };
 const PATCH_MAINTENANCE_WINDOW_ID_CONTRACT: InternalConnectorContract = {
@@ -11665,11 +11948,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: ['enabled', 'schedule', 'scope', 'title'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(patch_maintenance_window_id_request, 'body'),
-    getZodLooseObjectFromProperty(patch_maintenance_window_id_request, 'path'),
-    getZodLooseObjectFromProperty(patch_maintenance_window_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(patch_maintenance_window_id_request, 'body'),
+    ...getShapeAt(patch_maintenance_window_id_request, 'path'),
+    ...getShapeAt(patch_maintenance_window_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: patch_maintenance_window_id_response,
 };
 const POST_MAINTENANCE_WINDOW_ID_ARCHIVE_CONTRACT: InternalConnectorContract = {
@@ -11692,11 +11976,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_maintenance_window_id_archive_request, 'body'),
-    getZodLooseObjectFromProperty(post_maintenance_window_id_archive_request, 'path'),
-    getZodLooseObjectFromProperty(post_maintenance_window_id_archive_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_maintenance_window_id_archive_request, 'body'),
+    ...getShapeAt(post_maintenance_window_id_archive_request, 'path'),
+    ...getShapeAt(post_maintenance_window_id_archive_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_maintenance_window_id_archive_response,
 };
 const POST_MAINTENANCE_WINDOW_ID_UNARCHIVE_CONTRACT: InternalConnectorContract = {
@@ -11719,11 +12004,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_maintenance_window_id_unarchive_request, 'body'),
-    getZodLooseObjectFromProperty(post_maintenance_window_id_unarchive_request, 'path'),
-    getZodLooseObjectFromProperty(post_maintenance_window_id_unarchive_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_maintenance_window_id_unarchive_request, 'body'),
+    ...getShapeAt(post_maintenance_window_id_unarchive_request, 'path'),
+    ...getShapeAt(post_maintenance_window_id_unarchive_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_maintenance_window_id_unarchive_response,
 };
 const MLSYNC_CONTRACT: InternalConnectorContract = {
@@ -11747,11 +12033,12 @@ Synchronizes Kibana saved objects for machine learning jobs and trained models i
     urlParams: ['simulate'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(ml_sync_request, 'body'),
-    getZodLooseObjectFromProperty(ml_sync_request, 'path'),
-    getZodLooseObjectFromProperty(ml_sync_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(ml_sync_request, 'body'),
+    ...getShapeAt(ml_sync_request, 'path'),
+    ...getShapeAt(ml_sync_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: ml_sync_response,
 };
 const DELETENOTE_CONTRACT: InternalConnectorContract = {
@@ -11774,11 +12061,12 @@ Delete a note from a Timeline using the note ID.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_note_request, 'body'),
-    getZodLooseObjectFromProperty(delete_note_request, 'path'),
-    getZodLooseObjectFromProperty(delete_note_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_note_request, 'body'),
+    ...getShapeAt(delete_note_request, 'path'),
+    ...getShapeAt(delete_note_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_note_response,
 };
 const GETNOTES_CONTRACT: InternalConnectorContract = {
@@ -11812,11 +12100,12 @@ Get all notes for a given document.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_notes_request, 'body'),
-    getZodLooseObjectFromProperty(get_notes_request, 'path'),
-    getZodLooseObjectFromProperty(get_notes_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_notes_request, 'body'),
+    ...getShapeAt(get_notes_request, 'path'),
+    ...getShapeAt(get_notes_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_notes_response,
 };
 const PERSISTNOTEROUTE_CONTRACT: InternalConnectorContract = {
@@ -11839,11 +12128,12 @@ Add a note to a Timeline or update an existing note.`,
     urlParams: [],
     bodyParams: ['note', 'noteId', 'version'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(persist_note_route_request, 'body'),
-    getZodLooseObjectFromProperty(persist_note_route_request, 'path'),
-    getZodLooseObjectFromProperty(persist_note_route_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(persist_note_route_request, 'body'),
+    ...getShapeAt(persist_note_route_request, 'path'),
+    ...getShapeAt(persist_note_route_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: persist_note_route_response,
 };
 const OBSERVABILITY_AI_ASSISTANT_CHAT_COMPLETE_CONTRACT: InternalConnectorContract = {
@@ -11882,11 +12172,12 @@ This functionality is in technical preview and may be changed or removed in a fu
       'title',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(observability_ai_assistant_chat_complete_request, 'body'),
-    getZodLooseObjectFromProperty(observability_ai_assistant_chat_complete_request, 'path'),
-    getZodLooseObjectFromProperty(observability_ai_assistant_chat_complete_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(observability_ai_assistant_chat_complete_request, 'body'),
+    ...getShapeAt(observability_ai_assistant_chat_complete_request, 'path'),
+    ...getShapeAt(observability_ai_assistant_chat_complete_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: observability_ai_assistant_chat_complete_response,
 };
 const OSQUERYFINDLIVEQUERIES_CONTRACT: InternalConnectorContract = {
@@ -11909,11 +12200,12 @@ Get a list of all live queries.`,
     urlParams: ['kuery', 'page', 'pageSize', 'sort', 'sortOrder'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(osquery_find_live_queries_request, 'body'),
-    getZodLooseObjectFromProperty(osquery_find_live_queries_request, 'path'),
-    getZodLooseObjectFromProperty(osquery_find_live_queries_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(osquery_find_live_queries_request, 'body'),
+    ...getShapeAt(osquery_find_live_queries_request, 'path'),
+    ...getShapeAt(osquery_find_live_queries_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: osquery_find_live_queries_response,
 };
 const OSQUERYCREATELIVEQUERY_CONTRACT: InternalConnectorContract = {
@@ -11950,11 +12242,12 @@ Create and run a live query.`,
       'saved_query_id',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(osquery_create_live_query_request, 'body'),
-    getZodLooseObjectFromProperty(osquery_create_live_query_request, 'path'),
-    getZodLooseObjectFromProperty(osquery_create_live_query_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(osquery_create_live_query_request, 'body'),
+    ...getShapeAt(osquery_create_live_query_request, 'path'),
+    ...getShapeAt(osquery_create_live_query_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: osquery_create_live_query_response,
 };
 const OSQUERYGETLIVEQUERYDETAILS_CONTRACT: InternalConnectorContract = {
@@ -11977,11 +12270,12 @@ Get the details of a live query using the query ID.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(osquery_get_live_query_details_request, 'body'),
-    getZodLooseObjectFromProperty(osquery_get_live_query_details_request, 'path'),
-    getZodLooseObjectFromProperty(osquery_get_live_query_details_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(osquery_get_live_query_details_request, 'body'),
+    ...getShapeAt(osquery_get_live_query_details_request, 'path'),
+    ...getShapeAt(osquery_get_live_query_details_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: osquery_get_live_query_details_response,
 };
 const OSQUERYGETLIVEQUERYRESULTS_CONTRACT: InternalConnectorContract = {
@@ -12004,11 +12298,12 @@ Get the results of a live query using the query action ID.`,
     urlParams: ['kuery', 'page', 'pageSize', 'sort', 'sortOrder'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(osquery_get_live_query_results_request, 'body'),
-    getZodLooseObjectFromProperty(osquery_get_live_query_results_request, 'path'),
-    getZodLooseObjectFromProperty(osquery_get_live_query_results_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(osquery_get_live_query_results_request, 'body'),
+    ...getShapeAt(osquery_get_live_query_results_request, 'path'),
+    ...getShapeAt(osquery_get_live_query_results_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: osquery_get_live_query_results_response,
 };
 const OSQUERYFINDPACKS_CONTRACT: InternalConnectorContract = {
@@ -12031,11 +12326,12 @@ Get a list of all query packs.`,
     urlParams: ['page', 'pageSize', 'sort', 'sortOrder'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(osquery_find_packs_request, 'body'),
-    getZodLooseObjectFromProperty(osquery_find_packs_request, 'path'),
-    getZodLooseObjectFromProperty(osquery_find_packs_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(osquery_find_packs_request, 'body'),
+    ...getShapeAt(osquery_find_packs_request, 'path'),
+    ...getShapeAt(osquery_find_packs_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: osquery_find_packs_response,
 };
 const OSQUERYCREATEPACKS_CONTRACT: InternalConnectorContract = {
@@ -12058,11 +12354,12 @@ Create a query pack.`,
     urlParams: [],
     bodyParams: ['description', 'enabled', 'name', 'policy_ids', 'queries', 'shards'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(osquery_create_packs_request, 'body'),
-    getZodLooseObjectFromProperty(osquery_create_packs_request, 'path'),
-    getZodLooseObjectFromProperty(osquery_create_packs_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(osquery_create_packs_request, 'body'),
+    ...getShapeAt(osquery_create_packs_request, 'path'),
+    ...getShapeAt(osquery_create_packs_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: osquery_create_packs_response,
 };
 const OSQUERYDELETEPACKS_CONTRACT: InternalConnectorContract = {
@@ -12085,11 +12382,12 @@ Delete a query pack using the pack ID.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(osquery_delete_packs_request, 'body'),
-    getZodLooseObjectFromProperty(osquery_delete_packs_request, 'path'),
-    getZodLooseObjectFromProperty(osquery_delete_packs_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(osquery_delete_packs_request, 'body'),
+    ...getShapeAt(osquery_delete_packs_request, 'path'),
+    ...getShapeAt(osquery_delete_packs_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: osquery_delete_packs_response,
 };
 const OSQUERYGETPACKSDETAILS_CONTRACT: InternalConnectorContract = {
@@ -12112,11 +12410,12 @@ Get the details of a query pack using the pack ID.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(osquery_get_packs_details_request, 'body'),
-    getZodLooseObjectFromProperty(osquery_get_packs_details_request, 'path'),
-    getZodLooseObjectFromProperty(osquery_get_packs_details_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(osquery_get_packs_details_request, 'body'),
+    ...getShapeAt(osquery_get_packs_details_request, 'path'),
+    ...getShapeAt(osquery_get_packs_details_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: osquery_get_packs_details_response,
 };
 const OSQUERYUPDATEPACKS_CONTRACT: InternalConnectorContract = {
@@ -12142,11 +12441,12 @@ Update a query pack using the pack ID.
     urlParams: [],
     bodyParams: ['description', 'enabled', 'name', 'policy_ids', 'queries', 'shards'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(osquery_update_packs_request, 'body'),
-    getZodLooseObjectFromProperty(osquery_update_packs_request, 'path'),
-    getZodLooseObjectFromProperty(osquery_update_packs_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(osquery_update_packs_request, 'body'),
+    ...getShapeAt(osquery_update_packs_request, 'path'),
+    ...getShapeAt(osquery_update_packs_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: osquery_update_packs_response,
 };
 const OSQUERYFINDSAVEDQUERIES_CONTRACT: InternalConnectorContract = {
@@ -12169,11 +12469,12 @@ Get a list of all saved queries.`,
     urlParams: ['page', 'pageSize', 'sort', 'sortOrder'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(osquery_find_saved_queries_request, 'body'),
-    getZodLooseObjectFromProperty(osquery_find_saved_queries_request, 'path'),
-    getZodLooseObjectFromProperty(osquery_find_saved_queries_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(osquery_find_saved_queries_request, 'body'),
+    ...getShapeAt(osquery_find_saved_queries_request, 'path'),
+    ...getShapeAt(osquery_find_saved_queries_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: osquery_find_saved_queries_response,
 };
 const OSQUERYCREATESAVEDQUERY_CONTRACT: InternalConnectorContract = {
@@ -12206,11 +12507,12 @@ Create and run a saved query.`,
       'version',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(osquery_create_saved_query_request, 'body'),
-    getZodLooseObjectFromProperty(osquery_create_saved_query_request, 'path'),
-    getZodLooseObjectFromProperty(osquery_create_saved_query_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(osquery_create_saved_query_request, 'body'),
+    ...getShapeAt(osquery_create_saved_query_request, 'path'),
+    ...getShapeAt(osquery_create_saved_query_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: osquery_create_saved_query_response,
 };
 const OSQUERYDELETESAVEDQUERY_CONTRACT: InternalConnectorContract = {
@@ -12233,11 +12535,12 @@ Delete a saved query using the query ID.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(osquery_delete_saved_query_request, 'body'),
-    getZodLooseObjectFromProperty(osquery_delete_saved_query_request, 'path'),
-    getZodLooseObjectFromProperty(osquery_delete_saved_query_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(osquery_delete_saved_query_request, 'body'),
+    ...getShapeAt(osquery_delete_saved_query_request, 'path'),
+    ...getShapeAt(osquery_delete_saved_query_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: osquery_delete_saved_query_response,
 };
 const OSQUERYGETSAVEDQUERYDETAILS_CONTRACT: InternalConnectorContract = {
@@ -12260,11 +12563,12 @@ Get the details of a saved query using the query ID.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(osquery_get_saved_query_details_request, 'body'),
-    getZodLooseObjectFromProperty(osquery_get_saved_query_details_request, 'path'),
-    getZodLooseObjectFromProperty(osquery_get_saved_query_details_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(osquery_get_saved_query_details_request, 'body'),
+    ...getShapeAt(osquery_get_saved_query_details_request, 'path'),
+    ...getShapeAt(osquery_get_saved_query_details_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: osquery_get_saved_query_details_response,
 };
 const OSQUERYUPDATESAVEDQUERY_CONTRACT: InternalConnectorContract = {
@@ -12300,11 +12604,12 @@ Update a saved query using the query ID.
       'version',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(osquery_update_saved_query_request, 'body'),
-    getZodLooseObjectFromProperty(osquery_update_saved_query_request, 'path'),
-    getZodLooseObjectFromProperty(osquery_update_saved_query_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(osquery_update_saved_query_request, 'body'),
+    ...getShapeAt(osquery_update_saved_query_request, 'path'),
+    ...getShapeAt(osquery_update_saved_query_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: osquery_update_saved_query_response,
 };
 const PERSISTPINNEDEVENTROUTE_CONTRACT: InternalConnectorContract = {
@@ -12327,11 +12632,12 @@ Pin/unpin an event to/from an existing Timeline.`,
     urlParams: [],
     bodyParams: ['eventId', 'pinnedEventId', 'timelineId'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(persist_pinned_event_route_request, 'body'),
-    getZodLooseObjectFromProperty(persist_pinned_event_route_request, 'path'),
-    getZodLooseObjectFromProperty(persist_pinned_event_route_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(persist_pinned_event_route_request, 'body'),
+    ...getShapeAt(persist_pinned_event_route_request, 'path'),
+    ...getShapeAt(persist_pinned_event_route_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: persist_pinned_event_route_response,
 };
 const CLEANUPRISKENGINE_CONTRACT: InternalConnectorContract = {
@@ -12354,11 +12660,12 @@ Cleaning up the the Risk Engine by removing the indices, mapping and transforms`
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(clean_up_risk_engine_request, 'body'),
-    getZodLooseObjectFromProperty(clean_up_risk_engine_request, 'path'),
-    getZodLooseObjectFromProperty(clean_up_risk_engine_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(clean_up_risk_engine_request, 'body'),
+    ...getShapeAt(clean_up_risk_engine_request, 'path'),
+    ...getShapeAt(clean_up_risk_engine_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: clean_up_risk_engine_response,
 };
 const CONFIGURERISKENGINESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
@@ -12387,11 +12694,12 @@ Configuring the Risk Engine Saved Object`,
       'range',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(configure_risk_engine_saved_object_request, 'body'),
-    getZodLooseObjectFromProperty(configure_risk_engine_saved_object_request, 'path'),
-    getZodLooseObjectFromProperty(configure_risk_engine_saved_object_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(configure_risk_engine_saved_object_request, 'body'),
+    ...getShapeAt(configure_risk_engine_saved_object_request, 'path'),
+    ...getShapeAt(configure_risk_engine_saved_object_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: configure_risk_engine_saved_object_response,
 };
 const SCHEDULERISKENGINENOW_CONTRACT: InternalConnectorContract = {
@@ -12414,11 +12722,12 @@ Schedule the risk scoring engine to run as soon as possible. You can use this to
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(schedule_risk_engine_now_request, 'body'),
-    getZodLooseObjectFromProperty(schedule_risk_engine_now_request, 'path'),
-    getZodLooseObjectFromProperty(schedule_risk_engine_now_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(schedule_risk_engine_now_request, 'body'),
+    ...getShapeAt(schedule_risk_engine_now_request, 'path'),
+    ...getShapeAt(schedule_risk_engine_now_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: schedule_risk_engine_now_response,
 };
 const BULKCREATESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
@@ -12439,11 +12748,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['overwrite'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(bulk_create_saved_objects_request, 'body'),
-    getZodLooseObjectFromProperty(bulk_create_saved_objects_request, 'path'),
-    getZodLooseObjectFromProperty(bulk_create_saved_objects_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(bulk_create_saved_objects_request, 'body'),
+    ...getShapeAt(bulk_create_saved_objects_request, 'path'),
+    ...getShapeAt(bulk_create_saved_objects_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: bulk_create_saved_objects_response,
 };
 const BULKDELETESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
@@ -12467,11 +12777,12 @@ WARNING: When you delete a saved object, it cannot be recovered.
     urlParams: ['force'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(bulk_delete_saved_objects_request, 'body'),
-    getZodLooseObjectFromProperty(bulk_delete_saved_objects_request, 'path'),
-    getZodLooseObjectFromProperty(bulk_delete_saved_objects_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(bulk_delete_saved_objects_request, 'body'),
+    ...getShapeAt(bulk_delete_saved_objects_request, 'path'),
+    ...getShapeAt(bulk_delete_saved_objects_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: bulk_delete_saved_objects_response,
 };
 const BULKGETSAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
@@ -12492,11 +12803,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(bulk_get_saved_objects_request, 'body'),
-    getZodLooseObjectFromProperty(bulk_get_saved_objects_request, 'path'),
-    getZodLooseObjectFromProperty(bulk_get_saved_objects_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(bulk_get_saved_objects_request, 'body'),
+    ...getShapeAt(bulk_get_saved_objects_request, 'path'),
+    ...getShapeAt(bulk_get_saved_objects_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: bulk_get_saved_objects_response,
 };
 const BULKRESOLVESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
@@ -12520,11 +12832,12 @@ Retrieve multiple Kibana saved objects by identifier using any legacy URL aliase
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(bulk_resolve_saved_objects_request, 'body'),
-    getZodLooseObjectFromProperty(bulk_resolve_saved_objects_request, 'path'),
-    getZodLooseObjectFromProperty(bulk_resolve_saved_objects_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(bulk_resolve_saved_objects_request, 'body'),
+    ...getShapeAt(bulk_resolve_saved_objects_request, 'path'),
+    ...getShapeAt(bulk_resolve_saved_objects_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: bulk_resolve_saved_objects_response,
 };
 const BULKUPDATESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
@@ -12547,11 +12860,12 @@ Update the attributes for multiple Kibana saved objects.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(bulk_update_saved_objects_request, 'body'),
-    getZodLooseObjectFromProperty(bulk_update_saved_objects_request, 'path'),
-    getZodLooseObjectFromProperty(bulk_update_saved_objects_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(bulk_update_saved_objects_request, 'body'),
+    ...getShapeAt(bulk_update_saved_objects_request, 'path'),
+    ...getShapeAt(bulk_update_saved_objects_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: bulk_update_saved_objects_response,
 };
 const POST_SAVED_OBJECTS_EXPORT_CONTRACT: InternalConnectorContract = {
@@ -12585,11 +12899,12 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
       'type',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_saved_objects_export_request, 'body'),
-    getZodLooseObjectFromProperty(post_saved_objects_export_request, 'path'),
-    getZodLooseObjectFromProperty(post_saved_objects_export_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_saved_objects_export_request, 'body'),
+    ...getShapeAt(post_saved_objects_export_request, 'path'),
+    ...getShapeAt(post_saved_objects_export_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_saved_objects_export_response,
 };
 const FINDSAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
@@ -12627,11 +12942,12 @@ Retrieve a paginated set of Kibana saved objects.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_saved_objects_request, 'body'),
-    getZodLooseObjectFromProperty(find_saved_objects_request, 'path'),
-    getZodLooseObjectFromProperty(find_saved_objects_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_saved_objects_request, 'body'),
+    ...getShapeAt(find_saved_objects_request, 'path'),
+    ...getShapeAt(find_saved_objects_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_saved_objects_response,
 };
 const POST_SAVED_OBJECTS_IMPORT_CONTRACT: InternalConnectorContract = {
@@ -12656,11 +12972,12 @@ Exported saved objects are not backwards compatible and cannot be imported into 
     urlParams: ['overwrite', 'createNewCopies', 'compatibilityMode'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_saved_objects_import_request, 'body'),
-    getZodLooseObjectFromProperty(post_saved_objects_import_request, 'path'),
-    getZodLooseObjectFromProperty(post_saved_objects_import_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_saved_objects_import_request, 'body'),
+    ...getShapeAt(post_saved_objects_import_request, 'path'),
+    ...getShapeAt(post_saved_objects_import_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_saved_objects_import_response,
 };
 const RESOLVEIMPORTERRORS_CONTRACT: InternalConnectorContract = {
@@ -12688,11 +13005,12 @@ To resolve errors from the Import objects API, you can:
     urlParams: ['compatibilityMode', 'createNewCopies'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(resolve_import_errors_request, 'body'),
-    getZodLooseObjectFromProperty(resolve_import_errors_request, 'path'),
-    getZodLooseObjectFromProperty(resolve_import_errors_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(resolve_import_errors_request, 'body'),
+    ...getShapeAt(resolve_import_errors_request, 'path'),
+    ...getShapeAt(resolve_import_errors_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: resolve_import_errors_response,
 };
 const CREATESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
@@ -12715,11 +13033,12 @@ Create a Kibana saved object with a randomly generated identifier.`,
     urlParams: ['overwrite'],
     bodyParams: ['attributes', 'initialNamespaces', 'references'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_saved_object_request, 'body'),
-    getZodLooseObjectFromProperty(create_saved_object_request, 'path'),
-    getZodLooseObjectFromProperty(create_saved_object_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_saved_object_request, 'body'),
+    ...getShapeAt(create_saved_object_request, 'path'),
+    ...getShapeAt(create_saved_object_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_saved_object_response,
 };
 const GETSAVEDOBJECT_CONTRACT: InternalConnectorContract = {
@@ -12742,11 +13061,12 @@ Retrieve a single Kibana saved object by identifier.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_saved_object_request, 'body'),
-    getZodLooseObjectFromProperty(get_saved_object_request, 'path'),
-    getZodLooseObjectFromProperty(get_saved_object_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_saved_object_request, 'body'),
+    ...getShapeAt(get_saved_object_request, 'path'),
+    ...getShapeAt(get_saved_object_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_saved_object_response,
 };
 const CREATESAVEDOBJECTID_CONTRACT: InternalConnectorContract = {
@@ -12769,11 +13089,12 @@ Create a Kibana saved object and specify its identifier instead of using a rando
     urlParams: ['overwrite'],
     bodyParams: ['attributes', 'initialNamespaces', 'references'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_saved_object_id_request, 'body'),
-    getZodLooseObjectFromProperty(create_saved_object_id_request, 'path'),
-    getZodLooseObjectFromProperty(create_saved_object_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_saved_object_id_request, 'body'),
+    ...getShapeAt(create_saved_object_id_request, 'path'),
+    ...getShapeAt(create_saved_object_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_saved_object_id_response,
 };
 const UPDATESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
@@ -12796,11 +13117,12 @@ Update the attributes for Kibana saved objects.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_saved_object_request, 'body'),
-    getZodLooseObjectFromProperty(update_saved_object_request, 'path'),
-    getZodLooseObjectFromProperty(update_saved_object_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_saved_object_request, 'body'),
+    ...getShapeAt(update_saved_object_request, 'path'),
+    ...getShapeAt(update_saved_object_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_saved_object_response,
 };
 const RESOLVESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
@@ -12824,11 +13146,12 @@ Retrieve a single Kibana saved object by identifier using any legacy URL alias i
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(resolve_saved_object_request, 'body'),
-    getZodLooseObjectFromProperty(resolve_saved_object_request, 'path'),
-    getZodLooseObjectFromProperty(resolve_saved_object_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(resolve_saved_object_request, 'body'),
+    ...getShapeAt(resolve_saved_object_request, 'path'),
+    ...getShapeAt(resolve_saved_object_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: resolve_saved_object_response,
 };
 const PERFORMANONYMIZATIONFIELDSBULKACTION_CONTRACT: InternalConnectorContract = {
@@ -12851,11 +13174,12 @@ Apply a bulk action to multiple anonymization fields. The bulk action is applied
     urlParams: [],
     bodyParams: ['create', 'delete', 'update'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(perform_anonymization_fields_bulk_action_request, 'body'),
-    getZodLooseObjectFromProperty(perform_anonymization_fields_bulk_action_request, 'path'),
-    getZodLooseObjectFromProperty(perform_anonymization_fields_bulk_action_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(perform_anonymization_fields_bulk_action_request, 'body'),
+    ...getShapeAt(perform_anonymization_fields_bulk_action_request, 'path'),
+    ...getShapeAt(perform_anonymization_fields_bulk_action_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: perform_anonymization_fields_bulk_action_response,
 };
 const FINDANONYMIZATIONFIELDS_CONTRACT: InternalConnectorContract = {
@@ -12878,11 +13202,12 @@ Get a list of all anonymization fields.`,
     urlParams: ['fields', 'filter', 'sort_field', 'sort_order', 'page', 'per_page', 'all_data'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_anonymization_fields_request, 'body'),
-    getZodLooseObjectFromProperty(find_anonymization_fields_request, 'path'),
-    getZodLooseObjectFromProperty(find_anonymization_fields_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_anonymization_fields_request, 'body'),
+    ...getShapeAt(find_anonymization_fields_request, 'path'),
+    ...getShapeAt(find_anonymization_fields_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_anonymization_fields_response,
 };
 const CHATCOMPLETE_CONTRACT: InternalConnectorContract = {
@@ -12916,11 +13241,12 @@ Create a model response for the given chat conversation.`,
       'responseLanguage',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(chat_complete_request, 'body'),
-    getZodLooseObjectFromProperty(chat_complete_request, 'path'),
-    getZodLooseObjectFromProperty(chat_complete_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(chat_complete_request, 'body'),
+    ...getShapeAt(chat_complete_request, 'path'),
+    ...getShapeAt(chat_complete_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: chat_complete_response,
 };
 const DELETEALLCONVERSATIONS_CONTRACT: InternalConnectorContract = {
@@ -12943,11 +13269,12 @@ This endpoint allows users to permanently delete all conversations.`,
     urlParams: [],
     bodyParams: ['excludedIds'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_all_conversations_request, 'body'),
-    getZodLooseObjectFromProperty(delete_all_conversations_request, 'path'),
-    getZodLooseObjectFromProperty(delete_all_conversations_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_all_conversations_request, 'body'),
+    ...getShapeAt(delete_all_conversations_request, 'path'),
+    ...getShapeAt(delete_all_conversations_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_all_conversations_response,
 };
 const CREATECONVERSATION_CONTRACT: InternalConnectorContract = {
@@ -12978,11 +13305,12 @@ Create a new Security AI Assistant conversation. This endpoint allows the user t
       'title',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_conversation_request, 'body'),
-    getZodLooseObjectFromProperty(create_conversation_request, 'path'),
-    getZodLooseObjectFromProperty(create_conversation_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_conversation_request, 'body'),
+    ...getShapeAt(create_conversation_request, 'path'),
+    ...getShapeAt(create_conversation_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_conversation_response,
 };
 const FINDCONVERSATIONS_CONTRACT: InternalConnectorContract = {
@@ -13005,11 +13333,12 @@ Get a list of all conversations for the current user. This endpoint allows users
     urlParams: ['fields', 'filter', 'sort_field', 'sort_order', 'page', 'per_page', 'is_owner'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_conversations_request, 'body'),
-    getZodLooseObjectFromProperty(find_conversations_request, 'path'),
-    getZodLooseObjectFromProperty(find_conversations_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_conversations_request, 'body'),
+    ...getShapeAt(find_conversations_request, 'path'),
+    ...getShapeAt(find_conversations_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_conversations_response,
 };
 const DELETECONVERSATION_CONTRACT: InternalConnectorContract = {
@@ -13032,11 +13361,12 @@ Delete an existing conversation using the conversation ID. This endpoint allows 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_conversation_request, 'body'),
-    getZodLooseObjectFromProperty(delete_conversation_request, 'path'),
-    getZodLooseObjectFromProperty(delete_conversation_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_conversation_request, 'body'),
+    ...getShapeAt(delete_conversation_request, 'path'),
+    ...getShapeAt(delete_conversation_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_conversation_response,
 };
 const READCONVERSATION_CONTRACT: InternalConnectorContract = {
@@ -13059,11 +13389,12 @@ Get the details of an existing conversation using the conversation ID. This allo
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_conversation_request, 'body'),
-    getZodLooseObjectFromProperty(read_conversation_request, 'path'),
-    getZodLooseObjectFromProperty(read_conversation_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_conversation_request, 'body'),
+    ...getShapeAt(read_conversation_request, 'path'),
+    ...getShapeAt(read_conversation_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_conversation_response,
 };
 const UPDATECONVERSATION_CONTRACT: InternalConnectorContract = {
@@ -13095,11 +13426,12 @@ Update an existing conversation using the conversation ID. This endpoint allows 
       'users',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_conversation_request, 'body'),
-    getZodLooseObjectFromProperty(update_conversation_request, 'path'),
-    getZodLooseObjectFromProperty(update_conversation_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_conversation_request, 'body'),
+    ...getShapeAt(update_conversation_request, 'path'),
+    ...getShapeAt(update_conversation_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_conversation_response,
 };
 const GETKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
@@ -13122,11 +13454,12 @@ Read a single KB`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_knowledge_base_request, 'body'),
-    getZodLooseObjectFromProperty(get_knowledge_base_request, 'path'),
-    getZodLooseObjectFromProperty(get_knowledge_base_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_knowledge_base_request, 'body'),
+    ...getShapeAt(get_knowledge_base_request, 'path'),
+    ...getShapeAt(get_knowledge_base_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_knowledge_base_response,
 };
 const POSTKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
@@ -13147,11 +13480,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['modelId', 'ignoreSecurityLabs'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_knowledge_base_request, 'body'),
-    getZodLooseObjectFromProperty(post_knowledge_base_request, 'path'),
-    getZodLooseObjectFromProperty(post_knowledge_base_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_knowledge_base_request, 'body'),
+    ...getShapeAt(post_knowledge_base_request, 'path'),
+    ...getShapeAt(post_knowledge_base_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_knowledge_base_response,
 };
 const READKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
@@ -13174,11 +13508,12 @@ Read a knowledge base with a specific resource identifier.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_knowledge_base_request, 'body'),
-    getZodLooseObjectFromProperty(read_knowledge_base_request, 'path'),
-    getZodLooseObjectFromProperty(read_knowledge_base_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_knowledge_base_request, 'body'),
+    ...getShapeAt(read_knowledge_base_request, 'path'),
+    ...getShapeAt(read_knowledge_base_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_knowledge_base_response,
 };
 const CREATEKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
@@ -13201,11 +13536,12 @@ Create a knowledge base with a specific resource identifier.`,
     urlParams: ['modelId', 'ignoreSecurityLabs'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_knowledge_base_request, 'body'),
-    getZodLooseObjectFromProperty(create_knowledge_base_request, 'path'),
-    getZodLooseObjectFromProperty(create_knowledge_base_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_knowledge_base_request, 'body'),
+    ...getShapeAt(create_knowledge_base_request, 'path'),
+    ...getShapeAt(create_knowledge_base_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_knowledge_base_response,
 };
 const CREATEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
@@ -13228,11 +13564,12 @@ Create a Knowledge Base Entry`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_knowledge_base_entry_request, 'body'),
-    getZodLooseObjectFromProperty(create_knowledge_base_entry_request, 'path'),
-    getZodLooseObjectFromProperty(create_knowledge_base_entry_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_knowledge_base_entry_request, 'body'),
+    ...getShapeAt(create_knowledge_base_entry_request, 'path'),
+    ...getShapeAt(create_knowledge_base_entry_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_knowledge_base_entry_response,
 };
 const PERFORMKNOWLEDGEBASEENTRYBULKACTION_CONTRACT: InternalConnectorContract = {
@@ -13255,11 +13592,12 @@ The bulk action is applied to all Knowledge Base Entries that match the filter o
     urlParams: [],
     bodyParams: ['create', 'delete', 'update'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(perform_knowledge_base_entry_bulk_action_request, 'body'),
-    getZodLooseObjectFromProperty(perform_knowledge_base_entry_bulk_action_request, 'path'),
-    getZodLooseObjectFromProperty(perform_knowledge_base_entry_bulk_action_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(perform_knowledge_base_entry_bulk_action_request, 'body'),
+    ...getShapeAt(perform_knowledge_base_entry_bulk_action_request, 'path'),
+    ...getShapeAt(perform_knowledge_base_entry_bulk_action_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: perform_knowledge_base_entry_bulk_action_response,
 };
 const FINDKNOWLEDGEBASEENTRIES_CONTRACT: InternalConnectorContract = {
@@ -13282,11 +13620,12 @@ Finds Knowledge Base Entries that match the given query.`,
     urlParams: ['fields', 'filter', 'sort_field', 'sort_order', 'page', 'per_page'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_knowledge_base_entries_request, 'body'),
-    getZodLooseObjectFromProperty(find_knowledge_base_entries_request, 'path'),
-    getZodLooseObjectFromProperty(find_knowledge_base_entries_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_knowledge_base_entries_request, 'body'),
+    ...getShapeAt(find_knowledge_base_entries_request, 'path'),
+    ...getShapeAt(find_knowledge_base_entries_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_knowledge_base_entries_response,
 };
 const DELETEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
@@ -13309,11 +13648,12 @@ Delete a Knowledge Base Entry by its unique \`id\`.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_knowledge_base_entry_request, 'body'),
-    getZodLooseObjectFromProperty(delete_knowledge_base_entry_request, 'path'),
-    getZodLooseObjectFromProperty(delete_knowledge_base_entry_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_knowledge_base_entry_request, 'body'),
+    ...getShapeAt(delete_knowledge_base_entry_request, 'path'),
+    ...getShapeAt(delete_knowledge_base_entry_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_knowledge_base_entry_response,
 };
 const READKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
@@ -13336,11 +13676,12 @@ Retrieve a Knowledge Base Entry by its unique \`id\`.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(read_knowledge_base_entry_request, 'body'),
-    getZodLooseObjectFromProperty(read_knowledge_base_entry_request, 'path'),
-    getZodLooseObjectFromProperty(read_knowledge_base_entry_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(read_knowledge_base_entry_request, 'body'),
+    ...getShapeAt(read_knowledge_base_entry_request, 'path'),
+    ...getShapeAt(read_knowledge_base_entry_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: read_knowledge_base_entry_response,
 };
 const UPDATEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
@@ -13363,11 +13704,12 @@ Update an existing Knowledge Base Entry by its unique \`id\`.`,
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_knowledge_base_entry_request, 'body'),
-    getZodLooseObjectFromProperty(update_knowledge_base_entry_request, 'path'),
-    getZodLooseObjectFromProperty(update_knowledge_base_entry_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_knowledge_base_entry_request, 'body'),
+    ...getShapeAt(update_knowledge_base_entry_request, 'path'),
+    ...getShapeAt(update_knowledge_base_entry_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_knowledge_base_entry_response,
 };
 const PERFORMPROMPTSBULKACTION_CONTRACT: InternalConnectorContract = {
@@ -13390,11 +13732,12 @@ Apply a bulk action to multiple prompts. The bulk action is applied to all promp
     urlParams: [],
     bodyParams: ['create', 'delete', 'update'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(perform_prompts_bulk_action_request, 'body'),
-    getZodLooseObjectFromProperty(perform_prompts_bulk_action_request, 'path'),
-    getZodLooseObjectFromProperty(perform_prompts_bulk_action_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(perform_prompts_bulk_action_request, 'body'),
+    ...getShapeAt(perform_prompts_bulk_action_request, 'path'),
+    ...getShapeAt(perform_prompts_bulk_action_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: perform_prompts_bulk_action_response,
 };
 const FINDPROMPTS_CONTRACT: InternalConnectorContract = {
@@ -13417,11 +13760,12 @@ Get a list of all prompts based on optional filters, sorting, and pagination.`,
     urlParams: ['fields', 'filter', 'sort_field', 'sort_order', 'page', 'per_page'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_prompts_request, 'body'),
-    getZodLooseObjectFromProperty(find_prompts_request, 'path'),
-    getZodLooseObjectFromProperty(find_prompts_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_prompts_request, 'body'),
+    ...getShapeAt(find_prompts_request, 'path'),
+    ...getShapeAt(find_prompts_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_prompts_response,
 };
 const GET_SECURITY_ROLE_CONTRACT: InternalConnectorContract = {
@@ -13438,11 +13782,12 @@ const GET_SECURITY_ROLE_CONTRACT: InternalConnectorContract = {
     urlParams: ['replaceDeprecatedPrivileges'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_security_role_request, 'body'),
-    getZodLooseObjectFromProperty(get_security_role_request, 'path'),
-    getZodLooseObjectFromProperty(get_security_role_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_security_role_request, 'body'),
+    ...getShapeAt(get_security_role_request, 'path'),
+    ...getShapeAt(get_security_role_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_security_role_response,
 };
 const POST_SECURITY_ROLE_QUERY_CONTRACT: InternalConnectorContract = {
@@ -13459,11 +13804,12 @@ const POST_SECURITY_ROLE_QUERY_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: ['filters', 'from', 'query', 'size', 'sort'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_security_role_query_request, 'body'),
-    getZodLooseObjectFromProperty(post_security_role_query_request, 'path'),
-    getZodLooseObjectFromProperty(post_security_role_query_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_security_role_query_request, 'body'),
+    ...getShapeAt(post_security_role_query_request, 'path'),
+    ...getShapeAt(post_security_role_query_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_security_role_query_response,
 };
 const DELETE_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
@@ -13480,11 +13826,12 @@ const DELETE_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_security_role_name_request, 'body'),
-    getZodLooseObjectFromProperty(delete_security_role_name_request, 'path'),
-    getZodLooseObjectFromProperty(delete_security_role_name_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_security_role_name_request, 'body'),
+    ...getShapeAt(delete_security_role_name_request, 'path'),
+    ...getShapeAt(delete_security_role_name_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_security_role_name_response,
 };
 const GET_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
@@ -13501,11 +13848,12 @@ const GET_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
     urlParams: ['replaceDeprecatedPrivileges'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_security_role_name_request, 'body'),
-    getZodLooseObjectFromProperty(get_security_role_name_request, 'path'),
-    getZodLooseObjectFromProperty(get_security_role_name_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_security_role_name_request, 'body'),
+    ...getShapeAt(get_security_role_name_request, 'path'),
+    ...getShapeAt(get_security_role_name_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_security_role_name_response,
 };
 const PUT_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
@@ -13522,11 +13870,12 @@ const PUT_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
     urlParams: ['createOnly'],
     bodyParams: ['description', 'elasticsearch', 'kibana', 'metadata'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_security_role_name_request, 'body'),
-    getZodLooseObjectFromProperty(put_security_role_name_request, 'path'),
-    getZodLooseObjectFromProperty(put_security_role_name_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_security_role_name_request, 'body'),
+    ...getShapeAt(put_security_role_name_request, 'path'),
+    ...getShapeAt(put_security_role_name_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_security_role_name_response,
 };
 const POST_SECURITY_ROLES_CONTRACT: InternalConnectorContract = {
@@ -13543,11 +13892,12 @@ const POST_SECURITY_ROLES_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: ['roles'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_security_roles_request, 'body'),
-    getZodLooseObjectFromProperty(post_security_roles_request, 'path'),
-    getZodLooseObjectFromProperty(post_security_roles_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_security_roles_request, 'body'),
+    ...getShapeAt(post_security_roles_request, 'path'),
+    ...getShapeAt(post_security_roles_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_security_roles_response,
 };
 const POST_SECURITY_SESSION_INVALIDATE_CONTRACT: InternalConnectorContract = {
@@ -13565,11 +13915,12 @@ const POST_SECURITY_SESSION_INVALIDATE_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: ['match', 'query'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_security_session_invalidate_request, 'body'),
-    getZodLooseObjectFromProperty(post_security_session_invalidate_request, 'path'),
-    getZodLooseObjectFromProperty(post_security_session_invalidate_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_security_session_invalidate_request, 'body'),
+    ...getShapeAt(post_security_session_invalidate_request, 'path'),
+    ...getShapeAt(post_security_session_invalidate_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_security_session_invalidate_response,
 };
 const POST_URL_CONTRACT: InternalConnectorContract = {
@@ -13588,11 +13939,12 @@ Short URLs are created by specifying the locator ID and locator parameters. When
     urlParams: [],
     bodyParams: ['humanReadableSlug', 'locatorId', 'params', 'slug'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_url_request, 'body'),
-    getZodLooseObjectFromProperty(post_url_request, 'path'),
-    getZodLooseObjectFromProperty(post_url_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_url_request, 'body'),
+    ...getShapeAt(post_url_request, 'path'),
+    ...getShapeAt(post_url_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_url_response,
 };
 const RESOLVE_URL_CONTRACT: InternalConnectorContract = {
@@ -13610,11 +13962,12 @@ const RESOLVE_URL_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(resolve_url_request, 'body'),
-    getZodLooseObjectFromProperty(resolve_url_request, 'path'),
-    getZodLooseObjectFromProperty(resolve_url_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(resolve_url_request, 'body'),
+    ...getShapeAt(resolve_url_request, 'path'),
+    ...getShapeAt(resolve_url_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: resolve_url_response,
 };
 const DELETE_URL_CONTRACT: InternalConnectorContract = {
@@ -13632,11 +13985,12 @@ const DELETE_URL_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_url_request, 'body'),
-    getZodLooseObjectFromProperty(delete_url_request, 'path'),
-    getZodLooseObjectFromProperty(delete_url_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_url_request, 'body'),
+    ...getShapeAt(delete_url_request, 'path'),
+    ...getShapeAt(delete_url_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_url_response,
 };
 const GET_URL_CONTRACT: InternalConnectorContract = {
@@ -13654,11 +14008,12 @@ const GET_URL_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_url_request, 'body'),
-    getZodLooseObjectFromProperty(get_url_request, 'path'),
-    getZodLooseObjectFromProperty(get_url_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_url_request, 'body'),
+    ...getShapeAt(get_url_request, 'path'),
+    ...getShapeAt(get_url_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_url_response,
 };
 const POST_SPACES_COPY_SAVED_OBJECTS_CONTRACT: InternalConnectorContract = {
@@ -13682,11 +14037,12 @@ const POST_SPACES_COPY_SAVED_OBJECTS_CONTRACT: InternalConnectorContract = {
       'spaces',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_spaces_copy_saved_objects_request, 'body'),
-    getZodLooseObjectFromProperty(post_spaces_copy_saved_objects_request, 'path'),
-    getZodLooseObjectFromProperty(post_spaces_copy_saved_objects_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_spaces_copy_saved_objects_request, 'body'),
+    ...getShapeAt(post_spaces_copy_saved_objects_request, 'path'),
+    ...getShapeAt(post_spaces_copy_saved_objects_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_spaces_copy_saved_objects_response,
 };
 const POST_SPACES_DISABLE_LEGACY_URL_ALIASES_CONTRACT: InternalConnectorContract = {
@@ -13703,11 +14059,12 @@ const POST_SPACES_DISABLE_LEGACY_URL_ALIASES_CONTRACT: InternalConnectorContract
     urlParams: [],
     bodyParams: ['aliases'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_spaces_disable_legacy_url_aliases_request, 'body'),
-    getZodLooseObjectFromProperty(post_spaces_disable_legacy_url_aliases_request, 'path'),
-    getZodLooseObjectFromProperty(post_spaces_disable_legacy_url_aliases_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_spaces_disable_legacy_url_aliases_request, 'body'),
+    ...getShapeAt(post_spaces_disable_legacy_url_aliases_request, 'path'),
+    ...getShapeAt(post_spaces_disable_legacy_url_aliases_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_spaces_disable_legacy_url_aliases_response,
 };
 const POST_SPACES_GET_SHAREABLE_REFERENCES_CONTRACT: InternalConnectorContract = {
@@ -13724,11 +14081,12 @@ const POST_SPACES_GET_SHAREABLE_REFERENCES_CONTRACT: InternalConnectorContract =
     urlParams: [],
     bodyParams: ['objects'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_spaces_get_shareable_references_request, 'body'),
-    getZodLooseObjectFromProperty(post_spaces_get_shareable_references_request, 'path'),
-    getZodLooseObjectFromProperty(post_spaces_get_shareable_references_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_spaces_get_shareable_references_request, 'body'),
+    ...getShapeAt(post_spaces_get_shareable_references_request, 'path'),
+    ...getShapeAt(post_spaces_get_shareable_references_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_spaces_get_shareable_references_response,
 };
 const POST_SPACES_RESOLVE_COPY_SAVED_OBJECTS_ERRORS_CONTRACT: InternalConnectorContract = {
@@ -13745,11 +14103,12 @@ const POST_SPACES_RESOLVE_COPY_SAVED_OBJECTS_ERRORS_CONTRACT: InternalConnectorC
     urlParams: [],
     bodyParams: ['compatibilityMode', 'createNewCopies', 'includeReferences', 'objects', 'retries'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_spaces_resolve_copy_saved_objects_errors_request, 'body'),
-    getZodLooseObjectFromProperty(post_spaces_resolve_copy_saved_objects_errors_request, 'path'),
-    getZodLooseObjectFromProperty(post_spaces_resolve_copy_saved_objects_errors_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_spaces_resolve_copy_saved_objects_errors_request, 'body'),
+    ...getShapeAt(post_spaces_resolve_copy_saved_objects_errors_request, 'path'),
+    ...getShapeAt(post_spaces_resolve_copy_saved_objects_errors_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_spaces_resolve_copy_saved_objects_errors_response,
 };
 const POST_SPACES_UPDATE_OBJECTS_SPACES_CONTRACT: InternalConnectorContract = {
@@ -13766,11 +14125,12 @@ const POST_SPACES_UPDATE_OBJECTS_SPACES_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: ['objects', 'spacesToAdd', 'spacesToRemove'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_spaces_update_objects_spaces_request, 'body'),
-    getZodLooseObjectFromProperty(post_spaces_update_objects_spaces_request, 'path'),
-    getZodLooseObjectFromProperty(post_spaces_update_objects_spaces_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_spaces_update_objects_spaces_request, 'body'),
+    ...getShapeAt(post_spaces_update_objects_spaces_request, 'path'),
+    ...getShapeAt(post_spaces_update_objects_spaces_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_spaces_update_objects_spaces_response,
 };
 const GET_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
@@ -13787,11 +14147,12 @@ const GET_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
     urlParams: ['purpose', 'include_authorized_purposes'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_spaces_space_request, 'body'),
-    getZodLooseObjectFromProperty(get_spaces_space_request, 'path'),
-    getZodLooseObjectFromProperty(get_spaces_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_spaces_space_request, 'body'),
+    ...getShapeAt(get_spaces_space_request, 'path'),
+    ...getShapeAt(get_spaces_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_spaces_space_response,
 };
 const POST_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
@@ -13818,11 +14179,12 @@ const POST_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
       'solution',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_spaces_space_request, 'body'),
-    getZodLooseObjectFromProperty(post_spaces_space_request, 'path'),
-    getZodLooseObjectFromProperty(post_spaces_space_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_spaces_space_request, 'body'),
+    ...getShapeAt(post_spaces_space_request, 'path'),
+    ...getShapeAt(post_spaces_space_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_spaces_space_response,
 };
 const DELETE_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
@@ -13839,11 +14201,12 @@ const DELETE_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_spaces_space_id_request, 'body'),
-    getZodLooseObjectFromProperty(delete_spaces_space_id_request, 'path'),
-    getZodLooseObjectFromProperty(delete_spaces_space_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_spaces_space_id_request, 'body'),
+    ...getShapeAt(delete_spaces_space_id_request, 'path'),
+    ...getShapeAt(delete_spaces_space_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_spaces_space_id_response,
 };
 const GET_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
@@ -13860,11 +14223,12 @@ const GET_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_spaces_space_id_request, 'body'),
-    getZodLooseObjectFromProperty(get_spaces_space_id_request, 'path'),
-    getZodLooseObjectFromProperty(get_spaces_space_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_spaces_space_id_request, 'body'),
+    ...getShapeAt(get_spaces_space_id_request, 'path'),
+    ...getShapeAt(get_spaces_space_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_spaces_space_id_response,
 };
 const PUT_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
@@ -13891,11 +14255,12 @@ const PUT_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
       'solution',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_spaces_space_id_request, 'body'),
-    getZodLooseObjectFromProperty(put_spaces_space_id_request, 'path'),
-    getZodLooseObjectFromProperty(put_spaces_space_id_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_spaces_space_id_request, 'body'),
+    ...getShapeAt(put_spaces_space_id_request, 'path'),
+    ...getShapeAt(put_spaces_space_id_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_spaces_space_id_response,
 };
 const GET_STATUS_CONTRACT: InternalConnectorContract = {
@@ -13912,11 +14277,12 @@ const GET_STATUS_CONTRACT: InternalConnectorContract = {
     urlParams: ['v7format', 'v8format'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_status_request, 'body'),
-    getZodLooseObjectFromProperty(get_status_request, 'path'),
-    getZodLooseObjectFromProperty(get_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_status_request, 'body'),
+    ...getShapeAt(get_status_request, 'path'),
+    ...getShapeAt(get_status_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_status_response,
 };
 const GET_STREAMS_CONTRACT: InternalConnectorContract = {
@@ -13939,11 +14305,12 @@ Fetches list of all streams<br/><br/>[Required authorization] Route required pri
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_streams_request, 'body'),
-    getZodLooseObjectFromProperty(get_streams_request, 'path'),
-    getZodLooseObjectFromProperty(get_streams_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_streams_request, 'body'),
+    ...getShapeAt(get_streams_request, 'path'),
+    ...getShapeAt(get_streams_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_streams_response,
 };
 const POST_STREAMS_DISABLE_CONTRACT: InternalConnectorContract = {
@@ -13966,11 +14333,12 @@ Disables wired streams and deletes all existing stream definitions. The data of 
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_streams_disable_request, 'body'),
-    getZodLooseObjectFromProperty(post_streams_disable_request, 'path'),
-    getZodLooseObjectFromProperty(post_streams_disable_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_streams_disable_request, 'body'),
+    ...getShapeAt(post_streams_disable_request, 'path'),
+    ...getShapeAt(post_streams_disable_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_streams_disable_response,
 };
 const POST_STREAMS_ENABLE_CONTRACT: InternalConnectorContract = {
@@ -13993,11 +14361,12 @@ Enables wired streams<br/><br/>[Required authorization] Route required privilege
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_streams_enable_request, 'body'),
-    getZodLooseObjectFromProperty(post_streams_enable_request, 'path'),
-    getZodLooseObjectFromProperty(post_streams_enable_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_streams_enable_request, 'body'),
+    ...getShapeAt(post_streams_enable_request, 'path'),
+    ...getShapeAt(post_streams_enable_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_streams_enable_response,
 };
 const POST_STREAMS_RESYNC_CONTRACT: InternalConnectorContract = {
@@ -14020,11 +14389,12 @@ Resyncs all streams, making sure that Elasticsearch assets are up to date<br/><b
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_streams_resync_request, 'body'),
-    getZodLooseObjectFromProperty(post_streams_resync_request, 'path'),
-    getZodLooseObjectFromProperty(post_streams_resync_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_streams_resync_request, 'body'),
+    ...getShapeAt(post_streams_resync_request, 'path'),
+    ...getShapeAt(post_streams_resync_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_streams_resync_response,
 };
 const DELETE_STREAMS_NAME_CONTRACT: InternalConnectorContract = {
@@ -14047,11 +14417,12 @@ Deletes a stream definition and the underlying data stream<br/><br/>[Required au
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_streams_name_request, 'body'),
-    getZodLooseObjectFromProperty(delete_streams_name_request, 'path'),
-    getZodLooseObjectFromProperty(delete_streams_name_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_streams_name_request, 'body'),
+    ...getShapeAt(delete_streams_name_request, 'path'),
+    ...getShapeAt(delete_streams_name_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_streams_name_response,
 };
 const GET_STREAMS_NAME_CONTRACT: InternalConnectorContract = {
@@ -14074,11 +14445,12 @@ Fetches a stream definition and associated dashboards<br/><br/>[Required authori
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_streams_name_request, 'body'),
-    getZodLooseObjectFromProperty(get_streams_name_request, 'path'),
-    getZodLooseObjectFromProperty(get_streams_name_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_streams_name_request, 'body'),
+    ...getShapeAt(get_streams_name_request, 'path'),
+    ...getShapeAt(get_streams_name_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_streams_name_response,
 };
 const PUT_STREAMS_NAME_CONTRACT: InternalConnectorContract = {
@@ -14101,11 +14473,12 @@ Creates or updates a stream definition. Classic streams can not be created throu
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_streams_name_request, 'body'),
-    getZodLooseObjectFromProperty(put_streams_name_request, 'path'),
-    getZodLooseObjectFromProperty(put_streams_name_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_streams_name_request, 'body'),
+    ...getShapeAt(put_streams_name_request, 'path'),
+    ...getShapeAt(put_streams_name_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_streams_name_response,
 };
 const POST_STREAMS_NAME_FORK_CONTRACT: InternalConnectorContract = {
@@ -14128,11 +14501,12 @@ Forks a wired stream and creates a child stream<br/><br/>[Required authorization
     urlParams: [],
     bodyParams: ['status', 'stream', 'where'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_streams_name_fork_request, 'body'),
-    getZodLooseObjectFromProperty(post_streams_name_fork_request, 'path'),
-    getZodLooseObjectFromProperty(post_streams_name_fork_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_streams_name_fork_request, 'body'),
+    ...getShapeAt(post_streams_name_fork_request, 'path'),
+    ...getShapeAt(post_streams_name_fork_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_streams_name_fork_response,
 };
 const GET_STREAMS_NAME_GROUP_CONTRACT: InternalConnectorContract = {
@@ -14155,11 +14529,12 @@ Fetches the group settings of a group stream definition<br/><br/>[Required autho
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_streams_name_group_request, 'body'),
-    getZodLooseObjectFromProperty(get_streams_name_group_request, 'path'),
-    getZodLooseObjectFromProperty(get_streams_name_group_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_streams_name_group_request, 'body'),
+    ...getShapeAt(get_streams_name_group_request, 'path'),
+    ...getShapeAt(get_streams_name_group_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_streams_name_group_response,
 };
 const PUT_STREAMS_NAME_GROUP_CONTRACT: InternalConnectorContract = {
@@ -14182,11 +14557,12 @@ Upserts the group settings of a group stream definition<br/><br/>[Required autho
     urlParams: [],
     bodyParams: ['group'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_streams_name_group_request, 'body'),
-    getZodLooseObjectFromProperty(put_streams_name_group_request, 'path'),
-    getZodLooseObjectFromProperty(put_streams_name_group_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_streams_name_group_request, 'body'),
+    ...getShapeAt(put_streams_name_group_request, 'path'),
+    ...getShapeAt(put_streams_name_group_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_streams_name_group_response,
 };
 const GET_STREAMS_NAME_INGEST_CONTRACT: InternalConnectorContract = {
@@ -14209,11 +14585,12 @@ Fetches the ingest settings of an ingest stream definition<br/><br/>[Required au
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_streams_name_ingest_request, 'body'),
-    getZodLooseObjectFromProperty(get_streams_name_ingest_request, 'path'),
-    getZodLooseObjectFromProperty(get_streams_name_ingest_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_streams_name_ingest_request, 'body'),
+    ...getShapeAt(get_streams_name_ingest_request, 'path'),
+    ...getShapeAt(get_streams_name_ingest_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_streams_name_ingest_response,
 };
 const PUT_STREAMS_NAME_INGEST_CONTRACT: InternalConnectorContract = {
@@ -14236,11 +14613,12 @@ Upserts the ingest settings of an ingest stream definition<br/><br/>[Required au
     urlParams: [],
     bodyParams: ['ingest'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_streams_name_ingest_request, 'body'),
-    getZodLooseObjectFromProperty(put_streams_name_ingest_request, 'path'),
-    getZodLooseObjectFromProperty(put_streams_name_ingest_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_streams_name_ingest_request, 'body'),
+    ...getShapeAt(put_streams_name_ingest_request, 'path'),
+    ...getShapeAt(put_streams_name_ingest_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_streams_name_ingest_response,
 };
 const POST_STREAMS_NAME_CONTENT_EXPORT_CONTRACT: InternalConnectorContract = {
@@ -14263,11 +14641,12 @@ Exports the content associated to a stream.<br/><br/>[Required authorization] Ro
     urlParams: [],
     bodyParams: ['description', 'include', 'name', 'version'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_streams_name_content_export_request, 'body'),
-    getZodLooseObjectFromProperty(post_streams_name_content_export_request, 'path'),
-    getZodLooseObjectFromProperty(post_streams_name_content_export_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_streams_name_content_export_request, 'body'),
+    ...getShapeAt(post_streams_name_content_export_request, 'path'),
+    ...getShapeAt(post_streams_name_content_export_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_streams_name_content_export_response,
 };
 const POST_STREAMS_NAME_CONTENT_IMPORT_CONTRACT: InternalConnectorContract = {
@@ -14290,11 +14669,12 @@ Links content objects to a stream.<br/><br/>[Required authorization] Route requi
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_streams_name_content_import_request, 'body'),
-    getZodLooseObjectFromProperty(post_streams_name_content_import_request, 'path'),
-    getZodLooseObjectFromProperty(post_streams_name_content_import_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_streams_name_content_import_request, 'body'),
+    ...getShapeAt(post_streams_name_content_import_request, 'path'),
+    ...getShapeAt(post_streams_name_content_import_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_streams_name_content_import_response,
 };
 const GET_STREAMS_NAME_DASHBOARDS_CONTRACT: InternalConnectorContract = {
@@ -14317,11 +14697,12 @@ Fetches all dashboards linked to a stream that are visible to the current user i
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_streams_name_dashboards_request, 'body'),
-    getZodLooseObjectFromProperty(get_streams_name_dashboards_request, 'path'),
-    getZodLooseObjectFromProperty(get_streams_name_dashboards_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_streams_name_dashboards_request, 'body'),
+    ...getShapeAt(get_streams_name_dashboards_request, 'path'),
+    ...getShapeAt(get_streams_name_dashboards_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_streams_name_dashboards_response,
 };
 const POST_STREAMS_NAME_DASHBOARDS_BULK_CONTRACT: InternalConnectorContract = {
@@ -14344,11 +14725,12 @@ Bulk update dashboards linked to a stream. Can link new dashboards and delete ex
     urlParams: [],
     bodyParams: ['operations'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_streams_name_dashboards_bulk_request, 'body'),
-    getZodLooseObjectFromProperty(post_streams_name_dashboards_bulk_request, 'path'),
-    getZodLooseObjectFromProperty(post_streams_name_dashboards_bulk_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_streams_name_dashboards_bulk_request, 'body'),
+    ...getShapeAt(post_streams_name_dashboards_bulk_request, 'path'),
+    ...getShapeAt(post_streams_name_dashboards_bulk_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_streams_name_dashboards_bulk_response,
 };
 const DELETE_STREAMS_NAME_DASHBOARDS_DASHBOARDID_CONTRACT: InternalConnectorContract = {
@@ -14371,11 +14753,12 @@ Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the st
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_streams_name_dashboards_dashboardid_request, 'body'),
-    getZodLooseObjectFromProperty(delete_streams_name_dashboards_dashboardid_request, 'path'),
-    getZodLooseObjectFromProperty(delete_streams_name_dashboards_dashboardid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_streams_name_dashboards_dashboardid_request, 'body'),
+    ...getShapeAt(delete_streams_name_dashboards_dashboardid_request, 'path'),
+    ...getShapeAt(delete_streams_name_dashboards_dashboardid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_streams_name_dashboards_dashboardid_response,
 };
 const PUT_STREAMS_NAME_DASHBOARDS_DASHBOARDID_CONTRACT: InternalConnectorContract = {
@@ -14398,11 +14781,12 @@ Links a dashboard to a stream. Noop if the dashboard is already linked to the st
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_streams_name_dashboards_dashboardid_request, 'body'),
-    getZodLooseObjectFromProperty(put_streams_name_dashboards_dashboardid_request, 'path'),
-    getZodLooseObjectFromProperty(put_streams_name_dashboards_dashboardid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_streams_name_dashboards_dashboardid_request, 'body'),
+    ...getShapeAt(put_streams_name_dashboards_dashboardid_request, 'path'),
+    ...getShapeAt(put_streams_name_dashboards_dashboardid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_streams_name_dashboards_dashboardid_response,
 };
 const GET_STREAMS_NAME_QUERIES_CONTRACT: InternalConnectorContract = {
@@ -14425,11 +14809,12 @@ Fetches all queries linked to a stream that are visible to the current user in t
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_streams_name_queries_request, 'body'),
-    getZodLooseObjectFromProperty(get_streams_name_queries_request, 'path'),
-    getZodLooseObjectFromProperty(get_streams_name_queries_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_streams_name_queries_request, 'body'),
+    ...getShapeAt(get_streams_name_queries_request, 'path'),
+    ...getShapeAt(get_streams_name_queries_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_streams_name_queries_response,
 };
 const POST_STREAMS_NAME_QUERIES_BULK_CONTRACT: InternalConnectorContract = {
@@ -14452,11 +14837,12 @@ Bulk update queries of a stream. Can add new queries and delete existing ones.<b
     urlParams: [],
     bodyParams: ['operations'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_streams_name_queries_bulk_request, 'body'),
-    getZodLooseObjectFromProperty(post_streams_name_queries_bulk_request, 'path'),
-    getZodLooseObjectFromProperty(post_streams_name_queries_bulk_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_streams_name_queries_bulk_request, 'body'),
+    ...getShapeAt(post_streams_name_queries_bulk_request, 'path'),
+    ...getShapeAt(post_streams_name_queries_bulk_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_streams_name_queries_bulk_response,
 };
 const DELETE_STREAMS_NAME_QUERIES_QUERYID_CONTRACT: InternalConnectorContract = {
@@ -14479,11 +14865,12 @@ Remove a query from a stream. Noop if the query is not found on the stream.<br/>
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_streams_name_queries_queryid_request, 'body'),
-    getZodLooseObjectFromProperty(delete_streams_name_queries_queryid_request, 'path'),
-    getZodLooseObjectFromProperty(delete_streams_name_queries_queryid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_streams_name_queries_queryid_request, 'body'),
+    ...getShapeAt(delete_streams_name_queries_queryid_request, 'path'),
+    ...getShapeAt(delete_streams_name_queries_queryid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_streams_name_queries_queryid_response,
 };
 const PUT_STREAMS_NAME_QUERIES_QUERYID_CONTRACT: InternalConnectorContract = {
@@ -14506,11 +14893,12 @@ Adds a query to a stream. Noop if the query is already present on the stream.<br
     urlParams: [],
     bodyParams: ['feature', 'kql', 'title'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_streams_name_queries_queryid_request, 'body'),
-    getZodLooseObjectFromProperty(put_streams_name_queries_queryid_request, 'path'),
-    getZodLooseObjectFromProperty(put_streams_name_queries_queryid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_streams_name_queries_queryid_request, 'body'),
+    ...getShapeAt(put_streams_name_queries_queryid_request, 'path'),
+    ...getShapeAt(put_streams_name_queries_queryid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_streams_name_queries_queryid_response,
 };
 const GET_STREAMS_NAME_RULES_CONTRACT: InternalConnectorContract = {
@@ -14533,11 +14921,12 @@ Fetches all rules linked to a stream that are visible to the current user in the
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_streams_name_rules_request, 'body'),
-    getZodLooseObjectFromProperty(get_streams_name_rules_request, 'path'),
-    getZodLooseObjectFromProperty(get_streams_name_rules_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_streams_name_rules_request, 'body'),
+    ...getShapeAt(get_streams_name_rules_request, 'path'),
+    ...getShapeAt(get_streams_name_rules_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_streams_name_rules_response,
 };
 const DELETE_STREAMS_NAME_RULES_RULEID_CONTRACT: InternalConnectorContract = {
@@ -14560,11 +14949,12 @@ Unlinks a rule from a stream. Noop if the rule is not linked to the stream.<br/>
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_streams_name_rules_ruleid_request, 'body'),
-    getZodLooseObjectFromProperty(delete_streams_name_rules_ruleid_request, 'path'),
-    getZodLooseObjectFromProperty(delete_streams_name_rules_ruleid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_streams_name_rules_ruleid_request, 'body'),
+    ...getShapeAt(delete_streams_name_rules_ruleid_request, 'path'),
+    ...getShapeAt(delete_streams_name_rules_ruleid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_streams_name_rules_ruleid_response,
 };
 const PUT_STREAMS_NAME_RULES_RULEID_CONTRACT: InternalConnectorContract = {
@@ -14587,11 +14977,12 @@ Links a rule to a stream. Noop if the rule is already linked to the stream.<br/>
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_streams_name_rules_ruleid_request, 'body'),
-    getZodLooseObjectFromProperty(put_streams_name_rules_ruleid_request, 'path'),
-    getZodLooseObjectFromProperty(put_streams_name_rules_ruleid_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_streams_name_rules_ruleid_request, 'body'),
+    ...getShapeAt(put_streams_name_rules_ruleid_request, 'path'),
+    ...getShapeAt(put_streams_name_rules_ruleid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_streams_name_rules_ruleid_response,
 };
 const GET_STREAMS_NAME_SIGNIFICANT_EVENTS_CONTRACT: InternalConnectorContract = {
@@ -14614,11 +15005,12 @@ Read the significant events<br/><br/>[Required authorization] Route required pri
     urlParams: ['from', 'to', 'bucketSize'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_streams_name_significant_events_request, 'body'),
-    getZodLooseObjectFromProperty(get_streams_name_significant_events_request, 'path'),
-    getZodLooseObjectFromProperty(get_streams_name_significant_events_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_streams_name_significant_events_request, 'body'),
+    ...getShapeAt(get_streams_name_significant_events_request, 'path'),
+    ...getShapeAt(get_streams_name_significant_events_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_streams_name_significant_events_response,
 };
 const POST_STREAMS_NAME_SIGNIFICANT_EVENTS_GENERATE_CONTRACT: InternalConnectorContract = {
@@ -14641,11 +15033,12 @@ Generate significant events queries based on the stream data<br/><br/>[Required 
     urlParams: ['connectorId', 'currentDate', 'from', 'to'],
     bodyParams: ['feature'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_streams_name_significant_events_generate_request, 'body'),
-    getZodLooseObjectFromProperty(post_streams_name_significant_events_generate_request, 'path'),
-    getZodLooseObjectFromProperty(post_streams_name_significant_events_generate_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_streams_name_significant_events_generate_request, 'body'),
+    ...getShapeAt(post_streams_name_significant_events_generate_request, 'path'),
+    ...getShapeAt(post_streams_name_significant_events_generate_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_streams_name_significant_events_generate_response,
 };
 const POST_STREAMS_NAME_SIGNIFICANT_EVENTS_PREVIEW_CONTRACT: InternalConnectorContract = {
@@ -14668,13 +15061,140 @@ Preview significant event results based on a given query<br/><br/>[Required auth
     urlParams: ['from', 'to', 'bucketSize'],
     bodyParams: ['query'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_streams_name_significant_events_preview_request, 'body'),
-    getZodLooseObjectFromProperty(post_streams_name_significant_events_preview_request, 'path'),
-    getZodLooseObjectFromProperty(post_streams_name_significant_events_preview_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_streams_name_significant_events_preview_request, 'body'),
+    ...getShapeAt(post_streams_name_significant_events_preview_request, 'path'),
+    ...getShapeAt(post_streams_name_significant_events_preview_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_streams_name_significant_events_preview_response,
 };
+const GET_STREAMS_STREAMNAME_ATTACHMENTS_CONTRACT: InternalConnectorContract = {
+  type: 'kibana.get_streams_streamname_attachments',
+  connectorGroup: 'internal',
+  summary: `Get stream attachments`,
+  description: `**Spaces method and path for this operation:**
+
+<div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{streamName}/attachments</span></div>
+
+Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+Fetches all attachments linked to a stream that are visible to the current user in the current space. Optionally filter by attachment type.<br/><br/>[Required authorization] Route required privileges: read_stream.`,
+  methods: ['GET'],
+  patterns: ['/api/streams/{streamName}/attachments'],
+  documentation: null,
+  parameterTypes: {
+    headerParams: [],
+    pathParams: ['streamName'],
+    urlParams: ['attachmentType'],
+    bodyParams: [],
+  },
+  paramsSchema: z.object({
+    ...getShapeAt(get_streams_streamname_attachments_request, 'body'),
+    ...getShapeAt(get_streams_streamname_attachments_request, 'path'),
+    ...getShapeAt(get_streams_streamname_attachments_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
+  outputSchema: get_streams_streamname_attachments_response,
+};
+const POST_STREAMS_STREAMNAME_ATTACHMENTS_BULK_CONTRACT: InternalConnectorContract = {
+  type: 'kibana.post_streams_streamname_attachments_bulk',
+  connectorGroup: 'internal',
+  summary: `Bulk update attachments`,
+  description: `**Spaces method and path for this operation:**
+
+<div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{streamName}/attachments/_bulk</span></div>
+
+Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+Bulk update attachments linked to a stream. Can link new attachments and delete existing ones. Supports mixed attachment types in a single request.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
+  methods: ['POST'],
+  patterns: ['/api/streams/{streamName}/attachments/_bulk'],
+  documentation: null,
+  parameterTypes: {
+    headerParams: ['kbn-xsrf'],
+    pathParams: ['streamName'],
+    urlParams: [],
+    bodyParams: ['operations'],
+  },
+  paramsSchema: z.object({
+    ...getShapeAt(post_streams_streamname_attachments_bulk_request, 'body'),
+    ...getShapeAt(post_streams_streamname_attachments_bulk_request, 'path'),
+    ...getShapeAt(post_streams_streamname_attachments_bulk_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
+  outputSchema: post_streams_streamname_attachments_bulk_response,
+};
+const DELETE_STREAMS_STREAMNAME_ATTACHMENTS_ATTACHMENTTYPE_ATTACHMENTID_CONTRACT: InternalConnectorContract =
+  {
+    type: 'kibana.delete_streams_streamname_attachments_attachmenttype_attachmentid',
+    connectorGroup: 'internal',
+    summary: `Unlink an attachment from a stream`,
+    description: `**Spaces method and path for this operation:**
+
+<div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{streamName}/attachments/{attachmentType}/{attachmentId}</span></div>
+
+Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+Unlinks an attachment from a stream. Noop if the attachment is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
+    methods: ['DELETE'],
+    patterns: ['/api/streams/{streamName}/attachments/{attachmentType}/{attachmentId}'],
+    documentation: null,
+    parameterTypes: {
+      headerParams: ['kbn-xsrf'],
+      pathParams: ['streamName', 'attachmentType', 'attachmentId'],
+      urlParams: [],
+      bodyParams: [],
+    },
+    paramsSchema: z.object({
+      ...getShapeAt(
+        delete_streams_streamname_attachments_attachmenttype_attachmentid_request,
+        'body'
+      ),
+      ...getShapeAt(
+        delete_streams_streamname_attachments_attachmenttype_attachmentid_request,
+        'path'
+      ),
+      ...getShapeAt(
+        delete_streams_streamname_attachments_attachmenttype_attachmentid_request,
+        'query'
+      ),
+      fetcher: FetcherConfigSchema,
+    }),
+    outputSchema: delete_streams_streamname_attachments_attachmenttype_attachmentid_response,
+  };
+const PUT_STREAMS_STREAMNAME_ATTACHMENTS_ATTACHMENTTYPE_ATTACHMENTID_CONTRACT: InternalConnectorContract =
+  {
+    type: 'kibana.put_streams_streamname_attachments_attachmenttype_attachmentid',
+    connectorGroup: 'internal',
+    summary: `Link an attachment to a stream`,
+    description: `**Spaces method and path for this operation:**
+
+<div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{streamName}/attachments/{attachmentType}/{attachmentId}</span></div>
+
+Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+Links an attachment to a stream. Noop if the attachment is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
+    methods: ['PUT'],
+    patterns: ['/api/streams/{streamName}/attachments/{attachmentType}/{attachmentId}'],
+    documentation: null,
+    parameterTypes: {
+      headerParams: ['kbn-xsrf'],
+      pathParams: ['streamName', 'attachmentType', 'attachmentId'],
+      urlParams: [],
+      bodyParams: [],
+    },
+    paramsSchema: z.object({
+      ...getShapeAt(put_streams_streamname_attachments_attachmenttype_attachmentid_request, 'body'),
+      ...getShapeAt(put_streams_streamname_attachments_attachmenttype_attachmentid_request, 'path'),
+      ...getShapeAt(
+        put_streams_streamname_attachments_attachmenttype_attachmentid_request,
+        'query'
+      ),
+      fetcher: FetcherConfigSchema,
+    }),
+    outputSchema: put_streams_streamname_attachments_attachmenttype_attachmentid_response,
+  };
 const POST_SYNTHETICS_MONITOR_TEST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_synthetics_monitor_test',
   connectorGroup: 'internal',
@@ -14696,11 +15216,12 @@ Trigger an immediate test execution for the specified monitor. The response incl
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_synthetics_monitor_test_request, 'body'),
-    getZodLooseObjectFromProperty(post_synthetics_monitor_test_request, 'path'),
-    getZodLooseObjectFromProperty(post_synthetics_monitor_test_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_synthetics_monitor_test_request, 'body'),
+    ...getShapeAt(post_synthetics_monitor_test_request, 'path'),
+    ...getShapeAt(post_synthetics_monitor_test_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_synthetics_monitor_test_response,
 };
 const GET_SYNTHETIC_MONITORS_CONTRACT: InternalConnectorContract = {
@@ -14739,11 +15260,12 @@ You must have \`read\` privileges for the Synthetics feature in the Observabilit
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_synthetic_monitors_request, 'body'),
-    getZodLooseObjectFromProperty(get_synthetic_monitors_request, 'path'),
-    getZodLooseObjectFromProperty(get_synthetic_monitors_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_synthetic_monitors_request, 'body'),
+    ...getShapeAt(get_synthetic_monitors_request, 'path'),
+    ...getShapeAt(get_synthetic_monitors_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_synthetic_monitors_response,
 };
 const POST_SYNTHETIC_MONITORS_CONTRACT: InternalConnectorContract = {
@@ -14768,11 +15290,12 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_synthetic_monitors_request, 'body'),
-    getZodLooseObjectFromProperty(post_synthetic_monitors_request, 'path'),
-    getZodLooseObjectFromProperty(post_synthetic_monitors_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_synthetic_monitors_request, 'body'),
+    ...getShapeAt(post_synthetic_monitors_request, 'path'),
+    ...getShapeAt(post_synthetic_monitors_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_synthetic_monitors_response,
 };
 const DELETE_SYNTHETIC_MONITORS_CONTRACT: InternalConnectorContract = {
@@ -14796,11 +15319,12 @@ Delete multiple monitors by sending a list of config IDs.
     urlParams: [],
     bodyParams: ['ids'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_synthetic_monitors_request, 'body'),
-    getZodLooseObjectFromProperty(delete_synthetic_monitors_request, 'path'),
-    getZodLooseObjectFromProperty(delete_synthetic_monitors_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_synthetic_monitors_request, 'body'),
+    ...getShapeAt(delete_synthetic_monitors_request, 'path'),
+    ...getShapeAt(delete_synthetic_monitors_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_synthetic_monitors_response,
 };
 const DELETE_SYNTHETIC_MONITOR_CONTRACT: InternalConnectorContract = {
@@ -14825,11 +15349,12 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_synthetic_monitor_request, 'body'),
-    getZodLooseObjectFromProperty(delete_synthetic_monitor_request, 'path'),
-    getZodLooseObjectFromProperty(delete_synthetic_monitor_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_synthetic_monitor_request, 'body'),
+    ...getShapeAt(delete_synthetic_monitor_request, 'path'),
+    ...getShapeAt(delete_synthetic_monitor_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_synthetic_monitor_response,
 };
 const GET_SYNTHETIC_MONITOR_CONTRACT: InternalConnectorContract = {
@@ -14850,11 +15375,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_synthetic_monitor_request, 'body'),
-    getZodLooseObjectFromProperty(get_synthetic_monitor_request, 'path'),
-    getZodLooseObjectFromProperty(get_synthetic_monitor_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_synthetic_monitor_request, 'body'),
+    ...getShapeAt(get_synthetic_monitor_request, 'path'),
+    ...getShapeAt(get_synthetic_monitor_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_synthetic_monitor_response,
 };
 const PUT_SYNTHETIC_MONITOR_CONTRACT: InternalConnectorContract = {
@@ -14880,11 +15406,12 @@ You can also partially update a monitor. This will only update the fields that a
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_synthetic_monitor_request, 'body'),
-    getZodLooseObjectFromProperty(put_synthetic_monitor_request, 'path'),
-    getZodLooseObjectFromProperty(put_synthetic_monitor_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_synthetic_monitor_request, 'body'),
+    ...getShapeAt(put_synthetic_monitor_request, 'path'),
+    ...getShapeAt(put_synthetic_monitor_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_synthetic_monitor_response,
 };
 const GET_PARAMETERS_CONTRACT: InternalConnectorContract = {
@@ -14908,11 +15435,12 @@ Get a list of all parameters. You must have \`read\` privileges for the Syntheti
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_parameters_request, 'body'),
-    getZodLooseObjectFromProperty(get_parameters_request, 'path'),
-    getZodLooseObjectFromProperty(get_parameters_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_parameters_request, 'body'),
+    ...getShapeAt(get_parameters_request, 'path'),
+    ...getShapeAt(get_parameters_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_parameters_response,
 };
 const POST_PARAMETERS_CONTRACT: InternalConnectorContract = {
@@ -14937,11 +15465,12 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_parameters_request, 'body'),
-    getZodLooseObjectFromProperty(post_parameters_request, 'path'),
-    getZodLooseObjectFromProperty(post_parameters_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_parameters_request, 'body'),
+    ...getShapeAt(post_parameters_request, 'path'),
+    ...getShapeAt(post_parameters_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_parameters_response,
 };
 const DELETE_PARAMETERS_CONTRACT: InternalConnectorContract = {
@@ -14966,11 +15495,12 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     urlParams: [],
     bodyParams: ['ids'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_parameters_request, 'body'),
-    getZodLooseObjectFromProperty(delete_parameters_request, 'path'),
-    getZodLooseObjectFromProperty(delete_parameters_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_parameters_request, 'body'),
+    ...getShapeAt(delete_parameters_request, 'path'),
+    ...getShapeAt(delete_parameters_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_parameters_response,
 };
 const DELETE_PARAMETER_CONTRACT: InternalConnectorContract = {
@@ -14995,11 +15525,12 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_parameter_request, 'body'),
-    getZodLooseObjectFromProperty(delete_parameter_request, 'path'),
-    getZodLooseObjectFromProperty(delete_parameter_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_parameter_request, 'body'),
+    ...getShapeAt(delete_parameter_request, 'path'),
+    ...getShapeAt(delete_parameter_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_parameter_response,
 };
 const GET_PARAMETER_CONTRACT: InternalConnectorContract = {
@@ -15024,11 +15555,12 @@ You must have \`read\` privileges for the Synthetics feature in the Observabilit
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_parameter_request, 'body'),
-    getZodLooseObjectFromProperty(get_parameter_request, 'path'),
-    getZodLooseObjectFromProperty(get_parameter_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_parameter_request, 'body'),
+    ...getShapeAt(get_parameter_request, 'path'),
+    ...getShapeAt(get_parameter_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_parameter_response,
 };
 const PUT_PARAMETER_CONTRACT: InternalConnectorContract = {
@@ -15053,11 +15585,12 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
     urlParams: [],
     bodyParams: ['description', 'key', 'tags', 'value'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_parameter_request, 'body'),
-    getZodLooseObjectFromProperty(put_parameter_request, 'path'),
-    getZodLooseObjectFromProperty(put_parameter_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_parameter_request, 'body'),
+    ...getShapeAt(put_parameter_request, 'path'),
+    ...getShapeAt(put_parameter_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_parameter_response,
 };
 const GET_PRIVATE_LOCATIONS_CONTRACT: InternalConnectorContract = {
@@ -15082,11 +15615,12 @@ You must have \`read\` privileges for the Synthetics and Uptime feature in the O
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_private_locations_request, 'body'),
-    getZodLooseObjectFromProperty(get_private_locations_request, 'path'),
-    getZodLooseObjectFromProperty(get_private_locations_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_private_locations_request, 'body'),
+    ...getShapeAt(get_private_locations_request, 'path'),
+    ...getShapeAt(get_private_locations_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_private_locations_response,
 };
 const POST_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
@@ -15109,11 +15643,12 @@ You must have \`all\` privileges for the Synthetics and Uptime feature in the Ob
     urlParams: [],
     bodyParams: ['agentPolicyId', 'geo', 'label', 'spaces', 'tags'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(post_private_location_request, 'body'),
-    getZodLooseObjectFromProperty(post_private_location_request, 'path'),
-    getZodLooseObjectFromProperty(post_private_location_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(post_private_location_request, 'body'),
+    ...getShapeAt(post_private_location_request, 'path'),
+    ...getShapeAt(post_private_location_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: post_private_location_response,
 };
 const DELETE_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
@@ -15139,11 +15674,12 @@ A location cannot be deleted if it has associated monitors in use. You must dele
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_private_location_request, 'body'),
-    getZodLooseObjectFromProperty(delete_private_location_request, 'path'),
-    getZodLooseObjectFromProperty(delete_private_location_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_private_location_request, 'body'),
+    ...getShapeAt(delete_private_location_request, 'path'),
+    ...getShapeAt(delete_private_location_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_private_location_response,
 };
 const GET_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
@@ -15167,11 +15703,12 @@ You must have \`read\` privileges for the Synthetics and Uptime feature in the O
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_private_location_request, 'body'),
-    getZodLooseObjectFromProperty(get_private_location_request, 'path'),
-    getZodLooseObjectFromProperty(get_private_location_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_private_location_request, 'body'),
+    ...getShapeAt(get_private_location_request, 'path'),
+    ...getShapeAt(get_private_location_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_private_location_response,
 };
 const PUT_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
@@ -15197,11 +15734,12 @@ When a private location's label is updated, all monitors using this location wil
     urlParams: [],
     bodyParams: ['label'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_private_location_request, 'body'),
-    getZodLooseObjectFromProperty(put_private_location_request, 'path'),
-    getZodLooseObjectFromProperty(put_private_location_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_private_location_request, 'body'),
+    ...getShapeAt(put_private_location_request, 'path'),
+    ...getShapeAt(put_private_location_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_private_location_response,
 };
 const TASK_MANAGER_HEALTH_CONTRACT: InternalConnectorContract = {
@@ -15219,11 +15757,12 @@ const TASK_MANAGER_HEALTH_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(task_manager_health_request, 'body'),
-    getZodLooseObjectFromProperty(task_manager_health_request, 'path'),
-    getZodLooseObjectFromProperty(task_manager_health_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(task_manager_health_request, 'body'),
+    ...getShapeAt(task_manager_health_request, 'path'),
+    ...getShapeAt(task_manager_health_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: task_manager_health_response,
 };
 const DELETETIMELINES_CONTRACT: InternalConnectorContract = {
@@ -15246,11 +15785,12 @@ Delete one or more Timelines or Timeline templates.`,
     urlParams: [],
     bodyParams: ['savedObjectIds', 'searchIds'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_timelines_request, 'body'),
-    getZodLooseObjectFromProperty(delete_timelines_request, 'path'),
-    getZodLooseObjectFromProperty(delete_timelines_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_timelines_request, 'body'),
+    ...getShapeAt(delete_timelines_request, 'path'),
+    ...getShapeAt(delete_timelines_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_timelines_response,
 };
 const GETTIMELINE_CONTRACT: InternalConnectorContract = {
@@ -15273,11 +15813,12 @@ Get the details of an existing saved Timeline or Timeline template.`,
     urlParams: ['template_timeline_id', 'id'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_timeline_request, 'body'),
-    getZodLooseObjectFromProperty(get_timeline_request, 'path'),
-    getZodLooseObjectFromProperty(get_timeline_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_timeline_request, 'body'),
+    ...getShapeAt(get_timeline_request, 'path'),
+    ...getShapeAt(get_timeline_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_timeline_response,
 };
 const PATCHTIMELINE_CONTRACT: InternalConnectorContract = {
@@ -15300,11 +15841,12 @@ Update an existing Timeline. You can update the title, description, date range, 
     urlParams: [],
     bodyParams: ['timeline', 'timelineId', 'version'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(patch_timeline_request, 'body'),
-    getZodLooseObjectFromProperty(patch_timeline_request, 'path'),
-    getZodLooseObjectFromProperty(patch_timeline_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(patch_timeline_request, 'body'),
+    ...getShapeAt(patch_timeline_request, 'path'),
+    ...getShapeAt(patch_timeline_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: patch_timeline_response,
 };
 const CREATETIMELINES_CONTRACT: InternalConnectorContract = {
@@ -15335,11 +15877,12 @@ Create a new Timeline or Timeline template.`,
       'version',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_timelines_request, 'body'),
-    getZodLooseObjectFromProperty(create_timelines_request, 'path'),
-    getZodLooseObjectFromProperty(create_timelines_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_timelines_request, 'body'),
+    ...getShapeAt(create_timelines_request, 'path'),
+    ...getShapeAt(create_timelines_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_timelines_response,
 };
 const COPYTIMELINE_CONTRACT: InternalConnectorContract = {
@@ -15363,11 +15906,12 @@ Copies and returns a timeline or timeline template.
     urlParams: [],
     bodyParams: ['timeline', 'timelineIdToCopy'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(copy_timeline_request, 'body'),
-    getZodLooseObjectFromProperty(copy_timeline_request, 'path'),
-    getZodLooseObjectFromProperty(copy_timeline_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(copy_timeline_request, 'body'),
+    ...getShapeAt(copy_timeline_request, 'path'),
+    ...getShapeAt(copy_timeline_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: copy_timeline_response,
 };
 const GETDRAFTTIMELINES_CONTRACT: InternalConnectorContract = {
@@ -15390,11 +15934,12 @@ Get the details of the draft Timeline  or Timeline template for the current user
     urlParams: ['timelineType'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_draft_timelines_request, 'body'),
-    getZodLooseObjectFromProperty(get_draft_timelines_request, 'path'),
-    getZodLooseObjectFromProperty(get_draft_timelines_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_draft_timelines_request, 'body'),
+    ...getShapeAt(get_draft_timelines_request, 'path'),
+    ...getShapeAt(get_draft_timelines_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_draft_timelines_response,
 };
 const CLEANDRAFTTIMELINES_CONTRACT: InternalConnectorContract = {
@@ -15420,11 +15965,12 @@ Create a clean draft Timeline or Timeline template for the current user.
     urlParams: [],
     bodyParams: ['timelineType'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(clean_draft_timelines_request, 'body'),
-    getZodLooseObjectFromProperty(clean_draft_timelines_request, 'path'),
-    getZodLooseObjectFromProperty(clean_draft_timelines_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(clean_draft_timelines_request, 'body'),
+    ...getShapeAt(clean_draft_timelines_request, 'path'),
+    ...getShapeAt(clean_draft_timelines_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: clean_draft_timelines_response,
 };
 const EXPORTTIMELINES_CONTRACT: InternalConnectorContract = {
@@ -15447,11 +15993,12 @@ Export Timelines as an NDJSON file.`,
     urlParams: ['file_name'],
     bodyParams: ['ids'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(export_timelines_request, 'body'),
-    getZodLooseObjectFromProperty(export_timelines_request, 'path'),
-    getZodLooseObjectFromProperty(export_timelines_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(export_timelines_request, 'body'),
+    ...getShapeAt(export_timelines_request, 'path'),
+    ...getShapeAt(export_timelines_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: export_timelines_response,
 };
 const PERSISTFAVORITEROUTE_CONTRACT: InternalConnectorContract = {
@@ -15474,11 +16021,12 @@ Favorite a Timeline or Timeline template for the current user.`,
     urlParams: [],
     bodyParams: ['templateTimelineId', 'templateTimelineVersion', 'timelineId', 'timelineType'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(persist_favorite_route_request, 'body'),
-    getZodLooseObjectFromProperty(persist_favorite_route_request, 'path'),
-    getZodLooseObjectFromProperty(persist_favorite_route_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(persist_favorite_route_request, 'body'),
+    ...getShapeAt(persist_favorite_route_request, 'path'),
+    ...getShapeAt(persist_favorite_route_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: persist_favorite_route_response,
 };
 const IMPORTTIMELINES_CONTRACT: InternalConnectorContract = {
@@ -15501,11 +16049,12 @@ Import Timelines.`,
     urlParams: [],
     bodyParams: ['file', 'isImmutable'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(import_timelines_request, 'body'),
-    getZodLooseObjectFromProperty(import_timelines_request, 'path'),
-    getZodLooseObjectFromProperty(import_timelines_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(import_timelines_request, 'body'),
+    ...getShapeAt(import_timelines_request, 'path'),
+    ...getShapeAt(import_timelines_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: import_timelines_response,
 };
 const INSTALLPREPACKEDTIMELINES_CONTRACT: InternalConnectorContract = {
@@ -15528,11 +16077,12 @@ Install or update prepackaged Timelines.`,
     urlParams: [],
     bodyParams: ['prepackagedTimelines', 'timelinesToInstall', 'timelinesToUpdate'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(install_prepacked_timelines_request, 'body'),
-    getZodLooseObjectFromProperty(install_prepacked_timelines_request, 'path'),
-    getZodLooseObjectFromProperty(install_prepacked_timelines_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(install_prepacked_timelines_request, 'body'),
+    ...getShapeAt(install_prepacked_timelines_request, 'path'),
+    ...getShapeAt(install_prepacked_timelines_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: install_prepacked_timelines_response,
 };
 const RESOLVETIMELINE_CONTRACT: InternalConnectorContract = {
@@ -15553,11 +16103,12 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     urlParams: ['template_timeline_id', 'id'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(resolve_timeline_request, 'body'),
-    getZodLooseObjectFromProperty(resolve_timeline_request, 'path'),
-    getZodLooseObjectFromProperty(resolve_timeline_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(resolve_timeline_request, 'body'),
+    ...getShapeAt(resolve_timeline_request, 'path'),
+    ...getShapeAt(resolve_timeline_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: resolve_timeline_response,
 };
 const GETTIMELINES_CONTRACT: InternalConnectorContract = {
@@ -15589,11 +16140,12 @@ Get a list of all saved Timelines or Timeline templates.`,
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_timelines_request, 'body'),
-    getZodLooseObjectFromProperty(get_timelines_request, 'path'),
-    getZodLooseObjectFromProperty(get_timelines_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_timelines_request, 'body'),
+    ...getShapeAt(get_timelines_request, 'path'),
+    ...getShapeAt(get_timelines_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_timelines_response,
 };
 const GET_UPGRADE_STATUS_CONTRACT: InternalConnectorContract = {
@@ -15610,11 +16162,12 @@ const GET_UPGRADE_STATUS_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_upgrade_status_request, 'body'),
-    getZodLooseObjectFromProperty(get_upgrade_status_request, 'path'),
-    getZodLooseObjectFromProperty(get_upgrade_status_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_upgrade_status_request, 'body'),
+    ...getShapeAt(get_upgrade_status_request, 'path'),
+    ...getShapeAt(get_upgrade_status_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_upgrade_status_response,
 };
 const GET_UPTIME_SETTINGS_CONTRACT: InternalConnectorContract = {
@@ -15638,11 +16191,12 @@ You must have \`read\` privileges for the uptime feature in the Observability se
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_uptime_settings_request, 'body'),
-    getZodLooseObjectFromProperty(get_uptime_settings_request, 'path'),
-    getZodLooseObjectFromProperty(get_uptime_settings_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_uptime_settings_request, 'body'),
+    ...getShapeAt(get_uptime_settings_request, 'path'),
+    ...getShapeAt(get_uptime_settings_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_uptime_settings_response,
 };
 const PUT_UPTIME_SETTINGS_CONTRACT: InternalConnectorContract = {
@@ -15672,11 +16226,12 @@ Update uptime setting attributes like \`heartbeatIndices\`, \`certExpirationThre
       'heartbeatIndices',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(put_uptime_settings_request, 'body'),
-    getZodLooseObjectFromProperty(put_uptime_settings_request, 'path'),
-    getZodLooseObjectFromProperty(put_uptime_settings_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(put_uptime_settings_request, 'body'),
+    ...getShapeAt(put_uptime_settings_request, 'path'),
+    ...getShapeAt(put_uptime_settings_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: put_uptime_settings_response,
 };
 const FINDSLOSOP_CONTRACT: InternalConnectorContract = {
@@ -15703,11 +16258,12 @@ const FINDSLOSOP_CONTRACT: InternalConnectorContract = {
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(find_slos_op_request, 'body'),
-    getZodLooseObjectFromProperty(find_slos_op_request, 'path'),
-    getZodLooseObjectFromProperty(find_slos_op_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(find_slos_op_request, 'body'),
+    ...getShapeAt(find_slos_op_request, 'path'),
+    ...getShapeAt(find_slos_op_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: find_slos_op_response,
 };
 const CREATESLOOP_CONTRACT: InternalConnectorContract = {
@@ -15737,11 +16293,12 @@ const CREATESLOOP_CONTRACT: InternalConnectorContract = {
       'timeWindow',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(create_slo_op_request, 'body'),
-    getZodLooseObjectFromProperty(create_slo_op_request, 'path'),
-    getZodLooseObjectFromProperty(create_slo_op_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(create_slo_op_request, 'body'),
+    ...getShapeAt(create_slo_op_request, 'path'),
+    ...getShapeAt(create_slo_op_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: create_slo_op_response,
 };
 const BULKDELETEOP_CONTRACT: InternalConnectorContract = {
@@ -15759,11 +16316,12 @@ const BULKDELETEOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: ['list'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(bulk_delete_op_request, 'body'),
-    getZodLooseObjectFromProperty(bulk_delete_op_request, 'path'),
-    getZodLooseObjectFromProperty(bulk_delete_op_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(bulk_delete_op_request, 'body'),
+    ...getShapeAt(bulk_delete_op_request, 'path'),
+    ...getShapeAt(bulk_delete_op_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: bulk_delete_op_response,
 };
 const BULKDELETESTATUSOP_CONTRACT: InternalConnectorContract = {
@@ -15781,11 +16339,12 @@ const BULKDELETESTATUSOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(bulk_delete_status_op_request, 'body'),
-    getZodLooseObjectFromProperty(bulk_delete_status_op_request, 'path'),
-    getZodLooseObjectFromProperty(bulk_delete_status_op_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(bulk_delete_status_op_request, 'body'),
+    ...getShapeAt(bulk_delete_status_op_request, 'path'),
+    ...getShapeAt(bulk_delete_status_op_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: bulk_delete_status_op_response,
 };
 const DELETEROLLUPDATAOP_CONTRACT: InternalConnectorContract = {
@@ -15803,11 +16362,12 @@ const DELETEROLLUPDATAOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: ['list', 'purgePolicy'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_rollup_data_op_request, 'body'),
-    getZodLooseObjectFromProperty(delete_rollup_data_op_request, 'path'),
-    getZodLooseObjectFromProperty(delete_rollup_data_op_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_rollup_data_op_request, 'body'),
+    ...getShapeAt(delete_rollup_data_op_request, 'path'),
+    ...getShapeAt(delete_rollup_data_op_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_rollup_data_op_response,
 };
 const DELETESLOINSTANCESOP_CONTRACT: InternalConnectorContract = {
@@ -15825,11 +16385,12 @@ const DELETESLOINSTANCESOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: ['list'],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_slo_instances_op_request, 'body'),
-    getZodLooseObjectFromProperty(delete_slo_instances_op_request, 'path'),
-    getZodLooseObjectFromProperty(delete_slo_instances_op_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_slo_instances_op_request, 'body'),
+    ...getShapeAt(delete_slo_instances_op_request, 'path'),
+    ...getShapeAt(delete_slo_instances_op_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_slo_instances_op_response,
 };
 const DELETESLOOP_CONTRACT: InternalConnectorContract = {
@@ -15847,11 +16408,12 @@ const DELETESLOOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(delete_slo_op_request, 'body'),
-    getZodLooseObjectFromProperty(delete_slo_op_request, 'path'),
-    getZodLooseObjectFromProperty(delete_slo_op_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(delete_slo_op_request, 'body'),
+    ...getShapeAt(delete_slo_op_request, 'path'),
+    ...getShapeAt(delete_slo_op_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: delete_slo_op_response,
 };
 const GETSLOOP_CONTRACT: InternalConnectorContract = {
@@ -15869,11 +16431,12 @@ const GETSLOOP_CONTRACT: InternalConnectorContract = {
     urlParams: ['instanceId'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_slo_op_request, 'body'),
-    getZodLooseObjectFromProperty(get_slo_op_request, 'path'),
-    getZodLooseObjectFromProperty(get_slo_op_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_slo_op_request, 'body'),
+    ...getShapeAt(get_slo_op_request, 'path'),
+    ...getShapeAt(get_slo_op_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_slo_op_response,
 };
 const UPDATESLOOP_CONTRACT: InternalConnectorContract = {
@@ -15902,11 +16465,12 @@ const UPDATESLOOP_CONTRACT: InternalConnectorContract = {
       'timeWindow',
     ],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(update_slo_op_request, 'body'),
-    getZodLooseObjectFromProperty(update_slo_op_request, 'path'),
-    getZodLooseObjectFromProperty(update_slo_op_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(update_slo_op_request, 'body'),
+    ...getShapeAt(update_slo_op_request, 'path'),
+    ...getShapeAt(update_slo_op_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: update_slo_op_response,
 };
 const RESETSLOOP_CONTRACT: InternalConnectorContract = {
@@ -15924,11 +16488,12 @@ const RESETSLOOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(reset_slo_op_request, 'body'),
-    getZodLooseObjectFromProperty(reset_slo_op_request, 'path'),
-    getZodLooseObjectFromProperty(reset_slo_op_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(reset_slo_op_request, 'body'),
+    ...getShapeAt(reset_slo_op_request, 'path'),
+    ...getShapeAt(reset_slo_op_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: reset_slo_op_response,
 };
 const DISABLESLOOP_CONTRACT: InternalConnectorContract = {
@@ -15946,11 +16511,12 @@ const DISABLESLOOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(disable_slo_op_request, 'body'),
-    getZodLooseObjectFromProperty(disable_slo_op_request, 'path'),
-    getZodLooseObjectFromProperty(disable_slo_op_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(disable_slo_op_request, 'body'),
+    ...getShapeAt(disable_slo_op_request, 'path'),
+    ...getShapeAt(disable_slo_op_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: disable_slo_op_response,
 };
 const ENABLESLOOP_CONTRACT: InternalConnectorContract = {
@@ -15968,11 +16534,12 @@ const ENABLESLOOP_CONTRACT: InternalConnectorContract = {
     urlParams: [],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(enable_slo_op_request, 'body'),
-    getZodLooseObjectFromProperty(enable_slo_op_request, 'path'),
-    getZodLooseObjectFromProperty(enable_slo_op_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(enable_slo_op_request, 'body'),
+    ...getShapeAt(enable_slo_op_request, 'path'),
+    ...getShapeAt(enable_slo_op_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: enable_slo_op_response,
 };
 const GETDEFINITIONSOP_CONTRACT: InternalConnectorContract = {
@@ -15990,11 +16557,12 @@ const GETDEFINITIONSOP_CONTRACT: InternalConnectorContract = {
     urlParams: ['includeOutdatedOnly', 'includeHealth', 'tags', 'search', 'page', 'perPage'],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    getZodLooseObjectFromProperty(get_definitions_op_request, 'body'),
-    getZodLooseObjectFromProperty(get_definitions_op_request, 'path'),
-    getZodLooseObjectFromProperty(get_definitions_op_request, 'query'),
-  ]),
+  paramsSchema: z.object({
+    ...getShapeAt(get_definitions_op_request, 'body'),
+    ...getShapeAt(get_definitions_op_request, 'path'),
+    ...getShapeAt(get_definitions_op_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
   outputSchema: get_definitions_op_response,
 };
 
@@ -16474,6 +17042,10 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
   GET_STREAMS_NAME_SIGNIFICANT_EVENTS_CONTRACT,
   POST_STREAMS_NAME_SIGNIFICANT_EVENTS_GENERATE_CONTRACT,
   POST_STREAMS_NAME_SIGNIFICANT_EVENTS_PREVIEW_CONTRACT,
+  GET_STREAMS_STREAMNAME_ATTACHMENTS_CONTRACT,
+  POST_STREAMS_STREAMNAME_ATTACHMENTS_BULK_CONTRACT,
+  DELETE_STREAMS_STREAMNAME_ATTACHMENTS_ATTACHMENTTYPE_ATTACHMENTID_CONTRACT,
+  PUT_STREAMS_STREAMNAME_ATTACHMENTS_ATTACHMENTTYPE_ATTACHMENTID_CONTRACT,
   POST_SYNTHETICS_MONITOR_TEST_CONTRACT,
   GET_SYNTHETIC_MONITORS_CONTRACT,
   POST_SYNTHETIC_MONITORS_CONTRACT,

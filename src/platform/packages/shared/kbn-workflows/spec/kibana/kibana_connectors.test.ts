@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { GENERATED_KIBANA_CONNECTORS } from './kibana_connectors.gen';
-import { getZodParamSchema, getZodSchemaKeys } from '../utils/zod';
+import { getZodParamSchema, getZodSchemaKeys } from '../../common/utils/zod';
 import type { InternalConnectorContract } from '../../types/v1';
 
 const KIBANA_CONNECTOR_COUNT = GENERATED_KIBANA_CONNECTORS.length;

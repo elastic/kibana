@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ConnectorContractUnion,
-  ConnectorTypeInfo,
-  EnhancedInternalConnectorContract,
-  InternalConnectorContract,
-} from '@kbn/workflows';
+import type { ConnectorContractUnion, ConnectorTypeInfo } from '@kbn/workflows';
 import {
-  enhanceKibanaConnectorsWithFetcher,
   generateYamlSchemaFromConnectors,
+  getElasticsearchConnectors,
+  getKibanaConnectors,
 } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 
@@ -77,60 +73,6 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
 
   // Generic fallback
   return z.any();
-}
-
-/**
- * Elasticsearch Connector Generation
- *
- * This system provides ConnectorContract[] for all Elasticsearch APIs
- * by using pre-generated definitions from Console's API specifications.
- *
- * Benefits:
- * 1. **Schema Validation**: Zod schemas for all ES API parameters
- * 2. **Autocomplete**: Monaco YAML editor gets full autocomplete via JSON Schema
- * 3. **Comprehensive Coverage**: 568 Elasticsearch APIs supported
- * 4. **Browser Compatible**: No file system access required
- * 5. **Lazy Loading**: Large generated files are only loaded when needed, reducing main bundle size
- *
- * The generated connectors include:
- * - All Console API definitions converted to Zod schemas
- * - Path parameters extracted from patterns (e.g., {index}, {id})
- * - URL parameters with proper types (flags, enums, strings, numbers)
- * - Proper ConnectorContract format for workflow execution
- *
- * To regenerate: run `npm run generate:es-connectors` from @kbn/workflows package
- */
-function generateElasticsearchConnectors(): EnhancedInternalConnectorContract[] {
-  // Lazy load the large generated files to keep them out of the main bundle
-  const {
-    GENERATED_ELASTICSEARCH_CONNECTORS,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('@kbn/workflows/common/generated/elasticsearch_connectors.gen');
-
-  return GENERATED_ELASTICSEARCH_CONNECTORS;
-  // const {
-  //   ENHANCED_ELASTICSEARCH_CONNECTORS,
-  //   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  // } = require('./enhanced_es_connectors');
-
-  // // Return enhanced connectors (merge generated with enhanced definitions)
-  // return mergeEnhancedConnectors(
-  //   GENERATED_ELASTICSEARCH_CONNECTORS,
-  //   ENHANCED_ELASTICSEARCH_CONNECTORS
-  // );
-}
-
-function generateKibanaConnectors(): InternalConnectorContract[] {
-  // TODO: bring the kibana connectors back, with the new approach to schemas generation
-  // Lazy load the generated Kibana connectors
-  // FIX: this is not really a lazy load, we should use a dynamic import instead
-  const {
-    GENERATED_KIBANA_CONNECTORS,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('@kbn/workflows/common/generated/kibana_connectors.gen');
-
-  // Enhance connectors with fetcher parameter support
-  return enhanceKibanaConnectorsWithFetcher(GENERATED_KIBANA_CONNECTORS);
 }
 
 /**
@@ -256,8 +198,8 @@ export function addDynamicConnectorsToCache(
 
   // Get base connectors if cache is empty
   if (allConnectorsCache === null) {
-    const elasticsearchConnectors = generateElasticsearchConnectors();
-    const kibanaConnectors = generateKibanaConnectors();
+    const elasticsearchConnectors = getElasticsearchConnectors();
+    const kibanaConnectors = getKibanaConnectors();
     allConnectorsCache = [...staticConnectors, ...elasticsearchConnectors, ...kibanaConnectors];
   }
 
@@ -295,8 +237,8 @@ export function getAllConnectors(): ConnectorContractUnion[] {
   }
 
   // Initialize cache with static and generated connectors
-  const elasticsearchConnectors = generateElasticsearchConnectors();
-  const kibanaConnectors = generateKibanaConnectors();
+  const elasticsearchConnectors = getElasticsearchConnectors();
+  const kibanaConnectors = getKibanaConnectors();
   allConnectorsCache = [...staticConnectors, ...elasticsearchConnectors, ...kibanaConnectors];
   setCachedAllConnectorsMap(allConnectorsCache);
 

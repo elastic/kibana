@@ -24,14 +24,14 @@ const ES_SPEC_OPENAPI_PATH = Path.resolve(
 // output
 const ES_GENERATED_OUTPUT_FOLDER_PATH = Path.resolve(
   REPO_ROOT,
-  'src/platform/packages/shared/kbn-workflows/common/generated'
+  'src/platform/packages/shared/kbn-workflows/spec/elasticsearch/generated'
 );
 
 const ES_CONTRACTS_OUTPUT_FILE_PATH = Path.resolve(
   ES_GENERATED_OUTPUT_FOLDER_PATH,
   'elasticsearch_connectors.gen.ts'
 );
-const OPENAPI_TS_OUTPUT_FOLDER_PATH = Path.resolve(ES_GENERATED_OUTPUT_FOLDER_PATH, 'schemas');
+const OPENAPI_TS_OUTPUT_FOLDER_PATH = ES_GENERATED_OUTPUT_FOLDER_PATH;
 const OPENAPI_TS_CONFIG_PATH = Path.resolve(SCRIPT_FOLDER_PATH, 'openapi_ts.config.ts');
 const OPENAPI_TS_OUTPUT_FILENAME = 'es_openapi_zod'; // .gen.ts will be added automatically
 

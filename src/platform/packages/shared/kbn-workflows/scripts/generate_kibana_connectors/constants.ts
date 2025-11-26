@@ -20,14 +20,14 @@ const KIBANA_SPEC_OPENAPI_PATH = Path.resolve(KIBANA_SPEC_OUTPUT_PATH, 'kibana.y
 // output
 const KIBANA_GENERATED_OUTPUT_FOLDER_PATH = Path.resolve(
   REPO_ROOT,
-  'src/platform/packages/shared/kbn-workflows/common/generated'
+  'src/platform/packages/shared/kbn-workflows/spec/kibana/generated'
 );
 
 const KIBANA_CONTRACTS_OUTPUT_FILE_PATH = Path.resolve(
   KIBANA_GENERATED_OUTPUT_FOLDER_PATH,
   'kibana_connectors.gen.ts'
 );
-const OPENAPI_TS_OUTPUT_FOLDER_PATH = Path.resolve(KIBANA_GENERATED_OUTPUT_FOLDER_PATH, 'schemas');
+const OPENAPI_TS_OUTPUT_FOLDER_PATH = KIBANA_GENERATED_OUTPUT_FOLDER_PATH;
 const OPENAPI_TS_CONFIG_PATH = Path.resolve(SCRIPT_FOLDER_PATH, 'openapi_ts.config.ts');
 const OPENAPI_TS_OUTPUT_FILENAME = 'kibana_openapi_zod'; // .gen.ts will be added automatically
 

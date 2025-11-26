@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { addFetcherToKibanaConnectorParamsSchema, type ConnectorContractUnion } from '../..';
+import { type ConnectorContractUnion } from '../..';
 import {
   BaseConnectorStepSchema,
   getForEachStepSchema,
@@ -89,18 +89,12 @@ function generateStepSchemaForConnector(
   stepSchema: z.ZodType,
   loose: boolean = false
 ) {
-  // TODO: decide where we should add the fetcher to the connector schema
-  // - build-time or runtime?
-  // - here or in workflows_management/common/schema.ts
-  const paramsSchema = connector.type.startsWith('kibana.')
-    ? addFetcherToKibanaConnectorParamsSchema(connector.paramsSchema)
-    : connector.paramsSchema;
   return BaseConnectorStepSchema.extend({
     type: connector.description
       ? z.literal(connector.type).describe(connector.description)
       : z.literal(connector.type),
     'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
-    with: paramsSchema,
+    with: connector.paramsSchema,
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
   });
 }

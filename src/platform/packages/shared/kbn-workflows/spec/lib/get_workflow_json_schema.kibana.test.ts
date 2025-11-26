@@ -7,19 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ValidateFunction } from 'ajv';
 import { Ajv } from 'ajv';
+import yaml from 'yaml';
+import type { JSONSchema } from '@kbn/zod/v4/core';
 import { generateYamlSchemaFromConnectors } from './generate_yaml_schema_from_connectors';
 import { getWorkflowJsonSchema } from './get_workflow_json_schema';
-import { GENERATED_KIBANA_CONNECTORS } from '../../common/generated/kibana_connectors.gen';
+import { KIBANA_SAMPLE_STEPS } from './samples';
+import type { ValidateWithYamlLspFunction } from './validate_with_yaml_lsp';
+import { getValidateWithYamlLsp } from './validate_with_yaml_lsp';
+import { GENERATED_KIBANA_CONNECTORS } from '../kibana/kibana_connectors.gen';
 
 describe('getWorkflowJsonSchema / kibana connectors', () => {
+  let validateAjv: ValidateFunction;
+  let jsonSchema: JSONSchema.JSONSchema;
+  let validateWithYamlLsp: ValidateWithYamlLspFunction;
+
+  beforeAll(() => {
+    const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
+    jsonSchema = getWorkflowJsonSchema(workflowSchema) as JSONSchema.JSONSchema;
+    const ajv = new Ajv({ strict: false, validateFormats: false, discriminator: true });
+    validateAjv = ajv.compile(jsonSchema);
+    validateWithYamlLsp = getValidateWithYamlLsp(jsonSchema);
+  });
+
   it('should fix Monaco JSON schema generation to restore YAML validation', () => {
     // This test verifies that the Monaco YAML validation works properly
     // after fixing the broken $ref paths in the JSON schema
-
-    // Generate the workflow schema and convert to JSON schema (this is what Monaco uses)
-    const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
-    const jsonSchema = getWorkflowJsonSchema(workflowSchema);
 
     // Check if the schema generation worked
     expect(jsonSchema).toBeDefined();
@@ -101,14 +115,14 @@ describe('getWorkflowJsonSchema / kibana connectors', () => {
     const workflowDef = jsonSchema as JSONSchema.ObjectSchema;
     expect(workflowDef.type).toBe('object');
     expect(workflowDef.properties).toBeDefined();
-    expect(workflowDef.properties.version).toBeDefined();
-    expect(workflowDef.properties.name).toBeDefined();
-    expect(workflowDef.properties.steps).toBeDefined();
-    expect(workflowDef.properties.settings).toBeDefined();
+    expect(workflowDef?.properties?.version).toBeDefined();
+    expect(workflowDef?.properties?.name).toBeDefined();
+    expect(workflowDef?.properties?.steps).toBeDefined();
+    expect(workflowDef?.properties?.settings).toBeDefined();
 
     // Verify steps array structure for proper validation
-    expect(workflowDef.properties.steps.type).toBe('array');
-    expect(workflowDef.properties.steps.items).toBeDefined();
+    expect((workflowDef?.properties?.steps as JSONSchema.ArraySchema)?.type).toBe('array');
+    expect((workflowDef?.properties?.steps as JSONSchema.ArraySchema)?.items).toBeDefined();
 
     // Test that the schema can validate a basic workflow
     // Note: We don't actually validate here since we're testing the JSON schema structure
@@ -125,8 +139,8 @@ describe('getWorkflowJsonSchema / kibana connectors', () => {
 
     // Test that the schema properly validates Kibana connectors
     // Find a Kibana connector in the schema to test validation
-    const stepItems = workflowDef.properties.steps.items;
-    if (stepItems && stepItems.anyOf) {
+    const stepItems = (workflowDef?.properties?.steps as any)?.items;
+    if (stepItems && (stepItems as any).anyOf) {
       const kibanaConnector = stepItems.anyOf.find(
         (item: any) =>
           item.properties &&
@@ -160,10 +174,6 @@ describe('getWorkflowJsonSchema / kibana connectors', () => {
     // This test validates the fix for RulePreview and similar complex union schemas
     // The issue was that objects inside allOf arrays had additionalProperties: false,
     // which blocked properties from other parts of the union
-
-    // Generate the workflow schema and convert to JSON schema
-    const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
-    const jsonSchema = getWorkflowJsonSchema(workflowSchema);
 
     // Find RulePreview connector in the JSON schema
     const jsonString = JSON.stringify(jsonSchema);
@@ -205,10 +215,6 @@ describe('getWorkflowJsonSchema / kibana connectors', () => {
     // These are empty objects with descriptions like "Complex schema intersection (simplified...)"
     // that were blocking ALL properties
 
-    // Generate the workflow schema and convert to JSON schema
-    const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
-    const jsonSchema = getWorkflowJsonSchema(workflowSchema);
-
     const jsonString = JSON.stringify(jsonSchema);
 
     // Find broken reference fallback objects
@@ -228,112 +234,25 @@ describe('getWorkflowJsonSchema / kibana connectors', () => {
     expect(brokenRefObjectsCount).toEqual(0);
   });
 
+  // This test ensures our generated JSON Schema is structurally valid
+  // This is critical for Monaco autocomplete and validation to work properly
   it('should generate valid JSON Schema that can be compiled', () => {
-    // This test ensures our generated JSON Schema is structurally valid
-    // This is critical for Monaco autocomplete and validation to work properly
-
-    // Generate the workflow schema and convert to JSON schema (this is what Monaco uses)
-    const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
-    const jsonSchema = getWorkflowJsonSchema(workflowSchema);
-
-    // Try to compile the schema with AJV (like Monaco does)
-    const ajv = new Ajv({ strict: false, validateFormats: false });
-
-    let schemaIsValid = false;
-
-    try {
-      ajv.compile(jsonSchema);
-      schemaIsValid = true;
-      // console.log('✅ JSON Schema compiled successfully - Monaco autocomplete should work');
-    } catch (error) {
-      // console.log('❌ JSON Schema compilation failed:', error.message);
-
-      // Common issues in generated schemas:
-      if (error.message.includes('duplicate items')) {
-        // console.log('Issue: Duplicate enum values in the schema');
-      }
-      if (error.message.includes('must be array')) {
-        // console.log('Issue: Schema structure problems with array definitions');
-      }
-      if (error.message.includes('must match a schema in anyOf')) {
-        // console.log('Issue: anyOf schema validation problems');
-      }
-    }
-
-    // The schema must be valid for Monaco to work properly
-    expect(schemaIsValid).toBe(true);
-
-    if (!schemaIsValid) {
-      // console.log('🔧 Schema generation produced invalid JSON Schema');
-      // console.log('This breaks Monaco autocomplete and validation');
-      // console.log('Error:', error.message);
-    }
+    expect(jsonSchema).toBeTruthy();
+    expect(validateAjv).toBeDefined();
   });
 
-  it('should generate a valid JSON Schema from a zod schema', () => {
-    const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
-    const jsonSchema = getWorkflowJsonSchema(workflowSchema);
-
-    // Test data with addCaseCommentDefaultSpace (proper workflow structure)
-    const testWorkflow = {
-      version: '1',
-      name: 'Test Workflow',
-      triggers: [{ type: 'manual' }], // Add a trigger to satisfy schema
-      steps: [
-        {
-          name: 'test',
-          type: 'kibana.addCaseCommentDefaultSpace',
-          with: {
-            caseId: 'test-case',
-            comment: 'test comment',
-            owner: 'cases',
-            type: 'user',
-          },
-        },
-      ],
-    };
-
-    // Test data with INVALID properties that should be rejected
-    const invalidWorkflow = {
-      version: '1',
-      name: 'Test Workflow',
-      triggers: [{ type: 'manual' }], // Add a trigger to satisfy schema
-      steps: [
-        {
-          name: 'test',
-          type: 'kibana.addCaseCommentDefaultSpace',
-          with: {
-            invalidProperty: 'this should be rejected',
-            anotherBadProp: 'also bad',
-          },
-        },
-      ],
-    };
-
-    const ajv = new Ajv({ strict: false, validateFormats: false });
-
-    const validate = ajv.compile(jsonSchema);
-
-    // Test 1: Valid data should pass
-    const validResult = validate(testWorkflow);
-    expect(validate.errors).toBe(null);
-    expect(validResult).toBe(true);
-    // console.log('Valid workflow validation result:', validResult);
-
-    // Test 2: Invalid data should fail
-    const invalidResult = validate(invalidWorkflow);
-    expect(validate.errors).toBeDefined();
-    expect(invalidResult).toBe(false); // console.log('Invalid workflow validation result:', invalidResult);
-
-    // Check if validation is working properly
-    // console.log('Valid result:', validResult, 'Invalid result:', invalidResult);
-
-    // Check schema size to see if it's the useless fallback
-    const roughSchemaSize = JSON.stringify(jsonSchema).length / 1024;
-    // console.log(`Schema size: ${Math.round(schemaSize / 1024)}KB`);
-
-    // Schema size should be between 5MB and 10MB
-    expect(roughSchemaSize).toBeGreaterThan(5000);
-    expect(roughSchemaSize).toBeLessThan(10000);
+  KIBANA_SAMPLE_STEPS.forEach((step) => {
+    it(`${step.type}`, async () => {
+      const result = await validateWithYamlLsp(
+        `test-${step.name}.yaml`,
+        yaml.stringify({
+          name: 'test-workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [step],
+        })
+      );
+      expect(result).toEqual([]);
+    });
   });
 });

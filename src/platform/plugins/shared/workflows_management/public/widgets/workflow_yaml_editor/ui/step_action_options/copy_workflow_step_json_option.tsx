@@ -10,7 +10,6 @@
 import { EuiContextMenuItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import yaml from 'yaml';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,7 +20,7 @@ export interface CopyWorkflowStepOption {
   onClick: () => void;
 }
 
-export const CopyWorkflowStepOption: React.FC<CopyWorkflowStepOption> = ({ onClick }) => {
+export const CopyWorkflowStepJsonOption: React.FC<CopyWorkflowStepJsonOption> = ({ onClick }) => {
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const {
     services: { notifications },
@@ -34,7 +33,7 @@ export const CopyWorkflowStepOption: React.FC<CopyWorkflowStepOption> = ({ onCli
 
     try {
       // Get the entire step YAML
-      await navigator.clipboard.writeText(yaml.stringify(focusedStepInfo.stepYamlNode));
+      await navigator.clipboard.writeText(JSON.stringify(focusedStepInfo.stepYamlNode, null, 2));
 
       if (notifications) {
         notifications.toasts.addSuccess({
@@ -69,14 +68,14 @@ export const CopyWorkflowStepOption: React.FC<CopyWorkflowStepOption> = ({ onCli
 
   return (
     <EuiContextMenuItem
-      data-test-subj={`actionButton-copy-step`}
-      key="copy-step-as-yaml"
+      data-test-subj={`actionButton-copy-step-as-json`}
+      key="copy-step-as-json"
       onClick={copy}
       icon="copy"
     >
       <FormattedMessage
-        id="plugins.workflowsManagement.copyWorkflowStepToClipboard.buttonLabel"
-        defaultMessage="Copy as YAML"
+        id="plugins.workflowsManagement.copyWorkflowStepAsJson.buttonLabel"
+        defaultMessage="Copy as JSON"
       />
     </EuiContextMenuItem>
   );

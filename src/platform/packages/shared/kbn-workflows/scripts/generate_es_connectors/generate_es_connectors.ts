@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createClient } from '@hey-api/openapi-ts';
 import fs from 'fs';
 import { execSync } from 'node:child_process';
 import type { OpenAPIV3 } from 'openapi-types';
@@ -15,23 +16,30 @@ import {
   ES_CONTRACTS_OUTPUT_FILE_PATH,
   ES_SPEC_OPENAPI_PATH,
   ES_SPEC_SCHEMA_PATH,
-  OPENAPI_TS_CONFIG_PATH,
   OPENAPI_TS_OUTPUT_FILENAME,
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
 } from './constants';
+import openapiTsConfig from './openapi_ts.config';
 import type { SpecificationTypes } from './types';
 import type { HttpMethod } from '../../types/latest';
 import {
   type ContractMeta,
   generateContractBlock,
+  generateOutputSchemaString,
   generateParameterTypes,
+  generateParamsSchemaString,
   getRequestSchemaName,
   getResponseSchemaName,
   StaticImports,
   toSnakeCase,
 } from '../shared';
 
-export const generateAndSaveEsConnectors = () => {
+export async function generateAndSaveEsConnectors() {
+  await generateZodSchemas();
+  generateAndSaveEsConnectorsFile();
+}
+
+const generateAndSaveEsConnectorsFile = () => {
   try {
     const schema = JSON.parse(
       fs.readFileSync(ES_SPEC_SCHEMA_PATH, 'utf8')
@@ -43,8 +51,6 @@ export const generateAndSaveEsConnectors = () => {
     const endpoints = schema.endpoints.filter(
       (endpoint) => !endpoint.name.startsWith('_internal.')
     );
-
-    generateZodSchemas();
 
     console.log(`Generating Elasticsearch connectors from ${endpoints.length} endpoints...`);
 
@@ -71,14 +77,14 @@ export const generateAndSaveEsConnectors = () => {
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
 
-import type { InternalConnectorContract } from '../../types/latest';
+import type { InternalConnectorContract } from '../../../types/latest';
 import { z } from '@kbn/zod/v4';
 ${StaticImports}
 
 // import all needed request and response schemas generated from the OpenAPI spec
 import { ${contracts
         .flatMap((contract) => contract.schemaImports)
-        .join(',\n')} } from './schemas/${OPENAPI_TS_OUTPUT_FILENAME}.gen';
+        .join(',\n')} } from './${OPENAPI_TS_OUTPUT_FILENAME}.gen';
 
 // declare contracts
 ${contracts.map((contract) => generateContractBlock(contract)).join('\n')}
@@ -94,6 +100,7 @@ ${contracts.map((contract) => `  ${contract.contractName},`).join('\n')}
     eslintFixAndPrettifyGeneratedCode();
 
     console.log(`Successfully generated ${contracts.length} Elasticsearch connectors`);
+
     return { success: true, count: contracts.length };
   } catch (error) {
     console.error('Error generating Elasticsearch connectors:', error);
@@ -101,15 +108,13 @@ ${contracts.map((contract) => `  ${contract.contractName},`).join('\n')}
   }
 };
 
-function generateZodSchemas() {
+async function generateZodSchemas() {
   try {
     console.log('🔄 Generating Zod schemas from OpenAPI spec...');
 
     // Use openapi-zod-client CLI to generate TypeScript client, use pinned version because it's still pre 1.0.0 and we want to avoid breaking changes
-    const command = `npx @hey-api/openapi-ts@0.88.0 -f ${OPENAPI_TS_CONFIG_PATH}`;
-    console.log(`Running: ${command}`);
 
-    execSync(command, { stdio: 'inherit' });
+    await createClient(openapiTsConfig);
     console.log('✅ Zod schemas generated successfully');
 
     const zodPath = Path.resolve(
@@ -144,10 +149,6 @@ function eslintFixAndPrettifyGeneratedCode() {
   }
 }
 
-function generateContractName(endpoint: SpecificationTypes.Endpoint): string {
-  return `${toSnakeCase(endpoint.name).toUpperCase()}_CONTRACT`;
-}
-
 function generateContractMeta(
   endpoint: SpecificationTypes.Endpoint,
   openApiDocument: OpenAPIV3.Document
@@ -168,21 +169,29 @@ function generateContractMeta(
     getRequestSchemaName(operationId),
     getResponseSchemaName(operationId),
   ]);
+  const paramsSchemaString = generateParamsSchemaString(operationIds, {});
+  const outputSchemaString = generateOutputSchemaString(operationIds);
 
   return {
+    connectorGroup: 'internal',
     type,
     description,
     summary,
     methods,
     patterns,
     documentation,
-    isInternal: true,
     parameterTypes,
 
     contractName,
     operationIds,
     schemaImports,
+    paramsSchemaString,
+    outputSchemaString,
   };
+}
+
+function generateContractName(endpoint: SpecificationTypes.Endpoint): string {
+  return `${toSnakeCase(endpoint.name).toUpperCase()}_CONTRACT`;
 }
 
 function getRelatedOperations(

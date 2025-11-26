@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createClient } from '@hey-api/openapi-ts';
 import fs from 'fs';
 import { execSync } from 'node:child_process';
 import type { OpenAPIV3 } from 'openapi-types';
@@ -15,29 +16,34 @@ import yaml from 'yaml';
 import {
   KIBANA_CONTRACTS_OUTPUT_FILE_PATH,
   KIBANA_SPEC_OPENAPI_PATH,
-  OPENAPI_TS_CONFIG_PATH,
   OPENAPI_TS_OUTPUT_FILENAME,
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
 } from './constants';
+import openapiTsConfig from './openapi_ts.config';
 import { isHttpMethod } from '../..';
 import type { HttpMethod } from '../../types/latest';
 import {
   type ContractMeta,
   generateContractBlock,
+  generateOutputSchemaString,
   generateParameterTypes,
+  generateParamsSchemaString,
   getRequestSchemaName,
   getResponseSchemaName,
   StaticImports,
   toSnakeCase,
 } from '../shared';
 
-export const generateAndSaveKibanaConnectors = () => {
+export async function generateAndSaveKibanaConnectors() {
+  await generateZodSchemas();
+  generateAndSaveKibanaConnectorsFile();
+}
+
+const generateAndSaveKibanaConnectorsFile = () => {
   try {
     const openApiSpec = yaml.parse(
       fs.readFileSync(KIBANA_SPEC_OPENAPI_PATH, 'utf8')
     ) as OpenAPIV3.Document;
-
-    generateZodSchemas();
 
     console.log(`Generating Kibana connectors from ${openApiSpec.paths.length} paths...`);
 
@@ -66,14 +72,15 @@ export const generateAndSaveKibanaConnectors = () => {
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
 
-import type { InternalConnectorContract } from '../../types/latest';
+import type { InternalConnectorContract } from '../../../types/latest';
 import { z } from '@kbn/zod/v4';
+import { FetcherConfigSchema } from '../../../spec/schema';
 ${StaticImports}
 
 // import all needed request and response schemas generated from the OpenAPI spec
 import { ${contracts
         .flatMap((contract) => contract.schemaImports)
-        .join(',\n')} } from './schemas/${OPENAPI_TS_OUTPUT_FILENAME}.gen';
+        .join(',\n')} } from './${OPENAPI_TS_OUTPUT_FILENAME}.gen';
 
 // declare contracts
 ${contracts.map((contract) => generateContractBlock(contract)).join('\n')}
@@ -96,15 +103,12 @@ ${contracts.map((contract) => `  ${contract.contractName},`).join('\n')}
   }
 };
 
-function generateZodSchemas() {
+async function generateZodSchemas() {
   try {
     console.log('🔄 Generating Zod schemas from OpenAPI spec...');
 
-    // Use openapi-zod-client CLI to generate TypeScript client, use pinned version because it's still pre 1.0.0 and we want to avoid breaking changes
-    const command = `npx @hey-api/openapi-ts@0.88.0 -f ${OPENAPI_TS_CONFIG_PATH}`;
-    console.log(`Running: ${command}`);
-
-    execSync(command, { stdio: 'inherit' });
+    // Use @hey-api/openapi-ts to generate TypeScript client, use pinned version because it's still pre 1.0.0 and we want to avoid breaking changes
+    await createClient(openapiTsConfig);
     console.log('✅ Zod schemas generated successfully');
 
     const zodPath = Path.resolve(
@@ -167,9 +171,14 @@ function generateContractMetasFromPath(
     const parameterTypes = generateParameterTypes([operation], openApiDocument);
     const contractName = generateContractName(operationId);
     const schemaImports = [getRequestSchemaName(operationId), getResponseSchemaName(operationId)];
+    const paramsSchemaString = generateParamsSchemaString([operationId], {
+      // Adding fetcher to all kibana contracts at build time
+      fetcher: 'FetcherConfigSchema',
+    });
+    const outputSchemaString = generateOutputSchemaString([operationId]);
 
     contractMetas.push({
-      isInternal: true,
+      connectorGroup: 'internal',
       type,
       summary,
       description,
@@ -181,6 +190,8 @@ function generateContractMetasFromPath(
 
       contractName,
       operationIds: [operationId],
+      paramsSchemaString,
+      outputSchemaString,
       schemaImports,
     });
   }

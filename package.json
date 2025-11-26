@@ -1497,6 +1497,7 @@
     "@emotion/jest": "^11.11.0",
     "@fast-check/jest": "^2.1.1",
     "@frsource/cypress-plugin-visual-regression-diff": "^3.3.10",
+    "@hey-api/openapi-ts": "0.88.0",
     "@huggingface/hub": "^2.2.0",
     "@jest/console": "^29.7.0",
     "@jest/reporters": "^29.7.0",
@@ -2049,6 +2050,7 @@
     "typescript": "5.4.5",
     "val-loader": "^6.0.0",
     "vinyl-fs": "^4.0.0",
+    "vscode-languageserver-textdocument": "^1.0.12",
     "watchpack": "^1.6.0",
     "web-streams-polyfill": "^4.2.0",
     "webpack": "^5.95.0",
@@ -2060,6 +2062,7 @@
     "whatwg-fetch": "^3.6.20",
     "xml-crypto": "^6.1.2",
     "xmlbuilder": "15.1.1",
+    "yaml-language-server": "^1.19.2",
     "yargs": "^15.4.1",
     "yarn-deduplicate": "^6.0.2"
   },

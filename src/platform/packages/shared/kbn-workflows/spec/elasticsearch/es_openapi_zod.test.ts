@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { InternalConnectorContract } from '../../types/latest';
+import { types_mapping_property } from './generated/es_openapi_zod.gen';
 
-export interface ContractMeta
-  extends Omit<InternalConnectorContract, 'paramsSchema' | 'outputSchema'> {
-  contractName: string;
-  operationIds: string[];
-  paramsSchemaString: string;
-  outputSchemaString: string;
-  schemaImports: string[];
-}
+describe('types_mapping_property', () => {
+  it('should be a valid zod schema', () => {
+    expect(types_mapping_property).toBeDefined();
+  });
+  it('should parse a simple keyword property', () => {
+    const result = types_mapping_property.safeParse({ type: 'keyword' });
+    expect(result.success).toBe(true);
+    expect(result.data).toEqual({ type: 'keyword' });
+  });
+});

@@ -417,15 +417,12 @@ export interface InternalConnectorContract extends ConnectorContract {
     urlParams: string[];
     bodyParams: string[];
   };
+  examples?: ConnectorExamples;
 }
 
 export interface ConnectorExamples {
   params?: Record<string, string>;
   snippet?: string;
-}
-
-export interface EnhancedInternalConnectorContract extends InternalConnectorContract {
-  examples?: ConnectorExamples;
 }
 
 export interface StaticConnectorContract extends ConnectorContract {
@@ -434,8 +431,8 @@ export interface StaticConnectorContract extends ConnectorContract {
 
 export type ConnectorContractUnion =
   | DynamicConnectorContract
-  | EnhancedInternalConnectorContract
-  | StaticConnectorContract;
+  | StaticConnectorContract
+  | InternalConnectorContract;
 
 export interface WorkflowsSearchParams {
   size: number;

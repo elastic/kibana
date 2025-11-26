@@ -11,13 +11,14 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Elasticsearch connector definitions generated from elasticsearch-specification repository.
- * Generated at: 2025-11-24T19:52:29.352Z
+ * Generated at: 2025-11-26T17:41:54.651Z
  * Source: elasticsearch-specification repository (582 APIs)
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
 
 import { z } from '@kbn/zod/v4';
+
 import {
   async_search_delete_request,
   async_search_delete_response,
@@ -1637,12 +1638,11 @@ import {
   xpack_info_response,
   xpack_usage_request,
   xpack_usage_response,
-} from './schemas/es_openapi_zod.gen';
-import type { InternalConnectorContract } from '../../types/latest';
-
-import { getShapeAt } from '../utils/zod';
+} from './es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
 
 // declare contracts
 const ASYNC_SEARCH_DELETE_CONTRACT: InternalConnectorContract = {

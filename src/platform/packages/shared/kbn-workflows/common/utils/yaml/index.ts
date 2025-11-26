@@ -7,13 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { InternalConnectorContract } from '../../types/latest';
-
-export interface ContractMeta
-  extends Omit<InternalConnectorContract, 'paramsSchema' | 'outputSchema'> {
-  contractName: string;
-  operationIds: string[];
-  paramsSchemaString: string;
-  outputSchemaString: string;
-  schemaImports: string[];
-}
+export { getPathAtOffset } from './get_path_at_offset';
+export { getPathFromAncestors } from './get_path_from_ancestors';

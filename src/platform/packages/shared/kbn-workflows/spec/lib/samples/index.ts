@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { InternalConnectorContract } from '../../types/latest';
+// es
+// Document Operations: Create, read, update, delete documents
+// Search and Query: Execute searches and retrieve data
+// Index Operations: Create, list, delete indices
+export { ES_SAMPLE_STEPS } from './es_steps';
 
-export interface ContractMeta
-  extends Omit<InternalConnectorContract, 'paramsSchema' | 'outputSchema'> {
-  contractName: string;
-  operationIds: string[];
-  paramsSchemaString: string;
-  outputSchemaString: string;
-  schemaImports: string[];
-}
+// kibana
+// Alert Triage: Update alert status, assign ownership, apply tags
+// Case Management: Create and update cases
+export { KIBANA_SAMPLE_STEPS } from './kibana_steps';

@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { JSONSchema } from '@kbn/zod/v4/core';
+import type { $ZodTypes, JSONSchema } from '@kbn/zod/v4/core';
 import { getOrResolveObject } from '../../common/utils';
 
 export function getWorkflowJsonSchema(zodSchema: z.ZodType): JSONSchema.JSONSchema | null {
@@ -18,28 +18,52 @@ export function getWorkflowJsonSchema(zodSchema: z.ZodType): JSONSchema.JSONSche
       unrepresentable: 'any', // do not throw an error for unrepresentable types
       reused: 'ref', // using ref reduces the size of the schema 4x
       override: (ctx) => {
-        // Adjust the 'required' array on object schemas because we validating user input not the result of safeParse.
-        // we'd love to use 'io:input' but it results in memory leak currently
-        if (ctx.jsonSchema.required && ctx.jsonSchema.required.length > 0) {
-          const newRequired = ctx.jsonSchema.required.filter((field) => {
-            const fieldObject = ctx.jsonSchema.properties?.[field];
-            if (!fieldObject) {
-              // field is not defined in the schema, weird, skipping
-              return false;
-            }
-            const fieldSchema = getOrResolveObject(
-              fieldObject as JSONSchema.JSONSchema,
-              ctx.jsonSchema
-            );
-            // filter out from 'required' array, if field has default or optional
-            return fieldSchema && !('default' in fieldSchema) && !('optional' in fieldSchema);
-          });
-          ctx.jsonSchema.required = newRequired.length > 0 ? newRequired : undefined;
-        }
+        filterRequiredFields(ctx);
+        removeAdditionalPropertiesFromAllOfItems(ctx);
       },
     });
   } catch (error) {
     // console.error('Error generating JSON schema from YAML schema:', error);
     return null;
+  }
+}
+
+// this function MODIFIES the jsonSchema in place
+function filterRequiredFields(ctx: {
+  zodSchema: $ZodTypes;
+  jsonSchema: JSONSchema.BaseSchema;
+  path: (string | number)[];
+}) {
+  // Adjust the 'required' array on object schemas because we validating user input not the result of safeParse.
+  // we'd love to use 'io:input' but it results in memory leak currently
+  if (ctx.jsonSchema.required && ctx.jsonSchema.required.length > 0) {
+    const newRequired = ctx.jsonSchema.required.filter((field) => {
+      const fieldObject = ctx.jsonSchema.properties?.[field];
+      if (!fieldObject) {
+        // field is not defined in the schema, weird, skipping
+        return false;
+      }
+      const fieldSchema = getOrResolveObject(fieldObject as JSONSchema.JSONSchema, ctx.jsonSchema);
+      // filter out from 'required' array, if field has default or optional
+      return fieldSchema && !('default' in fieldSchema) && !('optional' in fieldSchema);
+    });
+    ctx.jsonSchema.required = newRequired.length > 0 ? newRequired : undefined;
+  }
+}
+
+function removeAdditionalPropertiesFromAllOfItems(ctx: {
+  zodSchema: $ZodTypes;
+  jsonSchema: JSONSchema.BaseSchema;
+  path: (string | number)[];
+}) {
+  const lastPathPart = ctx.path[ctx.path.length - 1];
+  const secondLastPathPart = ctx.path[ctx.path.length - 2];
+  // if we are inside an item of an allOf array, we need to remove additionalProperties
+  if (
+    typeof lastPathPart === 'number' &&
+    typeof secondLastPathPart === 'string' &&
+    secondLastPathPart === 'allOf'
+  ) {
+    ctx.jsonSchema.additionalProperties = undefined;
   }
 }
