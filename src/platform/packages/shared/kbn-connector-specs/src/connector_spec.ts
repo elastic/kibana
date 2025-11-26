@@ -171,11 +171,11 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
 }
 
 export interface ActionContext {
-  auth: { method: string; headers: Record<string, string>; [key: string]: unknown };
-  log: Logger;
   client: AxiosInstance;
   config?: Record<string, unknown>;
   connectorUsageCollector?: unknown;
+  log: Logger;
+  secrets?: Record<string, unknown>;
 }
 
 // ============================================================================
@@ -218,6 +218,10 @@ export interface ConnectorTest {
 export interface AuthTypeDef {
   type: string;
   defaults: Record<string, unknown>;
+  overrides?: {
+    meta?: Record<string, Record<string, unknown>>;
+    // can override other Zod fields here in the future if needed
+  };
 }
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
