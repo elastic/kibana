@@ -10,6 +10,7 @@
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
+  EuiIcon,
   EuiIconTip,
   useEuiTheme,
   type EuiDataGridColumn,
@@ -119,10 +120,13 @@ const ColumnHeader = ({
   const { euiTheme } = useEuiTheme();
 
   const columnLabel = isPlaceholderColumn(initialColumnName) ? (
-    <FormattedMessage
-      id="indexEditor.flyout.grid.columnHeader.add"
-      defaultMessage="Add a column…"
-    />
+    <EuiFlexGroup alignItems="center" gutterSize="xs" wrap={false}>
+      <EuiIcon type="plus" />
+      <FormattedMessage
+        id="indexEditor.flyout.grid.columnHeader.add"
+        defaultMessage="Add a column…"
+      />
+    </EuiFlexGroup>
   ) : (
     // The default column header display comming from UnifiedDataTable, the type icon + column name
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} css={{ cursor: 'pointer' }}>
