@@ -37,6 +37,17 @@ export const CloudConnectApiKeyType: SavedObjectsType = {
     importableAndExportable: false, // Sensitive data should not be exported
     displayName: 'Cloud Connect API Key',
   },
+  modelVersions: {
+    '1': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: (attrs: any) => attrs,
+        create: {
+          up: (attrs: any) => attrs,
+        },
+      },
+    },
+  },
 };
 
 /**
