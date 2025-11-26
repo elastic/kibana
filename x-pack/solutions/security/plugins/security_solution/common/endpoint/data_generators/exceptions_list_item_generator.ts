@@ -161,9 +161,18 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
 
   generateEndpointExceptionForCreate(
     overrides: Partial<CreateExceptionListItemSchema> = {}
-  ): CreateExceptionListItemSchema {
+  ): CreateExceptionListItemSchemaWithNonNullProps {
     return {
       ...exceptionItemToCreateExceptionItem(this.generateEndpointException()),
+      ...overrides,
+    };
+  }
+
+  generateEndpointExceptionForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateEndpointException()),
       ...overrides,
     };
   }
