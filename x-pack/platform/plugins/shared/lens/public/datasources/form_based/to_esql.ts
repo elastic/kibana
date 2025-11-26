@@ -60,7 +60,9 @@ export function getESQLForLayer(
 
   if (indexPattern.timeFieldName) {
     esqlCompose = esqlCompose.pipe(
-      where(`${indexPattern.timeFieldName} >= ?_tstart AND ${indexPattern.timeFieldName} <= ?_tend`)
+      where('??timeFieldName >= ?_tstart AND ??timeFieldName <= ?_tend', {
+        timeFieldName: indexPattern.timeFieldName,
+      })
     );
   }
 
