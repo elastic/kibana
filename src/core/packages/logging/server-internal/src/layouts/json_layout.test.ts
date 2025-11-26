@@ -546,7 +546,7 @@ test('format() correctly serializes meta.error after calling meta.toJSON() if me
       logger: 'context-meta-error-with-toJSON',
     },
     message: 'message-meta-error-with-toJSON',
-    someProp: 'initialValue', // Should come from { ...record.meta }, not toJSON()
+    someProp: 'initialValue',
     error: {
       message: metaError.message,
       type: metaError.name,
