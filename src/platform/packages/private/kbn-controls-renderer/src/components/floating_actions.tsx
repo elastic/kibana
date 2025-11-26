@@ -62,6 +62,7 @@ const getFloatingActionItem = (
           color="text"
           onClick={() => action.execute(context)}
           aria-labelledby={tooltipKey}
+          data-test-subj={tooltipKey}
         />
       </EuiToolTip>
     );
