@@ -5673,6 +5673,11 @@ Object {
                     "type": "string",
                   },
                 },
+                "preferences": Object {
+                  "stripUnknown": Object {
+                    "objects": true,
+                  },
+                },
                 "type": "object",
               },
             },

@@ -508,10 +508,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         // Verify the rule was created correctly
-        const rule = await getRuleByName(CUSTOM_THRESHOLD_RULE_NAME);
-        expect(rule).not.to.be(undefined);
+        let rule: Awaited<ReturnType<typeof getRuleByName>>;
+        await retry.waitFor('rule to be created', async () => {
+          rule = await getRuleByName(CUSTOM_THRESHOLD_RULE_NAME);
+          return rule !== undefined;
+        });
         // The ad-hoc data view should have the pattern as its title
-        const searchConfigIndex = rule.params.searchConfiguration.index;
+        const searchConfigIndex = rule!.params.searchConfiguration.index;
         expect(searchConfigIndex.title).to.eql(AD_HOC_DATA_VIEW_PATTERN);
       });
     });
