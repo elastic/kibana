@@ -51,7 +51,7 @@ describe('HealthCallout', () => {
     );
     fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following SLO is in an unhealthy state. Data may be missing or incomplete. You can inspect it here:'
+      'The following SLO might have some operational problems. You can inspect it here:'
     );
   });
 
@@ -79,7 +79,7 @@ describe('HealthCallout', () => {
     );
     fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following SLO is in an unhealthy state. Data may be missing or incomplete. You can inspect it here:'
+      'The following SLO might have some operational problems. You can inspect it here:'
     );
   });
 
@@ -107,7 +107,7 @@ describe('HealthCallout', () => {
     );
     fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following SLO is in an unhealthy state. Data may be missing or incomplete. You can inspect it here:'
+      'The following SLO might have some operational problems. You can inspect it here:'
     );
   });
 
@@ -135,7 +135,7 @@ describe('HealthCallout', () => {
     );
     fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following SLO is in an unhealthy state. Data may be missing or incomplete. You can inspect it here:'
+      'The following SLO might have some operational problems. You can inspect it here:'
     );
   });
 
@@ -201,7 +201,7 @@ describe('HealthCallout', () => {
 
     fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following SLOs are in an unhealthy state. Data may be missing or incomplete. You can inspect each one here:'
+      'The following SLOs might have some operational problems. You can inspect each one here:'
     );
   });
 });

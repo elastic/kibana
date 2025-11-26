@@ -15,6 +15,7 @@ import React from 'react';
 import { useActionModal } from '../../../context/action_modal';
 import { baseSlo } from '../../../data/slo';
 import {
+  aConflictingTransformHealth,
   aHealthyTransformHealth,
   aMissingTransformHealth,
   anUnhealthyTransformHealth,
@@ -165,6 +166,34 @@ describe('SloHealthCallout', () => {
     expect(screen.getByText('Reset')).toBeInTheDocument();
   });
 
+  it('should render callout with conflicting state for rollup transform', () => {
+    mockUseFetchSloHealth.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: [
+        {
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
+          health: {
+            isProblematic: true,
+            rollup: aConflictingTransformHealth,
+            summary: aHealthyTransformHealth,
+          },
+        },
+      ],
+    });
+
+    renderComponent();
+
+    expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
+    expect(
+      screen.getByText(/slo-test-slo-id-1 \((conflicting state: should be started)\)/)
+    ).toBeInTheDocument();
+    expect(screen.getByText('Inspect')).toBeInTheDocument();
+  });
+
   it('should render callout with unhealthy summary transform', () => {
     mockUseFetchSloHealth.mockReturnValue({
       isLoading: false,
@@ -215,6 +244,34 @@ describe('SloHealthCallout', () => {
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
     expect(screen.getByText(/slo-summary-test-slo-id-1 \(missing\)/)).toBeInTheDocument();
     expect(screen.getByText('Reset')).toBeInTheDocument();
+  });
+
+  it('should render callout with conflicting state for summary transform', () => {
+    mockUseFetchSloHealth.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: [
+        {
+          id: 'test-slo-id',
+          instanceId: 'irrelevant',
+          revision: 1,
+          name: 'Test SLO',
+          health: {
+            isProblematic: true,
+            rollup: aHealthyTransformHealth,
+            summary: aConflictingTransformHealth,
+          },
+        },
+      ],
+    });
+
+    renderComponent();
+
+    expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
+    expect(
+      screen.getByText(/slo-summary-test-slo-id-1 \((conflicting state: should be started)\)/)
+    ).toBeInTheDocument();
+    expect(screen.getByText('Inspect')).toBeInTheDocument();
   });
 
   it('should render callout with both unhealthy and missing transforms - rollup unhealthy, summary missing', () => {

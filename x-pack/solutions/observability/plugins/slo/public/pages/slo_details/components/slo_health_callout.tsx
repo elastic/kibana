@@ -92,7 +92,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
                     content={
                       health.rollup.status === 'unhealthy'
                         ? getUnhealthyText(rollupTransformId)
-                        : getStateConflictText(rollupTransformId)
+                        : getStateConflictText(rollupTransformId, slo.enabled)
                     }
                     url={rollupUrl}
                   />
@@ -116,7 +116,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
                     content={
                       health.summary.status === 'unhealthy'
                         ? getUnhealthyText(summaryTransformId)
-                        : getStateConflictText(summaryTransformId)
+                        : getStateConflictText(summaryTransformId, slo.enabled)
                     }
                     url={summaryUrl}
                   />
@@ -144,11 +144,17 @@ const getUnhealthyText = (transformId: string) =>
     values: { transformId },
   });
 
-const getStateConflictText = (transformId: string) =>
-  i18n.translate('xpack.slo.sloDetails.healthCallout.transformStateConflictText', {
-    defaultMessage: '{transformId} (conflicting state)',
-    values: { transformId },
-  });
+const getStateConflictText = (transformId: string, sloEnabled: boolean) => {
+  return sloEnabled
+    ? i18n.translate('xpack.slo.sloDetails.healthCallout.transformStateConflictStartedText', {
+        defaultMessage: '{transformId} (conflicting state: should be started)',
+        values: { transformId },
+      })
+    : i18n.translate('xpack.slo.sloDetails.healthCallout.transformStateConflictStoppedText', {
+        defaultMessage: '{transformId} (conflicting state: should be stopped)',
+        values: { transformId },
+      });
+};
 
 const getMissingText = (transformId: string) =>
   i18n.translate('xpack.slo.sloDetails.healthCallout.missingTransformText', {

@@ -71,8 +71,8 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
           <EuiFlexItem>
             <span data-test-subj="sloHealthCalloutDescription">
               <FormattedMessage
-                id="xpack.slo.sloList.healthCallout.description"
-                defaultMessage="The following {count, plural, one {SLO is} other {SLOs are}} in an unhealthy state. Data may be missing or incomplete. You can inspect {count, plural, one {it} other {each one}} here:"
+                id="xpack.slo.sloList.healthCallout.operationalProblemsDescription"
+                defaultMessage="The following {count, plural, one {SLO} other {SLOs}} might have some operational problems. You can inspect {count, plural, one {it} other {each one}} here:"
                 values={{
                   count: deduplicatedList.length,
                 }}
