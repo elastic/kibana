@@ -108,7 +108,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should install global assets if they are missing during package install', async () => {
-        const res = await installPackage(pkgName, pkgVersion);
+        await installPackage(pkgName, pkgVersion);
         const template = await es.cluster.getComponentTemplate({
           name: FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
         });
