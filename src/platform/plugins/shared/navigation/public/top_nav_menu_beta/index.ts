@@ -11,8 +11,11 @@ export { TopNavMenuItemsBeta } from './top_nav_menu_items_beta';
 export { TopNavMenuActionButton } from './top_nav_menu_action_button';
 export { TopNavMenuItemBeta } from './top_nav_menu_item_beta';
 export { TopNavMenuShowMoreButton } from './top_nav_menu_show_more_button';
+export { TopNavMenuBeta } from './top_nav_menu_beta';
+export { TopNavPopover } from './top_nav_popover';
 
 export type {
+  TopNavMenuActionBeta,
   TopNavMenuSplitButtonProps,
   TopNavMenuItemBetaType,
   TopNavMenuActionItemBeta,

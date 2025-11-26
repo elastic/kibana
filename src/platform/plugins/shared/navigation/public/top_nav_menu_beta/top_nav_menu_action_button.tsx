@@ -18,14 +18,11 @@ import type {
   TopNavMenuSecondaryActionItemBeta,
   TopNavMenuSplitButtonProps,
 } from './types';
+import { TopNavPopover } from './top_nav_popover';
 
-type TopNavMenuActionButtonProps = (
+type TopNavMenuActionButtonProps =
   | TopNavMenuPrimaryActionItemBeta
-  | TopNavMenuSecondaryActionItemBeta
-) & {
-  closePopover: () => void;
-  isMobileMenu?: boolean;
-};
+  | TopNavMenuSecondaryActionItemBeta;
 
 export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
   const {
@@ -38,33 +35,40 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
     href,
     target,
     isLoading,
-    isMobileMenu,
     tooltip,
-    closePopover,
+    items,
   } = props;
   const itemText = upperFirst(label);
 
   const splitButtonProps = 'splitButtonProps' in props ? props.splitButtonProps : undefined;
   const colorProp = 'color' in props ? props.color : undefined;
+  const [isMainPopoverOpen, setIsMainPopoverOpen] = React.useState(false);
+  const [isSplitPopoverOpen, setIsSplitPopoverOpen] = React.useState(false);
+
+  const splitButtonItems = splitButtonProps?.items;
+  const hasMainItems = items && items.length > 0;
+  const hasSplitItems = splitButtonItems && splitButtonItems.length > 0;
 
   const handleClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (isDisabled(disableButton)) return;
 
-    run(e.currentTarget);
-
-    if (isMobileMenu) {
-      closePopover();
+    if (hasMainItems) {
+      setIsMainPopoverOpen(!isMainPopoverOpen);
+      return;
     }
+
+    run();
   };
 
-  const handleSecondaryButtonClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+  const handleSecondaryButtonClick = () => {
     if (splitButtonProps?.isSecondaryButtonDisabled) return;
 
-    splitButtonProps?.run?.(event.currentTarget);
-
-    if (isMobileMenu) {
-      closePopover();
+    if (hasSplitItems) {
+      setIsSplitPopoverOpen(!isSplitPopoverOpen);
+      return;
     }
+
+    splitButtonProps?.run?.();
   };
 
   const commonProps = {
@@ -78,7 +82,6 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
     isLoading,
     size: 's' as const,
     iconSize: 'm' as const,
-    fullWidth: isMobileMenu,
   };
 
   const button = splitButtonProps ? (
@@ -99,9 +102,40 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
 
   const tooltipContent = getTooltip(tooltip);
 
-  if (tooltipContent) {
-    return <EuiToolTip content={tooltipContent}>{button}</EuiToolTip>;
+  const buttonWithTooltip = tooltipContent ? (
+    <EuiToolTip content={tooltipContent}>{button}</EuiToolTip>
+  ) : (
+    button
+  );
+
+  // Handle both main items and split button items - wrap in separate popovers if needed
+  let result = buttonWithTooltip;
+
+  // First wrap with main items popover (if exists)
+  if (hasMainItems) {
+    result = (
+      <TopNavPopover
+        items={items}
+        anchorElement={result}
+        isOpen={isMainPopoverOpen}
+        onToggle={() => setIsMainPopoverOpen(!isMainPopoverOpen)}
+        onClose={() => setIsMainPopoverOpen(false)}
+      />
+    );
   }
 
-  return button;
+  // Then wrap with split button items popover (if exists)
+  if (hasSplitItems) {
+    result = (
+      <TopNavPopover
+        items={splitButtonItems}
+        anchorElement={result}
+        isOpen={isSplitPopoverOpen}
+        onToggle={() => setIsSplitPopoverOpen(!isSplitPopoverOpen)}
+        onClose={() => setIsSplitPopoverOpen(false)}
+      />
+    );
+  }
+
+  return result;
 };

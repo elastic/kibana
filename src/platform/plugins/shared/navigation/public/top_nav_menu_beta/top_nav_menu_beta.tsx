@@ -42,12 +42,10 @@ export function TopNavMenuBeta<QT extends AggregateQuery | Query = Query>({
   showDatePicker = true,
   showFilterBar = true,
   screenTitle = '',
-  gutterSize,
   setMenuMountPoint,
   visible,
   unifiedSearch,
   className,
-  popoverBreakpoints,
   ...searchBarProps
 }: TopNavMenuPropsBeta<QT>): ReactElement | null {
   if ((!config || config.items.length === 0) && (!showSearchBar || !unifiedSearch)) {
@@ -60,13 +58,6 @@ export function TopNavMenuBeta<QT extends AggregateQuery | Query = Query>({
       config={config}
       className={className}
       data-test-subj="kbn-top-nav-menu-wrapper"
-      css={css`
-        button:last-child {
-          margin-right: 0;
-        }
-      `}
-      popoverBreakpoints={popoverBreakpoints}
-      gutterSize={gutterSize}
     />
   );
 
@@ -77,17 +68,22 @@ export function TopNavMenuBeta<QT extends AggregateQuery | Query = Query>({
     return <AggregateQuerySearchBar<QT> {...searchBarProps} />;
   };
 
-  if (setMenuMountPoint && (badgesComponent || menuComponent)) {
+  if (setMenuMountPoint) {
     return (
-      <MountPointPortal setMountPoint={setMenuMountPoint}>
-        <span
-          className="kbnTopNavMenu__wrapper"
-          css={[styles.badgeWrapper, visible === false && styles.hidden]}
-        >
-          {badgesComponent}
-          {menuComponent}
-        </span>
-      </MountPointPortal>
+      <>
+        {(badgesComponent || menuComponent) && (
+          <MountPointPortal setMountPoint={setMenuMountPoint}>
+            <span
+              className="kbnTopNavMenu__wrapper"
+              css={[styles.badgeWrapper, visible === false && styles.hidden]}
+            >
+              {badgesComponent}
+              {menuComponent}
+            </span>
+          </MountPointPortal>
+        )}
+        {renderSearchBar()}
+      </>
     );
   }
 

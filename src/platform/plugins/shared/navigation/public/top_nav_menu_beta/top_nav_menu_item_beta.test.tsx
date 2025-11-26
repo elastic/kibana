@@ -9,14 +9,16 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { TopNavMenuItemBetaProps } from './top_nav_menu_item_beta';
 import { TopNavMenuItemBeta } from './top_nav_menu_item_beta';
+import type { TopNavMenuItemBetaType } from './types';
 
 describe('TopNavMenuItemBeta', () => {
-  const defaultProps: TopNavMenuItemBetaProps = {
+  const defaultProps: TopNavMenuItemBetaType = {
     label: 'elastic',
     run: jest.fn(),
-    closePopover: jest.fn(),
+    id: 'elasticButton',
+    iconType: 'logoElastic',
+    order: 1,
   };
 
   beforeEach(() => {

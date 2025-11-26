@@ -9,7 +9,8 @@
 
 import type { EuiButtonColor, IconType } from '@elastic/eui';
 import type { SplitButtonProps } from '@kbn/split-button';
-import type { TopNavMenuAction } from '../top_nav_menu/top_nav_menu_data';
+
+export type TopNavMenuActionBeta = () => void;
 
 export type TopNavMenuSplitButtonProps = Pick<
   SplitButtonProps,
@@ -22,26 +23,27 @@ export type TopNavMenuSplitButtonProps = Pick<
   | 'secondaryButtonIcon'
   | 'iconType'
 > & {
-  run: TopNavMenuAction;
+  run: TopNavMenuActionBeta;
+  items?: TopNavMenuItemBetaType[];
 };
 
 export interface TopNavMenuItemCommonBeta {
-  id?: string;
+  id: string;
   htmlId?: string;
   label: string;
   iconType: IconType;
-  run: TopNavMenuAction;
+  run: TopNavMenuActionBeta;
   testId?: string;
   disableButton?: boolean | (() => boolean);
   isLoading?: boolean;
   target?: string;
   href?: string;
   tooltip?: string | (() => string | undefined);
+  items?: TopNavMenuItemBetaType[];
 }
 
 export interface TopNavMenuItemBetaType extends TopNavMenuItemCommonBeta {
   order: number;
-  children?: TopNavMenuItemBetaType[];
 }
 
 export type TopNavMenuActionItemBeta = TopNavMenuItemCommonBeta;

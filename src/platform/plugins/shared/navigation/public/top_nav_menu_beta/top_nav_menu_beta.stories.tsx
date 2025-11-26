@@ -7,88 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { useCallback, useRef } from 'react';
 import type { ComponentProps } from 'react';
-import React, { useCallback, useRef, useState } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-
 import type { MountPoint } from '@kbn/core/public';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import {
-  EuiContextMenu,
-  EuiFlexGroup,
-  EuiHeader,
-  EuiPageTemplate,
-  EuiWrappingPopover,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiHeader, EuiPageTemplate } from '@elastic/eui';
 import type { TopNavMenuConfigBeta } from './types';
 import { TopNavMenuBeta } from './top_nav_menu_beta';
-
-const PopoverMock = ({
-  anchorElement,
-  items,
-  onClose,
-}: {
-  anchorElement: HTMLElement;
-  items: EuiContextMenuPanelItemDescriptor[];
-  onClose: () => void;
-}) => {
-  const [isOpen, setIsOpen] = useState(true);
-
-  const handleClose = useCallback(() => {
-    setIsOpen(false);
-    setTimeout(() => {
-      onClose();
-    }, 100);
-  }, [onClose]);
-
-  const panels = [
-    {
-      id: 0,
-      initialFocusedItemIndex: 0,
-      items,
-    },
-  ];
-
-  return (
-    <EuiWrappingPopover
-      isOpen={isOpen}
-      closePopover={handleClose}
-      button={anchorElement}
-      panelPaddingSize="none"
-      anchorPosition="downRight"
-      attachToAnchor
-      buffer={0}
-      repositionOnScroll
-    >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
-    </EuiWrappingPopover>
-  );
-};
-
-const renderPopoverMock = (
-  anchorElement: HTMLElement,
-  items: EuiContextMenuPanelItemDescriptor[]
-) => {
-  const container = document.createElement('div');
-  document.body.appendChild(container);
-
-  const cleanup = () => {
-    unmountComponentAtNode(container);
-    if (document.body.contains(container)) {
-      document.body.removeChild(container);
-    }
-  };
-
-  render(
-    <PopoverMock anchorElement={anchorElement} items={items} onClose={cleanup} />,
-
-    container
-  );
-
-  return cleanup;
-};
 
 const TopNavMenuBetaWrapper = (props: ComponentProps<typeof TopNavMenuBeta>) => {
   const mountContainerRef = useRef<HTMLDivElement>(null);
@@ -148,33 +74,38 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
       iconType: 'exit', // use 'logOut' when added to EUI
     },
     {
-      run: (anchorElement) => {
-        renderPopoverMock(anchorElement, [
-          {
-            name: 'PDF reports',
-            icon: 'document',
-            'data-test-subj': 'exportPDFButton',
-            onClick: () => action('export-pdf-clicked'),
-          },
-          {
-            name: 'PNG reports',
-            icon: 'image',
-            'data-test-subj': 'exportPNGButton',
-            onClick: () => action('export-png-clicked'),
-          },
-          {
-            name: 'CSV reports',
-            icon: 'exportAction',
-            'data-test-subj': 'exportCSVButton',
-            onClick: () => action('export-csv-clicked'),
-          },
-        ]);
-      },
+      run: () => action('export-clicked'),
       id: 'export',
       order: 2,
       label: 'export',
       testId: 'exportButton',
       iconType: 'download',
+      items: [
+        {
+          run: () => action('export-pdf-clicked'),
+          id: 'exportPDF',
+          order: 1,
+          label: 'PDF reports',
+          iconType: 'document',
+          testId: 'exportPDFButton',
+        },
+        {
+          run: () => action('export-png-clicked'),
+          id: 'exportPNG',
+          order: 2,
+          label: 'PNG reports',
+          iconType: 'image',
+          testId: 'exportPNGButton',
+        },
+        {
+          run: () => action('export-csv-clicked'),
+          id: 'exportCSV',
+          order: 3,
+          label: 'CSV reports',
+          iconType: 'exportAction',
+          testId: 'exportCSVButton',
+        },
+      ],
     },
     {
       run: action('share-clicked'),
@@ -202,45 +133,88 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
     },
   ],
   secondaryActionItem: {
-    run: (anchorElement) => {
-      renderPopoverMock(anchorElement, [
-        {
-          name: 'Visualization',
-          icon: 'lensApp',
-          'data-test-subj': 'createNewVisButton',
-          onClick: () => action('create-visualization-clicked'),
-        },
-        {
-          name: 'New panel',
-          icon: 'plusInCircle',
-          'data-test-subj': 'openAddPanelFlyoutButton',
-          onClick: () => action('new-panel-clicked'),
-        },
-        {
-          name: 'Collapsible section',
-          icon: 'section',
-          'data-test-subj': 'addCollapsibleSectionButton',
-          onClick: () => action('add-section-clicked'),
-        },
-        {
-          name: 'Controls',
-          icon: 'controlsHorizontal',
-          'data-test-subj': 'controls-menu-button',
-          panel: 1,
-        },
-        {
-          name: 'From library',
-          'data-test-subj': 'addFromLibraryButton',
-          icon: 'folderOpen',
-          onClick: () => action('add-from-library-clicked'),
-        },
-      ]);
-    },
+    run: () => action('add-clicked'),
     id: 'add',
     label: 'add',
     testId: 'addButton',
     iconType: 'plusInCircle',
     color: 'success',
+    items: [
+      {
+        run: () => action('create-visualization-clicked'),
+        order: 1,
+        id: 'createVisualization',
+        label: 'Visualization',
+        iconType: 'lensApp',
+        testId: 'createNewVisButton',
+      },
+      {
+        run: () => action('new-panel-clicked'),
+        id: 'newPanel',
+        order: 2,
+        label: 'New panel',
+        iconType: 'plusInCircle',
+        testId: 'openAddPanelFlyoutButton',
+      },
+      {
+        run: () => action('add-section-clicked'),
+        id: 'collapsibleSection',
+        order: 3,
+        label: 'Collapsible section',
+        iconType: 'section',
+        testId: 'addCollapsibleSectionButton',
+      },
+      {
+        run: () => action('add-controls-clicked'),
+        id: 'controls',
+        order: 4,
+        label: 'Controls',
+        iconType: 'controlsHorizontal',
+        testId: 'controls-menu-button',
+        items: [
+          {
+            run: () => action('control-clicked'),
+            id: 'control',
+            order: 1,
+            label: 'control',
+            iconType: 'analyzeEvent', // find a better icon
+            testId: 'controlButton',
+          },
+          {
+            run: () => action('variable-control-clicked'),
+            id: 'variableControl',
+            order: 2,
+            label: 'variable control',
+            iconType: 'analyzeEvent', // find a better icon
+            testId: 'variableControlButton',
+          },
+          {
+            run: () => action('time-slider-control-clicked'),
+            id: 'timeSliderControl',
+            order: 3,
+            label: 'time slider control',
+            iconType: 'analyzeEvent', // find a better icon
+            testId: 'timeSliderControlButton',
+          },
+          {
+            run: () => action('setting-clicked'),
+            id: 'settings',
+            order: 4,
+            label: 'setting',
+            iconType: 'gear',
+            testId: 'settingButton',
+          },
+        ],
+      },
+      {
+        run: () => action('add-from-library-clicked'),
+        id: 'fromLibrary',
+        order: 5,
+        label: 'From library',
+        iconType: 'folderOpen',
+        testId: 'addFromLibraryButton',
+      },
+    ],
   },
   primaryActionItem: {
     run: action('save-clicked'),
@@ -248,25 +222,46 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
     label: 'save',
     testId: 'saveButton',
     iconType: 'save',
-    splitButtonProps: {
-      run: (anchorElement) => {
-        renderPopoverMock(anchorElement, [
-          {
-            name: 'Save as',
-            icon: 'save',
-            'data-test-subj': 'interactiveSaveMenuItem',
-            onClick: () => action('save-option-clicked'),
-          },
-          {
-            name: 'Reset changes',
-            icon: 'editorUndo',
-            'data-test-subj': 'discardChangesMenuItem',
-            onClick: () => action('discard-changes-clicked'),
-          },
-        ]);
+    items: [
+      {
+        run: () => action('save-option-clicked'),
+        id: 'saveAs',
+        order: 1,
+        label: 'Save as',
+        iconType: 'save',
+        testId: 'interactiveSaveMenuItem',
       },
+      {
+        run: () => action('discard-changes-clicked'),
+        id: 'resetChanges',
+        order: 2,
+        label: 'Reset changes',
+        iconType: 'editorUndo',
+        testId: 'discardChangesMenuItem',
+      },
+    ],
+    splitButtonProps: {
+      run: action('save-secondary-clicked'),
       secondaryButtonAriaLabel: 'Save options',
       secondaryButtonIcon: 'arrowDown',
+      items: [
+        {
+          run: () => action('save-option-clicked'),
+          id: 'saveAs',
+          order: 1,
+          label: 'Save as',
+          iconType: 'save',
+          testId: 'interactiveSaveMenuItem',
+        },
+        {
+          run: () => action('discard-changes-clicked'),
+          id: 'resetChanges',
+          order: 2,
+          label: 'Reset changes',
+          iconType: 'editorUndo',
+          testId: 'discardChangesMenuItem',
+        },
+      ],
     },
   },
 };
@@ -329,24 +324,27 @@ const discoverConfig: TopNavMenuConfigBeta = {
     testId: 'saveButton',
     iconType: 'save',
     splitButtonProps: {
-      run: (anchorElement) => {
-        renderPopoverMock(anchorElement, [
-          {
-            name: 'Save as',
-            icon: 'save',
-            'data-test-subj': 'interactiveSaveMenuItem',
-            onClick: () => action('save-option-clicked'),
-          },
-          {
-            name: 'Reset changes',
-            icon: 'editorUndo',
-            'data-test-subj': 'discardChangesMenuItem',
-            onClick: () => action('discard-changes-clicked'),
-          },
-        ]);
-      },
+      run: action('save-secondary-clicked'),
       secondaryButtonAriaLabel: 'Save options',
       secondaryButtonIcon: 'arrowDown',
+      items: [
+        {
+          run: () => action('save-option-clicked'),
+          id: 'saveAs',
+          order: 1,
+          label: 'Save as',
+          iconType: 'save',
+          testId: 'interactiveSaveMenuItem',
+        },
+        {
+          run: () => action('discard-changes-clicked'),
+          id: 'resetChanges',
+          order: 2,
+          label: 'Reset changes',
+          iconType: 'editorUndo',
+          testId: 'discardChangesMenuItem',
+        },
+      ],
     },
   },
 };
@@ -355,10 +353,10 @@ const discoverConfig: TopNavMenuConfigBeta = {
  * The configuration mimics the editModeTopNavConfig from Dashboard application.
  */
 export const DashboardEditModeConfig: Story = {
+  name: 'Dashboard edit mode',
   args: {
     config: dashboardEditModeConfig,
     visible: true,
-    showSearchBar: false,
   },
 };
 
@@ -366,10 +364,9 @@ export const DashboardEditModeConfig: Story = {
  * The configuration mimics the app menu bar from Discover application.
  */
 export const DiscoverConfig: Story = {
-  name: 'Discover config',
+  name: 'Discover',
   args: {
     config: discoverConfig,
     visible: true,
-    showSearchBar: true,
   },
 };

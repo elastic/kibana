@@ -27,39 +27,33 @@ const getDisplayedItemsAllowedAmount = (config: TopNavMenuConfigBeta) => {
  */
 const getShouldOverflow = ({
   config,
-  isMobileMenu,
   displayedItemsAllowedAmount,
 }: {
   config: TopNavMenuConfigBeta;
-  isMobileMenu: boolean;
   displayedItemsAllowedAmount: number;
-}) => config.items.length > displayedItemsAllowedAmount && !isMobileMenu;
+}) => config.items.length > displayedItemsAllowedAmount;
 
 /**
  * Split the items into displayed and overflow based on the configuration.
  */
-export const getTopNavItems = ({
-  config,
-  isMobileMenu,
-}: {
-  config: TopNavMenuConfigBeta;
-  isMobileMenu: boolean;
-}) => {
+export const getTopNavItems = ({ config }: { config: TopNavMenuConfigBeta }) => {
   const displayedItemsAllowedAmount = getDisplayedItemsAllowedAmount(config);
-  const shouldOverflow = getShouldOverflow({ config, isMobileMenu, displayedItemsAllowedAmount });
+  const shouldOverflow = getShouldOverflow({ config, displayedItemsAllowedAmount });
+
+  const sortedItems = [...config.items].sort((a, b) => a.order - b.order);
 
   if (!shouldOverflow) {
     return {
-      displayedItems: config.items,
+      displayedItems: sortedItems,
       overflowItems: [],
       shouldOverflow: false,
     };
   }
 
-  const overflowItems = config.items.slice(displayedItemsAllowedAmount);
+  const overflowItems = sortedItems.slice(displayedItemsAllowedAmount);
 
   return {
-    displayedItems: config.items.slice(0, displayedItemsAllowedAmount),
+    displayedItems: sortedItems.slice(0, displayedItemsAllowedAmount),
     overflowItems,
     shouldOverflow: overflowItems.length > 0,
   };

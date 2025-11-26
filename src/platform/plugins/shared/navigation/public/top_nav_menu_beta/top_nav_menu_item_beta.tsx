@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type MouseEvent } from 'react';
+import React from 'react';
 import { EuiHeaderLink, EuiToolTip } from '@elastic/eui';
 import { upperFirst } from 'lodash';
 import { getTooltip, isDisabled } from './utils';
 import type { TopNavMenuItemBetaType } from './types';
-
-export interface TopNavMenuItemBetaProps extends TopNavMenuItemBetaType {
-  closePopover: () => void;
-  isMobileMenu?: boolean;
-}
+import { TopNavPopover } from './top_nav_popover';
 
 export const TopNavMenuItemBeta = ({
   run,
@@ -28,20 +24,19 @@ export const TopNavMenuItemBeta = ({
   href,
   target,
   isLoading,
-  isMobileMenu,
   tooltip,
-  closePopover,
-}: TopNavMenuItemBetaProps) => {
+  items,
+}: TopNavMenuItemBetaType) => {
   const itemText = upperFirst(label);
 
-  const handleClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+  const handleClick = () => {
     if (isDisabled(disableButton)) return;
 
-    run(e.currentTarget);
-
-    if (isMobileMenu) {
-      closePopover();
+    if (items && items.length > 0) {
+      return;
     }
+
+    run();
   };
 
   const tooltipContent = getTooltip(tooltip);
@@ -65,9 +60,15 @@ export const TopNavMenuItemBeta = ({
     </EuiHeaderLink>
   );
 
-  if (tooltipContent) {
-    return <EuiToolTip content={tooltipContent}>{button}</EuiToolTip>;
+  const buttonWithTooltip = tooltipContent ? (
+    <EuiToolTip content={tooltipContent}>{button}</EuiToolTip>
+  ) : (
+    button
+  );
+
+  if (items && items.length > 0) {
+    return <TopNavPopover items={items} anchorElement={buttonWithTooltip} />;
   }
 
-  return button;
+  return buttonWithTooltip;
 };

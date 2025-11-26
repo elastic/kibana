@@ -16,8 +16,8 @@ describe('TopNavMenuActionButton', () => {
   const defaultProps = {
     label: 'save',
     run: jest.fn(),
-    closePopover: jest.fn(),
     iconType: 'save',
+    id: 'saveButton',
   };
 
   const splitButtonProps = {

@@ -7,78 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiBreakpointSize } from '@elastic/eui';
-import { EuiHeaderLinks, useIsWithinBreakpoints, type EuiHeaderLinksProps } from '@elastic/eui';
 import React from 'react';
-
+import { EuiHeaderLinks } from '@elastic/eui';
 import { getTopNavItems } from './utils';
 import type { TopNavMenuConfigBeta } from './types';
 import { TopNavMenuActionButton } from './top_nav_menu_action_button';
 import { TopNavMenuItemBeta } from './top_nav_menu_item_beta';
 import { TopNavMenuShowMoreButton } from './top_nav_menu_show_more_button';
 
-const POPOVER_BREAKPOINTS: EuiBreakpointSize[] = ['xs', 's'];
-
 interface TopNavMenuItemsProps {
-  config: TopNavMenuConfigBeta | undefined;
+  config?: TopNavMenuConfigBeta;
   className?: string;
-  popoverBreakpoints?: EuiBreakpointSize[];
-  gutterSize?: EuiHeaderLinksProps['gutterSize'];
 }
 
-export const TopNavMenuItemsBeta = ({
-  config,
-  className,
-  popoverBreakpoints = POPOVER_BREAKPOINTS,
-  gutterSize = 'xs',
-}: TopNavMenuItemsProps) => {
-  const isMobileMenu = useIsWithinBreakpoints(popoverBreakpoints);
-
+export const TopNavMenuItemsBeta = ({ config, className }: TopNavMenuItemsProps) => {
   if (!config || config.items.length === 0) return null;
 
   const { displayedItems, overflowItems, shouldOverflow } = getTopNavItems({
     config,
-    isMobileMenu,
   });
 
   return (
-    <EuiHeaderLinks
-      data-test-subj="top-nav"
-      gutterSize={gutterSize}
-      className={className}
-      popoverBreakpoints={popoverBreakpoints}
-    >
-      {(closePopover) => (
-        <>
-          {displayedItems.map((menuItem, i) => {
-            return (
-              <TopNavMenuItemBeta
-                key={`nav-menu-${i}`}
-                isMobileMenu={isMobileMenu}
-                closePopover={closePopover}
-                {...menuItem}
-              />
-            );
-          })}
-          {shouldOverflow && (
-            <TopNavMenuShowMoreButton items={overflowItems} closePopover={closePopover} />
-          )}
-          {config.secondaryActionItem && (
-            <TopNavMenuActionButton
-              {...config.secondaryActionItem}
-              closePopover={closePopover}
-              isMobileMenu={isMobileMenu}
-            />
-          )}
-          {config.primaryActionItem && (
-            <TopNavMenuActionButton
-              {...config.primaryActionItem}
-              closePopover={closePopover}
-              isMobileMenu={isMobileMenu}
-            />
-          )}
-        </>
-      )}
+    <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={className}>
+      {displayedItems.map((menuItem, i) => {
+        return <TopNavMenuItemBeta key={`nav-menu-${i}`} {...menuItem} />;
+      })}
+      {shouldOverflow && <TopNavMenuShowMoreButton items={overflowItems} />}
+      {config?.secondaryActionItem && <TopNavMenuActionButton {...config.secondaryActionItem} />}
+      {config?.primaryActionItem && <TopNavMenuActionButton {...config.primaryActionItem} />}
     </EuiHeaderLinks>
   );
 };
