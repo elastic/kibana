@@ -6,7 +6,9 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { schema } from '@kbn/config-schema';
 import type { Milestone } from '../../../../common/trial_companion/types';
 
 export interface NBAUserSeenSavedObjectAttributes {
@@ -27,10 +29,29 @@ const savedObjectMappings: SavedObjectsType['mappings'] = {
   },
 };
 
+const TrialCompanionNBAUserSeenAttributesSchemaV1 = schema.object({
+  milestoneIds: schema.arrayOf(schema.number()),
+  userId: schema.string(),
+});
+
+const version1: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    forwardCompatibility: TrialCompanionNBAUserSeenAttributesSchemaV1.extends(
+      {},
+      { unknowns: 'ignore' }
+    ),
+    create: TrialCompanionNBAUserSeenAttributesSchemaV1,
+  },
+};
+
 export const trialCompanionNBAUserSeenSavedObject: SavedObjectsType = {
   name: NBA_USER_SEEN_SAVED_OBJECT_TYPE,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'agnostic',
   mappings: savedObjectMappings,
+  modelVersions: {
+    1: version1,
+  },
 };

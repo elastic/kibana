@@ -6,7 +6,9 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { schema } from '@kbn/config-schema';
 import type { Milestone } from '../../../../common/trial_companion/types';
 
 export interface NBASavedObjectAttributes {
@@ -23,10 +25,25 @@ const savedObjectMappings: SavedObjectsType['mappings'] = {
   },
 };
 
+const TrialCompanionNBAAttributesSchemaV1 = schema.object({
+  milestoneId: schema.number(),
+});
+
+const version1: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    forwardCompatibility: TrialCompanionNBAAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
+    create: TrialCompanionNBAAttributesSchemaV1,
+  },
+};
+
 export const trialCompanionNBASavedObject: SavedObjectsType = {
   name: NBA_SAVED_OBJECT_TYPE,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: savedObjectMappings,
+  modelVersions: {
+    1: version1,
+  },
 };
