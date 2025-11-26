@@ -45,7 +45,7 @@ interface Props {
   updateAdvancedSettingsHasErrors: (hasErrors: boolean) => void;
   setInvalidSpaceError: (hasErrors: boolean) => void;
 }
-export const AgentPolicyFormContext = React.createContext<
+const AgentPolicyFormContext = React.createContext<
   | {
       agentPolicy: Partial<NewAgentPolicy | AgentPolicy> & { [key: string]: any };
       updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
