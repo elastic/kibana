@@ -237,24 +237,33 @@ describe('SLO Transform Alert Integration Test', () => {
     // This simulates the scenario where transforms are stopped and no SLI data exists
     // Note: Transform-generated SLI documents may not have slo.revision field,
     // so we delete by slo.id only (as done in DeleteSLO service)
-    const deleteResponse = await esClient.deleteByQuery({
-      index: SLI_DESTINATION_INDEX_PATTERN,
-      query: {
-        bool: {
-          filter: [{ term: { 'slo.id': slo.id } }],
-        },
-      },
-      refresh: true,
-      wait_for_completion: true,
-      conflicts: 'proceed',
-      slices: 'auto',
-    });
+    // Try multiple delete attempts to ensure all documents are removed
+    let deleteAttempts = 0;
+    const maxDeleteAttempts = 10;
+    let remainingCount = 1;
 
-    // Verify deletion worked - wait a bit longer and check multiple times
-    let verifyDelete;
-    for (let attempt = 0; attempt < 5; attempt++) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      verifyDelete = await esClient.count({
+    while (remainingCount > 0 && deleteAttempts < maxDeleteAttempts) {
+      deleteAttempts++;
+      const deleteResponse = await esClient.deleteByQuery({
+        index: SLI_DESTINATION_INDEX_PATTERN,
+        query: {
+          bool: {
+            filter: [{ term: { 'slo.id': slo.id } }],
+          },
+        },
+        refresh: true,
+        wait_for_completion: true,
+        conflicts: 'proceed',
+        slices: 'auto',
+      });
+
+      loggerMock.info(
+        `Delete attempt ${deleteAttempts}: deleted ${deleteResponse.deleted || 0} documents`
+      );
+
+      // Wait a bit and verify deletion
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const verifyDelete = await esClient.count({
         index: SLI_DESTINATION_INDEX_PATTERN,
         query: {
           bool: {
@@ -262,14 +271,36 @@ describe('SLO Transform Alert Integration Test', () => {
           },
         },
       });
-      if (verifyDelete.count === 0) {
+
+      remainingCount = verifyDelete.count;
+      if (remainingCount === 0) {
         break;
       }
+
+      loggerMock.info(
+        `After delete attempt ${deleteAttempts}: ${remainingCount} documents still remaining`
+      );
     }
 
-    if (verifyDelete.count > 0) {
+    if (remainingCount > 0) {
+      // Log detailed info before failing
+      const detailedCheck = await esClient.search({
+        index: SLI_DESTINATION_INDEX_PATTERN,
+        size: 5,
+        query: {
+          bool: {
+            filter: [{ term: { 'slo.id': slo.id } }],
+          },
+        },
+        _source: ['slo.id', 'slo.revision', '@timestamp'],
+      });
+      loggerMock.error(
+        `Failed to delete all SLI documents after ${maxDeleteAttempts} attempts. ` +
+          `${remainingCount} documents remaining for SLO ${slo.id}. ` +
+          `Sample documents: ${JSON.stringify(detailedCheck.hits.hits.map((h) => h._source))}`
+      );
       throw new Error(
-        `Failed to delete all SLI documents. ${verifyDelete.count} documents remaining for SLO ${slo.id}.`
+        `Failed to delete all SLI documents. ${remainingCount} documents remaining for SLO ${slo.id} after ${maxDeleteAttempts} delete attempts.`
       );
     }
 
@@ -278,10 +309,10 @@ describe('SLO Transform Alert Integration Test', () => {
 
     // 7. Continue indexing source data RIGHT BEFORE running the executor
     // This ensures the recent window (last 20 minutes) has fresh data
-    // The executor checks for at least 3 documents in the last 20 minutes
+    // The executor checks for any documents in the last 20 minutes (no minimum threshold)
     const justBeforeExecutor = Date.now();
     const additionalDocuments = [];
-    // Add 10 documents spread over the last 20 minutes to ensure we have at least 3
+    // Add 10 documents spread over the last 20 minutes to ensure we have recent data
     // We use the current time to ensure they're definitely in the recent window
     for (let i = 0; i < 10; i++) {
       additionalDocuments.push({
