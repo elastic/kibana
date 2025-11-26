@@ -8,7 +8,14 @@
 /* eslint-disable playwright/no-nth-methods */
 
 import type { ScoutPage } from '@kbn/scout';
-import { expect, EuiDataGridWrapper, EuiSuperSelectWrapper, EuiComboBoxWrapper } from '@kbn/scout';
+import {
+  expect,
+  EuiDataGridWrapper,
+  EuiSuperSelectWrapper,
+  EuiComboBoxWrapper,
+  EuiCodeBlockWrapper,
+  KibanaCodeEditorWrapper,
+} from '@kbn/scout';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
@@ -19,6 +26,8 @@ export class StreamsApp {
   public readonly fieldTypeSuperSelect;
   public readonly previewDataGrid;
   public readonly schemaDataGrid;
+  public readonly advancedSettingsCodeBlock;
+  public readonly kibanaMonacoEditor;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -47,6 +56,10 @@ export class StreamsApp {
       this.page,
       'streamsAppSchemaEditorFieldsTableLoaded'
     );
+    this.advancedSettingsCodeBlock = new EuiCodeBlockWrapper(this.page, {
+      locator: '.euiCodeBlock',
+    });
+    this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
   }
 
   async goto() {

@@ -16,7 +16,7 @@ import type { ScoutPage } from '..';
  * Initially the API is intentionally aligned with the FTR `MonacoEditorService`
  * (`src/platform/test/functional/services/monaco_editor.ts`).
  */
-export class MonacoEditor {
+export class KibanaCodeEditorWrapper {
   constructor(private readonly page: ScoutPage) {}
 
   /**

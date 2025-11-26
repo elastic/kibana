@@ -88,7 +88,7 @@ test.describe(
       }
 
       const advancedSettingsJsonContent = JSON.stringify({ copy_to: targetFieldName });
-      await pageObjects.monacoEditor.setCodeEditorValue(advancedSettingsJsonContent);
+      await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue(advancedSettingsJsonContent);
 
       // Check if the add button is enabled (form should be valid)
       const addButton = page.getByTestId('streamsAppSchemaEditorAddFieldButton');
@@ -127,7 +127,7 @@ test.describe(
       }
 
       // Get the code block value and verify it contains copy_to
-      const codeValue = await pageObjects.codeBlock.getCodeValue({ locator: '.euiCodeBlock' });
+      const codeValue = await pageObjects.streams.advancedSettingsCodeBlock.getCodeValue();
       expect(codeValue).toContain('copy_to');
       expect(codeValue).toContain(targetFieldName);
     });

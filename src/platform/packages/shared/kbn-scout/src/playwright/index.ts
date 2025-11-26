@@ -49,3 +49,6 @@ export { apiTest } from './test/api';
 
 // Test helpers for EUI components
 export * from './eui_components';
+
+// Test helpers for Kibana components
+export * from './ui_components';
