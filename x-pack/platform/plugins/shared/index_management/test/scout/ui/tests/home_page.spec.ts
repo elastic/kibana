@@ -16,7 +16,7 @@ test.describe('Home page', { tag: ['@ess'] }, () => {
     await pageObjects.indexManagement.goto();
   });
 
-  test.afterAll(async ({ esClient }) => {
+  test.afterAll(async ({ esClient, log }) => {
     try {
       await esClient.indices.delete({ index: testIndexName });
     } catch (e: any) {
