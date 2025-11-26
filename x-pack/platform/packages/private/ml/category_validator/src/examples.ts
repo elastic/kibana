@@ -115,8 +115,6 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
       (example: string | null | undefined) => example !== undefined && example !== null
     );
 
-    validationResults.createMedianMessageLengthResult(allExamples);
-
     try {
       const examplesWithTokens = await getTokens(CHUNK_SIZE, allExamples, analyzer);
       return { examples: examplesWithTokens };
