@@ -15,7 +15,9 @@ import { AXE_OPTIONS, AXE_IMPACT_LEVELS } from '@kbn/axe-config';
 import type { KibanaUrl } from '../../..';
 
 export interface RunA11yScanOptions {
-  /** Optional CSS selectors to exclude from scan */
+  /** Optional CSS selectors to include in analysis */
+  include?: string[];
+  /** Optional CSS selectors to exclude from analysis */
   exclude?: string[];
   /** Timeout in ms for the scan (defaults 10000) */
   timeoutMs?: number;
@@ -23,10 +25,16 @@ export interface RunA11yScanOptions {
 
 const runA11yScan = async (
   page: Page,
-  { exclude = [], timeoutMs = 10000 }: RunA11yScanOptions = {}
+  { include = [], exclude = [], timeoutMs = 10000 }: RunA11yScanOptions = {}
 ) => {
   const builder = new AxeBuilder({ page });
   builder.options(AXE_OPTIONS);
+
+  if (include) {
+    for (const selector of include) {
+      builder.include(selector);
+    }
+  }
 
   if (exclude) {
     for (const selector of exclude) {
