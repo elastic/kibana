@@ -16,8 +16,11 @@
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/management-plugin",
-    "@kbn/react-kibana-context-render",
-    "@kbn/core-application-browser",
-    "@kbn/shared-ux-router"
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/features-plugin",
+    "@kbn/encrypted-saved-objects-plugin"
   ]
 }
