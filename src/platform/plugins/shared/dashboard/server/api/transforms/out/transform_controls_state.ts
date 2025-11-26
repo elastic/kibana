@@ -45,8 +45,8 @@ export function transformControlProperties(controls: Array<StoredControlState>) 
       return {
         uid: id,
         type,
-        grow,
-        width,
+        ...(grow !== undefined && { grow }),
+        ...(width !== undefined && { width }),
         config: explicitInput as SerializableRecord,
       };
     });

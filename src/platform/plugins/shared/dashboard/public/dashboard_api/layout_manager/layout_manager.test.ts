@@ -21,6 +21,7 @@ import { initializeTitleManager } from '@kbn/presentation-publishing';
 import type { DashboardState } from '../../../common';
 import type { initializeTrackPanel } from '../track_panel';
 import { initializeLayoutManager } from './layout_manager';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('54321'),
@@ -384,8 +385,8 @@ describe('layout manager', () => {
         },
         ['control3']: {
           type: 'optionsListControl',
-          grow: undefined,
-          width: undefined,
+          grow: DEFAULT_CONTROL_GROW,
+          width: DEFAULT_CONTROL_WIDTH,
           order: 2,
         },
       });

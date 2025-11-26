@@ -16,6 +16,7 @@ import { BehaviorSubject } from 'rxjs';
 import { registerReactEmbeddableFactory } from './react_embeddable_registry';
 import { EmbeddableRenderer } from './react_embeddable_renderer';
 import type { EmbeddableFactory } from './types';
+import { EuiThemeProvider } from '@elastic/eui';
 
 const testEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> = {
   type: 'test',
@@ -161,6 +162,10 @@ describe('embeddable renderer', () => {
         phase$: expect.any(Object),
         hasLockedHoverActions$: expect.any(Object),
         lockHoverActions: expect.any(Function),
+        isCustomizable: true,
+        isDuplicable: true,
+        isExpandable: true,
+        isPinnable: false,
       })
     );
   });
@@ -186,7 +191,6 @@ describe('embeddable renderer', () => {
   });
 
   it('catches error when thrown in buildEmbeddable', async () => {
-    const buildEmbeddable = jest.fn();
     const errorInInitializeFactory: EmbeddableFactory<{ name: string; bork: string }> = {
       ...testEmbeddableFactory,
       type: 'errorInBuildEmbeddable',
@@ -200,22 +204,24 @@ describe('embeddable renderer', () => {
     setupPresentationPanelServices();
 
     const onApiAvailable = jest.fn();
+    // EuiThemeProvider is necessary to get around the complex way the error panel is rendered
     const embeddable = render(
-      <EmbeddableRenderer
-        type={'errorInBuildEmbeddable'}
-        maybeId={'12345'}
-        onApiAvailable={onApiAvailable}
-        getParentApi={() => ({
-          getSerializedStateForChild: () => ({
-            rawState: {},
-          }),
-        })}
-      />
+      <EuiThemeProvider>
+        <EmbeddableRenderer
+          type={'errorInBuildEmbeddable'}
+          maybeId={'12345'}
+          onApiAvailable={onApiAvailable}
+          getParentApi={() => ({
+            getSerializedStateForChild: () => ({
+              rawState: {},
+            }),
+          })}
+        />
+      </EuiThemeProvider>
     );
 
     await waitFor(() => expect(embeddable.getByTestId('errorMessageMarkdown')).toBeInTheDocument());
     expect(onApiAvailable).not.toBeCalled();
-    expect(buildEmbeddable).not.toBeCalled();
     expect(embeddable.getByTestId('errorMessageMarkdown')).toHaveTextContent(
       'error in buildEmbeddable'
     );

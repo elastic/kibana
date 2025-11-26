@@ -66,6 +66,9 @@ describe('Options List Control Api', () => {
         if (dataviewDelayPromise) await dataviewDelayPromise;
         return getDataView(id);
       });
+      coreServices.http.get = jest.fn().mockResolvedValue({
+        allowExpensiveQueries: true,
+      });
     });
 
     it('returns api immediately when no initial selections are configured', async () => {
@@ -160,6 +163,7 @@ describe('Options List Control Api', () => {
       expect(api.appliedFilters$.value).toEqual([
         {
           meta: {
+            controlledBy: 'myControl1',
             index: 'myDataViewId',
             key: 'myFieldName',
             params: ['cool', 'test'],
@@ -202,6 +206,7 @@ describe('Options List Control Api', () => {
       expect(api.appliedFilters$.value).toEqual([
         {
           meta: {
+            controlledBy: 'myControl1',
             index: 'myDataViewId',
             key: 'myFieldName',
           },
@@ -231,6 +236,7 @@ describe('Options List Control Api', () => {
       expect(api.appliedFilters$.value).toEqual([
         {
           meta: {
+            controlledBy: 'myControl1',
             index: 'myDataViewId',
             key: 'myFieldName',
             negate: true,
@@ -391,10 +397,7 @@ describe('Options List Control Api', () => {
 
       expect(api.appliedFilters$.value).toEqual([
         {
-          meta: {
-            index: 'myDataViewId',
-            key: 'myFieldName',
-          },
+          meta: { controlledBy: 'myControl1', index: 'myDataViewId', key: 'myFieldName' },
           query: {
             match_phrase: {
               myFieldName: 'woof',
@@ -423,10 +426,7 @@ describe('Options List Control Api', () => {
 
       expect(api.appliedFilters$.value).toEqual([
         {
-          meta: {
-            index: 'myDataViewId',
-            key: 'myFieldName',
-          },
+          meta: { controlledBy: 'myControl1', index: 'myDataViewId', key: 'myFieldName' },
           query: {
             match_phrase: {
               myFieldName: 'woof',
@@ -453,10 +453,7 @@ describe('Options List Control Api', () => {
 
       expect(api.appliedFilters$.value).toEqual([
         {
-          meta: {
-            index: 'myDataViewId',
-            key: 'myFieldName',
-          },
+          meta: { controlledBy: 'myControl1', index: 'myDataViewId', key: 'myFieldName' },
           query: {
             match_phrase: {
               myFieldName: 'bark',

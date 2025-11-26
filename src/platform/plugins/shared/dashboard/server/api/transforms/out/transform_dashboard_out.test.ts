@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
-} from '@kbn/controls-constants';
+import type { StickyControlState } from '@kbn/controls-schemas';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../../../dashboard_saved_object';
 import type { DashboardState } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
+
+jest.mock('../../../kibana_services', () => ({
+  ...jest.requireActual('../../../kibana_services'),
+  embeddableService: {
+    getTransforms: jest.fn(),
+  },
+}));
 
 describe('transformDashboardOut', () => {
   const controlGroupInputControlsSo = {
@@ -69,19 +72,12 @@ describe('transformDashboardOut', () => {
     };
     expect(transformDashboardOut(input)).toEqual<DashboardState>({
       controlGroupInput: {
-        labelPosition: '', // TODO: Remove
-        ignoreParentSettings: {}, // TODO: Remove
-        autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
         controls: [
           {
-            controlConfig: { anyKey: 'some value' },
-            grow: DEFAULT_CONTROL_GROW,
-            id: 'foo',
-            order: 0,
-            // @ts-expect-error Test type
+            config: { anyKey: 'some value' },
+            uid: 'foo',
             type: 'type1',
-            width: DEFAULT_CONTROL_WIDTH,
-          },
+          } as unknown as StickyControlState,
         ],
       },
       description: 'my description',
@@ -156,26 +152,16 @@ describe('transformDashboardOut', () => {
     ];
     expect(transformDashboardOut(input, references)).toEqual<DashboardState>({
       controlGroupInput: {
-        labelPosition: 'twoLine',
-        ignoreParentSettings: {
-          ignoreFilters: true,
-          ignoreQuery: false,
-          ignoreTimerange: false,
-          ignoreValidations: false,
-        },
-        autoApplySelections: false,
         controls: [
           {
-            controlConfig: {
-              anyKey: 'some value',
-            },
-            id: 'foo',
+            uid: 'foo',
             grow: false,
             width: 'small',
-            order: 0,
-            // @ts-expect-error Test type
+            config: {
+              anyKey: 'some value',
+            },
             type: 'type1',
-          },
+          } as unknown as StickyControlState,
         ],
       },
       description: 'description',
@@ -186,6 +172,7 @@ describe('transformDashboardOut', () => {
         syncColors: false,
         syncTooltips: false,
         syncCursor: false,
+        autoApplyFilters: false,
       },
       panels: [
         {

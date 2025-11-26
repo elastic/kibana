@@ -318,7 +318,7 @@ describe('useESQLVariables', () => {
           controlType: 'STATIC_VALUES' as EsqlControlType,
           order: 0,
         },
-      } as ControlPanelsState;
+      } as unknown as ControlPanelsState;
 
       act(() => {
         mockControlGroupAPI.simulateInput({
@@ -358,7 +358,7 @@ describe('useESQLVariables', () => {
           controlType: 'STATIC_VALUES' as EsqlControlType,
           order: 0,
         },
-      } as ControlPanelsState;
+      } as unknown as ControlPanelsState;
 
       act(() => {
         mockControlGroupAPI.simulateInput({

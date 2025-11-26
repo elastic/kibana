@@ -132,7 +132,8 @@ export const EmbeddableRenderer = <
           return React.forwardRef<Api>((_, ref) => {
             // expose the dummy error api into the imperative handle
             useImperativeHandle(ref, () => errorApi, []);
-            return <PresentationPanelError error={e} api={errorApi} />;
+            // if `hidePanelChrome` is false, then `PresentationPanel` will render the error
+            return hidePanelChrome ? <PresentationPanelError error={e} api={errorApi} /> : null;
           });
         }
       })();

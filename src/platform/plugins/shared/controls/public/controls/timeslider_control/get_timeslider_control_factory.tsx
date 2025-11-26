@@ -329,6 +329,12 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
           }
         );
 
+      // Initialize the timeslice
+      syncTimesliceWithTimeRangePercentage(
+        state.timesliceStartAsPercentageOfTimeRange,
+        state.timesliceEndAsPercentageOfTimeRange
+      );
+
       return {
         api,
         Component: (controlPanelClassNames) => {
