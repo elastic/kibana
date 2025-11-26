@@ -30,7 +30,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { FieldType } from '@kbn/esql-ast';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
-import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
+import type { ESQLTelemetryCallbacks, ESQLControlsContext } from '@kbn/esql-types';
 import {
   ESQLVariableType,
   type ESQLControlVariable,
@@ -77,11 +77,7 @@ import { ResizableButton } from './resizable_button';
 import { useRestorableState, withRestorableState } from './restorable_state';
 import { getHistoryItems } from './history_local_storage';
 import type { StarredQueryMetadata } from './editor_footer/esql_starred_queries_service';
-import type {
-  ControlsContext,
-  ESQLEditorDeps,
-  ESQLEditorProps as ESQLEditorPropsInternal,
-} from './types';
+import type { ESQLEditorDeps, ESQLEditorProps as ESQLEditorPropsInternal } from './types';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -94,8 +90,8 @@ const triggerControl = async (
   uiActions: ESQLEditorDeps['uiActions'],
   triggerSource: ControlTriggerSource,
   esqlVariables?: ESQLControlVariable[],
-  onSaveControl?: ControlsContext['onSaveControl'],
-  onCancelControl?: ControlsContext['onCancelControl']
+  onSaveControl?: ESQLControlsContext['onSaveControl'],
+  onCancelControl?: ESQLControlsContext['onCancelControl']
 ) => {
   await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
     queryString,

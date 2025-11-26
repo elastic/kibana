@@ -40,6 +40,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { BackgroundSearchRestoredCallout } from '@kbn/background-search';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { ESQLRequestStats } from '@kbn/esql-types';
 import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import type { SavedQueryMeta } from '../saved_query_form';
@@ -160,6 +161,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * typically bound to UI controls like dropdowns or input fields (Dashboard controls here).
    */
   esqlVariablesConfig?: QueryBarTopRowProps['esqlVariablesConfig'];
+  esqlRequestStats?: ESQLRequestStats;
 
   /** Optional configurations for the lookup join index editor */
   onOpenQueryInNewTab?: QueryBarTopRowProps['onOpenQueryInNewTab'];

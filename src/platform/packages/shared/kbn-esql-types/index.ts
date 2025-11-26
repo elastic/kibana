@@ -53,3 +53,5 @@ export {
   TelemetryControlCancelledReason,
   type TelemetryQuerySubmittedProps,
 } from './src/esql_telemetry_types';
+
+export { type ESQLRequestStats, type ESQLControlsContext } from './src/editor_types';

@@ -20,19 +20,10 @@ import type {
   IndicesAutocompleteResult,
   RecommendedQuery,
   RecommendedField,
+  ESQLRequestStats,
+  ESQLControlsContext,
 } from '@kbn/esql-types';
 import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
-
-export interface ControlsContext {
-  /** The editor supports the creation of controls,
-   * This flag should be set to true to display the "Create control" suggestion
-   **/
-  supportsControls: boolean;
-  /** Function to be called after the control creation **/
-  onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
-  /** Function to be called after cancelling the control creation **/
-  onCancelControl: () => void;
-}
 
 export interface DataErrorsControl {
   enabled: boolean;
@@ -84,7 +75,7 @@ export interface ESQLEditorProps {
   /** The component by default focuses on the editor when it is mounted, this flag disables it**/
   disableAutoFocus?: boolean;
   /** Enables the creation of controls from the editor **/
-  controlsContext?: ControlsContext;
+  controlsContext?: ESQLControlsContext;
   /** Opens the given query in a new Discover tab **/
   onOpenQueryInNewTab?: (tabName: string, esqlQuery: string) => Promise<void>;
   /** The available ESQL variables from the page context this editor was opened in */
@@ -97,6 +88,8 @@ export interface ESQLEditorProps {
   formLabel?: string;
   /** Whether to merge external messages into the editor's message list */
   mergeExternalMessages?: boolean;
+  /** Stats about the last request made */
+  requestStats?: ESQLRequestStats;
 }
 
 interface ESQLVariableService {
