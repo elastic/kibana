@@ -38,7 +38,7 @@ import type {
   ScriptsLibraryClientInterface,
   ScriptsLibrarySavedObjectAttributes,
 } from './types';
-import { wrapErrorIfNeeded } from '../../utils';
+import { catchAndWrapError, wrapErrorIfNeeded } from '../../utils';
 import { stringify } from '../../utils/stringify';
 
 export interface ScriptsLibraryClientOptions {
@@ -237,7 +237,24 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     sortField = 'name',
     sortDirection = 'asc',
   }: ListScriptsRequestQuery = {}): Promise<EndpointScriptListApiResponse> {
-    throw new ScriptLibraryError('Not implemented', 501);
+    const soFindResults = await this.soClient
+      .find<ScriptsLibrarySavedObjectAttributes>({
+        type: SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+        perPage: pageSize,
+        page,
+        sortField,
+        sortOrder: sortDirection,
+      })
+      .catch(catchAndWrapError.withMessage('Failed to search for scripts'));
+
+    return {
+      data: soFindResults.saved_objects.map(this.mapSoAttributesToEndpointScript),
+      page,
+      pageSize,
+      sortDirection,
+      sortField,
+      total: soFindResults.total ?? 0,
+    };
   }
 
   public async delete(scriptId: string): Promise<void> {
