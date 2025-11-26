@@ -66,6 +66,7 @@ export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
         })}
         css={styles}
         id={PRIMARY_NAVIGATION_ID}
+        data-test-subj={PRIMARY_NAVIGATION_ID}
         onKeyDown={handleRovingIndex}
         ref={handleRef}
       >

@@ -161,7 +161,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     ],
   },
   {
-    id: 'agents',
+    id: 'assets',
     label: 'Assets',
     iconType: 'indexManagementApp',
     href: '/assets/fleet/agents',
