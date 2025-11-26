@@ -469,13 +469,9 @@ export class AutomaticImportSavedObjectService {
         }
       );
 
-      // After successful data stream creation, update data stream count in the integration
-      // or create a new integration if it doesn't exist
       try {
         if (existingIntegration) {
-          this.logger.debug(
-            `Data stream created successfully, incrementing integration ${integrationId} count`
-          );
+          this.logger.debug(`Data stream created successfully`);
 
           const updatedIntegrationData: IntegrationAttributes = {
             ...existingIntegration.attributes,
@@ -493,16 +489,8 @@ export class AutomaticImportSavedObjectService {
 
           const defaultIntegrationData: Integration = {
             integration_id: integrationId,
-            dataStreams: [], // Empty array, data_stream_count will be set correctly below
+            dataStreams: [],
             title: `Auto-generated integration ${integrationId}`,
-            data_stream_count: 1,
-            created_by: authenticatedUser.username,
-            status: TASK_STATUSES.pending,
-            metadata: {
-              created_at: new Date().toISOString(),
-              version: '1.0.0',
-              title: `Auto-generated integration ${integrationId}`,
-            },
           };
 
           const createdIntegration = await this.insertIntegration(request, defaultIntegrationData);
