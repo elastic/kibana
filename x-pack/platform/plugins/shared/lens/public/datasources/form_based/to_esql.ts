@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { from, where, sort, SortOrder, stats as statsComposer } from '@kbn/esql-composer';
+import { from, where, sort, SortOrder, stats } from '@kbn/esql-composer';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getCalculateAutoTimeExpression, getUserTimeZone } from '@kbn/data-plugin/common';
@@ -43,9 +43,7 @@ export function getESQLForLayer(
 
   const timeZone = getUserTimeZone((key) => uiSettings.get(key), true);
   const utcOffset = moment.tz(timeZone).utcOffset() / 60;
-  if (utcOffset !== 0) {
-    return;
-  }
+  if (utcOffset !== 0) return;
 
   if (
     Object.values(layer.columns).find(
@@ -54,9 +52,8 @@ export function getESQLForLayer(
         col.timeShift ||
         ('sourceField' in col && indexPattern.getFieldByName(col.sourceField)?.runtime)
     )
-  ) {
+  )
     return;
-  }
 
   // indexPattern.title is the actual es pattern
   let esqlCompose = from(indexPattern.title);
@@ -85,9 +82,7 @@ export function getESQLForLayer(
   const metrics = metricEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
-    if (!def.toESQL) {
-      return undefined;
-    }
+    if (!def.toESQL) return undefined;
 
     const aggId = String(index);
     const wrapInFilter = Boolean(def.filterable && col.filter?.query);
@@ -154,9 +149,7 @@ export function getESQLForLayer(
       dateRange
     );
 
-    if (!metricESQL) {
-      return undefined;
-    }
+    if (!metricESQL) return undefined;
 
     metricESQL = `${esAggsId} = ` + metricESQL;
 
@@ -173,16 +166,12 @@ export function getESQLForLayer(
     return metricESQL;
   });
 
-  if (metrics.some((m) => !m)) {
-    return;
-  }
+  if (metrics.some((m) => !m)) return;
 
   const buckets = bucketEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
-    if (!def.toESQL) {
-      return undefined;
-    }
+    if (!def.toESQL) return undefined;
 
     const aggId = String(index);
     const wrapInFilter = Boolean(def.filterable && col.filter?.query);
@@ -290,13 +279,10 @@ export function getESQLForLayer(
   if (buckets.some((m) => !m)) return;
 
   if (buckets.length > 0) {
-    if (metrics.length > 0) {
-      const stats = metrics.join(', ');
-      esqlCompose = esqlCompose.pipe(statsComposer(`${stats} BY ${buckets.join(', ')}`));
-    }
+    if (buckets.some((b) => !b || b.includes('undefined'))) return;
 
-    if (buckets.some((b) => !b || b.includes('undefined'))) {
-      return;
+    if (metrics.length > 0) {
+      esqlCompose = esqlCompose.pipe(stats(`${metrics.join(', ')} BY ${buckets.join(', ')}`));
     }
 
     const sortsCompose = bucketEsAggsEntries.map(([colId, col], index) => {
@@ -315,8 +301,7 @@ export function getESQLForLayer(
     esqlCompose = esqlCompose.pipe(sort(...sortsCompose));
   } else {
     if (metrics.length > 0) {
-      const stats = metrics.join(', ');
-      esqlCompose = esqlCompose.pipe(statsComposer(stats));
+      esqlCompose = esqlCompose.pipe(stats(metrics.join(', ')));
     }
   }
 
