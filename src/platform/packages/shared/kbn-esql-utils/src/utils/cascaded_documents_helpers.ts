@@ -31,8 +31,9 @@ import type {
 } from '@kbn/esql-ast/src/mutate/commands/stats';
 import type {
   BinaryExpressionComparisonOperator,
-  BinaryExpressionWhereOperator,
   ESQLBinaryExpression,
+  ESQLUnaryExpression,
+  ESQLPostfixUnaryExpression,
   ESQLLiteral,
 } from '@kbn/esql-ast/src/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -809,27 +810,23 @@ export const appendFilteringWhereClauseForCascadeLayout = <
 
   let modifiedFilteringWhereCommand: ESQLCommand | null = null;
 
-  // the where command itself typically only accepts a single expression as its argument
-  // if it's not a named "and" binary expression, we'll treat it as a command that has only one expression,
-  // hence we only need to either replace it with a new one or append a new one
-  if (
-    isBinaryExpression(filteringWhereCommand.args[0]) &&
-    filteringWhereCommand.args[0].name !== 'and'
-  ) {
-    const binaryExpression = filteringWhereCommand
-      .args[0] as ESQLBinaryExpression<BinaryExpressionWhereOperator>;
-    const [left] = binaryExpression.args;
+  // the where command itself represents it's expressions as a single argument that could a series of nested left and right expressions
+  // hence why only access the first argument.
+  const filteringExpression = filteringWhereCommand.args[0] as
+    | ESQLBinaryExpression
+    | ESQLUnaryExpression
+    | ESQLPostfixUnaryExpression;
 
+  if (isBinaryExpression(filteringExpression) && filteringExpression.name === 'and') {
+    // This is already a combination of some conditions, for now we'll just append the new condition to the existing one
+    modifiedFilteringWhereCommand = synth.cmd`WHERE ${computedFilteringExpression} AND ${filteringExpression}`;
+  } else {
     modifiedFilteringWhereCommand =
-      (left as ESQLColumn).name === normalizedFieldName
-        ? // when the expression's left hand's value matches the target field we're trying to filter on, we simply replace it with the new expression
+      isBinaryExpression(filteringExpression) &&
+      (filteringExpression.args[0] as ESQLColumn).name === normalizedFieldName
+        ? // when the expression is a binary expression and it's left hand's value matches the target field we're trying to filter on, we simply replace it with the new expression
           synth.cmd`WHERE ${computedFilteringExpression}`
-        : synth.cmd`WHERE ${computedFilteringExpression} AND ${binaryExpression}`;
-  } else if (
-    isBinaryExpression(filteringWhereCommand.args[0]) &&
-    filteringWhereCommand.args[0].name === 'and'
-  ) {
-    modifiedFilteringWhereCommand = synth.cmd`WHERE ${computedFilteringExpression} AND ${filteringWhereCommand.args[0]}`;
+        : synth.cmd`WHERE ${computedFilteringExpression} AND ${filteringExpression}`;
   }
 
   // if we where able to create a new filtering where command, we need to add it in and remove the old one

@@ -90,7 +90,7 @@ const contextRowActions: Array<
     'data-test-subj': 'dscCascadeRowContextActionCopyToClipboard',
     onClick(this: RowClickActionContext) {
       copyToClipboard(this.rowContext.groupValue as string);
-      this.closeActionMenu();
+      return this.closeActionMenu();
     },
   },
   {
@@ -115,6 +115,8 @@ const contextRowActions: Array<
       }
 
       this.updateESQLQuery(updatedQuery);
+
+      return this.closeActionMenu();
     },
   },
   {
@@ -139,6 +141,7 @@ const contextRowActions: Array<
       }
 
       this.updateESQLQuery(updatedQuery);
+      return this.closeActionMenu();
     },
   },
   {
@@ -150,7 +153,7 @@ const contextRowActions: Array<
     onClick(this: RowClickActionContext, e) {
       e.preventDefault();
 
-      this.openInNewTab({
+      return this.openInNewTab({
         globalState: this.globalState,
         appState: {
           query: constructCascadeQuery({
@@ -344,7 +347,7 @@ export const useEsqlDataCascadeRowActionHelpers = ({
             editorQuery={editorQuery}
             esqlVariables={esqlVariables}
             globalState={globalState}
-            row={popoverRowData!}
+            row={popoverRowData}
             services={services}
             dataView={dataView}
             statsFieldSummary={statsFieldSummary}
@@ -447,6 +450,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
     ({ rowData }) =>
       selectedColumns
         .map((selectedColumn) => {
+          // only allow grouping columns to be rendered in the meta part of the row header
           if (namedColumnsFromQuery.indexOf(selectedColumn) < 0) {
             return null;
           }

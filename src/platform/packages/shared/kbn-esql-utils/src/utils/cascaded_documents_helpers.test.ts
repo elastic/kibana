@@ -847,5 +847,29 @@ describe('cascaded documents helpers utils', () => {
         });
       });
     });
+
+    describe('handling for fields that are not aggregatable', () => {
+      it('uses match phrase query when the selected column is a text or keyword field that is not aggregatable', () => {
+        // only apply this mock for this test
+        jest.spyOn(dataViewMock.fields, 'getByName').mockReturnValueOnce({
+          esTypes: ['text', 'keyword'],
+          aggregatable: false,
+        } as unknown as DataViewField);
+
+        expect(
+          appendFilteringWhereClauseForCascadeLayout(
+            'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY tags',
+            [],
+            dataViewMock,
+            'tags',
+            'tada!',
+            '+',
+            'string'
+          )
+        ).toBe(
+          'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(tags, "tada!") | STATS count = COUNT(bytes), average = AVG(memory) BY tags'
+        );
+      });
+    });
   });
 });
