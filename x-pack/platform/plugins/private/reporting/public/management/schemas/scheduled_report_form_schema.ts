@@ -85,9 +85,11 @@ export const getScheduledReportFormSchema = (
   emailSubject: {
     type: FIELD_TYPES.TEXT,
     label: i18n.SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_LABEL,
+    defaultValue: i18n.SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_DEFAULT_VALUE,
   },
   emailMessage: {
     type: FIELD_TYPES.TEXTAREA,
     label: i18n.SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_LABEL,
+    defaultValue: i18n.SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_DEFAULT_VALUE,
   },
 });

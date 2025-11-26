@@ -516,13 +516,11 @@ export const ScheduledReportForm = ({
                             paramsProperty="emailSubject"
                           />
                         ),
-                        helpText: i18n.SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_HINT,
                         euiFieldProps: {
                           inputRef: emailSubjectFieldRef,
                           compressed: true,
                           fullWidth: true,
                           isDisabled: readOnly,
-                          placeholder: i18n.SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_PLACEHOLDER,
                           'data-test-subj': 'emailSubjectInput',
                         },
                       }}
@@ -550,7 +548,6 @@ export const ScheduledReportForm = ({
                           fullWidth: true,
                           isDisabled: readOnly,
                           'data-test-subj': 'emailMessageTextArea',
-                          placeholder: i18n.SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_PLACEHOLDER,
                           rows: 4,
                         },
                       }}

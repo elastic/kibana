@@ -232,18 +232,17 @@ export const SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_LABEL = i18n.translate(
   }
 );
 
-export const SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_PLACEHOLDER = i18n.translate(
-  'xpack.reporting.scheduledReportingForm.emailSubjectPlaceholder',
+export const SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_DEFAULT_VALUE = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailSubjectDefaultValue',
   {
-    defaultMessage: "New export available for '{{title}}'",
+    defaultMessage: "'{{title}}'-'{{date}}' scheduled report",
   }
 );
 
-export const SCHEDULED_REPORT_FORM_EMAIL_SUBJECT_HINT = i18n.translate(
-  'xpack.reporting.scheduledReportingForm.emailSubjectHint',
+export const SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_DEFAULT_VALUE = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailMessageDefaultValue',
   {
-    defaultMessage:
-      'Supports Mustache variables. The report title and date will be used if no subject is provided.',
+    defaultMessage: 'Your scheduled report is attached for you to download or share.',
   }
 );
 
@@ -254,19 +253,10 @@ export const SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_LABEL = i18n.translate(
   }
 );
 
-export const SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_PLACEHOLDER = i18n.translate(
-  'xpack.reporting.scheduledReportingForm.emailMessagePlaceholder',
-  {
-    defaultMessage:
-      "# Your export is ready\n\nTitle: '{{title}}'\nFilename: '{{filename}}'\nDate: '{{date}}'",
-  }
-);
-
 export const SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_HINT = i18n.translate(
   'xpack.reporting.scheduledReportingForm.emailMessageHint',
   {
-    defaultMessage:
-      'Supports Mustache variables and markdown formatting. A default message will be used if none is provided.',
+    defaultMessage: 'Supports Mustache variables and markdown formatting.',
   }
 );
 
