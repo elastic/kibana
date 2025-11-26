@@ -13,7 +13,7 @@ import { getSimpleRule } from './get_simple_rule';
  */
 export const getSimpleRuleWithoutRuleId = (): RuleCreateProps => {
   const simpleRule = getSimpleRule();
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   const { rule_id, ...ruleWithoutId } = simpleRule;
   return ruleWithoutId;
 };

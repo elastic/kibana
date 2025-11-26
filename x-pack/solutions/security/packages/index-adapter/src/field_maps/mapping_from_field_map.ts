@@ -27,7 +27,6 @@ export function mappingFromFieldMap(
   });
 
   fields.forEach((field) => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { name, required, array, multi_fields, ...rest } = field;
     const mapped = multi_fields
       ? {

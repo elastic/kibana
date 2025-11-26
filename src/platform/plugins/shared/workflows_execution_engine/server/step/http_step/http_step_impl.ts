@@ -123,13 +123,12 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
     // Apply fetcher options if provided
     if (fetcherOptions && Object.keys(fetcherOptions).length > 0) {
       const {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         skip_ssl_verification,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         follow_redirects,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         max_redirects,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         keep_alive,
       } = fetcherOptions;
 

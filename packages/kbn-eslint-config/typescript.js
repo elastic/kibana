@@ -5,6 +5,9 @@
 
 const eslintConfigPrettierRules = require('eslint-config-prettier').rules;
 
+// UNSAFE_* variables can use any format
+const allowedNameRegexp = '^UNSAFE_';
+
 module.exports = {
   overrides: [
     {
@@ -81,6 +84,10 @@ module.exports = {
             'error',
             {
               selector: 'default',
+              filter: {
+                regex: allowedNameRegexp,
+                match: false,
+              },
               format: ['camelCase', 'PascalCase', 'UPPER_CASE', 'snake_case'],
               leadingUnderscore: 'allowSingleOrDouble',
               trailingUnderscore: 'allowSingleOrDouble',
@@ -89,8 +96,8 @@ module.exports = {
               selector: 'variable',
               format: [
                 'camelCase',
-                'UPPER_CASE', // const SOMETHING = ...
-                'PascalCase', // React.FunctionComponent =
+                'UPPER_CASE', // e.g. const SOMETHING = ...
+                'PascalCase', // e.g. React.FunctionComponent =
               ],
               leadingUnderscore: 'allowSingleOrDouble',
               trailingUnderscore: 'allowSingleOrDouble',
@@ -100,9 +107,9 @@ module.exports = {
               modifiers: ['destructured'],
               format: [
                 'camelCase',
-                'snake_case', // response properties from ES
-                'UPPER_CASE', // const SOMETHING = ...
-                'PascalCase', // React.FunctionComponent =
+                'snake_case', // e.g. properties from ES response objects
+                'UPPER_CASE', // e.g. const SOMETHING = ...
+                'PascalCase', // e.g. React.FunctionComponent =
               ],
               leadingUnderscore: 'allowSingleOrDouble',
               trailingUnderscore: 'allowSingleOrDouble',
@@ -115,6 +122,10 @@ module.exports = {
             },
             {
               selector: 'memberLike',
+              filter: {
+                regex: allowedNameRegexp,
+                match: false,
+              },
               format: [
                 'camelCase',
                 'PascalCase',

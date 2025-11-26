@@ -61,10 +61,9 @@ export function uncovertMetricNames(byDateBucketResponse: { buckets: MetricNameB
     unconverted[metricName] = {
       buckets: byDateBucketResponse.buckets.map((bucket) => {
         const {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           key_as_string,
           key,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           doc_count,
           ...rest
         } = bucket;

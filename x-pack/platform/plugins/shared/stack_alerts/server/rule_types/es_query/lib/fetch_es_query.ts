@@ -64,7 +64,7 @@ export async function fetchEsQuery({
   const {
     query,
     fields,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     runtime_mappings,
     _source,
   } = getParsedQuery(params);
