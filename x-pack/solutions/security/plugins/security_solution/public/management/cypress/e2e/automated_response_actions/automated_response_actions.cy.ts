@@ -76,7 +76,7 @@ describe(
       }
     });
 
-    it.only('should have been called against a created host', () => {
+    it('should have been called against a created host', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       toggleRuleOffAndOn(ruleName);
 
