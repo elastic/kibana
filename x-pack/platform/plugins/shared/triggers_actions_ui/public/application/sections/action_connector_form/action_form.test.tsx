@@ -773,5 +773,17 @@ describe('action_form', () => {
 
       expect(actionOption.at(1).prop('disabled')).toBe(true);
     });
+
+    it('allows multiple instances of workflows system action', async () => {
+      const wrapper = await setup([
+        { id: 'system-connector-.workflows', actionTypeId: '.workflows', params: {} },
+      ]);
+
+      const actionOption = wrapper.find(
+        `[data-test-subj=".workflows-alerting-ActionTypeSelectOption"]`
+      );
+
+      expect(actionOption.at(1).prop('disabled')).toBe(false);
+    });
   });
 });

@@ -14,6 +14,10 @@ import { isDashboardSection } from '../../../../common';
 import { embeddableService } from '../../../kibana_services';
 import { getPanelIdFromReference } from '../../../../common/reference_utils';
 
+export function isSearchSourceReference(reference: SavedObjectReference) {
+  return reference.name.startsWith('kibanaSavedObjectMeta');
+}
+
 export function transformReferencesOut(
   references: SavedObjectReference[],
   panels?: DashboardState['panels']
@@ -44,6 +48,9 @@ export function transformReferencesOut(
       // drop tag references
       // tags are returned in "data.tags"
       if (ref.type === tagSavedObjectTypeName) return false;
+
+      // drop search source references because they are injected on server
+      if (isSearchSourceReference(ref)) return false;
 
       const panelId = getPanelIdFromReference(ref);
       return panelId && dropRefsForPanel[panelId]

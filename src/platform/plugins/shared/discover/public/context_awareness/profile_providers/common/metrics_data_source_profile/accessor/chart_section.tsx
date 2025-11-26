@@ -15,15 +15,16 @@ import { once } from 'lodash';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import type { DataSourceProfileProvider } from '../../../../profiles';
+import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
 
 export const createChartSection = (
   metricsExperienceClient?: MetricsExperienceClient
 ): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
   // prevents unmounting the component when the query changes but the index pattern is still valid
-  once((prev: () => ChartSectionConfiguration) =>
-    once((): ChartSectionConfiguration => {
+  once((prev: (params: ChartSectionConfigurationExtensionParams) => ChartSectionConfiguration) =>
+    once((params: ChartSectionConfigurationExtensionParams): ChartSectionConfiguration => {
       return {
-        ...(prev ? prev() : {}),
+        ...(prev ? prev(params) : {}),
         Component: (props: ChartSectionProps) => {
           // This will prevent the filter being added to the query for multi-dimensional breakdowns when the user clicks on a data point on the series.
           const handleFilter = (event: ExpressionRendererEvent['data']) => {
