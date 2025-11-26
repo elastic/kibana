@@ -29,6 +29,10 @@
     "@kbn/core-security-common",
     "@kbn/storage-adapter",
     "@kbn/core-saved-objects-server-mocks",
-    "@kbn/inference-langchain"
+    "@kbn/inference-langchain",
+    "@kbn/core-application-common",
+    "@kbn/i18n",
+    "@kbn/features-plugin",
+    "@kbn/task-manager-plugin"
   ]
 }
