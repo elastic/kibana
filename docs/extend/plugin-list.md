@@ -111,6 +111,7 @@ mapped_pages:
 | Name | Description |
 | --- | --- |
 | [actions](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/actions/README.md) | The Kibana actions plugin provides a framework to create executable actions. You can: |
+| [agentBuilderPlatform](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder_platform/README.md) | Contains the platform-owned agent builder entities |
 | [aiops](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/aiops/README.md) | The plugin provides APIs and components for AIOps features, including the “Log rate analysis” UI, maintained by the ML team. |
 | [alerting](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/alerting/README.md) | The Kibana Alerting plugin provides a common place to set up rules. You can: |
 | [apm](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/readme.md) | This plugin provides access to App Monitoring features provided by Elastic. It allows you to monitor your software services and applications in real-time; visualize detailed performance information on your services, identify and analyze errors, and monitor host-level and APM agent-specific metrics like JVM and Go runtime metrics. |
@@ -179,6 +180,7 @@ mapped_pages:
 | [logsDataAccess](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/logs_data_access/README.md) | Exposes services to access logs data. |
 | [logsShared](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/logs_shared/README.md) | Exposes the shared components and APIs to access and visualize logs. |
 | [logstash](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/logstash) | WARNING: Missing or empty README. |
+| [maintenanceWindows](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/maintenance_windows/README.md) | A Kibana plugin providing functionalities to manage maintenance windows. |
 | [maps](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/maps/README.md) | Visualize geo data from Elasticsearch or 3rd party geo-services. |
 | [metricsDataAccess](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/metrics_data_access/README.md) | Exposes utilities to access metrics data. |
 | [ml](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ml/readme.md) | This plugin provides access to the machine learning features provided by Elastic. |
