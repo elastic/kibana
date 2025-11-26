@@ -82,6 +82,7 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/core-http-server-mocks'
   - '@kbn/test-jest-helpers'
+  - '@kbn/streams-schema'
 tags:
   - plugin
   - prod
