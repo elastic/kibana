@@ -34,12 +34,12 @@ export const ErrorResultStep: React.FC<ErrorResultStepProps> = ({ result: { data
             <strong>{labels.title}</strong>
           </EuiText>
         </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner paddingSize="none">
+          <EuiCodeBlock language="esql" isCopyable paddingSize="m" lineNumbers>
+            {data.message}
+          </EuiCodeBlock>
+        </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
-      <EuiSplitPanel.Inner paddingSize="none">
-        <EuiCodeBlock language="esql" isCopyable paddingSize="m" lineNumbers>
-          {data.message}
-        </EuiCodeBlock>
-      </EuiSplitPanel.Inner>
     </div>
   );
 };
