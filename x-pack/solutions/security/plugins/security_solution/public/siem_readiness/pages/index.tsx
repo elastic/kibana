@@ -5,14 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiPageHeader, EuiPageSection } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useReadinessTasks } from '@kbn/siem-readiness';
 import { ReadinessPillarCards } from './readiness_pillar_cards';
 import { ReadinessTasksTable } from './readiness_tasks_table';
 import { ReadinessSummary } from './readiness_summary';
 
 const SiemReadinessDashboard = () => {
+  const { getReadinessCategories } = useReadinessTasks();
+
+  useEffect(() => {
+    if (getReadinessCategories.data) {
+      // eslint-disable-next-line no-console
+      console.log('Raw Categories Map:', getReadinessCategories.data.rawCategoriesMap);
+      // eslint-disable-next-line no-console
+      console.log('Main Categories Map:', getReadinessCategories.data.mainCategoriesMap);
+    }
+  }, [getReadinessCategories.data]);
+
   return (
     <div>
       <EuiPageHeader
