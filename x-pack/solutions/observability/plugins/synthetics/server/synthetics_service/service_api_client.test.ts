@@ -16,6 +16,7 @@ import type { PublicLocations } from '../../common/runtime_types';
 import { LocationStatus } from '../../common/runtime_types';
 import type { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SyntheticsServerSetup } from '../types';
+import * as sanitizeErrorModule from './utils/sanitize_error';
 
 const licenseMock: LicenseGetResponse = {
   license: {
@@ -141,6 +142,30 @@ describe('checkAccountAccessStatus', () => {
     );
 
     expect(result).toEqual({ allowed: true, signupUrl: 'http://localhost:666/example' });
+  });
+
+  it('should log a sanitized error if the request fails', async () => {
+    const spyGetSanitizedError = jest.spyOn(sanitizeErrorModule, 'getSanitizedError');
+    const logger = loggerMock.create();
+    const apiClient = new ServiceAPIClient(
+      logger,
+      { tls: { certificate: 'crt', key: 'k' }, manifestUrl: 'http://localhost' } as ServiceConfig,
+      { isDev: false, stackVersion: '8.4', coreStart: mockCoreStart } as SyntheticsServerSetup
+    );
+    apiClient.locations = [
+      {
+        id: 'test-location',
+        url: 'http://localhost',
+        label: 'Test location',
+        isServiceManaged: true,
+      },
+    ];
+    const error = new Error('Request failed');
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValue(error);
+
+    await apiClient.checkAccountAccessStatus();
+
+    expect(spyGetSanitizedError).toHaveBeenCalledWith(error);
   });
 });
 
