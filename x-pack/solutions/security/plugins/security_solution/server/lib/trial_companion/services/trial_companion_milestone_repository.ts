@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { MilestoneID } from '../../../../common/trial_companion/types';
 import type { NBAMilestone } from '../types';
 import type { TrialCompanionMilestoneRepository } from './trial_companion_milestone_repository.types';

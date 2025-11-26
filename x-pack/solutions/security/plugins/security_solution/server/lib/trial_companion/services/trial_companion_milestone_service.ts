@@ -6,23 +6,27 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { PackageService } from '@kbn/fleet-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import {
+  allSet,
+  detectionRulesInstalled,
+  installedPackages,
+  savedSearches,
+} from './trial_companion_nba_detectors';
 import { TrialCompanionMilestoneRepositoryImpl } from './trial_companion_milestone_repository';
 import type {
-  DetectorF,
   TrialCompanionMilestoneService,
   TrialCompanionMilestoneServiceSetup,
   TrialCompanionMilestoneServiceStart,
 } from './trial_companion_milestone_service.types';
 import { newTelemetryLogger } from '../../telemetry/helpers';
 import type { MilestoneID } from '../../../../common/trial_companion/types';
-import { Milestones } from '../../../../common/trial_companion/types';
 import type { TrialCompanionMilestoneRepository } from './trial_companion_milestone_repository.types';
-import type { NBAMilestone } from '../types';
+import type { NBAMilestone, DetectorF } from '../types';
 
 const TASK_TYPE = 'security:trial-companion-milestone';
 const TASK_TITLE = 'This task periodically checks currently achieved milestones.';
@@ -33,6 +37,7 @@ const TIMEOUT = '10m';
 export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilestoneService {
   private readonly logger: Logger;
   private repo?: TrialCompanionMilestoneRepository | null;
+  private usageCollection?: UsageCollectionSetup;
 
   private detectors: DetectorF[] = [];
 
@@ -43,16 +48,20 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
 
   public setup(setup: TrialCompanionMilestoneServiceSetup) {
     this.logger.debug('Setting up health diagnostic service');
+    this.usageCollection = setup.usageCollection;
     this.registerTask(setup.taskManager);
   }
 
   public async start(start: TrialCompanionMilestoneServiceStart) {
     this.logger.debug('Starting health diagnostic service');
-    this.detectors.push(installedPackages(this.logger, start.packageService), allSet(this.logger)); // TODO: add more detectors here, order matters
-    this.repo = new TrialCompanionMilestoneRepositoryImpl(
-      this.logger,
-      start.savedObjects.getUnsafeInternalClient()
-    );
+    const soClient = start.savedObjects.getUnsafeInternalClient();
+    this.detectors.push(
+      savedSearches(this.logger, start.esClient, soClient, this.usageCollection), // TODO - fix me
+      installedPackages(this.logger, start.packageService),
+      detectionRulesInstalled(this.logger, start.esClient, soClient, this.usageCollection),
+      allSet(this.logger)
+    ); // order matters
+    this.repo = new TrialCompanionMilestoneRepositoryImpl(this.logger, soClient);
     await this.scheduleTask(start.taskManager);
   }
 
@@ -139,49 +148,3 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
     this.logger.debug('Task scheduled');
   }
 }
-
-const installedPackages = (logger: Logger, packageService: PackageService): DetectorF => {
-  return async (): Promise<MilestoneID | undefined> => {
-    try {
-      logger.debug('verifyNonDefaultPackagesInstalled: Fetching Fleet packages');
-
-      const packages = await packageService.asInternalUser.getPackages();
-      const installedPackageNames = packages
-        .filter((pkg) => pkg.status === 'installed')
-        .map((pkg) => pkg.name);
-      // filter out defaults security_ai_prompts, security_detection_engine, elastic_agent, fleet_server
-      const defaultPackages = [
-        'endpoint', // installed by default on serverless even if not visible in the UI (see Slack thread), TODO: should be handled differently for ECH
-        'security_ai_prompts',
-        'security_detection_engine',
-        'elastic_agent',
-        'fleet_server',
-      ];
-      const nonDefaultPackages = installedPackageNames.filter(
-        (pkg) => !defaultPackages.includes(pkg)
-      );
-      logger.info(
-        `verifyNonDefaultPackagesInstalled: Fetched Fleet packages: ${
-          packages.length
-        } items, non-default packages: ${
-          nonDefaultPackages.length
-        }, installed package names: ${nonDefaultPackages.join(', ')}`
-      );
-
-      if (nonDefaultPackages.length === 0) {
-        return Milestones.M1;
-      }
-      return undefined;
-    } catch (error) {
-      logger.error('verifyNonDefaultPackagesInstalled: Error fetching Fleet packages', error);
-      throw error;
-    }
-  };
-};
-
-const allSet = (logger: Logger): DetectorF => {
-  return async (): Promise<MilestoneID | undefined> => {
-    logger.info('allSet: all conditions met for the highest milestone');
-    return Milestones.M7;
-  };
-};

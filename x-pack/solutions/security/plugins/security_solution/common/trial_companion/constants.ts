@@ -17,13 +17,18 @@ const SUFFIX_MESSAGE = 'message';
 const SUFFIX_TITLE = 'title';
 const SUFFIX_ACTION = 'action';
 
-function translateNBA(milestone: MilestoneID, message, suffix: string) {
+function translateNBA(milestone: MilestoneID, message: string, suffix: string) {
   return i18n.translate(`xpack.securitySolution.trialCompanion.nba.m${milestone}.${suffix}`, {
     defaultMessage: message,
   });
 }
 
-function toNBA(milestoneId: MilestoneID, message, title: string, actions?: NBAAction[]): NBA {
+function toNBA(
+  milestoneId: MilestoneID,
+  message: string,
+  title: string,
+  actions?: NBAAction[]
+): NBA {
   const apps: NBAAction[] | undefined = actions?.map((a) => {
     return {
       app: a.app,

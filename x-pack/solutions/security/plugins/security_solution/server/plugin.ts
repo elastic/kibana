@@ -606,6 +606,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       this.trialCompanionMilestoneService.setup({
         taskManager: plugins.taskManager,
+        usageCollection: plugins.usageCollection,
       });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
@@ -863,9 +864,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     }
 
     if (plugins.taskManager) {
+      const esInternalUserClient = core.elasticsearch.client.asInternalUser;
       const serviceStart = {
         taskManager: plugins.taskManager,
-        esClient: core.elasticsearch.client.asInternalUser,
+        esClient: esInternalUserClient,
         analytics: core.analytics,
         receiver: this.telemetryReceiver,
       };
@@ -880,6 +882,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         taskManager: plugins.taskManager,
         packageService,
         savedObjects: core.savedObjects,
+        esClient: esInternalUserClient,
       });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not started.');
