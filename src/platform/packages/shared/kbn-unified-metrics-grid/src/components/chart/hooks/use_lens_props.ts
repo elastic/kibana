@@ -42,6 +42,7 @@ export type LensProps = Pick<
   | 'searchSessionId'
   | 'executionContext'
   | 'onLoad'
+  | 'lastReloadRequestTime'
 >;
 
 export const useLensProps = ({
@@ -85,11 +86,12 @@ export const useLensProps = ({
     (attributes: LensAttributes) => {
       return getLensProps({
         searchSessionId: fetchParams.searchSessionId,
-        timeRange: fetchParams.timeRange,
+        timeRange: fetchParams.relativeTimeRange, // same as in the time picker
         attributes,
+        lastReloadRequestTime: Date.now(),
       });
     },
-    [fetchParams.searchSessionId, fetchParams.timeRange]
+    [fetchParams.searchSessionId, fetchParams.relativeTimeRange]
   );
 
   const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
@@ -183,10 +185,12 @@ const getLensProps = ({
   searchSessionId,
   timeRange,
   attributes,
+  lastReloadRequestTime,
 }: {
   searchSessionId?: string;
   attributes: LensAttributes;
   timeRange: TimeRange;
+  lastReloadRequestTime?: number;
 }): LensProps => ({
   id: 'metricsExperienceLensComponent',
   viewMode: 'view',
@@ -197,4 +201,5 @@ const getLensProps = ({
   executionContext: {
     description: 'metrics experience chart data',
   },
+  lastReloadRequestTime,
 });
