@@ -12,7 +12,7 @@ import { asyncForEach } from '../../helpers';
 
 const TOTAL_ALERTS_CELL_COUNT = 440;
 const RECOVERED_ALERTS_CELL_COUNT = 330;
-const ACTIVE_ALERTS_CELL_COUNT = 110;
+const ACTIVE_ALERTS_CELL_COUNT = 120;
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
