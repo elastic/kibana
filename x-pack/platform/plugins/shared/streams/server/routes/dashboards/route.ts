@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod';
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
-import { internal } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import type { Attachment } from '../../lib/streams/attachments/types';
@@ -22,10 +21,6 @@ export interface LinkDashboardResponse {
 
 export interface UnlinkDashboardResponse {
   acknowledged: boolean;
-}
-
-export interface SuggestDashboardResponse {
-  suggestions: Attachment[];
 }
 
 export type BulkUpdateAttachmentsResponse =
@@ -158,51 +153,6 @@ const unlinkDashboardRoute = createServerRoute({
   },
 });
 
-const suggestDashboardsRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/dashboards/_suggestions',
-  options: {
-    access: 'internal',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    path: z.object({
-      name: z.string(),
-    }),
-    query: z.object({
-      query: z.string(),
-    }),
-    body: z.object({
-      tags: z.optional(z.array(z.string())),
-    }),
-  }),
-  handler: async ({ params, request, getScopedClients }): Promise<SuggestDashboardResponse> => {
-    const { attachmentClient, streamsClient } = await getScopedClients({ request });
-
-    await streamsClient.ensureStream(params.path.name);
-
-    const {
-      query: { query },
-      body: { tags },
-    } = params;
-
-    const suggestions = (
-      await attachmentClient.getSuggestions({
-        attachmentTypes: ['dashboard'],
-        query,
-        tags,
-      })
-    ).attachments;
-
-    return {
-      suggestions,
-    };
-  },
-});
-
 const dashboardSchema = z.object({
   id: z.string(),
 });
@@ -255,7 +205,7 @@ const bulkDashboardsRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
 
-    const result = await attachmentClient.bulk(
+    await attachmentClient.bulk(
       streamName,
       operations.map((operation) => {
         if ('index' in operation) {
@@ -279,11 +229,6 @@ const bulkDashboardsRoute = createServerRoute({
       })
     );
 
-    if (result.errors) {
-      logger.error(`Error indexing some items`);
-      throw internal(`Could not index all items`, { errors: result.errors });
-    }
-
     return { acknowledged: true };
   },
 });
@@ -292,6 +237,5 @@ export const dashboardRoutes = {
   ...listDashboardsRoute,
   ...linkDashboardRoute,
   ...unlinkDashboardRoute,
-  ...suggestDashboardsRoute,
   ...bulkDashboardsRoute,
 };
