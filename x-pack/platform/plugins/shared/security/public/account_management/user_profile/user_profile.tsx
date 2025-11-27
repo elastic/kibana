@@ -1084,18 +1084,11 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
   return (
     <EuiFlexGroup alignItems="center" css={{ width: '100%' }} responsive={false}>
       <EuiFlexItem>
-        <EuiFlexGroup responsive={false} gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="dot" color="success" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.security.accountManagement.userProfile.unsavedChangesMessage"
-              defaultMessage="{count, plural, one {# unsaved change} other {# unsaved changes}}"
-              values={{ count }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.unsavedChangesMessage"
+          defaultMessage="{count, plural, one {# unsaved change} other {# unsaved changes}}"
+          values={{ count }}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty onClick={formik.handleReset} color="text">
