@@ -347,6 +347,7 @@ describe('AIValue', () => {
             to: '2025-01-31T23:59:59.999Z',
           },
         },
+        isExportMode: true,
       });
     });
 
