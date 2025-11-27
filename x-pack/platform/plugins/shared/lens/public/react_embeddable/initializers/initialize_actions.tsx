@@ -7,13 +7,7 @@
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import type {
-  AggregateQuery,
-  EsQueryConfig,
-  Filter,
-  Query,
-  TimeRange,
-} from '@kbn/es-query';
+import type { AggregateQuery, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
 import { isOfQueryType } from '@kbn/es-query';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import {
