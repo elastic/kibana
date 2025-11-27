@@ -809,6 +809,13 @@ export class IndexUpdateService {
               }
             });
 
+            // Populate unsupported ES|QL field types
+            columns.forEach((col) => {
+              if (col.type === 'unsupported' && col.original_types?.length) {
+                this.esqlUnsupportedFieldTypes.add(col.original_types[0]);
+              }
+            });
+
             const columnNames = columns.map(({ name }) => name);
             const resultRows: DataTableRecord[] = values
               .map((row) => zipObject(columnNames, row))
