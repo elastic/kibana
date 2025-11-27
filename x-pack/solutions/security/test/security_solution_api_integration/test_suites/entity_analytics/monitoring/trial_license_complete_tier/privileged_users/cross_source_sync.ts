@@ -7,6 +7,7 @@
 
 import expect from 'expect';
 import type { ListPrivMonUsersResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics';
+import { waitFor } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { PrivMonUtils, PlainIndexSyncUtils } from '../utils';
 import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
@@ -14,6 +15,7 @@ import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 export default ({ getService }: FtrProviderContext) => {
   const entityAnalyticsApi = getService('entityAnalyticsApi');
   const privMonUtils = PrivMonUtils(getService);
+  const log = getService('log');
 
   describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
     const kibanaServer = getService('kibanaServer');
@@ -79,8 +81,22 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       expect(createEntitySourceResponse.status).toBe(200);
-      await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
-      await privMonUtils.waitForSyncTaskRun();
+      // Use scheduleEngineAndWaitForUserCount to ensure sync completes before checking
+      users = await privMonUtils.scheduleEngineAndWaitForUserCount(1);
+
+      // Additional wait to ensure the 'index' source has been merged
+      await waitFor(
+        async () => {
+          const currentUsers = (await entityAnalyticsApi.listPrivMonUsers({ query: {} }))
+            .body as ListPrivMonUsersResponse;
+          const currentUser = privMonUtils.findUser(currentUsers, user1.name);
+          const sources = currentUser?.labels?.sources || [];
+          log.info(`Waiting for 'index' source. Current sources: ${JSON.stringify(sources)}`);
+          return sources.includes('index') && sources.length === 3;
+        },
+        'wait for index source to be merged',
+        log
+      );
 
       users = (await entityAnalyticsApi.listPrivMonUsers({ query: {} }))
         .body as ListPrivMonUsersResponse;
