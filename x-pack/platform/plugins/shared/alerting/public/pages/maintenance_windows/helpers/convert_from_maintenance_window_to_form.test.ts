@@ -213,7 +213,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
     });
   });
 
-  test('should convert a maintenance window that is recurring on a custom daily schedule', () => {
+  test('should not convert a maintenance window that is recurring on a daily schedule', () => {
     const maintenanceWindow = convertFromMaintenanceWindowToForm({
       title,
       duration,
@@ -232,9 +232,8 @@ describe('convertFromMaintenanceWindowToForm', () => {
       timezone: ['UTC'],
       recurring: true,
       recurringSchedule: {
-        customFrequency: Frequency.DAILY,
         ends: 'never',
-        frequency: 'CUSTOM',
+        frequency: Frequency.DAILY,
         interval: 1,
       },
     });

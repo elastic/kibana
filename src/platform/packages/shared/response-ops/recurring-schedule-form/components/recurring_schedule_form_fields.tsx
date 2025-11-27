@@ -163,8 +163,7 @@ export const RecurringScheduleFormFields = memo(
               },
             }}
           />
-          {(parsedSchedule?.frequency === Frequency.DAILY ||
-            parsedSchedule?.frequency === 'CUSTOM') && (
+          {parsedSchedule?.frequency === 'CUSTOM' && (
             <CustomRecurringSchedule
               startDate={startDate}
               compressed={compressed}

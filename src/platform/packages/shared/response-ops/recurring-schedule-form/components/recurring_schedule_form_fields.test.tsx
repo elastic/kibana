@@ -89,7 +89,7 @@ describe('RecurringScheduleForm', () => {
     expect(await screen.findByTestId('count-field')).toBeInTheDocument();
   });
 
-  it('renders custom schedule if frequency = daily', async () => {
+  it('does not render custom schedule if frequency = daily', async () => {
     render(
       <TestWrapper
         iv={{ recurringSchedule: { frequency: Frequency.DAILY, ends: RecurrenceEnd.NEVER } }}
@@ -99,8 +99,9 @@ describe('RecurringScheduleForm', () => {
     );
 
     expect(
-      await screen.findByTestId('customRecurringScheduleByWeekdayButtonGroup')
-    ).toBeInTheDocument();
+      screen.queryByTestId('customRecurringScheduleByWeekdayButtonGroup')
+    ).not.toBeInTheDocument();
+    expect(await screen.findByText('Repeats every day')).toBeInTheDocument();
   });
 
   it('renders custom schedule if frequency = custom', async () => {

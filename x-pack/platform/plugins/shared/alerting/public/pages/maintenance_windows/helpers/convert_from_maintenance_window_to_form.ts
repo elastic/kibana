@@ -85,10 +85,6 @@ const isCustom = (rRule: RRuleParams) => {
   if (rRule.interval && rRule.interval > 1) {
     return true;
   }
-  // frequency is daily and no weekdays are selected
-  if (freq && freq === Frequency.DAILY && !rRule.byweekday) {
-    return true;
-  }
   // frequency is weekly and there are multiple weekdays selected
   if (freq && freq === Frequency.WEEKLY && rRule.byweekday && rRule.byweekday.length > 1) {
     return true;
