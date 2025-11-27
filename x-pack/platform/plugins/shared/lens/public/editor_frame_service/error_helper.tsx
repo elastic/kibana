@@ -10,6 +10,21 @@ import { renderSearchError } from '@kbn/search-errors';
 import React from 'react';
 import type { UserMessage } from '@kbn/lens-common';
 
+export const ignoredBlockingMessagesByID = new Set<string>(['The expression was aborted.']);
+
+function extractUniqueId(message: string | { short: string; long: React.ReactNode }): string {
+  return typeof message === 'string' ? message : message.short;
+}
+
+export function isIgnorableBlockingMessage(error: ExpressionRenderError | null): boolean {
+  const message = error?.original?.message ?? error?.message;
+  if (!message) {
+    return false;
+  }
+  const uniqueId = extractUniqueId(message);
+  return ignoredBlockingMessagesByID.has(uniqueId);
+}
+
 export function getOriginalRequestErrorMessages(
   error: ExpressionRenderError | null
 ): UserMessage[] {
@@ -34,14 +49,18 @@ export function getOriginalRequestErrorMessages(
   } else if (error?.message) {
     errorMessages.push(error.message);
   }
-  return errorMessages.map((message) => ({
-    uniqueId: typeof message === 'string' ? message : message.short,
-    severity: 'error',
-    displayLocations: [{ id: 'visualizationOnEmbeddable' }],
-    longMessage: typeof message === 'string' ? '' : message.long,
-    shortMessage: typeof message === 'string' ? message : message.short,
-    fixableInEditor: false,
-  }));
+  return errorMessages.map((message) => {
+    const uniqueId = extractUniqueId(message);
+    return {
+      uniqueId,
+      severity: 'error',
+      displayLocations: [{ id: 'visualizationOnEmbeddable' }],
+      longMessage: typeof message === 'string' ? '' : message.long,
+      shortMessage: typeof message === 'string' ? message : message.short,
+      fixableInEditor: false,
+      canBeSkipped: ignoredBlockingMessagesByID.has(uniqueId),
+    };
+  });
 }
 
 // NOTE - if you are adding a new error message, add it as a UserMessage in get_application_error_messages

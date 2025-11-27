@@ -653,6 +653,7 @@ export interface UserMessage {
   longMessage: string | React.ReactNode | ((closePopover?: () => void) => React.ReactNode);
   fixableInEditor: boolean;
   displayLocations: UserMessageDisplayLocation[];
+  canBeSkipped?: boolean;
 }
 
 export interface UserMessageFilters {
