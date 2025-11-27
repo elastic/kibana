@@ -587,7 +587,8 @@ describe('Both modes', () => {
       });
     });
 
-    describe('More menu', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/244075
+    describe.skip('More menu', () => {
       /**
        * GIVEN not all primary menu items fit the menu height
        * WHEN I click on the "More" primary menu
