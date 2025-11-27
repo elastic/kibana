@@ -44,7 +44,7 @@ type SignificantEventsPreviewResponse = Pick<
   'occurrences' | 'change_points' | 'kql'
 >;
 
-export interface GeneratedSignificantEventQuery {
+interface GeneratedSignificantEventQuery {
   title: string;
   kql: string;
   feature?: {
