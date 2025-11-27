@@ -31,11 +31,7 @@ import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { type FieldType } from '@kbn/esql-ast';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
-import {
-  ESQLVariableType,
-  type ESQLControlVariable,
-  type IndicesAutocompleteResult,
-} from '@kbn/esql-types';
+import type { ESQLControlVariable, IndicesAutocompleteResult } from '@kbn/esql-types';
 import { fixESQLQueryWithVariables, getRemoteClustersFromESQLQuery } from '@kbn/esql-utils';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -49,8 +45,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types';
-import { QuerySource, ControlTriggerSource } from '@kbn/esql-types';
-import { useCanCreateLookupIndex, useLookupIndexCommand } from './custom_commands';
+import { QuerySource } from '@kbn/esql-types';
+import { useCanCreateLookupIndex, useLookupIndexCommand } from './lookup_join';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
 import {
@@ -77,36 +73,16 @@ import { ResizableButton } from './resizable_button';
 import { useRestorableState, withRestorableState } from './restorable_state';
 import { getHistoryItems } from './history_local_storage';
 import type { StarredQueryMetadata } from './editor_footer/esql_starred_queries_service';
-import type {
-  ControlsContext,
-  ESQLEditorDeps,
-  ESQLEditorProps as ESQLEditorPropsInternal,
-} from './types';
+import type { ESQLEditorDeps, ESQLEditorProps as ESQLEditorPropsInternal } from './types';
+import {
+  registerCustomCommands,
+  addEditorKeyBindings,
+  addTabKeybindingRules,
+} from './custom_editor_commands';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
 const DATEPICKER_WIDTH = 373;
-
-const triggerControl = async (
-  queryString: string,
-  variableType: ESQLVariableType,
-  position: monaco.Position | null | undefined,
-  uiActions: ESQLEditorDeps['uiActions'],
-  triggerSource: ControlTriggerSource,
-  esqlVariables?: ESQLControlVariable[],
-  onSaveControl?: ControlsContext['onSaveControl'],
-  onCancelControl?: ControlsContext['onCancelControl']
-) => {
-  await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
-    queryString,
-    variableType,
-    cursorPosition: position,
-    triggerSource,
-    esqlVariables,
-    onSaveControl,
-    onCancelControl,
-  });
-};
 
 // React.memo is applied inside the withRestorableState HOC (called below)
 const ESQLEditorInternal = function ESQLEditor({
@@ -142,6 +118,10 @@ const ESQLEditorInternal = function ESQLEditor({
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);
+
+  const editorCommandDisposables = useRef(
+    new WeakMap<monaco.editor.IStandaloneCodeEditor, monaco.IDisposable[]>()
+  );
 
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const theme = useEuiTheme();
@@ -351,68 +331,6 @@ const ESQLEditorInternal = function ESQLEditor({
       popoverRef.current?.focus();
     }
   }, []);
-
-  // Registers a command to redirect users to the index management page
-  // to create a new policy. The command is called by the buildNoPoliciesAvailableDefinition
-  monaco.editor.registerCommand('esql.policies.create', (...args) => {
-    application?.navigateToApp('management', {
-      path: 'data/index_management/enrich_policies/create',
-      openInNewTab: true,
-    });
-  });
-
-  monaco.editor.registerCommand('esql.timepicker.choose', (...args) => {
-    openTimePickerPopover();
-  });
-
-  monaco.editor.registerCommand('esql.recommendedQuery.accept', (...args) => {
-    const [, { queryLabel }] = args;
-    telemetryService.trackRecommendedQueryClicked(QuerySource.AUTOCOMPLETE, queryLabel);
-  });
-
-  const controlCommands = [
-    { command: 'esql.control.multi_values.create', variableType: ESQLVariableType.MULTI_VALUES },
-    { command: 'esql.control.time_literal.create', variableType: ESQLVariableType.TIME_LITERAL },
-    { command: 'esql.control.fields.create', variableType: ESQLVariableType.FIELDS },
-    { command: 'esql.control.values.create', variableType: ESQLVariableType.VALUES },
-    { command: 'esql.control.functions.create', variableType: ESQLVariableType.FUNCTIONS },
-  ];
-
-  controlCommands.forEach(({ command, variableType }) => {
-    monaco.editor.registerCommand(command, async (...args) => {
-      const [, { triggerSource }] = args;
-      const prefilled = triggerSource !== ControlTriggerSource.QUESTION_MARK;
-      telemetryService.trackEsqlControlFlyoutOpened(
-        prefilled,
-        variableType,
-        triggerSource,
-        fixedQuery
-      );
-      const position = editor1.current?.getPosition();
-      await triggerControl(
-        fixedQuery,
-        variableType,
-        position,
-        uiActions,
-        triggerSource,
-        esqlVariables,
-        controlsContext?.onSaveControl,
-        controlsContext?.onCancelControl
-      );
-    });
-  });
-
-  editor1.current?.addCommand(
-    // eslint-disable-next-line no-bitwise
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-    () => onQuerySubmit(QuerySource.MANUAL)
-  );
-
-  editor1.current?.addCommand(
-    // eslint-disable-next-line no-bitwise
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
-    () => setIsVisorOpen(!isVisorOpen)
-  );
 
   const styles = esqlEditorStyles(
     theme.euiTheme,
@@ -940,7 +858,20 @@ const ESQLEditorInternal = function ESQLEditor({
   useEffect(() => {
     const model = editorModel;
     const editor1ref = editor1;
+    const disposablesMap = editorCommandDisposables.current;
     return () => {
+      // Cleanup editor command disposables
+      const currentEditor = editor1ref.current;
+      if (currentEditor) {
+        const disposables = disposablesMap.get(currentEditor);
+        if (disposables) {
+          disposables.forEach((disposable) => {
+            disposable.dispose();
+          });
+          disposablesMap.delete(currentEditor);
+        }
+      }
+
       model.current?.dispose();
       editor1ref.current?.dispose();
       editorModel.current = undefined;
@@ -1126,21 +1057,31 @@ const ESQLEditorInternal = function ESQLEditor({
                       await addLookupIndicesDecorator();
                     }
 
-                    // When both inline and suggestion widget are visible,
-                    // we want Tab to accept inline suggestions,
-                    // so we need to unbind the default suggestion widget behavior
-                    monaco.editor.addKeybindingRule({
-                      keybinding: monaco.KeyCode.Tab,
-                      command: '-acceptSelectedSuggestion',
-                      when: 'suggestWidgetHasFocusedSuggestion && suggestWidgetVisible && textInputFocus && inlineSuggestionVisible',
+                    // Register custom commands
+                    const commandDisposables = registerCustomCommands({
+                      application,
+                      uiActions,
+                      telemetryService,
+                      editor1: editor1 as React.RefObject<monaco.editor.IStandaloneCodeEditor>,
+                      fixedQuery,
+                      esqlVariables,
+                      controlsContext,
+                      openTimePickerPopover,
                     });
 
-                    // Add explicit binding for Tab to accept inline suggestions when they're visible
-                    monaco.editor.addKeybindingRule({
-                      keybinding: monaco.KeyCode.Tab,
-                      command: 'editor.action.inlineSuggest.commit',
-                      when: 'inlineSuggestionVisible && textInputFocus',
-                    });
+                    // Add editor key bindings
+                    addEditorKeyBindings(editor, onQuerySubmit, setIsVisorOpen, isVisorOpen);
+
+                    // Store disposables for cleanup
+                    const currentEditor = editor1.current;
+                    if (currentEditor) {
+                      if (!editorCommandDisposables.current.has(currentEditor)) {
+                        editorCommandDisposables.current.set(currentEditor, commandDisposables);
+                      }
+                    }
+
+                    // Add Tab keybinding rules for inline suggestions
+                    addTabKeybindingRules();
 
                     // this is fixing a bug between the EUIPopover and the monaco editor
                     // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
