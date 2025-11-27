@@ -25,7 +25,6 @@ export const AnomaliesPlaceholderPanel = () => {
         size="fullWidth"
         src={placeholderImage}
         alt="Anomaly explorer placeholder"
-        alignItems="center"
       />
     </EuiPanel>
   );

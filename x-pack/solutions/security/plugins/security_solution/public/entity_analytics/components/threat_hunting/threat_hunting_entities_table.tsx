@@ -106,7 +106,9 @@ const getEntitySpecificRiskScore = (
     if (userRisk != null && typeof userRisk === 'number') {
       return userRisk;
     }
-    return source?.user?.risk?.calculated_score_norm as number | undefined;
+    // Access through index signature since GenericEntityRecord has [key: string]: unknown
+    const user = source?.user as { risk?: { calculated_score_norm?: number } } | undefined;
+    return user?.risk?.calculated_score_norm;
   }
 
   if (entityType === EntityType.host) {
@@ -114,7 +116,8 @@ const getEntitySpecificRiskScore = (
     if (hostRisk != null && typeof hostRisk === 'number') {
       return hostRisk;
     }
-    return source?.host?.risk?.calculated_score_norm as number | undefined;
+    const host = source?.host as { risk?: { calculated_score_norm?: number } } | undefined;
+    return host?.risk?.calculated_score_norm;
   }
 
   if (entityType === EntityType.service) {
@@ -122,7 +125,8 @@ const getEntitySpecificRiskScore = (
     if (serviceRisk != null && typeof serviceRisk === 'number') {
       return serviceRisk;
     }
-    return source?.service?.risk?.calculated_score_norm as number | undefined;
+    const service = source?.service as { risk?: { calculated_score_norm?: number } } | undefined;
+    return service?.risk?.calculated_score_norm;
   }
 
   return undefined;
@@ -137,20 +141,28 @@ const getRiskLevelFromSources = (
   source: GenericEntityRecord | undefined
 ): RiskSeverity | undefined => {
   const entityLevel =
-    record.flattened['entity.risk_level'] || source?.entity?.risk?.calculated_level;
+    record.flattened['entity.risk_level'] ||
+    (source?.entity as { risk?: { calculated_level?: RiskSeverity } } | undefined)?.risk
+      ?.calculated_level;
   if (entityLevel) return entityLevel as RiskSeverity;
 
   if (entityType === EntityType.user) {
-    return (record.flattened['user.risk.calculated_level'] ||
-      source?.user?.risk?.calculated_level) as RiskSeverity | undefined;
+    const userLevel = record.flattened['user.risk.calculated_level'];
+    if (userLevel) return userLevel as RiskSeverity;
+    const user = source?.user as { risk?: { calculated_level?: RiskSeverity } } | undefined;
+    return user?.risk?.calculated_level;
   }
   if (entityType === EntityType.host) {
-    return (record.flattened['host.risk.calculated_level'] ||
-      source?.host?.risk?.calculated_level) as RiskSeverity | undefined;
+    const hostLevel = record.flattened['host.risk.calculated_level'];
+    if (hostLevel) return hostLevel as RiskSeverity;
+    const host = source?.host as { risk?: { calculated_level?: RiskSeverity } } | undefined;
+    return host?.risk?.calculated_level;
   }
   if (entityType === EntityType.service) {
-    return (record.flattened['service.risk.calculated_level'] ||
-      source?.service?.risk?.calculated_level) as RiskSeverity | undefined;
+    const serviceLevel = record.flattened['service.risk.calculated_level'];
+    if (serviceLevel) return serviceLevel as RiskSeverity;
+    const service = source?.service as { risk?: { calculated_level?: RiskSeverity } } | undefined;
+    return service?.risk?.calculated_level;
   }
 
   return undefined;
@@ -177,8 +189,12 @@ const RiskScoreCellRenderer = ({
       : undefined;
 
   // 2. Try raw source entity.risk.calculated_score_norm
-  if (riskScore === undefined && source?.entity?.risk?.calculated_score_norm != null) {
-    riskScore = source.entity.risk.calculated_score_norm as number;
+  if (riskScore === undefined) {
+    const entityRisk = (source?.entity as { risk?: { calculated_score_norm?: number } } | undefined)
+      ?.risk?.calculated_score_norm;
+    if (entityRisk != null) {
+      riskScore = entityRisk;
+    }
   }
 
   // 3. Try entity-specific fields based on entity type

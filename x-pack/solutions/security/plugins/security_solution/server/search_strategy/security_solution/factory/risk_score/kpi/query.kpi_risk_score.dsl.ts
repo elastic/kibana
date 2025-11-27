@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityType } from '../../../../../../common/entity_analytics/types';
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { EntityTypeToLevelField } from '../../../../../../common/search_strategy';
 import type { RiskScoreKpiRequestOptions } from '../../../../../../common/api/search_strategy';
@@ -49,7 +49,7 @@ export const buildKpiRiskScoreQuery = ({
       },
     };
     return acc;
-  }, {} as Record<EntityType, unknown>);
+  }, {} as Record<string, AggregationsAggregationContainer>);
 
   const dslQuery = {
     index: defaultIndex,
