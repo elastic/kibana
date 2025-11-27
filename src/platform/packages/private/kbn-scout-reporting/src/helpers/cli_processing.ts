@@ -47,6 +47,7 @@ export function getRunTarget(argv: string[] = process.argv): string {
     '@svlOblt': 'serverless-oblt',
     '@svlLogsEssentials': 'serverless-oblt-logs-essentials',
     '@svlSecurity': 'serverless-security',
+    '@svlSecurityEssentials': 'serverless-security-essentials',
   };
 
   // Try to find --grep argument in different formats

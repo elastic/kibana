@@ -40,5 +40,6 @@ export const tagsByMode = {
     oblt: '@svlOblt',
     'oblt-logs-essentials': '@svlLogsEssentials',
     security: '@svlSecurity',
+    'security-essentials': '@svlSecurityEssentials',
   },
 };
