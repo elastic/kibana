@@ -42,7 +42,6 @@ export function runCheckSavedObjectsCli() {
         gitRev: gitRev!,
         newTypes: [],
         updatedTypes: [],
-        previousVersions: {},
         newVersions: {},
         currentRemovedTypes: [],
         newRemovedTypes: [],

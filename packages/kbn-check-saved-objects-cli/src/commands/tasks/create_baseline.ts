@@ -22,7 +22,7 @@ export const createBaseline: Task = async (ctx, task) => {
     getPreviousVersionType({ type, previousMappings: baselineMappings! })
   );
 
-  ctx.previousVersions = previousVersionTypes.reduce<Record<string, string>>((acc, type) => {
+  const previousVersions = previousVersionTypes.reduce<Record<string, string>>((acc, type) => {
     acc[type.name] = latestVersion(type);
     return acc;
   }, {});
@@ -53,7 +53,7 @@ export const createBaseline: Task = async (ctx, task) => {
           docs.map<SavedObjectsBulkCreateObject<FixtureTemplate>>((attributes) => ({
             type,
             attributes,
-            typeMigrationVersion: ctx.previousVersions[type],
+            typeMigrationVersion: previousVersions[type],
           }))
         );
         // insert all fixtures in the `.kibana_migrator` SO index

@@ -26,7 +26,6 @@ export interface TaskContext {
   to?: MigrationSnapshot;
   newTypes: string[];
   updatedTypes: SavedObjectsType<any>[];
-  previousVersions: Record<string, string>;
   newVersions: Record<string, string>;
   currentRemovedTypes: string[];
   newRemovedTypes: string[];
