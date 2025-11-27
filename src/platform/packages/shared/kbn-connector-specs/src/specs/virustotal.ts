@@ -37,6 +37,11 @@ export const VirusTotalConnector: ConnectorSpec = {
       defaults: {
         headerField: 'x-apikey',
       },
+      overrides: {
+        meta: {
+          'x-apikey': { placeholder: 'vt-...' },
+        },
+      },
     },
   ],
 

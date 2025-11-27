@@ -99,11 +99,10 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
     </EuiContextMenuItem>,
   ];
 
-  const button = (
+  const button = canAddStep && (
     <EuiButton
       size="s"
       onClick={togglePopover}
-      disabled={!canAddStep}
       data-test-subj="streamsAppStreamDetailEnrichmentCreateStepButton"
     >
       {mode === 'prominent' ? createTextProminent : createText}

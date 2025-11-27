@@ -20,6 +20,7 @@ import { SloOutdatedFilterCallout } from './components/slo_management_outdated_f
 import { SloManagementTable } from './components/slo_management_table';
 import { ActionModalProvider } from '../../context/action_modal';
 import { BulkOperationProvider } from './context/bulk_operation';
+import { LoadingPage } from '../loading_page';
 
 export function SloManagementPage() {
   const {
@@ -64,6 +65,10 @@ export function SloManagementPage() {
     ],
     { serverless }
   );
+
+  if (isLoading) {
+    return <LoadingPage dataTestSubj="sloManagementPageLoading" />;
+  }
 
   return (
     <ObservabilityPageTemplate

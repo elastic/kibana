@@ -274,6 +274,12 @@ export const interactiveModeMachine = setup({
     idle: {
       entry: [{ type: 'syncToDSL' }, { type: 'sendStepsToSimulator' }],
       on: {
+        'step.change': {
+          actions: [
+            { type: 'reassignSteps' },
+            { type: 'sendStepsToSimulator', params: ({ event }) => event },
+          ],
+        },
         'step.edit': {
           guard: 'hasSimulatePrivileges',
           target: 'editing',
