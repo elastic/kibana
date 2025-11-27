@@ -18,7 +18,7 @@ import { BaseAtomicNodeImplementation } from './node_implementation';
 import { getKibanaUrl } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 // Extend BaseStep for kibana-specific properties
 export interface KibanaActionStep extends BaseStep {
