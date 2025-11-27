@@ -42,12 +42,12 @@ Details of the currently used model are available in the [model card](https://ra
 
 ## Region and hosting
 
-The Elastic Managed LLM v1 and v2 are currently proxying to AWS Bedrock in AWS US regions, beginning with `us-east-1`.
+The Elastic Managed LLMs user a third party service provider for inference. Currently, this is AWS Bedrock in AWS US regions, beginning with `us-east-1`. Additional providers may be added in future.
 
 ## Data protection
 
 Customer projects or deployments hosted in any cloud service provider or region have access to the Elastic Managed LLMs in the AWS US region `us-east-1`.
-All data is encrypted in transit. The LLMs are configured for zero data retention: none of the prompts or outputs are stored by the models.
+All data is encrypted in transit. The LLMs are configured for zero data retention: none of the prompts or outputs are stored by the service provider
 
 Only request metadata is logged in AWS CloudWatch.
 No information related to prompts is retained.
