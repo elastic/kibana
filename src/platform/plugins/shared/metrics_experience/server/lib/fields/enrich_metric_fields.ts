@@ -169,6 +169,7 @@ async function executeEsqlQueriesForChunk(
       const response = await esClient.esql('sample_metrics_documents', {
         query,
         filter: dateRangeFilter,
+        drop_null_columns: true,
       });
 
       return {

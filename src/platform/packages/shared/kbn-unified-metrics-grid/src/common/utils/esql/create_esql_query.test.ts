@@ -246,10 +246,10 @@ TS metrics-*
 
       expect(query).toBe(
         `
-        TS metrics-*
-          | WHERE host.name == "prod-server"
-          | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
-        `.trim()
+TS metrics-*
+  | WHERE host.name == "prod-server"
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
       );
     });
 
@@ -266,10 +266,10 @@ TS metrics-*
 
       expect(query).toBe(
         `
-        TS metrics-*
-          | WHERE region == "us-west"
-          | WHERE \`host.name\` IS NOT NULL
-          | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`
+TS metrics-*
+  | WHERE region == "us-west"
+  | WHERE \`host.name\` IS NOT NULL
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`
         `.trim()
       );
     });
@@ -289,10 +289,10 @@ TS metrics-*
 
       expect(query).toBe(
         `
-        TS metrics-*
-          | WHERE \`host.name\`::STRING IN ("host-1", "host-2")
-          | WHERE status == "active"
-          | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+TS metrics-*
+  | WHERE \`host.name\`::STRING IN ("host-1", "host-2")
+  | WHERE status == "active"
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
         `.trim()
       );
     });
@@ -309,8 +309,8 @@ TS metrics-*
 
       expect(query).toBe(
         `
-        TS metrics-*
-          | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+TS metrics-*
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
         `.trim()
       );
     });
@@ -327,9 +327,9 @@ TS metrics-*
 
       expect(query).toBe(
         `
-        TS metrics-*
-          | WHERE cpu.usage > 80 AND memory.usage < 90
-          | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+TS metrics-*
+  | WHERE cpu.usage > 80 AND memory.usage < 90
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
         `.trim()
       );
     });
