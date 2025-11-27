@@ -16,6 +16,8 @@ import { createSearchToolGraph } from './graph';
 export const runSearchTool = async ({
   nlQuery,
   index,
+  rowLimit,
+  customInstructions,
   model,
   esClient,
   logger,
@@ -23,12 +25,19 @@ export const runSearchTool = async ({
 }: {
   nlQuery: string;
   index?: string;
+  rowLimit?: number;
+  customInstructions?: string;
   model: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
 }): Promise<ToolHandlerResult[]> => {
-  const toolGraph = createSearchToolGraph({ model, esClient, logger, events });
+  const toolGraph = createSearchToolGraph({
+    model,
+    esClient,
+    logger,
+    events,
+  });
 
   return withActiveInferenceSpan(
     'SearchToolGraph',
@@ -39,7 +48,12 @@ export const runSearchTool = async ({
     },
     async () => {
       const outState = await toolGraph.invoke(
-        { nlQuery, targetPattern: index },
+        {
+          nlQuery,
+          targetPattern: index,
+          rowLimit,
+          customInstructions,
+        },
         { tags: ['search_tool'], metadata: { graphName: 'search_tool' } }
       );
 

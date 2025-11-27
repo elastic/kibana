@@ -18,19 +18,15 @@ import type { DashboardCreateResponseBody } from './types';
 
 export async function create(
   requestCtx: RequestHandlerContext,
-  searchBody: DashboardCreateRequestBody
+  createBody: DashboardCreateRequestBody
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
-  const { references: incomingReferences, ...incomingDashboardState } = searchBody.data;
   const {
     attributes: soAttributes,
     references: soReferences,
     error: transformInError,
-  } = transformDashboardIn({
-    dashboardState: incomingDashboardState,
-    incomingReferences,
-  });
+  } = transformDashboardIn(createBody.data);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
@@ -40,8 +36,8 @@ export async function create(
     soAttributes,
     {
       references: soReferences,
-      ...(searchBody.id && { id: searchBody.id }),
-      ...(searchBody.spaces && { initialNamespaces: searchBody.spaces }),
+      ...(createBody.id && { id: createBody.id }),
+      ...(createBody.spaces && { initialNamespaces: createBody.spaces }),
     }
   );
 
