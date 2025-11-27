@@ -76,7 +76,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         },
         {
           link: { deepLinkId: 'searchPlayground' },
-          breadcrumbs: ['Build', 'Playground'],
+          breadcrumbs: ['Playground'],
           pageTestSubject: 'playgroundsListPage',
         },
         {

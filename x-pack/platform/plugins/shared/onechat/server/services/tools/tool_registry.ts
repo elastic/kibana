@@ -16,11 +16,11 @@ import type {
   RunToolReturn,
   ScopedRunnerRunToolsParams,
   ToolAvailabilityContext,
+  InternalToolDefinition,
 } from '@kbn/onechat-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type {
-  InternalToolDefinition,
   ToolCreateParams,
   ToolUpdateParams,
   ToolProvider,

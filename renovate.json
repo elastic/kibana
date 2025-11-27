@@ -3687,8 +3687,8 @@
     {
       "groupName": "inquirer",
       "matchDepNames": [
-        "inquirer",
-        "@types/inquirer"
+        "@types/inquirer",
+        "inquirer"
       ],
       "reviewers": [
         "team:kibana-operations"

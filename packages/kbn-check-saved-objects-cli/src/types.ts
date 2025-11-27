@@ -7,17 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import type { Root } from '@kbn/core-root-server-internal';
 import type { SavedObjectTypeMigrationInfo } from '@kbn/core-test-helpers-so-type-serializer';
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 export type { ModelVersionSummary } from '@kbn/core-test-helpers-so-type-serializer';
-
-export interface ServerHandles {
-  esServer: TestElasticsearchUtils;
-  kibanaRoot: Root;
-  typeRegistry: ISavedObjectTypeRegistry;
-}
 
 export type MigrationInfoRecord = Pick<
   SavedObjectTypeMigrationInfo,
