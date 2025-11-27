@@ -36,8 +36,8 @@ describe('CspConfig', () => {
       CspConfig {
         "disableEmbedding": false,
         "disableUnsafeEval": true,
-        "header": "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'",
-        "reportOnlyHeader": "form-action 'report-sample' 'self'; object-src 'report-sample' 'none'",
+        "header": "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'",
+        "reportOnlyHeader": "form-action 'report-sample' 'self'",
         "strict": true,
         "warnLegacyBrowsers": true,
       }
@@ -68,7 +68,7 @@ describe('CspConfig', () => {
         worker_src: ['foo', 'bar'],
       });
       expect(config.header).toEqual(
-        `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob: foo bar; style-src 'report-sample' 'self' 'unsafe-inline'`
+        `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob: foo bar; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'`
       );
     });
 
@@ -79,7 +79,7 @@ describe('CspConfig', () => {
       });
 
       expect(config.header).toEqual(
-        `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline' foo bar`
+        `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline' foo bar; object-src 'report-sample' 'none'`
       );
     });
 
@@ -90,7 +90,7 @@ describe('CspConfig', () => {
       });
 
       expect(config.header).toEqual(
-        `script-src 'report-sample' 'self' foo bar; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'`
+        `script-src 'report-sample' 'self' foo bar; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'`
       );
     });
 
@@ -100,9 +100,10 @@ describe('CspConfig', () => {
         script_src: ['script', 'foo'],
         worker_src: ['worker', 'bar'],
         style_src: ['style', 'dolly'],
+        object_src: ['object', 'obj'],
       });
       expect(config.header).toEqual(
-        `script-src 'report-sample' 'self' script foo; worker-src 'report-sample' 'self' blob: worker bar; style-src 'report-sample' 'self' 'unsafe-inline' style dolly`
+        `script-src 'report-sample' 'self' script foo; worker-src 'report-sample' 'self' blob: worker bar; style-src 'report-sample' 'self' 'unsafe-inline' style dolly; object-src 'report-sample' object obj`
       );
     });
 
@@ -114,7 +115,7 @@ describe('CspConfig', () => {
         style_src: ['style'],
       });
       expect(config.header).toEqual(
-        `script-src 'report-sample' 'self' script; worker-src 'report-sample' 'self' blob: worker; style-src 'report-sample' 'self' 'unsafe-inline' style`
+        `script-src 'report-sample' 'self' script; worker-src 'report-sample' 'self' blob: worker; style-src 'report-sample' 'self' 'unsafe-inline' style; object-src 'report-sample' 'none'`
       );
     });
 
@@ -127,7 +128,7 @@ describe('CspConfig', () => {
         });
 
         expect(config.header).toEqual(
-          `script-src 'report-sample' 'self' foo bar; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'`
+          `script-src 'report-sample' 'self' foo bar; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'`
         );
       });
 
@@ -139,7 +140,7 @@ describe('CspConfig', () => {
         });
 
         expect(config.header).toEqual(
-          `script-src 'report-sample' 'self' 'unsafe-eval' foo bar; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'`
+          `script-src 'report-sample' 'self' 'unsafe-eval' foo bar; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'`
         );
       });
 
@@ -150,7 +151,7 @@ describe('CspConfig', () => {
         });
 
         expect(config.header).toEqual(
-          `script-src 'report-sample' 'self' foo bar; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'`
+          `script-src 'report-sample' 'self' foo bar; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'`
         );
       });
     });
@@ -163,7 +164,7 @@ describe('CspConfig', () => {
         expect(config.disableEmbedding).toEqual(disableEmbedding);
         expect(config.disableEmbedding).not.toEqual(CspConfig.DEFAULT.disableEmbedding);
         expect(config.header).toMatchInlineSnapshot(
-          `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; frame-ancestors 'self'"`
+          `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; frame-ancestors 'self'"`
         );
       });
 
@@ -176,7 +177,7 @@ describe('CspConfig', () => {
         expect(config.disableEmbedding).toEqual(disableEmbedding);
         expect(config.disableEmbedding).not.toEqual(CspConfig.DEFAULT.disableEmbedding);
         expect(config.header).toMatchInlineSnapshot(
-          `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; frame-ancestors 'self'"`
+          `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; frame-ancestors 'self'"`
         );
       });
     });
@@ -186,7 +187,7 @@ describe('CspConfig', () => {
     test(`adds, for example, CDN host name to directives along with 'self'`, () => {
       const config = new CspConfig(defaultConfig, { default_src: ['foo.bar'] });
       expect(config.header).toEqual(
-        "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; default-src 'self' foo.bar"
+        "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; default-src 'self' foo.bar"
       );
     });
 
@@ -195,7 +196,7 @@ describe('CspConfig', () => {
         /* empty */
       });
       expect(config.header).toEqual(
-        "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'"
+        "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'"
       );
     });
     test('Passing an empty array in additional config does not affect existing config', () => {
@@ -204,7 +205,7 @@ describe('CspConfig', () => {
         worker_src: ['foo.bar'],
       });
       expect(config.header).toEqual(
-        "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob: foo.bar; style-src 'report-sample' 'self' 'unsafe-inline'"
+        "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob: foo.bar; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'"
       );
     });
   });

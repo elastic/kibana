@@ -7,8 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { type InferenceClient } from '@kbn/inference-common';
-import type { Feature } from '@kbn/streams-schema';
-import { type GeneratedSignificantEventQuery, type Streams } from '@kbn/streams-schema';
+import type { GeneratedSignificantEventQuery, Streams, Feature } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 
 interface Params {
@@ -23,6 +22,7 @@ interface Dependencies {
   inferenceClient: InferenceClient;
   esClient: ElasticsearchClient;
   logger: Logger;
+  signal: AbortSignal;
 }
 
 export async function generateSignificantEventDefinitions(
@@ -30,7 +30,7 @@ export async function generateSignificantEventDefinitions(
   dependencies: Dependencies
 ): Promise<GeneratedSignificantEventQuery[]> {
   const { definition, connectorId, start, end, feature } = params;
-  const { inferenceClient, esClient, logger } = dependencies;
+  const { inferenceClient, esClient, logger, signal } = dependencies;
 
   const boundInferenceClient = inferenceClient.bindTo({
     connectorId,
@@ -44,16 +44,12 @@ export async function generateSignificantEventDefinitions(
     inferenceClient: boundInferenceClient,
     logger,
     feature,
+    signal,
   });
 
   return queries.map((query) => ({
     title: query.title,
     kql: query.kql,
-    feature: feature
-      ? {
-          name: feature?.name,
-          filter: feature?.filter,
-        }
-      : undefined,
+    feature: feature ? { name: feature.name, filter: feature?.filter } : undefined,
   }));
 }

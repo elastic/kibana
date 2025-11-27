@@ -30,6 +30,7 @@ import {
   EuiTitle,
   htmlIdGenerator,
   useEuiTheme,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { Form, FormikProvider, useFormik } from 'formik';
 import moment from 'moment-timezone';
@@ -186,6 +187,8 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   isLoadingCurrentUser,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
+  const flyoutSize = isSmallScreen ? 'm' : 's';
   const {
     services: { http },
   } = useKibana();
@@ -326,7 +329,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
 
   return (
     <FormikProvider value={formik}>
-      <EuiFlyout onClose={onCancel} aria-labelledby={titleId} size="m" ownFocus>
+      <EuiFlyout onClose={onCancel} aria-labelledby={titleId} size={flyoutSize} ownFocus>
         <Form
           onSubmit={formik.handleSubmit}
           style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
@@ -341,6 +344,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
               {responseError && (
                 <>
                   <EuiCallOut
+                    announceOnMount
                     data-test-subj="apiKeyFlyoutResponseError"
                     color="danger"
                     title={
@@ -359,6 +363,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                 !isOwner ? (
                   <>
                     <EuiCallOut
+                      announceOnMount
                       iconType="lock"
                       title={
                         <FormattedMessage
@@ -372,6 +377,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                 ) : hasExpired ? (
                   <>
                     <EuiCallOut
+                      announceOnMount
                       iconType="lock"
                       title={
                         <FormattedMessage

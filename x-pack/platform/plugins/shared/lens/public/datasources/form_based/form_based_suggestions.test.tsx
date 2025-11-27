@@ -5,16 +5,23 @@
  * 2.0.
  */
 import type {
-  Layer,
-  TermsColumn,
-  FiltersColumn,
-  FormulaColumn,
-  StaticValueColumn,
-  CountColumn,
-} from '@kbn/visualizations-plugin/common/convert_to_lens';
-import type { DatasourceSuggestion } from '../../types';
+  TermsColumn as VisualizeContextTermsColumn,
+  FiltersColumn as VisualizeContextFiltersColumn,
+  FormulaColumn as VisualizeContextFormulaColumn,
+  StaticValueColumn as VisualizeContextStaticValueColumn,
+  CountColumn as VisualizeContextCountColumn,
+} from '@kbn/visualizations-plugin/common';
+import type {
+  NavigateToLensLayer,
+  DatasourceSuggestion,
+  FormBasedPrivateState,
+  DateHistogramIndexPatternColumn,
+  TermsIndexPatternColumn,
+  MathIndexPatternColumn,
+  RangeIndexPatternColumn,
+  StaticValueIndexPatternColumn,
+} from '@kbn/lens-common';
 import { generateId } from '../../id_generator';
-import type { FormBasedPrivateState } from './types';
 import type { IndexPatternSuggestion } from './form_based_suggestions';
 import {
   getDatasourceSuggestionsForField,
@@ -25,12 +32,6 @@ import {
 import { documentField } from './document_field';
 import { getFieldByNameFactory } from './pure_helpers';
 import { isEqual } from 'lodash';
-import type { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
-import type {
-  MathIndexPatternColumn,
-  RangeIndexPatternColumn,
-  StaticValueIndexPatternColumn,
-} from './operations/definitions';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');
@@ -1587,7 +1588,7 @@ describe('IndexPattern Data Source suggestions', () => {
         indexPatternId: '1',
         ignoreGlobalFilters: false,
       },
-    ] as Layer[];
+    ] as unknown as NavigateToLensLayer[];
     function stateWithoutLayer() {
       return {
         ...testInitialState(),
@@ -1725,7 +1726,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   id: 'bytes',
                 },
               },
-            } as CountColumn,
+            } as VisualizeContextCountColumn,
             context[0].columns[1],
           ],
         },
@@ -1802,7 +1803,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   columnId: 'column-id-1',
                 },
               },
-            } as TermsColumn,
+            } satisfies VisualizeContextTermsColumn,
           ],
         },
       ];
@@ -1872,6 +1873,7 @@ describe('IndexPattern Data Source suggestions', () => {
               operationType: 'filters',
               isBucketed: true,
               columnId: 'column-id-3',
+              dataType: 'string',
               isSplit: true,
               params: {
                 filters: [
@@ -1891,7 +1893,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   },
                 ],
               },
-            } as FiltersColumn,
+            } satisfies VisualizeContextFiltersColumn,
           ],
         },
       ];
@@ -1978,7 +1980,7 @@ describe('IndexPattern Data Source suggestions', () => {
               params: {
                 formula: 'overall_sum(count())',
               },
-            } as FormulaColumn,
+            } satisfies VisualizeContextFormulaColumn,
             context[0].columns[1],
           ],
         },
@@ -2051,7 +2053,7 @@ describe('IndexPattern Data Source suggestions', () => {
               params: {
                 value: '10',
               },
-            } as StaticValueColumn,
+            } satisfies VisualizeContextStaticValueColumn,
           ],
         },
       ];

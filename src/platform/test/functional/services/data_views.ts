@@ -30,10 +30,27 @@ export class DataViewsService extends FtrService {
     changeTimestampField, // optionally override default timestamp field
   }: DataViewOptions) {
     await this.testSubjects.existOrFail('indexPatternEditorFlyout');
-    await this.testSubjects.setValue('createIndexPatternTitleInput', name, {
-      clearWithKeyboard: true,
-      typeCharByChar: true,
+
+    await this.retry.waitFor('data view title input to be valid', async () => {
+      await this.testSubjects.setValue('createIndexPatternTitleInput', name, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
+
+      await this.testSubjects.waitForAttributeToChange(
+        'createIndexPatternTitleInput',
+        'data-is-validating',
+        '0'
+      );
+
+      const isInvalid = await this.testSubjects.getAttribute(
+        'createIndexPatternTitleInput',
+        'aria-invalid'
+      );
+
+      return isInvalid !== 'true';
     });
+
     if (hasTimeField) {
       await this.retry.waitFor('timestamp field loaded', async () => {
         const timestampField = await this.testSubjects.find('timestampField');
@@ -117,6 +134,11 @@ export class DataViewsService extends FtrService {
    * Switch Data View from top search bar
    */
   public async switchTo(name: string) {
+    // TODO: remove in https://github.com/elastic/kibana/issues/239313
+    if (await this.testSubjects.exists('nav-tour-skip-button')) {
+      await this.testSubjects.click('nav-tour-skip-button');
+      await this.testSubjects.waitForDeleted('nav-tour-skip-button');
+    }
     const selectedDataView = await this.getSelectedName();
     if (name === selectedDataView) {
       return;
@@ -152,16 +174,24 @@ export class DataViewsService extends FtrService {
    */
   public async editFromSearchBar({
     newName,
+    newIndexPattern,
     newTimeField,
   }: {
     newName?: string;
+    newIndexPattern?: string;
     newTimeField?: string;
   }) {
     await this.testSubjects.click('*dataView-switch-link');
     await this.testSubjects.click('indexPattern-manage-field');
     await this.testSubjects.existOrFail('indexPatternEditorFlyout');
     if (newName) {
-      await this.testSubjects.setValue('createIndexPatternTitleInput', newName, {
+      await this.testSubjects.setValue('createIndexPatternNameInput', newName, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
+    }
+    if (newIndexPattern) {
+      await this.testSubjects.setValue('createIndexPatternTitleInput', newIndexPattern, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });

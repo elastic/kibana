@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataType, TimeScaleUnit } from '@kbn/visualizations-plugin/common';
+import type { DataType, TimeScaleUnit } from '@kbn/lens-common';
 import type { Query } from '@kbn/es-query';
 import { fromFilterAPIToLensState, fromFilterLensStateToAPI } from './filter';
 import type {

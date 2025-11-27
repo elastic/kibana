@@ -11,8 +11,6 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
-import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type {
   UnifiedHistogramBucketInterval,
@@ -24,13 +22,12 @@ import { useTimeRange } from './hooks/use_time_range';
 import type { LensProps } from './hooks/use_lens_props';
 
 export interface HistogramProps {
-  abortController?: AbortController;
+  abortController: AbortController | undefined;
   services: UnifiedHistogramServices;
   dataView: DataView;
   chart: UnifiedHistogramChartContext;
-  bucketInterval?: UnifiedHistogramBucketInterval;
-  isPlainRecord?: boolean;
-  getTimeRange: () => TimeRange;
+  bucketInterval: UnifiedHistogramBucketInterval | undefined;
+  isPlainRecord: boolean;
   requestData: string;
   lensProps: LensProps;
   visContext: UnifiedHistogramVisContext;
@@ -39,7 +36,6 @@ export interface HistogramProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
-  esqlVariables?: ESQLControlVariable[];
 }
 
 export function Histogram({
@@ -48,7 +44,6 @@ export function Histogram({
   chart: { timeInterval },
   bucketInterval,
   isPlainRecord,
-  getTimeRange,
   requestData,
   lensProps,
   visContext,
@@ -58,12 +53,11 @@ export function Histogram({
   onBrushEnd,
   withDefaultActions,
   abortController,
-  esqlVariables,
 }: HistogramProps) {
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,
     bucketInterval,
-    timeRange: getTimeRange(),
+    timeRange: lensProps.timeRange!,
     timeInterval,
     isPlainRecord,
     timeField: dataView.timeFieldName,
@@ -121,7 +115,6 @@ export function Histogram({
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
           withDefaultActions={withDefaultActions}
-          esqlVariables={esqlVariables}
         />
       </div>
       {timeRangeDisplay}

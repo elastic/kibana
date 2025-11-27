@@ -10,7 +10,7 @@ import { AuthConfig } from './auth_config';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { AuthType, SSLCertType } from '../../../common/auth/constants';
+import { AuthType, SSLCertType } from '@kbn/connector-schemas/common/auth/constants';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
 import { useSecretHeaders } from './use_secret_headers';
 
@@ -380,6 +380,83 @@ describe('AuthConfig renders', () => {
         expect(onSubmit).toHaveBeenCalledWith({
           data: {},
           isValid: false,
+        });
+      });
+    });
+
+    it('keeps the header when changing its type from config to secret', async () => {
+      useSecretHeadersMock.mockReturnValue({
+        isLoading: false,
+        isFetching: false,
+        data: [],
+      });
+
+      render(
+        <AuthFormTestProvider defaultValue={defaultTestFormData} onSubmit={onSubmit}>
+          <AuthConfig readOnly={false} />
+        </AuthFormTestProvider>
+      );
+
+      const typeSelector = await screen.findByTestId('webhookHeaderTypeSelect');
+
+      await userEvent.click(typeSelector);
+      await userEvent.click(await screen.findByTestId('option-secret'), { pointerEventsCheck: 0 });
+
+      expect(await screen.findByTestId('webhookHeadersKeyInput')).toHaveValue('config-key');
+      expect(await screen.findByTestId('webhookHeadersSecretValueInput')).toBeInTheDocument();
+      expect(await screen.findByTestId('webhookHeadersSecretValueInput')).toHaveValue('text');
+      expect(typeSelector).toHaveTextContent('Secret');
+      expect(await screen.findByTestId('form-test-provide-submit')).not.toBeDisabled();
+    });
+
+    it('submits properly when changing the header type from config to secret', async () => {
+      const testFormData = {
+        config: {
+          hasAuth: false,
+        },
+        __internal__: {
+          hasHeaders: true,
+          hasCA: false,
+          headers: [
+            { key: 'key-1', value: 'text-1', type: 'config' },
+            { key: 'key-2', value: 'text-2', type: 'config' },
+          ],
+        },
+      };
+      useSecretHeadersMock.mockReturnValue({
+        isLoading: false,
+        isFetching: false,
+        data: [],
+      });
+
+      render(
+        <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
+          <AuthConfig readOnly={false} />
+        </AuthFormTestProvider>
+      );
+
+      const typeSelectors = await screen.findAllByTestId('webhookHeaderTypeSelect');
+      await userEvent.click(typeSelectors[0]);
+      await userEvent.click(await screen.findByTestId('option-secret'), { pointerEventsCheck: 0 });
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            config: {
+              hasAuth: false,
+              authType: null,
+            },
+            __internal__: {
+              hasHeaders: true,
+              hasCA: false,
+              headers: [
+                { key: 'key-1', value: 'text-1', type: 'secret' },
+                { key: 'key-2', value: 'text-2', type: 'config' },
+              ],
+            },
+          },
+          isValid: true,
         });
       });
     });

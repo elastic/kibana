@@ -22,12 +22,14 @@ import { GENERIC_ENTITY_PREVIEW_BANNER } from '../../document_details/preview/co
 import { useKibana } from '../../../common/lib/kibana';
 import { ASK_AI_ASSISTANT } from '../shared/translations';
 import { useAssetInventoryAssistant } from './hooks/use_asset_inventory_assistant';
+import type { AssetCriticalityLevel } from '../../../../common/api/entity_analytics/asset_criticality';
 
 interface GenericEntityFlyoutFooterProps {
   entityId: EntityEcs['id'];
   isPreviewMode: boolean;
   scopeId: string;
   entityFields: Record<string, string[]>;
+  assetCriticalityLevel?: AssetCriticalityLevel;
 }
 
 export const GenericEntityFlyoutFooter = ({
@@ -35,6 +37,7 @@ export const GenericEntityFlyoutFooter = ({
   isPreviewMode,
   scopeId,
   entityFields,
+  assetCriticalityLevel,
 }: GenericEntityFlyoutFooterProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
@@ -43,6 +46,7 @@ export const GenericEntityFlyoutFooter = ({
     entityId,
     entityFields,
     isPreviewMode,
+    assetCriticalityLevel,
   });
 
   const openDocumentFlyout = useCallback(() => {

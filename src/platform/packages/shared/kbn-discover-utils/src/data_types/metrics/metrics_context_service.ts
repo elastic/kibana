@@ -11,19 +11,10 @@ import type {
   MetricsExperiencePluginStart,
   MetricsExperienceClient,
 } from '@kbn/metrics-experience-plugin/public';
-import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 
-// metricbeat-*, metrics-*, metric*
-const DEFAULT_ALLOWED_METRICS_BASE_PATTERNS = ['metric', 'metrics'];
 export interface MetricsContextService {
   getMetricsExperienceClient(): MetricsExperienceClient | undefined;
-  isMetricsIndexPattern(indexPattern: string): boolean;
 }
-
-const DEFAULT_ALLOWED_METRICS_BASE_PATTERNS_REGEXP = createRegExpPatternFrom(
-  DEFAULT_ALLOWED_METRICS_BASE_PATTERNS,
-  'data'
-);
 
 export interface MetricsContextServiceDeps {
   metricsExperience?: MetricsExperiencePluginStart;
@@ -48,8 +39,5 @@ export const getMetricsContextService = ({
 }) => {
   return {
     getMetricsExperienceClient: () => metricsExperienceClient,
-    isMetricsIndexPattern: testPatternAgainstAllowedList([
-      DEFAULT_ALLOWED_METRICS_BASE_PATTERNS_REGEXP,
-    ]),
   };
 };

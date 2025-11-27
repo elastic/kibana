@@ -9,8 +9,10 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import {
   streamsAIGrokSuggestionAcceptedEventType,
   streamsAIGrokSuggestionLatencyEventType,
-  streamsAssetClickEventType,
-  streamsAssetCountEventType,
+  streamsAIDissectSuggestionAcceptedEventType,
+  streamsAIDissectSuggestionLatencyEventType,
+  streamsAttachmentClickEventType,
+  streamsAttachmentCountEventType,
   streamsChildStreamCreatedEventType,
   streamsProcessingSavedEventType,
   streamsRetentionChangedEventType,
@@ -28,10 +30,12 @@ export class StreamsTelemetryService {
 
   public setup(analytics: AnalyticsServiceSetup) {
     this.analytics = analytics;
-    this.analytics.registerEventType(streamsAssetCountEventType);
-    this.analytics.registerEventType(streamsAssetClickEventType);
+    this.analytics.registerEventType(streamsAttachmentCountEventType);
+    this.analytics.registerEventType(streamsAttachmentClickEventType);
     this.analytics.registerEventType(streamsAIGrokSuggestionLatencyEventType);
     this.analytics.registerEventType(streamsAIGrokSuggestionAcceptedEventType);
+    this.analytics.registerEventType(streamsAIDissectSuggestionLatencyEventType);
+    this.analytics.registerEventType(streamsAIDissectSuggestionAcceptedEventType);
     this.analytics.registerEventType(streamsProcessingSavedEventType);
     this.analytics.registerEventType(streamsRetentionChangedEventType);
     this.analytics.registerEventType(streamsChildStreamCreatedEventType);

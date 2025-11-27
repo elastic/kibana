@@ -43,6 +43,12 @@ export type {
   StaticEsqlTool,
   StaticWorkflowTool,
   StaticIndexSearchTool,
+  ToolAvailabilityContext,
+  ToolAvailabilityHandler,
+  ToolAvailabilityResult,
+  ToolAvailabilityConfig,
+  InternalToolAvailabilityHandler,
+  InternalToolDefinition,
 } from './tools';
 export { getToolResultId, createErrorResult, isToolResultId } from './tools';
 export type {

@@ -11,8 +11,9 @@ import { useCallback } from 'react';
 
 /**
  * Hook that returns a callback to smoothly scroll an element into view when it becomes active.
- * @param isActive - Whether the element should be scrolled into view
- * @returns A callback function that accepts a ref to scroll into view
+ *
+ * @param isActive - whether the element should be scrolled into view.
+ * @returns a callback function that accepts a ref to scroll into view.
  */
 export const useScrollToActive = <T extends HTMLElement = HTMLElement>(isActive?: boolean) => {
   return useCallback(

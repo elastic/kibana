@@ -8,11 +8,18 @@
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
+import {
+  existsQuery,
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+  termsQuery,
+} from '@kbn/observability-plugin/server';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import {
   DATASTREAM_DATASET,
   EVENT_MODULE,
+  findInventoryFields,
   findInventoryModel,
   METRICSET_MODULE,
 } from '@kbn/metrics-data-access-plugin/common';
@@ -213,7 +220,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     },
     async (context, request, response) => {
       try {
-        const { entityType } = request.query;
+        const { source } = request.query;
 
         const infraMetricsClient = await getInfraMetricsClient({
           request,
@@ -221,12 +228,12 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           context,
         });
 
-        const inventoryModel = entityType ? findInventoryModel(entityType) : undefined;
-        const source =
-          typeof inventoryModel?.requiredIntegration !== 'object' ||
-          !('otel' in inventoryModel?.requiredIntegration)
+        const hostInventoryModel = findInventoryModel('host');
+        const hostIntegration =
+          typeof hostInventoryModel?.requiredIntegration !== 'object' ||
+          !('otel' in hostInventoryModel?.requiredIntegration)
             ? undefined
-            : inventoryModel.requiredIntegration;
+            : hostInventoryModel.requiredIntegration;
 
         const hasDataResponse = await infraMetricsClient.search({
           track_total_hits: true,
@@ -234,13 +241,25 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           size: 0,
           query: {
             bool: {
-              should: source
-                ? [
-                    ...termQuery(EVENT_MODULE, source.beats),
-                    ...termQuery(METRICSET_MODULE, source.beats),
-                    ...termQuery(DATASTREAM_DATASET, source.otel),
-                  ]
-                : [],
+              should:
+                source === 'all'
+                  ? [
+                      ...existsQuery(hostInventoryModel.fields.id),
+                      ...existsQuery(findInventoryFields('container').id),
+                      ...existsQuery(findInventoryFields('pod').id),
+                      ...existsQuery(findInventoryFields('awsEC2').id),
+                      ...existsQuery(findInventoryFields('awsS3').id),
+                      ...existsQuery(findInventoryFields('awsRDS').id),
+                      ...existsQuery(findInventoryFields('awsSQS').id),
+                    ]
+                  : source === 'host' && hostIntegration
+                  ? [
+                      ...termQuery(EVENT_MODULE, hostIntegration.beats),
+                      ...termQuery(METRICSET_MODULE, hostIntegration.beats),
+                      ...termQuery(DATASTREAM_DATASET, hostIntegration.otel),
+                    ]
+                  : [],
+              minimum_should_match: 1,
             },
           },
         });

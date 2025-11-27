@@ -13,6 +13,7 @@ import React, { useState } from 'react';
 import { useSendMessage } from '../../../../context/send_message/send_message_context';
 import { RoundFlyout } from '../round_flyout';
 import { RoundSteps } from './steps/round_steps';
+import { ThinkingTimeDisplay } from './thinking_time_display';
 
 interface RoundThinkingProps {
   rawRound: ConversationRound;
@@ -91,6 +92,7 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
             {rawResponseButtonLabel}
           </EuiButton>
         )}
+        <ThinkingTimeDisplay timeToFirstToken={rawRound.time_to_first_token} />
       </EuiPanel>
       <RoundFlyout isOpen={showFlyout} onClose={toggleFlyout} rawRound={rawRound} />
     </EuiAccordion>

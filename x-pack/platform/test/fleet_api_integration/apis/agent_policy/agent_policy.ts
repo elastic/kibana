@@ -12,6 +12,7 @@ import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '@kbn/fleet-plugin/server/co
 import { skipIfNoDockerRegistry, generateAgent } from '../../helpers';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupMockServer } from '../agents/helpers/mock_agentless_api';
+import { cleanFleetIndices } from '../space_awareness/helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -2128,6 +2129,17 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('GET /api/fleet/agent_policies/{id}/auto_upgrade_agents_status', () => {
+      before(async () => {
+        await cleanFleetIndices(es);
+        await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
+      });
+
+      after(async () => {
+        await cleanFleetIndices(es);
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
+
       it('should get auto upgrade agents status', async () => {
         const {
           body: { item: policyWithAgents },
@@ -2143,14 +2155,34 @@ export default function (providerContext: FtrProviderContext) {
         await generateAgent(providerContext, 'healhty', 'agent-2', policyWithAgents.id, '8.16.1', {
           state: 'UPG_FAILED',
           target_version: '8.16.3',
+          action_id: 'test-action-automatic',
+        });
+        await generateAgent(providerContext, 'healthy', 'agent-3', policyWithAgents.id, '8.16.1', {
+          state: 'UPG_DOWNLOADING',
+          target_version: '8.16.3',
+          action_id: 'test-action-automatic',
         });
         await generateAgent(
           providerContext,
           'uninstalled',
-          'agent-3',
+          'agent-4',
           policyWithAgents.id,
           '8.16.1'
         );
+        await es.index({
+          index: '.fleet-actions',
+          refresh: 'wait_for',
+          body: {
+            '@timestamp': new Date().toISOString(),
+            expiration: new Date().toISOString(),
+            agents: ['agent-2', 'agent-3'],
+            action_id: 'test-action-automatic',
+            data: {},
+            is_automatic: true,
+            type: 'UPGRADE',
+          },
+        });
+
         const { body } = await supertest
           .get(`/api/fleet/agent_policies/${policyWithAgents.id}/auto_upgrade_agents_status`)
           .set('kbn-xsrf', 'xxx')
@@ -2159,17 +2191,21 @@ export default function (providerContext: FtrProviderContext) {
         expect(body).to.eql({
           currentVersions: [
             {
-              agents: 2,
+              agents: 3,
               failedUpgradeAgents: 0,
+              inProgressUpgradeAgents: 0,
               version: '8.16.1',
             },
             {
               agents: 0,
-              failedUpgradeAgents: 1,
               version: '8.16.3',
+              failedUpgradeAgents: 1,
+              failedUpgradeActionIds: ['test-action-automatic'],
+              inProgressUpgradeAgents: 1,
+              inProgressUpgradeActionIds: ['test-action-automatic'],
             },
           ],
-          totalAgents: 2,
+          totalAgents: 3,
         });
 
         await supertest.delete(`/api/fleet/agents/agent-1`).set('kbn-xsrf', 'xx').expect(200);
@@ -2271,18 +2307,20 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/213370
-    describe.skip('POST /internal/fleet/agent_and_package_policies', () => {
+    describe('POST /internal/fleet/agent_and_package_policies', () => {
       before(async () => {
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
-        await fleetAndAgents.setup();
       });
 
       after(async () => {
         await esArchiver.unload(
           'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
         );
+      });
+
+      beforeEach(async () => {
+        await fleetAndAgents.setup();
       });
 
       afterEach(async () => {
@@ -2386,11 +2424,13 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(createdPolicy.id).to.eql(requestBody.id);
-        expect(createdPolicy.package_policies[0].id).to.eql(requestBody.package_policies[0].id);
+        expect(createdPolicy.package_policies.map((policy: any) => policy.id).sort()).to.eql([
+          'test-package-policy-with-id',
+          'test-package-policy-with-id-2',
+        ]);
         expect(createdPolicy.package_policies[0].policy_ids).to.eql(
           requestBody.package_policies[0].policy_ids
         );
-        expect(createdPolicy.package_policies[1].id).to.eql(requestBody.package_policies[1].id);
         expect(createdPolicy.package_policies[1].policy_ids).to.eql(
           requestBody.package_policies[1].policy_ids
         );

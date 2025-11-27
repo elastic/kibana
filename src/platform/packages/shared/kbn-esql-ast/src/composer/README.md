@@ -245,6 +245,39 @@ const query = esql.from('index').where`status == ${status}`
   .limit(50);
 ```
 
+#### SET Header Instructions
+
+ES|QL supports SET instructions at the beginning of queries to configure query-level settings. You can add SET instructions either directly in the template or programmatically:
+
+```ts
+// Direct in template (recommended)
+const query = esql`SET a = 123; FROM index | LIMIT 10`;
+
+// Multiple SET instructions
+const query = esql`
+  SET threshold = 100;
+  SET limit = 50;
+  FROM logs | WHERE value > ?threshold | LIMIT ?limit`;
+
+// Programmatically add SET instructions
+const query = esql`FROM index | LIMIT 10`;
+query.addSetCommand('setting1', 'value1');
+query.addSetCommand('setting2', 42);
+query.addSetCommand('setting3', true);
+
+// Get all SET instructions
+const sets = query.getSetCommands();
+// Returns: [{ name: 'setting1', value: '"value1"' }, ...]
+
+// Remove specific SET instruction
+query.removeSetCommand('setting2');
+
+// Clear all SET instructions
+query.clearSetCommands();
+```
+
+SET instructions support string, numeric, and boolean values and are preserved when combining queries or adding more commands.
+
 #### Output Methods
 
 ```ts

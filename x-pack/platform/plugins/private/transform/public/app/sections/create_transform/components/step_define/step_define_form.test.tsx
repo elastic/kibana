@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';

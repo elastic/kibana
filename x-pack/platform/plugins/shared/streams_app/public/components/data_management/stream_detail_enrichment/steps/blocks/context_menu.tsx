@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { useSelector } from '@xstate5/react';
-import { isWhereBlock } from '@kbn/streamlang';
+import { isActionBlock, isWhereBlock } from '@kbn/streamlang';
 import { useDiscardConfirm } from '../../../../../hooks/use_discard_confirm';
 import {
   useStreamEnrichmentEvents,
@@ -25,6 +25,12 @@ import {
 import { deleteProcessorPromptOptions } from './action/prompt_options';
 import { deleteConditionPromptOptions } from './where/prompt_options';
 import { collectDescendantIds } from '../../state_management/stream_enrichment_state_machine/utils';
+import { EditStepDescriptionModal } from './action/edit_step_description_modal';
+import {
+  ADD_DESCRIPTION_MENU_LABEL,
+  EDIT_DESCRIPTION_MENU_LABEL,
+  REMOVE_DESCRIPTION_MENU_LABEL,
+} from './action/translations';
 import type { StepConfigurationProps } from '../steps_list';
 
 const moveUpItemText = i18n.translate(
@@ -44,7 +50,14 @@ const moveDownItemText = i18n.translate(
 const editItemText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.editItemButtonText',
   {
-    defaultMessage: 'Edit item',
+    defaultMessage: 'Edit',
+  }
+);
+
+const duplicateItemText = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.duplicateItemButtonText',
+  {
+    defaultMessage: 'Duplicate',
   }
 );
 
@@ -66,8 +79,11 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   isFirstStepInLevel,
   isLastStepInLevel,
 }) => {
-  const { reorderStep } = useStreamEnrichmentEvents();
+  const { reorderStep, duplicateProcessor } = useStreamEnrichmentEvents();
   const canEdit = useStreamEnrichmentSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
+  const canDuplicate = useStreamEnrichmentSelector((snapshot) =>
+    snapshot.can({ type: 'step.duplicateProcessor', processorStepId: stepRef.id })
+  );
   const canReorder = useStreamEnrichmentSelector(
     (snapshot) =>
       snapshot.can({ type: 'step.reorder', stepId: stepRef.id, direction: 'up' }) ||
@@ -82,8 +98,13 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
   const isWhere = isWhereBlock(step);
+  const hasCustomDescription =
+    isActionBlock(step) &&
+    typeof step.description === 'string' &&
+    step.description.trim().length > 0;
 
   const [isPopoverOpen, togglePopover] = useToggle(false);
+  const [isEditDescriptionModalOpen, toggleEditDescriptionModal] = useToggle(false);
 
   const menuPopoverId = useGeneratedHtmlId({
     prefix: 'stepContextMenuPopover',
@@ -91,6 +112,10 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
 
   const handleEdit = () => {
     stepRef.send({ type: 'step.edit' });
+  };
+
+  const handleDuplicate = () => {
+    duplicateProcessor(stepRef.id);
   };
 
   const getChildStepsLength = () => {
@@ -140,6 +165,49 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
     >
       {moveDownItemText}
     </EuiContextMenuItem>,
+    ...(!isWhere
+      ? hasCustomDescription
+        ? [
+            <EuiContextMenuItem
+              data-test-subj="stepContextMenuEditDescriptionItem"
+              key="editDescription"
+              icon="editorComment"
+              disabled={!canEdit}
+              onClick={() => {
+                togglePopover(false);
+                toggleEditDescriptionModal(true);
+              }}
+            >
+              {EDIT_DESCRIPTION_MENU_LABEL}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              data-test-subj="stepContextMenuRemoveDescriptionItem"
+              key="removeDescription"
+              icon="minusInCircle"
+              disabled={!canEdit}
+              onClick={() => {
+                togglePopover(false);
+                stepRef.send({ type: 'step.changeDescription', description: '' });
+              }}
+            >
+              {REMOVE_DESCRIPTION_MENU_LABEL}
+            </EuiContextMenuItem>,
+          ]
+        : [
+            <EuiContextMenuItem
+              data-test-subj="stepContextMenuEditDescriptionItem"
+              key="editDescription"
+              icon="editorComment"
+              disabled={!canEdit}
+              onClick={() => {
+                togglePopover(false);
+                toggleEditDescriptionModal(true);
+              }}
+            >
+              {ADD_DESCRIPTION_MENU_LABEL}
+            </EuiContextMenuItem>,
+          ]
+      : []),
     <EuiContextMenuItem
       data-test-subj="stepContextMenuEditItem"
       key="editItem"
@@ -152,6 +220,22 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
     >
       {editItemText}
     </EuiContextMenuItem>,
+    ...(!isWhere
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="stepContextMenuDuplicateItem"
+            key="duplicateStep"
+            icon="copy"
+            disabled={!canDuplicate}
+            onClick={() => {
+              togglePopover(false);
+              handleDuplicate();
+            }}
+          >
+            {duplicateItemText}
+          </EuiContextMenuItem>,
+        ]
+      : []),
     <EuiContextMenuItem
       data-test-subj="stepContextMenuDeleteItem"
       key="deleteStep"
@@ -183,14 +267,26 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   );
 
   return (
-    <EuiPopover
-      id={menuPopoverId}
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={() => togglePopover(false)}
-      panelPaddingSize="none"
-    >
-      <EuiContextMenuPanel size="s" items={items} />
-    </EuiPopover>
+    <>
+      <EuiPopover
+        id={menuPopoverId}
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={() => togglePopover(false)}
+        panelPaddingSize="none"
+      >
+        <EuiContextMenuPanel size="s" items={items} />
+      </EuiPopover>
+      {isEditDescriptionModalOpen && !isWhere && isActionBlock(step) && (
+        <EditStepDescriptionModal
+          step={step}
+          onCancel={() => toggleEditDescriptionModal(false)}
+          onSave={(description) => {
+            toggleEditDescriptionModal(false);
+            stepRef.send({ type: 'step.changeDescription', description });
+          }}
+        />
+      )}
+    </>
   );
 };

@@ -7,25 +7,23 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-
 import { omit } from 'lodash';
-
 import pMap from 'p-map';
 
 import type { Agent } from '../../types';
-
 import { packagePolicyService } from '../package_policy';
-
 import { FleetUnauthorizedError } from '../../errors';
-
 import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS } from '../../constants';
+import {
+  MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION,
+  isAgentPrivilegeLevelChangeSupported,
+} from '../../../common/services';
+import type { AgentPrivilegeLevelChangeUserInfo } from '../../../common/types';
 
 import { ActionRunner } from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
-
 import { createAgentAction, createErrorActionResults } from './actions';
-
-import { getPackagesWithRootAccess } from './change_privilege_level';
+import { getPackagesWithRootPrivilege } from './change_privilege_level';
 
 export class ChangePrivilegeActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -54,11 +52,7 @@ export async function bulkChangePrivilegeAgentsBatch(
     actionId?: string;
     total?: number;
     spaceId?: string;
-    user_info?: {
-      username?: string;
-      groupname?: string;
-      password?: string;
-    };
+    user_info?: AgentPrivilegeLevelChangeUserInfo;
   }
 ) {
   const errors: Record<Agent['id'], Error> = {};
@@ -71,20 +65,26 @@ export async function bulkChangePrivilegeAgentsBatch(
   const spaceId = options.spaceId;
   const namespaces = spaceId ? [spaceId] : [];
 
-  // Fail fast if agents contain integrations that require root access.
   await pMap(
     agents,
     async (agent) => {
+      // Create error if agent is on an unsupported version.
+      if (!isAgentPrivilegeLevelChangeSupported(agent)) {
+        errors[agent.id] = new FleetUnauthorizedError(
+          `Cannot remove root privilege. Privilege level change is supported from version ${MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION}.`
+        );
+        return;
+      }
       if (agent?.policy_id) {
         const allPackagePolicies =
           (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_id)) || [];
-        const packagesWithRootAccess = getPackagesWithRootAccess(allPackagePolicies);
-        if (packagesWithRootAccess.length > 0) {
-          // find list of agents on that agent policy
+        const packagesWithRootPrivilege = getPackagesWithRootPrivilege(allPackagePolicies);
+        // Create error if agent contains an integration that requires root privilege.
+        if (packagesWithRootPrivilege.length > 0) {
           errors[agent.id] = new FleetUnauthorizedError(
-            `Agent ${
-              agent.id
-            } contains integrations that require root access: ${packagesWithRootAccess
+            `Agent ${agent.id} is on policy ${
+              agent.policy_id
+            }, which contains integrations that require root privilege: ${packagesWithRootPrivilege
               .map((pkg) => pkg?.name)
               .join(', ')}`
           );
@@ -99,6 +99,7 @@ export async function bulkChangePrivilegeAgentsBatch(
   );
   const agentIds = agentsToAction.map((agent) => agent.id);
 
+  // Create action to change the privilege level of eligible agents.
   // Extract password from options if provided and pass it as a secret.
   await createAgentAction(esClient, soClient, {
     id: actionId,

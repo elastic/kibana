@@ -16,7 +16,7 @@ import type { TaskManagerStartContract } from '../plugin';
 import { TaskManagerPlugin } from '../plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { TaskManagerConfig } from '../config';
-import { BulkUpdateError } from '../lib/bulk_update_error';
+import { BulkUpdateError } from '../lib/errors';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 const mockTaskTypeRunFn = jest.fn();

@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { monaco } from '@kbn/monaco';
+import type { ESQLColumn } from '@kbn/esql-ast';
+import { Parser, walk } from '@kbn/esql-ast';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import {
-  getIndexPatternFromESQLQuery,
   getRemoteClustersFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
   getTimeFieldFromESQLQuery,
   prettifyQuery,
-  isQueryWrappedByPipes,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
   mapVariableToColumn,
@@ -28,73 +29,11 @@ import {
   findClosestColumn,
   getKqlSearchQueries,
   convertTimeseriesCommandToFrom,
+  hasLimitBeforeAggregate,
+  missingSortBeforeLimit,
 } from './query_parsing_helpers';
-import type { monaco } from '@kbn/monaco';
-import type { ESQLColumn } from '@kbn/esql-ast';
-import { parse, walk } from '@kbn/esql-ast';
+
 describe('esql query helpers', () => {
-  describe('getIndexPatternFromESQLQuery', () => {
-    it('should return the index pattern string from esql queries', () => {
-      const idxPattern1 = getIndexPatternFromESQLQuery('FROM foo');
-      expect(idxPattern1).toBe('foo');
-
-      const idxPattern3 = getIndexPatternFromESQLQuery('from foo | project abc, def');
-      expect(idxPattern3).toBe('foo');
-
-      const idxPattern4 = getIndexPatternFromESQLQuery('from foo | project a | limit 2');
-      expect(idxPattern4).toBe('foo');
-
-      const idxPattern5 = getIndexPatternFromESQLQuery('from foo | limit 2');
-      expect(idxPattern5).toBe('foo');
-
-      const idxPattern6 = getIndexPatternFromESQLQuery('from foo-1,foo-2 | limit 2');
-      expect(idxPattern6).toBe('foo-1,foo-2');
-
-      const idxPattern7 = getIndexPatternFromESQLQuery('from foo-1, foo-2 | limit 2');
-      expect(idxPattern7).toBe('foo-1,foo-2');
-
-      const idxPattern8 = getIndexPatternFromESQLQuery('FROM foo-1,  foo-2');
-      expect(idxPattern8).toBe('foo-1,foo-2');
-
-      const idxPattern9 = getIndexPatternFromESQLQuery('FROM foo-1, foo-2 metadata _id');
-      expect(idxPattern9).toBe('foo-1,foo-2');
-
-      const idxPattern10 = getIndexPatternFromESQLQuery('FROM foo-1, remote_cluster:foo-2, foo-3');
-      expect(idxPattern10).toBe('foo-1,remote_cluster:foo-2,foo-3');
-
-      const idxPattern11 = getIndexPatternFromESQLQuery(
-        'FROM foo-1, foo-2 | where event.reason like "*Disable: changed from [true] to [false]*"'
-      );
-      expect(idxPattern11).toBe('foo-1,foo-2');
-
-      const idxPattern12 = getIndexPatternFromESQLQuery('FROM foo-1, foo-2 // from command used');
-      expect(idxPattern12).toBe('foo-1,foo-2');
-
-      const idxPattern13 = getIndexPatternFromESQLQuery('ROW a = 1, b = "two", c = null');
-      expect(idxPattern13).toBe('');
-
-      const idxPattern14 = getIndexPatternFromESQLQuery('TS tsdb');
-      expect(idxPattern14).toBe('tsdb');
-
-      const idxPattern15 = getIndexPatternFromESQLQuery('TS tsdb | STATS max(cpu) BY host');
-      expect(idxPattern15).toBe('tsdb');
-
-      const idxPattern16 = getIndexPatternFromESQLQuery(
-        'TS pods | STATS load=avg(cpu), writes=max(rate(indexing_requests)) BY pod | SORT pod'
-      );
-      expect(idxPattern16).toBe('pods');
-
-      const idxPattern17 = getIndexPatternFromESQLQuery('FROM "$foo%"');
-      expect(idxPattern17).toBe('$foo%');
-
-      const idxPattern18 = getIndexPatternFromESQLQuery('FROM """foo-{{mm-dd_yy}}"""');
-      expect(idxPattern18).toBe('foo-{{mm-dd_yy}}');
-
-      const idxPattern19 = getIndexPatternFromESQLQuery('FROM foo-1::data');
-      expect(idxPattern19).toBe('foo-1::data');
-    });
-  });
-
   describe('getLimitFromESQLQuery', () => {
     it('should return default limit when ES|QL query is empty', () => {
       const limit = getLimitFromESQLQuery('');
@@ -162,6 +101,24 @@ describe('esql query helpers', () => {
 
     it('should return true for timeseries with aggregations', () => {
       expect(hasTransformationalCommand('ts a | stats var = avg(b)')).toBeTruthy();
+    });
+
+    it('should return true for fork with all branches containing only transformational commands', () => {
+      expect(
+        hasTransformationalCommand('from a | fork (stats count() by field1) (keep field2, field3)')
+      ).toBeTruthy();
+    });
+
+    it('should return false for fork with non-transformational commands in branches', () => {
+      expect(
+        hasTransformationalCommand('from a | fork (where field1 > 0) (eval field2 = field1 * 2)')
+      ).toBeFalsy();
+    });
+
+    it('should return false for fork with mixed transformational and non-transformational commands', () => {
+      expect(
+        hasTransformationalCommand('from a | fork (stats count() by field1) (where field2 > 0)')
+      ).toBeFalsy();
     });
   });
 
@@ -272,23 +229,6 @@ describe('esql query helpers', () => {
     it('should return the query with FROM command if TS command is found', function () {
       const query = convertTimeseriesCommandToFrom('TS index1 | KEEP field1, field2 | SORT field1');
       expect(query).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
-    });
-  });
-
-  describe('isQueryWrappedByPipes', function () {
-    it('should return false if the query is not wrapped', function () {
-      const flag = isQueryWrappedByPipes('FROM index1 | KEEP field1, field2 | SORT field1');
-      expect(flag).toBeFalsy();
-    });
-
-    it('should return true if the query is wrapped', function () {
-      const flag = isQueryWrappedByPipes('FROM index1 /n| KEEP field1, field2 /n| SORT field1');
-      expect(flag).toBeTruthy();
-    });
-
-    it('should return true if the query is wrapped and prettified', function () {
-      const flag = isQueryWrappedByPipes('FROM index1 /n  | KEEP field1, field2 /n  | SORT field1');
-      expect(flag).toBeTruthy();
     });
   });
 
@@ -955,7 +895,7 @@ describe('esql query helpers', () => {
   describe('getArgsFromRenameFunction', () => {
     it('should return the args from an = rename function', () => {
       const esql = 'FROM index | RENAME renamed = original';
-      const { root } = parse(esql);
+      const { root } = Parser.parse(esql);
       let renameFunction;
       walk(root, {
         visitFunction: (node) => (renameFunction = node),
@@ -969,7 +909,7 @@ describe('esql query helpers', () => {
 
     it('should return the args from an AS rename function', () => {
       const esql = 'FROM index | RENAME original AS renamed';
-      const { root } = parse(esql);
+      const { root } = Parser.parse(esql);
       let renameFunction;
       walk(root, {
         visitFunction: (node) => (renameFunction = node),
@@ -1074,6 +1014,42 @@ describe('esql query helpers', () => {
           'FROM "cluster1:index1,cluster1:index2", "cluster2:index3", cluster3:index3, index4'
         )
       ).toEqual(['cluster3', 'cluster1', 'cluster2']);
+    });
+  });
+
+  describe('hasLimitBeforeAggregate', () => {
+    it('should return false if the query is empty', () => {
+      expect(hasLimitBeforeAggregate('')).toBe(false);
+    });
+    it('should return false if there is no limit', () => {
+      expect(hasLimitBeforeAggregate('FROM index | STATS COUNT() BY field')).toBe(false);
+    });
+    it("should return false if it's just a limit without aggregate", () => {
+      expect(hasLimitBeforeAggregate('FROM index | LIMIT 10')).toBe(false);
+    });
+    it('should return false if limit is after aggregate', () => {
+      expect(hasLimitBeforeAggregate('FROM index | STATS COUNT() BY field | LIMIT 10')).toBe(false);
+    });
+    it('should return true if limit is before aggregate', () => {
+      expect(hasLimitBeforeAggregate('FROM index | LIMIT 10 | STATS COUNT() BY field')).toBe(true);
+    });
+  });
+
+  describe('missingSortBeforeLimit', () => {
+    it('should return false if the query is empty', () => {
+      expect(missingSortBeforeLimit('')).toBe(false);
+    });
+    it('should return false if there is no limit', () => {
+      expect(missingSortBeforeLimit('FROM index | STATS COUNT() BY field')).toBe(false);
+    });
+    it("should return false if it's just a limit without sort", () => {
+      expect(missingSortBeforeLimit('FROM index | LIMIT 10')).toBe(false);
+    });
+    it('should return false if sort is before limit', () => {
+      expect(missingSortBeforeLimit('FROM index | SORT field | LIMIT 10')).toBe(false);
+    });
+    it('should return true if limit is before sort', () => {
+      expect(missingSortBeforeLimit('FROM index | LIMIT 10 | SORT field')).toBe(true);
     });
   });
 });

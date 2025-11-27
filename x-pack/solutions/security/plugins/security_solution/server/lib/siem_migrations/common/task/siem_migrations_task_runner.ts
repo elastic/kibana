@@ -26,7 +26,7 @@ import type { SiemMigrationTelemetryClient } from './siem_migrations_telemetry_c
 /** Number of items loaded in memory to be translated in the pool */
 const TASK_BATCH_SIZE = 100 as const;
 /** The timeout of each individual agent invocation in minutes */
-const AGENT_INVOKE_TIMEOUT_MIN = 3 as const;
+const AGENT_INVOKE_TIMEOUT_MIN = 20 as const;
 
 /** Exponential backoff configuration to handle rate limit errors */
 const RETRY_CONFIG = {

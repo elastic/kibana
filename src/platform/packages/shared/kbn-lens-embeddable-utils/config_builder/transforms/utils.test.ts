@@ -24,8 +24,8 @@ import type {
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
   FormBasedLayer,
-} from '@kbn/lens-plugin/public';
-import type { TextBasedLayer } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+} from '@kbn/lens-common';
+import type { TextBasedLayer } from '@kbn/lens-common';
 import type { LensApiState } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { LensAttributes } from '../types';

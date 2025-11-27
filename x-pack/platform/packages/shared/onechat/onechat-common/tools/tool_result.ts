@@ -12,8 +12,15 @@ export enum ToolResultType {
   resource = 'resource',
   tabularData = 'tabular_data',
   query = 'query',
+  visualization = 'visualization',
   other = 'other',
   error = 'error',
+}
+
+export enum SupportedChartType {
+  Metric = 'metric',
+  Gauge = 'gauge',
+  Tagcloud = 'tagcloud',
 }
 
 interface ToolResultMixin<TType extends ToolResultType, TData extends Object> {
@@ -47,6 +54,16 @@ export type TabularDataResult = ToolResultMixin<
 
 export type QueryResult = ToolResultMixin<ToolResultType.query, { esql: string }>;
 
+export interface VisualizationResult {
+  tool_result_id: string;
+  type: ToolResultType.visualization;
+  data: {
+    visualization: Record<string, unknown>;
+    chart_type: SupportedChartType;
+    esql: string;
+  };
+}
+
 export type OtherResult = ToolResultMixin<ToolResultType.other, Record<string, unknown>>;
 
 export type ErrorResult = ToolResultMixin<
@@ -62,6 +79,7 @@ export type ToolResult =
   | ResourceResult
   | TabularDataResult
   | QueryResult
+  | VisualizationResult
   | OtherResult
   | ErrorResult;
 

@@ -51,9 +51,9 @@ export function getFunctionDefinition({
           );
         }
 
-        const { aggs, indexPatterns, searchSource } = await getStartDependencies(kibanaRequest);
+        const { aggs, dataViews, searchSource } = await getStartDependencies(kibanaRequest);
 
-        const indexPattern = await indexPatterns.create(args.index.value, true);
+        const indexPattern = await dataViews.create(args.index.value, true);
         const aggConfigs = aggs.createAggConfigs(
           indexPattern,
           args.aggs?.map((agg) => agg.value) ?? [],
@@ -110,7 +110,7 @@ export function getEsaggs({
 
       return {
         aggs: await search.aggs.asScopedToClient(savedObjectsClient, esClient.asCurrentUser),
-        indexPatterns: await indexPatterns.dataViewsServiceFactory(
+        dataViews: await indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
           esClient.asCurrentUser
         ),

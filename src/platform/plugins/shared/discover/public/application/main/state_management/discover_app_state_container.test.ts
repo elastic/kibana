@@ -10,7 +10,7 @@
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { History } from 'history';
 import { discoverServiceMock } from '../../../__mocks__/services';
@@ -47,7 +47,7 @@ describe('Test discover app state container', () => {
     stateStorage = createKbnUrlStateStorage({
       useHash: storeInSessionStorage,
       history,
-      ...(toasts && withNotifyOnErrors(toasts)),
+      ...toasts,
     });
     tabsStorageManager = createTabsStorageManager({
       urlStateStorage: stateStorage,
@@ -86,26 +86,16 @@ describe('Test discover app state container', () => {
       injectCurrentTab: createTabActionInjector(getCurrentTab().id),
     });
 
-  test('hasChanged returns whether the current state has changed', async () => {
-    const state = getStateContainer();
-    state.set({
-      dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
-    });
-    expect(state.hasChanged()).toBeTruthy();
-    state.resetInitialState();
-    expect(state.hasChanged()).toBeFalsy();
-  });
-
   test('getPrevious returns the state before the current', async () => {
     const state = getStateContainer();
     state.set({
       dataSource: createDataViewDataSource({ dataViewId: 'first' }),
     });
-    const stateA = state.getState();
+    const stateA = state.get();
     state.set({
       dataSource: createDataViewDataSource({ dataViewId: 'second' }),
     });
-    expect(state.getPrevious()).toEqual(stateA);
+    expect(getCurrentTab().previousAppState).toEqual(stateA);
   });
 
   describe('getAppStateFromSavedSearch', () => {

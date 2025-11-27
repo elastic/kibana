@@ -15,7 +15,7 @@ import {
   EuiImage,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/status.gen';
 import type {
@@ -96,6 +96,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
   if (storeEnablement.error) {
     return (
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.entityStore.enablement.mutation.errorTitle"

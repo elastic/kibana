@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -63,7 +63,6 @@
     "@kbn/security-plugin",
     "@kbn/observability-plugin",
     "@kbn/actions-plugin",
-    "@kbn/stack-connectors-plugin",
     "@kbn/features-plugin",
     "@kbn/serverless",
     "@kbn/task-manager-plugin",
@@ -87,7 +86,9 @@
     "@kbn/alerts-ui-shared",
     "@kbn/traced-es-client",
     "@kbn/licensing-types",
-    "@kbn/utility-types-jest"
+    "@kbn/utility-types-jest",
+    "@kbn/zod",
+    "@kbn/connector-schemas"
   ],
   "exclude": ["target/**/*"]
 }

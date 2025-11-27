@@ -43,6 +43,7 @@ import type {
   KibanaAssetType,
   PackageVerificationResult,
   InstallResultStatus,
+  InstallLatestExecutedState,
 } from '../../../types';
 import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
@@ -460,6 +461,25 @@ function sendEvent(telemetryEvent: PackageUpdateEvent) {
   );
 }
 
+function sendEventWithLatestState(
+  telemetryEvent: PackageUpdateEvent,
+  errorMessage: string,
+  latestExecutedState?: InstallLatestExecutedState
+) {
+  sendEvent({
+    ...telemetryEvent,
+    errorMessage,
+    ...(latestExecutedState
+      ? {
+          latestExecutedState: {
+            name: latestExecutedState.name,
+            error: latestExecutedState.error,
+          },
+        }
+      : {}),
+  });
+}
+
 async function installPackageFromRegistry({
   savedObjectsClient,
   pkgkey,
@@ -487,11 +507,12 @@ async function installPackageFromRegistry({
   let installType: InstallType = 'unknown';
   const installSource = 'registry';
   const telemetryEvent: PackageUpdateEvent = getTelemetryEvent(pkgName, pkgVersion);
+  let installedPkg: SavedObject<Installation> | undefined;
 
   try {
     // get the currently installed package
 
-    const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+    installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
     installType = getInstallType({ pkgVersion, installedPkg });
 
     telemetryEvent.installType = installType;
@@ -583,10 +604,11 @@ async function installPackageFromRegistry({
       automaticInstall,
     });
   } catch (e) {
-    sendEvent({
-      ...telemetryEvent,
-      errorMessage: e.message,
-    });
+    sendEventWithLatestState(
+      telemetryEvent,
+      e.message,
+      installedPkg?.attributes.latest_executed_state
+    );
     return {
       error: e,
       installType,
@@ -791,7 +813,7 @@ export async function installPackageWithStateMachine(options: {
       })
       .catch(async (err: Error) => {
         logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`, {
-          error: { stack_trace: err.stack },
+          error: err,
         });
         await handleInstallPackageFailure({
           savedObjectsClient,
@@ -804,17 +826,19 @@ export async function installPackageWithStateMachine(options: {
           authorizationHeader,
           keepFailedInstallation,
         });
-        sendEvent({
-          ...telemetryEvent!,
-          errorMessage: err.message,
-        });
+        sendEventWithLatestState(
+          telemetryEvent,
+          err.message,
+          installedPkg?.attributes.latest_executed_state
+        );
         return { error: err, installType, installSource, pkgName };
       });
   } catch (e) {
-    sendEvent({
-      ...telemetryEvent,
-      errorMessage: e.message,
-    });
+    sendEventWithLatestState(
+      telemetryEvent,
+      e.message,
+      installedPkg?.attributes.latest_executed_state
+    );
     return {
       error: e,
       installType,

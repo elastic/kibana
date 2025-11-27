@@ -96,6 +96,7 @@ const SamplePreviewTableContent = ({
   ) {
     return (
       <EuiCallOut
+        announceOnMount
         size="s"
         color="warning"
         iconType="warning"
@@ -111,6 +112,7 @@ const SamplePreviewTableContent = ({
     const formattedError = error && getFormattedError(error);
     return (
       <EuiCallOut
+        announceOnMount
         color="danger"
         title={i18n.translate('xpack.streams.samplePreviewTable.errorTitle', {
           defaultMessage:

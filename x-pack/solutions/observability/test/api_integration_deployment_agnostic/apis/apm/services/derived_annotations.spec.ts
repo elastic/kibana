@@ -134,9 +134,12 @@ export default function annotationApiTests({ getService }: DeploymentAgnosticFtr
       });
 
       after(async () => {
-        await es.indices.delete({
-          index: indexName,
-        });
+        const indexExists = await es.indices.exists({ index: indexName });
+        if (indexExists) {
+          await es.indices.delete({
+            index: indexName,
+          });
+        }
         await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       });
 

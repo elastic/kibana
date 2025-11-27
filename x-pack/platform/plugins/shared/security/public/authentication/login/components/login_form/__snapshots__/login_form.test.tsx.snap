@@ -201,16 +201,17 @@ exports[`LoginForm renders as expected 1`] = `
                 "borderBaseDisabled": "#485975",
                 "borderBaseFloating": "#2B394F",
                 "borderBaseFormsColorSwatch": "rgba(255,255,255, 0.32)",
-                "borderBaseFormsControl": "#6A7FA0",
                 "borderBaseNeutral": "#00425C",
                 "borderBasePlain": "#485975",
                 "borderBasePrimary": "#123778",
+                "borderBaseProminent": "#6A7FA0",
                 "borderBaseRisk": "#5E281A",
                 "borderBaseSubdued": "#2B394F",
                 "borderBaseSuccess": "#094837",
                 "borderBaseWarning": "#513910",
                 "borderInteractiveFormsHoverDanger": "#EE4C48",
                 "borderInteractiveFormsHoverPlain": "#5A6D8C",
+                "borderInteractiveFormsHoverProminent": "#8E9FBC",
                 "borderStrongAccent": "#EE72A6",
                 "borderStrongAccentSecondary": "#16C5C0",
                 "borderStrongDanger": "#F6726A",
@@ -381,16 +382,17 @@ exports[`LoginForm renders as expected 1`] = `
                 "borderBaseDisabled": "#CAD3E2",
                 "borderBaseFloating": "transparent",
                 "borderBaseFormsColorSwatch": "rgba(72,89,117, 0.24)",
-                "borderBaseFormsControl": "#8E9FBC",
                 "borderBaseNeutral": "#B5E5F2",
                 "borderBasePlain": "#CAD3E2",
                 "borderBasePrimary": "#BFDBFF",
+                "borderBaseProminent": "#A2B1C9",
                 "borderBaseRisk": "#FFCDA1",
                 "borderBaseSubdued": "#E3E8F2",
                 "borderBaseSuccess": "#AEE8D2",
                 "borderBaseWarning": "#FCD883",
                 "borderInteractiveFormsHoverDanger": "#DA3737",
                 "borderInteractiveFormsHoverPlain": "#B4C1D5",
+                "borderInteractiveFormsHoverProminent": "#798EAF",
                 "borderStrongAccent": "#BC1E70",
                 "borderStrongAccentSecondary": "#008B87",
                 "borderStrongDanger": "#C61E25",
@@ -737,12 +739,6 @@ exports[`LoginForm renders as expected 1`] = `
                 "headerDarkBackground": "#0B1628",
                 "headerDarkSearchBorderColor": "#485975",
                 "headerDarkSectionItemBackgroundFocus": "#0A2342",
-                "keyPadMenuItemBackgroundDisabledSelect": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseDisabled",
-                  ],
-                },
                 "listGroupItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -1173,12 +1169,6 @@ exports[`LoginForm renders as expected 1`] = `
                 "headerDarkBackground": "#0B1628",
                 "headerDarkSearchBorderColor": "#485975",
                 "headerDarkSectionItemBackgroundFocus": "#0A2342",
-                "keyPadMenuItemBackgroundDisabledSelect": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseDisabled",
-                  ],
-                },
                 "listGroupItemBackgroundHover": Computed {
                   "computer": [Function],
                   "dependencies": Array [
@@ -1541,9 +1531,7 @@ exports[`LoginForm renders as expected 1`] = `
                   "backgroundText": Computed {
                     "computer": [Function],
                     "dependencies": Array [
-                      "flags.buttonVariant",
                       "colors.backgroundBasePlain",
-                      "colors.backgroundLightText",
                     ],
                   },
                   "backgroundTextActive": "rgba(255,255,255, 0.16)",
@@ -1834,9 +1822,7 @@ exports[`LoginForm renders as expected 1`] = `
                   "backgroundText": Computed {
                     "computer": [Function],
                     "dependencies": Array [
-                      "flags.buttonVariant",
                       "colors.backgroundBasePlain",
-                      "colors.backgroundLightText",
                     ],
                   },
                   "backgroundTextActive": "rgba(23,80,186, 0.12)",
@@ -2070,7 +2056,7 @@ exports[`LoginForm renders as expected 1`] = `
                   "controlBorder": Computed {
                     "computer": [Function],
                     "dependencies": Array [
-                      "colors.borderBaseFormsControl",
+                      "colors.borderBaseProminent",
                     ],
                   },
                   "controlBorderDisabled": Computed {
@@ -2201,7 +2187,7 @@ exports[`LoginForm renders as expected 1`] = `
                   "controlBorder": Computed {
                     "computer": [Function],
                     "dependencies": Array [
-                      "colors.borderBaseFormsControl",
+                      "colors.borderBaseProminent",
                     ],
                   },
                   "controlBorderDisabled": Computed {
@@ -2238,10 +2224,7 @@ exports[`LoginForm renders as expected 1`] = `
               },
             },
             "flags": Object {
-              "buttonVariant": "refresh",
-              "formVariant": "refresh",
-              "hasGlobalFocusColor": true,
-              "hasVisColorAdjustment": false,
+              "shadowVariant": "refresh",
             },
             "focus": Object {
               "backgroundColor": Computed {
@@ -2384,6 +2367,86 @@ exports[`LoginForm renders as expected 1`] = `
                   },
                   "ghost": "#FFFFFF",
                   "ink": "#000000",
+                },
+              },
+            },
+            "shadows": Object {
+              "DARK": Object {
+                "colors": Object {
+                  "base": "#000000",
+                },
+                "flat": Object {
+                  "down": "0px 1px 4px 0px hsla(0,0%,0%,0.4), 0px 2px 8px 0px hsla(0,0%,0%,0.24)",
+                  "up": "0px 1px 4px 0px hsla(0,0%,0%,0.4), 0px -2px 8px 0px hsla(0,0%,0%,0.24)",
+                },
+                "hover": Object {
+                  "base": Object {
+                    "down": "0px 2px 7px 0px hsla(0,0%,0%,0.46), 0px 4px 11px 0px hsla(0,0%,0%,0.26)",
+                    "up": "0px 2px 7px 0px hsla(0,0%,0%,0.46), 0px -4px 11px 0px hsla(0,0%,0%,0.26)",
+                  },
+                  "xl": Object {
+                    "down": "0px 6px 19px 0px hsla(0,0%,0%,0.7), 0px 12px 23px 0px hsla(0,0%,0%,0.34)",
+                    "up": "0px 6px 19px 0px hsla(0,0%,0%,0.7), 0px -12px 23px 0px hsla(0,0%,0%,0.34)",
+                  },
+                },
+                "l": Object {
+                  "down": "0px 4px 13px 0px hsla(0,0%,0%,0.58), 0px 8px 17px 0px hsla(0,0%,0%,0.3)",
+                  "up": "0px 4px 13px 0px hsla(0,0%,0%,0.58), 0px -8px 17px 0px hsla(0,0%,0%,0.3)",
+                },
+                "m": Object {
+                  "down": "0px 3px 10px 0px hsla(0,0%,0%,0.52), 0px 6px 14px 0px hsla(0,0%,0%,0.28)",
+                  "up": "0px 3px 10px 0px hsla(0,0%,0%,0.52), 0px -6px 14px 0px hsla(0,0%,0%,0.28)",
+                },
+                "s": Object {
+                  "down": "0px 2px 7px 0px hsla(0,0%,0%,0.46), 0px 4px 11px 0px hsla(0,0%,0%,0.26)",
+                  "up": "0px 2px 7px 0px hsla(0,0%,0%,0.46), 0px -4px 11px 0px hsla(0,0%,0%,0.26)",
+                },
+                "xl": Object {
+                  "down": "0px 5px 16px 0px hsla(0,0%,0%,0.64), 0px 10px 20px 0px hsla(0,0%,0%,0.32)",
+                  "up": "0px 5px 16px 0px hsla(0,0%,0%,0.64), 0px -10px 20px 0px hsla(0,0%,0%,0.32)",
+                },
+                "xs": Object {
+                  "down": "0px 1px 4px 0px hsla(0,0%,0%,0.4), 0px 2px 8px 0px hsla(0,0%,0%,0.24)",
+                  "up": "0px 1px 4px 0px hsla(0,0%,0%,0.4), 0px -2px 8px 0px hsla(0,0%,0%,0.24)",
+                },
+              },
+              "LIGHT": Object {
+                "colors": Object {
+                  "base": "#2B394F",
+                },
+                "flat": Object {
+                  "down": "0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px 1px 4px 0px hsla(216.67,29.51%,23.92%,0.06), 0px 2px 8px 0px hsla(216.67,29.51%,23.92%,0.04)",
+                  "up": "0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px -1px 4px 0px hsla(216.67,29.51%,23.92%,0.06), 0px -2px 8px 0px hsla(216.67,29.51%,23.92%,0.04)",
+                },
+                "hover": Object {
+                  "base": Object {
+                    "down": "0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px 2px 7px 0px hsla(216.67,29.51%,23.92%,0.08), 0px 4px 11px 0px hsla(216.67,29.51%,23.92%,0.05)",
+                    "up": "0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px -2px 7px 0px hsla(216.67,29.51%,23.92%,0.08), 0px -4px 11px 0px hsla(216.67,29.51%,23.92%,0.05)",
+                  },
+                  "xl": Object {
+                    "down": "0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px 6px 19px 0px hsla(216.67,29.51%,23.92%,0.16), 0px 12px 23px 0px hsla(216.67,29.51%,23.92%,0.09)",
+                    "up": "0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px -6px 19px 0px hsla(216.67,29.51%,23.92%,0.16), 0px -12px 23px 0px hsla(216.67,29.51%,23.92%,0.09)",
+                  },
+                },
+                "l": Object {
+                  "down": "0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px 4px 13px 0px hsla(216.67,29.51%,23.92%,0.12), 0px 8px 17px 0px hsla(216.67,29.51%,23.92%,0.07)",
+                  "up": "0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px -4px 13px 0px hsla(216.67,29.51%,23.92%,0.12), 0px -8px 17px 0px hsla(216.67,29.51%,23.92%,0.07)",
+                },
+                "m": Object {
+                  "down": "0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px 3px 10px 0px hsla(216.67,29.51%,23.92%,0.1), 0px 6px 14px 0px hsla(216.67,29.51%,23.92%,0.06)",
+                  "up": "0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px -3px 10px 0px hsla(216.67,29.51%,23.92%,0.1), 0px -6px 14px 0px hsla(216.67,29.51%,23.92%,0.06)",
+                },
+                "s": Object {
+                  "down": "0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px 2px 7px 0px hsla(216.67,29.51%,23.92%,0.08), 0px 4px 11px 0px hsla(216.67,29.51%,23.92%,0.05)",
+                  "up": "0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px -2px 7px 0px hsla(216.67,29.51%,23.92%,0.08), 0px -4px 11px 0px hsla(216.67,29.51%,23.92%,0.05)",
+                },
+                "xl": Object {
+                  "down": "0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px 5px 16px 0px hsla(216.67,29.51%,23.92%,0.14), 0px 10px 20px 0px hsla(216.67,29.51%,23.92%,0.08)",
+                  "up": "0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px -5px 16px 0px hsla(216.67,29.51%,23.92%,0.14), 0px -10px 20px 0px hsla(216.67,29.51%,23.92%,0.08)",
+                },
+                "xs": Object {
+                  "down": "0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px 1px 4px 0px hsla(216.67,29.51%,23.92%,0.06), 0px 2px 8px 0px hsla(216.67,29.51%,23.92%,0.04)",
+                  "up": "0px 0px 2px 0px hsla(216.67,29.51%,23.92%,0.16), 0px -1px 4px 0px hsla(216.67,29.51%,23.92%,0.06), 0px -2px 8px 0px hsla(216.67,29.51%,23.92%,0.04)",
                 },
               },
             },

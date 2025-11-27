@@ -98,6 +98,7 @@ export const BodyRow = <Item extends object>({
           {errors.map((errorMessage, errorMessageIndex) => (
             <EuiFlexItem key={errorMessageIndex}>
               <EuiCallOut
+                announceOnMount={false}
                 role="alert"
                 aria-live="polite"
                 iconType="warning"

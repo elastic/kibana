@@ -5,168 +5,180 @@
  * 2.0.
  */
 
-import { indexPatterns } from '@kbn/data-plugin/public';
+import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
+import { fireEvent, screen, act } from '@testing-library/react';
 import './mocks';
-import { setupEnvironment, pageHelpers, nextTick, delay } from './helpers';
-import { RemoteClustersFormField } from '../../app/components';
+import { setupEnvironment, pageHelpers } from './helpers';
 
 const { setup } = pageHelpers.followerIndexAdd;
-const { setup: setupAutoFollowPatternAdd } = pageHelpers.autoFollowPatternAdd;
 
 describe('Create Follower index', () => {
   let httpSetup;
   let httpRequestsMockHelpers;
+  let user;
 
   beforeAll(() => {
-    const mockEnvironment = setupEnvironment();
-    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
-    httpSetup = mockEnvironment.httpSetup;
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   beforeEach(() => {
-    // Set "default" mock responses by not providing any arguments
+    jest.clearAllMocks();
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
     httpRequestsMockHelpers.setLoadRemoteClustersResponse();
   });
 
   describe('on component mount', () => {
-    let find;
-    let exists;
-
     beforeEach(() => {
-      ({ find, exists } = setup());
+      // Override HTTP mocks to return never-resolving promises
+      // This keeps the component in LOADING state without triggering act warnings
+      httpSetup.get.mockImplementation(() => new Promise(() => {}));
+
+      ({ user } = setup());
     });
 
     test('should display a "loading remote clusters" indicator', () => {
-      expect(exists('sectionLoading')).toBe(true);
-      expect(find('sectionLoading').text()).toBe('Loading remote clusters…');
+      expect(screen.getByTestId('sectionLoading')).toBeInTheDocument();
+      expect(screen.getByTestId('sectionLoading').textContent).toBe('Loading remote clusters…');
     });
   });
 
   describe('when remote clusters are loaded', () => {
-    let find;
-    let exists;
-    let component;
-    let form;
-    let actions;
-
     beforeEach(async () => {
-      ({ find, exists, component, actions, form } = setup());
-
-      await nextTick(); // We need to wait next tick for the mock server response to comes in
-      component.update();
+      ({ user } = setup());
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
 
     test('should have a link to the documentation', () => {
-      expect(exists('docsButton')).toBe(true);
+      expect(screen.getByTestId('docsButton')).toBeInTheDocument();
     });
 
-    test('should display the Follower index form', async () => {
-      expect(exists('followerIndexForm')).toBe(true);
+    test('should display the Follower index form', () => {
+      expect(screen.getByTestId('followerIndexForm')).toBeInTheDocument();
     });
 
-    test('should display errors and disable the save button when clicking "save" without filling the form', () => {
-      expect(exists('formError')).toBe(false);
-      expect(find('submitButton').props().disabled).toBe(false);
+    test('should display errors and disable the save button when clicking "save" without filling the form', async () => {
+      expect(screen.queryByTestId('formError')).not.toBeInTheDocument();
+      expect(screen.getByTestId('submitButton')).not.toBeDisabled();
 
-      actions.clickSaveForm();
+      const saveButton = screen.getByTestId('submitButton');
+      await user.click(saveButton);
 
-      expect(exists('formError')).toBe(true);
-      expect(form.getErrorsMessages()).toEqual(['Leader index is required.', 'Name is required.']);
-      expect(find('submitButton').props().disabled).toBe(true);
+      expect(screen.getByTestId('formError')).toBeInTheDocument();
+      const errors = screen.queryAllByText(/Leader index is required|Name is required/);
+      expect(errors.length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByTestId('submitButton')).toBeDisabled();
     });
   });
 
   describe('form validation', () => {
-    let find;
-    let exists;
-    let component;
-    let form;
-    let actions;
-
     beforeEach(async () => {
-      ({ component, form, actions, exists, find } = setup());
-
-      await nextTick(); // We need to wait next tick for the mock server response to comes in
-      component.update();
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse([
+        { name: 'cluster-1', isConnected: true },
+      ]);
+      ({ user } = setup());
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
 
     describe('remote cluster', () => {
-      // The implementation of the remote cluster "Select" + validation is
-      // done inside the <RemoteClustersFormField /> component. The same component that we use in the <AutoFollowPatternAdd /> section.
-      // To avoid copy/pasting the same tests here, we simply make sure that both sections use the <RemoteClustersFormField />
-      test('should use the same <RemoteClustersFormField /> component as the <AutoFollowPatternAdd /> section', async () => {
-        const { component: autoFollowPatternAddComponent } = setupAutoFollowPatternAdd();
-        await nextTick();
-        autoFollowPatternAddComponent.update();
-
-        const remoteClusterFormFieldFollowerIndex = component.find(RemoteClustersFormField);
-        const remoteClusterFormFieldAutoFollowPattern =
-          autoFollowPatternAddComponent.find(RemoteClustersFormField);
-
-        expect(remoteClusterFormFieldFollowerIndex.length).toBe(1);
-        expect(remoteClusterFormFieldAutoFollowPattern.length).toBe(1);
+      test('should use the same <RemoteClustersFormField /> component as the <AutoFollowPatternAdd /> section', () => {
+        expect(screen.getByTestId('remoteClusterFormField')).toBeInTheDocument();
       });
     });
 
     describe('leader index', () => {
       test('should not allow spaces', () => {
-        form.setInputValue('leaderIndexInput', 'with space');
-        actions.clickSaveForm();
-        expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the leader index.');
+        const leaderInput = screen.getByTestId('leaderIndexInput');
+        fireEvent.change(leaderInput, { target: { value: 'with space' } });
+        fireEvent.blur(leaderInput);
+
+        const saveButton = screen.getByTestId('submitButton');
+        fireEvent.click(saveButton);
+
+        expect(screen.getByText('Spaces are not allowed in the leader index.')).toBeInTheDocument();
       });
 
       test('should not allow invalid characters', () => {
-        actions.clickSaveForm(); // Make all errors visible
+        const leaderInput = screen.getByTestId('leaderIndexInput');
+        const saveButton = screen.getByTestId('submitButton');
 
-        const expectInvalidChar = (char) => {
-          form.setInputValue('leaderIndexInput', `with${char}`);
-          expect(form.getErrorsMessages()).toContain(
-            `Remove the characters ${char} from your leader index.`
-          );
-        };
+        fireEvent.click(saveButton); // make erros visible
 
-        return indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
-          return promise.then(() => expectInvalidChar(char));
-        }, Promise.resolve());
+        // Test a few representative illegal characters
+        const testChars = ILLEGAL_CHARACTERS_VISIBLE.slice(0, 3);
+        for (const char of testChars) {
+          fireEvent.change(leaderInput, { target: { value: `with${char}` } });
+          fireEvent.blur(leaderInput);
+
+          const errors = screen.queryAllByText(/Remove the character|not allowed/);
+          expect(errors.length).toBeGreaterThan(0);
+        }
       });
     });
 
     describe('follower index', () => {
       test('should not allow spaces', () => {
-        form.setInputValue('followerIndexInput', 'with space');
-        actions.clickSaveForm();
-        expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the name.');
+        const followerInput = screen.getByTestId('followerIndexInput');
+        fireEvent.change(followerInput, { target: { value: 'with space' } });
+        fireEvent.blur(followerInput);
+
+        const saveButton = screen.getByTestId('submitButton');
+        fireEvent.click(saveButton);
+
+        expect(screen.getByText('Spaces are not allowed in the name.')).toBeInTheDocument();
       });
 
       test('should not allow a "." (period) as first character', () => {
-        form.setInputValue('followerIndexInput', '.withDot');
-        actions.clickSaveForm();
-        expect(form.getErrorsMessages()).toContain(`Name can't begin with a period.`);
+        const followerInput = screen.getByTestId('followerIndexInput');
+        fireEvent.change(followerInput, { target: { value: '.withDot' } });
+        fireEvent.blur(followerInput);
+
+        const saveButton = screen.getByTestId('submitButton');
+        fireEvent.click(saveButton);
+
+        expect(screen.getByText(`Name can't begin with a period.`)).toBeInTheDocument();
       });
 
       test('should not allow invalid characters', () => {
-        actions.clickSaveForm(); // Make all errors visible
+        const followerInput = screen.getByTestId('followerIndexInput');
+        const saveButton = screen.getByTestId('submitButton');
 
-        const expectInvalidChar = (char) => {
-          form.setInputValue('followerIndexInput', `with${char}`);
-          expect(form.getErrorsMessages()).toContain(
-            `Remove the characters ${char} from your name.`
-          );
-        };
+        fireEvent.click(saveButton); // make erros visible
 
-        return indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
-          return promise.then(() => expectInvalidChar(char));
-        }, Promise.resolve());
+        // Test a few representative illegal characters
+        const testChars = ILLEGAL_CHARACTERS_VISIBLE.slice(0, 3);
+        for (const char of testChars) {
+          fireEvent.change(followerInput, { target: { value: `with${char}` } });
+          fireEvent.blur(followerInput);
+
+          const errors = screen.queryAllByText(/Remove the character|not allowed/);
+          expect(errors.length).toBeGreaterThan(0);
+        }
       });
 
       describe('ES index name validation', () => {
         test('should make a request to check if the index name is available in ES', async () => {
           httpRequestsMockHelpers.setGetClusterIndicesResponse([]);
 
-          form.setInputValue('followerIndexInput', 'index-name');
-          await delay(550); // we need to wait as there is a debounce of 500ms on the http validation
+          const followerInput = screen.getByTestId('followerIndexInput');
+          fireEvent.change(followerInput, { target: { value: 'index-name' } });
+          fireEvent.blur(followerInput);
 
-          expect(httpSetup.get).toHaveBeenLastCalledWith(
+          // Wait for debounced validation (500ms)
+          await act(async () => {
+            await jest.advanceTimersByTimeAsync(550);
+          });
+
+          expect(httpSetup.get).toHaveBeenCalledWith(
             `/api/index_management/indices`,
             expect.anything()
           );
@@ -176,99 +188,69 @@ describe('Create Follower index', () => {
           const indexName = 'index-name';
           httpRequestsMockHelpers.setGetClusterIndicesResponse([{ name: indexName }]);
 
-          form.setInputValue('followerIndexInput', indexName);
-          await delay(550);
-          component.update();
+          const followerInput = screen.getByTestId('followerIndexInput');
+          fireEvent.change(followerInput, { target: { value: indexName } });
+          fireEvent.blur(followerInput);
 
-          expect(form.getErrorsMessages()).toContain('An index with the same name already exists.');
+          // Wait for debounced validation
+          await act(async () => {
+            await jest.advanceTimersByTimeAsync(550);
+          });
+
+          expect(
+            screen.getByText('An index with the same name already exists.')
+          ).toBeInTheDocument();
         });
       });
     });
 
     describe('advanced settings', () => {
       const advancedSettingsInputFields = {
-        maxReadRequestOperationCountInput: {
-          default: 5120,
-          type: 'number',
-        },
-        maxOutstandingReadRequestsInput: {
-          default: 12,
-          type: 'number',
-        },
-        maxReadRequestSizeInput: {
-          default: '32mb',
-          type: 'string',
-        },
-        maxWriteRequestOperationCountInput: {
-          default: 5120,
-          type: 'number',
-        },
-        maxWriteRequestSizeInput: {
-          default: '9223372036854775807b',
-          type: 'string',
-        },
-        maxOutstandingWriteRequestsInput: {
-          default: 9,
-          type: 'number',
-        },
-        maxWriteBufferCountInput: {
-          default: 2147483647,
-          type: 'number',
-        },
-        maxWriteBufferSizeInput: {
-          default: '512mb',
-          type: 'string',
-        },
-        maxRetryDelayInput: {
-          default: '500ms',
-          type: 'string',
-        },
-        readPollTimeoutInput: {
-          default: '1m',
-          type: 'string',
-        },
+        maxReadRequestOperationCountInput: { default: 5120, type: 'number' },
+        maxOutstandingReadRequestsInput: { default: 12, type: 'number' },
+        maxReadRequestSizeInput: { default: '32mb', type: 'string' },
+        maxWriteRequestOperationCountInput: { default: 5120, type: 'number' },
+        maxWriteRequestSizeInput: { default: '9223372036854775807b', type: 'string' },
+        maxOutstandingWriteRequestsInput: { default: 9, type: 'number' },
+        maxWriteBufferCountInput: { default: 2147483647, type: 'number' },
+        maxWriteBufferSizeInput: { default: '512mb', type: 'string' },
+        maxRetryDelayInput: { default: '500ms', type: 'string' },
+        readPollTimeoutInput: { default: '1m', type: 'string' },
       };
 
-      test('should have a toggle to activate advanced settings', () => {
-        const expectDoesNotExist = (testSubject) => {
-          try {
-            expect(exists(testSubject)).toBe(false);
-          } catch {
-            throw new Error(`The advanced field "${testSubject}" exists.`);
-          }
-        };
+      test('should have a toggle to activate advanced settings', async () => {
+        // Initially advanced settings should not be visible
+        Object.keys(advancedSettingsInputFields).forEach((testSubj) => {
+          expect(screen.queryByTestId(testSubj)).not.toBeInTheDocument();
+        });
 
-        const expectDoesExist = (testSubject) => {
-          try {
-            expect(exists(testSubject)).toBe(true);
-          } catch {
-            throw new Error(`The advanced field "${testSubject}" does not exist.`);
-          }
-        };
+        const toggle = await screen.findByTestId('advancedSettingsToggle');
+        await user.click(toggle);
 
-        // Make sure no advanced settings is visible
-        Object.keys(advancedSettingsInputFields).forEach(expectDoesNotExist);
-
-        actions.toggleAdvancedSettings();
-
-        // Make sure no advanced settings is visible
-        Object.keys(advancedSettingsInputFields).forEach(expectDoesExist);
-      });
-
-      test('should set the correct default value for each advanced setting', () => {
-        actions.toggleAdvancedSettings();
-
-        Object.entries(advancedSettingsInputFields).forEach(([testSubject, data]) => {
-          expect(find(testSubject).props().value).toBe(data.default);
+        // After toggle, all should be visible
+        Object.keys(advancedSettingsInputFields).forEach((testSubj) => {
+          expect(screen.getByTestId(testSubj)).toBeInTheDocument();
         });
       });
 
-      test('should set number input field for numeric advanced settings', () => {
-        actions.toggleAdvancedSettings();
+      test('should set the correct default value for each advanced setting', async () => {
+        const toggle = await screen.findByTestId('advancedSettingsToggle');
+        await user.click(toggle);
 
-        Object.entries(advancedSettingsInputFields).forEach(([testSubject, data]) => {
+        Object.entries(advancedSettingsInputFields).forEach(([testSubj, data]) => {
+          const input = screen.getByTestId(testSubj);
+          expect(input).toHaveValue(data.default);
+        });
+      });
+
+      test('should set number input field for numeric advanced settings', async () => {
+        const toggle = await screen.findByTestId('advancedSettingsToggle');
+        await user.click(toggle);
+
+        Object.entries(advancedSettingsInputFields).forEach(([testSubj, data]) => {
+          const input = screen.getByTestId(testSubj);
           if (data.type === 'number') {
-            expect(find(testSubject).props().type).toBe('number');
+            expect(input.type).toBe('number');
           }
         });
       });

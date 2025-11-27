@@ -9,8 +9,11 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import type { ReadonlyModeType } from '@kbn/core-ui-settings-common';
+import {
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
+} from '@kbn/management-settings-ids';
 import {
   APP_ID,
   DEFAULT_ALERT_TAGS_KEY,
@@ -30,11 +33,13 @@ import {
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
   ENABLE_ASSET_INVENTORY_SETTING,
-  ENABLE_SIEM_READINESS_SETTING,
-  ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_CCS_READ_WARNING_SETTING,
+  ENABLE_CLOUD_CONNECTOR_SETTING,
+  ENABLE_ESQL_RISK_SCORING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
   ENABLE_NEWS_FEED_SETTING,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  ENABLE_SIEM_READINESS_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
   EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
@@ -44,14 +49,8 @@ import {
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   SHOW_RELATED_INTEGRATIONS_SETTING,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
-  DEFAULT_VALUE_REPORT_MINUTES,
-  DEFAULT_VALUE_REPORT_RATE,
-  DEFAULT_VALUE_REPORT_TITLE,
-  ENABLE_ESQL_RISK_SCORING,
-  DEFAULT_AI_CONNECTOR,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -622,33 +621,8 @@ export const initUiSettings = (
   uiSettings.register(orderSettings(securityUiSettings));
 };
 
-export const getDefaultAIConnectorSetting = (
-  connectors: Connector[],
-  readonlyMode?: ReadonlyModeType
-): SettingsConfig => ({
-  [DEFAULT_AI_CONNECTOR]: {
-    name: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorLabel', {
-      defaultMessage: 'Default AI Connector',
-    }),
-    // TODO, make Elastic LLM the default value once fully available in serverless
-    value: connectors.at(0)?.id,
-    description: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorDescription', {
-      defaultMessage: 'Default AI connector for serverless AI features (Elastic AI SOC Engine)',
-    }),
-    type: 'select',
-    options: connectors.map(({ id }) => id),
-    optionLabels: Object.fromEntries(connectors.map(({ id, name }) => [id, name])),
-    category: [APP_ID],
-    requiresPageReload: true,
-    schema: schema.string(),
-    solutionViews: ['classic', 'security'],
-    readonlyMode,
-    readonly: readonlyMode !== undefined,
-  },
-});
-
 export const getDefaultValueReportSettings = (): SettingsConfig => ({
-  [DEFAULT_VALUE_REPORT_MINUTES]: {
+  [SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES]: {
     name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueMinutesLabel', {
       defaultMessage: 'Value report minutes per alert',
     }),
@@ -666,7 +640,7 @@ export const getDefaultValueReportSettings = (): SettingsConfig => ({
     schema: schema.number(),
     solutionViews: ['classic', 'security'],
   },
-  [DEFAULT_VALUE_REPORT_RATE]: {
+  [SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE]: {
     name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueRateLabel', {
       defaultMessage: 'Value report analyst hourly rate',
     }),
@@ -681,7 +655,7 @@ export const getDefaultValueReportSettings = (): SettingsConfig => ({
     schema: schema.number(),
     solutionViews: ['classic', 'security'],
   },
-  [DEFAULT_VALUE_REPORT_TITLE]: {
+  [SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE]: {
     name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueTitleLabel', {
       defaultMessage: 'Value report title',
     }),

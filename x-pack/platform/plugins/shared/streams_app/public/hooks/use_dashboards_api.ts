@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useCallback } from 'react';
-import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
+import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from './use_kibana';
 import { useStreamDetail } from './use_stream_detail';
@@ -22,7 +22,7 @@ export const useDashboardsApi = (name: string) => {
   } = useKibana();
 
   const addDashboards = useCallback(
-    async (dashboards: SanitizedDashboardAsset[]) => {
+    async (dashboards: Attachment[]) => {
       await streamsRepositoryClient.fetch('POST /api/streams/{name}/dashboards/_bulk 2023-10-31', {
         signal,
         params: {
@@ -42,7 +42,7 @@ export const useDashboardsApi = (name: string) => {
   );
 
   const removeDashboards = useCallback(
-    async (dashboards: SanitizedDashboardAsset[]) => {
+    async (dashboards: Attachment[]) => {
       await streamsRepositoryClient.fetch('POST /api/streams/{name}/dashboards/_bulk 2023-10-31', {
         signal,
         params: {

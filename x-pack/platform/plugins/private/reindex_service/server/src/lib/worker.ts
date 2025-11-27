@@ -17,6 +17,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { type Version } from '@kbn/upgrade-assistant-pkg-common';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import { getRollupJobByIndexName } from '@kbn/upgrade-assistant-pkg-server';
 import type { ReindexSavedObject } from './types';
 import type { Credential, CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
@@ -68,6 +69,7 @@ export class ReindexWorker {
   private readonly log: Logger;
   private readonly security: SecurityPluginStart;
   private currentWorkerPadding: number = INITIAL_WORKER_PADDING_MS;
+  private rollupsEnabled: boolean;
 
   public static create(
     client: SavedObjectsClientContract,
@@ -102,17 +104,25 @@ export class ReindexWorker {
     log: Logger,
     private licensing: LicensingPluginStart,
     security: SecurityPluginStart,
-    version: Version
+    version: Version,
+    rollupsEnabled: boolean = true
   ) {
     this.log = log.get('reindex_worker');
     this.security = security;
+    this.rollupsEnabled = rollupsEnabled;
     ReindexWorker.version = version;
 
     const callAsInternalUser = this.clusterClient.asInternalUser;
 
     this.reindexService = reindexServiceFactory(
       callAsInternalUser,
-      reindexActionsFactory(this.client, callAsInternalUser, this.log),
+      reindexActionsFactory(
+        this.client,
+        callAsInternalUser,
+        this.log,
+        getRollupJobByIndexName,
+        rollupsEnabled
+      ),
       log,
       this.licensing,
       version
@@ -213,7 +223,13 @@ export class ReindexWorker {
     const fakeRequest: FakeRequest = { headers: credential };
     const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
     const callAsCurrentUser = scopedClusterClient.asCurrentUser;
-    const actions = reindexActionsFactory(this.client, callAsCurrentUser, this.log);
+    const actions = reindexActionsFactory(
+      this.client,
+      callAsCurrentUser,
+      this.log,
+      getRollupJobByIndexName,
+      this.rollupsEnabled
+    );
     return reindexServiceFactory(
       callAsCurrentUser,
       actions,

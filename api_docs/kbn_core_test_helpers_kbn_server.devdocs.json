@@ -210,6 +210,59 @@
       },
       {
         "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+        "id": "def-server.createServerlessKibana",
+        "type": "Function",
+        "tags": [],
+        "label": "createServerlessKibana",
+        "description": [],
+        "signature": [
+          "(settings: {}, cliArgs: Partial<",
+          "CliArgs",
+          ">) => ",
+          "Root"
+        ],
+        "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-server.createServerlessKibana.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              "{}"
+            ],
+            "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-server.createServerlessKibana.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "cliArgs",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "CliArgs",
+              ">"
+            ],
+            "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-kbn-server",
         "id": "def-server.createTestServerlessInstances",
         "type": "Function",
         "tags": [

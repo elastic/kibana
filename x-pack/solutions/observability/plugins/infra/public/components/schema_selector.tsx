@@ -159,7 +159,7 @@ export const SchemaSelector = ({
 }: {
   onChange: (selected: DataSchemaFormat) => void;
   schemas: DataSchemaFormat[];
-  value: DataSchemaFormat | null;
+  value: DataSchemaFormat;
   isLoading: boolean;
   isHostsView?: boolean;
 }) => {
@@ -238,7 +238,7 @@ export const SchemaSelector = ({
           })}
           css={{ minWidth: isHostsView ? '400px' : '300px' }}
           helpText={
-            options.length > 1 &&
+            (options.length > 1 || (options.length === 1 && isInvalid)) &&
             i18n.translate('xpack.infra.schemaSelector.select.helpText', {
               defaultMessage: 'There are hosts available in another schema',
             })

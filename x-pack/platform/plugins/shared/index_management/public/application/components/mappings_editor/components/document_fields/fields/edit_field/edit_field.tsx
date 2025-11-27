@@ -189,6 +189,7 @@ export const EditField = React.memo(
           {form.isSubmitted && !form.isValid && (
             <>
               <EuiCallOut
+                announceOnMount
                 title={i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.editFieldFlyout.validationErrorTitle',
                   {

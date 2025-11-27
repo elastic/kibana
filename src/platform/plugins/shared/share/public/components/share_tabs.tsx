@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC } from 'react';
+import React, { useMemo, type FC } from 'react';
 import { TabbedModal, type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 
 import { ShareProvider, useShareContext, type IShareContext } from './context';
@@ -27,20 +27,23 @@ export const ShareMenuTabs = () => {
 
   const { objectTypeMeta, onClose, shareMenuItems, anchorElement } = shareContext;
 
-  const tabs: Array<IModalTabDeclaration<any>> = [];
+  const tabs = useMemo(() => {
+    const tabList: Array<IModalTabDeclaration<any>> = [];
 
-  // Do not show the link tab if the share url is disabled
-  if (!objectTypeMeta?.config.link?.disabled) {
-    tabs.push(linkTab);
-  }
+    // Do not show the link tab if the share url is disabled
+    if (!objectTypeMeta?.config.link?.disabled) {
+      tabList.push(linkTab);
+    }
 
-  // Embed is disabled in the serverless offering, hence the need to check if the embed tab should be shown
-  if (
-    shareMenuItems.some(({ shareType }) => shareType === 'embed') &&
-    !objectTypeMeta?.config?.embed?.disabled
-  ) {
-    tabs.push(embedTab);
-  }
+    // Embed is disabled in the serverless offering, hence the need to check if the embed tab should be shown
+    if (
+      shareMenuItems.some(({ shareType }) => shareType === 'embed') &&
+      !objectTypeMeta?.config?.embed?.disabled
+    ) {
+      tabList.push(embedTab);
+    }
+    return tabList;
+  }, [objectTypeMeta, shareMenuItems]);
 
   return Boolean(tabs.length) ? (
     <TabbedModal
@@ -51,6 +54,7 @@ export const ShareMenuTabs = () => {
       defaultSelectedTabId={tabs[0].id}
       anchorElement={anchorElement}
       data-test-subj="shareContextModal"
+      outsideClickCloses
     />
   ) : null;
 };

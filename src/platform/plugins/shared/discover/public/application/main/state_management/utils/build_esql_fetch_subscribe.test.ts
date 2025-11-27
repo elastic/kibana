@@ -8,7 +8,7 @@
  */
 
 import { waitFor } from '@testing-library/react';
-import type { DataViewsContract } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -417,7 +417,7 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from the-data-view-title | WHERE field1=2' },
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
-    stateContainer.appState.getState = jest.fn(() => {
+    stateContainer.appState.get = jest.fn(() => {
       return { columns: ['field1', 'field2'], index: 'the-data-view-id' };
     });
     replaceUrlState.mockReset();

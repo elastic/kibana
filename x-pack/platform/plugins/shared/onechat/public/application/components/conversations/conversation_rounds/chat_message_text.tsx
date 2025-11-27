@@ -87,7 +87,9 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
       esql: (props) => {
         return (
           <>
-            <EuiCodeBlock>{props.value}</EuiCodeBlock>
+            <EuiCodeBlock language="esql" isCopyable>
+              {props.value}
+            </EuiCodeBlock>
             <EuiSpacer size="m" />
           </>
         );

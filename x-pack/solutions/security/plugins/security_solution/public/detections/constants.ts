@@ -11,5 +11,5 @@ export const SECURITY_ALERT_DATA_VIEW = {
 };
 
 // Runtime field to extract the related_integration.package value from the kibana.alert.rule.parameters field
-// This is used in the AI4DSOC alert summary page
+// This is used in the EASE alert summary page
 export const RELATED_INTEGRATION = 'relatedIntegration';

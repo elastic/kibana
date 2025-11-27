@@ -37,14 +37,15 @@ describe('eql', () => {
           get: jest.fn().mockReturnValue(true),
         },
       },
-      {},
+      {
+        dataViews: {
+          get: jest.fn(),
+          create: jest.fn(),
+        },
+      },
       {
         search: {
           search: jest.fn((params: any) => of({ rawResponse: params })),
-        },
-        indexPatterns: {
-          get: jest.fn(),
-          create: jest.fn(),
         },
       },
     ];

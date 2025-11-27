@@ -19,6 +19,7 @@ describe('ClassicStream', () => {
           processing: { steps: [] },
           settings: {},
           classic: {},
+          failure_store: { inherit: {} },
         },
       },
       {
@@ -35,6 +36,7 @@ describe('ClassicStream', () => {
               },
             },
           },
+          failure_store: { inherit: {} },
         },
       },
     ])('is valid', (val) => {
@@ -87,6 +89,7 @@ describe('ClassicStream', () => {
             processing: { steps: [] },
             settings: {},
             classic: {},
+            failure_store: { inherit: {} },
           },
         },
         effective_lifecycle: {
@@ -101,8 +104,12 @@ describe('ClassicStream', () => {
           text_structure: true,
           read_failure_store: true,
           manage_failure_store: true,
+          view_index_metadata: true,
         },
         data_stream_exists: true,
+        effective_failure_store: {
+          lifecycle: { enabled: {} },
+        },
         ...emptyAssets,
       },
     ] satisfies ClassicStream.GetResponse[])('is valid', (val) => {
@@ -132,6 +139,7 @@ describe('ClassicStream', () => {
           simulate: true,
           text_structure: true,
           failure_store: true,
+          view_index_metadata: true,
         },
         data_stream_exists: true,
         dashboards: [],
@@ -152,6 +160,7 @@ describe('ClassicStream', () => {
             processing: { steps: [] },
             settings: {},
             classic: {},
+            failure_store: { inherit: {} },
           },
         },
         ...emptyAssets,

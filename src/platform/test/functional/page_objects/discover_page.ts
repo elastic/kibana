@@ -113,10 +113,15 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click('addFilter');
   }
 
+  public async isDataGridUpdating() {
+    return await this.testSubjects.exists('discoverDataGridUpdating');
+  }
+
   public async waitUntilSearchingHasFinished() {
     await this.testSubjects.missingOrFail('loadingSpinner', {
       timeout: this.defaultFindTimeout * 10,
     });
+    // TODO: Should we add a check for `discoverDataGridUpdating` too?
   }
 
   public async waitUntilTabIsLoaded() {
@@ -478,6 +483,15 @@ export class DiscoverPageObject extends FtrService {
     return await this.find.byClassName('monaco-editor');
   }
 
+  public async expectDocTableToBeLoaded() {
+    const renderComplete = await this.testSubjects.getAttribute(
+      'discoverDocTable',
+      'data-render-complete'
+    );
+
+    expect(renderComplete).to.be('true');
+  }
+
   public async findFieldByNameOrValueInDocViewer(name: string) {
     await this.retry.waitForWithTimeout('field search input value', 5000, async () => {
       const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
@@ -801,6 +815,7 @@ export class DiscoverPageObject extends FtrService {
       await this.fieldEditor.setPopularity(popularity);
     }
     await this.fieldEditor.save();
+    await this.fieldEditor.waitUntilClosed();
     await this.header.waitUntilLoadingHasFinished();
   }
 

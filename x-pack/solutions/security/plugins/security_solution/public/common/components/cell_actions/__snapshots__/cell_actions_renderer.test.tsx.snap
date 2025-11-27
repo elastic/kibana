@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`cell actions renderer rendering it renders theCellActionsRenderer 1`] = `
+<div
+  data-test-subj="mockSecurityCellActions"
+>
+  <div
+    tabindex="-1"
+  >
+    <span
+      class="css-jlsvsc-ProviderContentWrapper e1p0plmv0"
+      data-test-subj="render-content-some-field"
+    >
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      >
+        <span>
+          A child of this
+        </span>
+      </span>
+    </span>
+  </div>
+</div>
+`;

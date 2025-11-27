@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 /**
  * Whether or not to instruct the graph component to only render nodes and edges that would be visible in the viewport.
  */
@@ -24,6 +26,21 @@ export const STACK_NODE_VERTICAL_PADDING = 20;
  * The horizontal padding between nodes when being stacked, in pixels.
  */
 export const STACK_NODE_HORIZONTAL_PADDING = 20;
+
+/**
+ * graph package scope id - to be used by flyout hook
+ */
+export const GRAPH_SCOPE_ID = 'graph';
+
+export const i18nNamespaceKey = 'securitySolutionPackages.csp.graph.flyout.networkPreviewPanel';
+
+export const NETWORK_PREVIEW_BANNER = {
+  title: i18n.translate(`${i18nNamespaceKey}.bannerTitle`, {
+    defaultMessage: 'Preview network details',
+  }),
+  backgroundColor: 'warning',
+  textColor: 'warning',
+};
 
 export {
   NODE_WIDTH,

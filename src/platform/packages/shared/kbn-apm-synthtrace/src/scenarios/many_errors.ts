@@ -23,6 +23,8 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
   const { logger } = runOptions;
+  const { withoutErrorId = false } = runOptions.scenarioOpts;
+
   const severities = ['critical', 'error', 'warning', 'info', 'debug', 'trace'];
 
   return {
@@ -50,6 +52,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
                 message: errorMessage + ` ${errorIndex}`,
                 type: getExceptionTypeForIndex(index + errorIndex),
                 culprit: 'request (node_modules/@elastic/transport/src/Transport.ts)',
+                withoutErrorId,
               })
               .timestamp(timestamp + 50 * (errorIndex + 1)); // Stagger error timestamps
           });

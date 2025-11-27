@@ -59,12 +59,11 @@ export default function searchSolutionNavigation({
         breadcrumbs: string[];
         pageTestSubject: string;
       }> = [
-        // TODO: enable when available
-        // {
-        //   link: { navId: 'agent_builder' },
-        //   breadcrumbs: [],
-        //   pageTestSubject: 'agentBuilderWrapper',
-        // },
+        {
+          link: { navId: 'agent_builder' },
+          breadcrumbs: [],
+          pageTestSubject: 'agentBuilderWrapper',
+        },
         {
           link: { deepLinkId: 'discover' },
           breadcrumbs: ['Discover'],
@@ -105,7 +104,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectOnlyDefinedLinks(
         [
           'searchHomepage',
-          // 'agent_builder', enabled when available
+          'agent_builder',
           'discover',
           'dashboards',
           'searchPlayground',

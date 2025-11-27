@@ -11,6 +11,7 @@ import { useKibana } from './use_kibana';
 
 export interface LocationState {
   shouldStickToBottom?: boolean;
+  initialMessage?: string;
 }
 
 export const useNavigation = () => {
@@ -39,8 +40,17 @@ export const useNavigation = () => {
     [application]
   );
 
+  const navigateToManageConnectors = useCallback(
+    () =>
+      application.navigateToApp('management', {
+        path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
+      }),
+    [application]
+  );
+
   return {
     createOnechatUrl,
     navigateToOnechatUrl,
+    navigateToManageConnectors,
   };
 };

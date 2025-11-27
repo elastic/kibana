@@ -16,7 +16,7 @@ export interface PlatformIconProps {
 const PlatformIconComponent: React.FC<PlatformIconProps> = ({ platform }) => {
   const platformIconModule = useMemo(() => getPlatformIconModule(platform), [platform]);
 
-  return <EuiIcon type={platformIconModule} title={platform} size="l" />;
+  return <EuiIcon type={platformIconModule} size="l" aria-hidden="true" />;
 };
 
 export const PlatformIcon = React.memo(PlatformIconComponent);

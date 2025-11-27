@@ -8,7 +8,6 @@
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 
-import { KibanaServices } from '../../common/lib/kibana';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { basicCase, connectorsMock } from '../../containers/mock';
 import { ConnectorsForm } from './connectors_form';
@@ -26,7 +25,6 @@ jest.mock('../connectors/servicenow/use_get_choices');
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 
-const getConfigMock = KibanaServices.getConfig as jest.Mock;
 const useGetChoicesMock = useGetChoices as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
@@ -69,13 +67,6 @@ describe('ConnectorsForm ', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    getConfigMock.mockReturnValue({
-      resilient: {
-        additionalFields: {
-          enabled: true,
-        },
-      },
-    });
     useGetChoicesMock.mockReturnValue({ isLoading: false, data: { data: choices } });
     useGetIncidentTypesMock.mockReturnValue({
       isLoading: false,

@@ -8,8 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import { searchOptionsSchemas } from '@kbn/content-management-utils';
 
-import { lensCMSearchOptionsSchema, lensResponseItemSchema } from '../../../../content_management';
+import { lensCMSearchOptionsSchema } from '../../../../content_management';
 import { pickFromObjectSchema } from '../../../../utils';
+import { lensResponseItemSchema } from './common';
 
 // TODO cleanup and align search options types with client side options
 // TODO align defaults with cm and other schema definitions (i.e. searchOptionsSchemas)

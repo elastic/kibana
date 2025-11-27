@@ -225,10 +225,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
 
       it('changes link text on hover when failure store is not enabled', async () => {
-        const linkSelector = 'datasetQualitySetFailureStoreLink';
-        const links = await testSubjects.findAll(linkSelector);
-        expect(links.length).to.be.greaterThan(0);
-        const link = links[links.length - 1];
+        // Target synth.1 which doesn't have failure store enabled
+        const targetDataStreamName = 'logs-synth.1-default';
+        const targetLink = `${PageObjects.datasetQuality.testSubjectSelectors.enableFailureStoreFromTableButton}-${targetDataStreamName}`;
+
+        await testSubjects.existOrFail(targetLink);
+        const link = await testSubjects.find(targetLink);
 
         expect(await link.getVisibleText()).to.eql('N/A');
 
@@ -240,6 +242,30 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         const table = await PageObjects.datasetQuality.getDatasetsTable();
         await table.moveMouseTo();
+      });
+
+      it('enables failure store through modal and removes link from table', async () => {
+        const {
+          editFailureStoreModal,
+          failureStoreModalSaveButton,
+          enableFailureStoreToggle,
+          enableFailureStoreFromTableButton,
+        } = PageObjects.datasetQuality.testSubjectSelectors;
+        // Target synth.1 which doesn't have failure store enabled
+        const targetDataStreamName = 'logs-synth.1-default';
+
+        const targetLink = `${enableFailureStoreFromTableButton}-${targetDataStreamName}`;
+        await testSubjects.existOrFail(targetLink);
+        await testSubjects.click(targetLink);
+
+        await testSubjects.existOrFail(editFailureStoreModal);
+
+        await testSubjects.click(enableFailureStoreToggle);
+        await testSubjects.clickWhenNotDisabled(failureStoreModalSaveButton);
+        await testSubjects.missingOrFail(editFailureStoreModal);
+
+        // Verify the specific link is now removed
+        await testSubjects.missingOrFail(targetLink);
       });
     });
   });

@@ -39,47 +39,60 @@ describe('Gauge Schema', () => {
   });
 
   it('validates full configuration with bullet shape', () => {
-    const input = {
-      ...baseGaugeConfig,
-      title: 'Performance Gauge',
-      metric: {
-        operation: 'sum' as const,
-        field: 'performance_score',
-        empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-        title: 'Score',
-        sub_title: 'with 80% target',
-        color: {
-          type: 'dynamic' as const,
-          min: 0,
-          max: 100,
-          range: 'absolute' as const,
-          steps: [
-            { type: 'from' as const, from: 0, color: '#red' },
-            { type: 'to' as const, to: 100, color: '#green' },
-          ],
-        },
-        ticks: 'bands' as const,
-        min: {
-          operation: 'static_value' as const,
-          value: 0,
-        },
-        max: {
-          operation: 'static_value' as const,
-          value: 100,
-        },
-        goal: {
-          operation: 'static_value' as const,
-          value: 80,
-        },
+    const colorByValueConfig = [
+      {
+        type: 'dynamic',
+        range: 'absolute',
+        steps: [
+          { type: 'from', from: 0, color: '#blue' },
+          { type: 'to', to: 100, color: '#red' },
+        ],
       },
-      shape: {
-        type: 'bullet' as const,
-        direction: 'vertical' as const,
+      {
+        type: 'dynamic',
+        range: 'percentage',
+        min: 0,
+        max: 100,
+        steps: [
+          { type: 'from', from: 0, color: '#blue' },
+          { type: 'to', to: 100, color: '#red' },
+        ],
       },
-    };
+    ];
+    for (const color of colorByValueConfig) {
+      const input = {
+        ...baseGaugeConfig,
+        title: 'Performance Gauge',
+        metric: {
+          operation: 'sum' as const,
+          field: 'performance_score',
+          empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          title: 'Score',
+          sub_title: 'with 80% target',
+          color,
+          ticks: 'bands' as const,
+          min: {
+            operation: 'static_value' as const,
+            value: 0,
+          },
+          max: {
+            operation: 'static_value' as const,
+            value: 100,
+          },
+          goal: {
+            operation: 'static_value' as const,
+            value: 80,
+          },
+        },
+        shape: {
+          type: 'bullet' as const,
+          direction: 'vertical' as const,
+        },
+      };
 
-    const validated = gaugeStateSchema.validate(input);
-    expect(validated).toEqual({ ...defaultValues, ...input });
+      const validated = gaugeStateSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
+    }
   });
 
   it('validates circular gauge configuration', () => {
@@ -153,13 +166,11 @@ describe('Gauge Schema', () => {
         title: 'Score',
         sub_title: 'with 80% target',
         color: {
-          type: 'dynamic' as const,
-          min: 0,
-          max: 100,
-          range: 'absolute' as const,
+          type: 'dynamic',
+          range: 'absolute',
           steps: [
-            { type: 'from' as const, from: 0, color: '#red' },
-            { type: 'to' as const, to: 100, color: '#green' },
+            { type: 'from', from: 0, color: '#blue' },
+            { type: 'to', to: 100, color: '#red' },
           ],
         },
         ticks: 'bands' as const,

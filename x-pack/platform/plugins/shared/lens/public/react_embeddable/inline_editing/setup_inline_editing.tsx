@@ -7,21 +7,21 @@
 
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import React from 'react';
-import type { EditLensConfigurationProps } from '../../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
-import type { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
-import { getActiveDatasourceIdFromDoc } from '../../utils';
-import { isTextBasedLanguage } from '../helper';
 import type {
   GetStateType,
-  LensEmbeddableStartServices,
   LensInspectorAdapters,
   LensInternalApi,
   LensRuntimeState,
   TypedLensSerializedState,
-} from '../types';
+} from '@kbn/lens-common';
+import type { EditLensConfigurationProps } from '../../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
+import type { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
+import { getActiveDatasourceIdFromDoc } from '../../utils';
+import { isTextBasedLanguage } from '../helper';
 import type { PanelManagementApi } from './panel_management';
 import { getStateManagementForInlineEditing } from './state_management';
 import { saveUserChartTypeToSessionStorage } from '../../chart_type_session_storage';
+import type { LensEmbeddableStartServices } from '../types';
 
 export function prepareInlineEditPanel(
   initialState: LensRuntimeState,

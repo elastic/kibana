@@ -43,4 +43,5 @@ export interface CreateTestConfigOptions<
   pageObjects?: TPageObjects;
   apps?: Record<string, { pathname: string; hash?: string }>;
   screenshots?: { directory: string };
+  indexRefreshInterval?: string | false;
 }

@@ -9,8 +9,8 @@
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../../..';
 import type {
+  ESQLAstAllCommands,
   ESQLAstItem,
-  ESQLCommand,
   ESQLFunction,
   ESQLProperNode,
   ESQLSingleAstItem,
@@ -50,28 +50,30 @@ export type CaretPosition =
   | 'grouping_expression_after_assignment'
   | 'after_where';
 
-export const getPosition = (command: ESQLCommand, innerText: string): CaretPosition => {
+const ENDS_WITH_COMMA_AND_WHITESPACE_REGEX = /,\s*$/;
+
+export const getPosition = (command: ESQLAstAllCommands, innerText: string): CaretPosition => {
   const lastCommandArg = command.args[command.args.length - 1];
 
   if (isOptionNode(lastCommandArg) && lastCommandArg.name === 'by') {
     // in the BY clause
 
     const lastOptionArg = lastCommandArg.args[lastCommandArg.args.length - 1];
-    if (isAssignment(lastOptionArg)) {
+    if (isAssignment(lastOptionArg) && !ENDS_WITH_COMMA_AND_WHITESPACE_REGEX.test(innerText)) {
       return 'grouping_expression_after_assignment';
     }
 
     return 'grouping_expression_without_assignment';
   }
 
-  if (isAssignment(lastCommandArg) && !/,\s*$/.test(innerText)) {
+  if (isAssignment(lastCommandArg) && !ENDS_WITH_COMMA_AND_WHITESPACE_REGEX.test(innerText)) {
     return 'expression_after_assignment';
   }
 
   if (
     isFunctionExpression(lastCommandArg) &&
     lastCommandArg.name === 'where' &&
-    !/,\s*$/.test(innerText)
+    !ENDS_WITH_COMMA_AND_WHITESPACE_REGEX.test(innerText)
   ) {
     return 'after_where';
   }

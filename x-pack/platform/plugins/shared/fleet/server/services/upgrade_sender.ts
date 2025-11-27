@@ -25,6 +25,10 @@ export interface PackageUpdateEvent {
   packageType?: string;
   discoveryDatasets?: DiscoveryDataset[];
   automaticInstall?: boolean;
+  latestExecutedState?: {
+    name: string;
+    error?: string;
+  };
 }
 
 export enum UpdateEventType {

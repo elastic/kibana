@@ -128,6 +128,7 @@ export const GrokPatternAISuggestions = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       {aiFeatures &&
+        aiFeatures.enabled &&
         aiFeatures.isManagedAIConnector &&
         !aiFeatures.hasAcknowledgedAdditionalCharges && (
           <>
@@ -200,7 +201,14 @@ export function GrokPatternSuggestion({
           </EuiBadgeGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="check" onClick={onAccept} color="primary" size="s" fill>
+          <EuiButton
+            iconType="check"
+            onClick={onAccept}
+            color="primary"
+            size="s"
+            fill
+            data-test-subj="streamsAppGrokSuggestionAcceptButton"
+          >
             {i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.acceptButton',
               {

@@ -22,11 +22,12 @@ import {
   EuiTitle,
   EuiPortal,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { MetricFlyoutBody } from './metrics_flyout_body';
 import { useFlyoutA11y } from './hooks/use_flyout_a11y';
 import { useFieldsMetadataContext } from '../../context/fields_metadata';
@@ -34,7 +35,6 @@ import { useFieldsMetadataContext } from '../../context/fields_metadata';
 interface MetricInsightsFlyoutProps {
   metric: MetricField;
   esqlQuery?: string;
-  isOpen: boolean;
   onClose: () => void;
   chartRef: { current: HTMLDivElement | null };
 }
@@ -43,7 +43,6 @@ export const MetricInsightsFlyout = ({
   metric,
   esqlQuery,
   chartRef,
-  isOpen,
   onClose,
 }: MetricInsightsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
@@ -56,6 +55,10 @@ export const MetricInsightsFlyout = ({
   const { a11yProps, screenReaderDescription } = useFlyoutA11y({ isXlScreen });
   const { fieldsMetadata = {} } = useFieldsMetadataContext();
 
+  useEffect(() => {
+    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
+  }, []);
+
   const onKeyDown = useCallback(
     (ev: React.KeyboardEvent) => {
       if (isDOMNode(ev.target) && ev.currentTarget.contains(ev.target) && ev.key === keys.ESCAPE) {
@@ -67,8 +70,6 @@ export const MetricInsightsFlyout = ({
     [onClose]
   );
 
-  if (!isOpen) return null;
-
   const minWidth = euiTheme.base * 24;
   const maxWidth = euiTheme.breakpoint.xl;
 
@@ -77,9 +78,9 @@ export const MetricInsightsFlyout = ({
       <EuiFlyoutResizable
         onClose={onClose}
         type="push"
+        pushMinBreakpoint="xl"
         size={flyoutWidth}
         onKeyDown={onKeyDown}
-        pushMinBreakpoint="xl"
         data-test-subj="metricsExperienceFlyout"
         aria-label={i18n.translate(
           'metricsExperience.metricInsightsFlyout.euiFlyoutResizable.metricInsightsFlyoutLabel',

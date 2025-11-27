@@ -1412,36 +1412,6 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-t-grid",
-        "id": "def-common.NOTE_CONTENT_CLASS_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "NOTE_CONTENT_CLASS_NAME",
-        "description": [],
-        "signature": [
-          "\"note-content\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/constants/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-t-grid",
-        "id": "def-common.NOTES_CONTAINER_CLASS_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "NOTES_CONTAINER_CLASS_NAME",
-        "description": [],
-        "signature": [
-          "\"notes-container\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/constants/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-t-grid",
         "id": "def-common.ROW_RENDERER_CLASS_NAME",
         "type": "string",
         "tags": [],

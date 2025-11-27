@@ -6,7 +6,7 @@
  */
 
 import type { ApiKey } from '@kbn/security-plugin-types-common';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibanaServices } from '../use_kibana';
 
 export const useGetApiKeys = () => {

@@ -25,6 +25,13 @@ export const ruleUpgradeFlyoutButtonClickEvent: RuleUpgradeTelemetryEvent = {
         optional: false,
       },
     },
+    eventVersion: {
+      type: 'integer',
+      _meta: {
+        description: 'Indicates the version of the event',
+        optional: false,
+      },
+    },
   },
 };
 
@@ -48,6 +55,13 @@ export const ruleUpgradeOpenFlyoutEvent: RuleUpgradeTelemetryEvent = {
       type: 'boolean',
       _meta: {
         description: 'Indicates if the rule has a missing base version',
+        optional: false,
+      },
+    },
+    eventVersion: {
+      type: 'integer',
+      _meta: {
+        description: 'Indicates the version of the event',
         optional: false,
       },
     },

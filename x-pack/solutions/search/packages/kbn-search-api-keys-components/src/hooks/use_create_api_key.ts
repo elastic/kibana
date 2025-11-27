@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { APIKeyCreationResponse } from '@kbn/search-api-keys-server/types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { APIRoutes } from '../types';

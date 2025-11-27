@@ -39,39 +39,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/background-search",
-        "id": "def-public.EuiIconBackgroundTask",
-        "type": "Function",
-        "tags": [],
-        "label": "EuiIconBackgroundTask",
-        "description": [],
-        "signature": [
-          "({ title, titleId, ...props }: React.SVGProps<SVGSVGElement> & SVGRProps) => React.JSX.Element"
-        ],
-        "path": "src/platform/packages/shared/kbn-background-search/src/components/eui_icon_background_task.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/background-search",
-            "id": "def-public.EuiIconBackgroundTask.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  title,\n  titleId,\n  ...props\n}",
-            "description": [],
-            "signature": [
-              "React.SVGProps<SVGSVGElement> & SVGRProps"
-            ],
-            "path": "src/platform/packages/shared/kbn-background-search/src/components/eui_icon_background_task.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [],

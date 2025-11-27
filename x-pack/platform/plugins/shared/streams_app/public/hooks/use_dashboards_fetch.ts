@@ -31,7 +31,7 @@ export const useDashboardsFetch = (name: string) => {
         }
       );
 
-      telemetryClient.trackAssetCounts({
+      telemetryClient.trackAttachmentCounts({
         name,
         dashboards: response.dashboards.length,
       });

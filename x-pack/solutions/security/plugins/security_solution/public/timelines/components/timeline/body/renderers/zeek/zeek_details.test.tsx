@@ -37,7 +37,7 @@ describe('ZeekDetails', () => {
     test('it renders the default ZeekDetails', () => {
       const wrapper = mount(
         <TestProviders>
-          <ZeekDetails data={mockTimelineData[2].ecs} timelineId="test" />
+          <ZeekDetails data={mockTimelineData[2].ecs} scopeId="test" />
         </TestProviders>
       );
       expect(wrapper.find('ZeekDetails')).toMatchSnapshot();
@@ -46,7 +46,7 @@ describe('ZeekDetails', () => {
     test('it returns zeek.connection if the data does contain zeek.connection data', () => {
       const wrapper = mount(
         <TestProviders>
-          <ZeekDetails data={mockTimelineData[13].ecs} timelineId="test" />
+          <ZeekDetails data={mockTimelineData[13].ecs} scopeId="test" />
         </TestProviders>
       );
       expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toEqual(
@@ -57,7 +57,7 @@ describe('ZeekDetails', () => {
     test('it returns zeek.dns if the data does contain zeek.dns data', () => {
       const wrapper = mount(
         <TestProviders>
-          <ZeekDetails data={mockTimelineData[14].ecs} timelineId="test" />
+          <ZeekDetails data={mockTimelineData[14].ecs} scopeId="test" />
         </TestProviders>
       );
       expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toEqual(
@@ -68,7 +68,7 @@ describe('ZeekDetails', () => {
     test('it returns zeek.http if the data does contain zeek.http data', () => {
       const wrapper = mount(
         <TestProviders>
-          <ZeekDetails data={mockTimelineData[15].ecs} timelineId="test" />
+          <ZeekDetails data={mockTimelineData[15].ecs} scopeId="test" />
         </TestProviders>
       );
       expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toEqual(
@@ -79,7 +79,7 @@ describe('ZeekDetails', () => {
     test('it returns zeek.notice if the data does contain zeek.notice data', () => {
       const wrapper = mount(
         <TestProviders>
-          <ZeekDetails data={mockTimelineData[16].ecs} timelineId="test" />
+          <ZeekDetails data={mockTimelineData[16].ecs} scopeId="test" />
         </TestProviders>
       );
       expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toEqual(
@@ -90,7 +90,7 @@ describe('ZeekDetails', () => {
     test('it returns zeek.ssl if the data does contain zeek.ssl data', () => {
       const wrapper = mount(
         <TestProviders>
-          <ZeekDetails data={mockTimelineData[17].ecs} timelineId="test" />
+          <ZeekDetails data={mockTimelineData[17].ecs} scopeId="test" />
         </TestProviders>
       );
       expect(extractEuiIconText(removeExternalLinkText(wrapper.text()))).toEqual(
@@ -101,7 +101,7 @@ describe('ZeekDetails', () => {
     test('it returns zeek.files if the data does contain zeek.files data', () => {
       const wrapper = mount(
         <TestProviders>
-          <ZeekDetails data={mockTimelineData[18].ecs} timelineId="test" />
+          <ZeekDetails data={mockTimelineData[18].ecs} scopeId="test" />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('Cu0n232QMyvNtzb75jfilessha1: fa5195a...md5: f7653f1...');
@@ -110,7 +110,7 @@ describe('ZeekDetails', () => {
     test('it returns null for text if the data contains no zeek data', () => {
       const wrapper = mount(
         <TestProviders>
-          <ZeekDetails data={mockTimelineData[0].ecs} timelineId="test" />
+          <ZeekDetails data={mockTimelineData[0].ecs} scopeId="test" />
         </TestProviders>
       );
       expect(wrapper.find('ZeekDetails').children().exists()).toBeFalsy();

@@ -11,7 +11,6 @@ import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
-import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import type { DiscoverAppStateContainer } from '../state_management/discover_app_state_container';
@@ -86,8 +85,7 @@ export function fetchAll(
   try {
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
-    const { query, sort } = appStateContainer.getState();
-    const prevQuery = dataSubjects.documents$.getValue().query;
+    const { query, sort } = appStateContainer.get();
     const isEsqlQuery = isOfAggregateQueryType(query);
     const currentTab = getCurrentTab();
 
@@ -169,34 +167,18 @@ export function fetchAll(
         }
 
         /**
-         * Determine the appropriate fetch status for ES|QL queries.
+         * Determine the appropriate fetch status
          *
-         * The partial state for ES|QL mode is necessary in several scenarios:
-         * 1. Initial query execution (no previous query)
-         * 2. Query has changed from the previous execution
-         * 3. ESQL variables are present (indicating parameterized queries that may affect results)
-         *
-         * In the follow-up useEsqlMode hook, when queries change, new columns are added to AppState
-         * so the data table shows the updated columns. The partial state was introduced to prevent
+         * The partial state for ES|QL mode is necessary to limit data table renders.
+         * Depending on the type of query new columns can be added to AppState to ensure the data table
+         * shows the updated columns. The partial state was introduced to prevent
          * too frequent state changes that cause the table to re-render too often, which can cause
          * race conditions, poor user experience, and potential test flakiness.
          *
          * For non-ES|QL queries, we always use COMPLETE status as they don't require this
          * special handling.
          */
-        const fetchStatus = (() => {
-          if (!isEsqlQuery) {
-            return FetchStatus.COMPLETE;
-          }
-
-          const isFirstQuery = !prevQuery;
-          const queryChanged = !isEqual(query, prevQuery);
-          const hasEsqlVariables = Boolean(currentTab.esqlVariables?.length);
-
-          return isFirstQuery || queryChanged || hasEsqlVariables
-            ? FetchStatus.PARTIAL
-            : FetchStatus.COMPLETE;
-        })();
+        const fetchStatus = isEsqlQuery ? FetchStatus.PARTIAL : FetchStatus.COMPLETE;
 
         dataSubjects.documents$.next({
           fetchStatus,
@@ -254,7 +236,7 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
   try {
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
-    const { query, sort } = appStateContainer.getState();
+    const { query, sort } = appStateContainer.get();
     const isEsqlQuery = isOfAggregateQueryType(query);
 
     if (isEsqlQuery) {

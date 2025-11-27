@@ -24,6 +24,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const comboBox = getService('comboBox');
+  const dataGrid = getService('dataGrid');
 
   describe('discover - ES|QL controls', function () {
     it('should add an ES|QL value control', async () => {
@@ -43,6 +45,60 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(editorValue).to.contain('FROM logstash-* | WHERE geo.dest == ?geo_dest');
 
       await discover.waitUntilTabIsLoaded();
+    });
+
+    it('should add an ES|QL multi - value control', async () => {
+      await discover.selectTextBaseLang();
+      await discover.waitUntilTabIsLoaded();
+
+      await esql.openEsqlControlFlyout('FROM logstash-* | WHERE MV_CONTAINS( ');
+
+      await comboBox.setCustom('esqlValuesOptions', 'IN');
+      await comboBox.setCustom('esqlValuesOptions', 'US');
+
+      // create the control
+      await testSubjects.click('saveEsqlControlsFlyoutButton');
+
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
+        expect(controlGroupVisible).to.be(true);
+      });
+
+      // Check Discover editor has been updated accordingly
+      const editorValue = await esql.getEsqlEditorQuery();
+      expect(editorValue).to.contain('FROM logstash-* | WHERE MV_CONTAINS( ?values');
+
+      await discover.waitUntilTabIsLoaded();
+
+      // Update the query
+      await esql.typeEsqlEditorQuery(
+        'FROM logstash-* | WHERE MV_CONTAINS( ?values, geo.dest ) | KEEP geo.dest'
+      );
+      await discover.waitUntilTabIsLoaded();
+
+      // run the query to make sure the table is updated
+      await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
+
+      const dataGridExists = await testSubjects.exists('docTable');
+      expect(dataGridExists).to.be(true);
+
+      // Check that the table has data
+      const rowCount = await dataGrid.getDocCount();
+      expect(rowCount).to.be.greaterThan(0);
+
+      // Select all options in the control
+      const controlId = (await dashboardControls.getAllControlIds())[0];
+      await dashboardControls.optionsListOpenPopover(controlId, true);
+      await dashboardControls.optionsListPopoverSelectOption('US');
+
+      await discover.waitUntilTabIsLoaded();
+
+      const actualRowsText = await dataGrid.getRowsText();
+      // Both 'US' and 'IN' should be present in the results
+      expect(actualRowsText.every((row) => row.includes('US') || row.includes('IN'))).to.be(true);
     });
 
     it('should keep the ES|QL control after a browser refresh', async () => {

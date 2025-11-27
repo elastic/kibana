@@ -20,7 +20,7 @@ import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import type { DataType } from '../../types';
+import type { DataType } from '@kbn/lens-common';
 import type { MetricVisualizationState } from './types';
 import type { Props, SupportingVisType, ApplyColor } from './dimension_editor';
 import {

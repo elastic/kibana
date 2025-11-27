@@ -39,7 +39,7 @@ import type {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { PersistableFilter } from '@kbn/lens-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
+import { LegendSize } from '@kbn/chart-expressions-common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import {

@@ -104,7 +104,7 @@ To generate PDF and PNG files, Reporting uses an internal "screenshotting" plugi
 The following settings control the capturing process.
 
 `xpack.screenshotting.capture.timeouts.openUrl` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for the "Loading…​" screen to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
+:   Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for the "Loading…" screen to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
 
 `xpack.screenshotting.capture.timeouts.waitForElements` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for all visualization panels to load on the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.

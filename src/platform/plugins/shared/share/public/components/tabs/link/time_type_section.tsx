@@ -198,6 +198,7 @@ export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: P
       <EuiSpacer size="m" />
       {isAbsoluteTimeByDefault && (
         <EuiCallOut
+          announceOnMount
           size="s"
           title={i18n.translate('share.link.timeRange.relativeTimeCallout', {
             defaultMessage: 'To use a relative time range, select it in the time picker first.',

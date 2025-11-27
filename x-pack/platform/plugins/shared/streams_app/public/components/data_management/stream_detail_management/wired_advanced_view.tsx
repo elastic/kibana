@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { isRoot } from '@kbn/streams-schema';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { StreamFeatureConfiguration } from './stream_feature_configuration';
+import { StreamFeatureConfiguration } from '../../stream_detail_features/stream_feature_configuration';
+import { StreamDescription } from '../../stream_detail_features/stream_description';
 import { IndexConfiguration } from './advanced_view/index_configuration';
 import { DeleteStreamPanel } from './advanced_view/delete_stream';
 import { ImportExportPanel } from './advanced_view/import_export';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
-import { StreamDescription } from './stream_description';
 
 export function WiredAdvancedView({
   definition,
@@ -39,12 +39,12 @@ export function WiredAdvancedView({
 
       {significantEvents?.available && (
         <>
-          <StreamDescription definition={definition} />
+          <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
           <EuiSpacer />
           <StreamFeatureConfiguration definition={definition.stream} />
         </>
       )}
-      <EuiSpacer size="m" />
+      <EuiSpacer />
       <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
         <EuiCallOut
           iconType="warning"

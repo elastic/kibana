@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type {
+  ESQLAstAllCommands,
   ESQLColumn,
   ESQLCommand,
   ESQLFunction,
@@ -55,6 +56,13 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         message: i18n.translate('kbn-esql-ast.esql.validation.missingFunction', {
           defaultMessage: 'Unknown function {name}',
           values: { name: out.name.toUpperCase() },
+        }),
+      };
+    case 'unknownSetting':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.unknownSetting', {
+          defaultMessage: 'Unknown setting {name}',
+          values: { name: out.name },
         }),
       };
     case 'noMatchingCallSignature':
@@ -247,6 +255,14 @@ Expected one of:
           values: { identifier: out.identifier },
         }),
       };
+    case 'joinOnSingleExpression':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.joinOnSingleExpression', {
+          defaultMessage:
+            'JOIN ON clause must be a comma separated list of fields or a single expression',
+        }),
+        type: 'error',
+      };
     case 'tooManyForks':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.tooManyForks', {
@@ -326,6 +342,21 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'forkNotAllowedWithSubqueries':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.forkNotAllowedWithSubqueries', {
+          defaultMessage: '[FORK] Command is not allowed inside a subquery.',
+        }),
+        type: 'error',
+      };
+    case 'inlineStatsNotAllowedAfterLimit':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.inlineStatsNotAllowedAfterLimit', {
+          defaultMessage:
+            '[INLINE STATS] Command is not allowed at the root level when the query contains subqueries.',
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }
@@ -359,6 +390,35 @@ export function createMessage(
 const createError = (messageId: string, location: ESQLLocation, message: string = '') =>
   createMessage('error', message, location, messageId);
 
+/**
+ * Tags an error as semantic, indicating it requires runtime data to validate.
+ *
+ * Semantic errors depend on external data (indices, columns, policies) that can only
+ * be determined at runtime. When the required callback is not available, these errors
+ * will be filtered out during validation to avoid false positives.
+ *
+ * This is the core mechanism of the Error Tagging system, which eliminates the need
+ * for manual maintenance of error-to-callback mappings.
+ *
+ * @param error - The base error message to tag
+ * @param requiresCallback - The name of the callback required to validate this error
+ *                          Common values: 'getColumnsFor', 'getSources', 'getPolicies', 'getJoinIndices'
+ * @returns The error with semantic metadata attached
+ *
+ * @example
+ * ```typescript
+ * // Error that requires column information
+ * unknownColumn: (column) =>
+ *   tagSemanticError(
+ *     errors.byId('unknownColumn', column.location, { name: column.name }),
+ *     'getColumnsFor'  // Will be filtered if getColumnsFor callback is missing
+ *   )
+ * ```
+ */
+export function tagSemanticError(error: ESQLMessage, requiresCallback: string): ESQLMessage {
+  return { ...error, errorType: 'semantic', requiresCallback };
+}
+
 export const errors = {
   unexpected: (
     location: ESQLLocation,
@@ -384,9 +444,19 @@ export const errors = {
     errors.byId('unknownFunction', fn.location, fn),
 
   unknownColumn: (column: ESQLColumn | ESQLIdentifier): ESQLMessage =>
-    errors.byId('unknownColumn', column.location, {
-      name: column.name,
-    }),
+    tagSemanticError(
+      errors.byId('unknownColumn', column.location, { name: column.name }),
+      'getColumnsFor'
+    ),
+
+  unknownIndex: (source: ESQLSource): ESQLMessage =>
+    tagSemanticError(
+      errors.byId('unknownIndex', source.location, { name: source.name }),
+      'getSources'
+    ),
+
+  unknownPolicy: (policyName: string, location: ESQLLocation): ESQLMessage =>
+    tagSemanticError(errors.byId('unknownPolicy', location, { name: policyName }), 'getPolicies'),
 
   tooManyForks: (command: ESQLCommand): ESQLMessage =>
     errors.byId('tooManyForks', command.location, {}),
@@ -407,9 +477,13 @@ export const errors = {
     }),
 
   invalidJoinIndex: (identifier: ESQLSource): ESQLMessage =>
-    errors.byId('invalidJoinIndex', identifier.location, {
-      identifier: identifier.name,
-    }),
+    tagSemanticError(
+      errors.byId('invalidJoinIndex', identifier.location, { identifier: identifier.name }),
+      'getJoinIndices'
+    ),
+
+  joinOnSingleExpression: (location: ESQLLocation): ESQLMessage =>
+    errors.byId('joinOnSingleExpression', location, {}),
 
   noMatchingCallSignature: (
     fn: ESQLFunction,
@@ -423,11 +497,14 @@ export const errors = {
         return `${definitionArgTypes}`;
       });
 
-    return errors.byId('noMatchingCallSignature', fn.location, {
-      functionName: fn.name,
-      argTypes: argTypes.join(', '),
-      validSignatures,
-    });
+    return tagSemanticError(
+      errors.byId('noMatchingCallSignature', fn.location, {
+        functionName: fn.name,
+        argTypes: argTypes.join(', '),
+        validSignatures,
+      }),
+      'getColumnsFor'
+    );
   },
 
   licenseRequired: (fn: ESQLFunction, license: string): ESQLMessage =>
@@ -502,11 +579,17 @@ export const errors = {
   dropTimestampWarning: ({ location }: ESQLColumn): ESQLMessage =>
     errors.byId('dropTimestampWarning', location, {}),
 
-  forkTooManyBranches: (command: ESQLCommand): ESQLMessage =>
+  forkTooManyBranches: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkTooManyBranches', command.location, {}),
 
-  forkTooFewBranches: (command: ESQLCommand): ESQLMessage =>
+  forkTooFewBranches: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkTooFewBranches', command.location, {}),
+
+  forkNotAllowedWithSubqueries: (command: ESQLAstAllCommands): ESQLMessage =>
+    errors.byId('forkNotAllowedWithSubqueries', command.location, {}),
+
+  inlineStatsNotAllowedAfterLimit: (command: ESQLAstAllCommands): ESQLMessage =>
+    errors.byId('inlineStatsNotAllowedAfterLimit', command.location, {}),
 };
 
 export const buildSignatureTypes = (sig: Signature) =>

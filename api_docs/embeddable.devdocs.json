@@ -428,100 +428,10 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage",
+            "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackages",
             "type": "Function",
             "tags": [],
-            "label": "navigateToWithEmbeddablePackage",
-            "description": [
-              "\nA wrapper around the {@link ApplicationStart.navigateToApp} method which navigates to the specified appId\nwith {@link EmbeddablePackageState | embeddable package state}"
-            ],
-            "signature": [
-              "<SerializedStateType extends object = object>(appId: string, options?: { path?: string | undefined; state: ",
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddablePackageState",
-                "text": "EmbeddablePackageState"
-              },
-              "<SerializedStateType>; } | undefined) => Promise<void>"
-            ],
-            "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.$1",
-                "type": "string",
-                "tags": [],
-                "label": "appId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "embeddable",
-                    "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.$2.path",
-                    "type": "string",
-                    "tags": [],
-                    "label": "path",
-                    "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
-                    "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "embeddable",
-                    "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.$2.state",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "state",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "embeddable",
-                        "scope": "public",
-                        "docId": "kibEmbeddablePluginApi",
-                        "section": "def-public.EmbeddablePackageState",
-                        "text": "EmbeddablePackageState"
-                      },
-                      "<SerializedStateType>"
-                    ],
-                    "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.EmbeddableStateTransfer.navigateToWithMultipleEmbeddablePackage",
-            "type": "Function",
-            "tags": [],
-            "label": "navigateToWithMultipleEmbeddablePackage",
+            "label": "navigateToWithEmbeddablePackages",
             "description": [
               "\nA wrapper around the {@link ApplicationStart.navigateToApp} method which navigates to the specified appId\nwith multiple {@link EmbeddablePackageState | embeddable package state}"
             ],
@@ -542,7 +452,7 @@
             "children": [
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.EmbeddableStateTransfer.navigateToWithMultipleEmbeddablePackage.$1",
+                "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackages.$1",
                 "type": "string",
                 "tags": [],
                 "label": "appId",
@@ -557,7 +467,7 @@
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.EmbeddableStateTransfer.navigateToWithMultipleEmbeddablePackage.$2",
+                "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackages.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -568,7 +478,7 @@
                 "children": [
                   {
                     "parentPluginId": "embeddable",
-                    "id": "def-public.EmbeddableStateTransfer.navigateToWithMultipleEmbeddablePackage.$2.path",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackages.$2.path",
                     "type": "string",
                     "tags": [],
                     "label": "path",
@@ -582,7 +492,7 @@
                   },
                   {
                     "parentPluginId": "embeddable",
-                    "id": "def-public.EmbeddableStateTransfer.navigateToWithMultipleEmbeddablePackage.$2.state",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackages.$2.state",
                     "type": "Array",
                     "tags": [],
                     "label": "state",
@@ -3470,7 +3380,7 @@
         "label": "EmbeddableTransforms",
         "description": [],
         "signature": [
-          "{ transformOut?: ((storedState: StoredEmbeddableState, references?: ",
+          "{ transformOutInjectsReferences?: boolean | undefined; transformOut?: ((storedState: StoredEmbeddableState, references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",

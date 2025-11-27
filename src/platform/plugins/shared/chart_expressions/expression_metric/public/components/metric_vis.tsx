@@ -25,7 +25,7 @@ import type {
 import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
-import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/chart-expressions-common';
 import type {
   Datatable,
   DatatableColumn,

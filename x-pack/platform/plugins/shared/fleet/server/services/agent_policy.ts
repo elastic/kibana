@@ -136,8 +136,6 @@ import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 
-const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
-
 function normalizeKuery(savedObjectType: string, kuery: string) {
   if (savedObjectType === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE) {
     return _normalizeKuery(
@@ -472,21 +470,12 @@ class AgentPolicyService {
 
     validateRequiredVersions(agentPolicy.name, agentPolicy.required_versions);
 
+    const preparedAgentPolicySo = this.prepareAsNewSo(agentPolicy, {
+      username: options?.user?.username,
+    });
+
     const newSo = await soClient
-      .create<AgentPolicySOAttributes>(
-        savedObjectType,
-        {
-          ...agentPolicy,
-          status: 'active',
-          is_managed: agentPolicy.is_managed ?? false,
-          revision: 1,
-          updated_at: new Date().toISOString(),
-          updated_by: options?.user?.username || 'system',
-          schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
-          is_protected: false,
-        } as AgentPolicy,
-        options
-      )
+      .create<AgentPolicySOAttributes>(savedObjectType, preparedAgentPolicySo, options)
       .catch(
         catchAndSetErrorStackTrace.withMessage(
           `Attempt to create agent policy [${agentPolicy.id}] failed`
@@ -502,7 +491,7 @@ class AgentPolicyService {
       spaceId: soClient.getCurrentNamespace(),
     });
     logger.debug(`Created new agent policy with id ${newSo.id}`);
-    return { id: newSo.id, ...newSo.attributes };
+    return mapAgentPolicySavedObjectToAgentPolicy(newSo);
   }
 
   public async createWithPackagePolicies({
@@ -631,44 +620,50 @@ class AgentPolicyService {
 
   public async requireUniqueName(
     soClient: SavedObjectsClientContract,
-    givenPolicy: { id?: string; name: string; supports_agentless?: boolean | null }
+    policy: {
+      id?: string;
+      name: string;
+      space_ids?: string[];
+      supports_agentless?: boolean | null;
+    }
   ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
-
-    const results = await soClient
+    const isMultispace = (policy.space_ids ?? []).length > 1;
+    const _soClient = isMultispace
+      ? appContextService.getInternalUserSOClientWithoutSpaceExtension()
+      : soClient;
+    const results = await _soClient
       .find<AgentPolicySOAttributes>({
         type: savedObjectType,
         searchFields: ['name'],
-        search: escapeSearchQueryPhrase(givenPolicy.name),
+        search: escapeSearchQueryPhrase(policy.name),
+        ...(isMultispace ? { namespaces: policy.space_ids } : {}),
       })
       .catch(
         catchAndSetErrorStackTrace.withMessage(
-          `Failed to find agent policies with name [${givenPolicy.name}]`
+          `Failed to find agent policies with name [${policy.name}]`
         )
       );
 
-    const idsWithName = results.total && results.saved_objects.map(({ id }) => id);
-    if (Array.isArray(idsWithName)) {
-      const isEditingSelf = givenPolicy.id && idsWithName.includes(givenPolicy.id);
+    const idsWithName = results.total ? results.saved_objects.map(({ id }) => id) : [];
+    const othersWithName = idsWithName.filter((id) => id !== policy.id);
 
-      if (
-        (!givenPolicy?.supports_agentless && !givenPolicy.id) ||
-        (!givenPolicy?.supports_agentless && !isEditingSelf)
-      ) {
-        const isSinglePolicy = idsWithName.length === 1;
-        const existClause = isSinglePolicy
-          ? `Agent Policy '${idsWithName[0]}' already exists`
-          : `Agent Policies '${idsWithName.join(',')}' already exist`;
+    if (othersWithName.length === 0) {
+      return;
+    }
 
-        throw new AgentPolicyNameExistsError(`${existClause} with name '${givenPolicy.name}'`);
-      }
+    if (!policy?.supports_agentless) {
+      const isSinglePolicy = othersWithName.length === 1;
+      const existClause = isSinglePolicy
+        ? `Agent Policy '${othersWithName[0]}' already exists`
+        : `Agent Policies '${othersWithName.join(',')}' already exist`;
 
-      if (givenPolicy?.supports_agentless && !givenPolicy.id) {
-        const integrationName = givenPolicy.name.split(' ').pop();
-        throw new AgentlessPolicyExistsRequestError(
-          `${givenPolicy.name} already exist. Please rename the integration name ${integrationName}.`
-        );
-      }
+      throw new AgentPolicyNameExistsError(`${existClause} with name '${policy.name}'`);
+    } else {
+      const integrationName = policy.name.split(' ').pop();
+      throw new AgentlessPolicyExistsRequestError(
+        `${policy.name} already exist. Please rename the integration name ${integrationName}.`
+      );
     }
   }
 
@@ -966,13 +961,6 @@ class AgentPolicyService {
     const logger = this.getLogger('update');
     logger.debug(`Starting update of agent policy ${id}`);
 
-    if (agentPolicy.name) {
-      await this.requireUniqueName(soClient, {
-        id,
-        name: agentPolicy.name,
-        supports_agentless: agentPolicy?.supports_agentless,
-      });
-    }
     if (agentPolicy.namespace) {
       await validatePolicyNamespaceForSpace({
         spaceId: soClient.getCurrentNamespace(),
@@ -984,6 +972,15 @@ class AgentPolicyService {
 
     if (!existingAgentPolicy) {
       throw new AgentPolicyNotFoundError('Agent policy not found');
+    }
+
+    if (agentPolicy.name && agentPolicy.name !== existingAgentPolicy.name) {
+      await this.requireUniqueName(soClient, {
+        id,
+        name: agentPolicy.name,
+        space_ids: agentPolicy?.space_ids ?? existingAgentPolicy.space_ids,
+        supports_agentless: agentPolicy?.supports_agentless,
+      });
     }
 
     validateRequiredVersions(
@@ -1014,13 +1011,11 @@ class AgentPolicyService {
     }
 
     if (existingAgentPolicy.is_managed && !options?.force) {
-      Object.entries(agentPolicy)
-        .filter(([key]) => !KEY_EDITABLE_FOR_MANAGED_POLICIES.includes(key))
-        .forEach(([key, val]) => {
-          if (!isEqual(existingAgentPolicy[key as keyof AgentPolicy], val)) {
-            throw new HostedAgentPolicyRestrictionRelatedError(`Cannot update ${key}`);
-          }
-        });
+      Object.entries(agentPolicy).forEach(([key, val]) => {
+        if (!isEqual(existingAgentPolicy[key as keyof AgentPolicy], val)) {
+          throw new HostedAgentPolicyRestrictionRelatedError(`Cannot update ${key}`);
+        }
+      });
     }
     const { monitoring_enabled: monitoringEnabled } = agentPolicy;
     const packagesToInstall = [];
@@ -1037,7 +1032,9 @@ class AgentPolicyService {
         force: options?.force,
       });
     }
-    return this._update(soClient, esClient, id, agentPolicy, options?.user, {
+
+    const { space_ids: _, ...preparedAgentPolicySo } = agentPolicy;
+    return this._update(soClient, esClient, id, { ...preparedAgentPolicySo }, options?.user, {
       bumpRevision: options?.bumpRevision ?? true,
       removeProtection: false,
       skipValidation: options?.skipValidation ?? false,
@@ -1620,15 +1617,22 @@ class AgentPolicyService {
   public async deployPolicy(
     soClient: SavedObjectsClientContract,
     agentPolicyId: string,
-    agentPolicy?: AgentPolicy | null
+    agentPolicy?: AgentPolicy | null,
+    options?: { throwOnAgentlessError?: boolean }
   ) {
-    await this.deployPolicies(soClient, [agentPolicyId], agentPolicy ? [agentPolicy] : undefined);
+    await this.deployPolicies(
+      soClient,
+      [agentPolicyId],
+      agentPolicy ? [agentPolicy] : undefined,
+      options
+    );
   }
 
   public async deployPolicies(
     soClient: SavedObjectsClientContract,
     agentPolicyIds: string[],
-    agentPolicies?: AgentPolicy[]
+    agentPolicies?: AgentPolicy[],
+    options?: { throwOnAgentlessError?: boolean }
   ) {
     const logger = this.getLogger('deployPolicies');
     logger.debug(
@@ -1640,7 +1644,7 @@ class AgentPolicyService {
 
     // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
-    const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
+    const defaultOutputId = await outputService.getDefaultDataOutputId();
 
     if (!defaultOutputId) {
       logger.debug(`Deployment canceled!! Default output ID is not defined.`);
@@ -1766,6 +1770,9 @@ class AgentPolicyService {
           `[Agentless API] Error deploying agentless deployment for single agent policy id ${agentPolicy.id}`,
           { error }
         );
+        if (options?.throwOnAgentlessError) {
+          throw error;
+        }
       }
     }
 
@@ -2191,15 +2198,12 @@ class AgentPolicyService {
   }
 
   // Get all the outputs per agent policy
-  public async getAllOutputsForPolicy(
-    soClient: SavedObjectsClientContract,
-    agentPolicy: AgentPolicy
-  ) {
+  public async getAllOutputsForPolicy(agentPolicy: AgentPolicy) {
     const logger = this.getLogger('getAllOutputsForPolicy');
 
     const [defaultDataOutputId, defaultMonitoringOutputId] = await Promise.all([
-      outputService.getDefaultDataOutputId(soClient),
-      outputService.getDefaultMonitoringOutputId(soClient),
+      outputService.getDefaultDataOutputId(),
+      outputService.getDefaultMonitoringOutputId(),
     ]);
 
     if (!defaultDataOutputId) {
@@ -2229,7 +2233,7 @@ class AgentPolicyService {
         async (pkgPolicy) => {
           if (pkgPolicy?.output_id) {
             try {
-              const output = await outputService.get(soClient, pkgPolicy.output_id);
+              const output = await outputService.get(pkgPolicy.output_id);
               return { integrationPolicyName: pkgPolicy?.name, id: output.id, name: output.name };
             } catch (error) {
               logger.error(
@@ -2262,14 +2266,11 @@ class AgentPolicyService {
     return outputs;
   }
 
-  public async listAllOutputsForPolicies(
-    soClient: SavedObjectsClientContract,
-    agentPolicies: AgentPolicy[]
-  ) {
+  public async listAllOutputsForPolicies(agentPolicies: AgentPolicy[]) {
     const allOutputs: OutputsForAgentPolicy[] = await pMap(
       agentPolicies,
       async (agentPolicy) => {
-        const output = await this.getAllOutputsForPolicy(soClient, agentPolicy);
+        const output = await this.getAllOutputsForPolicy(agentPolicy);
         return { agentPolicyId: agentPolicy.id, ...output };
       },
       {
@@ -2322,6 +2323,23 @@ class AgentPolicyService {
       (policy) => policy?.policy_ids && policy?.policy_ids.length > 1
     );
     return { policiesWithSingleAP, policiesWithMultipleAP };
+  }
+
+  private prepareAsNewSo(
+    agentPolicy: NewAgentPolicy,
+    options: { username?: string }
+  ): AgentPolicySOAttributes {
+    const { space_ids: _, ...baseAgentPolicySo } = agentPolicy;
+    return {
+      ...baseAgentPolicySo,
+      status: 'active',
+      is_managed: agentPolicy.is_managed ?? false,
+      revision: 1,
+      updated_at: new Date().toISOString(),
+      updated_by: options?.username || 'system',
+      schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+      is_protected: false,
+    };
   }
 }
 

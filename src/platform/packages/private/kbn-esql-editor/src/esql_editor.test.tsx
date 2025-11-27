@@ -56,6 +56,17 @@ describe('ESQLEditor', () => {
 
   const corePluginMock = coreMock.createStart();
   corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
+
+  corePluginMock.http.get = jest.fn().mockImplementation((url: string) => {
+    if (url.includes('/internal/esql/autocomplete/sources/')) {
+      return Promise.resolve([
+        { name: 'test_index', hidden: false, type: 'index' },
+        { name: 'logs', hidden: false, type: 'index' },
+      ]);
+    }
+    return Promise.resolve([]);
+  });
+
   const services = {
     uiSettings,
     settings: {
@@ -81,6 +92,7 @@ describe('ESQLEditor', () => {
       onTextLangQuerySubmit: jest.fn(),
     };
     mockValidate.mockResolvedValue({ errors: [], warnings: [] });
+
     jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(
       (contextId, options) =>
         ({
@@ -101,11 +113,6 @@ describe('ESQLEditor', () => {
   it('should  render the date info with no @timestamp found', async () => {
     const { getByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
     expect(getByTestId('ESQLEditor-date-info')).toHaveTextContent('@timestamp not found');
-  });
-
-  it('should  render the feedback link', async () => {
-    const { getByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
-    expect(getByTestId('ESQLEditor-feedback-link')).toBeInTheDocument();
   });
 
   it('should not render the date info if hideTimeFilterInfo is set to true', async () => {
@@ -211,6 +218,20 @@ describe('ESQLEditor', () => {
     };
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
     expect(queryByTestId('ESQLEditor-run-query-button')).not.toBeInTheDocument();
+  });
+
+  it('should render the visor by default', async () => {
+    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
+    expect(queryByTestId('ESQLEditor-quick-search-visor')).toBeInTheDocument();
+  });
+
+  it('should hide the visor by default if the hideQuickSearch prop is set to true', async () => {
+    const newProps = {
+      ...props,
+      hideQuickSearch: true,
+    };
+    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
+    expect(queryByTestId('ESQLEditor-quick-search-visor')).not.toBeInTheDocument();
   });
 
   describe('data errors switch', () => {

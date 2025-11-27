@@ -13,17 +13,23 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { omit } from 'lodash';
+import type {
+  LensAppState,
+  LensAppServices,
+  LensDocument,
+  VisualizeEditorContext,
+  LensSerializedState,
+  ILensDocumentService,
+} from '@kbn/lens-common';
+import type { Simplify } from '@kbn/chart-expressions-common';
 import { SaveModal } from './save_modal';
-import type { LensAppProps, LensAppServices } from './types';
+import type { LensAppProps } from './types';
 import type { SaveProps } from './app';
-import type { LensDocumentService, LensDocument } from '../persistence';
 import { APP_ID, getFullPath } from '../../common/constants';
-import type { LensAppState } from '../state_management';
 import { getFromPreloaded } from '../state_management/init_middleware/load_initial';
-import type { Simplify, VisualizeEditorContext } from '../types';
 import { redirectToDashboard } from './save_modal_container_helpers';
-import type { LensSerializedState } from '../react_embeddable/types';
 import { isLegacyEditorEmbeddable } from './app_helpers';
+import { transformToApiConfig } from '../react_embeddable/helper';
 
 type ExtraProps = Simplify<
   Pick<LensAppProps, 'initialInput'> &
@@ -159,7 +165,7 @@ export function SaveModalContainer({
           controlsState,
           onAppLeave: () => {},
           ...lensServices,
-        },
+        } satisfies SaveVisualizationProps,
         saveProps,
         options
       );
@@ -240,7 +246,7 @@ export type SaveVisualizationProps = Simplify<
     getOriginatingPath?: (dashboardId: string) => string;
     textBasedLanguageSave?: boolean;
     switchDatasource?: () => void;
-    lensDocumentService: LensDocumentService;
+    lensDocumentService: ILensDocumentService;
     controlsState?: ControlPanelsState;
   } & ExtraProps &
     Pick<
@@ -367,8 +373,9 @@ export const runSaveLensVisualization = async (
     }
 
     if (shouldNavigateBackToOrigin) {
+      const apiConfig = transformToApiConfig({ ...newDoc, savedObjectId });
       redirectToOrigin({
-        state: { ...newDoc, savedObjectId },
+        state: apiConfig,
         isCopied: saveProps.newCopyOnSave,
       });
       return;

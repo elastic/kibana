@@ -121,9 +121,16 @@ export async function updateDSFailureStore(
   dataStreams: string[],
   data: {
     dsFailureStore: boolean;
+    customRetentionPeriod?: string;
+    retentionDisabled?: boolean;
   }
 ) {
-  const body = { dsFailureStore: data.dsFailureStore, dataStreams };
+  const body = {
+    dsFailureStore: data.dsFailureStore,
+    dataStreams,
+    customRetentionPeriod: data.customRetentionPeriod,
+    retentionDisabled: data.retentionDisabled,
+  };
 
   return sendRequest({
     path: `${API_BASE_PATH}/data_streams/configure_failure_store`,

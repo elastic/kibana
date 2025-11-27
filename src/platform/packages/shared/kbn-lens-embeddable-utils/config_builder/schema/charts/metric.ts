@@ -14,7 +14,7 @@ import {
   esqlColumnSchema,
   genericOperationOptionsSchema,
 } from '../metric_ops';
-import { coloringTypeSchema } from '../color';
+import { colorByValueAbsolute, staticColorSchema, applyColorToSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
   collapseBySchema,
@@ -26,6 +26,7 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { horizontalAlignmentSchema, leftRightAlignmentSchema } from '../alignments';
 
 const compareToSchemaShared = schema.object({
   palette: schema.maybe(schema.string({ meta: { description: 'Palette' } })),
@@ -71,26 +72,20 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
        * - 'center': Align label to the center
        * - 'right': Align label to the right
        */
-      labels: schema.oneOf(
-        [schema.literal('left'), schema.literal('center'), schema.literal('right')],
-        {
-          meta: { description: 'Alignments for labels' },
-          defaultValue: 'left',
-        }
-      ),
+      labels: horizontalAlignmentSchema({
+        meta: { description: 'Alignments for labels' },
+        defaultValue: 'left',
+      }),
       /**
        * Alignments for value. Possible values:
        * - 'left': Align value to the left
        * - 'center': Align value to the center
        * - 'right': Align value to the right
        */
-      value: schema.oneOf(
-        [schema.literal('left'), schema.literal('center'), schema.literal('right')],
-        {
-          meta: { description: 'Alignments for value' },
-          defaultValue: 'left',
-        }
-      ),
+      value: horizontalAlignmentSchema({
+        meta: { description: 'Alignments for value' },
+        defaultValue: 'left',
+      }),
     },
     { defaultValue: { labels: 'left', value: 'left' } }
   ),
@@ -112,7 +107,7 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
        * - 'right': Icon is aligned to the right
        * - 'left': Icon is aligned to the left
        */
-      align: schema.oneOf([schema.literal('right'), schema.literal('left')], {
+      align: leftRightAlignmentSchema({
         meta: { description: 'Icon alignment' },
         defaultValue: 'right',
       }),
@@ -121,15 +116,11 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
   /**
    * Color configuration
    */
-  color: schema.maybe(coloringTypeSchema),
+  color: schema.maybe(schema.oneOf([colorByValueAbsolute, staticColorSchema])),
   /**
    * Where to apply the color (background or value)
    */
-  apply_color_to: schema.maybe(
-    schema.oneOf([schema.literal('background'), schema.literal('value')], {
-      meta: { description: 'Apply color to' },
-    })
-  ),
+  apply_color_to: schema.maybe(applyColorToSchema),
   /**
    * Complementary visualization
    */
@@ -164,7 +155,7 @@ const metricStateSecondaryMetricOptionsSchema = schema.object({
   /**
    * Color configuration
    */
-  color: schema.maybe(coloringTypeSchema),
+  color: schema.maybe(schema.oneOf([colorByValueAbsolute, staticColorSchema])),
 });
 
 const metricStateBreakdownByOptionsSchema = schema.object({
@@ -215,7 +206,7 @@ export const metricStateSchemaNoESQL = schema.object({
   ),
 });
 
-const esqlMetricState = schema.object({
+export const esqlMetricState = schema.object({
   type: schema.literal('metric'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,

@@ -302,6 +302,20 @@
           },
           {
             "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.searchGettingStarted",
+            "type": "Object",
+            "tags": [],
+            "label": "searchGettingStarted",
+            "description": [],
+            "signature": [
+              "{ readonly visitSearchLabs: string; readonly notebooksExamples: string; readonly elasticTraining: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
             "id": "def-common.DocLinks.metricbeat",
             "type": "Object",
             "tags": [],
@@ -540,7 +554,7 @@
             "label": "server",
             "description": [],
             "signature": [
-              "{ readonly protocol: string; readonly publicBaseUrl: string; }"
+              "{ readonly protocol: string; readonly publicBaseUrl: string; readonly troubleshootServerNotReady: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -582,7 +596,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              "{ readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuery: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; readonly queryESQL: string; readonly queryESQLExamples: string; }"
+              "{ readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuery: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; readonly queryESQL: string; readonly queryESQLExamples: string; readonly queryESQLMultiValueControls: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -1115,6 +1129,20 @@
             "description": [],
             "signature": [
               "{ readonly agentBuilder: string; readonly getStarted: string; readonly models: string; readonly chat: string; readonly agentBuilderAgents: string; readonly tools: string; readonly programmaticAccess: string; readonly kibanaApi: string; readonly mcpServer: string; readonly a2aServer: string; readonly limitationsKnownIssues: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.indexManagement",
+            "type": "Object",
+            "tags": [],
+            "label": "indexManagement",
+            "description": [],
+            "signature": [
+              "{ readonly componentTemplate: string; readonly indexAlias: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,

@@ -37,7 +37,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
   };
 
-  describe('Service group counts', () => {
+  describe('Service group counts', function () {
+    // flaky when running in stateful cloud, see https://github.com/elastic/kibana/issues/244457
+    this.tags(['skipCloud']);
+
     let synthbeansServiceGroupId: string;
     let opbeansServiceGroupId: string;
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;

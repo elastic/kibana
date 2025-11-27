@@ -18,25 +18,33 @@ import type {
 } from './composable_profile';
 
 /**
+ * Resolution result when the associated profile is a match
+ */
+interface ProfileResolutionMatch<TContext> {
+  /**
+   * `true` if the associated profile is a match
+   */
+  isMatch: true;
+  /**
+   * The resolved context associated with the profile
+   */
+  context: TContext;
+}
+
+/**
+ * Resolution result when the associated profile is not a match
+ */
+interface ProfileResolutionMismatch {
+  /**
+   * `false` if the associated profile is not a match
+   */
+  isMatch: false;
+}
+
+/**
  * The profile provider resolution result
  */
-type ResolveProfileResult<TContext> =
-  | {
-      /**
-       * `true` if the associated profile is a match
-       */
-      isMatch: true;
-      /**
-       * The resolved context associated with the profile
-       */
-      context: TContext;
-    }
-  | {
-      /**
-       * `false` if the associated profile is not a match
-       */
-      isMatch: false;
-    };
+type ResolveProfileResult<TContext> = ProfileResolutionMatch<TContext> | ProfileResolutionMismatch;
 
 /**
  * The base profile provider interface
@@ -120,6 +128,12 @@ type ExtractProfile<TProvider> = TProvider extends BaseProfileProvider<infer TPr
 type ExtractContext<TProvider> = TProvider extends BaseProfileProvider<{}, infer TContext>
   ? TContext
   : never;
+
+/**
+ * Extract the resolution match type from a profile provider
+ */
+export type ExtractResolutionMatch<TProvider extends BaseProfileProvider<{}, {}>> =
+  ProfileResolutionMatch<ExtractContext<TProvider>>;
 
 const EMPTY_PROFILE = {};
 

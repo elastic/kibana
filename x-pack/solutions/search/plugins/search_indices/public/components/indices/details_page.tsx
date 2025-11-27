@@ -264,7 +264,7 @@ export const SearchIndexDetailsPage = () => {
                 ) : (
                   <EuiFlexItem>
                     <EuiButtonEmpty
-                      href={docLinks.links.apiReference}
+                      href={docLinks.links.apis.restApis}
                       target="_blank"
                       isLoading={isInitialLoading}
                       iconType="documentation"

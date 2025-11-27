@@ -10,6 +10,8 @@ import {
   updatePolicyInputs,
   updatePolicyWithAwsCloudConnectorCredentials,
   isCloudConnectorReusableEnabled,
+  isAwsCloudConnectorVars,
+  isAzureCloudConnectorVars,
 } from './utils';
 
 import type {
@@ -17,9 +19,14 @@ import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
 } from '@kbn/fleet-plugin/common';
-import { type CloudConnectorCredentials } from './hooks/use_cloud_connector_setup';
+import type {
+  AwsCloudConnectorVars,
+  AzureCloudConnectorVars,
+} from '@kbn/fleet-plugin/common/types';
+import type { CloudConnectorCredentials } from './types';
+import { AWS_PROVIDER, AZURE_PROVIDER } from './constants';
 
-describe('updateInputVarsWithCredentials', () => {
+describe('updateInputVarsWithCredentials - AWS support', () => {
   let mockInputVars: PackagePolicyConfigRecord;
 
   beforeEach(() => {
@@ -132,6 +139,90 @@ describe('updateInputVarsWithCredentials', () => {
     expect(result?.external_id).toEqual({ value: undefined });
     expect(result?.['aws.role_arn']).toEqual({ value: undefined });
     expect(result?.['aws.credentials.external_id']).toEqual({ value: undefined });
+  });
+});
+
+describe('updateInputVarsWithCredentials - Azure support', () => {
+  let mockAzureInputVars: PackagePolicyConfigRecord;
+
+  beforeEach(() => {
+    mockAzureInputVars = {
+      tenant_id: { value: 'old-tenant-id' },
+      client_id: { value: 'old-client-id' },
+      azure_credentials_cloud_connector_id: { value: 'old-cc-id' },
+      'azure.credentials.tenant_id': { value: 'old-azure-tenant-id' },
+      'azure.credentials.client_id': { value: 'old-azure-client-id' },
+    };
+  });
+
+  it('should update Azure tenant_id and client_id fields', () => {
+    const credentials: CloudConnectorCredentials = {
+      tenantId: 'new-tenant-id',
+      clientId: 'new-client-id',
+      azure_credentials_cloud_connector_id: 'new-cc-id',
+    };
+
+    const result = updateInputVarsWithCredentials(mockAzureInputVars, credentials);
+
+    expect(result?.tenant_id?.value).toBe('new-tenant-id');
+    expect(result?.client_id?.value).toBe('new-client-id');
+    expect(result?.azure_credentials_cloud_connector_id?.value).toBe('new-cc-id');
+  });
+
+  it('should update Azure credentials with azure.credentials.* format', () => {
+    const credentials: CloudConnectorCredentials = {
+      tenantId: 'new-azure-tenant-id',
+      clientId: 'new-azure-client-id',
+    };
+
+    const result = updateInputVarsWithCredentials(mockAzureInputVars, credentials);
+
+    expect(result?.['azure.credentials.tenant_id']?.value).toBe('new-azure-tenant-id');
+    expect(result?.['azure.credentials.client_id']?.value).toBe('new-azure-client-id');
+  });
+
+  it('should clear Azure fields when credentials are undefined', () => {
+    const credentials: CloudConnectorCredentials = {
+      tenantId: undefined,
+      clientId: undefined,
+      azure_credentials_cloud_connector_id: undefined,
+    };
+
+    const result = updateInputVarsWithCredentials(mockAzureInputVars, credentials);
+
+    expect(result?.tenant_id).toEqual({ value: undefined });
+    expect(result?.client_id).toEqual({ value: undefined });
+    expect(result?.azure_credentials_cloud_connector_id).toEqual({ value: undefined });
+    expect(result?.['azure.credentials.tenant_id']).toEqual({ value: undefined });
+    expect(result?.['azure.credentials.client_id']).toEqual({ value: undefined });
+  });
+
+  it('should handle partial Azure credentials', () => {
+    const credentials: CloudConnectorCredentials = {
+      tenantId: 'partial-tenant-id',
+      clientId: undefined,
+      azure_credentials_cloud_connector_id: 'partial-cc-id',
+    };
+
+    const result = updateInputVarsWithCredentials(mockAzureInputVars, credentials);
+
+    expect(result?.tenant_id?.value).toBe('partial-tenant-id');
+    expect(result?.client_id).toEqual({ value: undefined });
+    expect(result?.azure_credentials_cloud_connector_id?.value).toBe('partial-cc-id');
+  });
+
+  it('should handle Azure credentials with secret references', () => {
+    const credentials: CloudConnectorCredentials = {
+      tenantId: { id: 'secret-tenant-id', isSecretRef: true },
+      clientId: { id: 'secret-client-id', isSecretRef: true },
+      azure_credentials_cloud_connector_id: 'secret-cc-id',
+    };
+
+    const result = updateInputVarsWithCredentials(mockAzureInputVars, credentials);
+
+    expect(result?.tenant_id?.value).toEqual({ id: 'secret-tenant-id', isSecretRef: true });
+    expect(result?.client_id?.value).toEqual({ id: 'secret-client-id', isSecretRef: true });
+    expect(result?.azure_credentials_cloud_connector_id?.value).toBe('secret-cc-id');
   });
 });
 
@@ -501,38 +592,135 @@ describe('updatePolicyWithAwsCloudConnectorCredentials', () => {
   });
 });
 
-describe('isCloudConnectorReusableEnabled', () => {
+describe('isCloudConnectorReusableEnabled - AWS provider', () => {
   it('should return true for CSPM when package version meets minimum requirement', () => {
-    expect(isCloudConnectorReusableEnabled('3.1.0-preview06', 'cspm')).toBe(true);
-    expect(isCloudConnectorReusableEnabled('3.2.0', 'cspm')).toBe(true);
-    expect(isCloudConnectorReusableEnabled('4.0.0', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '3.1.0-preview06', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '3.2.0', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '4.0.0', 'cspm')).toBe(true);
   });
 
   it('should return false for CSPM when package version is below minimum requirement', () => {
-    expect(isCloudConnectorReusableEnabled('3.0.0', 'cspm')).toBe(false);
-    expect(isCloudConnectorReusableEnabled('3.1.0-preview05', 'cspm')).toBe(false);
-    expect(isCloudConnectorReusableEnabled('2.5.0', 'cspm')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '3.0.0', 'cspm')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '3.1.0-preview05', 'cspm')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '2.5.0', 'cspm')).toBe(false);
   });
 
   it('should return true for asset inventory when package version meets minimum requirement', () => {
-    expect(isCloudConnectorReusableEnabled('1.1.5', 'asset_inventory')).toBe(true);
-    expect(isCloudConnectorReusableEnabled('1.2.0', 'asset_inventory')).toBe(true);
-    expect(isCloudConnectorReusableEnabled('2.0.0', 'asset_inventory')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '1.1.5', 'asset_inventory')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '1.2.0', 'asset_inventory')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '2.0.0', 'asset_inventory')).toBe(true);
   });
 
   it('should return false for asset inventory when package version is below minimum requirement', () => {
-    expect(isCloudConnectorReusableEnabled('1.1.4', 'asset_inventory')).toBe(false);
-    expect(isCloudConnectorReusableEnabled('1.0.0', 'asset_inventory')).toBe(false);
-    expect(isCloudConnectorReusableEnabled('0.9.0', 'asset_inventory')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '1.1.4', 'asset_inventory')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '1.0.0', 'asset_inventory')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '0.9.0', 'asset_inventory')).toBe(false);
   });
 
   it('should handle unknown template names by defaulting to asset inventory version', () => {
-    expect(isCloudConnectorReusableEnabled('1.1.5', 'unknown_template')).toBe(false);
-    expect(isCloudConnectorReusableEnabled('1.1.4', 'unknown_template')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '1.1.5', 'unknown_template')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '1.1.4', 'unknown_template')).toBe(false);
   });
 
   it('should handle edge cases with version formats', () => {
-    expect(isCloudConnectorReusableEnabled('3.1.0', 'cspm')).toBe(true);
-    expect(isCloudConnectorReusableEnabled('3.1.0-preview06', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '3.1.0', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AWS_PROVIDER, '3.1.0-preview06', 'cspm')).toBe(true);
+  });
+});
+
+describe('isCloudConnectorReusableEnabled - Azure provider', () => {
+  it('should return true for Azure CSPM when version meets requirement', () => {
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '3.1.0', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '3.2.0', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '4.0.0', 'cspm')).toBe(true);
+  });
+
+  it('should return false for Azure CSPM when version below requirement', () => {
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '3.0.9', 'cspm')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '2.9.0', 'cspm')).toBe(false);
+  });
+
+  it('should return true for Azure asset_inventory when version meets requirement', () => {
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '1.2.2', 'asset_inventory')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '1.3.0', 'asset_inventory')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '2.0.0', 'asset_inventory')).toBe(true);
+  });
+
+  it('should return false for Azure asset_inventory when version below requirement', () => {
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '1.2.1', 'asset_inventory')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(AZURE_PROVIDER, '1.1.0', 'asset_inventory')).toBe(false);
+  });
+
+  it('should return false for unknown providers', () => {
+    expect(isCloudConnectorReusableEnabled('gcp', '9.9.9', 'cspm')).toBe(false);
+    expect(isCloudConnectorReusableEnabled('unknown', '1.0.0', 'asset_inventory')).toBe(false);
+  });
+});
+
+describe('Cloud Connector Type Guards', () => {
+  describe('isAwsCloudConnectorVars', () => {
+    it('should return true for AWS cloud connector vars with aws provider', () => {
+      const awsVars: AwsCloudConnectorVars = {
+        role_arn: { value: 'arn:aws:iam::123456789012:role/MyRole' },
+        external_id: { value: { isSecretRef: true, id: 'secret-id' }, type: 'password' },
+      };
+
+      expect(isAwsCloudConnectorVars(awsVars, AWS_PROVIDER)).toBe(true);
+    });
+
+    it('should return false for AWS cloud connector vars with non-aws provider', () => {
+      const awsVars: AwsCloudConnectorVars = {
+        role_arn: { value: 'arn:aws:iam::123456789012:role/MyRole' },
+        external_id: { value: { isSecretRef: true, id: 'secret-id' }, type: 'password' },
+      };
+
+      expect(isAwsCloudConnectorVars(awsVars, AZURE_PROVIDER)).toBe(false);
+    });
+
+    it('should return false for Azure cloud connector vars', () => {
+      const azureVars: AzureCloudConnectorVars = {
+        tenant_id: { value: { id: 'tenant-id', isSecretRef: true }, type: 'password' },
+        client_id: { value: { id: 'client-id', isSecretRef: true }, type: 'password' },
+        azure_credentials_cloud_connector_id: {
+          value: 'connector-id',
+          type: 'text',
+        },
+      };
+
+      expect(isAwsCloudConnectorVars(azureVars, AWS_PROVIDER)).toBe(false);
+    });
+  });
+
+  describe('isAzureCloudConnectorVars', () => {
+    it('should return true for Azure cloud connector vars with azure provider', () => {
+      const azureVars: AzureCloudConnectorVars = {
+        tenant_id: { value: { id: 'tenant-id', isSecretRef: true }, type: 'password' },
+        client_id: { value: { id: 'client-id', isSecretRef: true }, type: 'password' },
+        azure_credentials_cloud_connector_id: {
+          value: 'connector-id',
+          type: 'text',
+        },
+      };
+
+      expect(isAzureCloudConnectorVars(azureVars, AZURE_PROVIDER)).toBe(true);
+    });
+
+    it('should return false for Azure cloud connector vars with non-azure provider', () => {
+      const awsVars: AwsCloudConnectorVars = {
+        role_arn: { value: 'arn:aws:iam::123456789012:role/MyRole' },
+        external_id: { value: { isSecretRef: true, id: 'secret-id' }, type: 'password' },
+      };
+
+      expect(isAzureCloudConnectorVars(awsVars, AWS_PROVIDER)).toBe(false);
+    });
+
+    it('should return false for AWS cloud connector vars', () => {
+      const awsVars: AwsCloudConnectorVars = {
+        role_arn: { value: 'arn:aws:iam::123456789012:role/MyRole' },
+        external_id: { value: { isSecretRef: true, id: 'secret-id' }, type: 'password' },
+      };
+
+      expect(isAzureCloudConnectorVars(awsVars, AZURE_PROVIDER)).toBe(false);
+    });
   });
 });

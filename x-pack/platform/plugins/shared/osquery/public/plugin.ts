@@ -39,18 +39,32 @@ import {
   getExternalReferenceAttachmentRegular,
 } from './shared_components';
 import type { ServicesWrapperProps } from './shared_components/services_wrapper';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
   private storage = new Storage(localStorage);
+  private experimentalFeatures: ExperimentalFeatures;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
+
+    // Parse experimental features from config
+    const config = this.initializerContext.config.get<{
+      actionEnabled: boolean;
+      enableExperimental?: string[];
+    }>();
+
+    this.experimentalFeatures = parseExperimentalConfigValue(
+      config.enableExperimental || []
+    ).features;
   }
 
   public setup(core: CoreSetup, plugins: SetupPlugins): OsqueryPluginSetup {
     const storage = this.storage;
     const kibanaVersion = this.kibanaVersion;
+    const experimentalFeatures = this.experimentalFeatures;
 
     // Register an application into the side navigation menu
     core.application.register({
@@ -71,7 +85,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           depsStart as AppPluginStartDependencies,
           params,
           storage,
-          kibanaVersion
+          kibanaVersion,
+          experimentalFeatures
         );
       },
     });

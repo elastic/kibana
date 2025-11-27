@@ -72,7 +72,13 @@ export const SiemTranslatedRulesTour: React.FC = React.memo(() => {
           anchorPosition={selectMigrationStepData.anchorPosition}
           maxWidth={tourState.tourPopoverWidth}
           footerAction={
-            <EuiButtonEmpty size="xs" color="text" flush="right" onClick={onTourNext}>
+            <EuiButtonEmpty
+              aria-label={i18n.NEXT_TOUR_STEP_BUTTON}
+              size="xs"
+              color="text"
+              flush="right"
+              onClick={onTourNext}
+            >
               {i18n.NEXT_TOUR_STEP_BUTTON}
             </EuiButtonEmpty>
           }
@@ -90,7 +96,13 @@ export const SiemTranslatedRulesTour: React.FC = React.memo(() => {
           anchorPosition={statusHeaderStepData.anchorPosition}
           maxWidth={tourState.tourPopoverWidth}
           footerAction={
-            <EuiButtonEmpty size="xs" color="text" flush="right" onClick={onTourNext}>
+            <EuiButtonEmpty
+              aria-label={i18n.NEXT_TOUR_STEP_BUTTON}
+              size="xs"
+              color="text"
+              flush="right"
+              onClick={onTourNext}
+            >
               {i18n.NEXT_TOUR_STEP_BUTTON}
             </EuiButtonEmpty>
           }
@@ -108,7 +120,13 @@ export const SiemTranslatedRulesTour: React.FC = React.memo(() => {
           anchorPosition={getStartedStepData.anchorPosition}
           maxWidth={tourState.tourPopoverWidth}
           footerAction={
-            <EuiButtonEmpty size="xs" color="text" flush="right" onClick={onTourFinished}>
+            <EuiButtonEmpty
+              aria-label={i18n.FINISH_TOUR_BUTTON}
+              size="xs"
+              color="text"
+              flush="right"
+              onClick={onTourFinished}
+            >
               {i18n.FINISH_TOUR_BUTTON}
             </EuiButtonEmpty>
           }

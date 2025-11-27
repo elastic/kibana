@@ -11,18 +11,25 @@ import { DETECTION_ENGINE_ALERT_ASSIGNEES_URL } from '../../../../../common/cons
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { getMockUserProfiles } from '../__mocks__/request_responses';
 import { suggestUserProfilesRoute } from './suggest_user_profiles_route';
+import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 
 describe('suggestUserProfilesRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { context } = requestContextMock.createTools();
+  let context: SecuritySolutionRequestHandlerContextMock;
   let mockSecurityStart: ReturnType<typeof securityMock.createStart>;
   let getStartServicesMock: jest.Mock;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     mockSecurityStart = securityMock.createStart();
     mockSecurityStart.userProfiles.suggest.mockResolvedValue(getMockUserProfiles());
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   const buildRequest = () => {
@@ -61,5 +68,10 @@ describe('suggestUserProfilesRoute', () => {
       expect(response.status).toEqual(500);
       expect(response.body.message).toEqual('something went wrong');
     });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 });

@@ -62,7 +62,7 @@ describe('runSaveLensVisualization', () => {
        * and in the modal the user chooses to add the chart into a specific dashboard. Make sure to pass the "dashboardId" prop as well to simulate this scenario.
        * This is used to test indirectly the redirectToDashboard call
        */
-      redirectToDashboardFn: props.stateTransfer.navigateToWithMultipleEmbeddablePackage,
+      redirectToDashboardFn: props.stateTransfer.navigateToWithEmbeddablePackages,
       /**
        * This function will be called before reloading the editor after saving a a new document/new copy of the document
        */

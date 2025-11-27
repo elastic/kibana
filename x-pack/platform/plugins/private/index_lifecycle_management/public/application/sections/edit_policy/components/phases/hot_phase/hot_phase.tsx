@@ -134,6 +134,7 @@ export const HotPhase: FunctionComponent = () => {
                 {showEmptyRolloverFieldsError && (
                   <>
                     <EuiCallOut
+                      announceOnMount={false}
                       size="s"
                       title={i18nTexts.editPolicy.errors.rollOverConfigurationCallout.title}
                       data-test-subj="rolloverSettingsRequired"
