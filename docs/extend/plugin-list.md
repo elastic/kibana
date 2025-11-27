@@ -132,7 +132,7 @@ mapped_pages:
 | [contentConnectors](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/content_connectors/README.mdx) | This plugin contains common assets and endpoints for the use of connectors in Kibana. Primarily used by the enterprise_search and serverless_search plugins. |
 | [crossClusterReplication](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/cross_cluster_replication/README.md) | You can run a local cluster and simulate a remote cluster within a single Kibana directory. |
 | [customBranding](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/custom_branding/README.md) | This is a plugin to configure custom branding. Plugin server-side only. Plugin has three main functions: |
-| [dashboardAgent](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/dashboard_agent) | WARNING: Missing or empty README. |
+| [dashboardAgent](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/dashboard_agent/README.md) | Server-side plugin that provides a specialized AI agent and tools for dashboard management via the Onechat framework. |
 | [dashboardEnhanced](dashboard-enhanced-plugin.md) | Adds drilldown capabilities to dashboard.  Owned by the Kibana App team. |
 | [dataConnectors](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/data_connectors/README.md) | Home of the Data Connectors plugin. |
 | [dataQuality](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/data_quality/README.md) | Page where users can see the quality of their log data sets. |
