@@ -62,10 +62,7 @@ const runA11yScan = async (
   let violations: Result[] = result.violations;
 
   if (AXE_IMPACT_LEVELS?.length) {
-    const allowed = new Set(AXE_IMPACT_LEVELS);
-    violations = violations.filter(
-      (v) => v.impact && allowed.has(v.impact as (typeof AXE_IMPACT_LEVELS)[number])
-    );
+    violations = violations.filter((v) => v.impact && AXE_IMPACT_LEVELS.includes(v.impact));
   }
 
   return { violations };
