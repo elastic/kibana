@@ -92,7 +92,9 @@ function getTagcloudMetric(
   layer: FormBasedLayer | TextBasedLayer,
   visualization: LensTagCloudState
 ): TagcloudState['metric'] | undefined {
-  if (!visualization.valueAccessor) return undefined;
+  if (visualization.valueAccessor == null) {
+    throw new Error('Metric accessor is missing in the visualization state');
+  }
 
   return {
     ...(isTextBasedLayer(layer)
@@ -109,7 +111,9 @@ function getTagcloudTagBy(
   layer: FormBasedLayer | TextBasedLayer,
   visualization: LensTagCloudState
 ): TagcloudState['tag_by'] | undefined {
-  if (!visualization.tagAccessor) return undefined;
+  if (visualization.tagAccessor == null) {
+    throw new Error('Tag accessor is missing in the visualization state');
+  }
 
   const colorMapping = fromColorMappingLensStateToAPI(visualization.colorMapping);
 
@@ -137,8 +141,8 @@ function reverseBuildVisualizationState(
     type: 'tagcloud',
     dataset,
     ...generateApiLayer(layer),
-    ...(metric ? { metric } : {}),
-    ...(tagBy ? { tag_by: tagBy } : {}),
+    metric,
+    tag_by: tagBy,
     orientation:
       visualization.orientation === TAGCLOUD_ORIENTATION.SINGLE
         ? 'horizontal'
