@@ -712,6 +712,14 @@ export class DashboardPageObject extends FtrService {
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 
+  public async getPanelIdByTitle(title: string) {
+    debugger;
+    const panelHoverActionsWrapper = await this.testSubjects.find(
+      `embeddablePanelHoverActions-${title}`
+    );
+    return await panelHoverActionsWrapper.getAttribute('data-test-embeddable-id');
+  }
+
   /**
    * @return An array of boolean values - true if the panel title is visible in view mode, false if it is not
    */
