@@ -91,10 +91,6 @@
     "@kbn/esql-types",
     "@kbn/presentation-containers",
     "@kbn/elastic-assistant-common",
-    "@kbn/react-query"
-    "@kbn/ebt-tools",
-    "@kbn/presentation-util",
-    "@kbn/discover-utils",
     "@kbn/react-query",
     "@kbn/router-utils",
     "@kbn/maintenance-windows-plugin"
