@@ -68,6 +68,10 @@ function reverseBuildVisualizationState(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): LegacyMetricState {
+  if (visualization.accessor == null) {
+    throw new Error('Metric accessor is missing in the visualization state');
+  }
+
   const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
 
   if (!dataset || dataset.type == null) {
@@ -76,13 +80,9 @@ function reverseBuildVisualizationState(
 
   const props: DeepPartial<DeepMutable<LegacyMetricState>> = {
     ...generateApiLayer(layer),
-    ...(visualization.accessor
-      ? {
-          metric: isEsqlTableTypeDataset(dataset)
-            ? getValueApiColumn(visualization.accessor, layer as TextBasedLayer)
-            : operationFromColumn(visualization.accessor, layer as FormBasedLayer),
-        }
-      : {}),
+    metric: isEsqlTableTypeDataset(dataset)
+      ? getValueApiColumn(visualization.accessor, layer as TextBasedLayer)
+      : operationFromColumn(visualization.accessor, layer as FormBasedLayer),
   } as LegacyMetricState;
 
   if (props.metric) {

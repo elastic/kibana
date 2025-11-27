@@ -195,6 +195,9 @@ function reverseBuildVisualizationState(
   adhocReferences?: SavedObjectReference[]
 ): MetricState {
   const metricAccessor = getMetricAccessor(visualization);
+  if (metricAccessor == null) {
+    throw new Error('Metric accessor is missing in the visualization state');
+  }
 
   const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
 
@@ -208,7 +211,7 @@ function reverseBuildVisualizationState(
     const esqlLayer = layer as TextBasedLayer;
     props = {
       ...props,
-      ...(metricAccessor ? { metric: getValueApiColumn(metricAccessor, esqlLayer) } : {}),
+      metric: getValueApiColumn(metricAccessor, esqlLayer),
       ...(visualization.secondaryMetricAccessor
         ? {
             secondary_metric: {
@@ -236,7 +239,7 @@ function reverseBuildVisualizationState(
     } as MetricState;
   } else if (dataset.type === 'dataView' || dataset.type === 'index') {
     const formLayer = layer as FormBasedLayer;
-    const metric = metricAccessor ? operationFromColumn(metricAccessor, formLayer) : undefined;
+    const metric = operationFromColumn(metricAccessor, formLayer) as LensApiAllMetricOperations;
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const secondary_metric = visualization.secondaryMetricAccessor
       ? (operationFromColumn(

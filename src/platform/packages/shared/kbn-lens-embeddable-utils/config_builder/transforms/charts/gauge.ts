@@ -86,7 +86,9 @@ function reverseBuildVisualizationState(
   adhocReferences?: SavedObjectReference[]
 ): GaugeState {
   const metricAccessor = getMetricAccessor(visualization);
-
+  if (metricAccessor == null) {
+    throw new Error('Metric accessor is missing in the visualization state');
+  }
   const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
 
   if (!dataset || dataset.type == null) {
@@ -103,7 +105,7 @@ function reverseBuildVisualizationState(
         : { type: visualization.shape },
     metric: isEsqlTableTypeDataset(dataset)
       ? {
-          ...(metricAccessor ? getValueApiColumn(metricAccessor, layer as TextBasedLayer) : {}),
+          ...getValueApiColumn(metricAccessor, layer as TextBasedLayer),
           ...(visualization.minAccessor
             ? { min: getValueApiColumn(visualization.minAccessor, layer as TextBasedLayer) }
             : {}),
@@ -115,7 +117,7 @@ function reverseBuildVisualizationState(
             : {}),
         }
       : {
-          ...(metricAccessor ? operationFromColumn(metricAccessor, layer as FormBasedLayer) : {}),
+          ...operationFromColumn(metricAccessor, layer as FormBasedLayer),
           ...(visualization.minAccessor
             ? {
                 min: operationFromColumn(
