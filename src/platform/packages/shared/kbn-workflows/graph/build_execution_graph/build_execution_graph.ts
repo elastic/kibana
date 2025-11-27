@@ -308,7 +308,7 @@ function createIfGraph(
       type: 'enter-else-branch',
       stepId,
       stepType: ifStep.type,
-      condition: ifStep.condition,
+      condition: undefined,
     };
     graph.setNode(enterElseBranchNode.id, enterElseBranchNode);
     graph.setEdge(enterConditionNodeId, enterElseBranchNode.id);
