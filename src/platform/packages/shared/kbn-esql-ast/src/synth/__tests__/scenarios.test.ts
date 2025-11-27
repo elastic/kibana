@@ -30,6 +30,17 @@ test('can cast expression to string', () => {
   expect(String(expression)).toBe('?my_param');
 });
 
+test('can dump AST tree representation of the node', () => {
+  const expression = synth.exp`fn(a + 1)`;
+
+  expect('\n' + expression.dump()).toBe(`
+function "fn"
+└─ function "+"
+   ├─ column "a"
+   │  └─ identifier "a"
+   └─ literal "1"`);
+});
+
 test('can build the same expression with Builder', () => {
   const expression1 = synth.exp`my.field = max(10, ?my_param)`;
   const expression2 = Builder.expression.func.binary('=', [
