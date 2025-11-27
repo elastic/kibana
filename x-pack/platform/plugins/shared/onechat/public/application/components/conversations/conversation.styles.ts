@@ -6,6 +6,7 @@
  */
 
 import { css } from '@emotion/react';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 const maxConversationWidthStyles = css`
   max-width: 800px;
@@ -20,4 +21,13 @@ export const conversationElementWidthStyles = css`
 export const fullWidthAndHeightStyles = css`
   width: 100%;
   height: 100%;
+`;
+
+export const conversationBackgroundStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+  background: linear-gradient(
+    180deg,
+    ${euiTheme.colors.backgroundBasePlain} 21.09%,
+    ${euiTheme.colors.backgroundBaseSubdued} 51.44%,
+    ${euiTheme.colors.backgroundBasePlain} 87.98%
+  );
 `;
