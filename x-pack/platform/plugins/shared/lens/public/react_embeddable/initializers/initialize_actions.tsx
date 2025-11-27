@@ -11,7 +11,6 @@ import type {
   AggregateQuery,
   EsQueryConfig,
   Filter,
-  ProjectRouting,
   Query,
   TimeRange,
 } from '@kbn/es-query';
@@ -60,7 +59,6 @@ function getViewUnderlyingDataArgs({
   filters,
   timeRange,
   esQueryConfig,
-  projectRouting,
 }: {
   activeDatasource: Datasource;
   activeDatasourceState: unknown;
@@ -79,7 +77,6 @@ function getViewUnderlyingDataArgs({
   filters: Filter[];
   timeRange: TimeRange;
   esQueryConfig: EsQueryConfig;
-  projectRouting?: ProjectRouting;
 }) {
   const { error, meta } = getLayerMetaInfo(
     activeDatasource,
@@ -209,7 +206,6 @@ function loadViewUnderlyingDataArgs(
     query: mergedSearchContext.query,
     filters: mergedSearchContext.filters || [],
     timeRange: mergedSearchContext.timeRange,
-    projectRouting: mergedSearchContext.projectRouting,
     esQueryConfig: getEsQueryConfig(uiSettings),
     dataViews: indexPatterns,
   });
