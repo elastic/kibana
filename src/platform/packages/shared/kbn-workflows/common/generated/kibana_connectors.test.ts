@@ -707,7 +707,8 @@ describe('Generated Kibana Connectors', () => {
 
       // Test that the schema properly validates Kibana connectors
       // Find a Kibana connector in the schema to test validation
-      const stepItems = workflowDef.properties.steps.items;
+      // Use the properties variable that was correctly extracted from allOf structure
+      const stepItems = properties.steps.items;
       if (stepItems && stepItems.anyOf) {
         const kibanaConnector = stepItems.anyOf.find(
           (item: any) =>
