@@ -14,6 +14,7 @@ module.exports = (api) => ({
     // our explicit plugin configs to a sub-preset
     {
       plugins: [
+        require.resolve('@kbn/babel-plugin-lazy-require/src/plugin/lazy_require_plugin'),
         require.resolve('@kbn/lazy-object/src/plugin/lazy_babel_plugin'),
         require.resolve('babel-plugin-add-module-exports'),
         // The class properties proposal was merged with the private fields proposal
