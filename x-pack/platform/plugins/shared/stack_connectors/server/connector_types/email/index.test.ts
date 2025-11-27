@@ -47,6 +47,19 @@ const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 let connectorType: EmailConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
+const getConfig = (overrides?: {}) => ({
+  service: 'gmail',
+  from: 'bob@example.com',
+  host: null,
+  port: null,
+  secure: false,
+  hasAuth: true,
+  tenantId: null,
+  clientId: null,
+  oauthTokenUrl: null,
+  ...overrides,
+});
+
 beforeEach(() => {
   jest.resetAllMocks();
   configurationUtilities = actionsConfigMock.create();
@@ -329,7 +342,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtilsSmtp });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: [oauthTokenUrl]: host name value for 'http://auth.example.com' is not in the allowedHosts configuration"`
+      `"error validating action type config: [oauthTokenUrl]: host name value for 'http://auth.example.com' is not in the allowedHosts configuration"`
     );
   });
 
