@@ -207,4 +207,134 @@ describe('getEsqlQuery', () => {
       `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH(exception.type, "SingleError")`
     );
   });
+
+  describe('message normalization and escaping', () => {
+    it('uses == for simple messages without special characters', () => {
+      const result = source
+        .pipe(
+          getEsqlQuery({
+            serviceName: 'payment-service',
+            message: { fieldName: 'message', value: 'Simple error message' },
+          }) || emptyQueryOperator
+        )
+        .toString();
+
+      expect(result).toEqual(
+        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND message == "Simple error message"`
+      );
+    });
+
+    it('uses MATCH_PHRASE when message contains newlines', () => {
+      const result = source
+        .pipe(
+          getEsqlQuery({
+            serviceName: 'payment-service',
+            message: { fieldName: 'message', value: 'Line 1\nLine 2' },
+          }) || emptyQueryOperator
+        )
+        .toString();
+
+      expect(result).toEqual(
+        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH_PHRASE(message, "Line 1\\nLine 2")`
+      );
+    });
+
+    it('uses MATCH_PHRASE when message contains Windows line endings (\\r\\n)', () => {
+      const result = source
+        .pipe(
+          getEsqlQuery({
+            serviceName: 'payment-service',
+            message: { fieldName: 'message', value: 'Line 1\r\nLine 2' },
+          }) || emptyQueryOperator
+        )
+        .toString();
+
+      expect(result).toEqual(
+        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH_PHRASE(message, "Line 1\\r\\nLine 2")`
+      );
+    });
+
+    it('uses MATCH_PHRASE when message contains only tabs', () => {
+      const result = source
+        .pipe(
+          getEsqlQuery({
+            serviceName: 'payment-service',
+            message: { fieldName: 'message', value: 'Column1\tColumn2' },
+          }) || emptyQueryOperator
+        )
+        .toString();
+
+      expect(result).toEqual(
+        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH_PHRASE(message, "Column1\\tColumn2")`
+      );
+    });
+
+    it('uses MATCH_PHRASE when message contains only carriage returns', () => {
+      const result = source
+        .pipe(
+          getEsqlQuery({
+            serviceName: 'payment-service',
+            message: { fieldName: 'message', value: 'Line 1\rLine 2' },
+          }) || emptyQueryOperator
+        )
+        .toString();
+
+      expect(result).toEqual(
+        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH_PHRASE(message, "Line 1\\rLine 2")`
+      );
+    });
+
+    it('uses == when message contains only double quotes (parameters handle quotes safely)', () => {
+      const result = source
+        .pipe(
+          getEsqlQuery({
+            serviceName: 'payment-service',
+            message: { fieldName: 'message', value: 'Error: "Deadline Exceeded"' },
+          }) || emptyQueryOperator
+        )
+        .toString();
+
+      expect(result).toEqual(
+        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND message == "Error: \\"Deadline Exceeded\\""`
+      );
+    });
+
+    it('uses == for messages with quotes in database error messages', () => {
+      const result = source
+        .pipe(
+          getEsqlQuery({
+            serviceName: 'payment-service',
+            message: {
+              fieldName: 'message',
+              value:
+                'failed to get product: querying products: pq: relation "products" does not exist',
+            },
+          }) || emptyQueryOperator
+        )
+        .toString();
+
+      expect(result).toEqual(
+        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND message == "failed to get product: querying products: pq: relation \\"products\\" does not exist"`
+      );
+    });
+
+    it('uses MATCH_PHRASE for complex messages with newlines, tabs and quotes', () => {
+      const result = source
+        .pipe(
+          getEsqlQuery({
+            serviceName: 'payment-service',
+            message: {
+              fieldName: 'message',
+              value: 'Error:\n\tstatus = "DEADLINE_EXCEEDED"\n\tdetails = "Deadline Exceeded"',
+            },
+          }) || emptyQueryOperator
+        )
+        .toString();
+
+      // Tabs are escaped to \t in MATCH_PHRASE string literal
+      expect(result).toEqual(
+        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH_PHRASE(message, "Error:\\n\\tstatus = \\"DEADLINE_EXCEEDED\\"\\n\\tdetails = \\"Deadline Exceeded\\"")`
+      );
+    });
+  });
 });

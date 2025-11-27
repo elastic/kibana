@@ -15,6 +15,18 @@ interface ErrorField {
   value: string | string[];
 }
 
+function needsNormalization(message: string): boolean {
+  return /\n|\t|\r/.test(message);
+}
+
+function normalizeAndEscapeMessage(message: string): string {
+  return message
+    .replace(/\t/g, '\\t')
+    .replace(/\r/g, '\\r')
+    .replace(/\n/g, '\\n')
+    .replace(/"/g, '\\"');
+}
+
 export function getEsqlQuery({
   serviceName,
   culprit,
@@ -44,9 +56,15 @@ export function getEsqlQuery({
   }
 
   if (message?.value !== undefined && message?.fieldName) {
-    const paramName = 'message';
-    conditions.push(`${message.fieldName} == ?${paramName}`);
-    params[paramName] = String(message.value);
+    const messageValue = String(message.value);
+    if (needsNormalization(messageValue)) {
+      const normalizedAndEscapedMessage = normalizeAndEscapeMessage(messageValue);
+      conditions.push(`MATCH_PHRASE(${message.fieldName}, "${normalizedAndEscapedMessage}")`);
+    } else {
+      const paramName = 'message';
+      conditions.push(`${message.fieldName} == ?${paramName}`);
+      params[paramName] = messageValue;
+    }
   }
 
   if (type?.value !== undefined && type?.fieldName) {

@@ -48,7 +48,7 @@ export function SimilarErrors({ hit, formattedDoc }: SimilarErrorsProps) {
   const serviceNameValue = formattedDoc[fieldConstants.SERVICE_NAME_FIELD];
   const groupingNameValue = formattedDoc[fieldConstants.ERROR_GROUPING_NAME_FIELD];
   const culpritValue = formattedDoc[fieldConstants.ERROR_CULPRIT_FIELD];
-  const { field: messageField, value: messageValue } = getMessageFieldWithFallbacks(formattedDoc);
+  const { field: messageField, value: messageValue } = getMessageFieldWithFallbacks(hit.flattened);
   const { field: typeField, value: typeValue } = getLogExceptionTypeFieldWithFallback(
     hit.flattened
   );
@@ -87,14 +87,6 @@ export function SimilarErrors({ hit, formattedDoc }: SimilarErrorsProps) {
   // TODO extract to a higher level folder
   const { indexes } = useDataSourcesContext();
   const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.logs });
-
-  // TODO check how to parse the message properly, when there's special chars the query does not work.
-  // It does work if you filter by message from the flyout (if there's no line breaks). I think it happens mostly
-  // with exceptions (WHERE exception.type is not null)
-  // Latest discover, we could do it by having /n as linebreak and using MATCH_PHRASE
-  /**
-   * AND MATCH_PHRASE(exception.message, "<_MultiThreadedRendezvous of RPC that terminated with:\n\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = \"Deadline Exceeded\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {grpc_status:4, grpc_message:\"Deadline Exceeded\"}\"\n>")
-   */
 
   // TODO should we keep in mind mixed sources?
   // TODO when there's only 1 occurence and is the doc that I have opened, the chart shows empty.
