@@ -40,7 +40,6 @@ test.describe('Stream data routing - AI suggestions generation', { tag: ['@ess']
   test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
     await cleanupLlmProxyAndConnector(llmSetup, apiServices);
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
   });
 
   test('should successfully generate and display suggestions', async ({ page }) => {

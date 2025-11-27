@@ -36,7 +36,6 @@ test.describe('Stream data routing - AI suggestions button', { tag: ['@ess'] }, 
   test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
     await cleanupLlmProxyAndConnector(llmSetup, apiServices);
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
   });
 
   test('should show button when AI features are enabled', async ({ page }) => {

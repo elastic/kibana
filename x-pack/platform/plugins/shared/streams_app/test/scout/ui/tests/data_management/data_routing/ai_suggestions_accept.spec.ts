@@ -56,7 +56,6 @@ test.describe('Stream data routing - AI suggestions accept flow', { tag: ['@ess'
   test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
     await cleanupLlmProxyAndConnector(llmSetup, apiServices);
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
   });
 
   test('should open confirmation modal when accepting suggestion', async ({ page }) => {
