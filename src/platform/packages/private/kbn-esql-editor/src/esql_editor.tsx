@@ -857,11 +857,10 @@ const ESQLEditorInternal = function ESQLEditor({
   // Clean up the monaco editor and DOM on unmount
   useEffect(() => {
     const model = editorModel;
-    const editorRefref = editorRef;
     const disposablesMap = editorCommandDisposables.current;
     return () => {
       // Cleanup editor command disposables
-      const currentEditor = editorRefref.current;
+      const currentEditor = editorRef.current;
       if (currentEditor) {
         const disposables = disposablesMap.get(currentEditor);
         if (disposables) {
@@ -873,7 +872,7 @@ const ESQLEditorInternal = function ESQLEditor({
       }
 
       model.current?.dispose();
-      editorRefref.current?.dispose();
+      editorRef.current?.dispose();
       editorModel.current = undefined;
     };
   }, []);
