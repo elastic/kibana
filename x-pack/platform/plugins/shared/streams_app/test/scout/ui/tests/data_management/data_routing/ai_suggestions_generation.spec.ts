@@ -23,7 +23,6 @@ test.describe('Stream data routing - AI suggestions generation', { tag: ['@ess']
   let llmSetup: LlmProxySetup;
 
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, log }) => {
-    await apiServices.streams.enable();
     await logsSynthtraceEsClient.clean();
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
 
