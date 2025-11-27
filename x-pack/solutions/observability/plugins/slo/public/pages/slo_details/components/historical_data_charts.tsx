@@ -45,9 +45,6 @@ export function HistoricalDataCharts({
   );
   const historicalSliData = formatHistoricalData(sloHistoricalSummary?.data, 'sli_value');
 
-  const lastObservedValue = sloHistoricalSummary?.data?.at(-1)?.sliValue;
-  const lastErrorBudgetRemaining = sloHistoricalSummary?.data?.at(-1)?.errorBudget.remaining;
-
   return (
     <>
       <EuiFlexItem>
@@ -55,7 +52,6 @@ export function HistoricalDataCharts({
           data={historicalSliData}
           isLoading={isLoading}
           slo={slo}
-          observedValue={lastObservedValue}
           onBrushed={onBrushed}
           hideHeaderDurationLabel={hideHeaderDurationLabel}
         />
@@ -66,7 +62,6 @@ export function HistoricalDataCharts({
           isLoading={isLoading}
           slo={slo}
           onBrushed={onBrushed}
-          lastErrorBudgetRemaining={lastErrorBudgetRemaining}
           hideHeaderDurationLabel={hideHeaderDurationLabel}
         />
       </EuiFlexItem>

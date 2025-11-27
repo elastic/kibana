@@ -22,12 +22,12 @@ import { ErrorBudgetChart } from './error_budget_chart';
 import { ErrorBudgetHeader } from './error_budget_header';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
+
 export interface Props {
   data: ChartData[];
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
   onBrushed?: (timeBounds: TimeBounds) => void;
-  lastErrorBudgetRemaining?: number;
   hideHeaderDurationLabel?: boolean;
 }
 
@@ -36,7 +36,6 @@ export function ErrorBudgetChartPanel({
   isLoading,
   slo,
   onBrushed,
-  lastErrorBudgetRemaining,
   hideHeaderDurationLabel = false,
 }: Props) {
   const [isMouseOver, setIsMouseOver] = useState(false);
@@ -95,13 +94,7 @@ export function ErrorBudgetChartPanel({
             setDashboardAttachmentReady={setDashboardAttachmentReady}
           />
 
-          <ErrorBudgetChart
-            slo={slo}
-            data={data}
-            isLoading={isLoading}
-            onBrushed={onBrushed}
-            lastErrorBudgetRemaining={lastErrorBudgetRemaining}
-          />
+          <ErrorBudgetChart slo={slo} data={data} isLoading={isLoading} onBrushed={onBrushed} />
         </EuiFlexGroup>
       </EuiPanel>
       {isDashboardAttachmentReady ? (

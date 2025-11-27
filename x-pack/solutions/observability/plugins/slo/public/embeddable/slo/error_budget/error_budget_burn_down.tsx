@@ -108,7 +108,6 @@ export function SloErrorBudget({
   }
 
   const hasGroupBy = slo.instanceId !== ALL_VALUE;
-  const lastErrorBudgetRemaining = sloHistoricalSummary?.data?.at(-1)?.errorBudget.remaining;
 
   return (
     <div data-shared-item="" ref={containerRef} style={{ width: '100%', padding: 10 }}>
@@ -138,7 +137,6 @@ export function SloErrorBudget({
           data={errorBudgetBurnDownData}
           isLoading={historicalSummaryLoading}
           slo={slo!}
-          lastErrorBudgetRemaining={lastErrorBudgetRemaining}
         />
       </EuiFlexGroup>
 

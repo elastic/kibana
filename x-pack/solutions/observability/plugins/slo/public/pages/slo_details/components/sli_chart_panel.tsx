@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
 import React from 'react';
+import { useKibana } from '../../../hooks/use_kibana';
 import type { ChartData } from '../../../typings/slo';
+import { getSloChartState, isSloFailed } from '../../../utils/slo/is_slo_failed';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
 import type { TimeBounds } from '../types';
-import { SliChart } from './sli_chart';
+import { WideChart } from './wide_chart';
 
 export interface Props {
   data: ChartData[];
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
-  observedValue?: number;
   onBrushed?: (timeBounds: TimeBounds) => void;
   hideHeaderDurationLabel?: boolean;
 }
@@ -28,10 +30,47 @@ export function SliChartPanel({
   data,
   isLoading,
   slo,
-  observedValue,
   onBrushed,
   hideHeaderDurationLabel = false,
 }: Props) {
+  const { uiSettings } = useKibana().services;
+  const percentFormat = uiSettings.get('format:percent:defaultPattern');
+  const isSloFailedStatus = isSloFailed(slo.summary.status);
+  const observedValue = data.at(-1)?.value;
+
+  const hasNoData = React.useMemo(() => {
+    if (observedValue !== undefined) {
+      return observedValue < 0;
+    }
+    return slo.summary.status === 'NO_DATA';
+  }, [observedValue, slo.summary.status]);
+
+  const metadata = (
+    <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiStat
+          titleColor={isSloFailedStatus ? 'danger' : 'success'}
+          title={hasNoData ? '-' : numeral(observedValue).format(percentFormat)}
+          titleSize="s"
+          description={i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.current', {
+            defaultMessage: 'Observed value',
+          })}
+          reverse
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiStat
+          title={numeral(slo.objective.target).format(percentFormat)}
+          titleSize="s"
+          description={i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.objective', {
+            defaultMessage: 'Objective',
+          })}
+          reverse
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="sliChartPanel">
       <EuiFlexGroup direction="column" gutterSize="l">
@@ -59,13 +98,21 @@ export function SliChartPanel({
           )}
         </EuiFlexGroup>
 
-        <SliChart
-          data={data}
-          isLoading={isLoading}
-          slo={slo}
-          observedValue={observedValue}
-          onBrushed={onBrushed}
-        />
+        {metadata}
+
+        <EuiFlexItem>
+          <WideChart
+            chart="line"
+            id={i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.chartTitle', {
+              defaultMessage: 'SLI value',
+            })}
+            state={getSloChartState(slo.summary.status)}
+            data={data}
+            isLoading={isLoading}
+            onBrushed={onBrushed}
+            slo={slo}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );
