@@ -42,10 +42,10 @@ test.describe('Stream data retention - updating failure store', () => {
     await apiServices.streams.clearStreamProcessors('logs-generic-default');
   });
 
-    test.afterAll(async ({ logsSynthtraceEsClient, apiServices }) => {
-      await apiServices.streams.clearStreamChildren('logs');
-      await logsSynthtraceEsClient.clean();
-    });
+  test.afterAll(async ({ logsSynthtraceEsClient, apiServices }) => {
+    await apiServices.streams.clearStreamChildren('logs');
+    await logsSynthtraceEsClient.clean();
+  });
 
   test(
     'should edit failure store successfully for classic streams',
