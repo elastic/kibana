@@ -122,12 +122,14 @@ export async function updateDSFailureStore(
   data: {
     dsFailureStore: boolean;
     customRetentionPeriod?: string;
+    retentionDisabled?: boolean;
   }
 ) {
   const body = {
     dsFailureStore: data.dsFailureStore,
     dataStreams,
     customRetentionPeriod: data.customRetentionPeriod,
+    retentionDisabled: data.retentionDisabled,
   };
 
   return sendRequest({

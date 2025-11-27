@@ -108,7 +108,7 @@ const Accent = ({
     >
       <path
         d="M8 7.92676C7.67329 7.97351 7.33964 8 7 8H8V7.92676ZM0 8H7C3.13401 8 0 4.86599 0 1C0 0.660412 0.0255308 0.326664 0.0722656 0H0V8Z"
-        fill="white"
+        fill={euiTheme.colors.backgroundBasePlain}
       />
     </svg>
   );

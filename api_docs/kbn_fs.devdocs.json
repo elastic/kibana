@@ -1,0 +1,765 @@
+{
+  "id": "@kbn/fs",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/fs",
+        "id": "def-common.appendFile",
+        "type": "Function",
+        "tags": [],
+        "label": "appendFile",
+        "description": [
+          "\nAppends data to a file, creating the file if it does not yet exist.\nThe content is validated and sanitized before appending.\n"
+        ],
+        "signature": [
+          "(name: string, content: string | Uint8Array, options: ",
+          "WriteFileOptions",
+          " | undefined) => Promise<",
+          "FileMetadata",
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.appendFile.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "- The filename (relative path within the data directory or volume)"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.appendFile.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "content",
+            "description": [
+              "- The content to append (string or Uint8Array)"
+            ],
+            "signature": [
+              "string | Uint8Array"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.appendFile.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Optional configuration"
+            ],
+            "signature": [
+              "WriteFileOptions",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "Metadata about the file, including its alias and full path"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/fs",
+        "id": "def-common.appendFileSync",
+        "type": "Function",
+        "tags": [],
+        "label": "appendFileSync",
+        "description": [
+          "\nAppends data to a file synchronously, creating the file if it does not yet exist.\nThe content is validated and sanitized before appending.\n"
+        ],
+        "signature": [
+          "(name: string, content: string | Uint8Array, options: ",
+          "WriteFileOptions",
+          " | undefined) => ",
+          "FileMetadata"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.appendFileSync.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "- The filename (relative path within the data directory or volume)"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.appendFileSync.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "content",
+            "description": [
+              "- The content to append (string or Uint8Array)"
+            ],
+            "signature": [
+              "string | Uint8Array"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.appendFileSync.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Optional configuration"
+            ],
+            "signature": [
+              "WriteFileOptions",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "Metadata about the file, including its alias and full path"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/fs",
+        "id": "def-common.createReadStream",
+        "type": "Function",
+        "tags": [],
+        "label": "createReadStream",
+        "description": [
+          "\nCreates a Readable stream from a file.\nUseful for reading large files incrementally without loading everything into memory.\n"
+        ],
+        "signature": [
+          "(name: string, volume: string | undefined, options: BufferEncoding | ",
+          "StreamOptions",
+          "<",
+          "Readable",
+          "> | undefined) => ",
+          "Readable"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.createReadStream.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "- The filename (relative path within the data directory or volume)"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.createReadStream.$2",
+            "type": "string",
+            "tags": [],
+            "label": "volume",
+            "description": [
+              "- Optional namespace within the data directory"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.createReadStream.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Stream options (encoding or StreamOptions)"
+            ],
+            "signature": [
+              "BufferEncoding | ",
+              "StreamOptions",
+              "<",
+              "Readable",
+              "> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "A Readable stream that reads from the specified file"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/fs",
+        "id": "def-common.createWriteStream",
+        "type": "Function",
+        "tags": [],
+        "label": "createWriteStream",
+        "description": [
+          "\nCreates a Writable stream for writing to a file.\n"
+        ],
+        "signature": [
+          "(name: string, volume: string | undefined, options: BufferEncoding | ",
+          "StreamOptions",
+          "<",
+          "Writable",
+          "> | undefined) => ",
+          "Writable"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.createWriteStream.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "- The filename (relative path within the data directory or volume)"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.createWriteStream.$2",
+            "type": "string",
+            "tags": [],
+            "label": "volume",
+            "description": [
+              "- Optional namespace within the data directory to organize files"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.createWriteStream.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Stream options (encoding or StreamOptions)"
+            ],
+            "signature": [
+              "BufferEncoding | ",
+              "StreamOptions",
+              "<",
+              "Writable",
+              "> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "A Writable stream that writes to the specified file"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/fs",
+        "id": "def-common.deleteFile",
+        "type": "Function",
+        "tags": [],
+        "label": "deleteFile",
+        "description": [
+          "\nDeletes a file asynchronously.\n"
+        ],
+        "signature": [
+          "(name: string, options: Pick<",
+          "WriteFileOptions",
+          ", \"volume\"> | undefined) => Promise<void>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.deleteFile.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "- The filename (relative path within the data directory or volume)"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.deleteFile.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Optional configuration"
+            ],
+            "signature": [
+              "Pick<",
+              "WriteFileOptions",
+              ", \"volume\"> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/fs",
+        "id": "def-common.deleteFileSync",
+        "type": "Function",
+        "tags": [],
+        "label": "deleteFileSync",
+        "description": [
+          "\nDeletes a file synchronously.\n"
+        ],
+        "signature": [
+          "(name: string, options: Pick<",
+          "WriteFileOptions",
+          ", \"volume\"> | undefined) => void"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.deleteFileSync.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "- The filename (relative path within the data directory or volume)"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.deleteFileSync.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Optional configuration"
+            ],
+            "signature": [
+              "Pick<",
+              "WriteFileOptions",
+              ", \"volume\"> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/fs",
+        "id": "def-common.readFile",
+        "type": "Function",
+        "tags": [],
+        "label": "readFile",
+        "description": [
+          "\nReads the entire contents of a file asynchronously.\n"
+        ],
+        "signature": [
+          "(name: string, volume: string | undefined) => Promise<string | Buffer>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.readFile.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "- The filename (relative path within the data directory or volume)"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.readFile.$2",
+            "type": "string",
+            "tags": [],
+            "label": "volume",
+            "description": [
+              "- Optional namespace within the data directory"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "The file contents as a Buffer (or string if encoding is specified)"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/fs",
+        "id": "def-common.readFileSync",
+        "type": "Function",
+        "tags": [],
+        "label": "readFileSync",
+        "description": [
+          "\nReads the entire contents of a file synchronously.\n"
+        ],
+        "signature": [
+          "(name: string, volume: string | undefined) => string | Buffer"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.readFileSync.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "- The filename (relative path within the data directory or volume)"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.readFileSync.$2",
+            "type": "string",
+            "tags": [],
+            "label": "volume",
+            "description": [
+              "- Optional namespace within the data directory"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "The file contents as a Buffer (or string if encoding is specified)"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/fs",
+        "id": "def-common.sanitizeSvg",
+        "type": "Function",
+        "tags": [],
+        "label": "sanitizeSvg",
+        "description": [],
+        "signature": [
+          "(svgContent: Buffer) => Buffer"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-fs/sanitizations/svg.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.sanitizeSvg.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "svgContent",
+            "description": [],
+            "signature": [
+              "Buffer"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/sanitizations/svg.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/fs",
+        "id": "def-common.writeFile",
+        "type": "Function",
+        "tags": [],
+        "label": "writeFile",
+        "description": [
+          "\nWrites data to a file asynchronously, with automatic validation and sanitization.\n"
+        ],
+        "signature": [
+          "(name: string, content: ",
+          "WriteFileContent",
+          ", options: ",
+          "WriteFileOptions",
+          " | undefined) => Promise<",
+          "FileMetadata",
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.writeFile.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "- The filename (relative path within the data directory or volume)"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.writeFile.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "content",
+            "description": [
+              "- The content to write. Can be a string, Buffer, TypedArray, Iterable, AsyncIterable, or Stream"
+            ],
+            "signature": [
+              "WriteFileContent"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.writeFile.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Optional configuration"
+            ],
+            "signature": [
+              "WriteFileOptions",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "Metadata about the written file, including its alias and full path"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/fs",
+        "id": "def-common.writeFileSync",
+        "type": "Function",
+        "tags": [],
+        "label": "writeFileSync",
+        "description": [
+          "\nWrites data to a file synchronously, with automatic validation and sanitization.\nAll files are written to the data directory with path traversal protection.\n"
+        ],
+        "signature": [
+          "(name: string, content: string | NodeJS.ArrayBufferView, options: ",
+          "WriteFileOptions",
+          " | undefined) => ",
+          "FileMetadata"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.writeFileSync.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "- The filename (relative path within the data directory or volume)"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.writeFileSync.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "content",
+            "description": [
+              "- The content to write (string or ArrayBufferView)"
+            ],
+            "signature": [
+              "string | NodeJS.ArrayBufferView"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/fs",
+            "id": "def-common.writeFileSync.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Optional configuration"
+            ],
+            "signature": [
+              "WriteFileOptions",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "Metadata about the written file, including its alias and full path"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
