@@ -57,7 +57,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
       >
         <div
           class="css-1y7bpvk-wrapperStyles"
-          role="none"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -96,7 +95,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         </div>
         <div
           class="css-1y7bpvk-wrapperStyles"
-          role="none"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -135,7 +133,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         </div>
         <div
           class="css-1y7bpvk-wrapperStyles"
-          role="none"
         >
           <p
             class="emotion-euiScreenReaderOnly"
@@ -190,7 +187,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
       >
         <div
           class="css-1y7bpvk-wrapperStyles"
-          role="none"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -222,7 +218,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         </div>
         <div
           class="css-1y7bpvk-wrapperStyles"
-          role="none"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -253,7 +248,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         </div>
         <div
           class="css-1y7bpvk-wrapperStyles"
-          role="none"
         >
           <p
             class="emotion-euiScreenReaderOnly"
@@ -292,7 +286,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         </div>
         <div
           class="css-1y7bpvk-wrapperStyles"
-          role="none"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -323,7 +316,6 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         </div>
         <div
           class="css-1y7bpvk-wrapperStyles"
-          role="none"
         >
           <div
             class="euiPopover emotion-euiPopover-block"

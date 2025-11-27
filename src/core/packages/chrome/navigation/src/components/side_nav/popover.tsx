@@ -281,7 +281,6 @@ export const Popover = ({
       onMouseLeave={handleMouseLeave}
       onFocus={handleMouseEnter}
       onBlur={handleBlur}
-      role="none"
     >
       {hasContent && !isSidePanelOpen && (
         <EuiScreenReaderOnly>
