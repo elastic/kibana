@@ -1610,9 +1610,9 @@ module.exports = {
         'src/platform/packages/shared/kbn-scout/src/playwright/**/*.ts',
         'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
         'x-pack/solutions/security/packages/kbn-scout-security/src/playwright/**/*.ts',
-        'src/platform/plugins/**/test/scout/**/*.ts',
-        'x-pack/platform/plugins/**/test/scout/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/scout/**/*.ts',
+        'src/platform/{packages,plugins}/**/test/scout/**/*.ts',
+        'x-pack/platform/{packages,plugins}/**/test/scout/**/*.ts',
+        'x-pack/solutions/**/{packages,plugins}/**/test/scout/**/*.ts',
       ],
       excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
@@ -2501,6 +2501,40 @@ module.exports = {
       ],
       rules: {
         '@kbn/eslint/deployment_agnostic_test_context': 'error',
+      },
+    },
+
+    {
+      // Restrict fs imports in production code (exclude test files, scripts, etc.)
+      files: [
+        'src/platform/plugins/shared/**/*.ts',
+        'x-pack/solutions/**/*.ts',
+        'x-pack/plugins/**/*.ts',
+      ],
+      excludedFiles: [
+        '**/*.{test,spec}.ts',
+        '**/*.test.ts',
+        '**/test/**',
+        '**/tests/**',
+        '**/__tests__/**',
+        '**/scripts/**',
+        '**/e2e/**',
+        '**/cypress/**',
+        '**/ftr_e2e/**',
+        '**/.storybook/**',
+        '**/json_schemas/**',
+        // Can use fs for telemetry collection
+        'src/platform/plugins/shared/telemetry/**',
+      ],
+      rules: {
+        '@kbn/eslint/require_kbn_fs': [
+          'warn',
+          {
+            restrictedMethods: ['writeFile', 'writeFileSync', 'createWriteStream'],
+            disallowedMessage:
+              'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
+          },
+        ],
       },
     },
   ],
