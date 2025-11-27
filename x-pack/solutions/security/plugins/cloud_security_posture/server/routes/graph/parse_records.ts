@@ -226,47 +226,35 @@ const createGroupedActorAndTargetNodes = (
         .filter((doc): doc is NodeDocumentDataModel => doc !== null)
     : [];
 
-  const actorGroup: {
-    id: string;
-    type: string;
-    count?: number;
-    docData: NodeDocumentDataModel[];
-    hostIps: string[];
-    label?: string;
-  } = {
-    id: actorNodeId, // Actor: Always use node ID from ES|QL (single entity ID or MD5 hash)
-    type: actorEntityType,
-    docData: actorsDocDataArray,
-    hostIps: actorHostIpsArray,
-    ...(actorIdsCount > 1 ? { count: actorIdsCount } : {}),
-    ...(actorLabel && actorLabel !== '' ? { label: actorLabel } : {}),
-  };
+  // Target: Use node ID from ES|QL or UUID for unknown
+  const targetId =
+    targetIdsCount === 0
+      ? `unknown-${uuidv4()}` // Multiple unknown target nodes possible - differentiate via UUID
+      : targetNodeId!; // Use node ID from ES|QL (we know it's not null here)
 
-  const targetGroup: {
-    id: string;
-    type: string;
-    count?: number;
-    docData: NodeDocumentDataModel[];
-    hostIps: string[];
-    label?: string;
-  } =
-    targetIdsCount > 0 && targetNodeId
-      ? {
-          id: targetNodeId,
-          type: targetEntityType,
-          docData: targetsDocDataArray,
-          hostIps: targetHostIpsArray,
-          ...(targetIdsCount > 1 ? { count: targetIdsCount } : {}),
-          ...(targetLabel && targetLabel !== '' ? { label: targetLabel } : {}),
-        }
-      : {
-          // Unknown target
-          id: `unknown-${uuidv4()}`,
-          type: '',
-          label: 'Unknown',
-          docData: [],
-          hostIps: [],
-        };
+  // If we have a namespace hint but no documents, create a minimal document with just id and hint
+  // This ensures the hint is preserved for filtering
+  const actorDocDataWithHint =
+    actorsDocDataArray.length === 0 && actorNamespaceArray.length > 0 && actorIdsCount > 0
+      ? [
+          {
+            id: actorNodeId,
+            type: 'entity' as const,
+            sourceNamespaceField: actorNamespaceArray[0],
+          },
+        ]
+      : actorsDocDataArray;
+
+  const targetDocDataWithHint =
+    targetsDocDataArray.length === 0 && targetNamespaceArray.length > 0 && targetIdsCount > 0
+      ? [
+          {
+            id: targetId,
+            type: 'entity' as const,
+            sourceNamespaceField: targetNamespaceArray[0],
+          },
+        ]
+      : targetsDocDataArray;
 
   const actorGroup: {
     id: string;
@@ -292,7 +280,7 @@ const createGroupedActorAndTargetNodes = (
     hostIps: string[];
     label?: string;
   } =
-    targetIdsCount > 0
+    targetIdsCount > 0 && targetNodeId
       ? {
           id: targetId,
           type: targetEntityType,
