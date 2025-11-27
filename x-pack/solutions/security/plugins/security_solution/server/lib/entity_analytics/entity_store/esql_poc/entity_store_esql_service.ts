@@ -121,14 +121,28 @@ export class EntityStoreESQLService {
       state.config
     );
 
-    this.logger.debug(`[Entity Store ESQL] [${type}-${this.namespace}] running query 
-      ${query}`);
+    // this.logger.debug(`[Entity Store ESQL] [${type}-${this.namespace}] running query
+    // ${query}`);
 
     const docs = await executeEsqlQuery(this.esClient, query, this.logger);
 
     await storeEntityStoreDocs(this.esClient, type, this.namespace, docs);
 
-    await updateEntityStoreLastExecutionTime(this.soClient, type, this.namespace, now);
+    // this.logger.debug(JSON.stringify(docs, undefined, 2));
+
+    let lastSeenTimestamp;
+    if (docs.length > 0) {
+      lastSeenTimestamp = docs[docs.length - 1]['@timestamp'] as string;
+    } else {
+      lastSeenTimestamp = now;
+    }
+
+    await updateEntityStoreLastExecutionTime(
+      this.soClient,
+      type,
+      this.namespace,
+      lastSeenTimestamp
+    );
 
     this.logger.info(
       `[Entity Store ESQL] [${type}-${this.namespace}] Processed ${docs.length} entities for type`

@@ -54,8 +54,10 @@ describe('buildEsql', () => {
      FROM logs-*, .entities.v1.updates.security_host_default
       | WHERE host.name IS NOT NULL
       AND host.name != ""
-          AND @timestamp >= TO_DATETIME("${from}")
+          AND @timestamp > TO_DATETIME("${from}")
           AND @timestamp <= TO_DATETIME("${to}")
+      | SORT @timestamp ASC
+      | LIMIT 10
       | RENAME
         host.name AS recent.host.name
       | STATS
@@ -175,6 +177,7 @@ describe('buildEsql', () => {
         entity.id,
         host.name
       | LIMIT 10
+      | SORT @timestamp ASC
       `)
     );
   });

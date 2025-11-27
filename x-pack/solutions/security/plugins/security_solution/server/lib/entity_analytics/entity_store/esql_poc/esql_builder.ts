@@ -40,8 +40,10 @@ export const buildESQLQuery = async (
 
   return `FROM ${indexPatterns.join(', ')}
   | WHERE ${entityIdFiler(description)}
-      AND @timestamp >= TO_DATETIME("${fromDateISO}")
+      AND @timestamp > TO_DATETIME("${fromDateISO}")
       AND @timestamp <= TO_DATETIME("${toDateISO}")
+  | SORT @timestamp ASC
+  | LIMIT ${config.maxPageSearchSize}
   | RENAME
     ${description.identityField} AS ${recentData(description.identityField)}
   | STATS
@@ -56,7 +58,8 @@ export const buildESQLQuery = async (
     ${mergedFieldStats(description)},
     ${customFieldEvalLogic()}
   | KEEP ${fieldsToKeep(description)}
-  | LIMIT ${config.maxPageSearchSize}`;
+  | LIMIT ${config.maxPageSearchSize}
+  | SORT @timestamp ASC`;
 };
 
 function entityIdFiler({ identityField }: EntityDescription) {
