@@ -15,13 +15,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ActionConnector } from '../../../../types';
 
 interface Props {
   hasConnectorTypeSelected: boolean;
   onBack: () => void;
   onCancel: () => void;
   isUsingInitialConnector: boolean;
-  onTestConnector?: () => void;
+  onTestConnector?: (connector: ActionConnector) => void;
   testConnector?: () => void;
   isSaving: boolean;
   disabled: boolean;
