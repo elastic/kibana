@@ -19,7 +19,11 @@ import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
-import { normalizeGeoPointsInObject } from '../../../../lib/streams/helpers/normalize_geo_points';
+import {
+  buildGeoPointExistsQuery,
+  normalizeGeoPointsInObject,
+  rebuildGeoPointsFromFlattened,
+} from '../../../../lib/streams/helpers/normalize_geo_points';
 
 const UNMAPPED_SAMPLE_SIZE = 500;
 const FIELD_SIMULATION_TIMEOUT = '1s';
@@ -163,22 +167,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
 
     const filterConditions = userFieldDefinitions.map((field) => {
       if (field.type === 'geo_point') {
-        return {
-          bool: {
-            should: [
-              { exists: { field: field.name } },
-              {
-                bool: {
-                  filter: [
-                    { exists: { field: `${field.name}.lat` } },
-                    { exists: { field: `${field.name}.lon` } },
-                  ],
-                },
-              },
-            ],
-            minimum_should_match: 1,
-          },
-        };
+        return buildGeoPointExistsQuery(field.name);
       }
 
       return { exists: { field: field.name } };
@@ -225,55 +214,11 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       const normalized = normalizeGeoPointsInObject(hit._source as SampleDocument, geoPointFields);
       const flattenedSource = getFlattenedObject(normalized);
 
-      const filteredEntries = Object.entries(flattenedSource).filter(([k]) => {
-        if (k === '@timestamp') return true;
-
-        if (fieldDefinitionKeys.includes(k)) return true;
-
-        const latMatch = k.match(/^(.+)\.lat$/);
-        const lonMatch = k.match(/^(.+)\.lon$/);
-        if (
-          (latMatch && geoPointFields.has(latMatch[1])) ||
-          (lonMatch && geoPointFields.has(lonMatch[1]))
-        ) {
-          return true;
-        }
-
-        return false;
-      });
-
-      const sourceWithGeoPoints: Record<string, any> = {};
-      const processedGeoFields = new Set<string>();
-
-      for (const [key, value] of filteredEntries) {
-        const latMatch = key.match(/^(.+)\.lat$/);
-        const lonMatch = key.match(/^(.+)\.lon$/);
-
-        if (latMatch && geoPointFields.has(latMatch[1])) {
-          const baseField = latMatch[1];
-          if (!processedGeoFields.has(baseField)) {
-            const lonKey = `${baseField}.lon`;
-            const lonValue = flattenedSource[lonKey];
-            if (lonValue !== undefined) {
-              sourceWithGeoPoints[baseField] = { lat: value, lon: lonValue };
-              processedGeoFields.add(baseField);
-            }
-          }
-        } else if (lonMatch && geoPointFields.has(lonMatch[1])) {
-          const baseField = lonMatch[1];
-          if (!processedGeoFields.has(baseField)) {
-            const latKey = `${baseField}.lat`;
-            const latValue = flattenedSource[latKey];
-            if (latValue !== undefined) {
-              sourceWithGeoPoints[baseField] = { lat: latValue, lon: value };
-              processedGeoFields.add(baseField);
-            }
-          }
-        } else {
-          // Not a geo_point component, add as-is
-          sourceWithGeoPoints[key] = value;
-        }
-      }
+      const sourceWithGeoPoints = rebuildGeoPointsFromFlattened(
+        flattenedSource,
+        fieldDefinitionKeys,
+        geoPointFields
+      );
 
       return {
         _index: params.path.name.startsWith(`${LOGS_ROOT_STREAM_NAME}.`)
