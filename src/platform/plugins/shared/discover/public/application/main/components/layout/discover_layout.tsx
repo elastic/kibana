@@ -410,7 +410,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         styles.dscPage,
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            ${kbnFullBodyHeightCss(tabsEnabled ? '32px' : undefined)}
+            ${kbnFullBodyHeightCss(tabsEnabled ? '40px' : undefined)}
           }
         `,
       ]}
@@ -530,7 +530,7 @@ const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') =
 const componentStyles = {
   dscPage: ({ euiTheme }: UseEuiTheme) =>
     css({
-      overflow: 'hidden',
+      overflow: 'visible',
       padding: 0,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
     }),
