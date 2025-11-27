@@ -21,7 +21,7 @@ import {
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
-import type { StreamlangStepWithUIAttributes, StreamlangDSL } from '@kbn/streamlang';
+import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
   convertStepsForUI,
@@ -258,21 +258,6 @@ export const streamEnrichmentMachine = setup({
     reorderSteps: assign(({ context }, params: { stepId: string; direction: 'up' | 'down' }) => {
       return {
         stepRefs: [...reorderSteps(context.stepRefs, params.stepId, params.direction)],
-      };
-    }),
-    resetSteps: assign((assignArgs, params: { steps: StreamlangDSL['steps'] }) => {
-      // Clean-up existing step refs
-      assignArgs.context.stepRefs.forEach(stopChild);
-
-      // Convert new steps to UI format and spawn new step refs
-      // Mark as isNew: true so they're tracked as new additions
-      const uiSteps = convertStepsForUI({ steps: params.steps });
-      const stepRefs = uiSteps.map((step) => {
-        return spawnStep(step, assignArgs, { isNew: true });
-      });
-
-      return {
-        stepRefs,
       };
     }),
     reassignSteps: assign(({ context }) => ({

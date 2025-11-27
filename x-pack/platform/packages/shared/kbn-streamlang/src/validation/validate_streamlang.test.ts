@@ -652,6 +652,42 @@ describe('validateStreamlang', () => {
         expect(result.errors).toHaveLength(0);
       });
 
+      it('should detect type mismatch after convert processor with different target field', () => {
+        const dsl: StreamlangDSL = {
+          steps: [
+            {
+              action: 'set',
+              to: 'abc',
+              value: '123',
+            },
+            {
+              action: 'convert',
+              from: 'abc',
+              to: 'xyz',
+              type: 'long',
+            },
+            {
+              action: 'replace',
+              from: 'xyz',
+              pattern: '123',
+              replacement: '456',
+            },
+          ],
+        };
+
+        const result = validateStreamlang(dsl, { validateTypes: true });
+
+        // Set creates string field 'abc'
+        // Convert creates number field 'xyz' from 'abc'
+        // Replace expects string but xyz is number - should fail
+        expect(result.isValid).toBe(false);
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0].type).toBe('type_mismatch');
+        expect(result.errors[0].field).toBe('xyz');
+        expect(result.errors[0].expectedType).toBe('string');
+        expect(result.errors[0].actualType).toBe('number');
+      });
+
       it('should infer number type from grok with :int suffix', () => {
         const dsl: StreamlangDSL = {
           steps: [
@@ -748,6 +784,58 @@ describe('validateStreamlang', () => {
               from: 'attributes.value',
               pattern: '42',
               replacement: '100',
+            },
+          ],
+        };
+
+        const result = validateStreamlang(dsl, { validateTypes: true });
+
+        expect(result.isValid).toBe(false);
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0].type).toBe('type_mismatch');
+        expect(result.errors[0].field).toBe('attributes.value');
+        expect(result.errors[0].expectedType).toBe('string');
+        expect(result.errors[0].actualType).toBe('number');
+      });
+
+      it('should detect grok processor used on non-string field', () => {
+        const dsl: StreamlangDSL = {
+          steps: [
+            {
+              action: 'set',
+              to: 'attributes.value',
+              value: 42,
+            },
+            {
+              action: 'grok',
+              from: 'attributes.value',
+              patterns: ['%{NUMBER:attributes.parsed}'],
+            },
+          ],
+        };
+
+        const result = validateStreamlang(dsl, { validateTypes: true });
+
+        expect(result.isValid).toBe(false);
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0].type).toBe('type_mismatch');
+        expect(result.errors[0].field).toBe('attributes.value');
+        expect(result.errors[0].expectedType).toBe('string');
+        expect(result.errors[0].actualType).toBe('number');
+      });
+
+      it('should detect dissect processor used on non-string field', () => {
+        const dsl: StreamlangDSL = {
+          steps: [
+            {
+              action: 'set',
+              to: 'attributes.value',
+              value: 42,
+            },
+            {
+              action: 'dissect',
+              from: 'attributes.value',
+              pattern: '%{attributes.first} %{attributes.second}',
             },
           ],
         };

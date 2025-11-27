@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { StreamlangDSL } from '../../types/streamlang';
 import type { StreamlangProcessorDefinition } from '../../types/processors';
 import { flattenSteps } from '../transpilers/shared/flatten_steps';
 import { isAlwaysCondition } from '../../types/conditions';
+import { parseGrokPattern, parseDissectPattern } from '../../types/utils';
 
 /**
  * Supported field types for type tracking
@@ -29,6 +31,24 @@ export interface StreamlangValidationError {
   actualType?: FieldType;
   conflictingTypes?: FieldType[];
 }
+
+/**
+ * Human-readable labels for validation error types
+ */
+export const validationErrorTypeLabels = {
+  non_namespaced_field: i18n.translate('xpack.streamlang.validation.nonNamespacedField', {
+    defaultMessage: 'Non-namespaced field',
+  }),
+  reserved_field: i18n.translate('xpack.streamlang.validation.reservedField', {
+    defaultMessage: 'Reserved field',
+  }),
+  type_mismatch: i18n.translate('xpack.streamlang.validation.typeMismatch', {
+    defaultMessage: 'Type mismatch',
+  }),
+  mixed_type: i18n.translate('xpack.streamlang.validation.mixedType', {
+    defaultMessage: 'Mixed type',
+  }),
+};
 
 export interface StreamlangValidationOptions {
   /**
@@ -142,34 +162,27 @@ function extractModifiedFields(processor: StreamlangProcessorDefinition): string
       break;
 
     case 'grok':
-      // For grok processor, extract pattern field names
-      // Pattern format: %{PATTERN:fieldname} or %{PATTERN:fieldname:type}
+      // For grok processor, extract pattern field names using the helper
       if (processor.patterns) {
         const patterns = Array.isArray(processor.patterns)
           ? processor.patterns
           : [processor.patterns];
         patterns.forEach((pattern: string) => {
-          // Extract field names from grok patterns: %{PATTERN:fieldname} or %{PATTERN:fieldname:type}
-          const matches = pattern.matchAll(/%\{[^:}]+:([^:}]+)(?::[^}]+)?\}/g);
-          for (const match of matches) {
-            if (match[1]) {
-              fields.push(match[1]);
-            }
-          }
+          const extractedFields = parseGrokPattern(pattern);
+          extractedFields.forEach((field) => {
+            fields.push(field.name);
+          });
         });
       }
       break;
 
     case 'dissect':
-      // For dissect processor, extract pattern field names
+      // For dissect processor, extract pattern field names using the helper
       if (processor.pattern) {
-        // Dissect patterns contain field extractions like %{fieldname}
-        const matches = processor.pattern.matchAll(/%\{([^}]+)\}/g);
-        for (const match of matches) {
-          if (match[1] && !match[1].startsWith('+') && !match[1].startsWith('->')) {
-            fields.push(match[1]);
-          }
-        }
+        const extractedFields = parseDissectPattern(processor.pattern);
+        extractedFields.forEach((field) => {
+          fields.push(field.name);
+        });
       }
       break;
 
@@ -383,7 +396,19 @@ function getExpectedInputType(
       return null;
 
     case 'grok':
+      // Grok requires string input to parse
+      if (processor.from === fieldName) {
+        return ['string'];
+      }
+      return null;
+
     case 'dissect':
+      // Dissect requires string input to parse
+      if (processor.from === fieldName) {
+        return ['string'];
+      }
+      return null;
+
     case 'rename':
     case 'set':
     case 'append':
@@ -466,11 +491,17 @@ function trackFieldTypesAndValidate(
         if (actualType && actualType !== 'unknown' && !expectedTypes.includes(actualType)) {
           errors.push({
             type: 'type_mismatch',
-            message: `Processor #${i + 1} (${
-              step.action
-            }) expects field "${field}" to be of type ${expectedTypes.join(
-              ' or '
-            )}, but it has type ${actualType}`,
+            message: i18n.translate('xpack.streamlang.validation.typeMismatchMessage', {
+              defaultMessage:
+                'Processor #{processorNumber} ({processorAction}) expects field "{fieldName}" to be of type {expectedTypes}, but it has type {actualType}',
+              values: {
+                processorNumber: i + 1,
+                processorAction: step.action,
+                fieldName: field,
+                expectedTypes: expectedTypes.join(' or '),
+                actualType,
+              },
+            }),
             processorId,
             field,
             expectedType: expectedTypes.length === 1 ? expectedTypes[0] : expectedTypes,
@@ -507,11 +538,16 @@ function trackFieldTypesAndValidate(
           if (existingPotentialTypes.size > 1) {
             errors.push({
               type: 'mixed_type',
-              message: `Field "${field}" has mixed types due to conditional processor #${i + 1} (${
-                step.action
-              }). It can be ${Array.from(existingPotentialTypes).join(
-                ' or '
-              )}, which makes downstream usage ambiguous.`,
+              message: i18n.translate('xpack.streamlang.validation.mixedTypeMessage', {
+                defaultMessage:
+                  'Field "{fieldName}" has mixed types due to conditional processor #{processorNumber} ({processorAction}). It can be {conflictingTypes}, which makes downstream usage ambiguous.',
+                values: {
+                  fieldName: field,
+                  processorNumber: i + 1,
+                  processorAction: step.action,
+                  conflictingTypes: Array.from(existingPotentialTypes).join(' or '),
+                },
+              }),
               processorId,
               field,
               conflictingTypes: Array.from(existingPotentialTypes),
@@ -640,9 +676,15 @@ export function validateStreamlang(
         for (const field of nonNamespacedFields) {
           errors.push({
             type: 'non_namespaced_field',
-            message: `The field "${field}" generated by processor #${i + 1} (${
-              step.action
-            }) does not match the streams recommended schema - put custom fields into attributes, body.structured or resource.attributes`,
+            message: i18n.translate('xpack.streamlang.validation.nonNamespacedFieldMessage', {
+              defaultMessage:
+                'The field "{fieldName}" generated by processor #{processorNumber} ({processorAction}) does not match the streams recommended schema - put custom fields into attributes, body.structured or resource.attributes',
+              values: {
+                fieldName: field,
+                processorNumber: i + 1,
+                processorAction: step.action,
+              },
+            }),
             processorId,
             field,
           });
@@ -660,9 +702,15 @@ export function validateStreamlang(
         for (const field of reservedFieldViolations) {
           errors.push({
             type: 'reserved_field',
-            message: `Processor #${i + 1} (${
-              step.action
-            }) is trying to modify reserved field "${field}"`,
+            message: i18n.translate('xpack.streamlang.validation.reservedFieldMessage', {
+              defaultMessage:
+                'Processor #{processorNumber} ({processorAction}) is trying to modify reserved field "{fieldName}"',
+              values: {
+                processorNumber: i + 1,
+                processorAction: step.action,
+                fieldName: field,
+              },
+            }),
             processorId,
             field,
           });

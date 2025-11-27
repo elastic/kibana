@@ -21,6 +21,7 @@ import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Streams } from '@kbn/streams-schema';
+import { validationErrorTypeLabels } from '@kbn/streamlang';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ManagementBottomBar } from '../management_bottom_bar';
@@ -317,18 +318,14 @@ const StepsEditor = React.memo(() => {
             >
               <EuiText size="s">
                 <ul>
-                  {allValidationErrors.map((error, idx) => (
-                    <li key={idx}>
-                      <strong>{error.type}:</strong> {error.message}
-                      {error.field && (
-                        <FormattedMessage
-                          id="xpack.streams.streamDetailView.managementTab.enrichment.validationErrors.fieldLabel"
-                          defaultMessage=" (field: {field})"
-                          values={{ field: <EuiCode>{error.field}</EuiCode> }}
-                        />
-                      )}
-                    </li>
-                  ))}
+                  {allValidationErrors.map((error, idx) => {
+                    const errorTypeLabel = validationErrorTypeLabels[error.type];
+                    return (
+                      <li key={idx}>
+                        <strong>{errorTypeLabel}:</strong> {error.message}
+                      </li>
+                    );
+                  })}
                 </ul>
               </EuiText>
             </EuiAccordion>
