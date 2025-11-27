@@ -16,6 +16,8 @@ const rankingOrder = [
   fieldConstants.ERROR_EXCEPTION_TYPE_FIELD,
 ] as const;
 
-export const getLogExceptionTypeFieldWithFallback = (doc: LogDocumentOverview) => {
+export const getLogExceptionTypeFieldWithFallback = (
+  doc: Record<string, unknown> | LogDocumentOverview
+) => {
   return getLogFieldWithFallback(doc, rankingOrder);
 };

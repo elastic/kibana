@@ -18,116 +18,138 @@ describe('getLogExceptionTypeFieldWithFallback', () => {
     'data_stream.dataset': 'logs',
   });
 
-  it(`returns ${OTEL_EXCEPTION_TYPE_FIELD} when present`, () => {
-    const doc: LogDocumentOverview = {
-      ...createBaseDoc(),
-      [OTEL_EXCEPTION_TYPE_FIELD]: 'ProgrammingError',
-    };
+  describe('field priority', () => {
+    it(`returns ${OTEL_EXCEPTION_TYPE_FIELD} when present`, () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        [OTEL_EXCEPTION_TYPE_FIELD]: 'ProgrammingError',
+      };
 
-    const result = getLogExceptionTypeFieldWithFallback(doc);
+      const result = getLogExceptionTypeFieldWithFallback(doc);
 
-    expect(result).toEqual({
-      field: OTEL_EXCEPTION_TYPE_FIELD,
-      value: 'ProgrammingError',
+      expect(result).toEqual({
+        field: OTEL_EXCEPTION_TYPE_FIELD,
+        value: 'ProgrammingError',
+      });
+    });
+
+    it(`prioritizes ${OTEL_EXCEPTION_TYPE_FIELD} even when ${ERROR_EXCEPTION_TYPE_FIELD} also exists`, () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        [OTEL_EXCEPTION_TYPE_FIELD]: 'ProgrammingError',
+        [ERROR_EXCEPTION_TYPE_FIELD]: 'UndefinedTable',
+      };
+
+      const result = getLogExceptionTypeFieldWithFallback(doc);
+
+      expect(result).toEqual({
+        field: OTEL_EXCEPTION_TYPE_FIELD,
+        value: 'ProgrammingError',
+      });
+      expect(result.value).not.toBe('UndefinedTable');
     });
   });
 
-  it(`falls back to ${ERROR_EXCEPTION_TYPE_FIELD} when ${OTEL_EXCEPTION_TYPE_FIELD} is not present`, () => {
-    const doc: LogDocumentOverview = {
-      ...createBaseDoc(),
-      [ERROR_EXCEPTION_TYPE_FIELD]: 'UndefinedTable',
-    };
+  describe('fallback behavior', () => {
+    it(`falls back to ${ERROR_EXCEPTION_TYPE_FIELD} when ${OTEL_EXCEPTION_TYPE_FIELD} is not present`, () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        [ERROR_EXCEPTION_TYPE_FIELD]: 'UndefinedTable',
+      };
 
-    const result = getLogExceptionTypeFieldWithFallback(doc);
+      const result = getLogExceptionTypeFieldWithFallback(doc);
 
-    expect(result).toEqual({
-      field: ERROR_EXCEPTION_TYPE_FIELD,
-      value: 'UndefinedTable',
+      expect(result).toEqual({
+        field: ERROR_EXCEPTION_TYPE_FIELD,
+        value: 'UndefinedTable',
+      });
+    });
+
+    it(`falls back to ${ERROR_EXCEPTION_TYPE_FIELD} when ${OTEL_EXCEPTION_TYPE_FIELD} is null`, () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        [OTEL_EXCEPTION_TYPE_FIELD]: null as any,
+        [ERROR_EXCEPTION_TYPE_FIELD]: 'UndefinedTable',
+      };
+
+      const result = getLogExceptionTypeFieldWithFallback(doc);
+
+      expect(result).toEqual({
+        field: ERROR_EXCEPTION_TYPE_FIELD,
+        value: 'UndefinedTable',
+      });
+    });
+
+    it(`falls back to ${ERROR_EXCEPTION_TYPE_FIELD} when ${OTEL_EXCEPTION_TYPE_FIELD} is undefined`, () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        [ERROR_EXCEPTION_TYPE_FIELD]: 'ValueError',
+      };
+
+      const result = getLogExceptionTypeFieldWithFallback(doc);
+
+      expect(result).toEqual({
+        field: ERROR_EXCEPTION_TYPE_FIELD,
+        value: 'ValueError',
+      });
     });
   });
 
-  it(`falls back to ${ERROR_EXCEPTION_TYPE_FIELD} when ${OTEL_EXCEPTION_TYPE_FIELD} is null`, () => {
-    const doc: LogDocumentOverview = {
-      ...createBaseDoc(),
-      [OTEL_EXCEPTION_TYPE_FIELD]: null as any,
-      [ERROR_EXCEPTION_TYPE_FIELD]: 'UndefinedTable',
-    };
+  describe('missing fields', () => {
+    it(`returns undefined field when neither ${OTEL_EXCEPTION_TYPE_FIELD} nor ${ERROR_EXCEPTION_TYPE_FIELD} are present`, () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+      };
 
-    const result = getLogExceptionTypeFieldWithFallback(doc);
+      const result = getLogExceptionTypeFieldWithFallback(doc);
 
-    expect(result).toEqual({
-      field: ERROR_EXCEPTION_TYPE_FIELD,
-      value: 'UndefinedTable',
+      expect(result).toEqual({
+        field: undefined,
+      });
+    });
+
+    it('returns undefined field when both fields are null', () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        [OTEL_EXCEPTION_TYPE_FIELD]: null as any,
+        [ERROR_EXCEPTION_TYPE_FIELD]: null as any,
+      };
+
+      const result = getLogExceptionTypeFieldWithFallback(doc);
+
+      expect(result).toEqual({
+        field: undefined,
+      });
     });
   });
 
-  it(`falls back to ${ERROR_EXCEPTION_TYPE_FIELD} when ${OTEL_EXCEPTION_TYPE_FIELD} is undefined`, () => {
-    const doc: LogDocumentOverview = {
-      ...createBaseDoc(),
-      [ERROR_EXCEPTION_TYPE_FIELD]: 'ValueError',
-    };
+  describe('array values', () => {
+    it(`handles array values for ${OTEL_EXCEPTION_TYPE_FIELD}`, () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        [OTEL_EXCEPTION_TYPE_FIELD]: ['ProgrammingError', 'UndefinedTable'] as any,
+      };
 
-    const result = getLogExceptionTypeFieldWithFallback(doc);
+      const result = getLogExceptionTypeFieldWithFallback(doc);
 
-    expect(result).toEqual({
-      field: ERROR_EXCEPTION_TYPE_FIELD,
-      value: 'ValueError',
+      expect(result).toEqual({
+        field: OTEL_EXCEPTION_TYPE_FIELD,
+        value: ['ProgrammingError', 'UndefinedTable'],
+      });
     });
-  });
 
-  it(`returns undefined field when neither ${OTEL_EXCEPTION_TYPE_FIELD} nor ${ERROR_EXCEPTION_TYPE_FIELD} are present`, () => {
-    const doc: LogDocumentOverview = {
-      ...createBaseDoc(),
-    };
+    it(`handles array values for ${ERROR_EXCEPTION_TYPE_FIELD} when ${OTEL_EXCEPTION_TYPE_FIELD} is not present`, () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        [ERROR_EXCEPTION_TYPE_FIELD]: ['Error', 'withMessage', 'withStack'] as any,
+      };
 
-    const result = getLogExceptionTypeFieldWithFallback(doc);
+      const result = getLogExceptionTypeFieldWithFallback(doc);
 
-    expect(result).toEqual({
-      field: undefined,
-    });
-  });
-
-  it('returns undefined field when both fields are null', () => {
-    const doc: LogDocumentOverview = {
-      ...createBaseDoc(),
-      [OTEL_EXCEPTION_TYPE_FIELD]: null as any,
-      [ERROR_EXCEPTION_TYPE_FIELD]: null as any,
-    };
-
-    const result = getLogExceptionTypeFieldWithFallback(doc);
-
-    expect(result).toEqual({
-      field: undefined,
-    });
-  });
-
-  it(`prioritizes ${OTEL_EXCEPTION_TYPE_FIELD} even when ${ERROR_EXCEPTION_TYPE_FIELD} also exists`, () => {
-    const doc: LogDocumentOverview = {
-      ...createBaseDoc(),
-      [OTEL_EXCEPTION_TYPE_FIELD]: 'ProgrammingError',
-      [ERROR_EXCEPTION_TYPE_FIELD]: 'UndefinedTable',
-    };
-
-    const result = getLogExceptionTypeFieldWithFallback(doc);
-
-    expect(result).toEqual({
-      field: OTEL_EXCEPTION_TYPE_FIELD,
-      value: 'ProgrammingError',
-    });
-    expect(result.value).not.toBe('UndefinedTable');
-  });
-
-  it(`handles array values for ${OTEL_EXCEPTION_TYPE_FIELD}`, () => {
-    const doc: LogDocumentOverview = {
-      ...createBaseDoc(),
-      [OTEL_EXCEPTION_TYPE_FIELD]: ['ProgrammingError', 'UndefinedTable'] as any,
-    };
-
-    const result = getLogExceptionTypeFieldWithFallback(doc);
-
-    expect(result).toEqual({
-      field: OTEL_EXCEPTION_TYPE_FIELD,
-      value: ['ProgrammingError', 'UndefinedTable'],
+      expect(result).toEqual({
+        field: ERROR_EXCEPTION_TYPE_FIELD,
+        value: ['Error', 'withMessage', 'withStack'],
+      });
     });
   });
 });
