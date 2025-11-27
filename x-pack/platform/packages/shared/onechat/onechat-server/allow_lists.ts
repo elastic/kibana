@@ -21,11 +21,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   'observability.get_alerts',
   'observability.get_services',
   'observability.get_downstream_dependencies',
-  'observability.get_error_by_id',
-  'observability.get_transaction_by_id',
-  'observability.get_trace_overview_by_id',
-  'observability.get_span_by_id',
-  'observability.get_error_group_by_key',
 ];
 
 /**
