@@ -64,6 +64,7 @@ import { useCellActionsOptions } from '../../hooks/trigger_actions_alert_table/u
 import { useAlertsTableFieldsBrowserOptions } from '../../hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options';
 import { AlertTableCellContextProvider } from '../../configurations/security_solution_detections/cell_value_context';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
+import { DETECTIONS_TABLE_IDS } from '../../constants';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
 
@@ -496,11 +497,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
               actionsColumnWidth={leadingControlColumn.width}
               additionalBulkActions={bulkActions}
               fieldsBrowserOptions={
-                tableType === TableId.alertsOnAlertsPage ||
-                tableType === TableId.alertsOnAttacksPage ||
-                tableType === TableId.alertsOnRuleDetailsPage
-                  ? fieldsBrowserOptions
-                  : undefined
+                DETECTIONS_TABLE_IDS.includes(tableType) ? fieldsBrowserOptions : undefined
               }
               cellActionsOptions={cellActionsOptions}
               showInspectButton

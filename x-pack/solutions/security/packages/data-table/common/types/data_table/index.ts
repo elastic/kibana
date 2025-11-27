@@ -72,10 +72,12 @@ const TableIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TableId.alertsOnAttacksPage),
   runtimeTypes.literal(TableId.alertsOnAlertSummaryPage),
   runtimeTypes.literal(TableId.test),
+  runtimeTypes.literal(TableId.alternateTest),
   runtimeTypes.literal(TableId.rulePreview),
   runtimeTypes.literal(TableId.kubernetesPageSessions),
   runtimeTypes.literal(TableId.alertsOnCasePage),
   runtimeTypes.literal(TableId.alertsRiskInputs),
+  runtimeTypes.literal(TableId.riskInputs),
 ]);
 
 export type TableIdLiteral = runtimeTypes.TypeOf<typeof TableIdLiteralRt>;

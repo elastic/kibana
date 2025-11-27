@@ -13,7 +13,6 @@ import {
   dataTableActions,
   dataTableSelectors,
   tableDefaults,
-  TableId,
 } from '@kbn/securitysolution-data-table';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
 import { getTelemetryEvent } from '@kbn/grouping/src/telemetry/const';
@@ -30,6 +29,7 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/h
 import { AdditionalFiltersAction } from './additional_filters_action';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { DETECTIONS_TABLE_IDS } from '../../constants';
 
 const { changeViewMode } = dataTableActions;
 
@@ -138,11 +138,7 @@ const AdditionalToolbarControlsComponent = ({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m">
-      {[
-        TableId.alertsOnRuleDetailsPage,
-        TableId.alertsOnAlertsPage,
-        TableId.alertsOnAttacksPage,
-      ].includes(tableType) && (
+      {DETECTIONS_TABLE_IDS.includes(tableType) && (
         <EuiFlexItem grow={false} data-test-subj="summary-view-selector">
           <SummaryViewSelector viewSelected={tableView} onViewChange={handleChangeTableView} />
         </EuiFlexItem>
