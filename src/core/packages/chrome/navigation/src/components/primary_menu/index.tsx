@@ -84,7 +84,7 @@ export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
           <p id={mainNavigationInstructionsId}>
             {i18n.translate('core.ui.chrome.sideNavigation.primaryMenuInstructions', {
               defaultMessage:
-                'You are in the main navigation primary menu. Use Up and Down arrow keys to navigate the menu',
+                'You are in the main navigation primary menu. Use Up and Down arrow keys to navigate the menu.',
             })}
           </p>
         </EuiScreenReaderOnly>

@@ -43,7 +43,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
         class="emotion-euiScreenReaderOnly"
         id="main-navigation-instructions_generated-id"
       >
-        You are in the main navigation primary menu. Use Up and Down arrow keys to navigate the menu
+        You are in the main navigation primary menu. Use Up and Down arrow keys to navigate the menu.
       </p>
       <nav
         aria-label="Main"
