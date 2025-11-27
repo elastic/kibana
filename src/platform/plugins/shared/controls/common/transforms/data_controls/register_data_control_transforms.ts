@@ -13,10 +13,12 @@ import { extractReferences, injectReferences } from './references';
 export const registerDataControlTransforms = (
   embeddable: EmbeddableSetup,
   type: string,
-  refName: string
+  refName: string,
+  legacyRefNames: string[]
 ) => {
   embeddable.registerTransforms(type, {
     transformIn: (state) => extractReferences(state, refName),
-    transformOut: (state, references, id) => injectReferences(id, state, refName, references),
+    transformOut: (state, references, id) =>
+      injectReferences(id, state, legacyRefNames, references),
   });
 };

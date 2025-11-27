@@ -36,15 +36,21 @@ export function extractReferences(
 export function injectReferences(
   id: string | undefined,
   state: StoredDataControlState,
-  refName: string,
+  refNames: string[],
   references: Reference[] = []
 ): DataControlState {
   let { dataViewRefName } = state;
+  let dataViewRef: Reference | undefined;
   if (!dataViewRefName && id) {
     // backwards compatibility for when we didn't store the ref name with the saved object (<v9.2.0)
-    dataViewRefName = getLegacyReferenceName(id, refName);
+    for (const refName of refNames) {
+      dataViewRefName = getLegacyReferenceName(id, refName);
+      dataViewRef = references.find(({ name }) => name === dataViewRefName);
+      if (dataViewRef) break; // found the reference - so stop looking
+    }
+  } else {
+    dataViewRef = references.find(({ name }) => name === dataViewRefName);
   }
-  const dataViewRef = references.find(({ name }) => name === dataViewRefName);
   return { ...omit(state, 'dataViewRefName'), dataViewId: dataViewRef?.id ?? '' };
 }
 
