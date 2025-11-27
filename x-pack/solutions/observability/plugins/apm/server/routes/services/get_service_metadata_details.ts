@@ -234,14 +234,14 @@ export async function getServiceMetadataDetails({
 
   const totalNumberInstances = aggregations?.totalNumberInstances.value;
 
-  const kubernetes = event['kubernetes.container.id'];
-  const container = event['container.id'];
+  const kubernetes = event.containsFields('kubernetes');
+  const container = event.containsFields('container');
   const host = event[HOST_OS_PLATFORM];
 
   const containerDetails =
-    host || container || totalNumberInstances || kubernetes
+    host || kubernetes || totalNumberInstances || container
       ? {
-          type: (!!kubernetes ? 'Kubernetes' : 'Docker') as ContainerType,
+          type: (kubernetes ? 'Kubernetes' : 'Docker') as ContainerType,
           os: host,
           totalNumberInstances,
           ids: aggregations?.containerIds.buckets.map((bucket) => bucket.key as string),

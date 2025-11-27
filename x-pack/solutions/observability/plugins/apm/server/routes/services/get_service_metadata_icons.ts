@@ -25,7 +25,6 @@ import {
   SERVICE_FRAMEWORK_NAME,
   TELEMETRY_SDK_NAME,
   TELEMETRY_SDK_LANGUAGE,
-  KUBERNETES_CONTAINER_ID,
 } from '../../../common/es_fields/apm';
 import type { ContainerType } from '../../../common/service_metadata';
 import { SERVICE_METADATA_KUBERNETES_KEYS } from '../../../common/service_metadata';
@@ -113,7 +112,7 @@ export async function getServiceMetadataIcons({
       event[TELEMETRY_SDK_NAME] ?? null
     ) ?? undefined;
 
-  const containerType = event[KUBERNETES_CONTAINER_ID] ? 'Kubernetes' : 'Docker';
+  const containerType = event.containsFields('kubernetes') ? 'Kubernetes' : 'Docker';
 
   const serverlessType = getServerlessTypeFromCloudData(
     event[CLOUD_PROVIDER],
