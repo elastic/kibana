@@ -23,7 +23,8 @@ export function getStepsCollectionSchema(
   const stepNode =
     workflowExecutionGraph.getNode(stepId) ||
     workflowExecutionGraph.getNode(`enterForeach_${stepId}`) ||
-    workflowExecutionGraph.getNode(`enterCondition_${stepId}`);
+    workflowExecutionGraph.getNode(`enterCondition_${stepId}`) ||
+    workflowExecutionGraph.getNode(`enterSwitch_${stepId}`);
 
   if (!stepNode) {
     throw new Error(`Step with id ${stepId} not found in the workflow graph.`);

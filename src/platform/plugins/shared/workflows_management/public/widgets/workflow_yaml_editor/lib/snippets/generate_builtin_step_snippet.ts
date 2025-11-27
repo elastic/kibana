@@ -49,6 +49,29 @@ export function generateBuiltInStepSnippet(
         steps: [{ name: 'then-step', type: '# Add step type here' }],
       };
       break;
+    case 'switch':
+      parameters = {
+        switch: '{{ steps.step_1.output.status }}',
+        cases: [
+          {
+            name: 'case-1',
+            match: 'active',
+            steps: [{ name: 'step-1', type: '# Add step type here' }],
+          },
+          {
+            name: 'case-2',
+            match: 'inactive',
+            steps: [{ name: 'step-2', type: '# Add step type here' }],
+          },
+        ],
+        default: { steps: [{ name: 'default-step', type: '# Add step type here' }] },
+      };
+      // Note: The switch field supports both {{ }} and ${{ }} syntax:
+      // - {{ }} for template substitution: switch: "{{ steps.step_1.output.status }}"
+      // - ${{ }} for expressions with filters: switch: "${{ inputs.a | plus: inputs.b }}"
+      // Math filters: plus, minus, times, divided_by, modulo
+      // Example: "${{ inputs.a | times: 2 | plus: inputs.b }}"
+      break;
     case 'parallel':
       parameters = {
         branches: [

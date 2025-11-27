@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod';
 import { GraphNodeSchema } from './base';
-import { IfStepSchema } from '../../../spec/schema';
+import { IfStepSchema, SwitchStepSchema } from '../../../spec/schema';
 
 export const EnterIfNodeConfigurationSchema = IfStepSchema.omit({
   steps: true,
@@ -45,3 +45,51 @@ export const ExitIfNodeSchema = GraphNodeSchema.extend({
 });
 
 export type ExitIfNode = z.infer<typeof ExitIfNodeSchema>;
+
+export const EnterSwitchNodeConfigurationSchema = SwitchStepSchema.omit({
+  cases: true,
+  default: true,
+});
+
+export const EnterSwitchNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('enter-switch'),
+  exitNodeId: z.string(),
+  configuration: EnterSwitchNodeConfigurationSchema,
+});
+export type EnterSwitchNode = z.infer<typeof EnterSwitchNodeSchema>;
+
+export const EnterSwitchCaseNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('enter-switch-case'),
+  caseName: z.string(),
+  match: z.union([z.string(), z.number(), z.boolean()]),
+});
+export type EnterSwitchCaseNode = z.infer<typeof EnterSwitchCaseNodeSchema>;
+
+export const ExitSwitchCaseNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('exit-switch-case'),
+  startNodeId: z.string(),
+});
+export type ExitSwitchCaseNode = z.infer<typeof ExitSwitchCaseNodeSchema>;
+
+export const EnterSwitchDefaultNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('enter-switch-default'),
+});
+export type EnterSwitchDefaultNode = z.infer<typeof EnterSwitchDefaultNodeSchema>;
+
+export const ExitSwitchDefaultNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('exit-switch-default'),
+  startNodeId: z.string(),
+});
+export type ExitSwitchDefaultNode = z.infer<typeof ExitSwitchDefaultNodeSchema>;
+
+export const ExitSwitchNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('exit-switch'),
+  startNodeId: z.string(),
+});
+export type ExitSwitchNode = z.infer<typeof ExitSwitchNodeSchema>;

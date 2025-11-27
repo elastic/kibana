@@ -298,6 +298,20 @@ export const getOutputSchemaForStepType = (stepType: string) => {
     return connector.outputSchema;
   }
 
+  // Handle built-in step types
+  if (stepType === 'switch') {
+    return z.object({
+      switchValue: z.any().optional(),
+      selectedCase: z.string().optional(),
+      evaluation: z
+        .object({
+          matched: z.boolean(),
+          checkedCases: z.array(z.string()),
+        })
+        .optional(),
+    });
+  }
+
   // Handle internal actions with pattern matching
   // TODO: add output schema support for elasticsearch.request and kibana.request connectors
   if (stepType.startsWith('elasticsearch.')) {

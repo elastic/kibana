@@ -18,8 +18,14 @@ import {
 import {
   EnterConditionBranchNodeSchema,
   EnterIfNodeSchema,
+  EnterSwitchCaseNodeSchema,
+  EnterSwitchDefaultNodeSchema,
+  EnterSwitchNodeSchema,
   ExitConditionBranchNodeSchema,
   ExitIfNodeSchema,
+  ExitSwitchCaseNodeSchema,
+  ExitSwitchDefaultNodeSchema,
+  ExitSwitchNodeSchema,
 } from './branching_nodes';
 import { EnterForeachNodeSchema, ExitForeachNodeSchema } from './loop_nodes';
 import {
@@ -50,6 +56,12 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   ExitIfNodeSchema,
   EnterConditionBranchNodeSchema,
   ExitConditionBranchNodeSchema,
+  EnterSwitchNodeSchema,
+  ExitSwitchNodeSchema,
+  EnterSwitchCaseNodeSchema,
+  ExitSwitchCaseNodeSchema,
+  EnterSwitchDefaultNodeSchema,
+  ExitSwitchDefaultNodeSchema,
   EnterForeachNodeSchema,
   ExitForeachNodeSchema,
   EnterRetryNodeSchema,

@@ -326,6 +326,70 @@ export const getIfStepSchema = (stepSchema: z.ZodType, loose: boolean = false) =
   return schema;
 };
 
+export const SwitchStepSchema = BaseStepSchema.extend({
+  type: z.literal('switch'),
+  switch: z.string(),
+  cases: z
+    .array(
+      z.object({
+        name: z.string().min(1),
+        match: z.union([z.string(), z.number(), z.boolean()]),
+        steps: z.array(BaseStepSchema).min(1),
+      })
+    )
+    .min(1)
+    .refine(
+      (cases) => {
+        const caseNames = cases.map((c) => c.name);
+        return caseNames.length === new Set(caseNames).size;
+      },
+      {
+        message: 'Case names must be unique within a switch step',
+      }
+    ),
+  default: z
+    .object({
+      steps: z.array(BaseStepSchema).min(1),
+    })
+    .optional(),
+});
+export type SwitchStep = z.infer<typeof SwitchStepSchema>;
+
+export const getSwitchStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = SwitchStepSchema.extend({
+    cases: z
+      .array(
+        z.object({
+          name: z.string().min(1),
+          match: z.union([z.string(), z.number(), z.boolean()]),
+          steps: z.array(stepSchema).min(1),
+        })
+      )
+      .min(1)
+      .refine(
+        (cases) => {
+          const caseNames = cases.map((c) => c.name);
+          return caseNames.length === new Set(caseNames).size;
+        },
+        {
+          message: 'Case names must be unique within a switch step',
+        }
+      ),
+    default: z
+      .object({
+        steps: z.array(stepSchema).min(1),
+      })
+      .optional(),
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
+};
+
 export const ParallelStepSchema = BaseStepSchema.extend({
   type: z.literal('parallel'),
   branches: z.array(
@@ -433,6 +497,7 @@ const StepSchema = z.lazy(() =>
   z.union([
     ForEachStepSchema,
     IfStepSchema,
+    SwitchStepSchema,
     WaitStepSchema,
     HttpStepSchema,
     ElasticsearchStepSchema,
@@ -447,6 +512,7 @@ export type Step = z.infer<typeof StepSchema>;
 export const BuiltInStepTypes = [
   ForEachStepSchema.shape.type._def.value,
   IfStepSchema.shape.type._def.value,
+  SwitchStepSchema.shape.type._def.value,
   ParallelStepSchema.shape.type._def.value,
   MergeStepSchema.shape.type._def.value,
   WaitStepSchema.shape.type._def.value,

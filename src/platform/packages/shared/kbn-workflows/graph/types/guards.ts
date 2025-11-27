@@ -17,8 +17,14 @@ import type {
 import type {
   EnterConditionBranchNode,
   EnterIfNode,
+  EnterSwitchCaseNode,
+  EnterSwitchDefaultNode,
+  EnterSwitchNode,
   ExitConditionBranchNode,
   ExitIfNode,
+  ExitSwitchCaseNode,
+  ExitSwitchDefaultNode,
+  ExitSwitchNode,
 } from './nodes/branching_nodes';
 import type { EnterForeachNode, ExitForeachNode } from './nodes/loop_nodes';
 import type {
@@ -62,6 +68,24 @@ export const isEnterForeach = (node: GraphNodeUnion): node is EnterForeachNode =
 
 export const isExitForeach = (node: GraphNodeUnion): node is ExitForeachNode =>
   node.type === 'exit-foreach';
+
+export const isEnterSwitch = (node: GraphNodeUnion): node is EnterSwitchNode =>
+  node.type === 'enter-switch';
+
+export const isExitSwitch = (node: GraphNodeUnion): node is ExitSwitchNode =>
+  node.type === 'exit-switch';
+
+export const isEnterSwitchCase = (node: GraphNodeUnion): node is EnterSwitchCaseNode =>
+  node.type === 'enter-switch-case';
+
+export const isExitSwitchCase = (node: GraphNodeUnion): node is ExitSwitchCaseNode =>
+  node.type === 'exit-switch-case';
+
+export const isEnterSwitchDefault = (node: GraphNodeUnion): node is EnterSwitchDefaultNode =>
+  node.type === 'enter-switch-default';
+
+export const isExitSwitchDefault = (node: GraphNodeUnion): node is ExitSwitchDefaultNode =>
+  node.type === 'exit-switch-default';
 
 export const isEnterRetry = (node: GraphNodeUnion): node is EnterRetryNode =>
   node.type === 'enter-retry';

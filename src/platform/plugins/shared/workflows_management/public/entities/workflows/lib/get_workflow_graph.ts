@@ -150,6 +150,51 @@ function transformYamlToNodesAndEdges(
       }
     }
 
+    if (step.type === 'switch' && 'cases' in step && step.cases) {
+      // Handle switch cases
+      for (const switchCase of step.cases) {
+        if (switchCase.steps && switchCase.steps.length > 0) {
+          const { nodes: caseNodes, edges: caseEdges } = transformYamlToNodesAndEdges(
+            [],
+            switchCase.steps as any
+          );
+          nodes.push(...caseNodes);
+          edges.push(...caseEdges);
+
+          // Create edge from switch step to first step in case
+          const firstCaseStepId = switchCase.steps[0].name.toLowerCase().replace(/\s+/g, '-');
+          edges.push({
+            id: `${id}:${switchCase.name}:${firstCaseStepId}`,
+            source: id,
+            target: firstCaseStepId,
+          });
+        }
+      }
+
+      // Handle default branch if present
+      if (
+        'default' in step &&
+        step.default &&
+        step.default.steps &&
+        step.default.steps.length > 0
+      ) {
+        const { nodes: defaultNodes, edges: defaultEdges } = transformYamlToNodesAndEdges(
+          [],
+          step.default.steps as any
+        );
+        nodes.push(...defaultNodes);
+        edges.push(...defaultEdges);
+
+        // Create edge from switch step to first step in default
+        const firstDefaultStepId = step.default.steps[0].name.toLowerCase().replace(/\s+/g, '-');
+        edges.push({
+          id: `${id}:default:${firstDefaultStepId}`,
+          source: id,
+          target: firstDefaultStepId,
+        });
+      }
+    }
+
     if (step.type === 'atomic' && 'steps' in step && step.steps) {
       const { nodes: atomicNodes, edges: atomicEdges } = transformYamlToNodesAndEdges(
         [],

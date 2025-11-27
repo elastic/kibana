@@ -326,6 +326,75 @@ describe('WorkflowTemplatingEngine', () => {
         expect(actual).toEqual('foo|bar|dak');
       });
     });
+
+    describe('math operations', () => {
+      it('should evaluate plus filter', () => {
+        const template = `{{ inputs.a | plus: inputs.b }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          inputs: {
+            a: 2,
+            b: 3,
+          },
+        });
+        expect(actual).toEqual(5);
+      });
+
+      it('should evaluate minus filter', () => {
+        const template = `{{ inputs.a | minus: inputs.b }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          inputs: {
+            a: 10,
+            b: 3,
+          },
+        });
+        expect(actual).toEqual(7);
+      });
+
+      it('should evaluate times filter', () => {
+        const template = `{{ inputs.a | times: inputs.b }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          inputs: {
+            a: 5,
+            b: 4,
+          },
+        });
+        expect(actual).toEqual(20);
+      });
+
+      it('should evaluate divided_by filter', () => {
+        const template = `{{ inputs.a | divided_by: inputs.b }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          inputs: {
+            a: 10,
+            b: 2,
+          },
+        });
+        expect(actual).toEqual(5);
+      });
+
+      it('should chain math filters', () => {
+        const template = `{{ inputs.a | times: 2 | plus: inputs.b }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          inputs: {
+            a: 5,
+            b: 10,
+          },
+        });
+        expect(actual).toEqual(20);
+      });
+
+      it('should evaluate complex chained expressions', () => {
+        const template = `{{ inputs.a | plus: inputs.b | times: inputs.c }}`;
+        const actual = templatingEngine.evaluateExpression(template, {
+          inputs: {
+            a: 2,
+            b: 3,
+            c: 4,
+          },
+        });
+        expect(actual).toEqual(20); // (2 + 3) * 4 = 20
+      });
+    });
   });
 
   describe('raw value evaluation with ${{ }} syntax', () => {

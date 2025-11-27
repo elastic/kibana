@@ -42,6 +42,12 @@ export type {
   EnterTimeoutZoneNode,
   ExitTimeoutZoneNode,
   GraphNodeUnion,
+  EnterSwitchNode,
+  EnterSwitchCaseNode,
+  EnterSwitchDefaultNode,
+  ExitSwitchNode,
+  ExitSwitchCaseNode,
+  ExitSwitchDefaultNode,
 } from './types';
 
 export {
@@ -66,4 +72,10 @@ export {
   isExitStepTimeoutZone,
   isEnterWorkflowTimeoutZone,
   isExitWorkflowTimeoutZone,
+  isEnterSwitch,
+  isExitSwitch,
+  isEnterSwitchCase,
+  isEnterSwitchDefault,
+  isExitSwitchCase,
+  isExitSwitchDefault,
 } from './types';

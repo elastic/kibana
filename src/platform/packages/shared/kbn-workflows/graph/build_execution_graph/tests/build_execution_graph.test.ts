@@ -15,6 +15,7 @@ import type {
   HttpStep,
   IfStep,
   KibanaStep,
+  SwitchStep,
   WaitStep,
   WorkflowYaml,
 } from '../../../spec/schema';
@@ -24,9 +25,15 @@ import type {
   EnterConditionBranchNode,
   EnterForeachNode,
   EnterIfNode,
+  EnterSwitchCaseNode,
+  EnterSwitchDefaultNode,
+  EnterSwitchNode,
   ExitConditionBranchNode,
   ExitForeachNode,
   ExitIfNode,
+  ExitSwitchCaseNode,
+  ExitSwitchDefaultNode,
+  ExitSwitchNode,
   HttpGraphNode,
   KibanaGraphNode,
   WaitGraphNode,
@@ -1254,6 +1261,282 @@ describe('convertToWorkflowGraph', () => {
         'exitTryBlock_testForeachConnectorStep',
         'exitContinue_testForeachConnectorStep',
       ]);
+    });
+  });
+
+  describe('switch step', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testSwitchStep',
+          type: 'switch',
+          switch: '{{ steps.getData.output.status }}',
+          cases: [
+            {
+              name: 'active',
+              match: 'active',
+              steps: [
+                {
+                  name: 'activeStep1',
+                  type: 'slack',
+                  connectorId: 'slack',
+                  with: {
+                    message: 'Hello from active step 1',
+                  },
+                } as ConnectorStep,
+                {
+                  name: 'activeStep2',
+                  type: 'openai',
+                  connectorId: 'openai',
+                  with: {
+                    message: 'Hello from active step 2',
+                  },
+                } as ConnectorStep,
+              ],
+            },
+            {
+              name: 'inactive',
+              match: 'inactive',
+              steps: [
+                {
+                  name: 'inactiveStep',
+                  type: 'slack',
+                  connectorId: 'slack',
+                  with: {
+                    message: 'Hello from inactive step',
+                  },
+                } as ConnectorStep,
+              ],
+            },
+          ],
+          default: {
+            steps: [
+              {
+                name: 'defaultStep',
+                type: 'slack',
+                connectorId: 'slack',
+                with: {
+                  message: 'Hello from default step',
+                },
+              } as ConnectorStep,
+            ],
+          },
+        } as SwitchStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should return nodes for switch step in correct topological order', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topSort = graphlib.alg.topsort(executionGraph);
+      expect(topSort).toHaveLength(11);
+      // All cases and default branch from enter-switch are parallel (same level)
+      // The order within each branch should be sequential
+      expect(topSort[0]).toBe('enterSwitch_testSwitchStep');
+      expect(topSort).toContain('enterCase_testSwitchStep_active');
+      expect(topSort).toContain('enterCase_testSwitchStep_inactive');
+      expect(topSort).toContain('enterDefault_testSwitchStep');
+      // Within active case branch
+      const activeCaseIndex = topSort.indexOf('enterCase_testSwitchStep_active');
+      expect(topSort[activeCaseIndex + 1]).toBe('activeStep1');
+      expect(topSort[activeCaseIndex + 2]).toBe('activeStep2');
+      expect(topSort[activeCaseIndex + 3]).toBe('exitCase_testSwitchStep_active');
+      // Within inactive case branch
+      const inactiveCaseIndex = topSort.indexOf('enterCase_testSwitchStep_inactive');
+      expect(topSort[inactiveCaseIndex + 1]).toBe('inactiveStep');
+      expect(topSort[inactiveCaseIndex + 2]).toBe('exitCase_testSwitchStep_inactive');
+      // Within default branch
+      const defaultIndex = topSort.indexOf('enterDefault_testSwitchStep');
+      expect(topSort[defaultIndex + 1]).toBe('defaultStep');
+      expect(topSort[defaultIndex + 2]).toBe('exitDefault_testSwitchStep');
+      // Exit switch should be last
+      expect(topSort[topSort.length - 1]).toBe('exitSwitch_testSwitchStep');
+    });
+
+    it('should return correct edges for switch step graph', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const edges = executionGraph.edges();
+      expect(edges).toEqual(
+        expect.arrayContaining([
+          {
+            v: 'enterSwitch_testSwitchStep',
+            w: 'enterCase_testSwitchStep_active',
+          },
+          {
+            v: 'enterCase_testSwitchStep_active',
+            w: 'activeStep1',
+          },
+          {
+            v: 'activeStep1',
+            w: 'activeStep2',
+          },
+          {
+            v: 'activeStep2',
+            w: 'exitCase_testSwitchStep_active',
+          },
+          {
+            v: 'exitCase_testSwitchStep_active',
+            w: 'exitSwitch_testSwitchStep',
+          },
+          {
+            v: 'enterSwitch_testSwitchStep',
+            w: 'enterCase_testSwitchStep_inactive',
+          },
+          {
+            v: 'enterCase_testSwitchStep_inactive',
+            w: 'inactiveStep',
+          },
+          {
+            v: 'inactiveStep',
+            w: 'exitCase_testSwitchStep_inactive',
+          },
+          {
+            v: 'exitCase_testSwitchStep_inactive',
+            w: 'exitSwitch_testSwitchStep',
+          },
+          {
+            v: 'enterSwitch_testSwitchStep',
+            w: 'enterDefault_testSwitchStep',
+          },
+          {
+            v: 'enterDefault_testSwitchStep',
+            w: 'defaultStep',
+          },
+          {
+            v: 'defaultStep',
+            w: 'exitDefault_testSwitchStep',
+          },
+          {
+            v: 'exitDefault_testSwitchStep',
+            w: 'exitSwitch_testSwitchStep',
+          },
+        ])
+      );
+      expect(edges.length).toBeGreaterThanOrEqual(13);
+    });
+
+    it('should configure enter-switch node correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const enterSwitchNode = executionGraph.node('enterSwitch_testSwitchStep');
+      expect(enterSwitchNode).toEqual({
+        id: 'enterSwitch_testSwitchStep',
+        type: 'enter-switch',
+        stepId: 'testSwitchStep',
+        stepType: 'switch',
+        exitNodeId: 'exitSwitch_testSwitchStep',
+        configuration: {
+          name: 'testSwitchStep',
+          type: 'switch',
+          switch: '{{ steps.getData.output.status }}',
+        },
+      } as EnterSwitchNode);
+    });
+
+    it('should configure enter-switch-case nodes correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const enterCaseNode = executionGraph.node('enterCase_testSwitchStep_active');
+      expect(enterCaseNode).toEqual({
+        id: 'enterCase_testSwitchStep_active',
+        type: 'enter-switch-case',
+        caseName: 'active',
+        match: 'active',
+        stepId: 'testSwitchStep',
+        stepType: 'switch',
+      } as EnterSwitchCaseNode);
+    });
+
+    it('should configure exit-switch-case nodes correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const exitCaseNode = executionGraph.node('exitCase_testSwitchStep_active');
+      expect(exitCaseNode).toEqual({
+        id: 'exitCase_testSwitchStep_active',
+        type: 'exit-switch-case',
+        startNodeId: 'enterCase_testSwitchStep_active',
+        stepId: 'testSwitchStep',
+        stepType: 'switch',
+      } as ExitSwitchCaseNode);
+    });
+
+    it('should configure enter-switch-default node correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const enterDefaultNode = executionGraph.node('enterDefault_testSwitchStep');
+      expect(enterDefaultNode).toEqual({
+        id: 'enterDefault_testSwitchStep',
+        type: 'enter-switch-default',
+        stepId: 'testSwitchStep',
+        stepType: 'switch',
+      } as EnterSwitchDefaultNode);
+    });
+
+    it('should configure exit-switch-default node correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const exitDefaultNode = executionGraph.node('exitDefault_testSwitchStep');
+      expect(exitDefaultNode).toEqual({
+        id: 'exitDefault_testSwitchStep',
+        type: 'exit-switch-default',
+        startNodeId: 'enterDefault_testSwitchStep',
+        stepId: 'testSwitchStep',
+        stepType: 'switch',
+      } as ExitSwitchDefaultNode);
+    });
+
+    it('should configure exit-switch node correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const exitSwitchNode = executionGraph.node('exitSwitch_testSwitchStep');
+      expect(exitSwitchNode).toEqual({
+        id: 'exitSwitch_testSwitchStep',
+        type: 'exit-switch',
+        stepId: 'testSwitchStep',
+        stepType: 'switch',
+        startNodeId: 'enterSwitch_testSwitchStep',
+      } as ExitSwitchNode);
+    });
+
+    describe('switch step without default', () => {
+      const workflowDefinitionWithoutDefault = {
+        steps: [
+          {
+            name: 'testSwitchStepWithoutDefault',
+            type: 'switch',
+            switch: '{{ steps.getData.output.status }}',
+            cases: [
+              {
+                name: 'active',
+                match: 'active',
+                steps: [
+                  {
+                    name: 'activeStep',
+                    type: 'slack',
+                    connectorId: 'slack',
+                    with: {
+                      message: 'Hello from active step',
+                    },
+                  } as ConnectorStep,
+                ],
+              },
+            ],
+          } as SwitchStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      it('should handle switch step without default correctly', () => {
+        const executionGraph = convertToWorkflowGraph(workflowDefinitionWithoutDefault as any);
+        const topSort = graphlib.alg.topsort(executionGraph);
+        expect(topSort).toHaveLength(5);
+        expect(topSort).toEqual([
+          'enterSwitch_testSwitchStepWithoutDefault',
+          'enterCase_testSwitchStepWithoutDefault_active',
+          'activeStep',
+          'exitCase_testSwitchStepWithoutDefault_active',
+          'exitSwitch_testSwitchStepWithoutDefault',
+        ]);
+      });
+
+      it('should not have default nodes when default is not provided', () => {
+        const executionGraph = convertToWorkflowGraph(workflowDefinitionWithoutDefault as any);
+        const nodes = executionGraph.nodes();
+        expect(nodes).not.toContain('enterDefault_testSwitchStepWithoutDefault');
+        expect(nodes).not.toContain('exitDefault_testSwitchStepWithoutDefault');
+      });
     });
   });
 });

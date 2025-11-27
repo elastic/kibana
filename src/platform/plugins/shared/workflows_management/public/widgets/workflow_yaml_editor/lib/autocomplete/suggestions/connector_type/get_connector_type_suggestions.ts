@@ -15,6 +15,7 @@ import {
   IfStepSchema,
   MergeStepSchema,
   ParallelStepSchema,
+  SwitchStepSchema,
   WaitStepSchema,
 } from '@kbn/workflows';
 import { getCachedAllConnectors } from '../../../connectors_cache';
@@ -211,6 +212,11 @@ function getBuiltInStepTypesFromSchema(): Array<{
     {
       schema: IfStepSchema,
       description: 'Execute steps conditionally based on a condition',
+      icon: monaco.languages.CompletionItemKind.Keyword,
+    },
+    {
+      schema: SwitchStepSchema,
+      description: 'Route execution to one of several branches based on conditions',
       icon: monaco.languages.CompletionItemKind.Keyword,
     },
     {

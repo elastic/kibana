@@ -17,6 +17,7 @@ import {
   getMergeStepSchema,
   getOnFailureStepSchema,
   getParallelStepSchema,
+  getSwitchStepSchema,
   getWorkflowSettingsSchema,
   WaitStepSchema,
   WorkflowSchema,
@@ -46,6 +47,7 @@ function createRecursiveStepSchema(
     // Use the same stepSchema reference to maintain consistency
     const forEachSchema = getForEachStepSchema(stepSchema, loose);
     const ifSchema = getIfStepSchema(stepSchema, loose);
+    const switchSchema = getSwitchStepSchema(stepSchema, loose);
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
     const httpSchema = getHttpStepSchema(stepSchema, loose);
@@ -59,6 +61,7 @@ function createRecursiveStepSchema(
     return z.discriminatedUnion('type', [
       forEachSchema,
       ifSchema,
+      switchSchema,
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
