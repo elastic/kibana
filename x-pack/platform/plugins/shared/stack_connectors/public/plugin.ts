@@ -14,6 +14,7 @@ import { ExperimentalFeaturesService } from './common/experimental_features_serv
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { ConfigService } from './common/config_service';
+import { registerConnectorTypesFromSpecs } from './connector_types_from_spec';
 
 export type Setup = void;
 export type Start = void;
@@ -43,6 +44,12 @@ export class StackConnectorsPublicPlugin
         validateEmailAddresses: actions.validateEmailAddresses,
       },
     });
+
+    if (ExperimentalFeaturesService.get().connectorsFromSpecs) {
+      registerConnectorTypesFromSpecs({
+        connectorTypeRegistry: triggersActionsUi.actionTypeRegistry,
+      });
+    }
   }
 
   public start() {}

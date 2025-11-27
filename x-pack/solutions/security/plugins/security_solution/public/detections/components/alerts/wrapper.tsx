@@ -17,9 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { PageScope } from '../../../data_view_manager/constants';
 import { HeaderPage } from '../../../common/components/header_page';
 import { useSourcererDataView } from '../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { AlertsPageContent } from './content';
@@ -42,10 +42,10 @@ export const Wrapper = memo(() => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { sourcererDataView: oldSourcererDataViewSpec, loading: oldSourcererDataViewIsLoading } =
-    useSourcererDataView(SourcererScopeName.detections);
+    useSourcererDataView(PageScope.alerts);
   // TODO rename to just dataView and status once we remove the newDataViewPickerEnabled feature flag
   const { dataView: experimentalDataView, status: experimentalDataViewStatus } = useDataView(
-    SourcererScopeName.detections
+    PageScope.alerts
   );
 
   const isLoading: boolean = useMemo(

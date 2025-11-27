@@ -16,7 +16,10 @@ import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
  */
 export const configSchema = schema.object({
   allowDynamicConfigOverrides: schema.boolean({ defaultValue: false }),
-  skipBundleRoutesIfCdnEnabled: schema.boolean({ defaultValue: false }),
+  /**
+   * Do not register unused bundle routes if the CDN configuration is enabled.
+   */
+  skipBundleRoutesIfCdnEnabled: schema.boolean({ defaultValue: true }),
 });
 
 export type CoreAppConfigType = TypeOf<typeof configSchema>;

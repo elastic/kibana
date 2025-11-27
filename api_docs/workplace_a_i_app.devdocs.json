@@ -77,7 +77,62 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "workplaceAIApp",
+        "id": "def-common.AGENT_BUILDER_AGENTS",
+        "type": "string",
+        "tags": [],
+        "label": "AGENT_BUILDER_AGENTS",
+        "description": [],
+        "signature": [
+          "\"agents\""
+        ],
+        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workplaceAIApp",
+        "id": "def-common.AGENT_BUILDER_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "AGENT_BUILDER_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/agent_builder\""
+        ],
+        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workplaceAIApp",
+        "id": "def-common.GET_AGENTS_ROUTE",
+        "type": "string",
+        "tags": [],
+        "label": "GET_AGENTS_ROUTE",
+        "description": [],
+        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workplaceAIApp",
+        "id": "def-common.MCP_SERVER_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "MCP_SERVER_PATH",
+        "description": [],
+        "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

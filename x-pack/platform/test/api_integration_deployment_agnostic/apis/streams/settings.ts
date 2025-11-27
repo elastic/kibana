@@ -103,6 +103,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               processing: { steps: [] },
               lifecycle: { inherit: {} },
               wired: { fields: {}, routing: [] },
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -133,6 +134,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               processing: { steps: [] },
               lifecycle: { inherit: {} },
               wired: { fields: {}, routing: [] },
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -167,6 +169,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 processing: { steps: [] },
                 lifecycle: { inherit: {} },
                 wired: { fields: {}, routing: [] },
+                failure_store: { inherit: {} },
               },
             },
           });
@@ -236,6 +239,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               processing: { steps: [] },
               lifecycle: { inherit: {} },
               classic: {},
+              failure_store: { inherit: {} },
             },
           },
         });
