@@ -428,8 +428,7 @@ describe('Both modes', () => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/244074
-    describe.skip('Primary menu item limit', () => {
+    describe('Primary menu item limit', () => {
       /**
        * GIVEN fewer than 12 primary menu items exist (e.g. 10)
        * WHEN the navigation renders
@@ -553,8 +552,7 @@ describe('Both modes', () => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/244075
-    describe.skip('More menu', () => {
+    describe('More menu', () => {
       /**
        * GIVEN not all primary menu items fit the menu height
        * WHEN I click on the "More" primary menu
