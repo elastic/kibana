@@ -53,6 +53,7 @@ export const getAddRowControl = (
               iconType="plus"
               size="xs"
               aria-label={addRowText}
+              data-test-subj="indexEditorAddRowButton"
               onClick={() => onAddRow()}
               onKeyDown={(e: React.KeyboardEvent) => {
                 // Focus back to the cell when pressing Escape

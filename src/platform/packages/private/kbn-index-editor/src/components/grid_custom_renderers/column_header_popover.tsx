@@ -27,7 +27,7 @@ import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldSelect } from '@kbn/field-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useAddColumnName, errorMessages } from '../../hooks/use_add_column_name';
+import { useAddColumn, errorMessages } from '../../hooks/use_add_column';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
 import { isPlaceholderColumn } from '../../utils';
 import type { KibanaContextExtra } from '../../types';
@@ -64,7 +64,7 @@ export const ColumnHeaderPopover = ({
   } = useKibana<KibanaContextExtra>();
 
   const { columnType, setColumnType, columnName, setColumnName, saveColumn, validationError } =
-    useAddColumnName(initialColumnName, initialColumnType);
+    useAddColumn(initialColumnName, initialColumnType);
 
   const canSubmit = useMemo(
     () => columnType && columnName.length > 0 && !validationError,
