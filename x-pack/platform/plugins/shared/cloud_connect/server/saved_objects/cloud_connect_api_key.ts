@@ -5,9 +5,20 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core/server';
 import type { EncryptedSavedObjectTypeRegistration } from '@kbn/encrypted-saved-objects-plugin/server';
 import { CLOUD_CONNECT_API_KEY_TYPE } from '../../common/constants';
+
+/**
+ * Schema for Cloud Connect API key saved object attributes
+ */
+const cloudConnectApiKeySchema = schema.object({
+  apiKey: schema.string(),
+  clusterId: schema.maybe(schema.string()),
+  createdAt: schema.maybe(schema.string()),
+  updatedAt: schema.maybe(schema.string()),
+});
 
 /**
  * Saved object type definition for Cloud Connect API key storage
@@ -41,7 +52,8 @@ export const CloudConnectApiKeyType: SavedObjectsType = {
     '1': {
       changes: [],
       schemas: {
-        forwardCompatibility: (attrs: any) => attrs,
+        forwardCompatibility: cloudConnectApiKeySchema.extends({}, { unknowns: 'ignore' }),
+        create: cloudConnectApiKeySchema,
       },
     },
   },
