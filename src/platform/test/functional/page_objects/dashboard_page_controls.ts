@@ -126,35 +126,8 @@ export class DashboardPageControls extends FtrService {
   }
 
   /* -----------------------------------------------------------
-     Control group editor flyout
+     Control editor flyout
      ----------------------------------------------------------- */
-
-  public async openControlGroupSettingsFlyout() {
-    this.log.debug('Open controls group settings flyout');
-    await this.openControlsMenu();
-    await this.testSubjects.click('controls-settings-button');
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail('control-group-settings-flyout');
-    });
-  }
-
-  public async deleteAllControls() {
-    this.log.debug('Delete all controls');
-    if ((await this.getControlsCount()) === 0) return;
-
-    await this.openControlGroupSettingsFlyout();
-    await this.testSubjects.click('delete-all-controls-button');
-    await this.testSubjects.click('confirmModalConfirmButton');
-    expect(await this.getControlsCount()).to.be(0);
-  }
-
-  public async adjustControlsLayout(layout: 'oneLine' | 'twoLine') {
-    this.log.debug(`Adjust controls layout to "${layout}"`);
-    await this.openControlGroupSettingsFlyout();
-    await this.testSubjects.existOrFail('control-group-layout-options');
-    await this.testSubjects.click(`control-editor-layout-${layout}`);
-    await this.testSubjects.click('control-group-editor-save');
-  }
 
   public async setSwitchState(goalState: boolean, subject: string) {
     await this.testSubjects.existOrFail(subject);
@@ -166,55 +139,6 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       const stateIsChecked = (await this.testSubjects.getAttribute(subject, 'checked')) === 'true';
       expect(stateIsChecked).to.be(goalState);
-    });
-  }
-
-  public async updateValidationSetting(validate: boolean) {
-    this.log.debug(`Update control group validation setting to ${validate}`);
-    await this.openControlGroupSettingsFlyout();
-    await this.setSwitchState(validate, 'control-group-validate-selections');
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async updateFilterSyncSetting(querySync: boolean) {
-    this.log.debug(`Update filter sync setting to ${querySync}`);
-    await this.openControlGroupSettingsFlyout();
-    await this.setSwitchState(querySync, 'control-group-filter-sync');
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async updateTimeRangeSyncSetting(syncTimeRange: boolean) {
-    this.log.debug(`Update time range sync setting to ${syncTimeRange}`);
-    await this.openControlGroupSettingsFlyout();
-    await this.setSwitchState(syncTimeRange, 'control-group-query-sync-time-range');
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async updateShowApplyButtonSetting(showApplyButton: boolean) {
-    this.log.debug(`Update show apply button setting to ${showApplyButton}`);
-    await this.openControlGroupSettingsFlyout();
-    // the "showApplyButton" toggle has in inverse relationship with the `showApplyButton` seting - so, negate `showApplyButton`
-    await this.setSwitchState(!showApplyButton, 'control-group-auto-apply-selections');
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async clickApplyButton() {
-    this.log.debug('Clicking the apply button');
-    await this.verifyApplyButtonEnabled();
-
-    const applyButton = await this.testSubjects.find('controlGroup--applyFiltersButton');
-    await applyButton.click();
-
-    await this.verifyApplyButtonEnabled(false);
-  }
-
-  public async verifyApplyButtonEnabled(enabled: boolean = true) {
-    this.log.debug(
-      `Checking that control group apply button is ${enabled ? 'enabled' : 'not enabled'}`
-    );
-    const applyButton = await this.testSubjects.find('controlGroup--applyFiltersButton');
-    await this.retry.try(async () => {
-      expect(await applyButton.isEnabled()).to.be(enabled);
     });
   }
 
@@ -297,6 +221,15 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       await elementToHover.moveMouseTo();
       await this.testSubjects.existOrFail(`control-action-${controlId}-deletePanel`);
+    });
+  }
+
+  public async hideHoverActions() {
+    await this.retry.try(async () => {
+      await this.browser.clickMouseButton({ x: 0, y: 0 });
+      await this.testSubjects.missingOrFail('presentationUtil__floatingActions', {
+        allowHidden: true,
+      });
     });
   }
 

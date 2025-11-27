@@ -238,22 +238,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(suggestionKeys).to.not.contain('woof');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
     });
-
-    describe('Hierarchical chaining off', () => {
-      it('Selecting an option in the first Options List will not filter the second or third controls', async () => {
-        await dashboardControls.optionsListOpenPopover(controlIds[0]);
-        await dashboardControls.optionsListPopoverSelectOption('cat');
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
-
-        await dashboardControls.ensureAvailableOptionsEqual(controlIds[1], {
-          suggestions: { Fluffy: 6, Tiger: 6, sylvester: 5, 'Fee Fee': 3, Rover: 3, Max: 1 },
-          invalidSelections: [],
-        });
-        await dashboardControls.ensureAvailableOptionsEqual(controlIds[2], {
-          suggestions: { ...OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, woof: 1 },
-          invalidSelections: [],
-        });
-      });
-    });
   });
 }
