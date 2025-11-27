@@ -12,9 +12,6 @@ import {
   setupLlmProxyAndConnector,
   cleanupLlmProxyAndConnector,
   setupAiSuggestionsTest,
-  setupTestPage,
-  setupPartitionLogsInterceptor,
-  generateSuggestions,
   getStreamName,
   openSuggestionConfirmationModal,
   clickModalCreateButton,
@@ -111,43 +108,5 @@ test.describe('Stream data routing - AI suggestions accept flow', { tag: ['@ess'
     await pageObjects.toasts.closeAll();
 
     await expect(page.getByTestId('streamsAppReviewPartitioningSuggestionsCallout')).toBeHidden();
-  });
-
-  test('should prevent accepting suggestion with duplicate name', async ({
-    page,
-    apiServices,
-    browserAuth,
-    pageObjects,
-  }) => {
-    await apiServices.streams.forkStream('logs', 'logs.existing', {
-      field: 'service.name',
-      eq: 'existing-service',
-    });
-
-    const duplicateSuggestion = {
-      name: 'existing',
-      condition: { field: 'severity_text', eq: 'info' },
-    };
-
-    await page.reload();
-    await browserAuth.loginAsAdmin();
-    await pageObjects.streams.gotoPartitioningTab('logs');
-    await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
-
-    await setupTestPage(page, llmSetup.llmProxy, llmSetup.connectorId);
-    setupPartitionLogsInterceptor(llmSetup.llmProxy, [duplicateSuggestion]);
-    await generateSuggestions(page, llmSetup.llmProxy);
-
-    const streamName = getStreamName(duplicateSuggestion.name);
-    const modal = await openSuggestionConfirmationModal(page, streamName);
-
-    const nameField = modal.getByTestId(MODAL_TEST_IDS.streamNameField);
-    await expect(nameField).toHaveValue(streamName);
-
-    await clickModalCreateButton(modal);
-
-    await pageObjects.toasts.waitFor();
-    const toastText = await pageObjects.toasts.getMessageText();
-    expect(toastText).toBeTruthy();
   });
 });

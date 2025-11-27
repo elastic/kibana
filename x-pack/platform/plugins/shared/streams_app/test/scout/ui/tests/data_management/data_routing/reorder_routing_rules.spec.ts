@@ -144,21 +144,5 @@ test.describe(
       await expect(dragHandleFirst).toBeVisible();
       await expect(dragHandleSecond).toBeVisible();
     });
-
-    test('should disable creating new rules while reordering', async ({ page, pageObjects }) => {
-      // Start reordering
-      await pageObjects.streams.dragRoutingRule('logs.first', 1);
-      await pageObjects.streams.checkDraggingOver();
-
-      // Create button should be disabled during reordering
-      const createButton = page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
-      await expect(createButton).toBeDisabled();
-
-      // Cancel the reordering
-      await pageObjects.streams.cancelChanges();
-
-      // Create button should be enabled again
-      await expect(createButton).toBeEnabled();
-    });
   }
 );

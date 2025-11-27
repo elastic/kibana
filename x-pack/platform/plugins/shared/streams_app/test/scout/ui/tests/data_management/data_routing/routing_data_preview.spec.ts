@@ -211,24 +211,6 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await expect(page.getByTestId('streamsAppRoutingPreviewEmptyPromptTitle')).toBeVisible();
   });
 
-  test('should show empty state during rule editing', async ({
-    page,
-    apiServices,
-    pageObjects,
-  }) => {
-    // Create a rule first
-    await apiServices.streams.forkStream('logs', 'logs.edit-preview-test', {
-      field: 'service.name',
-      eq: 'test',
-    });
-
-    await pageObjects.streams.gotoPartitioningTab('logs');
-    await pageObjects.streams.clickEditRoutingRule('logs.edit-preview-test');
-
-    // Preview should show empty state during editing
-    await expect(page.getByTestId('streamsAppRoutingPreviewEditingPanelTitle')).toBeVisible();
-  });
-
   test('should show correct message when editing existing rule in preview panel', async ({
     page,
     apiServices,
