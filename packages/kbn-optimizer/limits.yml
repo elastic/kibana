@@ -168,7 +168,7 @@ pageLoadAssetSize:
   snapshotRestore: 22068
   spaces: 30665
   stackAlerts: 31499
-  stackConnectors: 81160
+  stackConnectors: 81148
   streams: 10000
   streamsApp: 19225
   synthetics: 31571

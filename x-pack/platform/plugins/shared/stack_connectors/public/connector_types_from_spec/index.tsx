@@ -21,15 +21,15 @@ export function registerConnectorTypesFromSpecs({
     // This is a workaround to avoid webpack from bundling the entire @kbn/connector-specs package into the main stackConnectors plugin bundle.
     // If this chunk grows too much, we could have problems in some pages since the connectors won't be registered in time for rendering.
     import(
-      /* webpackChunkName: "connectorsSpecs" */
+      /* webpackChunkName: "singleFileConnectorBundle" */
       '@kbn/connector-specs'
     ),
     import(
-      /* webpackChunkName: "formGenerator" */
+      /* webpackChunkName: "singleFileConnectorBundle" */
       '@kbn/response-ops-form-generator'
     ),
     import(
-      /* webpackChunkName: "generateSchema" */
+      /* webpackChunkName: "singleFileConnectorBundle" */
       './generate_schema'
     ),
   ]).then(([{ connectorsSpecs }, { generateFormFields }, { generateSchema }]) => {
