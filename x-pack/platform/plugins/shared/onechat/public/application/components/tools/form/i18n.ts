@@ -244,6 +244,19 @@ export const i18nMessages = {
             defaultMessage: 'Workflow',
           }
         ),
+        waitForLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForLabel',
+          {
+            defaultMessage: 'Wait time',
+          }
+        ),
+        waitForHelpText: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForHelpText',
+          {
+            defaultMessage:
+              'Maximum amount of time to wait synchronously for the workflow to complete, in seconds.',
+          }
+        ),
       },
     },
   },
