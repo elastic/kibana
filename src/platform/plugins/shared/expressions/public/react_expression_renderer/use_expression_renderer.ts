@@ -8,7 +8,7 @@
  */
 
 import type { Reducer, RefObject } from 'react';
-import { useRef, useEffect, useLayoutEffect, useReducer } from 'react';
+import { useRef, useEffect, useLayoutEffect, useReducer, useCallback } from 'react';
 import type { Observable } from 'rxjs';
 import { filter } from 'rxjs';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
@@ -81,12 +81,16 @@ export function useExpressionRenderer(
   // will call done() in LayoutEffect when done with rendering custom error state
   const errorRenderHandlerRef = useRef<IInterpreterRenderHandlers | null>(null);
 
+  const abortListener = useCallback(() => {
+    expressionLoaderRef.current?.cancel();
+  }, [expressionLoaderRef]);
+
   useEffect(() => {
-    if (abortController?.signal)
-      abortController.signal.onabort = () => {
-        expressionLoaderRef.current?.cancel(abortController.signal.reason);
-      };
-  }, [abortController]);
+    abortController?.signal.addEventListener('abort', abortListener);
+    return () => {
+      abortController?.signal.removeEventListener('abort', abortListener);
+    };
+  }, [abortController, abortListener]);
 
   /* eslint-disable react-hooks/exhaustive-deps */
   // OK to ignore react-hooks/exhaustive-deps because options update is handled by calling .update()
@@ -100,13 +104,17 @@ export function useExpressionRenderer(
         // if custom renderError is not provided then we fallback to default error handling from ExpressionLoader
         onRenderError: (domNode, newError, handlers) => {
           errorRenderHandlerRef.current = handlers;
-          setState({
-            error: newError,
-            isEmpty: false,
-            isLoading: false,
-          });
+          // the consumer may ask to ignore an error in specific cases
+          const canBeIgnored = debouncedLoaderParams.onRenderError?.(domNode, newError, handlers);
+          if (!canBeIgnored) {
+            setState({
+              error: newError,
+              isEmpty: false,
+              isLoading: false,
+            });
+          }
 
-          return debouncedLoaderParams.onRenderError?.(domNode, newError, handlers);
+          return;
         },
       });
 

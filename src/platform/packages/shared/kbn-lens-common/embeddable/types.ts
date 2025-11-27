@@ -170,6 +170,7 @@ export interface IntegrationCallbacks extends LensApiProps {
   updateSavedObjectId: (newSavedObjectId: LensRuntimeState['savedObjectId']) => void;
   updateOverrides: (newOverrides: LensOverrides['overrides']) => void;
   getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<Action[]>;
+  updateAbortController: (abortController?: AbortController) => void;
 }
 
 /**

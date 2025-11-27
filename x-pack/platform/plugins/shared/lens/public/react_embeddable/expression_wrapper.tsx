@@ -16,7 +16,10 @@ import type { ExecutionContextSearch } from '@kbn/es-query';
 import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import classNames from 'classnames';
 import type { UserMessage, LensInspector } from '@kbn/lens-common';
-import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
+import {
+  getOriginalRequestErrorMessages,
+  isIgnorableBlockingMessage,
+} from '../editor_frame_service/error_helper';
 import { lnsExpressionRendererStyle } from '../expression_renderer_styles';
 
 export interface ExpressionWrapperProps {
@@ -99,6 +102,10 @@ export function ExpressionWrapper({
         syncCursor={syncCursor}
         executionContext={executionContext}
         abortController={abortController}
+        // We need to notify the expression renderer if certain errors can be ignored even when "blocking"
+        onRenderError={(_, error) => {
+          return isIgnorableBlockingMessage(error);
+        }}
         renderError={(errorMessage, error) => {
           const messages = getOriginalRequestErrorMessages(error || null);
           addUserMessages(messages);

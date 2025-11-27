@@ -80,7 +80,7 @@ export type RenderErrorHandlerFnType = (
   domNode: HTMLElement,
   error: ExpressionRenderError,
   handlers: IInterpreterRenderHandlers
-) => void;
+) => boolean | void;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ExpressionRendererEvent = IInterpreterRenderEvent<any>;

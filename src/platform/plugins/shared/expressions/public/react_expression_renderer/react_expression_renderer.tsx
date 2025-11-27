@@ -36,7 +36,6 @@ export function ReactExpressionRenderer({
   dataAttrs,
   padding,
   renderError,
-  abortController,
   ...expressionRendererOptions
 }: ReactExpressionRendererProps) {
   const nodeRef = useRef<HTMLDivElement>(null);

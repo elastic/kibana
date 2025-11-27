@@ -116,23 +116,40 @@ export function loadEmbeddableData(
     updateMessages,
   } = buildUserMessagesHelpers(api, internalApi, services, onBeforeBadgesRender, metaInfo);
 
+  // We need to track how many requests are in flight for each instance
+  const loadingReasons: string[] = [];
+
   const dispatchBlockingErrorIfAny = () => {
     const blockingErrors = getUserMessages(blockingMessageDisplayLocations, {
       severity: 'error',
     });
-    updateValidationErrors(blockingErrors);
-    updateBlockingErrors(blockingErrors);
-    if (blockingErrors.length > 0) {
+    // check how many requests are loading
+    const isThereAnotherRequestOnFlight = loadingReasons.length > 1;
+    // filter out blocking errors if marked as skippable, but only if there are other requests on flight
+    const filteredBlockingErrors = blockingErrors.filter(
+      (msg) => isThereAnotherRequestOnFlight && !msg.canBeSkipped
+    );
+    updateValidationErrors(filteredBlockingErrors);
+    updateBlockingErrors(filteredBlockingErrors);
+    if (filteredBlockingErrors.length > 0) {
       internalApi.dispatchError();
     }
-    return blockingErrors.length > 0;
+    return {
+      blockingErrors: filteredBlockingErrors.length,
+      ignoredBlockedErrors: blockingErrors.length - filteredBlockingErrors.length,
+    };
   };
 
   const onRenderComplete = () => {
     updateMessages(getUserMessages('embeddableBadge'));
     // No issues so far, blocking errors are handled directly by Lens from this point on
-    if (!dispatchBlockingErrorIfAny()) {
-      internalApi.dispatchRenderComplete();
+    const check = dispatchBlockingErrorIfAny();
+    if (!check.blockingErrors) {
+      // remove past render
+      loadingReasons.shift();
+      if (!check.ignoredBlockedErrors) {
+        internalApi.dispatchRenderComplete();
+      }
     }
   };
 
@@ -142,7 +159,7 @@ export function loadEmbeddableData(
     fetchContext?: FetchContext
   ) {
     addLog(`Embeddable reload reason: ${sourceId}`);
-
+    loadingReasons.push(sourceId);
     resetMessages();
 
     // reset the render on reload
@@ -261,9 +278,9 @@ export function loadEmbeddableData(
     internalApi.updateDataViews(dataViewIds);
 
     // This will catch also failed loaded dataViews
-    const hasBlockingErrors = dispatchBlockingErrorIfAny();
+    const { blockingErrors } = dispatchBlockingErrorIfAny();
 
-    if (params?.expression != null && !hasBlockingErrors) {
+    if (params?.expression != null && !blockingErrors) {
       internalApi.updateExpressionParams(params);
     }
 
