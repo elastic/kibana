@@ -10,49 +10,102 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 
-export const INTEGRATIONS: Record<InventoryItemType, { label: string; documentation: string }> = {
+export const INTEGRATIONS: Record<
+  InventoryItemType,
+  { inventoryLabel: string; documentation: string; alertingLabel?: string }
+> = {
   host: {
-    label: i18n.translate('xpack.infra.supportedDataTooltipLink.hostIntegrationInfo', {
+    inventoryLabel: i18n.translate('xpack.infra.supportedDataTooltipLink.hostIntegrationInfo', {
       defaultMessage:
         'This view supports data from the OpenTelemetry and Elastic System Integration.',
     }),
+    alertingLabel: i18n.translate(
+      'xpack.infra.supportedDataTooltipLink.hostIntegrationInfoAlerting',
+      {
+        defaultMessage:
+          'This alert rule supports data from the OpenTelemetry and Elastic System Integration.',
+      }
+    ),
     documentation: 'https://ela.st/infra-inventory-supported-data-hosts',
   },
   pod: {
-    label: i18n.translate('xpack.infra.supportedDataTooltipLink.kubernetesIntegrationInfo', {
-      defaultMessage: 'This view supports data from the Kubernetes Integration.',
-    }),
+    inventoryLabel: i18n.translate(
+      'xpack.infra.supportedDataTooltipLink.kubernetesIntegrationInfo',
+      {
+        defaultMessage: 'This view supports data from the Kubernetes Integration.',
+      }
+    ),
+    alertingLabel: i18n.translate(
+      'xpack.infra.supportedDataTooltipLink.kubernetesIntegrationInfoAlerting',
+      {
+        defaultMessage: 'This alert rule supports data from the Kubernetes Integration.',
+      }
+    ),
     documentation: 'https://ela.st/infra-inventory-supported-data-k8s-pods',
   },
   container: {
-    label: i18n.translate('xpack.infra.supportedDataTooltipLink.dockerContainerIntegrationInfo', {
-      defaultMessage:
-        'This view supports data from the Kubernetes, System and Docker Integrations.',
-    }),
+    inventoryLabel: i18n.translate(
+      'xpack.infra.supportedDataTooltipLink.dockerContainerIntegrationInfo',
+      {
+        defaultMessage:
+          'This view supports data from the Kubernetes, System and Docker Integrations.',
+      }
+    ),
+    alertingLabel: i18n.translate(
+      'xpack.infra.supportedDataTooltipLink.dockerContainerIntegrationInfoAlerting',
+      {
+        defaultMessage:
+          'This alert rule supports data from the Kubernetes, System and Docker Integrations.',
+      }
+    ),
     documentation: 'https://ela.st/infra-inventory-supported-data-containers',
   },
   awsEC2: {
-    label: i18n.translate('xpack.infra.supportedDataTooltipLink.awsEC2IntegrationInfo', {
+    inventoryLabel: i18n.translate('xpack.infra.supportedDataTooltipLink.awsEC2IntegrationInfo', {
       defaultMessage: 'This view supports data from the AWS EC2 Integration.',
     }),
+    alertingLabel: i18n.translate(
+      'xpack.infra.supportedDataTooltipLink.awsEC2IntegrationInfoAlerting',
+      {
+        defaultMessage: 'This alert rule supports data from the AWS EC2 Integration.',
+      }
+    ),
     documentation: 'https://ela.st/infra-inventory-supported-data-aws-ec2',
   },
   awsRDS: {
-    label: i18n.translate('xpack.infra.supportedDataTooltipLink.awsRDSIntegrationInfo', {
+    inventoryLabel: i18n.translate('xpack.infra.supportedDataTooltipLink.awsRDSIntegrationInfo', {
       defaultMessage: 'This view supports data from the AWS RDS Integration.',
     }),
+    alertingLabel: i18n.translate(
+      'xpack.infra.supportedDataTooltipLink.awsRDSIntegrationInfoAlerting',
+      {
+        defaultMessage: 'This alert rule supports data from the AWS RDS Integration.',
+      }
+    ),
     documentation: 'https://ela.st/infra-inventory-supported-data-aws-rds',
   },
   awsS3: {
-    label: i18n.translate('xpack.infra.supportedDataTooltipLink.awsS3IntegrationInfo', {
+    inventoryLabel: i18n.translate('xpack.infra.supportedDataTooltipLink.awsS3IntegrationInfo', {
       defaultMessage: 'This view supports data from the AWS S3 Integration.',
     }),
+    alertingLabel: i18n.translate(
+      'xpack.infra.supportedDataTooltipLink.awsS3IntegrationInfoAlerting',
+      {
+        defaultMessage: 'This alert rule supports data from the AWS S3 Integration.',
+      }
+    ),
     documentation: 'https://ela.st/infra-inventory-supported-data-aws-s3',
   },
   awsSQS: {
-    label: i18n.translate('xpack.infra.supportedDataTooltipLink.awsSQSIntegrationInfo', {
+    inventoryLabel: i18n.translate('xpack.infra.supportedDataTooltipLink.awsSQSIntegrationInfo', {
       defaultMessage: 'This view supports data from the AWS SQS Integration.',
     }),
+    alertingLabel: i18n.translate(
+      'xpack.infra.supportedDataTooltipLink.awsSQSIntegrationInfoAlerting',
+      {
+        defaultMessage: 'This alert rule supports data from the AWS SQS Integration.',
+      }
+    ),
     documentation: 'https://ela.st/infra-inventory-supported-data-aws-sqs',
   },
 } as const;
@@ -67,7 +120,11 @@ export function SupportedDataTooltipLink({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiToolTip content={INTEGRATIONS[nodeType].label}>
+    <EuiToolTip
+      content={
+        isAlertUI ? INTEGRATIONS[nodeType].alertingLabel : INTEGRATIONS[nodeType].inventoryLabel
+      }
+    >
       <EuiLink
         data-test-subj="infraSupportedDataTooltipLink"
         href={INTEGRATIONS[nodeType].documentation}
