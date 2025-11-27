@@ -7,8 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { parse, Parser, type ParseOptions, type ParseResult } from './parser';
-
-export { TIME_SPAN_UNITS, SOURCE_COMMANDS } from './constants';
-
-export { ESQLErrorListener } from './esql_error_listener';
+export { FieldSelect, type FieldSelectProps } from './field_select';
