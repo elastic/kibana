@@ -7,18 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import type { estypes } from '@elastic/elasticsearch';
 import { v4 as generateUuid } from 'uuid';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
-import type {
-  ActionsClient,
-  PluginStartContract as ActionsPluginStartContract,
-  IUnsecuredActionsClient,
-} from '@kbn/actions-plugin/server';
+import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import type {
+  CoreStart,
   ElasticsearchClient,
   KibanaRequest,
   Logger,
@@ -45,25 +40,26 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { ExecutionType, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import type {
+  IWorkflowEventLoggerService,
+  LogSearchResult,
+} from '@kbn/workflows-execution-engine/server';
+import type {
+  ExecutionLogsParams,
+  StepLogsParams,
+} from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { z } from '@kbn/zod';
 
 import { getWorkflowExecution } from './lib/get_workflow_execution';
 import { searchStepExecutions } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
-import type { IWorkflowEventLogger, LogSearchResult } from './lib/workflow_logger';
-import { SimpleWorkflowLogger } from './lib/workflow_logger';
+
 import type {
   GetAvailableConnectorsResponse,
-  GetExecutionLogsParams,
   GetStepExecutionParams,
-  GetStepLogsParams,
   GetWorkflowsParams,
 } from './workflows_management_api';
-import {
-  WORKFLOWS_EXECUTION_LOGS_INDEX,
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-} from '../../common';
+import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
 import {
   InvalidYamlSchemaError,
@@ -79,6 +75,7 @@ import { hasScheduledTriggers } from '../lib/schedule_utils';
 import { createStorage } from '../storage/workflow_storage';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
+import type { WorkflowsServerPluginStartDeps } from '../types';
 
 const DEFAULT_PAGE_SIZE = 100;
 export interface SearchWorkflowExecutionsParams {
@@ -92,7 +89,7 @@ export interface SearchWorkflowExecutionsParams {
 export class WorkflowsService {
   private esClient!: ElasticsearchClient;
   private workflowStorage!: WorkflowStorage;
-  private workflowEventLoggerService!: SimpleWorkflowLogger;
+  private workflowEventLoggerService!: IWorkflowEventLoggerService;
   private taskScheduler: WorkflowTaskScheduler | null = null;
   private readonly logger: Logger;
   private security?: SecurityServiceStart;
@@ -102,17 +99,17 @@ export class WorkflowsService {
   ) => Promise<PublicMethodsOf<ActionsClient>>;
 
   constructor(
-    esClientPromise: Promise<ElasticsearchClient>,
     logger: Logger,
-    enableConsoleLogging: boolean = false,
-    getActionsStart: () => Promise<ActionsPluginStartContract>
+    getCoreStart: () => Promise<CoreStart>,
+    getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>
   ) {
     this.logger = logger;
     this.getActionsClient = () =>
-      getActionsStart().then((actions) => actions.getUnsecuredActionsClient());
+      getPluginsStart().then((plugins) => plugins.actions.getUnsecuredActionsClient());
     this.getActionsClientWithRequest = (request: KibanaRequest) =>
-      getActionsStart().then((actions) => actions.getActionsClientWithRequest(request));
-    void this.initialize(esClientPromise, enableConsoleLogging);
+      getPluginsStart().then((plugins) => plugins.actions.getActionsClientWithRequest(request));
+
+    void this.initialize(getCoreStart, getPluginsStart);
   }
 
   public setTaskScheduler(taskScheduler: WorkflowTaskScheduler) {
@@ -124,10 +121,13 @@ export class WorkflowsService {
   }
 
   private async initialize(
-    esClientPromise: Promise<ElasticsearchClient>,
-    enableConsoleLogging: boolean = false
+    getCoreStart: () => Promise<CoreStart>,
+    getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>
   ) {
-    this.esClient = await esClientPromise;
+    const coreStart = await getCoreStart();
+    const pluginsStart = await getPluginsStart();
+
+    this.esClient = coreStart.elasticsearch.client.asInternalUser;
 
     // Initialize workflow storage
     this.workflowStorage = createStorage({
@@ -135,12 +135,8 @@ export class WorkflowsService {
       esClient: this.esClient,
     });
 
-    this.workflowEventLoggerService = new SimpleWorkflowLogger(
-      this.logger,
-      this.esClient,
-      WORKFLOWS_EXECUTION_LOGS_INDEX,
-      enableConsoleLogging
-    );
+    this.workflowEventLoggerService =
+      pluginsStart.workflowsExecutionEngine.workflowEventLoggerService;
   }
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
@@ -1043,19 +1039,20 @@ export class WorkflowsService {
     });
   }
 
-  public async getExecutionLogs(
-    params: GetExecutionLogsParams,
-    spaceId: string
-  ): Promise<LogSearchResult> {
-    return this.workflowEventLoggerService!.searchLogs(params, spaceId);
+  public async getExecutionLogs(params: ExecutionLogsParams): Promise<LogSearchResult> {
+    if (!this.workflowEventLoggerService) {
+      throw new Error('WorkflowEventLoggerService not initialized');
+    }
+
+    return this.workflowEventLoggerService.getExecutionLogs(params);
   }
 
-  public async getStepLogs(params: GetStepLogsParams, spaceId: string): Promise<LogSearchResult> {
-    return this.workflowEventLoggerService!.searchLogs(params, spaceId);
-  }
+  public async getStepLogs(params: StepLogsParams): Promise<LogSearchResult> {
+    if (!this.workflowEventLoggerService) {
+      throw new Error('WorkflowEventLoggerService not initialized');
+    }
 
-  public getLogger(): IWorkflowEventLogger {
-    return this.workflowEventLoggerService!;
+    return this.workflowEventLoggerService.getStepLogs(params);
   }
 
   public async getStepExecution(
@@ -1131,8 +1128,6 @@ export class WorkflowsService {
         includeSystemActionTypes: false,
       }),
     ]);
-
-    // Note: We now get display names directly from actionTypes, no need for the map
 
     // Initialize connectorsByType with ALL available action types
     const connectorsByType: Record<string, ConnectorTypeInfo> = {};
