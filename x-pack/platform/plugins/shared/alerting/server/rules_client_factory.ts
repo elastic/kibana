@@ -168,7 +168,11 @@ export class RulesClientFactory {
         // privileges
         const createAPIKeyResult = await securityPluginStart.authc.apiKeys.grantAsInternalUser(
           request,
-          { name, role_descriptors: {}, metadata: { managed: true } }
+          {
+            name,
+            role_descriptors: {},
+            metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+          }
         );
         if (!createAPIKeyResult) {
           return { apiKeysEnabled: false };
