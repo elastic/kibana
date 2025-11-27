@@ -24,7 +24,8 @@ import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_ex
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
-import { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+
+import { WorkflowEventLoggerService } from '../workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 const defaultWorkflowSettings: WorkflowSettings = {
@@ -75,19 +76,18 @@ export async function setupDependencies(
   const scopedActionsClient = await actionsPlugin.getActionsClientWithRequest(fakeRequest);
   const connectorExecutor = new ConnectorExecutor(scopedActionsClient);
 
-  const workflowLogger = new WorkflowEventLogger(
+  const workflowEventLoggerService = new WorkflowEventLoggerService(
     logsRepository,
     logger,
-    {
-      workflowId: workflowExecution.workflowId,
-      workflowName: workflowExecution.workflowDefinition.name,
-      executionId: workflowExecution.id,
-      spaceId: workflowExecution.spaceId,
-    },
-    {
-      enableConsoleLogging: config.logging.console,
-    }
+    config.logging.console
   );
+
+  const workflowLogger = workflowEventLoggerService.createLogger({
+    workflowId: workflowExecution.workflowId,
+    workflowName: workflowExecution.workflowDefinition.name,
+    executionId: workflowExecution.id,
+    spaceId: workflowExecution.spaceId,
+  });
 
   const workflowExecutionState = new WorkflowExecutionState(
     workflowExecution as EsWorkflowExecution,
