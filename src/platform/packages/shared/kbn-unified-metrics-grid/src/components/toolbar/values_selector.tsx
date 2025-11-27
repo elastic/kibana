@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
 import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 import { useDimensionsQuery } from '../../hooks';
 import { ClearAllSection } from './clear_all_section';
@@ -31,12 +31,13 @@ import {
   METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
 } from '../../common/constants';
 
-export interface ValuesFilterProps extends Pick<ChartSectionProps, 'timeRange'> {
+export interface ValuesFilterProps {
   selectedDimensions: Dimension[];
   selectedValues: string[];
   indices?: string[];
   disabled?: boolean;
   fullWidth?: boolean;
+  timeRange?: TimeRange;
   onChange: (values: string[]) => void;
   onClear: () => void;
 }
