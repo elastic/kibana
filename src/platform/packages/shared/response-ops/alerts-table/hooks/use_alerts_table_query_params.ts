@@ -82,7 +82,6 @@ export const useAlertsTableQueryParams = ({
           runtimeMappings: prevQueryParams.runtimeMappings,
           trackScores: prevQueryParams.trackScores,
           pageSize: prevQueryParams.pageSize,
-          pageIndex: prevQueryParams.pageIndex,
         },
         {
           ruleTypeIds,
@@ -93,10 +92,9 @@ export const useAlertsTableQueryParams = ({
           runtimeMappings,
           trackScores,
           pageSize,
-          pageIndex,
         }
       );
-      if (resetPageIndex) {
+      if (resetPageIndex || pageIndex !== prevQueryParams.pageIndex) {
         // Clear any bulk actions selections when the query changes
         dispatchBulkAction({ action: BulkActionsVerbs.clear });
       }
