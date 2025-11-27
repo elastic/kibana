@@ -240,7 +240,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     return [getAddColumnControl(indexEditorTelemetryService)];
   }, [indexEditorTelemetryService]);
 
-  const externalControlColumns = useMemo(() => {
+  const leadingControlColumns = useMemo(() => {
     return [getAddRowControl(indexUpdateService, dataTableRef)];
   }, [indexUpdateService, dataTableRef]);
 
@@ -249,7 +249,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       ref={dataTableRef}
       customGridColumnsConfiguration={customGridColumnsConfiguration}
       trailingControlColumns={trailingControlColumns}
-      externalControlColumns={externalControlColumns}
+      rowAdditionalLeadingControls={leadingControlColumns}
       columns={renderedColumns}
       rows={rows}
       columnsMeta={columnsMeta}
