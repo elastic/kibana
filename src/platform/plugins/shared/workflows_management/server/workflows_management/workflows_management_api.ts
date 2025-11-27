@@ -17,6 +17,7 @@ import type {
   CreateWorkflowCommand,
   EsWorkflow,
   EsWorkflowStepExecution,
+  TriggerType,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -210,6 +211,7 @@ export class WorkflowsManagementApi {
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
     inputs: Record<string, any>,
+    triggeredBy: TriggerType,
     request: KibanaRequest
   ): Promise<string> {
     const { event, ...manualInputs } = inputs;
@@ -217,7 +219,7 @@ export class WorkflowsManagementApi {
       event,
       spaceId,
       inputs: manualInputs,
-      triggeredBy: 'alert', // Ensure it schedules, not executes directly
+      triggeredBy,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const scheduleResponse = await workflowsExecutionEngine.scheduleWorkflow(

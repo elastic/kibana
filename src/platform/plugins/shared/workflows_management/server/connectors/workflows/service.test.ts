@@ -130,13 +130,6 @@ describe('Workflows Service', () => {
         },
         mockRequest
       );
-
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'Attempting to run workflow test-workflow-id via internal service'
-      );
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'Successfully started workflow test-workflow-id, run ID: workflow-run-123'
-      );
     });
 
     it('should handle missing workflow service', async () => {
@@ -169,10 +162,6 @@ describe('Workflows Service', () => {
 
       await expect(service.runWorkflow(params)).rejects.toThrow(
         'Workflows service not available. This connector requires workflows management plugin to be enabled.'
-      );
-
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'Attempting to run workflow test-workflow-id via internal service'
       );
     });
 
@@ -376,14 +365,8 @@ describe('Workflows Service', () => {
             spaceId: 'default',
           },
         },
+        'alert',
         mockRequest
-      );
-
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'Attempting to schedule workflow test-workflow-id via internal service'
-      );
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'Successfully scheduled workflow test-workflow-id, run ID: workflow-run-123'
       );
     });
 
@@ -417,10 +400,6 @@ describe('Workflows Service', () => {
 
       await expect(service.scheduleWorkflow(params)).rejects.toThrow(
         'Workflows scheduling service not available. This connector requires workflows management plugin to be enabled.'
-      );
-
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'Attempting to schedule workflow test-workflow-id via internal service'
       );
     });
 

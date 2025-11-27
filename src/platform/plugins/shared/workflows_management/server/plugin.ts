@@ -17,6 +17,7 @@ import type {
 } from '@kbn/core/server';
 
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { TriggerType } from '@kbn/workflows';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
 import type { WorkflowsManagementConfig } from './config';
 
@@ -106,7 +107,12 @@ export class WorkflowsPlugin
 
       // Create workflows scheduling service function for per-alert execution
       const getScheduleWorkflowService = async (request: KibanaRequest) => {
-        return async (workflowId: string, spaceId: string, inputs: Record<string, unknown>) => {
+        return async (
+          workflowId: string,
+          spaceId: string,
+          inputs: Record<string, unknown>,
+          triggeredBy: TriggerType
+        ) => {
           if (!this.api) {
             throw new Error('Workflows management API not initialized');
           }
@@ -132,7 +138,13 @@ export class WorkflowsPlugin
             yaml: workflow.yaml,
           };
 
-          return this.api.scheduleWorkflow(workflowToSchedule, spaceId, inputs, request);
+          return this.api.scheduleWorkflow(
+            workflowToSchedule,
+            spaceId,
+            inputs,
+            triggeredBy,
+            request
+          );
         };
       };
 

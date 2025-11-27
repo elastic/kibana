@@ -9,6 +9,7 @@
 
 import type { AlertHit } from '@kbn/alerting-plugin/server/types';
 import type { Logger } from '@kbn/core/server';
+import type { TriggerType } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
 import type { ExecutorParamsSchema } from './schema';
 
@@ -67,6 +68,7 @@ export interface ScheduleWorkflowParams {
       spaceId: string;
     };
   };
+  triggeredBy?: TriggerType | undefined;
 }
 
 export interface ExternalService {

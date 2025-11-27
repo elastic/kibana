@@ -11,6 +11,7 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { TriggerType } from '@kbn/workflows';
 import type {
   ExternalService,
   RunWorkflowParams,
@@ -31,6 +32,7 @@ export type ScheduleWorkflowServiceFunction = (
   workflowId: string,
   spaceId: string,
   inputs: Record<string, unknown>,
+  triggeredBy: TriggerType,
   request: KibanaRequest
 ) => Promise<string>;
 
@@ -50,7 +52,7 @@ export const createExternalService = (
     inputs,
   }: RunWorkflowParams): Promise<WorkflowExecutionResponse> => {
     try {
-      logger.info(`Attempting to run workflow ${workflowId} via internal service`);
+      logger.debug(`Attempting to run workflow ${workflowId} via internal service`);
 
       if (!runWorkflowService) {
         throw new Error(
@@ -65,7 +67,7 @@ export const createExternalService = (
         throw new Error('Invalid response: missing workflowRunId');
       }
 
-      logger.info(`Successfully started workflow ${workflowId}, run ID: ${workflowRunId}`);
+      logger.debug(`Successfully started workflow ${workflowId}, run ID: ${workflowRunId}`);
 
       return {
         workflowRunId,
@@ -81,9 +83,10 @@ export const createExternalService = (
     workflowId,
     spaceId,
     inputs,
+    triggeredBy,
   }: ScheduleWorkflowParams): Promise<string> => {
     try {
-      logger.info(`Attempting to schedule workflow ${workflowId} via internal service`);
+      logger.debug(`Attempting to schedule workflow ${workflowId} via internal service`);
 
       if (!scheduleWorkflowService) {
         throw new Error(
@@ -92,13 +95,19 @@ export const createExternalService = (
       }
 
       // Use the injected scheduling service function
-      const workflowRunId = await scheduleWorkflowService(workflowId, spaceId, inputs, request);
+      const workflowRunId = await scheduleWorkflowService(
+        workflowId,
+        spaceId,
+        inputs,
+        triggeredBy ?? 'alert',
+        request
+      );
 
       if (!workflowRunId) {
         throw new Error('Invalid response: missing workflowRunId');
       }
 
-      logger.info(`Successfully scheduled workflow ${workflowId}, run ID: ${workflowRunId}`);
+      logger.debug(`Successfully scheduled workflow ${workflowId}, run ID: ${workflowRunId}`);
 
       return workflowRunId;
     } catch (error) {
