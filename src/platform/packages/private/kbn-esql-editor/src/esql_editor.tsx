@@ -50,6 +50,7 @@ import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types';
 import { QuerySource, ControlTriggerSource } from '@kbn/esql-types';
+import useLatest from 'react-use/lib/useLatest';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './custom_commands';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
@@ -352,67 +353,107 @@ const ESQLEditorInternal = function ESQLEditor({
     }
   }, []);
 
-  // Registers a command to redirect users to the index management page
-  // to create a new policy. The command is called by the buildNoPoliciesAvailableDefinition
-  monaco.editor.registerCommand('esql.policies.create', (...args) => {
-    application?.navigateToApp('management', {
-      path: 'data/index_management/enrich_policies/create',
-      openInNewTab: true,
-    });
+  const latestCommandDeps = useLatest({
+    application,
+    controlsContext,
+    esqlVariables,
+    fixedQuery,
+    isVisorOpen,
+    onQuerySubmit,
+    openTimePickerPopover,
+    telemetryService,
+    uiActions,
   });
 
-  monaco.editor.registerCommand('esql.timepicker.choose', (...args) => {
-    openTimePickerPopover();
-  });
+  useEffect(() => {
+    const disposables: monaco.IDisposable[] = [];
 
-  monaco.editor.registerCommand('esql.recommendedQuery.accept', (...args) => {
-    const [, { queryLabel }] = args;
-    telemetryService.trackRecommendedQueryClicked(QuerySource.AUTOCOMPLETE, queryLabel);
-  });
+    // Registers a command to redirect users to the index management page
+    // to create a new policy. The command is called by the buildNoPoliciesAvailableDefinition
+    disposables.push(
+      monaco.editor.registerCommand('esql.policies.create', (...args) => {
+        latestCommandDeps.current.application?.navigateToApp('management', {
+          path: 'data/index_management/enrich_policies/create',
+          openInNewTab: true,
+        });
+      })
+    );
 
-  const controlCommands = [
-    { command: 'esql.control.multi_values.create', variableType: ESQLVariableType.MULTI_VALUES },
-    { command: 'esql.control.time_literal.create', variableType: ESQLVariableType.TIME_LITERAL },
-    { command: 'esql.control.fields.create', variableType: ESQLVariableType.FIELDS },
-    { command: 'esql.control.values.create', variableType: ESQLVariableType.VALUES },
-    { command: 'esql.control.functions.create', variableType: ESQLVariableType.FUNCTIONS },
-  ];
+    disposables.push(
+      monaco.editor.registerCommand('esql.timepicker.choose', (...args) => {
+        latestCommandDeps.current.openTimePickerPopover();
+      })
+    );
 
-  controlCommands.forEach(({ command, variableType }) => {
-    monaco.editor.registerCommand(command, async (...args) => {
-      const [, { triggerSource }] = args;
-      const prefilled = triggerSource !== ControlTriggerSource.QUESTION_MARK;
-      telemetryService.trackEsqlControlFlyoutOpened(
-        prefilled,
-        variableType,
-        triggerSource,
-        fixedQuery
+    disposables.push(
+      monaco.editor.registerCommand('esql.recommendedQuery.accept', (...args) => {
+        const [, { queryLabel }] = args;
+        latestCommandDeps.current.telemetryService.trackRecommendedQueryClicked(
+          QuerySource.AUTOCOMPLETE,
+          queryLabel
+        );
+      })
+    );
+
+    const controlCommands = [
+      { command: 'esql.control.multi_values.create', variableType: ESQLVariableType.MULTI_VALUES },
+      { command: 'esql.control.time_literal.create', variableType: ESQLVariableType.TIME_LITERAL },
+      { command: 'esql.control.fields.create', variableType: ESQLVariableType.FIELDS },
+      { command: 'esql.control.values.create', variableType: ESQLVariableType.VALUES },
+      { command: 'esql.control.functions.create', variableType: ESQLVariableType.FUNCTIONS },
+    ];
+
+    controlCommands.forEach(({ command, variableType }) => {
+      disposables.push(
+        monaco.editor.registerCommand(command, async (...args) => {
+          const [, { triggerSource }] = args;
+          const prefilled = triggerSource !== ControlTriggerSource.QUESTION_MARK;
+          latestCommandDeps.current.telemetryService.trackEsqlControlFlyoutOpened(
+            prefilled,
+            variableType,
+            triggerSource,
+            latestCommandDeps.current.fixedQuery
+          );
+          const position = editor1.current?.getPosition();
+          await triggerControl(
+            latestCommandDeps.current.fixedQuery,
+            variableType,
+            position,
+            latestCommandDeps.current.uiActions,
+            triggerSource,
+            latestCommandDeps.current.esqlVariables,
+            latestCommandDeps.current.controlsContext?.onSaveControl,
+            latestCommandDeps.current.controlsContext?.onCancelControl
+          );
+        })
       );
-      const position = editor1.current?.getPosition();
-      await triggerControl(
-        fixedQuery,
-        variableType,
-        position,
-        uiActions,
-        triggerSource,
-        esqlVariables,
-        controlsContext?.onSaveControl,
-        controlsContext?.onCancelControl
-      );
     });
-  });
 
-  editor1.current?.addCommand(
-    // eslint-disable-next-line no-bitwise
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-    () => onQuerySubmit(QuerySource.MANUAL)
-  );
+    editor1.current?.addCommand(
+      // eslint-disable-next-line no-bitwise
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+      () => latestCommandDeps.current.onQuerySubmit(QuerySource.MANUAL)
+    );
 
-  editor1.current?.addCommand(
-    // eslint-disable-next-line no-bitwise
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
-    () => setIsVisorOpen(!isVisorOpen)
-  );
+    editor1.current?.addCommand(
+      // eslint-disable-next-line no-bitwise
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
+      () => setIsVisorOpen(!latestCommandDeps.current.isVisorOpen)
+    );
+
+    return () => {
+      disposables.forEach((d) => d.dispose());
+    };
+  }, [latestCommandDeps]);
+
+  const editorDidMountDisposables = useRef<monaco.IDisposable[]>([]);
+
+  useEffect(() => {
+    const disposables = editorDidMountDisposables;
+    return () => {
+      disposables.current.forEach((d) => d.dispose());
+    };
+  }, []);
 
   const styles = esqlEditorStyles(
     theme.euiTheme,
@@ -1129,40 +1170,50 @@ const ESQLEditorInternal = function ESQLEditor({
                     // When both inline and suggestion widget are visible,
                     // we want Tab to accept inline suggestions,
                     // so we need to unbind the default suggestion widget behavior
-                    monaco.editor.addKeybindingRule({
-                      keybinding: monaco.KeyCode.Tab,
-                      command: '-acceptSelectedSuggestion',
-                      when: 'suggestWidgetHasFocusedSuggestion && suggestWidgetVisible && textInputFocus && inlineSuggestionVisible',
-                    });
+                    editorDidMountDisposables.current.push(
+                      monaco.editor.addKeybindingRule({
+                        keybinding: monaco.KeyCode.Tab,
+                        command: '-acceptSelectedSuggestion',
+                        when: 'suggestWidgetHasFocusedSuggestion && suggestWidgetVisible && textInputFocus && inlineSuggestionVisible',
+                      })
+                    );
 
                     // Add explicit binding for Tab to accept inline suggestions when they're visible
-                    monaco.editor.addKeybindingRule({
-                      keybinding: monaco.KeyCode.Tab,
-                      command: 'editor.action.inlineSuggest.commit',
-                      when: 'inlineSuggestionVisible && textInputFocus',
-                    });
+                    editorDidMountDisposables.current.push(
+                      monaco.editor.addKeybindingRule({
+                        keybinding: monaco.KeyCode.Tab,
+                        command: 'editor.action.inlineSuggest.commit',
+                        when: 'inlineSuggestionVisible && textInputFocus',
+                      })
+                    );
 
                     // this is fixing a bug between the EUIPopover and the monaco editor
                     // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
                     // to fire, the timeout is needed because otherwise it refocuses on the popover icon
                     // and the user needs to click again the editor.
                     // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-                    editor.onMouseDown(() => {
-                      setTimeout(() => {
-                        editor.focus();
-                      }, 100);
-                      if (datePickerOpenStatusRef.current) {
-                        setPopoverPosition({});
-                      }
-                    });
+                    editorDidMountDisposables.current.push(
+                      editor.onMouseDown(() => {
+                        setTimeout(() => {
+                          editor.focus();
+                        }, 100);
+                        if (datePickerOpenStatusRef.current) {
+                          setPopoverPosition({});
+                        }
+                      })
+                    );
 
-                    editor.onDidFocusEditorText(() => {
-                      onEditorFocus();
-                    });
+                    editorDidMountDisposables.current.push(
+                      editor.onDidFocusEditorText(() => {
+                        onEditorFocus();
+                      })
+                    );
 
-                    editor.onKeyDown(() => {
-                      onEditorFocus();
-                    });
+                    editorDidMountDisposables.current.push(
+                      editor.onKeyDown(() => {
+                        onEditorFocus();
+                      })
+                    );
 
                     // on CMD/CTRL + / comment out the entire line
                     editor.addCommand(
@@ -1183,14 +1234,18 @@ const ESQLEditorInternal = function ESQLEditor({
                         setEditorHeight(EDITOR_MAX_HEIGHT);
                       }
                     }
-                    editor.onDidLayoutChange((layoutInfoEvent) => {
-                      onLayoutChangeRef.current(layoutInfoEvent);
-                    });
+                    editorDidMountDisposables.current.push(
+                      editor.onDidLayoutChange((layoutInfoEvent) => {
+                        onLayoutChangeRef.current(layoutInfoEvent);
+                      })
+                    );
 
-                    editor.onDidChangeModelContent(async () => {
-                      await addLookupIndicesDecorator();
-                      showSuggestionsIfEmptyQuery();
-                    });
+                    editorDidMountDisposables.current.push(
+                      editor.onDidChangeModelContent(async () => {
+                        await addLookupIndicesDecorator();
+                        showSuggestionsIfEmptyQuery();
+                      })
+                    );
 
                     // Auto-focus the editor and move the cursor to the end.
                     if (!disableAutoFocus) {
