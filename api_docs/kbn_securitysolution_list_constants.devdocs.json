@@ -594,26 +594,6 @@
             "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lists_integration/endpoint/validators/endpoint_exceptions_validator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lists_integration/endpoint/validators/endpoint_exceptions_validator.ts"
-          },
-          {
             "plugin": "lists",
             "path": "x-pack/solutions/security/plugins/lists/common/schemas/response/exception_list_schema.mock.ts"
           },
@@ -764,50 +744,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/tasks/security_lists.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           },
           {
             "plugin": "@kbn/test-suites-security-solution-apis",

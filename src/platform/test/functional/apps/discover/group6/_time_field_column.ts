@@ -39,7 +39,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     hideAnnouncements: true,
   };
 
-  describe('discover time field column', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/244544
+  describe.skip('discover time field column', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded(
