@@ -60,7 +60,7 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
     this.logger.debug('Starting health diagnostic service');
     const soClient = start.savedObjects.getUnsafeInternalClient();
 
-    const usageCollectorDeps: UsageCollectorDeps = this.usageCollection
+    const usageCollectorDeps: UsageCollectorDeps | undefined = this.usageCollection
       ? {
           logger: this.logger,
           collectorContext: {

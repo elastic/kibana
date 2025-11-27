@@ -93,7 +93,7 @@ export const detectionRulesInstalledM3 = (deps: UsageCollectorDeps): DetectorF =
     const elasticEnabled = ruleUsage?.elastic_total?.enabled ?? 0;
     const rulesCount = customEnabled + elasticEnabled;
 
-    logger.debug(
+    deps.logger.debug(
       `verifyEnabledSecurityRulesCount: Rules count - custom: ${customEnabled}, elastic: ${elasticEnabled}, total: ${rulesCount}`
     );
     return rulesCount > 0 ? undefined : Milestone.M3;
@@ -105,16 +105,15 @@ export const detectionRulesInstalledM3 = (deps: UsageCollectorDeps): DetectorF =
 
 export const casesM7 = (deps: UsageCollectorDeps): DetectorF => {
   return async (): Promise<Milestone | undefined> => {
-    interface CasesTelemetry {
-      cases?: {
-        all?: {
-          total?: number;
-        };
-      };
+    interface SavedObjectsCountsTelemetry {
+      by_type?: [{ type: string; count: number }];
     }
 
-    const result = await fetchCollectorResults<CasesTelemetry>('cases', deps);
-    const count = result?.cases?.all?.total;
+    const result = await fetchCollectorResults<SavedObjectsCountsTelemetry>(
+      'saved_objects_counts',
+      deps
+    );
+    const count = result?.by_type?.find((item) => item.type === 'cases')?.count ?? 0;
     return count > 0 ? undefined : Milestone.M6;
   };
 };
@@ -137,7 +136,7 @@ async function fetchCollectorResults<T>(
       return undefined;
     }
 
-    logger.info(`result: ${JSON.stringify(casesResult, null, 2)}`);
+    logger.info(`result: ${JSON.stringify(result, null, 2)}`);
 
     return result as T;
   } catch (error) {
