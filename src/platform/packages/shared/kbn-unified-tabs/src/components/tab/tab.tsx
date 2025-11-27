@@ -221,7 +221,16 @@ export const Tab: React.FC<TabProps> = (props) => {
           ) : (
             <div css={getTabLabelContainerCss(euiTheme)} className="unifiedTabs__tabLabel">
               {previewData?.status === TabStatus.RUNNING && (
-                <EuiProgress size="xs" color="accent" position="absolute" />
+                <EuiProgress
+                  size="xs"
+                  color="accent"
+                  position="absolute"
+                  css={css`
+                    // we can't simply use overflow: hidden; because then curved notches are not visible
+                    border-top-left-radius: ${euiTheme.border.radius.small};
+                    border-top-right-radius: ${euiTheme.border.radius.small};
+                  `}
+                />
               )}
               <EuiFlexGroup
                 ref={tabLabelRef}
