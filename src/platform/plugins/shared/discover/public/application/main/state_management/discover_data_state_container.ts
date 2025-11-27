@@ -18,7 +18,6 @@ import {
   Subject,
   switchMap,
   tap,
-  withLatestFrom,
 } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -29,6 +28,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram/types';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverServices } from '../../../build_services';
@@ -79,6 +79,11 @@ export interface DataTotalHitsMsg extends DataMsg {
   result?: number;
 }
 
+export interface DiscoverLatestFetchDetails {
+  abortController?: AbortController;
+  visContext?: UnifiedHistogramVisContext;
+}
+
 export interface DiscoverDataStateContainer {
   /**
    * Implicitly starting fetching data from ES
@@ -99,7 +104,7 @@ export interface DiscoverDataStateContainer {
   /**
    * Emits when the chart should be fetched
    */
-  fetchChart$: Observable<void>;
+  fetchChart$: Observable<DiscoverLatestFetchDetails | null>;
   /**
    * Used to disable the next fetch that would otherwise be triggered by a URL state change
    */
@@ -162,7 +167,7 @@ export function getDataStateContainer({
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
-  const fetchChart$ = new ReplaySubject<void>(1);
+  const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails | null>(1);
   const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
 
   /**
@@ -178,6 +183,11 @@ export function getDataStateContainer({
       !timefilter.getRefreshInterval().pause ||
       searchSessionManager.hasSearchSessionIdInURL();
     return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
+  };
+
+  // Reset fetchChart$ to avoid emitting stale values when re-mounting useDiscoverHistogram
+  const resetFetchChart$ = () => {
+    fetchChart$.next(null);
   };
 
   /**
@@ -222,8 +232,6 @@ export function getDataStateContainer({
     autoRefreshDone = fn;
   };
 
-  const lastReloadRequestTime$ = new Subject<number | undefined>();
-
   const fetch$ = getFetch$({
     setAutoRefreshDone,
     data,
@@ -231,7 +239,6 @@ export function getDataStateContainer({
     refetch$,
     searchSource: savedSearchContainer.getState().searchSource,
     searchSessionManager,
-    lastReloadRequestTime$,
   }).pipe(
     filter(() => validateTimeRange(timefilter.getTime(), toastNotifications)),
     tap(() => inspectorAdapters.requests.reset()),
@@ -249,8 +256,7 @@ export function getDataStateContainer({
   function subscribe() {
     const subscription = fetch$
       .pipe(
-        withLatestFrom(lastReloadRequestTime$),
-        mergeMap(async ([{ options }, lastReloadRequestTime]) => {
+        mergeMap(async ({ options }) => {
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
           const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
             selectTabRuntimeState(runtimeStateManager, currentTabId);
@@ -312,16 +318,18 @@ export function getDataStateContainer({
                 timeRangeRelative: timefilter.getTime(),
                 searchSessionId,
                 isSearchSessionRestored,
-                lastReloadRequestTime,
               },
             })
           );
 
-          await scopedProfilesManager.resolveDataSourceProfile({
-            dataSource: getCurrentTab().appState.dataSource,
-            dataView: savedSearchContainer.getState().searchSource.getField('index'),
-            query: getCurrentTab().appState.query,
-          });
+          await scopedProfilesManager.resolveDataSourceProfile(
+            {
+              dataSource: getCurrentTab().appState.dataSource,
+              dataView: savedSearchContainer.getState().searchSource.getField('index'),
+              query: getCurrentTab().appState.query,
+            },
+            resetFetchChart$
+          );
 
           const dataView = currentDataView$.getValue();
           const defaultProfileState = dataView
@@ -341,9 +349,17 @@ export function getDataStateContainer({
 
           abortController = new AbortController();
 
+          const isEsqlQuery = isOfAggregateQueryType(getCurrentTab().appState.query);
+          const latestFetchDetails: DiscoverLatestFetchDetails = {
+            abortController,
+          };
+
           // Trigger chart fetching after the pre fetch state has been updated
           // to ensure state values that would affect data fetching are set
-          fetchChart$.next();
+          if (!isEsqlQuery) {
+            // trigger in parallel with the main request for Classic mode
+            fetchChart$.next(latestFetchDetails);
+          }
 
           const prevAutoRefreshDone = autoRefreshDone;
           const fetchAllTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchAll');
@@ -357,6 +373,11 @@ export function getDataStateContainer({
             reset: options.reset,
             abortController,
             onFetchRecordsComplete: async () => {
+              if (isEsqlQuery && !abortController.signal.aborted) {
+                // defer triggering chart fetching until after main request completes for ES|QL mode
+                fetchChart$.next(latestFetchDetails);
+              }
+
               const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
 
               if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {

@@ -530,7 +530,7 @@ const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') =
 const componentStyles = {
   dscPage: ({ euiTheme }: UseEuiTheme) =>
     css({
-      overflow: 'hidden',
+      overflow: 'visible',
       padding: 0,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
     }),
