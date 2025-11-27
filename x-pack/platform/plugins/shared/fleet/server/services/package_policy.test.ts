@@ -86,7 +86,6 @@ import { agentPolicyService } from './agent_policy';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { licenseService } from './license';
 import { cloudConnectorService } from './cloud_connector';
-import { isSecretStorageEnabled, extractAndWriteSecrets } from './secrets';
 
 jest.mock('./spaces/helpers');
 
