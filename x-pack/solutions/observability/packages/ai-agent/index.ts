@@ -8,4 +8,4 @@
 export {
   ContextualInsight,
   type ContextualInsightProps,
-} from './contextual-insight/contextual_insight';
+} from './contextual_insight/contextual_insight';

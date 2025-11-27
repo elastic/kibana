@@ -174,6 +174,17 @@ export function ErrorSampleAiAgentContextualInsight({
           exception_stacktrace: exceptionStacktrace,
         }),
       },
+      ...(llmResponse?.content
+        ? [
+            {
+              id: 'apm_error_details_llm_summary',
+              type: 'text',
+              getContent: () => ({
+                content: llmResponse.content,
+              }),
+            },
+          ]
+        : []),
     ];
   }, [
     error,
@@ -182,6 +193,7 @@ export function ErrorSampleAiAgentContextualInsight({
     exceptionStacktrace,
     onechat,
     isObservabilityAgentEnabled,
+    llmResponse,
   ]);
 
   if (!onechat || !isObservabilityAgentEnabled || !inference) {
