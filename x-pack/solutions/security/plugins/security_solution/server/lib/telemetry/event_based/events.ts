@@ -424,38 +424,40 @@ export const ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT: EventTypeOpts<{
     snapshotDate: {
       type: 'date',
       _meta: {
-        description: 'TODO',
+        description:
+          'Snapshot date marks the date on which the entities were captured (the day before the task run)',
       },
     },
     snapshotIndex: {
       type: 'keyword',
       _meta: {
-        description: 'TODO',
+        description: 'Name of the index containing captured entities',
       },
     },
     entityCount: {
       type: 'long',
       _meta: {
-        description: 'TODO',
+        description: 'Number of entities captured in the snapshot',
       },
     },
     durationMs: {
       type: 'long',
       _meta: {
-        description: 'Duration (in seconds) of the entity store data view refresh execution time',
+        description:
+          'Duration (in milliseconds) of the entity store data view refresh execution time',
       },
     },
     success: {
       type: 'boolean',
       _meta: {
-        description: 'TODO',
+        description: 'True if the task run was completed succesfully, false otherwise',
       },
     },
     errorMessage: {
       type: 'string',
       _meta: {
         optional: true,
-        description: 'TODO',
+        description: 'Contains the error message in case the task run failed (success: false)',
       },
     },
   },
