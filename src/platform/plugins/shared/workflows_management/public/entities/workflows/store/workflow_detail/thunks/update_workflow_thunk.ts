@@ -10,11 +10,13 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { EsWorkflow } from '@kbn/workflows';
+import { loadWorkflowThunk } from './load_workflow_thunk';
+import { affectsYamlMetadata, updateWorkflowYamlFields } from '../../../../../../common/lib/yaml';
 import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
-import { selectWorkflowId } from '../selectors';
-import { updateWorkflow } from '../slice';
+import { selectWorkflowId, selectYamlString } from '../selectors';
+import { setYamlString, updateWorkflow } from '../slice';
 
 export interface UpdateWorkflowParams {
   workflow: Partial<EsWorkflow>;
@@ -45,6 +47,26 @@ export const updateWorkflowThunk = createAsyncThunk<
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
       queryClient.invalidateQueries({ queryKey: ['workflows', id] });
 
+      // If the update affects YAML, update content in the editor immediately
+      // for better UX, then reload from server to sync
+      if (affectsYamlMetadata(workflow)) {
+        const currentYaml = selectYamlString(getState());
+
+        if (currentYaml) {
+          // Update all fields that were changed, preserving formatting (optimistic update)
+          const updatedYaml = updateWorkflowYamlFields(currentYaml, workflow, workflow.enabled);
+          dispatch(setYamlString(updatedYaml));
+        }
+
+        // Also update the workflow object in the store
+        dispatch(updateWorkflow(workflow));
+
+        // Reload the workflow from server to sync
+        await dispatch(loadWorkflowThunk({ id }));
+      } else {
+        dispatch(updateWorkflow(workflow));
+      }
+
       // Show success notification
       notifications.toasts.addSuccess(
         i18n.translate('workflows.detail.updateWorkflow.success', {
@@ -52,9 +74,6 @@ export const updateWorkflowThunk = createAsyncThunk<
         }),
         { toastLifeTimeMs: 2000 }
       );
-
-      // Update the workflow in the store
-      dispatch(updateWorkflow(workflow));
     } catch (error) {
       // Extract error message from HTTP error body if available
       const errorMessage = error.body?.message || error.message || 'Failed to update workflow';
