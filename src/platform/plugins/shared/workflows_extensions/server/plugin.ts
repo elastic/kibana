@@ -36,7 +36,7 @@ export class WorkflowsExtensionsServerPlugin
     _plugins: WorkflowsExtensionsServerPluginSetupDeps
   ): WorkflowsExtensionsServerPluginSetup {
     return {
-      registerStep: (definition) => {
+      registerStepDefinition: (definition) => {
         this.stepRegistry.register(definition);
       },
     };
@@ -47,13 +47,13 @@ export class WorkflowsExtensionsServerPlugin
     _plugins: WorkflowsExtensionsServerPluginStartDeps
   ): WorkflowsExtensionsServerPluginStart {
     return {
-      getStep: (stepTypeId: string) => {
+      getStepDefinition: (stepTypeId: string) => {
         return this.stepRegistry.get(stepTypeId);
       },
-      hasStep: (stepTypeId: string) => {
+      hasStepDefinition: (stepTypeId: string) => {
         return this.stepRegistry.has(stepTypeId);
       },
-      getAll: () => {
+      getAllStepDefinitions: () => {
         return this.stepRegistry.getAll();
       },
     };

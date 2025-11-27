@@ -7,4 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { StepTypeId, createStepTypeId } from './common';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import { setVarStepDefinition } from './setvar_step';
+
+export const registerStepDefinitions = (
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
+) => {
+  workflowsExtensions.registerStepDefinition(setVarStepDefinition);
+};

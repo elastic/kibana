@@ -4,8 +4,14 @@
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License v 1"; you may not use this file except in compliance with, at
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License v 1".
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { SetVarStepInput, SetVarStepOutput } from '../common/step_types/setvat_step';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import { setVarStepDefinition } from './setvar_step';
 
+export const registerStepDefinitions = (
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
+) => {
+  workflowsExtensions.registerStepDefinition(setVarStepDefinition);
+};

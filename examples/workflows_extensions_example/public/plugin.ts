@@ -18,7 +18,7 @@
 
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import { SETVAR_STEP_DEFINITION } from '../common/types';
+import { registerStepDefinitions } from './step_types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExtensionsExamplePublicPluginSetup {
@@ -52,46 +52,8 @@ export class WorkflowsExtensionsExamplePlugin
     _core: CoreSetup,
     plugins: WorkflowsExtensionsExamplePublicPluginSetupDeps
   ): WorkflowsExtensionsExamplePublicPluginSetup {
-    // Register the setvar step metadata
-    plugins.workflowsExtensions.registerStepMetadata({
-      ...SETVAR_STEP_DEFINITION,
-      label: 'Set Variable',
-      description: 'Sets a variable in the workflow context that can be used in subsequent steps',
-      icon: 'documentEdit',
-      documentation: {
-        summary: 'Sets a variable in the workflow context',
-        details:
-          'The setvar step allows you to store values in the workflow context that can be referenced in later steps using template syntax like {{ variables.name }}.',
-        examples: [
-          `# Set variables using key-value pairs
-- name: set_vars
-  type: workflows_step_example.setvar
-  with:
-    variables:
-      myVar: "Hello World"
-      count: 42
-      enabled: true`,
-          `# Set a single variable
-- name: set_single_var
-  type: workflows_step_example.setvar
-  with:
-    variables:
-      message: "{{ workflow.name }}"`,
-          `# Use variables in subsequent steps
-- name: set_vars
-  type: workflows_step_example.setvar
-  with:
-    variables:
-      apiUrl: "https://api.example.com"
-      timeout: 5000
-- name: use_vars
-  type: http
-  with:
-    url: "{{ steps.set_vars.output.variables.apiUrl }}"
-    timeout: "{{ steps.set_vars.output.variables.timeout }}"`,
-        ],
-      },
-    });
+    // Register steps on setup phase
+    registerStepDefinitions(plugins.workflowsExtensions);
 
     return {};
   }

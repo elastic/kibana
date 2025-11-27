@@ -9,8 +9,24 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { StepContext } from '@kbn/workflows';
-import type { ZodSchema } from '@kbn/zod';
 import type { CommonStepDefinition } from '../../common';
+
+/**
+ * Definition of a server-side workflow step extension.
+ * Contains the technical/behavioral implementation of a step.
+ */
+export interface ServerStepDefinition extends CommonStepDefinition {
+  /**
+   * The handler function that executes this step's logic
+   */
+  handler: StepHandler;
+
+  /**
+   * Optional timeout for this step type (e.g., '5m', '30s')
+   * If not specified, uses workflow-level or default timeout
+   */
+  timeout?: string;
+}
 
 /**
  * Handler function that executes a custom workflow step.
@@ -21,18 +37,6 @@ import type { CommonStepDefinition } from '../../common';
  * @returns The step output (should conform to outputSchema)
  */
 export type StepHandler = (context: StepHandlerContext) => Promise<StepHandlerResult>;
-
-/**
- * Definition of a server-side workflow step extension.
- * Contains the technical/behavioral implementation of a step.
- */
-export interface ServerStepDefinition extends CommonStepDefinition {
-  /**
-   * Handler function that executes the step logic.
-   * Receives validated input and returns output conforming to outputSchema.
-   */
-  handler: StepHandler;
-}
 
 /**
  * Context provided to custom step handlers during execution.
@@ -122,87 +126,4 @@ export interface StepHandlerResult<TOutput = unknown> {
    * Optional error information if the step failed
    */
   error?: Error;
-}
-
-/**
- * Definition of a custom step type that can be registered
- */
-export interface StepTypeDefinition {
-  /**
-   * Unique identifier for this step type (e.g., 'setvar', 'custom_http')
-   * This will be used in workflow YAML as the step type
-   */
-  id: string;
-
-  /**
-   * Human-readable title for the step type
-   */
-  title: string;
-
-  /**
-   * Optional detailed description of what this step does
-   */
-  description?: string;
-
-  /**
-   * Zod schema defining the expected input structure for this step
-   * Input will be validated against this schema before handler execution
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  inputSchema: ZodSchema<any>;
-
-  /**
-   * Zod schema defining the output structure from this step
-   * This helps document what data subsequent steps can access
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  outputSchema: ZodSchema<any>;
-
-  /**
-   * The handler function that executes this step's logic
-   */
-  handler: StepHandler;
-
-  /**
-   * Optional timeout for this step type (e.g., '5m', '30s')
-   * If not specified, uses workflow-level or default timeout
-   */
-  timeout?: string;
-
-  /**
-   * Optional documentation/help configuration for the UI
-   * This controls what users see when hovering over the step in the editor
-   */
-  documentation?: {
-    /**
-     * Short summary shown in hover (one line)
-     * @example "Define variables accessible throughout the workflow"
-     */
-    summary?: string;
-
-    /**
-     * Detailed description with usage examples (markdown supported)
-     * @example "This step allows you to set variables that can be accessed in subsequent steps via `{{ steps.stepName.variableName }}`"
-     */
-    details?: string;
-
-    /**
-     * External documentation URL
-     * @example "https://docs.example.com/custom-steps/setvar"
-     */
-    url?: string;
-
-    /**
-     * Usage examples in YAML format
-     * @example
-     * ```yaml
-     * - name: myStep
-     *   type: setvar
-     *   with:
-     *     variables:
-     *       x: 10
-     * ```
-     */
-    examples?: string[];
-  };
 }

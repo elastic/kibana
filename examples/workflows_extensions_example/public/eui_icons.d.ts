@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
-import { WorkflowsExtensionsPublicPlugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new WorkflowsExtensionsPublicPlugin(initializerContext);
+declare module '@elastic/eui/es/components/icon/assets/*' {
+  import type * as React from 'react';
+  import type { SVGProps } from 'react';
+  interface SVGRProps {
+    title?: string;
+    titleId?: string;
+  }
+  export const icon: ({
+    title,
+    titleId,
+    ...props
+  }: SVGProps<SVGSVGElement> & SVGRProps) => React.JSX.Element;
+  export {};
 }
-
-export type {
-  WorkflowsExtensionsPublicPluginSetup,
-  WorkflowsExtensionsPublicPluginStart,
-} from './types';
-
-export type { PublicStepDefinition, StepDocumentation } from './step_registry/types';

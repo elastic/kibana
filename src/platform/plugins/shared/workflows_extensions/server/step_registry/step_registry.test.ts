@@ -7,9 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod';
 import { ServerStepRegistry } from './step_registry';
-import { createStepTypeId } from '../../common';
-import type { ServerStepDefinition } from '../types';
+import type { ServerStepDefinition } from './types';
+
+const stepId = 'custom.myStep';
+const handler = jest.fn();
+const defaultDefinition: ServerStepDefinition = {
+  id: stepId,
+  inputSchema: z.object({ name: z.string() }),
+  outputSchema: z.object({ name: z.string() }),
+  handler,
+  timeout: '5m',
+};
 
 describe('ServerStepRegistry', () => {
   let registry: ServerStepRegistry;
@@ -20,55 +30,38 @@ describe('ServerStepRegistry', () => {
 
   describe('register', () => {
     it('should register a step definition', () => {
-      const stepId = createStepTypeId('custom.myStep');
-      const factory = jest.fn();
-      const definition: ServerStepDefinition = {
-        id: stepId,
-        factory,
-      };
+      registry.register(defaultDefinition);
 
-      registry.register(definition);
-
-      expect(registry.has(String(stepId))).toBe(true);
-      expect(registry.get(String(stepId))).toBe(factory);
+      expect(registry.has(stepId)).toBe(true);
+      expect(registry.get(stepId)).toBe(defaultDefinition);
     });
 
     it('should throw an error if a step with the same ID is already registered', () => {
-      const stepId = createStepTypeId('custom.myStep');
-      const factory1 = jest.fn();
-      const factory2 = jest.fn();
-
-      registry.register({ id: stepId, factory: factory1 });
+      registry.register(defaultDefinition);
 
       expect(() => {
-        registry.register({ id: stepId, factory: factory2 });
+        registry.register(defaultDefinition);
       }).toThrow('Step type "custom.myStep" is already registered');
     });
   });
 
   describe('get', () => {
-    it('should return the factory for a registered step', () => {
-      const stepId = createStepTypeId('custom.myStep');
-      const factory = jest.fn();
-      registry.register({ id: stepId, factory });
+    it('should return the handler for a registered step', () => {
+      registry.register(defaultDefinition);
 
-      const retrievedFactory = registry.get(String(stepId));
-
-      expect(retrievedFactory).toBe(factory);
+      expect(registry.get(stepId)?.handler).toBe(handler);
     });
 
     it('should return undefined for an unregistered step', () => {
-      const factory = registry.get('unknown.step');
-      expect(factory).toBeUndefined();
+      expect(registry.get('unknown.step')).toBeUndefined();
     });
   });
 
   describe('has', () => {
     it('should return true for a registered step', () => {
-      const stepId = createStepTypeId('custom.myStep');
-      registry.register({ id: stepId, factory: jest.fn() });
+      registry.register(defaultDefinition);
 
-      expect(registry.has(String(stepId))).toBe(true);
+      expect(registry.has(stepId)).toBe(true);
     });
 
     it('should return false for an unregistered step', () => {
@@ -78,20 +71,20 @@ describe('ServerStepRegistry', () => {
 
   describe('getAllStepTypeIds', () => {
     it('should return all registered step type IDs', () => {
-      registry.register({ id: createStepTypeId('custom.step1'), factory: jest.fn() });
-      registry.register({ id: createStepTypeId('custom.step2'), factory: jest.fn() });
-      registry.register({ id: createStepTypeId('plugin.step3'), factory: jest.fn() });
+      registry.register({ ...defaultDefinition, id: 'custom.step1' });
+      registry.register({ ...defaultDefinition, id: 'custom.step2' });
+      registry.register({ ...defaultDefinition, id: 'plugin.step3' });
 
-      const allIds = registry.getAllStepTypeIds();
+      const allIds = registry.getAll().map((step) => step.id);
 
       expect(allIds).toHaveLength(3);
-      expect(allIds).toContain('custom.step1');
-      expect(allIds).toContain('custom.step2');
-      expect(allIds).toContain('plugin.step3');
+      expect(allIds[0]).toBe('custom.step1');
+      expect(allIds[1]).toBe('custom.step2');
+      expect(allIds[2]).toBe('plugin.step3');
     });
 
     it('should return an empty array when no steps are registered', () => {
-      const allIds = registry.getAllStepTypeIds();
+      const allIds = registry.getAll();
       expect(allIds).toEqual([]);
     });
   });

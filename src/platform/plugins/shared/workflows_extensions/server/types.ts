@@ -8,49 +8,24 @@
  */
 
 import type { ServerStepDefinition } from './step_registry/types';
+import type {
+  WorkflowsExtensionsSetupContract,
+  WorkflowsExtensionsStartContract,
+} from '../common/types';
 
 /**
  * Server-side plugin setup contract.
- * Exposes methods for other plugins to register custom workflow steps.
+ * Exposes methods for other plugins to register server-side custom workflow steps.
  */
-export interface WorkflowsExtensionsServerPluginSetup {
-  /**
-   * Register a custom workflow step implementation.
-   * This should be called during the plugin's setup phase.
-   *
-   * @param definition - The step definition containing the handler function
-   * @throws Error if a step with the same ID is already registered
-   */
-  registerStep(definition: ServerStepDefinition): void;
-}
+export type WorkflowsExtensionsServerPluginSetup =
+  WorkflowsExtensionsSetupContract<ServerStepDefinition>;
 
 /**
  * Server-side plugin start contract.
- * Exposes methods for retrieving registered step implementations.
+ * Exposes methods for retrieving registered server-side step implementations.
  */
-export interface WorkflowsExtensionsServerPluginStart {
-  /**
-   * Get a step handler for a given step type ID.
-   *
-   * @param stepTypeId - The step type identifier
-   * @returns The step handler function, or undefined if not found
-   */
-  getStep(stepTypeId: string): ServerStepDefinition | undefined;
-
-  /**
-   * Check if a step type is registered.
-   *
-   * @param stepTypeId - The step type identifier
-   * @returns True if the step type is registered, false otherwise
-   */
-  hasStep(stepTypeId: string): boolean;
-
-  /**
-   * Get all registered step type IDs.
-   * @returns Array of registered step type identifiers
-   */
-  getAll(): ServerStepDefinition[];
-}
+export type WorkflowsExtensionsServerPluginStart =
+  WorkflowsExtensionsStartContract<ServerStepDefinition>;
 
 /**
  * Dependencies for the server plugin setup phase.

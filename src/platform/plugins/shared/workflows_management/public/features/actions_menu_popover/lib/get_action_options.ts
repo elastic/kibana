@@ -161,7 +161,15 @@ export function getActionOptions(
   const baseTypeInstancesCount: Record<string, number> = {};
 
   for (const connector of connectors) {
-    if (connector.type.startsWith('elasticsearch.')) {
+    const customStepDefinition = workflowsExtensions.getStepDefinition(connector.type);
+    if (customStepDefinition) {
+      kibanaGroup.options.push({
+        id: customStepDefinition.id,
+        label: customStepDefinition.label,
+        description: customStepDefinition.description,
+        iconType: customStepDefinition.icon ?? 'plugs',
+      });
+    } else if (connector.type.startsWith('elasticsearch.')) {
       elasticSearchGroup.options.push({
         id: connector.type,
         label: connector.description || connector.type,
@@ -215,15 +223,6 @@ export function getActionOptions(
       }
     }
   }
-
-  workflowsExtensions.getRegisteredSteps().forEach((step) => {
-    kibanaGroup.options.push({
-      id: step.id,
-      label: step.label,
-      description: step.description,
-      iconType: step.icon,
-    });
-  });
 
   return [
     triggersGroup,

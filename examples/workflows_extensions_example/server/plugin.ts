@@ -9,8 +9,7 @@
 
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import { SETVAR_STEP_DEFINITION } from '../common/types';
-import { setVarStepHandler } from './step_types/setvar_step';
+import { registerStepDefinitions } from './step_types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExtensionsExamplePluginSetup {
@@ -42,11 +41,8 @@ export class WorkflowsExtensionsExamplePlugin
     _core: CoreSetup,
     plugins: WorkflowsExtensionsExamplePluginSetupDeps
   ): WorkflowsExtensionsExamplePluginSetup {
-    // Register the setvar step
-    plugins.workflowsExtensions.registerStep({
-      ...SETVAR_STEP_DEFINITION,
-      handler: setVarStepHandler,
-    });
+    // Register steps on setup phase
+    registerStepDefinitions(plugins.workflowsExtensions);
 
     return {};
   }

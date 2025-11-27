@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StepHandler } from '@kbn/workflows-extensions/server';
+import type { ServerStepDefinition, StepHandler } from '@kbn/workflows-extensions/server';
+import { setVarStepCommonDefinition } from '../../common/step_types/setvat_step';
 
 // Handler function that sets the variables
-export const setVarStepHandler: StepHandler = async (context) => {
+const setVarStepHandler: StepHandler = async (context) => {
   try {
     const { variables } = context.input;
 
@@ -23,9 +24,14 @@ export const setVarStepHandler: StepHandler = async (context) => {
       variables: variableNames,
     });
 
-    return { output: { success: true, variablesSet: variableNames } };
+    return { output: { variables } };
   } catch (error) {
     context.logger.error('Failed to set variables', error);
     return { error: new Error(error instanceof Error ? error.message : 'Failed to set variables') };
   }
+};
+
+export const setVarStepDefinition: ServerStepDefinition = {
+  ...setVarStepCommonDefinition,
+  handler: setVarStepHandler,
 };

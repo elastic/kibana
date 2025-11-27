@@ -80,11 +80,6 @@ export class NodesFactory {
   ) {}
 
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
-    const genericStepNode = this.createGenericStepNode(stepExecutionRuntime);
-    if (genericStepNode) {
-      return genericStepNode;
-    }
-
     const { node } = stepExecutionRuntime;
 
     // Handle elasticsearch.* and kibana.* actions
@@ -118,8 +113,8 @@ export class NodesFactory {
 
     // Check for custom registered step types first
     const { workflowsExtensions } = this.dependencies;
-    if (node.stepType && workflowsExtensions.hasStep(node.stepType)) {
-      const stepDefinition = workflowsExtensions.getStep(node.stepType);
+    if (node.stepType && workflowsExtensions.hasStepDefinition(node.stepType)) {
+      const stepDefinition = workflowsExtensions.getStepDefinition(node.stepType);
       if (stepDefinition) {
         this.workflowLogger.logDebug(`Creating custom registered step: ${node.stepType}`, {
           event: { action: 'custom-step-creation', outcome: 'success' },
@@ -136,12 +131,10 @@ export class NodesFactory {
       }
     }
 
-    throw new Error(`Unknown node type: ${node.stepType}`);
+    return this.createGenericStepNode(stepExecutionRuntime);
   }
 
-  private createGenericStepNode(
-    stepExecutionRuntime: StepExecutionRuntime
-  ): NodeImplementation | undefined {
+  private createGenericStepNode(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
     const node = stepExecutionRuntime.node;
     const stepLogger = stepExecutionRuntime.stepLogger;
     switch (node.type) {
@@ -266,7 +259,7 @@ export class NodesFactory {
           this.workflowRuntime
         );
       default:
-        return undefined;
+        throw new Error(`Unknown node type: ${node.stepType}`);
     }
   }
 }

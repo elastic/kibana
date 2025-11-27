@@ -9,6 +9,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
+  rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/plugins/shared/workflows_extensions'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/workflows_extensions',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/plugins/shared/workflows_extensions/{common,public,server}/**/*.{js,ts,tsx}',
+  ],
 };

@@ -7,42 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod';
+import type { CommonStepDefinition } from './step_registry/types';
 
 /**
- * Step type identifier. Used to uniquely identify a workflow step type.
- * Should follow a namespaced format (e.g., "custom.myStep", "plugin.feature.step").
+ * Exposes methods for other plugins to register step UI definition.
  */
-export type StepTypeId = string & { readonly __brand: 'StepTypeId' };
-
-/**
- * Creates a branded step type ID from a string.
- * @param id - The step type identifier string
- * @returns A branded StepTypeId
- */
-export function createStepTypeId(id: string): StepTypeId {
-  return id as StepTypeId;
+export interface WorkflowsExtensionsSetupContract<TStepDefinition extends CommonStepDefinition> {
+  /**
+   * Register user-facing definition for a workflow step.
+   * This should be called during the plugin's setup phase.
+   *
+   * @param definition - The step definition containing label, description, and icon
+   * @throws Error if definition for the same step type ID is already registered
+   */
+  registerStepDefinition(definition: TStepDefinition): void;
 }
 
 /**
- * Common step definition fields shared between server and public.
+ * Public-side plugin start contract.
+ * Exposes methods for retrieving registered step definition.
  */
-export interface CommonStepDefinition {
+export interface WorkflowsExtensionsStartContract<TStepDefinition extends CommonStepDefinition> {
   /**
-   * Unique identifier for this step type.
-   * Should follow a namespaced format (e.g., "custom.myStep", "plugin.feature.step").
+   * Get all registered step definition.
+   * @returns Array of all registered step definition
    */
-  id: StepTypeId;
+  getAllStepDefinitions(): TStepDefinition[];
 
   /**
-   * Zod schema for validating step input.
-   * Defines the structure and validation rules for the step's input parameters.
+   * Get definition for a specific step type.
+   * @param stepTypeId - The step type identifier
+   * @returns The step definition, or undefined if not found
    */
-  inputSchema: z.ZodTypeAny;
+  getStepDefinition(stepTypeId: string): TStepDefinition | undefined;
 
   /**
-   * Zod schema for validating step output.
-   * Defines the structure and validation rules for the step's output.
+   * Check if definition for a step type is registered.
+   * @param stepTypeId - The step type identifier
+   * @returns True if definition for the step type is registered, false otherwise
    */
-  outputSchema: z.ZodTypeAny;
+  hasStepDefinition(stepTypeId: string): boolean;
 }

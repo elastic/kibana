@@ -77,7 +77,7 @@ import { createStepTypeId } from '@kbn/workflows-extensions';
 export class MyPlugin implements Plugin {
   public setup(core, plugins) {
     // Register UI metadata for your step
-    plugins.workflowsExtensions.registerStepMetadata({
+    plugins.workflowsExtensions.registerStepDefinition({
       id: createStepTypeId('myPlugin.myCustomStep'),
       label: 'My Custom Step',
       description: 'Performs a custom action in workflows',
@@ -98,17 +98,17 @@ function MyComponent() {
   const { workflowsExtensions } = useKibana().services;
 
   // Get all registered steps
-  const allSteps = workflowsExtensions.getRegisteredSteps();
+  const allSteps = workflowsExtensions.getAllStepDefinitions();
 
   // Get metadata for a specific step
-  const stepMetadata = workflowsExtensions.getStepMetadata('myPlugin.myCustomStep');
+  const stepMetadata = workflowsExtensions.getStepDefinition('myPlugin.myCustomStep');
   if (stepMetadata) {
     console.log(stepMetadata.label); // "My Custom Step"
     console.log(stepMetadata.icon);   // "star"
   }
 
   // Check if a step is registered
-  if (workflowsExtensions.hasStepMetadata('myPlugin.myCustomStep')) {
+  if (workflowsExtensions.hasStepDefinition('myPlugin.myCustomStep')) {
     // Step is available
   }
 }
@@ -140,7 +140,7 @@ plugins.workflowsExtensions.registerStep({
 });
 
 // Public side
-plugins.workflowsExtensions.registerStepMetadata({
+plugins.workflowsExtensions.registerStepDefinition({
   id: createStepTypeId('myPlugin.myStep'), // Must match!
   label: 'My Step',
   icon: 'star',

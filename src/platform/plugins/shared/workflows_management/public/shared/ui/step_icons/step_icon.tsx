@@ -42,9 +42,9 @@ export const StepIcon = React.memo(
       return <EuiIcon type={actionType.iconClass} size="m" />;
     }
 
-    const stepMetadata = workflowsExtensions.getStepMetadata(stepType);
-    if (stepMetadata) {
-      return <EuiIcon type={stepMetadata.icon} size="m" />;
+    const stepDefinition = workflowsExtensions.getStepDefinition(stepType);
+    if (stepDefinition?.icon) {
+      return <EuiIcon type={stepDefinition.icon} size="m" />;
     }
 
     const iconType = getStepIconType(stepType);

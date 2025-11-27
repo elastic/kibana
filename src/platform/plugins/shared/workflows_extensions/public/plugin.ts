@@ -8,7 +8,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { PublicStepRegistry } from './registry';
+import { PublicStepRegistry } from './step_registry';
 import type {
   WorkflowsExtensionsPublicPluginSetup,
   WorkflowsExtensionsPublicPluginSetupDeps,
@@ -36,7 +36,7 @@ export class WorkflowsExtensionsPublicPlugin
     _plugins: WorkflowsExtensionsPublicPluginSetupDeps
   ): WorkflowsExtensionsPublicPluginSetup {
     return {
-      registerStepMetadata: (metadata) => {
+      registerStepDefinition: (metadata) => {
         this.stepRegistry.register(metadata);
       },
     };
@@ -47,13 +47,13 @@ export class WorkflowsExtensionsPublicPlugin
     _plugins: WorkflowsExtensionsPublicPluginStartDeps
   ): WorkflowsExtensionsPublicPluginStart {
     return {
-      getRegisteredSteps: () => {
+      getAllStepDefinitions: () => {
         return this.stepRegistry.getAll();
       },
-      getStepMetadata: (stepTypeId: string) => {
+      getStepDefinition: (stepTypeId: string) => {
         return this.stepRegistry.get(stepTypeId);
       },
-      hasStepMetadata: (stepTypeId: string) => {
+      hasStepDefinition: (stepTypeId: string) => {
         return this.stepRegistry.has(stepTypeId);
       },
     };

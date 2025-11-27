@@ -18,18 +18,17 @@
 
 import { z } from '@kbn/zod';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { createStepTypeId } from '@kbn/workflows-extensions/common';
 
 /**
  * Step type ID for the setvar step.
  */
-export const SETVAR_STEP_ID = createStepTypeId('workflows_step_example.setvar');
+export const SetVarStepTypeId = 'example.setVariable';
 
 /**
  * Input schema for the setvar step.
  * Uses variables structure with key->value pairs.
  */
-export const SETVAR_INPUT_SCHEMA = z.object({
+export const InputSchema = z.object({
   variables: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
 });
 
@@ -37,29 +36,19 @@ export const SETVAR_INPUT_SCHEMA = z.object({
  * Output schema for the setvar step.
  * Uses variables structure with key->value pairs.
  */
-export const SETVAR_OUTPUT_SCHEMA = z.object({
+export const OutputSchema = z.object({
   variables: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
 });
 
-/**
- * Type inference for setvar step input.
- */
-export type SetVarStepInput = z.infer<typeof SETVAR_INPUT_SCHEMA>;
+export type SetVarStepInput = z.infer<typeof InputSchema>;
+export type SetVarStepOutput = z.infer<typeof OutputSchema>;
 
 /**
- * Type inference for setvar step output.
- */
-export type SetVarStepOutput = z.infer<typeof SETVAR_OUTPUT_SCHEMA>;
-
-/**
- * Common step definition for setvar step.
+ * Common step definition for SetVar step.
  * This is shared between server and public implementations.
  */
-export const SETVAR_STEP_DEFINITION: Pick<
-  CommonStepDefinition,
-  'id' | 'inputSchema' | 'outputSchema'
-> = {
-  id: SETVAR_STEP_ID,
-  inputSchema: SETVAR_INPUT_SCHEMA,
-  outputSchema: SETVAR_OUTPUT_SCHEMA,
+export const setVarStepCommonDefinition: CommonStepDefinition = {
+  id: SetVarStepTypeId,
+  inputSchema: InputSchema,
+  outputSchema: OutputSchema,
 };
