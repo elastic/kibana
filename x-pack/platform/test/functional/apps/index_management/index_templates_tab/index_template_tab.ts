@@ -140,7 +140,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Navigate to Mappings
         await testSubjects.click('formWizardStep-3');
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await testSubjects.click('fieldsTab');
+        await testSubjects.click('advancedOptionsTab');
 
         // Modify timestamp format
         await testSubjects.click('comboBoxClearButton');
