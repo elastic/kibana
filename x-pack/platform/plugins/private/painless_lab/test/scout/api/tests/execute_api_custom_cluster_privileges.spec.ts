@@ -80,7 +80,7 @@ apiTest.describe(
       'should return an unauthorized status code when using both cluster and Kibana privileges',
       async ({ apiClient, requestAuth }) => {
         const monitorClusterPrivilegesCredentials = await requestAuth.getApiKeyForCustomRole({
-          elasticsearch: { cluster: ['cluster:admin/scripts/painless/execute'] },
+          elasticsearch: { cluster: ['cluster:admin/scripts/painless/execute'], indices: [] },
           kibana: [{ base: [], feature: { dev_tools: ['all'] }, spaces: ['*'] }],
         });
 
