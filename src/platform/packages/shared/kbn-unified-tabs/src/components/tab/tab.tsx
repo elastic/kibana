@@ -38,6 +38,7 @@ import { useTabLabelWidth } from './use_tab_label_width';
 export interface TabProps {
   item: TabItem;
   isSelected: boolean;
+  selectedItemId?: string;
   isUnsaved?: boolean;
   isDragging?: boolean;
   hideRightSeparator?: boolean;
@@ -69,6 +70,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   const {
     item,
     isSelected,
+    selectedItemId,
     isUnsaved,
     isDragging,
     hideRightSeparator,
@@ -93,6 +95,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [isActionPopoverOpen, setActionPopover] = useState<boolean>(false);
+  const prevSelectedItemIdRef = useRef<string | undefined>(selectedItemId);
   const previewData = useMemo(() => getPreviewData?.(item), [getPreviewData, item]);
 
   const hidePreview = useCallback(() => setShowPreview(false), [setShowPreview]);
@@ -191,6 +194,14 @@ export const Tab: React.FC<TabProps> = (props) => {
       setIsInlineEditActive(false);
     }
   }, [isInlineEditActive, isSelected, setIsInlineEditActive]);
+
+  // dismisses action popover when the selected tab changes
+  useEffect(() => {
+    if (prevSelectedItemIdRef.current !== selectedItemId && !isSelected && isActionPopoverOpen) {
+      setActionPopover(false);
+    }
+    prevSelectedItemIdRef.current = selectedItemId;
+  }, [selectedItemId, isSelected, isActionPopoverOpen]);
 
   const mainTabContent = (
     <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging)}>

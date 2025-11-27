@@ -313,6 +313,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                           <Tab
                             item={item}
                             isSelected={selectedItem?.id === item.id}
+                            selectedItemId={selectedItem?.id}
                             isUnsaved={unsavedItemIds?.includes(item.id)}
                             isDragging={isDragging}
                             hideRightSeparator={hideRightSeparator}
