@@ -7,6 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './client';
-export * from './types';
-export * from './utils';
+import fs from 'fs';
+
+export function emitPipeline(pipelineSteps: string[]) {
+  const pipelineStr = [...new Set(pipelineSteps)].join('\n');
+  console.log(pipelineStr);
+}
+
+export const getPipeline = (filename: string, removeSteps = true) => {
+  const str = fs.readFileSync(filename).toString();
+  return removeSteps ? str.replace(/^steps:/, '') : str;
+};
