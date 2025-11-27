@@ -1848,4 +1848,974 @@ export const DISSECT_PATTERN_DATASETS: Record<string, PatternExtractionEvaluatio
       },
     ],
   },
+
+  web_access_logs: {
+    name: 'Web Access Logs - Dissect Extraction',
+    description: 'Simple web server access logs with consistent delimiters',
+    examples: [
+      // Simple Space-Delimited Access Log
+      {
+        input: {
+          stream_name: 'logs.web_access',
+          connector_id: '',
+          field_to_parse: 'body.text',
+          sample_messages: [
+            '192.168.1.100 GET /api/users 200 45 2023-01-15T10:30:45Z',
+            '10.0.0.5 POST /api/login 401 0 2023-01-15T10:30:46Z',
+            '172.16.0.10 GET /health 200 12 2023-01-15T10:30:47Z',
+            '192.168.1.101 DELETE /api/users/123 204 0 2023-01-15T10:30:48Z',
+            '10.0.0.6 PUT /api/settings 200 156 2023-01-15T10:30:49Z',
+            '172.16.0.11 GET /static/app.js 200 45678 2023-01-15T10:30:50Z',
+            '192.168.1.102 POST /api/orders 201 89 2023-01-15T10:30:51Z',
+            '10.0.0.7 GET /api/products 200 2341 2023-01-15T10:30:52Z',
+            '172.16.0.12 PATCH /api/users/456 200 34 2023-01-15T10:30:53Z',
+            '192.168.1.103 GET /favicon.ico 404 0 2023-01-15T10:30:54Z',
+          ],
+        },
+        output: {
+          source_id: 'simple-access-log',
+          source_type: 'synthetic',
+          sample_messages: [],
+          expected_fields: {
+            timestamp: {
+              field_name: 'attributes.custom.timestamp',
+              format: "yyyy-MM-dd'T'HH:mm:ss'Z'",
+              example_value: '2023-01-15T10:30:45Z',
+              dissect_pattern: '%{attributes.custom.timestamp}',
+            },
+            other_fields: [
+              {
+                name: 'attributes.source.ip',
+                type: 'ip',
+                required: true,
+                dissect_pattern: '%{attributes.source.ip}',
+              },
+              {
+                name: 'attributes.http.request.method',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.http.request.method}',
+              },
+              {
+                name: 'attributes.url.path',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.url.path}',
+              },
+              {
+                name: 'attributes.http.response.status_code',
+                type: 'number',
+                required: true,
+                dissect_pattern: '%{attributes.http.response.status_code}',
+              },
+              {
+                name: 'attributes.http.response.body.bytes',
+                type: 'number',
+                required: true,
+                dissect_pattern: '%{attributes.http.response.body.bytes}',
+              },
+            ],
+          },
+          pattern_characteristics: {
+            expected_min_fields: 6,
+            expected_max_fields: 6,
+          },
+          reference_patterns: {
+            dissect:
+              '%{attributes.source.ip} %{attributes.http.request.method} %{attributes.url.path} %{attributes.http.response.status_code} %{attributes.http.response.body.bytes} %{attributes.custom.timestamp}',
+            source: 'Synthetic simple access log format',
+          },
+        },
+        metadata: {
+          difficulty: 'easy',
+          notes: 'Simple space-delimited access log - ideal for dissect',
+        },
+      },
+      // HAProxy-style Log
+      {
+        input: {
+          stream_name: 'logs.haproxy',
+          connector_id: '',
+          field_to_parse: 'body.text',
+          sample_messages: [
+            '2023-01-15T10:30:45.123Z frontend backend-api 192.168.1.100:54321 200 45 GET /api/users',
+            '2023-01-15T10:30:46.234Z frontend backend-web 10.0.0.5:54322 301 0 GET /old-path',
+            '2023-01-15T10:30:47.345Z frontend backend-api 172.16.0.10:54323 500 123 POST /api/orders',
+            '2023-01-15T10:30:48.456Z frontend backend-static 192.168.1.101:54324 200 45678 GET /static/bundle.js',
+            '2023-01-15T10:30:49.567Z frontend backend-api 10.0.0.6:54325 401 0 POST /api/login',
+            '2023-01-15T10:30:50.678Z frontend backend-ws 172.16.0.11:54326 101 0 GET /ws/connect',
+            '2023-01-15T10:30:51.789Z frontend backend-api 192.168.1.102:54327 204 0 DELETE /api/sessions/abc',
+            '2023-01-15T10:30:52.890Z frontend backend-cache 10.0.0.7:54328 304 0 GET /api/cached-data',
+            '2023-01-15T10:30:53.901Z frontend backend-api 172.16.0.12:54329 429 89 POST /api/batch',
+            '2023-01-15T10:30:54.012Z frontend backend-health 192.168.1.103:54330 200 15 GET /health',
+          ],
+        },
+        output: {
+          source_id: 'haproxy-style-log',
+          source_type: 'synthetic',
+          sample_messages: [],
+          expected_fields: {
+            timestamp: {
+              field_name: 'attributes.custom.timestamp',
+              format: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+              example_value: '2023-01-15T10:30:45.123Z',
+              dissect_pattern: '%{attributes.custom.timestamp}',
+            },
+            other_fields: [
+              {
+                name: 'attributes.haproxy.frontend_name',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.haproxy.frontend_name}',
+              },
+              {
+                name: 'attributes.haproxy.backend_name',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.haproxy.backend_name}',
+              },
+              {
+                name: 'attributes.source.address',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.source.address}',
+              },
+              {
+                name: 'attributes.http.response.status_code',
+                type: 'number',
+                required: true,
+                dissect_pattern: '%{attributes.http.response.status_code}',
+              },
+              {
+                name: 'attributes.http.response.body.bytes',
+                type: 'number',
+                required: true,
+                dissect_pattern: '%{attributes.http.response.body.bytes}',
+              },
+              {
+                name: 'attributes.http.request.method',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.http.request.method}',
+              },
+              {
+                name: 'attributes.url.path',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.url.path}',
+              },
+            ],
+          },
+          pattern_characteristics: {
+            expected_min_fields: 8,
+            expected_max_fields: 8,
+          },
+          reference_patterns: {
+            dissect:
+              '%{attributes.custom.timestamp} %{attributes.haproxy.frontend_name} %{attributes.haproxy.backend_name} %{attributes.source.address} %{attributes.http.response.status_code} %{attributes.http.response.body.bytes} %{attributes.http.request.method} %{attributes.url.path}',
+            source: 'Synthetic HAProxy-style log format',
+          },
+        },
+        metadata: {
+          difficulty: 'easy',
+          notes: 'HAProxy-style access log with backend routing info',
+        },
+      },
+    ],
+  },
+
+  syslog_style: {
+    name: 'Syslog-Style Logs - Dissect Extraction',
+    description: 'BSD and RFC syslog format logs with consistent structure',
+    examples: [
+      // BSD Syslog Format
+      {
+        input: {
+          stream_name: 'logs.syslog_bsd',
+          connector_id: '',
+          field_to_parse: 'body.text',
+          sample_messages: [
+            '<134>Jan 15 10:30:45 server01 nginx: 192.168.1.100 GET /api/users 200',
+            '<131>Jan 15 10:30:46 server02 sshd: Accepted password for admin from 10.0.0.5',
+            '<135>Jan 15 10:30:47 server01 cron: Job scheduled: backup-daily',
+            '<131>Jan 15 10:30:48 server03 kernel: Out of memory: Killed process 1234',
+            '<134>Jan 15 10:30:49 server02 nginx: 172.16.0.10 POST /api/login 401',
+            '<135>Jan 15 10:30:50 server01 systemd: Started MySQL Server',
+            '<131>Jan 15 10:30:51 server03 sshd: Failed password for root from 192.168.1.200',
+            '<134>Jan 15 10:30:52 server02 nginx: 10.0.0.6 DELETE /api/sessions 204',
+            '<135>Jan 15 10:30:53 server01 docker: Container app-01 started',
+            '<131>Jan 15 10:30:54 server03 kernel: TCP: request_sock_TCP: Possible SYN flooding',
+          ],
+        },
+        output: {
+          source_id: 'syslog-bsd',
+          source_type: 'synthetic',
+          sample_messages: [],
+          expected_fields: {
+            timestamp: {
+              field_name: 'attributes.custom.timestamp',
+              format: 'MMM dd HH:mm:ss',
+              example_value: 'Jan 15 10:30:45',
+              dissect_pattern: '%{attributes.custom.timestamp}',
+            },
+            other_fields: [
+              {
+                name: 'attributes.log.syslog.priority',
+                type: 'number',
+                required: true,
+                dissect_pattern: '<%{attributes.log.syslog.priority}>',
+              },
+              {
+                name: 'attributes.host.name',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.host.name}',
+              },
+              {
+                name: 'attributes.process.name',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.process.name}',
+              },
+              {
+                name: 'body.text',
+                type: 'text',
+                required: true,
+                dissect_pattern: '%{body.text}',
+              },
+            ],
+          },
+          pattern_characteristics: {
+            expected_min_fields: 5,
+            expected_max_fields: 6,
+          },
+          reference_patterns: {
+            dissect:
+              '<%{attributes.log.syslog.priority}>%{attributes.custom.timestamp} %{attributes.host.name} %{attributes.process.name}: %{body.text}',
+            source: 'BSD syslog format',
+          },
+        },
+        metadata: {
+          difficulty: 'medium',
+          notes: 'BSD syslog format with priority, timestamp, host, and process',
+        },
+      },
+      // RFC 5424 Syslog Format (simplified)
+      {
+        input: {
+          stream_name: 'logs.syslog_rfc5424',
+          connector_id: '',
+          field_to_parse: 'body.text',
+          sample_messages: [
+            '<134>1 2023-01-15T10:30:45.123Z server01 nginx 1234 - - GET /api/users returned 200',
+            '<131>1 2023-01-15T10:30:46.234Z server02 sshd 5678 - - Connection from 10.0.0.5 accepted',
+            '<135>1 2023-01-15T10:30:47.345Z server01 cron 9012 - - Starting scheduled job backup',
+            '<131>1 2023-01-15T10:30:48.456Z server03 kernel - - - Memory pressure detected',
+            '<134>1 2023-01-15T10:30:49.567Z server02 nginx 1235 - - POST /api/login failed 401',
+            '<135>1 2023-01-15T10:30:50.678Z server01 systemd 1 - - Started service mysql.service',
+            '<131>1 2023-01-15T10:30:51.789Z server03 sshd 5679 - - Authentication failure for root',
+            '<134>1 2023-01-15T10:30:52.890Z server02 nginx 1236 - - DELETE /api/sessions returned 204',
+            '<135>1 2023-01-15T10:30:53.901Z server01 docker 3456 - - Container started: app-01',
+            '<131>1 2023-01-15T10:30:54.012Z server03 kernel - - - TCP SYN flood detected',
+          ],
+        },
+        output: {
+          source_id: 'syslog-rfc5424',
+          source_type: 'synthetic',
+          sample_messages: [],
+          expected_fields: {
+            timestamp: {
+              field_name: 'attributes.custom.timestamp',
+              format: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+              example_value: '2023-01-15T10:30:45.123Z',
+              dissect_pattern: '%{attributes.custom.timestamp}',
+            },
+            other_fields: [
+              {
+                name: 'attributes.log.syslog.priority',
+                type: 'number',
+                required: true,
+                dissect_pattern: '<%{attributes.log.syslog.priority}>',
+              },
+              {
+                name: 'attributes.log.syslog.version',
+                type: 'number',
+                required: true,
+                dissect_pattern: '%{attributes.log.syslog.version}',
+              },
+              {
+                name: 'attributes.host.name',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.host.name}',
+              },
+              {
+                name: 'attributes.process.name',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.process.name}',
+              },
+              {
+                name: 'attributes.process.pid',
+                type: 'keyword',
+                required: false,
+                dissect_pattern: '%{attributes.process.pid}',
+              },
+              {
+                name: 'body.text',
+                type: 'text',
+                required: true,
+                dissect_pattern: '%{body.text}',
+              },
+            ],
+          },
+          pattern_characteristics: {
+            expected_min_fields: 7,
+            expected_max_fields: 8,
+          },
+          reference_patterns: {
+            dissect:
+              '<%{attributes.log.syslog.priority}>%{attributes.log.syslog.version} %{attributes.custom.timestamp} %{attributes.host.name} %{attributes.process.name} %{attributes.process.pid} - - %{body.text}',
+            source: 'RFC 5424 syslog format (simplified)',
+          },
+        },
+        metadata: {
+          difficulty: 'medium',
+          notes: 'RFC 5424 syslog format with version and structured data placeholders',
+        },
+      },
+    ],
+  },
+
+  network_security: {
+    name: 'Network & Security Logs - Dissect Extraction',
+    description: 'Firewall, network device, and security appliance logs',
+    examples: [
+      // Firewall Log (iptables-style)
+      {
+        input: {
+          stream_name: 'logs.firewall',
+          connector_id: '',
+          field_to_parse: 'body.text',
+          sample_messages: [
+            '2023-01-15T10:30:45Z ACCEPT IN=eth0 OUT= SRC=192.168.1.100 DST=10.0.0.5 PROTO=TCP SPT=54321 DPT=443',
+            '2023-01-15T10:30:46Z DROP IN=eth0 OUT= SRC=172.16.0.10 DST=10.0.0.5 PROTO=TCP SPT=12345 DPT=22',
+            '2023-01-15T10:30:47Z ACCEPT IN=eth0 OUT=eth1 SRC=192.168.1.101 DST=8.8.8.8 PROTO=UDP SPT=53421 DPT=53',
+            '2023-01-15T10:30:48Z DROP IN=eth0 OUT= SRC=10.0.0.100 DST=10.0.0.5 PROTO=ICMP TYPE=8 CODE=0',
+            '2023-01-15T10:30:49Z ACCEPT IN=eth1 OUT= SRC=192.168.1.102 DST=10.0.0.5 PROTO=TCP SPT=44567 DPT=80',
+            '2023-01-15T10:30:50Z DROP IN=eth0 OUT= SRC=172.16.0.11 DST=10.0.0.5 PROTO=TCP SPT=65432 DPT=3389',
+            '2023-01-15T10:30:51Z ACCEPT IN=eth0 OUT=eth1 SRC=192.168.1.103 DST=1.1.1.1 PROTO=UDP SPT=54000 DPT=53',
+            '2023-01-15T10:30:52Z DROP IN=eth0 OUT= SRC=10.0.0.101 DST=10.0.0.5 PROTO=TCP SPT=11111 DPT=445',
+            '2023-01-15T10:30:53Z ACCEPT IN=eth1 OUT= SRC=192.168.1.104 DST=10.0.0.5 PROTO=TCP SPT=33333 DPT=8080',
+            '2023-01-15T10:30:54Z DROP IN=eth0 OUT= SRC=172.16.0.12 DST=10.0.0.5 PROTO=TCP SPT=22222 DPT=1433',
+          ],
+        },
+        output: {
+          source_id: 'firewall-iptables',
+          source_type: 'synthetic',
+          sample_messages: [],
+          expected_fields: {
+            timestamp: {
+              field_name: 'attributes.custom.timestamp',
+              format: "yyyy-MM-dd'T'HH:mm:ss'Z'",
+              example_value: '2023-01-15T10:30:45Z',
+              dissect_pattern: '%{attributes.custom.timestamp}',
+            },
+            other_fields: [
+              {
+                name: 'attributes.event.action',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.event.action}',
+              },
+              {
+                name: 'attributes.observer.ingress.interface.name',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: 'IN=%{attributes.observer.ingress.interface.name}',
+              },
+              {
+                name: 'attributes.source.ip',
+                type: 'ip',
+                required: true,
+                dissect_pattern: 'SRC=%{attributes.source.ip}',
+              },
+              {
+                name: 'attributes.destination.ip',
+                type: 'ip',
+                required: true,
+                dissect_pattern: 'DST=%{attributes.destination.ip}',
+              },
+              {
+                name: 'attributes.network.transport',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: 'PROTO=%{attributes.network.transport}',
+              },
+            ],
+          },
+          pattern_characteristics: {
+            expected_min_fields: 6,
+            expected_max_fields: 10,
+          },
+          reference_patterns: {
+            dissect:
+              '%{attributes.custom.timestamp} %{attributes.event.action} IN=%{attributes.observer.ingress.interface.name} OUT=%{?out} SRC=%{attributes.source.ip} DST=%{attributes.destination.ip} PROTO=%{attributes.network.transport} %{?rest}',
+            source: 'Synthetic iptables-style firewall log',
+          },
+        },
+        metadata: {
+          difficulty: 'medium',
+          notes: 'Firewall logs with key=value pairs - dissect handles this pattern well',
+        },
+      },
+      // VPN Connection Log
+      {
+        input: {
+          stream_name: 'logs.vpn',
+          connector_id: '',
+          field_to_parse: 'body.text',
+          sample_messages: [
+            '2023-01-15 10:30:45 CONNECT user=alice client_ip=192.168.1.100 assigned_ip=10.8.0.10 tunnel=tun0',
+            '2023-01-15 10:30:46 DISCONNECT user=bob client_ip=192.168.1.101 duration=3600 bytes_in=1048576 bytes_out=524288',
+            '2023-01-15 10:30:47 AUTH_FAIL user=charlie client_ip=172.16.0.10 reason=invalid_password',
+            '2023-01-15 10:30:48 CONNECT user=david client_ip=192.168.1.102 assigned_ip=10.8.0.11 tunnel=tun0',
+            '2023-01-15 10:30:49 REKEY user=alice client_ip=192.168.1.100 new_key_id=12345',
+            '2023-01-15 10:30:50 DISCONNECT user=eve client_ip=192.168.1.103 duration=7200 bytes_in=2097152 bytes_out=1048576',
+            '2023-01-15 10:30:51 AUTH_FAIL user=frank client_ip=172.16.0.11 reason=certificate_expired',
+            '2023-01-15 10:30:52 CONNECT user=grace client_ip=192.168.1.104 assigned_ip=10.8.0.12 tunnel=tun0',
+            '2023-01-15 10:30:53 TIMEOUT user=henry client_ip=192.168.1.105 idle_time=900',
+            '2023-01-15 10:30:54 DISCONNECT user=david client_ip=192.168.1.102 duration=360 bytes_in=51200 bytes_out=25600',
+          ],
+        },
+        output: {
+          source_id: 'vpn-connection-log',
+          source_type: 'synthetic',
+          sample_messages: [],
+          expected_fields: {
+            timestamp: {
+              field_name: 'attributes.custom.timestamp',
+              format: 'yyyy-MM-dd HH:mm:ss',
+              example_value: '2023-01-15 10:30:45',
+              dissect_pattern: '%{attributes.custom.timestamp}',
+            },
+            other_fields: [
+              {
+                name: 'attributes.event.action',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.event.action}',
+              },
+              {
+                name: 'attributes.user.name',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: 'user=%{attributes.user.name}',
+              },
+              {
+                name: 'attributes.source.ip',
+                type: 'ip',
+                required: true,
+                dissect_pattern: 'client_ip=%{attributes.source.ip}',
+              },
+              {
+                name: 'body.text',
+                type: 'text',
+                required: true,
+                dissect_pattern: '%{body.text}',
+              },
+            ],
+          },
+          pattern_characteristics: {
+            expected_min_fields: 5,
+            expected_max_fields: 8,
+          },
+          reference_patterns: {
+            dissect:
+              '%{attributes.custom.timestamp} %{attributes.event.action} user=%{attributes.user.name} client_ip=%{attributes.source.ip} %{body.text}',
+            source: 'Synthetic VPN connection log',
+          },
+        },
+        metadata: {
+          difficulty: 'medium',
+          notes: 'VPN logs with action types and key=value attributes',
+        },
+      },
+    ],
+  },
+
+  database_logs: {
+    name: 'Database Logs - Dissect Extraction',
+    description: 'Simple database query and connection logs with fixed formats',
+    examples: [
+      // Database Query Log
+      {
+        input: {
+          stream_name: 'logs.db_query',
+          connector_id: '',
+          field_to_parse: 'body.text',
+          sample_messages: [
+            '2023-01-15T10:30:45.123Z|SELECT|users|45|1|admin|SELECT * FROM users WHERE id = 1',
+            '2023-01-15T10:30:46.234Z|INSERT|orders|123|1|app_user|INSERT INTO orders (user_id, total) VALUES (1, 99.99)',
+            '2023-01-15T10:30:47.345Z|UPDATE|products|67|15|admin|UPDATE products SET stock = stock - 1 WHERE id = 123',
+            '2023-01-15T10:30:48.456Z|DELETE|sessions|12|5|system|DELETE FROM sessions WHERE expired_at < NOW()',
+            '2023-01-15T10:30:49.567Z|SELECT|products|234|100|app_user|SELECT * FROM products WHERE category = electronics',
+            '2023-01-15T10:30:50.678Z|INSERT|audit_log|8|1|system|INSERT INTO audit_log (action, user_id) VALUES (login, 42)',
+            '2023-01-15T10:30:51.789Z|UPDATE|users|89|1|admin|UPDATE users SET last_login = NOW() WHERE id = 42',
+            '2023-01-15T10:30:52.890Z|SELECT|orders|456|25|app_user|SELECT * FROM orders WHERE status = pending',
+            '2023-01-15T10:30:53.901Z|DELETE|temp_data|5|1000|system|DELETE FROM temp_data WHERE created_at < DATE_SUB(NOW(), INTERVAL 1 DAY)',
+            '2023-01-15T10:30:54.012Z|SELECT|inventory|178|50|warehouse|SELECT * FROM inventory WHERE quantity < 10',
+          ],
+        },
+        output: {
+          source_id: 'database-query-log',
+          source_type: 'synthetic',
+          sample_messages: [],
+          expected_fields: {
+            timestamp: {
+              field_name: 'attributes.custom.timestamp',
+              format: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+              example_value: '2023-01-15T10:30:45.123Z',
+              dissect_pattern: '%{attributes.custom.timestamp}',
+            },
+            other_fields: [
+              {
+                name: 'attributes.db.operation',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.db.operation}',
+              },
+              {
+                name: 'attributes.db.sql.table',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.db.sql.table}',
+              },
+              {
+                name: 'attributes.event.duration',
+                type: 'number',
+                required: true,
+                dissect_pattern: '%{attributes.event.duration}',
+              },
+              {
+                name: 'attributes.db.sql.rows_affected',
+                type: 'number',
+                required: true,
+                dissect_pattern: '%{attributes.db.sql.rows_affected}',
+              },
+              {
+                name: 'attributes.user.name',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.user.name}',
+              },
+              {
+                name: 'body.text',
+                type: 'text',
+                required: true,
+                dissect_pattern: '%{body.text}',
+              },
+            ],
+          },
+          pattern_characteristics: {
+            expected_min_fields: 7,
+            expected_max_fields: 7,
+          },
+          reference_patterns: {
+            dissect:
+              '%{attributes.custom.timestamp}|%{attributes.db.operation}|%{attributes.db.sql.table}|%{attributes.event.duration}|%{attributes.db.sql.rows_affected}|%{attributes.user.name}|%{body.text}',
+            source: 'Synthetic database query log',
+          },
+        },
+        metadata: {
+          difficulty: 'easy',
+          notes: 'Pipe-delimited database query log with operation details',
+        },
+      },
+      // Database Connection Pool Log
+      {
+        input: {
+          stream_name: 'logs.db_pool',
+          connector_id: '',
+          field_to_parse: 'body.text',
+          sample_messages: [
+            '[2023-01-15 10:30:45] [pool-main] ACQUIRE conn_id=1 wait_ms=5 active=10 idle=5 total=15',
+            '[2023-01-15 10:30:46] [pool-main] RELEASE conn_id=1 held_ms=45 active=9 idle=6 total=15',
+            '[2023-01-15 10:30:47] [pool-main] CREATE conn_id=16 connect_ms=123 active=10 idle=5 total=16',
+            '[2023-01-15 10:30:48] [pool-replica] ACQUIRE conn_id=5 wait_ms=0 active=3 idle=7 total=10',
+            '[2023-01-15 10:30:49] [pool-main] TIMEOUT conn_id=2 wait_ms=5000 active=15 idle=0 total=15',
+            '[2023-01-15 10:30:50] [pool-replica] RELEASE conn_id=5 held_ms=89 active=2 idle=8 total=10',
+            '[2023-01-15 10:30:51] [pool-main] DESTROY conn_id=3 reason=idle_timeout active=9 idle=5 total=14',
+            '[2023-01-15 10:30:52] [pool-main] ACQUIRE conn_id=4 wait_ms=12 active=10 idle=4 total=14',
+            '[2023-01-15 10:30:53] [pool-replica] CREATE conn_id=11 connect_ms=98 active=4 idle=6 total=11',
+            '[2023-01-15 10:30:54] [pool-main] RELEASE conn_id=4 held_ms=234 active=9 idle=5 total=14',
+          ],
+        },
+        output: {
+          source_id: 'database-pool-log',
+          source_type: 'synthetic',
+          sample_messages: [],
+          expected_fields: {
+            timestamp: {
+              field_name: 'attributes.custom.timestamp',
+              format: 'yyyy-MM-dd HH:mm:ss',
+              example_value: '2023-01-15 10:30:45',
+              dissect_pattern: '[%{attributes.custom.timestamp}]',
+            },
+            other_fields: [
+              {
+                name: 'attributes.db.connection.pool.name',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '[%{attributes.db.connection.pool.name}]',
+              },
+              {
+                name: 'attributes.event.action',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.event.action}',
+              },
+              {
+                name: 'attributes.db.connection.id',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: 'conn_id=%{attributes.db.connection.id}',
+              },
+              {
+                name: 'body.text',
+                type: 'text',
+                required: true,
+                dissect_pattern: '%{body.text}',
+              },
+            ],
+          },
+          pattern_characteristics: {
+            expected_min_fields: 5,
+            expected_max_fields: 8,
+          },
+          reference_patterns: {
+            dissect:
+              '[%{attributes.custom.timestamp}] [%{attributes.db.connection.pool.name}] %{attributes.event.action} conn_id=%{attributes.db.connection.id} %{body.text}',
+            source: 'Synthetic database connection pool log',
+          },
+        },
+        metadata: {
+          difficulty: 'medium',
+          notes: 'Connection pool log with acquire/release events and pool metrics',
+        },
+      },
+    ],
+  },
+
+  application_logs: {
+    name: 'Application Logs - Dissect Extraction',
+    description: 'Various application log formats with consistent structure',
+    examples: [
+      // Spring Boot Style Log
+      {
+        input: {
+          stream_name: 'logs.spring_boot',
+          connector_id: '',
+          field_to_parse: 'body.text',
+          sample_messages: [
+            '2023-01-15 10:30:45.123 INFO 12345 --- [main] c.e.app.Application : Starting Application v1.0.0',
+            '2023-01-15 10:30:46.234 INFO 12345 --- [main] o.s.b.w.e.tomcat.TomcatWebServer : Tomcat started on port 8080',
+            '2023-01-15 10:30:47.345 WARN 12345 --- [http-nio-8080-exec-1] c.e.app.UserService : User not found: id=999',
+            '2023-01-15 10:30:48.456 ERROR 12345 --- [http-nio-8080-exec-2] c.e.app.PaymentService : Payment failed: amount=99.99',
+            '2023-01-15 10:30:49.567 DEBUG 12345 --- [scheduler-1] c.e.app.CacheService : Cache refresh completed: items=1000',
+            '2023-01-15 10:30:50.678 INFO 12345 --- [main] c.e.app.Application : Application started in 5.432 seconds',
+            '2023-01-15 10:30:51.789 WARN 12345 --- [http-nio-8080-exec-3] c.e.app.RateLimiter : Rate limit exceeded: ip=192.168.1.100',
+            '2023-01-15 10:30:52.890 ERROR 12345 --- [async-exec-1] c.e.app.EmailService : SMTP connection failed: host=mail.example.com',
+            '2023-01-15 10:30:53.901 INFO 12345 --- [http-nio-8080-exec-4] c.e.app.OrderService : Order created: order_id=ORD-12345',
+            '2023-01-15 10:30:54.012 DEBUG 12345 --- [pool-1-thread-1] c.e.app.MetricsService : Metrics exported: count=150',
+          ],
+        },
+        output: {
+          source_id: 'spring-boot-log',
+          source_type: 'synthetic',
+          sample_messages: [],
+          expected_fields: {
+            timestamp: {
+              field_name: 'attributes.custom.timestamp',
+              format: 'yyyy-MM-dd HH:mm:ss.SSS',
+              example_value: '2023-01-15 10:30:45.123',
+              dissect_pattern: '%{attributes.custom.timestamp}',
+            },
+            log_level: {
+              field_name: 'attributes.log.level',
+              example_values: ['INFO', 'WARN', 'ERROR', 'DEBUG'],
+              dissect_pattern: '%{attributes.log.level}',
+            },
+            other_fields: [
+              {
+                name: 'attributes.process.pid',
+                type: 'number',
+                required: true,
+                dissect_pattern: '%{attributes.process.pid}',
+              },
+              {
+                name: 'attributes.process.thread.name',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '[%{attributes.process.thread.name}]',
+              },
+              {
+                name: 'attributes.log.logger',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.log.logger}',
+              },
+              {
+                name: 'body.text',
+                type: 'text',
+                required: true,
+                dissect_pattern: '%{body.text}',
+              },
+            ],
+          },
+          pattern_characteristics: {
+            expected_min_fields: 6,
+            expected_max_fields: 6,
+          },
+          reference_patterns: {
+            dissect:
+              '%{attributes.custom.timestamp} %{attributes.log.level} %{attributes.process.pid} --- [%{attributes.process.thread.name}] %{attributes.log.logger} : %{body.text}',
+            source: 'Spring Boot default log format',
+          },
+        },
+        metadata: {
+          difficulty: 'medium',
+          notes: 'Spring Boot default logging format with thread name and logger class',
+        },
+      },
+      // JSON-ish Log (key=value style)
+      {
+        input: {
+          stream_name: 'logs.keyvalue',
+          connector_id: '',
+          field_to_parse: 'body.text',
+          sample_messages: [
+            'ts=2023-01-15T10:30:45Z level=info caller=main.go:42 msg="Server starting" port=8080 version=1.0.0',
+            'ts=2023-01-15T10:30:46Z level=info caller=http.go:156 msg="Request received" method=GET path=/api/users duration=45ms',
+            'ts=2023-01-15T10:30:47Z level=warn caller=auth.go:89 msg="Auth failed" user=unknown ip=192.168.1.100 reason=invalid_token',
+            'ts=2023-01-15T10:30:48Z level=error caller=db.go:234 msg="Query failed" table=users error=connection_timeout retry=3',
+            'ts=2023-01-15T10:30:49Z level=debug caller=cache.go:67 msg="Cache hit" key=user:123 ttl=3600s size=2048',
+            'ts=2023-01-15T10:30:50Z level=info caller=http.go:156 msg="Request received" method=POST path=/api/orders duration=123ms',
+            'ts=2023-01-15T10:30:51Z level=warn caller=ratelimit.go:45 msg="Rate limit" ip=10.0.0.5 requests=1000 limit=1000',
+            'ts=2023-01-15T10:30:52Z level=error caller=email.go:112 msg="SMTP error" host=mail.example.com error=connection_refused',
+            'ts=2023-01-15T10:30:53Z level=info caller=metrics.go:78 msg="Metrics exported" count=150 interval=60s',
+            'ts=2023-01-15T10:30:54Z level=info caller=main.go:99 msg="Shutdown complete" uptime=86400s requests_total=1000000',
+          ],
+        },
+        output: {
+          source_id: 'keyvalue-log',
+          source_type: 'synthetic',
+          sample_messages: [],
+          expected_fields: {
+            timestamp: {
+              field_name: 'attributes.custom.timestamp',
+              format: "yyyy-MM-dd'T'HH:mm:ss'Z'",
+              example_value: '2023-01-15T10:30:45Z',
+              dissect_pattern: 'ts=%{attributes.custom.timestamp}',
+            },
+            log_level: {
+              field_name: 'attributes.log.level',
+              example_values: ['info', 'warn', 'error', 'debug'],
+              dissect_pattern: 'level=%{attributes.log.level}',
+            },
+            other_fields: [
+              {
+                name: 'attributes.log.origin.file.name',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: 'caller=%{attributes.log.origin.file.name}',
+              },
+              {
+                name: 'body.text',
+                type: 'text',
+                required: true,
+                dissect_pattern: 'msg="%{body.text}"',
+              },
+            ],
+          },
+          pattern_characteristics: {
+            expected_min_fields: 4,
+            expected_max_fields: 8,
+          },
+          reference_patterns: {
+            dissect:
+              'ts=%{attributes.custom.timestamp} level=%{attributes.log.level} caller=%{attributes.log.origin.file.name} msg="%{body.text}" %{?rest}',
+            source: 'Key-value style log format (logfmt)',
+          },
+        },
+        metadata: {
+          difficulty: 'medium',
+          notes: 'Logfmt-style key=value log format common in Go applications',
+        },
+      },
+    ],
+  },
+
+  metrics_monitoring: {
+    name: 'Metrics & Monitoring Logs - Dissect Extraction',
+    description: 'System metrics, health checks, and monitoring logs',
+    examples: [
+      // System Metrics Log
+      {
+        input: {
+          stream_name: 'logs.system_metrics',
+          connector_id: '',
+          field_to_parse: 'body.text',
+          sample_messages: [
+            '2023-01-15T10:30:45Z server01 cpu_percent=45.2 mem_percent=67.8 disk_percent=34.5 load_1m=1.23',
+            '2023-01-15T10:30:46Z server02 cpu_percent=78.9 mem_percent=82.1 disk_percent=45.6 load_1m=3.45',
+            '2023-01-15T10:30:47Z server03 cpu_percent=12.3 mem_percent=45.6 disk_percent=78.9 load_1m=0.56',
+            '2023-01-15T10:30:48Z server01 cpu_percent=46.1 mem_percent=68.2 disk_percent=34.5 load_1m=1.34',
+            '2023-01-15T10:30:49Z server02 cpu_percent=81.2 mem_percent=83.4 disk_percent=45.7 load_1m=3.78',
+            '2023-01-15T10:30:50Z server03 cpu_percent=15.6 mem_percent=46.2 disk_percent=78.9 load_1m=0.67',
+            '2023-01-15T10:30:51Z server01 cpu_percent=44.8 mem_percent=67.5 disk_percent=34.6 load_1m=1.21',
+            '2023-01-15T10:30:52Z server02 cpu_percent=76.5 mem_percent=81.8 disk_percent=45.8 load_1m=3.34',
+            '2023-01-15T10:30:53Z server03 cpu_percent=11.2 mem_percent=45.1 disk_percent=79.0 load_1m=0.45',
+            '2023-01-15T10:30:54Z server01 cpu_percent=47.3 mem_percent=68.9 disk_percent=34.6 load_1m=1.45',
+          ],
+        },
+        output: {
+          source_id: 'system-metrics-log',
+          source_type: 'synthetic',
+          sample_messages: [],
+          expected_fields: {
+            timestamp: {
+              field_name: 'attributes.custom.timestamp',
+              format: "yyyy-MM-dd'T'HH:mm:ss'Z'",
+              example_value: '2023-01-15T10:30:45Z',
+              dissect_pattern: '%{attributes.custom.timestamp}',
+            },
+            other_fields: [
+              {
+                name: 'attributes.host.name',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.host.name}',
+              },
+              {
+                name: 'attributes.system.cpu.total.pct',
+                type: 'number',
+                required: true,
+                dissect_pattern: 'cpu_percent=%{attributes.system.cpu.total.pct}',
+              },
+              {
+                name: 'attributes.system.memory.used.pct',
+                type: 'number',
+                required: true,
+                dissect_pattern: 'mem_percent=%{attributes.system.memory.used.pct}',
+              },
+              {
+                name: 'attributes.system.filesystem.used.pct',
+                type: 'number',
+                required: true,
+                dissect_pattern: 'disk_percent=%{attributes.system.filesystem.used.pct}',
+              },
+              {
+                name: 'attributes.system.load.1',
+                type: 'number',
+                required: true,
+                dissect_pattern: 'load_1m=%{attributes.system.load.1}',
+              },
+            ],
+          },
+          pattern_characteristics: {
+            expected_min_fields: 6,
+            expected_max_fields: 6,
+          },
+          reference_patterns: {
+            dissect:
+              '%{attributes.custom.timestamp} %{attributes.host.name} cpu_percent=%{attributes.system.cpu.total.pct} mem_percent=%{attributes.system.memory.used.pct} disk_percent=%{attributes.system.filesystem.used.pct} load_1m=%{attributes.system.load.1}',
+            source: 'Synthetic system metrics log',
+          },
+        },
+        metadata: {
+          difficulty: 'easy',
+          notes: 'System metrics with CPU, memory, disk, and load averages',
+        },
+      },
+      // Health Check Log
+      {
+        input: {
+          stream_name: 'logs.health_check',
+          connector_id: '',
+          field_to_parse: 'body.text',
+          sample_messages: [
+            '2023-01-15T10:30:45Z|api-service|HEALTHY|response_time=45|checks_passed=5|checks_total=5',
+            '2023-01-15T10:30:46Z|database|HEALTHY|response_time=12|checks_passed=3|checks_total=3',
+            '2023-01-15T10:30:47Z|cache-service|DEGRADED|response_time=234|checks_passed=2|checks_total=3',
+            '2023-01-15T10:30:48Z|message-queue|HEALTHY|response_time=8|checks_passed=4|checks_total=4',
+            '2023-01-15T10:30:49Z|search-service|UNHEALTHY|response_time=5000|checks_passed=1|checks_total=3',
+            '2023-01-15T10:30:50Z|api-service|HEALTHY|response_time=42|checks_passed=5|checks_total=5',
+            '2023-01-15T10:30:51Z|database|HEALTHY|response_time=15|checks_passed=3|checks_total=3',
+            '2023-01-15T10:30:52Z|cache-service|HEALTHY|response_time=89|checks_passed=3|checks_total=3',
+            '2023-01-15T10:30:53Z|message-queue|HEALTHY|response_time=6|checks_passed=4|checks_total=4',
+            '2023-01-15T10:30:54Z|search-service|DEGRADED|response_time=2500|checks_passed=2|checks_total=3',
+          ],
+        },
+        output: {
+          source_id: 'health-check-log',
+          source_type: 'synthetic',
+          sample_messages: [],
+          expected_fields: {
+            timestamp: {
+              field_name: 'attributes.custom.timestamp',
+              format: "yyyy-MM-dd'T'HH:mm:ss'Z'",
+              example_value: '2023-01-15T10:30:45Z',
+              dissect_pattern: '%{attributes.custom.timestamp}',
+            },
+            other_fields: [
+              {
+                name: 'attributes.service.name',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.service.name}',
+              },
+              {
+                name: 'attributes.service.state',
+                type: 'keyword',
+                required: true,
+                dissect_pattern: '%{attributes.service.state}',
+              },
+              {
+                name: 'attributes.event.duration',
+                type: 'number',
+                required: true,
+                dissect_pattern: 'response_time=%{attributes.event.duration}',
+              },
+              {
+                name: 'attributes.health.checks_passed',
+                type: 'number',
+                required: true,
+                dissect_pattern: 'checks_passed=%{attributes.health.checks_passed}',
+              },
+              {
+                name: 'attributes.health.checks_total',
+                type: 'number',
+                required: true,
+                dissect_pattern: 'checks_total=%{attributes.health.checks_total}',
+              },
+            ],
+          },
+          pattern_characteristics: {
+            expected_min_fields: 6,
+            expected_max_fields: 6,
+          },
+          reference_patterns: {
+            dissect:
+              '%{attributes.custom.timestamp}|%{attributes.service.name}|%{attributes.service.state}|response_time=%{attributes.event.duration}|checks_passed=%{attributes.health.checks_passed}|checks_total=%{attributes.health.checks_total}',
+            source: 'Synthetic health check log',
+          },
+        },
+        metadata: {
+          difficulty: 'easy',
+          notes: 'Health check logs with service status and check results',
+        },
+      },
+    ],
+  },
 };
