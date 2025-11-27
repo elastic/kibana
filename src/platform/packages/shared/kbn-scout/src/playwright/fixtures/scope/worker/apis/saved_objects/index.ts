@@ -54,6 +54,13 @@ export interface ImportSavedObjectsParams {
   createNewCopies?: boolean;
 }
 
+export interface ExportSavedObjectsParams {
+  objects?: Array<{ type: string; id: string }>;
+  type?: string | string[];
+  excludeExportDetails?: boolean;
+  includeReferencesDeep?: boolean;
+}
+
 export interface ImportSavedObjectsResponse {
   success: boolean;
   successCount: number;
@@ -73,6 +80,27 @@ export interface ImportSavedObjectsResponse {
       references?: SavedObjectReference[];
     };
   }>;
+}
+
+export interface ExportedSavedObject {
+  type: string;
+  id: string;
+  attributes: Record<string, any>;
+  references?: SavedObjectReference[];
+  namespaces?: string[];
+  originId?: string;
+  updated_at?: string;
+}
+
+export interface ExportSavedObjectsResponse {
+  exportedObjects: ExportedSavedObject[];
+  exportDetails?: {
+    exportedCount: number;
+    missingRefCount: number;
+    missingReferences: Array<{ type: string; id: string }>;
+    excludedObjectsCount: number;
+    excludedObjects: Array<{ type: string; id: string; reason?: string }>;
+  };
 }
 
 export interface ApiResponse<T = any> {
@@ -117,6 +145,10 @@ export interface SavedObjectsApiService {
     params: ImportSavedObjectsParams,
     spaceId?: string
   ) => Promise<ApiResponse<ImportSavedObjectsResponse>>;
+  export: (
+    params: ExportSavedObjectsParams,
+    spaceId?: string
+  ) => Promise<ApiResponse<ExportSavedObjectsResponse>>;
 }
 
 export const getSavedObjectsApiHelper = (
@@ -295,6 +327,72 @@ export const getSavedObjectsApiHelper = (
 
           return {
             data: importResponse as ImportSavedObjectsResponse,
+            status: response.status,
+          };
+        }
+      );
+    },
+
+    export: async (params, spaceId) => {
+      return await measurePerformanceAsync(
+        log,
+        `savedObjectsApi.export [${params.objects?.length || 'by type'}]`,
+        async () => {
+          const exportType = params.objects ? 'specific objects' : `type: ${params.type}`;
+          log.debug(
+            `Exporting ${exportType} from space '${spaceId || 'default'}'${
+              params.includeReferencesDeep ? ' with deep references' : ''
+            }`
+          );
+
+          const response = await kbnClient.request({
+            method: 'POST',
+            path: `${buildSpacePath(spaceId)}/api/saved_objects/_export`,
+            retries: 3,
+            body: {
+              ...(params.objects && { objects: params.objects }),
+              ...(params.type && { type: params.type }),
+              ...(params.excludeExportDetails !== undefined && {
+                excludeExportDetails: params.excludeExportDetails,
+              }),
+              ...(params.includeReferencesDeep !== undefined && {
+                includeReferencesDeep: params.includeReferencesDeep,
+              }),
+            },
+            ignoreErrors: [400],
+            responseType: 'text',
+          });
+
+          // Export returns NDJSON format - parse it
+          const ndjsonText =
+            typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+          const lines = ndjsonText.split('\n').filter((line) => line.trim());
+
+          // Last line is export details (if not excluded)
+          const exportedObjects: ExportedSavedObject[] = [];
+          let exportDetails;
+
+          for (let i = 0; i < lines.length; i++) {
+            const parsed = JSON.parse(lines[i]);
+            // Check if this is the export details object
+            if (parsed.exportedCount !== undefined) {
+              exportDetails = parsed;
+            } else {
+              exportedObjects.push(parsed as ExportedSavedObject);
+            }
+          }
+
+          log.debug(
+            `Export completed: ${exportedObjects.length} objects${
+              exportDetails ? `, ${exportDetails.exportedCount} total` : ''
+            }`
+          );
+
+          return {
+            data: {
+              exportedObjects,
+              ...(exportDetails && { exportDetails }),
+            } as ExportSavedObjectsResponse,
             status: response.status,
           };
         }

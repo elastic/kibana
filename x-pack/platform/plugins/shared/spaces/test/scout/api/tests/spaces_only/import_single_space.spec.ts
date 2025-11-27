@@ -7,34 +7,18 @@
 
 import { apiTest, expect, tags } from '@kbn/scout';
 
-const SPACES = {
-  DEFAULT: {
-    spaceId: 'default',
-    name: 'Default',
-    description: 'This is the default space',
-    disabledFeatures: [],
-  },
-  SPACE_1: {
-    spaceId: 'space_1',
-    name: 'Space 1',
-    description: 'This is the first test space',
-    disabledFeatures: [],
-  },
-  SPACE_2: {
-    spaceId: 'space_2',
-    name: 'Space 2',
-    description: 'This is the second test space',
-    disabledFeatures: [],
-  },
-} as const;
+import {
+  ATTRIBUTE_TITLE_KEY,
+  ATTRIBUTE_TITLE_VALUE,
+  DASHBOARD_SAVED_OBJECT,
+  SPACES,
+  TEST_SPACES,
+} from './constants';
 
-const ATTRIBUTE_TITLE_KEY = 'title';
-const ATTRIBUTE_TITLE_VALUE = `Hello world`;
-
-const TEST_SPACES = [SPACES.DEFAULT, SPACES.SPACE_1] as const;
-
+// tests importing saved objects into a single space at a time
 TEST_SPACES.forEach((space) => {
   apiTest.describe(`_import API within the ${space.name} space`, { tag: tags.ESS_ONLY }, () => {
+    // create all spaces
     apiTest.beforeAll(async ({ kbnClient, log }) => {
       // Create the space (skip for default which always exists)
       if (space.spaceId !== SPACES.DEFAULT.spaceId) {
@@ -49,7 +33,6 @@ TEST_SPACES.forEach((space) => {
         log.info(`Using default space for test suite`);
       }
     });
-
     apiTest.afterAll(async ({ kbnClient, log }) => {
       // Delete the space (skip for default)
       if (space.spaceId !== SPACES.DEFAULT.spaceId) {
@@ -57,7 +40,6 @@ TEST_SPACES.forEach((space) => {
         log.info(`Deleted space [${space.spaceId}] after test suite`);
       }
     });
-
     apiTest(
       'should return 409 when trying to create dashboard that already exists',
       async ({ apiServices }) => {
@@ -69,9 +51,8 @@ TEST_SPACES.forEach((space) => {
           {
             objects: [
               {
-                type: 'dashboard',
+                ...DASHBOARD_SAVED_OBJECT,
                 id: uniqueId,
-                attributes: { [ATTRIBUTE_TITLE_KEY]: ATTRIBUTE_TITLE_VALUE },
               },
             ],
             overwrite: true,
@@ -87,9 +68,8 @@ TEST_SPACES.forEach((space) => {
           {
             objects: [
               {
-                type: 'dashboard',
+                ...DASHBOARD_SAVED_OBJECT,
                 id: uniqueId,
-                attributes: { [ATTRIBUTE_TITLE_KEY]: ATTRIBUTE_TITLE_VALUE },
               },
             ],
             overwrite: false,
@@ -115,9 +95,8 @@ TEST_SPACES.forEach((space) => {
         {
           objects: [
             {
-              type: 'dashboard',
+              ...DASHBOARD_SAVED_OBJECT,
               id: uniqueId,
-              attributes: { [ATTRIBUTE_TITLE_KEY]: ATTRIBUTE_TITLE_VALUE },
             },
           ],
           overwrite: false,
@@ -133,9 +112,9 @@ TEST_SPACES.forEach((space) => {
         {
           objects: [
             {
-              type: 'dashboard',
+              ...DASHBOARD_SAVED_OBJECT,
+              attributes: { title: `${ATTRIBUTE_TITLE_VALUE} - Overwritten` },
               id: uniqueId,
-              attributes: { [ATTRIBUTE_TITLE_KEY]: ATTRIBUTE_TITLE_VALUE },
             },
           ],
           overwrite: true,
@@ -148,6 +127,17 @@ TEST_SPACES.forEach((space) => {
       expect(response2.data.successResults).toBeDefined();
       expect(response2.data.successResults![0].type).toBe('dashboard');
       expect(response2.data.successResults![0].id).toBe(uniqueId);
+
+      // export to verify title was updated
+      const exportResponse = await apiServices.savedObjects.export(
+        { objects: [{ type: 'dashboard', id: uniqueId }] },
+        space.spaceId
+      );
+      expect(exportResponse.status).toBe(200);
+      expect(exportResponse.data.exportedObjects).toHaveLength(1);
+      expect(exportResponse.data.exportedObjects[0].attributes[ATTRIBUTE_TITLE_KEY]).toBe(
+        `${ATTRIBUTE_TITLE_VALUE} - Overwritten`
+      );
 
       // Cleanup
       await apiServices.savedObjects.delete('dashboard', uniqueId, space.spaceId);
@@ -162,9 +152,8 @@ TEST_SPACES.forEach((space) => {
           {
             objects: [
               {
-                type: 'dashboard',
+                ...DASHBOARD_SAVED_OBJECT,
                 id: uniqueId,
-                attributes: { [ATTRIBUTE_TITLE_KEY]: ATTRIBUTE_TITLE_VALUE },
               },
             ],
             overwrite: false,
@@ -191,7 +180,7 @@ TEST_SPACES.forEach((space) => {
             {
               type: 'hiddentype',
               id: 'some-id',
-              attributes: { [ATTRIBUTE_TITLE_KEY]: ATTRIBUTE_TITLE_VALUE },
+              attributes: {},
             },
           ],
           overwrite: false,
