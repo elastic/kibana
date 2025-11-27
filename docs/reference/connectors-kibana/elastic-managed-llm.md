@@ -11,7 +11,7 @@ Elastic provides built-in LLMs through the Elastic Managed LLM connector vetted 
 Currently, the following built-in LLMs are available:
 
 * [General Purpose LLM v2](#general-purpose-llm-v2)
-* [Elastic Managed LLM v1](#elastic-managed-llm-v1)
+* [General Purpose LLM v1](#general-purpose-llm-v1)
 
 ## General Purpose LLM v2
 ```{applies_to}
@@ -22,16 +22,17 @@ serverless: ga
 A high-performance, general-purpose language model suitable for the widest range of use cases.
 Model details are available in the [model card]().
 
-## Elastic Managed LLM v1
+## General Purpose LLM v1
 ```{applies_to}
 stack: ga 9.0
 serverless: ga
 ```
 
-Elastic Managed LLM v1 is the default LLM to use with this connector.
+General Purpose LLM v1 is the default LLM to use with this connector.
 
 ::::{note}
-The default LLM may change in the future based on evaluations of performance, security, and accuracy.
+* The default LLM may change in the future based on evaluations of performance, security, and accuracy.
+* This LLM was called Elastic Managed LLM before 9.3.
 ::::
 
 Details of the currently used model are available in the [model card](https://raw.githubusercontent.com/elastic/kibana/refs/heads/main/docs/reference/resources/Elastic_Managed_LLM_model_card.pdf).
