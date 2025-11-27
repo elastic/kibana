@@ -497,7 +497,6 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             streams: ['all', 'read', 'minimal_all', 'minimal_read'],
-            cloudConnect: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           reserved: [
             'fleet-setup',
