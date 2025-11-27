@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
-import { tasks_list_request, tasks_list_response } from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
+import { tasks_list_request, tasks_list_response } from './es_openapi_zod.gen';
 
 // export contract
 export const TASKS_LIST_CONTRACT: InternalConnectorContract = {

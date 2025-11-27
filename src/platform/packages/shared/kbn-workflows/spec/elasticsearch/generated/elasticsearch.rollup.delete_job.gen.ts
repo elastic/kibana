@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
-import { rollup_delete_job_request, rollup_delete_job_response } from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
+import { rollup_delete_job_request, rollup_delete_job_response } from './es_openapi_zod.gen';
 
 // export contract
 export const ROLLUP_DELETE_JOB_CONTRACT: InternalConnectorContract = {

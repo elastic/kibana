@@ -49,7 +49,6 @@ export type {
   ConnectorInstance,
   ConnectorTypeInfo,
   ConnectorContractUnion,
-  EnhancedInternalConnectorContract,
   InternalConnectorContract,
   DynamicConnectorContract,
   StaticConnectorContract,

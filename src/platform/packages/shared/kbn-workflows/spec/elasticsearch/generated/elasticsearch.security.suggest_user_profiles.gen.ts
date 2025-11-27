@@ -16,17 +16,17 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
-import {
-  security_suggest_user_profiles1_request,
-  security_suggest_user_profiles1_response,
-  security_suggest_user_profiles_request,
-  security_suggest_user_profiles_response,
-} from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
+import {
+  security_suggest_user_profiles_request,
+  security_suggest_user_profiles_response,
+  security_suggest_user_profiles1_request,
+  security_suggest_user_profiles1_response,
+} from './es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_SUGGEST_USER_PROFILES_CONTRACT: InternalConnectorContract = {

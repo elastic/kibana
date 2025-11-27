@@ -16,17 +16,17 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
-import {
-  indices_shard_stores1_request,
-  indices_shard_stores1_response,
-  indices_shard_stores_request,
-  indices_shard_stores_response,
-} from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
+import {
+  indices_shard_stores_request,
+  indices_shard_stores_response,
+  indices_shard_stores1_request,
+  indices_shard_stores1_response,
+} from './es_openapi_zod.gen';
 
 // export contract
 export const INDICES_SHARD_STORES_CONTRACT: InternalConnectorContract = {

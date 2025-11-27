@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JSONSchema } from '@kbn/zod/v4/core';
 import { resolveReferenceObject } from './resolve_reference_object';
 
-type Object = JSONSchema.JSONSchema | { $ref: string };
-
-export function getOrResolveObject<T = JSONSchema.JSONSchema>(
-  object: Object,
-  schema: JSONSchema.JSONSchema
-): T | null {
-  if ('$ref' in object && object.$ref && object.$ref.startsWith('#')) {
+export function getOrResolveObject<T = any>(object: unknown, schema: any): T | null {
+  if (
+    object !== null &&
+    typeof object === 'object' &&
+    '$ref' in object &&
+    typeof object.$ref === 'string' &&
+    object.$ref.startsWith('#')
+  ) {
     return resolveReferenceObject(object.$ref, schema) as T | null;
   }
   return object as T | null;

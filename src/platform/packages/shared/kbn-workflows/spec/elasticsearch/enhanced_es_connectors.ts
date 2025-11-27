@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { EnhancedInternalConnectorContract, InternalConnectorContract } from '../..';
+import type { InternalConnectorContract } from '../..';
 
 /**
  * Enhanced connector definition that extends auto-generated connectors
@@ -135,7 +135,7 @@ export const ENHANCED_ELASTICSEARCH_CONNECTORS: EnhancedConnectorDefinition[] = 
 export function mergeEnhancedConnectors(
   generatedConnectors: InternalConnectorContract[],
   enhancedConnectors: EnhancedConnectorDefinition[]
-): EnhancedInternalConnectorContract[] {
+): InternalConnectorContract[] {
   const enhancedMap = new Map(enhancedConnectors.map((e) => [e.type, e]));
 
   return generatedConnectors.map((connector) => {
@@ -147,7 +147,7 @@ export function mergeEnhancedConnectors(
     // Debug logging removed for performance
 
     // Create enhanced connector
-    const enhanced: EnhancedInternalConnectorContract = {
+    const enhanced: InternalConnectorContract = {
       ...connector,
       description: enhancement.enhancedDescription || connector.description,
       ...(enhancement.examples && { examples: enhancement.examples }),

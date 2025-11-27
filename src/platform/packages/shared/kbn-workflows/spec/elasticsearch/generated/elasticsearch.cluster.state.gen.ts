@@ -16,19 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
 import {
+  cluster_state_request,
+  cluster_state_response,
   cluster_state1_request,
   cluster_state1_response,
   cluster_state2_request,
   cluster_state2_response,
-  cluster_state_request,
-  cluster_state_response,
 } from './es_openapi_zod.gen';
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const CLUSTER_STATE_CONTRACT: InternalConnectorContract = {

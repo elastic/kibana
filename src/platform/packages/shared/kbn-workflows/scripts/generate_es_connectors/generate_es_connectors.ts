@@ -38,6 +38,7 @@ import {
 } from '../shared';
 
 export async function run() {
+  cleanGeneratedFolder();
   await generateZodSchemas();
   generateAndSaveEsConnectors();
   eslintFixGeneratedCode({
@@ -46,6 +47,11 @@ export async function run() {
       `${ES_GENERATED_OUTPUT_FOLDER_PATH}/elasticsearch*.gen.ts`,
     ],
   });
+}
+
+function cleanGeneratedFolder() {
+  fs.rmSync(ES_GENERATED_OUTPUT_FOLDER_PATH, { recursive: true, force: true });
+  fs.mkdirSync(ES_GENERATED_OUTPUT_FOLDER_PATH);
 }
 
 function generateAndSaveEsConnectors() {

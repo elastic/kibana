@@ -16,21 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
 import {
+  scroll_request,
+  scroll_response,
   scroll1_request,
   scroll1_response,
   scroll2_request,
   scroll2_response,
   scroll3_request,
   scroll3_response,
-  scroll_request,
-  scroll_response,
 } from './es_openapi_zod.gen';
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SCROLL_CONTRACT: InternalConnectorContract = {

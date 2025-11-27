@@ -94,7 +94,7 @@ describe('generateParameterTypes', () => {
       },
       operationId: 'operationWithRefs',
     };
-    const openApiDocument = {
+    const openApiDocument: OpenAPIV3.Document = {
       openapi: '3.0.0',
       info: {
         title: 'Test API',

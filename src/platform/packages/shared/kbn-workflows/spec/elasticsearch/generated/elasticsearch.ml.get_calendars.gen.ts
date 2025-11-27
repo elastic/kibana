@@ -16,21 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
 import {
+  ml_get_calendars_request,
+  ml_get_calendars_response,
   ml_get_calendars1_request,
   ml_get_calendars1_response,
   ml_get_calendars2_request,
   ml_get_calendars2_response,
   ml_get_calendars3_request,
   ml_get_calendars3_response,
-  ml_get_calendars_request,
-  ml_get_calendars_response,
 } from './es_openapi_zod.gen';
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_GET_CALENDARS_CONTRACT: InternalConnectorContract = {

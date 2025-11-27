@@ -24,7 +24,7 @@ export function generateParameterTypes(
     .filter(
       (param): param is OpenAPIV3.ParameterObject | OpenAPIV3.ReferenceObject => param !== undefined
     )
-    .map((param) => getOrResolveObject(param, openApiDocument))
+    .map((param) => getOrResolveObject<OpenAPIV3.ParameterObject>(param, openApiDocument))
     .filter((param): param is OpenAPIV3.ParameterObject => param !== null && 'name' in param);
 
   const headerParams = new Set(
@@ -42,27 +42,28 @@ export function generateParameterTypes(
       (requestBody): requestBody is OpenAPIV3.RequestBodyObject | OpenAPIV3.ReferenceObject =>
         requestBody !== undefined
     )
-    .map((requestBody) => getOrResolveObject(requestBody, openApiDocument))
-    .filter(
-      (requestBody): requestBody is OpenAPIV3.RequestBodyObject =>
-        requestBody !== null &&
-        'content' in requestBody &&
-        requestBody.content !== undefined &&
-        'application/json' in requestBody.content &&
-        requestBody.content['application/json']?.schema !== undefined
+    .map((requestBody) =>
+      getOrResolveObject<OpenAPIV3.RequestBodyObject>(requestBody, openApiDocument)
     )
-    .map((requestBody) => requestBody.content['application/json'].schema);
+    .filter((requestBody): requestBody is OpenAPIV3.RequestBodyObject => requestBody !== null)
+    .map((requestBody) =>
+      getOrResolveObject<OpenAPIV3.SchemaObject>(
+        requestBody.content['application/json']?.schema,
+        openApiDocument
+      )
+    )
+    .filter((schema): schema is OpenAPIV3.SchemaObject => schema !== null);
   const bodyParams = new Set(
     requestBodiesSchemas
       .map((schema) => getOrResolveObject(schema, openApiDocument))
       .filter(
-        (schema): schema is OpenAPIV3.SchemaObject =>
+        (schema): schema is OpenAPIV3.NonArraySchemaObject =>
           schema !== null &&
           schema !== undefined &&
           'properties' in schema &&
           schema.properties !== undefined
       )
-      .map((schema) => Object.keys(schema.properties))
+      .map((schema) => Object.keys(schema.properties ?? {}))
       .flat()
   );
   return {

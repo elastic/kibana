@@ -16,17 +16,17 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
-import {
-  search_application_get_behavioral_analytics1_request,
-  search_application_get_behavioral_analytics1_response,
-  search_application_get_behavioral_analytics_request,
-  search_application_get_behavioral_analytics_response,
-} from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
+import {
+  search_application_get_behavioral_analytics_request,
+  search_application_get_behavioral_analytics_response,
+  search_application_get_behavioral_analytics1_request,
+  search_application_get_behavioral_analytics1_response,
+} from './es_openapi_zod.gen';
 
 // export contract
 export const SEARCH_APPLICATION_GET_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorContract = {

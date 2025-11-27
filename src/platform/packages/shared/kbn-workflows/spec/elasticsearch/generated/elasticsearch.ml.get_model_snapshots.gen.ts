@@ -16,21 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
 import {
+  ml_get_model_snapshots_request,
+  ml_get_model_snapshots_response,
   ml_get_model_snapshots1_request,
   ml_get_model_snapshots1_response,
   ml_get_model_snapshots2_request,
   ml_get_model_snapshots2_response,
   ml_get_model_snapshots3_request,
   ml_get_model_snapshots3_response,
-  ml_get_model_snapshots_request,
-  ml_get_model_snapshots_response,
 } from './es_openapi_zod.gen';
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const ML_GET_MODEL_SNAPSHOTS_CONTRACT: InternalConnectorContract = {

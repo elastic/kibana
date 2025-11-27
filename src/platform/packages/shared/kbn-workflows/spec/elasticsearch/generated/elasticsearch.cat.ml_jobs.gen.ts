@@ -16,17 +16,17 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
-import {
-  cat_ml_jobs1_request,
-  cat_ml_jobs1_response,
-  cat_ml_jobs_request,
-  cat_ml_jobs_response,
-} from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
+import {
+  cat_ml_jobs_request,
+  cat_ml_jobs_response,
+  cat_ml_jobs1_request,
+  cat_ml_jobs1_response,
+} from './es_openapi_zod.gen';
 
 // export contract
 export const CAT_ML_JOBS_CONTRACT: InternalConnectorContract = {

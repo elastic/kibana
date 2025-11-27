@@ -39,6 +39,7 @@ import {
 } from '../shared';
 
 export async function run() {
+  cleanGeneratedFolder();
   await generateZodSchemas();
   generateAndSaveKibanaConnectors();
   eslintFixGeneratedCode({
@@ -47,6 +48,11 @@ export async function run() {
       `${KIBANA_GENERATED_OUTPUT_FOLDER_PATH}/kibana*.gen.ts`,
     ],
   });
+}
+
+function cleanGeneratedFolder() {
+  fs.rmSync(KIBANA_GENERATED_OUTPUT_FOLDER_PATH, { recursive: true, force: true });
+  fs.mkdirSync(KIBANA_GENERATED_OUTPUT_FOLDER_PATH);
 }
 
 function generateAndSaveKibanaConnectors() {

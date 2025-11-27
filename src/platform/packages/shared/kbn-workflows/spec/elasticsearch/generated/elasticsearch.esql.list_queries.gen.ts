@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
-import { esql_list_queries_request, esql_list_queries_response } from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
+import { esql_list_queries_request, esql_list_queries_response } from './es_openapi_zod.gen';
 
 // export contract
 export const ESQL_LIST_QUERIES_CONTRACT: InternalConnectorContract = {

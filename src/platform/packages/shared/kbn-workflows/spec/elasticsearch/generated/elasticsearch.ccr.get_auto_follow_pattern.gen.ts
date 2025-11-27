@@ -16,17 +16,17 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
-import {
-  ccr_get_auto_follow_pattern1_request,
-  ccr_get_auto_follow_pattern1_response,
-  ccr_get_auto_follow_pattern_request,
-  ccr_get_auto_follow_pattern_response,
-} from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
+import {
+  ccr_get_auto_follow_pattern_request,
+  ccr_get_auto_follow_pattern_response,
+  ccr_get_auto_follow_pattern1_request,
+  ccr_get_auto_follow_pattern1_response,
+} from './es_openapi_zod.gen';
 
 // export contract
 export const CCR_GET_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {

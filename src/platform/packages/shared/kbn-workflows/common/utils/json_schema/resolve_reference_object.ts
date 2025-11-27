@@ -17,17 +17,17 @@ import type { JSONSchema } from '@kbn/zod/v4/core';
  */
 export function resolveReferenceObject(
   reference: string,
-  jsonSchema: JSONSchema.JSONSchema
+  jsonSchema: any
 ): JSONSchema.JSONSchema | null {
   const path = reference.replace(/^#\//, '').split('/');
   let current: unknown = jsonSchema;
   for (const segment of path) {
     if (current && typeof current === 'object' && segment in current) {
-      current = current[segment];
+      current = (current as Record<string, unknown>)[segment];
     } else {
       return null;
     }
   }
 
-  return current;
+  return current as JSONSchema.JSONSchema;
 }

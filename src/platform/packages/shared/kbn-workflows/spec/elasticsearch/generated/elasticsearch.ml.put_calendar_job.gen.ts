@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
-import { ml_put_calendar_job_request, ml_put_calendar_job_response } from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
+import { ml_put_calendar_job_request, ml_put_calendar_job_response } from './es_openapi_zod.gen';
 
 // export contract
 export const ML_PUT_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {

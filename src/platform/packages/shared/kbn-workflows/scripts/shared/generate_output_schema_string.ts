@@ -25,7 +25,10 @@ export function generateOutputSchemaString(
       openApiDocument as unknown as JSONSchema.JSONSchema
     );
     return (
-      response && response.content && response.content['application/json']?.schema !== undefined
+      response &&
+      response.content &&
+      response.content['application/json']?.schema !== undefined &&
+      Object.keys(response.content['application/json'].schema ?? {}).length > 0
     );
   });
   // TODO: add error schema

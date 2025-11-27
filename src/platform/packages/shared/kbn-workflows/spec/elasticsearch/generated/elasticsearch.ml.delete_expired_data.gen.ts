@@ -16,17 +16,17 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
-import {
-  ml_delete_expired_data1_request,
-  ml_delete_expired_data1_response,
-  ml_delete_expired_data_request,
-  ml_delete_expired_data_response,
-} from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
+import {
+  ml_delete_expired_data_request,
+  ml_delete_expired_data_response,
+  ml_delete_expired_data1_request,
+  ml_delete_expired_data1_response,
+} from './es_openapi_zod.gen';
 
 // export contract
 export const ML_DELETE_EXPIRED_DATA_CONTRACT: InternalConnectorContract = {

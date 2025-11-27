@@ -16,17 +16,17 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
-import {
-  ingest_get_geoip_database1_request,
-  ingest_get_geoip_database1_response,
-  ingest_get_geoip_database_request,
-  ingest_get_geoip_database_response,
-} from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
+import {
+  ingest_get_geoip_database_request,
+  ingest_get_geoip_database_response,
+  ingest_get_geoip_database1_request,
+  ingest_get_geoip_database1_response,
+} from './es_openapi_zod.gen';
 
 // export contract
 export const INGEST_GET_GEOIP_DATABASE_CONTRACT: InternalConnectorContract = {

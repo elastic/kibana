@@ -16,21 +16,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
 import {
+  rank_eval_request,
+  rank_eval_response,
   rank_eval1_request,
   rank_eval1_response,
   rank_eval2_request,
   rank_eval2_response,
   rank_eval3_request,
   rank_eval3_response,
-  rank_eval_request,
-  rank_eval_response,
 } from './es_openapi_zod.gen';
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const RANK_EVAL_CONTRACT: InternalConnectorContract = {

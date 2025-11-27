@@ -16,17 +16,17 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
-import {
-  fleet_search1_request,
-  fleet_search1_response,
-  fleet_search_request,
-  fleet_search_response,
-} from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
+import {
+  fleet_search_request,
+  fleet_search_response,
+  fleet_search1_request,
+  fleet_search1_response,
+} from './es_openapi_zod.gen';
 
 // export contract
 export const FLEET_SEARCH_CONTRACT: InternalConnectorContract = {

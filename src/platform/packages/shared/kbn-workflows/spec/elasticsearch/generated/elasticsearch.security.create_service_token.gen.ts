@@ -16,19 +16,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
 import {
+  security_create_service_token_request,
+  security_create_service_token_response,
   security_create_service_token1_request,
   security_create_service_token1_response,
   security_create_service_token2_request,
   security_create_service_token2_response,
-  security_create_service_token_request,
-  security_create_service_token_response,
 } from './es_openapi_zod.gen';
-import { getShapeAt } from '../../../common/utils/zod';
-
-// import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
 
 // export contract
 export const SECURITY_CREATE_SERVICE_TOKEN_CONTRACT: InternalConnectorContract = {

@@ -16,7 +16,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // import all needed request and response schemas generated from the OpenAPI spec
