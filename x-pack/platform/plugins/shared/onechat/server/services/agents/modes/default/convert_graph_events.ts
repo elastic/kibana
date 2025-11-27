@@ -72,6 +72,7 @@ export const convertGraphEvents = ({
 
     return streamEvents$.pipe(
       mergeMap((event) => {
+
         if (!matchGraphName(event, graphName)) {
           return EMPTY;
         }

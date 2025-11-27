@@ -7,6 +7,7 @@
 
 import type { OnechatAgentExecutionError } from '@kbn/onechat-common/base/errors';
 import type { ToolCall } from '@kbn/onechat-genai-utils/langchain';
+import z from 'zod/v3';
 
 export enum AgentActionType {
   Error = 'error',
@@ -28,6 +29,11 @@ export interface AgentErrorAction {
   type: AgentActionType.Error;
   error: OnechatAgentExecutionError;
 }
+
+export const AgentErrorActionSchema = z.object({
+  type: z.literal(AgentActionType.Error),
+  error: z.any().optional(),
+});
 
 export interface ToolCallAction {
   type: AgentActionType.ToolCall;
@@ -61,7 +67,17 @@ export interface AnswerAction {
   message: string;
 }
 
+export const AnswerActionSchema = z.object({
+  type: z.literal(AgentActionType.Answer),
+  message: z.string(),
+});
+
 export type AnswerAgentAction = AnswerAction | AgentErrorAction;
+
+export const AnswerAgentActionSchema = z.discriminatedUnion('type', [
+  AnswerActionSchema,
+  AgentErrorActionSchema,
+]);
 
 // all possible actions for the agent flow
 

@@ -121,10 +121,9 @@ export function createDeepAgent<
   const middleware: AgentMiddleware[] = [
     // Provides todo list management capabilities for tracking tasks
     todoListMiddleware({
-      systemPrompt: "You should always make a todo list.",
     }),
     // Enables filesystem operations and optional long-term memory storage
-    createFilesystemMiddleware({ backend: filesystemBackend, toolTokenLimitBeforeEvict: 100 }),
+    createFilesystemMiddleware({ backend: filesystemBackend }),
     // Enables delegation to specialized subagents for complex tasks
     createSubAgentMiddleware({
       defaultModel: model,
@@ -135,7 +134,6 @@ export function createDeepAgent<
         // Subagent middleware: Filesystem operations
         createFilesystemMiddleware({
           backend: filesystemBackend,
-          toolTokenLimitBeforeEvict: 100,
         }),
         // Subagent middleware: Automatic conversation summarization when token limits are approached
         summarizationMiddleware({

@@ -8,17 +8,19 @@
 import { v4 as uuidv4 } from 'uuid';
 import { isArray } from 'lodash';
 import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
-import type { AIMessageChunk } from '@langchain/core/messages';
+import { AIMessageChunk, BaseMessage, BaseMessageLike, ToolMessage } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
-import type {
-  MessageChunkEvent,
-  MessageCompleteEvent,
-  ThinkingCompleteEvent,
-  ToolCallEvent,
-  BrowserToolCallEvent,
-  ToolResultEvent,
-  ReasoningEvent,
+import {
+  type MessageChunkEvent,
+  type MessageCompleteEvent,
+  type ThinkingCompleteEvent,
+  type ToolCallEvent,
+  type BrowserToolCallEvent,
+  type ToolResultEvent,
+  type ReasoningEvent,
+  ToolResultType,
+  OtherResult,
 } from '@kbn/onechat-common';
 import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
 import {
@@ -43,6 +45,8 @@ import type { StateType } from './state';
 import { steps, tags, BROWSER_TOOL_PREFIX } from './constants';
 import { isToolCallAction, isAnswerAction, isExecuteToolAction } from './actions';
 import type { ToolCallResult } from './actions';
+import { processAnswerResponse, processResearchResponse, processToolNodeResponse } from './action_utils';
+import { Command } from '@langchain/langgraph';
 
 export type ConvertedEvents =
   | MessageChunkEvent
@@ -72,6 +76,7 @@ export const convertGraphEvents = ({
 
     return streamEvents$.pipe(
       mergeMap((event) => {
+        console.log(event)
         if (!matchGraphName(event, graphName)) {
           return EMPTY;
         }
@@ -93,10 +98,19 @@ export const convertGraphEvents = ({
         }
 
         // emit tool calls for research agent steps
-        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.researchAgent)) {
+        if (matchEvent(event, 'on_chain_end') && matchName(event, "researchAgent.after_model")) {
           const events: ConvertedEvents[] = [];
-          const addedActions = (event.data.output as StateType).mainActions;
-          const nextAction = addedActions[addedActions.length - 1];
+          const messages = event.data.output.messages as BaseMessage[];
+          const lastMessage = messages[messages.length - 1];
+          if(!AIMessageChunk.isInstance(lastMessage)){
+            return EMPTY;
+          }
+          const action = processResearchResponse(lastMessage);
+          const nextAction = action
+
+          console.log("nextAction");
+          console.log(messages);
+          console.log(nextAction);
 
           if (isToolCallAction(nextAction)) {
             const { tool_calls: toolCalls, message: messageText } = nextAction;
@@ -145,12 +159,17 @@ export const convertGraphEvents = ({
         }
 
         // emit messages for answering step
-        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.answerAgent)) {
+        if (matchEvent(event, 'on_chain_end') && matchName(event, "answerAgent.after_agent")) {
           const events: ConvertedEvents[] = [];
 
           // process last emitted message
-          const answerActions = (event.data.output as StateType).answerActions;
-          const lastAction = answerActions[answerActions.length - 1];
+          const messages = event.data.output.messages as BaseMessage[];
+          const lastMessage = messages[messages.length - 1];
+          if(!AIMessageChunk.isInstance(lastMessage)){
+            return EMPTY;
+          }
+          const action = processAnswerResponse(lastMessage);
+          const lastAction = action
 
           if (isAnswerAction(lastAction)) {
             const messageEvent = createMessageEvent(lastAction.message, {
@@ -163,9 +182,17 @@ export const convertGraphEvents = ({
         }
 
         // emit tool result events
-        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.executeTool)) {
-          const addedActions = (event.data.output as StateType).mainActions;
-          const nextAction = addedActions[addedActions.length - 1];
+        if (matchEvent(event, 'on_tool_end')) {
+          const output = event.data.output as BaseMessage | Command;
+          let messages: BaseMessage[] = [];
+          if(output instanceof Command && output.update && "messages" in output.update){
+            messages = output.update?.messages as BaseMessage[];
+          } else if(BaseMessage.isInstance(output)){
+            messages = [output];
+          }
+
+          const action = processToolNodeResponse(messages);
+          const nextAction = action;
 
           if (isExecuteToolAction(nextAction)) {
             const toolResultEvents: ToolResultEvent[] = [];
@@ -209,7 +236,17 @@ export const extractToolReturn = (message: ToolCallResult): RunToolReturn => {
         results: [createErrorResult(message.content)],
       };
     } else {
-      throw new Error(`No artifact attached to tool message: ${JSON.stringify(message)}`);
+      const otherToolResult: OtherResult = {
+        tool_result_id: message.toolCallId,
+        type: ToolResultType.other,
+        data: {
+          content: message.content,
+        },
+      }
+
+      return {
+        results: [otherToolResult]
+      };
     }
   }
 };

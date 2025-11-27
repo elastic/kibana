@@ -117,7 +117,7 @@ export const runDeepAgentMode: RunChatAgentFn = async (
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
 
   const eventStream = agentGraph.streamEvents(
-    { initialMessages, cycleLimit },
+    { messages: initialMessages, cycleLimit },
     {
       version: 'v2',
       signal: abortSignal,
@@ -169,5 +169,5 @@ export const runDeepAgentMode: RunChatAgentFn = async (
 const getRecursionLimit = (cycleLimit: number): number => {
   // langchain's recursionLimit is basically the number of nodes we can traverse before hitting a recursion limit error
   // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
-  return cycleLimit * 2 + 8;
+  return 100
 };
