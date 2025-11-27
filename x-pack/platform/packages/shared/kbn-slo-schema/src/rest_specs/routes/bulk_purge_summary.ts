@@ -19,6 +19,7 @@ interface BulkPurgeSummaryResponse {
   taskId?: string;
 }
 
+type BulkPurgeSummaryInput = t.OutputOf<typeof bulkPurgeSummaryParamsSchema.props.body>;
 type BulkPurgeSummaryParams = t.TypeOf<typeof bulkPurgeSummaryParamsSchema.props.body>;
 
 const bulkPurgeSummaryStatusParamsSchema = t.type({
@@ -40,4 +41,9 @@ interface BulkPurgeSummaryStatusResponse {
 }
 
 export { bulkPurgeSummaryParamsSchema, bulkPurgeSummaryStatusParamsSchema };
-export type { BulkPurgeSummaryParams, BulkPurgeSummaryResponse, BulkPurgeSummaryStatusResponse };
+export type {
+  BulkPurgeSummaryInput,
+  BulkPurgeSummaryParams,
+  BulkPurgeSummaryResponse,
+  BulkPurgeSummaryStatusResponse,
+};
