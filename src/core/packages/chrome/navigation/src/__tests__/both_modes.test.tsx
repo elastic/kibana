@@ -449,7 +449,8 @@ describe('Both modes', () => {
       });
     });
 
-    describe('Primary menu item limit', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/244074
+    describe.skip('Primary menu item limit', () => {
       /**
        * GIVEN fewer than 12 primary menu items exist (e.g. 10)
        * WHEN the navigation renders
