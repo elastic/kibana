@@ -158,22 +158,13 @@ const createFilterFromRawColumnsESQL = async (
   if (!field || !field.filterable) {
     return [];
   }
-  const filters: Filter[] = [];
-
   // Match phrase or phrases filter based on whether value is an array
   // The advantage of match_phrase is that you get a term query when it's not a text and
   // match phrase if it is a text. So you don't have to worry about the field type.
   if (Array.isArray(value)) {
-    filters.push(
-      buildPhrasesFilter({ name: column.name, type: column.meta?.type }, value, dataView)
-    );
-  } else {
-    filters.push(
-      buildPhraseFilter({ name: column.name, type: column.meta?.type }, value, dataView)
-    );
+    return [buildPhrasesFilter({ name: column.name, type: column.meta?.type }, value, dataView)];
   }
-
-  return filters;
+  return [buildPhraseFilter({ name: column.name, type: column.meta?.type }, value, dataView)];
 };
 
 export const createFilterESQL = async (
@@ -201,7 +192,10 @@ export const createFilterESQL = async (
 
   const filters: Filter[] = [];
 
-  if (['date_histogram', 'histogram'].includes(operationType)) {
+  if (
+    typeof operationType === 'string' &&
+    ['date_histogram', 'histogram'].includes(operationType)
+  ) {
     filters.push(
       buildSimpleNumberRangeFilter(
         sourceField,
