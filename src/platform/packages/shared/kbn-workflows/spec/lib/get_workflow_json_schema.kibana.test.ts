@@ -112,7 +112,7 @@ describe('getWorkflowJsonSchema / kibana connectors', () => {
     // console.log('✅ No broken references found');
 
     // Verify core workflow structure is object with properties version, name, steps, and settings
-    const workflowDef = jsonSchema as JSONSchema.ObjectSchema;
+    const workflowDef = jsonSchema as z.core.JSONSchema.ObjectSchema;
     expect(workflowDef.type).toBe('object');
     expect(workflowDef.properties).toBeDefined();
     expect(workflowDef?.properties?.version).toBeDefined();
@@ -121,8 +121,8 @@ describe('getWorkflowJsonSchema / kibana connectors', () => {
     expect(workflowDef?.properties?.settings).toBeDefined();
 
     // Verify steps array structure for proper validation
-    expect((workflowDef?.properties?.steps as JSONSchema.ArraySchema)?.type).toBe('array');
-    expect((workflowDef?.properties?.steps as JSONSchema.ArraySchema)?.items).toBeDefined();
+    expect((workflowDef?.properties?.steps as z.core.JSONSchema.ArraySchema)?.type).toBe('array');
+    expect((workflowDef?.properties?.steps as z.core.JSONSchema.ArraySchema)?.items).toBeDefined();
 
     // Test that the schema can validate a basic workflow
     // Note: We don't actually validate here since we're testing the JSON schema structure
