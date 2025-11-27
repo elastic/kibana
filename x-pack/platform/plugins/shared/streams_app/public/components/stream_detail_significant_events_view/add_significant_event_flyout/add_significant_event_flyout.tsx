@@ -20,7 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams, Feature } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, Feature, FeatureType } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
@@ -115,10 +115,8 @@ export function AddSignificantEventFlyout({
 
   const generateQueries = useCallback(() => {
     let numberOfGeneratedQueries = 0;
-    const numberOfGeneratedQueriesByFeature: Record<string, number> = {
+    const numberOfGeneratedQueriesByFeature: Record<FeatureType, number> = {
       system: 0,
-      infrastructure: 0,
-      technology: 0,
     };
     let inputTokensUsed = 0;
     let outputTokensUsed = 0;

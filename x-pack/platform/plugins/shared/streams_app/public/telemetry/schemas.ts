@@ -6,6 +6,7 @@
  */
 
 import type { RootSchema, SchemaArray, SchemaObject } from '@elastic/ebt';
+import type { FeatureType } from '@kbn/streams-schema';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIGrokSuggestionLatencyProps,
@@ -289,7 +290,7 @@ const streamsSchemaUpdatedSchema: RootSchema<StreamsSchemaUpdatedProps> = {
   },
 };
 
-const countByTypes: SchemaObject<{ system: number; infrastructure: number; technology: number }> = {
+const countByTypes: SchemaObject<{ [key in FeatureType]: number }> = {
   _meta: {
     description: 'The count of identified features grouped by type',
   },
@@ -298,18 +299,6 @@ const countByTypes: SchemaObject<{ system: number; infrastructure: number; techn
       type: 'long',
       _meta: {
         description: 'The count of identified system features',
-      },
-    },
-    infrastructure: {
-      type: 'long',
-      _meta: {
-        description: 'The count of identified infrastructure features',
-      },
-    },
-    technology: {
-      type: 'long',
-      _meta: {
-        description: 'The count of identified technology features',
       },
     },
   },

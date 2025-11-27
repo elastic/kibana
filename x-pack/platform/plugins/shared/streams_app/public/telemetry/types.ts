@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { FeatureType } from '@kbn/streams-schema';
+
 type StreamType = 'wired' | 'classic' | 'unknown';
 
 interface StreamsAttachmentCountProps {
@@ -82,7 +84,7 @@ interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
   input_tokens_used: number;
   output_tokens_used: number;
   count: number;
-  count_by_feature_type: Record<string, number>;
+  count_by_feature_type: Record<FeatureType, number>;
   features_selected: number;
   features_total: number;
   stream_name: string;
@@ -91,7 +93,7 @@ interface StreamsSignificantEventsSuggestionsGeneratedEventProps {
 
 interface StreamsSignificantEventsCreatedProps {
   count: number;
-  count_by_feature_type: Record<string, number>;
+  count_by_feature_type: Record<FeatureType, number>;
   stream_name: string;
   stream_type: StreamType;
 }

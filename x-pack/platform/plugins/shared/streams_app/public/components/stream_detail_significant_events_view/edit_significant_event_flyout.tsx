@@ -12,6 +12,7 @@ import type {
   Streams,
   Feature,
   GeneratedSignificantEventQuery,
+  FeatureType,
 } from '@kbn/streams-schema';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
@@ -138,16 +139,14 @@ export const EditSignificantEventFlyout = ({
                     (acc, query) => {
                       if (query.feature) {
                         const type = (query.feature as GeneratedSignificantEventQuery['feature'])!
-                          .type as 'system' | 'infrastructure' | 'technology';
+                          .type as FeatureType;
                         acc[type] = acc[type] + 1;
                       }
                       return acc;
                     },
                     {
                       system: 0,
-                      infrastructure: 0,
-                      technology: 0,
-                    }
+                    } satisfies Record<FeatureType, number>
                   ),
                   stream_name: definition.stream.name,
                   stream_type: streamType,

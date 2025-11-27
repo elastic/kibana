@@ -15,6 +15,6 @@ export function sumTokens(
     completion: a.completion + (b?.completion ?? 0),
     prompt: a.prompt + (b?.prompt ?? 0),
     total: a.total + (b?.total ?? 0),
-    cached: a.cached! + (b?.cached ?? 0),
+    cached: (a.cached ?? 0) + (b?.cached ?? 0),
   };
 }
