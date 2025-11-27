@@ -10,7 +10,7 @@ import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import type { ConnectorExecutor } from '../../connector_executor';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import { ConnectorStepImpl } from '../connector_step';
 import type { NodeImplementation } from '../node_implementation';
 

@@ -10,6 +10,7 @@ export {
   oneChatDefaultAgentId,
   type AgentDefinition,
   type AgentConfiguration,
+  type AgentConfigurationOverrides,
   type AgentResearchStepConfiguration,
   type AgentAnswerStepConfiguration,
 } from './definition';
