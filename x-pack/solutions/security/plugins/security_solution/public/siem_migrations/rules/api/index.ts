@@ -54,7 +54,6 @@ import type {
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { RuleMigrationStats } from '../types';
 import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../../common/types';
-import { MigrationSource } from '../../common/types';
 
 /** Retrieves the stats for the specific migration. */
 export const getRuleMigrationStats = async ({
@@ -97,6 +96,26 @@ export const createRuleMigration = async ({
   });
 };
 
+export interface AddRulesToQradarMigrationParams {
+  /** `id` of the migration to add the rules to */
+  migrationId: string;
+  /** The body containing the list of rules to be added to the migration */
+  body: { xml: string };
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+
+export const addRulesToQRadarMigration = async ({
+  migrationId,
+  body,
+  signal,
+}: AddRulesToQradarMigrationParams) => {
+  return KibanaServices.get().http.post<void>(
+    replaceParams(SIEM_RULE_MIGRATION_QRADAR_RULES_PATH, { migration_id: migrationId }),
+    { body: JSON.stringify(body), version: '1', signal }
+  );
+};
+
 export interface AddRulesToMigrationParams {
   /** `id` of the migration to add the rules to */
   migrationId: string;
@@ -104,8 +123,6 @@ export interface AddRulesToMigrationParams {
   body: CreateRuleMigrationRulesRequestBody;
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
-  /** The source of the migration */
-  migrationSource: MigrationSource;
 }
 
 /** Adds provided rules to an existing migration */
@@ -113,15 +130,9 @@ export const addRulesToMigration = async ({
   migrationId,
   body,
   signal,
-  migrationSource,
 }: AddRulesToMigrationParams) => {
   return KibanaServices.get().http.post<void>(
-    replaceParams(
-      migrationSource === MigrationSource.QRADAR
-        ? SIEM_RULE_MIGRATION_QRADAR_RULES_PATH
-        : SIEM_RULE_MIGRATION_RULES_PATH,
-      { migration_id: migrationId }
-    ),
+    replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, { migration_id: migrationId }),
     { body: JSON.stringify(body), version: '1', signal }
   );
 };

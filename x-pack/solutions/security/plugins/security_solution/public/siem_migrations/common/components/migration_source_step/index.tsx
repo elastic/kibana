@@ -7,14 +7,14 @@
 
 import { useState } from 'react';
 import type { MigrationSource } from '../../types';
-import { MIGRATIONSOURCE_OPTIONS } from './migration_source_options';
 
-export const useMigrationSourceStep = () => {
-  const [migrationSource, setMigrationSource] = useState<MigrationSource>(
-    MIGRATIONSOURCE_OPTIONS[0].value
-  );
+export const useMigrationSourceStep = (initialMigrationSource: MigrationSource) => {
+  const [migrationSource, setMigrationSource] = useState<MigrationSource>(initialMigrationSource);
+  const [migrationSourceDisabled, setMigrationSourceDisabled] = useState<boolean>(false);
   return {
     migrationSource,
     setMigrationSource,
+    migrationSourceDisabled,
+    setMigrationSourceDisabled,
   };
 };

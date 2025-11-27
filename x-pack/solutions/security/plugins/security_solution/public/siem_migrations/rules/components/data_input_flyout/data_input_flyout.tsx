@@ -23,27 +23,22 @@ import {
   SiemMigrationRetryFilter,
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
-import type { DataInputStepId } from './steps/constants';
-import { DataInputStep } from './steps/constants';
+import type { DataInputStep, DataInputStepId } from './steps/constants';
+import { QradarDataInputStep, SplunkDataInputStep } from './steps/constants';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import type { RuleMigrationSettings, RuleMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
 import { useMigrationSourceStep } from '../../../common/components/migration_source_step';
 import { MigrationSourceDropdown } from '../../../common/components/migration_source_step/migration_source_dropdown';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
-import {
-  useQradarMigrationSteps,
-  useSplunkMigrationSteps,
-} from '../../../common/components/migration_source_step/migration_source_options';
-import type {
-  QradarMigrationSteps,
-  SplunkMigrationSteps,
-  Step,
-} from '../../../common/components/migration_source_step/types';
+import { useMigrationSteps } from '../../../common/components/migration_source_step/migration_source_options';
+import type { Step } from '../../../common/components/migration_source_step/types';
+import { MigrationSource } from '../../../common/types';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
   migrationStats?: RuleMigrationStats;
+  migrationSource?: MigrationSource;
 }
 
 function StepRenderer<K extends DataInputStepId>({ step }: { step: Step<K> }) {
@@ -54,10 +49,21 @@ function StepRenderer<K extends DataInputStepId>({ step }: { step: Step<K> }) {
 const RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE = 'rulesMigrationDataInputFlyoutTitle';
 
 export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps>(
-  ({ onClose, migrationStats: initialMigrationSats }) => {
+  ({
+    onClose,
+    migrationStats: initialMigrationSats,
+    migrationSource: initialMigrationSource = MigrationSource.SPLUNK,
+  }) => {
     const modalTitleId = useGeneratedHtmlId({
       prefix: RULES_MIGRATION_DATA_INPUT_FLYOUT_TITLE,
     });
+
+    const {
+      migrationSource,
+      setMigrationSource,
+      migrationSourceDisabled,
+      setMigrationSourceDisabled,
+    } = useMigrationSourceStep(initialMigrationSource);
 
     const [migrationStats, setMigrationStats] = useState<RuleMigrationStats | undefined>(
       initialMigrationSats
@@ -65,24 +71,38 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
 
     const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
 
-    const [dataInputStep, setDataInputStep] = useState<DataInputStep>(DataInputStep.Rules);
+    const [dataInputStep, setDataInputStep] = useState<DataInputStep>({
+      [MigrationSource.SPLUNK]: SplunkDataInputStep.Rules,
+      [MigrationSource.QRADAR]: QradarDataInputStep.Rules,
+    });
 
-    const onMigrationCreated = useCallback((createdMigrationStats: RuleMigrationStats) => {
-      setMigrationStats(createdMigrationStats);
-    }, []);
+    const setMigrationDataInputStep = useCallback(
+      (step: DataInputStep[MigrationSource]) => {
+        setDataInputStep((prev) => ({ ...prev, ...{ [migrationSource]: step } }));
+      },
+      [migrationSource]
+    );
+
+    const onMigrationCreated = useCallback(
+      (createdMigrationStats: RuleMigrationStats) => {
+        setMigrationStats(createdMigrationStats);
+        setMigrationSourceDisabled(true);
+      },
+      [setMigrationStats, setMigrationSourceDisabled]
+    );
 
     const { startMigration, isLoading: isStartLoading } = useStartMigration(onClose);
     const onStartMigrationWithSettings = useCallback(
       (settings: RuleMigrationSettings) => {
-        if (migrationStats?.id) {
+        if (typeof migrationStats?.id === 'string') {
           startMigration(
-            migrationStats.id,
+            migrationStats?.id as string,
             isRetry ? SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED : undefined,
             settings
           );
         }
       },
-      [isRetry, migrationStats?.id, startMigration]
+      [isRetry, migrationStats, startMigration]
     );
     const { modal: startMigrationModal, showModal: showStartMigrationModal } =
       useStartRulesMigrationModal({
@@ -94,26 +114,15 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
       if (migrationStats?.id) {
         showStartMigrationModal();
       }
-    }, [migrationStats?.id, showStartMigrationModal]);
+    }, [migrationStats, showStartMigrationModal]);
 
-    const { migrationSource, setMigrationSource } = useMigrationSourceStep();
-
-    const splunkMigrationSteps: SplunkMigrationSteps | null = useSplunkMigrationSteps({
-      setDataInputStep,
+    const steps = useMigrationSteps({
+      onMigrationCreated,
       dataInputStep,
       migrationSource,
       migrationStats,
-      onMigrationCreated,
+      setMigrationDataInputStep,
     });
-
-    const qradarMigrationSteps: QradarMigrationSteps | null = useQradarMigrationSteps({
-      dataInputStep,
-      migrationSource,
-      migrationStats,
-      onMigrationCreated,
-    });
-
-    const steps = splunkMigrationSteps ?? qradarMigrationSteps;
 
     return (
       <>
@@ -142,6 +151,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                 <MigrationSourceDropdown
                   migrationSource={migrationSource}
                   setMigrationSource={setMigrationSource}
+                  disabled={migrationSourceDisabled}
                 />
               </EuiFlexItem>
               <>

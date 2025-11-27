@@ -6,29 +6,19 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { isPlainObject } from 'lodash';
 import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
 import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import { UploadFileButton } from '../../../../../../../common/components';
-import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
-import {
-  type SplunkRow,
-  useParseFileInput,
-} from '../../../../../../../common/hooks/use_parse_file_input';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
-import type { CreateRuleMigrationRulesRequestBody } from '../../../../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import { MigrationSource } from '../../../../../../../common/types';
 import { RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION } from '../check_resources/translations';
-import type { SPLUNK_RULES_COLUMNS } from '../../../../constants';
+import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
 
-type SplunkRulesResult = Partial<Record<(typeof SPLUNK_RULES_COLUMNS)[number], string>>;
-
-export interface RulesFileUploadProps {
+export interface RulesXMLFileUploadProps {
   createMigration: CreateMigration;
   isLoading: boolean;
   isCreated: boolean;
@@ -42,7 +32,8 @@ const RULES_DATA_INPUT_FILE_UPLOAD_PROMPT: Record<MigrationSource, string> = {
   [MigrationSource.SPLUNK]: i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_SPLUNK,
   [MigrationSource.QRADAR]: i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_QRADAR,
 };
-export const RulesFileUpload = React.memo<RulesFileUploadProps>(
+
+export const RulesXMLFileUpload = React.memo<RulesXMLFileUploadProps>(
   ({
     createMigration,
     migrationName,
@@ -52,42 +43,95 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
     isCreated,
     onRulesFileChanged,
   }) => {
-    const [rulesToUpload, setRulesToUpload] = useState<CreateRuleMigrationRulesRequestBody>([]);
+    const [rulesToUpload, setRulesToUpload] = useState<string>();
     const filePickerRef = useRef<EuiFilePickerClass>(null);
 
     const createRules = useCallback(() => {
-      if (migrationName) {
+      if (migrationName && rulesToUpload) {
         filePickerRef.current?.removeFiles();
         createMigration({ migrationName, rules: rulesToUpload, migrationSource });
       }
     }, [createMigration, migrationName, migrationSource, rulesToUpload]);
 
-    const onFileParsed = useCallback((content: Array<SplunkRow<SplunkRulesResult>>) => {
-      const rules = content.map(formatRuleRow);
-      setRulesToUpload(rules);
+    const onXMLFileParsed = useCallback((content: string) => {
+      setRulesToUpload(content);
     }, []);
 
-    const { parseFile, isParsing, error: fileError } = useParseFileInput(onFileParsed);
+    const [isParsing, setIsParsing] = useState<boolean>(false);
+    const [error, setError] = useState<string>();
+
+    const parseFile = useCallback(
+      (files: FileList | null) => {
+        setError(undefined);
+
+        if (!files || files.length === 0) {
+          return;
+        }
+
+        const file = files[0];
+        const reader = new FileReader();
+
+        reader.onloadstart = () => setIsParsing(true);
+        reader.onloadend = () => setIsParsing(false);
+
+        reader.onload = function (e) {
+          // We can safely cast to string since we call `readAsText` to load the file.
+          const fileContent = e.target?.result as string | undefined;
+
+          if (fileContent == null) {
+            setError(FILE_UPLOAD_ERROR.CAN_NOT_READ);
+            return;
+          }
+
+          if (fileContent === '' && e.loaded > 100000) {
+            // V8-based browsers can't handle large files and return an empty string
+            // instead of an error; see https://stackoverflow.com/a/61316641
+            setError(FILE_UPLOAD_ERROR.TOO_LARGE_TO_PARSE);
+            return;
+          }
+
+          try {
+            onXMLFileParsed(fileContent);
+          } catch (err) {
+            setError(err.message);
+          }
+        };
+
+        const handleReaderError = function () {
+          const message = reader.error?.message;
+          if (message) {
+            setError(FILE_UPLOAD_ERROR.CAN_NOT_READ_WITH_REASON(message));
+          } else {
+            setError(FILE_UPLOAD_ERROR.CAN_NOT_READ);
+          }
+        };
+
+        reader.onerror = handleReaderError;
+        reader.onabort = handleReaderError;
+
+        reader.readAsText(file);
+      },
+      [onXMLFileParsed]
+    );
+
+    const validationError = useMemo(() => {
+      if (apiError) {
+        return apiError;
+      }
+      return error;
+    }, [apiError, error]);
 
     const onFileChange = useCallback(
       (files: FileList | null) => {
-        setRulesToUpload([]);
         onRulesFileChanged(files);
         parseFile(files);
       },
       [parseFile, onRulesFileChanged]
     );
 
-    const error = useMemo(() => {
-      if (apiError) {
-        return apiError;
-      }
-      return fileError;
-    }, [apiError, fileError]);
-
     const showLoader = isParsing || isLoading;
     const isDisabled = !migrationName || showLoader || isCreated;
-    const isButtonDisabled = isDisabled || rulesToUpload.length === 0;
+    const isButtonDisabled = isDisabled || rulesToUpload == null;
 
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -95,9 +139,9 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
           <EuiText size="s">{RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow isInvalid={error != null} fullWidth error={error}>
+          <EuiFormRow isInvalid={validationError != null} fullWidth error={validationError}>
             <EuiFilePicker
-              isInvalid={error != null}
+              isInvalid={validationError != null}
               id="rulesFilePicker"
               ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
               fullWidth
@@ -136,29 +180,4 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
     );
   }
 );
-RulesFileUpload.displayName = 'RulesFileUpload';
-
-const formatRuleRow = (row: SplunkRow<SplunkRulesResult>): OriginalRule => {
-  if (!isPlainObject(row.result)) {
-    throw new Error(FILE_UPLOAD_ERROR.NOT_OBJECT);
-  }
-  const originalRule: Partial<OriginalRule> = {
-    id: row.result.id,
-    vendor: 'splunk',
-    title: row.result.title,
-    query: row.result.search,
-    query_language: 'spl',
-    description: row.result['action.escu.eli5']?.trim() || row.result.description,
-    severity: row.result['alert.severity'] as OriginalRule['severity'],
-  };
-
-  if (row.result['action.correlationsearch.annotations']) {
-    try {
-      originalRule.annotations = JSON.parse(row.result['action.correlationsearch.annotations']);
-    } catch (error) {
-      delete originalRule.annotations;
-    }
-  }
-  // rule document format validation delegated to API
-  return originalRule as OriginalRule;
-};
+RulesXMLFileUpload.displayName = 'RulesXMLFileUpload';

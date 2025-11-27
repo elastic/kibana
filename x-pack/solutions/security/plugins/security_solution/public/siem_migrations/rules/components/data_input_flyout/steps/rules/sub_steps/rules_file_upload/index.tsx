@@ -15,7 +15,8 @@ import {
   type OnSuccess,
 } from '../../../../../../service/hooks/use_create_migration';
 import * as i18n from './translations';
-import type { MigrationSource } from '../../../../../../../common/types';
+import { MigrationSource } from '../../../../../../../common/types';
+import { RulesXMLFileUpload } from './rules_xml_file_upload';
 
 export interface RulesFileUploadStepProps {
   status: EuiStepStatus;
@@ -33,13 +34,26 @@ export const useRulesFileUploadStep = ({
   onMigrationCreated,
   onRulesFileChanged,
 }: RulesFileUploadStepProps): EuiStepProps => {
-  const [isCreated, setIsCreated] = useState<boolean>(!!migrationStats);
+  const [isCreated, setIsCreated] = useState<{
+    [MigrationSource.SPLUNK]: boolean;
+    [MigrationSource.QRADAR]: boolean;
+  }>({
+    [MigrationSource.SPLUNK]: !!migrationStats,
+    [MigrationSource.QRADAR]: !!migrationStats,
+  });
+  const setMigrationCreated = useCallback(
+    (created: boolean) => {
+      setIsCreated((prev) => ({ ...prev, ...{ [migrationSource]: created } }));
+    },
+    [migrationSource]
+  );
+
   const onSuccess = useCallback<OnSuccess>(
     (stats) => {
-      setIsCreated(true);
+      setMigrationCreated(true);
       onMigrationCreated(stats);
     },
-    [onMigrationCreated]
+    [onMigrationCreated, setMigrationCreated]
   );
   const { createMigration, isLoading, error } = useCreateMigration(onSuccess);
 
@@ -53,16 +67,19 @@ export const useRulesFileUploadStep = ({
     return status;
   }, [isLoading, error, status]);
 
+  const Component =
+    migrationSource === MigrationSource.QRADAR ? RulesXMLFileUpload : RulesFileUpload;
+
   return {
     title: i18n.RULES_DATA_INPUT_FILE_UPLOAD_TITLE,
     status: uploadStepStatus,
     children: (
-      <RulesFileUpload
+      <Component
         createMigration={createMigration}
         migrationName={migrationName}
         migrationSource={migrationSource}
         isLoading={isLoading}
-        isCreated={isCreated}
+        isCreated={isCreated[migrationSource]}
         apiError={error?.message}
         onRulesFileChanged={onRulesFileChanged}
       />

@@ -25,7 +25,7 @@ import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { OnResourcesCreated } from '../../types';
 import * as i18n from './translations';
-import { DataInputStep } from '../constants';
+import { SplunkDataInputStep } from '../constants';
 import { useMissingLookupsListStep } from './sub_steps/missing_lookups_list';
 import { useLookupsFileUploadStep } from './sub_steps/lookups_file_upload';
 
@@ -36,14 +36,14 @@ interface LookupsDataInputSubStepsProps {
 }
 interface LookupsDataInputProps
   extends Omit<LookupsDataInputSubStepsProps, 'migrationStats' | 'missingLookups'> {
-  dataInputStep: DataInputStep;
+  dataInputStep: SplunkDataInputStep;
   migrationStats?: RuleMigrationTaskStats;
   missingLookups?: string[];
 }
 export const LookupsDataInput = React.memo<LookupsDataInputProps>(
   ({ dataInputStep, migrationStats, missingLookups, onAllLookupsCreated }) => {
     const dataInputStatus = useMemo(
-      () => getEuiStepStatus(DataInputStep.Lookups, dataInputStep),
+      () => getEuiStepStatus(SplunkDataInputStep.Lookups, dataInputStep),
       [dataInputStep]
     );
 
@@ -56,7 +56,7 @@ export const LookupsDataInput = React.memo<LookupsDataInputProps>(
                 <EuiStepNumber
                   data-test-subj="lookupsUploadStepNumber"
                   titleSize="xs"
-                  number={DataInputStep.Lookups}
+                  number={SplunkDataInputStep.Lookups}
                   status={dataInputStatus}
                 />
               </EuiFlexItem>

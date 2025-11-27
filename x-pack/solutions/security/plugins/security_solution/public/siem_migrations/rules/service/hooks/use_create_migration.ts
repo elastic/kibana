@@ -34,7 +34,7 @@ export type CreateMigration = ({
 }: {
   migrationName: string;
   migrationSource: MigrationSource;
-  rules: CreateRuleMigrationRulesRequestBody;
+  rules: CreateRuleMigrationRulesRequestBody | string;
 }) => void;
 export type OnSuccess = (migrationStats: RuleMigrationStats) => void;
 
@@ -43,15 +43,11 @@ export const useCreateMigration = (onSuccess: OnSuccess) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const createMigration = useCallback<CreateMigration>(
-    ({ migrationName, migrationSource, rules }) => {
+    ({ migrationName, rules }) => {
       (async () => {
         try {
           dispatch({ type: 'start' });
-          const migrationId = await siemMigrations.rules.createRuleMigration(
-            rules,
-            migrationName,
-            migrationSource
-          );
+          const migrationId = await siemMigrations.rules.createRuleMigration(rules, migrationName);
           const stats = await siemMigrations.rules.api.getRuleMigrationStats({
             migrationId,
           });

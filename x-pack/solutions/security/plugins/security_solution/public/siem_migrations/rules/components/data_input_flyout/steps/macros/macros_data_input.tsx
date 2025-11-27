@@ -14,7 +14,7 @@ import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { OnResourcesCreated, OnMissingResourcesFetched } from '../../types';
 import * as i18n from './translations';
-import { DataInputStep } from '../constants';
+import { SplunkDataInputStep } from '../constants';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useMacrosFileUploadStep } from './sub_steps/macros_file_upload';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
@@ -26,14 +26,14 @@ interface MacrosDataInputSubStepsProps {
 }
 interface MacrosDataInputProps
   extends Omit<MacrosDataInputSubStepsProps, 'migrationStats' | 'missingMacros'> {
-  dataInputStep: DataInputStep;
+  dataInputStep: SplunkDataInputStep;
   migrationStats?: RuleMigrationTaskStats;
   missingMacros?: string[];
 }
 export const MacrosDataInput = React.memo<MacrosDataInputProps>(
   ({ dataInputStep, migrationStats, missingMacros, onMissingResourcesFetched }) => {
     const dataInputStatus = useMemo(
-      () => getEuiStepStatus(DataInputStep.Macros, dataInputStep),
+      () => getEuiStepStatus(SplunkDataInputStep.Macros, dataInputStep),
       [dataInputStep]
     );
 
@@ -46,7 +46,7 @@ export const MacrosDataInput = React.memo<MacrosDataInputProps>(
                 <EuiStepNumber
                   data-test-subj="macrosUploadStepNumber"
                   titleSize="xs"
-                  number={DataInputStep.Macros}
+                  number={SplunkDataInputStep.Macros}
                   status={dataInputStatus}
                 />
               </EuiFlexItem>

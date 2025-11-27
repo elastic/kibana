@@ -13,10 +13,11 @@ import { MIGRATIONSOURCE_OPTIONS } from './migration_source_options';
 export interface MigrationSourceDropdownProps {
   migrationSource: MigrationSource;
   setMigrationSource: (migrationSource: MigrationSource) => void;
+  disabled: boolean;
 }
 
 export const MigrationSourceDropdown = React.memo<MigrationSourceDropdownProps>(
-  ({ migrationSource, setMigrationSource }) => {
+  ({ migrationSource, setMigrationSource, disabled }) => {
     const [value, setValue] = useState<MigrationSource>(migrationSource);
     const [isTouched, setIsTouched] = useState(false);
 
@@ -50,6 +51,7 @@ export const MigrationSourceDropdown = React.memo<MigrationSourceDropdownProps>(
               }}
               label={i18n.MIGRATION_SOURCE_DROPDOWN_TITLE}
               fullWidth
+              helpText={disabled ? i18n.MIGRATION_SOURCE_DROPDOWN_HELPER_TEXT : undefined}
             >
               <EuiSuperSelect
                 options={MIGRATIONSOURCE_OPTIONS}
@@ -59,6 +61,7 @@ export const MigrationSourceDropdown = React.memo<MigrationSourceDropdownProps>(
                 onBlur={onBlur}
                 autoFocus
                 data-test-subj="migrationSourceDropdown"
+                disabled={disabled}
               />
             </EuiFormRow>
           </EuiForm>

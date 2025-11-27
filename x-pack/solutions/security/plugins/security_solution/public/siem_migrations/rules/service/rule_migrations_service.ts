@@ -25,11 +25,7 @@ import {
   getMissingCapabilitiesToast,
   getNoConnectorToast,
 } from '../../common/service';
-import type {
-  GetMigrationStatsParams,
-  GetMigrationsStatsAllParams,
-  MigrationSource,
-} from '../../common/types';
+import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../../common/types';
 import { raiseSuccessToast } from './notification/success_notification';
 import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
 
@@ -52,11 +48,19 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
     return api;
   }
 
+  public async addQradarRulesToMigration(migrationId: string, rules: string) {
+    const rulesCount = rules.length;
+    if (rulesCount === 0) {
+      throw new Error(i18n.EMPTY_RULES_ERROR);
+    }
+
+    await api.addRulesToQRadarMigration({ migrationId, body: { xml: rules } });
+  }
+
   /** Adds rules to a rule migration, batching the requests to avoid hitting the max payload size limit of the API */
   public async addRulesToMigration(
     migrationId: string,
-    rules: CreateRuleMigrationRulesRequestBody,
-    migrationSource: MigrationSource
+    rules: CreateRuleMigrationRulesRequestBody
   ) {
     const rulesCount = rules.length;
     if (rulesCount === 0) {
@@ -66,15 +70,14 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
     // Batching creation to avoid hitting the max payload size limit of the API
     for (let i = 0; i < rulesCount; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
       const rulesBatch = rules.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
-      await api.addRulesToMigration({ migrationId, body: rulesBatch, migrationSource });
+      await api.addRulesToMigration({ migrationId, body: rulesBatch });
     }
   }
 
   /** Creates a rule migration with a name and adds the rules to it, returning the migration ID */
   public async createRuleMigration(
-    data: CreateRuleMigrationRulesRequestBody,
-    migrationName: string,
-    migrationSource: MigrationSource
+    data: CreateRuleMigrationRulesRequestBody | string,
+    migrationName: string
   ): Promise<string> {
     const rulesCount = data.length;
     if (rulesCount === 0) {
@@ -87,7 +90,11 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
         name: migrationName,
       });
 
-      await this.addRulesToMigration(migrationId, data, migrationSource);
+      if (typeof data === 'string') {
+        await this.addQradarRulesToMigration(migrationId, data);
+      } else {
+        await this.addRulesToMigration(migrationId, data);
+      }
 
       this.telemetry.reportSetupMigrationCreated({ migrationId, rulesCount });
       return migrationId;

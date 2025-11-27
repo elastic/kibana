@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { LookupsDataInput } from './lookups_data_input';
-import { DataInputStep } from '../constants';
+import { SplunkDataInputStep } from '../constants';
 import { getRuleMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../../../common/mock';
@@ -40,7 +40,7 @@ jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
 describe('LookupsDataInput', () => {
   const defaultProps = {
     onAllLookupsCreated: jest.fn(),
-    dataInputStep: DataInputStep.Lookups,
+    dataInputStep: SplunkDataInputStep.Lookups,
     migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
     missingLookups: ['lookup1', 'lookup2'],
   };
@@ -84,7 +84,7 @@ describe('LookupsDataInput', () => {
   it('does not render description when dataInputStep is not LookupsUpload', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <LookupsDataInput {...defaultProps} dataInputStep={DataInputStep.Rules} />
+        <LookupsDataInput {...defaultProps} dataInputStep={SplunkDataInputStep.Rules} />
       </TestProviders>
     );
     expect(queryByTestId('lookupsUploadDescription')).not.toBeInTheDocument();

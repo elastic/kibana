@@ -8,7 +8,7 @@
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MacrosDataInput } from './macros_data_input';
-import { DataInputStep } from '../constants';
+import { SplunkDataInputStep } from '../constants';
 import { getRuleMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../../../common/mock';
@@ -46,7 +46,7 @@ describe('MacrosDataInput', () => {
 
   const defaultProps = {
     onMissingResourcesFetched: jest.fn(),
-    dataInputStep: DataInputStep.Macros,
+    dataInputStep: SplunkDataInputStep.Macros,
     migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
     missingMacros: ['macro1', 'macro2'],
   };
@@ -83,7 +83,7 @@ describe('MacrosDataInput', () => {
   it('does not render sub-steps when dataInputStep is not MacrosUpload', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <MacrosDataInput {...defaultProps} dataInputStep={DataInputStep.Rules} />
+        <MacrosDataInput {...defaultProps} dataInputStep={SplunkDataInputStep.Rules} />
       </TestProviders>
     );
     expect(queryByTestId('migrationsSubSteps')).not.toBeInTheDocument();

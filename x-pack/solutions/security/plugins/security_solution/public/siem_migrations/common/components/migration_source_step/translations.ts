@@ -21,3 +21,8 @@ export const MIGRATION_SOURCE_DROPDOWN_OPTION_QRADAR = i18n.translate(
   'xpack.securitySolution.siemMigrations.common.dataInputFlyout.migrationSource.option.qradar',
   { defaultMessage: 'QRadar' }
 );
+
+export const MIGRATION_SOURCE_DROPDOWN_HELPER_TEXT = i18n.translate(
+  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.migrationSource.helperText',
+  { defaultMessage: 'You cannot change the migration source after creating a migration.' }
+);
