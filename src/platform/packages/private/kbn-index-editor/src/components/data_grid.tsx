@@ -16,7 +16,6 @@ import type { CustomCellRenderer, CustomGridColumnsConfiguration } from '@kbn/un
 import {
   DataLoadingState,
   UnifiedDataTable,
-  type SortOrder,
   type EuiDataGridRefProps,
 } from '@kbn/unified-data-table';
 import type { RestorableStateProviderApi } from '@kbn/restorable-state';
@@ -220,11 +219,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     ];
   }, [indexUpdateService]);
 
-  const onSort = useCallback(
-    (newSort: string[][]) => indexUpdateService.setSort(newSort as SortOrder[]),
-    [indexUpdateService]
-  );
-
   const gridToolbar = useMemo(() => {
     // Count all rows with at least one field (to avoid counting empty rows)
     const rowsCount = rows.reduce((acc, row) => {
@@ -274,7 +268,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       dataView={props.dataView}
       onSetColumns={setActiveColumns}
       onUpdateRowsPerPage={setRowsPerPage}
-      onSort={onSort}
       sort={sortOrder}
       ariaLabelledBy="lookupIndexDataGrid"
       maxDocFieldsDisplayed={100}
