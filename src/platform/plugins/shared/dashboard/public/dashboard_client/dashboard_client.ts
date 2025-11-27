@@ -45,12 +45,12 @@ export const dashboardClient = {
         data: {
           ...dashboardState,
           references,
-          accessControl: accessMode
-            ? {
-                accessMode,
-              }
-            : undefined,
         },
+        meta: accessMode
+          ? {
+              accessControl: { accessMode },
+            }
+          : undefined,
       }),
     });
   },

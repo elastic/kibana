@@ -25,7 +25,7 @@ export const saveDashboard = async ({
   try {
     const result = idToSaveTo
       ? await dashboardClient.update(idToSaveTo, dashboardState, references)
-      : await dashboardClient.create(dashboardState, references);
+      : await dashboardClient.create(dashboardState, references, accessMode);
 
     const newId = result.id;
 

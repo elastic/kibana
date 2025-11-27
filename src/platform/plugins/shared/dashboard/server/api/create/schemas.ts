@@ -29,7 +29,7 @@ export function getCreateResponseBodySchema() {
   return schema.object({
     id: schema.string(),
     data: getDashboardStateSchema(),
-    meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
+    meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema, accessMetaSchema]),
     spaces: schema.maybe(schema.arrayOf(schema.string())),
   });
 }
