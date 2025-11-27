@@ -7,7 +7,6 @@
 
 import { apiTest, expect, tags } from '@kbn/scout';
 
-// Space configurations - matches FTR test suite
 const SPACES = {
   DEFAULT: {
     spaceId: 'default',
@@ -29,14 +28,11 @@ const SPACES = {
   },
 } as const;
 
-// Test attribute
 const NEW_ATTRIBUTE_KEY = 'title';
 const NEW_ATTRIBUTE_VAL = `New attribute value ${Date.now()}`;
 
-// Test spaces configuration - add or remove spaces as needed
 const TEST_SPACES = [SPACES.DEFAULT, SPACES.SPACE_1] as const;
 
-// This pattern runs the same tests across multiple spaces
 TEST_SPACES.forEach((space) => {
   apiTest.describe(`_create API within the ${space.name} space`, { tag: tags.ESS_ONLY }, () => {
     apiTest.beforeAll(async ({ kbnClient, log }) => {
@@ -62,7 +58,6 @@ TEST_SPACES.forEach((space) => {
       }
     });
 
-    // Test 1: Create duplicate should return 409
     apiTest(
       'should return 409 when trying to create dashboard that already exists',
       async ({ apiServices }) => {
@@ -100,7 +95,6 @@ TEST_SPACES.forEach((space) => {
       }
     );
 
-    // Test 2: Create with overwrite should succeed
     apiTest('should return 200 when creating with overwrite=true', async ({ apiServices }) => {
       const uniqueId = `dashboard-overwrite-${Date.now()}-${space.spaceId}`;
 
@@ -135,7 +129,6 @@ TEST_SPACES.forEach((space) => {
       await apiServices.savedObjects.delete('dashboard', uniqueId, space.spaceId);
     });
 
-    // Test 3: Create without ID should generate one
     apiTest(
       'should return 200 and auto-generate ID when creating without ID',
       async ({ apiServices }) => {
@@ -159,7 +152,6 @@ TEST_SPACES.forEach((space) => {
       }
     );
 
-    // Test 4: Create hidden type should return 400
     apiTest('should return 400 when creating hidden type object', async ({ apiServices }) => {
       const response = await apiServices.savedObjects.create(
         {
