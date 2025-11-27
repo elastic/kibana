@@ -23,7 +23,6 @@
     "@kbn/alerting-types",
     "@kbn/cases-components",
     "@kbn/core-http-browser",
-    "@kbn/alerting-plugin",
     "@kbn/actions-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/alerts-ui-shared",
@@ -48,5 +47,6 @@
     "@kbn/zod",
     "@kbn/field-types",
     "@kbn/react-query",
+    "@kbn/maintenance-windows-plugin",
   ]
 }
