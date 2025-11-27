@@ -99,14 +99,6 @@ export interface GenerateThreatHuntingPrioritiesResponse {
 export const useGenerateThreatHuntingPriorities = () => {
   const http = useKibana().services.http;
 
-  const paramsWithDefaults = useCallback((params: GenerateThreatHuntingPrioritiesParams) => {
-    return {
-      start: params.start ?? 'now-30d',
-      end: params.end ?? 'now',
-      apiConfig: params.apiConfig,
-    };
-  }, []);
-
   const generateThreatHuntingPriorities = useCallback(
     async ({
       signal,
@@ -120,7 +112,11 @@ export const useGenerateThreatHuntingPriorities = () => {
         {
           method: 'POST',
           version: API_VERSIONS.public.v1,
-          body: JSON.stringify(params),
+          body: JSON.stringify({
+            start: params.start ?? 'now-30d',
+            end: params.end ?? 'now',
+            apiConfig: params.apiConfig,
+          }),
           signal,
         }
       );

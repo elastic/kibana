@@ -44,15 +44,79 @@ export interface ThreatHuntingPriority {
   };
 }
 
+/**
+ * Properties for a risk score spike discovery
+ */
+export interface RiskScoreSpikeDiscoveryProperties {
+  baseline: number; // The baseline risk score (past score)
+  spike: number; // The spike value (new/current score)
+  riskScore: number; // Current risk score (same as spike value)
+}
+
+/**
+ * Properties for a high score alerts discovery
+ * TODO: Implement when adding high score alerts discovery
+ */
+export interface HighScoreAlertsDiscoveryProperties {
+  alertCount: number;
+  highScoreCount: number;
+}
+
+/**
+ * Properties for a high alert count discovery
+ * TODO: Implement when adding high alert count discovery
+ */
+export interface HighAlertCountDiscoveryProperties {
+  alertCount: number;
+}
+
+/**
+ * Properties for an anomaly discovery
+ * TODO: Implement when adding anomaly discovery
+ */
+export interface AnomalyDiscoveryProperties {
+  anomalyType: string;
+  severity: number;
+}
+
+/**
+ * Discriminated union type for entity discoveries
+ * Each discovery type has its own specific properties
+ */
+export type EntityDiscovery =
+  | {
+      type: 'risk_score_spike';
+      score: number; // Importance score from 0-100
+      properties: RiskScoreSpikeDiscoveryProperties;
+    }
+  | {
+      type: 'high_score_alerts';
+      score: number;
+      properties: HighScoreAlertsDiscoveryProperties;
+    }
+  | {
+      type: 'high_alert_count';
+      score: number;
+      properties: HighAlertCountDiscoveryProperties;
+    }
+  | {
+      type: 'anomaly';
+      score: number;
+      properties: AnomalyDiscoveryProperties;
+    };
+
+/**
+ * Union type of all discovery type names
+ */
+export type EntityDiscoveryType = EntityDiscovery['type'];
+
+/**
+ * Represents a candidate entity that may have been discovered through multiple methods
+ */
 export interface CandidateEntity {
   entityId: string;
   entityType: 'user' | 'host';
-  riskScore?: number;
-  riskScoreSpike?: boolean;
-  spike?: number; // The spike value from getRiskScoreSpikes
-  baseline?: number; // The baseline value from getRiskScoreSpikes
-  alertCount?: number;
-  highScoreAlerts?: number;
+  discoveries: EntityDiscovery[]; // Array of discoveries from different sources
 }
 
 export interface Options {

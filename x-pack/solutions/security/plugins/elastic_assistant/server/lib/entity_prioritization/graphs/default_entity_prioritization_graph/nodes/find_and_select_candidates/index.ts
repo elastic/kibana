@@ -6,17 +6,26 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { RiskScoreDataClient } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_score/risk_score_data_client';
-import { StructuredOutputParser } from 'langchain/output_parsers';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
 
-import type { ThreatHuntingPrioritiesGraphState, CandidateEntity } from '../../../../state';
-import { getSelectCandidatesSchema } from '../../schemas';
-import type { CombinedPrompts } from '../..';
-import { extractJson } from '../../../../../langchain/output_chunking/nodes/helpers/extract_json';
+import type {
+  ThreatHuntingPrioritiesGraphState,
+  CandidateEntity,
+  EntityDiscovery,
+} from '../../../../state';
 
 const MAX_SELECTED_CANDIDATES = 10;
+const STRONG_SIGNAL_THRESHOLD = 60; // Threshold for considering a signal "strong"
+const DIVERSITY_BONUS = 50; // Bonus added when multiple strong signals exist
+
+/**
+ * Type guard to check if a discovery is a risk score spike discovery
+ */
+const isRiskScoreSpikeDiscovery = (
+  discovery: EntityDiscovery
+): discovery is Extract<EntityDiscovery, { type: 'risk_score_spike' }> => {
+  return discovery.type === 'risk_score_spike';
+};
 
 /**
  * Maps a SpikeEntity identifierKey to CandidateEntity entityType
@@ -36,67 +45,86 @@ const mapIdentifierKeyToEntityType = (
 };
 
 /**
- * Formats candidate entities into a readable string for the LLM prompt
- * Only includes information available from getRiskScoreSpikes
+ * Calculates an importance score (0-100) for a risk score spike discovery
+ * Higher scores indicate more significant spikes
  */
-const formatCandidateEntities = (
-  candidateEntities: ThreatHuntingPrioritiesGraphState['candidateEntities']
-): string => {
-  if (candidateEntities.length === 0) {
-    return 'No candidate entities found.';
+const calculateRiskScoreSpikeScore = (spike: number, baseline: number): number => {
+  // For new high scores (baseline is 0), score based on absolute value
+  // Risk scores typically range from 0-100, so we normalize
+  if (baseline === 0) {
+    return Math.min(100, Math.round(spike));
   }
 
-  return candidateEntities
-    .map((entity, index) => {
-      const details: string[] = [];
-      details.push(`Entity ID: ${entity.entityId}`);
-      details.push(`Type: ${entity.entityType}`);
+  // For spikes above baseline, calculate based on:
+  // 1. The magnitude of the spike (spike - baseline)
+  // 2. The percentage increase ((spike - baseline) / baseline * 100)
+  // Combine both factors, weighted toward percentage increase for low baselines
+  const spikeMagnitude = spike - baseline;
+  const percentageIncrease = baseline > 0 ? (spikeMagnitude / baseline) * 100 : 0;
 
-      // Include baseline if available
-      if (entity.baseline !== undefined) {
-        details.push(`Baseline Risk Score: ${entity.baseline}`);
-      }
+  // Weight: 40% magnitude (normalized to 0-100), 60% percentage increase (capped at 100)
+  const magnitudeScore = Math.min(100, spikeMagnitude);
+  const percentageScore = Math.min(100, percentageIncrease);
 
-      // Include spike value if available (this is the new/current score)
-      if (entity.spike !== undefined) {
-        details.push(`Spike: ${entity.spike}`);
-      }
+  return Math.min(100, Math.round(magnitudeScore * 0.4 + percentageScore * 0.6));
+};
 
-      // Include current risk score (same as spike value)
-      if (entity.riskScore !== undefined) {
-        details.push(`Current Risk Score: ${entity.riskScore}`);
-      }
+/**
+ * Gets the feedback modifier for an entity
+ * TODO: Implement actual feedback mechanism
+ * For now, returns 1.0 (no modification)
+ */
+const getFeedbackModifier = (_entityId: string): number => {
+  // Stub: return 1.0 (no feedback modification)
+  // In the future, this will look up user feedback for the entity
+  return 1.0;
+};
 
-      // Indicate if this is a new high score (baseline is 0) vs spike above baseline
-      if (entity.riskScoreSpike) {
-        if (entity.baseline === 0) {
-          details.push('New high-risk entity (no previous baseline)');
-        } else {
-          details.push('Spike above baseline');
-        }
-      }
+/**
+ * Calculates the priority score for a candidate entity based on its discoveries
+ * Priority score formula:
+ * 1. Start with max of all discovery scores
+ * 2. Add diversity bonus (+50) if multiple signals exceed strong threshold (>60)
+ * 3. Apply feedback modifier (multiply by feedback modifier)
+ */
+const calculatePriorityScore = (entity: CandidateEntity): number => {
+  if (entity.discoveries.length === 0) {
+    return 0;
+  }
 
-      return `${index + 1}. ${details.join(', ')}`;
-    })
-    .join('\n');
+  // Step 1: Get max of all discovery scores
+  const maxScore = Math.max(...entity.discoveries.map((d) => d.score));
+
+  // Step 2: Check for multiple strong signals (scores > STRONG_SIGNAL_THRESHOLD)
+  const strongSignals = entity.discoveries.filter((d) => d.score > STRONG_SIGNAL_THRESHOLD);
+  const multipleStrongSignals = strongSignals.length > 1;
+
+  let score = maxScore;
+
+  // Add diversity bonus if multiple strong signals exist
+  if (multipleStrongSignals) {
+    score += DIVERSITY_BONUS;
+  }
+
+  // Step 3: Apply feedback modifier
+  const feedbackModifier = getFeedbackModifier(entity.entityId);
+  score = score * feedbackModifier;
+
+  return Math.round(score);
 };
 
 export const getFindAndSelectCandidatesNode = ({
   alertsIndexPattern,
   esClient,
-  llm,
   logger,
   namespace,
-  prompts,
   riskScoreDataClient,
   riskScoreIndexPattern,
 }: {
   alertsIndexPattern?: string;
   esClient: ElasticsearchClient;
-  llm: ActionsClientLlm;
   logger?: Logger;
   namespace?: string;
-  prompts: CombinedPrompts;
   riskScoreDataClient?: RiskScoreDataClient;
   riskScoreIndexPattern?: string;
 }): ((state: ThreatHuntingPrioritiesGraphState) => Promise<ThreatHuntingPrioritiesGraphState>) => {
@@ -105,10 +133,18 @@ export const getFindAndSelectCandidatesNode = ({
   ): Promise<ThreatHuntingPrioritiesGraphState> => {
     logger?.debug(() => '---FIND AND SELECT CANDIDATE ENTITIES---');
 
-    const candidateEntities: CandidateEntity[] = [];
+    const candidateEntitiesMap = new Map<
+      string,
+      {
+        entityId: string;
+        entityType: CandidateEntity['entityType'];
+        discoveries: EntityDiscovery[];
+      }
+    >();
 
-    // Step 1: Find candidate entities
-    // Get entities with risk score spikes
+    // Step 1: Find candidate entities from various discovery methods
+
+    // Discovery method 1: Risk score spikes
     if (riskScoreDataClient) {
       try {
         const riskScoreSpikes = await riskScoreDataClient.getRiskScoreSpikes({
@@ -120,14 +156,27 @@ export const getFindAndSelectCandidatesNode = ({
           for (const spike of riskScoreSpikes.spikesAboveBaseline) {
             const entityType = mapIdentifierKeyToEntityType(spike.identifierKey);
             if (entityType) {
-              candidateEntities.push({
-                entityId: spike.identifier,
-                entityType,
-                riskScore: spike.spike, // Current score is the spike value (new score)
-                riskScoreSpike: true,
-                spike: spike.spike, // Store the spike value
-                baseline: spike.baseline, // Store the baseline value (past score)
-              });
+              const score = calculateRiskScoreSpikeScore(spike.spike, spike.baseline);
+              const discovery: EntityDiscovery = {
+                type: 'risk_score_spike',
+                score,
+                properties: {
+                  baseline: spike.baseline,
+                  spike: spike.spike,
+                  riskScore: spike.spike, // Current score is the spike value
+                },
+              };
+
+              const existing = candidateEntitiesMap.get(spike.identifier);
+              if (existing) {
+                existing.discoveries.push(discovery);
+              } else {
+                candidateEntitiesMap.set(spike.identifier, {
+                  entityId: spike.identifier,
+                  entityType,
+                  discoveries: [discovery],
+                });
+              }
             }
           }
         }
@@ -137,20 +186,33 @@ export const getFindAndSelectCandidatesNode = ({
           for (const spike of riskScoreSpikes.newScoreSpikes) {
             const entityType = mapIdentifierKeyToEntityType(spike.identifierKey);
             if (entityType) {
-              candidateEntities.push({
-                entityId: spike.identifier,
-                entityType,
-                riskScore: spike.spike, // New score is the spike value
-                riskScoreSpike: true,
-                spike: spike.spike, // Store the spike value (same as riskScore for new spikes)
-                baseline: spike.baseline, // Store the baseline value (0 for new spikes)
-              });
+              const score = calculateRiskScoreSpikeScore(spike.spike, spike.baseline);
+              const discovery: EntityDiscovery = {
+                type: 'risk_score_spike',
+                score,
+                properties: {
+                  baseline: spike.baseline, // 0 for new spikes
+                  spike: spike.spike,
+                  riskScore: spike.spike, // New score is the spike value
+                },
+              };
+
+              const existing = candidateEntitiesMap.get(spike.identifier);
+              if (existing) {
+                existing.discoveries.push(discovery);
+              } else {
+                candidateEntitiesMap.set(spike.identifier, {
+                  entityId: spike.identifier,
+                  entityType,
+                  discoveries: [discovery],
+                });
+              }
             }
           }
         }
 
         logger?.debug(
-          () => `Found ${candidateEntities.length} candidate entities from risk score spikes`
+          () => `Found ${candidateEntitiesMap.size} candidate entities from risk score spikes`
         );
       } catch (error) {
         logger?.error(() => `Error fetching risk score spikes: ${error}`);
@@ -164,12 +226,41 @@ export const getFindAndSelectCandidatesNode = ({
 
     // TODO: Implement additional candidate entity finding logic
     // - Query for entities with recently opened high-score alerts
+    //   Example:
+    //   const alertDiscovery: EntityDiscovery = {
+    //     type: 'high_score_alerts',
+    //     score: calculateAlertScore(...),
+    //     properties: {
+    //       alertCount: ...,
+    //       highScoreCount: ...
+    //     }
+    //   };
     // - Query for entities with lots of alerts
+    //   Example:
+    //   const alertCountDiscovery: EntityDiscovery = {
+    //     type: 'high_alert_count',
+    //     score: calculateAlertCountScore(...),
+    //     properties: {
+    //       alertCount: ...
+    //     }
+    //   };
     // - Optionally include anomalies
+    //   Example:
+    //   const anomalyDiscovery: EntityDiscovery = {
+    //     type: 'anomaly',
+    //     score: calculateAnomalyScore(...),
+    //     properties: {
+    //       anomalyType: ...,
+    //       severity: ...
+    //     }
+    //   };
+
+    // Convert map to array of CandidateEntity
+    const candidateEntities: CandidateEntity[] = Array.from(candidateEntitiesMap.values());
 
     logger?.debug(() => `Found ${candidateEntities.length} total candidate entities`);
 
-    // Step 2: Select candidates (auto-select if ≤ 10, use LLM if > 10)
+    // Step 2: Calculate priority scores and select top candidates
     let selectedCandidateIds: string[] = [];
 
     if (candidateEntities.length === 0) {
@@ -181,90 +272,32 @@ export const getFindAndSelectCandidatesNode = ({
       };
     }
 
-    // If we have 10 or fewer candidates, select all of them
-    if (candidateEntities.length <= MAX_SELECTED_CANDIDATES) {
-      logger?.debug(
-        () => `Only ${candidateEntities.length} candidates found, selecting all for enrichment`
-      );
-      selectedCandidateIds = candidateEntities.map((entity) => entity.entityId);
-    } else {
-      // Use LLM to select top candidates
-      try {
-        const generationSchema = getSelectCandidatesSchema();
-        const outputParser = StructuredOutputParser.fromZodSchema(generationSchema);
-        const formatInstructions = outputParser.getFormatInstructions();
+    // Calculate priority score for each entity
+    const entitiesWithScores = candidateEntities.map((entity) => ({
+      entity,
+      priorityScore: calculatePriorityScore(entity),
+    }));
 
-        // Build the prompt
-        const candidateEntitiesText = formatCandidateEntities(candidateEntities);
-        const prompt = `${
-          prompts.selectCandidates ||
-          'Select the most interesting candidate entities for further analysis.'
-        }
+    // Sort by priority score (descending) and select top N
+    entitiesWithScores.sort((a, b) => b.priorityScore - a.priorityScore);
 
-Candidate Entities:
-${candidateEntitiesText}
+    selectedCandidateIds = entitiesWithScores
+      .slice(0, MAX_SELECTED_CANDIDATES)
+      .map(({ entity }) => entity.entityId);
 
-Select exactly ${MAX_SELECTED_CANDIDATES} entity IDs that are most worthy of further investigation. Consider factors such as:
-- High current risk scores
-- Large spike values (the magnitude of the increase)
-- Entities with spikes above an established baseline (vs new high-risk entities)
-- The ratio of spike to baseline (a small spike on a low baseline may be significant)
-
-${formatInstructions}`;
-
-        const chatPrompt = ChatPromptTemplate.fromTemplate(
-          `Answer the user's question as best you can:\n{format_instructions}\n{query}`
-        );
-
-        const chain = chatPrompt.pipe(llm);
-        const llmType = llm._llmType();
-
-        logger?.debug(
-          () =>
-            `findAndSelectCandidates node is invoking the chain (${llmType}) to select from ${candidateEntities.length} candidates`
-        );
-
-        const rawResponse = (await chain.invoke({
-          format_instructions: formatInstructions,
-          query: prompt,
-        })) as unknown as string;
-
-        // Extract JSON from response
-        const jsonResponse = extractJson(rawResponse);
-        const parsed = await outputParser.parse(jsonResponse);
-
-        // Validate and limit to MAX_SELECTED_CANDIDATES
-        selectedCandidateIds = parsed.selectedEntityIds
-          .slice(0, MAX_SELECTED_CANDIDATES)
-          .filter((id: string) => {
-            // Validate that the selected ID exists in our candidate entities
-            const exists = candidateEntities.some((entity) => entity.entityId === id);
-            if (!exists) {
-              logger?.warn(
-                () => `LLM selected entity ID "${id}" that doesn't exist in candidate entities`
-              );
-            }
-            return exists;
-          });
-
-        logger?.debug(
-          () =>
-            `Selected ${
-              selectedCandidateIds.length
-            } candidates for enrichment: ${selectedCandidateIds.join(', ')}`
-        );
-      } catch (error) {
-        logger?.error(() => `Error selecting candidates: ${error}`);
-        // Fallback: select first MAX_SELECTED_CANDIDATES candidates
-        selectedCandidateIds = candidateEntities
-          .slice(0, MAX_SELECTED_CANDIDATES)
-          .map((entity) => entity.entityId);
-        logger?.warn(
-          () =>
-            `Falling back to selecting first ${selectedCandidateIds.length} candidates due to error`
-        );
-      }
-    }
+    logger?.debug(
+      () =>
+        `Selected ${
+          selectedCandidateIds.length
+        } candidates based on priority scores: ${selectedCandidateIds
+          .map(
+            (id) =>
+              `${id} (score: ${
+                entitiesWithScores.find((e) => e.entity.entityId === id)?.priorityScore ?? 0
+              })`
+          )
+          .join(', ')}`
+    );
 
     return {
       ...state,

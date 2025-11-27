@@ -61,7 +61,7 @@ export type DefaultThreatHuntingPrioritiesGraph = ReturnType<
  * Graph flow:
  * START
  *   ↓
- * FIND_AND_SELECT_CANDIDATES_NODE (find entities with risk spikes, optionally use LLM to select top candidates)
+ * FIND_AND_SELECT_CANDIDATES_NODE (find entities with risk spikes, select top candidates based on priority scores)
  *   ↓ (conditional: if candidates selected)
  * ENRICH_ENTITIES_NODE (fetch entity store records, alerts, risk score history, asset criticality, vulnerabilities, anomalies)
  *   ↓ (always)
@@ -94,10 +94,8 @@ export const getDefaultThreatHuntingPrioritiesGraph = ({
     const findAndSelectCandidatesNode = getFindAndSelectCandidatesNode({
       alertsIndexPattern,
       esClient,
-      llm,
       logger,
       namespace,
-      prompts,
       riskScoreDataClient,
       riskScoreIndexPattern,
     });
