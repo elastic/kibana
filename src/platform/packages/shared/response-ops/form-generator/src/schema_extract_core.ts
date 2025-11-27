@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { addMeta, getMeta, setMeta } from './schema_connector_metadata';
+import { getMeta, setMeta } from './schema_connector_metadata';
 
 interface HasUnwrap {
   unwrap(): z.ZodType;
@@ -38,22 +38,28 @@ export const extractSchemaCore = (schema: z.ZodType) => {
       defaultValue = current.parse(undefined);
     }
 
+    const wrapperMeta = getMeta(current);
+    let nextSchema: z.ZodType;
+    let extraMeta = {};
+
     if (current instanceof z.ZodReadonly) {
       // Readonly had no unwarp fn until v4.0.6
       // https://github.com/colinhacks/zod/issues/4951
       // This if statement can be removed when we upgrade
-      current = current.def.innerType as z.ZodType;
-      addMeta(current, { disabled: true });
-      continue;
+      nextSchema = current.def.innerType as z.ZodType;
+      extraMeta = { disabled: true };
+    } else {
+      nextSchema = current.unwrap();
     }
 
-    const wrapperMeta = getMeta(current);
-    current = current.unwrap();
-    const innerMeta = getMeta(current);
+    const mergedMeta = {
+      ...wrapperMeta,
+      ...getMeta(nextSchema),
+      ...extraMeta,
+    };
 
-    // Merge: inner meta takes precedence over wrapper meta
-    const mergedMeta = { ...wrapperMeta, ...innerMeta };
-    setMeta(current, mergedMeta);
+    setMeta(nextSchema, mergedMeta);
+    current = nextSchema;
   }
 
   // If the schema is a literal, we need it as defaultValue
@@ -61,5 +67,5 @@ export const extractSchemaCore = (schema: z.ZodType) => {
     defaultValue = current.value;
   }
 
-  return { schema: current as z.ZodType, defaultValue };
+  return { schema: current, defaultValue };
 };

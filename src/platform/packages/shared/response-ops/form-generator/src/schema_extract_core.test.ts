@@ -527,5 +527,15 @@ describe('extractSchemaCore', () => {
       // When parsing undefined with a default schema, Zod should still return undefined if that's what's set
       expect(result.defaultValue).toBeUndefined();
     });
+
+    it('should not loose the meta value when unwrapping multiple times', () => {
+      const schema = z.string().optional().readonly().meta({ label: 'readonly' });
+      const result = extractSchemaCore(schema);
+
+      expect(result.schema).toBeInstanceOf(z.ZodString);
+      const meta = getMeta(result.schema);
+      expect(meta.label).toBe('readonly');
+      expect(meta.disabled).toBe(true);
+    });
   });
 });
