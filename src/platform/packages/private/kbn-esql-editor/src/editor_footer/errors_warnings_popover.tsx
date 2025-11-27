@@ -8,7 +8,7 @@
  */
 
 import {
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiFlexGroup,
@@ -29,34 +29,14 @@ import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import { filterDataErrors } from '../helpers';
 import type { DataErrorsControl } from '../types';
 
-interface TypeConsts {
-  color: 'danger' | 'warning' | 'text';
-  message: string;
-  label: string;
-}
-const getConstsByType = (type: 'error' | 'warning', count: number): TypeConsts => {
+const getColorByType = (
+  type: 'error' | 'warning',
+  count: number
+): 'danger' | 'warning' | 'text' => {
   if (type === 'error') {
-    return {
-      color: count > 0 ? 'danger' : 'text',
-      message: i18n.translate('esqlEditor.query.errorCount', {
-        defaultMessage: '{count} {count, plural, one {error} other {errors}}',
-        values: { count },
-      }),
-      label: i18n.translate('esqlEditor.query.errorsTitle', {
-        defaultMessage: 'Errors',
-      }),
-    };
+    return count > 0 ? 'danger' : 'text';
   } else {
-    return {
-      color: 'warning',
-      message: i18n.translate('esqlEditor.query.warningCount', {
-        defaultMessage: '{count} {count, plural, one {warning} other {warnings}}',
-        values: { count },
-      }),
-      label: i18n.translate('esqlEditor.query.warningsTitle', {
-        defaultMessage: 'Warnings',
-      }),
-    };
+    return 'warning';
   }
 };
 
@@ -70,7 +50,7 @@ function ErrorsWarningsContent({
   onErrorClick: (error: MonacoMessage) => void;
 }) {
   const { euiTheme } = useEuiTheme();
-  const { color } = getConstsByType(type, items.length);
+  const color = getColorByType(type, items.length);
 
   const handleClick = (item: MonacoMessage) => {
     const selection = window.getSelection();
@@ -180,7 +160,6 @@ export function ErrorsWarningsFooterPopover({
   type,
   setIsPopoverOpen,
   onErrorClick,
-  isSpaceReduced,
   dataErrorsControl,
 }: {
   isPopoverOpen: boolean;
@@ -188,7 +167,6 @@ export function ErrorsWarningsFooterPopover({
   type: 'error' | 'warning';
   setIsPopoverOpen: (flag: boolean) => void;
   onErrorClick: (error: MonacoMessage) => void;
-  isSpaceReduced?: boolean;
   dataErrorsControl?: DataErrorsControl;
 }) {
   // Visible items may be 0 if dataErrorsControl is enabled and there are only data errors.
@@ -200,7 +178,7 @@ export function ErrorsWarningsFooterPopover({
     return items;
   }, [items, dataErrorsControl]);
 
-  const { color, message } = getConstsByType(type, visibleItems.length);
+  const color = getColorByType(type, visibleItems.length);
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
   return (
@@ -211,19 +189,20 @@ export function ErrorsWarningsFooterPopover({
           hasArrow={false}
           panelPaddingSize="none"
           button={
-            <EuiButtonEmpty
+            <EuiButtonIcon
               iconType={type}
               iconSize="s"
               color={color}
               size="xs"
-              iconSide="left"
               onClick={() => {
                 setIsPopoverOpen(!isPopoverOpen);
               }}
               data-test-subj={`ESQLEditor-footerPopoverButton-${type}`}
-            >
-              {isSpaceReduced ? visibleItems.length : message}
-            </EuiButtonEmpty>
+              aria-label={i18n.translate('esqlEditor.query.errorsWarningsPopoverButtonAriaLabel', {
+                defaultMessage: 'Show {type} details',
+                values: { type },
+              })}
+            />
           }
           ownFocus={false}
           isOpen={isPopoverOpen}

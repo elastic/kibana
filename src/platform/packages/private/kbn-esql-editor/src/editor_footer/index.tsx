@@ -122,14 +122,7 @@ export const EditorFooter = memo(function EditorFooter({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              gutterSize="none"
-              responsive={false}
-              alignItems="center"
-              css={css`
-                gap: 12px;
-              `}
-            >
+            <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
               <QueryWrapComponent code={code} updateQuery={updateQuery} />
               {/* <EuiFlexItem grow={false} /> */}
               {errors && errors.length > 0 && (
