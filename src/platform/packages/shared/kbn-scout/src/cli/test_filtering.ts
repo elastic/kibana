@@ -338,7 +338,7 @@ export const filterConfigsWithTests = (
       // Run Playwright once per config (not once per runMatrixEntry)
       let output = '';
       try {
-        log.info(`Checking config: '${pwConfigPath}'`);
+        log.debug(`Checking config: '${pwConfigPath}'`);
         output = execSync(`npx playwright test --list --config ${pwConfigPath} --reporter=json`, {
           encoding: 'utf-8',
           maxBuffer: 1024 * 1024 * 10,
