@@ -1,0 +1,6 @@
+{
+  "files": ["generated/*"],
+  "rules": {
+    "@typescript-eslint/naming-convention": 0
+  }
+}
