@@ -121,3 +121,42 @@ export const gapAutoFillSchedulerResponseSchema = schema.object({
   created_at: schema.string(),
   updated_at: schema.string(),
 });
+
+export const gapAutoFillSchedulerLogsRequestQuerySchema = schema.object({
+  start: schema.string(),
+  end: schema.string(),
+  page: schema.number({ defaultValue: 1, min: 1 }),
+  per_page: schema.number({ defaultValue: 50, min: 1, max: 1000 }),
+  sort_field: schema.oneOf([schema.literal('@timestamp')], { defaultValue: '@timestamp' }),
+  sort_direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+    defaultValue: 'desc',
+  }),
+  statuses: schema.maybe(
+    schema.arrayOf(
+      schema.oneOf([schema.literal('success'), schema.literal('error'), schema.literal('skipped')])
+    )
+  ),
+});
+
+export const gapAutoFillSchedulerLogEntrySchema = schema.object({
+  timestamp: schema.maybe(schema.string()),
+  status: schema.maybe(schema.string()),
+  message: schema.maybe(schema.string()),
+  results: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        rule_id: schema.maybe(schema.string()),
+        processed_gaps: schema.maybe(schema.number()),
+        status: schema.maybe(schema.string()),
+        error: schema.maybe(schema.string()),
+      })
+    )
+  ),
+});
+
+export const gapAutoFillSchedulerLogsResponseSchema = schema.object({
+  data: schema.arrayOf(gapAutoFillSchedulerLogEntrySchema),
+  total: schema.number(),
+  page: schema.number(),
+  per_page: schema.number(),
+});

@@ -11,6 +11,9 @@ import type {
   gapAutoFillSchedulerResponseSchemaV1,
   gapAutoFillSchedulerUpdateBodySchemaV1,
   getGapAutoFillSchedulerParamsSchemaV1,
+  gapAutoFillSchedulerLogEntrySchemaV1,
+  gapAutoFillSchedulerLogsResponseSchemaV1,
+  gapAutoFillSchedulerLogsRequestQuerySchemaV1,
 } from '..';
 
 export type GapAutoFillSchedulerRequestBody = TypeOf<typeof gapAutoFillSchedulerBodySchemaV1>;
@@ -26,3 +29,15 @@ export interface GapAutoFillSchedulerResponse {
 export interface UpdateGapAutoFillSchedulerResponse {
   body: GapAutoFillSchedulerResponseBody;
 }
+
+export type GapAutoFillSchedulerLogEntry = TypeOf<typeof gapAutoFillSchedulerLogEntrySchemaV1>;
+export type GapAutoFillSchedulerLogsResponseBody = TypeOf<
+  typeof gapAutoFillSchedulerLogsResponseSchemaV1
+>;
+export interface GapAutoFillSchedulerLogsResponse {
+  body: GapAutoFillSchedulerLogsResponseBody;
+}
+
+export type GapAutoFillSchedulerLogsRequestQuery = TypeOf<
+  typeof gapAutoFillSchedulerLogsRequestQuerySchemaV1
+>;
