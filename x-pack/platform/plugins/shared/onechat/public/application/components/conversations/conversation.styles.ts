@@ -27,8 +27,8 @@ const ROUNDED_BORDER_RADIUS = '6px';
 
 export const roundedBorderRadiusStyles = css`
   border-radius: ${ROUNDED_BORDER_RADIUS};
-`;  
-  
+`;
+
 export const conversationBackgroundStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   background: linear-gradient(
     180deg,
