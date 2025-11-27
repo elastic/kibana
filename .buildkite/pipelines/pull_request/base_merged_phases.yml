@@ -117,6 +117,7 @@ steps:
       JEST_CONFIGS_DEPS: 'check_types'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       FTR_CONFIGS_DEPS: 'build,check_types'
+      FUNCTIONAL_MAX_MINUTES: '25'
       KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build'
     retry:
       automatic:
