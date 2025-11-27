@@ -17,9 +17,9 @@ import { errorResult, otherResult } from '@kbn/onechat-genai-utils/tools/utils/r
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
-const WORKFLOW_MAX_WAIT = 60_000;
-const WORKFLOW_INITIAL_WAIT = 1000;
-const WORKFLOW_CHECK_INTERVAL = 2_500;
+const DEFAULT_WAIT_FOR = 60;
+const DEFAULT_INITIAL_WAIT = 1;
+const DEFAULT_CHECK_INTERVAL = 2.5;
 
 const finalStatuses = [WorkflowExecutionStatus.COMPLETED, WorkflowExecutionStatus.FAILED];
 
@@ -29,9 +29,15 @@ export const executeWorkflow = async ({
   request,
   spaceId,
   workflowApi,
+  waitFor = DEFAULT_WAIT_FOR,
+  initialWait = DEFAULT_INITIAL_WAIT,
+  checkInterval = DEFAULT_CHECK_INTERVAL,
 }: {
   workflowId: string;
   workflowParams: Record<string, unknown>;
+  waitFor?: number;
+  initialWait?: number;
+  checkInterval?: number;
   request: KibanaRequest;
   spaceId: string;
   workflowApi: WorkflowApi;
@@ -65,12 +71,15 @@ export const executeWorkflow = async ({
   );
 
   const waitStart = Date.now();
-  await waitMs(WORKFLOW_INITIAL_WAIT);
+  const waitLimit = waitStart + waitFor * 1000;
+
+  await waitMs(initialWait * 1000);
 
   let execution: WorkflowExecutionState | null | undefined;
   do {
     try {
       execution = await getExecutionState({ executionId, spaceId, workflowApi });
+      // if final status is reached, return result directly
       if (execution && finalStatuses.includes(execution.status)) {
         return [otherResult({ execution })];
       }
@@ -78,20 +87,16 @@ export const executeWorkflow = async ({
       // trap - we just keep waiting until timeout
     }
 
-    await waitMs(WORKFLOW_CHECK_INTERVAL);
-  } while (Date.now() - waitStart < WORKFLOW_MAX_WAIT);
+    await waitMs(checkInterval * 1000);
+  } while (Date.now() < waitLimit);
 
   if (execution) {
     return [otherResult({ execution })];
   } else {
     return [
-      errorResult(
-        `Workflow '${workflowId}' executed but not completed after ${WORKFLOW_MAX_WAIT}ms.`
-      ),
+      errorResult(`Workflow '${workflowId}' executed but execution not found after ${waitFor}s.`),
     ];
   }
-
-  // timeout-ed waiting without completion or failure status
 };
 
 const waitMs = async (durationMs: number) => {

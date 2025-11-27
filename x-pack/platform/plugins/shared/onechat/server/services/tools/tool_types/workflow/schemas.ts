@@ -9,8 +9,10 @@ import { schema } from '@kbn/config-schema';
 
 export const configurationSchema = schema.object({
   workflow_id: schema.string(),
+  wait_for: schema.maybe(schema.number({ min: 1, max: 300 })),
 });
 
 export const configurationUpdateSchema = schema.object({
   workflow_id: schema.maybe(schema.string()),
+  wait_for: schema.maybe(schema.number({ min: 1, max: 300 })),
 });

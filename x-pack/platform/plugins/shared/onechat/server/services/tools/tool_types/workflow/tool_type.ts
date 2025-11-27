@@ -7,9 +7,10 @@
 
 import { z } from '@kbn/zod';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { ToolType } from '@kbn/onechat-common';
+import { ToolType, platformCoreTools } from '@kbn/onechat-common';
 import type { WorkflowToolConfig } from '@kbn/onechat-common/tools';
 import { createErrorResult } from '@kbn/onechat-server';
+import { cleanPrompt } from '@kbn/onechat-genai-utils/prompts';
 import type { AnyToolTypeDefinition } from '../definitions';
 import { executeWorkflow } from './execute_workflow';
 import { generateSchema } from './generate_schema';
@@ -45,6 +46,7 @@ export const getWorkflowToolType = ({
                 workflowApi,
                 workflowId,
                 workflowParams: params,
+                waitFor: config.wait_for,
               });
 
               return {
@@ -75,9 +77,21 @@ export const getWorkflowToolType = ({
           }
           return generateSchema({ workflow });
         },
+        getLlmDescription: ({ description }) => {
+          return cleanPrompt(`${description}
+
+          ## Additional information
+          - this tool executes the workflow with the ID '${config.workflow_id}'
+          - the tool will wait up to ${config.wait_for} seconds for the workflow to complete
+          - if the workflow isn't completed within the specified time, a workflow execution ID will be returned
+          - the ${platformCoreTools.getWorkflowExecutionStatus} tool can be used later to check the status of the workflow execution
+          - **important**: do **NOT** call the ${platformCoreTools.getWorkflowExecutionStatus} tool directly after calling this tool.
+            Instead, if the workflow didn't complete, suggest to the user to ask you to check the status of the workflow execution.
+            This is to prevent the user from calling the tool multiple times, which would result in multiple workflow executions being created.
+          `);
+        },
       };
     },
-
     createSchema: configurationSchema,
     updateSchema: configurationUpdateSchema,
     validateForCreate: async ({ config, context: { spaceId } }) => {
