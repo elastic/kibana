@@ -90,6 +90,14 @@ export function isTextBasedLayer(
   return 'index' in layer && 'query' in layer;
 }
 
+function generateAdHocDataViewId(dataView: {
+  type: 'adHocDataView';
+  index: string;
+  timeFieldName: string;
+}) {
+  return `${dataView.index}-${dataView.timeFieldName ?? 'no_time_field'}`;
+}
+
 function getAdHocDataViewSpec(dataView: {
   type: 'adHocDataView';
   index: string;
@@ -97,7 +105,7 @@ function getAdHocDataViewSpec(dataView: {
 }) {
   return {
     // Improve id genertation to be more predictable and hit cache more often
-    id: `${dataView.index}-${dataView.timeFieldName ?? 'no_time_field'}`,
+    id: generateAdHocDataViewId(dataView),
     title: dataView.index,
     name: dataView.index,
     timeFieldName: dataView.timeFieldName,
@@ -130,7 +138,10 @@ export const getAdhocDataviews = (
   // dedupe and map multiple layer references to the same ad hoc dataview
   for (const [layerId, dataViewEntry] of adHocDataViewsFiltered) {
     if (!internalReferencesMap.has(dataViewEntry)) {
-      internalReferencesMap.set(dataViewEntry, { layerIds: [], id: uuidv4({}) });
+      internalReferencesMap.set(dataViewEntry, {
+        layerIds: [],
+        id: generateAdHocDataViewId(dataViewEntry),
+      });
     }
     const internalRef = internalReferencesMap.get(dataViewEntry)!;
     internalRef.layerIds.push(layerId);
