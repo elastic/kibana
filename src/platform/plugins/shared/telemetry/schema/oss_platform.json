@@ -11072,7 +11072,7 @@
             "description": "Enable Group streams in Streams"
           }
         },
-          "observability:streamsEnableAttachments": {
+        "observability:streamsEnableAttachments": {
           "type": "boolean",
           "_meta": {
             "description": "Enable Streams attachments tab."

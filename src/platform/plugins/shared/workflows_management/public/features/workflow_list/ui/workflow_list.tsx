@@ -419,16 +419,16 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     );
   }
 
-  const showStart = (search.page - 1) * search.limit + 1;
-  let showEnd = search.page * search.limit;
-  if (workflows && showEnd > (workflows._pagination.total || 0)) {
-    showEnd = workflows._pagination.total;
+  const showStart = (search.page - 1) * search.size + 1;
+  let showEnd = search.page * search.size;
+  if (workflows && showEnd > (workflows.total || 0)) {
+    showEnd = workflows.total;
   }
 
   return (
     <>
       <WorkflowsUtilityBar
-        totalWorkflows={workflows?._pagination.total || 0}
+        totalWorkflows={workflows?.total || 0}
         selectedWorkflows={selectedItems}
         deselectWorkflows={deselectWorkflows}
         onRefresh={onRefresh}
@@ -452,7 +452,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         onChange={({
           page: { index: pageIndex, size },
         }: CriteriaWithPagination<WorkflowListItemDto>) =>
-          setSearch({ ...search, page: pageIndex + 1, limit: size })
+          setSearch({ ...search, page: pageIndex + 1, size })
         }
         selection={{
           onSelectionChange: setSelectedItems,
@@ -460,9 +460,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           selected: selectedItems,
         }}
         pagination={{
-          pageSize: search.limit,
+          pageSize: search.size,
           pageSizeOptions: WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS,
-          totalItemCount: workflows?._pagination?.total ?? 0,
+          totalItemCount: workflows?.total ?? 0,
           pageIndex: search.page - 1,
         }}
       />

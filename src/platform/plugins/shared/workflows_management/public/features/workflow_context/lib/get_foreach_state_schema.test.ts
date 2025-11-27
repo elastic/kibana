@@ -21,9 +21,7 @@ describe('getForeachStateSchema', () => {
       name: 'foreach-step',
     });
     expect(foreachStateSchema).toBeDefined();
-    expect(foreachStateSchema.shape.item.description).toMatch(
-      /Foreach step must iterate over an array type, but received no valid path or JSON string/
-    );
+    expect(foreachStateSchema.shape.item.description).toMatch(/Unable to parse foreach parameter/);
   });
 
   it('should return foreach state with item type if it is possible to infer from previous step output', () => {
@@ -36,7 +34,7 @@ describe('getForeachStateSchema', () => {
       }),
     });
     const foreachStateSchema = getForeachStateSchema(stepContext, {
-      foreach: 'steps.previous_step.output',
+      foreach: '{{steps.previous_step.output}}',
       type: 'foreach',
       name: 'foreach-step',
     });
@@ -57,7 +55,7 @@ describe('getForeachStateSchema', () => {
       }),
     });
     const foreachStateSchema = getForeachStateSchema(stepContext, {
-      foreach: 'consts.items',
+      foreach: '{{consts.items}}',
       type: 'foreach',
       name: 'foreach-step',
     });
@@ -77,13 +75,13 @@ describe('getForeachStateSchema', () => {
       }),
     });
     const foreachStateSchema = getForeachStateSchema(stepContext, {
-      foreach: 'consts.items',
+      foreach: '{{consts.items}}',
       type: 'foreach',
       name: 'foreach-step',
     });
     expect(foreachStateSchema).toBeDefined();
     expect(foreachStateSchema.shape.item.description).toMatch(
-      /Foreach step must iterate over an array type, but received:/
+      /Expected array for foreach iteration, but got object/
     );
   });
 });

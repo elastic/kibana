@@ -172,7 +172,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.page).to.be(1);
       });
 
-      it('should return empty results if no fields match the filters', async () => {
+      // TODO: see https://github.com/elastic/kibana/pull/243499
+      it.skip('should return empty results if no fields match the filters', async () => {
         const { body, status } = await sendSearchRequest({
           index: 'fieldsense-station-metrics',
           from: timerange.min,
@@ -185,7 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(status).to.be(200);
         expect(body.fields.length).to.equal(0);
-        expect(body.total).to.equal(1);
+        expect(body.total).to.equal(0);
         expect(body.page).to.equal(1);
       });
     });

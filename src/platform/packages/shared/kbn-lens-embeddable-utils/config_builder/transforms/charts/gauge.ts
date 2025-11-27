@@ -119,10 +119,7 @@ function reverseBuildVisualizationState(
             : {}),
         }
       : {
-          ...(operationFromColumn(
-            metricAccessor,
-            layer as FormBasedLayer
-          ) as LensApiAllMetricOperations),
+          ...operationFromColumn(metricAccessor, layer as FormBasedLayer),
           ...(visualization.minAccessor
             ? {
                 min: operationFromColumn(
@@ -178,7 +175,7 @@ function reverseBuildVisualizationState(
 }
 
 function buildFormBasedLayer(layer: GaugeStateNoESQL): FormBasedPersistedState['layers'] {
-  const columns = fromMetricAPItoLensState(layer.metric as LensApiAllMetricOperations);
+  const columns = fromMetricAPItoLensState(layer.metric);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
 

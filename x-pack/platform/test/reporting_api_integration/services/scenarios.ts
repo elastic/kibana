@@ -17,6 +17,7 @@ import {
 import rison from '@kbn/rison';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { RruleSchedule } from '@kbn/task-manager-plugin/server';
+import type { RawNotification } from '@kbn/reporting-plugin/server/saved_objects/scheduled_report/schemas/latest';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
@@ -243,7 +244,8 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     password: string,
     job: JobParamsPDFV2,
     schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
-    startedAt?: string
+    startedAt?: string,
+    notification?: RawNotification
   ) => {
     const jobParams = rison.encode(job);
     const scheduleToUse = startedAt
@@ -253,7 +255,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .post(`/internal/reporting/schedule/printablePdfV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
-      .send({ jobParams, schedule: scheduleToUse });
+      .send({ jobParams, schedule: scheduleToUse, notification });
   };
   const generatePng = async (
     username: string,

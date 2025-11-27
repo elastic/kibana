@@ -59,6 +59,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             routing: [],
             fields: {},
           },
+          failure_store: { inherit: {} },
         },
       };
 
@@ -195,6 +196,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             processing: { steps: [] },
             settings: {},
             classic: {},
+            failure_store: { inherit: {} },
           },
         },
         ...emptyAssets,

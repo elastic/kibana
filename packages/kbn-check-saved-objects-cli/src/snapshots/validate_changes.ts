@@ -53,7 +53,7 @@ function validateChangesExistingType({ from, to }: ValidateChangesExistingTypePa
   // check that current changes don't define more than 1 new modelVersion
   if (to.modelVersions.length - from.modelVersions.length > 1) {
     throw new Error(
-      `❌ The SO type '${name}' is defining two (or more) new model versions. Please refer to our troubleshooting guide: https://docs.elastic.dev/kibana-dev-docs/tutorials/saved-objects#troubleshooting`
+      `❌ The SO type '${name}' is defining two (or more) new model versions. Please refer to our troubleshooting guide: https://www.elastic.co/docs/extend/kibana/saved-objects#troubleshooting`
     );
   }
 

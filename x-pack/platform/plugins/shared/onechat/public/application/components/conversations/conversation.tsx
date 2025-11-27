@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, useEuiScrollBar } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useRef } from 'react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
-import { ConversationInputForm } from './conversation_input/conversation_input_form';
+import { ConversationInput } from './conversation_input/conversation_input';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
@@ -20,6 +20,8 @@ import { useConversationStatus } from '../../hooks/use_conversation';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
 import { conversationElementWidthStyles, fullWidthAndHeightStyles } from './conversation.styles';
 import { ScrollButton } from './scroll_button';
+import { useAppLeave } from '../../context/app_leave_context';
+import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 
 export const Conversation: React.FC<{}> = () => {
   const conversationId = useConversationId();
@@ -27,8 +29,14 @@ export const Conversation: React.FC<{}> = () => {
   const { isResponseLoading } = useSendMessage();
   const { isFetched } = useConversationStatus();
   const shouldStickToBottom = useShouldStickToBottom();
+  const onAppLeave = useAppLeave();
 
   useSendPredefinedInitialMessage();
+
+  useNavigationAbort({
+    onAppLeave,
+    isResponseLoading,
+  });
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const {
@@ -89,7 +97,7 @@ export const Conversation: React.FC<{}> = () => {
         {showScrollButton && <ScrollButton onClick={scrollToMostRecentRoundBottom} />}
       </EuiFlexItem>
       <EuiFlexItem css={conversationElementWidthStyles} grow={false}>
-        <ConversationInputForm onSubmit={scrollToMostRecentRoundTop} />
+        <ConversationInput onSubmit={scrollToMostRecentRoundTop} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

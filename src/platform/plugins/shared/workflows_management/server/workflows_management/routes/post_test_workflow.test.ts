@@ -51,7 +51,17 @@ describe('POST /api/workflows/test', () => {
 
       workflowsApi.testWorkflow = jest.fn().mockResolvedValue(mockExecutionId);
 
-      const mockContext = {};
+      const mockContext = {
+        core: Promise.resolve({
+          elasticsearch: {
+            client: {
+              asCurrentUser: {
+                mget: jest.fn(),
+              },
+            },
+          },
+        }),
+      };
       const mockRequest = {
         body: {
           workflowId: 'workflow-123',
@@ -83,11 +93,136 @@ describe('POST /api/workflows/test', () => {
       });
     });
 
+    it('should preprocess alert inputs when trigger type is alert', async () => {
+      const mockExecutionId = 'test-execution-123';
+      const mockAlertSource = {
+        '@timestamp': '2024-01-01T00:00:00Z',
+        'kibana.alert.rule.uuid': 'rule-uuid-123',
+        'kibana.alert.rule.name': 'Test Rule',
+        'kibana.alert.rule.tags': ['tag1'],
+        'kibana.alert.rule.consumer': 'test-consumer',
+        'kibana.alert.rule.producer': 'test-producer',
+        'kibana.alert.rule.rule_type_id': 'test-rule-type',
+      };
+
+      const mockEsClient = {
+        mget: jest.fn().mockResolvedValue({
+          docs: [
+            {
+              found: true,
+              _source: mockAlertSource,
+            },
+          ],
+        }),
+      };
+
+      workflowsApi.testWorkflow = jest.fn().mockResolvedValue(mockExecutionId);
+
+      const mockContext = {
+        core: Promise.resolve({
+          elasticsearch: {
+            client: {
+              asCurrentUser: mockEsClient,
+            },
+          },
+        }),
+      };
+      const mockRequest = {
+        body: {
+          workflowYaml: 'name: Test Workflow',
+          inputs: {
+            event: {
+              triggerType: 'alert',
+              alertIds: [{ _id: 'alert-1', _index: '.alerts-test-default' }],
+            },
+          },
+        },
+        headers: {},
+        url: { pathname: '/api/workflows/test' },
+      };
+      const mockResponse = createMockResponse();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockEsClient.mget).toHaveBeenCalled();
+      expect(workflowsApi.testWorkflow).toHaveBeenCalled();
+      const testWorkflowCall = (workflowsApi.testWorkflow as jest.Mock).mock.calls[0];
+      const processedInputs = testWorkflowCall[0].inputs;
+      // Verify that inputs were transformed
+      expect(processedInputs.event.alerts).toBeDefined();
+      expect(processedInputs.event.rule).toBeDefined();
+      expect(processedInputs.event.rule.id).toBe('rule-uuid-123');
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          workflowExecutionId: mockExecutionId,
+        },
+      });
+    });
+
+    it('should handle alert preprocessing errors gracefully', async () => {
+      const mockExecutionId = 'test-execution-123';
+      const mockEsClient = {
+        mget: jest.fn().mockRejectedValue(new Error('Elasticsearch error')),
+      };
+
+      workflowsApi.testWorkflow = jest.fn().mockResolvedValue(mockExecutionId);
+
+      const mockContext = {
+        core: Promise.resolve({
+          elasticsearch: {
+            client: {
+              asCurrentUser: mockEsClient,
+            },
+          },
+        }),
+      };
+      const mockRequest = {
+        body: {
+          workflowYaml: 'name: Test Workflow',
+          inputs: {
+            event: {
+              triggerType: 'alert',
+              alertIds: [{ _id: 'alert-1', _index: '.alerts-test-default' }],
+            },
+          },
+        },
+        headers: {},
+        url: { pathname: '/api/workflows/test' },
+      };
+      const mockResponse = createMockResponse();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      // Should fall back to original inputs when preprocessing fails
+      expect(workflowsApi.testWorkflow).toHaveBeenCalledWith({
+        workflowId: undefined,
+        workflowYaml: mockRequest.body.workflowYaml,
+        inputs: mockRequest.body.inputs,
+        spaceId: 'default',
+        request: mockRequest,
+      });
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          workflowExecutionId: mockExecutionId,
+        },
+      });
+    });
+
     it('should handle API errors gracefully', async () => {
       const errorMessage = 'Workflow execution engine failed';
       workflowsApi.testWorkflow = jest.fn().mockRejectedValue(new Error(errorMessage));
 
-      const mockContext = {};
+      const mockContext = {
+        core: Promise.resolve({
+          elasticsearch: {
+            client: {
+              asCurrentUser: {
+                mget: jest.fn(),
+              },
+            },
+          },
+        }),
+      };
       const mockRequest = {
         body: {
           workflowYaml: 'name: Test Workflow',
@@ -114,7 +249,17 @@ describe('POST /api/workflows/test', () => {
       workflowsApi.testWorkflow = jest.fn().mockResolvedValue(mockExecutionId);
       mockSpaces.getSpaceId = jest.fn().mockReturnValue('custom-space');
 
-      const mockContext = {};
+      const mockContext = {
+        core: Promise.resolve({
+          elasticsearch: {
+            client: {
+              asCurrentUser: {
+                mget: jest.fn(),
+              },
+            },
+          },
+        }),
+      };
       const mockRequest = {
         body: {
           workflowYaml: 'name: Space-specific Test Workflow',
@@ -147,7 +292,17 @@ describe('POST /api/workflows/test', () => {
       const executionError = new Error('Execution engine connection failed');
       workflowsApi.testWorkflow = jest.fn().mockRejectedValue(executionError);
 
-      const mockContext = {};
+      const mockContext = {
+        core: Promise.resolve({
+          elasticsearch: {
+            client: {
+              asCurrentUser: {
+                mget: jest.fn(),
+              },
+            },
+          },
+        }),
+      };
       const mockRequest = {
         body: {
           workflowYaml: 'name: Test Workflow',
