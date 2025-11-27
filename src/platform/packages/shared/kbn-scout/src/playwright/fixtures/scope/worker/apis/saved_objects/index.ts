@@ -10,103 +10,15 @@
 import FormData from 'form-data';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
-
-export interface CreateSavedObjectParams {
-  type: string;
-  id?: string;
-  attributes: Record<string, any>;
-  initialNamespaces?: string[];
-  overwrite?: boolean;
-}
-
-export interface UpdateSavedObjectParams {
-  type: string;
-  id: string;
-  attributes: Record<string, any>;
-  upsert?: boolean;
-}
-
-export interface BulkCreateSavedObjectsParams {
-  objects: Array<{
-    type: string;
-    id?: string;
-    attributes: Record<string, any>;
-    initialNamespaces?: string[];
-  }>;
-  overwrite?: boolean;
-}
-
-export interface SavedObjectReference {
-  name: string;
-  type: string;
-  id: string;
-}
-
-export interface ImportSavedObjectsParams {
-  objects: Array<{
-    type: string;
-    id: string;
-    attributes: Record<string, any>;
-    originId?: string;
-    references?: SavedObjectReference[];
-  }>;
-  overwrite?: boolean;
-  createNewCopies?: boolean;
-}
-
-export interface ExportSavedObjectsParams {
-  objects?: Array<{ type: string; id: string }>;
-  type?: string | string[];
-  excludeExportDetails?: boolean;
-  includeReferencesDeep?: boolean;
-}
-
-export interface ImportSavedObjectsResponse {
-  success: boolean;
-  successCount: number;
-  successResults?: Array<{
-    type: string;
-    id: string;
-    destinationId?: string;
-    createNewCopy?: boolean;
-  }>;
-  errors?: Array<{
-    type: string;
-    id: string;
-    error: {
-      type: string;
-      destinationId?: string;
-      destinations?: Array<{ id: string; title: string; updatedAt: string }>;
-      references?: SavedObjectReference[];
-    };
-  }>;
-}
-
-export interface ExportedSavedObject {
-  type: string;
-  id: string;
-  attributes: Record<string, any>;
-  references?: SavedObjectReference[];
-  namespaces?: string[];
-  originId?: string;
-  updated_at?: string;
-}
-
-export interface ExportSavedObjectsResponse {
-  exportedObjects: ExportedSavedObject[];
-  exportDetails?: {
-    exportedCount: number;
-    missingRefCount: number;
-    missingReferences: Array<{ type: string; id: string }>;
-    excludedObjectsCount: number;
-    excludedObjects: Array<{ type: string; id: string; reason?: string }>;
-  };
-}
-
-export interface ApiResponse<T = any> {
-  data: T;
-  status: number;
-}
+import type {
+  ApiResponse,
+  ImportSavedObjectsParams,
+  ImportSavedObjectsResponse,
+  ExportSavedObjectsParams,
+  ExportSavedObjectsResponse,
+  ExportedSavedObject,
+  UpdateSavedObjectParams,
+} from './types';
 
 export interface SavedObjectsApiService {
   // Note: the create and bulk create operations are deprecated in favor of the import API so they weren't added to the API helper
