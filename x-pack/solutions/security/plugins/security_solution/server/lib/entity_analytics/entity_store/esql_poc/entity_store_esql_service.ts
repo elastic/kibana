@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IUiSettingsClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import moment from 'moment';
+import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 import { EntityType } from '../../../../../common/api/entity_analytics/entity_store';
 import {
   removeEntityStoreESQLExecuteTask,
@@ -26,6 +32,7 @@ import type { ApiKeyManager } from '../auth/api_key';
 import { executeEsqlQuery } from './esql_executer';
 import { storeEntityStoreDocs } from './elasticsearch_store_results';
 import type { EntityStoreEsqlConfig } from './config';
+import { getEnabledEntityTypes } from '../../../../../common/entity_analytics/utils';
 
 const defaultLookback = () => moment().utc().subtract(1, 'minute').toISOString();
 
@@ -37,6 +44,7 @@ export class EntityStoreESQLService {
   private logger: Logger;
   private dataViews: DataViewsService;
   private appClient: AppClient;
+  private uiSettingsClient: IUiSettingsClient;
   private taskManager?: TaskManagerStartContract;
 
   constructor(
@@ -47,6 +55,7 @@ export class EntityStoreESQLService {
     dataViews: DataViewsService,
     appClient: AppClient,
     apiKeyGenerator: ApiKeyManager,
+    uiSettingsClient: IUiSettingsClient,
     taskManager?: TaskManagerStartContract
   ) {
     this.namespace = namespace;
@@ -56,6 +65,7 @@ export class EntityStoreESQLService {
     this.dataViews = dataViews;
     this.appClient = appClient;
     this.apiKeyGenerator = apiKeyGenerator;
+    this.uiSettingsClient = uiSettingsClient;
     this.taskManager = taskManager;
   }
 
@@ -91,13 +101,27 @@ export class EntityStoreESQLService {
     );
   }
 
+  public async getEnabledEntityTypes(): Promise<EntityType[]> {
+    const genericEntityStoreEnabled = await this.uiSettingsClient.get<boolean>(
+      SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
+    );
+
+    return getEnabledEntityTypes(genericEntityStoreEnabled);
+  }
+
   public async runEntityStoreCycleForAllEntities() {
+    const types = await this.getEnabledEntityTypes();
     await Promise.all(
-      Object.values(EntityType.Values)
-        .filter((type) => type !== 'generic') // generic is causing problems with mappings, will fix later
-        .map(async (entityType) => {
-          return this.runEntityStoreCycle(entityType as EntityType);
-        })
+      types.map(async (type) => {
+        try {
+          return this.runEntityStoreCycle(type as EntityType);
+        } catch (e) {
+          this.logger.error(
+            `[Entity Store ESQL] [${type}-${this.namespace}] Problems running cycle`
+          );
+          this.logger.error(e);
+        }
+      })
     );
   }
 

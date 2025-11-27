@@ -357,6 +357,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           dataViewsService,
           getAppClient(),
           getEntityStoreApiKeyManager(),
+          coreContext.uiSettings.client,
           startPlugins.taskManager
         );
       }),

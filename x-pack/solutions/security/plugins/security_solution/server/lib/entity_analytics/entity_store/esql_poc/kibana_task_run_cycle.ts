@@ -126,6 +126,7 @@ const doRunEntityStoreCycle = async (
     dataViewsService,
     appClient,
     apiKeyManager,
+    core.uiSettings.asScopedToClient(soClient),
     taskManager
   );
 
