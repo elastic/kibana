@@ -18,7 +18,7 @@ import { WaffleMetricControls } from '../waffle/metric_control';
 import { WaffleGroupByControls } from '../waffle/waffle_group_by_controls';
 import { WaffleSortControls } from '../waffle/waffle_sort_controls';
 import type { ToolbarProps } from './types';
-import { SupportedDataPopover } from '../../../../../components/supported_data_popover';
+import { SupportedDataTooltipLink } from '../../../../../components/supported_data_tooltip_link';
 
 interface Props extends ToolbarProps {
   groupByFields: string[];
@@ -112,7 +112,7 @@ export const MetricsAndGroupByToolbarItems = ({
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <SupportedDataPopover nodeType={props.nodeType} />
+        <SupportedDataTooltipLink nodeType={props.nodeType} />
       </EuiFlexItem>
     </>
   );
