@@ -8,55 +8,32 @@
 import React from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
 import { MetricPanels } from './metric_panels';
-import { PromoCard } from './promo_card';
-import { CloudServerlessPromo } from '../cloud_serverless_promo/cloud_serverless_promo';
 import { DiveDeeperWithElasticsearch } from '../dive_deeper/dive_deeper_with_elasticsearch';
 import { AlternateSolutions } from '../alternate_solutions/alternate_solutions';
 import { Footer } from '../footer/footer';
-import { useKibana } from '../../hooks/use_kibana';
 import { HomepageNavLinks } from './homepage_nav_links';
+import { CloudResources } from './cloud_resources';
 
 export const SearchHomepageBody = () => {
   const { euiTheme } = useEuiTheme();
   const itemPadding = css({ padding: `${euiTheme.size.xxl}` });
-  const {
-    services: { cloud: { isCloudEnabled = false } = {} },
-  } = useKibana();
 
   return (
-    <KibanaPageTemplate.Section alignment="top" restrictWidth={true} grow>
+    <KibanaPageTemplate.Section alignment="top" restrictWidth={true} grow paddingSize="none">
       <MetricPanels />
+
       <EuiFlexGroup gutterSize="l" direction="column">
         <EuiFlexItem>
-          <EuiHorizontalRule margin="s" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <PromoCard />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <PromoCard />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <CloudResources />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiHorizontalRule margin="s" />
+          <EuiHorizontalRule margin="xxl" />
         </EuiFlexItem>
-        {!isCloudEnabled && (
-          <>
-            <EuiFlexItem>
-              <EuiHorizontalRule />
-            </EuiFlexItem>
-            <EuiFlexItem css={itemPadding}>
-              <CloudServerlessPromo />
-            </EuiFlexItem>
-          </>
-        )}
         <EuiFlexItem>
           <HomepageNavLinks type="dataManagement" />
         </EuiFlexItem>

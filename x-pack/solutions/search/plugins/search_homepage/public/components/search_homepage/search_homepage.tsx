@@ -6,14 +6,13 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiBetaBadge,
+  EuiBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiText,
+  EuiLink,
   EuiTitle,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -21,8 +20,8 @@ import { i18n } from '@kbn/i18n';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchHomepageBody } from './search_homepage_body';
-import { PromoBanner } from './promo_banner';
 import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
+import { ConnectToElasticsearch } from './connect_to_elasticsearch';
 
 export const SearchHomepagePage = () => {
   const {
@@ -61,7 +60,6 @@ export const SearchHomepagePage = () => {
       grow={false}
       solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
-      <PromoBanner />
       <KibanaPageTemplate.Section restrictWidth={true} grow={false}>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
@@ -82,23 +80,46 @@ export const SearchHomepagePage = () => {
                       </h1>
                     </EuiTitle>
                   </EuiFlexItem>
-                  {isTrial && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBetaBadge
-                        title=""
-                        color="subdued"
-                        label={
-                          <FormattedMessage
-                            id="xpack.searchHomepage.searchHomepagePage.trialBadgeLabel"
-                            defaultMessage="Trial"
-                          />
-                        }
-                      />
-                    </EuiFlexItem>
-                  )}
                 </EuiFlexGroup>
               </EuiFlexItem>
 
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup responsive={false} justifyContent="flexEnd" alignItems="center">
+                  {isTrial && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="success" iconSide="left" iconType="clock">
+                        {i18n.translate('xpack.searchHomepage.searchHomepagePage.p.youHaveLabel', {
+                          defaultMessage:
+                            '{daysLeft} trial {daysLeft, plural, one {day} other {days}} remaining.',
+                          values: {
+                            daysLeft,
+                          },
+                        })}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiLink
+                      data-test-subj="searchHomepageSearchHomepagePageManageSubscriptionLink"
+                      external
+                      href="#"
+                    >
+                      {i18n.translate(
+                        'xpack.searchHomepage.searchHomepagePage.manageSubscriptionLinkLabel',
+                        { defaultMessage: 'Manage subscription' }
+                      )}
+                    </EuiLink>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false} />
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup responsive={false} gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <ConnectToElasticsearch />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   iconType="plugs"
@@ -108,34 +129,15 @@ export const SearchHomepagePage = () => {
                   color="text"
                 >
                   {i18n.translate('xpack.searchHomepage.connectionDetails.buttonLabel', {
-                    defaultMessage: 'Connection details',
+                    defaultMessage: 'Connect',
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {isTrial && (
-            <EuiFlexItem>
-              <EuiFlexGroup responsive={false}>
-                <EuiFlexItem>
-                  <EuiText>
-                    <p>
-                      {i18n.translate('xpack.searchHomepage.searchHomepagePage.p.youHaveLabel', {
-                        defaultMessage: 'You have {daysLeft} days remaining your trial.',
-                        values: {
-                          daysLeft,
-                        },
-                      })}
-                    </p>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem />
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
 
-        <EuiHorizontalRule margin="none" />
+        <EuiHorizontalRule />
       </KibanaPageTemplate.Section>
       <SearchHomepageBody />
       {embeddableConsole}
