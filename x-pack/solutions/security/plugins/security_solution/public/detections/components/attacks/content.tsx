@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback, useRef, useState } from 'react';
-import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiWindowEvent,
+} from '@elastic/eui';
 import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -78,11 +84,17 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
       >
         <Display show={!globalFullScreen}>
           <HeaderPage title={PAGE_TITLE}>
-            <Schedule openFlyout={openFlyout} />
-            <FilterByAssigneesPopover
-              selectedUserIds={assignees}
-              onSelectionChange={onAssigneesSelectionChange}
-            />
+            <EuiFlexGroup gutterSize="m">
+              <EuiFlexItem>
+                <FilterByAssigneesPopover
+                  selectedUserIds={assignees}
+                  onSelectionChange={onAssigneesSelectionChange}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <Schedule openFlyout={openFlyout} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </HeaderPage>
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="l" />
