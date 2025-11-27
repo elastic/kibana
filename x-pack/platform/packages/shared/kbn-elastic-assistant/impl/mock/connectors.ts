@@ -91,5 +91,4 @@ export const mockConnectors: AIConnector[] = [
     },
     isConnectorTypeDeprecated: false,
   },
-  
 ];

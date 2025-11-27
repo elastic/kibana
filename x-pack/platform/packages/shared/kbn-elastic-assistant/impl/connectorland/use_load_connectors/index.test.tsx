@@ -144,7 +144,7 @@ describe('useLoadConnectors', () => {
     );
     await waitFor(() => {
       const connectorIds = result.current.data?.map((c) => c.id) || [];
-    
+
       expect(connectorIds).not.toContain('connector-text-embedding');
       expect(connectorIds).not.toContain('text-embedding-connector-id');
       expect(connectorIds).not.toContain('sparse-embedding-connector-id');
