@@ -6,7 +6,7 @@
  */
 import type { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { Gap } from '../gap';
-import type { StringInterval } from '../types';
+import type { StringInterval } from '../../../application/gaps/types/intervals';
 
 type PotentialInterval = { lte?: string; gte?: string } | undefined;
 
@@ -55,6 +55,7 @@ export const transformToGap = (events: Pick<QueryEventsBySavedObjectResult, 'dat
         range,
         filledIntervals,
         inProgressIntervals,
+        updatedAt: gap?.updated_at,
         internalFields: {
           _id: doc._id,
           _index: doc._index,
