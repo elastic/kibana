@@ -91,17 +91,5 @@ export const mockConnectors: AIConnector[] = [
     },
     isConnectorTypeDeprecated: false,
   },
-  {
-    id: 'c29c28a0-20fe-11ee-9396-a1f4d42ec542',
-    name: 'Preconfigured Inference Connector',
-    isMissingSecrets: false,
-    actionTypeId: '.inference',
-    isPreconfigured: true,
-    isDeprecated: false,
-    isSystemAction: false,
-    config: {
-      taskType: 'chat_completion',
-    },
-    isConnectorTypeDeprecated: false,
-  },
+  
 ];
