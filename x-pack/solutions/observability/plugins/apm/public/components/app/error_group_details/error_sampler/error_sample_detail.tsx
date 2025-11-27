@@ -50,6 +50,8 @@ import { ErrorTabKey, getTabs } from './error_tabs';
 import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
 import { SampleSummary } from './sample_summary';
 import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
+import { ErrorSampleAiAgentContextualInsight } from './error_sample_ai_agent_contextual_insight';
+import { getIsObservabilityAgentEnabled } from '../../../../../common/observability_agent/get_is_obs_agent_enabled';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { buildUrl } from '../../../../utils/build_url';
 import { OpenErrorInDiscoverButton } from '../../../shared/links/discover_links/open_error_in_discover_button';
@@ -88,7 +90,8 @@ export function ErrorSampleDetails({
     urlParams: { detailTab, offset, comparisonEnabled },
   } = useLegacyUrlParams();
 
-  const { uiActions, core } = useApmPluginContext();
+  const { uiActions, core, onechat, inference } = useApmPluginContext();
+  const isObservabilityAgentEnabled = getIsObservabilityAgentEnabled(core);
 
   const router = useApmRouter();
 
@@ -291,7 +294,11 @@ export function ErrorSampleDetails({
         <SampleSummary error={error} />
       )}
 
-      <ErrorSampleContextualInsight error={error} transaction={transaction} />
+      {onechat && inference && isObservabilityAgentEnabled ? (
+        <ErrorSampleAiAgentContextualInsight error={error} transaction={transaction} />
+      ) : (
+        <ErrorSampleContextualInsight error={error} transaction={transaction} />
+      )}
 
       <EuiTabs>
         {tabs.map(({ key, label }) => {

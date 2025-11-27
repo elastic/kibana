@@ -172,6 +172,7 @@
     "@kbn/actions-types": "link:src/platform/packages/shared/kbn-actions-types",
     "@kbn/advanced-settings-plugin": "link:src/platform/plugins/private/advanced_settings",
     "@kbn/agent-builder-platform-plugin": "link:x-pack/platform/plugins/shared/agent_builder_platform",
+    "@kbn/ai-agent": "link:x-pack/solutions/observability/packages/ai-agent",
     "@kbn/ai-assistant": "link:x-pack/platform/packages/shared/kbn-ai-assistant",
     "@kbn/ai-assistant-common": "link:x-pack/platform/packages/shared/ai-assistant/common",
     "@kbn/ai-assistant-connector-selector-action": "link:x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action",

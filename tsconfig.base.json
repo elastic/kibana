@@ -16,6 +16,8 @@
       "@kbn/advanced-settings-plugin/*": ["src/platform/plugins/private/advanced_settings/*"],
       "@kbn/agent-builder-platform-plugin": ["x-pack/platform/plugins/shared/agent_builder_platform"],
       "@kbn/agent-builder-platform-plugin/*": ["x-pack/platform/plugins/shared/agent_builder_platform/*"],
+      "@kbn/ai-agent": ["x-pack/solutions/observability/packages/ai-agent"],
+      "@kbn/ai-agent/*": ["x-pack/solutions/observability/packages/ai-agent/*"],
       "@kbn/ai-assistant": ["x-pack/platform/packages/shared/kbn-ai-assistant"],
       "@kbn/ai-assistant/*": ["x-pack/platform/packages/shared/kbn-ai-assistant/*"],
       "@kbn/ai-assistant-common": ["x-pack/platform/packages/shared/ai-assistant/common"],

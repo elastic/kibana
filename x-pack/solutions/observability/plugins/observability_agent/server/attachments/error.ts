@@ -11,11 +11,6 @@ import dedent from 'dedent';
 import {
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
-  OBSERVABILITY_GET_ERROR_BY_ID_TOOL_ID,
-  OBSERVABILITY_GET_TRANSACTION_BY_ID_TOOL_ID,
-  OBSERVABILITY_GET_TRACE_OVERVIEW_BY_ID_TOOL_ID,
-  OBSERVABILITY_GET_SPAN_BY_ID_TOOL_ID,
-  OBSERVABILITY_GET_ERROR_GROUP_BY_KEY_TOOL_ID,
 } from '../../common/constants';
 import { OBSERVABILITY_GET_ALERTS_TOOL_ID } from '../tools/get_alerts/get_alerts';
 
@@ -144,29 +139,19 @@ export const createErrorAttachmentType = (): AttachmentTypeDefinition => {
           2) If only error_grouping_key is present: fetch recent samples for that group (service.name is required) and choose a representative error_id and continue with step 1.
 
         Identifiers that may be present and what they allow you to fetch:
-        - error_id: fetch the specific error document.
-        - error_grouping_key: fetch the error group and representative samples.
-        - transaction_id: fetch the transaction document.
-        - trace_id: fetch the full trace (related spans/transactions).
-        - span_id: fetch the specific span and related events.
+        - error_id
+        - error_grouping_key
+        - transaction_id
+        - trace_id
+        - span_id
 
         Use the following tools as needed to enrich the investigation:
-        - ${OBSERVABILITY_GET_ERROR_BY_ID_TOOL_ID}: fetch the error document by error_id.
-        - ${OBSERVABILITY_GET_ERROR_GROUP_BY_KEY_TOOL_ID}: fetch recent error samples and counts for an error_grouping_key. If only error_grouping_key is provided, use this first to obtain an error_id, then use ${OBSERVABILITY_GET_ERROR_BY_ID_TOOL_ID}.
-        - ${OBSERVABILITY_GET_TRANSACTION_BY_ID_TOOL_ID}: fetch the transaction document by transaction_id (and optional trace_id).
-        - ${OBSERVABILITY_GET_TRACE_OVERVIEW_BY_ID_TOOL_ID}: fetch the overview of a trace by trace_id.
-        - ${OBSERVABILITY_GET_SPAN_BY_ID_TOOL_ID}: fetch a span by span_id and trace_id.
         - ${OBSERVABILITY_GET_SERVICES_TOOL_ID}: verify service and environment metadata.
         - ${OBSERVABILITY_GET_ALERTS_TOOL_ID}: retrieve related alerts in the relevant time window.
         - ${OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID}: inspect downstream dependencies and propagation paths.
       `);
     },
     getTools: () => [
-      OBSERVABILITY_GET_ERROR_BY_ID_TOOL_ID,
-      OBSERVABILITY_GET_ERROR_GROUP_BY_KEY_TOOL_ID,
-      OBSERVABILITY_GET_TRANSACTION_BY_ID_TOOL_ID,
-      OBSERVABILITY_GET_TRACE_OVERVIEW_BY_ID_TOOL_ID,
-      OBSERVABILITY_GET_SPAN_BY_ID_TOOL_ID,
       OBSERVABILITY_GET_SERVICES_TOOL_ID,
       OBSERVABILITY_GET_ALERTS_TOOL_ID,
       OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,

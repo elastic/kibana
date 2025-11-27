@@ -4547,6 +4547,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-agent@link:x-pack/solutions/observability/packages/ai-agent":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""
