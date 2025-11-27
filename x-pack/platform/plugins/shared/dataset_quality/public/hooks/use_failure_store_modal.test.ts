@@ -520,6 +520,7 @@ describe('useFailureStoreModal', () => {
             },
             canShowDisableLifecycle: true,
             showIlmDescription: true,
+            disableButtonLabel: 'Indefinite',
           });
         });
 
@@ -557,6 +558,7 @@ describe('useFailureStoreModal', () => {
             },
             canShowDisableLifecycle: false,
             showIlmDescription: false,
+            disableButtonLabel: 'Indefinite',
           });
         });
       });
@@ -602,6 +604,7 @@ describe('useFailureStoreModal', () => {
             },
             canShowDisableLifecycle: true,
             showIlmDescription: true,
+            disableButtonLabel: 'Indefinite',
           });
         });
 
@@ -639,6 +642,7 @@ describe('useFailureStoreModal', () => {
             },
             canShowDisableLifecycle: false,
             showIlmDescription: false,
+            disableButtonLabel: 'Indefinite',
           });
         });
       });
@@ -695,6 +699,7 @@ describe('useFailureStoreModal', () => {
             },
             canShowDisableLifecycle: true,
             showIlmDescription: true,
+            disableButtonLabel: 'Indefinite',
           });
         });
 
@@ -727,6 +732,7 @@ describe('useFailureStoreModal', () => {
             },
             canShowDisableLifecycle: false,
             showIlmDescription: false,
+            disableButtonLabel: 'Indefinite',
           });
         });
       });
@@ -782,6 +788,7 @@ describe('useFailureStoreModal', () => {
             },
             canShowDisableLifecycle: true,
             showIlmDescription: true,
+            disableButtonLabel: 'Indefinite',
           });
         });
       });
@@ -839,6 +846,7 @@ describe('useFailureStoreModal', () => {
             },
             canShowDisableLifecycle: true,
             showIlmDescription: true,
+            disableButtonLabel: 'Indefinite',
           });
         });
       });
@@ -894,6 +902,7 @@ describe('useFailureStoreModal', () => {
             },
             canShowDisableLifecycle: true,
             showIlmDescription: true,
+            disableButtonLabel: 'Indefinite',
           });
         });
       });

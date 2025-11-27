@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { FailureStoreModal } from '@kbn/failure-store-modal';
+import type { FailureStore } from '@kbn/streams-schema';
 import {
   isRootStreamDefinition,
   isEnabledFailureStore,
@@ -14,6 +15,7 @@ import {
   isDisabledLifecycleFailureStore,
 } from '@kbn/streams-schema';
 import type { FailureStoreFormData } from '@kbn/failure-store-modal';
+import { i18n } from '@kbn/i18n';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
 
 export function useFailureStoreModal() {
@@ -39,7 +41,7 @@ export function useFailureStoreModal() {
     setIsFailureStoreModalOpen(false);
   };
 
-  const getFailureStoreConfigForStreamView = (data: FailureStoreFormData) => {
+  const getFailureStoreConfigForStreamView = (data: FailureStoreFormData): FailureStore => {
     if ('inherit' in data && data.inherit) {
       return { inherit: {} };
     } else if (!data.failureStoreEnabled) {
@@ -102,6 +104,12 @@ export function useFailureStoreModal() {
       }),
       showIlmDescription: !isServerless,
       canShowDisableLifecycle: !isServerless,
+      disableButtonLabel: i18n.translate(
+        'xpack.streams.dataManagement.streamDetailFailureStore.indefiniteButtonLabel',
+        {
+          defaultMessage: 'Indefinite',
+        }
+      ),
     });
   };
 
