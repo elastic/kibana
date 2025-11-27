@@ -18,6 +18,7 @@ import {
   type ESQLAstItem,
   type ESQLCommandOption,
   type ESQLFunction,
+  SuggestionOrderingEngine,
 } from '@kbn/esql-ast';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import type {
@@ -40,12 +41,13 @@ import { getQueryForFields } from './get_query_for_fields';
 import type { GetColumnMapFn } from '../shared/columns';
 import { getColumnsByTypeRetriever } from '../shared/columns';
 
+const orderingEngine = new SuggestionOrderingEngine();
+
 export async function suggest(
   fullText: string,
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ): Promise<ISuggestionItem[]> {
-  // Partition out to inner ast / ast context for the latest command
   const innerText = fullText.substring(0, offset);
   const correctedQuery = correctQuerySyntax(innerText);
   const { root } = parse(correctedQuery, { withFormatting: true });
@@ -165,7 +167,7 @@ export async function suggest(
       false
     );
 
-    return controlSuggestions;
+    return orderingEngine.sort(controlSuggestions, { command: '' });
   }
 
   if (astContext.type === 'expression') {
@@ -262,5 +264,11 @@ async function getSuggestionsWithinCommandExpression(
     offset
   );
 
-  return suggestions;
+  // Apply context-aware ordering
+  const orderedSuggestions = orderingEngine.sort(suggestions, {
+    command: astContext.command.name.toUpperCase(),
+    location: astContext.option?.name.toUpperCase(),
+  });
+
+  return orderedSuggestions;
 }
