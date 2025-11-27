@@ -20,3 +20,4 @@ export { getSchemaNamePrefix, camelToSnake, toSnakeCase } from './get_schema_nam
 export { formatDuration } from './format_duration';
 export { getLicenseHeader } from './get_license_header';
 export { eslintFixGeneratedCode } from './eslint_fix_generated_code';
+export { getEslintrcForGeneratedCode } from './get_eslintrc_for_generated_code';
