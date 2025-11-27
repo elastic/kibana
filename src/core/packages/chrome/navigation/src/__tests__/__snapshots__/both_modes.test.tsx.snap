@@ -42,6 +42,7 @@ exports[`Both modes should render the side navigation 1`] = `
       <nav
         aria-label="Main"
         class="css-175v8l8-getPrimaryMenuStyles"
+        data-test-subj="kbnChromeNav-primaryNavigation"
         id="kbnChromeNav-primaryNavigation"
       >
         <div
@@ -151,6 +152,7 @@ exports[`Both modes should render the side navigation 1`] = `
       <footer
         aria-label="Side navigation"
         class="css-1cpms11-getWrapperStyles"
+        data-test-subj="kbnChromeNav-footer"
       >
         <div
           class="css-1y7bpvk-wrapperStyles"
