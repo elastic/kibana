@@ -7,32 +7,20 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { EuiSkeletonText, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import type { OverviewTrend } from '../../../../../../../../../common/types';
 import { formatDuration } from '../../../../../../utils/formatting';
 import { selectOverviewTrends } from '../../../../../../state';
 import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
+import { getTrendDuration } from '../../../../../../utils/formatting/trend_duration';
 
 const getDurationToDisplay = (trendData: OverviewTrend | 'loading' | null | undefined) => {
-  if (trendData === 'loading') {
-    return (
-      <EuiSkeletonText
-        lines={1}
-        ariaWrapperProps={{
-          style: {
-            height: '16px',
-            width: '50px',
-          },
-        }}
-      />
-    );
-  }
-
-  if (!trendData || (!trendData.median && trendData.median !== 0)) {
-    return '--';
-  }
-
-  return formatDuration(trendData.median);
+  return getTrendDuration<React.JSX.Element | string>({
+    onLoading: (onLoadingComponent) => onLoadingComponent,
+    onNoData: (onNoDataComponent) => onNoDataComponent,
+    onData: ({ median }) => formatDuration(median),
+    trendData,
+  });
 };
 
 export const MonitorsDuration = ({
