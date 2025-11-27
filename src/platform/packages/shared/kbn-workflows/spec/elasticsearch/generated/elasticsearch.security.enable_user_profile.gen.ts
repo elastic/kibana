@@ -1,0 +1,75 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * AUTO-GENERATED FILE - DO NOT EDIT
+ *
+ * Generated at: 2025-11-27T07:04:28.249Z
+ * Source: elasticsearch-specification repository, operations: security-enable-user-profile, security-enable-user-profile-1
+ *
+ * To regenerate: node scripts/generate_workflow_es_contracts.js
+ */
+
+import { z } from '@kbn/zod/v4';
+
+import {
+  security_enable_user_profile1_request,
+  security_enable_user_profile1_response,
+  security_enable_user_profile_request,
+  security_enable_user_profile_response,
+} from './es_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
+
+// export contract
+export const SECURITY_ENABLE_USER_PROFILE_CONTRACT: InternalConnectorContract = {
+  type: 'elasticsearch.security.enable_user_profile',
+  connectorGroup: 'internal',
+  summary: `Enable a user profile`,
+  description: `Enable a user profile.
+
+Enable user profiles to make them visible in user profile searches.
+
+NOTE: The user profile feature is designed only for use by Kibana and Elastic's Observability, Enterprise Search, and Elastic Security solutions.
+Individual users and external applications should not call this API directly.
+Elastic reserves the right to change or remove this feature in future releases without prior notice.
+
+When you activate a user profile, it's automatically enabled and visible in user profile searches.
+If you later disable the user profile, you can use the enable user profile API to make the profile visible in these searches again.
+
+ Documentation: https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-enable-user-profile`,
+  methods: ['PUT', 'POST'],
+  patterns: ['_security/profile/{uid}/_enable'],
+  documentation:
+    'https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-enable-user-profile',
+  parameterTypes: {
+    headerParams: [],
+    pathParams: ['uid'],
+    urlParams: ['refresh'],
+    bodyParams: [],
+  },
+  paramsSchema: z.union([
+    z.object({
+      ...getShapeAt(security_enable_user_profile_request, 'body'),
+      ...getShapeAt(security_enable_user_profile_request, 'path'),
+      ...getShapeAt(security_enable_user_profile_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(security_enable_user_profile1_request, 'body'),
+      ...getShapeAt(security_enable_user_profile1_request, 'path'),
+      ...getShapeAt(security_enable_user_profile1_request, 'query'),
+    }),
+  ]),
+  outputSchema: z.union([
+    security_enable_user_profile_response,
+    security_enable_user_profile1_response,
+  ]),
+};

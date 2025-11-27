@@ -11,7 +11,7 @@ import type { ContractMeta } from './types';
 
 export function generateContractBlock(contract: ContractMeta): string {
   return `
-    const ${contract.contractName}: InternalConnectorContract = {
+    export const ${contract.contractName}: InternalConnectorContract = {
       type: '${contract.type}',
       connectorGroup: 'internal',
       summary: ${contract.summary ? `\`${escapeString(contract.summary)}\`` : 'null'},

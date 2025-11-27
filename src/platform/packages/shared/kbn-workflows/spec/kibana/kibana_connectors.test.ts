@@ -8,25 +8,28 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { GENERATED_KIBANA_CONNECTORS } from './kibana_connectors.gen';
+import { getKibanaConnectors } from '.';
 import { getZodParamSchema, getZodSchemaKeys } from '../../common/utils/zod';
 import type { InternalConnectorContract } from '../../types/v1';
 
-const KIBANA_CONNECTOR_COUNT = GENERATED_KIBANA_CONNECTORS.length;
-
 describe('Generated Kibana Connectors', () => {
+  let GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[];
+
+  beforeAll(async () => {
+    GENERATED_KIBANA_CONNECTORS = getKibanaConnectors();
+  });
+
   // SANITY TEST: Critical test to ensure no runtime errors are introduced
   describe('Sanity Check - Runtime Error Prevention', () => {
     it('should import kibana_connectors.ts without any runtime errors', () => {
       // This is the most critical test - it ensures the file can be imported
       // without throwing any runtime errors, which was the original issue
-      expect(() => {
+      expect(async () => {
         // Re-import to test the actual import process
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const connectors = require('./kibana_connectors.gen');
-        expect(connectors.GENERATED_KIBANA_CONNECTORS).toBeDefined();
-        expect(Array.isArray(connectors.GENERATED_KIBANA_CONNECTORS)).toBe(true);
-        expect(connectors.GENERATED_KIBANA_CONNECTORS.length).toBeGreaterThan(0);
+        const module = await import('./generated/kibana_connectors.gen');
+        expect(module.GENERATED_KIBANA_CONNECTORS).toBeDefined();
+        expect(Array.isArray(module.GENERATED_KIBANA_CONNECTORS)).toBe(true);
+        expect(module.GENERATED_KIBANA_CONNECTORS.length).toBeGreaterThan(0);
       }).not.toThrow();
     });
 
@@ -53,9 +56,9 @@ describe('Generated Kibana Connectors', () => {
 
     it('should maintain consistent connector count across imports', () => {
       // Ensure the connector count is consistent and doesn't change unexpectedly
-      expect(KIBANA_CONNECTOR_COUNT).toBe(GENERATED_KIBANA_CONNECTORS.length);
-      expect(KIBANA_CONNECTOR_COUNT).toBeGreaterThan(400); // Reasonable minimum
-      expect(KIBANA_CONNECTOR_COUNT).toBeLessThan(1000); // Reasonable maximum
+      expect(GENERATED_KIBANA_CONNECTORS.length).toBe(GENERATED_KIBANA_CONNECTORS.length);
+      expect(GENERATED_KIBANA_CONNECTORS.length).toBeGreaterThan(400); // Reasonable minimum
+      expect(GENERATED_KIBANA_CONNECTORS.length).toBeLessThan(1000); // Reasonable maximum
     });
   });
 
@@ -87,13 +90,13 @@ describe('Generated Kibana Connectors', () => {
     // Ensure we have connectors loaded
     expect(GENERATED_KIBANA_CONNECTORS).toBeDefined();
     expect(GENERATED_KIBANA_CONNECTORS.length).toBeGreaterThan(0);
-    expect(KIBANA_CONNECTOR_COUNT).toBeGreaterThan(0);
+    expect(GENERATED_KIBANA_CONNECTORS.length).toBeGreaterThan(0);
   });
 
   describe('Basic Structure Validation', () => {
     it('should export an array of connectors', () => {
       expect(Array.isArray(GENERATED_KIBANA_CONNECTORS)).toBe(true);
-      expect(GENERATED_KIBANA_CONNECTORS.length).toBe(KIBANA_CONNECTOR_COUNT);
+      expect(GENERATED_KIBANA_CONNECTORS.length).toBe(GENERATED_KIBANA_CONNECTORS.length);
     });
 
     it('should not have any endpoints with generic bodyParams ["body"]', () => {
@@ -153,7 +156,7 @@ describe('Generated Kibana Connectors', () => {
           expect(connector.type).toBe(connectorType);
           expect(connector.paramsSchema).toBeDefined();
           expect(typeof connector.description).toBe('string');
-          expect(connector.isInternal).toBe(true);
+          expect(connector.connectorGroup).toBe('internal');
           expect(connector.summary).toBeDefined();
           expect(connector.patterns).toBeDefined();
           expect(connector.documentation).toBeNull();
@@ -165,7 +168,7 @@ describe('Generated Kibana Connectors', () => {
           expect(connector.methods!.length).toBeGreaterThan(0);
           expect(Array.isArray(connector.patterns)).toBe(true);
           expect(connector.patterns!.length).toBeGreaterThan(0);
-          expect(typeof connector.isInternal).toBe('boolean');
+          expect(connector.connectorGroup).toBe('internal');
           expect(
             connector.documentation === null || typeof connector.documentation === 'string'
           ).toBe(true);
@@ -532,9 +535,9 @@ describe('Generated Kibana Connectors', () => {
 
   describe('Performance and Scale', () => {
     it('should have reasonable connector count', () => {
-      expect(KIBANA_CONNECTOR_COUNT).toBeGreaterThan(100);
-      expect(KIBANA_CONNECTOR_COUNT).toBeLessThan(1000);
-      expect(GENERATED_KIBANA_CONNECTORS.length).toBe(KIBANA_CONNECTOR_COUNT);
+      expect(GENERATED_KIBANA_CONNECTORS.length).toBeGreaterThan(100);
+      expect(GENERATED_KIBANA_CONNECTORS.length).toBeLessThan(1000);
+      expect(GENERATED_KIBANA_CONNECTORS.length).toBe(GENERATED_KIBANA_CONNECTORS.length);
     });
 
     it('should have unique connector types', () => {

@@ -11,6 +11,7 @@ import type { InternalConnectorContract } from '../../types/latest';
 
 export interface ContractMeta
   extends Omit<InternalConnectorContract, 'paramsSchema' | 'outputSchema'> {
+  fileName: string;
   contractName: string;
   operationIds: string[];
   paramsSchemaString: string;

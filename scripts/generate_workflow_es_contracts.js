@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/workflows/scripts/generate_es_connectors').generateAndSaveEsConnectors();
+require('@kbn/workflows/scripts/generate_es_connectors').run();

@@ -39,7 +39,7 @@ export function getElasticsearchConnectors(): InternalConnectorContract[] {
   const {
     GENERATED_ELASTICSEARCH_CONNECTORS,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('./generated/elasticsearch_connectors.gen');
+  } = require('./generated');
 
   return mergeEnhancedConnectors(
     GENERATED_ELASTICSEARCH_CONNECTORS,

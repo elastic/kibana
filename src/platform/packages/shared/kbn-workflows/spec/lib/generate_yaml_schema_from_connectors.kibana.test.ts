@@ -9,14 +9,13 @@
 
 import type { z } from '@kbn/zod/v4';
 import { KIBANA_SAMPLE_STEPS } from './samples';
-import { generateYamlSchemaFromConnectors } from '../..';
-import { GENERATED_KIBANA_CONNECTORS } from '../kibana/kibana_connectors.gen';
+import { generateYamlSchemaFromConnectors, getKibanaConnectors } from '../..';
 
 describe('generateYamlSchemaFromConnectors / kibana connectors', () => {
   let workflowSchema: z.ZodType;
 
   beforeAll(() => {
-    workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
+    workflowSchema = generateYamlSchemaFromConnectors(getKibanaConnectors());
   });
 
   it('should generate a valid YAML schema from connectors', () => {

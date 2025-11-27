@@ -9,14 +9,13 @@
 
 import type { z } from '@kbn/zod/v4';
 import { ES_SAMPLE_STEPS } from './samples';
-import { generateYamlSchemaFromConnectors } from '../..';
-import { GENERATED_ELASTICSEARCH_CONNECTORS } from '../elasticsearch/elasticsearch_connectors.gen';
+import { generateYamlSchemaFromConnectors, getElasticsearchConnectors } from '../..';
 
 describe('generateYamlSchemaFromConnectors / elasticsearch connectors', () => {
   let workflowSchema: z.ZodType;
 
   beforeAll(() => {
-    workflowSchema = generateYamlSchemaFromConnectors(GENERATED_ELASTICSEARCH_CONNECTORS);
+    workflowSchema = generateYamlSchemaFromConnectors(getElasticsearchConnectors());
   });
 
   it('should generate a valid YAML schema from connectors', () => {

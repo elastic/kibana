@@ -18,3 +18,4 @@ export {
 export { generateOutputSchemaString, getResponseSchemaName } from './generate_output_schema_string';
 export { getSchemaNamePrefix } from './get_schema_name_prefix';
 export { toSnakeCase } from './get_schema_name_prefix';
+export { formatDuration } from './format_duration';
