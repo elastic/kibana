@@ -16585,13 +16585,13 @@ body-parser@^2.0.1:
   dependencies:
     bytes "^3.1.2"
     content-type "^1.0.5"
-    debug "^4.4.3"
+    debug "^4.4.0"
     http-errors "^2.0.0"
-    iconv-lite "^0.7.0"
+    iconv-lite "^0.6.3"
     on-finished "^2.4.1"
     qs "^6.14.0"
-    raw-body "^3.0.1"
-    type-is "^2.0.1"
+    raw-body "^3.0.0"
+    type-is "^2.0.0"
 
 bonjour-service@^1.2.1:
   version "1.2.1"
