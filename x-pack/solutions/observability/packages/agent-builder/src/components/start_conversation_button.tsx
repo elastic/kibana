@@ -19,7 +19,7 @@ export function StartConversationButton(props: React.ComponentProps<typeof EuiBu
       size="s"
       {...props}
     >
-      {i18n.translate('aiAgent.contextualInsight.startConversationButton.label', {
+      {i18n.translate('observabilityAgentBuilder.contextualInsight.startConversationButton.label', {
         defaultMessage: 'Start conversation',
       })}
     </EuiButton>
