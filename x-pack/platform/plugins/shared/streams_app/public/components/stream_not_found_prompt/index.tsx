@@ -9,23 +9,15 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../hooks/use_kibana';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 interface StreamNotFoundPromptProps {
   streamName: string;
 }
 
 export function StreamNotFoundPrompt({ streamName }: StreamNotFoundPromptProps) {
-  const {
-    core: {
-      application: { navigateToApp },
-    },
-  } = useKibana();
-
-  const handleGoBack = () => {
-    navigateToApp('streams', { path: '/' });
-  };
+  const router = useStreamsAppRouter();
 
   return (
     <StreamsAppPageTemplate.EmptyPrompt
@@ -33,27 +25,15 @@ export function StreamNotFoundPrompt({ streamName }: StreamNotFoundPromptProps) 
       iconType="search"
       title={
         <h2>
-          {i18n.translate('xpack.streams.streamNotFound.title', {
-            defaultMessage: 'Stream not found',
-          })}
-        </h2>
-      }
-      body={
-        <p>
           <FormattedMessage
             id="xpack.streams.streamNotFound.description"
             defaultMessage="The stream {streamName} does not exist."
             values={{ streamName }}
           />
-        </p>
+        </h2>
       }
       actions={
-        <EuiButton
-          data-test-subj="streamNotFoundBackButton"
-          color="primary"
-          fill
-          onClick={handleGoBack}
-        >
+        <EuiButton data-test-subj="streamNotFoundBackButton" fill href={router.link('/')}>
           {i18n.translate('xpack.streams.streamNotFound.backButton', {
             defaultMessage: 'Back to Streams',
           })}
