@@ -25,7 +25,7 @@ interface CreateESQLQueryParams {
   metric: MetricField;
   dimensions?: Dimension[];
   filters?: DimensionFilters;
-  requestParams?: Pick<ChartSectionProps, 'requestParams'>['requestParams'];
+  requestParams?: Pick<ChartSectionProps, 'fetchParams'>['fetchParams'];
 }
 
 const separator = '\u203A'.normalize('NFC');
