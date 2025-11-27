@@ -11,6 +11,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { LensApi } from '@kbn/lens-common-2';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { isApiESQLVariablesCompatible, isLensApi } from '../react_embeddable/type_guards';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
@@ -97,6 +98,8 @@ function getEsqlControls(embeddable: LensApi) {
 
   return serializedState.rawState.controls.reduce((acc, control) => {
     if (!control.id) return acc;
+    if (control.type !== ESQL_CONTROL) return acc; // only include ESQL controls
+
     return {
       ...acc,
       [control.id]: {
