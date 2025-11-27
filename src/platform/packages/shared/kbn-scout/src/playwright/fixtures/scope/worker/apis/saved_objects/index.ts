@@ -7,9 +7,117 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import FormData from 'form-data';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
-import type { SavedObjectsApiService } from './types';
+
+export interface CreateSavedObjectParams {
+  type: string;
+  id?: string;
+  attributes: Record<string, any>;
+  initialNamespaces?: string[];
+  overwrite?: boolean;
+}
+
+export interface UpdateSavedObjectParams {
+  type: string;
+  id: string;
+  attributes: Record<string, any>;
+  upsert?: boolean;
+}
+
+export interface BulkCreateSavedObjectsParams {
+  objects: Array<{
+    type: string;
+    id?: string;
+    attributes: Record<string, any>;
+    initialNamespaces?: string[];
+  }>;
+  overwrite?: boolean;
+}
+
+export interface SavedObjectReference {
+  name: string;
+  type: string;
+  id: string;
+}
+
+export interface ImportSavedObjectsParams {
+  objects: Array<{
+    type: string;
+    id: string;
+    attributes: Record<string, any>;
+    originId?: string;
+    references?: SavedObjectReference[];
+  }>;
+  overwrite?: boolean;
+  createNewCopies?: boolean;
+}
+
+export interface ImportSavedObjectsResponse {
+  success: boolean;
+  successCount: number;
+  successResults?: Array<{
+    type: string;
+    id: string;
+    destinationId?: string;
+    createNewCopy?: boolean;
+  }>;
+  errors?: Array<{
+    type: string;
+    id: string;
+    error: {
+      type: string;
+      destinationId?: string;
+      destinations?: Array<{ id: string; title: string; updatedAt: string }>;
+      references?: SavedObjectReference[];
+    };
+  }>;
+}
+
+export interface ApiResponse<T = any> {
+  data: T;
+  status: number;
+}
+
+export interface SavedObjectsApiService {
+  // Note: the create and bulk create operations are deprecated in favor of the import API so they weren't added to the API helper
+  get: (type: string, id: string, spaceId?: string) => Promise<ApiResponse>;
+  update: (params: UpdateSavedObjectParams, spaceId?: string) => Promise<ApiResponse>;
+  delete: (type: string, id: string, spaceId?: string, force?: boolean) => Promise<ApiResponse>;
+  bulkGet: (
+    objects: Array<{ type: string; id: string; namespaces?: string[] }>,
+    spaceId?: string
+  ) => Promise<ApiResponse>;
+  bulkUpdate: (
+    objects: Array<{
+      type: string;
+      id: string;
+      attributes: Record<string, any>;
+      namespace?: string;
+    }>,
+    spaceId?: string
+  ) => Promise<ApiResponse>;
+  bulkDelete: (
+    objects: Array<{ type: string; id: string; force?: boolean }>,
+    spaceId?: string
+  ) => Promise<ApiResponse>;
+  find: (
+    options: {
+      type?: string | string[];
+      search?: string;
+      page?: number;
+      perPage?: number;
+      fields?: string[];
+      namespaces?: string[];
+    },
+    spaceId?: string
+  ) => Promise<ApiResponse>;
+  import: (
+    params: ImportSavedObjectsParams,
+    spaceId?: string
+  ) => Promise<ApiResponse<ImportSavedObjectsResponse>>;
+}
 
 export const getSavedObjectsApiHelper = (
   log: ScoutLogger,
@@ -20,42 +128,6 @@ export const getSavedObjectsApiHelper = (
   };
 
   return {
-    create: async (params, spaceId) => {
-      return await measurePerformanceAsync(
-        log,
-        `savedObjectsApi.create [${params.type}/${params.id || 'auto'}]`,
-        async () => {
-          log.debug(
-            `Creating saved object of type '${params.type}'${
-              params.id ? ` with ID '${params.id}'` : ''
-            } in space '${spaceId || 'default'}'`
-          );
-          const path = params.id ? `${params.type}/${params.id}` : params.type;
-          const response = await kbnClient.request({
-            method: 'POST',
-            path: `${buildSpacePath(spaceId)}/api/saved_objects/${path}`,
-            retries: 3,
-            query: params.overwrite ? { overwrite: 'true' } : undefined,
-            body: {
-              attributes: params.attributes,
-              ...(params.initialNamespaces && { initialNamespaces: params.initialNamespaces }),
-            },
-            ignoreErrors: [409, 400],
-          });
-
-          if (response.status === 200 || response.status === 201) {
-            log.debug(
-              `Created saved object of type '${params.type}' with ID '${
-                response.data.id
-              }' in space '${spaceId || 'default'}'`
-            );
-          }
-
-          return { data: response.data, status: response.status };
-        }
-      );
-    },
-
     get: async (type, id, spaceId) => {
       return await measurePerformanceAsync(log, `savedObjectsApi.get [${type}/${id}]`, async () => {
         const response = await kbnClient.request({
@@ -67,7 +139,6 @@ export const getSavedObjectsApiHelper = (
         return { data: response.data, status: response.status };
       });
     },
-
     update: async (params, spaceId) => {
       return await measurePerformanceAsync(
         log,
@@ -86,7 +157,6 @@ export const getSavedObjectsApiHelper = (
         }
       );
     },
-
     delete: async (type, id, spaceId, force) => {
       return await measurePerformanceAsync(
         log,
@@ -103,24 +173,6 @@ export const getSavedObjectsApiHelper = (
         }
       );
     },
-
-    bulkCreate: async (params, spaceId) => {
-      return await measurePerformanceAsync(
-        log,
-        `savedObjectsApi.bulkCreate [${params.objects.length} objects]`,
-        async () => {
-          const response = await kbnClient.request({
-            method: 'POST',
-            path: `${buildSpacePath(spaceId)}/api/saved_objects/_bulk_create`,
-            retries: 3,
-            query: params.overwrite ? { overwrite: 'true' } : undefined,
-            body: params.objects,
-          });
-          return { data: response.data, status: response.status };
-        }
-      );
-    },
-
     bulkGet: async (objects, spaceId) => {
       return await measurePerformanceAsync(
         log,
@@ -136,7 +188,6 @@ export const getSavedObjectsApiHelper = (
         }
       );
     },
-
     bulkUpdate: async (objects, spaceId) => {
       return await measurePerformanceAsync(
         log,
@@ -152,7 +203,6 @@ export const getSavedObjectsApiHelper = (
         }
       );
     },
-
     bulkDelete: async (objects, spaceId) => {
       return await measurePerformanceAsync(
         log,
@@ -169,7 +219,6 @@ export const getSavedObjectsApiHelper = (
         }
       );
     },
-
     find: async (options, spaceId) => {
       return await measurePerformanceAsync(log, 'savedObjectsApi.find', async () => {
         const response = await kbnClient.request({
@@ -187,6 +236,69 @@ export const getSavedObjectsApiHelper = (
         });
         return { data: response.data, status: response.status };
       });
+    },
+    import: async (params, spaceId) => {
+      return await measurePerformanceAsync(
+        log,
+        `savedObjectsApi.import [${params.objects.length} objects]`,
+        async () => {
+          log.debug(
+            `Importing ${params.objects.length} saved objects into space '${spaceId || 'default'}'${
+              params.overwrite ? ' with overwrite' : ''
+            }${params.createNewCopies ? ' with createNewCopies' : ''}`
+          );
+
+          // Build the NDJSON file content: each object on its own line
+          const ndjsonContent = params.objects.map((obj) => JSON.stringify(obj)).join('\n');
+
+          // Create FormData for file upload
+          const formData = new FormData();
+          formData.append('file', ndjsonContent, 'import.ndjson');
+
+          // Build query parameters
+          const query: Record<string, boolean> = {};
+          if (params.overwrite) {
+            query.overwrite = true;
+          }
+          if (params.createNewCopies) {
+            query.createNewCopies = true;
+          }
+
+          const response = await kbnClient.request({
+            method: 'POST',
+            path: `${buildSpacePath(spaceId)}/api/saved_objects/_import`,
+            retries: 3,
+            query,
+            body: formData,
+            headers: formData.getHeaders(),
+            ignoreErrors: [400, 409],
+          });
+
+          const importResponse = response.data as any;
+
+          if (response.status === 200) {
+            log.debug(
+              `Import completed: success=${importResponse.success}, successCount=${importResponse.successCount}`
+            );
+            if (importResponse.errors && importResponse.errors.length > 0) {
+              log.debug(
+                `Import had ${importResponse.errors.length} errors: ${JSON.stringify(
+                  importResponse.errors.map((e: any) => ({
+                    type: e.type,
+                    id: e.id,
+                    error: e.error.type,
+                  }))
+                )}`
+              );
+            }
+          }
+
+          return {
+            data: importResponse as ImportSavedObjectsResponse,
+            status: response.status,
+          };
+        }
+      );
     },
   };
 };
