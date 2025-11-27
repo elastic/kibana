@@ -22,6 +22,8 @@ import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { appPaths } from '../../../../../utils/app_paths';
+import { iconRobot } from '../../../../common/icons/robot';
+import { usePopoverButtonStyles } from '../input_actions.styles';
 import { useAgentOptions } from './use_agent_options';
 
 const AGENT_OPTION_ROW_HEIGHT = 88;
@@ -51,24 +53,27 @@ const agentSearchPlaceholder = i18n.translate(
 
 const agentSelectId = 'agentBuilderAgentSelect';
 
-interface AgentSelectButtonProps {
+const AgentSelectPopoverButton: React.FC<{
+  isPopoverOpen: boolean;
   selectedAgentName?: string;
   onClick: () => void;
-}
-
-const AgentSelectButton: React.FC<AgentSelectButtonProps> = ({ selectedAgentName, onClick }) => (
-  <EuiButtonEmpty
-    iconSide="right"
-    flush="both"
-    iconType="arrowDown"
-    onClick={onClick}
-    aria-haspopup="menu"
-    aria-labelledby={agentSelectId}
-    data-test-subj="agentBuilderAgentSelectorButton"
-  >
-    {selectedAgentName}
-  </EuiButtonEmpty>
-);
+}> = ({ isPopoverOpen, selectedAgentName, onClick }) => {
+  const popoverButtonStyles = usePopoverButtonStyles({ open: isPopoverOpen });
+  return (
+    <EuiButtonEmpty
+      color="text"
+      css={popoverButtonStyles}
+      iconSide="left"
+      iconType={iconRobot}
+      onClick={onClick}
+      aria-haspopup="menu"
+      aria-labelledby={agentSelectId}
+      data-test-subj="agentBuilderAgentSelectorButton"
+    >
+      {selectedAgentName}
+    </EuiButtonEmpty>
+  );
+};
 
 const AgentPopoverTitle: React.FC<{ search: ReactNode }> = ({ search }) => {
   const { createOnechatUrl } = useNavigation();
@@ -128,7 +133,8 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
       panelProps={{ css: panelStyles }}
       panelPaddingSize="none"
       button={
-        <AgentSelectButton
+        <AgentSelectPopoverButton
+          isPopoverOpen={isPopoverOpen}
           selectedAgentName={selectedAgent?.name}
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         />

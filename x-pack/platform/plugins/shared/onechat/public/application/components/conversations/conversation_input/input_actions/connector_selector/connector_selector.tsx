@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { EuiPopover, EuiButtonEmpty, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import {
   ConnectorSelectable,
   type ConnectorSelectableComponentProps,
 } from '@kbn/ai-assistant-connector-selector-action';
 import { useLoadConnectors } from '@kbn/elastic-assistant';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSendMessage } from '../../../../../context/send_message/send_message_context';
-import { useNavigation } from '../../../../../hooks/use_navigation';
-import { useKibana } from '../../../../../hooks/use_kibana';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
+import { useKibana } from '../../../../../hooks/use_kibana';
+import { useNavigation } from '../../../../../hooks/use_navigation';
+import { usePopoverButtonStyles } from '../input_actions.styles';
 
 const connectorSelectorButtonAriaLabel = i18n.translate(
   'xpack.onechat.connectorSelector.selectConnector',
@@ -25,9 +27,6 @@ const connectorSelectorButtonAriaLabel = i18n.translate(
     defaultMessage: 'Select connector',
   }
 );
-const noConnectorLabel = i18n.translate('xpack.onechat.connectorSelector.noConnector', {
-  defaultMessage: 'No connector',
-});
 
 export const ConnectorSelector: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -100,22 +99,24 @@ export const ConnectorSelector: React.FC<{}> = () => {
     }
   }, [selectedConnectorId, selectedConnector, isLoading, initialConnectorId, onSelectConnector]);
 
-  const selectedConnectorName = selectedConnector?.name || selectedConnectorId;
-
-  const buttonLabel = selectedConnectorName || noConnectorLabel;
+  const popoverButtonStyles = usePopoverButtonStyles({ open: isPopoverOpen });
 
   const button = (
     <EuiButtonEmpty
-      iconType={isLoading ? undefined : 'arrowDown'}
-      iconSide="right"
-      flush="both"
+      css={popoverButtonStyles}
+      color="text"
+      iconType="sparkles"
+      iconSide="left"
       onClick={togglePopover}
       disabled={isLoading || connectors.length === 0}
       data-test-subj="onechatConnectorSelectorButton"
       aria-haspopup="menu"
       aria-label={connectorSelectorButtonAriaLabel}
     >
-      {isLoading ? <EuiLoadingSpinner size="s" /> : buttonLabel}
+      <FormattedMessage
+        id="xpack.onechat.conversationInput.connectorSelector.buttonLabel"
+        defaultMessage="LLM"
+      />
     </EuiButtonEmpty>
   );
 

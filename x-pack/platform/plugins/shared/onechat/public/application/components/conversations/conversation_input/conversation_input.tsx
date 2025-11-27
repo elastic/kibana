@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
@@ -37,12 +37,6 @@ const enabledPlaceholder = i18n.translate(
   }
 );
 
-const editorContainerStyles = css`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-`;
-
 export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }) => {
   const isSendingMessage = useIsSendingMessage();
   const { sendMessage, pendingMessage } = useSendMessage();
@@ -58,6 +52,15 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   const isSubmitDisabled = messageEditor.isEmpty || isSendingMessage || !isAgentIdValid;
 
   const placeholder = isInputDisabled ? disabledPlaceholder(agentId) : enabledPlaceholder;
+
+  const { euiTheme } = useEuiTheme();
+  const editorContainerStyles = css`
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* Aligns editor text with action menus' text */
+    padding-left: ${euiTheme.size.m};
+  `;
 
   // Auto-focus when conversation changes
   useEffect(() => {
