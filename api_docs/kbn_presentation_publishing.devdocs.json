@@ -8886,7 +8886,7 @@
         "label": "ViewMode",
         "description": [],
         "signature": [
-          "\"edit\" | \"view\" | \"print\" | \"preview\""
+          "\"view\" | \"edit\" | \"print\" | \"preview\""
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
         "deprecated": false,

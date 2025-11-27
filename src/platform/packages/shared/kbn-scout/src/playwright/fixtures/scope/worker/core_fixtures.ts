@@ -24,6 +24,7 @@ import {
   ScoutLogger,
   createElasticsearchCustomRole,
   createCustomRole,
+  isElasticsearchRole,
 } from '../../../../common/services';
 import type { ScoutTestOptions } from '../../../types';
 import type { ScoutTestConfig } from '.';
@@ -129,10 +130,11 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
    * SAML-based authentication. Exposes a method to set a custom role for the session.
    *
    * Note: In order to speedup execution of tests, we cache the session cookies for each role
-   * after first call.
+   * after first call. Custom roles are persisted for the worker lifetime and cleaned up when
+   * the worker completes.
    */
   samlAuth: [
-    ({ log, config, esClient, kbnClient }, use, workerInfo) => {
+    async ({ log, config, esClient, kbnClient }, use, workerInfo) => {
       /**
        * When running tests against Cloud, ensure the `.ftr/role_users.json` file is populated with the required roles
        * and credentials. Each worker uses a unique custom role named `custom_role_worker_<index>`.
@@ -145,31 +147,54 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
       const customRoleName = `custom_role_worker_${workerInfo.parallelIndex + 1}`;
       const session = createSamlSessionManager(config, log, customRoleName);
       let customRoleHash = '';
+      let isCustomRoleCreated = false;
 
       const isCustomRoleSet = (roleHash: string) => roleHash === customRoleHash;
-
-      const isElasticsearchRole = (role: any): role is ElasticsearchRoleDescriptor => {
-        return 'applications' in role;
-      };
 
       const setCustomRole = async (role: KibanaRole | ElasticsearchRoleDescriptor) => {
         const newRoleHash = JSON.stringify(role);
 
         if (isCustomRoleSet(newRoleHash)) {
-          log.info(`Custom role is already set`);
+          log.debug(
+            `Custom role '${customRoleName}' with provided privileges already exists, reusing it`
+          );
           return;
         }
 
+        log.debug(
+          isCustomRoleCreated
+            ? `Overriding existing custom role '${customRoleName}'`
+            : `Creating custom role '${customRoleName}'`
+        );
+
+        isCustomRoleCreated = true;
+
         if (isElasticsearchRole(role)) {
           await createElasticsearchCustomRole(esClient, customRoleName, role);
+          log.debug(`Created Elasticsearch custom role: ${customRoleName}`);
         } else {
           await createCustomRole(kbnClient, customRoleName, role);
+          log.debug(`Created Kibana custom role: ${customRoleName}`);
         }
 
         customRoleHash = newRoleHash;
       };
 
-      use({ session, customRoleName, setCustomRole });
+      await use({ session, customRoleName, setCustomRole });
+
+      // Delete custom role when worker completes (if it was created)
+      if (isCustomRoleCreated) {
+        log.debug(`Deleting custom role ${customRoleName}`);
+        try {
+          await esClient.security.deleteRole({ name: customRoleName });
+          log.debug(`Custom role '${customRoleName}' deleted`);
+          customRoleHash = '';
+        } catch (error: any) {
+          log.error(
+            `Failed to delete custom role '${customRoleName}' during worker cleanup: ${error.message}`
+          );
+        }
+      }
     },
     { scope: 'worker' },
   ],
