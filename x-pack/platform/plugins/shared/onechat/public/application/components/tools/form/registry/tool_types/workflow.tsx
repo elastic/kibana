@@ -7,7 +7,10 @@
 
 import { ToolType } from '@kbn/onechat-common';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import { isWorkflowTool, WORKFLOW_WAIT_FOR_DEFAULT } from '@kbn/onechat-common/tools/types/workflow';
+import {
+  isWorkflowTool,
+  WORKFLOW_WAIT_FOR_DEFAULT,
+} from '@kbn/onechat-common/tools/types/workflow';
 
 import { WorkflowConfiguration } from '../../sections/configuration_fields/workflow_configuration_fields';
 
