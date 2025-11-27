@@ -43,6 +43,12 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </a>
         </div>
       </span>
+      <p
+        class="emotion-euiScreenReaderOnly"
+        id="main-navigation-instructions_generated-id"
+      >
+        You are in the main navigation primary menu. Use Up and Down arrow keys to navigate the menu.
+      </p>
       <nav
         aria-label="Main"
         class="css-1v1tn-styles"
@@ -58,7 +64,10 @@ exports[`Collapsed mode should render the side navigation 1`] = `
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
             >
               <a
+                aria-describedby="main-navigation-instructions_generated-id"
                 aria-haspopup="false"
+                aria-posinset="1"
+                aria-setsize="3"
                 class="css-1p9ljkz-buttonStyles"
                 data-highlighted="false"
                 data-menu-item="true"
@@ -97,6 +106,8 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             >
               <a
                 aria-haspopup="false"
+                aria-posinset="2"
+                aria-setsize="3"
                 class="css-1p9ljkz-buttonStyles"
                 data-highlighted="false"
                 data-menu-item="true"
@@ -127,12 +138,21 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         <div
           class="css-1y7bpvk-wrapperStyles"
         >
+          <p
+            class="emotion-euiScreenReaderOnly"
+            id="popover-enter-exit-instructions_generated-id"
+          >
+            Press Enter to go to the submenu.
+          </p>
           <div
             class="euiPopover emotion-euiPopover-block"
           >
             <a
+              aria-describedby="popover-enter-exit-instructions_generated-id"
               aria-expanded="false"
               aria-haspopup="true"
+              aria-posinset="3"
+              aria-setsize="3"
               class="css-1p9ljkz-buttonStyles"
               data-highlighted="false"
               data-menu-item="true"
@@ -160,6 +180,12 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
       </nav>
+      <p
+        class="emotion-euiScreenReaderOnly"
+        id="footer-navigation-instructions_generated-id"
+      >
+        You are in the main navigation footer menu. Use Up and Down arrow keys to navigate the menu.
+      </p>
       <footer
         aria-label="Side navigation"
         class="css-5bzxab-SideNavFooter"
@@ -174,6 +200,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
             >
               <a
+                aria-describedby="footer-navigation-instructions_generated-id"
                 aria-haspopup="false"
                 aria-label="Getting started"
                 class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
@@ -227,6 +254,12 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         <div
           class="css-1y7bpvk-wrapperStyles"
         >
+          <p
+            class="emotion-euiScreenReaderOnly"
+            id="popover-enter-exit-instructions_generated-id"
+          >
+            Press Enter to go to the submenu.
+          </p>
           <div
             class="euiPopover emotion-euiPopover-block"
           >
@@ -234,6 +267,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
               class="css-1g7fa48-wrapperStyles"
             >
               <a
+                aria-describedby="popover-enter-exit-instructions_generated-id"
                 aria-expanded="false"
                 aria-haspopup="true"
                 aria-label="Settings"
