@@ -65,7 +65,10 @@ exports[`Collapsed mode should render the side navigation 1`] = `
               class="euiToolTipAnchor  emotion-euiToolTipAnchor-inlineBlock-wrapperStyles"
             >
               <a
+                aria-describedby="main-navigation-instructions_generated-id"
                 aria-haspopup="false"
+                aria-posinset="1"
+                aria-setsize="3"
                 class="css-12vu9wt-buttonStyles"
                 data-highlighted="false"
                 data-menu-item="true"
@@ -104,6 +107,8 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             >
               <a
                 aria-haspopup="false"
+                aria-posinset="2"
+                aria-setsize="3"
                 class="css-12vu9wt-buttonStyles"
                 data-highlighted="false"
                 data-menu-item="true"
@@ -147,6 +152,8 @@ exports[`Collapsed mode should render the side navigation 1`] = `
               aria-describedby="popover-enter-exit-instructions_generated-id"
               aria-expanded="false"
               aria-haspopup="true"
+              aria-posinset="3"
+              aria-setsize="3"
               class="css-12vu9wt-buttonStyles"
               data-highlighted="false"
               data-menu-item="true"
