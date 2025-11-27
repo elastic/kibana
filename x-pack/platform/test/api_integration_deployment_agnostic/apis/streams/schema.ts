@@ -150,7 +150,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'origin.point': 'POINT (-122.4194 37.7749)',
           });
 
-          //Multiple geo_point fields in same doc
+          // Multiple geo_point fields in same doc
           await indexDocument(esClient, 'logs', {
             '@timestamp': '2024-01-01T00:00:14.000Z',
             'source.geo.lat': 48.8566,
