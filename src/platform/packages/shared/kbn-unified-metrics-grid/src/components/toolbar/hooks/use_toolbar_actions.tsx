@@ -20,7 +20,7 @@ import { DimensionsSelector } from '../dimensions_selector';
 import { ValuesSelector } from '../values_selector';
 import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 interface UseToolbarActionsProps
-  extends Pick<ChartSectionProps, 'timeRange' | 'renderToggleActions'> {
+  extends Pick<ChartSectionProps, 'fetchParams' | 'renderToggleActions'> {
   fields: MetricField[];
   hideDimensionsSelector?: boolean;
   hideRightSideActions?: boolean;
@@ -28,13 +28,13 @@ interface UseToolbarActionsProps
 }
 export const useToolbarActions = ({
   fields,
-  timeRange: originalTimeRange,
+  fetchParams,
   renderToggleActions,
   hideDimensionsSelector = false,
   hideRightSideActions = false,
   isLoading = false,
 }: UseToolbarActionsProps) => {
-  const [timeRange, setTimeRange] = useState<TimeRange | undefined>(originalTimeRange);
+  const [timeRange, setTimeRange] = useState<TimeRange | undefined>(fetchParams.timeRange);
   const [indices, setIndices] = useState<string[]>([
     ...new Set(fields.map((field) => field.index)),
   ]);
@@ -64,9 +64,9 @@ export const useToolbarActions = ({
   useEffect(() => {
     if (!isLoading) {
       setIndices([...new Set(fields.map((field) => field.index))]);
-      setTimeRange(originalTimeRange);
+      setTimeRange(fetchParams.timeRange);
     }
-  }, [isLoading, fields, originalTimeRange]);
+  }, [isLoading, fields, fetchParams.timeRange]);
 
   const leftSideActions = useMemo(
     () => [
