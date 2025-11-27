@@ -130,8 +130,8 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/fleet/promote_package_registry.sh
-    label: Promote docker.elastic.co/package-registry/distribution:lite
+  - command: .buildkite/scripts/steps/fleet/promote_package_registry.sh promote-temp-and-build-cache
+    label: Promote EPR image to ~/package-registry/distribution:temp and build cache
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -149,6 +149,8 @@ steps:
   - command: .buildkite/scripts/lifecycle/post_build.sh
     label: Post-Build
     timeout_in_minutes: 10
+    depends_on:
+      - promote-epr-image
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
