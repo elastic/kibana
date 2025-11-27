@@ -11,10 +11,7 @@ import { z } from '@kbn/zod/v4';
 import { getShape } from './get_shape';
 import { getZodObjectProperty } from './get_zod_object_property';
 
-export function getShapeAt(
-  schema: z.ZodObject | z.ZodOptional | z.ZodNever,
-  property: string
-): Record<string, z.ZodType> {
+export function getShapeAt(schema: z.ZodType, property: string): Record<string, z.ZodType> {
   const schemaAtProperty = getZodObjectProperty(schema, property);
   if (schemaAtProperty === null) {
     return {};

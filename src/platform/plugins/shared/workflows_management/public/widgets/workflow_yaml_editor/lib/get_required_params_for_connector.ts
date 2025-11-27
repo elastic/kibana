@@ -9,7 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { type ConnectorTypeInfo, isEnhancedInternalConnector } from '@kbn/workflows';
+import { type ConnectorTypeInfo, isInternalConnector } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { getCachedAllConnectors } from './connectors_cache';
 
@@ -34,7 +34,7 @@ export function getRequiredParamsForConnector(
 
   if (connector && connector.paramsSchema) {
     try {
-      if (isEnhancedInternalConnector(connector) && connector.examples?.params) {
+      if (isInternalConnector(connector) && connector.examples && connector.examples.params) {
         // Use examples directly from enhanced connector
         const exampleParams = connector.examples.params;
         // Using enhanced examples

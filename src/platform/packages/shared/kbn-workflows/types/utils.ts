@@ -10,7 +10,6 @@
 import type {
   ConnectorContractUnion,
   DynamicConnectorContract,
-  EnhancedInternalConnectorContract,
   EsWorkflowCreate,
   HttpMethod,
   InternalConnectorContract,
@@ -103,10 +102,6 @@ export const isInternalConnector = (
 export const isDynamicConnector = (
   connector: ConnectorContractUnion
 ): connector is DynamicConnectorContract => 'actionTypeId' in connector;
-
-export const isEnhancedInternalConnector = (
-  connector: ConnectorContractUnion
-): connector is EnhancedInternalConnectorContract => 'examples' in connector;
 
 export const isHttpMethod = (method: string): method is HttpMethod =>
   KNOWN_HTTP_METHODS.includes(method as HttpMethod);

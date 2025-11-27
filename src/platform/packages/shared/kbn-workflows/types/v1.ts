@@ -401,6 +401,10 @@ export const KNOWN_HTTP_METHODS = [
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 
+export interface EnhancedInternalConnectorContract extends InternalConnectorContract {
+  examples: ConnectorExamples;
+}
+
 export interface InternalConnectorContract extends ConnectorContract {
   /** Whether this is an internal connector with hardcoded endpoint details */
   connectorGroup: 'internal';

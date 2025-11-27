@@ -9,7 +9,7 @@
 
 import { resolveReferenceObject } from './resolve_reference_object';
 
-export function getOrResolveObject<T = any>(object: unknown, schema: any): T | null {
+export function getOrResolveObject<T = unknown>(object: unknown, schema: unknown): T | null {
   if (
     object !== null &&
     typeof object === 'object' &&

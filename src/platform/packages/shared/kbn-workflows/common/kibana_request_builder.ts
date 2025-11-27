@@ -71,7 +71,7 @@ export function buildKibanaRequestFromAction(
     const headerParamKeys = new Set<string>(connector.parameterTypes?.headerParams || []);
 
     // Determine method (allow user override)
-    const method = params.method || connector.methods[0]; // User can override method
+    const method = typeof params.method === 'string' ? params.method : connector.methods[0]; // User can override method
 
     // Choose the best pattern based on available parameters
     let selectedPattern = selectBestPattern(connector.patterns, params);

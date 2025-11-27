@@ -9,10 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-export function getZodObjectProperty(
-  schema: z.ZodObject | z.ZodOptional | z.ZodNever,
-  property: string
-): z.ZodType | null {
+export function getZodObjectProperty(schema: z.ZodType, property: string): z.ZodType | null {
   if (schema instanceof z.ZodObject) {
     return schema.shape[property] ?? null;
   }

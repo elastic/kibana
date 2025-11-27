@@ -9,9 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-export function getShape(
-  schema: z.ZodObject | z.ZodOptional | z.ZodNever
-): Record<string, z.ZodType> {
+export function getShape(schema: z.ZodType): Record<string, z.ZodType> {
   let current: unknown = schema;
   if (current instanceof z.ZodOptional) {
     current = current.unwrap();

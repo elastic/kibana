@@ -45,7 +45,12 @@ function filterRequiredFields(ctx: {
       }
       const fieldSchema = getOrResolveObject(fieldObject as JSONSchema.JSONSchema, ctx.jsonSchema);
       // filter out from 'required' array, if field has default or optional
-      return fieldSchema && !('default' in fieldSchema) && !('optional' in fieldSchema);
+      return (
+        fieldSchema &&
+        typeof fieldSchema === 'object' &&
+        !('default' in fieldSchema) &&
+        !('optional' in fieldSchema)
+      );
     });
     ctx.jsonSchema.required = newRequired.length > 0 ? newRequired : undefined;
   }

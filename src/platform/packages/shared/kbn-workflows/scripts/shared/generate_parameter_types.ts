@@ -59,7 +59,7 @@ export function generateParameterTypes(
       .filter(
         (schema): schema is OpenAPIV3.NonArraySchemaObject =>
           schema !== null &&
-          schema !== undefined &&
+          typeof schema === 'object' &&
           'properties' in schema &&
           schema.properties !== undefined
       )
