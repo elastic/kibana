@@ -11,9 +11,7 @@ import React, { useMemo, useCallback } from 'react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import { useFetch } from '@kbn/unified-histogram';
-import { Subject, shareReplay } from 'rxjs';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import {
   EuiBetaBadge,
   EuiFlexGroup,
@@ -34,16 +32,9 @@ import { useMetricsExperienceState } from '../context/metrics_experience_state_p
 export interface MetricsExperienceGridContentProps
   extends Pick<
     ChartSectionProps,
-    | 'timeRange'
-    | 'services'
-    | 'input$'
-    | 'requestParams'
-    | 'onBrushEnd'
-    | 'onFilter'
-    | 'searchSessionId'
-    | 'abortController'
-    | 'histogramCss'
+    'services' | 'fetchParams' | 'onBrushEnd' | 'onFilter' | 'histogramCss'
   > {
+  discoverFetch$: ChartSectionProps['fetch$'];
   fields: MetricField[];
   isFieldsLoading?: boolean;
   isDiscoverLoading?: boolean;
@@ -51,14 +42,11 @@ export interface MetricsExperienceGridContentProps
 
 export const MetricsExperienceGridContent = ({
   fields: allFields,
-  timeRange,
   services,
-  input$: originalInput$,
-  requestParams,
+  discoverFetch$,
+  fetchParams,
   onBrushEnd,
   onFilter,
-  searchSessionId,
-  abortController,
   histogramCss,
   isFieldsLoading = false,
   isDiscoverLoading,
@@ -66,24 +54,7 @@ export const MetricsExperienceGridContent = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const { updateTimeRange } = requestParams;
-
-  const input$ = useMemo(
-    () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
-    [originalInput$]
-  );
-
-  const baseFetch$ = useFetch({
-    input$,
-    beforeFetch: updateTimeRange,
-  });
-
-  const discoverFetch$ = useMemo(
-    // Buffer and replay emissions to child components that subscribe in later useEffects
-    // without this, child components would miss emissions that occurred before they subscribed
-    () => baseFetch$.pipe(shareReplay({ bufferSize: 1, refCount: false })),
-    [baseFetch$]
-  );
+  const { timeRange } = fetchParams;
 
   const { searchTerm, currentPage, dimensions, valueFilters, onPageChange } =
     useMetricsExperienceState();
@@ -194,12 +165,10 @@ export const MetricsExperienceGridContent = ({
           filters={filters}
           services={services}
           fields={currentPageFields}
-          searchSessionId={searchSessionId}
           onBrushEnd={onBrushEnd}
           onFilter={onFilter}
           discoverFetch$={discoverFetch$}
-          requestParams={requestParams}
-          abortController={abortController}
+          fetchParams={fetchParams}
           searchTerm={searchTerm}
         />
       </EuiFlexItem>

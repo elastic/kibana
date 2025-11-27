@@ -30,6 +30,7 @@ import {
   EuiTitle,
   htmlIdGenerator,
   useEuiTheme,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { Form, FormikProvider, useFormik } from 'formik';
 import moment from 'moment-timezone';
@@ -185,6 +186,8 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   isLoadingCurrentUser,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
+  const flyoutSize = isSmallScreen ? 'm' : 's';
   const {
     services: { http, docLinks },
   } = useKibana();
@@ -324,7 +327,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
 
   return (
     <FormikProvider value={formik}>
-      <EuiFlyout onClose={onCancel} aria-labelledby={titleId} size="m" ownFocus>
+      <EuiFlyout onClose={onCancel} aria-labelledby={titleId} size={flyoutSize} ownFocus>
         <Form
           onSubmit={formik.handleSubmit}
           style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
