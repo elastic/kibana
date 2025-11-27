@@ -4023,10 +4023,10 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
-            "id": "def-common.EsWorkflowStepExecution.completedAt",
+            "id": "def-common.EsWorkflowStepExecution.finishedAt",
             "type": "string",
             "tags": [],
-            "label": "completedAt",
+            "label": "finishedAt",
             "description": [],
             "signature": [
               "string | undefined"
@@ -7618,7 +7618,7 @@
             "section": "def-common.StackFrame",
             "text": "StackFrame"
           },
-          "[]; workflowRunId: string; workflowId: string; completedAt?: string | undefined; executionTimeMs?: number | undefined; topologicalIndex: number; globalExecutionIndex: number; stepExecutionIndex: number; }"
+          "[]; workflowRunId: string; workflowId: string; finishedAt?: string | undefined; executionTimeMs?: number | undefined; topologicalIndex: number; globalExecutionIndex: number; stepExecutionIndex: number; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,

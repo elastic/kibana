@@ -15,7 +15,7 @@ import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
 import { parseDuration } from '../utils';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
@@ -188,6 +188,10 @@ export class StepExecutionRuntime {
     this.workflowExecutionState.upsertStep(stepExecutionUpdate);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.logStepFail(stepExecutionUpdate.id!, error);
+  }
+
+  public async flushEventLogs(): Promise<void> {
+    await this.stepLogger?.flushEvents();
   }
 
   /**

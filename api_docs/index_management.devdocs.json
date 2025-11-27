@@ -1383,7 +1383,7 @@
         "label": "IndexManagementConfig",
         "description": [],
         "signature": [
-          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; enableSemanticText: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly enableSizeAndDocCount: boolean; readonly enableIndexStats: boolean; readonly enableDataStreamStats: boolean; readonly editableIndexSettings: \"all\" | \"limited\"; readonly enableMappingsSourceFieldSection: boolean; readonly enableTogglingDataRetention: boolean; readonly enableProjectLevelRetentionChecks: boolean; }"
+          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; enableSemanticText: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly enableSizeAndDocCount: boolean; readonly enableIndexStats: boolean; readonly enableDataStreamStats: boolean; readonly editableIndexSettings: \"all\" | \"limited\"; readonly enableMappingsSourceFieldSection: boolean; readonly enableTogglingDataRetention: boolean; readonly enableProjectLevelRetentionChecks: boolean; readonly enableFailureStoreRetentionDisabling: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/index_management/server/config.ts",
         "deprecated": false,
@@ -2303,7 +2303,7 @@
             "label": "failureStoreRetention",
             "description": [],
             "signature": [
-              "{ customRetentionPeriod?: string | undefined; defaultRetentionPeriod?: string | undefined; } | undefined"
+              "{ customRetentionPeriod?: string | undefined; defaultRetentionPeriod?: string | undefined; retentionDisabled?: boolean | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
@@ -2534,6 +2534,22 @@
             "description": [],
             "signature": [
               "{ delete_index: boolean; manage_data_stream_lifecycle: boolean; read_failure_store: boolean; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.EnhancedDataStreamFromEs.failure_store",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "failure_store",
+            "description": [],
+            "signature": [
+              "(",
+              "IndicesFailureStore",
+              " & { lifecycle?: { enabled?: boolean | undefined; data_retention?: string | undefined; } | undefined; }) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,

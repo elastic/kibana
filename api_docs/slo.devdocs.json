@@ -135,11 +135,11 @@
               },
               "<",
               {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.RulesParams",
-                "text": "RulesParams"
+                "pluginId": "@kbn/deeplinks-observability",
+                "scope": "common",
+                "docId": "kibKbnDeeplinksObservabilityPluginApi",
+                "section": "def-common.RulesLocatorParams",
+                "text": "RulesLocatorParams"
               },
               ">; ruleDetailsLocator: ",
               {
@@ -1261,7 +1261,13 @@
           "text": "LocatorPublic"
         },
         "<",
-        "SloDetailsLocatorParams",
+        {
+          "pluginId": "@kbn/deeplinks-observability",
+          "scope": "common",
+          "docId": "kibKbnDeeplinksObservabilityPluginApi",
+          "section": "def-common.SloDetailsLocatorParams",
+          "text": "SloDetailsLocatorParams"
+        },
         ">; sloDetailsHistoryLocator: ",
         {
           "pluginId": "share",
@@ -1271,7 +1277,13 @@
           "text": "LocatorPublic"
         },
         "<",
-        "SloDetailsHistoryLocatorParams",
+        {
+          "pluginId": "@kbn/deeplinks-observability",
+          "scope": "common",
+          "docId": "kibKbnDeeplinksObservabilityPluginApi",
+          "section": "def-common.SloDetailsHistoryLocatorParams",
+          "text": "SloDetailsHistoryLocatorParams"
+        },
         ">; sloEditLocator: ",
         {
           "pluginId": "share",
@@ -1291,7 +1303,13 @@
           "text": "LocatorPublic"
         },
         "<",
-        "SloListLocatorParams",
+        {
+          "pluginId": "@kbn/deeplinks-observability",
+          "scope": "common",
+          "docId": "kibKbnDeeplinksObservabilityPluginApi",
+          "section": "def-common.SloListLocatorParams",
+          "text": "SloListLocatorParams"
+        },
         ">; }"
       ],
       "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",

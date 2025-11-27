@@ -12,7 +12,7 @@ import { useHttp } from '../../../../common/lib/kibana';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { EndpointExceptionsForm } from './components/endpoint_exceptions_form';
 import { EndpointExceptionsApiClient } from '../service/api_client';
-import { SEARCHABLE_FIELDS } from '../constants';
+import { ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS } from '../constants';
 import { ENDPOINT_EXCEPTIONS_PAGE_LABELS } from '../translations';
 
 export const EndpointExceptions = memo(() => {
@@ -26,7 +26,7 @@ export const EndpointExceptions = memo(() => {
       ArtifactFormComponent={EndpointExceptionsForm}
       labels={ENDPOINT_EXCEPTIONS_PAGE_LABELS}
       data-test-subj="endpointExceptionsListPage"
-      searchableFields={SEARCHABLE_FIELDS}
+      searchableFields={ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS}
       flyoutSize="l"
       allowCardCreateAction={canWriteEndpointExceptions}
       allowCardEditAction={canWriteEndpointExceptions}
