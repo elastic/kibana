@@ -194,7 +194,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           // Navigate to Mappings
           await testSubjects.click('formWizardStep-3');
           await pageObjects.header.waitUntilLoadingHasFinished();
-          (await testSubjects.find('advancedOptionsTab')).click();
+          await (await testSubjects.find('advancedOptionsTab')).click();
 
           // Modify source
           await testSubjects.click('sourceValueField');
