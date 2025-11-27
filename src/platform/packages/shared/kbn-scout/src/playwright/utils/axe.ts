@@ -30,16 +30,12 @@ const runA11yScan = async (
   const builder = new AxeBuilder({ page });
   builder.options(AXE_OPTIONS);
 
-  if (include) {
-    for (const selector of include) {
-      builder.include(selector);
-    }
+  for (const selector of include) {
+    builder.include(selector);
   }
 
-  if (exclude) {
-    for (const selector of exclude) {
-      builder.exclude(selector);
-    }
+  for (const selector of exclude) {
+    builder.exclude(selector);
   }
 
   const analysisPromise = builder.analyze();
