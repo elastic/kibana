@@ -35,7 +35,7 @@
             "section": "def-common.LensLayerType",
             "text": "LensLayerType"
           },
-          " | undefined, count: number | undefined) => string"
+          " | undefined, layerTypeCount: number | undefined, countForLayerId: number | undefined) => string"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/layer_type_tab_display_name.ts",
         "deprecated": false,
@@ -68,7 +68,22 @@
             "id": "def-common.getLensLayerTypeTabDisplayName.$2",
             "type": "number",
             "tags": [],
-            "label": "count",
+            "label": "layerTypeCount",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/layer_type_tab_display_name.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.getLensLayerTypeTabDisplayName.$3",
+            "type": "number",
+            "tags": [],
+            "label": "countForLayerId",
             "description": [],
             "signature": [
               "number | undefined"

@@ -28,7 +28,11 @@ import type {
 import { getJsonSchemaFromYamlSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import type { LogSearchResult } from './lib/workflow_logger';
+import type { LogSearchResult } from '@kbn/workflows-execution-engine/server/repositories/logs_repository';
+import type {
+  ExecutionLogsParams,
+  StepLogsParams,
+} from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type {
   SearchWorkflowExecutionsParams,
   WorkflowsService,
@@ -59,7 +63,7 @@ export interface GetWorkflowExecutionLogsParams {
 export interface WorkflowExecutionLogEntry {
   id: string;
   timestamp: string;
-  level: 'info' | 'debug' | 'warn' | 'error';
+  level?: 'trace' | 'debug' | 'info' | 'warn' | 'error';
   message: string;
   stepId?: string;
   stepName?: string;
@@ -80,22 +84,6 @@ export interface GetStepExecutionParams {
   id: string;
 }
 
-export interface GetExecutionLogsParams {
-  executionId: string;
-  size?: number;
-  page?: number;
-  sortField?: string;
-  sortOrder?: 'asc' | 'desc';
-}
-
-export interface GetStepLogsParams {
-  executionId: string;
-  size?: number;
-  page?: number;
-  sortField?: string;
-  sortOrder?: 'asc' | 'desc';
-  stepExecutionId: string;
-}
 export interface GetAvailableConnectorsParams {
   spaceId: string;
   request: KibanaRequest;
@@ -327,36 +315,31 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowExecution(workflowExecutionId, spaceId);
   }
 
-  public async getWorkflowExecutionLogs(
-    params: GetWorkflowExecutionLogsParams,
-    spaceId: string
-  ): Promise<WorkflowExecutionLogsDto> {
+  public async getWorkflowExecutionLogs(params: {
+    executionId: string;
+    spaceId: string;
+    size: number;
+    page: number;
+    stepExecutionId?: string;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<WorkflowExecutionLogsDto> {
     let result: LogSearchResult;
-    if (params.stepExecutionId) {
-      result = await this.workflowsService.getStepLogs(
-        {
-          executionId: params.executionId,
-          stepExecutionId: params.stepExecutionId,
-          size: params.size,
-          page: params.page,
-          sortField: params.sortField,
-          sortOrder: params.sortOrder,
-        },
-        spaceId
-      );
-    } else {
-      result = await this.workflowsService.getExecutionLogs(params, spaceId);
-    }
 
-    const size = params.size || 100;
-    const page = params.page || 1;
+    if (this.isStepExecution(params)) {
+      result = await this.workflowsService.getStepLogs(params);
+    } else {
+      result = await this.workflowsService.getExecutionLogs(params);
+    }
 
     // Transform the logs to match our API format
     return {
       logs: result.logs
-        .filter((log: any) => log) // Filter out undefined/null logs
-        .map((log: any) => ({
+        .filter((log) => log) // Filter out undefined/null logs
+        .map((log) => ({
           id:
+            // TODO: log.id not defined in the doc, do we store it somewhere?
+            // @ts-expect-error - log.id is not defined in the type
             log.id ||
             `${log['@timestamp']}-${log.workflow?.execution_id}-${
               log.workflow?.step_id || 'workflow'
@@ -378,8 +361,8 @@ export class WorkflowsManagementApi {
           },
         })),
       total: result.total,
-      size,
-      page,
+      size: params.size,
+      page: params.page,
     };
   }
 
@@ -424,5 +407,9 @@ export class WorkflowsManagementApi {
       request
     );
     return getJsonSchemaFromYamlSchema(zodSchema);
+  }
+
+  private isStepExecution(params: StepLogsParams | ExecutionLogsParams): params is StepLogsParams {
+    return 'stepExecutionId' in params;
   }
 }

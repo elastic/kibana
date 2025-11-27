@@ -55,24 +55,37 @@ const getRoleWithoutArtifactPrivilege = (privilegePrefix: string) => {
   };
 };
 
-const visitArtifactTab = (tabId: string) => {
-  visitPolicyDetailsPage();
-  clickArtifactTab(tabId);
-};
-
 const clickArtifactTab = (tabId: string) => {
   cy.get(`#${tabId}`).click();
 };
 
 describe(
   'Artifact tabs in Policy Details page',
-  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
+  {
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'endpointExceptionsMovedUnderManagement',
+          ])}`,
+        ],
+      },
+    },
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+  },
   () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
+    let policyId: string;
+
+    const visitArtifactTab = (tabId: string) => {
+      visitPolicyDetailsPage(policyId);
+      clickArtifactTab(tabId);
+    };
 
     before(() => {
       indexEndpointHosts().then((indexEndpoints) => {
         endpointData = indexEndpoints;
+        policyId = indexEndpoints.data.integrationPolicies[0].id;
       });
     });
 
@@ -84,9 +97,7 @@ describe(
     });
 
     for (const testData of getArtifactsListTestsData()) {
-      // FLAKY: https://github.com/elastic/kibana/issues/183670
-      // FLAKY: https://github.com/elastic/kibana/issues/183671
-      describe.skip(`${testData.title} tab`, () => {
+      describe(`${testData.title} tab`, () => {
         beforeEach(() => {
           login();
           removeExceptionsList(testData.createRequestBody.list_id);
@@ -98,7 +109,7 @@ describe(
           { tags: ['@skipInServerless'] },
           () => {
             loginWithPrivilegeNone(testData.privilegePrefix);
-            visitPolicyDetailsPage();
+            visitPolicyDetailsPage(policyId);
 
             cy.get(`#${testData.tabId}`).should('not.exist');
           }
