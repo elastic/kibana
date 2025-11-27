@@ -407,7 +407,7 @@ export const ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT: EventTypeOpts<{
   success: boolean;
   errorMessage: string | undefined;
 }> = {
-  eventType: 'entity_store_data_view_refresh_execution_event',
+  eventType: 'entity_store_data_view_refresh_execution',
   schema: {
     entityType: {
       type: 'keyword',
@@ -458,6 +458,20 @@ export const ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT: EventTypeOpts<{
       _meta: {
         optional: true,
         description: 'Contains the error message in case the task run failed (success: false)',
+      },
+    },
+  },
+};
+
+export const ENTITY_STORE_HEALTH_REPORT_EVENT: EventTypeOpts<{
+  error: string;
+}> = {
+  eventType: 'entity_store_health_report',
+  schema: {
+    error: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message for a resource initialization failure',
       },
     },
   },
