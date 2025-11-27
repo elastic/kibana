@@ -729,8 +729,6 @@ export class CstToAstConverter {
 
     if (ctx._stats) {
       command.args.push(...this.fromAggFields(ctx.aggFields()));
-    } else {
-      command.incomplete = true;
     }
 
     if (ctx._grouping) {
@@ -739,8 +737,6 @@ export class CstToAstConverter {
       if (option) {
         command.args.push(option);
       }
-    } else {
-      command.incomplete = true;
     }
 
     return command;

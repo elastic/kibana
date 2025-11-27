@@ -54,19 +54,6 @@ query
    └─ literal`);
 });
 
-test('invalid query prints "INCOMPLETE" flag', () => {
-  const { root } = Parser.parse('FROM a | STATS count(a, {"adf"}) BY b');
-  const text = printAst(root);
-
-  expect('\n' + text).toBe(`
-query 0-5
-├─ command 0-5 "from"
-│  └─ source 5-5 "a"
-│     └─ literal 5-5 ""a""
-└─ command 9-29 "stats" INCOMPLETE
-   └─ literal 25-29 ""adf""`);
-});
-
 test('can limit tree depth with "depth" option', () => {
   const { root } = Parser.parse(
     'FROM a | STATS fn = count(a * (1 + 3), {"adf": 123}) BY b | LIMIT 123'
