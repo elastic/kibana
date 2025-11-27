@@ -7,9 +7,8 @@
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { BulkPurgeRollupInput, BulkPurgeRollupResponse } from '@kbn/slo-schema';
 import { useMutation } from '@kbn/react-query';
-
+import type { BulkPurgeRollupInput, BulkPurgeRollupResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 

@@ -10,7 +10,7 @@ import type { SLODefinitionResponse } from '@kbn/slo-schema';
 import React from 'react';
 import type { PurgePolicyData } from './purge_rollup_confirmation_modal';
 import { PurgeRollupConfirmationModal } from './purge_rollup_confirmation_modal';
-import { usePurgeRollupData } from '../../../pages/slo_management/hooks/use_purge_rollup_data';
+import { useBulkPurgeRollupData } from '../../../pages/slo_management/hooks/use_bulk_purge_rollup_data';
 
 export interface Props {
   onCancel: () => void;
@@ -19,7 +19,7 @@ export interface Props {
 }
 
 export function SloPurgeRollupConfirmationModal({ item, onCancel, onConfirm }: Props) {
-  const { mutate: purge } = usePurgeRollupData({ name: item.name, onConfirm });
+  const { mutate: purge } = useBulkPurgeRollupData({ onConfirm });
 
   const onClickConfirm = (purgePolicyData: PurgePolicyData) => {
     const { purgeDate, purgeType, forcePurge, age } = purgePolicyData;
