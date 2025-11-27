@@ -35,13 +35,13 @@ export function SuggestPipelinePanel({ children }: React.PropsWithChildren) {
               defaultMessage: 'Use the power of AI to generate the most effective pipeline',
             })}
           </EuiText>
-          <EuiSpacer size="m" />
-          {children}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <AssetImage type="suggestPipeline" size="xs" />
+          <AssetImage type="suggestPipeline" size={100} />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      {children}
     </EuiPanel>
   );
 }

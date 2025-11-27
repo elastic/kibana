@@ -27,6 +27,7 @@ import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { PipelineSuggestion } from './pipeline_suggestions/pipeline_suggestion';
 import { SuggestPipelineLoadingPrompt } from './pipeline_suggestions/suggest_pipeline_loading_prompt';
 import { SuggestPipelinePanel } from './pipeline_suggestions/suggest_pipeline_panel';
+import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
 
 export interface StepsEditorProps {
   suggestionState: ReturnType<typeof useSuggestPipeline>;
@@ -36,6 +37,11 @@ export const StepsEditor = React.memo(({ suggestionState }: StepsEditorProps) =>
   const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
+  const isLoadingSamples = useStreamEnrichmentSelector((state) =>
+    getActiveDataSourceRef(state.context.dataSourcesRefs)
+      ?.getSnapshot()
+      .matches({ enabled: 'loadingData' })
+  );
 
   // Check if samples have valid message fields for pipeline suggestion
   const hasValidMessageFields = useMemo(() => {
@@ -81,6 +87,9 @@ export const StepsEditor = React.memo(({ suggestionState }: StepsEditorProps) =>
     definition: { stream },
   } = useStreamDetail();
 
+  const canUsePipelineSuggestions = aiFeatures && aiFeatures.enabled && hasValidMessageFields;
+  const canUsePipelineSuggestionsPending = !aiFeatures || (aiFeatures.enabled && isLoadingSamples);
+
   if (aiFeatures && aiFeatures.enabled) {
     if (suggestionState.state.loading) {
       return (
@@ -119,9 +128,10 @@ export const StepsEditor = React.memo(({ suggestionState }: StepsEditorProps) =>
     <>
       {hasSteps ? (
         <RootSteps stepRefs={stepRefs} />
-      ) : (
+      ) : // hold off rendering empty prompt while there is a chance we will show the pipeline suggestion prompt
+      !canUsePipelineSuggestions && canUsePipelineSuggestionsPending ? null : (
         <NoStepsEmptyPrompt>
-          {aiFeatures && aiFeatures.enabled && hasValidMessageFields ? (
+          {canUsePipelineSuggestions && (
             <SuggestPipelinePanel>
               <GenerateSuggestionButton
                 aiFeatures={aiFeatures}
@@ -135,7 +145,7 @@ export const StepsEditor = React.memo(({ suggestionState }: StepsEditorProps) =>
                 })}
               </GenerateSuggestionButton>
             </SuggestPipelinePanel>
-          ) : null}
+          )}
         </NoStepsEmptyPrompt>
       )}
       {(!isEmpty(errors.ignoredFields) ||

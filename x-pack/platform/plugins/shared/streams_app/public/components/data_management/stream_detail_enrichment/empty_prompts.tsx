@@ -76,7 +76,13 @@ export const NoStepsEmptyPrompt: React.FC<React.PropsWithChildren> = ({ children
   return (
     <EuiEmptyPrompt
       aria-live="polite"
-      icon={children ? undefined : <AssetImage type="extractFields" />}
+      icon={
+        children ? undefined : (
+          <div css={{ height: 200 }}>
+            <AssetImage type="extractFields" height={200} />
+          </div>
+        )
+      }
       title={
         <h2>
           {i18n.translate('xpack.streams.streamDetailView.managementTab.noStepsEmptyPrompt.title', {
