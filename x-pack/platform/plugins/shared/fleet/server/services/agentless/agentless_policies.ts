@@ -180,12 +180,13 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         policy_ids: [agentPolicy.id],
         supports_agentless: true,
         // Extract cloud connector fields from cloud_connector object
-        ...(data.cloud_connector && {
-          supports_cloud_connector: true,
-          ...(data.cloud_connector.cloud_connector_id && {
-            cloud_connector_id: data.cloud_connector.cloud_connector_id,
+        ...(data.cloud_connector &&
+          data.cloud_connector.enabled && {
+            supports_cloud_connector: true,
+            ...(data.cloud_connector.cloud_connector_id && {
+              cloud_connector_id: data.cloud_connector.cloud_connector_id,
+            }),
           }),
-        }),
       };
 
       let newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo);
