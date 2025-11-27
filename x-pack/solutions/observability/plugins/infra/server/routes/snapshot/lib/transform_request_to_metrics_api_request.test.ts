@@ -21,19 +21,6 @@ jest.mock('./create_timerange_with_interval', () => {
   };
 });
 
-describe('transformRequestToMetricsAPIRequest', () => {
-  test('returns a MetricsApiRequest given parameters', async () => {
-    const compositeSize = 3000;
-    const result = await transformRequestToMetricsAPIRequest({
-      client: {} as ESSearchClient,
-      source,
-      snapshotRequest,
-      compositeSize,
-    });
-    expect(result).toEqual(metricsApiRequest);
-  });
-});
-
 const source: InfraSource = {
   id: 'default',
   version: 'WzkzNjk5LDVd',
@@ -107,7 +94,13 @@ const metricsApiRequest: MetricsAPIRequest = {
   ],
   filters: {
     bool: {
-      filter: [],
+      filter: [
+        {
+          term: {
+            'event.module': 'kubernetes',
+          },
+        },
+      ],
     },
   },
   limit: 3000,
@@ -116,3 +109,16 @@ const metricsApiRequest: MetricsAPIRequest = {
   groupBy: ['kubernetes.pod.uid'],
   includeTimeseries: true,
 };
+
+describe('transformRequestToMetricsAPIRequest', () => {
+  test('returns a MetricsApiRequest given parameters', async () => {
+    const compositeSize = 3000;
+    const result = await transformRequestToMetricsAPIRequest({
+      client: {} as ESSearchClient,
+      source,
+      snapshotRequest,
+      compositeSize,
+    });
+    expect(result).toEqual(metricsApiRequest);
+  });
+});
