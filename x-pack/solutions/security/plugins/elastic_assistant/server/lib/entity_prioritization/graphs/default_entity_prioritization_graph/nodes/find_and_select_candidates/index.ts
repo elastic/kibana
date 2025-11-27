@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RiskScoreDataClient } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_score/risk_score_data_client';
+import { getAlertsIndex } from '@kbn/security-solution-plugin/common/entity_analytics/utils';
 
 import type {
   ThreatHuntingPrioritiesGraphState,
@@ -113,6 +114,298 @@ const calculatePriorityScore = (entity: CandidateEntity): number => {
   return Math.round(score);
 };
 
+type CandidateEntitiesMap = Map<
+  string,
+  {
+    entityId: string;
+    entityType: CandidateEntity['entityType'];
+    discoveries: EntityDiscovery[];
+  }
+>;
+
+/**
+ * Adds a discovery to the candidate entities map, merging with existing entities if found
+ */
+const addDiscoveryToMap = (
+  map: CandidateEntitiesMap,
+  entityId: string,
+  entityType: CandidateEntity['entityType'],
+  discovery: EntityDiscovery
+): void => {
+  const existing = map.get(entityId);
+  if (existing) {
+    existing.discoveries.push(discovery);
+  } else {
+    map.set(entityId, {
+      entityId,
+      entityType,
+      discoveries: [discovery],
+    });
+  }
+};
+
+/**
+ * Processes risk score spikes and adds discoveries to the candidate entities map
+ */
+const processRiskScoreSpikes = async (
+  riskScoreDataClient: RiskScoreDataClient,
+  candidateEntitiesMap: CandidateEntitiesMap,
+  logger?: Logger
+): Promise<void> => {
+  try {
+    const riskScoreSpikes = await riskScoreDataClient.getRiskScoreSpikes({
+      countPerCategory: 25, // Get top 25 spikes per category
+    });
+
+    const processSpike = (spike: {
+      identifier: string;
+      identifierKey: string;
+      spike: number;
+      baseline: number;
+    }) => {
+      const entityType = mapIdentifierKeyToEntityType(spike.identifierKey);
+      if (entityType) {
+        const score = calculateRiskScoreSpikeScore(spike.spike, spike.baseline);
+        const discovery: EntityDiscovery = {
+          type: 'risk_score_spike',
+          score,
+          properties: {
+            baseline: spike.baseline,
+            spike: spike.spike,
+            riskScore: spike.spike, // Current score is the spike value
+          },
+        };
+        addDiscoveryToMap(candidateEntitiesMap, spike.identifier, entityType, discovery);
+      }
+    };
+
+    // Process spikes above baseline
+    if (riskScoreSpikes.spikesAboveBaseline) {
+      for (const spike of riskScoreSpikes.spikesAboveBaseline) {
+        processSpike(spike);
+      }
+    }
+
+    // Process new high score spikes
+    if (riskScoreSpikes.newScoreSpikes) {
+      for (const spike of riskScoreSpikes.newScoreSpikes) {
+        processSpike(spike);
+      }
+    }
+
+    logger?.debug(
+      () => `Found ${candidateEntitiesMap.size} candidate entities from risk score spikes`
+    );
+  } catch (error) {
+    logger?.error(() => `Error fetching risk score spikes: ${error}`);
+    throw error;
+  }
+};
+
+/**
+ * Processes a single entity from an alert hit
+ */
+const processAlertEntity = (
+  entityAlertMap: Map<
+    string,
+    {
+      entityId: string;
+      entityType: CandidateEntity['entityType'];
+      alertCount: number;
+      highScoreCount: number;
+      maxRiskScore: number;
+    }
+  >,
+  entityName: string,
+  entityType: CandidateEntity['entityType'],
+  riskScore: number
+): void => {
+  const existing = entityAlertMap.get(entityName);
+  if (existing) {
+    existing.alertCount++;
+    if (riskScore >= 50) {
+      existing.highScoreCount++;
+    }
+    existing.maxRiskScore = Math.max(existing.maxRiskScore, riskScore);
+  } else {
+    entityAlertMap.set(entityName, {
+      entityId: entityName,
+      entityType,
+      alertCount: 1,
+      highScoreCount: riskScore >= 50 ? 1 : 0,
+      maxRiskScore: riskScore,
+    });
+  }
+};
+
+/**
+ * Processes high score alerts and adds discoveries to the candidate entities map
+ */
+const processHighScoreAlerts = async (
+  alertsIndex: string,
+  esClient: ElasticsearchClient,
+  candidateEntitiesMap: CandidateEntitiesMap,
+  logger?: Logger
+): Promise<void> => {
+  try {
+    // Query for top 25 most recent alerts sorted by risk score
+    const alertsResponse = await esClient.search({
+      index: alertsIndex,
+      size: 25,
+      sort: [
+        {
+          'kibana.alert.risk_score': {
+            order: 'desc',
+            missing: '_last',
+          },
+        },
+        {
+          '@timestamp': {
+            order: 'desc',
+          },
+        },
+      ],
+      _source: [
+        'user.name',
+        'host.name',
+        'kibana.alert.risk_score',
+        'kibana.alert.rule.name',
+        '@timestamp',
+      ],
+      query: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: 'kibana.alert.risk_score',
+              },
+            },
+          ],
+          should: [
+            {
+              exists: {
+                field: 'user.name',
+              },
+            },
+            {
+              exists: {
+                field: 'host.name',
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    });
+
+    if (alertsResponse.hits.hits.length === 0) {
+      return;
+    }
+
+    // Track entities and their alert counts for aggregation
+    const entityAlertMap = new Map<
+      string,
+      {
+        entityId: string;
+        entityType: CandidateEntity['entityType'];
+        alertCount: number;
+        highScoreCount: number;
+        maxRiskScore: number;
+      }
+    >();
+
+    for (const hit of alertsResponse.hits.hits) {
+      const source = hit._source as {
+        'user.name'?: string | string[];
+        'host.name'?: string | string[];
+        'kibana.alert.risk_score'?: number;
+      };
+
+      const riskScore = source['kibana.alert.risk_score'] ?? 0;
+
+      // Process user entities
+      if (source['user.name']) {
+        const userName = Array.isArray(source['user.name'])
+          ? source['user.name'][0]
+          : source['user.name'];
+        if (userName) {
+          processAlertEntity(entityAlertMap, userName, 'user', riskScore);
+        }
+      }
+
+      // Process host entities
+      if (source['host.name']) {
+        const hostName = Array.isArray(source['host.name'])
+          ? source['host.name'][0]
+          : source['host.name'];
+        if (hostName) {
+          processAlertEntity(entityAlertMap, hostName, 'host', riskScore);
+        }
+      }
+    }
+
+    // Create discoveries for entities found in alerts
+    for (const [entityId, alertData] of entityAlertMap.entries()) {
+      const discovery: EntityDiscovery = {
+        type: 'high_score_alerts',
+        score: alertData.maxRiskScore,
+        properties: {
+          alertCount: alertData.alertCount,
+          highScoreCount: alertData.highScoreCount,
+        },
+      };
+      addDiscoveryToMap(candidateEntitiesMap, entityId, alertData.entityType, discovery);
+    }
+
+    logger?.debug(
+      () =>
+        `Found ${entityAlertMap.size} candidate entities from high score alerts (${alertsResponse.hits.hits.length} alerts processed)`
+    );
+  } catch (error) {
+    logger?.error(() => `Error fetching high score alerts: ${error}`);
+    throw error;
+  }
+};
+
+/**
+ * Selects top candidates based on priority scores
+ */
+const selectTopCandidates = (candidateEntities: CandidateEntity[], logger?: Logger): string[] => {
+  if (candidateEntities.length === 0) {
+    logger?.debug(() => 'No candidate entities to select from');
+    return [];
+  }
+
+  // Calculate priority score for each entity
+  const entitiesWithScores = candidateEntities.map((entity) => ({
+    entity,
+    priorityScore: calculatePriorityScore(entity),
+  }));
+
+  // Sort by priority score (descending) and select top N
+  entitiesWithScores.sort((a, b) => b.priorityScore - a.priorityScore);
+
+  const selectedCandidateIds = entitiesWithScores
+    .slice(0, MAX_SELECTED_CANDIDATES)
+    .map(({ entity }) => entity.entityId);
+
+  logger?.debug(
+    () =>
+      `Selected ${
+        selectedCandidateIds.length
+      } candidates based on priority scores: ${selectedCandidateIds
+        .map(
+          (id) =>
+            `${id} (score: ${
+              entitiesWithScores.find((e) => e.entity.entityId === id)?.priorityScore ?? 0
+            })`
+        )
+        .join(', ')}`
+  );
+
+  return selectedCandidateIds;
+};
+
 export const getFindAndSelectCandidatesNode = ({
   alertsIndexPattern,
   esClient,
@@ -133,87 +426,14 @@ export const getFindAndSelectCandidatesNode = ({
   ): Promise<ThreatHuntingPrioritiesGraphState> => {
     logger?.debug(() => '---FIND AND SELECT CANDIDATE ENTITIES---');
 
-    const candidateEntitiesMap = new Map<
-      string,
-      {
-        entityId: string;
-        entityType: CandidateEntity['entityType'];
-        discoveries: EntityDiscovery[];
-      }
-    >();
+    const candidateEntitiesMap: CandidateEntitiesMap = new Map();
 
     // Step 1: Find candidate entities from various discovery methods
 
     // Discovery method 1: Risk score spikes
     if (riskScoreDataClient) {
       try {
-        const riskScoreSpikes = await riskScoreDataClient.getRiskScoreSpikes({
-          countPerCategory: 25, // Get top 25 spikes per category
-        });
-
-        // Process spikes above baseline
-        if (riskScoreSpikes.spikesAboveBaseline) {
-          for (const spike of riskScoreSpikes.spikesAboveBaseline) {
-            const entityType = mapIdentifierKeyToEntityType(spike.identifierKey);
-            if (entityType) {
-              const score = calculateRiskScoreSpikeScore(spike.spike, spike.baseline);
-              const discovery: EntityDiscovery = {
-                type: 'risk_score_spike',
-                score,
-                properties: {
-                  baseline: spike.baseline,
-                  spike: spike.spike,
-                  riskScore: spike.spike, // Current score is the spike value
-                },
-              };
-
-              const existing = candidateEntitiesMap.get(spike.identifier);
-              if (existing) {
-                existing.discoveries.push(discovery);
-              } else {
-                candidateEntitiesMap.set(spike.identifier, {
-                  entityId: spike.identifier,
-                  entityType,
-                  discoveries: [discovery],
-                });
-              }
-            }
-          }
-        }
-
-        // Process new high score spikes
-        if (riskScoreSpikes.newScoreSpikes) {
-          for (const spike of riskScoreSpikes.newScoreSpikes) {
-            const entityType = mapIdentifierKeyToEntityType(spike.identifierKey);
-            if (entityType) {
-              const score = calculateRiskScoreSpikeScore(spike.spike, spike.baseline);
-              const discovery: EntityDiscovery = {
-                type: 'risk_score_spike',
-                score,
-                properties: {
-                  baseline: spike.baseline, // 0 for new spikes
-                  spike: spike.spike,
-                  riskScore: spike.spike, // New score is the spike value
-                },
-              };
-
-              const existing = candidateEntitiesMap.get(spike.identifier);
-              if (existing) {
-                existing.discoveries.push(discovery);
-              } else {
-                candidateEntitiesMap.set(spike.identifier, {
-                  entityId: spike.identifier,
-                  entityType,
-                  discoveries: [discovery],
-                });
-              }
-            }
-          }
-        }
-
-        logger?.debug(
-          () => `Found ${candidateEntitiesMap.size} candidate entities from risk score spikes`
-        );
+        await processRiskScoreSpikes(riskScoreDataClient, candidateEntitiesMap, logger);
       } catch (error) {
         logger?.error(() => `Error fetching risk score spikes: ${error}`);
         // Continue with other candidate finding methods even if this fails
@@ -224,36 +444,24 @@ export const getFindAndSelectCandidatesNode = ({
       );
     }
 
+    // Discovery method 2: High score alerts
+    if (alertsIndexPattern || namespace) {
+      try {
+        const alertsIndex = alertsIndexPattern || getAlertsIndex(namespace || 'default');
+        await processHighScoreAlerts(alertsIndex, esClient, candidateEntitiesMap, logger);
+      } catch (error) {
+        logger?.error(() => `Error fetching high score alerts: ${error}`);
+        // Continue with other candidate finding methods even if this fails
+      }
+    } else {
+      logger?.debug(
+        () => 'Alerts index pattern and namespace not available, skipping alert queries'
+      );
+    }
+
     // TODO: Implement additional candidate entity finding logic
-    // - Query for entities with recently opened high-score alerts
-    //   Example:
-    //   const alertDiscovery: EntityDiscovery = {
-    //     type: 'high_score_alerts',
-    //     score: calculateAlertScore(...),
-    //     properties: {
-    //       alertCount: ...,
-    //       highScoreCount: ...
-    //     }
-    //   };
-    // - Query for entities with lots of alerts
-    //   Example:
-    //   const alertCountDiscovery: EntityDiscovery = {
-    //     type: 'high_alert_count',
-    //     score: calculateAlertCountScore(...),
-    //     properties: {
-    //       alertCount: ...
-    //     }
-    //   };
+    // - Query for entities with lots of alerts (high_alert_count discovery type)
     // - Optionally include anomalies
-    //   Example:
-    //   const anomalyDiscovery: EntityDiscovery = {
-    //     type: 'anomaly',
-    //     score: calculateAnomalyScore(...),
-    //     properties: {
-    //       anomalyType: ...,
-    //       severity: ...
-    //     }
-    //   };
 
     // Convert map to array of CandidateEntity
     const candidateEntities: CandidateEntity[] = Array.from(candidateEntitiesMap.values());
@@ -261,43 +469,7 @@ export const getFindAndSelectCandidatesNode = ({
     logger?.debug(() => `Found ${candidateEntities.length} total candidate entities`);
 
     // Step 2: Calculate priority scores and select top candidates
-    let selectedCandidateIds: string[] = [];
-
-    if (candidateEntities.length === 0) {
-      logger?.debug(() => 'No candidate entities to select from');
-      return {
-        ...state,
-        candidateEntities,
-        selectedCandidateIds,
-      };
-    }
-
-    // Calculate priority score for each entity
-    const entitiesWithScores = candidateEntities.map((entity) => ({
-      entity,
-      priorityScore: calculatePriorityScore(entity),
-    }));
-
-    // Sort by priority score (descending) and select top N
-    entitiesWithScores.sort((a, b) => b.priorityScore - a.priorityScore);
-
-    selectedCandidateIds = entitiesWithScores
-      .slice(0, MAX_SELECTED_CANDIDATES)
-      .map(({ entity }) => entity.entityId);
-
-    logger?.debug(
-      () =>
-        `Selected ${
-          selectedCandidateIds.length
-        } candidates based on priority scores: ${selectedCandidateIds
-          .map(
-            (id) =>
-              `${id} (score: ${
-                entitiesWithScores.find((e) => e.entity.entityId === id)?.priorityScore ?? 0
-              })`
-          )
-          .join(', ')}`
-    );
+    const selectedCandidateIds = selectTopCandidates(candidateEntities, logger);
 
     return {
       ...state,
