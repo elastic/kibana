@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, isString } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import React from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 
@@ -18,17 +18,6 @@ export const getEmptyString = () => `(${i18n.EMPTY_STRING})`;
 
 export const getEmptyCellValue = () => <span css={emptyWrapperCss}>{getEmptyValue()}</span>;
 export const getEmptyStringTag = () => <span css={emptyWrapperCss}>{getEmptyString()}</span>;
-
-export const defaultToEmptyTag = <T extends unknown>(item: T): JSX.Element => {
-  if (item == null) {
-    return getEmptyCellValue();
-  } else if (isString(item) && item === '') {
-    return getEmptyStringTag();
-  } else {
-    // @ts-expect-error upgrade typescript v5.9.3
-    return <>{item}</>;
-  }
-};
 
 export const getOrEmptyTag = (path: string, item: unknown): JSX.Element => {
   const text = get(path, item);

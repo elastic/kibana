@@ -28,9 +28,9 @@ export const useAvailableCasesOwners = (
         return availableOwners;
       }
       for (const cap of capabilities) {
-        const hasCapability =
-          // @ts-expect-error upgrade typescript v5.9.3
-          !!kibanaCapability[`${cap}_cases`] || !!kibanaCapability[`cases_${cap}`];
+        const capCases = `${cap}_cases` as keyof typeof kibanaCapability;
+        const casesCap = `cases_${cap}` as keyof typeof kibanaCapability;
+        const hasCapability = !!kibanaCapability[capCases] || !!kibanaCapability[casesCap];
         if (!hasCapability) {
           return availableOwners;
         }
