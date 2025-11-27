@@ -19,7 +19,6 @@ import type {
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TriggerType } from '@kbn/workflows';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
-import type { WorkflowsManagementConfig } from './config';
 
 import {
   getWorkflowsConnectorAdapter,
@@ -49,7 +48,6 @@ export class WorkflowsPlugin
     >
 {
   private readonly logger: Logger;
-  private readonly config: WorkflowsManagementConfig;
   private workflowsService: WorkflowsService | null = null;
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private api: WorkflowsManagementApi | null = null;
@@ -57,7 +55,6 @@ export class WorkflowsPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.config = initializerContext.config.get<WorkflowsManagementConfig>();
   }
 
   public setup(
@@ -167,24 +164,13 @@ export class WorkflowsPlugin
 
     this.logger.debug('Workflows Management: Creating workflows service');
 
-    // Get ES client from core
-    const esClientPromise = core
-      .getStartServices()
-      .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);
-
+    const getCoreStart = () => core.getStartServices().then(([coreStart]) => coreStart);
+    const getPluginsStart = () => core.getStartServices().then(([, pluginsStart]) => pluginsStart);
     const getWorkflowExecutionEngine = () =>
-      core.getStartServices().then(([, pluginsStart]) => pluginsStart.workflowsExecutionEngine);
+      getPluginsStart().then(({ workflowsExecutionEngine }) => workflowsExecutionEngine);
 
-    // Create function to get actions client (available after start)
-    const getActionsStart = () =>
-      core.getStartServices().then(([, pluginsStart]) => pluginsStart.actions);
+    this.workflowsService = new WorkflowsService(this.logger, getCoreStart, getPluginsStart);
 
-    this.workflowsService = new WorkflowsService(
-      esClientPromise,
-      this.logger,
-      this.config.logging.console,
-      getActionsStart
-    );
     this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
     this.spaces = plugins.spaces?.spacesService;
 
