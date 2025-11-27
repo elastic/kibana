@@ -7,7 +7,7 @@ applies_to:
 
 # Elastic Managed LLMs
 
-Elastic provides built-in LLMs vetted for GenAI product features across our platform.
+Elastic provides built-in LLMs through the Elastic Managed LLM connector vetted for GenAI product features across our platform.
 Currently, the following built-in LLMs are available:
 
 * [General Purpose LLM v2](#general-purpose-llm-v2)
@@ -19,7 +19,8 @@ stack: ga 9.3
 serverless: ga
 ```
 
-Details of this used model are available in the [model card]().
+A high-performance, general-purpose language model suitable for the widest range of use cases.
+Model details are available in the [model card]().
 
 ## Elastic Managed LLM v1
 ```{applies_to}
