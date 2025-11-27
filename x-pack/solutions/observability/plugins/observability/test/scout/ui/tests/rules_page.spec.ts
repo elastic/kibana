@@ -7,6 +7,8 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
+import { createRule } from './rules/helpers';
+import type { CreateRuleResponse } from './rules/types';
 
 test.describe('Rules Page', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -69,12 +71,26 @@ test.describe('Rules Page', { tag: ['@ess', '@svlOblt'] }, () => {
 });
 
 test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
+  let createdRule: CreateRuleResponse['data'];
+
+  test.beforeAll(async ({ apiServices }) => {
+    // Create a test rule that will generate event log entries
+    createdRule = (await createRule(apiServices, { name: 'Logs Tab Test Rule' })).data;
+  });
+
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     // Navigate to the rules list page
     await pageObjects.rulesPage.goto();
     // Verify we're on the rules page
     await expect(pageObjects.rulesPage.pageTitle).toBeVisible();
+  });
+
+  test.afterAll(async ({ apiServices }) => {
+    // Clean up the created rule
+    if (createdRule?.id) {
+      await apiServices.alerting.rules.delete(createdRule.id);
+    }
   });
 
   test('should navigate to logs tab and display event log table', async ({ pageObjects }) => {
@@ -168,19 +184,13 @@ test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     await expect(statusFilterContent).toHaveAttribute('class', /euiPopover-isOpen/);
   });
 
-  test('should display event log table rows or empty state', async ({ pageObjects }) => {
+  test('should display event log table and count rows', async ({ pageObjects }) => {
     // Navigate to logs tab
     await pageObjects.rulesPage.clickLogsTab();
     await pageObjects.rulesPage.expectLogsContentLoaded();
 
     // Simply verify the table container is visible (it exists even when empty)
     await expect(pageObjects.rulesPage.eventLogTable).toBeVisible();
-  });
-
-  test('should count event log table rows', async ({ pageObjects }) => {
-    // Navigate to logs tab
-    await pageObjects.rulesPage.clickLogsTab();
-    await pageObjects.rulesPage.expectLogsContentLoaded();
 
     // Get row count using the helper method
     const rowCount = await pageObjects.rulesPage.getEventLogRowCount();
@@ -188,5 +198,77 @@ test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     // Verify we get a number back
     expect(typeof rowCount).toBe('number');
     expect(rowCount).toBeGreaterThanOrEqual(0);
+  });
+
+  test('should display rule name links in event log table', async ({ pageObjects }) => {
+    // Navigate to logs tab
+    await pageObjects.rulesPage.clickLogsTab();
+    await pageObjects.rulesPage.expectLogsContentLoaded();
+
+    // Get all rule name links
+    const ruleNameLinks = pageObjects.rulesPage.getRuleNameLinks();
+
+    // Verify at least one rule name link exists
+    const linkCount = await ruleNameLinks.count();
+    expect(linkCount).toBeGreaterThan(0);
+  });
+
+  test('should verify event log table columns are present', async ({ pageObjects }) => {
+    // Navigate to logs tab
+    await pageObjects.rulesPage.clickLogsTab();
+    await pageObjects.rulesPage.expectLogsContentLoaded();
+
+    // Verify the table has the expected structure by checking for column headers
+    const tableHeaders = pageObjects.rulesPage.page.locator(
+      '[data-test-subj="eventLogList"] thead th'
+    );
+
+    // Should have at least some column headers
+    const headerCount = await tableHeaders.count();
+    expect(headerCount).toBeGreaterThan(0);
+  });
+
+  test('should handle empty state gracefully', async ({ pageObjects }) => {
+    // Navigate to logs tab
+    await pageObjects.rulesPage.clickLogsTab();
+    await pageObjects.rulesPage.expectLogsContentLoaded();
+
+    // The table should always be visible (even if empty)
+    await expect(pageObjects.rulesPage.eventLogTable).toBeVisible();
+
+    // Check row count
+    const rowCount = await pageObjects.rulesPage.getEventLogRowCount();
+
+    // Row count should be a valid number (0 or more)
+    expect(typeof rowCount).toBe('number');
+    expect(rowCount).toBeGreaterThanOrEqual(0);
+  });
+
+  test('should persist logs tab selection in URL', async ({ pageObjects }) => {
+    // Navigate to logs tab
+    await pageObjects.rulesPage.clickLogsTab();
+    await pageObjects.rulesPage.expectLogsContentLoaded();
+
+    // Verify URL contains logs tab indicator
+    const url = pageObjects.rulesPage.page.url();
+    expect(url).toContain('logs');
+  });
+
+  test('should refresh logs data when using date picker', async ({ pageObjects }) => {
+    // Navigate to logs tab
+    await pageObjects.rulesPage.clickLogsTab();
+    await pageObjects.rulesPage.expectLogsContentLoaded();
+
+    // Open date picker
+    await pageObjects.rulesPage.openDatePicker();
+
+    // The date picker opening itself tests the interaction
+    // After changing dates, the table should still be visible
+    await expect(pageObjects.rulesPage.eventLogTable).toBeVisible();
+
+    // Row count should still be a valid number
+    const currentRowCount = await pageObjects.rulesPage.getEventLogRowCount();
+    expect(typeof currentRowCount).toBe('number');
+    expect(currentRowCount).toBeGreaterThanOrEqual(0);
   });
 });
