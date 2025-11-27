@@ -205,7 +205,7 @@ export async function getServiceMetadataDetails({
   const runtimeName = event[SERVICE_RUNTIME_NAME];
   const runtimeVersion = event[SERVICE_RUNTIME_VERSION];
 
-  if (!event || !agentName || !agentVersion || !runtimeName || !runtimeVersion) {
+  if (!event || !agentName || !agentVersion) {
     return {
       service: undefined,
       container: undefined,
@@ -215,22 +215,24 @@ export async function getServiceMetadataDetails({
 
   const serviceMetadataDetails = {
     versions: aggregations?.serviceVersions.buckets.map((bucket) => bucket.key as string),
-    runtime: {
-      name: runtimeName,
-      version: runtimeVersion,
-    },
+    runtime:
+      runtimeName && runtimeVersion
+        ? {
+            name: runtimeName,
+            version: runtimeVersion,
+          }
+        : undefined,
     framework: event[SERVICE_FRAMEWORK_NAME],
     agent: { name: agentName, version: agentVersion },
   };
 
-  const otelDetails =
-    agentName && isOpenTelemetryAgentName(agentName)
-      ? {
-          language: hasOpenTelemetryPrefix(agentName) ? agentName.split('/')[1] : undefined,
-          sdkVersion: agentVersion,
-          autoVersion: event['labels.telemetry_auto_version'] as string,
-        }
-      : undefined;
+  const otelDetails = isOpenTelemetryAgentName(agentName)
+    ? {
+        language: hasOpenTelemetryPrefix(agentName) ? agentName.split('/')[1] : undefined,
+        sdkVersion: agentVersion,
+        autoVersion: event['labels.telemetry_auto_version'] as string,
+      }
+    : undefined;
 
   const totalNumberInstances = aggregations?.totalNumberInstances.value;
 
