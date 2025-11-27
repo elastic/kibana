@@ -160,7 +160,7 @@ export function StreamDetailEnrichmentContentImpl() {
     state.matches({ ready: { stream: 'updating' } })
   );
 
-  const hasChanges = canUpdate && !isSimulating && !hasValidationErrors;
+  const hasChanges = canUpdate && !isSimulating;
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
