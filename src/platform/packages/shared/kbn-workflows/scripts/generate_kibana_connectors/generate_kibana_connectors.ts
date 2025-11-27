@@ -9,108 +9,159 @@
 
 import { createClient } from '@hey-api/openapi-ts';
 import fs from 'fs';
-import { execSync } from 'node:child_process';
 import type { OpenAPIV3 } from 'openapi-types';
 import Path from 'path';
 import yaml from 'yaml';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
   KIBANA_CONTRACTS_OUTPUT_FILE_PATH,
+  KIBANA_GENERATED_OUTPUT_FOLDER_PATH,
   KIBANA_SPEC_OPENAPI_PATH,
   OPENAPI_TS_OUTPUT_FILENAME,
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
 } from './constants';
-import openapiTsConfig from './openapi_ts.config';
 import { isHttpMethod } from '../..';
 import type { HttpMethod } from '../../types/latest';
 import {
+  camelToSnake,
   type ContractMeta,
+  eslintFixGeneratedCode,
+  formatDuration,
   generateContractBlock,
   generateOutputSchemaString,
   generateParameterTypes,
   generateParamsSchemaString,
+  getLicenseHeader,
   getRequestSchemaName,
   getResponseSchemaName,
   StaticImports,
   toSnakeCase,
 } from '../shared';
 
-export async function generateAndSaveKibanaConnectors() {
+export async function run() {
   await generateZodSchemas();
-  generateAndSaveKibanaConnectorsFile();
+  generateAndSaveKibanaConnectors();
+  eslintFixGeneratedCode({
+    paths: [
+      KIBANA_CONTRACTS_OUTPUT_FILE_PATH,
+      `${KIBANA_GENERATED_OUTPUT_FOLDER_PATH}/kibana*.gen.ts`,
+    ],
+  });
 }
 
-const generateAndSaveKibanaConnectorsFile = () => {
+function generateAndSaveKibanaConnectors() {
   try {
-    const openApiSpec = yaml.parse(
-      fs.readFileSync(KIBANA_SPEC_OPENAPI_PATH, 'utf8')
-    ) as OpenAPIV3.Document;
-
-    console.log(`Generating Kibana connectors from ${openApiSpec.paths.length} paths...`);
-
-    const contracts = Object.entries(openApiSpec.paths).flatMap(([path, pathItem]) =>
-      generateContractMetasFromPath(path, pathItem as OpenAPIV3.PathItemObject, openApiSpec)
+    const startedAt = performance.now();
+    console.log('2/3 Generating Kibana connectors...');
+    const contracts = generateContracts();
+    const indexFile = generateKibanaConnectorsIndexFile(contracts);
+    fs.writeFileSync(KIBANA_CONTRACTS_OUTPUT_FILE_PATH, indexFile);
+    for (const contract of contracts) {
+      const connectorFile = generateKibanaConnectorFile(contract);
+      fs.writeFileSync(
+        Path.resolve(KIBANA_GENERATED_OUTPUT_FOLDER_PATH, contract.fileName),
+        connectorFile,
+        'utf8'
+      );
+    }
+    console.log(
+      `✅ ${contracts.length} Kibana connectors generated in ${formatDuration(
+        startedAt,
+        performance.now()
+      )}`
     );
+  } catch (error) {
+    console.error('❌ Failed to generate Kibana connectors:', error);
+    return false;
+  }
+}
 
-    fs.writeFileSync(
-      KIBANA_CONTRACTS_OUTPUT_FILE_PATH,
-      `/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
+function generateContracts() {
+  const openApiSpec = yaml.parse(
+    fs.readFileSync(KIBANA_SPEC_OPENAPI_PATH, 'utf8')
+  ) as OpenAPIV3.Document;
+
+  console.log(
+    `Generating Kibana connectors from ${Object.keys(openApiSpec.paths).length} paths...`
+  );
+
+  return Object.entries(openApiSpec.paths).flatMap(([path, pathItem]) =>
+    generateContractMetasFromPath(path, pathItem as OpenAPIV3.PathItemObject, openApiSpec)
+  );
+}
+
+function generateKibanaConnectorsIndexFile(contracts: ContractMeta[]) {
+  return `${getLicenseHeader()}
 
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
- * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
+ * This file contains Kibana connector definitions generated from Kibana OpenAPI specification.
  * Generated at: ${new Date().toISOString()}
- * Source: /oas_docs/output/kibana.yaml (${openApiSpec.paths.length} APIs)
+ * Source: /oas_docs/output/kibana.yaml (${contracts.length} APIs)
+ * 
+ * To regenerate: node scripts/generate_workflow_kibana_contracts.js
+ */
+/* eslint-disable import/order */
+
+import type { InternalConnectorContract } from '../../../types/latest';
+
+// import contracts from individual files
+${contracts
+  .map(
+    (contract) =>
+      `import { ${contract.contractName} } from './${contract.fileName.replace('.ts', '')}';`
+  )
+  .join('\n')}
+
+// export contracts
+export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
+${contracts.map((contract) => `  ${contract.contractName},`).join('\n')}
+];`;
+}
+
+function generateKibanaConnectorFile(contract: ContractMeta) {
+  return `${getLicenseHeader()}
+/*
+ * AUTO-GENERATED FILE - DO NOT EDIT
+ * 
+ * Source: /oas_docs/output/kibana.yaml, operations: ${contract.operationIds.join(', ')}
  * 
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
 
 import type { InternalConnectorContract } from '../../../types/latest';
 import { z } from '@kbn/zod/v4';
-import { FetcherConfigSchema } from '../../../spec/schema';
 ${StaticImports}
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { ${contracts
-        .flatMap((contract) => contract.schemaImports)
-        .join(',\n')} } from './${OPENAPI_TS_OUTPUT_FILENAME}.gen';
+import { ${contract.schemaImports.join(',\n')} } from './schemas/${OPENAPI_TS_OUTPUT_FILENAME}.gen';
+${contract.additionalImports?.join('\n')}
 
-// declare contracts
-${contracts.map((contract) => generateContractBlock(contract)).join('\n')}
-
-// export contracts
-export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
-${contracts.map((contract) => `  ${contract.contractName},`).join('\n')}
-];
-`,
-      'utf8'
-    );
-
-    eslintFixAndPrettifyGeneratedCode();
-
-    console.log(`Successfully generated ${contracts.length} Kibana connectors`);
-    return { success: true, count: contracts.length };
-  } catch (error) {
-    console.error('Error generating Kibana connectors:', error);
-    return { success: false, count: 0 };
-  }
-};
+// export contract
+${generateContractBlock(contract)}
+`;
+}
 
 async function generateZodSchemas() {
   try {
-    console.log('🔄 Generating Zod schemas from OpenAPI spec...');
+    const startedAt = performance.now();
+    console.log('1/3 Generating Zod schemas from OpenAPI spec...');
 
-    // Use @hey-api/openapi-ts to generate TypeScript client, use pinned version because it's still pre 1.0.0 and we want to avoid breaking changes
+    console.log('- Importing openapi-ts config...');
+    const openapiTsConfig = await import('./openapi_ts.config').then((module) => module.default);
+    console.log(`- Openapi-ts config imported in ${formatDuration(startedAt, performance.now())}`);
+
+    const createClientStartedAt = performance.now();
+    console.log('- Creating Zod schemas with openapi-ts...');
+    // Use openapi-zod-client CLI to generate TypeScript client, use pinned version because it's still pre 1.0.0 and we want to avoid breaking changes
     await createClient(openapiTsConfig);
-    console.log('✅ Zod schemas generated successfully');
+    console.log(
+      `- Zod schemas generated in ${formatDuration(createClientStartedAt, performance.now())}`
+    );
 
+    const replaceZodImportsStartedAt = performance.now();
+    console.log('- Replacing zod imports with @kbn/zod...');
     const zodPath = Path.resolve(
       OPENAPI_TS_OUTPUT_FOLDER_PATH,
       `${OPENAPI_TS_OUTPUT_FILENAME}.gen.ts`
@@ -123,22 +174,19 @@ async function generateZodSchemas() {
       zodSchemas.replace(/import { z } from 'zod\/v4';/, "import { z } from '@kbn/zod/v4';"),
       'utf8'
     );
+    console.log(
+      `- Zod imports replaced in ${formatDuration(replaceZodImportsStartedAt, performance.now())}`
+    );
 
+    console.log(
+      `✅ Zod schemas saved to ${Path.relative(REPO_ROOT, zodPath)} in ${formatDuration(
+        startedAt,
+        performance.now()
+      )}`
+    );
     return true;
   } catch (error) {
-    console.error('❌ Failed to generate API client:', error.message);
-    return false;
-  }
-}
-
-function eslintFixAndPrettifyGeneratedCode() {
-  try {
-    console.log('🔄 Fixing and prettifying generated code...');
-    const command = `npx eslint ${KIBANA_CONTRACTS_OUTPUT_FILE_PATH} --fix --no-ignore`;
-    execSync(command, { stdio: 'inherit' });
-    console.log('✅ Generated code fixed and prettified successfully');
-  } catch (error) {
-    console.error('❌ Failed to fix and prettify generated code:', error.message);
+    console.error('❌ Failed to generate API client:', error);
     return false;
   }
 }
@@ -175,7 +223,7 @@ function generateContractMetasFromPath(
       // Adding fetcher to all kibana contracts at build time
       fetcher: 'FetcherConfigSchema',
     });
-    const outputSchemaString = generateOutputSchemaString([operationId]);
+    const outputSchemaString = generateOutputSchemaString([operation], openApiDocument);
 
     contractMetas.push({
       connectorGroup: 'internal',
@@ -188,11 +236,13 @@ function generateContractMetasFromPath(
       documentation: null,
       parameterTypes,
 
+      fileName: `kibana.${toSnakeCase(camelToSnake(operationId))}.gen.ts`,
       contractName,
       operationIds: [operationId],
       paramsSchemaString,
       outputSchemaString,
       schemaImports,
+      additionalImports: ["import { FetcherConfigSchema } from '../../schema';"],
     });
   }
   return contractMetas;

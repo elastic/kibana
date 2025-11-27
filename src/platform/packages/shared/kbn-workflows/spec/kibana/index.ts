@@ -16,7 +16,7 @@ export function getKibanaConnectors(): InternalConnectorContract[] {
   const {
     GENERATED_KIBANA_CONNECTORS,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('./generated/kibana_connectors.gen');
+  } = require('./generated');
 
   return GENERATED_KIBANA_CONNECTORS;
 }

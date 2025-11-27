@@ -9,7 +9,6 @@
 
 import { createClient } from '@hey-api/openapi-ts';
 import fs from 'fs';
-import { execSync } from 'node:child_process';
 import type { OpenAPIV3 } from 'openapi-types';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -25,11 +24,13 @@ import type { SpecificationTypes } from './types';
 import type { HttpMethod } from '../../types/latest';
 import {
   type ContractMeta,
+  eslintFixGeneratedCode,
   formatDuration,
   generateContractBlock,
   generateOutputSchemaString,
   generateParameterTypes,
   generateParamsSchemaString,
+  getLicenseHeader,
   getRequestSchemaName,
   getResponseSchemaName,
   StaticImports,
@@ -39,7 +40,12 @@ import {
 export async function run() {
   await generateZodSchemas();
   generateAndSaveEsConnectors();
-  eslintFixAndPrettifyGeneratedCode();
+  eslintFixGeneratedCode({
+    paths: [
+      ES_CONTRACTS_OUTPUT_FILE_PATH,
+      `${ES_GENERATED_OUTPUT_FOLDER_PATH}/elasticsearch*.gen.ts`,
+    ],
+  });
 }
 
 function generateAndSaveEsConnectors() {
@@ -118,7 +124,6 @@ function generateEsConnectorFile(contract: ContractMeta) {
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
- * Generated at: ${new Date().toISOString()}
  * Source: elasticsearch-specification repository, operations: ${contract.operationIds.join(', ')}
  * 
  * To regenerate: node scripts/generate_workflow_es_contracts.js
@@ -133,18 +138,6 @@ import { ${contract.schemaImports.join(',\n')} } from './${OPENAPI_TS_OUTPUT_FIL
 
 // export contract
 ${generateContractBlock(contract)}
-`;
-}
-
-function getLicenseHeader() {
-  return `/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
 `;
 }
 
@@ -192,23 +185,6 @@ async function generateZodSchemas() {
     return true;
   } catch (error) {
     console.error('❌ Failed to generate API client:', error.message);
-    return false;
-  }
-}
-
-function eslintFixAndPrettifyGeneratedCode() {
-  try {
-    const startedAt = performance.now();
-    console.log(
-      '3/3 Running eslint --fix on generated code... Hang tight, it might take a min or two...'
-    );
-    const command = `npx eslint ${ES_GENERATED_OUTPUT_FOLDER_PATH}/index.ts ${ES_GENERATED_OUTPUT_FOLDER_PATH}/elasticsearch*.gen.ts --fix --no-ignore`;
-    execSync(command, { stdio: 'inherit' });
-    console.log(
-      `✅ Generated code fixed and prettified in ${formatDuration(startedAt, performance.now())}`
-    );
-  } catch (error) {
-    console.error('❌ Failed to fix and prettify generated code:', error.message);
     return false;
   }
 }

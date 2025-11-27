@@ -10,7 +10,6 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:43:24.876Z
  * Source: elasticsearch-specification repository, operations: indices-forcemerge, indices-forcemerge-1
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

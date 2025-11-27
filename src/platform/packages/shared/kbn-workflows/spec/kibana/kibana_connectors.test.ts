@@ -26,7 +26,7 @@ describe('Generated Kibana Connectors', () => {
       // without throwing any runtime errors, which was the original issue
       expect(async () => {
         // Re-import to test the actual import process
-        const module = await import('./generated/kibana_connectors.gen');
+        const module = await import('./generated');
         expect(module.GENERATED_KIBANA_CONNECTORS).toBeDefined();
         expect(Array.isArray(module.GENERATED_KIBANA_CONNECTORS)).toBe(true);
         expect(module.GENERATED_KIBANA_CONNECTORS.length).toBeGreaterThan(0);

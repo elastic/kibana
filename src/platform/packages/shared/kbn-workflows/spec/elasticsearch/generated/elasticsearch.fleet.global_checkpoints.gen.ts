@@ -10,7 +10,6 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:43:24.870Z
  * Source: elasticsearch-specification repository, operations: fleet-global-checkpoints
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

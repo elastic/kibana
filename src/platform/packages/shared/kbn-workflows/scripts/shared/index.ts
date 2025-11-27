@@ -16,6 +16,7 @@ export {
   StaticImports,
 } from './generate_params_schema_string';
 export { generateOutputSchemaString, getResponseSchemaName } from './generate_output_schema_string';
-export { getSchemaNamePrefix } from './get_schema_name_prefix';
-export { toSnakeCase } from './get_schema_name_prefix';
+export { getSchemaNamePrefix, camelToSnake, toSnakeCase } from './get_schema_name_prefix';
 export { formatDuration } from './format_duration';
+export { getLicenseHeader } from './get_license_header';
+export { eslintFixGeneratedCode } from './eslint_fix_generated_code';

@@ -31,4 +31,7 @@ describe('getSchemaNamePrefix', () => {
   it('should return the correct schema name prefix for a operation id with a Capital Case', () => {
     expect(getSchemaNamePrefix('SearchCapitalCase')).toBe('search_capital_case');
   });
+  it('should return the correct schema name prefix for a operation id with abbreviation', () => {
+    expect(getSchemaNamePrefix('PrivmonBulkUploadUsersCSV')).toBe('privmon_bulk_upload_users_csv');
+  });
 });

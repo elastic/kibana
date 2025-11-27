@@ -17,4 +17,5 @@ export interface ContractMeta
   paramsSchemaString: string;
   outputSchemaString: string;
   schemaImports: string[];
+  additionalImports?: string[];
 }

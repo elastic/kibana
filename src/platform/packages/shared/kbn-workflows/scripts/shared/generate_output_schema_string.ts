@@ -17,6 +17,9 @@ export function generateOutputSchemaString(
   openApiDocument: OpenAPIV3.Document
 ): string {
   const operationsWithNonEmptyResponseSchemas = operations.filter((operation) => {
+    if (!operation.responses?.[200]) {
+      return false;
+    }
     const response = getOrResolveObject<OpenAPIV3.ResponseObject>(
       operation.responses?.[200] as JSONSchema.JSONSchema,
       openApiDocument as unknown as JSONSchema.JSONSchema

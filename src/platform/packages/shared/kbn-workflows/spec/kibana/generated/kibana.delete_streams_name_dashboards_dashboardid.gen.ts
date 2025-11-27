@@ -1,0 +1,55 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * AUTO-GENERATED FILE - DO NOT EDIT
+ *
+ * Source: /oas_docs/output/kibana.yaml, operations: delete-streams-name-dashboards-dashboardid
+ *
+ * To regenerate: node scripts/generate_workflow_kibana_contracts.js
+ */
+
+import { z } from '@kbn/zod/v4';
+
+import { delete_streams_name_dashboards_dashboardid_request } from './schemas/kibana_openapi_zod.gen';
+import { getShapeAt } from '../../../common/utils/zod';
+
+// import all needed request and response schemas generated from the OpenAPI spec
+import type { InternalConnectorContract } from '../../../types/latest';
+import { FetcherConfigSchema } from '../../schema';
+
+// export contract
+export const DELETE_STREAMS_NAME_DASHBOARDS_DASHBOARDID_CONTRACT: InternalConnectorContract = {
+  type: 'kibana.delete_streams_name_dashboards_dashboardid',
+  connectorGroup: 'internal',
+  summary: `Unlink a dashboard from a stream`,
+  description: `**Spaces method and path for this operation:**
+
+<div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/dashboards/{dashboardId}</span></div>
+
+Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.`,
+  methods: ['DELETE'],
+  patterns: ['/api/streams/{name}/dashboards/{dashboardId}'],
+  documentation: null,
+  parameterTypes: {
+    headerParams: ['kbn-xsrf'],
+    pathParams: ['name', 'dashboardId'],
+    urlParams: [],
+    bodyParams: [],
+  },
+  paramsSchema: z.object({
+    ...getShapeAt(delete_streams_name_dashboards_dashboardid_request, 'body'),
+    ...getShapeAt(delete_streams_name_dashboards_dashboardid_request, 'path'),
+    ...getShapeAt(delete_streams_name_dashboards_dashboardid_request, 'query'),
+    fetcher: FetcherConfigSchema,
+  }),
+  outputSchema: z.optional(z.looseObject({})),
+};

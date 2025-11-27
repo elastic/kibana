@@ -10,7 +10,6 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:43:24.879Z
  * Source: elasticsearch-specification repository, operations: indices-put-alias, indices-put-alias-1, indices-put-alias-2, indices-put-alias-3
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

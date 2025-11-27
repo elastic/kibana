@@ -2391,7 +2391,7 @@ module.exports = {
             // prevents code from importing files that contain the name "legacy" within their name. This is a mechanism
             // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
             // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it is has valid uses.
-            patterns: ['*legacy*'],
+            patterns: ['*legacy!(*.gen)*'],
             paths: RESTRICTED_IMPORTS,
           },
         ],

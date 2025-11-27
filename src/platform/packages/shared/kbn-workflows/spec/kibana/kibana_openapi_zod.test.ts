@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { add_case_comment_default_space_request } from './generated/kibana_openapi_zod.gen';
+import { add_case_comment_default_space_request } from './generated/schemas/kibana_openapi_zod.gen';
 
 describe('add_case_comment_default_space_request.shape.body', () => {
   it('should be a valid zod schema', () => {

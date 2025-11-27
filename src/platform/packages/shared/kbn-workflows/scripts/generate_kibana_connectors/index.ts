@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { generateAndSaveKibanaConnectors } from './generate_kibana_connectors';
+export { run } from './generate_kibana_connectors';
