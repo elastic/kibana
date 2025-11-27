@@ -28,6 +28,15 @@
         },
         "event": {
           "properties": {
+            "action": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
             "dataset": {
               "type": "text",
               "fields": {
