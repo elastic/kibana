@@ -8,6 +8,7 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/server';
 import { PLUGIN_NAME } from '../common';
+import { CLOUD_CONNECT_API_KEY_TYPE } from '../common/constants';
 
 export const CLOUD_CONNECTED_FEATURE_ID = 'cloudConnect';
 export const CLOUD_CONNECTED_APP_ID = 'cloud_connect';
@@ -30,8 +31,8 @@ export const cloudConnectedFeature: KibanaFeatureConfig = {
         kibana: [CLOUD_CONNECTED_APP_ID],
       },
       savedObject: {
-        all: [],
-        read: [],
+        all: [CLOUD_CONNECT_API_KEY_TYPE],
+        read: [CLOUD_CONNECT_API_KEY_TYPE],
       },
       ui: ['show', 'configure'],
       api: [],
@@ -44,7 +45,7 @@ export const cloudConnectedFeature: KibanaFeatureConfig = {
       },
       savedObject: {
         all: [],
-        read: [],
+        read: [CLOUD_CONNECT_API_KEY_TYPE],
       },
       ui: ['show'],
       api: [],
