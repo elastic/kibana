@@ -31,27 +31,24 @@ export class DataViewsService extends FtrService {
   }: DataViewOptions) {
     await this.testSubjects.existOrFail('indexPatternEditorFlyout');
 
-    await this.testSubjects.setValue('createIndexPatternTitleInput', name, {
-      clearWithKeyboard: true,
-      typeCharByChar: true,
-    });
+    await this.retry.waitFor('data view title input to be valid', async () => {
+      await this.testSubjects.setValue('createIndexPatternTitleInput', name, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
 
-    await this.retry.waitFor('data view name input to be valid', async () => {
-      const input = await this.testSubjects.find('createIndexPatternTitleInput');
+      await this.testSubjects.waitForAttributeToChange(
+        'createIndexPatternTitleInput',
+        'data-is-validating',
+        '0'
+      );
 
-      const [isValidating, isInvalid] = await Promise.all([
-        input.getAttribute('data-is-validating'),
-        input.getAttribute('aria-invalid'),
-      ]);
+      const isInvalid = await this.testSubjects.getAttribute(
+        'createIndexPatternTitleInput',
+        'aria-invalid'
+      );
 
-      if (isValidating === '0' && isInvalid === 'true') {
-        await this.testSubjects.setValue('createIndexPatternTitleInput', name, {
-          clearWithKeyboard: true,
-          typeCharByChar: true,
-        });
-      }
-
-      return isValidating === '0' && isInvalid !== 'true';
+      return isInvalid !== 'true';
     });
 
     if (hasTimeField) {
