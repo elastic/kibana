@@ -7,24 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
-import { filter, share, tap } from 'rxjs';
-import type { UnifiedHistogramInput$ } from '../../../types';
-
-export const useFetch = ({
-  input$,
-  beforeFetch,
-}: {
-  input$: UnifiedHistogramInput$;
-  beforeFetch: () => void;
-}) => {
-  return useMemo(
-    () =>
-      input$.pipe(
-        filter((message) => message.type === 'fetch'),
-        tap(beforeFetch),
-        share()
-      ),
-    [beforeFetch, input$]
-  );
-};
+export { FieldSelect, type FieldSelectProps } from './field_select';
