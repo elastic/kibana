@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fieldDefinitionConfigSchema } from './index';
+import { fieldDefinitionConfigSchema } from '.';
 
 describe('fieldDefinitionConfigSchema', () => {
   it('should accept geo_point type', () => {

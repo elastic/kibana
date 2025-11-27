@@ -54,7 +54,9 @@ export const SchemaEditorFlyout = ({
   const [isValidAdvancedFieldMappings, setValidAdvancedFieldMappings] = useState(true);
   const [isValidSimulation, setValidSimulation] = useState(true);
   const [isIgnoredField, setIsIgnoredField] = useState(false);
-  const [geoPointSuggestionApplied, setGeoPointSuggestionApplied] = useState(applyGeoPointSuggestionProp);
+  const [geoPointSuggestionApplied, setGeoPointSuggestionApplied] = useState(
+    applyGeoPointSuggestionProp
+  );
 
   const flyoutId = useGeneratedHtmlId({ prefix: 'streams-edit-field' });
 
@@ -80,10 +82,10 @@ export const SchemaEditorFlyout = ({
 
   const [nextField, setNextField] = useReducer(
     (prev: SchemaField, updated: Partial<SchemaField>) =>
-    ({
-      ...prev,
-      ...updated,
-    } as SchemaField),
+      ({
+        ...prev,
+        ...updated,
+      } as SchemaField),
     initialField
   );
 
