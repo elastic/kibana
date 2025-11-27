@@ -91,6 +91,8 @@ describe('utils', () => {
       canReadWorkflowInsights: true,
       canReadAdminData: true,
       canWriteAdminData: true,
+      canReadScriptsLibrary: false,
+      canWriteScriptsLibrary: false,
     };
 
     describe('with valid permissions', () => {
