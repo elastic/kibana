@@ -113,7 +113,7 @@ export const createLensEmbeddableFactory = (
         parentApi
       );
 
-      const integrationsConfig = initializeIntegrations(getLatestState);
+      const integrationsConfig = initializeIntegrations(getLatestState, internalApi);
       const actionsConfig = initializeActionApi(
         uuid,
         initialRuntimeState,
