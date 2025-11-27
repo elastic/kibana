@@ -97,7 +97,6 @@
     "@kbn/react-query",
     "@kbn/router-utils",
     "@kbn/maintenance-windows-plugin"
->>>>>>> 8a227944d3c ([ResponseOps][Accessibility] Buttons to the rule detail views should be links (#244108))
   ],
   "exclude": ["target/**/*"]
 }
