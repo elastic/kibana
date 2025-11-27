@@ -49,40 +49,32 @@ describe('SliChartPanel', () => {
     expect(screen.queryByTestId('sliChartPanel')).toBeTruthy();
   });
 
-  it('uses provided observedValue when available', () => {
+  it('uses observed value from the last data point', () => {
     const slo = buildSlo();
-    const observedValue = 0.95;
-    render(
-      <SliChartPanel
-        data={mockChartData}
-        isLoading={false}
-        slo={slo}
-        observedValue={observedValue}
-      />
-    );
+    const chartDataWithObservedValue: ChartData[] = [
+      ...mockChartData,
+      { key: new Date('2024-01-04').getTime(), value: 0.95 },
+    ];
+    render(<SliChartPanel data={chartDataWithObservedValue} isLoading={false} slo={slo} />);
 
-    // Should display the provided observed value (95.0%)
+    // Should display the observed value from the last data point (95.0%)
     expect(screen.getByText('95.0%')).toBeTruthy();
     expect(screen.getByText('Observed value')).toBeTruthy();
   });
 
-  it('handles NO_DATA status when observedValue is provided and negative', () => {
+  it('handles NO_DATA status when last data point value is negative', () => {
     const slo = buildSlo();
-    const observedValue = -1; // NO_DATA indicator
-    render(
-      <SliChartPanel
-        data={mockChartData}
-        isLoading={false}
-        slo={slo}
-        observedValue={observedValue}
-      />
-    );
+    const chartDataWithNoData: ChartData[] = [
+      ...mockChartData,
+      { key: new Date('2024-01-04').getTime(), value: -1 }, // NO_DATA indicator
+    ];
+    render(<SliChartPanel data={chartDataWithNoData} isLoading={false} slo={slo} />);
 
     // Should display '-' for NO_DATA
     expect(screen.getByText('-')).toBeTruthy();
   });
 
-  it('handles NO_DATA status from slo.summary when observedValue is not provided', () => {
+  it('handles NO_DATA status from slo.summary when data array is empty', () => {
     const slo = buildSlo({
       summary: {
         status: 'NO_DATA',
@@ -98,15 +90,16 @@ describe('SliChartPanel', () => {
         oneDayBurnRate: 0,
       },
     });
-    render(<SliChartPanel data={mockChartData} isLoading={false} slo={slo} />);
+    // Empty data array - component should use slo.summary.status
+    render(<SliChartPanel data={[]} isLoading={false} slo={slo} />);
 
     // Should display '-' for NO_DATA
     expect(screen.getByText('-')).toBeTruthy();
   });
 
-  it('uses observedValue over slo.summary.sliValue when both are available', () => {
+  it('uses data array value over slo.summary.sliValue when both are available', () => {
     const slo = buildSlo({
-      objective: { target: 0.95 }, // Different from both observedValue and sliValue
+      objective: { target: 0.95 }, // Different from both data value and sliValue
       summary: {
         status: 'HEALTHY',
         sliValue: 0.98,
@@ -121,17 +114,13 @@ describe('SliChartPanel', () => {
         oneDayBurnRate: 0,
       },
     });
-    const observedValue = 0.92;
-    render(
-      <SliChartPanel
-        data={mockChartData}
-        isLoading={false}
-        slo={slo}
-        observedValue={observedValue}
-      />
-    );
+    const chartDataWithObservedValue: ChartData[] = [
+      ...mockChartData,
+      { key: new Date('2024-01-04').getTime(), value: 0.92 },
+    ];
+    render(<SliChartPanel data={chartDataWithObservedValue} isLoading={false} slo={slo} />);
 
-    // Should display the observed value (92.0%), not the summary value (98.0%)
+    // Should display the observed value from data (92.0%), not the summary value (98.0%)
     // Objective should be 95.0%
     expect(screen.getByText('92.0%')).toBeTruthy();
     expect(screen.getByText('95.0%')).toBeTruthy();
