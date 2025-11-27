@@ -223,30 +223,6 @@ function extractModifiedFields(processor: StreamlangProcessorDefinition): string
 }
 
 /**
- * Analyze grok pattern to infer field type based on pattern name.
- * Common numeric patterns: NUMBER, INT, POSINT, NONNEGINT, etc.
- */
-function inferTypeFromGrokPattern(patternName: string): FieldType {
-  const numericPatterns = [
-    'NUMBER',
-    'INT',
-    'POSINT',
-    'NONNEGINT',
-    'WORD',
-    'BASE10NUM',
-    'BASE16NUM',
-    'FLOAT',
-  ];
-
-  if (numericPatterns.includes(patternName.toUpperCase())) {
-    return 'number';
-  }
-
-  // Default to string for most patterns (IP, WORD, DATA, etc.)
-  return 'string';
-}
-
-/**
  * Infer the type of a value from its JavaScript type.
  * Used for static values in the Streamlang DSL (e.g., set processor values).
  */
@@ -286,8 +262,9 @@ function getProcessorOutputType(
 ): FieldType {
   switch (processor.action) {
     case 'grok':
-      // Grok type depends on the pattern and optional :type suffix
-      // Format: %{PATTERN:fieldname} or %{PATTERN:fieldname:type}
+      // Grok type depends ONLY on explicit :type suffix (e.g., %{NUMBER:count:int})
+      // Format: %{PATTERN:fieldname} produces string
+      // Format: %{PATTERN:fieldname:type} produces the specified type
       if (processor.patterns) {
         const patterns = Array.isArray(processor.patterns)
           ? processor.patterns
@@ -300,7 +277,7 @@ function getProcessorOutputType(
           );
           const match = regex.exec(pattern);
           if (match) {
-            // If explicit type is specified (e.g., :int, :float), use that
+            // If explicit type cast is specified (e.g., :int, :float), use that
             if (match[2]) {
               const explicitType = match[2].toLowerCase();
               if (
@@ -314,13 +291,11 @@ function getProcessorOutputType(
               if (explicitType === 'boolean' || explicitType === 'bool') {
                 return 'boolean';
               }
-              // Default to string for unknown type suffixes
+              // Unknown type suffix defaults to string
               return 'string';
             }
-            // Otherwise infer from pattern name
-            if (match[1]) {
-              return inferTypeFromGrokPattern(match[1]);
-            }
+            // No explicit type cast = always string (regardless of pattern name)
+            return 'string';
           }
         }
       }

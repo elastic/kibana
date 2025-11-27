@@ -1007,6 +1007,70 @@ describe('validateStreamlang', () => {
         expect(result.errors[0].field).toBe('attributes.value');
         expect(result.errors[0].actualType).toBe('number');
       });
+
+      it('should detect type mismatch when renamed field is used incorrectly', () => {
+        const dsl: StreamlangDSL = {
+          steps: [
+            {
+              action: 'set',
+              to: 'attributes.count',
+              value: 42, // Number
+            },
+            {
+              action: 'rename',
+              from: 'attributes.count',
+              to: 'attributes.renamed_count',
+            },
+            {
+              action: 'replace', // Expects string, but renamed_count is number
+              from: 'attributes.renamed_count',
+              pattern: '42',
+              replacement: '43',
+            },
+          ],
+        };
+
+        const result = validateStreamlang(dsl, { validateTypes: true });
+
+        // Type should propagate through rename, and then fail on replace
+        expect(result.isValid).toBe(false);
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0].type).toBe('type_mismatch');
+        expect(result.errors[0].field).toBe('attributes.renamed_count');
+        expect(result.errors[0].actualType).toBe('number');
+      });
+
+      it('should detect type mismatch when copied field is used incorrectly', () => {
+        const dsl: StreamlangDSL = {
+          steps: [
+            {
+              action: 'set',
+              to: 'attributes.price',
+              value: 99.99, // Number
+            },
+            {
+              action: 'set',
+              to: 'attributes.copied_price',
+              copy_from: 'attributes.price',
+            },
+            {
+              action: 'replace', // Expects string, but copied_price is number
+              from: 'attributes.copied_price',
+              pattern: '99',
+              replacement: '100',
+            },
+          ],
+        };
+
+        const result = validateStreamlang(dsl, { validateTypes: true });
+
+        // Type should propagate through copy_from, and then fail on replace
+        expect(result.isValid).toBe(false);
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0].type).toBe('type_mismatch');
+        expect(result.errors[0].field).toBe('attributes.copied_price');
+        expect(result.errors[0].actualType).toBe('number');
+      });
     });
 
     describe('initial field types', () => {
