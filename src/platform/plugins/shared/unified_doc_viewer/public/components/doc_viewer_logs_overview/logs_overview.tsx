@@ -36,6 +36,7 @@ import {
 } from '../doc_viewer_source/get_height';
 import { TraceWaterfall } from '../observability/traces/components/trace_waterfall';
 import { DataSourcesProvider } from '../observability/traces/hooks/use_data_sources';
+import { TraceStateProvider } from '../../hooks/use_trace_state';
 
 export type LogsOverviewProps = DocViewRenderProps & {
   renderAIAssistant?: ObservabilityLogsAIAssistantFeature['render'];
@@ -101,50 +102,52 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
         onAddColumn={onAddColumn}
         onRemoveColumn={onRemoveColumn}
       >
-        <div
-          ref={setContainerRef}
-          css={
-            containerHeight
-              ? css`
-                  height: ${containerHeight}px;
-                  overflow: auto;
-                `
-              : undefined
-          }
-        >
-          <EuiSpacer size="m" />
-          <LogsOverviewHeader
-            formattedDoc={parsedDoc}
-            hit={hit}
-            renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
-            filter={filter}
-            onAddColumn={onAddColumn}
-            onRemoveColumn={onRemoveColumn}
-            dataView={dataView}
-          />
-
-          <div>{renderFlyoutStreamField && renderFlyoutStreamField({ dataView, doc: hit })}</div>
-
-          <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
-          {isStacktraceAvailable && (
-            <LogsOverviewStacktraceSection
-              ref={stackTraceSectionRef}
+        <TraceStateProvider>
+          <div
+            ref={setContainerRef}
+            css={
+              containerHeight
+                ? css`
+                    height: ${containerHeight}px;
+                    overflow: auto;
+                  `
+                : undefined
+            }
+          >
+            <EuiSpacer size="m" />
+            <LogsOverviewHeader
+              formattedDoc={parsedDoc}
               hit={hit}
+              renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
               dataView={dataView}
             />
-          )}
-          {parsedDoc[TRACE_ID_FIELD] && showTraceWaterfall ? (
-            <DataSourcesProvider indexes={indexes}>
-              <TraceWaterfall
-                traceId={parsedDoc[TRACE_ID_FIELD]}
-                docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
-                serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+
+            <div>{renderFlyoutStreamField && renderFlyoutStreamField({ dataView, doc: hit })}</div>
+
+            <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
+            {isStacktraceAvailable && (
+              <LogsOverviewStacktraceSection
+                ref={stackTraceSectionRef}
+                hit={hit}
                 dataView={dataView}
               />
-            </DataSourcesProvider>
-          ) : null}
-          {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
-        </div>
+            )}
+            {parsedDoc[TRACE_ID_FIELD] && showTraceWaterfall ? (
+              <DataSourcesProvider indexes={indexes}>
+                <TraceWaterfall
+                  traceId={parsedDoc[TRACE_ID_FIELD]}
+                  docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
+                  serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+                  dataView={dataView}
+                />
+              </DataSourcesProvider>
+            ) : null}
+            {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
+          </div>
+        </TraceStateProvider>
       </FieldActionsProvider>
     );
   }

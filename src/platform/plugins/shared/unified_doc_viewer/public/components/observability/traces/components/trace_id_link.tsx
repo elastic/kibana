@@ -12,6 +12,8 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR } from '@kbn/deeplinks-observability';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { TraceDataState } from '../../../../../../../../../../x-pack/solutions/observability/plugins/apm/public/components/shared/trace_waterfall/use_trace_waterfall';
+import { useTraceStateContext } from '../../../../hooks/use_trace_state';
 
 interface TraceIdLinkProps {
   traceId: string;
@@ -29,6 +31,8 @@ export function TraceIdLink({
     core,
     data: dataService,
   } = getUnifiedDocViewerServices();
+  const traceStateContext = useTraceStateContext();
+  const traceState = traceStateContext ? traceStateContext.traceState : undefined;
 
   const canViewApm = core.application.capabilities.apm?.show || false;
   const { from: timeRangeFrom, to: timeRangeTo } =
@@ -60,7 +64,7 @@ export function TraceIdLink({
 
   return (
     <>
-      {canViewApm && routeLinkProps ? (
+      {canViewApm && routeLinkProps && traceState && traceState !== TraceDataState.Empty ? (
         <EuiLink {...routeLinkProps} data-test-subj={dataTestSubj}>
           {formattedTraceId}
         </EuiLink>
