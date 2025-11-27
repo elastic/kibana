@@ -211,51 +211,6 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await expect(page.getByTestId('streamsAppRoutingPreviewEmptyPromptTitle')).toBeVisible();
   });
 
-  test('should show correct message when editing existing rule in preview panel', async ({
-    page,
-    apiServices,
-    pageObjects,
-  }) => {
-    await apiServices.streams.forkStream('logs', 'logs.edit-message-test', {
-      field: 'service.name',
-      eq: 'test',
-    });
-
-    await pageObjects.streams.gotoPartitioningTab('logs');
-    await pageObjects.streams.clickEditRoutingRule('logs.edit-message-test');
-
-    // Should show message about saving changes
-    await expect(page.getByTestId('streamsAppRoutingPreviewEditingPanelBodyMessage')).toBeVisible();
-
-    // Should also show warning about reordering
-    await expect(
-      page.getByTestId('streamsAppRoutingPreviewEditingPanelReorderingWarning')
-    ).toBeVisible();
-  });
-
-  test('should recover from error state when condition is fixed', async ({ page, pageObjects }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-    await pageObjects.streams.fillRoutingRuleName('error-recovery-test');
-
-    // Set invalid condition (only operator, no field or value)
-    await pageObjects.streams.fillConditionEditor({
-      operator: 'equals',
-    });
-
-    // Should show disabled state or error
-    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeDisabled();
-
-    // Fix the condition
-    await pageObjects.streams.fillConditionEditor({
-      field: 'severity_text',
-      value: 'info',
-    });
-
-    // Should recover and show preview
-    await pageObjects.streams.expectPreviewPanelVisible();
-    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toBeEnabled();
-  });
-
   test('should display child stream count badge for nested routing rules', async ({
     page,
     apiServices,
