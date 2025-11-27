@@ -9,6 +9,7 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isDynamicConnector } from '@kbn/workflows';
 import { getAllConnectors } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
 import type { ActionConnectorGroup, ActionOptionData } from '../types';
@@ -171,7 +172,7 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
         description: connector.type,
         iconType: 'logoKibana',
       });
-    } else {
+    } else if (isDynamicConnector(connector)) {
       const [baseType, subtype] = connector.type.split('.');
       let groupOption = externalGroup;
       if (subtype) {

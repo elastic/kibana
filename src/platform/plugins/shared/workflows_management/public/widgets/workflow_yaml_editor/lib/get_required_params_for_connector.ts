@@ -194,12 +194,12 @@ function extractBodyExample(bodySchema: z.ZodType): any {
     // Handle ZodOptional wrapper
     let schema = bodySchema;
     if (bodySchema instanceof z.ZodOptional) {
-      schema = bodySchema._def.innerType;
+      schema = bodySchema.unwrap() as z.ZodType;
     }
 
     // If it's a ZodObject, try to extract its shape and build YAML-compatible example
     if (schema instanceof z.ZodObject) {
-      const shape = schema._def.shape();
+      const shape = schema.shape;
       const example: any = {};
 
       // Extract examples from each field

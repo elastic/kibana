@@ -163,7 +163,7 @@ export function getEnhancedTypeInfo(schema: z.ZodType): {
   // Unwrap ZodOptional
   if (currentSchema instanceof z.ZodOptional) {
     isOptional = true;
-    currentSchema = currentSchema._def.innerType;
+    currentSchema = currentSchema.unwrap() as z.ZodType;
   }
 
   const baseType = getZodTypeName(currentSchema);
@@ -182,17 +182,17 @@ export function getEnhancedTypeInfo(schema: z.ZodType): {
   // Enhanced type information based on schema type
   let enhancedType = baseType;
   if (currentSchema instanceof z.ZodArray) {
-    const elementType = getZodTypeName(currentSchema._def.type);
+    const elementType = getZodTypeName(currentSchema.unwrap() as z.ZodType);
     enhancedType = `${elementType}[]`;
   } else if (currentSchema instanceof z.ZodUnion) {
     const options = currentSchema._def.options;
-    const unionTypes = options.map((opt: z.ZodType) => getZodTypeName(opt)).join(' | ');
+    const unionTypes = options.map((opt) => getZodTypeName(opt as z.ZodType)).join(' | ');
     enhancedType = unionTypes;
   } else if (currentSchema instanceof z.ZodEnum) {
-    const values = currentSchema._def.values;
+    const values = currentSchema.options;
     enhancedType = `enum: ${values.slice(0, 3).join(' | ')}${values.length > 3 ? '...' : ''}`;
   } else if (currentSchema instanceof z.ZodLiteral) {
-    enhancedType = `"${currentSchema._def.value}"`;
+    enhancedType = `"${currentSchema.value}"`;
   }
 
   return {

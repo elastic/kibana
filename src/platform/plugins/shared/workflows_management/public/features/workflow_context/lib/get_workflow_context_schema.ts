@@ -34,11 +34,7 @@ export function getWorkflowContextSchema(definition: WorkflowYaml) {
               const opts = input.options ?? [];
               valueSchema = z.any();
               if (opts.length > 0) {
-                const literals = opts.map((o) => z.literal(o)) as [
-                  z.ZodLiteral<unknown>,
-                  z.ZodLiteral<unknown>,
-                  ...z.ZodLiteral<unknown>[]
-                ];
+                const literals = opts.map((o) => z.literal(o));
                 valueSchema = z.union(literals);
               }
               break;

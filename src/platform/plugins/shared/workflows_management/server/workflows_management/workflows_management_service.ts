@@ -192,10 +192,12 @@ export class WorkflowsService {
     );
     if (parsedYaml.success) {
       // The type of parsedYaml.data is validated by getWorkflowZodSchema (strict mode), so this assertion is safe.
-      workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
+      workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(
+        parsedYaml.data as unknown as WorkflowYaml
+      );
 
       // Validate step name uniqueness
-      const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+      const stepValidation = validateStepNameUniqueness(parsedYaml.data as unknown as WorkflowYaml);
       if (!stepValidation.isValid) {
         workflowToCreate.valid = false;
         workflowToCreate.definition = undefined;

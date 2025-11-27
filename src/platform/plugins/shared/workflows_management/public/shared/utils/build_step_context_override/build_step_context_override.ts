@@ -21,12 +21,12 @@ import { z } from '@kbn/zod/v4';
 
 export interface ContextOverrideData {
   stepContext: Partial<StepContext>;
-  schema: z.ZodTypeAny;
+  schema: z.ZodType;
 }
 
 const StepContextSchemaPropertyPaths = extractSchemaPropertyPaths(StepContextSchema);
 
-function buildStepContextSchemaFromObject(obj: any): z.ZodTypeAny {
+function buildStepContextSchemaFromObject(obj: any): z.ZodType {
   if (Array.isArray(obj)) {
     return z.array(buildStepContextSchemaFromObject(obj[0]));
   } else if (typeof obj === 'object' && obj !== null) {

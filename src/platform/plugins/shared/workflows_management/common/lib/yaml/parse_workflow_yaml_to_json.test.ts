@@ -16,6 +16,9 @@ import { parseWorkflowYamlToJSON } from './parse_workflow_yaml_to_json';
 describe('parseWorkflowYamlToJSON', () => {
   const mockConnectors: ConnectorContractUnion[] = [
     {
+      connectorGroup: 'static',
+      summary: 'Noop',
+      description: 'Noop',
       type: 'noop',
       paramsSchema: z.object({
         message: z.string(),
@@ -71,14 +74,7 @@ describe('parseWorkflowYamlToJSON', () => {
     `;
     const result = parseWorkflowYamlToJSON(yaml, yamlSchemaLoose);
     expect(result.success).toBe(true);
-    expect(
-      (
-        result as SafeParseReturnType<
-          z.input<typeof yamlSchemaLoose>,
-          z.output<typeof yamlSchemaLoose>
-        >
-      ).data
-    ).toEqual({
+    expect((result as any).data).toEqual({
       version: '1',
       enabled: true,
       steps: [{ name: 'step1', type: 'noop', with: { message: 'Hello, {{event.message}}' } }],

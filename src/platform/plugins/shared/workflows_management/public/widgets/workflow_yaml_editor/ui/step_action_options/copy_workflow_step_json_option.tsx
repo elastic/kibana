@@ -16,11 +16,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { selectEditorFocusedStepInfo } from '../../../../entities/workflows/store';
 
-export interface CopyWorkflowStepOption {
+export interface CopyWorkflowStepJsonOptionProps {
   onClick: () => void;
 }
 
-export const CopyWorkflowStepJsonOption: React.FC<CopyWorkflowStepJsonOption> = ({ onClick }) => {
+export const CopyWorkflowStepJsonOption: React.FC<CopyWorkflowStepJsonOptionProps> = ({
+  onClick,
+}) => {
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const {
     services: { notifications },

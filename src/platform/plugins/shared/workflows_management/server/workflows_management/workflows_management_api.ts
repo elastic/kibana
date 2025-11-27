@@ -148,7 +148,7 @@ export class WorkflowsManagementApi {
     };
 
     // Convert back to YAML string using proper YAML stringification
-    const clonedYaml = stringifyWorkflowDefinition(updatedYaml as WorkflowYaml);
+    const clonedYaml = stringifyWorkflowDefinition(updatedYaml as unknown as WorkflowYaml);
     return this.workflowsService.createWorkflow({ yaml: clonedYaml }, spaceId, request);
   }
 
@@ -234,7 +234,7 @@ export class WorkflowsManagementApi {
     }
 
     // Validate step name uniqueness
-    const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+    const stepValidation = validateStepNameUniqueness(parsedYaml.data as unknown as WorkflowYaml);
     if (!stepValidation.isValid) {
       const errorMessages = stepValidation.errors.map((error) => error.message);
       throw new WorkflowValidationError(
@@ -243,7 +243,9 @@ export class WorkflowsManagementApi {
       );
     }
 
-    const workflowJson = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
+    const workflowJson = transformWorkflowYamlJsontoEsWorkflow(
+      parsedYaml.data as unknown as WorkflowYaml
+    );
     const { event, ...manualInputs } = inputs;
     const context = {
       event,
@@ -282,7 +284,9 @@ export class WorkflowsManagementApi {
       throw parsedYaml.error;
     }
 
-    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
+    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(
+      parsedYaml.data as unknown as WorkflowYaml
+    );
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflowStep(
       {
