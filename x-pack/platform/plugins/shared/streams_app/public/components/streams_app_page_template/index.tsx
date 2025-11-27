@@ -12,14 +12,7 @@ import { css } from '@emotion/css';
 
 export function StreamsAppPageTemplate({ children }: { children: React.ReactNode }) {
   return (
-    <EuiPageTemplate
-      offset={0}
-      minHeight={0}
-      restrictWidth={false}
-      className={css`
-        max-height: 100%;
-      `}
-    >
+    <EuiPageTemplate offset={0} minHeight={0} restrictWidth={false}>
       {children}
     </EuiPageTemplate>
   );
@@ -35,15 +28,14 @@ StreamsAppPageTemplate.Body = ({
     grow
     className={css`
       overflow-y: auto;
-      padding-inline: ${noPadding ? '0px' : '24px'};
+      ${noPadding ? 'padding: 0px;' : ''}
     `}
     contentProps={{
       className: css`
         display: flex;
         flex-direction: column;
-        flex-grow: 1;
-        padding-block: ${noPadding ? '0px' : '24px'};
         height: 100%;
+        ${noPadding ? 'padding: 0px;' : ''}
       `,
     }}
     {...props}

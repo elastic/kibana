@@ -146,6 +146,7 @@ const expectedStreamsResponse: Streams.ClassicStream.Definition = {
     processing: migratedProcessing,
     settings: {},
     classic: {},
+    failure_store: { inherit: {} },
   },
 };
 
@@ -179,6 +180,7 @@ const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
         },
       },
     },
+    failure_store: { inherit: {} },
   },
 };
 

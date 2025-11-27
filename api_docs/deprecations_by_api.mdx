@@ -7,7 +7,7 @@ id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2025-11-20
+date: 2025-11-26
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 ---
 
@@ -33,8 +33,8 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibAlertingPluginApi" section="def-server.RuleExecutorServices.alertFactory" text="alertFactory"/> | ruleRegistry, @kbn/test-suites-xpack-platform, securitySolution, slo | - |
 | <DocLink id="kibFleetPluginApi" section="def-public.NewPackagePolicy.policy_id" text="policy_id"/> | @kbn/test-suites-xpack-platform, securitySolution, synthetics, @kbn/test-suites-xpack-observability, cloudDefend, @kbn/test-suites-xpack-security, @kbn/cloud-security-posture | - |
 | <DocLink id="kibFleetPluginApi" section="def-common.NewPackagePolicy.policy_id" text="policy_id"/> | @kbn/test-suites-xpack-platform, securitySolution, synthetics, @kbn/test-suites-xpack-observability, cloudDefend, @kbn/test-suites-xpack-security, @kbn/cloud-security-posture | - |
-| <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginStart.authc" text="authc"/> | alerting, fleet, observabilityAIAssistant, reindexService, transform, entityManager, @kbn/test-suites-xpack-platform, observabilityAgent, synthetics, serverlessSearch, securitySolution, cloudSecurityPosture, security | - |
-| <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginStart.userProfiles" text="userProfiles"/> | cases, @kbn/test-suites-xpack-platform, securitySolution, security | - |
+| <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginStart.authc" text="authc"/> | alerting, fleet, observabilityAIAssistant, reindexService, transform, entityManager, osquery, @kbn/test-suites-xpack-platform, synthetics, serverlessSearch, securitySolution, cloudSecurityPosture, security | - |
+| <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginStart.userProfiles" text="userProfiles"/> | cases, osquery, @kbn/test-suites-xpack-platform, securitySolution, security | - |
 | <DocLink id="kibTaskManagerPluginApi" section="def-server.ConcreteTaskInstance.interval" text="interval"/> | @kbn/test-suites-xpack-platform | - |
 | <DocLink id="kibKbnCoreApplicationBrowserPluginApi" section="def-public.AppMountParameters.appBasePath" text="appBasePath"/> | @kbn/core, management, fleet, @kbn/test-suites-xpack-platform, security, kibanaOverview, @kbn/test-suites-src | - |
 | <DocLink id="kibKbnCoreSavedObjectsCommonPluginApi" section="def-common.SavedObject" text="SavedObject"/> | @kbn/core, home, savedObjectsTagging, canvas, savedObjectsTaggingOss, reindexService, @kbn/test-suites-xpack-platform, lists, @kbn/test-suites-src, savedObjectsManagement | - |
@@ -57,7 +57,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.useDarkMode" text="useDarkMode"/> | securitySolution | - |
 | <DocLink id="kibLensPluginApi" section="def-public.LensPartitionVisualizationState.palette" text="palette"/> | securitySolution, visTypePie, @kbn/lens-embeddable-utils | - |
 | <DocLink id="kibTelemetryPluginApi" section="def-server.TelemetryPluginStart.getIsOptedIn" text="getIsOptedIn"/> | fleet, datasetQuality, synthetics, securitySolution | - |
-| <DocLink id="kibTimelinesPluginApi" section="def-public.TimelinesUIStart.getHoverActions" text="getHoverActions"/> | osquery, securitySolution | - |
+| <DocLink id="kibTimelinesPluginApi" section="def-public.TimelinesUIStart.getHoverActions" text="getHoverActions"/> | osquery, kubernetesSecurity, securitySolution | - |
 | <DocLink id="kibTimelinesPluginApi" section="def-common.DeprecatedCellValueElementProps" text="DeprecatedCellValueElementProps"/> | @kbn/securitysolution-data-table, securitySolution | - |
 | <DocLink id="kibTimelinesPluginApi" section="def-common.DeprecatedRowRenderer" text="DeprecatedRowRenderer"/> | @kbn/securitysolution-data-table, securitySolution | - |
 | <DocLink id="kibTimelinesPluginApi" section="def-common.BeatFields" text="BeatFields"/> | securitySolution | - |
@@ -86,6 +86,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectSaveModalWithSaveResult" text="SavedObjectSaveModalWithSaveResult"/> | visualizations, dashboard, graph, links | - |
 | <DocLink id="kibSavedObjectsPluginApi" section="def-public.showSaveModal" text="showSaveModal"/> | visualizations, maps, dashboard, discover, graph, links | - |
 | <DocLink id="kibKbnCoreSavedObjectsServerPluginApi" section="def-server.SavedObjectsType.schemas" text="schemas"/> | @kbn/core, spaces, data, savedSearch, dashboard, visualizations, cloudSecurityPosture | - |
+| <DocLink id="kibDashboardPluginApi" section="def-server.DashboardPluginStart.getDashboard" text="getDashboard"/> | observability | - |
 | <DocLink id="kibDashboardPluginApi" section="def-server.DashboardPluginStart.scanDashboards" text="scanDashboards"/> | observability | - |
 | <DocLink id="kibSecurityPluginApi" section="def-server.ApiActions.get" text="get"/> | @kbn/security-plugin-types-server, telemetry, alerting, fleet, reporting, profiling, @kbn/security-authorization-core, security | - |
 | <DocLink id="kibTaskManagerPluginApi" section="def-server.TaskManagerSetupContract.index" text="index"/> | actions, alerting | - |
@@ -137,7 +138,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibExpressionsPluginApi" section="def-common.ExpressionsServiceSetup.getTypes" text="getTypes"/> | canvas | - |
 | <DocLink id="kibExpressionsPluginApi" section="def-server.ExpressionFunctionDefinition.context" text="context"/> | canvas | - |
 | <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.findTestSubject" text="findTestSubject"/> | snapshotRestore, watcher, ingestPipelines, remoteClusters, upgradeAssistant, indexManagement, @kbn/security-ui-components, security, dataViewFieldEditor | - |
-| <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.registerTestBed" text="registerTestBed"/> | runtimeFields, indexLifecycleManagement, snapshotRestore, watcher, ingestPipelines, remoteClusters, reporting, upgradeAssistant, indexManagement, searchprofiler, dataViewEditor, dataViewFieldEditor | - |
+| <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.registerTestBed" text="registerTestBed"/> | runtimeFields, snapshotRestore, watcher, ingestPipelines, remoteClusters, reporting, upgradeAssistant, indexManagement, searchprofiler, dataViewEditor, dataViewFieldEditor | - |
 | <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.shallowWithIntl" text="shallowWithIntl"/> | uptime, telemetry | - |
 | <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.mountWithIntl" text="mountWithIntl"/> | uptime | - |
 | <DocLink id="kibKbnTestJestHelpersPluginApi" section="def-common.renderWithI18nProvider" text="renderWithI18nProvider"/> | uptime | - |

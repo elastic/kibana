@@ -13,7 +13,7 @@
 import agent from 'elastic-apm-node';
 import type { CoreStart } from '@kbn/core/server';
 import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
@@ -391,9 +391,8 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     if (
-      [ExecutionStatus.COMPLETED, ExecutionStatus.FAILED].includes(
-        workflowExecutionUpdate.status as ExecutionStatus
-      )
+      (workflowExecutionUpdate.status && isTerminalStatus(workflowExecutionUpdate.status)) ||
+      isTerminalStatus(workflowExecution.status)
     ) {
       const startedAt = new Date(workflowExecution.startedAt);
       const completeDate = new Date();
@@ -431,7 +430,6 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
-    await this.workflowExecutionState.flush();
   }
 
   private logWorkflowStart(): void {

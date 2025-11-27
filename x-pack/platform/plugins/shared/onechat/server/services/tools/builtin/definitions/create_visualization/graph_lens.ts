@@ -8,6 +8,8 @@ import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/onechat-server';
 import type { Logger } from '@kbn/logging';
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
+import { gaugeStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/gauge';
+import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/tagcloud';
 import { generateEsql } from '@kbn/onechat-genai-utils';
 import { extractTextContent } from '@kbn/onechat-genai-utils/langchain';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -242,6 +244,10 @@ export const createVisualizationGraph = (
         let validatedConfig: VisualizationConfig | null = null;
         if (state.chartType === SupportedChartType.Metric) {
           validatedConfig = esqlMetricState.validate(config);
+        } else if (state.chartType === SupportedChartType.Gauge) {
+          validatedConfig = gaugeStateSchemaESQL.validate(config);
+        } else if (state.chartType === SupportedChartType.Tagcloud) {
+          validatedConfig = tagcloudStateSchemaESQL.validate(config);
         } else {
           throw new Error(`Unsupported chart type: ${state.chartType}`);
         }

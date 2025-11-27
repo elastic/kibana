@@ -6,7 +6,7 @@
  */
 import { toBooleanRt } from '@kbn/io-ts-utils/src/to_boolean_rt';
 import * as t from 'io-ts';
-import { sloDefinitionAndHealthSchema, sloDefinitionSchema } from '../../schema';
+import { sloDefinitionWithHealthSchema, sloDefinitionSchema } from '../../schema';
 
 const findSloDefinitionsParamsSchema = t.partial({
   query: t.partial({
@@ -30,7 +30,7 @@ const findSloDefinitionsWithHealthResponseSchema = t.type({
   page: t.number,
   perPage: t.number,
   total: t.number,
-  results: t.array(sloDefinitionAndHealthSchema),
+  results: t.array(sloDefinitionWithHealthSchema),
 });
 
 type FindSLODefinitionsParams = t.TypeOf<typeof findSloDefinitionsParamsSchema.props.query>;

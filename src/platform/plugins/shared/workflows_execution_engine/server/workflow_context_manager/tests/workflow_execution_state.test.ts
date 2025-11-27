@@ -346,31 +346,6 @@ describe('WorkflowExecutionState', () => {
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledTimes(1);
       expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledTimes(2); // create the first step execution and then update
     });
-
-    it('should sync workflow execution with latest from repository', async () => {
-      workflowExecutionRepository.getWorkflowExecutionById = jest.fn().mockResolvedValue({
-        id: 'test-workflow-execution-id',
-        status: ExecutionStatus.CANCELLED,
-        cancelledAt: '2025-08-05T20:02:00.000Z',
-        cancelledBy: 'user-123',
-      } as EsWorkflowExecution);
-      underTest.updateWorkflowExecution({
-        status: ExecutionStatus.SKIPPED,
-      });
-
-      await underTest.flush();
-
-      expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
-        'test-workflow-execution-id',
-        undefined
-      );
-      expect(underTest.getWorkflowExecution()).toEqual({
-        id: 'test-workflow-execution-id',
-        status: ExecutionStatus.CANCELLED,
-        cancelledAt: '2025-08-05T20:02:00.000Z',
-        cancelledBy: 'user-123',
-      } as EsWorkflowExecution);
-    });
   });
 
   describe('getStepExecutionsByStepId', () => {

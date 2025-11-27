@@ -45,6 +45,7 @@ export interface AssistantResponse {
    * The text message from the assistant.
    */
   message: string;
+  structured_output?: object;
 }
 
 export enum ConversationRoundStepType {

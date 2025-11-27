@@ -172,6 +172,20 @@ export default function ({ getService }: FtrProviderContext) {
         });
     }
 
+    function scheduleTaskWithFakeRequest(
+      task: Partial<ConcreteTaskInstance | DeprecatedConcreteTaskInstance>
+    ): Promise<SerializedConcreteTaskInstance> {
+      return supertest
+        .post('/api/sample_tasks/schedule_with_fake_request')
+        .set('kbn-xsrf', 'xxx')
+        .send({ task })
+        .expect(200)
+        .then((response: { body: SerializedConcreteTaskInstance }) => {
+          log.debug(`Task Scheduled: ${response.body.id}`);
+          return response.body;
+        });
+    }
+
     function runTaskSoon(task: { id: string }, force: boolean = false) {
       return supertest
         .post('/api/sample_tasks/run_soon')
@@ -645,6 +659,47 @@ export default function ({ getService }: FtrProviderContext) {
       ).eql(0);
 
       expect(queryResult.body.apiKeys.length).eql(apiKeysLength);
+    });
+
+    it('should schedule tasks with fake request if request is provided', async () => {
+      let queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      const apiKeysLength = queryResult.body.apiKeys.length;
+
+      await scheduleTaskWithFakeRequest({
+        id: 'test-task-for-sample-task-plugin-to-test-task-api-key',
+        taskType: 'sampleTask',
+        params: {},
+      });
+
+      const result = await currentTask('test-task-for-sample-task-plugin-to-test-task-api-key');
+
+      expect(result.apiKey).not.empty();
+      expect(result.userScope?.apiKeyCreatedByUser).to.be(true);
+
+      queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      // should be one new api key generated in the route
+      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+
+      await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
+
+      queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      // api key should not have been invalidated when the task was deleted
+      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
     });
 
     it('should return a task run result when asked to run a task now', async () => {

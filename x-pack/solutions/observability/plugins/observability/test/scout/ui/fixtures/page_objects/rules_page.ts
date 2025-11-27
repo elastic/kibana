@@ -168,6 +168,34 @@ export class RulesPage {
     await expect(this.ruleTypeModal).toBeHidden({ timeout: 5000 });
   }
 
+  /**
+   * Gets the Rules Table container locator
+   */
+  public get rulesTableContainer() {
+    return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULES_TABLE_CONTAINER);
+  }
+
+  /**
+   * Gets the inner Rules Table locator
+   */
+  public get rulesTable() {
+    return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULES_TABLE);
+  }
+
+  /**
+   * Gets the non-editable rules locator
+   */
+  public getNonEditableRules() {
+    return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULE_ROW_NON_EDITABLE);
+  }
+
+  /**
+   * Gets the editable rules locator
+   */
+  public getEditableRules() {
+    return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULE_ROW);
+  }
+
   // Logs Tab methods
   /**
    * Gets the logs tab button locator
