@@ -198,7 +198,9 @@ export const streamRoutingMachine = setup({
               type: 'routingSamples.updateCondition',
               condition: event.toggle
                 ? event.condition
-                : context.routing.find((rule) => rule.id === context.currentRuleId)?.where,
+                : context.currentRuleId
+                ? selectCurrentRule(context)?.where
+                : undefined,
             })),
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.setDocumentMatchFilter',
