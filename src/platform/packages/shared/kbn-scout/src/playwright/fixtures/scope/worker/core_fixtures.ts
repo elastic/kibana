@@ -22,6 +22,7 @@ import {
   createCustomRole,
   ElasticsearchRoleDescriptor,
   KibanaRole,
+  isElasticsearchRole,
 } from '../../../../common/services';
 import type { ScoutTestOptions } from '../../../types';
 import type { ScoutTestConfig } from '.';
