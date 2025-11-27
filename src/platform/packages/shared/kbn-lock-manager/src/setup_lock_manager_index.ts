@@ -35,7 +35,16 @@ export async function removeLockIndexWithIncorrectMappings(
     return;
   }
 
-  const { mappings } = res[LOCKS_CONCRETE_INDEX_NAME];
+  const indexNames = Object.keys(res);
+  if (indexNames.length === 0) {
+    logger.debug(`No mappings found for "${LOCKS_CONCRETE_INDEX_NAME}"`);
+    return;
+  }
+  const { mappings } = res[indexNames[0]];
+  if (!mappings) {
+    logger.debug(`Mappings object is empty for "${LOCKS_CONCRETE_INDEX_NAME}"`);
+    return;
+  }
   const hasIncorrectMappings =
     mappings.properties?.token?.type !== 'keyword' ||
     mappings.properties?.expiresAt?.type !== 'date';
