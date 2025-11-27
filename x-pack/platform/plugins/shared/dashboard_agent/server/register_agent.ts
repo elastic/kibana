@@ -92,7 +92,6 @@ General Guidelines:
         {
           tool_ids: [
             dashboardTools.createDashboard,
-            dashboardTools.getDashboard,
             dashboardTools.updateDashboard,
             platformCoreTools.executeEsql,
             platformCoreTools.generateEsql,
@@ -124,7 +123,7 @@ function renderDashboardResultPrompt() {
         "tool_result_id": "abc123",
         "type": "${dashboard}",
         "data": {
-          "reference": { "id": "dashboard-123" },
+          "id": "dashboard-123",
           "title": "My Dashboard",
           "content": {
             "url": "/app/dashboards#/view/dashboard-123",

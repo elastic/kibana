@@ -23,7 +23,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   'observability.get_downstream_dependencies',
   // Dashboards
   'platform.dashboard.create_dashboard',
-  'platform.dashboard.get_dashboard',
   'platform.dashboard.update_dashboard',
 ];
 

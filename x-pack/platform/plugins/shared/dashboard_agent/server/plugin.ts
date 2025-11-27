@@ -15,7 +15,7 @@ import type {
   DashboardAgentPluginStart,
 } from './types';
 import { registerDashboardAgent } from './register_agent';
-import { createDashboardTool, getDashboardTool, updateDashboardTool } from './tools';
+import { createDashboardTool, updateDashboardTool } from './tools';
 
 export class DashboardAgentPlugin
   implements
@@ -50,12 +50,6 @@ export class DashboardAgentPlugin
 
       setupDeps.onechat.tools.register(
         createDashboardTool(startDeps.dashboard, coreStart.savedObjects, {
-          dashboardLocator,
-          spaces: startDeps.spaces,
-        })
-      );
-      setupDeps.onechat.tools.register(
-        getDashboardTool(startDeps.dashboard, coreStart.savedObjects, {
           dashboardLocator,
           spaces: startDeps.spaces,
         })

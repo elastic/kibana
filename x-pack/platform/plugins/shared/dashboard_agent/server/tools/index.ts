@@ -6,5 +6,4 @@
  */
 
 export { createDashboardTool } from './create_dashboard';
-export { getDashboardTool } from './get_dashboard';
 export { updateDashboardTool } from './update_dashboard';
