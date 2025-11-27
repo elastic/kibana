@@ -17,6 +17,8 @@ import type {
   TableSuggestion,
   TableChangeType,
 } from '@kbn/lens-common';
+import { Parser, Walker, isFunctionExpression } from '@kbn/esql-ast';
+import type { AggregateQuery } from '@kbn/es-query';
 import { getColorMappingDefaults } from '../../utils';
 import type { XYState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
 import { visualizationSubtypes, defaultSeriesType } from './types';
@@ -51,6 +53,7 @@ export function getSuggestions({
   mainPalette,
   isFromContext,
   allowMixed,
+  query,
 }: SuggestionRequest<XYState>): Array<VisualizationSuggestion<XYState>> {
   const incompleteTable =
     !table.isMultiRow ||
@@ -76,7 +79,8 @@ export function getSuggestions({
     state,
     subVisualizationId as SeriesType | undefined,
     mainPalette,
-    allowMixed
+    allowMixed,
+    query
   );
 
   if (Array.isArray(suggestions)) {
@@ -92,7 +96,8 @@ function getSuggestionForColumns(
   currentState?: XYState,
   seriesType?: SeriesType,
   mainPalette?: SuggestionRequest['mainPalette'],
-  allowMixed?: boolean
+  allowMixed?: boolean,
+  query?: AggregateQuery
 ): VisualizationSuggestion<XYState> | Array<VisualizationSuggestion<XYState>> | undefined {
   const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
   const sharedArgs = {
@@ -104,6 +109,7 @@ function getSuggestionForColumns(
     requestedSeriesType: seriesType,
     mainPalette,
     allowMixed,
+    query,
   };
 
   if (buckets.length === 1 || buckets.length === 2) {
@@ -181,7 +187,6 @@ function prioritizeColumns(columns: TableSuggestionColumn[]) {
     (a, b) => columnSortOrder[a.operation.dataType] - columnSortOrder[b.operation.dataType]
   );
 }
-
 function getSuggestionsForLayer({
   layerId,
   changeType,
@@ -194,6 +199,7 @@ function getSuggestionsForLayer({
   requestedSeriesType,
   mainPalette,
   allowMixed,
+  query,
 }: {
   layerId: string;
   changeType: TableChangeType;
@@ -206,10 +212,11 @@ function getSuggestionsForLayer({
   requestedSeriesType?: SeriesType;
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
+  query?: AggregateQuery;
 }): VisualizationSuggestion<XYState> | Array<VisualizationSuggestion<XYState>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
   const seriesType: SeriesType =
-    requestedSeriesType || getSeriesType(currentState, layerId, xValue);
+    requestedSeriesType || getSeriesType(currentState, layerId, xValue, query);
 
   const options = {
     currentState,
@@ -224,6 +231,7 @@ function getSuggestionsForLayer({
     // only use palette if there is a breakdown by dimension
     mainPalette: splitBy ? mainPalette : undefined,
     allowMixed,
+    query,
   };
 
   // handles the simplest cases, acting as a chart switcher
@@ -235,8 +243,8 @@ function getSuggestionsForLayer({
           ...buildSuggestion({
             ...options,
             seriesType: visType.id as SeriesType,
-            // explicitly hide everything besides stacked bars, use default hiding logic for stacked bars
-            hide: visType.id === 'bar_stacked' ? undefined : true,
+            // explicitly hide everything besides stacked bars and line charts, use default hiding logic for stacked bars and line charts
+            hide: visType.id === 'bar_stacked' || visType.id === 'line' ? undefined : true,
           }),
           title: visType.label,
         };
@@ -421,13 +429,17 @@ function altSeriesType(oldSeriesType: SeriesType) {
 function getSeriesType(
   currentState: XYState | undefined,
   layerId: string,
-  xValue?: TableSuggestionColumn
+  xValue?: TableSuggestionColumn,
+  query?: AggregateQuery
 ): SeriesType {
   const oldLayer = getExistingLayer(currentState, layerId);
   const oldLayerSeriesType = oldLayer && isDataLayer(oldLayer) ? oldLayer.seriesType : false;
+  const shouldPreferLine = shouldPreferLineForESQL({ query, xValue });
 
   const closestSeriesType =
-    oldLayerSeriesType || (currentState && currentState.preferredSeriesType) || defaultSeriesType;
+    oldLayerSeriesType ||
+    (currentState && currentState.preferredSeriesType) ||
+    (shouldPreferLine ? 'line' : defaultSeriesType);
 
   // Attempt to keep the seriesType consistent on initial add of a layer
   // Ordinal scales should always use a bar because there is no interpolation between buckets
@@ -488,6 +500,7 @@ function buildSuggestion({
   hide,
   mainPalette,
   allowMixed,
+  query,
 }: {
   currentState: XYState | undefined;
   seriesType: SeriesType;
@@ -501,6 +514,7 @@ function buildSuggestion({
   hide?: boolean;
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
+  query?: AggregateQuery;
 }) {
   if (seriesType.includes('percentage') && xValue?.operation.scale === 'ordinal' && !splitBy) {
     splitBy = xValue;
@@ -534,7 +548,8 @@ function buildSuggestion({
   };
 
   const hasDateHistogramDomain =
-    xValue?.operation.dataType === 'date' && xValue.operation.scale === 'interval';
+    xValue?.operation.dataType === 'date' &&
+    (xValue.operation.scale === 'interval' || hasESQLBucketFunction(query));
 
   // Maintain consistent order for any layers that were saved
   const keptLayers: XYLayerConfig[] = currentState
@@ -638,4 +653,57 @@ function getScore(
 
 function getExistingLayer(currentState: XYState | undefined, layerId: string) {
   return currentState && currentState.layers.find((layer) => layer.layerId === layerId);
+}
+
+const XY_LINE_INCOMPATIBLE_AGGS = ['count', 'count_distinct', 'cardinality', 'bucket'];
+function parseESQLQuery(query?: AggregateQuery) {
+  if (!query?.esql) {
+    return undefined;
+  }
+
+  try {
+    const { root } = Parser.parse(query.esql);
+    return root;
+  } catch (error) {
+    return undefined;
+  }
+}
+
+function hasESQLBucketFunction(query?: AggregateQuery) {
+  const root = parseESQLQuery(query);
+  if (!root) {
+    return false;
+  }
+  return Walker.hasFunction(root, 'bucket');
+}
+function shouldPreferLineForESQL({
+  query,
+  xValue,
+}: {
+  query?: AggregateQuery;
+  xValue?: TableSuggestionColumn;
+}): boolean {
+  const root = parseESQLQuery(query);
+  if (!root) {
+    return false;
+  }
+
+  const statsCommands = Walker.matchAll(root, { type: 'command', name: 'stats' });
+  if (statsCommands.length === 0) {
+    return false;
+  }
+
+  if (!Walker.hasFunction(statsCommands, 'bucket') || xValue?.operation.dataType !== 'date') {
+    return false;
+  }
+
+  const hasValidAggregations = Walker.findAll(
+    statsCommands,
+    (node) =>
+      isFunctionExpression(node) &&
+      node.subtype === 'variadic-call' &&
+      !XY_LINE_INCOMPATIBLE_AGGS.includes(node.name.toLowerCase())
+  );
+
+  return hasValidAggregations.length > 0;
 }

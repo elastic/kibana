@@ -25,6 +25,7 @@ import type {
   VisualizationState,
   DataViewsState,
 } from '@kbn/lens-common';
+import type { AggregateQuery } from '@kbn/es-query';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import type { LensDispatch } from '../../state_management';
 import { switchVisualization, applyChanges } from '../../state_management';
@@ -50,6 +51,7 @@ export function getSuggestions({
   dataViews,
   mainPalette,
   allowMixed,
+  query,
 }: {
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
@@ -63,6 +65,7 @@ export function getSuggestions({
   dataViews: DataViewsState;
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
+  query?: AggregateQuery;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
@@ -169,7 +172,8 @@ export function getSuggestions({
             visualizeTriggerFieldContext && 'isVisualizeAction' in visualizeTriggerFieldContext,
             activeData,
             allowMixed,
-            datasourceId
+            datasourceId,
+            query
           );
         });
     })
@@ -240,7 +244,8 @@ function getVisualizationSuggestions(
   isFromContext?: boolean,
   activeData?: Record<string, Datatable>,
   allowMixed?: boolean,
-  datasourceId?: string
+  datasourceId?: string,
+  query?: AggregateQuery
 ) {
   try {
     return visualization
@@ -254,6 +259,7 @@ function getVisualizationSuggestions(
         activeData,
         allowMixed,
         datasourceId,
+        query,
       })
       .map(({ state, ...visualizationSuggestion }) => ({
         ...visualizationSuggestion,

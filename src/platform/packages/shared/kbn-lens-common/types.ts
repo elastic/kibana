@@ -1189,6 +1189,7 @@ export interface SuggestionRequest<T = unknown> {
   activeData?: Record<string, Datatable>;
   allowMixed?: boolean;
   datasourceId?: string;
+  query?: AggregateQuery;
 }
 
 /**

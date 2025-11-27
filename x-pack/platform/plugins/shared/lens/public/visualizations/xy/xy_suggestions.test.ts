@@ -1399,4 +1399,222 @@ describe('xy_suggestions', () => {
       })
     );
   });
+
+  describe('ESQL query pattern detection for line chart preference', () => {
+    test('suggests line chart for ESQL query with date histogram and valid aggregations', () => {
+      const esqlQuery = {
+        esql: 'FROM index | STATS avg(bytes), max(memory) BY bucket(@timestamp, 1h)',
+      };
+
+      const currentState: XYState = {
+        legend: { isVisible: true, position: 'right' },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar_stacked',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'bar_stacked',
+            xAccessor: 'timestamp_bucket',
+            accessors: ['avg_bytes', 'max_memory'],
+            splitAccessor: undefined,
+          },
+        ],
+      };
+
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('avg_bytes'), numCol('max_memory'), dateCol('timestamp_bucket')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        keptLayerIds: ['first'],
+        state: currentState,
+        query: esqlQuery,
+      });
+
+      // Should suggest line chart as the preferred type
+      expect(suggestions).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            state: expect.objectContaining({
+              preferredSeriesType: 'line',
+            }),
+          }),
+        ])
+      );
+    });
+
+    test('does not suggest line chart for ESQL without STATS command', () => {
+      const esqlQuery = {
+        esql: 'FROM index | WHERE bytes > 100',
+      };
+
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('bytes'), dateCol('date')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        keptLayerIds: [],
+        query: esqlQuery,
+      });
+
+      const lineSuggestion = suggestions.find((s) => s.state.preferredSeriesType === 'line');
+      // Line should not be preferred (could still exist but shouldn't be the default)
+      expect(lineSuggestion?.hide).toBe(true);
+    });
+
+    test('does not suggest line chart for ESQL STATS without BY clause', () => {
+      const esqlQuery = {
+        esql: 'FROM index | STATS avg(bytes), max(memory)',
+      };
+
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('avg_bytes'), numCol('max_memory')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        keptLayerIds: [],
+        query: esqlQuery,
+      });
+
+      const lineSuggestion = suggestions.find((s) => s.state.preferredSeriesType === 'line');
+      expect(lineSuggestion?.hide).toBe(true);
+    });
+
+    test('does not suggest line chart for ESQL without bucket function in BY clause', () => {
+      const esqlQuery = {
+        esql: 'FROM index | STATS avg(bytes) BY status',
+      };
+
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('avg_bytes'), strCol('status')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        keptLayerIds: [],
+        query: esqlQuery,
+      });
+
+      const lineSuggestion = suggestions.find((s) => s.state.preferredSeriesType === 'line');
+      expect(lineSuggestion?.hide).toBe(true);
+    });
+
+    test('does not suggest line chart for ESQL with only histogram-type aggregations', () => {
+      const esqlQuery = {
+        esql: 'FROM index | STATS count(), count_distinct(ip) BY bucket(@timestamp, 1h)',
+      };
+
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('count'), numCol('unique_ips'), dateCol('timestamp_bucket')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        keptLayerIds: [],
+        query: esqlQuery,
+      });
+
+      const lineSuggestion = suggestions.find((s) => s.state.preferredSeriesType === 'line');
+      expect(lineSuggestion?.hide).toBe(true);
+    });
+
+    test('suggests line chart for ESQL with mixed aggregations including non-histogram types', () => {
+      const esqlQuery = {
+        esql: 'FROM index | STATS count(), avg(bytes), sum(memory) BY bucket(@timestamp, 1h)',
+      };
+
+      const currentState: XYState = {
+        legend: { isVisible: true, position: 'right' },
+        valueLabels: 'hide',
+        preferredSeriesType: 'bar_stacked',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'bar_stacked',
+            xAccessor: 'timestamp_bucket',
+            accessors: ['count', 'avg_bytes', 'sum_memory'],
+            splitAccessor: undefined,
+          },
+        ],
+      };
+
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [
+            numCol('count'),
+            numCol('avg_bytes'),
+            numCol('sum_memory'),
+            dateCol('timestamp_bucket'),
+          ],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        keptLayerIds: ['first'],
+        state: currentState,
+        query: esqlQuery,
+      });
+
+      // Should suggest line chart because of avg and sum aggregations
+      expect(suggestions).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            state: expect.objectContaining({
+              preferredSeriesType: 'line',
+            }),
+          }),
+        ])
+      );
+    });
+
+    test('handles malformed ESQL query gracefully', () => {
+      const esqlQuery = {
+        esql: 'FROM index | STATS this is not valid syntax',
+      };
+
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('bytes'), dateCol('date')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        keptLayerIds: [],
+        query: esqlQuery,
+      });
+
+      // Should not crash and should return suggestions
+      expect(suggestions.length).toBeGreaterThan(0);
+    });
+
+    test('handles missing query parameter', () => {
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('bytes'), dateCol('date')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        keptLayerIds: [],
+        query: undefined,
+      });
+
+      // Should not crash and should return default suggestions
+      expect(suggestions.length).toBeGreaterThan(0);
+      const barStackedSuggestion = suggestions.find(
+        (s) => s.state.preferredSeriesType === 'bar_stacked'
+      );
+      expect(barStackedSuggestion).toBeDefined();
+    });
+  });
 });

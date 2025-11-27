@@ -85,6 +85,8 @@ export const suggestionsApi = ({
 
   const initialVisualization = visualizationMap?.[Object.keys(visualizationMap)[0]] || null;
 
+  const query = context && 'query' in context ? context.query : undefined;
+
   // find the active visualizations from the context
   const suggestions = getSuggestions({
     datasourceMap,
@@ -94,6 +96,7 @@ export const suggestionsApi = ({
     visualizationState: undefined,
     visualizeTriggerFieldContext: context,
     dataViews,
+    query,
   });
   if (!suggestions.length) return [];
 
@@ -117,6 +120,7 @@ export const suggestionsApi = ({
     activeVisualization: visualizationMap[activeVisualization.visualizationId],
     visualizationState: activeVisualization.visualizationState,
     dataViews,
+    query,
   }).filter(
     (sug) =>
       // Datatables are always return as hidden suggestions
