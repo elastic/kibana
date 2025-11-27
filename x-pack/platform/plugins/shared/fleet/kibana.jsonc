@@ -44,6 +44,7 @@
       "discover",
       "ingestPipelines",
       "automaticImport",
+      "automaticImportVTwo",
       "alerting"
     ],
     "requiredBundles": [

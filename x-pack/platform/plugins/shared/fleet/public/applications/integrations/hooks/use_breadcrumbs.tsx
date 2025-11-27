@@ -50,6 +50,14 @@ const breadcrumbGetters: {
       }),
     },
   ],
+  integration_create_v2: () => [
+    BASE_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.createIntegrationV2PageTitle', {
+        defaultMessage: 'Create integration V2',
+      }),
+    },
+  ],
   integration_details_overview: ({ pkgTitle }) => [BASE_BREADCRUMB, { text: pkgTitle }],
   integration_policy_edit: ({ pkgTitle, pkgkey, policyName }) => [
     BASE_BREADCRUMB,
