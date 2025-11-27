@@ -5,13 +5,4 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-
-const AlertRt = rt.strict({
-  id: rt.string,
-  index: rt.string,
-  attached_at: rt.string,
-});
-
-export const AlertResponseRt = rt.array(AlertRt);
-export type AlertResponse = rt.TypeOf<typeof AlertResponseRt>;
+export { createGapAutoFillSchedulerSchema } from './create_gap_auto_fill_scheduler_schema';
