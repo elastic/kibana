@@ -674,11 +674,13 @@ function PrimaryMetricEditor({ state, setState, datasource, accessor }: SubProps
     return state.color || getDefaultColor(state, isMetricNumeric);
   }, [state, isMetricNumeric]);
 
-  if (accessor == null) return null;
+  if (accessor == null) {
+    return null;
+  }
 
   // Show static color control in Primary Metric editor when is not numeric.
   // Non-numeric metrics do not support the "Supporting visualization" section
-  const showStaticColorControl = !isMetricNumeric && !state.palette;
+  const showStaticColorControl = !isMetricNumeric;
 
   return (
     <div className="lnsIndexPatternDimensionEditor--padded">
