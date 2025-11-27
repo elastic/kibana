@@ -11,7 +11,7 @@ import {
   isDisabledLifecycleFailureStore,
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
-import type { FailureStoreFormData } from '@kbn/failure-store-modal/src/components/failure_store_modal/failure_store_modal';
+import type { FailureStoreFormData } from '@kbn/failure-store-modal';
 import { useFailureStoreDefaultRetention } from './use_failure_store_default_retention';
 
 export function transformFailureStoreConfig(update: FailureStoreFormData) {

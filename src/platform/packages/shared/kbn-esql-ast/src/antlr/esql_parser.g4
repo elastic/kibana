@@ -216,6 +216,11 @@ identifierOrParameter
     | doubleParameter
     ;
 
+stringOrParameter
+    : string
+    | parameter
+    ;
+
 limitCommand
     : LIMIT constant
     ;
