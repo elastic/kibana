@@ -209,6 +209,8 @@ const buildEsqlQuery = ({
     entity.target.id IS NOT NULL, "entity",
     null
   )
+| MV_EXPAND actorEntityId
+| MV_EXPAND targetEntityId
 ${
   isEnrichPolicyExists
     ? `

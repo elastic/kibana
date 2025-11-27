@@ -286,9 +286,6 @@
         ]
       },
       "service": {
-        "entity": {
-          "id": "api-service@your-project-id.iam.gserviceaccount.com"
-        },
         "name": "iam.googleapis.com"
       },
       "entity": {
