@@ -76,7 +76,8 @@ steps:
       - command: .buildkite/scripts/steps/entity_store_performance/run_performance_tests_orchestrator.sh
         label: 'Run Entity Store Performance Tests'
         env:
-          SECURITY_DOCS_GEN_BRANCH: dg-update-entity-store-perf #TODO: Remove this after debugging
+          # SECURITY_DOCS_GEN_BRANCH: branch-name # Optional: checkout a specific branch from security-documents-generator repo (default: main branch)
+          # SECURITY_DOCS_GEN_PR: 123 # Optional: checkout a specific PR from security-documents-generator repo (alternative to SECURITY_DOCS_GEN_BRANCH)
           PERF_INTERVAL: 100
           PERF_COUNT: 1
           PERF_SAMPLING_INTERVAL: 1
