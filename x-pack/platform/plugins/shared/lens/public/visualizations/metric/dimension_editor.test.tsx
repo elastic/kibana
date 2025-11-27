@@ -326,11 +326,11 @@ describe('dimension editor', () => {
       const getSelectedPalette = (name: string) =>
         screen.queryByRole('button', { name: new RegExp(name, 'i') });
 
-      const colorModeGroup = screen.getByRole('group', { name: /Color by value/i });
+      const colorModeGroup = screen.getByRole('group', { name: /Color mode/i });
       const clickOnColorMode = async (mode: 'none' | 'static' | 'dynamic') => {
         const colorByValueOption = getByTitle(colorModeGroup, mode, { exact: false });
         if (!colorByValueOption) {
-          throw new Error(`Supported color by value ${mode} not found`);
+          throw new Error(`Supported color mode ${mode} not found`);
         }
         await userEvent.click(colorByValueOption);
       };
@@ -1230,7 +1230,7 @@ describe('dimension editor', () => {
           expect(mockSetState).toHaveBeenCalledWith({ ...mockState, applyColorTo: 'background' });
         });
 
-        it('should show help message when color by value static, supporting visualization is panel, apply color to value', () => {
+        it('should show help message when color mode static, supporting visualization is panel, apply color to value', () => {
           renderAdditionalSectionEditor({
             state: {
               ...stateWOTrend,
@@ -1246,7 +1246,7 @@ describe('dimension editor', () => {
           );
         });
 
-        it('should show help message when color by value dynamic, supporting visualization is panel, apply color to value', () => {
+        it('should show help message when color mode dynamic, supporting visualization is panel, apply color to value', () => {
           renderAdditionalSectionEditor({
             state: {
               ...stateWOTrend,
@@ -1308,7 +1308,7 @@ describe('dimension editor', () => {
         const { staticColorPicker } = renderAdditionalSectionEditor({
           state: {
             ...metricAccessorState,
-            palette: undefined, // color by value static
+            palette: undefined,
             trendlineLayerId: undefined,
             showBar: false,
             color: undefined,
