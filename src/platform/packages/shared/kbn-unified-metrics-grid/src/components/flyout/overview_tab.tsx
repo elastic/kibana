@@ -177,6 +177,17 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
             </strong>
           </EuiText>
           <EuiSpacer size="xs" />
+          <div className="euiScreenReaderOnly" aria-live="assertive" aria-atomic="true">
+            {i18n.translate('metricsExperience.overviewTab.dimensionsAnnouncement', {
+              defaultMessage: 'Showing {count} dimensions on page {page} of {total}. {dimensions}',
+              values: {
+                count: paginatedDimensions.length,
+                page: activePage + 1,
+                total: pageCount,
+                dimensions: paginatedDimensions.map((d) => `${d.name}`).join('. '),
+              },
+            })}
+          </div>
           <EuiListGroup
             data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsList"
             listItems={dimensionListItems}
