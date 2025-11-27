@@ -9,15 +9,13 @@ import { EuiPanel, useEuiTheme, euiTextBreakWord, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ROUNDED_BORDER_RADIUS_LARGE } from '../conversation.styles';
 
 const labels = {
   userMessage: i18n.translate('xpack.onechat.round.userInput', {
     defaultMessage: 'User input',
   }),
 };
-
-// TODO: migrate to EUI
-const borderRadius = '12px 12px 0 12px';
 
 interface RoundInputProps {
   input: string;
@@ -40,7 +38,7 @@ export const RoundInput = ({ input }: RoundInputProps) => {
     max-inline-size: 90%;
     background: ${backgroundColorStyle.background};
     ${euiTextBreakWord()}
-    border-radius: ${borderRadius};
+    border-radius: ${`${ROUNDED_BORDER_RADIUS_LARGE} ${ROUNDED_BORDER_RADIUS_LARGE} 0 ${ROUNDED_BORDER_RADIUS_LARGE}`};
   `;
 
   return (

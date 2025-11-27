@@ -24,6 +24,7 @@ export const fullWidthAndHeightStyles = css`
 `;
 
 const ROUNDED_BORDER_RADIUS = '6px';
+export const ROUNDED_BORDER_RADIUS_LARGE = '12px';
 
 export const roundedBorderRadiusStyles = css`
   border-radius: ${ROUNDED_BORDER_RADIUS};
