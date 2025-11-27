@@ -173,7 +173,6 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
         {Boolean(managedRuleKeys.length) && (
           <>
             <EuiCallOut
-              announceOnMount
               title={i18n.translate(
                 'xpack.security.management.apiKeys.deleteApiKey.confirmModal.kibanaManagedWarningTitle',
                 {
