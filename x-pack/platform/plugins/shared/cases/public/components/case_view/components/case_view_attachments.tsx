@@ -73,6 +73,7 @@ export const CaseViewAttachments = ({
           append: tab.badge,
           isFocused: tab.id === activeTab,
           onFocusBadge: false,
+          showIcons: false,
           onClick: () => {
             navigateToCaseView({ detailName: caseData.id, tabId: tab.id });
           },
