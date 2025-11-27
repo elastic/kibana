@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.206Z
+ * Generated at: 2025-11-27T07:43:24.866Z
  * Source: elasticsearch-specification repository, operations: count, count-1, count-2, count-3
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

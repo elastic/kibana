@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.248Z
+ * Generated at: 2025-11-27T07:43:24.911Z
  * Source: elasticsearch-specification repository, operations: security-create-service-token, security-create-service-token-1, security-create-service-token-2
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

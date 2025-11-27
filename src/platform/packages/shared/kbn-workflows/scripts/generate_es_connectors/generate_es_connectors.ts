@@ -234,7 +234,7 @@ function generateContractMeta(
     getResponseSchemaName(operationId),
   ]);
   const paramsSchemaString = generateParamsSchemaString(operationIds, {});
-  const outputSchemaString = generateOutputSchemaString(operationIds);
+  const outputSchemaString = generateOutputSchemaString(operations, openApiDocument);
 
   return {
     connectorGroup: 'internal',

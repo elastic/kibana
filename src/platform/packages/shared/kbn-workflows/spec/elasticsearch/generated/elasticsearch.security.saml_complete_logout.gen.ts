@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.253Z
+ * Generated at: 2025-11-27T07:43:24.917Z
  * Source: elasticsearch-specification repository, operations: security-saml-complete-logout
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
@@ -18,10 +18,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import {
-  security_saml_complete_logout_request,
-  security_saml_complete_logout_response,
-} from './es_openapi_zod.gen';
+import { security_saml_complete_logout_request } from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
@@ -61,5 +58,5 @@ The caller of this API must prepare the request accordingly so that this API can
     ...getShapeAt(security_saml_complete_logout_request, 'path'),
     ...getShapeAt(security_saml_complete_logout_request, 'query'),
   }),
-  outputSchema: security_saml_complete_logout_response,
+  outputSchema: z.optional(z.looseObject({})),
 };

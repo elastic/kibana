@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.232Z
+ * Generated at: 2025-11-27T07:43:24.894Z
  * Source: elasticsearch-specification repository, operations: logstash-get-pipeline, logstash-get-pipeline-1
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

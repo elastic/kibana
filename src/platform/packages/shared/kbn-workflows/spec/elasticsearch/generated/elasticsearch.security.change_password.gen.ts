@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.247Z
+ * Generated at: 2025-11-27T07:43:24.910Z
  * Source: elasticsearch-specification repository, operations: security-change-password, security-change-password-1, security-change-password-2, security-change-password-3
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

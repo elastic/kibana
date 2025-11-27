@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.234Z
+ * Generated at: 2025-11-27T07:43:24.896Z
  * Source: elasticsearch-specification repository, operations: ml-get-buckets, ml-get-buckets-1, ml-get-buckets-2, ml-get-buckets-3
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

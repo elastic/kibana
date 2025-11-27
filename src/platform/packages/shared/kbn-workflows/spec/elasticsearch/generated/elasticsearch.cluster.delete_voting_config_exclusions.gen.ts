@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.193Z
+ * Generated at: 2025-11-27T07:43:24.860Z
  * Source: elasticsearch-specification repository, operations: cluster-delete-voting-config-exclusions
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
@@ -18,10 +18,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import {
-  cluster_delete_voting_config_exclusions_request,
-  cluster_delete_voting_config_exclusions_response,
-} from './es_openapi_zod.gen';
+import { cluster_delete_voting_config_exclusions_request } from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
@@ -52,5 +49,5 @@ Remove master-eligible nodes from the voting configuration exclusion list.
     ...getShapeAt(cluster_delete_voting_config_exclusions_request, 'path'),
     ...getShapeAt(cluster_delete_voting_config_exclusions_request, 'query'),
   }),
-  outputSchema: cluster_delete_voting_config_exclusions_response,
+  outputSchema: z.optional(z.looseObject({})),
 };

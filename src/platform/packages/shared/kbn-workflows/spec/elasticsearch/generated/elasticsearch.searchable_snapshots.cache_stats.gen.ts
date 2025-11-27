@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.247Z
+ * Generated at: 2025-11-27T07:43:24.909Z
  * Source: elasticsearch-specification repository, operations: searchable-snapshots-cache-stats, searchable-snapshots-cache-stats-1
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

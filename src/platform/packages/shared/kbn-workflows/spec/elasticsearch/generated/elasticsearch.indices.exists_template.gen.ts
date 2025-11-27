@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.218Z
+ * Generated at: 2025-11-27T07:43:24.875Z
  * Source: elasticsearch-specification repository, operations: indices-exists-template
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
@@ -18,10 +18,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import {
-  indices_exists_template_request,
-  indices_exists_template_response,
-} from './es_openapi_zod.gen';
+import { indices_exists_template_request } from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
@@ -55,5 +52,5 @@ IMPORTANT: This documentation is about legacy index templates, which are depreca
     ...getShapeAt(indices_exists_template_request, 'path'),
     ...getShapeAt(indices_exists_template_request, 'query'),
   }),
-  outputSchema: indices_exists_template_response,
+  outputSchema: z.optional(z.looseObject({})),
 };

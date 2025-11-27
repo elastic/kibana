@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.242Z
+ * Generated at: 2025-11-27T07:43:24.905Z
  * Source: elasticsearch-specification repository, operations: ping
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
@@ -18,7 +18,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { ping_request, ping_response } from './es_openapi_zod.gen';
+import { ping_request } from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
@@ -48,5 +48,5 @@ Get information about whether the cluster is running.
     ...getShapeAt(ping_request, 'path'),
     ...getShapeAt(ping_request, 'query'),
   }),
-  outputSchema: ping_response,
+  outputSchema: z.optional(z.looseObject({})),
 };

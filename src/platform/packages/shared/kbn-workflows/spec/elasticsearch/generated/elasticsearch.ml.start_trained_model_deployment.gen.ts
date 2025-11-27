@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.239Z
+ * Generated at: 2025-11-27T07:43:24.902Z
  * Source: elasticsearch-specification repository, operations: ml-start-trained-model-deployment
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

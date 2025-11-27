@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.242Z
+ * Generated at: 2025-11-27T07:43:24.905Z
  * Source: elasticsearch-specification repository, operations: put-script, put-script-1, put-script-2, put-script-3
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.261Z
+ * Generated at: 2025-11-27T07:43:24.927Z
  * Source: elasticsearch-specification repository, operations: watcher-execute-watch, watcher-execute-watch-1, watcher-execute-watch-2, watcher-execute-watch-3
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

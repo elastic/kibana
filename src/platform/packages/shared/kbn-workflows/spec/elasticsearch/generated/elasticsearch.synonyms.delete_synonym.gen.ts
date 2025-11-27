@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.258Z
+ * Generated at: 2025-11-27T07:43:24.922Z
  * Source: elasticsearch-specification repository, operations: synonyms-delete-synonym
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

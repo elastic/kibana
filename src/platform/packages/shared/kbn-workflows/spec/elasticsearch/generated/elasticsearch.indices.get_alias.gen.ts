@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.219Z
+ * Generated at: 2025-11-27T07:43:24.876Z
  * Source: elasticsearch-specification repository, operations: indices-get-alias, indices-get-alias-1, indices-get-alias-2, indices-get-alias-3
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.232Z
+ * Generated at: 2025-11-27T07:43:24.894Z
  * Source: elasticsearch-specification repository, operations: logstash-put-pipeline
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
@@ -18,10 +18,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import {
-  logstash_put_pipeline_request,
-  logstash_put_pipeline_response,
-} from './es_openapi_zod.gen';
+import { logstash_put_pipeline_request } from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
@@ -60,5 +57,5 @@ If the specified pipeline exists, it is replaced.
     ...getShapeAt(logstash_put_pipeline_request, 'path'),
     ...getShapeAt(logstash_put_pipeline_request, 'query'),
   }),
-  outputSchema: logstash_put_pipeline_response,
+  outputSchema: z.optional(z.looseObject({})),
 };

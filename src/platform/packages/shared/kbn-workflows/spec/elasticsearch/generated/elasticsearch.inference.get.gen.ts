@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.226Z
+ * Generated at: 2025-11-27T07:43:24.886Z
  * Source: elasticsearch-specification repository, operations: inference-get, inference-get-1, inference-get-2
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.260Z
+ * Generated at: 2025-11-27T07:43:24.925Z
  * Source: elasticsearch-specification repository, operations: transform-preview-transform, transform-preview-transform-1, transform-preview-transform-2, transform-preview-transform-3
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

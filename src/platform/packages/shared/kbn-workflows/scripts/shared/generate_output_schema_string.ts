@@ -7,11 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { OpenAPIV3 } from 'openapi-types';
+import type { JSONSchema } from '@kbn/zod/v4/core';
 import { getSchemaNamePrefix } from './get_schema_name_prefix';
+import { getOrResolveObject } from '../../common/utils';
 
-export function generateOutputSchemaString(operationIds: string[]): string {
+export function generateOutputSchemaString(
+  operations: OpenAPIV3.OperationObject[],
+  openApiDocument: OpenAPIV3.Document
+): string {
+  const operationsWithNonEmptyResponseSchemas = operations.filter((operation) => {
+    const response = getOrResolveObject<OpenAPIV3.ResponseObject>(
+      operation.responses?.[200] as JSONSchema.JSONSchema,
+      openApiDocument as unknown as JSONSchema.JSONSchema
+    );
+    return (
+      response && response.content && response.content['application/json']?.schema !== undefined
+    );
+  });
   // TODO: add error schema
-  return generateSuccessSchemaString(operationIds);
+  return generateSuccessSchemaString(
+    operationsWithNonEmptyResponseSchemas.map((operation) => operation.operationId ?? '')
+  );
 }
 
 function generateSuccessSchemaString(operationIds: string[]): string {

@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.237Z
+ * Generated at: 2025-11-27T07:43:24.901Z
  * Source: elasticsearch-specification repository, operations: ml-preview-data-frame-analytics, ml-preview-data-frame-analytics-1, ml-preview-data-frame-analytics-2, ml-preview-data-frame-analytics-3
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

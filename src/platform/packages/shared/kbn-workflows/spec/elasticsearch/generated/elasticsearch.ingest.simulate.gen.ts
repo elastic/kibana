@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.231Z
+ * Generated at: 2025-11-27T07:43:24.893Z
  * Source: elasticsearch-specification repository, operations: ingest-simulate, ingest-simulate-1, ingest-simulate-2, ingest-simulate-3
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

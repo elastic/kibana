@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.218Z
+ * Generated at: 2025-11-27T07:43:24.875Z
  * Source: elasticsearch-specification repository, operations: indices-exists
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
@@ -18,7 +18,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { indices_exists_request, indices_exists_response } from './es_openapi_zod.gen';
+import { indices_exists_request } from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
@@ -56,5 +56,5 @@ Check if one or more indices, index aliases, or data streams exist.
     ...getShapeAt(indices_exists_request, 'path'),
     ...getShapeAt(indices_exists_request, 'query'),
   }),
-  outputSchema: indices_exists_response,
+  outputSchema: z.optional(z.looseObject({})),
 };

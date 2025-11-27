@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.250Z
+ * Generated at: 2025-11-27T07:43:24.913Z
  * Source: elasticsearch-specification repository, operations: security-get-service-accounts, security-get-service-accounts-1, security-get-service-accounts-2
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

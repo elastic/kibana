@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.251Z
+ * Generated at: 2025-11-27T07:43:24.914Z
  * Source: elasticsearch-specification repository, operations: security-has-privileges, security-has-privileges-1, security-has-privileges-2, security-has-privileges-3
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

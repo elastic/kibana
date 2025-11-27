@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.226Z
+ * Generated at: 2025-11-27T07:43:24.885Z
  * Source: elasticsearch-specification repository, operations: indices-validate-query, indices-validate-query-1, indices-validate-query-2, indices-validate-query-3
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

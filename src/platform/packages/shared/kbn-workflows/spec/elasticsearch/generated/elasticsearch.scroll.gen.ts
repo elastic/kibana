@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.245Z
+ * Generated at: 2025-11-27T07:43:24.907Z
  * Source: elasticsearch-specification repository, operations: scroll, scroll-1, scroll-2, scroll-3
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

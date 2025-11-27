@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.232Z
+ * Generated at: 2025-11-27T07:43:24.893Z
  * Source: elasticsearch-specification repository, operations: logstash-delete-pipeline
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
@@ -18,10 +18,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import {
-  logstash_delete_pipeline_request,
-  logstash_delete_pipeline_response,
-} from './es_openapi_zod.gen';
+import { logstash_delete_pipeline_request } from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
@@ -53,5 +50,5 @@ If the request succeeds, you receive an empty response with an appropriate statu
     ...getShapeAt(logstash_delete_pipeline_request, 'path'),
     ...getShapeAt(logstash_delete_pipeline_request, 'query'),
   }),
-  outputSchema: logstash_delete_pipeline_response,
+  outputSchema: z.optional(z.looseObject({})),
 };

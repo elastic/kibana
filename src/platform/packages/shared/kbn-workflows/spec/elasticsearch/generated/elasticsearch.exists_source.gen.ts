@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.209Z
+ * Generated at: 2025-11-27T07:43:24.870Z
  * Source: elasticsearch-specification repository, operations: exists-source
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
@@ -18,7 +18,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { exists_source_request, exists_source_response } from './es_openapi_zod.gen';
+import { exists_source_request } from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
@@ -65,5 +65,5 @@ A document's source is not available if it is disabled in the mapping.
     ...getShapeAt(exists_source_request, 'path'),
     ...getShapeAt(exists_source_request, 'query'),
   }),
-  outputSchema: exists_source_response,
+  outputSchema: z.optional(z.looseObject({})),
 };

@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.191Z
+ * Generated at: 2025-11-27T07:43:24.859Z
  * Source: elasticsearch-specification repository, operations: ccr-resume-auto-follow-pattern
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.246Z
+ * Generated at: 2025-11-27T07:43:24.909Z
  * Source: elasticsearch-specification repository, operations: search-shards, search-shards-1, search-shards-2, search-shards-3
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

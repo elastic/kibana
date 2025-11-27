@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.194Z
+ * Generated at: 2025-11-27T07:43:24.860Z
  * Source: elasticsearch-specification repository, operations: cluster-exists-component-template
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
@@ -18,10 +18,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import {
-  cluster_exists_component_template_request,
-  cluster_exists_component_template_response,
-} from './es_openapi_zod.gen';
+import { cluster_exists_component_template_request } from './es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
@@ -52,5 +49,5 @@ Returns information about whether a particular component template exists.
     ...getShapeAt(cluster_exists_component_template_request, 'path'),
     ...getShapeAt(cluster_exists_component_template_request, 'query'),
   }),
-  outputSchema: cluster_exists_component_template_response,
+  outputSchema: z.optional(z.looseObject({})),
 };

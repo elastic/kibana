@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Generated at: 2025-11-27T07:04:28.234Z
+ * Generated at: 2025-11-27T07:43:24.897Z
  * Source: elasticsearch-specification repository, operations: ml-get-calendars, ml-get-calendars-1, ml-get-calendars-2, ml-get-calendars-3
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js

@@ -10,12 +10,14 @@
 import type { JSONSchema } from '@kbn/zod/v4/core';
 import { resolveReferenceObject } from './resolve_reference_object';
 
-export function getOrResolveObject(
-  object: JSONSchema.JSONSchema,
+type Object = JSONSchema.JSONSchema | { $ref: string };
+
+export function getOrResolveObject<T = JSONSchema.JSONSchema>(
+  object: Object,
   schema: JSONSchema.JSONSchema
-): JSONSchema.JSONSchema | null {
+): T | null {
   if ('$ref' in object && object.$ref && object.$ref.startsWith('#')) {
-    return resolveReferenceObject(object.$ref, schema);
+    return resolveReferenceObject(object.$ref, schema) as T | null;
   }
-  return object;
+  return object as T | null;
 }
