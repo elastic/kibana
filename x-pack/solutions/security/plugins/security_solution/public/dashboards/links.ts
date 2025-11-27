@@ -9,6 +9,7 @@ import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/cons
 import { DASHBOARDS_PATH, SecurityPageName, SECURITY_FEATURE_ID } from '../../common/constants';
 import { DASHBOARDS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
+import { links as kubernetesLinks } from '../kubernetes/links';
 import { cspDashboardLink, vulnerabilityDashboardLink } from '../cloud_security_posture/links';
 import {
   ecsDataQualityDashboardLinks,
@@ -21,6 +22,7 @@ import { IconDashboards } from '../common/icons/dashboards';
 const subLinks: LinkItem[] = [
   overviewLinks,
   detectionResponseLinks,
+  kubernetesLinks,
   cspDashboardLink,
   vulnerabilityDashboardLink,
   entityAnalyticsLinks,
