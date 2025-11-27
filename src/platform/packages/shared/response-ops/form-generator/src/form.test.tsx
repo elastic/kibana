@@ -291,6 +291,18 @@ describe('Form', () => {
       fireEvent.click(submitButton);
     }).not.toThrow();
   });
+
+  it('adds optional label to optional fields', () => {
+    const schema = z.object({
+      name: z.string().optional().meta({
+        label: 'Name',
+      }),
+    });
+
+    render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
+
+    expect(screen.getByText('Optional')).toBeInTheDocument();
+  });
 });
 
 describe('Authentication Form Integration Tests', () => {

@@ -11,10 +11,16 @@ import React from 'react';
 import type { z } from '@kbn/zod/v4';
 import { ZodError } from '@kbn/zod/v4';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { i18n } from '@kbn/i18n';
+import { EuiText } from '@elastic/eui';
 import type { FormConfig } from './form';
 import { getWidgetComponent } from './widgets';
 import { extractSchemaCore } from './schema_extract_core';
 import { addMeta, getMeta } from './schema_connector_metadata';
+
+const OPTIONAL_LABEL = i18n.translate('responseOps.formGenerator.fieldBuilder.optionalLabel', {
+  defaultMessage: 'Optional',
+});
 
 export type FieldValidationFunc = (
   ...args: Parameters<ValidationFunc>
@@ -32,6 +38,7 @@ export interface FieldDefinition {
   /* Options for fields like select dropdowns */
   options?: Record<string, unknown>;
   defaultValue?: unknown;
+  isOptional?: boolean;
 }
 
 interface GetFieldFromSchemaProps {
@@ -45,13 +52,14 @@ export const getFieldFromSchema = ({
   formConfig,
 }: GetFieldFromSchemaProps) => {
   // Some schemas are wrapped (e.g., with ZodOptional or ZodDefault), so we unwrap them to get the underlying schema. Because we might unwrap default values, we also extract the default value here.
-  const { schema, defaultValue } = extractSchemaCore(outerSchema);
+  const { schema, defaultValue, isOptional } = extractSchemaCore(outerSchema);
 
   return {
     path,
     schema,
     formConfig,
     defaultValue,
+    isOptional,
     validate: (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
       const [{ value, path: formPath }] = args;
 
@@ -117,7 +125,7 @@ interface RenderFieldProps {
   field: FieldDefinition;
 }
 export const renderField = ({ field }: RenderFieldProps) => {
-  const { schema, validate, path, formConfig, defaultValue } = field;
+  const { schema, validate, path, formConfig, defaultValue, isOptional } = field;
 
   const WidgetComponent = getWidgetComponent(schema);
 
@@ -143,6 +151,12 @@ export const renderField = ({ field }: RenderFieldProps) => {
           label,
           helpText,
           fullWidth: true,
+
+          labelAppend: isOptional ? (
+            <EuiText size="xs" color="subdued">
+              {OPTIONAL_LABEL}
+            </EuiText>
+          ) : null,
           euiFieldProps: {
             disabled: formConfig.disabled || disabled,
             placeholder,

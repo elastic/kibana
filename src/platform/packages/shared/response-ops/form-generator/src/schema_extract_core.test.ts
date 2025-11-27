@@ -19,6 +19,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBeUndefined();
+      expect(result.isOptional).toBe(true);
     });
 
     it('should unwrap ZodOptional with inner number schema', () => {
@@ -27,6 +28,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodNumber);
       expect(result.defaultValue).toBeUndefined();
+      expect(result.isOptional).toBe(true);
     });
 
     it('should unwrap ZodOptional with inner boolean schema', () => {
@@ -35,6 +37,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodBoolean);
       expect(result.defaultValue).toBeUndefined();
+      expect(result.isOptional).toBe(true);
     });
   });
 
@@ -45,6 +48,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBeUndefined();
+      expect(result.isOptional).toBe(false);
     });
 
     it('should unwrap ZodNullable with inner number schema', () => {
@@ -53,6 +57,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodNumber);
       expect(result.defaultValue).toBeUndefined();
+      expect(result.isOptional).toBe(false);
     });
 
     it('should unwrap ZodNullable with inner object schema', () => {
@@ -61,6 +66,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodObject);
       expect(result.defaultValue).toBeUndefined();
+      expect(result.isOptional).toBe(false);
     });
   });
 
@@ -71,6 +77,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBe('default-value');
+      expect(result.isOptional).toBe(false);
     });
 
     it('should extract default value from ZodDefault with number', () => {
@@ -79,6 +86,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodNumber);
       expect(result.defaultValue).toBe(42);
+      expect(result.isOptional).toBe(false);
     });
 
     it('should extract default value from ZodDefault with boolean', () => {
@@ -87,6 +95,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodBoolean);
       expect(result.defaultValue).toBe(true);
+      expect(result.isOptional).toBe(false);
     });
 
     it('should extract default value from ZodDefault with object', () => {
@@ -96,6 +105,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodObject);
       expect(result.defaultValue).toEqual(defaultObj);
+      expect(result.isOptional).toBe(false);
     });
 
     it('should extract default value from ZodDefault with array', () => {
@@ -105,6 +115,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodArray);
       expect(result.defaultValue).toEqual(defaultArray);
+      expect(result.isOptional).toBe(false);
     });
 
     it('should extract default value from ZodDefault with empty string', () => {
@@ -113,6 +124,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBe('');
+      expect(result.isOptional).toBe(false);
     });
 
     it('should extract default value from ZodDefault with zero', () => {
@@ -121,6 +133,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodNumber);
       expect(result.defaultValue).toBe(0);
+      expect(result.isOptional).toBe(false);
     });
 
     it('should extract default value from ZodDefault with false', () => {
@@ -129,6 +142,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodBoolean);
       expect(result.defaultValue).toBe(false);
+      expect(result.isOptional).toBe(false);
     });
   });
 
@@ -191,6 +205,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBe('default-value');
+      expect(result.isOptional).toBe(true);
     });
 
     it('should unwrap z.nullable(z.default(...))', () => {
@@ -199,6 +214,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBe('default-value');
+      expect(result.isOptional).toBe(false);
     });
 
     it('should unwrap z.optional(z.nullable(...))', () => {
@@ -207,6 +223,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBeUndefined();
+      expect(result.isOptional).toBe(true);
     });
 
     it('should unwrap z.optional(z.nullable(z.default(...)))', () => {
@@ -215,6 +232,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBe('default-value');
+      expect(result.isOptional).toBe(true);
     });
 
     it('should unwrap z.readonly(z.default(...))', () => {
@@ -223,6 +241,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBe('default-value');
+      expect(result.isOptional).toBe(false);
       const meta = getMeta(result.schema);
       expect(meta.disabled).toBe(true);
     });
@@ -242,6 +261,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBe('default-value');
+      expect(result.isOptional).toBe(false);
     });
 
     it('should unwrap deeply nested wrappers', () => {
@@ -250,6 +270,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBe('default-value');
+      expect(result.isOptional).toBe(true);
       const meta = getMeta(result.schema);
       expect(meta.disabled).toBe(true);
     });
@@ -261,6 +282,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBeUndefined();
+      expect(result.isOptional).toBe(true);
     });
 
     it('should unwrap complex nested structure with all wrapper types', () => {
@@ -269,6 +291,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodNumber);
       expect(result.defaultValue).toBe(42);
+      expect(result.isOptional).toBe(true);
       const meta = getMeta(result.schema);
       expect(meta.disabled).toBe(true);
     });
@@ -281,6 +304,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodLiteral);
       expect(result.defaultValue).toBe('fixed-value');
+      expect(result.isOptional).toBe(false);
     });
 
     it('should extract number literal value', () => {
@@ -289,6 +313,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodLiteral);
       expect(result.defaultValue).toBe(123);
+      expect(result.isOptional).toBe(false);
     });
 
     it('should extract boolean literal value', () => {
@@ -297,6 +322,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodLiteral);
       expect(result.defaultValue).toBe(true);
+      expect(result.isOptional).toBe(false);
     });
 
     it('should extract false literal value', () => {
@@ -305,6 +331,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodLiteral);
       expect(result.defaultValue).toBe(false);
+      expect(result.isOptional).toBe(false);
     });
 
     it('should extract null literal value', () => {
@@ -313,6 +340,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodLiteral);
       expect(result.defaultValue).toBe(null);
+      expect(result.isOptional).toBe(false);
     });
 
     it('should extract empty string literal value', () => {
@@ -321,6 +349,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodLiteral);
       expect(result.defaultValue).toBe('');
+      expect(result.isOptional).toBe(false);
     });
 
     it('should extract zero literal value', () => {
@@ -329,6 +358,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodLiteral);
       expect(result.defaultValue).toBe(0);
+      expect(result.isOptional).toBe(false);
     });
   });
 
@@ -338,6 +368,7 @@ describe('extractSchemaCore', () => {
       const result = extractSchemaCore(schema);
 
       expect(result.defaultValue).toBe('my-default');
+      expect(result.isOptional).toBe(true);
     });
 
     it('should preserve default value when unwrapping nullable', () => {
@@ -345,6 +376,7 @@ describe('extractSchemaCore', () => {
       const result = extractSchemaCore(schema);
 
       expect(result.defaultValue).toBe('my-default');
+      expect(result.isOptional).toBe(false);
     });
 
     it('should preserve default value when unwrapping catch', () => {
@@ -352,6 +384,7 @@ describe('extractSchemaCore', () => {
       const result = extractSchemaCore(schema);
 
       expect(result.defaultValue).toBe('my-default');
+      expect(result.isOptional).toBe(false);
     });
 
     it('should preserve default value when unwrapping readonly', () => {
@@ -359,6 +392,7 @@ describe('extractSchemaCore', () => {
       const result = extractSchemaCore(schema);
 
       expect(result.defaultValue).toBe('my-default');
+      expect(result.isOptional).toBe(false);
     });
 
     it('should extract default value even with complex nesting', () => {
@@ -366,6 +400,7 @@ describe('extractSchemaCore', () => {
       const result = extractSchemaCore(schema);
 
       expect(result.defaultValue).toBe('nested-default');
+      expect(result.isOptional).toBe(true);
     });
 
     it('should handle default value with function', () => {
@@ -373,6 +408,7 @@ describe('extractSchemaCore', () => {
       const result = extractSchemaCore(schema);
 
       expect(result.defaultValue).toEqual(['a', 'b']);
+      expect(result.isOptional).toBe(false);
     });
 
     it('should handle default value with Date', () => {
@@ -381,6 +417,7 @@ describe('extractSchemaCore', () => {
       const result = extractSchemaCore(schema);
 
       expect(result.defaultValue).toEqual(defaultDate);
+      expect(result.isOptional).toBe(false);
     });
   });
 
@@ -393,6 +430,7 @@ describe('extractSchemaCore', () => {
       expect(result.defaultValue).toBe('value');
       const meta = getMeta(result.schema);
       expect(meta.disabled).toBe(true);
+      expect(result.isOptional).toBe(true);
     });
 
     it('should handle literal inside wrapped schema correctly', () => {
@@ -401,6 +439,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodLiteral);
       expect(result.defaultValue).toBe('discriminator-value');
+      expect(result.isOptional).toBe(true);
     });
 
     it('should handle readonly at any position in the wrapper chain', () => {
@@ -408,21 +447,25 @@ describe('extractSchemaCore', () => {
       const result = extractSchemaCore(schema1);
       const meta1 = getMeta(result.schema);
       expect(meta1.disabled).toBe(true);
+      expect(result.isOptional).toBe(true);
 
       const schema2 = z.string().optional().readonly();
       const result2 = extractSchemaCore(schema2);
       const meta2 = getMeta(result2.schema);
       expect(meta2.disabled).toBe(true);
+      expect(result2.isOptional).toBe(true);
     });
 
     it('should not lose default value when readonly is in the chain', () => {
       const schema1 = z.string().default('test').readonly();
       const result1 = extractSchemaCore(schema1);
       expect(result1.defaultValue).toBe('test');
+      expect(result1.isOptional).toBe(false);
 
       const schema2 = z.string().readonly().default('test');
       const result2 = extractSchemaCore(schema2);
       expect(result2.defaultValue).toBe('test');
+      expect(result2.isOptional).toBe(false);
     });
 
     it('should handle all wrappers in a complex realistic scenario', () => {
@@ -433,6 +476,7 @@ describe('extractSchemaCore', () => {
       expect(result.defaultValue).toBe('my-type');
       const meta = getMeta(result.schema);
       expect(meta.disabled).toBe(true);
+      expect(result.isOptional).toBe(true);
     });
 
     it('should not loose meta information correctly even if before default', () => {
@@ -450,6 +494,7 @@ describe('extractSchemaCore', () => {
       expect(result.defaultValue).toEqual({ authType: 'none' });
       const meta = getMeta(result.schema);
       expect(meta.disabled).toBe(true);
+      expect(result.isOptional).toBe(false);
     });
 
     it('should not loose meta information correctly even if after default', () => {
@@ -467,6 +512,7 @@ describe('extractSchemaCore', () => {
       expect(result.defaultValue).toEqual({ authType: 'none' });
       const meta = getMeta(result.schema);
       expect(meta.disabled).toBe(true);
+      expect(result.isOptional).toBe(false);
     });
   });
 
@@ -477,6 +523,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodString);
       expect(result.defaultValue).toBeUndefined();
+      expect(result.isOptional).toBe(false);
     });
 
     it('should handle enum schema', () => {
@@ -485,6 +532,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodEnum);
       expect(result.defaultValue).toBeUndefined();
+      expect(result.isOptional).toBe(false);
     });
 
     it('should handle enum schema with default', () => {
@@ -493,6 +541,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodEnum);
       expect(result.defaultValue).toBe('option2');
+      expect(result.isOptional).toBe(false);
     });
 
     it('should handle discriminated union schema', () => {
@@ -504,6 +553,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodDiscriminatedUnion);
       expect(result.defaultValue).toBeUndefined();
+      expect(result.isOptional).toBe(false);
     });
 
     it('should handle discriminated union schema with default', () => {
@@ -517,6 +567,7 @@ describe('extractSchemaCore', () => {
 
       expect(result.schema).toBeInstanceOf(z.ZodDiscriminatedUnion);
       expect(result.defaultValue).toStrictEqual({ type: 'b', value: 3 });
+      expect(result.isOptional).toBe(false);
     });
 
     it('should handle undefined default value', () => {
@@ -526,6 +577,7 @@ describe('extractSchemaCore', () => {
       expect(result.schema).toBeInstanceOf(z.ZodString);
       // When parsing undefined with a default schema, Zod should still return undefined if that's what's set
       expect(result.defaultValue).toBeUndefined();
+      expect(result.isOptional).toBe(false);
     });
 
     it('should not loose the meta value when unwrapping multiple times', () => {
@@ -536,6 +588,16 @@ describe('extractSchemaCore', () => {
       const meta = getMeta(result.schema);
       expect(meta.label).toBe('readonly');
       expect(meta.disabled).toBe(true);
+      expect(result.isOptional).toBe(true);
+    });
+
+    it('should return isOptional true when schema is optional at any level', () => {
+      const schema = z.string().nullable().optional().readonly();
+      const result = extractSchemaCore(schema);
+
+      expect(result.schema).toBeInstanceOf(z.ZodString);
+      expect(result.isOptional).toBe(true);
+      expect(result.defaultValue).toBeUndefined();
     });
   });
 });

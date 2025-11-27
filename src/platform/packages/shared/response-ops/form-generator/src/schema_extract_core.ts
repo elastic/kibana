@@ -32,10 +32,15 @@ const isUnwrappable = (schema: z.ZodType): schema is z.ZodType & HasUnwrap => {
 export const extractSchemaCore = (schema: z.ZodType) => {
   let current = schema;
   let defaultValue: unknown;
+  let isOptional = false;
 
   while (isUnwrappable(current)) {
     if (current instanceof z.ZodDefault) {
       defaultValue = current.parse(undefined);
+    }
+
+    if (current instanceof z.ZodOptional) {
+      isOptional = true;
     }
 
     const wrapperMeta = getMeta(current);
@@ -67,5 +72,5 @@ export const extractSchemaCore = (schema: z.ZodType) => {
     defaultValue = current.value;
   }
 
-  return { schema: current, defaultValue };
+  return { schema: current, defaultValue, isOptional };
 };
