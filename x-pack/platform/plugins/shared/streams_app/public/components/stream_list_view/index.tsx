@@ -38,6 +38,7 @@ import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { FeedbackButton } from '../feedback_button';
 import { AssetImage } from '../asset_image';
+import { SignificantEventsSummary } from './significant_events_summary';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -158,6 +159,8 @@ export function StreamListView() {
         ) : (
           <>
             <WelcomePanel />
+            <SignificantEventsSummary />
+            <EuiSpacer size="l" />
             <StreamsTreeTable
               loading={streamsListFetch.loading}
               streams={streamsListFetch.value?.streams}

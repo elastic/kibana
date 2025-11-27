@@ -87,6 +87,14 @@ interface StreamsSignificantEventsCreatedProps {
   stream_type: StreamType;
 }
 
+interface StreamsSignificantEventsSummaryGeneratedEventProps {
+  input_tokens_used: number;
+  output_tokens_used: number;
+  number_of_streams: number;
+  number_of_queries: number;
+  number_of_events: number;
+}
+
 export {
   type StreamsAttachmentCountProps,
   type StreamsAttachmentClickEventProps,
@@ -101,4 +109,5 @@ export {
   type StreamsSignificantEventsSuggestionsGeneratedEventProps,
   type StreamsSignificantEventsCreatedProps,
   type WiredStreamsStatusChangedProps,
+  type StreamsSignificantEventsSummaryGeneratedEventProps,
 };

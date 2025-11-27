@@ -19,6 +19,7 @@ import {
   STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
   STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_SUMMARY_GENERATED_EVENT_TYPE,
 } from './constants';
 import {
   streamsAIGrokSuggestionAcceptedSchema,
@@ -34,6 +35,7 @@ import {
   streamsSignificantEventsCreatedSchema,
   streamsSignificantEventsSuggestionsGeneratedSchema,
   wiredStreamsStatusChangedSchema,
+  streamsSignificantEventsSummaryGeneratedSchema,
 } from './schemas';
 
 const streamsAttachmentCountEventType = {
@@ -96,6 +98,11 @@ const streamsSignificantEventsCreatedEventType = {
   schema: streamsSignificantEventsCreatedSchema,
 };
 
+const streamsSignificantEventsSummaryGeneratedEventType = {
+  eventType: STREAMS_SIGNIFICANT_EVENTS_SUMMARY_GENERATED_EVENT_TYPE,
+  schema: streamsSignificantEventsSummaryGeneratedSchema,
+};
+
 const wiredStreamsStatusChangedEventType = {
   eventType: STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
   schema: wiredStreamsStatusChangedSchema,
@@ -114,5 +121,6 @@ export {
   streamsSchemaUpdatedEventType,
   streamsSignificantEventsSuggestionsGeneratedEventType,
   streamsSignificantEventsCreatedEventType,
+  streamsSignificantEventsSummaryGeneratedEventType,
   wiredStreamsStatusChangedEventType,
 };
