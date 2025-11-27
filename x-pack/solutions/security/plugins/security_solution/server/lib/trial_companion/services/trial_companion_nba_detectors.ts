@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
 import type {
   CollectorFetchContext,
@@ -14,8 +14,13 @@ import type {
 import type { DetectorF } from '../types';
 import { Milestone } from '../../../../common/trial_companion/types';
 
-// M1 - data
-export const installedPackages = (logger: Logger, packageService: PackageService): DetectorF => {
+export interface UsageCollectorDeps {
+  logger: Logger;
+  collectorContext: CollectorFetchContext;
+  usageCollection: UsageCollectionSetup;
+}
+
+export const installedPackagesM1 = (logger: Logger, packageService: PackageService): DetectorF => {
   return async (): Promise<Milestone | undefined> => {
     try {
       logger.debug('verifyNonDefaultPackagesInstalled: Fetching Fleet packages');
@@ -54,115 +59,89 @@ export const installedPackages = (logger: Logger, packageService: PackageService
   };
 };
 
-// M7 - for testing / demo purposes
-export const allSet = (logger: Logger): DetectorF => {
+// for testing / demo purposes
+export const allSetM7 = (logger: Logger): DetectorF => {
   return async (): Promise<Milestone | undefined> => {
     logger.info('allSet: all conditions met for the highest milestone');
     return Milestone.M7;
   };
 };
 
-// M3 - detections
-export const detectionRulesInstalled = (
-  logger: Logger,
-  esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract,
-  usageCollection?: UsageCollectionSetup
-): DetectorF => {
+export const detectionRulesInstalledM3 = (deps: UsageCollectorDeps): DetectorF => {
   return async (): Promise<Milestone | undefined> => {
-    const collectorContext = {
-      esClient,
-      soClient,
-    } as CollectorFetchContext;
-    logger.info('detectionRulesInstalled: Fetching rules telemetry from usage collector');
-    if (!usageCollection) {
-      logger.warn('detectionRulesInstalled: usageCollection is not available');
-      return undefined;
-    }
-
-    try {
-      const securitySolutionCollector = usageCollection.getCollectorByType('security_solution');
-
-      if (!securitySolutionCollector) {
-        logger.warn('detectionRulesInstalled: security_solution collector not found');
-        return undefined;
-      }
-
-      // Fetch the telemetry data from the collector with proper context
-      const securitySolutionResult = await securitySolutionCollector.fetch(collectorContext);
-
-      logger.info(
-        `detectionRulesInstalled: Security solution telemetry result keys: ${Object.keys(
-          securitySolutionResult || {}
-        ).join(', ')}`
-      );
-
-      // Extract enabled rule count from detection_rules usage
-      interface SecuritySolutionTelemetry {
-        detectionMetrics?: {
-          detection_rules?: {
-            detection_rule_usage?: {
-              custom_total?: { enabled?: number };
-              elastic_total?: { enabled?: number };
-            };
+    // Extract enabled rule count from detection_rules usage
+    interface SecuritySolutionTelemetry {
+      detectionMetrics?: {
+        detection_rules?: {
+          detection_rule_usage?: {
+            custom_total?: { enabled?: number };
+            elastic_total?: { enabled?: number };
           };
         };
-      }
-      const detectionMetrics = (securitySolutionResult as SecuritySolutionTelemetry)
-        ?.detectionMetrics;
-      const detectionRules = detectionMetrics?.detection_rules;
-      const ruleUsage = detectionRules?.detection_rule_usage;
-
-      const customEnabled = ruleUsage?.custom_total?.enabled ?? 0;
-      const elasticEnabled = ruleUsage?.elastic_total?.enabled ?? 0;
-      const rulesCount = customEnabled + elasticEnabled;
-
-      logger.debug(
-        `verifyEnabledSecurityRulesCount: Rules count - custom: ${customEnabled}, elastic: ${elasticEnabled}, total: ${rulesCount}`
-      );
-      return rulesCount > 0 ? undefined : Milestone.M3;
-    } catch (error) {
-      logger.error(
-        `verifyEnabledSecurityRulesCount: Error fetching security solution telemetry: ${error}`
-      );
-      return undefined;
+      };
     }
+    const result = await fetchCollectorResults<SecuritySolutionTelemetry>(
+      'security_solution',
+      deps
+    );
+
+    const detectionMetrics = result?.detectionMetrics;
+    const detectionRules = detectionMetrics?.detection_rules;
+    const ruleUsage = detectionRules?.detection_rule_usage;
+
+    const customEnabled = ruleUsage?.custom_total?.enabled ?? 0;
+    const elasticEnabled = ruleUsage?.elastic_total?.enabled ?? 0;
+    const rulesCount = customEnabled + elasticEnabled;
+
+    logger.debug(
+      `verifyEnabledSecurityRulesCount: Rules count - custom: ${customEnabled}, elastic: ${elasticEnabled}, total: ${rulesCount}`
+    );
+    return rulesCount > 0 ? undefined : Milestone.M3;
   };
 };
 
-// M2 - explore your data
-export const savedSearches = (
-  logger: Logger,
-  esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract,
-  usageCollection?: UsageCollectionSetup
-): DetectorF => {
+// TODO:
+// M2 - explore your data - there is no rollups collector in serverless
+
+export const casesM7 = (deps: UsageCollectorDeps): DetectorF => {
   return async (): Promise<Milestone | undefined> => {
-    const collectorContext = {
-      esClient,
-      soClient,
-    } as CollectorFetchContext;
-    logger.info('detectionRulesInstalled: Fetching rules telemetry from usage collector');
-    if (!usageCollection) {
-      logger.warn('detectionRulesInstalled: usageCollection is not available');
-      return undefined;
+    interface CasesTelemetry {
+      cases?: {
+        all?: {
+          total?: number;
+        };
+      };
     }
 
-    try {
-      const rollupsCollector = usageCollection.getCollectorByType('rollups');
-      if (!rollupsCollector) {
-        logger.warn('savedSearches: rollups collector not found');
-        return undefined;
-      }
-      // Fetch the telemetry data from the collector with proper context
-      const rollupsResult = await rollupsCollector.fetch(collectorContext);
-
-      logger.info(`Rollups: ${JSON.stringify(rollupsResult, null, 2)}`);
-
-      return undefined;
-    } catch (error) {
-      logger.error(`savedSearches: Error fetching security solution telemetry: ${error}`);
-      return undefined;
-    }
+    const result = await fetchCollectorResults<CasesTelemetry>('cases', deps);
+    const count = result?.cases?.all?.total;
+    return count > 0 ? undefined : Milestone.M6;
   };
 };
+
+async function fetchCollectorResults<T>(
+  collectorType: string,
+  { logger, collectorContext, usageCollection }: UsageCollectorDeps
+): Promise<T | undefined> {
+  logger.info(`Fetching telemetry from usage collector ${collectorType}`);
+
+  try {
+    const collector = usageCollection.getCollectorByType(collectorType);
+    if (!collector) {
+      logger.warn(`collectorType ${collectorType} not found`);
+      return undefined;
+    }
+    // Fetch the telemetry data from the collectorType with proper context
+    const result = await collector.fetch(collectorContext);
+    if (!result) {
+      return undefined;
+    }
+
+    logger.info(`result: ${JSON.stringify(casesResult, null, 2)}`);
+
+    return result as T;
+  } catch (error) {
+    logger.error(`cases: Error fetching security solution telemetry: ${error}`);
+    return undefined;
+  }
+}

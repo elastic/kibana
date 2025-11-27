@@ -10,11 +10,16 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type {
+  CollectorFetchContext,
+  UsageCollectionSetup,
+} from '@kbn/usage-collection-plugin/server';
+import type { UsageCollectorDeps } from './trial_companion_nba_detectors';
 import {
-  allSet,
-  detectionRulesInstalled,
-  installedPackages,
+  allSetM7,
+  detectionRulesInstalledM3,
+  installedPackagesM1,
+  casesM7,
 } from './trial_companion_nba_detectors';
 import { TrialCompanionMilestoneRepositoryImpl } from './trial_companion_milestone_repository';
 import type {
@@ -54,12 +59,27 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
   public async start(start: TrialCompanionMilestoneServiceStart) {
     this.logger.debug('Starting health diagnostic service');
     const soClient = start.savedObjects.getUnsafeInternalClient();
-    this.detectors.push(
-      // savedSearches(this.logger, start.esClient, soClient, this.usageCollection), // TODO - fix me
-      installedPackages(this.logger, start.packageService),
-      detectionRulesInstalled(this.logger, start.esClient, soClient, this.usageCollection),
-      allSet(this.logger)
-    ); // order matters
+
+    const usageCollectorDeps: UsageCollectorDeps = this.usageCollection
+      ? {
+          logger: this.logger,
+          collectorContext: {
+            esClient: start.esClient,
+            soClient,
+          } as CollectorFetchContext,
+          usageCollection: this.usageCollection,
+        }
+      : undefined;
+
+    // order matters
+    this.detectors.push(installedPackagesM1(this.logger, start.packageService));
+    if (usageCollectorDeps) {
+      this.detectors.push(
+        detectionRulesInstalledM3(usageCollectorDeps),
+        casesM7(usageCollectorDeps)
+      );
+    }
+    this.detectors.push(allSetM7(this.logger));
     this.repo = new TrialCompanionMilestoneRepositoryImpl(this.logger, soClient);
     await this.scheduleTask(start.taskManager);
   }
