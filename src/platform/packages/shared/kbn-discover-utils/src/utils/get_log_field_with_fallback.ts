@@ -32,7 +32,7 @@ export const getLogFieldWithFallback = <T extends keyof LogDocumentOverview>(
       }
     }
 
-    return { field, value: valueAsString, formattedValue };
+    return { field, value, formattedValue };
   }
 
   // If none of the ranks (fallbacks) are present
