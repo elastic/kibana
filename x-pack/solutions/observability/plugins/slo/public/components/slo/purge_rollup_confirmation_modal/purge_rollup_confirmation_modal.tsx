@@ -34,7 +34,7 @@ export interface Props {
   purgePolicyHelpText: string;
 }
 
-export function SloPurgeConfirmationModal({
+export function PurgeRollupConfirmationModal({
   modalTitle,
   purgePolicyHelpText,
   onCancel,

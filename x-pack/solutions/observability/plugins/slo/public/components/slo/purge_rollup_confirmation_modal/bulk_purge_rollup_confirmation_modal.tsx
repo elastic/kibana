@@ -8,23 +8,23 @@
 import { i18n } from '@kbn/i18n';
 import type { SLODefinitionResponse } from '@kbn/slo-schema';
 import React from 'react';
-import type { PurgePolicyData } from './purge_confirmation_modal';
-import { SloPurgeConfirmationModal } from './purge_confirmation_modal';
-import { usePurgeRollupData } from '../../../pages/slo_management/hooks/use_purge_rollup_data';
+import { useBulkPurgeRollupData } from '../../../pages/slo_management/hooks/use_bulk_purge_rollup_data';
+import type { PurgePolicyData } from './purge_rollup_confirmation_modal';
+import { PurgeRollupConfirmationModal } from './purge_rollup_confirmation_modal';
 
 export interface Props {
   onCancel: () => void;
   onConfirm: () => void;
-  item: SLODefinitionResponse;
+  items: SLODefinitionResponse[];
 }
 
-export function PurgeConfirmationContainer({ item, onCancel, onConfirm }: Props) {
-  const { mutate: purge } = usePurgeRollupData({ name: item.name, onConfirm });
+export function BulkPurgeRollupConfirmationModal({ items, onCancel, onConfirm }: Props) {
+  const { mutate: bulkPurge } = useBulkPurgeRollupData({ onConfirm });
 
   const onClickConfirm = (purgePolicyData: PurgePolicyData) => {
     const { purgeDate, purgeType, forcePurge, age } = purgePolicyData;
-    purge({
-      list: [item.id],
+    bulkPurge({
+      list: items.map(({ id }) => id),
       purgePolicy:
         purgeType === 'fixed_age'
           ? {
@@ -39,22 +39,22 @@ export function PurgeConfirmationContainer({ item, onCancel, onConfirm }: Props)
     });
   };
 
-  const MODAL_TITLE = i18n.translate('xpack.slo.purgeConfirmationModal.title', {
-    defaultMessage: 'Purge {name}',
-    values: { name: item.name },
+  const MODAL_TITLE = i18n.translate('xpack.slo.bulkPurgeConfirmationModal.title', {
+    defaultMessage: 'Purge {count} SLOs',
+    values: { count: items.length },
   });
 
   const PURGE_POLICY_HELP_TEXT = i18n.translate(
-    'xpack.slo.purgeConfirmationModal.descriptionText',
+    'xpack.slo.bulkPurgeConfirmationModal.descriptionText',
     {
       defaultMessage:
-        'Rollup data for {name} will be purged according to the policy provided below.',
-      values: { name: item.name },
+        'Rollup data for {count} SLOs will be purged according to the policy provided below.',
+      values: { count: items.length },
     }
   );
 
   return (
-    <SloPurgeConfirmationModal
+    <PurgeRollupConfirmationModal
       onCancel={onCancel}
       onConfirm={onClickConfirm}
       modalTitle={MODAL_TITLE}
