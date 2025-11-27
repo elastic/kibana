@@ -138,7 +138,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .post(
         `/api/alerting/rule/${encodeURIComponent(ruleId)}/alert/${encodeURIComponent(
           alertId
-        )}/_mute`
+        )}/_mute?validate_alerts_existence=false`
       )
       .set('kbn-xsrf', 'foo')
       .expect(204);
