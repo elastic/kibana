@@ -142,6 +142,13 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
+  public async updateValidationSetting(controlId: string, validate: boolean) {
+    this.log.debug(`Update control validation setting for ${controlId} to ${validate}`);
+    await this.editExistingControl(controlId);
+    await this.setSwitchState(validate, 'dataControl__ignoreValidationsAdditionalSetting');
+    await this.testSubjects.click('control-editor-save');
+  }
+
   /* -----------------------------------------------------------
      Individual controls functions
      ----------------------------------------------------------- */
