@@ -26,7 +26,7 @@ export const PROFILING_TOPN_FUNCTIONS_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.profiling.topn_functions',
   connectorGroup: 'internal',
   summary: null,
-  description: `Extracts a list of topN functions from Universal Profiling
+  description: `Extracts a list of topN functions from Universal Profiling.
 
  Documentation: https://www.elastic.co/guide/en/observability/current/universal-profiling.html`,
   methods: ['POST'],

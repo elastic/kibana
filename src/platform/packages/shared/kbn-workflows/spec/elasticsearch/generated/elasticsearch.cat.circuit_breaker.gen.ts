@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Source: elasticsearch-specification repository, operations:
+ * Source: elasticsearch-specification repository, operations: cat-circuit-breaker, cat-circuit-breaker-1
  *
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
@@ -18,15 +18,25 @@
 import { z } from '@kbn/zod/v4';
 import type { InternalConnectorContract } from '../../../types/latest';
 
+import { getShapeAt } from '../../../common/utils/zod';
+
 // import all needed request and response schemas generated from the OpenAPI spec
-import {} from './es_openapi_zod.gen';
+import {
+  cat_circuit_breaker_request,
+  cat_circuit_breaker_response,
+  cat_circuit_breaker1_request,
+  cat_circuit_breaker1_response,
+} from './es_openapi_zod.gen';
 
 // export contract
 export const CAT_CIRCUIT_BREAKER_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.cat.circuit_breaker',
   connectorGroup: 'internal',
-  summary: null,
-  description: `Get circuit breakers statistics
+  summary: `Get circuit breakers statistics`,
+  description: `Get circuit breakers statistics.
+
+
+IMPORTANT: CAT APIs are only intended for human consumption using the command line or Kibana console. They are not intended for use by applications.
 
  Documentation: https://www.elastic.co/docs/api/doc/elasticsearch#TODO`,
   methods: ['GET'],
@@ -34,10 +44,21 @@ export const CAT_CIRCUIT_BREAKER_CONTRACT: InternalConnectorContract = {
   documentation: 'https://www.elastic.co/docs/api/doc/elasticsearch#TODO',
   parameterTypes: {
     headerParams: [],
-    pathParams: [],
-    urlParams: [],
+    pathParams: ['circuit_breaker_patterns'],
+    urlParams: ['h', 's', 'local', 'master_timeout'],
     bodyParams: [],
   },
-  paramsSchema: z.optional(z.object({})),
-  outputSchema: z.optional(z.looseObject({})),
+  paramsSchema: z.union([
+    z.object({
+      ...getShapeAt(cat_circuit_breaker_request, 'body'),
+      ...getShapeAt(cat_circuit_breaker_request, 'path'),
+      ...getShapeAt(cat_circuit_breaker_request, 'query'),
+    }),
+    z.object({
+      ...getShapeAt(cat_circuit_breaker1_request, 'body'),
+      ...getShapeAt(cat_circuit_breaker1_request, 'path'),
+      ...getShapeAt(cat_circuit_breaker1_request, 'query'),
+    }),
+  ]),
+  outputSchema: z.union([cat_circuit_breaker_response, cat_circuit_breaker1_response]),
 };

@@ -38,7 +38,11 @@ export const sanitizeNamespaceIdentifier = (name: string) =>
     .replace(/[$+]/g, '-');
 
 export function camelToSnake(str: string): string {
-  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`).replace(/^_/, ''); // remove leading underscore
+  // Insert underscores before capital letters, but treat consecutive capitals (abbreviations) as a single unit
+  return str
+    .replace(/([a-z\d])([A-Z])/g, '$1_$2') // Insert underscore between lowercase/digit and uppercase
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2') // Insert underscore between abbreviation and next word
+    .toLowerCase();
 }
 
 export function toSnakeCase(str: string): string {

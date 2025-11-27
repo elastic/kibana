@@ -3979,6 +3979,59 @@ export const cat_allocation_allocation_record = z.object({
     ]))
 });
 
+export const cat_types_cat_circuit_breaker_column = z.union([
+    z.enum([
+        'node_id',
+        'id',
+        'node_name',
+        'nn',
+        'breaker',
+        'br',
+        'limit',
+        'l',
+        'limit_bytes',
+        'lb',
+        'estimated',
+        'e',
+        'estimated_bytes',
+        'eb',
+        'tripped',
+        't',
+        'overhead',
+        'o'
+    ]),
+    z.string()
+]);
+
+export const cat_types_cat_circuit_breaker_columns = z.union([
+    cat_types_cat_circuit_breaker_column,
+    z.array(cat_types_cat_circuit_breaker_column)
+]);
+
+export const cat_circuit_breaker_circuit_breaker_record = z.object({
+    node_id: z.optional(types_node_id),
+    node_name: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Node name'
+    })),
+    breaker: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Breaker name'
+    })),
+    limit: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Limit size'
+    })),
+    limit_bytes: z.optional(types_byte_size),
+    estimated: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Estimated size'
+    })),
+    estimated_bytes: z.optional(types_byte_size),
+    tripped: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Tripped count'
+    })),
+    overhead: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Overhead'
+    }))
+});
+
 export const cat_types_cat_component_column = z.union([
     z.enum([
         'name',
@@ -14779,13 +14832,7 @@ export const ingest_types_input_config = z.object({
 
 export const ingest_types_json_processor_conflict_strategy = z.enum(['replace', 'merge']);
 
-export const ingest_types_user_agent_property = z.enum([
-    'name',
-    'os',
-    'device',
-    'original',
-    'version'
-]);
+export const ingest_types_user_agent_property = z.unknown();
 
 export const ingest_types_field_access_pattern = z.enum(['classic', 'flexible']);
 
@@ -26565,6 +26612,41 @@ export const cat_allocation_local = z.boolean().register(z.globalRegistry, {
 export const cat_allocation_master_timeout = types_duration;
 
 /**
+ * A comma-separated list of regular-expressions to filter the circuit breakers in the output
+ */
+export const cat_circuit_breaker_circuit_breaker_patterns = z.union([
+    z.string(),
+    z.array(z.string())
+]);
+
+/**
+ * A comma-separated list of columns names to display. It supports simple wildcards.
+ */
+export const cat_circuit_breaker_h = cat_types_cat_circuit_breaker_columns;
+
+/**
+ * List of columns that determine how the table should be sorted.
+ * Sorting defaults to ascending and can be changed by setting `:asc`
+ * or `:desc` as a suffix to the column name.
+ */
+export const cat_circuit_breaker_s = types_names;
+
+/**
+ * If `true`, the request computes the list of selected nodes from the
+ * local cluster state. If `false` the list of selected nodes are computed
+ * from the cluster state of the master node. In both cases the coordinating
+ * node will send requests for further information to each selected node.
+ */
+export const cat_circuit_breaker_local = z.boolean().register(z.globalRegistry, {
+    description: 'If `true`, the request computes the list of selected nodes from the\nlocal cluster state. If `false` the list of selected nodes are computed\nfrom the cluster state of the master node. In both cases the coordinating\nnode will send requests for further information to each selected node.'
+});
+
+/**
+ * Period to wait for a connection to the master node.
+ */
+export const cat_circuit_breaker_master_timeout = types_duration;
+
+/**
  * The name of the component template.
  * It accepts wildcard expressions.
  * If it is omitted, all component templates are returned.
@@ -33682,6 +33764,41 @@ export const cat_allocation1_request = z.object({
 });
 
 export const cat_allocation1_response = z.array(cat_allocation_allocation_record);
+
+export const cat_circuit_breaker_request = z.object({
+    body: z.optional(z.never()),
+    path: z.optional(z.never()),
+    query: z.optional(z.object({
+        h: z.optional(cat_types_cat_circuit_breaker_columns),
+        s: z.optional(types_names),
+        local: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request computes the list of selected nodes from the\nlocal cluster state. If `false` the list of selected nodes are computed\nfrom the cluster state of the master node. In both cases the coordinating\nnode will send requests for further information to each selected node.'
+        })),
+        master_timeout: z.optional(types_duration)
+    }))
+});
+
+export const cat_circuit_breaker_response = z.array(cat_circuit_breaker_circuit_breaker_record);
+
+export const cat_circuit_breaker1_request = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        circuit_breaker_patterns: z.union([
+            z.string(),
+            z.array(z.string())
+        ])
+    }),
+    query: z.optional(z.object({
+        h: z.optional(cat_types_cat_circuit_breaker_columns),
+        s: z.optional(types_names),
+        local: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, the request computes the list of selected nodes from the\nlocal cluster state. If `false` the list of selected nodes are computed\nfrom the cluster state of the master node. In both cases the coordinating\nnode will send requests for further information to each selected node.'
+        })),
+        master_timeout: z.optional(types_duration)
+    }))
+});
+
+export const cat_circuit_breaker1_response = z.array(cat_circuit_breaker_circuit_breaker_record);
 
 export const cat_component_templates_request = z.object({
     body: z.optional(z.never()),
