@@ -319,6 +319,23 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                         }),
                       },
                     }),
+                    ...(rawResponse?.documents_found && {
+                      documentsProcessed: {
+                        label: i18n.translate('data.search.es_search.documentsProcessedLabel', {
+                          defaultMessage: 'Documents processed',
+                        }),
+                        value: i18n.translate('data.search.es_search.documentsProcessedValue', {
+                          defaultMessage: '{documentsProcessed}',
+                          values: { documentsProcessed: rawResponse.documents_found },
+                        }),
+                        description: i18n.translate(
+                          'data.search.es_search.documentsProcessedDescription',
+                          {
+                            defaultMessage: 'The number of documents processed by the query.',
+                          }
+                        ),
+                      },
+                    }),
                   })
                   .json(params)
                   .ok({ json: { rawResponse }, requestParams });

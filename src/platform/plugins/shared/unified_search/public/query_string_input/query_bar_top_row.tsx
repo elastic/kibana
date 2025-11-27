@@ -229,6 +229,9 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
      */
     controlsWrapper: React.ReactNode;
   };
+  /**
+   * Optional ES|QL prop - Request statistics to be displayed in the ES|QL editor UI
+   */
   esqlRequestStats?: ESQLRequestStats;
   /**
    * Optional ES|QL prop - Callback function invoked to open the given ES|QL query in a new Discover tab

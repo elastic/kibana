@@ -38,6 +38,7 @@ import {
 } from '../../state_management/redux';
 import { onSaveDiscoverSession } from './save_discover_session';
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
+import { useESQLRequestStats } from './use_esql_request_stats';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -167,6 +168,11 @@ export const DiscoverTopNav = ({
       appState.set(newState);
     }
   };
+
+  const esqlRequestStats = useESQLRequestStats(
+    isEsqlMode,
+    stateContainer.dataState.inspectorAdapters.requests
+  );
 
   const onESQLToDataViewTransitionModalClose = useCallback(
     (shouldDismissModal?: boolean, needsSave?: boolean) => {
@@ -328,6 +334,7 @@ export const DiscoverTopNav = ({
               }
             : undefined
         }
+        esqlRequestStats={esqlRequestStats}
         onOpenQueryInNewTab={tabsEnabled ? onOpenQueryInNewTab : undefined}
       />
       {isESQLToDataViewTransitionModalVisible && (
