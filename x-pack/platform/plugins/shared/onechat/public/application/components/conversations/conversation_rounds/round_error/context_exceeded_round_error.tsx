@@ -32,7 +32,7 @@ export const ContextExceededRoundError: React.FC = () => (
             values={{
               docsLink: (
                 <EuiLink
-                  href={`${docLinks.limitationsKnownIssues}#conversation-length-exceeded`}
+                  href={docLinks.limitationsKnownIssuesConversationLengthExceeded}
                   external
                   target="_blank"
                 >
