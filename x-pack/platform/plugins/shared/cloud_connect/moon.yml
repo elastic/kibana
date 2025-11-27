@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/cloud-connect-plugin'
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: '@elastic/kibana-management'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/cloud-connect-plugin'
   description: Moon project for @kbn/cloud-connect-plugin
   channel: ''
-  owner: '@elastic/kibana-core'
+  owner: '@elastic/kibana-management'
   metadata:
     sourceRoot: x-pack/platform/plugins/shared/cloud_connect
 dependsOn:
