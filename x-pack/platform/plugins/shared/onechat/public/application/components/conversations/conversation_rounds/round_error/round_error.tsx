@@ -21,9 +21,6 @@ interface RoundErrorProps {
 }
 
 const labels = {
-  showErrorThinkingPanel: i18n.translate('xpack.onechat.round.error.showErrorThinkingPanel', {
-    defaultMessage: 'Show',
-  }),
   retryAriaLabel: i18n.translate('xpack.onechat.round.error.retryLabel', {
     defaultMessage: 'Retry',
   }),

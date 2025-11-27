@@ -36,7 +36,7 @@ const reasoningLabel = i18n.translate('xpack.onechat.conversation.reasoning', {
   defaultMessage: 'Reasoning',
 });
 const completedReasoningLabel = i18n.translate('xpack.onechat.conversation.completedReasoning', {
-  defaultMessage: 'Completed Reasoning',
+  defaultMessage: 'Completed reasoning',
 });
 
 interface RoundThinkingPanelProps {

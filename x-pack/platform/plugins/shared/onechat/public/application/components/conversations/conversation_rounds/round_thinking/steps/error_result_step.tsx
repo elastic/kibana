@@ -35,7 +35,7 @@ export const ErrorResultStep: React.FC<ErrorResultStepProps> = ({ result: { data
           </EuiText>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner paddingSize="none">
-          <EuiCodeBlock language="esql" isCopyable paddingSize="m" lineNumbers>
+          <EuiCodeBlock isCopyable paddingSize="m" lineNumbers>
             {data.message}
           </EuiCodeBlock>
         </EuiSplitPanel.Inner>

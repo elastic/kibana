@@ -27,6 +27,12 @@ const labels = {
   parameters: i18n.translate('xpack.onechat.round.thinking.steps.thinkingItemLayout.parameters', {
     defaultMessage: 'Parameters',
   }),
+  close: i18n.translate('xpack.onechat.round.thinking.steps.thinkingItemLayout.close', {
+    defaultMessage: 'Close',
+  }),
+  open: i18n.translate('xpack.onechat.round.thinking.steps.thinkingItemLayout.open', {
+    defaultMessage: 'Open',
+  }),
 };
 
 interface AccordionProps {
@@ -47,7 +53,7 @@ const Accordion = ({ children, accordionContent }: AccordionProps) => {
       extraAction={
         <EuiButtonIcon
           iconType={isOpen ? 'eyeClosed' : 'eye'}
-          aria-label={isOpen ? 'Close' : 'Open'}
+          aria-label={isOpen ? labels.close : labels.open}
           onClick={() => setIsOpen(!isOpen)}
           color="text"
         />
@@ -64,7 +70,7 @@ const Accordion = ({ children, accordionContent }: AccordionProps) => {
             </EuiText>
           </EuiSplitPanel.Inner>
           <EuiSplitPanel.Inner paddingSize="none">
-            <EuiCodeBlock language="esql" isCopyable paddingSize="m" lineNumbers>
+            <EuiCodeBlock isCopyable paddingSize="m" lineNumbers>
               {JSON.stringify(accordionContent, null, 2)}
             </EuiCodeBlock>
           </EuiSplitPanel.Inner>
@@ -103,7 +109,7 @@ export const ThinkingItemLayout: React.FC<ThinkingItemLayoutProps> = ({
       )}
       <EuiFlexItem>
         {accordionContent ? (
-          <Accordion children={children} accordionContent={accordionContent} />
+          <Accordion accordionContent={accordionContent}>{children}</Accordion>
         ) : (
           <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
             <EuiFlexItem grow={false}>{children}</EuiFlexItem>

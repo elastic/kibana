@@ -32,6 +32,9 @@ const labels = {
   flyoutTitle: i18n.translate('xpack.onechat.thinking.flyoutTitle', {
     defaultMessage: 'Tool response details',
   }),
+  loading: i18n.translate('xpack.onechat.conversation.thinking.loading', {
+    defaultMessage: 'Loading...',
+  }),
 };
 
 // Exposed in main thinking chain, for now query and tabular data
@@ -51,7 +54,7 @@ const disabledToolResultIconTypes = [ToolResultType.error, ToolResultType.query]
 
 const getItemIcon = (isLastItem: boolean, isLoading: boolean): ReactNode => {
   if (isLastItem && isLoading) {
-    return <EuiLoadingElastic size="m" aria-label={'Loading...'} />;
+    return <EuiLoadingElastic size="m" aria-label={labels.loading} />;
   }
   return <EuiIcon type="check" color="success" />;
 };
