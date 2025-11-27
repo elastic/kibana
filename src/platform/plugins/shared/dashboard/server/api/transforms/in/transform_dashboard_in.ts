@@ -60,7 +60,17 @@ export const transformDashboardIn = (
 
     const tagReferences = transformTagsIn(tags);
 
-    const { panelsJSON, sections, references: panelReferences } = transformPanelsIn(panels);
+    const {
+      panelsJSON,
+      sections,
+      references: panelReferences,
+    } = panels
+      ? transformPanelsIn(panels)
+      : {
+          panelsJSON: '',
+          sections: undefined,
+          references: [],
+        };
 
     const { searchSourceJSON, references: searchSourceReferences } = transformSearchSourceIn(
       filters,
@@ -74,9 +84,7 @@ export const transformDashboardIn = (
         controlGroupInput: transformControlGroupIn(controlGroupInput),
       }),
       optionsJSON: JSON.stringify(options ?? {}),
-      ...(panels && {
-        panelsJSON,
-      }),
+      panelsJSON,
       ...(sections?.length && { sections }),
       ...(timeRange
         ? { timeFrom: timeRange.from, timeTo: timeRange.to, timeRestore: true }
