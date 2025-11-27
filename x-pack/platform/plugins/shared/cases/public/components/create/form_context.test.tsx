@@ -1167,6 +1167,43 @@ describe('Create case', () => {
     ).toBe(true);
   });
 
+  it('should succeed even when pushing to an external service fails', async () => {
+    const failPushCaseToExternalService = jest.fn().mockRejectedValue(new Error('Push failed'));
+    usePostPushToServiceMock.mockImplementation(() => ({
+      isLoading: false,
+      isError: false,
+      mutateAsync: failPushCaseToExternalService,
+    }));
+
+    renderWithTestingProviders(
+      <FormContext
+        selectedOwner={SECURITY_SOLUTION_OWNER}
+        onSuccess={onFormSubmitSuccess}
+        afterCaseCreated={afterCaseCreated}
+        currentConfiguration={currentConfiguration}
+      >
+        <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectorsMock} />
+        <SubmitCaseButton />
+      </FormContext>
+    );
+
+    await waitForFormToRender();
+    await fillFormReactTestingLib({ user });
+
+    await user.click(screen.getByTestId('dropdown-connectors'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    await user.click(screen.getByTestId('create-case-submit'));
+
+    await waitFor(() => {
+      expect(onFormSubmitSuccess).toHaveBeenCalled();
+    });
+  });
+
   describe('Permissions', () => {
     it('should not push to service if the user does not have access to actions', async () => {
       const coreStart = coreMock.createStart();
