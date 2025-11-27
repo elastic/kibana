@@ -26,7 +26,7 @@ import { SimilarErrorsOccurrencesChart } from './similar_errors_occurrences_char
 const sectionTitle = i18n.translate(
   'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.title',
   {
-    defaultMessage: 'Similar errors',
+    defaultMessage: 'Similar errors', // TODO should this be configurable between error and exception?
   }
 );
 
@@ -45,13 +45,13 @@ export interface SimilarErrorsProps {
 }
 
 export function SimilarErrors({ hit, formattedDoc }: SimilarErrorsProps) {
-  // TODO should I also check error.grouping_name?
   const serviceNameValue = formattedDoc[fieldConstants.SERVICE_NAME_FIELD];
+  const groupingNameValue = formattedDoc[fieldConstants.ERROR_GROUPING_NAME_FIELD];
   const culpritValue = formattedDoc[fieldConstants.ERROR_CULPRIT_FIELD];
-  const { field: messageField, value: messageValue } = getMessageFieldWithFallbacks(formattedDoc, {
-    includeFormattedValue: true,
-  });
-  const { field: typeField, value: typeValue } = getLogExceptionTypeFieldWithFallback(formattedDoc);
+  const { field: messageField, value: messageValue } = getMessageFieldWithFallbacks(formattedDoc);
+  const { field: typeField, value: typeValue } = getLogExceptionTypeFieldWithFallback(
+    hit.flattened
+  );
 
   const sectionDescription = useMemo(() => {
     const fieldsWithValues: string[] = [fieldConstants.SERVICE_NAME_FIELD];
@@ -64,7 +64,9 @@ export function SimilarErrors({ hit, formattedDoc }: SimilarErrorsProps) {
     }
     if (typeValue) {
       fieldsWithValues.push(typeField || 'exception.type');
-      // TODO check this value, I've seen a case with ["ProgrammingError", "UndefinedTable"] as value
+    }
+    if (groupingNameValue) {
+      fieldsWithValues.push(fieldConstants.ERROR_GROUPING_NAME_FIELD);
     }
 
     if (fieldsWithValues.length === 0) {
@@ -80,22 +82,37 @@ export function SimilarErrors({ hit, formattedDoc }: SimilarErrorsProps) {
         },
       }
     );
-  }, [culpritValue, messageValue, typeValue, messageField, typeField]);
+  }, [culpritValue, messageValue, typeValue, messageField, typeField, groupingNameValue]);
 
   // TODO extract to a higher level folder
   const { indexes } = useDataSourcesContext();
   const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.logs });
 
   // TODO check how to parse the message properly, when there's special chars the query does not work.
-  // It does work if you filter by message from the flyout.
+  // It does work if you filter by message from the flyout (if there's no line breaks). I think it happens mostly
+  // with exceptions (WHERE exception.type is not null)
+  // Latest discover, we could do it by having /n as linebreak and using MATCH_PHRASE
+  /**
+   * AND MATCH_PHRASE(exception.message, "<_MultiThreadedRendezvous of RPC that terminated with:\n\tstatus = StatusCode.DEADLINE_EXCEEDED\n\tdetails = \"Deadline Exceeded\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {grpc_status:4, grpc_message:\"Deadline Exceeded\"}\"\n>")
+   */
 
+  // TODO should we keep in mind mixed sources?
+  // TODO when there's only 1 occurence and is the doc that I have opened, the chart shows empty.
+  // should we show it anyway?
   const esqlQuery = getEsqlQuery({
     serviceName: formattedDoc[fieldConstants.SERVICE_NAME_FIELD],
-    culprit: culpritValue
-      ? { fieldName: fieldConstants.ERROR_CULPRIT_FIELD, value: culpritValue }
-      : undefined,
-    message: messageValue ? { fieldName: messageField, value: messageValue } : undefined,
-    type: typeValue ? { fieldName: typeField, value: typeValue } : undefined,
+    culprit: culpritValue,
+    message:
+      messageValue && messageField
+        ? { fieldName: messageField, value: String(messageValue) }
+        : undefined,
+    type:
+      typeValue && typeField
+        ? {
+            fieldName: typeField,
+            value: Array.isArray(typeValue) ? typeValue.map(String) : String(typeValue),
+          }
+        : undefined,
   });
 
   const discoverUrl = useMemo(

@@ -12,7 +12,7 @@ import { where } from '@kbn/esql-composer';
 
 interface ErrorField {
   fieldName: string;
-  value: string | undefined;
+  value: string | string[];
 }
 
 export function getEsqlQuery({
@@ -22,7 +22,7 @@ export function getEsqlQuery({
   type,
 }: {
   serviceName?: string;
-  culprit?: ErrorField;
+  culprit?: string;
   message?: ErrorField;
   type?: ErrorField;
 }) {
@@ -37,22 +37,31 @@ export function getEsqlQuery({
     params[paramName] = serviceName;
   }
 
-  if (culprit?.value !== undefined && culprit?.fieldName) {
+  if (culprit) {
     const paramName = 'culprit';
-    conditions.push(`${culprit.fieldName} == ?${paramName}`);
-    params[paramName] = culprit.value;
+    conditions.push(`${fieldConstants.ERROR_CULPRIT_FIELD} == ?${paramName}`);
+    params[paramName] = culprit;
   }
 
   if (message?.value !== undefined && message?.fieldName) {
     const paramName = 'message';
     conditions.push(`${message.fieldName} == ?${paramName}`);
-    params[paramName] = message.value;
+    params[paramName] = String(message.value);
   }
 
   if (type?.value !== undefined && type?.fieldName) {
-    const paramName = 'type';
-    conditions.push(`${type.fieldName} == ?${paramName}`);
-    params[paramName] = type.value;
+    const typeFieldName = type.fieldName;
+    if (Array.isArray(type.value)) {
+      const matchConditions = type.value.map((val) => {
+        const stringValue = String(val);
+        return `MATCH(${typeFieldName}, "${stringValue}")`;
+      });
+      conditions.push(matchConditions.join(' AND '));
+    } else {
+      const paramName = 'type';
+      conditions.push(`${typeFieldName} == ?${paramName}`);
+      params[paramName] = type.value;
+    }
   }
 
   if (conditions.length === 0) {

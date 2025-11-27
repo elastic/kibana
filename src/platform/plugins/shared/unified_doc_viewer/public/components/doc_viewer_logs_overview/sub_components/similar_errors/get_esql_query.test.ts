@@ -22,7 +22,7 @@ describe('getEsqlQuery', () => {
       .pipe(
         getEsqlQuery({
           serviceName: 'payment-service',
-          culprit: { fieldName: 'error.culprit', value: 'charge' },
+          culprit: 'charge',
           message: { fieldName: 'message', value: 'Payment failed' },
           type: { fieldName: 'exception.type', value: 'ProgrammingError' },
         }) || emptyQueryOperator
@@ -30,7 +30,7 @@ describe('getEsqlQuery', () => {
       .toString();
 
     expect(result).toEqual(
-      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND error.culprit == "charge" AND message == "Payment failed" AND exception.type == "ProgrammingError"`
+      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND ${fieldConstants.ERROR_CULPRIT_FIELD} == "charge" AND message == "Payment failed" AND exception.type == "ProgrammingError"`
     );
   });
 
@@ -39,13 +39,13 @@ describe('getEsqlQuery', () => {
       .pipe(
         getEsqlQuery({
           serviceName: 'payment-service',
-          culprit: { fieldName: 'error.culprit', value: 'charge' },
+          culprit: 'charge',
         }) || emptyQueryOperator
       )
       .toString();
 
     expect(result).toEqual(
-      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND error.culprit == "charge"`
+      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND ${fieldConstants.ERROR_CULPRIT_FIELD} == "charge"`
     );
   });
 
@@ -84,14 +84,14 @@ describe('getEsqlQuery', () => {
       .pipe(
         getEsqlQuery({
           serviceName: 'payment-service',
-          culprit: { fieldName: 'error.culprit', value: 'charge' },
+          culprit: 'charge',
           message: { fieldName: 'message', value: 'Payment failed' },
         }) || emptyQueryOperator
       )
       .toString();
 
     expect(result).toEqual(
-      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND error.culprit == "charge" AND message == "Payment failed"`
+      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND ${fieldConstants.ERROR_CULPRIT_FIELD} == "charge" AND message == "Payment failed"`
     );
   });
 
@@ -115,53 +115,19 @@ describe('getEsqlQuery', () => {
     );
   });
 
-  it('returns a query with only serviceName when all error field values are undefined', () => {
-    const result = source
-      .pipe(
-        getEsqlQuery({
-          serviceName: 'payment-service',
-          culprit: { fieldName: 'error.culprit', value: undefined },
-          message: { fieldName: 'message', value: undefined },
-          type: { fieldName: 'exception.type', value: undefined },
-        }) || emptyQueryOperator
-      )
-      .toString();
-
-    expect(result).toEqual(
-      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service"`
-    );
-  });
-
-  it('ignores fields with undefined values', () => {
-    const result = source
-      .pipe(
-        getEsqlQuery({
-          serviceName: 'payment-service',
-          culprit: { fieldName: 'error.culprit', value: undefined },
-          message: { fieldName: 'message', value: 'Payment failed' },
-          type: { fieldName: 'exception.type', value: undefined },
-        }) || emptyQueryOperator
-      )
-      .toString();
-
-    expect(result).toEqual(
-      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND message == "Payment failed"`
-    );
-  });
-
   it('ignores fields with missing fieldName', () => {
     const result = source
       .pipe(
         getEsqlQuery({
           serviceName: 'payment-service',
-          culprit: { fieldName: '', value: 'charge' },
-          message: { fieldName: 'message', value: 'Payment failed' },
+          culprit: 'charge',
+          message: { fieldName: '', value: 'Payment failed' },
         }) || emptyQueryOperator
       )
       .toString();
 
     expect(result).toEqual(
-      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND message == "Payment failed"`
+      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND ${fieldConstants.ERROR_CULPRIT_FIELD} == "charge"`
     );
   });
 
@@ -177,6 +143,68 @@ describe('getEsqlQuery', () => {
 
     expect(result).toEqual(
       `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND message == ""`
+    );
+  });
+
+  it('returns a query with MATCH conditions when type is an array', () => {
+    const result = source
+      .pipe(
+        getEsqlQuery({
+          serviceName: 'payment-service',
+          type: { fieldName: 'exception.type', value: ['ProgrammingError', 'UndefinedTable'] },
+        }) || emptyQueryOperator
+      )
+      .toString();
+
+    expect(result).toEqual(
+      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH(exception.type, "ProgrammingError") AND MATCH(exception.type, "UndefinedTable")`
+    );
+  });
+
+  it('returns a query with MATCH conditions for array type and other fields', () => {
+    const result = source
+      .pipe(
+        getEsqlQuery({
+          serviceName: 'payment-service',
+          culprit: 'charge',
+          message: { fieldName: 'message', value: 'Payment failed' },
+          type: { fieldName: 'exception.type', value: ['Error', 'withMessage', 'withStack'] },
+        }) || emptyQueryOperator
+      )
+      .toString();
+
+    expect(result).toEqual(
+      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND ${fieldConstants.ERROR_CULPRIT_FIELD} == "charge" AND message == "Payment failed" AND MATCH(exception.type, "Error") AND MATCH(exception.type, "withMessage") AND MATCH(exception.type, "withStack")`
+    );
+  });
+
+  it('returns a query with single type value using == when type is not an array', () => {
+    const result = source
+      .pipe(
+        getEsqlQuery({
+          serviceName: 'payment-service',
+          type: { fieldName: 'exception.type', value: 'ProgrammingError' },
+        }) || emptyQueryOperator
+      )
+      .toString();
+
+    expect(result).toEqual(
+      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND exception.type == "ProgrammingError"`
+    );
+  });
+
+  it('handles array type with single element', () => {
+    const result = source
+      .pipe(
+        getEsqlQuery({
+          serviceName: 'payment-service',
+          type: { fieldName: 'exception.type', value: ['SingleError'] },
+        }) || emptyQueryOperator
+      )
+      .toString();
+
+    expect(result).toEqual(
+      `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH(exception.type, "SingleError")`
     );
   });
 });
