@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, useCallback, useRef, useState, useMemo, type CSSProperties } from 'react';
+import React, { useCallback, useRef, useMemo, type CSSProperties, Fragment } from 'react';
 import { type Row } from '@tanstack/react-table';
 import { useVirtualizer, defaultRangeExtractor, type VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode } from '../../../store_provider';
@@ -113,7 +113,12 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
   getScrollElement,
 }: CascadeVirtualizerProps<G>): CascadeVirtualizerReturnValue => {
   const virtualizedRowsSizeCacheRef = useRef<Map<number, number>>(new Map());
-  const [activeStickyIndex, setActiveStickyIndex] = useState<number | null>(null);
+  const activeStickyIndexRef = useRef<number | null>(null);
+
+  const setActiveStickyIndex = useCallback((index: number | null) => {
+    activeStickyIndexRef.current = index;
+  }, []);
+
   const rangeExtractor = useCascadeVirtualizerRangeExtractor<G>({
     rows,
     enableStickyGroupHeader,
@@ -147,7 +152,9 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
 
   return useMemo(
     () => ({
-      activeStickyIndex,
+      get activeStickyIndex() {
+        return activeStickyIndexRef.current;
+      },
       getTotalSize: virtualizerImpl.getTotalSize.bind(virtualizerImpl),
       getVirtualItems: virtualizerImpl.getVirtualItems.bind(virtualizerImpl),
       measureElement: virtualizerImpl.measureElement.bind(virtualizerImpl),
@@ -171,7 +178,7 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
         return virtualizedRowsSizeCacheRef.current;
       },
     }),
-    [activeStickyIndex, virtualizerImpl, rows.length]
+    [virtualizerImpl, rows.length]
   );
 };
 
@@ -193,7 +200,7 @@ export interface VirtualizedCascadeListProps<G extends GroupNode>
     'virtualizedRowComputedTranslateValue' | 'getVirtualItems' | 'activeStickyIndex'
   > {
   rows: Row<G>[];
-  children: (props: {
+  listItemRenderer: (props: {
     isActiveSticky: boolean;
     virtualItem: VirtualItem;
     virtualRowStyle: React.CSSProperties;
@@ -206,20 +213,20 @@ export function VirtualizedCascadeRowList<G extends GroupNode>({
   getVirtualItems,
   virtualizedRowComputedTranslateValue,
   rows,
-  children,
+  listItemRenderer,
 }: VirtualizedCascadeListProps<G>) {
   return getVirtualItems().map(function buildCascadeRows(virtualItem, renderIndex) {
     const row = rows[virtualItem.index];
 
     const isActiveSticky = activeStickyIndex === virtualItem.index;
 
-    // side effect to record the computed translate value for each item of virtualized row
-    // allows us to position the header correctly in relation to the scrolled virtualized rows
+    // side effect to record the computed translate value for each item of virtualized row,
+    // doing this allows us to position the header correctly in relation to the scrolled virtualized rows
     virtualizedRowComputedTranslateValue.set(renderIndex, virtualItem.start);
 
     return (
       <Fragment key={row.id}>
-        {children({
+        {listItemRenderer({
           row,
           isActiveSticky,
           virtualItem,
