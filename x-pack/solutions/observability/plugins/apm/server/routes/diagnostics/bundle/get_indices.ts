@@ -10,7 +10,7 @@ import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { compactMap } from '../../../utils/compact_map';
 
 export function getApmIndexPatterns(indices: string[]) {
-  return [...new Set(indices.flatMap((index): string[] => index.split(',')))];
+  return Array.from(new Set(indices.flatMap((index): string[] => index.split(','))));
 }
 
 export async function getIndicesAndIngestPipelines({
@@ -35,12 +35,12 @@ export async function getIndicesAndIngestPipelines({
     ignore_unavailable: true,
   });
 
-  const pipelineIds = new Set(
-    compactMap(Object.values(indices), (index) => index.settings?.index?.default_pipeline)
+  const pipelineIds = Array.from(
+    new Set(compactMap(Object.values(indices), (index) => index.settings?.index?.default_pipeline))
   );
 
   const ingestPipelines = await esClient.ingest.getPipeline({
-    id: [...pipelineIds].join(','),
+    id: pipelineIds.join(','),
     filter_path: ['*.processors.grok.field', '*.processors.grok.patterns'],
   });
 
