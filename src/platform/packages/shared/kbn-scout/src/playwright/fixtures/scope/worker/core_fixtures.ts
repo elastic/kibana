@@ -24,6 +24,7 @@ import {
   ScoutLogger,
   createElasticsearchCustomRole,
   createCustomRole,
+  isElasticsearchRole,
 } from '../../../../common/services';
 import type { ScoutTestOptions } from '../../../types';
 import type { ScoutTestConfig } from '.';
@@ -150,10 +151,6 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
 
       const isCustomRoleSet = (roleHash: string) => roleHash === customRoleHash;
 
-      const isElasticsearchRole = (role: any): role is ElasticsearchRoleDescriptor => {
-        return 'applications' in role;
-      };
-
       const setCustomRole = async (role: KibanaRole | ElasticsearchRoleDescriptor) => {
         const newRoleHash = JSON.stringify(role);
 
@@ -174,8 +171,10 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
 
         if (isElasticsearchRole(role)) {
           await createElasticsearchCustomRole(esClient, customRoleName, role);
+          log.debug(`Created Elasticsearch custom role: ${customRoleName}`);
         } else {
           await createCustomRole(kbnClient, customRoleName, role);
+          log.debug(`Created Kibana custom role: ${customRoleName}`);
         }
 
         customRoleHash = newRoleHash;

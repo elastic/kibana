@@ -66,6 +66,26 @@
           },
           {
             "parentPluginId": "automaticImportVTwo",
+            "id": "def-server.AutomaticImportV2PluginSetupDependencies.features",
+            "type": "Object",
+            "tags": [],
+            "label": "features",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "features",
+                "scope": "server",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-server.FeaturesPluginSetup",
+                "text": "FeaturesPluginSetup"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImportVTwo",
             "id": "def-server.AutomaticImportV2PluginSetupDependencies.taskManager",
             "type": "Object",
             "tags": [],
