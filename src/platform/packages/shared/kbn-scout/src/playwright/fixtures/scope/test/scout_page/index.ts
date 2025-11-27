@@ -46,7 +46,7 @@ export type ScoutPage = Page & {
    * Performs an accessibility (a11y) scan of the current page using axe-core.
    * Use this in tests to collect formatted violation summaries (one string per violation).
    *
-   * @param options - Optional accessibility scan configuration (e.g. selectors to include, exclude, timeout). 
+   * @param options - Optional accessibility scan configuration (e.g. selectors to include, exclude, timeout).
    * @returns A Promise resolving to an object with a 'violations' array containing
    *          human-readable formatted strings for each detected violation (empty if none).
    */
