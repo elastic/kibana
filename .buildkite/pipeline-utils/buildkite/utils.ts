@@ -7,24 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
-import { filter, share, tap } from 'rxjs';
-import type { UnifiedHistogramInput$ } from '../../../types';
+import fs from 'fs';
 
-export const useFetch = ({
-  input$,
-  beforeFetch,
-}: {
-  input$: UnifiedHistogramInput$;
-  beforeFetch: () => void;
-}) => {
-  return useMemo(
-    () =>
-      input$.pipe(
-        filter((message) => message.type === 'fetch'),
-        tap(beforeFetch),
-        share()
-      ),
-    [beforeFetch, input$]
-  );
+export function emitPipeline(pipelineSteps: string[]) {
+  const pipelineStr = [...new Set(pipelineSteps)].join('\n');
+  console.log(pipelineStr);
+}
+
+export const getPipeline = (filename: string, removeSteps = true) => {
+  const str = fs.readFileSync(filename).toString();
+  return removeSteps ? str.replace(/^steps:/, '') : str;
 };
