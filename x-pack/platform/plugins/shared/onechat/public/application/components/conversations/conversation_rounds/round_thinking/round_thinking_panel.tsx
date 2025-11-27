@@ -71,7 +71,12 @@ export const RoundThinkingPanel = ({
 
   return (
     <>
-      <EuiFlexGroup direction="column" responsive={false} css={containerStyles}>
+      <EuiFlexGroup
+        direction="column"
+        responsive={false}
+        css={containerStyles}
+        data-test-subj="agentBuilderThinkingPanel"
+      >
         {/* Thinking Panel Title */}
         <EuiFlexGroup direction="row" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -81,6 +86,7 @@ export const RoundThinkingPanel = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
+              data-test-subj="agentBuilderThinkingToggle"
               aria-label={closePanelLabel}
               iconType="cross"
               color="text"

@@ -31,7 +31,7 @@ interface GenericRoundErrorProps {
 }
 export const GenericRoundError: React.FC<GenericRoundErrorProps> = ({ error }) => {
   return (
-    <EuiSplitPanel.Outer hasBorder hasShadow={false} data-test-subj="agentBuilderRoundError">
+    <EuiSplitPanel.Outer hasBorder hasShadow={false} data-test-subj="agentBuilderGenericRoundError">
       <EuiSplitPanel.Inner color="danger" grow={false} paddingSize="m">
         <EuiText size="s" color="danger">
           <strong>{labels.description}</strong>

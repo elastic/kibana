@@ -47,7 +47,12 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, onRetry }) => {
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="l"
+      responsive={false}
+      data-test-subj="agentBuilderRoundError"
+    >
       {showErrorThinkingPanel ? (
         <RoundErrorThinkingPanel onClose={toggleErrorThinkingPanel}>
           {errorContent}
@@ -61,6 +66,7 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, onRetry }) => {
             css={css`
               color: ${euiTheme.colors.textPrimary};
             `}
+            data-test-subj="agentBuilderRoundErrorRetryButton"
             iconType="refresh"
             onClick={onRetry}
             aria-label={labels.retryAriaLabel}
