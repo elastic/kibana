@@ -20,7 +20,5 @@ export const SCHEDULED_REPORT_FORM_EMAIL_MESSAGE_DEFAULT_VALUE = i18n.translate(
   'xpack.reporting.scheduledReportingForm.emailMessageDefaultValue',
   {
     defaultMessage: 'Your scheduled report is attached for you to download or share.',
-    description:
-      'The curly braces are Mustache interpolations, not translation variables, hence the single quotes around them.',
   }
 );
