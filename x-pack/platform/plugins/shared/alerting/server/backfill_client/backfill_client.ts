@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import pMap from 'p-map';
 import type {
   ISavedObjectsRepository,
   Logger,
@@ -24,7 +24,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { IEventLogger, IEventLogClient } from '@kbn/event-log-plugin/server';
-import { isNumber } from 'lodash';
+import { isNumber, chunk } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { withSpan } from '@kbn/apm-utils';
 import type {
@@ -187,18 +187,82 @@ export class BackfillClient {
 
     // Bulk create the saved objects in chunks of 10 to manage resource usage
     const chunkSize = 10;
-    const allSavedObjects: Array<SavedObject<AdHocRunSO>> = [];
 
-    for (let i = 0; i < adHocSOsToCreate.length; i += chunkSize) {
-      const chunk = adHocSOsToCreate.slice(i, i + chunkSize);
-      const bulkCreateChunkResponse = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(
-        chunk
-      );
-      allSavedObjects.push(...bulkCreateChunkResponse.saved_objects);
+    const chunks: Array<{
+      startIndex: number;
+      items: Array<SavedObjectsBulkCreateObject<AdHocRunSO>>;
+    }> = chunk(adHocSOsToCreate, chunkSize).map((items, index) => ({
+      startIndex: index * chunkSize,
+      items,
+    }));
+
+    interface BulkCreateError {
+      ruleId: string;
+      ruleName: string;
+      bulkCreateError: Error;
     }
 
-    const transformedResponse: ScheduleBackfillResults = allSavedObjects.map(
-      (so: SavedObject<AdHocRunSO>, index: number) => {
+    // Pre-size result array to preserve original order regardless of parallel completion order
+    const orderedResults: Array<SavedObject<AdHocRunSO> | BulkCreateError> = new Array(
+      adHocSOsToCreate.length
+    );
+
+    const chunkConcurrency = 10;
+    await pMap(
+      chunks,
+      async ({ startIndex, items }, idx) => {
+        try {
+          const response = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(items);
+
+          // Place results in the correct positions
+          response.saved_objects.forEach((so, j) => {
+            orderedResults[startIndex + j] = so;
+          });
+
+          this.logger.debug(
+            `backfillClient.bulkQueue: created ${items.length} SOs(chunk ${idx + 1}/${
+              chunks.length
+            })`
+          );
+        } catch (error) {
+          items.forEach((item, i) => {
+            const ruleId = item.references?.[0]?.id;
+            if (!ruleId) {
+              return;
+            }
+            orderedResults[startIndex + i] = {
+              ruleId,
+              ruleName: item.attributes.rule.name,
+              bulkCreateError: new Error(error.message),
+            };
+            this.logger.warn(`Error to schedule backfill for ruleId ${ruleId} - ${error.message}`);
+            auditLogger?.log(
+              adHocRunAuditEvent({
+                action: AdHocRunAuditAction.CREATE,
+                error: new Error(error.message),
+              })
+            );
+          });
+        }
+      },
+      { concurrency: chunkConcurrency }
+    );
+
+    this.logger.info(
+      `backfillClient.bulkQueue: created ${adHocSOsToCreate.length} SOs across ${chunks.length} chunks `
+    );
+
+    const isBulkCreateError = (
+      result: SavedObject<AdHocRunSO> | BulkCreateError
+    ): result is BulkCreateError => {
+      return 'bulkCreateError' in result && result.bulkCreateError !== undefined;
+    };
+
+    const transformedResponse: ScheduleBackfillResults = orderedResults.map(
+      (so: SavedObject<AdHocRunSO> | BulkCreateError, index: number) => {
+        if (isBulkCreateError(so)) {
+          return createBackfillError(so.bulkCreateError.message, so.ruleId, so.ruleName);
+        }
         if (so.error) {
           auditLogger?.log(
             adHocRunAuditEvent({
@@ -286,10 +350,11 @@ export class BackfillClient {
       try {
         // Process backfills in chunks of 10 to manage resource usage
         for (let i = 0; i < backfillSOs.length; i += 10) {
-          const chunk = backfillSOs.slice(i, i + 10);
+          const backfillChunk = backfillSOs.slice(i, i + 10);
           await Promise.all(
-            chunk.map((backfill) =>
-              updateGaps({
+            backfillChunk.map((backfill) => {
+              const ruleGaps = gaps?.filter((gap) => gap.ruleId === backfill.rule.id);
+              return updateGaps({
                 backfillSchedule: backfill.schedule,
                 ruleId: backfill.rule.id,
                 start: new Date(backfill.start),
@@ -300,9 +365,9 @@ export class BackfillClient {
                 logger: this.logger,
                 backfillClient: this,
                 actionsClient,
-                gaps,
-              })
-            )
+                gaps: ruleGaps,
+              });
+            })
           );
         }
       } catch {
@@ -387,17 +452,15 @@ export class BackfillClient {
 
   public async findOverlappingBackfills({
     ruleId,
-    start,
-    end,
+    ranges,
     savedObjectsRepository,
     actionsClient,
   }: {
     ruleId: string;
-    start: Date;
-    end: Date;
+    ranges: { start: Date; end: Date }[];
     savedObjectsRepository: ISavedObjectsRepository;
     actionsClient: ActionsClient;
-  }) {
+  }): Promise<ScheduleBackfillResult[]> {
     const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
 
     // Create a point in time finder for efficient pagination
@@ -405,10 +468,14 @@ export class BackfillClient {
       type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
       perPage: 100,
       hasReference: [{ id: ruleId, type: RULE_SAVED_OBJECT_TYPE }],
-      filter: `
-        ad_hoc_run_params.attributes.start <= "${end.toISOString()}" and
-        ad_hoc_run_params.attributes.end >= "${start.toISOString()}"
-      `,
+      filter: ranges
+        .map(
+          (range) => `
+        (ad_hoc_run_params.attributes.start <= "${range.end.toISOString()}" and
+        ad_hoc_run_params.attributes.end >= "${range.start.toISOString()}")
+      `
+        )
+        .join(' OR '),
     });
 
     try {
