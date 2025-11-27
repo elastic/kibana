@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expect } from '@kbn/scout-oblt';
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 
@@ -54,5 +55,15 @@ export class AnomalyDetectionPage {
     await this.clickCreateJobsButton();
 
     this.page.getByText('Anomaly detection jobs created');
+  }
+
+  async deleteMlJob() {
+    const manageJobsButton = this.page.testSubj.locator('apmMLManageJobsTextLink');
+    await manageJobsButton.click();
+    const allActionsButton = this.page.getByLabel('All actions, row 1');
+    await allActionsButton.click();
+    await this.page.testSubj.locator('mlActionButtonDeleteJob').click();
+    await this.page.testSubj.locator('mlDeleteJobConfirmModalButton').click();
+    await expect(this.page.getByText('deleted successfully')).toBeVisible();
   }
 }
