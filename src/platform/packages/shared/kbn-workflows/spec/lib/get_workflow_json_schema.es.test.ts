@@ -10,21 +10,24 @@
 import type { ValidateFunction } from 'ajv';
 import { Ajv } from 'ajv';
 import yaml from 'yaml';
-import type { JSONSchema } from '@kbn/zod/v4/core';
+import type { z } from '@kbn/zod/v4';
 import { generateYamlSchemaFromConnectors } from './generate_yaml_schema_from_connectors';
 import { getWorkflowJsonSchema } from './get_workflow_json_schema';
 import { ES_SAMPLE_STEPS } from './samples';
-import { getValidateWithYamlLsp, type ValidateWithYamlLspFunction } from './validate_with_yaml_lsp';
+import {
+  getValidateWithYamlLsp,
+  type ValidateWithYamlLspFunction,
+} from './test_utils/validate_with_yaml_lsp';
 import { getElasticsearchConnectors } from '../elasticsearch';
 
 describe('getWorkflowJsonSchema / elasticsearch connectors', () => {
-  let jsonSchema: JSONSchema.JSONSchema;
+  let jsonSchema: z.core.JSONSchema.JSONSchema;
   let validateAjv: ValidateFunction;
   let validateWithYamlLsp: ValidateWithYamlLspFunction;
 
   beforeAll(() => {
     const workflowSchema = generateYamlSchemaFromConnectors(getElasticsearchConnectors());
-    jsonSchema = getWorkflowJsonSchema(workflowSchema) as JSONSchema.JSONSchema;
+    jsonSchema = getWorkflowJsonSchema(workflowSchema) as z.core.JSONSchema.JSONSchema;
     const ajv = new Ajv({ strict: false, validateFormats: false, discriminator: true });
     validateAjv = ajv.compile(jsonSchema);
     validateWithYamlLsp = getValidateWithYamlLsp(jsonSchema);

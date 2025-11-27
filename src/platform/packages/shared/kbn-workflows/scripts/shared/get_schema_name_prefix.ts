@@ -38,19 +38,7 @@ export const sanitizeNamespaceIdentifier = (name: string) =>
     .replace(/[$+]/g, '-');
 
 export function camelToSnake(str: string): string {
-  // Handle consecutive capital letters (abbreviations) as a single unit
-  // e.g., "CSV" should become "csv", not "c_s_v"
-  return str
-    .replace(
-      /([a-z\d])([A-Z]+)(?=[A-Z]|$)/g,
-      (_, before, upper) => `${before}_${upper.toLowerCase()}`
-    )
-    .replace(
-      /([A-Z]+)([A-Z][a-z])/g,
-      (_, upper, rest) => `${upper.toLowerCase()}_${rest[0].toLowerCase()}${rest.slice(1)}`
-    )
-    .replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)
-    .replace(/^_/, ''); // remove leading underscore
+  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`).replace(/^_/, ''); // remove leading underscore
 }
 
 export function toSnakeCase(str: string): string {

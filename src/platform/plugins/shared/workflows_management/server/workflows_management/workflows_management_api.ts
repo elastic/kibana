@@ -32,7 +32,7 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
-import type { JSONSchema } from '@kbn/zod/v4/core';
+import type { z } from '@kbn/zod/v4';
 import type {
   SearchWorkflowExecutionsParams,
   WorkflowsService,
@@ -400,7 +400,7 @@ export class WorkflowsManagementApi {
     { loose }: { loose: boolean },
     spaceId: string,
     request: KibanaRequest
-  ): Promise<JSONSchema.JSONSchema | null> {
+  ): Promise<z.core.JSONSchema.JSONSchema | null> {
     const zodSchema = await this.workflowsService.getWorkflowZodSchema(
       { loose: false },
       spaceId,

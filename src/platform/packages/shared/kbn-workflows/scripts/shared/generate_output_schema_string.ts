@@ -8,7 +8,6 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import type { JSONSchema } from '@kbn/zod/v4/core';
 import { getSchemaNamePrefix } from './get_schema_name_prefix';
 import { getOrResolveObject } from '../../common/utils';
 
@@ -21,8 +20,8 @@ export function generateOutputSchemaString(
       return false;
     }
     const response = getOrResolveObject<OpenAPIV3.ResponseObject>(
-      operation.responses?.[200] as JSONSchema.JSONSchema,
-      openApiDocument as unknown as JSONSchema.JSONSchema
+      operation.responses?.[200],
+      openApiDocument
     );
     return (
       response &&

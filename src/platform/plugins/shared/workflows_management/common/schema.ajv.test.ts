@@ -15,7 +15,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import Path from 'path';
 import yaml from 'yaml';
 import { getWorkflowJsonSchema } from '@kbn/workflows';
-import type { JSONSchema } from '@kbn/zod/v4/core';
+import type { z } from '@kbn/zod/v4';
 import { getWorkflowZodSchema } from './schema';
 
 const JSON_SCHEMA_FILE_NAME = 'workflow_schema.json';
@@ -48,7 +48,7 @@ describe('schema.ts', () => {
   });
 });
 
-function compileJSONSchema(jsonSchema: JSONSchema.JSONSchema) {
+function compileJSONSchema(jsonSchema: z.core.JSONSchema.JSONSchema) {
   const ajv = new Ajv({
     strict: false,
     validateFormats: false,

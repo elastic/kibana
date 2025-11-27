@@ -8,10 +8,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { $ZodTypes, JSONSchema } from '@kbn/zod/v4/core';
 import { getOrResolveObject } from '../../common/utils';
 
-export function getWorkflowJsonSchema(zodSchema: z.ZodType): JSONSchema.JSONSchema | null {
+export function getWorkflowJsonSchema(zodSchema: z.ZodType): z.core.JSONSchema.JSONSchema | null {
   try {
     return z.toJSONSchema(zodSchema, {
       target: 'draft-7',
@@ -30,8 +29,8 @@ export function getWorkflowJsonSchema(zodSchema: z.ZodType): JSONSchema.JSONSche
 
 // this function MODIFIES the jsonSchema in place
 function filterRequiredFields(ctx: {
-  zodSchema: $ZodTypes;
-  jsonSchema: JSONSchema.BaseSchema;
+  zodSchema: z.core.$ZodTypes;
+  jsonSchema: z.core.JSONSchema.BaseSchema;
   path: (string | number)[];
 }) {
   // Adjust the 'required' array on object schemas because we validating user input not the result of safeParse.
@@ -43,7 +42,10 @@ function filterRequiredFields(ctx: {
         // field is not defined in the schema, weird, skipping
         return false;
       }
-      const fieldSchema = getOrResolveObject(fieldObject as JSONSchema.JSONSchema, ctx.jsonSchema);
+      const fieldSchema = getOrResolveObject(
+        fieldObject as z.core.JSONSchema.JSONSchema,
+        ctx.jsonSchema
+      );
       // filter out from 'required' array, if field has default or optional
       return (
         fieldSchema &&
@@ -57,8 +59,8 @@ function filterRequiredFields(ctx: {
 }
 
 function removeAdditionalPropertiesFromAllOfItems(ctx: {
-  zodSchema: $ZodTypes;
-  jsonSchema: JSONSchema.BaseSchema;
+  zodSchema: z.core.$ZodTypes;
+  jsonSchema: z.core.JSONSchema.BaseSchema;
   path: (string | number)[];
 }) {
   const lastPathPart = ctx.path[ctx.path.length - 1];

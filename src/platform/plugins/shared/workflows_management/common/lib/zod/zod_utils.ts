@@ -9,7 +9,6 @@
 
 import type { ZodType } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
-import type { $ZodCheckLengthEqualsDef, $ZodCheckMaxLengthDef } from '@kbn/zod/v4/core';
 
 export function parsePath(path: string) {
   const segments = path
@@ -105,9 +104,9 @@ export function getSchemaAtPath(
             if (check._zod?.def) {
               const checkDef = check._zod.def;
               if (checkDef.check === 'max_length') {
-                maxLength = (checkDef as $ZodCheckMaxLengthDef).maximum;
+                maxLength = (checkDef as z.core.$ZodCheckMaxLengthDef).maximum;
               } else if (checkDef.check === 'length_equals') {
-                maxLength = (checkDef as $ZodCheckLengthEqualsDef).length;
+                maxLength = (checkDef as z.core.$ZodCheckLengthEqualsDef).length;
               }
             }
           }

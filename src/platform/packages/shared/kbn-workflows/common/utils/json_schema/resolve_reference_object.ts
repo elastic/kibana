@@ -7,18 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JSONSchema } from '@kbn/zod/v4/core';
-
 /**
  * Resolve a reference object to a parameter object
  * @param param - The reference object to resolve, e.g. { "$ref": "#/components/parameters/search-index" }
  * @param openApiDocument - The OpenAPI document
  * @returns The parameter object
  */
-export function resolveReferenceObject(
-  reference: string,
-  jsonSchema: any
-): JSONSchema.JSONSchema | null {
+export function resolveReferenceObject(reference: string, jsonSchema: unknown): unknown | null {
   const path = reference.replace(/^#\//, '').split('/');
   let current: unknown = jsonSchema;
   for (const segment of path) {
@@ -29,5 +24,5 @@ export function resolveReferenceObject(
     }
   }
 
-  return current as JSONSchema.JSONSchema;
+  return current;
 }

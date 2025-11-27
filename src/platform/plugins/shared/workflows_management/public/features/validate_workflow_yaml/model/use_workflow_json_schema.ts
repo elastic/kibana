@@ -11,7 +11,7 @@
 
 import { useMemo } from 'react';
 import { getWorkflowJsonSchema } from '@kbn/workflows';
-import type { JSONSchema } from '@kbn/zod/v4/core';
+import type { z } from '@kbn/zod/v4';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 
@@ -30,7 +30,7 @@ interface UseWorkflowJsonSchemaOptions {
 }
 
 interface UseWorkflowJsonSchemaResult {
-  jsonSchema: JSONSchema.JSONSchema | null;
+  jsonSchema: z.core.JSONSchema.JSONSchema | null;
   uri: string | null;
 }
 

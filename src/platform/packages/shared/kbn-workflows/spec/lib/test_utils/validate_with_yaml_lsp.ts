@@ -11,8 +11,8 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import yaml from 'yaml';
 import { getLanguageService } from 'yaml-language-server';
 import type { Diagnostic } from 'yaml-language-server';
-import type { JSONSchema } from '@kbn/zod/v4/core';
-import { getPathAtOffset } from '../../common/utils/yaml/get_path_at_offset';
+import type { z } from '@kbn/zod/v4';
+import { getPathAtOffset } from '../../../common/utils/yaml/get_path_at_offset';
 
 interface FormattedDiagnostic {
   severity: 'error' | 'warning' | 'info' | 'hint';
@@ -27,7 +27,7 @@ export type ValidateWithYamlLspFunction = (
 ) => PromiseLike<FormattedDiagnostic[]>;
 
 export function getValidateWithYamlLsp(
-  jsonSchema: JSONSchema.JSONSchema
+  jsonSchema: z.core.JSONSchema.JSONSchema
 ): ValidateWithYamlLspFunction {
   const schemaUri = 'dummy://schema.json';
   const yamlLanguageService = getLanguageService({
