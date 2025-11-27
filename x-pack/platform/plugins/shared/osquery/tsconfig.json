@@ -78,7 +78,6 @@
     "@kbn/repo-info",
     "@kbn/zod",
     "@kbn/setup-node-env",
-    "@kbn/core-http-server",
     "@kbn/react-query"
   ]
 }
