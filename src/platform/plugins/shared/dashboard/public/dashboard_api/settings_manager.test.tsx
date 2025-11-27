@@ -11,14 +11,13 @@ import { BehaviorSubject } from 'rxjs';
 import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '../../common';
 import { initializeSettingsManager } from './settings_manager';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/content_management';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 
 describe('initializeSettingsManager', () => {
   describe('default values', () => {
     test('Should set syncCursor to false when value not provided', () => {
       const settingsManager = initializeSettingsManager({
         title: 'dashboard 1',
-        panels: [],
       });
       expect(settingsManager.api.getSettings().syncColors).toBe(false);
     });
@@ -26,7 +25,6 @@ describe('initializeSettingsManager', () => {
     test('Should set syncTooltips to false when value not provided', () => {
       const settingsManager = initializeSettingsManager({
         title: 'dashboard 1',
-        panels: [],
       });
       expect(settingsManager.api.getSettings().syncTooltips).toBe(false);
     });
@@ -36,7 +34,6 @@ describe('initializeSettingsManager', () => {
     test('Should not overwrite settings when setting partial state', () => {
       const settingsManager = initializeSettingsManager({
         title: 'dashboard 1',
-        panels: [],
         options: {
           ...DEFAULT_DASHBOARD_OPTIONS,
           useMargins: false,

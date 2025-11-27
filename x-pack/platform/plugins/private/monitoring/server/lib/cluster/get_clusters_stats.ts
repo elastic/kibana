@@ -8,7 +8,6 @@
 import { createQuery } from '../create_query';
 import { ElasticsearchMetric } from '../metrics';
 import { parseCrossClusterPrefix } from '../../../common/ccs_utils';
-import { getClustersState } from './get_clusters_state';
 import type { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
 import type { LegacyRequest } from '../../types';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
@@ -22,12 +21,7 @@ import { Globals } from '../../static_globals';
  * @return {Promise} A promise containing an array of clusters.
  */
 export function getClustersStats(req: LegacyRequest, clusterUuid?: string, ccs?: string) {
-  return (
-    fetchClusterStats(req, clusterUuid, ccs)
-      .then((response) => handleClusterStats(response))
-      // augment older documents (e.g., from 2.x - 5.4) with their cluster_state
-      .then((clusters) => getClustersState(req, clusters))
-  );
+  return fetchClusterStats(req, clusterUuid, ccs).then((response) => handleClusterStats(response));
 }
 
 /**

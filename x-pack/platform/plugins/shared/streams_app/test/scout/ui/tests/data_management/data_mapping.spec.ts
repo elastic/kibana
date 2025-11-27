@@ -13,7 +13,6 @@ import { generateLogsData } from '../../fixtures/generators';
 
 test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.enable();
     // Clear existing rules
     await apiServices.streams.clearStreamChildren('logs');
     // Create a test stream with routing rules first
@@ -34,8 +33,8 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
   });
 
   test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    await apiServices.streams.clearStreamChildren('logs');
     await logsSynthtraceEsClient.clean();
-    await apiServices.streams.disable();
   });
 
   test('should display a list of stream mappings', async ({ page, pageObjects }) => {
@@ -47,7 +46,9 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await expect(page.getByRole('columnheader').getByText('Type', { exact: true })).toBeVisible();
     await expect(page.getByRole('columnheader').getByText('Format', { exact: true })).toBeVisible();
     await expect(page.getByRole('columnheader').getByText('Field Parent')).toBeVisible();
-    await expect(page.getByRole('columnheader').getByText('Status', { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole('columnheader').getByText('Mapping status', { exact: true })
+    ).toBeVisible();
 
     // Verify at least one field is displayed (fields from the stream setup)
     const rows = await pageObjects.streams.getPreviewTableRows();
@@ -140,7 +141,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmanaged',
+      value: 'Unmapped',
     });
 
     // Open the field actions menu
@@ -182,7 +183,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmanaged',
+      value: 'Unmapped',
     });
 
     // Open the field actions menu
@@ -225,7 +226,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmanaged',
+      value: 'Unmapped',
     });
   });
 

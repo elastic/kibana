@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import type { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { infra, timerange } from '@kbn/apm-synthtrace-client';
 import type {
   MetricsSourceConfigurationResponse,
   PartialMetricsSourceConfigurationProperties,
@@ -17,15 +19,30 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 const SOURCE_API_URL = '/api/metrics/source';
 const SOURCE_ID = 'default';
 
+function generateMetricsData({ from, to }: { from: string; to: string }) {
+  const range = timerange(from, to);
+
+  return range
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp) => [
+      infra.host('demo-host-1').cpu({ 'system.cpu.total.norm.pct': 0.5 }).timestamp(timestamp),
+      infra.host('demo-host-1').memory().timestamp(timestamp),
+      infra.host('demo-host-1').network().timestamp(timestamp),
+      infra.host('demo-host-2').cpu({ 'system.cpu.total.norm.pct': 0.3 }).timestamp(timestamp),
+      infra.host('demo-host-2').memory().timestamp(timestamp),
+      infra.host('demo-host-2').network().timestamp(timestamp),
+    ]);
+}
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const roleScopedSupertest = getService('roleScopedSupertest');
   const kibanaServer = getService('kibanaServer');
+  const synthtrace = getService('synthtrace');
 
   describe('API /api/metrics/source', function () {
-    // Fails on MKI: https://github.com/elastic/kibana/issues/242627
-    this.tags(['failsOnMKI']);
     let supertestWithAdminScope: SupertestWithRoleScopeType;
+    let synthtraceClient: InfraSynthtraceEsClient;
 
     const patchRequest = async (
       body: PartialMetricsSourceConfigurationProperties,
@@ -38,20 +55,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       return response.body;
     };
 
+    const from = new Date(Date.now() - 1000 * 60 * 10).toISOString(); // 10 minutes ago
+    const to = new Date().toISOString();
+
     before(async () => {
       supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
         withInternalHeaders: true,
         useCookieHeader: true,
       });
-      await esArchiver.load(
-        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
-      );
+
+      synthtraceClient = synthtrace.createInfraSynthtraceEsClient();
+
+      await synthtraceClient.clean();
+      await synthtraceClient.index(generateMetricsData({ from, to }));
       await kibanaServer.savedObjects.cleanStandardList();
     });
+
     after(async () => {
-      await esArchiver.unload(
-        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
-      );
+      await synthtraceClient.clean();
       await supertestWithAdminScope.destroy();
     });
 
@@ -74,7 +95,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const updateResponse = await patchRequest({
           name: 'UPDATED_NAME',
           description: 'UPDATED_DESCRIPTION',
-          metricAlias: 'metricbeat-**',
+          metricAlias: 'metrics-*',
         });
 
         expect(metricsSourceConfigurationResponseRT.is(updateResponse)).to.be(true);
@@ -89,7 +110,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(updatedAt).to.be.greaterThan(createdAt || 0);
         expect(configuration?.name).to.be('UPDATED_NAME');
         expect(configuration?.description).to.be('UPDATED_DESCRIPTION');
-        expect(configuration?.metricAlias).to.be('metricbeat-**');
+        expect(configuration?.metricAlias).to.be('metrics-*');
         expect(configuration?.anomalyThreshold).to.be(50);
         expect(status?.metricIndicesExist).to.be(true);
       });
@@ -108,7 +129,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const updateResponse = await patchRequest({
           name: 'UPDATED_NAME',
           description: 'UPDATED_DESCRIPTION',
-          metricAlias: 'metricbeat-**',
+          metricAlias: 'metrics-*',
         });
 
         const version = updateResponse?.source.version;
@@ -119,7 +140,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(version).to.be.a('string');
         expect(version).to.not.be(initialVersion);
         expect(updatedAt).to.be.greaterThan(createdAt || 0);
-        expect(configuration?.metricAlias).to.be('metricbeat-**');
+        expect(configuration?.metricAlias).to.be('metrics-*');
         expect(status?.metricIndicesExist).to.be(true);
       });
 
@@ -172,7 +193,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(expectedHttpStatusCode);
       };
 
-      before(() => patchRequest({ name: 'default', metricAlias: 'metrics-*,metricbeat-*' }));
+      before(async () => {
+        await patchRequest({ name: 'default', metricAlias: 'metrics-*,metricbeat-*' });
+      });
 
       it('should return "hasData" true when modules is "system"', async () => {
         const response = await makeRequest({ modules: ['system'] });

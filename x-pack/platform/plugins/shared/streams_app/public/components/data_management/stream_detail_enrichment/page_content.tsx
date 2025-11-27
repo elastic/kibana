@@ -15,12 +15,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { Streams } from '@kbn/streams-schema';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ManagementBottomBar } from '../management_bottom_bar';
@@ -37,6 +37,9 @@ import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
 import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
+import { selectFieldsInSamples } from './state_management/simulation_state_machine/selectors';
+import type { SchemaEditorField } from '../schema_editor/types';
+import { isFieldUncommitted } from '../schema_editor/utils';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -85,6 +88,61 @@ export function StreamDetailEnrichmentContentImpl() {
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
   const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
+  const fieldsInSamples = useSimulatorSelector((state) => selectFieldsInSamples(state.context));
+
+  // Calculate schemaEditorFields with result property
+  const schemaEditorFields = React.useMemo(() => {
+    // Create lookup maps for efficient comparison
+    const definitionFieldsMap = new Map(definitionFields.map((field) => [field.name, field]));
+
+    // Convert definitionFields to SchemaEditorField[] for uncommitted comparison
+    const storedFields: SchemaEditorField[] = Array.from(definitionFieldsMap.values());
+
+    const result: SchemaEditorField[] = [];
+
+    // Create a set of field names in samples for quick lookup
+    const fieldsInSamplesSet = new Set(fieldsInSamples);
+
+    // Process only detected fields
+    detectedFields.forEach((detectedField) => {
+      const definitionField = definitionFieldsMap.get(detectedField.name);
+      const isInSamples = fieldsInSamplesSet.has(detectedField.name);
+      let fieldResult: SchemaEditorField['result'];
+
+      if (isInSamples) {
+        // Field exists in samples AND in detected fields - modified by the simulated processing steps
+        fieldResult = 'modified';
+      } else {
+        // Field not in samples - newly created by the processing steps
+        fieldResult = 'created';
+      }
+
+      let editorField: SchemaEditorField;
+
+      // If the detected field matches an inherited field, preserve the inherited properties
+      if (definitionField) {
+        // Merge with definition field to preserve any additional properties
+        editorField = {
+          ...definitionField,
+          ...detectedField,
+          result: fieldResult,
+        };
+      } else {
+        editorField = {
+          ...detectedField,
+          result: fieldResult,
+        };
+      }
+
+      // Mark field as uncommitted if it's new or modified from stored state
+      editorField.uncommitted = isFieldUncommitted(editorField, storedFields);
+
+      result.push(editorField);
+    });
+
+    return result;
+  }, [detectedFields, fieldsInSamples, definitionFields]);
+
   const hasDefinitionError = useSimulatorSelector((snapshot) =>
     Boolean(snapshot.context.simulation?.definition_error)
   );
@@ -116,7 +174,7 @@ export function StreamDetailEnrichmentContentImpl() {
       toMountPoint(
         <StreamsAppContextProvider context={context}>
           <SchemaChangesReviewModal
-            fields={detectedFields}
+            fields={schemaEditorFields}
             streamType={getStreamTypeFromDefinition(definition.stream)}
             definition={definition}
             storedFields={definitionFields}
@@ -161,7 +219,7 @@ export function StreamDetailEnrichmentContentImpl() {
                 paddingSize="l"
                 css={verticalFlexCss}
               >
-                <MemoSimulationPlayground />
+                <MemoSimulationPlayground schemaEditorFields={schemaEditorFields} />
               </EuiResizablePanel>
             </>
           )}
@@ -171,7 +229,8 @@ export function StreamDetailEnrichmentContentImpl() {
         <ManagementBottomBar
           onCancel={resetChanges}
           onConfirm={
-            detectedFields.length > 0 && getChanges(detectedFields, definitionFields).length > 0
+            schemaEditorFields.length > 0 &&
+            getChanges(schemaEditorFields, definitionFields).length > 0
               ? openConfirmationModal
               : saveChanges
           }

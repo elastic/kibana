@@ -14,3 +14,17 @@
 //   emitPipeline,
 //   getPipeline
 // } from '#pipeline-utils';
+import { emitPipeline, getPipeline } from '#pipeline-utils';
+
+(async () => {
+  const pipeline: string[] = [];
+
+  try {
+    pipeline.push(getPipeline('.buildkite/pipelines/fips.yml', false));
+
+    emitPipeline(pipeline);
+  } catch (ex) {
+    console.error('Error while generating the pipeline steps: ' + ex.message, ex);
+    process.exit(1);
+  }
+})();

@@ -12,7 +12,7 @@ import type { BaseSSLSecrets, MonitoringType, SecretReference, ValueOf } from '.
 
 import type { PackagePolicy } from './package_policy';
 import type { Output } from './output';
-
+import type { CloudProvider } from './cloud_connector';
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
 // adding a property here? If it should be cloned when duplicating a policy, add it to `agentPolicyService.copy`
@@ -74,7 +74,7 @@ export interface AgentTargetVersion {
 }
 
 export interface CloudConnectors {
-  target_csp?: string;
+  target_csp?: CloudProvider;
   enabled?: boolean;
 }
 export interface AgentlessPolicy {

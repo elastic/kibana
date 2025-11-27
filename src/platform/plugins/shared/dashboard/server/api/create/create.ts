@@ -10,27 +10,23 @@
 import Boom from '@hapi/boom';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../dashboard_saved_object';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardCreateRequestBody } from './types';
-import { transformDashboardIn } from '../../content_management/v1/transforms';
+import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../saved_object_utils';
 import type { DashboardCreateResponseBody } from './types';
 
 export async function create(
   requestCtx: RequestHandlerContext,
-  searchBody: DashboardCreateRequestBody
+  createBody: DashboardCreateRequestBody
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
-  const { references: incomingReferences, ...incomingDashboardState } = searchBody.data;
   const {
     attributes: soAttributes,
     references: soReferences,
     error: transformInError,
-  } = transformDashboardIn({
-    dashboardState: incomingDashboardState,
-    incomingReferences,
-  });
+  } = transformDashboardIn(createBody.data);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
@@ -40,8 +36,8 @@ export async function create(
     soAttributes,
     {
       references: soReferences,
-      ...(searchBody.id && { id: searchBody.id }),
-      ...(searchBody.spaces && { initialNamespaces: searchBody.spaces }),
+      ...(createBody.id && { id: createBody.id }),
+      ...(createBody.spaces && { initialNamespaces: createBody.spaces }),
     }
   );
 

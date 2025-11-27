@@ -15,8 +15,7 @@ test.describe(
   'Stream data processing - data sources management',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await apiServices.streams.enable();
+    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
     });
 
@@ -29,8 +28,8 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+      await apiServices.streams.clearStreamProcessors('logs-generic-default');
       await logsSynthtraceEsClient.clean();
-      await apiServices.streams.disable();
     });
 
     test('should load by default a latest samples data source', async ({ pageObjects }) => {
@@ -49,6 +48,7 @@ test.describe(
 
       // Assert that the custom samples are correctly displayed in the preview
       await pageObjects.streams.closeFlyout();
+      await pageObjects.streams.switchToColumnsView();
       const rows = await pageObjects.streams.getPreviewTableRows();
       for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
         await pageObjects.streams.expectCellValueContains({
