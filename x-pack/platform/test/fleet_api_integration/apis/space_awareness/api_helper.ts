@@ -127,6 +127,19 @@ export class SpaceTestApiClient {
     return res.body;
   }
 
+  async syncAgentlessPolicies(data: { dryRun?: boolean } = {}, spaceId?: string) {
+    const res = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/internal/fleet/agentless_policies/_sync`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .set('elastic-api-version', '1')
+      .send(data);
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+
   async deleteAgentlessPolicy(
     policyId: string,
     spaceId?: string
