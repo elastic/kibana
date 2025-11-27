@@ -54,6 +54,7 @@ export const createBaseline: Task = async (ctx, task) => {
       title: `Ensure fixtures have been correctly populated`,
       task: checkDocuments({
         repository: savedObjectsRepository,
+        types: previousVersionTypes,
         fixtures: ctx.fixtures.previous,
       }),
     },
