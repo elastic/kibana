@@ -175,6 +175,7 @@ const previouslyRegisteredTypes = [
   'usage-counters', // deprecated in favor of 'usage-counter'
   'visualization',
   'workplace_search_telemetry',
+  'gap_auto_fill_scheduler',
   'trial-companion-nba-milestone',
   'trial-companion-nba-milestone-user-seen',
 ].sort();
