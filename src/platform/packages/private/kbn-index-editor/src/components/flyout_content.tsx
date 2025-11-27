@@ -19,11 +19,11 @@ import {
   EuiSkeletonText,
 } from '@elastic/eui';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { FileUploadContext, useFileUpload } from '@kbn/file-upload';
+import { FileUploadContext, FileUploadManager, useFileUpload } from '@kbn/file-upload';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';
-import React, { lazy } from 'react';
+import React, { lazy, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -55,8 +55,46 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
   const rows = useObservable(deps.indexUpdateService.rows$, []);
   const isLoading = useObservable(deps.indexUpdateService.isFetching$, false);
 
+  const createFileUploadManager = useCallback(
+    (existingIndex?: string | null) => {
+      return new FileUploadManager(
+        {
+          analytics: coreStart.analytics,
+          data: deps.data,
+          fileUpload: deps.fileUpload,
+          http: coreStart.http,
+          notifications: coreStart.notifications,
+        },
+        null,
+        false,
+        true,
+        existingIndex,
+        { index: { mode: 'lookup' } },
+        'lookup-index-editor',
+        // On index searchable
+        undefined,
+        // On all docs searchable
+        (index) => {
+          // indexUpdateService.onFileUploadFinished(index);
+        }
+      );
+    },
+    [coreStart.analytics, coreStart.http, coreStart.notifications, deps.data, deps.fileUpload]
+  );
+
+  const [fileUploadManager, setFileUploadManager] = useState<FileUploadManager>(() =>
+    createFileUploadManager(deps.existingIndexName)
+  );
+
+  const reset = useCallback(
+    (existingIndex?: string) => {
+      setFileUploadManager(createFileUploadManager(existingIndex));
+    },
+    [createFileUploadManager]
+  );
+
   const fileUploadContextValue = useFileUpload(
-    deps.fileManager,
+    fileUploadManager,
     deps.data,
     coreStart.application,
     coreStart.http,
@@ -64,14 +102,17 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     undefined,
     // onUploadComplete
     (results: FileUploadResults | null) => {
-      if (results) {
-        fileUploadContextValue.setExistingIndexName(results.index);
-        results.files.forEach((_, index) => {
-          deps.fileManager.removeFile(index);
-        });
-      }
-    }
+      // if (results) {
+      //   fileUploadContextValue.setExistingIndexName(results.index);
+      //   results.files.forEach((_, index) => {
+      //     fileUploadManager.removeFile(index);
+      //   });
+      // }
+    },
+    reset
   );
+
+  // console.log(222222222);
 
   const rowsWithValues = rows?.some((row) => Object.keys(row.flattened).length > 0);
 

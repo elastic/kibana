@@ -9,7 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { FileUploadManager } from '@kbn/file-upload';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createFlyout } from '../components/create_flyout';
 import { IndexUpdateService } from '../index_update_service';
@@ -66,28 +65,6 @@ export function createEditLookupIndexContentAction(
 
       const existingIndexName = doesIndexExist ? indexName : null;
 
-      const fileManager = new FileUploadManager(
-        {
-          analytics: coreStart.analytics,
-          data,
-          fileUpload,
-          http: coreStart.http,
-          notifications: coreStart.notifications,
-        },
-        null,
-        false,
-        true,
-        existingIndexName,
-        { index: { mode: 'lookup' } },
-        'lookup-index-editor',
-        // On index searchable
-        undefined,
-        // On all docs searchable
-        (index) => {
-          indexUpdateService.onFileUploadFinished(index);
-        }
-      );
-
       const storage = new Storage(localStorage);
 
       try {
@@ -96,8 +73,8 @@ export function createEditLookupIndexContentAction(
             ...dependencies,
             indexUpdateService,
             indexEditorTelemetryService,
-            fileManager,
             storage,
+            existingIndexName,
           },
           context
         );
