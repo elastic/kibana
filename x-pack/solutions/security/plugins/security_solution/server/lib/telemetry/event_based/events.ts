@@ -396,6 +396,71 @@ export const ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT: EventTypeOpts<{
   },
 };
 
+export const ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT: EventTypeOpts<{
+  entityType: string;
+  namespace: string;
+  snapshotDate: Date;
+  snapshotIndex: string;
+  entityCount: number;
+  durationMs: number;
+  interval: string;
+  success: boolean;
+  errorMessage: string | undefined;
+}> = {
+  eventType: 'entity_store_data_view_refresh_execution_event',
+  schema: {
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entities stored (e.g. "host")',
+      },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: {
+        description: 'Namespace where the entities are stored (e.g. "default")',
+      },
+    },
+    snapshotDate: {
+      type: 'date',
+      _meta: {
+        description: 'TODO',
+      },
+    },
+    snapshotIndex: {
+      type: 'keyword',
+      _meta: {
+        description: 'TODO',
+      },
+    },
+    entityCount: {
+      type: 'long',
+      _meta: {
+        description: 'TODO',
+      },
+    },
+    durationMs: {
+      type: 'long',
+      _meta: {
+        description: 'Duration (in seconds) of the entity store data view refresh execution time',
+      },
+    },
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'TODO',
+      },
+    },
+    errorMessage: {
+      type: 'string',
+      _meta: {
+        optional: true,
+        description: 'TODO',
+      },
+    },
+  },
+};
+
 export const ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
   error: string;
 }> = {
@@ -426,6 +491,8 @@ export const ENTITY_ENGINE_INITIALIZATION_EVENT: EventTypeOpts<{
 
 export const ENTITY_STORE_USAGE_EVENT: EventTypeOpts<{
   storeSize: number;
+  entityType: string;
+  namespace: string;
 }> = {
   eventType: 'entity_store_usage',
   schema: {
