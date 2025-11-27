@@ -16,12 +16,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { InternalConnectorContract } from '../../../types/latest';
 
-import { create_rule_request, create_rule_response } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import type { InternalConnectorContract } from '../../../types/latest';
+import { create_rule_request, create_rule_response } from './schemas/kibana_openapi_zod.gen';
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

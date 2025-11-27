@@ -23411,7 +23411,11 @@ export const get_fleet_agent_policies_response = z.object({
         agentless: z.optional(z.object({
             cloud_connectors: z.optional(z.object({
                 enabled: z.boolean(),
-                target_csp: z.optional(z.string())
+                target_csp: z.optional(z.enum([
+                    'aws',
+                    'azure',
+                    'gcp'
+                ]))
             })),
             resources: z.optional(z.object({
                 requests: z.optional(z.object({
@@ -23765,7 +23769,11 @@ export const post_fleet_agent_policies_request = z.object({
         agentless: z.optional(z.object({
             cloud_connectors: z.optional(z.object({
                 enabled: z.boolean(),
-                target_csp: z.optional(z.string())
+                target_csp: z.optional(z.enum([
+                    'aws',
+                    'azure',
+                    'gcp'
+                ]))
             })),
             resources: z.optional(z.object({
                 requests: z.optional(z.object({
@@ -23896,7 +23904,11 @@ export const post_fleet_agent_policies_response = z.object({
         agentless: z.optional(z.object({
             cloud_connectors: z.optional(z.object({
                 enabled: z.boolean(),
-                target_csp: z.optional(z.string())
+                target_csp: z.optional(z.enum([
+                    'aws',
+                    'azure',
+                    'gcp'
+                ]))
             })),
             resources: z.optional(z.object({
                 requests: z.optional(z.object({
@@ -24271,7 +24283,11 @@ export const post_fleet_agent_policies_bulk_get_response = z.object({
         agentless: z.optional(z.object({
             cloud_connectors: z.optional(z.object({
                 enabled: z.boolean(),
-                target_csp: z.optional(z.string())
+                target_csp: z.optional(z.enum([
+                    'aws',
+                    'azure',
+                    'gcp'
+                ]))
             })),
             resources: z.optional(z.object({
                 requests: z.optional(z.object({
@@ -24635,7 +24651,11 @@ export const get_fleet_agent_policies_agentpolicyid_response = z.object({
         agentless: z.optional(z.object({
             cloud_connectors: z.optional(z.object({
                 enabled: z.boolean(),
-                target_csp: z.optional(z.string())
+                target_csp: z.optional(z.enum([
+                    'aws',
+                    'azure',
+                    'gcp'
+                ]))
             })),
             resources: z.optional(z.object({
                 requests: z.optional(z.object({
@@ -24986,7 +25006,11 @@ export const put_fleet_agent_policies_agentpolicyid_request = z.object({
         agentless: z.optional(z.object({
             cloud_connectors: z.optional(z.object({
                 enabled: z.boolean(),
-                target_csp: z.optional(z.string())
+                target_csp: z.optional(z.enum([
+                    'aws',
+                    'azure',
+                    'gcp'
+                ]))
             })),
             resources: z.optional(z.object({
                 requests: z.optional(z.object({
@@ -25120,7 +25144,11 @@ export const put_fleet_agent_policies_agentpolicyid_response = z.object({
         agentless: z.optional(z.object({
             cloud_connectors: z.optional(z.object({
                 enabled: z.boolean(),
-                target_csp: z.optional(z.string())
+                target_csp: z.optional(z.enum([
+                    'aws',
+                    'azure',
+                    'gcp'
+                ]))
             })),
             resources: z.optional(z.object({
                 requests: z.optional(z.object({
@@ -25529,7 +25557,11 @@ export const post_fleet_agent_policies_agentpolicyid_copy_response = z.object({
         agentless: z.optional(z.object({
             cloud_connectors: z.optional(z.object({
                 enabled: z.boolean(),
-                target_csp: z.optional(z.string())
+                target_csp: z.optional(z.enum([
+                    'aws',
+                    'azure',
+                    'gcp'
+                ]))
             })),
             resources: z.optional(z.object({
                 requests: z.optional(z.object({
@@ -26268,6 +26300,17 @@ export const post_fleet_agentless_policies_request = z.object({
             z.array(z.string()),
             z.null()
         ])),
+        cloud_connector: z.optional(z.object({
+            cloud_connector_id: z.optional(z.string().register(z.globalRegistry, {
+                description: 'ID of an existing cloud connector to reuse. If not provided, a new connector will be created.'
+            })),
+            enabled: z.optional(z.boolean().register(z.globalRegistry, {
+                description: 'Whether cloud connectors are enabled for this policy.'
+            })).default(false),
+            name: z.optional(z.string().register(z.globalRegistry, {
+                description: 'Optional name for the cloud connector. If not provided, will be auto-generated from credentials.'
+            }))
+        })),
         description: z.optional(z.string().register(z.globalRegistry, {
             description: 'Policy description.'
         })),

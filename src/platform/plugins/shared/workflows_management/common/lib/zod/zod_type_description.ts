@@ -114,6 +114,17 @@ function handleZodUnion(
   return `(${unionTypes.join(' | ')})${descriptionSuffix}`;
 }
 
+function handleZodIntersection(
+  schema: z.ZodIntersection<z.ZodType, z.ZodType>,
+  currentDepth: number,
+  opts: TypeDescriptionOptions,
+  descriptionSuffix: string
+): string {
+  const intersectionTypes = [schema.def.left, schema.def.right].map((option: z.ZodType) =>
+    generateDetailedDescription(option, currentDepth + 1, opts)
+  );
+  return `(${intersectionTypes.join(' & ')})${descriptionSuffix}`;
+}
 /**
  * Generate detailed type description with structure
  */
@@ -169,6 +180,14 @@ function generateDetailedDescription(
     case 'union':
       return handleZodUnion(
         schema as z.ZodUnion<[z.ZodType, ...z.ZodType[]]>,
+        currentDepth,
+        opts,
+        descriptionSuffix
+      );
+
+    case 'intersection':
+      return handleZodIntersection(
+        schema as z.ZodIntersection<z.ZodType, z.ZodType>,
         currentDepth,
         opts,
         descriptionSuffix
