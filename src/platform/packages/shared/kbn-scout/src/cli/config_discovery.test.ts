@@ -10,15 +10,17 @@
 import fs from 'fs';
 import type { FlagsReader } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getScoutPlaywrightConfigs } from '../config';
-import { runDiscoverPlaywrightConfigs } from './config_discovery';
 import { measurePerformance } from '../common';
+import { getScoutPlaywrightConfigs } from '../config';
 import { validateWithScoutCiConfig } from '../config/discovery';
+import { runDiscoverPlaywrightConfigs } from './config_discovery';
+import { filterConfigsWithTests } from './test_filtering';
 
 jest.mock('fs');
 
 jest.mock('@kbn/scout-info', () => ({
-  SCOUT_PLAYWRIGHT_CONFIGS_PATH: '/path/to/scout_playwright_configs.json',
+  SCOUT_OUTPUT_ROOT: '/path/to/scout',
+  SCOUT_PLAYWRIGHT_CONFIGS_PATH: '/path/to/scout/test_configs/scout_playwright_configs.json',
 }));
 
 jest.mock('../common', () => ({
@@ -31,6 +33,10 @@ jest.mock('../config', () => ({
 
 jest.mock('../config/discovery', () => ({
   validateWithScoutCiConfig: jest.fn(),
+}));
+
+jest.mock('./test_filtering', () => ({
+  filterConfigsWithTests: jest.fn(),
 }));
 
 describe('runDiscoverPlaywrightConfigs', () => {
@@ -73,6 +79,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     flagsReader = {
       arrayOfStrings: jest.fn(),
       boolean: jest.fn(),
+      enum: jest.fn(),
     } as any;
 
     log = {
@@ -93,6 +100,22 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     (getScoutPlaywrightConfigs as jest.Mock).mockReturnValue(mockAllConfigs);
     (validateWithScoutCiConfig as jest.Mock).mockReturnValue(mockScoutConfigs);
+    (filterConfigsWithTests as jest.Mock).mockReturnValue({
+      serverless: {
+        search: { tag: '@svlSearch', configs: ['config1.ts'] },
+      },
+      stateful: {
+        platform: { tag: '@ess', configs: ['config2.ts'] },
+      },
+    });
+
+    // Default to 'local' target
+    flagsReader.enum.mockImplementation((flag, options) => {
+      if (flag === 'target') {
+        return 'local';
+      }
+      return undefined;
+    });
   });
 
   it('validates configs when "validate" is true', () => {
@@ -110,6 +133,8 @@ describe('runDiscoverPlaywrightConfigs', () => {
       return false;
     });
 
+    flagsReader.enum.mockReturnValue('local');
+
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
     // setting --validate will trigger a validation
@@ -118,6 +143,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
   it('should correctly parse custom config search paths', () => {
     flagsReader.arrayOfStrings.mockReturnValue(['customConfigSearchPaths']);
+    flagsReader.enum.mockReturnValue('local');
     runDiscoverPlaywrightConfigs(flagsReader, log);
     expect(getScoutPlaywrightConfigs).toHaveBeenCalledWith(['customConfigSearchPaths'], log);
   });
@@ -135,6 +161,8 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
       return false;
     });
+
+    flagsReader.enum.mockReturnValue('local');
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
@@ -155,6 +183,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
   it('logs "No Playwright config files found" when no configs are found', () => {
     flagsReader.arrayOfStrings.mockReturnValue([]);
     flagsReader.boolean.mockReturnValue(false);
+    flagsReader.enum.mockReturnValue('local');
 
     (getScoutPlaywrightConfigs as jest.Mock).mockReturnValue(new Map());
     runDiscoverPlaywrightConfigs(flagsReader, log);
@@ -177,6 +206,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
     });
 
     flagsReader.arrayOfStrings.mockReturnValue(['searchPaths']);
+    flagsReader.enum.mockReturnValue('local');
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
@@ -184,16 +214,16 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(validateWithScoutCiConfig).toHaveBeenCalledWith(log, mockAllConfigs);
 
     // create directory if it doesn't exist
-    expect(fs.mkdirSync).toHaveBeenCalledWith('/path/to', { recursive: true });
+    expect(fs.mkdirSync).toHaveBeenCalledWith('/path/to/scout/test_configs', { recursive: true });
 
     // we should only write the configs of the items that are actually enabled
     expect(fs.writeFileSync).toHaveBeenCalledWith(
-      '/path/to/scout_playwright_configs.json',
+      '/path/to/scout/test_configs/scout_playwright_configs.json',
       JSON.stringify(Object.fromEntries(mockScoutConfigs), null, 2)
     );
 
     expect(log.info).toHaveBeenCalledWith(
-      `Found Playwright config files in 2 plugin(s) and 2 package(s).\nSaved 1 plugin(s) and 1 package(s) to '/path/to/scout_playwright_configs.json'`
+      `Found Playwright config files in 2 plugin(s) and 2 package(s).\nSaved 1 plugin(s) and 1 package(s) to '/path/to/scout/test_configs/scout_playwright_configs.json'`
     );
   });
 
@@ -209,6 +239,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     flagsReader.boolean.mockReturnValue(false);
     flagsReader.arrayOfStrings.mockReturnValue([]);
+    flagsReader.enum.mockReturnValue('local');
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
@@ -233,6 +264,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
     flagsReader.boolean.mockReturnValue(false);
     flagsReader.arrayOfStrings.mockReturnValue([]);
+    flagsReader.enum.mockReturnValue('local');
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
@@ -244,5 +276,74 @@ describe('runDiscoverPlaywrightConfigs', () => {
       ['security / [packageB] package:'],
       ['- config3.ts'],
     ]);
+  });
+
+  describe('cloud target', () => {
+    const mockFilteredConfigs = {
+      serverless: {
+        search: {
+          tag: '@svlSearch',
+          configs: ['config1.ts', 'config2.ts'],
+        },
+      },
+      stateful: {
+        platform: {
+          tag: '@ess',
+          configs: ['config3.ts'],
+        },
+      },
+    };
+
+    beforeEach(() => {
+      (filterConfigsWithTests as jest.Mock).mockReturnValue(mockFilteredConfigs);
+      flagsReader.enum.mockReturnValue('cloud');
+    });
+
+    it('filters and saves cloud configs when target is cloud', () => {
+      flagsReader.arrayOfStrings.mockReturnValue(['searchPaths']);
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      expect(filterConfigsWithTests).toHaveBeenCalledWith(mockAllConfigs, log);
+      expect(fs.mkdirSync).toHaveBeenCalledWith('/path/to/scout', { recursive: true });
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        '/path/to/scout/scout_cloud_run_config.json',
+        JSON.stringify(mockFilteredConfigs, null, 2)
+      );
+      expect(log.info).toHaveBeenCalledWith(
+        "Saved filtered cloud configs to '/path/to/scout/scout_cloud_run_config.json'"
+      );
+    });
+
+    it('does not validate or list configs when target is cloud', () => {
+      flagsReader.arrayOfStrings.mockReturnValue(['searchPaths']);
+      flagsReader.boolean.mockReturnValue(false);
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      expect(validateWithScoutCiConfig).not.toHaveBeenCalled();
+      expect(log.info).not.toHaveBeenCalledWith(
+        expect.stringContaining('Found Playwright config files')
+      );
+    });
+
+    it('ignores save and validate flags when target is cloud', () => {
+      flagsReader.arrayOfStrings.mockReturnValue(['searchPaths']);
+      flagsReader.boolean.mockImplementation((flag) => {
+        if (flag === 'save' || flag === 'validate') {
+          return true;
+        }
+        return false;
+      });
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      expect(validateWithScoutCiConfig).not.toHaveBeenCalled();
+      expect(filterConfigsWithTests).toHaveBeenCalled();
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        '/path/to/scout/scout_cloud_run_config.json',
+        expect.any(String)
+      );
+    });
   });
 });
