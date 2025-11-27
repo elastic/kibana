@@ -56,7 +56,7 @@ export const getBulkPurgeSummaryStatusRoute = createSloServerRoute({
 
     if (!task) {
       return {
-        completed: true,
+        completed: false,
         error: 'Task not found',
       } satisfies BulkPurgeSummaryStatusResponse;
     }
