@@ -39,6 +39,9 @@ const ThreatsDetectedMetricComponent: React.FC<Props> = ({ from, to }) => {
         .echMetricText__icon .euiIcon {
           ${isExportMode ? 'display: none;' : `fill: ${colors.vis.euiColorVis6};`}
         }
+        .echMetricText__valueBlock {
+          grid-row-start: 3 !important;
+        }
         .echMetricText {
           padding: 8px 16px 60px;
         }
