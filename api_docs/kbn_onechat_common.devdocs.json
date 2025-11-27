@@ -583,6 +583,57 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.isAgentExecutionError",
+        "type": "Function",
+        "tags": [],
+        "label": "isAgentExecutionError",
+        "description": [
+          "\nChecks if the given error is a {@link OnechatInternalError}"
+        ],
+        "signature": [
+          "(err: unknown) => err is ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.OnechatAgentExecutionError",
+            "text": "OnechatAgentExecutionError"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.AgentExecutionErrorCode",
+            "text": "AgentExecutionErrorCode"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.isAgentExecutionError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "err",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.isAgentNotFoundError",
         "type": "Function",
         "tags": [],
@@ -768,6 +819,57 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_selection.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.isContextLengthExceededAgentError",
+        "type": "Function",
+        "tags": [],
+        "label": "isContextLengthExceededAgentError",
+        "description": [
+          "\nChecks if the given error is a context length exceeded error"
+        ],
+        "signature": [
+          "(err: unknown) => err is ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.OnechatAgentExecutionError",
+            "text": "OnechatAgentExecutionError"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.AgentExecutionErrorCode",
+            "text": "AgentExecutionErrorCode"
+          },
+          ".contextLengthExceeded>"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.isContextLengthExceededAgentError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "err",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2248,6 +2350,20 @@
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.AssistantResponse.structured_output",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "structured_output",
+            "description": [],
+            "signature": [
+              "object | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2943,6 +3059,22 @@
             "label": "message_content",
             "description": [
               "full text content of the message"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.MessageCompleteEventData.structured_output",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "structured_output",
+            "description": [
+              "optional structured data"
+            ],
+            "signature": [
+              "object | undefined"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
@@ -3797,6 +3929,18 @@
     "enums": [
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.AgentExecutionErrorCode",
+        "type": "Enum",
+        "tags": [],
+        "label": "AgentExecutionErrorCode",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/execution_errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.ChatEventType",
         "type": "Enum",
         "tags": [],
@@ -3902,6 +4046,47 @@
           "24"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.AgentConfigurationOverrides",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentConfigurationOverrides",
+        "description": [
+          "\nRuntime configuration overrides for agent execution.\nThese override the stored agent configuration for a single execution instance.\nEach field, if provided, completely replaces the corresponding field in the stored configuration."
+        ],
+        "signature": [
+          "{ instructions?: string | undefined; tools?: ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ByIdsToolSelection",
+            "text": "ByIdsToolSelection"
+          },
+          "[] | undefined; research?: ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.AgentResearchStepConfiguration",
+            "text": "AgentResearchStepConfiguration"
+          },
+          " | undefined; answer?: ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.AgentAnswerStepConfiguration",
+            "text": "AgentAnswerStepConfiguration"
+          },
+          " | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4620,6 +4805,40 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.OnechatAgentExecutionError",
+        "type": "Type",
+        "tags": [],
+        "label": "OnechatAgentExecutionError",
+        "description": [
+          "\nRepresents an error related to agent execution"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/sse-utils",
+            "scope": "common",
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.OnechatErrorCode",
+            "text": "OnechatErrorCode"
+          },
+          ".agentExecutionError, { errCode: ErrCode; } & ",
+          "ExecutionErrorMetaOf",
+          "<ErrCode>>"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5653,9 +5872,21 @@
             "description": [],
             "signature": [
               "(err: unknown) => err is ",
-              "OnechatAgentExecutionError",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.OnechatAgentExecutionError",
+                "text": "OnechatAgentExecutionError"
+              },
               "<",
-              "AgentExecutionErrorCode",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.AgentExecutionErrorCode",
+                "text": "AgentExecutionErrorCode"
+              },
               ">"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
@@ -5666,6 +5897,53 @@
               {
                 "parentPluginId": "@kbn/onechat-common",
                 "id": "def-common.OnechatErrorUtils.isAgentExecutionError.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "err",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.OnechatErrorUtils.isContextLengthExceededAgentError",
+            "type": "Function",
+            "tags": [],
+            "label": "isContextLengthExceededAgentError",
+            "description": [],
+            "signature": [
+              "(err: unknown) => err is ",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.OnechatAgentExecutionError",
+                "text": "OnechatAgentExecutionError"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.AgentExecutionErrorCode",
+                "text": "AgentExecutionErrorCode"
+              },
+              ".contextLengthExceeded>"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/onechat-common",
+                "id": "def-common.OnechatErrorUtils.isContextLengthExceededAgentError.$1",
                 "type": "Unknown",
                 "tags": [],
                 "label": "err",
@@ -5851,11 +6129,23 @@
             "description": [],
             "signature": [
               "<ErrCode extends ",
-              "AgentExecutionErrorCode",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.AgentExecutionErrorCode",
+                "text": "AgentExecutionErrorCode"
+              },
               ">(message: string, code: ErrCode, meta: ",
               "ExecutionErrorMetaOf",
               "<ErrCode>) => ",
-              "OnechatAgentExecutionError",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.OnechatAgentExecutionError",
+                "text": "OnechatAgentExecutionError"
+              },
               "<ErrCode>"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
@@ -5917,7 +6207,7 @@
           "\nIds of built-in onechat tools"
         ],
         "signature": [
-          "{ readonly indexExplorer: string; readonly search: string; readonly listIndices: string; readonly getIndexMapping: string; readonly getDocumentById: string; readonly generateEsql: string; readonly executeEsql: string; readonly createVisualization: string; }"
+          "{ readonly indexExplorer: string; readonly search: string; readonly listIndices: string; readonly getIndexMapping: string; readonly getDocumentById: string; readonly generateEsql: string; readonly executeEsql: string; readonly createVisualization: string; readonly task: string; }"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
         "deprecated": false,
