@@ -73,9 +73,7 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
   }) => {
     await pageObjects.streams.clickAddProcessor();
 
-    await expect(
-      page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton')
-    ).toBeDisabled();
+    await expect(page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton')).toBeHidden();
 
     // Cancel the operation
     await pageObjects.streams.clickCancelProcessorChanges();
