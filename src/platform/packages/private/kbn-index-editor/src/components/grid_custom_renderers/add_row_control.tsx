@@ -25,16 +25,22 @@ export const getAddRowControl = (
   id: 'addRowControl',
   width: 40,
   render: (Control: RowControlComponent, props: RowControlRowProps) => {
+    const refocusAddControl = () => {
+      requestAnimationFrame(() => {
+        // Need to focus another cell first to ensure the add control can be focused again
+        dataTableRef.current?.setFocusedCell({
+          rowIndex: 0,
+          colIndex: 0,
+        });
+        dataTableRef.current?.setFocusedCell({
+          rowIndex: props.rowIndex,
+          colIndex: 1,
+        });
+      });
+    };
     const onAddRow = () => {
       indexUpdateService.addEmptyRow(props.rowIndex + 1);
-
-      // Set focus to the new added row's first cell
-      setTimeout(() => {
-        dataTableRef.current?.setFocusedCell({
-          rowIndex: props.rowIndex + 1,
-          colIndex: 2, // first data column (skip row control columns)
-        });
-      }, 100);
+      refocusAddControl();
     };
 
     return (
@@ -53,15 +59,9 @@ export const getAddRowControl = (
                 if (e.key === 'Escape') {
                   e.preventDefault();
                   e.stopPropagation();
-                  setTimeout(() => {
-                    dataTableRef.current?.setFocusedCell({
-                      rowIndex: props.rowIndex,
-                      colIndex: 1,
-                    });
-                  }, 100);
+                  refocusAddControl();
                 }
               }}
-              // css={{ margin: '0px 4px' }}
             />
           </EuiToolTip>
         }
