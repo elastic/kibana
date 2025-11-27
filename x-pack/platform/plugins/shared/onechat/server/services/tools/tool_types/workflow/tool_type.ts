@@ -85,9 +85,7 @@ export const getWorkflowToolType = ({
           - the tool will wait up to ${config.wait_for} seconds for the workflow to complete
           - if the workflow isn't completed within the specified time, a workflow execution ID will be returned
           - the ${platformCoreTools.getWorkflowExecutionStatus} tool can be used later to check the status of the workflow execution
-          - **important**: do **NOT** call the ${platformCoreTools.getWorkflowExecutionStatus} tool directly after calling this tool.
-            Instead, if the workflow didn't complete, suggest to the user to ask you to check the status of the workflow execution.
-            This is to prevent the user from calling the tool multiple times, which would result in multiple workflow executions being created.
+
           `);
         },
       };

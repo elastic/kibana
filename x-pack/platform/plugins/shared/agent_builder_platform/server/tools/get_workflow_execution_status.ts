@@ -31,8 +31,11 @@ export const getWorkflowExecutionStatusTool = ({
     type: ToolType.builtin,
     description: cleanPrompt(`Retrieve the status of a workflow execution.
 
-    If the workflow execution is still running, the tool will return the current status.
-    If the workflow execution has completed, the final output will also be returned.`),
+    If the workflow execution has completed, the final output will be returned. Otherwise, the execution status will be returned.
+
+    **important**: do **NOT** call this tool directly after calling a workflow tool.
+    Instead, if the workflow didn't complete, tell the user they can ask you to check the execution.
+    `),
     schema: getWorkflowExecutionStatusSchema,
     handler: async ({ executionId }, { spaceId }) => {
       const execution = await getExecutionState({
