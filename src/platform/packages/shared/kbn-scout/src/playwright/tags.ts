@@ -10,6 +10,7 @@
 const SERVERLESS_ONLY = [
   '@svlSecurity',
   '@svlSecurityEssentials',
+  '@svlSecurityEase',
   '@svlOblt',
   '@svlLogsEssentials',
   '@svlSearch',
@@ -21,6 +22,7 @@ const DEPLOYMENT_AGNOSTIC = [
   '@ess',
   '@svlSecurity',
   '@svlSecurityEssentials',
+  '@svlSecurityEase',
   '@svlOblt',
   '@svlLogsEssentials',
   '@svlSearch',
@@ -43,5 +45,6 @@ export const tagsByMode = {
     'oblt-logs-essentials': '@svlLogsEssentials',
     security: '@svlSecurity',
     'security-essentials': '@svlSecurityEssentials',
+    'security-ease': '@svlSecurityEase',
   },
 };
