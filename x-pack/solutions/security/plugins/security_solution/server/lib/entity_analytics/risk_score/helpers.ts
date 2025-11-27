@@ -9,11 +9,13 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { Logger } from '@kbn/core/server';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
-import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
+import type {
+  RiskScoresCalculationResponse,
+  AssetCriticalityRecord,
+} from '../../../../common/api/entity_analytics';
 import type {
   AfterKeys,
   EntityAfterKey,
-  AssetCriticalityRecord,
   EntityRiskScoreRecord,
   RiskScoreWeights,
   RiskScoreWeight,
