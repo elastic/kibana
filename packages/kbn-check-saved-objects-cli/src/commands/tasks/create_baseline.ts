@@ -9,9 +9,11 @@
 
 import type { ListrTask } from 'listr2';
 import { defaultKibanaIndex, getKibanaMigratorTestKit } from '@kbn/migrator-test-kit';
+import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import type { Task, TaskContext } from '../types';
-import { getPreviousVersionType } from '../../migrations';
+import { getPreviousVersionType, latestVersion } from '../../migrations';
 import { checkDocuments } from './check_documents';
+import type { FixtureTemplate } from '../../migrations/fixtures';
 
 export const createBaseline: Task = async (ctx, task) => {
   const { updatedTypes, baselineMappings } = ctx;
@@ -19,6 +21,11 @@ export const createBaseline: Task = async (ctx, task) => {
   const previousVersionTypes = updatedTypes.map((type) =>
     getPreviousVersionType({ type, previousMappings: baselineMappings! })
   );
+
+  ctx.previousVersions = previousVersionTypes.reduce<Record<string, string>>((acc, type) => {
+    acc[type.name] = latestVersion(type);
+    return acc;
+  }, {});
 
   const {
     client,
@@ -43,8 +50,13 @@ export const createBaseline: Task = async (ctx, task) => {
       task: async () => {
         // convert the fixtures into SavedObjectsBulkCreateObject[]
         const allDocs = Object.entries(ctx.fixtures.previous).flatMap(([type, docs]) =>
-          docs.map((attributes) => ({ type, attributes }))
+          docs.map<SavedObjectsBulkCreateObject<FixtureTemplate>>((attributes) => ({
+            type,
+            attributes,
+            typeMigrationVersion: ctx.previousVersions[type],
+          }))
         );
+        // insert all fixtures in the `.kibana_migrator` SO index
         await savedObjectsRepository.bulkCreate(allDocs, {
           refresh: 'wait_for',
         });

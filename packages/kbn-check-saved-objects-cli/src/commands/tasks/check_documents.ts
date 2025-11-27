@@ -35,7 +35,7 @@ export function checkDocuments({
 
       const matchingFixture = fixtures[type].find((fixture) => equal(fixture, attributes));
       if (!matchingFixture) {
-        const path = getFixturesRelativePath(type, ctx.typeVersionMap[type]);
+        const path = getFixturesRelativePath(type, ctx.newVersions[type]);
         const targetVersion = latestVersion(types.find(({ name }) => name === type)!);
         const messages = [
           `❌ A document of type '${type}' did NOT match any of the fixtures`,

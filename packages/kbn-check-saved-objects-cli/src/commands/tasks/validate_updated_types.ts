@@ -24,7 +24,7 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
           .registeredTypes!.filter(({ name }) => updatedList.includes(name))
           // we tweak the types to store them all in the `.kibana_migrator` index for our checks
           .map((type) => ({ ...type, indexPattern: defaultKibanaIndex }));
-        ctx.typeVersionMap = ctx.updatedTypes.reduce<Record<string, string>>((acc, type) => {
+        ctx.newVersions = ctx.updatedTypes.reduce<Record<string, string>>((acc, type) => {
           acc[type.name] = latestVersion(type);
           return acc;
         }, {});
