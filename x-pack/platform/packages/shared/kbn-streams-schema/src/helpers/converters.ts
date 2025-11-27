@@ -26,10 +26,10 @@ export const convertUpsertRequestIntoDefinition = (
       ...request.stream,
       name,
       updated_at: new Date().toISOString(),
-    } as Streams.GroupStream.Definition;
+    };
   }
 
-  if (Streams.ingest.all.UpsertRequest.is(request)) {
+  if (Streams.WiredStream.UpsertRequest.is(request)) {
     return {
       ...request.stream,
       name,
@@ -41,11 +41,29 @@ export const convertUpsertRequestIntoDefinition = (
           updated_at: new Date().toISOString(),
         },
       },
-    } as Streams.ingest.all.Definition;
+    };
   }
 
+  if (Streams.ClassicStream.UpsertRequest.is(request)) {
+    return {
+      ...request.stream,
+      name,
+      updated_at: new Date().toISOString(),
+      ingest: {
+        ...request.stream.ingest,
+        processing: {
+          ...request.stream.ingest.processing,
+          updated_at: new Date().toISOString(),
+        },
+      },
+    };
+  }
+
+  const _exhaustiveCheck: never = request;
   throw new Error(
-    "Couldn't parse stream upsert request. Please ensure you're passing a valid request."
+    `Couldn't parse stream upsert request. Please ensure you're passing a valid request. Received: ${JSON.stringify(
+      _exhaustiveCheck
+    )}`
   );
 };
 
@@ -65,10 +83,10 @@ export const convertGetResponseIntoUpsertRequest = (
       queries: getResponse.queries,
       rules: getResponse.rules,
       stream: omit(getResponse.stream, ['name', 'updated_at']),
-    } as Streams.GroupStream.UpsertRequest;
+    };
   }
 
-  if (Streams.ingest.all.GetResponse.is(getResponse)) {
+  if (Streams.WiredStream.GetResponse.is(getResponse)) {
     return {
       dashboards: getResponse.dashboards,
       queries: getResponse.queries,
@@ -80,10 +98,29 @@ export const convertGetResponseIntoUpsertRequest = (
           processing: omit(getResponse.stream.ingest.processing, ['updated_at']),
         },
       },
-    } as Streams.ingest.all.UpsertRequest;
+    };
   }
 
+  if (Streams.ClassicStream.GetResponse.is(getResponse)) {
+    return {
+      dashboards: getResponse.dashboards,
+      queries: getResponse.queries,
+      rules: getResponse.rules,
+      stream: {
+        ...omit(getResponse.stream, ['name', 'updated_at']),
+        ingest: {
+          ...getResponse.stream.ingest,
+          processing: omit(getResponse.stream.ingest.processing, ['updated_at']),
+        },
+      },
+    };
+  }
+
+  // Exhaustiveness check: if we reach here, TypeScript will error if there are unhandled cases
+  const _exhaustiveCheck: never = getResponse;
   throw new Error(
-    "Couldn't parse stream get request. Please ensure you're passing a valid request."
+    `Couldn't parse stream get response. Please ensure you're passing a valid response. Received: ${JSON.stringify(
+      _exhaustiveCheck
+    )}`
   );
 };
