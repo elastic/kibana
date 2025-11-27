@@ -17,6 +17,7 @@ import {
 
 const mockConnectorsAndExtras = [
   ...mockConnectors,
+  // These connectors are not supported for inference
   {
     ...mockConnectors[0],
     id: 'connector-missing-secrets',
@@ -30,6 +31,16 @@ const mockConnectorsAndExtras = [
     name: 'Connector Wrong Action Type',
     isMissingSecrets: true,
     actionTypeId: '.d3',
+  },
+  {
+    ...mockConnectors[0],
+    id: 'connector-text-embedding',
+    name: 'Text Embedding Connector',
+    isMissingSecrets: false,
+    actionTypeId: '.inference',
+    config: {
+      taskType: 'text_embedding',
+    },
   },
 ];
 
@@ -122,5 +133,33 @@ describe('useLoadConnectors', () => {
       wrapper: TestProviders,
     });
     await waitFor(() => expect(toasts.addError).toHaveBeenCalled());
+  });
+
+  it('should filter out .inference connectors without chat_completion taskType', async () => {
+    const { result } = renderHook(
+      () => useLoadConnectors({ ...defaultProps, inferenceEnabled: true }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+    await waitFor(() => {
+      const connectorIds = result.current.data?.map((c) => c.id) || [];
+      
+      // Should NOT include text_embedding connectors (from mockConnectorsAndExtras)
+      expect(connectorIds).not.toContain('connector-text-embedding');
+      
+      // Should NOT include text_embedding connector from mock data
+      expect(connectorIds).not.toContain('text-embedding-connector-id');
+      
+      // Should NOT include sparse_embedding connector from mock data
+      expect(connectorIds).not.toContain('sparse-embedding-connector-id');
+      
+      // SHOULD include chat_completion connectors
+      expect(connectorIds).toContain('c29c28a0-20fe-11ee-9386-a1f4d42ec542'); // Regular Inference Connector
+      expect(connectorIds).toContain('c29c28a0-20fe-11ee-9396-a1f4d42ec542'); // Preconfigured Inference Connector
+      
+      // SHOULD include other AI connector types
+      expect(connectorIds).toContain('connectorId'); // OpenAI connector
+    });
   });
 });
