@@ -21,6 +21,7 @@
       "stackConnectors",
       "inference",
       "security",
+      "features",
       "taskManager"
     ],
   }

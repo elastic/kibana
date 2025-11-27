@@ -316,28 +316,33 @@ export const columnExists = (col: string, context?: ICommandContext) =>
 export function getControlSuggestion(
   type: ESQLVariableType,
   triggerSource: ControlTriggerSource,
-  variables?: string[]
+  variables?: string[],
+  suggestCreation = true
 ): ISuggestionItem[] {
   return [
-    {
-      label: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlLabel', {
-        defaultMessage: 'Create control',
-      }),
-      text: '',
-      kind: 'Issue',
-      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
-        defaultMessage: 'Click to create',
-      }),
-      sortText: '1',
-      category: SuggestionCategory.CUSTOM_ACTION,
-      command: {
-        id: `esql.control.${type}.create`,
-        title: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
-          defaultMessage: 'Click to create',
-        }),
-        arguments: [{ triggerSource }],
-      },
-    } as ISuggestionItem,
+    ...(suggestCreation
+      ? [
+          {
+            label: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlLabel', {
+              defaultMessage: 'Create control',
+            }),
+            text: '',
+            kind: 'Issue',
+            detail: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
+              defaultMessage: 'Click to create',
+            }),
+            sortText: '1',
+            category: SuggestionCategory.CUSTOM_ACTION,
+            command: {
+              id: `esql.control.${type}.create`,
+              title: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
+                defaultMessage: 'Click to create',
+              }),
+              arguments: [{ triggerSource }],
+            },
+          } as ISuggestionItem,
+        ]
+      : []),
     ...(variables?.length
       ? buildConstantsDefinitions(
           variables,
@@ -365,17 +370,14 @@ export function getControlSuggestionIfSupported(
   variables?: ESQLControlVariable[],
   shouldBePrefixed = true
 ) {
-  if (!supportsControls) {
-    return [];
-  }
-
   const prefix = shouldBePrefixed ? getVariablePrefix(type) : '';
   const filteredVariables = variables?.filter((variable) => variable.type === type) ?? [];
 
   const controlSuggestion = getControlSuggestion(
     type,
     triggerSource,
-    filteredVariables?.map((v) => `${prefix}${v.key}`)
+    filteredVariables?.map((v) => `${prefix}${v.key}`),
+    supportsControls
   );
 
   return controlSuggestion;

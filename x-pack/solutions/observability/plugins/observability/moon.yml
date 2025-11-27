@@ -144,6 +144,7 @@ dependsOn:
   - '@kbn/observability-nav-icons'
   - '@kbn/react-query'
   - '@kbn/content-management-utils'
+  - '@kbn/maintenance-windows-plugin'
 tags:
   - plugin
   - prod
