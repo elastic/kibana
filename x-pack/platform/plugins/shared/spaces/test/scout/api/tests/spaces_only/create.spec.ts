@@ -5,944 +5,174 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
 import { apiTest, expect, tags } from '@kbn/scout';
-import type { ApiClientFixture, KbnClient } from '@kbn/scout/src/playwright/fixtures/scope/worker';
 
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'kibana',
-};
-
-// Space IDs
-const DEFAULT_SPACE_ID = 'default';
-const SPACE_1_ID = 'space_1';
-const SPACE_2_ID = 'space_2';
-const ALL_SPACES_ID = '*';
-const EACH_SPACE = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
+// Space configurations - matches FTR test suite
+const SPACES = {
+  DEFAULT: {
+    spaceId: 'default',
+    name: 'Default',
+    description: 'This is the default space',
+    disabledFeatures: [],
+  },
+  SPACE_1: {
+    spaceId: 'space_1',
+    name: 'Space 1',
+    description: 'This is the first test space',
+    disabledFeatures: [],
+  },
+  SPACE_2: {
+    spaceId: 'space_2',
+    name: 'Space 2',
+    description: 'This is the second test space',
+    disabledFeatures: [],
+  },
+} as const;
 
 // Test attribute
 const NEW_ATTRIBUTE_KEY = 'title';
 const NEW_ATTRIBUTE_VAL = `New attribute value ${Date.now()}`;
 
-// Test cases - single namespace objects
-const SINGLE_NAMESPACE_DEFAULT_SPACE = {
-  type: 'isolatedtype',
-  id: 'defaultspace-isolatedtype-id',
-  expectedNamespaces: [DEFAULT_SPACE_ID],
-};
+// Test spaces configuration - add or remove spaces as needed
+const TEST_SPACES = [SPACES.DEFAULT, SPACES.SPACE_1] as const;
 
-const SINGLE_NAMESPACE_SPACE_1 = {
-  type: 'isolatedtype',
-  id: 'space1-isolatedtype-id',
-  expectedNamespaces: [SPACE_1_ID],
-};
-
-const SINGLE_NAMESPACE_SPACE_2 = {
-  type: 'isolatedtype',
-  id: 'space2-isolatedtype-id',
-  expectedNamespaces: [SPACE_2_ID],
-};
-
-// Test cases - multi-namespace objects
-const MULTI_NAMESPACE_ALL_SPACES = {
-  type: 'sharedtype',
-  id: 'all_spaces',
-  expectedNamespaces: [ALL_SPACES_ID],
-};
-
-const MULTI_NAMESPACE_DEFAULT_AND_SPACE_1 = {
-  type: 'sharedtype',
-  id: 'default_and_space_1',
-  expectedNamespaces: [DEFAULT_SPACE_ID, SPACE_1_ID],
-};
-
-const MULTI_NAMESPACE_ONLY_SPACE_1 = {
-  type: 'sharedtype',
-  id: 'only_space_1',
-  expectedNamespaces: [SPACE_1_ID],
-};
-
-const MULTI_NAMESPACE_ONLY_SPACE_2 = {
-  type: 'sharedtype',
-  id: 'only_space_2',
-  expectedNamespaces: [SPACE_2_ID],
-};
-
-const MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE = {
-  type: 'sharecapabletype',
-  id: 'only_default_space',
-  expectedNamespaces: [DEFAULT_SPACE_ID],
-};
-
-const MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1 = {
-  type: 'sharecapabletype',
-  id: 'only_space_1',
-  expectedNamespaces: [SPACE_1_ID],
-};
-
-// Test cases - namespace agnostic
-const NAMESPACE_AGNOSTIC = {
-  type: 'globaltype',
-  id: 'globaltype-id',
-};
-
-// Test cases - hidden type
-const HIDDEN = {
-  type: 'hiddentype',
-  id: 'any',
-};
-
-// Test cases - new objects
-const NEW_SINGLE_NAMESPACE_OBJ = {
-  type: 'dashboard',
-  id: '', // ID intentionally left blank
-};
-
-const NEW_MULTI_NAMESPACE_OBJ = {
-  type: 'sharedtype',
-  id: 'new-sharedtype-id',
-};
-
-const NEW_NAMESPACE_AGNOSTIC_OBJ = {
-  type: 'globaltype',
-  id: 'new-globaltype-id',
-};
-
-// Test cases - initial namespaces
-const INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE = {
-  type: 'isolatedtype',
-  id: 'new-other-space-id',
-  expectedNamespaces: ['other-space'],
-  initialNamespaces: ['other-space'],
-};
-
-const INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE = {
-  type: 'sharecapabletype',
-  id: 'new-other-space-id',
-  expectedNamespaces: ['other-space'],
-  initialNamespaces: ['other-space'],
-};
-
-const INITIAL_NS_MULTI_NAMESPACE_OBJ_EACH_SPACE = {
-  type: 'sharedtype',
-  id: 'new-each-space-id',
-  expectedNamespaces: EACH_SPACE,
-  initialNamespaces: EACH_SPACE,
-};
-
-const INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES = {
-  type: 'sharedtype',
-  id: 'new-all-spaces-id',
-  expectedNamespaces: [ALL_SPACES_ID],
-  initialNamespaces: [ALL_SPACES_ID],
-};
-
-// Test cases - alias conflict
-const ALIAS_CONFLICT_OBJ = {
-  type: 'resolvetype',
-  id: 'alias-match',
-};
-
-apiTest.describe('_create within the default space', { tag: tags.ESS_ONLY }, () => {
-  let adminApiCredentials: RoleApiCredentials;
-
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    adminApiCredentials = await requestAuth.getApiKey('admin');
-  });
-
-  const createSavedObject = async (
-    apiClient: ApiClientFixture,
-    spaceId: string,
-    type: string,
-    id: string | undefined,
-    overwrite: boolean
-  ) => {
-    const path = id ? `${type}/${id}` : type;
-    return await apiClient.post(`s/${spaceId}/api/saved_objects/${path}?overwrite=${overwrite}`, {
-      headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
-      body: { attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL } },
-    });
-  };
-
-  const deleteSavedObject = async (kbnClient: KbnClient, id: string, type: string) => {
-    kbnClient.savedObjects.delete({ id, type });
-  };
-
-  apiTest(
-    'default: should return 409 when trying to create dashboard that already exists',
-    async ({ apiClient, kbnClient }) => {
-      const dashboardCreation1Response = await createSavedObject(
-        apiClient,
-        DEFAULT_SPACE_ID,
-        'dashboard',
-        'my-dashboard-id',
-        true
-      );
-      expect(dashboardCreation1Response.statusCode).toBe(200);
-
-      const dashboardCreation2Response = await createSavedObject(
-        apiClient,
-        DEFAULT_SPACE_ID,
-        'dashboard',
-        'my-dashboard-id',
-        false
-      );
-      expect(dashboardCreation2Response.statusCode).toBe(409);
-      expect(dashboardCreation2Response.body.error).toBe('Conflict');
-      expect(dashboardCreation2Response.body.message).toBe(
-        `Saved object [dashboard/my-dashboard-id] conflict`
-      );
-
-      deleteSavedObject(kbnClient, 'my-dashboard-id', 'dashboard');
-    }
-  );
-
-  /*
-  apiTest(
-    'default: should return 200 when trying to create dashboard from another space',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = SINGLE_NAMESPACE_SPACE_1;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(200);
-      expect(body.type).toBe(type);
-      expect(body.id).toBe(id);
-      expect(body.attributes[NEW_ATTRIBUTE_KEY]).toBe(NEW_ATTRIBUTE_VAL);
-      expect(body.namespaces).toStrictEqual([spaceId]);
-    }
-  );
-
-  apiTest(
-    'default: should return 200 when creating object in space_2 from default space',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = SINGLE_NAMESPACE_SPACE_2;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(200);
-      expect(body.namespaces).toStrictEqual([spaceId]);
-    }
-  );
-
-  apiTest(
-    'default: should return 409 when creating multi-namespace object in all spaces',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = MULTI_NAMESPACE_ALL_SPACES;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(409);
-    }
-  );
-
-  apiTest(
-    'default: should return 409 when creating multi-namespace object in default and space_1',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = MULTI_NAMESPACE_DEFAULT_AND_SPACE_1;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(409);
-    }
-  );
-
-  apiTest(
-    'default: should return 200 when creating multi-namespace object only in space_1',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = MULTI_NAMESPACE_ONLY_SPACE_1;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(200);
-      expect(body.namespaces).toStrictEqual([spaceId]);
-    }
-  );
-
-  apiTest(
-    'default: should return 200 when creating multi-namespace object only in space_2',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = MULTI_NAMESPACE_ONLY_SPACE_2;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(200);
-      expect(body.namespaces).toStrictEqual([spaceId]);
-    }
-  );
-
-  apiTest(
-    'default: should return 409 when creating isolated multi-namespace object in default space',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(409);
-    }
-  );
-
-  apiTest(
-    'default: should return 200 when creating isolated multi-namespace object in space_1',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(200);
-      expect(body.namespaces).toStrictEqual([spaceId]);
-    }
-  );
-
-  apiTest(
-    'default: should return 409 when creating namespace-agnostic object',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = NAMESPACE_AGNOSTIC;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(409);
-    }
-  );
-
-  apiTest('default: should return 400 when creating hidden type object', async ({ apiClient }) => {
-    const spaceId = DEFAULT_SPACE_ID;
-    const { type, id } = HIDDEN;
-    const path = `${type}/${id}`;
-    const requestBody = {
-      attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-    };
-
-    const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-      headers: COMMON_HEADERS,
-      body: requestBody,
-      responseType: 'json',
+// This pattern runs the same tests across multiple spaces
+TEST_SPACES.forEach((space) => {
+  apiTest.describe(`_create API within the ${space.name} space`, { tag: tags.ESS_ONLY }, () => {
+    apiTest.beforeAll(async ({ kbnClient, log }) => {
+      // Create the space (skip for default which always exists)
+      if (space.spaceId !== SPACES.DEFAULT.spaceId) {
+        log.info(`Creating space [${space.spaceId}] for test suite`);
+        await kbnClient.spaces.create({
+          id: space.spaceId,
+          name: space.name,
+          description: space.description,
+          disabledFeatures: [...space.disabledFeatures],
+        });
+      } else {
+        log.info(`Using default space for test suite`);
+      }
     });
 
-    expect(statusCode).toBe(400);
-    expect(body.error).toBe('Bad Request');
+    apiTest.afterAll(async ({ kbnClient, log }) => {
+      // Delete the space (skip for default)
+      if (space.spaceId !== SPACES.DEFAULT.spaceId) {
+        await kbnClient.spaces.delete(space.spaceId);
+        log.info(`Deleted space [${space.spaceId}] after test suite`);
+      }
+    });
+
+    // Test 1: Create duplicate should return 409
+    apiTest(
+      'should return 409 when trying to create dashboard that already exists',
+      async ({ apiServices }) => {
+        // Use unique ID to prevent conflicts between test runs and spaces
+        const uniqueId = `dashboard-${Date.now()}-${space.spaceId}`;
+
+        // First creation should succeed
+        const response1 = await apiServices.savedObjects.create(
+          {
+            type: 'dashboard',
+            id: uniqueId,
+            attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
+            overwrite: true,
+          },
+          space.spaceId
+        );
+        expect(response1.status).toBe(200);
+
+        // Second creation should fail with 409
+        const response2 = await apiServices.savedObjects.create(
+          {
+            type: 'dashboard',
+            id: uniqueId,
+            attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
+            overwrite: false,
+          },
+          space.spaceId
+        );
+        expect(response2.status).toBe(409);
+        expect(response2.data.error).toBe('Conflict');
+        expect(response2.data.message).toBe(`Saved object [dashboard/${uniqueId}] conflict`);
+
+        // Cleanup
+        await apiServices.savedObjects.delete('dashboard', uniqueId, space.spaceId);
+      }
+    );
+
+    // Test 2: Create with overwrite should succeed
+    apiTest('should return 200 when creating with overwrite=true', async ({ apiServices }) => {
+      const uniqueId = `dashboard-overwrite-${Date.now()}-${space.spaceId}`;
+
+      // Create initial object
+      const response1 = await apiServices.savedObjects.create(
+        {
+          type: 'dashboard',
+          id: uniqueId,
+          attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
+          overwrite: false,
+        },
+        space.spaceId
+      );
+      expect(response1.status).toBe(200);
+
+      // Overwrite should succeed
+      const response2 = await apiServices.savedObjects.create(
+        {
+          type: 'dashboard',
+          id: uniqueId,
+          attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
+          overwrite: true,
+        },
+        space.spaceId
+      );
+      expect(response2.status).toBe(200);
+      expect(response2.data.type).toBe('dashboard');
+      expect(response2.data.id).toBe(uniqueId);
+      expect(response2.data.namespaces).toStrictEqual([space.spaceId]);
+
+      // Cleanup
+      await apiServices.savedObjects.delete('dashboard', uniqueId, space.spaceId);
+    });
+
+    // Test 3: Create without ID should generate one
+    apiTest(
+      'should return 200 and auto-generate ID when creating without ID',
+      async ({ apiServices }) => {
+        const response = await apiServices.savedObjects.create(
+          {
+            type: 'dashboard',
+            attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
+            overwrite: false,
+          },
+          space.spaceId
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.data.type).toBe('dashboard');
+        expect(response.data.id).toBeDefined();
+        expect(response.data.attributes[NEW_ATTRIBUTE_KEY]).toBe(NEW_ATTRIBUTE_VAL);
+        expect(response.data.namespaces).toStrictEqual([space.spaceId]);
+
+        // Cleanup
+        await apiServices.savedObjects.delete('dashboard', response.data.id, space.spaceId);
+      }
+    );
+
+    // Test 4: Create hidden type should return 400
+    apiTest('should return 400 when creating hidden type object', async ({ apiServices }) => {
+      const response = await apiServices.savedObjects.create(
+        {
+          type: 'hiddentype',
+          id: 'some-id',
+          attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
+          overwrite: false,
+        },
+        space.spaceId
+      );
+
+      expect(response.status).toBe(400);
+      expect(response.data.error).toBe('Bad Request');
+    });
   });
-
-  apiTest(
-    'default: should return 200 when creating new single namespace object',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type } = NEW_SINGLE_NAMESPACE_OBJ;
-      const path = type; // no ID
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(200);
-      expect(body.type).toBe(type);
-      expect(body.id).toBeDefined();
-      expect(body.attributes[NEW_ATTRIBUTE_KEY]).toBe(NEW_ATTRIBUTE_VAL);
-      expect(body.namespaces).toStrictEqual([spaceId]);
-    }
-  );
-
-  apiTest(
-    'default: should return 200 when creating new multi-namespace object',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = NEW_MULTI_NAMESPACE_OBJ;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(200);
-      expect(body.type).toBe(type);
-      expect(body.id).toBe(id);
-      expect(body.namespaces).toStrictEqual([spaceId]);
-    }
-  );
-
-  apiTest(
-    'default: should return 200 when creating new namespace-agnostic object',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = NEW_NAMESPACE_AGNOSTIC_OBJ;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(200);
-      expect(body.type).toBe(type);
-      expect(body.id).toBe(id);
-      expect(body.namespaces).toBeUndefined(); // namespace-agnostic objects don't have namespaces
-    }
-  );
-
-  apiTest(
-    'default: should return 400 when creating object with initialNamespaces in multiple spaces (single namespace type)',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-        initialNamespaces: ['x', 'y'],
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(400);
-      expect(body.error).toBe('Bad Request');
-    }
-  );
-
-  apiTest(
-    'default: should return 200 when creating object with initialNamespaces in single other space',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id, initialNamespaces, expectedNamespaces } =
-        INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-        initialNamespaces,
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(200);
-      expect(body.namespaces).toStrictEqual(expectedNamespaces);
-    }
-  );
-
-  apiTest(
-    'default: should return 400 when creating isolated multi-namespace object with initialNamespaces ALL_SPACES',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-        initialNamespaces: [ALL_SPACES_ID],
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(400);
-      expect(body.error).toBe('Bad Request');
-    }
-  );
-
-  apiTest(
-    'default: should return 200 when creating isolated multi-namespace object with initialNamespaces in other space',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id, initialNamespaces, expectedNamespaces } =
-        INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-        initialNamespaces,
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(200);
-      expect(body.namespaces).toStrictEqual(expectedNamespaces);
-    }
-  );
-
-  apiTest(
-    'default: should return 200 when creating multi-namespace object with initialNamespaces in each space',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id, initialNamespaces, expectedNamespaces } =
-        INITIAL_NS_MULTI_NAMESPACE_OBJ_EACH_SPACE;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-        initialNamespaces,
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(200);
-      expect(body.namespaces).toStrictEqual(expectedNamespaces);
-    }
-  );
-
-  apiTest(
-    'default: should return 200 when creating multi-namespace object with initialNamespaces ALL_SPACES',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id, initialNamespaces, expectedNamespaces } =
-        INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-        initialNamespaces,
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(200);
-      expect(body.namespaces).toStrictEqual(expectedNamespaces);
-    }
-  );
-
-  apiTest(
-    'default: should return 409 when creating object with alias conflict in all spaces',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = ALIAS_CONFLICT_OBJ;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-        initialNamespaces: ['*'],
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(409);
-      expect(body.error).toBe('Conflict');
-    }
-  );
-
-  apiTest(
-    'default: should return 409 when creating object with alias conflict in default space',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = ALIAS_CONFLICT_OBJ;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(409);
-      expect(body.error).toBe('Conflict');
-    }
-  );
-
-  apiTest(
-    'default+overwrite: should return 200 when overwriting dashboard that already exists',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = SINGLE_NAMESPACE_DEFAULT_SPACE;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { body, statusCode } = await apiClient.post(
-        `s/${spaceId}/api/saved_objects/${path}?overwrite=true`,
-        {
-          headers: COMMON_HEADERS,
-          body: requestBody,
-          responseType: 'json',
-        }
-      );
-
-      expect(statusCode).toBe(200);
-      expect(body.type).toBe(type);
-      expect(body.id).toBe(id);
-      expect(body.attributes[NEW_ATTRIBUTE_KEY]).toBe(NEW_ATTRIBUTE_VAL);
-      expect(body.namespaces).toStrictEqual([spaceId]);
-    }
-  );
-
-  apiTest(
-    'default+overwrite: should return 200 when overwriting multi-namespace object',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = MULTI_NAMESPACE_ALL_SPACES;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { body, statusCode } = await apiClient.post(
-        `s/${spaceId}/api/saved_objects/${path}?overwrite=true`,
-        {
-          headers: COMMON_HEADERS,
-          body: requestBody,
-          responseType: 'json',
-        }
-      );
-
-      expect(statusCode).toBe(200);
-      expect(body.type).toBe(type);
-      expect(body.id).toBe(id);
-    }
-  );
-
-  apiTest(
-    'default+overwrite: should return 200 when overwriting namespace-agnostic object',
-    async ({ apiClient }) => {
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = NAMESPACE_AGNOSTIC;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { body, statusCode } = await apiClient.post(
-        `s/${spaceId}/api/saved_objects/${path}?overwrite=true`,
-        {
-          headers: COMMON_HEADERS,
-          body: requestBody,
-          responseType: 'json',
-        }
-      );
-
-      expect(statusCode).toBe(200);
-      expect(body.type).toBe(type);
-      expect(body.id).toBe(id);
-    }
-  );
-
-  apiTest(
-    'space_1: should return 200 when creating object from default space',
-    async ({ apiClient }) => {
-      const spaceId = SPACE_1_ID;
-      const { type, id } = SINGLE_NAMESPACE_DEFAULT_SPACE;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(200);
-      expect(body.namespaces).toStrictEqual([spaceId]);
-    }
-  );
-
-  apiTest(
-    'space_1: should return 409 when creating object that exists in space_1',
-    async ({ apiClient }) => {
-      const spaceId = SPACE_1_ID;
-      const { type, id } = SINGLE_NAMESPACE_SPACE_1;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(409);
-    }
-  );
-
-  apiTest(
-    'space_1: should return 409 when creating multi-namespace object in default and space_1',
-    async ({ apiClient }) => {
-      const spaceId = SPACE_1_ID;
-      const { type, id } = MULTI_NAMESPACE_DEFAULT_AND_SPACE_1;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(409);
-    }
-  );
-
-  apiTest(
-    'space_1: should return 409 when creating multi-namespace object only in space_1',
-    async ({ apiClient }) => {
-      const spaceId = SPACE_1_ID;
-      const { type, id } = MULTI_NAMESPACE_ONLY_SPACE_1;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(409);
-    }
-  );
-
-  apiTest(
-    'space_1: should return 409 when creating object with alias conflict in space_1',
-    async ({ apiClient }) => {
-      const spaceId = SPACE_1_ID;
-      const { type, id } = ALIAS_CONFLICT_OBJ;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(409);
-    }
-  );
-
-  apiTest(
-    'space_1+overwrite: should return 200 when overwriting object in space_1',
-    async ({ apiClient }) => {
-      const spaceId = SPACE_1_ID;
-      const { type, id } = SINGLE_NAMESPACE_SPACE_1;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { body, statusCode } = await apiClient.post(
-        `s/${spaceId}/api/saved_objects/${path}?overwrite=true`,
-        {
-          headers: COMMON_HEADERS,
-          body: requestBody,
-          responseType: 'json',
-        }
-      );
-
-      expect(statusCode).toBe(200);
-      expect(body.namespaces).toStrictEqual([spaceId]);
-    }
-  );
-
-  apiTest(
-    'space_1+overwrite: should return 200 when overwriting multi-namespace object in space_1',
-    async ({ apiClient }) => {
-      const spaceId = SPACE_1_ID;
-      const { type, id } = MULTI_NAMESPACE_ONLY_SPACE_1;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { statusCode } = await apiClient.post(
-        `s/${spaceId}/api/saved_objects/${path}?overwrite=true`,
-        {
-          headers: COMMON_HEADERS,
-          body: requestBody,
-          responseType: 'json',
-        }
-      );
-
-      expect(statusCode).toBe(200);
-    }
-  );
-
-  apiTest(
-    'space_2: should return 409 when creating object that exists in space_2',
-    async ({ apiClient }) => {
-      const spaceId = SPACE_2_ID;
-      const { type, id } = SINGLE_NAMESPACE_SPACE_2;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(409);
-    }
-  );
-
-  apiTest(
-    'space_2: should return 200 when creating object with alias (no conflict in space_2)',
-    async ({ apiClient }) => {
-      const spaceId = SPACE_2_ID;
-      const { type, id } = ALIAS_CONFLICT_OBJ;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: COMMON_HEADERS,
-        body: requestBody,
-        responseType: 'json',
-      });
-
-      expect(statusCode).toBe(200);
-      expect(body.namespaces).toStrictEqual([spaceId]);
-    }
-  );
-
-  apiTest(
-    'space_2+overwrite: should return 200 when overwriting object in space_2',
-    async ({ apiClient }) => {
-      const spaceId = SPACE_2_ID;
-      const { type, id } = SINGLE_NAMESPACE_SPACE_2;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
-
-      const { body, statusCode } = await apiClient.post(
-        `s/${spaceId}/api/saved_objects/${path}?overwrite=true`,
-        {
-          headers: COMMON_HEADERS,
-          body: requestBody,
-          responseType: 'json',
-        }
-      );
-
-      expect(statusCode).toBe(200);
-      expect(body.namespaces).toStrictEqual([spaceId]);
-    }
-  );
-
-  */
 });
