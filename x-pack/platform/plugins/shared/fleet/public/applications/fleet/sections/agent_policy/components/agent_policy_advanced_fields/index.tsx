@@ -390,12 +390,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           error={validation.namespace ? validation.namespace : null}
           isInvalid={Boolean(validation.namespace)}
           isDisabled={disabled}
+          aria-label="defaultNamespaceRow"
         >
           <EuiComboBox
+            data-test-subj="defaultNamespaceInput"
             fullWidth
             singleSelection
             noSuggestions
-            isDisabled={disabled}
+            isDisabled={disabled || agentPolicy.is_managed === true}
             selectedOptions={agentPolicy.namespace ? [{ label: agentPolicy.namespace }] : []}
             onCreateOption={(value: string) => {
               updateAgentPolicy({ namespace: value });

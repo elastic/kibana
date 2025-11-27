@@ -24,22 +24,19 @@ import { useMetricFieldsQuery } from '../hooks';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 
 export const MetricsExperienceGrid = ({
-  dataView,
   renderToggleActions,
   chartToolbarCss,
   histogramCss,
   onBrushEnd,
   onFilter,
-  searchSessionId,
-  requestParams,
   services,
-  input$,
+  fetch$: discoverFetch$,
+  fetchParams,
   isChartLoading: isDiscoverLoading,
   columns,
   isComponentVisible,
-  abortController,
-  timeRange,
 }: ChartSectionProps) => {
+  const { dataView, timeRange } = fetchParams;
   const { searchTerm, isFullscreen, valueFilters, onSearchTermChange, onToggleFullscreen } =
     useMetricsExperienceState();
 
@@ -47,13 +44,13 @@ export const MetricsExperienceGrid = ({
   const { data: fields = [], isFetching: isFetchingAllFields } = useMetricFieldsQuery({
     index: indexPattern,
     timeRange,
-    query: (requestParams.query as AggregateQuery).esql,
+    query: (fetchParams.query as AggregateQuery).esql,
   });
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
     fields,
     renderToggleActions,
-    requestParams,
+    fetchParams,
   });
 
   const onKeyDown = useCallback(
@@ -97,14 +94,11 @@ export const MetricsExperienceGrid = ({
     >
       <MetricsExperienceGridContent
         fields={fields}
-        timeRange={timeRange}
         services={services}
-        input$={input$}
-        requestParams={requestParams}
+        discoverFetch$={discoverFetch$}
+        fetchParams={fetchParams}
         onBrushEnd={onBrushEnd}
         onFilter={onFilter}
-        searchSessionId={searchSessionId}
-        abortController={abortController}
         histogramCss={histogramCss}
         isFieldsLoading={isFetchingAllFields}
         isDiscoverLoading={isDiscoverLoading}

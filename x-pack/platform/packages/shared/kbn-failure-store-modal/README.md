@@ -6,8 +6,9 @@ A reusable React component package that provides a modal interface for configuri
 
 The Failure Store Modal is a form-based modal component that allows users to:
 - Enable or disable failure store functionality
-- Configure retention periods (default or custom)
+- Configure retention periods (default, custom, or disabled)
 - Set custom retention values with various time units (days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds)
+- Disable lifecycle management for failure store retention
 - Inherit failure store configuration from parent streams or index templates
 - Validate and submit failure store configurations
 
@@ -75,6 +76,21 @@ const MyComponent = () => {
 />
 ```
 
+### With Disabled Lifecycle Management
+
+```typescript
+<FailureStoreModal
+  onCloseModal={handleClose}
+  onSaveModal={handleSave}
+  failureStoreProps={{
+    failureStoreEnabled: true,
+    defaultRetentionPeriod: '30d',
+    retentionDisabled: true
+  }}
+  canShowDisableLifecycle={true}
+/>
+```
+
 ### With Inheritance Options
 
 ```typescript
@@ -104,7 +120,8 @@ const MyComponent = () => {
 | `onSaveModal` | `(data: FailureStoreFormData) => Promise<void> \| void` | ✓ | Callback function called when the form is submitted with valid data |
 | `failureStoreProps` | `FailureStoreFormProps` | ✓ | Configuration object for the failure store settings |
 | `inheritOptions` | `InheritOptions` | ✗ | Configuration for inheritance behavior from parent stream or index template |
-| `showIlmDescription` | `boolean` | ✗ | Whether to display tier-specific messaging |
+| `showIlmDescription` | `boolean` | ✗ | Whether to display tier-specific messaging (defaults to `true`) |
+| `canShowDisableLifecycle` | `boolean` | ✗ | Whether to show the option to disable lifecycle management (defaults to `false`) |
 
 ### FailureStoreFormProps
 
@@ -113,6 +130,7 @@ const MyComponent = () => {
 | `failureStoreEnabled` | `boolean` | ✓ | Whether failure store is currently enabled |
 | `defaultRetentionPeriod` | `string` | ✗ | Default retention period (e.g., "30d", "7h") |
 | `customRetentionPeriod` | `string` | ✗ | Custom retention period if different from default |
+| `retentionDisabled` | `boolean` | ✗ | Whether lifecycle management is disabled for retention |
 
 ### InheritOptions
 
@@ -126,9 +144,10 @@ const MyComponent = () => {
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `failureStoreEnabled` | `boolean ` | Whether failure store should be enabled |
+| `failureStoreEnabled` | `boolean` | Whether failure store should be enabled |
 | `customRetentionPeriod` | `string \| undefined` | Custom retention period if specified |
-| `inherit` | `object \| undefined` | Empty object when inheritance is enabled |
+| `retentionDisabled` | `boolean \| undefined` | Whether lifecycle management is disabled |
+| `inherit` | `boolean \| undefined` | Whether to inherit configuration from parent stream or index template |
 
 ## Supported Time Units
 
@@ -153,6 +172,9 @@ The modal supports the following time units for retention periods:
 - **Inheritance Support**: Optional inheritance from parent streams or index templates
   - When inheritance is enabled, all configuration fields are disabled
   - Supports both wired (parent stream) and classic (index template) inheritance modes
+- **Lifecycle Management**: Optional ability to disable lifecycle management for failure store retention
+  - When enabled via `canShowDisableLifecycle`, users can choose to disable lifecycle management
+  - Provides flexibility for advanced retention configurations
 
 ## Development
 

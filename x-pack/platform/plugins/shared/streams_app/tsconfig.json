@@ -94,5 +94,6 @@
     "@kbn/discover-contextual-components",
     "@kbn/es-types",
     "@kbn/esql-utils",
+    "@kbn/core-chrome-navigation",
   ]
 }

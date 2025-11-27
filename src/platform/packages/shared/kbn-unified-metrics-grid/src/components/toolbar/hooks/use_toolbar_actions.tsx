@@ -21,14 +21,14 @@ import { ValuesSelector } from '../values_selector';
 import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 
 interface UseToolbarActionsProps
-  extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
+  extends Pick<ChartSectionProps, 'fetchParams' | 'renderToggleActions'> {
   fields: MetricField[];
   hideDimensionsSelector?: boolean;
   hideRightSideActions?: boolean;
 }
 export const useToolbarActions = ({
   fields,
-  requestParams,
+  fetchParams,
   renderToggleActions,
   hideDimensionsSelector = false,
   hideRightSideActions = false,
@@ -76,24 +76,25 @@ export const useToolbarActions = ({
           onChange={onValuesChange}
           disabled={dimensions.length === 0}
           indices={indices}
-          query={(requestParams.query as AggregateQuery).esql}
-          timeRange={requestParams.getTimeRange()}
+          query={(fetchParams.query as AggregateQuery).esql}
+          timeRange={fetchParams.timeRange}
           onClear={onClearValues}
           fullWidth={isSmallScreen}
         />
       ) : null,
     ],
     [
-      isSmallScreen,
-      dimensions,
-      fields,
-      indices,
-      onClearValues,
-      onDimensionsChange,
-      onValuesChange,
-      requestParams,
-      valueFilters,
       hideDimensionsSelector,
+      fields,
+      onDimensionsChange,
+      dimensions,
+      isSmallScreen,
+      valueFilters,
+      onValuesChange,
+      indices,
+      fetchParams.query,
+      fetchParams.timeRange,
+      onClearValues,
     ]
   );
 

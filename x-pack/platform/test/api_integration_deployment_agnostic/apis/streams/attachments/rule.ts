@@ -153,6 +153,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   routing: [],
                   fields: {},
                 },
+                failure_store: { inherit: {} },
               },
             },
           });

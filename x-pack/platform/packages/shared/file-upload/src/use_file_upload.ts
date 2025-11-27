@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { Index } from '@kbn/index-management-shared-types/src/types';
 import type { ApplicationStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import { isAbortError, type FileUploadResults } from '@kbn/file-upload-common';
 import useMountedState from 'react-use/lib/useMountedState';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
@@ -27,6 +28,7 @@ export function useFileUpload(
   application: ApplicationStart,
   http: HttpSetup,
   notifications: NotificationsStart,
+  getFieldsStatsGrid?: () => React.FC<{ results: FindFileStructureResponse | null }>,
   onUploadComplete?: (results: FileUploadResults | null) => void
 ) {
   const isMounted = useMountedState();
@@ -168,12 +170,9 @@ export function useFileUpload(
       if (isAbortError(e) === false) {
         // don't show a notification if the import was aborted
         notifications.toasts.addError(e, {
-          title: i18n.translate(
-            'xpack.dataVisualizer.file.importView.importErrorNotificationTitle',
-            {
-              defaultMessage: 'Error performing import',
-            }
-          ),
+          title: i18n.translate('xpack.fileUpload.importView.importErrorNotificationTitle', {
+            defaultMessage: 'Error performing import',
+          }),
         });
       }
     }
@@ -276,6 +275,7 @@ export function useFileUpload(
     setExistingIndexName,
     abortAllAnalysis,
     abortImport,
+    getFieldsStatsGrid,
   };
 }
 
@@ -286,12 +286,9 @@ function isDataViewNameValid(name: string, dataViewNames: string[], index: strin
   }
 
   if (dataViewNames.find((i) => i === name)) {
-    return i18n.translate(
-      'xpack.dataVisualizer.file.importView.dataViewNameAlreadyExistsErrorMessage',
-      {
-        defaultMessage: 'Data view name already exists',
-      }
-    );
+    return i18n.translate('xpack.fileUpload.importView.dataViewNameAlreadyExistsErrorMessage', {
+      defaultMessage: 'Data view name already exists',
+    });
   }
 
   // escape . and + to stop the regex matching more than it should.
@@ -303,7 +300,7 @@ function isDataViewNameValid(name: string, dataViewNames: string[], index: strin
   if (index.match(reg) === null) {
     // name should match index
     return i18n.translate(
-      'xpack.dataVisualizer.file.importView.indexPatternDoesNotMatchDataViewErrorMessage',
+      'xpack.fileUpload.importView.indexPatternDoesNotMatchDataViewErrorMessage',
       {
         defaultMessage: 'Data view does not match index name',
       }
