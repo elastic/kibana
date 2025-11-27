@@ -19,7 +19,7 @@ export interface MonacoCommandDependencies {
   uiActions: ESQLEditorDeps['uiActions'];
   telemetryService: ESQLEditorTelemetryService;
   editor1: React.RefObject<monaco.editor.IStandaloneCodeEditor>;
-  fixedQuery: string;
+  getCurrentQuery: () => string;
   esqlVariables?: ESQLControlVariable[];
   controlsContext?: ControlsContext;
   openTimePickerPopover: () => void;
@@ -52,7 +52,7 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
     uiActions,
     telemetryService,
     editor1,
-    fixedQuery,
+    getCurrentQuery,
     esqlVariables,
     controlsContext,
     openTimePickerPopover,
@@ -114,15 +114,16 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
       monaco.editor.registerCommand(command, async (...args) => {
         const [, { triggerSource }] = args;
         const prefilled = triggerSource !== ControlTriggerSource.QUESTION_MARK;
+        const currentQuery = getCurrentQuery();
         telemetryService.trackEsqlControlFlyoutOpened(
           prefilled,
           variableType,
           triggerSource,
-          fixedQuery
+          currentQuery
         );
         const position = editor1.current?.getPosition();
         await triggerControl(
-          fixedQuery,
+          currentQuery,
           variableType,
           position,
           uiActions,

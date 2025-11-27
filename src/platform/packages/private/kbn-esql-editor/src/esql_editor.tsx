@@ -1063,7 +1063,8 @@ const ESQLEditorInternal = function ESQLEditor({
                       uiActions,
                       telemetryService,
                       editor1: editor1 as React.RefObject<monaco.editor.IStandaloneCodeEditor>,
-                      fixedQuery,
+                      getCurrentQuery: () =>
+                        fixESQLQueryWithVariables(editor1.current?.getValue() || '', esqlVariables),
                       esqlVariables,
                       controlsContext,
                       openTimePickerPopover,
