@@ -6,64 +6,108 @@
  */
 
 /**
- * Ground truth data structure for pattern extraction evaluation
+ * Ground truth data structure for pattern extraction evaluation.
+ *
+ * ## Fields Used for Automated Scoring (in pattern_extraction_metrics.ts):
+ *
+ * - `expected_fields.timestamp.field_name` → calculateTimestampAccuracy()
+ * - `expected_fields.log_level.field_name` → calculateLogLevelAccuracy()
+ * - `expected_fields.log_level.example_values` → validateLogLevelValues()
+ * - `expected_fields.other_fields[].name` → calculateFieldQuality()
+ * - `expected_fields.other_fields[].type` → validateFieldType()
+ * - `expected_fields.other_fields[].required` → weightRequiredFields()
+ * - `pattern_characteristics.expected_min_fields` → calculateFieldCountPenalty()
+ * - `pattern_characteristics.expected_max_fields` → calculateFieldCountPenalty()
+ *
+ * ## Documentation-Only Fields (not used in scoring):
+ *
+ * - `source_id`, `source_type`, `integration_package` → Metadata
+ * - `sample_messages` → Redundant (input already has sample_messages)
+ * - `timestamp.format`, `timestamp.example_value` → Human reference
+ * - `*.grok_pattern`, `*.dissect_pattern` → Pattern hints
+ * - `*.example_values`, `*.description` → Human reference
+ * - `pattern_characteristics.should_*`, `delimiter` → Future use
+ * - `reference_patterns` → Reference implementation
  */
 export interface PatternExtractionGroundTruth {
-  // Metadata
-  source_id: string; // e.g., "apache-access"
+  // ===========================================
+  // METADATA (documentation only)
+  // ===========================================
+  source_id: string;
   source_type: 'loghub' | 'integration' | 'synthetic';
-  integration_package?: string; // For integrations: "apache"
-  loghub_system?: string; // For LogHub: "Apache"
+  integration_package?: string;
+  loghub_system?: string;
+  sample_messages: string[]; // Usually empty - input has the messages
 
-  // Sample data
-  sample_messages: string[]; // 10-20 representative log lines
-
-  // Expected extraction results
+  // ===========================================
+  // EXPECTED FIELDS (used for scoring)
+  // ===========================================
   expected_fields: {
-    // Timestamp is critical - always check this
-    timestamp: {
-      field_name: string; // e.g., "@timestamp"
-      format?: string; // e.g., "dd/MMM/yyyy:HH:mm:ss Z"
-      example_value: string; // e.g., "26/Dec/2016:16:16:29 +0200"
-      grok_pattern?: string; // Expected pattern like "HTTPDATE"
-      dissect_pattern?: string; // For dissect patterns
+    /**
+     * USED: field_name checked by calculateTimestampAccuracy()
+     * DOC: format, example_value, grok_pattern, dissect_pattern
+     */
+    timestamp?: {
+      field_name: string;
+      format?: string;
+      example_value?: string;
+      grok_pattern?: string;
+      dissect_pattern?: string;
     };
 
-    // Log level (if present)
+    /**
+     * USED: field_name + example_values checked by calculateLogLevelAccuracy()
+     * DOC: grok_pattern, dissect_pattern
+     */
     log_level?: {
-      field_name: string; // e.g., "log.level"
-      example_values: string[]; // e.g., ["error", "info", "warn"]
-      grok_pattern?: string; // e.g., "LOGLEVEL"
-      dissect_pattern?: string; // For dissect patterns
+      field_name: string;
+      example_values: string[];
+      grok_pattern?: string;
+      dissect_pattern?: string;
     };
 
-    // All other expected fields
+    /**
+     * USED: name, type, required checked by calculateFieldQuality()
+     * DOC: example_values, grok_pattern, dissect_pattern, description
+     */
     other_fields: Array<{
-      name: string; // ECS/OTEL field name
+      name: string;
       type: 'keyword' | 'number' | 'ip' | 'text' | 'boolean';
-      example_values: string[]; // Sample extracted values
-      required: boolean; // Must be extracted for full credit
-      grok_pattern?: string; // Expected pattern component
-      dissect_pattern?: string; // For dissect patterns
-      description?: string; // What this field represents
+      required: boolean;
+      example_values?: string[];
+      grok_pattern?: string;
+      dissect_pattern?: string;
+      description?: string;
     }>;
   };
 
-  // Expected pattern characteristics
+  // ===========================================
+  // PATTERN CHARACTERISTICS
+  // ===========================================
+  /**
+   * USED: expected_min_fields, expected_max_fields by calculateFieldCountPenalty()
+   * DOC: should_handle_*, delimiter (not currently used)
+   */
   pattern_characteristics?: {
+    expected_min_fields: number;
+    expected_max_fields: number;
     should_handle_multiline?: boolean;
     should_extract_quoted_strings?: boolean;
     should_handle_optional_fields?: boolean;
-    delimiter?: string; // For dissect patterns
-    expected_min_fields: number; // Minimum fields that should be extracted
-    expected_max_fields: number; // Maximum fields (penalty beyond this)
+    delimiter?: string;
   };
 
-  // Reference patterns (from integration or manual)
+  // ===========================================
+  // REFERENCE PATTERNS (documentation only)
+  // ===========================================
+  /**
+   * DOC: Reference patterns from official integrations.
+   * NOT USED for automated scoring - just for human reference.
+   */
   reference_patterns?: {
-    grok?: string[]; // Official grok patterns
-    dissect?: string; // Official dissect pattern
-    source: string; // Where pattern came from
+    grok?: string[];
+    dissect?: string;
+    source: string;
   };
 }
 

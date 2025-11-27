@@ -152,7 +152,7 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
         path: `/internal/streams/logs/processing/_suggestions/${patternType}`,
         body: {
           connector_id: connectorId,
-          sample_messages: messages.slice(0, 10),
+          sample_messages: messages,
           review_fields: reviewFields,
         },
       });
@@ -316,7 +316,7 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
 
   /**
    * LLM-based evaluator with clear, specific criteria.
-   * Compares extraction results against expected fields from the ground truth.
+   * Uses all relevant ground truth data to evaluate extraction quality.
    */
   function createLlmEvaluator(evaluators: any) {
     return {
@@ -327,16 +327,32 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
         const heuristicPattern = output?.output?.heuristicPattern || '';
         const processor = output?.output?.suggestedProcessor;
 
-        // Get expected fields from ground truth
+        // Extract all ground truth data
         const expectedFields = expected?.expected_fields || output?.expected?.expected_fields || {};
-        const expectedTimestamp = expectedFields.timestamp?.field_name;
-        const expectedLogLevel = expectedFields.log_level?.field_name;
-        const expectedOtherFields = (expectedFields.other_fields || [])
-          .filter((f: any) => f.required)
-          .map((f: any) => f.name);
+        const characteristics =
+          expected?.pattern_characteristics || output?.expected?.pattern_characteristics || {};
 
-        // Show first 3 examples of extraction results
-        const examples = parsedLogs.slice(0, 3).map((log: ParsedLog) => ({
+        // Timestamp info
+        const expectedTimestamp = expectedFields.timestamp?.field_name;
+
+        // Log level info with example values
+        const expectedLogLevel = expectedFields.log_level?.field_name;
+        const logLevelValues = expectedFields.log_level?.example_values || [];
+
+        // Other fields with type info
+        const requiredFields = (expectedFields.other_fields || [])
+          .filter((f: any) => f.required)
+          .map((f: any) => ({ name: f.name, type: f.type }));
+        const optionalFields = (expectedFields.other_fields || [])
+          .filter((f: any) => !f.required)
+          .map((f: any) => ({ name: f.name, type: f.type }));
+
+        // Field count expectations from ground truth
+        const minFields = characteristics.expected_min_fields || 3;
+        const maxFields = characteristics.expected_max_fields || 10;
+
+        // Build extraction examples
+        const examples = parsedLogs.map((log: ParsedLog) => ({
           original: log.originalMessage.slice(0, 200),
           parsed: log.parsed,
           extractedFields: Object.keys(log.fields),
@@ -344,66 +360,102 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
         }));
 
         const criteria = [
-          // Criterion 1: Parse success
-          `The pattern successfully parses the log messages. Check if most examples have "parsed: true".
-           Failing to parse indicates a fundamental pattern problem.`,
+          // Criterion 1: Parse success rate
+          `PARSE SUCCESS: The pattern must successfully parse log messages.
+           Check if most examples have "parsed: true".
+           - 100% parse rate: Excellent
+           - 80%+ parse rate: Acceptable
+           - Below 80%: Pattern has problems
+           A failing parse indicates a fundamental pattern mismatch.`,
 
           // Criterion 2: Expected field extraction
-          `The extraction should capture these expected fields (or semantically equivalent ones):
+          `EXPECTED FIELDS: The extraction must capture these specific fields:
+
            ${
              expectedTimestamp
-               ? `- Timestamp field: "${expectedTimestamp}"`
-               : '- No timestamp expected'
+               ? `TIMESTAMP: Look for a field like "${expectedTimestamp}"`
+               : 'No timestamp field expected.'
            }
            ${
              expectedLogLevel
-               ? `- Log level field: "${expectedLogLevel}"`
-               : '- No log level expected'
+               ? `LOG LEVEL: Look for a field like "${expectedLogLevel}" with values like: ${logLevelValues.join(
+                   ', '
+                 )}`
+               : 'No log level field expected.'
            }
            ${
-             expectedOtherFields.length > 0
-               ? `- Other required fields: ${expectedOtherFields.join(', ')}`
+             requiredFields.length > 0
+               ? `REQUIRED FIELDS:\n${requiredFields
+                   .map((f: { name: string; type: string }) => `  - "${f.name}" (${f.type})`)
+                   .join('\n')}`
                : ''
            }
-           
-           Field names don't need to match exactly, but should be semantically similar.
-           For example, "attributes.source.ip" and "source_ip" both represent the source IP.`,
+           ${
+             optionalFields.length > 0
+               ? `OPTIONAL FIELDS (bonus if present):\n${optionalFields
+                   .map((f: { name: string; type: string }) => `  - "${f.name}" (${f.type})`)
+                   .join('\n')}`
+               : ''
+           }
 
-          // Criterion 3: Field naming quality
-          `Field names should follow the attributes.* naming convention with semantic suffixes:
-           GOOD: "attributes.source.ip", "attributes.http.status_code", "attributes.user.name"
-           BAD: "field1", "data", "f0", "column1", numbered/generic fields
-           
-           The field names should describe what the data represents.`,
+           Field names don't need to match exactly, but should be semantically equivalent.
+           Example: "attributes.source.ip", "source_ip", "client_ip" all represent the source IP.`,
 
-          // Criterion 4: Value quality
-          `Field values should be cleanly extracted:
-           - Timestamps should contain date/time information
-           - IP addresses should look like IPs (e.g., "192.168.1.1")
-           - Status codes should be numbers
-           - Values should not have excessive leading/trailing delimiters
+          // Criterion 3: Field naming conventions
+          `FIELD NAMING: Field names should be semantic and follow conventions:
            
-           NOTE: Quoted values and special characters are ACCEPTABLE if they're part of the original data.
-           For example, a user agent with parentheses like "Mozilla/5.0 (Windows NT 6.1)" is fine.`,
+           GOOD naming patterns:
+           - "attributes.source.ip" - hierarchical, descriptive
+           - "attributes.http.status_code" - domain-specific
+           - "body.text" - standard for message body
+           
+           BAD naming patterns:
+           - "field1", "field2" - numbered fields
+           - "data", "value", "f0" - generic placeholders
+           - Single letters or abbreviations without meaning
+           
+           The field name should describe what the data represents.`,
 
-          // Criterion 5: Field count appropriateness
-          `The extraction should have a reasonable number of fields:
-           - Too few fields (1-2) means important data is being missed
-           - Too many fields (15+) may indicate over-extraction
-           - Most log formats should extract 4-10 meaningful fields`,
+          // Criterion 4: Value type correctness
+          `VALUE QUALITY: Extracted values should match their expected types:
+           
+           - TIMESTAMP values: Should contain date/time info (digits, separators, timezone)
+           - IP values: Should look like IP addresses (e.g., "192.168.1.1" or IPv6)
+           - NUMBER values: Should be numeric, not strings with units
+           - KEYWORD values: Clean strings without excessive delimiters
+           
+           ACCEPTABLE: Quoted strings, special chars, brackets if part of original data.
+           Example: User-agent "Mozilla/5.0 (Windows NT 6.1)" is correctly extracted.
+           
+           NOT ACCEPTABLE: Leading/trailing delimiters that should be stripped.
+           Example: "[INFO]" when it should be "INFO".`,
+
+          // Criterion 5: Field count (using ground truth values)
+          `FIELD COUNT: This log format should extract ${minFields}-${maxFields} fields.
+           
+           - Less than ${minFields} fields: Important data is being missed
+           - ${minFields}-${maxFields} fields: Optimal extraction
+           - More than ${maxFields} fields: May indicate over-extraction or splitting
+           
+           Count the actual extracted fields in each example and compare.`,
         ];
 
         return evaluators.criteria(criteria).evaluate({
           input: {
-            sample_logs: (input?.sample_messages || []).slice(0, 3),
+            sample_logs: input?.sample_messages || [],
             pattern_type: processor?.patterns ? 'grok' : 'dissect',
-            expected_timestamp: expectedTimestamp,
-            expected_log_level: expectedLogLevel,
-            expected_fields: expectedOtherFields,
           },
           output: {
             pattern: processor?.patterns?.[0] || processor?.pattern || heuristicPattern,
             extraction_examples: examples,
+          },
+          expected: {
+            timestamp_field: expectedTimestamp,
+            log_level_field: expectedLogLevel,
+            log_level_values: logLevelValues,
+            required_fields: requiredFields.map((f: { name: string }) => f.name),
+            optional_fields: optionalFields.map((f: { name: string }) => f.name),
+            field_count_range: `${minFields}-${maxFields}`,
           },
         });
       },
