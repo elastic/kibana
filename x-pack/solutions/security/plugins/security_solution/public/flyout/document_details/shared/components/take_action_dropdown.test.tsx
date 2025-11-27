@@ -157,7 +157,10 @@ describe('take action dropdown', () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         ...getUserPrivilegesMockDefaultValue(),
         timelinePrivileges: { read: true },
-        rulesPrivileges: { read: true, edit: true },
+        rulesPrivileges: {
+          rules: { read: true, edit: true },
+          exceptions: { read: true, crud: true },
+        },
       });
       wrapper = mount(
         <TestProviders>
