@@ -61,7 +61,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
 
   const hasInitialized = useRef(!!selectedAgentPolicyId);
 
-  // Select the first policy if no policy is selected on initial load. Not after though, as it will overwrite the selected policy.
+  // Select the first policy if no policy is selected on initial load. Not after though, as it will overwrite the selected policy. This is now handled in the onChange
   useEffect(() => {
     if (!hasInitialized.current && !selectedAgentPolicyId && agentPolicies.length) {
       setSelectedAgentPolicyId(agentPolicies[0]?.id);
