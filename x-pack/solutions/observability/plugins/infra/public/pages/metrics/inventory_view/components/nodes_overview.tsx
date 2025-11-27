@@ -140,7 +140,7 @@ export const NodesOverview = ({
             <SwitchSchemaMessage dataTestSubj="infraInventoryViewNoDataInSelectedSchema" />
           ) : (
             <FormattedMessage
-              id="xpack.infra.waffle.noDataDescription"
+              id="xpack.infra.waffle.noDataSupportedIntegrationDescription"
               defaultMessage="Try modifying your filter and ensure that you are sending data from the {supportedIntegration} for this view."
               values={{
                 supportedIntegration: (
