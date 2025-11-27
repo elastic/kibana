@@ -11,7 +11,15 @@ import React, { useCallback, useState, useMemo } from 'react';
 import type { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter, EuiTitle, EuiButton } from '@elastic/eui';
+import {
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiTitle,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 import type { Services } from '../services';
 import type { Item } from '../types';
@@ -145,16 +153,20 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         {isReadonly === false && (
-          <EuiButton
-            color="primary"
-            onClick={onClickSave}
-            data-test-subj="saveButton"
-            fill
-            disabled={(isSubmitted && !form.isValid) || hasNoChanges()}
-            isLoading={isSubmitting}
-          >
-            {i18nTexts.saveButtonLabel}
-          </EuiButton>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="primary"
+                onClick={onClickSave}
+                data-test-subj="saveButton"
+                fill
+                disabled={(isSubmitted && !form.isValid) || hasNoChanges()}
+                isLoading={isSubmitting}
+              >
+                {i18nTexts.saveButtonLabel}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
       </EuiFlyoutFooter>
     </>
