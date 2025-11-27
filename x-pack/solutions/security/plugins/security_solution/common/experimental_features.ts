@@ -61,11 +61,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Disables ESQL-based risk scoring
-   */
-  disableESQLRiskScoring: false,
-
-  /**
    * Enable resetting risk scores to zero for outdated entities
    */
   enableRiskScoreResetToZero: true,

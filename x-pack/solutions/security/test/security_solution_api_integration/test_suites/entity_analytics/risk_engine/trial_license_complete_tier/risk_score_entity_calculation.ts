@@ -248,23 +248,6 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @serverlessQA Risk Scoring Entity Calculation API', function () {
     this.tags(['esGate']);
 
-    describe('ESQL based risk scoring', () => {
-      doTests();
-    });
-
-    describe('scripted metric based risk scoring', () => {
-      before(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: false,
-        });
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: true,
-        });
-      });
-      doTests();
-    });
+    doTests();
   });
 };

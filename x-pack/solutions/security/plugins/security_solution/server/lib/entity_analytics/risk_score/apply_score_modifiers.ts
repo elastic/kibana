@@ -20,12 +20,11 @@ import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privi
 
 import type { RiskScoreBucket } from '../types';
 import { RIEMANN_ZETA_VALUE } from './constants';
-import { getGlobalWeightForIdentifierType } from './calculate_risk_scores';
+import { getGlobalWeightForIdentifierType, max10DecimalPlaces } from './helpers';
 import type { AssetCriticalityRiskFields } from './modifiers/asset_criticality';
 import { applyCriticalityModifier } from './modifiers/asset_criticality';
 import type { PrivmonRiskFields } from './modifiers/privileged_users';
 import { applyPrivmonModifier } from './modifiers/privileged_users';
-import { max10DecimalPlaces } from './helpers';
 import type { ExperimentalFeatures } from '../../../../common';
 interface ModifiersUpdateParams {
   now: string;

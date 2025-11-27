@@ -117,23 +117,6 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
   };
 
   describe('@ess Risk Scoring Task in non-default space', () => {
-    describe('ESQL', () => {
-      doTests();
-    });
-
-    describe('Scripted metric', () => {
-      before(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: false,
-        });
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: true,
-        });
-      });
-      doTests();
-    });
+    doTests();
   });
 };

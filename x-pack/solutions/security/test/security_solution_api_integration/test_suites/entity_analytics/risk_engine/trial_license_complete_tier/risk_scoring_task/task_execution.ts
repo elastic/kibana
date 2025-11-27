@@ -322,23 +322,6 @@ export default ({ getService }: FtrProviderContext): void => {
   };
 
   describe('@ess @serverless @serverlessQA Risk Scoring Task Execution', () => {
-    describe('ESQL', () => {
-      doTests();
-    });
-
-    describe('Scripted metric', () => {
-      before(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: false,
-        });
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.update({
-          ['securitySolution:enableEsqlRiskScoring']: true,
-        });
-      });
-      doTests();
-    });
+    doTests();
   });
 };

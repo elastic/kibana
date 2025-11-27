@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import { getPrivilegedMonitorUsersIndex } from '../../../../common/entity_analytics/privileged_user_monitoring/utils';
-import { ENABLE_ESQL_RISK_SCORING } from '../../../../common/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
 import type {
@@ -16,7 +15,6 @@ import type {
   EntityAnalyticsConfig,
   RiskEngineConfiguration,
 } from '../types';
-import { calculateRiskScores } from './calculate_risk_scores';
 import type { CalculationResults } from './calculate_and_persist_risk_scores';
 import { calculateAndPersistRiskScores } from './calculate_and_persist_risk_scores';
 import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
@@ -77,14 +75,7 @@ export const riskScoreServiceFactory = ({
   });
   return {
     calculateScores: async (params) => {
-      const isESQLRiskScoringAdvancedSettingEnabled = await uiSettingsClient.get<boolean>(
-        ENABLE_ESQL_RISK_SCORING
-      );
-      const calculate =
-        !experimentalFeatures.disableESQLRiskScoring && isESQLRiskScoringAdvancedSettingEnabled
-          ? calculateScoresWithESQL
-          : calculateRiskScores;
-      return calculate({
+      return calculateScoresWithESQL({
         ...params,
         assetCriticalityService,
         privmonUserCrudService,
