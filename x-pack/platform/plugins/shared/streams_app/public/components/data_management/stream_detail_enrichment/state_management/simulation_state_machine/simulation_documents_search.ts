@@ -43,6 +43,13 @@ export const previewDocsFilterOptions = {
       { defaultMessage: 'Failed' }
     ),
   },
+  outcome_filter_dropped: {
+    id: 'outcome_filter_dropped',
+    label: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.dropped',
+      { defaultMessage: 'Dropped' }
+    ),
+  },
 } as const;
 
 export type PreviewDocsFilterOption = keyof typeof previewDocsFilterOptions;

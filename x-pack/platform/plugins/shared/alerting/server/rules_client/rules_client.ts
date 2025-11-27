@@ -81,26 +81,27 @@ import { deleteBackfill } from '../application/backfill/methods/delete';
 import type { FindBackfillParams } from '../application/backfill/methods/find/types';
 import type { DisableRuleParams } from '../application/rule/methods/disable';
 import type { EnableRuleParams } from '../application/rule/methods/enable_rule';
-import { findGaps } from '../application/rule/methods/find_gaps';
-import { fillGapById } from '../application/rule/methods/fill_gap_by_id';
-import type { FillGapByIdParams } from '../application/rule/methods/fill_gap_by_id/types';
-import type { GetRuleIdsWithGapsParams } from '../application/rule/methods/get_rule_ids_with_gaps/types';
-
-import { getRuleIdsWithGaps } from '../application/rule/methods/get_rule_ids_with_gaps';
-import { getGapsSummaryByRuleIds } from '../application/rule/methods/get_gaps_summary_by_rule_ids';
-import type { GetGapsSummaryByRuleIdsParams } from '../application/rule/methods/get_gaps_summary_by_rule_ids/types';
-import type { FindGapsParams } from '../lib/rule_gaps/types';
 import type { GetGlobalExecutionSummaryParams } from './methods/get_execution_summary';
 import { getGlobalExecutionSummaryWithAuth } from './methods/get_execution_summary';
-import { bulkFillGapsByRuleIds } from '../application/rule/methods/bulk_fill_gaps_by_rule_ids';
-import type {
-  BulkFillGapsByRuleIdsOptions,
-  BulkFillGapsByRuleIdsParams,
-} from '../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
 import type { GetRuleTypesByQueryParams } from '../application/rule/methods/get_rule_types_by_query/types';
 import { getRuleTypesByQuery } from '../application/rule/methods/get_rule_types_by_query/get_rule_types_by_query';
 import type { GetRuleTemplateParams } from '../application/rule_template/methods/get/types';
 import { getRuleTemplate } from '../application/rule_template/methods/get/get_rule_template';
+
+// Gap methods
+import { findGaps } from '../application/gaps/methods/find_gaps';
+import { fillGapById } from '../application/gaps/methods/fill_gap_by_id';
+import type { FillGapByIdParams } from '../application/gaps/methods/fill_gap_by_id/types';
+import type { GetRuleIdsWithGapsParams } from '../application/gaps/methods/get_rule_ids_with_gaps/types';
+import { getRuleIdsWithGaps } from '../application/gaps/methods/get_rule_ids_with_gaps';
+import { getGapsSummaryByRuleIds } from '../application/gaps/methods/get_gaps_summary_by_rule_ids';
+import type { GetGapsSummaryByRuleIdsParams } from '../application/gaps/methods/get_gaps_summary_by_rule_ids/types';
+import type { FindGapsParams } from '../application/gaps/types';
+import { bulkFillGapsByRuleIds } from '../application/gaps/methods/bulk_fill_gaps_by_rule_ids';
+import type {
+  BulkFillGapsByRuleIdsOptions,
+  BulkFillGapsByRuleIdsParams,
+} from '../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
