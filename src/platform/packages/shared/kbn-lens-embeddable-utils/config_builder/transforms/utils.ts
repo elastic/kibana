@@ -96,7 +96,8 @@ function getAdHocDataViewSpec(dataView: {
   timeFieldName: string;
 }) {
   return {
-    id: uuidv4({}),
+    // Improve id genertation to be more predictable and hit cache more often
+    id: `${dataView.index}-${dataView.timeFieldName ?? 'no_time_field'}`,
     title: dataView.index,
     name: dataView.index,
     timeFieldName: dataView.timeFieldName,
