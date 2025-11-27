@@ -330,7 +330,6 @@ export class WorkflowsExecutionEnginePlugin
       // Get ES client and create repository for this execution
       const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-      const stepExecutionRepository = new StepExecutionRepository(esClient);
 
       const triggeredBy = context.triggeredBy || defaultTriggeredBy;
       const workflowExecution: Partial<EsWorkflowExecution> = {
@@ -412,7 +411,6 @@ export class WorkflowsExecutionEnginePlugin
 
       const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
       const stepExecutionRepository = new StepExecutionRepository(esClient);
-      const logsRepository = new LogsRepository(esClient);
 
       // AUTO-DETECT: Check if we're already running in a Task Manager context
       const isRunningInTaskManager =
