@@ -349,7 +349,7 @@ export const getWorkflowZodSchema = (dynamicConnectorTypes: Record<string, Conne
   const allConnectors = getAllConnectorsWithDynamic(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors);
 };
-export type WorkflowZodSchemaType = z.infer<ReturnType<typeof getWorkflowZodSchema>>;
+export type WorkflowZodSchemaType = ReturnType<typeof getWorkflowZodSchema>;
 
 export const getWorkflowZodSchemaLoose = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
