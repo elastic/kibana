@@ -11,6 +11,7 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import {
+  selectEditorYaml,
   selectIsTestModalOpen,
   selectWorkflowDefinition,
   selectWorkflowId,
@@ -45,6 +46,7 @@ jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => (
   selectIsTestModalOpen: jest.fn(),
   selectWorkflowDefinition: jest.fn(),
   selectWorkflowId: jest.fn(),
+  selectEditorYaml: jest.fn(),
 }));
 
 // Mock WorkflowExecuteModal
@@ -103,6 +105,8 @@ describe('WorkflowDetailTestModal', () => {
 
     (selectIsTestModalOpen as unknown as jest.Mock).mockReturnValue(true);
     (selectWorkflowDefinition as unknown as jest.Mock).mockReturnValue(mockDefinition);
+    (selectWorkflowId as unknown as jest.Mock).mockReturnValue(null);
+    (selectEditorYaml as unknown as jest.Mock).mockReturnValue('');
 
     mockUseAsyncThunk.mockImplementation((thunk) => {
       if (thunk === testWorkflowThunk) {

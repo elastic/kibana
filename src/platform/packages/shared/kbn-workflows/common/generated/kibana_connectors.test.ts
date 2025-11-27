@@ -649,16 +649,47 @@ describe('Generated Kibana Connectors', () => {
 
       // Verify core workflow structure is present in the definitions
       const workflowDef = jsonSchema.definitions.WorkflowSchema as any;
-      expect(workflowDef.type).toBe('object');
-      expect(workflowDef.properties).toBeDefined();
-      expect(workflowDef.properties.version).toBeDefined();
-      expect(workflowDef.properties.name).toBeDefined();
-      expect(workflowDef.properties.steps).toBeDefined();
-      expect(workflowDef.properties.settings).toBeDefined();
+      
+      // Handle allOf structure (from Zod's .pipe() transformation)
+      let actualWorkflowDef = workflowDef;
+      if (workflowDef.allOf && Array.isArray(workflowDef.allOf)) {
+        // When using .pipe(), the schema is wrapped in allOf
+        // The actual schema is typically in allOf[0] or merged from allOf items
+        actualWorkflowDef = workflowDef.allOf[0] || workflowDef;
+      }
+      
+      // The schema should have type 'object' (either directly or in allOf)
+      if (actualWorkflowDef.type) {
+        expect(actualWorkflowDef.type).toBe('object');
+      } else if (workflowDef.allOf) {
+        // If using allOf, at least one item should have type 'object'
+        const hasObjectType = workflowDef.allOf.some(
+          (item: any) => item && item.type === 'object'
+        );
+        expect(hasObjectType).toBe(true);
+      }
+      
+      // Properties can be at root level or in allOf items
+      let properties = actualWorkflowDef.properties;
+      if (!properties && workflowDef.allOf) {
+        // Try to find properties in allOf items
+        for (const item of workflowDef.allOf) {
+          if (item && item.properties) {
+            properties = item.properties;
+            break;
+          }
+        }
+      }
+      
+      expect(properties).toBeDefined();
+      expect(properties.version).toBeDefined();
+      expect(properties.name).toBeDefined();
+      expect(properties.steps).toBeDefined();
+      expect(properties.settings).toBeDefined();
 
       // Verify steps array structure for proper validation
-      expect(workflowDef.properties.steps.type).toBe('array');
-      expect(workflowDef.properties.steps.items).toBeDefined();
+      expect(properties.steps.type).toBe('array');
+      expect(properties.steps.items).toBeDefined();
 
       // Test that the schema can validate a basic workflow
       // Note: We don't actually validate here since we're testing the JSON schema structure
