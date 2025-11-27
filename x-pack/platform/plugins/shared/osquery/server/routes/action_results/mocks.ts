@@ -151,6 +151,8 @@ export const createMockRequest = (params: {
     sort?: string;
     sortOrder?: Direction;
     startDate?: string;
+    expiration?: string;
+    totalAgents?: number;
   };
 }) =>
   httpServerMock.createKibanaRequest({

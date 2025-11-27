@@ -10,10 +10,18 @@ import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { getActionResponses } from './utils';
 import type { ActionResultsStrategyResponse } from '../../../common/search_strategy';
 
+/**
+ * Extended mock response type that includes hybrid mode fields.
+ * These fields are added by the search strategy when hybridActionResults is enabled.
+ */
+type MockActionResultsResponse = Partial<ActionResultsStrategyResponse> & {
+  resultsAgentIds?: Set<string>;
+  resultsAgentBuckets?: Array<{ key: string; doc_count: number }>;
+  resultsTotalDocs?: number;
+};
+
 describe('getActionResponses', () => {
-  const createMockSearchClient = (
-    mockResponse: Partial<ActionResultsStrategyResponse>
-  ): IScopedSearchClient =>
+  const createMockSearchClient = (mockResponse: MockActionResultsResponse): IScopedSearchClient =>
     ({
       search: jest.fn().mockReturnValue(of(mockResponse)),
     } as unknown as IScopedSearchClient);
@@ -216,7 +224,7 @@ describe('getActionResponses', () => {
 
   describe('hybrid mode (with results index data)', () => {
     it('should combine Fleet and results index data', async () => {
-      const mockResponse: Partial<ActionResultsStrategyResponse> = {
+      const mockResponse: MockActionResultsResponse = {
         rawResponse: {
           aggregations: {
             aggs: {
@@ -265,7 +273,7 @@ describe('getActionResponses', () => {
     });
 
     it('should identify inferred successful agents (results but no Fleet response)', async () => {
-      const mockResponse: Partial<ActionResultsStrategyResponse> = {
+      const mockResponse: MockActionResultsResponse = {
         rawResponse: {
           aggregations: {
             aggs: {
@@ -313,7 +321,7 @@ describe('getActionResponses', () => {
     });
 
     it('should handle case where all agents only in results index (no Fleet responses)', async () => {
-      const mockResponse: Partial<ActionResultsStrategyResponse> = {
+      const mockResponse: MockActionResultsResponse = {
         rawResponse: {
           aggregations: {
             aggs: {
@@ -351,7 +359,7 @@ describe('getActionResponses', () => {
     });
 
     it('should prioritize results index total docs over Fleet rows_count', async () => {
-      const mockResponse: Partial<ActionResultsStrategyResponse> = {
+      const mockResponse: MockActionResultsResponse = {
         rawResponse: {
           aggregations: {
             aggs: {
@@ -381,11 +389,11 @@ describe('getActionResponses', () => {
       const result$ = getActionResponses(search, 'action-docs-priority', 100);
       const result = await result$.toPromise();
 
-      expect(result.docs).toBe(2500); // Should use results index value
+      expect(result?.docs).toBe(2500); // Should use results index value
     });
 
     it('should handle hybrid mode with Fleet errors and inferred successful', async () => {
-      const mockResponse: Partial<ActionResultsStrategyResponse> = {
+      const mockResponse: MockActionResultsResponse = {
         rawResponse: {
           aggregations: {
             aggs: {
@@ -436,7 +444,7 @@ describe('getActionResponses', () => {
       const fleetAgentIds = Array.from({ length: 10000 }, (_, i) => `fleet-${i}`);
       const inferredAgentIds = Array.from({ length: 5000 }, (_, i) => `inferred-${i}`);
 
-      const mockResponse: Partial<ActionResultsStrategyResponse> = {
+      const mockResponse: MockActionResultsResponse = {
         rawResponse: {
           aggregations: {
             aggs: {
@@ -477,7 +485,7 @@ describe('getActionResponses', () => {
     });
 
     it('should handle empty results index data in hybrid mode', async () => {
-      const mockResponse: Partial<ActionResultsStrategyResponse> = {
+      const mockResponse: MockActionResultsResponse = {
         rawResponse: {
           aggregations: {
             aggs: {
@@ -518,7 +526,7 @@ describe('getActionResponses', () => {
     });
 
     it('should ensure pending never goes negative', async () => {
-      const mockResponse: Partial<ActionResultsStrategyResponse> = {
+      const mockResponse: MockActionResultsResponse = {
         rawResponse: {
           aggregations: {
             aggs: {
@@ -552,8 +560,8 @@ describe('getActionResponses', () => {
       const result$ = getActionResponses(search, 'action-overflow', 50);
       const result = await result$.toPromise();
 
-      expect(result.pending).toBe(0); // Should be 0, not negative
-      expect(result.responded).toBe(110);
+      expect(result?.pending).toBe(0); // Should be 0, not negative
+      expect(result?.responded).toBe(110);
     });
   });
 
@@ -645,7 +653,7 @@ describe('getActionResponses', () => {
       const result$ = getActionResponses(search, 'action-no-rows', 50);
       const result = await result$.toPromise();
 
-      expect(result.docs).toBe(0);
+      expect(result?.docs).toBe(0);
     });
 
     it('should handle missing success bucket', async () => {
@@ -672,8 +680,8 @@ describe('getActionResponses', () => {
       const result$ = getActionResponses(search, 'action-no-success', 50);
       const result = await result$.toPromise();
 
-      expect(result.successful).toBe(0);
-      expect(result.failed).toBe(10);
+      expect(result?.successful).toBe(0);
+      expect(result?.failed).toBe(10);
     });
 
     it('should handle missing error bucket', async () => {
@@ -700,8 +708,8 @@ describe('getActionResponses', () => {
       const result$ = getActionResponses(search, 'action-no-error', 50);
       const result = await result$.toPromise();
 
-      expect(result.successful).toBe(40);
-      expect(result.failed).toBe(0);
+      expect(result?.successful).toBe(40);
+      expect(result?.failed).toBe(0);
     });
   });
 });

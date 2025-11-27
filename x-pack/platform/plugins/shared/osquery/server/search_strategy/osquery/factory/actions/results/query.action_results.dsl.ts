@@ -19,6 +19,13 @@ import type { ActionResultsRequestOptions } from '../../../../../../common/searc
 import { getQueryFilter } from '../../../../../utils/build_query';
 import { buildIndexNameWithNamespace } from '../../../../../utils/build_index_name_with_namespace';
 
+/**
+ * Maximum size for terms aggregation on agent_id field.
+ * Beyond this limit, composite aggregation is used for unlimited scale.
+ * Set to 15000 to support large deployments (terms agg has hard limit of ~65k).
+ */
+const MAX_TERMS_AGGREGATION_SIZE = 15000;
+
 export const buildActionResultsQuery = ({
   actionId,
   agentIds,
@@ -129,7 +136,7 @@ export const buildActionResultsQuery = ({
               unique_agent_ids: {
                 terms: {
                   field: 'agent_id',
-                  size: 15000, // Support large-scale deployments
+                  size: MAX_TERMS_AGGREGATION_SIZE,
                 },
               },
             },

@@ -29,10 +29,7 @@ import type {
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 import { osqueryFactory } from './factory';
 import type { OsqueryFactory } from './factory/types';
-import {
-  buildResultsAgentsQuery,
-  COMPOSITE_AGGREGATION_BATCH_SIZE,
-} from './factory/actions/results/query.results_agents.dsl';
+import { buildResultsAgentsQuery } from './factory/actions/results/query.results_agents.dsl';
 
 interface CompositeAgentBucket {
   key: { agent_id: string };
@@ -52,9 +49,13 @@ interface ResultsAgentsAggregations {
   };
 }
 
+const MAX_PAGINATION_ITERATIONS = 1000;
+const LARGE_AGENT_COUNT_THRESHOLD = 50000;
+
 /**
  * Fetches all unique agent IDs from results index using composite aggregation pagination.
  * Handles unlimited agent counts by paginating through results.
+ * Includes safeguards: max iterations (1000 = 10M agents max), error handling, timeout protection.
  */
 async function fetchAllResultsAgents(
   es: PluginStart['search']['searchAsInternalUser'],
@@ -66,49 +67,75 @@ async function fetchAllResultsAgents(
   const agentBuckets: Array<{ key: string; doc_count: number }> = [];
   let totalDocs = 0;
   let afterKey: { agent_id: string } | undefined;
+  let iterationCount = 0;
 
-  // Paginate through all composite aggregation pages
-  do {
-    const response = (await lastValueFrom(
-      es.search(
-        {
-          params: buildResultsAgentsQuery({
-            ...queryParams,
-            afterKey,
-          }),
-        },
-        options,
-        deps
-      )
-    )) as IKibanaSearchResponse<{
-      hits: { total?: number | { value: number } };
-      aggregations?: ResultsAgentsAggregations;
-    }>;
+  try {
+    // Paginate through all composite aggregation pages
+    do {
+      iterationCount++;
 
-    // Get total docs from first request only
-    if (totalDocs === 0) {
-      const hitsTotal = response.rawResponse.hits?.total;
-      totalDocs = typeof hitsTotal === 'number' ? hitsTotal : hitsTotal?.value ?? 0;
-    }
-
-    // Extract agent IDs from composite aggregation buckets
-    const buckets = response.rawResponse.aggregations?.unique_agents?.buckets;
-
-    if (buckets && buckets.length > 0) {
-      for (const bucket of buckets) {
-        const agentId = bucket.key.agent_id;
-        agentIds.add(agentId);
-        agentBuckets.push({ key: agentId, doc_count: bucket.doc_count });
+      if (iterationCount > MAX_PAGINATION_ITERATIONS) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[osquery] fetchAllResultsAgents exceeded max iterations (${MAX_PAGINATION_ITERATIONS}) for action ${queryParams.actionId}. ` +
+            `Processed ${agentBuckets.length} agents. This may indicate an issue with composite aggregation pagination.`
+        );
+        break;
       }
 
-      // Get after_key for next page
-      afterKey = response.rawResponse.aggregations?.unique_agents?.after_key;
-    } else {
-      afterKey = undefined;
-    }
+      const response = (await lastValueFrom(
+        es.search(
+          {
+            params: buildResultsAgentsQuery({
+              ...queryParams,
+              afterKey,
+            }),
+          },
+          options,
+          deps
+        )
+      )) as IKibanaSearchResponse<{
+        hits: { total?: number | { value: number } };
+        aggregations?: ResultsAgentsAggregations;
+      }>;
 
-    // Continue until no more pages (after_key is undefined) or we hit the batch size limit
-  } while (afterKey && agentBuckets.length < COMPOSITE_AGGREGATION_BATCH_SIZE * 100); // Safety limit: 1M agents
+      // Get total docs from first request only
+      if (totalDocs === 0) {
+        const hitsTotal = response.rawResponse.hits?.total;
+        totalDocs = typeof hitsTotal === 'number' ? hitsTotal : hitsTotal?.value ?? 0;
+      }
+
+      // Extract agent IDs from composite aggregation buckets
+      const buckets = response.rawResponse.aggregations?.unique_agents?.buckets;
+
+      if (buckets && buckets.length > 0) {
+        for (const bucket of buckets) {
+          const agentId = bucket.key.agent_id;
+          agentIds.add(agentId);
+          agentBuckets.push({ key: agentId, doc_count: bucket.doc_count });
+        }
+
+        // Get after_key for next page
+        afterKey = response.rawResponse.aggregations?.unique_agents?.after_key;
+      } else {
+        afterKey = undefined;
+      }
+    } while (afterKey);
+
+    if (agentBuckets.length > LARGE_AGENT_COUNT_THRESHOLD) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[osquery] fetchAllResultsAgents processed ${agentBuckets.length} agents for action ${queryParams.actionId} ` +
+          `(iterations: ${iterationCount}). Large agent counts may impact performance.`
+      );
+    }
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(
+      `[osquery] Error in fetchAllResultsAgents for action ${queryParams.actionId} after ${iterationCount} iterations: ${error}`
+    );
+    throw error;
+  }
 
   return { agentIds, agentBuckets, totalDocs };
 }

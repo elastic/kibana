@@ -9,9 +9,27 @@ import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { Direction } from '../../search_strategy';
 
+const iso8601DateString = new t.Type<string, string, unknown>(
+  'iso8601DateString',
+  (input): input is string => typeof input === 'string',
+  (input, context) => {
+    if (typeof input !== 'string') {
+      return t.failure(input, context);
+    }
+
+    const date = new Date(input);
+    if (isNaN(date.getTime())) {
+      return t.failure(input, context, 'Invalid ISO 8601 date format');
+    }
+
+    return t.success(input);
+  },
+  t.identity
+);
+
 export const getActionResultsRequestQuerySchema = t.type({
-  startDate: t.union([t.string, t.undefined]),
-  expiration: t.union([t.string, t.undefined]),
+  startDate: t.union([iso8601DateString, t.undefined]),
+  expiration: t.union([iso8601DateString, t.undefined]),
   page: t.union([toNumberRt, t.undefined]),
   pageSize: t.union([toNumberRt, t.undefined]),
   sort: t.union([t.string, t.undefined]),

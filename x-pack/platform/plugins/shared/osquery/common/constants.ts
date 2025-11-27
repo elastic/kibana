@@ -78,6 +78,16 @@ export const calculateActionExpirationMinutes = (
   queryTimeoutSeconds: number = QUERY_TIMEOUT.DEFAULT,
   agentCount: number
 ): number => {
+  if (queryTimeoutSeconds < 0 || queryTimeoutSeconds > QUERY_TIMEOUT.MAX) {
+    throw new Error(
+      `Invalid queryTimeoutSeconds: ${queryTimeoutSeconds}. Must be between 0 and ${QUERY_TIMEOUT.MAX}`
+    );
+  }
+
+  if (agentCount < 0) {
+    throw new Error(`Invalid agentCount: ${agentCount}. Must be >= 0`);
+  }
+
   const queryTimeoutMinutes = Math.ceil(queryTimeoutSeconds / 60);
 
   const fromQueryTimeout = queryTimeoutMinutes + ACTION_EXPIRATION.BUFFER_MINUTES;

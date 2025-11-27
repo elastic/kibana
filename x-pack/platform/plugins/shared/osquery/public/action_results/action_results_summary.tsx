@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { Criteria } from '@elastic/eui';
-import { EuiBasicTable, EuiCodeBlock, EuiLink, EuiSkeletonText, EuiToolTip } from '@elastic/eui';
+import { EuiBasicTable, EuiCodeBlock, EuiLink, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
@@ -126,7 +126,14 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     [data.edges]
   );
 
+  // Check if server already provided agent names (new behavior)
+  const needsClientFetch = useMemo(
+    () => data.edges.some((edge) => !edge.fields?.agent_name?.[0]),
+    [data.edges]
+  );
+
   // Bulk fetch agent details for current page using POST (avoids URL length limits)
+  // Only fetch if server didn't provide names (backward compatibility)
   const { data: agentsData, isLoading: isLoadingAgentNames } = useQuery(
     ['bulkAgentDetails', currentPageAgentIds],
     async () => {
@@ -142,7 +149,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
       });
     },
     {
-      enabled: currentPageAgentIds.length > 0,
+      enabled: currentPageAgentIds.length > 0 && needsClientFetch,
       staleTime: AGENT_DETAILS_CACHE_TIME_MS,
       onError: (err) => {
         setErrorToast(err, {
@@ -192,13 +199,10 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   );
 
   const renderAgentIdColumn = useCallback(
-    (agentId: string) => {
-      // Show skeleton while loading agent names to prevent ID-to-name flash
-      if (isLoadingAgentNames) {
-        return <EuiSkeletonText lines={1} size="s" isLoading={true} />;
-      }
+    (agentId: string, item: ResultEdge) => {
+      const serverName = item.fields?.agent_name?.[0];
 
-      const agentName = agentNameMap.get(agentId) || agentId;
+      const agentName = serverName || agentNameMap.get(agentId) || agentId;
 
       return (
         <EuiToolTip position="top" content={<p>{agentId}</p>}>
@@ -214,7 +218,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         </EuiToolTip>
       );
     },
-    [agentNameMap, application, isLoadingAgentNames]
+    [agentNameMap, application]
   );
   const renderRowsColumn = useCallback(
     (_: unknown, item: ResultEdge) => {

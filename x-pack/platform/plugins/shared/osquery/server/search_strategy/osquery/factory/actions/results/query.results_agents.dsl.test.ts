@@ -6,11 +6,21 @@
  */
 
 import moment from 'moment';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   buildResultsAgentsQuery,
   COMPOSITE_AGGREGATION_BATCH_SIZE,
 } from './query.results_agents.dsl';
 import { ACTION_EXPIRATION, OSQUERY_INTEGRATION_NAME } from '../../../../../../common/constants';
+
+// Helper to safely get filter array from query result
+const getFilterArray = (
+  filter: QueryDslQueryContainer | QueryDslQueryContainer[] | undefined
+): QueryDslQueryContainer[] => {
+  if (!filter) return [];
+
+  return Array.isArray(filter) ? filter : [filter];
+};
 
 jest.mock('../../../../../utils/build_query', () => ({
   getQueryFilter: jest.fn(({ filter }: { filter: string }) => ({
@@ -87,7 +97,10 @@ describe('buildResultsAgentsQuery', () => {
       });
 
       expect(result.aggs?.unique_agents).toHaveProperty('composite');
-      expect(result.aggs?.unique_agents.composite).toHaveProperty('size', COMPOSITE_AGGREGATION_BATCH_SIZE);
+      expect(result.aggs?.unique_agents.composite).toHaveProperty(
+        'size',
+        COMPOSITE_AGGREGATION_BATCH_SIZE
+      );
       expect(result.aggs?.unique_agents.composite).toHaveProperty('sources');
     });
 
@@ -197,9 +210,8 @@ describe('buildResultsAgentsQuery', () => {
         startDate,
       });
 
-      const timeRangeFilter = result.query?.bool?.filter?.find(
-        (f: any) => f.range && f.range['@timestamp']
-      ) as any;
+      const filters = getFilterArray(result.query?.bool?.filter);
+      const timeRangeFilter = filters.find((f: any) => f.range && f.range['@timestamp']) as any;
 
       const expectedEnd = moment(startDate)
         .add(ACTION_EXPIRATION.SEARCH_WINDOW_MINUTES, 'minutes')
@@ -213,9 +225,8 @@ describe('buildResultsAgentsQuery', () => {
         actionId: 'action-no-time',
       });
 
-      const hasTimeRange = result.query?.bool?.filter?.some(
-        (f: any) => f.range && f.range['@timestamp']
-      );
+      const filters = getFilterArray(result.query?.bool?.filter);
+      const hasTimeRange = filters.some((f: any) => f.range && f.range['@timestamp']);
 
       expect(hasTimeRange).toBeFalsy();
     });
@@ -226,9 +237,8 @@ describe('buildResultsAgentsQuery', () => {
         startDate: '',
       });
 
-      const hasTimeRange = result.query?.bool?.filter?.some(
-        (f: any) => f.range && f.range['@timestamp']
-      );
+      const filters = getFilterArray(result.query?.bool?.filter);
+      const hasTimeRange = filters.some((f: any) => f.range && f.range['@timestamp']);
 
       expect(hasTimeRange).toBeFalsy();
     });
@@ -240,9 +250,8 @@ describe('buildResultsAgentsQuery', () => {
         startDate,
       });
 
-      const timeRangeFilter = result.query?.bool?.filter?.find(
-        (f: any) => f.range && f.range['@timestamp']
-      ) as any;
+      const filters = getFilterArray(result.query?.bool?.filter);
+      const timeRangeFilter = filters.find((f: any) => f.range && f.range['@timestamp']) as any;
 
       expect(timeRangeFilter).toBeDefined();
       expect(timeRangeFilter.range['@timestamp'].gte).toBe(startDate);
@@ -275,7 +284,7 @@ describe('buildResultsAgentsQuery', () => {
         afterKey,
       });
 
-      expect(result.aggs?.unique_agents.composite.after).toEqual(afterKey);
+      expect(result.aggs?.unique_agents.composite?.after).toEqual(afterKey);
     });
 
     it('should use correct batch size', () => {
@@ -283,7 +292,7 @@ describe('buildResultsAgentsQuery', () => {
         actionId: 'action-batch',
       });
 
-      expect(result.aggs?.unique_agents.composite.size).toBe(COMPOSITE_AGGREGATION_BATCH_SIZE);
+      expect(result.aggs?.unique_agents.composite?.size).toBe(COMPOSITE_AGGREGATION_BATCH_SIZE);
     });
 
     it('should aggregate by agent.id field', () => {
@@ -291,7 +300,7 @@ describe('buildResultsAgentsQuery', () => {
         actionId: 'action-field',
       });
 
-      const sources = result.aggs?.unique_agents.composite.sources;
+      const sources = result.aggs?.unique_agents.composite?.sources;
 
       expect(sources).toHaveLength(1);
       expect(sources?.[0]).toEqual({
@@ -374,11 +383,11 @@ describe('buildResultsAgentsQuery', () => {
         startDate,
       });
 
-      const filters = result.query?.bool?.filter;
+      const filters = getFilterArray(result.query?.bool?.filter);
 
       expect(filters).toHaveLength(2);
-      expect(filters?.[0]).toHaveProperty('range');
-      expect(filters?.[1]).toHaveProperty('query_string');
+      expect(filters[0]).toHaveProperty('range');
+      expect(filters[1]).toHaveProperty('query_string');
     });
   });
 
@@ -390,7 +399,8 @@ describe('buildResultsAgentsQuery', () => {
         actionId: longActionId,
       });
 
-      expect(result.query?.bool?.filter?.[0]).toEqual({
+      const filters = getFilterArray(result.query?.bool?.filter);
+      expect(filters[0]).toEqual({
         query_string: {
           query: `action_id: ${longActionId}`,
         },
@@ -404,7 +414,8 @@ describe('buildResultsAgentsQuery', () => {
         actionId: specialActionId,
       });
 
-      expect(result.query?.bool?.filter?.[0]).toEqual({
+      const filters = getFilterArray(result.query?.bool?.filter);
+      expect(filters[0]).toEqual({
         query_string: {
           query: `action_id: ${specialActionId}`,
         },
@@ -436,16 +447,17 @@ describe('buildResultsAgentsQuery', () => {
     });
 
     it('should handle startDate at exact search window boundary', () => {
-      const startDate = moment().subtract(ACTION_EXPIRATION.SEARCH_WINDOW_MINUTES, 'minutes').toISOString();
+      const startDate = moment()
+        .subtract(ACTION_EXPIRATION.SEARCH_WINDOW_MINUTES, 'minutes')
+        .toISOString();
 
       const result = buildResultsAgentsQuery({
         actionId: 'action-boundary',
         startDate,
       });
 
-      const timeRangeFilter = result.query?.bool?.filter?.find(
-        (f: any) => f.range && f.range['@timestamp']
-      ) as any;
+      const filters = getFilterArray(result.query?.bool?.filter);
+      const timeRangeFilter = filters.find((f: any) => f.range && f.range['@timestamp']) as any;
 
       expect(timeRangeFilter).toBeDefined();
       expect(timeRangeFilter.range['@timestamp'].gte).toBe(startDate);
@@ -496,7 +508,7 @@ describe('buildResultsAgentsQuery', () => {
         integrationNamespaces: ['production'],
       });
 
-      expect(result.aggs?.unique_agents.composite.size).toBe(COMPOSITE_AGGREGATION_BATCH_SIZE);
+      expect(result.aggs?.unique_agents.composite?.size).toBe(COMPOSITE_AGGREGATION_BATCH_SIZE);
       expect(result.aggs?.unique_agents.composite).not.toHaveProperty('after');
     });
 
@@ -534,9 +546,8 @@ describe('buildResultsAgentsQuery', () => {
         startDate,
       });
 
-      const timeRangeFilter = result.query?.bool?.filter?.find(
-        (f: any) => f.range && f.range['@timestamp']
-      ) as any;
+      const filters = getFilterArray(result.query?.bool?.filter);
+      const timeRangeFilter = filters.find((f: any) => f.range && f.range['@timestamp']) as any;
 
       expect(timeRangeFilter.range['@timestamp'].gte).toBe(startDate);
 
