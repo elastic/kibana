@@ -549,3 +549,139 @@
     "type": "_doc"
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-security_auth",
+    "id": "auth_rare_hour_for_a_user_record_1761555600000_900_0_11",
+    "source": {
+      "job_id": "auth_rare_hour_for_a_user",
+      "result_type": "record",
+      "probability": 0.0009,
+      "record_score": 87.3,
+      "initial_record_score": 87.3,
+      "bucket_span": 900,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "by_field_name": "user.name",
+      "by_field_value": "john.doe",
+      "function": "time_of_day",
+      "function_description": "time_of_day",
+      "typical": [
+        9.0
+      ],
+      "actual": [
+        3.0
+      ],
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "john.doe"
+          ]
+        },
+        {
+          "influencer_field_name": "source.ip",
+          "influencer_field_values": [
+            "198.51.100.67"
+          ]
+        },
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "app-server-prod-01"
+          ]
+        }
+      ],
+      "user.name": [
+        "john.doe"
+      ],
+      "source.ip": [
+        "198.51.100.67"
+      ],
+      "source.geo.country_iso_code": [
+        "US"
+      ],
+      "source.geo.region_name": [
+        "California"
+      ],
+      "source.geo.city_name": [
+        "San Francisco"
+      ],
+      "host.name": [
+        "app-server-prod-01"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-security_auth",
+    "id": "auth_rare_hour_for_a_user_record_1761555600000_900_0_12",
+    "source": {
+      "job_id": "auth_rare_hour_for_a_user",
+      "result_type": "record",
+      "probability": 0.0011,
+      "record_score": 84.6,
+      "initial_record_score": 84.6,
+      "bucket_span": 900,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761595200000,
+      "by_field_name": "user.name",
+      "by_field_value": "sarah.chen",
+      "function": "time_of_day",
+      "function_description": "time_of_day",
+      "typical": [
+        14.0
+      ],
+      "actual": [
+        23.0
+      ],
+      "influencers": [
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "sarah.chen"
+          ]
+        },
+        {
+          "influencer_field_name": "source.ip",
+          "influencer_field_values": [
+            "203.0.113.92"
+          ]
+        },
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "web-server-prod-02"
+          ]
+        }
+      ],
+      "user.name": [
+        "sarah.chen"
+      ],
+      "source.ip": [
+        "203.0.113.92"
+      ],
+      "source.geo.country_iso_code": [
+        "JP"
+      ],
+      "source.geo.region_name": [
+        "Tokyo"
+      ],
+      "source.geo.city_name": [
+        "Tokyo"
+      ],
+      "host.name": [
+        "web-server-prod-02"
+      ]
+    },
+    "type": "_doc"
+  }
+}

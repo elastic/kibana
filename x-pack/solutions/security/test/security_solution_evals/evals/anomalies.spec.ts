@@ -28,6 +28,7 @@ evaluate.describe(
       'auth_rare_source_ip_for_a_user',
       'suspicious_login_activity',
       'auth_rare_user',
+      'auth_rare_hour_for_a_user',
     ];
 
     // Privileged Access Detection (PAD) ML module
@@ -221,6 +222,44 @@ evaluate.describe(
                   criteria: [
                     'Return that the required anomaly detection jobs are not enabled in this environment.',
                     'Prompt the user to enable anomaly detection jobs and list the job ids',
+                  ],
+                },
+                metadata: { query_intent: 'Factual' },
+              },
+              {
+                input: {
+                  // original question: Which accounts have downloaded more than 1GB this week?
+                  question: 'Which accounts have downloaded more than 1KB this millennium?',
+                },
+                output: {
+                  criteria: [
+                    'Return that the required anomaly detection jobs are not enabled in this environment.',
+                    'Prompt the user to enable anomaly detection jobs',
+                  ],
+                },
+                metadata: { query_intent: 'Factual' },
+              },
+              {
+                input: {
+                  question: 'Is anyone accessing sensitive data from new locations?',
+                },
+                output: {
+                  criteria: [
+                    'Return that the required anomaly detection jobs are not enabled in this environment.',
+                    'Prompt the user to enable anomaly detection jobs',
+                  ],
+                },
+                metadata: { query_intent: 'Factual' },
+              },
+              {
+                input: {
+                  question: 'Are there any unusual access patterns after hours?',
+                },
+                output: {
+                  criteria: [
+                    'Return that the required anomaly detection jobs are not enabled in this environment.',
+                    'Prompt the user to enable anomaly detection jobs',
+                    `Mention at least 1 job id from the list: auth_rare_hour_for_a_user`,
                   ],
                 },
                 metadata: { query_intent: 'Factual' },
@@ -606,6 +645,58 @@ evaluate.describe(
                   ],
                 },
                 metadata: { query_intent: 'Factual' },
+              },
+              {
+                input: {
+                  // original question: Which accounts have downloaded more than 1GB this week?
+                  question: 'Which accounts have downloaded more than 1KB this millennium?',
+                },
+                output: {
+                  criteria: [
+                    'Return the accounts that have downloaded more than 1KB this millennium.',
+                    `Mention at least 1 job id from the list: ${dedJobIds.join(', ')}`,
+                  ],
+                  toolCalls: [
+                    {
+                      id: 'security.entity_analytics.threat_hunting',
+                    },
+                  ],
+                },
+                metadata: { query_intent: 'Factual' },
+              },
+              {
+                input: {
+                  question: 'Is anyone accessing sensitive data from new locations?',
+                },
+                output: {
+                  criteria: [
+                    'Return the users that are accessing sensitive data from new locations.',
+                    `Mention at least one result with new location`,
+                  ],
+                  toolCalls: [
+                    {
+                      id: 'security.entity_analytics.threat_hunting',
+                    },
+                  ],
+                },
+                metadata: { query_intent: 'Factual' },
+              },
+              {
+                input: {
+                  question: 'Are there any unusual access patterns after hours?',
+                },
+                output: {
+                  criteria: [
+                    'Return the users that have unusual access patterns after hours.',
+                    'Return at least 1 result with unusual access patterns after hours',
+                    `Mention at least 1 job id from the list: auth_rare_hour_for_a_user`,
+                  ],
+                  toolCalls: [
+                    {
+                      id: 'security.entity_analytics.threat_hunting',
+                    },
+                  ],
+                },
               },
             ],
           },

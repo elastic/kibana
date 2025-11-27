@@ -110,7 +110,7 @@ export const getAnomalyDetectionSubTool: EntityAnalyticsSubTool = async (
 
       Fields that you should use to answer the question:
         * record_score: The anomaly score.
-        * @timestamp: The timestamp of the anomaly.
+        * @timestamp: The timestamp of the anomaly. This timestamp might be in a different timezone than the user's timezone. You should not compare this field with hour of the day to avoid timezone issues.
         * job_id: The job ID of the anomaly.
         * partition_field_name: The field used to segment the analysis.
         * partition_field_value: The value of the partition field.
