@@ -12,6 +12,7 @@ import { defaultKibanaIndex } from '@kbn/migrator-test-kit';
 import type { Task, TaskContext } from '../types';
 import { getUpdatedTypes, validateChanges } from '../../snapshots';
 import { getLatestTypeFixtures } from '../../migrations/fixtures';
+import { latestVersion } from '../../migrations';
 
 export const validateUpdatedTypes: Task = (ctx, task) => {
   const subtasks: ListrTask<TaskContext>[] = [
@@ -23,6 +24,10 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
           .registeredTypes!.filter(({ name }) => updatedList.includes(name))
           // we tweak the types to store them all in the `.kibana_migrator` index for our checks
           .map((type) => ({ ...type, indexPattern: defaultKibanaIndex }));
+        ctx.typeVersionMap = ctx.updatedTypes.reduce<Record<string, string>>((acc, type) => {
+          acc[type.name] = latestVersion(type);
+          return acc;
+        }, {});
       },
     },
     {
@@ -39,6 +44,7 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
 
         return subtask.newListr<TaskContext>(validateChangesTasks, {
           exitOnError: false,
+          rendererOptions: { showErrorMessage: true },
         });
       },
       skip: () => ctx.updatedTypes.length === 0,
@@ -61,7 +67,10 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
             },
           };
         });
-        return subtask.newListr<TaskContext>(fixturesTasks, { exitOnError: false });
+        return subtask.newListr<TaskContext>(fixturesTasks, {
+          exitOnError: false,
+          rendererOptions: { showErrorMessage: true },
+        });
       },
       skip: () => ctx.updatedTypes.length === 0,
     },

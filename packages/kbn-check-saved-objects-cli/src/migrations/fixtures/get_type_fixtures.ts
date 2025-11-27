@@ -7,13 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { join } from 'path';
+import { join, relative } from 'path';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { fileToJson } from '../../util';
 import type { ModelVersionFixtures } from './types';
 import { FIXTURES_BASE_PATH } from './constants';
 import { createFixtureFile } from './create_fixture_file';
 import { isValidFixtureFile } from './is_valid_fixture_file';
+
+export function getFixturesRelativePath(type: string, modelVersion: string): string {
+  return relative(REPO_ROOT, getFixturesBasePath(type, modelVersion));
+}
+
+export function getFixturesBasePath(type: string, modelVersion: string): string {
+  return join(FIXTURES_BASE_PATH, type, `${modelVersion}.json`);
+}
 
 export async function getTypeFixtures({
   type,
@@ -27,7 +36,7 @@ export async function getTypeFixtures({
   generate: boolean;
 }) {
   const name = type.name;
-  const fixturesPath = join(FIXTURES_BASE_PATH, name, `${current}.json`);
+  const fixturesPath = getFixturesBasePath(name, current);
   const fixtures = (await fileToJson(fixturesPath)) as ModelVersionFixtures;
   if (!fixtures) {
     if (generate) {

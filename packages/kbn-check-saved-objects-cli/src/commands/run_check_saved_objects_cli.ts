@@ -42,6 +42,7 @@ export function runCheckSavedObjectsCli() {
         gitRev: gitRev!,
         newTypes: [],
         updatedTypes: [],
+        typeVersionMap: {},
         currentRemovedTypes: [],
         newRemovedTypes: [],
         fixtures: {
@@ -141,6 +142,7 @@ export function runCheckSavedObjectsCli() {
           fallbackRenderer: 'simple',
           rendererOptions: {
             collapseSubtasks: false,
+            showErrorMessage: false,
             timer: PRESET_TIMER,
           },
         }

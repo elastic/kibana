@@ -31,7 +31,10 @@ export const validateNewTypes: Task = (ctx, task) => {
             }),
         }));
 
-        return checkNew.newListr<TaskContext>(checkNewTasks, { exitOnError: false });
+        return checkNew.newListr<TaskContext>(checkNewTasks, {
+          exitOnError: false,
+          rendererOptions: { showErrorMessage: true },
+        });
       },
       skip: () => ctx.newTypes.length === 0,
     },

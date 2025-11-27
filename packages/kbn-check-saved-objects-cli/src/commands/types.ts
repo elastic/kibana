@@ -26,6 +26,7 @@ export interface TaskContext {
   to?: MigrationSnapshot;
   newTypes: string[];
   updatedTypes: SavedObjectsType<any>[];
+  typeVersionMap: Record<string, string>;
   currentRemovedTypes: string[];
   newRemovedTypes: string[];
   baselineMappings?: SavedObjectsTypeMappingDefinitions;
