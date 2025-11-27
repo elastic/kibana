@@ -46,6 +46,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
       <nav
         aria-label="Main"
         class="css-1d7jr1a-getPrimaryMenuStyles"
+        data-test-subj="kbnChromeNav-primaryNavigation"
         id="kbnChromeNav-primaryNavigation"
       >
         <div
@@ -163,6 +164,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
       <footer
         aria-label="Side navigation"
         class="css-1q4tj4c-getWrapperStyles"
+        data-test-subj="kbnChromeNav-footer"
       >
         <div
           class="css-1y7bpvk-wrapperStyles"
