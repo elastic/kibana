@@ -24,8 +24,7 @@ import {
   type DataCascadeRowCellProps,
 } from '@kbn/shared-ux-document-data-cascade';
 import { fetchEsql } from '../../../../data_fetching/fetch_esql';
-import type { DataTableRecord } from '../blocks';
-import { type ESQLDataGroupNode } from '../blocks';
+import { type ESQLDataGroupNode, type DataTableRecord } from '../blocks';
 import type { CascadedDocumentsRestorableState } from '../cascaded_documents_restorable_state';
 
 interface UseGroupedCascadeDataProps extends Pick<UnifiedDataTableProps, 'rows'> {
@@ -63,6 +62,11 @@ export const useGroupedCascadeData = ({
         );
 
         Object.entries(groupMatch).forEach(([key, value], idx) => {
+          // skip undefined and null values
+          if (key === 'undefined' || key === 'null') {
+            return;
+          }
+
           const record = {
             id: String(idx),
             [cur]: key,
