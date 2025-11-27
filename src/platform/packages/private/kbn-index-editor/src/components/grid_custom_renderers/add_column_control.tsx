@@ -53,7 +53,7 @@ const AddColumnControl: React.FC<AddColumnControlProps> = ({ telemetryService })
             data-test-subj="indexEditorAddColumnButton"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             onKeyDown={(e: React.KeyboardEvent) => {
-              // Focus back to the cell when pressing Escape
+              // Focus back to the control cell when pressing Escape
               if (e.key === 'Escape') {
                 e.preventDefault();
                 e.stopPropagation();
