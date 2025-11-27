@@ -56,6 +56,7 @@ import type { PackageSpecConditions } from '../../../../common';
 import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
 import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
 import { deletePackageKnowledgeBase } from './knowledge_base_index';
+import { deleteEsqlViews } from '../elasticsearch/esql_views/remove';
 
 const MAX_ASSETS_TO_DELETE = 1000;
 
@@ -246,6 +247,8 @@ export const deleteESAsset = async (
     return deleteIlms(esClient, [id]);
   } else if (assetType === ElasticsearchAssetType.mlModel) {
     return deleteMlModel(esClient, [id]);
+  } else if (assetType === ElasticsearchAssetType.esqlView) {
+    return deleteEsqlViews(esClient, [id]);
   }
 };
 
@@ -506,6 +509,16 @@ export function cleanupTransforms(
     .filter((asset) => asset.type === ElasticsearchAssetType.transform)
     .map((asset) => asset.id);
   return deleteTransforms(esClient, idsToDelete);
+}
+
+export function cleanupEsqlViews(
+  installedObjects: EsAssetReference[],
+  esClient: ElasticsearchClient
+) {
+  const idsToDelete = installedObjects
+    .filter((asset) => asset.type === ElasticsearchAssetType.esqlView)
+    .map((asset) => asset.id);
+  return deleteEsqlViews(esClient, idsToDelete);
 }
 
 /**

@@ -36,6 +36,8 @@ const getKibanaLinkForESAsset = (type: ElasticsearchAssetType, id: string): stri
       return `/app/management/data/transform?_a=(transform:(queryText:${id}))`;
     case 'ml_model':
       return `/app/management/ml/trained_models?_a=(trained_models:(queryText:'model_id:(${id})'))`;
+    case 'esql_view':
+      return `TODO_ESQL_VIEW_LINK`;
     default:
       return '';
   }
