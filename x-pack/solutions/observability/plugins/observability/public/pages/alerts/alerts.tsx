@@ -18,7 +18,7 @@ import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared/src/maintenance_
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
-import { rulesLocatorID } from '../../../common';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
 import { renderGroupPanel } from '../../components/alerts_table/grouping/render_group_panel';
 import { getGroupStats } from '../../components/alerts_table/grouping/get_group_stats';
 import { getAggregationsByGroupingField } from '../../components/alerts_table/grouping/get_aggregations_by_grouping_field';
@@ -32,7 +32,6 @@ import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { useToasts } from '../../hooks/use_toast';
-import type { RulesParams } from '../../locators/rules';
 import { useKibana } from '../../utils/kibana_react';
 import {
   alertSearchBarStateContainer,
@@ -281,7 +280,7 @@ function InternalAlertsPage() {
             ruleStats,
             manageRulesHref,
             ruleStatsLoading,
-            locators.get<RulesParams>(rulesLocatorID)
+            locators.get<RulesLocatorParams>(rulesLocatorID)
           ),
         }}
       >
