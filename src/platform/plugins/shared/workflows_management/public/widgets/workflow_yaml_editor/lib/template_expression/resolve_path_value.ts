@@ -49,7 +49,7 @@ export function truncateForDisplay(
     currentDepth?: number;
   } = {}
 ): any {
-  const { maxDepth = 3, maxProperties = 10, maxArrayItems = 5, currentDepth = 0 } = options;
+  const { maxDepth = 5, maxProperties = 15, maxArrayItems = 5, currentDepth = 0 } = options;
 
   // Max depth reached
   if (currentDepth >= maxDepth) {

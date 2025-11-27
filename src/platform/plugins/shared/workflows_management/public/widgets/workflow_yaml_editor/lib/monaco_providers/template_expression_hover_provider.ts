@@ -211,7 +211,7 @@ export class TemplateExpressionHoverProvider implements monaco.languages.HoverPr
     const content = [
       `**Value at \`${pathStr}\`** _(${valueType})_`,
       '',
-      '```javascript',
+      '```json',
       jsonValue,
       '```',
     ]
