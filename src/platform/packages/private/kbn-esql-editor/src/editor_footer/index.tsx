@@ -24,11 +24,11 @@ import {
   LanguageDocumentationFlyout,
   LanguageDocumentationInline,
 } from '@kbn/language-documentation';
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback } from 'react';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';
-import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
+import { StatusIndicator } from './errors_warnings_popover';
 import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_starred_queries';
 import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
@@ -91,8 +91,6 @@ export const EditorFooter = memo(function EditorFooter({
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
-  const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
-  const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
 
   const toggleHistoryComponent = useCallback(() => {
     setIsHistoryOpen(!isHistoryOpen);
@@ -124,36 +122,12 @@ export const EditorFooter = memo(function EditorFooter({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
               <QueryWrapComponent code={code} updateQuery={updateQuery} />
-              {/* <EuiFlexItem grow={false} /> */}
-              {errors && errors.length > 0 && (
-                <ErrorsWarningsFooterPopover
-                  isPopoverOpen={isErrorPopoverOpen}
-                  items={errors}
-                  type="error"
-                  setIsPopoverOpen={(isOpen) => {
-                    if (isOpen) {
-                      setIsWarningPopoverOpen(false);
-                    }
-                    setIsErrorPopoverOpen(isOpen);
-                  }}
-                  onErrorClick={onErrorClick}
-                  dataErrorsControl={dataErrorsControl}
-                />
-              )}
-              {warnings && warnings.length > 0 && (
-                <ErrorsWarningsFooterPopover
-                  isPopoverOpen={isWarningPopoverOpen}
-                  items={warnings}
-                  type="warning"
-                  setIsPopoverOpen={(isOpen) => {
-                    if (isOpen) {
-                      setIsErrorPopoverOpen(false);
-                    }
-                    setIsWarningPopoverOpen(isOpen);
-                  }}
-                  onErrorClick={onErrorClick}
-                />
-              )}
+              <StatusIndicator
+                errors={errors}
+                warnings={warnings}
+                onErrorClick={onErrorClick}
+                dataErrorsControl={dataErrorsControl}
+              />
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

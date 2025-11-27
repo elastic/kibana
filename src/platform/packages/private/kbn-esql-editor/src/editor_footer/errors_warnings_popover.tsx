@@ -24,7 +24,7 @@ import { css as classNameCss } from '@emotion/css';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import { filterDataErrors } from '../helpers';
 import type { DataErrorsControl } from '../types';
@@ -220,5 +220,69 @@ export function ErrorsWarningsFooterPopover({
         </EuiPopover>
       </EuiFlexGroup>
     </EuiFlexItem>
+  );
+}
+
+export function StatusIndicator({
+  errors,
+  warnings,
+  onErrorClick,
+  dataErrorsControl,
+}: {
+  errors?: MonacoMessage[];
+  warnings?: MonacoMessage[];
+  onErrorClick: (error: MonacoMessage) => void;
+  dataErrorsControl?: DataErrorsControl;
+}) {
+  const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
+  const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
+
+  // Show success indicator when no errors or warnings
+  if (!errors?.length && !warnings?.length) {
+    return (
+      <EuiIcon
+        type="checkCircle"
+        size="s"
+        color="success"
+        data-test-subj="ESQLEditor-footerPopoverButton-success"
+        aria-label={i18n.translate('esqlEditor.query.successIndicatorAriaLabel', {
+          defaultMessage: 'Query has no errors or warnings',
+        })}
+      />
+    );
+  }
+
+  return (
+    <>
+      {errors && errors.length > 0 && (
+        <ErrorsWarningsFooterPopover
+          isPopoverOpen={isErrorPopoverOpen}
+          items={errors}
+          type="error"
+          setIsPopoverOpen={(isOpen) => {
+            if (isOpen) {
+              setIsWarningPopoverOpen(false);
+            }
+            setIsErrorPopoverOpen(isOpen);
+          }}
+          onErrorClick={onErrorClick}
+          dataErrorsControl={dataErrorsControl}
+        />
+      )}
+      {warnings && warnings.length > 0 && (
+        <ErrorsWarningsFooterPopover
+          isPopoverOpen={isWarningPopoverOpen}
+          items={warnings}
+          type="warning"
+          setIsPopoverOpen={(isOpen) => {
+            if (isOpen) {
+              setIsErrorPopoverOpen(false);
+            }
+            setIsWarningPopoverOpen(isOpen);
+          }}
+          onErrorClick={onErrorClick}
+        />
+      )}
+    </>
   );
 }

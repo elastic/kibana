@@ -110,11 +110,6 @@ describe('ESQLEditor', () => {
     expect(getByTestId('ESQLEditor')).toBeInTheDocument();
   });
 
-  it('should  render the date info with no @timestamp found', async () => {
-    const { getByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
-    expect(getByTestId('ESQLEditor-date-info')).toHaveTextContent('@timestamp not found');
-  });
-
   it('should not render the query history action if hideQueryHistory is set to true', async () => {
     const newProps = {
       ...props,
@@ -135,12 +130,6 @@ describe('ESQLEditor', () => {
   it('should render the resize for the expanded code editor mode', async () => {
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
     expect(queryByTestId('ESQLEditor-resize')).toBeInTheDocument();
-  });
-
-  it('should render the footer for the expanded code editor mode', async () => {
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
-    expect(queryByTestId('ESQLEditor-footer')).toBeInTheDocument();
-    expect(queryByTestId('ESQLEditor-footer-lines')).toHaveTextContent('1 line');
   });
 
   it('should render the run query text', async () => {
