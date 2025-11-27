@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod';
 import dedent from 'dedent';
-import { safeJsonStringify } from '@kbn/std';
 import type { Attachment } from '@kbn/onechat-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import {
@@ -19,8 +18,8 @@ import { OBSERVABILITY_GET_ALERTS_TOOL_ID } from '../tools/get_alerts/get_alerts
 export const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
 
 const aiInsightAttachmentDataSchema = z.object({
-  contextData: z.record(z.any()),
-  aiSummary: z.string(),
+  context: z.string(),
+  summary: z.string(),
 });
 
 type AiInsightAttachmentData = z.infer<typeof aiInsightAttachmentDataSchema>;
@@ -53,15 +52,12 @@ export const createAiInsightAttachmentType = (): AttachmentTypeDefinition => {
             throw new Error(`Invalid AI insight attachment data for attachment ${attachment.id}`);
           }
 
-          const data = attachment.data as AiInsightAttachmentData;
-          const representationParts: string[] = [];
-
-          representationParts.push(`AI summary:\n${data.aiSummary}`);
-          representationParts.push(`Context data:\n${safeJsonStringify(data.contextData)}`);
+          const { summary, context } = attachment.data;
+          const value = [`AI summary:\n${summary}`, `Context data:\n${context}`].join('\n\n');
 
           return {
             type: 'text',
-            value: representationParts.join('\n\n'),
+            value,
           };
         },
       };

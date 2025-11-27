@@ -49,7 +49,7 @@ export function AiInsight({
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="m">
       <EuiAccordion
-        id="aiAgentContextualInsight"
+        id="agentBuilderAiInsight"
         arrowProps={{ css: { alignSelf: 'flex-start' } }}
         buttonContent={
           <EuiFlexGroup
