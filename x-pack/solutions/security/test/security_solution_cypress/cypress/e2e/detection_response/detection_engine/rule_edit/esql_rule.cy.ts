@@ -55,7 +55,8 @@ const rule = getEsqlRule();
 const expectedValidEsqlQuery =
   'from auditbeat* | stats _count=count(event.category) by event.category';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/244043
+describe.skip(
   'Detection ES|QL rules, edit',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],

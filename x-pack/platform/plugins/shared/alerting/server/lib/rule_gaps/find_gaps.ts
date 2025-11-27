@@ -9,7 +9,7 @@ import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import type { FindGapsParams, FindGapsSearchAfterParams } from './types';
+import type { FindGapsParams, FindGapsSearchAfterParams } from '../../application/gaps/types';
 import type { Gap } from './gap';
 import { transformToGap } from './transforms/transform_to_gap';
 import { buildGapsFilter } from './build_gaps_filter';
