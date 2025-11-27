@@ -34,6 +34,13 @@ const getActiveTabId = (tabId?: string) => {
   return CASE_VIEW_PAGE_TABS.ACTIVITY;
 };
 
+const ATTACHMENT_TABS = [
+  CASE_VIEW_PAGE_TABS.ALERTS,
+  CASE_VIEW_PAGE_TABS.EVENTS,
+  CASE_VIEW_PAGE_TABS.FILES,
+  CASE_VIEW_PAGE_TABS.OBSERVABLES,
+];
+
 export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
     caseData,
@@ -125,12 +132,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
               useFetchAlertData={useFetchAlertData}
             />
           )}
-          {[
-            CASE_VIEW_PAGE_TABS.ALERTS,
-            CASE_VIEW_PAGE_TABS.EVENTS,
-            CASE_VIEW_PAGE_TABS.FILES,
-            CASE_VIEW_PAGE_TABS.OBSERVABLES,
-          ].includes(activeTabId as CASE_VIEW_PAGE_TABS) && (
+          {ATTACHMENT_TABS.includes(activeTabId as CASE_VIEW_PAGE_TABS) && (
             <CaseViewAttachments activeTab={activeTabId as CASE_VIEW_PAGE_TABS} caseData={caseData}>
               <>
                 {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && (
