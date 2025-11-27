@@ -1258,7 +1258,7 @@ describe('Package policy service', () => {
             agentPolicy
           )
         ).rejects.toThrow(
-          'Error creating cloud connector in Fleet, Error: Cloud connector creation failed'
+          'Error creating cloud connector in Fleet, Cloud connector creation failed'
         );
       } finally {
         // Restore the original method

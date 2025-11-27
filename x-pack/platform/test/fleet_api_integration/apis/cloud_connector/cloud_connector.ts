@@ -31,6 +31,21 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('POST /api/fleet/cloud_connectors - AWS and Azure', () => {
+      const createdConnectorIds: string[] = [];
+
+      after(async () => {
+        // Clean up all connectors created in this suite
+        for (const id of createdConnectorIds) {
+          try {
+            await supertest
+              .delete(`/api/fleet/cloud_connectors/${id}?force=true`)
+              .set('kbn-xsrf', 'xxxx');
+          } catch (error) {
+            // Connector might already be deleted or not exist
+          }
+        }
+      });
+
       it('should create an AWS cloud connector successfully', async () => {
         const response = await supertest
           .post(`/api/fleet/cloud_connectors`)
@@ -60,6 +75,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.item.packagePolicyCount).to.equal(1);
         expect(body.item).to.have.property('created_at');
         expect(body.item).to.have.property('updated_at');
+
+        createdConnectorIds.push(body.item.id);
       });
 
       it('should create an Azure cloud connector successfully', async () => {
@@ -94,7 +111,7 @@ export default function (providerContext: FtrProviderContext) {
         const body = response.body;
 
         expect(body.item).to.have.property('id');
-        expect(body.item.name).to.equal('azure-connector-id-12345');
+        expect(body.item.name).to.equal('test-azure-connector');
         expect(body.item.cloudProvider).to.equal('azure');
         expect(body.item.vars).to.have.property('tenant_id');
         expect(body.item.vars).to.have.property('client_id');
@@ -102,6 +119,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.item.packagePolicyCount).to.equal(1);
         expect(body.item).to.have.property('created_at');
         expect(body.item).to.have.property('updated_at');
+
+        createdConnectorIds.push(body.item.id);
       });
 
       it('should return 400 when external_id is missing for AWS', async () => {
@@ -109,7 +128,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'arn:aws:iam::123456789012:role/test-role',
+            name: 'arn:aws:iam::123456789012:role/test-role-missing-external-id',
             cloudProvider: 'aws',
             vars: {
               role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
@@ -123,7 +142,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'arn:aws:iam::123456789012:role/test-role',
+            name: 'arn:aws:iam::123456789012:role/test-role-missing-role-arn',
             cloudProvider: 'aws',
             vars: {
               external_id: {
@@ -143,7 +162,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-azure-connector',
+            name: 'test-azure-connector-missing-tenant-id',
             cloudProvider: 'azure',
             vars: {
               client_id: {
@@ -167,7 +186,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-azure-connector',
+            name: 'test-azure-connector-missing-client-id',
             cloudProvider: 'azure',
             vars: {
               tenant_id: {
@@ -191,7 +210,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-azure-connector',
+            name: 'test-azure-connector-missing-cc-id',
             cloudProvider: 'azure',
             vars: {
               tenant_id: {
@@ -238,7 +257,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-connector',
+            name: 'test-connector-missing-provider',
             vars: {
               role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
             },
@@ -251,7 +270,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-connector',
+            name: 'test-connector-missing-vars',
             cloudProvider: 'aws',
           })
           .expect(400);
@@ -262,7 +281,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-connector',
+            name: 'test-connector-invalid-provider',
             cloudProvider: 'invalid-provider',
             vars: {
               role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
@@ -276,7 +295,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-aws-connector',
+            name: 'test-aws-connector-too-short-external-id',
             cloudProvider: 'aws',
             vars: {
               role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
@@ -297,7 +316,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-aws-connector',
+            name: 'test-aws-connector-too-long-external-id',
             cloudProvider: 'aws',
             vars: {
               role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
@@ -318,7 +337,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-aws-connector',
+            name: 'test-aws-connector-special-chars-external-id',
             cloudProvider: 'aws',
             vars: {
               role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
@@ -339,7 +358,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-aws-connector',
+            name: 'test-aws-connector-spaces-external-id',
             cloudProvider: 'aws',
             vars: {
               role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
@@ -360,7 +379,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'arn:aws:iam::123456789012:role/test-role',
+            name: 'arn:aws:iam::123456789012:role/test-role-mixed-case',
             cloudProvider: 'aws',
             vars: {
               role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
@@ -376,8 +395,10 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body.item).to.have.property('id');
-        expect(body.item.name).to.equal('arn:aws:iam::123456789012:role/test-role');
+        expect(body.item.name).to.equal('arn:aws:iam::123456789012:role/test-role-mixed-case');
         expect(body.item.vars.external_id.value).to.have.property('id', 'aBcDeFgHiJkLmNoPqRsT');
+
+        createdConnectorIds.push(body.item.id);
       });
 
       it('should return 400 when tenant_id is not a valid secret reference for Azure', async () => {
@@ -385,7 +406,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-azure-connector',
+            name: 'test-azure-connector-invalid-tenant-secret',
             cloudProvider: 'azure',
             vars: {
               tenant_id: {
@@ -416,7 +437,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-azure-connector',
+            name: 'test-azure-connector-invalid-client-secret',
             cloudProvider: 'azure',
             vars: {
               tenant_id: {
@@ -473,18 +494,21 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body.item).to.have.property('id');
-        expect(body.item.name).to.equal('azure-connector-valid-id');
+        expect(body.item.name).to.equal('test-azure-connector-valid');
         expect(body.item.vars.tenant_id.value).to.have.property('id', 'validTenantId1234567');
         expect(body.item.vars.client_id.value).to.have.property('id', 'validClientId1234567');
         expect(body.item.vars.azure_credentials_cloud_connector_id.value).to.equal(
           'azure-connector-valid-id'
         );
+
+        createdConnectorIds.push(body.item.id);
       });
     });
 
     describe('GET /api/fleet/cloud_connectors - AWS and Azure', () => {
       let createdAwsConnectorId: string;
       let createdAzureConnectorId: string;
+      const testRunId = Date.now();
 
       before(async () => {
         // Create an AWS test connector for GET tests
@@ -492,7 +516,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-get-connector',
+            name: `arn:aws:iam::123456789012:role/test-get-role-${testRunId}`,
             cloudProvider: 'aws',
             vars: {
               role_arn: { value: 'arn:aws:iam::123456789012:role/test-role', type: 'text' },
@@ -513,7 +537,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-get-azure-connector',
+            name: `test-get-azure-connector-${testRunId}`,
             cloudProvider: 'azure',
             vars: {
               tenant_id: {
@@ -548,7 +572,9 @@ export default function (providerContext: FtrProviderContext) {
 
         const connector = body.items.find((c: any) => c.id === createdAwsConnectorId);
         expect(connector).to.be.an('object');
-        expect(connector.name).to.equal('arn:aws:iam::123456789012:role/test-role');
+        expect(connector.name).to.equal(
+          `arn:aws:iam::123456789012:role/test-get-role-${testRunId}`
+        );
         expect(connector.cloudProvider).to.equal('aws');
         expect(connector.vars).to.have.property('role_arn');
         expect(connector.vars).to.have.property('external_id');
@@ -565,7 +591,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const connector = body.items.find((c: any) => c.id === createdAzureConnectorId);
         expect(connector).to.be.an('object');
-        expect(connector.name).to.equal('test-get-azure-id');
+        expect(connector.name).to.equal(`test-get-azure-connector-${testRunId}`);
         expect(connector.cloudProvider).to.equal('azure');
         expect(connector.vars).to.have.property('tenant_id');
         expect(connector.vars).to.have.property('client_id');
@@ -604,7 +630,9 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-force-delete-connector',
+            name: `test-force-delete-connector-${Date.now()}-${Math.random()
+              .toString(36)
+              .substr(2, 9)}`,
             cloudProvider: 'aws',
             vars: {
               role_arn: { value: 'arn:aws:iam::123456789012:role/force-delete-role', type: 'text' },
@@ -625,7 +653,9 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-force-delete-azure-connector',
+            name: `test-force-delete-azure-connector-${Date.now()}-${Math.random()
+              .toString(36)
+              .substr(2, 9)}`,
             cloudProvider: 'azure',
             vars: {
               tenant_id: {
@@ -804,14 +834,19 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('GET /api/fleet/cloud_connectors/{id} - AWS and Azure', () => {
       let createdAwsConnectorId: string;
+      let createdAwsConnectorName: string;
       let createdAzureConnectorId: string;
+      let createdAzureConnectorName: string;
 
       beforeEach(async () => {
+        createdAwsConnectorName = `arn:aws:iam::123456789012:role/get-by-id-role-${Date.now()}-${Math.random()
+          .toString(36)
+          .substr(2, 9)}`;
         const awsResponse = await supertest
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'arn:aws:iam::123456789012:role/get-by-id-role',
+            name: createdAwsConnectorName,
             cloudProvider: 'aws',
             vars: {
               role_arn: { value: 'arn:aws:iam::123456789012:role/get-by-id-role', type: 'text' },
@@ -827,11 +862,14 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         createdAwsConnectorId = awsResponse.body.item.id;
 
+        createdAzureConnectorName = `test-azure-get-by-id-${Date.now()}-${Math.random()
+          .toString(36)
+          .substr(2, 9)}`;
         const azureResponse = await supertest
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-azure-get-by-id',
+            name: createdAzureConnectorName,
             cloudProvider: 'azure',
             vars: {
               tenant_id: {
@@ -881,7 +919,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body.item).to.have.property('id', createdAwsConnectorId);
-        expect(body.item).to.have.property('name', 'arn:aws:iam::123456789012:role/get-by-id-role');
+        expect(body.item).to.have.property('name', createdAwsConnectorName);
         expect(body.item).to.have.property('cloudProvider', 'aws');
         expect(body.item).to.have.property('packagePolicyCount', 1);
         expect(body.item).to.have.property('created_at');
@@ -901,7 +939,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body.item).to.have.property('id', createdAzureConnectorId);
-        expect(body.item).to.have.property('name', 'azure-get-by-id-12345');
+        expect(body.item).to.have.property('name', createdAzureConnectorName);
         expect(body.item).to.have.property('cloudProvider', 'azure');
         expect(body.item).to.have.property('packagePolicyCount', 1);
         expect(body.item).to.have.property('created_at');
@@ -947,7 +985,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-update-connector',
+            name: `test-update-connector-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             cloudProvider: 'aws',
             vars: {
               role_arn: { value: 'arn:aws:iam::123456789012:role/original-role', type: 'text' },
@@ -967,7 +1005,9 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/cloud_connectors`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-update-azure-connector',
+            name: `test-update-azure-connector-${Date.now()}-${Math.random()
+              .toString(36)
+              .substr(2, 9)}`,
             cloudProvider: 'azure',
             vars: {
               tenant_id: {
@@ -1122,7 +1162,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body.item).to.have.property('id', createdAzureConnectorId);
-        expect(body.item).to.have.property('name', 'original-azure-id-12345');
+        expect(body.item).to.have.property('name', 'test-update-azure-connector');
         expect(body.item).to.have.property('cloudProvider', 'azure');
         expect(body.item).to.have.property('packagePolicyCount', 1);
         expect(body.item).to.have.property('updated_at');

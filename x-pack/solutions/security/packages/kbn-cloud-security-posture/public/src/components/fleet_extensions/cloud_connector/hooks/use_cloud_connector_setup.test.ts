@@ -95,7 +95,7 @@ describe('useCloudConnectorSetup', () => {
 
     (updatePolicyInputs as jest.Mock).mockImplementation((policy, vars) => {
       return {
-        ...mockPolicy,
+        ...policy,
         inputs: mockPolicy.inputs.map((input) => ({
           ...input,
           streams: input.streams.map((stream) => ({
