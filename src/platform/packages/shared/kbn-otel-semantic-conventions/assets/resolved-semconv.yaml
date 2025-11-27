@@ -5372,6 +5372,10 @@ groups:
       - name: cloud.platform
         type:
           members:
+            - id: akamai_cloud.compute
+              value: akamai_cloud.compute
+              brief: Akamai Cloud Compute
+              stability: development
             - id: alibaba_cloud_ecs
               value: alibaba_cloud_ecs
               brief: Alibaba Cloud Elastic Compute Service
@@ -5549,6 +5553,10 @@ groups:
               value: gcp_openshift
               brief: Red Hat OpenShift on Google Cloud
               stability: development
+            - id: hetzner.cloud_server
+              value: hetzner.cloud_server
+              brief: Server on Hetzner Cloud
+              stability: development
             - id: ibm_cloud_openshift
               value: ibm_cloud_openshift
               brief: Red Hat OpenShift on IBM Cloud
@@ -5573,6 +5581,10 @@ groups:
               value: tencent_cloud_scf
               brief: Tencent Cloud Serverless Cloud Function (SCF)
               stability: development
+            - id: vultr.cloud_compute
+              value: vultr.cloud_compute
+              brief: Vultr Cloud Compute
+              stability: development
         brief: |
           The cloud platform in use.
         requirement_level: recommended
@@ -5582,6 +5594,10 @@ groups:
       - name: cloud.provider
         type:
           members:
+            - id: akamai_cloud
+              value: akamai_cloud
+              brief: Akamai Cloud
+              stability: development
             - id: alibaba_cloud
               value: alibaba_cloud
               brief: Alibaba Cloud
@@ -5602,6 +5618,10 @@ groups:
               value: heroku
               brief: Heroku Platform as a Service
               stability: development
+            - id: hetzner
+              value: hetzner
+              brief: Hetzner
+              stability: development
             - id: ibm_cloud
               value: ibm_cloud
               brief: IBM Cloud
@@ -5613,6 +5633,10 @@ groups:
             - id: tencent_cloud
               value: tencent_cloud
               brief: Tencent Cloud
+              stability: development
+            - id: vultr
+              value: vultr
+              brief: Vultr
               stability: development
         brief: |
           Name of the cloud provider.
@@ -7323,6 +7347,7 @@ groups:
           - opentelemetry-cluster
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: k8s.cluster.uid
         type: string
         brief: |
@@ -7354,6 +7379,7 @@ groups:
           Therefore, UIDs between clusters should be extremely unlikely to
           conflict.
         stability: development
+        role: identifying
     name: k8s.cluster
     lineage:
       provenance:
@@ -7368,6 +7394,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         k8s.cluster.uid:
           source_group: registry.k8s
           inherited_fields:
@@ -7376,6 +7404,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.k8s.container
     type: entity
     brief: |
@@ -7456,6 +7486,7 @@ groups:
           - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.cronjob.annotation.data` attribute with value `""`.
         stability: development
+        role: descriptive
       - name: k8s.cronjob.label
         type: template[string]
         brief: |
@@ -7472,6 +7503,7 @@ groups:
           - A label `automated` with empty string value SHOULD be recorded as
             the `k8s.cronjob.label.automated` attribute with value `""`.
         stability: development
+        role: descriptive
       - name: k8s.cronjob.name
         type: string
         brief: |
@@ -7480,6 +7512,7 @@ groups:
           - opentelemetry
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: k8s.cronjob.uid
         type: string
         brief: |
@@ -7488,6 +7521,7 @@ groups:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
         stability: development
+        role: identifying
     name: k8s.cronjob
     lineage:
       provenance:
@@ -7503,6 +7537,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.cronjob.label:
           source_group: registry.k8s
           inherited_fields:
@@ -7512,6 +7547,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.cronjob.name:
           source_group: registry.k8s
           inherited_fields:
@@ -7520,6 +7556,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         k8s.cronjob.uid:
           source_group: registry.k8s
           inherited_fields:
@@ -7528,6 +7566,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.k8s.daemonset
     type: entity
     brief: |
@@ -7551,6 +7591,7 @@ groups:
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.daemonset.annotation.data` attribute with value `""`.
         stability: development
+        role: descriptive
       - name: k8s.daemonset.label
         type: template[string]
         brief: |
@@ -7568,6 +7609,7 @@ groups:
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.daemonset.label.injected` attribute with value `""`.
         stability: development
+        role: descriptive
       - name: k8s.daemonset.name
         type: string
         brief: |
@@ -7576,6 +7618,7 @@ groups:
           - opentelemetry
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: k8s.daemonset.uid
         type: string
         brief: |
@@ -7584,6 +7627,7 @@ groups:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
         stability: development
+        role: identifying
     name: k8s.daemonset
     lineage:
       provenance:
@@ -7599,6 +7643,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.daemonset.label:
           source_group: registry.k8s
           inherited_fields:
@@ -7608,6 +7653,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.daemonset.name:
           source_group: registry.k8s
           inherited_fields:
@@ -7616,6 +7662,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         k8s.daemonset.uid:
           source_group: registry.k8s
           inherited_fields:
@@ -7624,6 +7672,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.k8s.deployment
     type: entity
     brief: |
@@ -7647,6 +7697,7 @@ groups:
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.deployment.annotation.data` attribute with value `""`.
         stability: development
+        role: descriptive
       - name: k8s.deployment.label
         type: template[string]
         brief: |
@@ -7664,6 +7715,7 @@ groups:
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.deployment.label.injected` attribute with value `""`.
         stability: development
+        role: descriptive
       - name: k8s.deployment.name
         type: string
         brief: |
@@ -7672,6 +7724,7 @@ groups:
           - opentelemetry
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: k8s.deployment.uid
         type: string
         brief: |
@@ -7680,6 +7733,7 @@ groups:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
         stability: development
+        role: identifying
     name: k8s.deployment
     lineage:
       provenance:
@@ -7695,6 +7749,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.deployment.label:
           source_group: registry.k8s
           inherited_fields:
@@ -7704,6 +7759,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.deployment.name:
           source_group: registry.k8s
           inherited_fields:
@@ -7712,6 +7768,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         k8s.deployment.uid:
           source_group: registry.k8s
           inherited_fields:
@@ -7720,6 +7778,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.k8s.hpa
     type: entity
     brief: |
@@ -7734,6 +7794,7 @@ groups:
           - opentelemetry
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: k8s.hpa.scaletargetref.api_version
         type: string
         brief: |
@@ -7745,6 +7806,7 @@ groups:
         note: |
           This maps to the `apiVersion` field in the `scaleTargetRef` of the HPA spec.
         stability: development
+        role: descriptive
       - name: k8s.hpa.scaletargetref.kind
         type: string
         brief: |
@@ -7756,6 +7818,7 @@ groups:
         note: |
           This maps to the `kind` field in the `scaleTargetRef` of the HPA spec.
         stability: development
+        role: descriptive
       - name: k8s.hpa.scaletargetref.name
         type: string
         brief: |
@@ -7767,6 +7830,7 @@ groups:
         note: |
           This maps to the `name` field in the `scaleTargetRef` of the HPA spec.
         stability: development
+        role: descriptive
       - name: k8s.hpa.uid
         type: string
         brief: |
@@ -7775,6 +7839,7 @@ groups:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
         stability: development
+        role: identifying
     name: k8s.hpa
     lineage:
       provenance:
@@ -7789,6 +7854,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         k8s.hpa.scaletargetref.api_version:
           source_group: registry.k8s
           inherited_fields:
@@ -7798,6 +7865,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.hpa.scaletargetref.kind:
           source_group: registry.k8s
           inherited_fields:
@@ -7807,6 +7875,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.hpa.scaletargetref.name:
           source_group: registry.k8s
           inherited_fields:
@@ -7816,6 +7885,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.hpa.uid:
           source_group: registry.k8s
           inherited_fields:
@@ -7824,6 +7894,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.k8s.job
     type: entity
     brief: |
@@ -7847,6 +7919,7 @@ groups:
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.job.annotation.data` attribute with value `""`.
         stability: development
+        role: descriptive
       - name: k8s.job.label
         type: template[string]
         brief: |
@@ -7864,6 +7937,7 @@ groups:
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.job.label.automated` attribute with value `""`.
         stability: development
+        role: descriptive
       - name: k8s.job.name
         type: string
         brief: |
@@ -7872,6 +7946,7 @@ groups:
           - opentelemetry
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: k8s.job.uid
         type: string
         brief: |
@@ -7880,6 +7955,7 @@ groups:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
         stability: development
+        role: identifying
     name: k8s.job
     lineage:
       provenance:
@@ -7895,6 +7971,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.job.label:
           source_group: registry.k8s
           inherited_fields:
@@ -7904,6 +7981,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.job.name:
           source_group: registry.k8s
           inherited_fields:
@@ -7912,6 +7990,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         k8s.job.uid:
           source_group: registry.k8s
           inherited_fields:
@@ -7920,6 +8000,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.k8s.namespace
     type: entity
     brief: |
@@ -8022,6 +8104,7 @@ groups:
           - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.node.annotation.data` attribute with value `""`.
         stability: development
+        role: descriptive
       - name: k8s.node.label
         type: template[string]
         brief: |
@@ -8038,6 +8121,7 @@ groups:
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.node.label.data` attribute with value `""`.
         stability: development
+        role: descriptive
       - name: k8s.node.name
         type: string
         brief: |
@@ -8046,6 +8130,7 @@ groups:
           - node-1
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: k8s.node.uid
         type: string
         brief: |
@@ -8054,6 +8139,7 @@ groups:
           - 1eb3a0c6-0477-4080-a9cb-0cb7db65c6a2
         requirement_level: recommended
         stability: development
+        role: identifying
     name: k8s.node
     lineage:
       provenance:
@@ -8069,6 +8155,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.node.label:
           source_group: registry.k8s
           inherited_fields:
@@ -8078,6 +8165,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.node.name:
           source_group: registry.k8s
           inherited_fields:
@@ -8086,6 +8174,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         k8s.node.uid:
           source_group: registry.k8s
           inherited_fields:
@@ -8094,6 +8184,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.k8s.pod
     type: entity
     brief: |
@@ -8119,6 +8211,7 @@ groups:
           - An annotation `data` with empty string value SHOULD be recorded as
             the `k8s.pod.annotation.data` attribute with value `""`.
         stability: development
+        role: descriptive
       - name: k8s.pod.label
         type: template[string]
         brief: |
@@ -8138,6 +8231,7 @@ groups:
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.pod.label.data` attribute with value `""`.
         stability: development
+        role: descriptive
       - name: k8s.pod.name
         type: string
         brief: |
@@ -8146,6 +8240,7 @@ groups:
           - opentelemetry-pod-autoconf
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: k8s.pod.uid
         type: string
         brief: |
@@ -8154,6 +8249,7 @@ groups:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
         stability: development
+        role: identifying
     name: k8s.pod
     lineage:
       provenance:
@@ -8169,6 +8265,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.pod.label:
           source_group: registry.k8s
           inherited_fields:
@@ -8178,6 +8275,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.pod.name:
           source_group: registry.k8s
           inherited_fields:
@@ -8186,6 +8284,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         k8s.pod.uid:
           source_group: registry.k8s
           inherited_fields:
@@ -8194,6 +8294,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.k8s.replicaset
     type: entity
     brief: |
@@ -8217,6 +8319,7 @@ groups:
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.replicaset.annotation.data` attribute with value `""`.
         stability: development
+        role: descriptive
       - name: k8s.replicaset.label
         type: template[string]
         brief: |
@@ -8234,6 +8337,7 @@ groups:
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.replicaset.label.injected` attribute with value `""`.
         stability: development
+        role: descriptive
       - name: k8s.replicaset.name
         type: string
         brief: |
@@ -8242,6 +8346,7 @@ groups:
           - opentelemetry
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: k8s.replicaset.uid
         type: string
         brief: |
@@ -8250,6 +8355,7 @@ groups:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
         stability: development
+        role: identifying
     name: k8s.replicaset
     lineage:
       provenance:
@@ -8265,6 +8371,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.replicaset.label:
           source_group: registry.k8s
           inherited_fields:
@@ -8274,6 +8381,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.replicaset.name:
           source_group: registry.k8s
           inherited_fields:
@@ -8282,6 +8390,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         k8s.replicaset.uid:
           source_group: registry.k8s
           inherited_fields:
@@ -8290,6 +8400,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.k8s.replicationcontroller
     type: entity
     brief: |
@@ -8304,6 +8416,7 @@ groups:
           - opentelemetry
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: k8s.replicationcontroller.uid
         type: string
         brief: |
@@ -8312,6 +8425,7 @@ groups:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
         stability: development
+        role: identifying
     name: k8s.replicationcontroller
     lineage:
       provenance:
@@ -8326,6 +8440,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         k8s.replicationcontroller.uid:
           source_group: registry.k8s
           inherited_fields:
@@ -8334,6 +8450,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.k8s.resourcequota
     type: entity
     brief: |
@@ -8348,6 +8466,7 @@ groups:
           - opentelemetry
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: k8s.resourcequota.uid
         type: string
         brief: |
@@ -8356,6 +8475,7 @@ groups:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
         stability: development
+        role: identifying
     name: k8s.resourcequota
     lineage:
       provenance:
@@ -8370,6 +8490,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         k8s.resourcequota.uid:
           source_group: registry.k8s
           inherited_fields:
@@ -8378,6 +8500,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.k8s.statefulset
     type: entity
     brief: |
@@ -8401,6 +8525,7 @@ groups:
           - A label `data` with empty string value SHOULD be recorded as
             the `k8s.statefulset.annotation.data` attribute with value `""`.
         stability: development
+        role: descriptive
       - name: k8s.statefulset.label
         type: template[string]
         brief: |
@@ -8418,6 +8543,7 @@ groups:
           - A label `injected` with empty string value SHOULD be recorded as
             the `k8s.statefulset.label.injected` attribute with value `""`.
         stability: development
+        role: descriptive
       - name: k8s.statefulset.name
         type: string
         brief: |
@@ -8426,6 +8552,7 @@ groups:
           - opentelemetry
         requirement_level: recommended
         stability: development
+        role: descriptive
       - name: k8s.statefulset.uid
         type: string
         brief: |
@@ -8434,6 +8561,7 @@ groups:
           - 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
         requirement_level: recommended
         stability: development
+        role: identifying
     name: k8s.statefulset
     lineage:
       provenance:
@@ -8449,6 +8577,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.statefulset.label:
           source_group: registry.k8s
           inherited_fields:
@@ -8458,6 +8587,7 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+            - role
         k8s.statefulset.name:
           source_group: registry.k8s
           inherited_fields:
@@ -8466,6 +8596,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
         k8s.statefulset.uid:
           source_group: registry.k8s
           inherited_fields:
@@ -8474,6 +8606,8 @@ groups:
             - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - role
   - id: entity.openshift.clusterquota
     type: entity
     brief: |
@@ -41353,8 +41487,8 @@ groups:
           Starting from .NET 9, Kestrel `kestrel.connection.duration` metric reports
           the following errors types when a corresponding error occurs:
 
-          | Value  | Description | Stability |
-          |---|---|---|
+          | Value  | Description |
+          | --- | --- |
           | `aborted_by_app` | The HTTP/1.1 connection was aborted when app code aborted an HTTP request with `HttpContext.Abort()`. |
           | `app_shutdown_timeout` | The connection was aborted during app shutdown. During shutdown, the server stops accepting new connections and HTTP requests, and it is given time for active requests to complete. If the app shutdown timeout is exceeded, all remaining connections are aborted. |
           | `closed_critical_stream` | A critical control stream for an HTTP/3 connection was closed. |
@@ -53177,21 +53311,19 @@ groups:
         metric_value_type: double
   - id: metric.system.linux.memory.available
     type: metric
-    brief: An estimate of how much memory is available for starting new applications, without causing swapping.
-    note: |
-      This is an alternative to `system.memory.usage` metric with `state=free`.
-      Linux starting from 3.14 exports "available" memory. It takes "free" memory as a baseline, and then factors in kernel-specific values.
-      This is supposed to be more accurate than just "free" memory.
-      For reference, see the calculations [here](https://superuser.com/a/980821).
-      See also `MemAvailable` in [/proc/meminfo](https://man7.org/linux/man-pages/man5/proc.5.html).
+    brief: The number of packets transferred.
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: system.memory.linux.available
+      note: Replaced by `system.memory.linux.available`.
     metric_name: system.linux.memory.available
-    instrument: updowncounter
-    unit: By
+    instrument: counter
+    unit: '{packet}'
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/system/metrics.yaml
+        path: /home/weaver/source/system/deprecated/metrics-deprecated.yaml
     entity_associations:
       - host
     annotations:
@@ -53199,12 +53331,12 @@ groups:
         metric_value_type: int
   - id: metric.system.linux.memory.slab.usage
     type: metric
-    brief: Reports the memory used by the Linux kernel for managing caches of frequently used objects.
-    note: |
-      The sum over the `reclaimable` and `unreclaimable` state values in `linux.memory.slab.usage` SHOULD be equal to the total slab memory available on the system.
-      Note that the total slab memory is not constant and may vary over time.
-      See also the [Slab allocator](https://blogs.oracle.com/linux/post/understanding-linux-kernel-memory-statistics) and `Slab` in [/proc/meminfo](https://man7.org/linux/man-pages/man5/proc.5.html).
+    brief: The number of packets transferred.
     stability: development
+    deprecated:
+      reason: renamed
+      renamed_to: system.memory.linux.slab.usage
+      note: Replaced by `system.memory.linux.slab.usage`.
     attributes:
       - name: linux.memory.slab.state
         type:
@@ -53221,18 +53353,23 @@ groups:
           - unreclaimable
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: renamed
+          renamed_to: system.memory.linux.slab.state
+          note: Replaced by `system.memory.linux.slab.state`.
     metric_name: system.linux.memory.slab.usage
-    instrument: updowncounter
-    unit: By
+    instrument: counter
+    unit: '{packet}'
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/system/metrics.yaml
+        path: /home/weaver/source/system/deprecated/metrics-deprecated.yaml
       attributes:
         linux.memory.slab.state:
-          source_group: registry.linux.memory
+          source_group: registry.linux.deprecated
           inherited_fields:
             - brief
+            - deprecated
             - examples
             - note
             - requirement_level
@@ -53253,6 +53390,73 @@ groups:
       provenance:
         registry_id: main
         path: /home/weaver/source/system/metrics.yaml
+    entity_associations:
+      - host
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.system.memory.linux.available
+    type: metric
+    brief: An estimate of how much memory is available for starting new applications, without causing swapping.
+    note: |
+      This is an alternative to `system.memory.usage` metric with `state=free`.
+      Linux starting from 3.14 exports "available" memory. It takes "free" memory as a baseline, and then factors in kernel-specific values.
+      This is supposed to be more accurate than just "free" memory.
+      For reference, see the calculations [here](https://superuser.com/a/980821).
+      See also `MemAvailable` in [/proc/meminfo](https://man7.org/linux/man-pages/man5/proc.5.html).
+    stability: development
+    metric_name: system.memory.linux.available
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/system/metrics.yaml
+    entity_associations:
+      - host
+    annotations:
+      code_generation:
+        metric_value_type: int
+  - id: metric.system.memory.linux.slab.usage
+    type: metric
+    brief: Reports the memory used by the Linux kernel for managing caches of frequently used objects.
+    note: |
+      The sum over the `reclaimable` and `unreclaimable` state values in `memory.linux.slab.usage` SHOULD be equal to the total slab memory available on the system.
+      Note that the total slab memory is not constant and may vary over time.
+      See also the [Slab allocator](https://blogs.oracle.com/linux/post/understanding-linux-kernel-memory-statistics) and `Slab` in [/proc/meminfo](https://man7.org/linux/man-pages/man5/proc.5.html).
+    stability: development
+    attributes:
+      - name: system.memory.linux.slab.state
+        type:
+          members:
+            - id: reclaimable
+              value: reclaimable
+              stability: development
+            - id: unreclaimable
+              value: unreclaimable
+              stability: development
+        brief: The Linux Slab memory state
+        examples:
+          - reclaimable
+          - unreclaimable
+        requirement_level: recommended
+        stability: development
+    metric_name: system.memory.linux.slab.usage
+    instrument: updowncounter
+    unit: By
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/system/metrics.yaml
+      attributes:
+        system.memory.linux.slab.state:
+          source_group: registry.system.memory
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
     entity_associations:
       - host
     annotations:
@@ -59503,6 +59707,10 @@ groups:
       - name: cloud.platform
         type:
           members:
+            - id: akamai_cloud.compute
+              value: akamai_cloud.compute
+              brief: Akamai Cloud Compute
+              stability: development
             - id: alibaba_cloud_ecs
               value: alibaba_cloud_ecs
               brief: Alibaba Cloud Elastic Compute Service
@@ -59680,6 +59888,10 @@ groups:
               value: gcp_openshift
               brief: Red Hat OpenShift on Google Cloud
               stability: development
+            - id: hetzner.cloud_server
+              value: hetzner.cloud_server
+              brief: Server on Hetzner Cloud
+              stability: development
             - id: ibm_cloud_openshift
               value: ibm_cloud_openshift
               brief: Red Hat OpenShift on IBM Cloud
@@ -59704,6 +59916,10 @@ groups:
               value: tencent_cloud_scf
               brief: Tencent Cloud Serverless Cloud Function (SCF)
               stability: development
+            - id: vultr.cloud_compute
+              value: vultr.cloud_compute
+              brief: Vultr Cloud Compute
+              stability: development
         brief: |
           The cloud platform in use.
         requirement_level: recommended
@@ -59713,6 +59929,10 @@ groups:
       - name: cloud.provider
         type:
           members:
+            - id: akamai_cloud
+              value: akamai_cloud
+              brief: Akamai Cloud
+              stability: development
             - id: alibaba_cloud
               value: alibaba_cloud
               brief: Alibaba Cloud
@@ -59733,6 +59953,10 @@ groups:
               value: heroku
               brief: Heroku Platform as a Service
               stability: development
+            - id: hetzner
+              value: hetzner
+              brief: Hetzner
+              stability: development
             - id: ibm_cloud
               value: ibm_cloud
               brief: IBM Cloud
@@ -59744,6 +59968,10 @@ groups:
             - id: tencent_cloud
               value: tencent_cloud
               brief: Tencent Cloud
+              stability: development
+            - id: vultr
+              value: vultr
+              brief: Vultr
               stability: development
         brief: |
           Name of the cloud provider.
@@ -66257,9 +66485,9 @@ groups:
         registry_id: main
         path: /home/weaver/source/k8s/deprecated/registry-deprecated.yaml
     display_name: Deprecated Kubernetes Attributes
-  - id: registry.linux.memory
+  - id: registry.linux.deprecated
     type: attribute_group
-    brief: Describes Linux Memory attributes
+    brief: Deprecated Linux attributes.
     attributes:
       - name: linux.memory.slab.state
         type:
@@ -66276,11 +66504,15 @@ groups:
           - unreclaimable
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: renamed
+          renamed_to: system.memory.linux.slab.state
+          note: Replaced by `system.memory.linux.slab.state`.
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/linux/registry.yaml
-    display_name: Linux Memory Attributes
+        path: /home/weaver/source/linux/registry-deprecated.yaml
+    display_name: Deprecated Linux Attributes
   - id: registry.log
     type: attribute_group
     brief: |
@@ -68016,6 +68248,26 @@ groups:
         registry_id: main
         path: /home/weaver/source/otel/registry.yaml
     display_name: OTel Component Attributes
+  - id: registry.otel.event
+    type: attribute_group
+    brief: Attributes used by non-OTLP exporters to represent OpenTelemetry Event's concepts.
+    attributes:
+      - name: otel.event.name
+        type: string
+        brief: |
+          Identifies the class / type of event.
+        examples:
+          - browser.mouse.click
+          - device.app.lifecycle
+        requirement_level: recommended
+        note: |
+          This attribute SHOULD be used by non-OTLP exporters when destination does not support `EventName` or equivalent field. This attribute MAY be used by applications using existing logging libraries so that it can be used to set the `EventName` field by Collector or SDK components.
+        stability: development
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/otel/registry.yaml
+    display_name: OTel Event Attributes
   - id: registry.otel.library.deprecated
     type: attribute_group
     brief: Describes deprecated otel.library attributes.
@@ -69525,6 +69777,21 @@ groups:
     type: attribute_group
     brief: Describes System Memory attributes
     attributes:
+      - name: system.memory.linux.slab.state
+        type:
+          members:
+            - id: reclaimable
+              value: reclaimable
+              stability: development
+            - id: unreclaimable
+              value: unreclaimable
+              stability: development
+        brief: The Linux Slab memory state
+        examples:
+          - reclaimable
+          - unreclaimable
+        requirement_level: recommended
+        stability: development
       - name: system.memory.state
         type:
           members:
@@ -70339,7 +70606,7 @@ groups:
           - YourApp
         requirement_level: recommended
         note: |
-          [Example](https://www.whatsmyua.info) of extracting browser's name from original string. In the case of using a user-agent for non-browser products, such as microservices with multiple names/versions inside the `user_agent.original`, the most significant name SHOULD be selected. In such a scenario it should align with `user_agent.version`
+          [Example](https://uaparser.dev/#demo) of extracting browser's name from original string. In the case of using a user-agent for non-browser products, such as microservices with multiple names/versions inside the `user_agent.original`, the most significant name SHOULD be selected. In such a scenario it should align with `user_agent.version`
         stability: development
       - name: user_agent.original
         type: string
@@ -70360,7 +70627,7 @@ groups:
           - 1.0.0
         requirement_level: recommended
         note: |
-          [Example](https://www.whatsmyua.info) of extracting browser's version from original string. In the case of using a user-agent for non-browser products, such as microservices with multiple names/versions inside the `user_agent.original`, the most significant version SHOULD be selected. In such a scenario it should align with `user_agent.name`
+          [Example](https://uaparser.dev/#demo) of extracting browser's version from original string. In the case of using a user-agent for non-browser products, such as microservices with multiple names/versions inside the `user_agent.original`, the most significant version SHOULD be selected. In such a scenario it should align with `user_agent.name`
         stability: development
     lineage:
       provenance:

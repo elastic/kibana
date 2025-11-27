@@ -409,7 +409,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       getContainer: () => deps.injection.getContainer(plugin.opaqueId),
     },
     dataStreams: {
-      getClient: (dataStream) => deps.dataStreams.getClient(dataStream),
+      initializeClient: (dataStream) => deps.dataStreams.initializeClient(dataStream),
     },
   };
 }
