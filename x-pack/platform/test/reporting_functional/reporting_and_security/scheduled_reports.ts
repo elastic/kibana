@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -19,8 +20,37 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
   const reportingFunctional = getService('reportingFunctional');
   const reportingAPI = getService('reportingAPI');
   const comboBox = getService('comboBox');
+  const find = getService('find');
 
   describe('Scheduled Reports Flyout', () => {
+    const hasFocus = async (element: WebElementWrapper) => {
+      const activeElement = await find.activeElement();
+      return (await element._webElement.getId()) === (await activeElement._webElement.getId());
+    };
+
+    const getSelection = (element: WebElementWrapper) => {
+      return browser.execute((field) => {
+        const fieldElement = field as unknown as HTMLInputElement;
+        return {
+          start: fieldElement.selectionStart,
+          end: fieldElement.selectionEnd,
+        };
+      }, element);
+    };
+
+    const setSelection = (element: WebElementWrapper, start: number, end: number) => {
+      return browser.execute(
+        (field, _start, _end) => {
+          // browser.execute converts WebElementWrappers args to the corresponding HTML element
+          const fieldElement = field as unknown as HTMLInputElement;
+          fieldElement.setSelectionRange(_start, _end);
+        },
+        element,
+        start,
+        end
+      );
+    };
+
     const openFlyout = async () => {
       await common.navigateToApp('dashboard');
       await dashboard.loadSavedDashboard('Ecom Dashboard');
@@ -145,19 +175,51 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       // Add valid email recipient
       await testSubjects.setValue('emailRecipientsCombobox', 'user@example.com');
 
-      // Add variable to subject field
+      // Add variable to subject field in a specific position
+      const subjectField = await testSubjects.find('emailSubjectInput');
+      await subjectField.clearValue();
+      const subjectPrefix = 'Your report (';
+      const subjectSuffix = ') is ready';
+      await subjectField.type(`${subjectPrefix}${subjectSuffix}`);
+      // Move caret just after the prefix
+      await setSelection(subjectField, subjectPrefix.length, subjectPrefix.length);
+      // Select the variable to insert
       await testSubjects.click('emailSubjectAddVariableButton');
       await testSubjects.click('title-selectableOption');
-      const subjectField = await testSubjects.find('emailSubjectInput');
+      // Check that the variable was inserted at the correct position
       const subject = await subjectField.getAttribute('value');
-      expect(subject).to.equal('{{title}}');
+      let expectedInterpolation = '{{title}}';
+      expect(subject).to.equal(`${subjectPrefix}${expectedInterpolation}${subjectSuffix}`);
+      // Check that focus was restored to the subject field
+      // and the caret was placed after the inserted variable
+      expect(await hasFocus(subjectField)).to.be(true);
+      let selection = await getSelection(subjectField);
+      let expectedPosition = subjectPrefix.length + expectedInterpolation.length;
+      expect(selection.start).to.equal(expectedPosition);
+      expect(selection.end).to.equal(expectedPosition);
 
-      // Add variable to message field
-      await testSubjects.click('emailMessageAddVariableButton');
-      await testSubjects.click('objectType-selectableOption');
+      // Add variable to message field in a specific position
       const messageField = await testSubjects.find('emailMessageTextArea');
+      await messageField.clearValue();
+      const messagePrefix = 'Please find your report file (';
+      const messageSuffix = ') attached';
+      await messageField.type(`${messagePrefix}${messageSuffix}`);
+      // Move caret just after the prefix
+      await setSelection(messageField, messagePrefix.length, messagePrefix.length);
+      // Select the variable to insert
+      await testSubjects.click('emailMessageAddVariableButton');
+      await testSubjects.click('filename-selectableOption');
+      // Check that the variable was inserted at the correct position
       const message = await messageField.getAttribute('value');
-      expect(message).to.equal('{{objectType}}');
+      expectedInterpolation = '{{filename}}';
+      expect(message).to.equal(`${messagePrefix}${expectedInterpolation}${messageSuffix}`);
+      // Check that focus was restored to the message field
+      // and the caret was placed after the inserted variable
+      expect(await hasFocus(messageField)).to.be(true);
+      selection = await getSelection(messageField);
+      expectedPosition = messagePrefix.length + expectedInterpolation.length;
+      expect(selection.start).to.equal(expectedPosition);
+      expect(selection.end).to.equal(expectedPosition);
 
       // Submit should succeed
       await testSubjects.click('scheduleExportSubmitButton');
