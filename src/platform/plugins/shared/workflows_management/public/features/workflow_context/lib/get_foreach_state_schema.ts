@@ -52,39 +52,41 @@ const extractForeachItemSchemaFromJson = (foreachParam: string) => {
 export function getForeachItemSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   foreachParam: string
-) {
+): z.ZodType {
   const parsedPath = parseVariablePath(foreachParam);
   const iterateOverPath = parsedPath?.propertyPath;
 
   // If we have a valid variable path syntax (e.g., {{some.path}})
   if (parsedPath && !parsedPath.errors && iterateOverPath) {
-    let itemSchema: z.ZodType = z.unknown().describe('Unable to parse foreach parameter'); // we need this constant to have references in json schema
+    // eslint-disable-next-line prefer-const -- we need this constant to have references in json schema
+    let itemSchema: z.ZodType = z.unknown().describe('Unable to parse foreach parameter');
     const { schema: iterableSchema } = getSchemaAtPath(stepContextSchema, iterateOverPath);
     if (!iterableSchema) {
       // if we cannot resolve the path in the schema, we return an unknown schema
       return itemSchema;
     }
     if (iterableSchema instanceof z.ZodArray) {
-      itemSchema = iterableSchema.element;
-      return itemSchema;
+      return iterableSchema.element as z.ZodType;
     } else if (iterableSchema instanceof z.ZodLiteral) {
       // If the resolved path is a known literal string, we need to try to parse it as JSON
-      return extractForeachItemSchemaFromJson(iterableSchema.value);
+      const literalValue = iterableSchema.value;
+      if (typeof literalValue === 'string') {
+        return extractForeachItemSchemaFromJson(literalValue);
+      }
+      return z.any().describe('Unable to parse foreach parameter: literal value is not a string');
     } else if (iterableSchema instanceof z.ZodString) {
       // If the resolved path is a string, we return a string schema and will tell the user we will try to parse it as JSON in runtime
       return z.any().describe('Unable to determine foreach item type');
     } else if (iterableSchema instanceof z.ZodUnion) {
-      const arrayOption = iterableSchema.options.find(
-        (option: z.ZodType) => option instanceof z.ZodArray
-      );
+      const arrayOption = iterableSchema.options.find((option) => option instanceof z.ZodArray);
       if (arrayOption && arrayOption instanceof z.ZodArray) {
-        return arrayOption.element;
+        return arrayOption.element as z.ZodType;
       } else {
         return z
           .any()
           .describe(
             `Expected array in union for foreach iteration, but no array type was found. Union options: [${iterableSchema.options
-              .map((opt: z.ZodType) => getZodTypeName(opt))
+              .map((opt) => getZodTypeName(opt as z.ZodType))
               .join(', ')}]`
           );
       }

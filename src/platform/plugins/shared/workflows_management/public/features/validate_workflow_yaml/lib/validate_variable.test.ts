@@ -107,9 +107,9 @@ describe('validateVariable', () => {
       errors: ['Invalid JSON'],
       propertyPath: null,
     } as any);
-    mockGetForeachItemSchema.mockImplementation(() => {
-      throw new Error('Invalid JSON');
-    });
+    mockGetForeachItemSchema.mockReturnValue(
+      z.any().describe('Unable to parse foreach parameter as JSON')
+    );
 
     const result = validateVariable(variableItem, mockContext);
 
