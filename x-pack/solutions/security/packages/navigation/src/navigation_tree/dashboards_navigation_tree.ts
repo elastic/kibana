@@ -38,5 +38,9 @@ export const createDashboardsNavigationTree = (): NodeDefinition => ({
       id: SecurityPageName.dataQuality,
       link: securityLink(SecurityPageName.dataQuality),
     },
+    {
+      id: SecurityPageName.kubernetes,
+      link: securityLink(SecurityPageName.kubernetes),
+    },
   ],
 });
