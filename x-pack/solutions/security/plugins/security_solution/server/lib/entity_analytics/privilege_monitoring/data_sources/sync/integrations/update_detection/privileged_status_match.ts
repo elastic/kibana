@@ -16,13 +16,7 @@ import { generateMonitoringLabels } from '../../generate_monitoring_labels';
 import { createSyncMarkersService } from '../sync_markers/sync_markers';
 import { createSyncMarkersStrategy } from '../../sync_markers_strategy';
 import { isTimestampGreaterThan } from '../../utils';
-import type {
-  AfterKey,
-  PrivBucket,
-  PrivMatcherModeConfig,
-  PrivMatchersAggregation,
-  PrivTopHit,
-} from './types';
+import type { AfterKey, PrivBucket, PrivMatchersAggregation, PrivTopHit } from './types';
 import { PRIV_MATCHER_MODE_CONFIG } from './types';
 
 export const createPatternMatcherService = ({
@@ -46,14 +40,15 @@ export const createPatternMatcherService = ({
   const findPrivilegedUsersFromMatchers = async (
     source: MonitoringEntitySource
   ): Promise<PrivMonBulkUser[]> => {
-    if (!source.matchers?.length) {
-      const defaultMatchersUsers: PrivMonBulkUser[] = await defaultMatchersPolicy(
-        modeConfig.emptyMatcherPolicy,
-        source
+    if (!source.matchers?.length && modeConfig.emptyMatcherPolicy === 'none') {
+      dataClient.log(
+        'info',
+        `No matchers for source id=${source.id ?? '(unknown)'} (type=${
+          source.type
+        }). Returning 0 privileged users.`
       );
-      return defaultMatchersUsers;
+      return [];
     }
-
     const esClient = dataClient.deps.clusterClient.asCurrentUser;
     // the last processed user from previous task run.
     const lastProcessedTimeStamp = await syncMarkersStrategy.getLastProcessedMarker(source);
@@ -71,7 +66,7 @@ export const createPatternMatcherService = ({
         const response = await esClient.search<never, PrivMatchersAggregation>({
           index: source.indexPattern,
           ...buildPrivilegedSearchBody(
-            source.matchers,
+            source.matchers ?? [],
             syncMarkersStrategy.getSearchTimestamp(lastProcessedTimeStamp),
             afterKey,
             pageSize
@@ -152,33 +147,6 @@ export const createPatternMatcherService = ({
       };
     });
     return { users, maxTimestamp };
-  };
-
-  const defaultMatchersPolicy = async (
-    // TODO: this assumes type is the index or integrations type
-    emptyMatcherPolicy: PrivMatcherModeConfig['emptyMatcherPolicy'],
-    source: MonitoringEntitySource
-  ): Promise<PrivMonBulkUser[]> => {
-    if (emptyMatcherPolicy === 'none') {
-      dataClient.log(
-        'info',
-        `No matchers for source id=${source.id ?? '(unknown)'} (type=${
-          source.type
-        }). Returning 0 privileged users.`
-      );
-      return [];
-    }
-    if (emptyMatcherPolicy === 'all') {
-      dataClient.log(
-        'info',
-        `No matchers for source id=${source.id ?? '(unknown)'} (type=${
-          source.type
-        }). Treating ALL users as privileged.`
-      );
-      // You’ll plug in whatever “fetch all users” logic makes sense here:
-      return []; //  fetchAllUsersAsPrivileged(esClient, source); // TODO: implement this function
-    }
-    return [];
   };
 
   return { findPrivilegedUsersFromMatchers };

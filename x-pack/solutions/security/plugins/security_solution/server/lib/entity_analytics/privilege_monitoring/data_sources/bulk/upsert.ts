@@ -272,7 +272,7 @@ export const bulkUpsertOperationsFactoryShared =
     }
     return ops;
   };
-
+// TODO: update naming
 export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
   const buildOps = bulkUpsertOperationsFactoryShared(dataClient);
   return (usersChunk: PrivMonBulkUser[], source: MonitoringEntitySource) =>

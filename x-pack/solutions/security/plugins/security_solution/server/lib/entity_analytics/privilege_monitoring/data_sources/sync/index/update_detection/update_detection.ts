@@ -10,6 +10,7 @@ import type { MonitoringEntitySource } from '../../../../../../../../common/api/
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { createPatternMatcherService } from '../../integrations/update_detection/privileged_status_match';
 import type { PrivMonBulkUser } from '../../../../types';
+import { createPrivilegeStatusUpdateService } from '../../integrations/update_detection/privileged_status_update';
 
 export const createIndexUpdateDetectionService = (
   dataClient: PrivilegeMonitoringDataClient,
@@ -20,6 +21,7 @@ export const createIndexUpdateDetectionService = (
     soClient,
     sourceType: 'index',
   });
+  const statusUpdateService = createPrivilegeStatusUpdateService(dataClient);
   const updateDetection = async (source: MonitoringEntitySource) => {
     /**
      * 1. Get privileged users from the index source using pattern matchers
@@ -29,9 +31,10 @@ export const createIndexUpdateDetectionService = (
     const users: PrivMonBulkUser[] = await patternMatcherService.findPrivilegedUsersFromMatchers(
       source
     );
+    await statusUpdateService.updatePrivilegedStatus(users, source);
     dataClient.log(
       'info',
-      `Index Update Detection: Found ${users.length} privileged users from index source ${source.id}`
+      `Index Update Detection: Found ${users.length} users from index source ${source.id}`
     );
     return users;
   };

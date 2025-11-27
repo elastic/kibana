@@ -118,11 +118,11 @@ export const applyPrivilegedUpdates = async ({
 
   const chunkSize = 500;
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
-  const opsForIntegration = makeIntegrationOpsBuilder(dataClient);
+  const operationsBuilder = makeIntegrationOpsBuilder(dataClient);
   try {
     for (let start = 0; start < users.length; start += chunkSize) {
       const chunk = users.slice(start, start + chunkSize);
-      const operations = opsForIntegration(chunk, source);
+      const operations = operationsBuilder(chunk, source);
       if (operations.length > 0) {
         const resp = await esClient.bulk({
           refresh: 'wait_for',
