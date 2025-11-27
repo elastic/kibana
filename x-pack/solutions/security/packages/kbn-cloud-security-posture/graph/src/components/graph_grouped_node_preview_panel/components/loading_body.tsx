@@ -9,6 +9,7 @@ import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PanelBody, List } from '../styles';
 import { i18nNamespaceKey } from '../constants';
+import { LOADING_BODY_TEST_ID } from '../test_ids';
 import { Title } from './title';
 import { ListHeader } from './list_header';
 import { GroupedItem } from './grouped_item/grouped_item';
@@ -24,7 +25,7 @@ const groupItems = i18n.translate(`${i18nNamespaceKey}.items`, {
 export type LoadingBodyProps = void;
 
 export const LoadingBody: FC = () => (
-  <PanelBody>
+  <PanelBody data-test-subj={LOADING_BODY_TEST_ID}>
     <Title icon="index" text={loadingItems} />
     <ListHeader groupedItemsType={groupItems} />
     <List>

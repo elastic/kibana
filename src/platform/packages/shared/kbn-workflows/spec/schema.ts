@@ -430,7 +430,7 @@ export const WorkflowConstsSchema = z.record(
 );
 
 const StepSchema = z.lazy(() =>
-  z.discriminatedUnion('type', [
+  z.union([
     ForEachStepSchema,
     IfStepSchema,
     WaitStepSchema,
@@ -469,6 +469,28 @@ export const WorkflowSchema = z.object({
 });
 
 export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
+
+// Schema is required for autocomplete because WorkflowGraph and WorkflowDefinition use it to build the autocomplete context.
+// The schema captures all possible fields and passes them through for consumption by WorkflowGraph.
+export const WorkflowSchemaForAutocomplete = WorkflowSchema.partial()
+  .extend({
+    triggers: z
+      .array(z.object({ type: z.string().catch('') }).passthrough())
+      .catch([])
+      .default([]),
+    steps: z
+      .array(
+        z
+          .object({
+            type: z.string().catch(''),
+            name: z.string().catch(''),
+          })
+          .passthrough()
+      )
+      .catch([])
+      .default([]),
+  })
+  .passthrough();
 
 export const WorkflowExecutionContextSchema = z.object({
   id: z.string(),

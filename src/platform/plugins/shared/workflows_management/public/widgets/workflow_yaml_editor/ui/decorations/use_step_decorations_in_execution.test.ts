@@ -12,17 +12,17 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import type { monaco } from '@kbn/monaco';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { useStepDecorationsInExecution } from './use_step_decorations_in_execution';
-import { createMockStore } from '../../lib/store/__mocks__/store.mock';
+import { createMockStore } from '../../../../entities/workflows/store/__mocks__/store.mock';
 import {
   _setComputedDataInternal,
+  setExecution,
   setHighlightedStepId,
-  setStepExecutions,
   setYamlString,
-} from '../../lib/store/slice';
-import type { ComputedData } from '../../lib/store/types';
-import type { StepInfo } from '../../lib/store/utils/build_workflow_lookup';
+} from '../../../../entities/workflows/store/workflow_detail/slice';
+import type { ComputedData } from '../../../../entities/workflows/store/workflow_detail/types';
+import type { StepInfo } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
 // Mock Monaco Range
 jest.mock('@kbn/monaco', () => {
@@ -84,6 +84,38 @@ const createStepExecution = (
   globalExecutionIndex: 0,
   stepExecutionIndex: 0,
   ...overrides,
+});
+
+// Helper function to create a mock workflow definition
+const createMockWorkflowDefinition = (): WorkflowYaml => ({
+  version: '1' as const,
+  name: 'test-workflow',
+  enabled: true,
+  triggers: [
+    {
+      type: 'manual' as const,
+    },
+  ],
+  steps: [],
+});
+
+// Helper function to create a valid WorkflowExecutionDto
+const createExecution = (
+  stepExecutions: WorkflowStepExecutionDto[] = []
+): WorkflowExecutionDto => ({
+  id: 'execution-1',
+  isTestRun: false,
+  spaceId: 'default',
+  status: ExecutionStatus.COMPLETED,
+  startedAt: '2023-01-01T00:00:00Z',
+  finishedAt: '2023-01-01T00:01:00Z',
+  workflowId: 'workflow-1',
+  workflowName: 'test-workflow',
+  workflowDefinition: createMockWorkflowDefinition(),
+  stepExecutions,
+  duration: 60000,
+  triggeredBy: 'manual',
+  yaml: 'version: "1"\nname: test',
 });
 
 // Helper function to create a mock editor
@@ -196,7 +228,7 @@ describe('useStepDecorationsInExecution', () => {
       const { store } = renderHookWithProviders(mockEditor);
 
       act(() => {
-        store.dispatch(setStepExecutions({ stepExecutions: [] }));
+        store.dispatch(setExecution(createExecution([])));
       });
 
       const decorationsCollection = (mockEditor.createDecorationsCollection as jest.Mock).mock
@@ -225,7 +257,7 @@ describe('useStepDecorationsInExecution', () => {
       const { rerender } = renderHook(() => useStepDecorationsInExecution(mockEditor), { wrapper });
 
       act(() => {
-        store.dispatch(setStepExecutions({ stepExecutions: [createStepExecution()] }));
+        store.dispatch(setExecution(createExecution([createStepExecution()])));
         rerender();
       });
 
@@ -241,11 +273,11 @@ describe('useStepDecorationsInExecution', () => {
 
       act(() => {
         store.dispatch(
-          setStepExecutions({
-            stepExecutions: [
+          setExecution(
+            createExecution([
               createStepExecution({ stepId: 'step-1', status: ExecutionStatus.COMPLETED }),
-            ],
-          })
+            ])
+          )
         );
         rerender();
       });
@@ -280,14 +312,16 @@ describe('useStepDecorationsInExecution', () => {
 
       act(() => {
         store.dispatch(
-          setStepExecutions({
-            stepExecutions: statuses.map((status, index) =>
-              createStepExecution({
-                stepId: `step-${index + 1}`,
-                status,
-              })
-            ),
-          })
+          setExecution(
+            createExecution(
+              statuses.map((status, index) =>
+                createStepExecution({
+                  stepId: `step-${index + 1}`,
+                  status,
+                })
+              )
+            )
+          )
         );
         rerender();
       });
@@ -311,12 +345,12 @@ describe('useStepDecorationsInExecution', () => {
       act(() => {
         store.dispatch(setHighlightedStepId({ stepId: 'step-1' }));
         store.dispatch(
-          setStepExecutions({
-            stepExecutions: [
+          setExecution(
+            createExecution([
               createStepExecution({ stepId: 'step-1', status: ExecutionStatus.COMPLETED }),
               createStepExecution({ stepId: 'step-2', status: ExecutionStatus.RUNNING }),
-            ],
-          })
+            ])
+          )
         );
         rerender();
       });
@@ -350,12 +384,12 @@ describe('useStepDecorationsInExecution', () => {
       // step-3 has parentStepId 'step-2'
       act(() => {
         store.dispatch(
-          setStepExecutions({
-            stepExecutions: [
+          setExecution(
+            createExecution([
               createStepExecution({ stepId: 'step-2', status: ExecutionStatus.COMPLETED }),
               createStepExecution({ stepId: 'step-3', status: ExecutionStatus.RUNNING }),
-            ],
-          })
+            ])
+          )
         );
         rerender();
       });
@@ -390,14 +424,14 @@ describe('useStepDecorationsInExecution', () => {
 
       act(() => {
         store.dispatch(
-          setStepExecutions({
-            stepExecutions: [
+          setExecution(
+            createExecution([
               createStepExecution({
                 stepId: 'non-existent-step',
                 status: ExecutionStatus.COMPLETED,
               }),
-            ],
-          })
+            ])
+          )
         );
         rerender();
       });
@@ -420,11 +454,11 @@ describe('useStepDecorationsInExecution', () => {
 
       act(() => {
         store.dispatch(
-          setStepExecutions({
-            stepExecutions: [
+          setExecution(
+            createExecution([
               createStepExecution({ stepId: 'step-1', status: ExecutionStatus.COMPLETED }),
-            ],
-          })
+            ])
+          )
         );
         rerender();
       });
@@ -435,11 +469,11 @@ describe('useStepDecorationsInExecution', () => {
 
       act(() => {
         store.dispatch(
-          setStepExecutions({
-            stepExecutions: [
+          setExecution(
+            createExecution([
               createStepExecution({ stepId: 'step-1', status: ExecutionStatus.RUNNING }),
-            ],
-          })
+            ])
+          )
         );
         rerender();
       });
@@ -453,11 +487,11 @@ describe('useStepDecorationsInExecution', () => {
 
       act(() => {
         store.dispatch(
-          setStepExecutions({
-            stepExecutions: [
+          setExecution(
+            createExecution([
               createStepExecution({ stepId: 'step-1', status: ExecutionStatus.COMPLETED }),
-            ],
-          })
+            ])
+          )
         );
         rerender();
       });

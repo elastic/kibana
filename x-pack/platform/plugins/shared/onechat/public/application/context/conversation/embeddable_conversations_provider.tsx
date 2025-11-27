@@ -9,13 +9,17 @@ import React, { useMemo, useEffect, useCallback, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { Conversation } from '@kbn/onechat-common';
 import type { EmbeddableConversationInternalProps } from '../../../embeddable/types';
 import { ConversationContext } from './conversation_context';
 import { OnechatServicesContext } from '../onechat_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
+import { getProcessedAttachments } from './get_processed_attachments';
+import { AppLeaveContext } from '../app_leave_context';
 
+const noopOnAppLeave = () => {};
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
   children: React.ReactNode;
 }
@@ -32,7 +36,9 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   const kibanaServices = useMemo(
     () => ({
       ...coreStart,
-      plugins: services.startDependencies,
+      plugins: {
+        ...services.startDependencies,
+      },
     }),
     [coreStart, services.startDependencies]
   );
@@ -95,12 +101,34 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     [setConversationId]
   );
 
+  const onDeleteConversation = useCallback(() => {
+    setConversationId(undefined);
+  }, [setConversationId]);
+
   const conversationActions = useConversationActions({
     conversationId: persistedConversationId,
     queryClient,
     conversationsService: services.conversationsService,
     onConversationCreated,
+    onDeleteConversation,
   });
+
+  const attachmentMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
+
+  const setAttachmentMap = useCallback((attachments: Map<string, Record<string, unknown>>) => {
+    attachmentMapRef.current = attachments;
+  }, []);
+
+  const handleGetProcessedAttachments = useCallback(
+    (_conversation?: Conversation) => {
+      return getProcessedAttachments({
+        attachments: contextProps.attachments ?? [],
+        getAttachment: (id) => attachmentMapRef.current.get(id),
+        setAttachment: (id, content) => attachmentMapRef.current.set(id, content),
+      });
+    },
+    [contextProps.attachments]
+  );
 
   const conversationContextValue = useMemo(
     () => ({
@@ -110,16 +138,24 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       sessionTag: contextProps.sessionTag,
       agentId: contextProps.agentId,
       initialMessage: contextProps.initialMessage,
+      browserApiTools: contextProps.browserApiTools,
       setConversationId,
+      attachments: contextProps.attachments,
       conversationActions,
+      getProcessedAttachments: handleGetProcessedAttachments,
+      setAttachmentMap,
     }),
     [
       persistedConversationId,
       contextProps.sessionTag,
       contextProps.agentId,
       contextProps.initialMessage,
+      contextProps.attachments,
+      contextProps.browserApiTools,
       conversationActions,
+      handleGetProcessedAttachments,
       setConversationId,
+      setAttachmentMap,
     ]
   );
 
@@ -128,9 +164,11 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
           <OnechatServicesContext.Provider value={services}>
-            <ConversationContext.Provider value={conversationContextValue}>
-              <SendMessageProvider>{children}</SendMessageProvider>
-            </ConversationContext.Provider>
+            <AppLeaveContext.Provider value={noopOnAppLeave}>
+              <ConversationContext.Provider value={conversationContextValue}>
+                <SendMessageProvider>{children}</SendMessageProvider>
+              </ConversationContext.Provider>
+            </AppLeaveContext.Provider>
           </OnechatServicesContext.Provider>
         </QueryClientProvider>
       </I18nProvider>

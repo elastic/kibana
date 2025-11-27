@@ -18,6 +18,8 @@ import type {
   GetOnePackagePolicyResponse,
   GetPackagePoliciesResponse,
   UpdatePackagePolicyResponse,
+  CreateAgentlessPolicyRequest,
+  DeleteAgentlessPolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import type {
   GetEnrollmentAPIKeysResponse,
@@ -42,6 +44,7 @@ import type {
   GetOneOutputResponse,
   GetSettingsResponse,
   PutSettingsRequest,
+  CreateAgentlessPolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
 import type {
   GetUninstallTokenResponse,
@@ -108,6 +111,37 @@ export class SpaceTestApiClient {
 
     return res.body;
   }
+
+  async createAgentlessPolicy(
+    data: CreateAgentlessPolicyRequest['body'],
+    spaceId?: string
+  ): Promise<CreateAgentlessPolicyResponse> {
+    const res = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agentless_policies`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data);
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+
+  async deleteAgentlessPolicy(
+    policyId: string,
+    spaceId?: string
+  ): Promise<DeleteAgentlessPolicyResponse> {
+    const res = await this.supertest
+      .delete(`${this.getBaseUrl(spaceId)}/api/fleet/agentless_policies/${policyId}`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .send();
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+
   async createPackagePolicy(
     spaceId?: string,
     data: Partial<SimplifiedPackagePolicy & { package: { name: string; version: string } }> = {}

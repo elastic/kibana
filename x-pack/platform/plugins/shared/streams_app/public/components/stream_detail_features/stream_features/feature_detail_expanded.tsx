@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiMarkdownEditor, EuiTitle, EuiSpacer, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import type { Condition } from '@kbn/streamlang';
-import type { Feature } from '@kbn/streams-schema';
+import { isFeatureWithFilter, type Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import { EditableConditionPanel } from '../../data_management/shared';
@@ -55,33 +55,37 @@ export const FeatureDetailExpanded = ({
         readOnly={false}
         initialViewMode="viewing"
       />
+
       <EuiSpacer size="m" />
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="center">
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.filter', {
-                defaultMessage: 'Filter',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiButtonIcon
-            iconType="pencil"
-            onClick={toggleIsEditingCondition}
-            aria-label={i18n.translate(
-              'xpack.streams.streamDetailView.featureDetailExpanded.filter.edit',
-              {
-                defaultMessage: 'Edit filter',
-              }
-            )}
+
+      {isFeatureWithFilter(feature) && (
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="center">
+            <EuiTitle size="xs">
+              <h3>
+                {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.filter', {
+                  defaultMessage: 'Filter',
+                })}
+              </h3>
+            </EuiTitle>
+            <EuiButtonIcon
+              iconType="pencil"
+              onClick={toggleIsEditingCondition}
+              aria-label={i18n.translate(
+                'xpack.streams.streamDetailView.featureDetailExpanded.filter.edit',
+                {
+                  defaultMessage: 'Edit filter',
+                }
+              )}
+            />
+          </EuiFlexGroup>
+          <EditableConditionPanel
+            condition={feature.filter}
+            isEditingCondition={isEditingCondition}
+            setCondition={handleConditionChange}
           />
         </EuiFlexGroup>
-        <EditableConditionPanel
-          condition={feature.filter}
-          isEditingCondition={isEditingCondition}
-          setCondition={handleConditionChange}
-        />
-      </EuiFlexGroup>
+      )}
     </EuiFlexGroup>
   );
 };

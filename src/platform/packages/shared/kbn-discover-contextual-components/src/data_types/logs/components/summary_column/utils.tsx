@@ -27,6 +27,8 @@ import {
   FILTER_OUT_EXACT_FIELDS_FOR_CONTENT,
   TRANSACTION_NAME_FIELD,
   OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
+  getAvailableResourceFields,
+  RESOURCE_FIELDS,
 } from '@kbn/discover-utils';
 import type { TraceDocument } from '@kbn/discover-utils/src';
 import { formatFieldValue } from '@kbn/discover-utils/src';
@@ -173,6 +175,37 @@ export const createResourceFields = ({
     return {
       name,
       rawValue: resourceDoc[name],
+      value,
+      property,
+      ResourceBadge: getResourceBadgeComponent(name, core, share),
+      Icon: getResourceBadgeIcon(name, resourceDoc),
+    };
+  });
+};
+
+/**
+ * Enhanced version that uses OTel field fallbacks and returns resource fields with actual field names.
+ * This ensures badges display the correct field names (e.g., 'resource.attributes.service.name'
+ * instead of 'service.name' when the document uses OTel format).
+ */
+export const createResourceFieldsWithOtelFallback = ({
+  row,
+  dataView,
+  core,
+  share,
+  fieldFormats,
+}: Omit<ResourceFieldsProps, 'fields' | 'getAvailableFields'>): ResourceFieldDescriptor[] => {
+  const resourceDoc = getUnformattedFields(row, RESOURCE_FIELDS);
+  const availableFields = getAvailableResourceFields(row.flattened);
+
+  return availableFields.map((name) => {
+    const property = dataView.getFieldByName(name);
+    const rawValue = row.flattened[name];
+    const value = formatFieldValue(rawValue, row.raw, fieldFormats, dataView, property, 'html');
+
+    return {
+      name,
+      rawValue,
       value,
       property,
       ResourceBadge: getResourceBadgeComponent(name, core, share),

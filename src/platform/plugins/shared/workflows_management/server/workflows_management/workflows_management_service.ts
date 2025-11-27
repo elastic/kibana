@@ -7,17 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import type { estypes } from '@elastic/elasticsearch';
 import { v4 as generateUuid } from 'uuid';
-import type {
-  ActionsClient,
-  PluginStartContract as ActionsPluginStartContract,
-  IUnsecuredActionsClient,
-} from '@kbn/actions-plugin/server';
+import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
+import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import type {
+  CoreStart,
   ElasticsearchClient,
   KibanaRequest,
   Logger,
@@ -29,10 +25,10 @@ import type {
   ConnectorTypeInfo,
   CreateWorkflowCommand,
   EsWorkflow,
+  EsWorkflowCreate,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
   ExecutionStatus,
-  ExecutionType,
   UpdatedWorkflowResponseDto,
   WorkflowAggsDto,
   WorkflowDetailDto,
@@ -43,55 +39,57 @@ import type {
   WorkflowStatsDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import { ExecutionType, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import type {
+  IWorkflowEventLoggerService,
+  LogSearchResult,
+} from '@kbn/workflows-execution-engine/server';
+import type {
+  ExecutionLogsParams,
+  StepLogsParams,
+} from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { z } from '@kbn/zod';
+
 import { getWorkflowExecution } from './lib/get_workflow_execution';
 import { searchStepExecutions } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
-import type { IWorkflowEventLogger, LogSearchResult } from './lib/workflow_logger';
-import { SimpleWorkflowLogger } from './lib/workflow_logger';
+
 import type {
   GetAvailableConnectorsResponse,
-  GetExecutionLogsParams,
   GetStepExecutionParams,
-  GetStepLogsParams,
   GetWorkflowsParams,
 } from './workflows_management_api';
-import {
-  UNSUPPORTED_CONNECTOR_TYPES,
-  WORKFLOWS_EXECUTION_LOGS_INDEX,
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-} from '../../common';
+import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
-
 import {
   InvalidYamlSchemaError,
   WorkflowConflictError,
   WorkflowValidationError,
 } from '../../common/lib/errors';
+
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml_utils';
-import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../common/schema';
+import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
+import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
-import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
 import { createStorage } from '../storage/workflow_storage';
+import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
+import type { WorkflowsServerPluginStartDeps } from '../types';
 
-const DEFAULT_PAGE_SIZE = 20;
+const DEFAULT_PAGE_SIZE = 100;
 export interface SearchWorkflowExecutionsParams {
   workflowId: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   page?: number;
-  perPage?: number;
+  size?: number;
 }
 
 export class WorkflowsService {
   private esClient!: ElasticsearchClient;
   private workflowStorage!: WorkflowStorage;
-  private workflowEventLoggerService!: SimpleWorkflowLogger;
+  private workflowEventLoggerService!: IWorkflowEventLoggerService;
   private taskScheduler: WorkflowTaskScheduler | null = null;
   private readonly logger: Logger;
   private security?: SecurityServiceStart;
@@ -101,17 +99,17 @@ export class WorkflowsService {
   ) => Promise<PublicMethodsOf<ActionsClient>>;
 
   constructor(
-    esClientPromise: Promise<ElasticsearchClient>,
     logger: Logger,
-    enableConsoleLogging: boolean = false,
-    getActionsStart: () => Promise<ActionsPluginStartContract>
+    getCoreStart: () => Promise<CoreStart>,
+    getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>
   ) {
     this.logger = logger;
     this.getActionsClient = () =>
-      getActionsStart().then((actions) => actions.getUnsecuredActionsClient());
+      getPluginsStart().then((plugins) => plugins.actions.getUnsecuredActionsClient());
     this.getActionsClientWithRequest = (request: KibanaRequest) =>
-      getActionsStart().then((actions) => actions.getActionsClientWithRequest(request));
-    void this.initialize(esClientPromise, enableConsoleLogging);
+      getPluginsStart().then((plugins) => plugins.actions.getActionsClientWithRequest(request));
+
+    void this.initialize(getCoreStart, getPluginsStart);
   }
 
   public setTaskScheduler(taskScheduler: WorkflowTaskScheduler) {
@@ -123,10 +121,13 @@ export class WorkflowsService {
   }
 
   private async initialize(
-    esClientPromise: Promise<ElasticsearchClient>,
-    enableConsoleLogging: boolean = false
+    getCoreStart: () => Promise<CoreStart>,
+    getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>
   ) {
-    this.esClient = await esClientPromise;
+    const coreStart = await getCoreStart();
+    const pluginsStart = await getPluginsStart();
+
+    this.esClient = coreStart.elasticsearch.client.asInternalUser;
 
     // Initialize workflow storage
     this.workflowStorage = createStorage({
@@ -134,12 +135,8 @@ export class WorkflowsService {
       esClient: this.esClient,
     });
 
-    this.workflowEventLoggerService = new SimpleWorkflowLogger(
-      this.logger,
-      this.esClient,
-      WORKFLOWS_EXECUTION_LOGS_INDEX,
-      enableConsoleLogging
-    );
+    this.workflowEventLoggerService =
+      pluginsStart.workflowsExecutionEngine.workflowEventLoggerService;
   }
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
@@ -181,26 +178,29 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
+    let workflowToCreate: EsWorkflowCreate = {
+      name: 'Untitled workflow',
+      description: undefined,
+      enabled: false,
+      tags: [],
+      definition: undefined,
+      valid: false,
+    };
     const parsedYaml = parseWorkflowYamlToJSON(
       workflow.yaml,
-      await this.getWorkflowZodSchema({ loose: true }, spaceId, request)
+      await this.getWorkflowZodSchema({ loose: false }, spaceId, request)
     );
-    if (!parsedYaml.success) {
-      throw new Error(`Invalid workflow yaml: ${parsedYaml.error.message}`);
-    }
+    if (parsedYaml.success) {
+      // The type of parsedYaml.data is validated by getWorkflowZodSchema (strict mode), so this assertion is safe.
+      workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
 
-    // Validate step name uniqueness
-    const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
-    if (!stepValidation.isValid) {
-      const errorMessages = stepValidation.errors.map((error) => error.message);
-      throw new WorkflowValidationError(
-        'Workflow validation failed: Step names must be unique throughout the workflow.',
-        errorMessages
-      );
+      // Validate step name uniqueness
+      const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
+      if (!stepValidation.isValid) {
+        workflowToCreate.valid = false;
+        workflowToCreate.definition = undefined;
+      }
     }
-
-    // The type of parsedYaml.data is validated by getWorkflowZodSchemaLoose(), so this assertion is partially safe.
-    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const now = new Date();
 
@@ -210,11 +210,11 @@ export class WorkflowsService {
       enabled: workflowToCreate.enabled,
       tags: workflowToCreate.tags || [],
       yaml: workflow.yaml,
-      definition: workflowToCreate.definition,
+      definition: workflowToCreate.definition ?? null,
       createdBy: authenticatedUser,
       lastUpdatedBy: authenticatedUser,
       spaceId,
-      valid: true,
+      valid: workflowToCreate.valid,
       deleted_at: null,
       created_at: now.toISOString(),
       updated_at: now.toISOString(),
@@ -240,7 +240,7 @@ export class WorkflowsService {
     });
 
     // Schedule the workflow if it has triggers
-    if (this.taskScheduler && workflowToCreate.definition.triggers) {
+    if (this.taskScheduler && workflowToCreate.definition?.triggers) {
       for (const trigger of workflowToCreate.definition.triggers) {
         if (trigger.type === 'scheduled') {
           await this.taskScheduler.scheduleWorkflowTask(id, spaceId, trigger, request);
@@ -508,8 +508,8 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
-    const { limit = 20, page = 1, enabled, createdBy, query } = params;
-    const from = (page - 1) * limit;
+    const { size = 100, page = 1, enabled, createdBy, query } = params;
+    const from = (page - 1) * size;
 
     const must: estypes.QueryDslQueryContainer[] = [];
 
@@ -605,7 +605,7 @@ export class WorkflowsService {
     }
 
     const searchResponse = await this.workflowStorage.getClient().search({
-      size: limit,
+      size,
       from,
       track_total_hits: true,
       query: {
@@ -641,14 +641,12 @@ export class WorkflowsService {
     }
 
     return {
-      _pagination: {
-        page,
-        limit,
-        total:
-          typeof searchResponse.hits.total === 'number'
-            ? searchResponse.hits.total
-            : searchResponse.hits.total?.value || 0,
-      },
+      page,
+      size,
+      total:
+        typeof searchResponse.hits.total === 'number'
+          ? searchResponse.hits.total
+          : searchResponse.hits.total?.value || 0,
       results: workflows,
     };
   }
@@ -843,17 +841,33 @@ export class WorkflowsService {
         },
       });
     }
-    if (params.executionTypes) {
-      must.push({
-        terms: {
-          executionType: params.executionTypes,
-        },
-      });
+    if (params.executionTypes && params.executionTypes?.length === 1) {
+      const isTestRun = params.executionTypes[0] === ExecutionType.TEST;
+
+      if (isTestRun) {
+        must.push({
+          term: {
+            isTestRun,
+          },
+        });
+      } else {
+        // the field isTestRun do not exist for regular runs
+        // so we need to check for both cases: field not existing or field being false
+        must.push({
+          bool: {
+            should: [
+              { term: { isTestRun: false } },
+              { bool: { must_not: { exists: { field: 'isTestRun' } } } },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+      }
     }
 
     const page = params.page ?? 1;
-    const perPage = params.perPage ?? DEFAULT_PAGE_SIZE;
-    const from = (page - 1) * perPage;
+    const size = params.size ?? DEFAULT_PAGE_SIZE;
+    const from = (page - 1) * size;
 
     return searchWorkflowExecutions({
       esClient: this.esClient,
@@ -864,10 +878,9 @@ export class WorkflowsService {
           must,
         },
       },
-      size: perPage,
+      size,
       from,
       page,
-      perPage,
     });
   }
 
@@ -1026,19 +1039,20 @@ export class WorkflowsService {
     });
   }
 
-  public async getExecutionLogs(
-    params: GetExecutionLogsParams,
-    spaceId: string
-  ): Promise<LogSearchResult> {
-    return this.workflowEventLoggerService!.searchLogs(params, spaceId);
+  public async getExecutionLogs(params: ExecutionLogsParams): Promise<LogSearchResult> {
+    if (!this.workflowEventLoggerService) {
+      throw new Error('WorkflowEventLoggerService not initialized');
+    }
+
+    return this.workflowEventLoggerService.getExecutionLogs(params);
   }
 
-  public async getStepLogs(params: GetStepLogsParams, spaceId: string): Promise<LogSearchResult> {
-    return this.workflowEventLoggerService!.searchLogs(params, spaceId);
-  }
+  public async getStepLogs(params: StepLogsParams): Promise<LogSearchResult> {
+    if (!this.workflowEventLoggerService) {
+      throw new Error('WorkflowEventLoggerService not initialized');
+    }
 
-  public getLogger(): IWorkflowEventLogger {
-    return this.workflowEventLoggerService!;
+    return this.workflowEventLoggerService.getStepLogs(params);
   }
 
   public async getStepExecution(
@@ -1109,21 +1123,17 @@ export class WorkflowsService {
     // Get both connectors and action types
     const [connectors, actionTypes] = await Promise.all([
       actionsClient.getAll(spaceId),
-      actionsClientWithRequest.listTypes({ includeSystemActionTypes: false }),
+      actionsClientWithRequest.listTypes({
+        featureId: WorkflowsConnectorFeatureId,
+        includeSystemActionTypes: false,
+      }),
     ]);
-
-    // Note: We now get display names directly from actionTypes, no need for the map
 
     // Initialize connectorsByType with ALL available action types
     const connectorsByType: Record<string, ConnectorTypeInfo> = {};
 
     // First, add all action types (even those without instances), excluding filtered types
     actionTypes.forEach((actionType) => {
-      // Skip filtered connector types
-      if (UNSUPPORTED_CONNECTOR_TYPES.includes(actionType.id)) {
-        return;
-      }
-
       // Get sub-actions from our static mapping
       const subActions = CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
 
@@ -1156,15 +1166,12 @@ export class WorkflowsService {
 
   public async getWorkflowZodSchema(
     options: {
-      loose: boolean;
+      loose?: false;
     },
     spaceId: string,
     request: KibanaRequest
   ): Promise<z.ZodType> {
     const { connectorsByType } = await this.getAvailableConnectors(spaceId, request);
-    if (options.loose) {
-      return getWorkflowZodSchemaLoose(connectorsByType);
-    }
     return getWorkflowZodSchema(connectorsByType);
   }
 }

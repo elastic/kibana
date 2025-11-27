@@ -44,7 +44,7 @@
         "label": "ChartSectionTemplate",
         "description": [],
         "signature": [
-          "({ id, toolbarCss, toolbar, children, }: ",
+          "({ id, toolbarCss, toolbar, children, toolbarWrapAt, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/unified-histogram",
             "scope": "public",
@@ -52,7 +52,7 @@
             "section": "def-public.ChartSectionTemplateProps",
             "text": "ChartSectionTemplateProps"
           },
-          ") => React.JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
         "deprecated": false,
@@ -61,18 +61,20 @@
           {
             "parentPluginId": "@kbn/unified-histogram",
             "id": "def-public.ChartSectionTemplate.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
-            "label": "{\n  id,\n  toolbarCss,\n  toolbar,\n  children,\n}",
+            "label": "{\n  id,\n  toolbarCss,\n  toolbar,\n  children,\n  toolbarWrapAt,\n}",
             "description": [],
             "signature": [
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/unified-histogram",
                 "scope": "public",
                 "docId": "kibKbnUnifiedHistogramPluginApi",
                 "section": "def-public.ChartSectionTemplateProps",
                 "text": "ChartSectionTemplateProps"
-              }
+              },
+              ">"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
             "deprecated": false,
@@ -972,7 +974,7 @@
             "label": "toolbar",
             "description": [],
             "signature": [
-              "{ leftSide?: React.ReactNode; rightSide?: ",
+              "{ toggleActions?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; leftSide?: React.ReactNode; rightSide?: ",
               {
                 "pluginId": "@kbn/shared-ux-button-toolbar",
                 "scope": "public",
@@ -988,13 +990,13 @@
           },
           {
             "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.ChartSectionTemplateProps.children",
+            "id": "def-public.ChartSectionTemplateProps.toolbarWrapAt",
             "type": "CompoundType",
             "tags": [],
-            "label": "children",
+            "label": "toolbarWrapAt",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | \"xxl\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
             "deprecated": false,

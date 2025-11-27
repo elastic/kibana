@@ -104,14 +104,9 @@ const updatePolicyCloudConnectorSupport = (
     return;
   }
 
-  if (awsCredentialsType === 'cloud_connectors' && !newPolicy.supports_cloud_connector) {
-    updatePolicy({
-      updatedPolicy: {
-        ...newPolicy,
-        supports_cloud_connector: true,
-      },
-    });
-  } else if (awsCredentialsType !== 'cloud_connectors' && newPolicy.supports_cloud_connector) {
+  // Ensure cloud connector support is false if credential type is not cloud_connectors
+  // (CloudConnectorSetup component handles setting it to true when cloud_connectors is selected)
+  if (awsCredentialsType !== 'cloud_connectors' && newPolicy.supports_cloud_connector) {
     updatePolicy({
       updatedPolicy: {
         ...newPolicy,
@@ -158,13 +153,23 @@ export const AwsCredentialsFormAgentless = ({
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
   const awsCredentialsType = getAgentlessCredentialsType(input, isAwsCloudConnectorEnabled);
 
-  updatePolicyCloudConnectorSupport(
+  // Update cloud connector support when relevant values change
+  React.useEffect(() => {
+    updatePolicyCloudConnectorSupport(
+      awsCredentialsType,
+      newPolicy,
+      updatePolicy,
+      input,
+      awsPolicyType
+    );
+  }, [
     awsCredentialsType,
+    newPolicy.supports_cloud_connector,
+    input,
+    awsPolicyType,
     newPolicy,
     updatePolicy,
-    input,
-    awsPolicyType
-  );
+  ]);
 
   const automationCredentialTemplate = getTemplateUrlFromPackageInfo(
     packageInfo,

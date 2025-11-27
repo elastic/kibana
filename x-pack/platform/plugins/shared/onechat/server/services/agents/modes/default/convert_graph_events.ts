@@ -16,6 +16,7 @@ import type {
   MessageCompleteEvent,
   ThinkingCompleteEvent,
   ToolCallEvent,
+  BrowserToolCallEvent,
   ToolResultEvent,
   ReasoningEvent,
 } from '@kbn/onechat-common';
@@ -28,6 +29,7 @@ import {
   createTextChunkEvent,
   createMessageEvent,
   createToolCallEvent,
+  createBrowserToolCallEvent,
   createToolResultEvent,
   createReasoningEvent,
   createThinkingCompleteEvent,
@@ -38,8 +40,13 @@ import type { Logger } from '@kbn/logging';
 import type { RunToolReturn } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
 import type { StateType } from './state';
-import { steps, tags } from './constants';
-import { isToolCallAction, isAnswerAction, isExecuteToolAction } from './actions';
+import { steps, tags, BROWSER_TOOL_PREFIX } from './constants';
+import {
+  isToolCallAction,
+  isAnswerAction,
+  isStructuredAnswerAction,
+  isExecuteToolAction,
+} from './actions';
 import type { ToolCallResult } from './actions';
 
 export type ConvertedEvents =
@@ -47,6 +54,7 @@ export type ConvertedEvents =
   | MessageCompleteEvent
   | ThinkingCompleteEvent
   | ToolCallEvent
+  | BrowserToolCallEvent
   | ToolResultEvent
   | ReasoningEvent;
 
@@ -111,13 +119,26 @@ export const convertGraphEvents = ({
                 }
 
                 toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
-                events.push(
-                  createToolCallEvent({
-                    toolId,
-                    toolCallId,
-                    params: toolCallArgs,
-                  })
-                );
+
+                const isBrowserTool = toolId.startsWith(BROWSER_TOOL_PREFIX);
+
+                if (isBrowserTool) {
+                  events.push(
+                    createBrowserToolCallEvent({
+                      toolId: toolId.replace(BROWSER_TOOL_PREFIX, ''),
+                      toolCallId,
+                      params: toolCallArgs,
+                    })
+                  );
+                } else {
+                  events.push(
+                    createToolCallEvent({
+                      toolId,
+                      toolCallId,
+                      params: toolCallArgs,
+                    })
+                  );
+                }
               }
               if (messageText && !hasReasoningEvent) {
                 events.push(createReasoningEvent(messageText));
@@ -136,7 +157,12 @@ export const convertGraphEvents = ({
           const answerActions = (event.data.output as StateType).answerActions;
           const lastAction = answerActions[answerActions.length - 1];
 
-          if (isAnswerAction(lastAction)) {
+          if (isStructuredAnswerAction(lastAction)) {
+            const messageEvent = createMessageEvent(lastAction.data, {
+              messageId,
+            });
+            events.push(messageEvent);
+          } else if (isAnswerAction(lastAction)) {
             const messageEvent = createMessageEvent(lastAction.message, {
               messageId,
             });

@@ -401,6 +401,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await retry.tryForTime(5000, async () => {
+          await pageObjects.infraHome.clearSearchTerm();
           await pageObjects.infraHome.enterSearchTerm('host.name: "host-1"');
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([{ name: 'host-1', value: 50, color: '#61a2ff' }]);
@@ -410,6 +411,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('change color palette', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
+        await pageObjects.infraHome.clearSearchTerm();
         await pageObjects.infraHome.openLegendControls();
         await pageObjects.infraHome.changePalette('temperature');
         await pageObjects.infraHome.applyLegendControls();
@@ -604,19 +606,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraSavedViews.createView('view2');
           await pageObjects.infraSavedViews.ensureViewIsLoaded('view2');
 
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
           await pageObjects.infraSavedViews.clickSavedViewsButton();
-          views = await pageObjects.infraSavedViews.getManageViewsEntries();
-          expect(views.length).to.equal(3);
+          await retry.tryForTime(5000, async () => {
+            views = await pageObjects.infraSavedViews.getManageViewsEntries();
+            expect(views.length).to.equal(3);
+          });
+
           await pageObjects.infraSavedViews.pressEsc();
 
           await pageObjects.infraSavedViews.clickSavedViewsButton();
           await pageObjects.infraSavedViews.updateView('view3');
           await pageObjects.infraSavedViews.ensureViewIsLoaded('view3');
 
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
           await pageObjects.infraSavedViews.clickSavedViewsButton();
-          views = await pageObjects.infraSavedViews.getManageViewsEntries();
-          expect(views.length).to.equal(3);
-          await pageObjects.infraSavedViews.pressEsc();
+          await retry.tryForTime(5000, async () => {
+            views = await pageObjects.infraSavedViews.getManageViewsEntries();
+            expect(views.length).to.equal(3);
+          });
         });
       });
     });

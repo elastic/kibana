@@ -8,8 +8,7 @@
 /* eslint-disable playwright/no-nth-methods */
 
 import type { ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout';
-import { EuiComboBoxWrapper } from '@kbn/scout';
+import { EuiComboBoxWrapper, expect } from '@kbn/scout';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
@@ -78,16 +77,16 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'advanced');
   }
 
-  async clickGoBackToStreams() {
-    await this.page.getByTestId('backToStreamsButton').click();
-  }
-
   async clickStreamNameLink(streamName: string) {
     await this.page.getByTestId(`streamsNameLink-${streamName}`).click();
   }
 
   async clickDataQualityTab() {
     await this.page.getByTestId('dataQualityTab').click();
+  }
+
+  async clickRootBreadcrumb() {
+    await this.page.getByTestId('breadcrumb first').click();
   }
 
   // Streams table utility methods
@@ -217,16 +216,20 @@ export class StreamsApp {
     await this.page.getByTestId(`routingRuleEditButton-${streamName}`).click();
   }
 
+  async switchToColumnsView() {
+    await this.page.getByTestId('columns').click();
+  }
+
   async saveRoutingRule() {
-    await this.page.getByRole('button', { name: 'Save' }).click();
+    await this.page.testSubj.locator('streamsAppStreamDetailRoutingSaveButton').click();
   }
 
   async updateRoutingRule() {
-    await this.page.getByRole('button', { name: 'Change routing' }).click();
+    await this.page.testSubj.locator('streamsAppStreamDetailRoutingUpdateButton').click();
   }
 
   async cancelRoutingRule() {
-    await this.page.getByRole('button', { name: 'Cancel' }).click();
+    await this.page.testSubj.locator('streamsAppRoutingStreamEntryCancelButton').click();
   }
 
   async removeRoutingRule() {
@@ -520,6 +523,34 @@ export class StreamsApp {
     await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
   }
 
+  async fillDateProcessorSourceFieldInput(value: string) {
+    await this.page.getByLabel('Source Field').fill(value);
+  }
+
+  async fillDateProcessorFormatInput(value: string) {
+    await this.page.getByPlaceholder('Type and then hit "Enter"').fill(value);
+  }
+
+  async fillDateProcessorTargetFieldInput(value: string) {
+    await this.page.getByLabel('Target field').fill(value);
+  }
+
+  async fillDateProcessorTimezoneInput(value: string) {
+    await this.page.getByLabel('Timezone').fill(value);
+  }
+
+  async fillDateProcessorLocaleInput(value: string) {
+    await this.page.getByLabel('Locale').fill(value);
+  }
+
+  async fillDateProcessorOutputFormatInput(value: string) {
+    await this.page.getByLabel('Output format').fill(value);
+  }
+
+  async clickDateProcessorAdvancedSettings() {
+    await this.page.getByRole('button', { name: 'Advanced settings' }).click();
+  }
+
   async fillCustomSamplesEditor(value: string) {
     // Clean previous content
     await this.page.getByTestId('streamsAppCustomSamplesDataSourceEditor').click();
@@ -594,6 +625,12 @@ export class StreamsApp {
 
   getDataSourcesList() {
     return this.page.getByTestId('streamsAppProcessingDataSourcesList');
+  }
+
+  async getDataSourcesSelector() {
+    const dataSourcesSelector = this.page.getByTestId('streamsAppProcessingDataSourceSelector');
+    await expect(dataSourcesSelector).toBeVisible();
+    return dataSourcesSelector;
   }
 
   getDataSourcesListItems() {
@@ -727,5 +764,9 @@ export class StreamsApp {
   async closeFlyout() {
     await this.page.getByTestId('euiFlyoutCloseButton').click();
     await expect(this.page.getByTestId('euiFlyoutCloseButton')).toBeHidden();
+  }
+
+  async clickProcessorPreviewTab(label: string) {
+    await this.page.getByText(label).click();
   }
 }

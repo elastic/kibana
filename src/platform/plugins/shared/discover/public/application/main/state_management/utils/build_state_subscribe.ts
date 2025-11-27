@@ -8,7 +8,7 @@
  */
 
 import { isEqual } from 'lodash';
-import type { InternalStateStore, RuntimeStateManager } from '../redux';
+import type { InternalStateStore, RuntimeStateManager, TabState } from '../redux';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
@@ -39,6 +39,7 @@ export const buildStateSubscribe =
     savedSearchState,
     services,
     setDataView,
+    getCurrentTab,
   }: {
     appState: DiscoverAppStateContainer;
     dataState: DiscoverDataStateContainer;
@@ -47,9 +48,10 @@ export const buildStateSubscribe =
     savedSearchState: DiscoverSavedSearchContainer;
     services: DiscoverServices;
     setDataView: DiscoverStateContainer['actions']['setDataView'];
+    getCurrentTab: () => TabState;
   }) =>
   async (nextState: DiscoverAppState) => {
-    const prevState = appState.getPrevious();
+    const prevState = getCurrentTab().previousAppState;
     const nextQuery = nextState.query;
     const savedSearch = savedSearchState.getState();
     const prevQuery = savedSearch.searchSource.getField('query');

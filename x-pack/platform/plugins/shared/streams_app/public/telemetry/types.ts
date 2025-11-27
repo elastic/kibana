@@ -7,17 +7,17 @@
 
 type StreamType = 'wired' | 'classic' | 'unknown';
 
-interface StreamsAssetCountProps {
+interface StreamsAttachmentCountProps {
   name: string;
   dashboards: number;
   slos?: number;
   rules?: number;
 }
 
-interface StreamsAssetClickEventProps {
+interface StreamsAttachmentClickEventProps {
   name: string;
-  asset_type: 'dashboard' | 'slo' | 'rule';
-  asset_id: string;
+  attachment_type: 'dashboard' | 'slo' | 'rule';
+  attachment_id: string;
 }
 
 interface StreamsAIGrokSuggestionLatencyProps {
@@ -30,6 +30,23 @@ interface StreamsAIGrokSuggestionLatencyProps {
 }
 
 interface StreamsAIGrokSuggestionAcceptedProps {
+  name: string;
+  field: string;
+  connector_id: string;
+  match_rate: number;
+  detected_fields: number;
+}
+
+interface StreamsAIDissectSuggestionLatencyProps {
+  name: string;
+  field: string;
+  connector_id: string;
+  suggestion_count: number;
+  duration_ms: number;
+  match_rate: number[];
+}
+
+interface StreamsAIDissectSuggestionAcceptedProps {
   name: string;
   field: string;
   connector_id: string;
@@ -71,10 +88,12 @@ interface StreamsSignificantEventsCreatedProps {
 }
 
 export {
-  type StreamsAssetCountProps,
-  type StreamsAssetClickEventProps,
+  type StreamsAttachmentCountProps,
+  type StreamsAttachmentClickEventProps,
   type StreamsAIGrokSuggestionLatencyProps,
   type StreamsAIGrokSuggestionAcceptedProps,
+  type StreamsAIDissectSuggestionLatencyProps,
+  type StreamsAIDissectSuggestionAcceptedProps,
   type StreamsRetentionChangedProps,
   type StreamsProcessingSavedProps,
   type StreamsChildStreamCreatedProps,

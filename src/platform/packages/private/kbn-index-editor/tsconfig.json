@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -41,5 +41,7 @@
     "@kbn/esql-utils",
     "@kbn/test-jest-helpers",
     "@kbn/esql-types",
+    "@kbn/field-types",
+    "@kbn/field-utils",
   ]
 }

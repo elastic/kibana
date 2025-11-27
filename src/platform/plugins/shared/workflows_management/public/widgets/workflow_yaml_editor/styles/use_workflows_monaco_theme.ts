@@ -9,19 +9,22 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { useEffect } from 'react';
-
-import { monaco } from '@kbn/monaco';
+import { CODE_EDITOR_DEFAULT_THEME_ID, defaultThemesResolvers, monaco } from '@kbn/monaco';
 
 export const WORKFLOWS_MONACO_EDITOR_THEME = 'workflows-theme';
 
 export function useWorkflowsMonacoTheme() {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode, ...rest } = useEuiTheme();
+  const themeBase = defaultThemesResolvers[CODE_EDITOR_DEFAULT_THEME_ID]({
+    colorMode,
+    euiTheme,
+    ...rest,
+  });
   useEffect(() => {
     monaco.editor.defineTheme(WORKFLOWS_MONACO_EDITOR_THEME, {
-      base: 'vs',
-      inherit: true,
-      rules: [],
+      ...themeBase,
       colors: {
+        ...themeBase.colors,
         'list.hoverForeground': euiTheme.colors.textPrimary,
         'list.hoverBackground': euiTheme.colors.backgroundBaseInteractiveSelect,
         'editorSuggestWidget.foreground': euiTheme.colors.textParagraph,
@@ -43,5 +46,5 @@ export function useWorkflowsMonacoTheme() {
         'minimap.background': '#00000000',
       },
     });
-  }, [euiTheme]);
+  }, [themeBase, euiTheme]);
 }

@@ -65,7 +65,6 @@ export interface TabsStorageManager {
   pushSelectedTabIdToUrl: (selectedTabId: string, options?: { replace?: boolean }) => Promise<void>;
   persistLocally: (
     props: Omit<TabsInternalStatePayload, 'selectedTabId'>,
-    getAppState: (tabId: string) => DiscoverAppState | undefined,
     getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined,
     discoverSessionId: string | undefined
   ) => Promise<void>;
@@ -171,19 +170,16 @@ export const createTabsStorageManager = ({
 
   const toTabStateInStorage = (
     tabState: TabState,
-    getAppState: ((tabId: string) => DiscoverAppState | undefined) | undefined,
     getInternalState: ((tabId: string) => TabState['initialInternalState'] | undefined) | undefined
   ): TabStateInLocalStorage => {
     const getInternalStateForTabWithoutRuntimeState = (tabId: string) =>
       getInternalState?.(tabId) || tabState.initialInternalState;
-    const getAppStateForTabWithoutRuntimeState = (tabId: string) =>
-      getAppState?.(tabId) || tabState.initialAppState;
 
     return {
       id: tabState.id,
       label: tabState.label,
       internalState: getInternalStateForTabWithoutRuntimeState(tabState.id),
-      appState: getAppStateForTabWithoutRuntimeState(tabState.id),
+      appState: tabState.appState,
       globalState: tabState.globalState,
     };
   };
@@ -191,7 +187,7 @@ export const createTabsStorageManager = ({
   const toRecentlyClosedTabStateInStorage = (
     tabState: RecentlyClosedTabState
   ): RecentlyClosedTabStateInLocalStorage => {
-    const state = toTabStateInStorage(tabState, undefined, undefined);
+    const state = toTabStateInStorage(tabState, undefined);
     return {
       ...state,
       closedAt: tabState.closedAt,
@@ -225,7 +221,7 @@ export const createTabsStorageManager = ({
       ...defaultTabState,
       ...pick(tabStateInStorage, 'id', 'label'),
       initialInternalState: internalState,
-      initialAppState: appState,
+      appState: appState || {},
       globalState: globalState || {},
       esqlVariables,
     };
@@ -296,7 +292,6 @@ export const createTabsStorageManager = ({
 
   const persistLocally: TabsStorageManager['persistLocally'] = async (
     { allTabs, recentlyClosedTabs },
-    getAppState,
     getInternalState,
     discoverSessionId
   ) => {
@@ -305,7 +300,7 @@ export const createTabsStorageManager = ({
     }
 
     const openTabs: TabsStateInLocalStorage['openTabs'] = allTabs.map((tab) =>
-      toTabStateInStorage(tab, getAppState, getInternalState)
+      toTabStateInStorage(tab, getInternalState)
     );
     const closedTabs: TabsStateInLocalStorage['closedTabs'] = recentlyClosedTabs.map((tab) =>
       toRecentlyClosedTabStateInStorage(tab)

@@ -17,15 +17,14 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { asyncMap } from '@kbn/std';
-import type { DashboardSearchAPIResult } from '../../../server/content_management';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
-  DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
 } from '../../utils/telemetry_constants';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
-import { coreServices } from '../../services/kibana_services';
+import { coreServices, savedObjectsTaggingService } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import {
@@ -46,27 +45,6 @@ type GetDetailViewLink =
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
-
-const toTableListViewSavedObject = (
-  hit: DashboardSearchAPIResult['hits'][number]
-): DashboardSavedObjectUserContent => {
-  const { title, description, timeRange } = hit.attributes;
-  return {
-    type: 'dashboard',
-    id: hit.id,
-    updatedAt: hit.updatedAt!,
-    createdAt: hit.createdAt,
-    createdBy: hit.createdBy,
-    updatedBy: hit.updatedBy,
-    references: hit.references ?? [],
-    managed: hit.managed,
-    attributes: {
-      title,
-      description,
-      timeRestore: Boolean(timeRange),
-    },
-  };
-};
 
 type DashboardListingViewTableProps = Omit<
   TableListViewTableProps<DashboardSavedObjectUserContent>,
@@ -136,7 +114,7 @@ export const useDashboardListingTable = ({
       if (dashboard.status === 'error') {
         return;
       }
-      const { references, spaces, namespaces, ...currentState } = dashboard.attributes;
+      const { references, ...currentState } = dashboard.attributes;
       await dashboardClient.update(
         id,
         {
@@ -221,28 +199,43 @@ export const useDashboardListingTable = ({
       return findService
         .search({
           search: searchTerm,
-          size: listingLimit,
-          hasReference: references,
-          hasNoReference: referencesToExclude,
-          options: {
-            // include only tags references in the response to save bandwidth
-            includeReferences: ['tag'],
-            fields: ['title', 'description', 'timeRange'],
+          per_page: listingLimit,
+          tags: {
+            included: (references ?? []).map(({ id }) => id),
+            excluded: (referencesToExclude ?? []).map(({ id }) => id),
           },
         })
-        .then(({ total, hits }) => {
+        .then(({ total, dashboards }) => {
           const searchEndTime = window.performance.now();
           const searchDuration = searchEndTime - searchStartTime;
           reportPerformanceMetricEvent(coreServices.analytics, {
             eventName: SAVED_OBJECT_LOADED_TIME,
             duration: searchDuration,
             meta: {
-              saved_object_type: DASHBOARD_CONTENT_ID,
+              saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
             },
           });
+          const tagApi = savedObjectsTaggingService?.getTaggingApi();
           return {
             total,
-            hits: hits.map(toTableListViewSavedObject),
+            hits: dashboards.map(
+              ({ id, data, meta }) =>
+                ({
+                  type: 'dashboard',
+                  id,
+                  updatedAt: meta.updatedAt!,
+                  createdAt: meta.createdAt,
+                  createdBy: meta.createdBy,
+                  updatedBy: meta.updatedBy,
+                  references: tagApi && data.tags ? data.tags.map(tagApi.ui.tagIdToReference) : [],
+                  managed: meta.managed,
+                  attributes: {
+                    title: data.title,
+                    description: data.description,
+                    timeRestore: Boolean(data.timeRange),
+                  },
+                } as DashboardSavedObjectUserContent)
+            ),
           };
         });
     },
@@ -264,7 +257,7 @@ export const useDashboardListingTable = ({
           eventName: SAVED_OBJECT_DELETE_TIME,
           duration: deleteDuration,
           meta: {
-            saved_object_type: DASHBOARD_CONTENT_ID,
+            saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
             total: dashboardsToDelete.length,
           },
         });

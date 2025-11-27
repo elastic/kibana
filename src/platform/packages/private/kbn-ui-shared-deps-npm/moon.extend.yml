@@ -1,0 +1,29 @@
+tags:
+  - is-webpack-built
+tasks:
+  build-webpack:
+    command: yarn
+    args:
+      - build
+    deps:
+      - '^:build-webpack'
+    inputs:
+      - '@group(src)'
+      - 'webpack.config.js'
+    outputs:
+      - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm
+  watch-webpack:
+    type: run
+    options:
+      persistent: true
+    command: yarn
+    args:
+      - build
+      - '--watch'
+    deps:
+      - '^:build-webpack'
+    inputs:
+      - '@group(src)'
+      - 'webpack.config.js'
+    outputs:
+      - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm

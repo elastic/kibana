@@ -21,17 +21,11 @@ import type {
   EdgeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { isLabelNode } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 import { dataViewRouteHelpersFactory } from '../utils';
-
-// Helper function to check if a node is a label node
-const isLabelNode = (
-  node: EntityNodeDataModel | LabelNodeDataModel | NodeDataModel
-): node is LabelNodeDataModel => {
-  return node.shape === 'label';
-};
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {

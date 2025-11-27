@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -57,6 +57,7 @@
     "@kbn/ai-tools",
     "@kbn/logging-mocks",
     "@kbn/grok-heuristics",
+    "@kbn/dissect-heuristics",
     "@kbn/streamlang",
     "@kbn/licensing-types",
     "@kbn/core-elasticsearch-server-utils",
@@ -70,5 +71,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/utility-types",
     "@kbn/console-plugin",
+    "@kbn/actions-plugin",
   ]
 }

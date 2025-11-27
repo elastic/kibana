@@ -16,6 +16,7 @@ import type { SearchSessionsMgmtAPI } from '../lib/api';
 import { SearchSessionsMgmtTable } from './table';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 import type { SearchUsageCollector } from '../../../collectors';
+import type { ISearchSessionEBTManager } from '../../ebt_manager';
 
 interface Props {
   core: CoreStart;
@@ -26,6 +27,7 @@ interface Props {
   kibanaVersion: string;
   share: SharePluginStart;
   searchUsageCollector: SearchUsageCollector;
+  searchSessionEBTManager: ISearchSessionEBTManager;
 }
 
 export function SearchSessionsMgmtMain({ share, ...tableProps }: Props) {
@@ -51,6 +53,7 @@ export function SearchSessionsMgmtMain({ share, ...tableProps }: Props) {
       <SearchSessionsMgmtTable
         data-test-subj="search-sessions-mgmt-table"
         locators={share.url.locators}
+        trackingProps={{ renderedIn: 'management', openedFrom: 'management' }}
         {...tableProps}
       />
     </>

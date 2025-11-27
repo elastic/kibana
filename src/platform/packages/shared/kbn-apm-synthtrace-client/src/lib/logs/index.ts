@@ -64,6 +64,12 @@ export type LogDocument = Fields &
     'error.log'?: unknown;
     'log.custom': Record<string, unknown>;
     'host.geo.location': number[];
+    'host.geo.city_name'?: string;
+    'host.geo.country_name'?: string;
+    'host.geo.country_iso_code'?: string;
+    'host.geo.continent_name'?: string;
+    'host.geo.region_name'?: string;
+    'host.geo.timezone'?: string;
     'host.ip': string;
     'network.bytes': number;
     'tls.established': boolean;
@@ -73,6 +79,10 @@ export type LogDocument = Fields &
     'event.category'?: string;
     'event.type'?: string;
     'event.outcome'?: string;
+    'event.action'?: string;
+    'event.sequence'?: number;
+    'source.ip'?: string;
+    'rule.name'?: string;
     labels?: Record<string, string>;
     test_field: string | string[];
     date: Date;
@@ -91,8 +101,13 @@ export type LogDocument = Fields &
     'kubernetes.namespace'?: string;
     'kubernetes.pod.name'?: string;
     'kubernetes.container.name'?: string;
+    'kubernetes.deployment.name'?: string;
+    'kubernetes.replicaset.name'?: string;
+    'kubernetes.statefulset.name'?: string;
+    'kubernetes.daemonset.name'?: string;
     'orchestrator.resource.name'?: string;
     tags?: string | string[];
+    'user.name'?: string;
     'user_agent.name'?: string;
     'orchestrator.type'?: string;
     'orchestrator.resource.type'?: string;
@@ -113,6 +128,18 @@ export type LogDocument = Fields &
     'kubernetes.labels.tier'?: string;
     'kubernetes.annotations.deployment'?: string;
     'process.pid'?: number;
+    'deployment.name'?: string;
+    'network.protocol'?: string;
+    'network.transport'?: string;
+    'network.type'?: string;
+    'tls.version'?: string;
+    'tls.cipher'?: string;
+    'tls.server.subject'?: string;
+    'tls.client.subject'?: string;
+    'session.id'?: string;
+    'span.id'?: string;
+    'error.type'?: string;
+    'error.code'?: string;
   }>;
 
 class Log extends Serializable<LogDocument> {

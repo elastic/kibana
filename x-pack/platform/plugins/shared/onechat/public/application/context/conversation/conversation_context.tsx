@@ -6,6 +6,9 @@
  */
 
 import { createContext, useContext } from 'react';
+import type { AttachmentInput } from '@kbn/onechat-common/attachments';
+import type { Conversation } from '@kbn/onechat-common/chat';
+import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browser_api_tool';
 import type { ConversationActions } from './use_conversation_actions';
 
 interface ConversationContextValue {
@@ -15,8 +18,11 @@ interface ConversationContextValue {
   sessionTag?: string;
   agentId?: string;
   initialMessage?: string;
+  browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   setConversationId?: (conversationId?: string) => void;
   conversationActions: ConversationActions;
+  getProcessedAttachments?: (conversation?: Conversation) => Promise<AttachmentInput[]>;
+  setAttachmentMap?: (attachmentMap: Map<string, Record<string, unknown>>) => void;
 }
 
 const ConversationContext = createContext<ConversationContextValue | undefined>(undefined);
