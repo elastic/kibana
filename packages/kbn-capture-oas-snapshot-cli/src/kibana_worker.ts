@@ -59,6 +59,7 @@ export type Result = string;
   let root: Root;
 
   set(settings, 'migrations.skip', true);
+  set(settings, 'dataStreams.migrations.skip', true);
   set(settings, 'elasticsearch.skipStartupConnectionCheck', true);
 
   if (serverless) {

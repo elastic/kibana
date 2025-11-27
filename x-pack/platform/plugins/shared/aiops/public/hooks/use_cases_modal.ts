@@ -15,7 +15,7 @@ import { useAiopsAppContext } from './use_aiops_app_context';
 import type { EmbeddablePatternAnalysisType } from '../embeddables/pattern_analysis/embeddable_pattern_analysis_factory';
 import type { PatternAnalysisEmbeddableRuntimeState } from '../embeddables/pattern_analysis/types';
 import type { EmbeddableLogRateAnalysisType } from '../embeddables/log_rate_analysis/embeddable_log_rate_analysis_factory';
-import type { LogRateAnalysisEmbeddableRuntimeState } from '../embeddables/log_rate_analysis/types';
+import type { LogRateAnalysisEmbeddableState } from '../../common/embeddables/log_rate_analysis/types';
 
 type SupportedEmbeddableTypes =
   | EmbeddableChangePointChartType
@@ -28,7 +28,7 @@ type EmbeddableRuntimeState<T extends SupportedEmbeddableTypes> =
     : T extends EmbeddablePatternAnalysisType
     ? PatternAnalysisEmbeddableRuntimeState
     : T extends EmbeddableLogRateAnalysisType
-    ? LogRateAnalysisEmbeddableRuntimeState
+    ? LogRateAnalysisEmbeddableState
     : never;
 
 /**

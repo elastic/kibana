@@ -139,49 +139,7 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
   return (
     <div ref={ref}>
       <EuiFlexGroup gutterSize="s" direction="column">
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <strong>{step.action.toUpperCase()}</strong>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem>
-                  <EuiButtonEmpty
-                    data-test-subj="streamsAppProcessorConfigurationCancelButton"
-                    onClick={handleCancel}
-                    size="s"
-                  >
-                    {i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.cancel',
-                      { defaultMessage: 'Cancel' }
-                    )}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiButton
-                    data-test-subj="streamsAppProcessorConfigurationSaveProcessorButton"
-                    size="s"
-                    fill
-                    onClick={methods.handleSubmit(handleSubmit)}
-                    disabled={!canSave}
-                  >
-                    {isConfigured
-                      ? i18n.translate(
-                          'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.confirmProcessor',
-                          { defaultMessage: 'Update' }
-                        )
-                      : i18n.translate(
-                          'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.confirmCreateProcessor',
-                          { defaultMessage: 'Create' }
-                        )}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
+        <strong>{step.action.toUpperCase()}</strong>
         <EuiFlexItem>
           <FormProvider {...methods}>
             <ProcessorContextProvider processorId={step.customIdentifier}>
@@ -201,26 +159,59 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
                 )}
               </EuiForm>
             </ProcessorContextProvider>
-            {isConfigured && (
-              <>
-                <EuiHorizontalRule margin="m" />
-                <EuiFlexGroup>
+            <EuiHorizontalRule margin="m" />
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={false}>
+                {canDelete && (
+                  <EuiButton
+                    data-test-subj="streamsAppProcessorConfigurationButton"
+                    color="danger"
+                    onClick={handleDelete}
+                    size="s"
+                  >
+                    {i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.deleteProcessorLabel',
+                      { defaultMessage: 'Delete processor' }
+                    )}
+                  </EuiButton>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="streamsAppProcessorConfigurationButton"
-                      color="danger"
-                      onClick={handleDelete}
+                    <EuiButtonEmpty
+                      data-test-subj="streamsAppProcessorConfigurationCancelButton"
+                      onClick={handleCancel}
                       size="s"
                     >
                       {i18n.translate(
-                        'xpack.streams.streamDetailView.managementTab.enrichment.deleteProcessorLabel',
-                        { defaultMessage: 'Delete processor' }
+                        'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.cancel',
+                        { defaultMessage: 'Cancel' }
                       )}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="streamsAppProcessorConfigurationSaveProcessorButton"
+                      size="s"
+                      fill
+                      onClick={methods.handleSubmit(handleSubmit)}
+                      disabled={!canSave}
+                    >
+                      {isConfigured
+                        ? i18n.translate(
+                            'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.confirmProcessor',
+                            { defaultMessage: 'Update' }
+                          )
+                        : i18n.translate(
+                            'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.confirmCreateProcessor',
+                            { defaultMessage: 'Create' }
+                          )}
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </>
-            )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
             {typeValidationErrors.length > 0 && (
               <>
                 <EuiSpacer size="m" />
