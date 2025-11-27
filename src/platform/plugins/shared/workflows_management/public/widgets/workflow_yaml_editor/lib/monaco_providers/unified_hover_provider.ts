@@ -196,29 +196,25 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       // Get YAML document
       const yamlDocument = this.getYamlDocument();
       if (!yamlDocument) {
-        //        return null;
+        return null;
       }
 
       // Detect context at current position
       const context = await this.buildHoverContext(model, position, yamlDocument);
       if (!context) {
-        //        return null;
-      }
-
-      //
-      // Find appropriate Monaco handler
-      const handler = getMonacoConnectorHandler(context.connectorType);
-      if (!handler) {
-        /*        */
         return null;
       }
 
-      /*      */
+      // Find appropriate Monaco handler
+      const handler = getMonacoConnectorHandler(context.connectorType);
+      if (!handler) {
+        return null;
+      }
 
       // Generate hover content
       const hoverContent = await handler.generateHoverContent(context);
       if (!hoverContent) {
-        //        return null;
+        return null;
       }
 
       // Calculate range for hover

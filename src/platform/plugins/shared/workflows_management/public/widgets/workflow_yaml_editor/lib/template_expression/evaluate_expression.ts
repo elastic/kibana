@@ -89,7 +89,7 @@ function findForeachContext(
   context: ExecutionContext
 ): { item: any; index: number; total: number; items: any[] } | null {
   // Look through all steps to find foreach steps
-  for (const [stepId, stepData] of Object.entries(context.steps)) {
+  for (const [, stepData] of Object.entries(context.steps)) {
     // Check if this step has foreach state (items array)
     if (stepData.state && 'items' in stepData.state && Array.isArray(stepData.state.items)) {
       // This is a foreach step

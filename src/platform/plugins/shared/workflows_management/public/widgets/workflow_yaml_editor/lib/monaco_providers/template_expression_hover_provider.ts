@@ -30,8 +30,6 @@ export interface TemplateExpressionHoverProviderConfig {
 export class TemplateExpressionHoverProvider implements monaco.languages.HoverProvider {
   private readonly getExecutionContext: () => ExecutionContext | null;
   private decorationCollection: monaco.editor.IEditorDecorationsCollection | null = null;
-  private currentEditor: monaco.editor.IStandaloneCodeEditor | null = null;
-  private lastHoverPosition: monaco.Position | null = null;
 
   constructor(config: TemplateExpressionHoverProviderConfig) {
     this.getExecutionContext = config.getExecutionContext;
@@ -41,7 +39,6 @@ export class TemplateExpressionHoverProvider implements monaco.languages.HoverPr
    * Set the editor instance for decoration management
    */
   public setEditor(editor: monaco.editor.IStandaloneCodeEditor) {
-    this.currentEditor = editor;
     this.decorationCollection = editor.createDecorationsCollection();
 
     // Clear decorations when content changes
@@ -50,13 +47,12 @@ export class TemplateExpressionHoverProvider implements monaco.languages.HoverPr
     });
 
     // Clear decorations when cursor position changes
-    editor.onDidChangeCursorPosition((e) => {
+    editor.onDidChangeCursorPosition(() => {
       this.clearHoverDecoration();
     });
 
     // Clear decorations on mouse move - but only when mouse is clearly away
     let mouseMoveTimeout: NodeJS.Timeout | null = null;
-    let lastMousePosition: monaco.Position | null = null;
 
     editor.onMouseMove((e) => {
       const currentMousePos = e.target.position;
@@ -67,26 +63,20 @@ export class TemplateExpressionHoverProvider implements monaco.languages.HoverPr
         mouseMoveTimeout = null;
       }
 
-      // Store current mouse position
-      lastMousePosition = currentMousePos;
-
       // Only set a timeout to clear if mouse is not over text content
       if (e.target.type !== monaco.editor.MouseTargetType.CONTENT_TEXT) {
         // Mouse is not over text (e.g., scrollbar, margin, etc.)
-        //        this.clearHoverDecoration();
-        this.lastHoverPosition = null;
+        // Don't clear decoration immediately to prevent flicker
       } else if (!currentMousePos) {
         // No position means mouse is away from content
         mouseMoveTimeout = setTimeout(() => {
-          //          this.clearHoverDecoration();
-          this.lastHoverPosition = null;
+          // Timeout-based cleanup if needed
         }, 200);
       }
     });
 
     editor.onDidScrollChange(() => {
-      //      this.clearHoverDecoration();
-      this.lastHoverPosition = null;
+      // Scroll change handling if needed
     });
   }
 
@@ -95,29 +85,18 @@ export class TemplateExpressionHoverProvider implements monaco.languages.HoverPr
     position: monaco.Position
   ): Promise<monaco.languages.Hover | null> {
     try {
-      //
-      // Store this position for tracking
-      this.lastHoverPosition = position;
-
       // Get execution context - return early if not available
       const executionContext = this.getExecutionContext();
-      //
       if (!executionContext) {
-        //        this.clearHoverDecoration();
-        this.lastHoverPosition = null;
         return null;
       }
 
       // Parse template expression at cursor position
       const templateInfo = parseTemplateAtPosition(model, position);
-      //
       if (!templateInfo || !templateInfo.isInsideTemplate) {
-        //        this.clearHoverDecoration();
-        this.lastHoverPosition = null;
         return null;
       }
 
-      //
       // Determine what to evaluate
       let value: any;
       let evaluatedPath: string;
@@ -126,7 +105,6 @@ export class TemplateExpressionHoverProvider implements monaco.languages.HoverPr
         // Cursor is on the filter part - evaluate with filters
         evaluatedPath = templateInfo.expression; // Show full expression in hover title
 
-        //
         value = evaluateExpression({
           expression: templateInfo.expression,
           context: executionContext,
@@ -135,17 +113,14 @@ export class TemplateExpressionHoverProvider implements monaco.languages.HoverPr
         // Cursor is on the variable path (not filter) - resolve path only
         evaluatedPath = templateInfo.pathUpToCursor.join('.');
 
-        //
         value = evaluateExpression({
           expression: evaluatedPath,
           context: executionContext,
         });
       }
 
-      //
       // If value is undefined, show a message
       if (value === undefined) {
-        //        this.addHoverDecoration(templateInfo.templateRange);
         return {
           range: templateInfo.templateRange,
           contents: [
@@ -158,7 +133,7 @@ export class TemplateExpressionHoverProvider implements monaco.languages.HoverPr
 
       // Format hover content
       const hoverContent = this.formatHoverContent([evaluatedPath], value);
-      //
+
       // Add a visible decoration to highlight the hovered segment
       this.addHoverDecoration(templateInfo.templateRange);
 
@@ -167,7 +142,6 @@ export class TemplateExpressionHoverProvider implements monaco.languages.HoverPr
         contents: [hoverContent],
       };
     } catch (error) {
-      //      this.clearHoverDecoration();
       return null;
     }
   }
