@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiButtonIcon, EuiIconTip, useEuiTheme } from '@elastic/eui';
-import type { EuiButtonProps, IconColor, IconType, UseEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import type { EuiButtonProps, IconType, UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import React from 'react';
 
@@ -24,10 +24,6 @@ export type SplitButtonProps = React.ComponentProps<typeof EuiButton> & {
   secondaryButtonTitle?: string;
   secondaryButtonFill?: boolean;
   onSecondaryButtonClick?: React.MouseEventHandler<HTMLButtonElement>;
-
-  showNotificationIndicator?: boolean;
-  notificationIndicatorColor?: IconColor;
-  notifcationIndicatorTooltipContent?: string;
 };
 
 export const SplitButton = ({
@@ -52,12 +48,6 @@ export const SplitButton = ({
   isMainButtonDisabled = false,
   iconOnly = false,
   iconType,
-
-  // Notification indicator props
-  showNotificationIndicator = false,
-  notificationIndicatorColor,
-  notifcationIndicatorTooltipContent,
-
   ...mainButtonProps
 }: SplitButtonProps) => {
   const styles = useMemoCss(componentStyles);
@@ -86,23 +76,11 @@ export const SplitButton = ({
       data-test-subj={mainButtonProps['data-test-subj'] + '-container'}
       css={[styles.container, hasTransparentBorder && styles.containerWithGap]}
     >
-      <div css={styles.mainButtonWrapper}>
-        {showNotificationIndicator && !iconOnly && (
-          <EuiIconTip
-            anchorProps={{ css: styles.notificationIndicator }}
-            type="dot"
-            iconProps={{ color: notificationIndicatorColor || euiTheme.colors.primary }}
-            size="l"
-            data-test-subj="split-button-notification-indicator"
-            content={notifcationIndicatorTooltipContent}
-          />
-        )}
-        {iconOnly && iconType ? (
-          <EuiButtonIcon iconType={iconType} {...commonMainButtonProps} />
-        ) : (
-          <EuiButton iconType={iconType} {...commonMainButtonProps} />
-        )}
-      </div>
+      {iconOnly && iconType ? (
+        <EuiButtonIcon iconType={iconType} {...commonMainButtonProps} />
+      ) : (
+        <EuiButton iconType={iconType} {...commonMainButtonProps} />
+      )}
       <EuiButtonIcon
         css={styles.secondaryButton}
         data-test-subj={mainButtonProps['data-test-subj'] + `-secondary-button`}
@@ -127,9 +105,6 @@ const componentStyles = {
   containerWithGap: {
     gap: '1px',
   },
-  mainButtonWrapper: {
-    position: 'relative' as const,
-  },
   mainButton: ({ euiTheme }: UseEuiTheme) => {
     return {
       borderTopRightRadius: 0,
@@ -141,11 +116,5 @@ const componentStyles = {
     borderTopLeftRadius: 0,
     borderBottomLeftRadius: 0,
     borderLeft: 'none',
-  },
-  notificationIndicator: {
-    position: 'absolute' as const,
-    top: '-10px',
-    right: '-2px',
-    zIndex: 1,
   },
 };

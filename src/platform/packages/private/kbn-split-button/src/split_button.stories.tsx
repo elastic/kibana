@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { SplitButtonWithNotification } from './split_button_with_notification';
 import { SplitButton } from './split_button';
 
 const DEFAULT_SECONDARY_ICON = 'clock';
@@ -190,15 +191,17 @@ export const WithNotificationIndicator = {
   name: 'With notification indicator',
   args: {
     showNotificationIndicator: true,
-    notifcationIndicatorTooltipContent: 'You have new notifications',
+    notifcationIndicatorTooltipContent: 'You have unsaved changes',
+    size: 'm',
   },
   render: (args: {
     showNotificationIndicator: boolean;
     notifcationIndicatorTooltipContent: string;
+    size: React.ComponentProps<typeof SplitButton>['size'];
   }) => (
-    <SplitButton secondaryButtonIcon={DEFAULT_SECONDARY_ICON} {...args}>
-      Notifications
-    </SplitButton>
+    <SplitButtonWithNotification secondaryButtonIcon={DEFAULT_SECONDARY_ICON} {...args}>
+      Save
+    </SplitButtonWithNotification>
   ),
 };
 
@@ -207,17 +210,19 @@ export const WithCustomColorIndicator = {
   args: {
     showNotificationIndicator: true,
     notificationIndicatorColor: 'success',
-    notifcationIndicatorTooltipContent: 'Everything is up to date',
+    notifcationIndicatorTooltipContent: 'You have unsaved changes',
+    size: 'm',
   },
   render: (args: {
     showNotificationIndicator: boolean;
     notificationIndicatorColor: React.ComponentProps<
-      typeof SplitButton
+      typeof SplitButtonWithNotification
     >['notificationIndicatorColor'];
     notifcationIndicatorTooltipContent: string;
+    size: React.ComponentProps<typeof SplitButton>['size'];
   }) => (
-    <SplitButton secondaryButtonIcon={DEFAULT_SECONDARY_ICON} {...args}>
-      Status
-    </SplitButton>
+    <SplitButtonWithNotification secondaryButtonIcon={DEFAULT_SECONDARY_ICON} {...args}>
+      Save
+    </SplitButtonWithNotification>
   ),
 };
