@@ -57,7 +57,13 @@ export const INTEGRATIONS: Record<InventoryItemType, { label: string; documentat
   },
 } as const;
 
-export function SupportedDataTooltipLink({ nodeType }: { nodeType: InventoryItemType }) {
+export function SupportedDataTooltipLink({
+  nodeType,
+  isAlertUI = false,
+}: {
+  nodeType: InventoryItemType;
+  isAlertUI?: boolean;
+}) {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -68,7 +74,7 @@ export function SupportedDataTooltipLink({ nodeType }: { nodeType: InventoryItem
         target="_blank"
         external
         css={{
-          height: euiTheme.size.xl,
+          height: !isAlertUI ? euiTheme.size.xl : '30px',
           display: 'inline-flex',
           alignItems: 'center',
         }}
