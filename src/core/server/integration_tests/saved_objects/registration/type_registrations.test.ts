@@ -175,6 +175,8 @@ const previouslyRegisteredTypes = [
   'usage-counters', // deprecated in favor of 'usage-counter'
   'visualization',
   'workplace_search_telemetry',
+  'trial-companion-nba-milestone',
+  'trial-companion-nba-milestone-user-seen',
 ].sort();
 
 describe('SO type registrations', () => {
