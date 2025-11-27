@@ -1602,7 +1602,7 @@
           },
           ", es: ",
           "default",
-          ", index?: (\".alerts-security.alerts-*\" | \".preview.alerts-security.alerts-*\")[]) => Promise<void>"
+          ", index?: (\".alerts-security.alerts-*\" | \".preview.alerts-security.alerts-*\" | \".alerts-security.attack.discovery.alerts-*\")[]) => Promise<void>"
         ],
         "path": "x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response/alerts/delete_all_alerts.ts",
         "deprecated": false,
@@ -1667,7 +1667,7 @@
             "label": "index",
             "description": [],
             "signature": [
-              "(\".alerts-security.alerts-*\" | \".preview.alerts-security.alerts-*\")[]"
+              "(\".alerts-security.alerts-*\" | \".preview.alerts-security.alerts-*\" | \".alerts-security.attack.discovery.alerts-*\")[]"
             ],
             "path": "x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response/alerts/delete_all_alerts.ts",
             "deprecated": false,
