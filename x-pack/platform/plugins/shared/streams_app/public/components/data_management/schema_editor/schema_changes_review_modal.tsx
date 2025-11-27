@@ -73,7 +73,8 @@ export function SchemaChangesReviewModal({
     onClose();
   }, [submitChanges, onClose]);
 
-  const [hasSimulationErrors, setHasSimulationErrors] = React.useState(false);
+  const [hasBlockingSimulationErrors, setHasBlockingSimulationErrors] = React.useState(false);
+  const [hasNonBlockingSimulationErrors, setHasNonBlockingSimulationErrors] = React.useState(false);
   const [simulationError, setSimulationError] = React.useState<string | null>(null);
   const [isSimulating, setIsSimulating] = React.useState(false);
   useEffect(() => {
@@ -103,20 +104,17 @@ export function SchemaChangesReviewModal({
         );
 
         if (simulationResults.status === 'failure') {
-          setHasSimulationErrors(true);
+          setHasBlockingSimulationErrors(true);
           setSimulationError(simulationResults.simulationError);
         }
       } catch (err) {
         const errorMessage = getFormattedError(err).message;
 
         // Check if error is caused by expensive queries being disabled
-        const isExpensiveQueriesError =
-          errorMessage.includes('allow_expensive_queries') ||
-          errorMessage.includes('runtime_mappings') ||
-          errorMessage.includes('runtime fields');
+        const isExpensiveQueriesError = errorMessage.includes('allow_expensive_queries');
 
         if (isExpensiveQueriesError) {
-          // Show warning but don't block submission
+          setHasNonBlockingSimulationErrors(true);
           setSimulationError(
             i18n.translate(
               'xpack.streams.schemaEditor.confirmChangesModal.expensiveQueriesDisabledWarning',
@@ -129,7 +127,7 @@ export function SchemaChangesReviewModal({
             )
           );
         } else {
-          setHasSimulationErrors(true);
+          setHasBlockingSimulationErrors(true);
           setSimulationError(errorMessage);
         }
       } finally {
@@ -335,7 +333,7 @@ export function SchemaChangesReviewModal({
           )}
         </EuiText>
         <EuiSpacer size="m" />
-        {(hasSimulationErrors || simulationError) && (
+        {(hasBlockingSimulationErrors || hasNonBlockingSimulationErrors) && (
           <>
             <EuiCallOut
               announceOnMount
@@ -370,7 +368,7 @@ export function SchemaChangesReviewModal({
           color="primary"
           onClick={handleSubmit}
           isLoading={loading || isSimulating}
-          disabled={isSimulating || hasSimulationErrors}
+          disabled={isSimulating || hasBlockingSimulationErrors}
           data-test-subj="streamsAppSchemaChangesReviewModalSubmitButton"
         >
           {isSimulating
