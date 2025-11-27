@@ -29,6 +29,7 @@ import type { SchemaEditorField } from '../schema_editor/types';
 import { DataSourcesControls } from './data_sources_controls';
 import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
 import { useDataSourceSelector } from './state_management/data_source_state_machine';
+import { selectWhetherThereAreOutdatedDocumentsInSimulation } from './state_management/stream_enrichment_state_machine/selectors';
 
 export const SimulationPlayground = ({
   schemaEditorFields,
@@ -57,9 +58,11 @@ export const SimulationPlayground = ({
     state ? state.matches({ enabled: 'loadingData' }) : false
   );
 
-  const hasOutdatedDocuments = useDataSourceSelector(
-    activeDataSourceRef,
-    (state) => state?.context.hasOutdatedDocuments ?? false
+  const hasOutdatedDocuments = useStreamEnrichmentSelector((state) =>
+    selectWhetherThereAreOutdatedDocumentsInSimulation(
+      state.context,
+      activeDataSourceRef?.getSnapshot().context
+    )
   );
 
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
