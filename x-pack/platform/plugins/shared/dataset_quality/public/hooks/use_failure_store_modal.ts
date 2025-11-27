@@ -105,7 +105,7 @@ export function useFailureStoreModal() {
       showIlmDescription: !isServerless,
       canShowDisableLifecycle: !isServerless,
       disableButtonLabel: i18n.translate(
-        'xpack.streams.dataManagement.streamDetailFailureStore.indefiniteButtonLabel',
+        'xpack.datasetQuality.failureStoreModal.indefiniteButtonLabel',
         {
           defaultMessage: 'Indefinite',
         }
