@@ -8,8 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { CustomCellRenderer } from '@kbn/unified-data-table';
-import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { CustomCellRenderer, DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { ThreatHuntingEntitiesTable } from './threat_hunting_entities_table';
 import { TestProviders } from '../../../common/mock';
 import type { AssetInventoryURLStateResult } from '../../../asset_inventory/hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
@@ -59,7 +58,7 @@ jest.mock('../../../asset_inventory/components/asset_inventory_data_table', () =
             {renderers[entityNameField]({
               rowIndex: 0,
               row: mockRows[0],
-            } as EuiDataGridCellValueElementProps)}
+            } as unknown as DataGridCellValueElementProps)}
           </div>
         )}
         {renderers[entityRiskField] && (
@@ -67,7 +66,7 @@ jest.mock('../../../asset_inventory/components/asset_inventory_data_table', () =
             {renderers[entityRiskField]({
               rowIndex: 0,
               row: mockRows[0],
-            } as EuiDataGridCellValueElementProps)}
+            } as unknown as DataGridCellValueElementProps)}
           </div>
         )}
       </div>
