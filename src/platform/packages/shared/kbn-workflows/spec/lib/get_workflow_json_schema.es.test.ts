@@ -15,7 +15,7 @@ import { generateYamlSchemaFromConnectors } from './generate_yaml_schema_from_co
 import { getWorkflowJsonSchema } from './get_workflow_json_schema';
 import { ES_SAMPLE_STEPS } from './samples';
 import { getValidateWithYamlLsp, type ValidateWithYamlLspFunction } from './validate_with_yaml_lsp';
-import { GENERATED_ELASTICSEARCH_CONNECTORS } from '../elasticsearch/elasticsearch_connectors.gen';
+import { getElasticsearchConnectors } from '../elasticsearch';
 
 describe('getWorkflowJsonSchema / elasticsearch connectors', () => {
   let jsonSchema: JSONSchema.JSONSchema;
@@ -23,7 +23,7 @@ describe('getWorkflowJsonSchema / elasticsearch connectors', () => {
   let validateWithYamlLsp: ValidateWithYamlLspFunction;
 
   beforeAll(() => {
-    const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_ELASTICSEARCH_CONNECTORS);
+    const workflowSchema = generateYamlSchemaFromConnectors(getElasticsearchConnectors());
     jsonSchema = getWorkflowJsonSchema(workflowSchema) as JSONSchema.JSONSchema;
     const ajv = new Ajv({ strict: false, validateFormats: false, discriminator: true });
     validateAjv = ajv.compile(jsonSchema);

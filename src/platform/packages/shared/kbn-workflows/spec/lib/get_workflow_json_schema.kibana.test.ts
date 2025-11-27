@@ -16,7 +16,7 @@ import { getWorkflowJsonSchema } from './get_workflow_json_schema';
 import { KIBANA_SAMPLE_STEPS } from './samples';
 import type { ValidateWithYamlLspFunction } from './validate_with_yaml_lsp';
 import { getValidateWithYamlLsp } from './validate_with_yaml_lsp';
-import { GENERATED_KIBANA_CONNECTORS } from '../kibana/kibana_connectors.gen';
+import { getKibanaConnectors } from '../kibana';
 
 describe('getWorkflowJsonSchema / kibana connectors', () => {
   let validateAjv: ValidateFunction;
@@ -24,7 +24,7 @@ describe('getWorkflowJsonSchema / kibana connectors', () => {
   let validateWithYamlLsp: ValidateWithYamlLspFunction;
 
   beforeAll(() => {
-    const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
+    const workflowSchema = generateYamlSchemaFromConnectors(getKibanaConnectors());
     jsonSchema = getWorkflowJsonSchema(workflowSchema) as JSONSchema.JSONSchema;
     const ajv = new Ajv({ strict: false, validateFormats: false, discriminator: true });
     validateAjv = ajv.compile(jsonSchema);

@@ -8,24 +8,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { JSONSchema } from '@kbn/zod/v4/core';
 import { getWorkflowJsonSchema } from './get_workflow_json_schema';
-import { getOrResolveObject } from '../../common/utils';
 import { WorkflowSchema } from '../schema';
-
-function findStepTypeSchema(
-  jsonSchema: JSONSchema.JSONSchema,
-  stepType: string
-): JSONSchema.JSONSchema | undefined {
-  const stepsItems = (jsonSchema as any).properties?.steps?.items;
-  if (!stepsItems) {
-    return undefined;
-  }
-  const stepsItemsResolved = getOrResolveObject(stepsItems, jsonSchema);
-  return (stepsItemsResolved as JSONSchema.JSONSchema).anyOf?.find(
-    (step: any) => step.properties?.type?.const === stepType
-  );
-}
 
 describe('getWorkflowJsonSchema', () => {
   it('should set `additionalProperties: {}` for loose objects', () => {

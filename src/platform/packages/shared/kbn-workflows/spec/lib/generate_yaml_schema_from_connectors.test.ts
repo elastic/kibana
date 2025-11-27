@@ -16,6 +16,9 @@ describe('generateYamlSchemaFromConnectors', () => {
     it('should generate a valid YAML schema from connectors', () => {
       const connectors: ConnectorContractUnion[] = [
         {
+          connectorGroup: 'static',
+          summary: 'Console',
+          description: 'Console',
           type: 'console',
           paramsSchema: z.object({
             message: z.string(),
