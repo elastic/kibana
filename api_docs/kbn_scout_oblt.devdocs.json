@@ -8898,7 +8898,7 @@
               "Locator",
               "; waitForSelector: (selector: string, options?: PageWaitForSelectorOptions | undefined) => Promise<",
               "ElementHandle",
-              "<HTMLElement | SVGElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; }; }"
+              "<HTMLElement | SVGElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
             "deprecated": false,
@@ -9112,6 +9112,22 @@
             "description": [],
             "signature": [
               "2 | 1 | 3 | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ScoutPlaywrightOptions.runGlobalSetup",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "runGlobalSetup",
+            "description": [
+              "\nWhen true, runs global.setup.ts as a pre-step before running tests.\nDefaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
             "deprecated": false,
@@ -9417,7 +9433,7 @@
               "Locator",
               "; waitForSelector: (selector: string, options?: PageWaitForSelectorOptions | undefined) => Promise<",
               "ElementHandle",
-              "<HTMLElement | SVGElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; }; }"
+              "<HTMLElement | SVGElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
             "deprecated": false,
@@ -9927,7 +9943,7 @@
           "Locator",
           "; waitForSelector: (selector: string, options?: PageWaitForSelectorOptions | undefined) => Promise<",
           "ElementHandle",
-          "<HTMLElement | SVGElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; }; }"
+          "<HTMLElement | SVGElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/test/scout_page/index.ts",
         "deprecated": false,
