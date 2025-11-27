@@ -28,8 +28,8 @@ const SPACES = {
   },
 } as const;
 
-const NEW_ATTRIBUTE_KEY = 'title';
-const NEW_ATTRIBUTE_VAL = `New attribute value ${Date.now()}`;
+const ATTRIBUTE_TITLE_KEY = 'title';
+const ATTRIBUTE_TITLE_VALUE = `Hello world`;
 
 const TEST_SPACES = [SPACES.DEFAULT, SPACES.SPACE_1] as const;
 
@@ -69,7 +69,7 @@ TEST_SPACES.forEach((space) => {
           {
             type: 'dashboard',
             id: uniqueId,
-            attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
+            attributes: { [ATTRIBUTE_TITLE_KEY]: ATTRIBUTE_TITLE_VALUE },
             overwrite: true,
           },
           space.spaceId
@@ -81,7 +81,7 @@ TEST_SPACES.forEach((space) => {
           {
             type: 'dashboard',
             id: uniqueId,
-            attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
+            attributes: { [ATTRIBUTE_TITLE_KEY]: ATTRIBUTE_TITLE_VALUE },
             overwrite: false,
           },
           space.spaceId
@@ -103,7 +103,7 @@ TEST_SPACES.forEach((space) => {
         {
           type: 'dashboard',
           id: uniqueId,
-          attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
+          attributes: { [ATTRIBUTE_TITLE_KEY]: ATTRIBUTE_TITLE_VALUE },
           overwrite: false,
         },
         space.spaceId
@@ -115,7 +115,7 @@ TEST_SPACES.forEach((space) => {
         {
           type: 'dashboard',
           id: uniqueId,
-          attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
+          attributes: { [ATTRIBUTE_TITLE_KEY]: ATTRIBUTE_TITLE_VALUE },
           overwrite: true,
         },
         space.spaceId
@@ -135,7 +135,7 @@ TEST_SPACES.forEach((space) => {
         const response = await apiServices.savedObjects.create(
           {
             type: 'dashboard',
-            attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
+            attributes: { [ATTRIBUTE_TITLE_KEY]: ATTRIBUTE_TITLE_VALUE },
             overwrite: false,
           },
           space.spaceId
@@ -144,7 +144,7 @@ TEST_SPACES.forEach((space) => {
         expect(response.status).toBe(200);
         expect(response.data.type).toBe('dashboard');
         expect(response.data.id).toBeDefined();
-        expect(response.data.attributes[NEW_ATTRIBUTE_KEY]).toBe(NEW_ATTRIBUTE_VAL);
+        expect(response.data.attributes[ATTRIBUTE_TITLE_KEY]).toBe(ATTRIBUTE_TITLE_VALUE);
         expect(response.data.namespaces).toStrictEqual([space.spaceId]);
 
         // Cleanup
@@ -157,7 +157,7 @@ TEST_SPACES.forEach((space) => {
         {
           type: 'hiddentype',
           id: 'some-id',
-          attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
+          attributes: { [ATTRIBUTE_TITLE_KEY]: ATTRIBUTE_TITLE_VALUE },
           overwrite: false,
         },
         space.spaceId
