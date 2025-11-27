@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { groupBy } from 'lodash';
 import { clampIntervals } from '../../../../lib/rule_gaps/gap/interval_utils';
 import type { BulkFillGapsByRuleIdsParams } from './types';
 import type { Gap } from '../../../../lib/rule_gaps/gap';
@@ -39,14 +40,7 @@ export const processGapsBatch = async (
   const { start, end } = range;
 
   // Group gaps by rule ID
-  const gapsByRuleId = new Map<string, Gap[]>();
-  for (const gap of gapsBatch) {
-    const ruleId = gap.ruleId;
-    if (!gapsByRuleId.has(ruleId)) {
-      gapsByRuleId.set(ruleId, []);
-    }
-    gapsByRuleId.get(ruleId)?.push(gap);
-  }
+  const gapsByRuleId = groupBy(gapsBatch, 'ruleId');
 
   const schedulingPayloads: Array<{
     ruleId: string;
@@ -64,7 +58,7 @@ export const processGapsBatch = async (
   const endDate = new Date(end);
 
   // Prepare all scheduling payloads from all rules
-  for (const [ruleId, gapBatchForRule] of gapsByRuleId) {
+  for (const [ruleId, gapBatchForRule] of Object.entries(gapsByRuleId)) {
     let ruleGapsClampedIntervals = gapBatchForRule
       .map((gap) => ({
         gap,

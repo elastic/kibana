@@ -63,6 +63,26 @@
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImportVTwo",
+            "id": "def-server.AutomaticImportV2PluginSetupDependencies.taskManager",
+            "type": "Object",
+            "tags": [],
+            "label": "taskManager",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskManagerSetupContract",
+                "text": "TaskManagerSetupContract"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -174,6 +194,32 @@
                 "section": "def-server.SecurityPluginStart",
                 "text": "SecurityPluginStart"
               }
+            ],
+            "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "automaticImportVTwo",
+            "id": "def-server.AutomaticImportV2PluginStartDependencies.taskManager",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "taskManager",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "TaskScheduling",
+              ", \"schedule\" | \"runSoon\" | \"bulkEnable\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkDisable\" | \"bulkSchedule\" | \"bulkUpdateState\"> & Pick<",
+              "TaskStore",
+              ", \"get\" | \"aggregate\" | \"fetch\" | \"bulkGet\" | \"remove\" | \"bulkRemove\"> & { removeIfExists: (id: string) => Promise<void>; } & { getRegisteredTypes: () => string[]; registerEncryptedSavedObjectsClient: (client: ",
+              {
+                "pluginId": "@kbn/encrypted-saved-objects-shared",
+                "scope": "common",
+                "docId": "kibKbnEncryptedSavedObjectsSharedPluginApi",
+                "section": "def-common.EncryptedSavedObjectsClient",
+                "text": "EncryptedSavedObjectsClient"
+              },
+              ") => void; }"
             ],
             "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/types.ts",
             "deprecated": false,

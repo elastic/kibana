@@ -173,7 +173,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
     };
   }
 
-  protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
+  protected handleFailure(input: any, error: any): RunStepResult {
     let errorMessage: string;
     let isAborted = false;
 

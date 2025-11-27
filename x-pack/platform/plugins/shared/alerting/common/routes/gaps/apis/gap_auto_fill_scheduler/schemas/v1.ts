@@ -16,7 +16,8 @@ const { maxBackfills, numRetries, minScheduleIntervalInMs } = gapAutoFillSchedul
 
 const validateGapAutoFillSchedulerPayload = (
   gapFillRange: string,
-  schedule: { interval: string }
+  schedule: { interval: string },
+  ruleTypes: { type: string; consumer: string }[]
 ) => {
   const now = new Date();
   const parsed = dateMath.parse(gapFillRange, { forceNow: now });
@@ -41,6 +42,16 @@ const validateGapAutoFillSchedulerPayload = (
     }
   } catch (error) {
     return `schedule.interval is invalid: ${(error as Error).message}`;
+  }
+
+  // Duplicate check for rule_types
+  const seen = new Set<string>();
+  for (const ruleType of ruleTypes) {
+    const key = `${ruleType.type}:${ruleType.consumer}`;
+    if (seen.has(key)) {
+      return `rule_types contains duplicate entry: type="${ruleType.type}" consumer="${ruleType.consumer}"`;
+    }
+    seen.add(key);
   }
 };
 
@@ -68,8 +79,12 @@ export const gapAutoFillSchedulerBodySchema = schema.object(
     ),
   },
   {
-    validate({ gap_fill_range: gapFillRange, schedule }) {
-      return validateGapAutoFillSchedulerPayload(gapFillRange, schedule);
+    validate(payload) {
+      return validateGapAutoFillSchedulerPayload(
+        payload.gap_fill_range,
+        payload.schedule,
+        payload.rule_types
+      );
     },
   }
 );
@@ -94,7 +109,11 @@ export const gapAutoFillSchedulerUpdateBodySchema = schema.object(
   },
   {
     validate(payload) {
-      return validateGapAutoFillSchedulerPayload(payload.gap_fill_range, payload.schedule);
+      return validateGapAutoFillSchedulerPayload(
+        payload.gap_fill_range,
+        payload.schedule,
+        payload.rule_types
+      );
     },
   }
 );

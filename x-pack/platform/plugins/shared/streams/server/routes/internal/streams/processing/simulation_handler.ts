@@ -712,7 +712,9 @@ const getDocumentStatus = (
     return 'skipped';
   }
 
-  if (processorResults.every(isDroppedProcessor)) {
+  // If any processor dropped the document, it should be considered dropped
+  // (even if other processors succeeded before the drop)
+  if (processorResults.some(isDroppedProcessor)) {
     return 'dropped';
   }
 

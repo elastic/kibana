@@ -57,11 +57,8 @@ export class Gap {
     if (timestamp) {
       this._timestamp = timestamp;
     }
-    if (updatedAt) {
-      this._updatedAt = updatedAt;
-    } else {
-      this._updatedAt = new Date().toISOString();
-    }
+
+    this._updatedAt = updatedAt ?? new Date().toISOString();
     this._ruleId = ruleId;
   }
 
