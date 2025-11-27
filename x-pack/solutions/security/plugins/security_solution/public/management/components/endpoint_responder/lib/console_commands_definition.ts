@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getMemoryDumpHelpUsage } from './get_memory_dump_help_usage';
 import { MemoryDumpActionResult } from '../command_render_components/memory_dump_action';
 import { CancelActionResult } from '../command_render_components/cancel_action';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
@@ -563,7 +564,6 @@ export const getEndpointConsoleCommands = ({
                   }
                 ),
                 mustHaveValue: 'truthy',
-                selectorShowTextValue: true,
                 SelectorComponent: PendingActionsSelector,
               },
             }
@@ -659,20 +659,6 @@ export const getEndpointConsoleCommands = ({
       },
       mustHaveArgs: true,
       args: {
-        kernel: {
-          about: CONSOLE_COMMANDS.memoryDump.kernelArgAbout,
-          required: false,
-          allowMultiples: false,
-          mustHaveValue: false,
-          exclusiveOr: true,
-          validate: () => {
-            if (!endpointSupportsKernelDump) {
-              return getMemoryDumpTypeNotSupportedMessage('kernel');
-            }
-
-            return true;
-          },
-        },
         process: {
           about: CONSOLE_COMMANDS.memoryDump.processArgAbout,
           required: false,
@@ -682,6 +668,20 @@ export const getEndpointConsoleCommands = ({
           validate: () => {
             if (!endpointSupportsProcessDump) {
               return getMemoryDumpTypeNotSupportedMessage('process');
+            }
+
+            return true;
+          },
+        },
+        kernel: {
+          about: CONSOLE_COMMANDS.memoryDump.kernelArgAbout,
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: false,
+          exclusiveOr: true,
+          validate: () => {
+            if (!endpointSupportsKernelDump) {
+              return getMemoryDumpTypeNotSupportedMessage('kernel');
             }
 
             return true;
@@ -706,6 +706,7 @@ export const getEndpointConsoleCommands = ({
       helpCommandPosition: 6,
       helpDisabled: !doesEndpointSupportCommand('memory-dump'),
       helpHidden: !getRbacControl({ commandName: 'execute', privileges: endpointPrivileges }),
+      helpUsage: getMemoryDumpHelpUsage(),
     });
   }
 
@@ -838,7 +839,6 @@ const adjustCommandsForSentinelOne = ({
             ),
             mustHaveValue: 'non-empty-string',
             SelectorComponent: CustomScriptSelector,
-            selectorShowTextValue: true,
           },
           inputParams: {
             required: false,
@@ -849,7 +849,6 @@ const adjustCommandsForSentinelOne = ({
             ),
             mustHaveValue: 'non-empty-string',
             SelectorComponent: SentinelOneScriptInputParams,
-            selectorShowTextValue: true,
           },
           ...commandCommentArgument(),
         };
@@ -941,7 +940,7 @@ const adjustCommandsForCrowdstrike = ({
         return {
           ...command,
           exampleUsage: `runscript --Raw=\`\`\`Get-ChildItem .\`\`\` --CommandLine=""`,
-          helpUsage: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.helpUsage,
+          helpExample: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.helpExample,
           mustHaveArgs: true,
           args: {
             Raw: {
@@ -957,7 +956,6 @@ const adjustCommandsForCrowdstrike = ({
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
               mustHaveValue: 'truthy',
               exclusiveOr: true,
-              selectorShowTextValue: true,
               SelectorComponent: CustomScriptSelector,
             },
             CommandLine: {
@@ -965,7 +963,6 @@ const adjustCommandsForCrowdstrike = ({
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.commandLine.about,
               mustHaveValue: 'non-empty-string',
-              selectorShowTextValue: true,
               SelectorComponent: CrowdstrikeScriptInputParams,
             },
             HostPath: {
@@ -1031,7 +1028,6 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
               allowMultiples: false,
               about: MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS.runscript.args.scriptName.about,
               mustHaveValue: 'truthy',
-              selectorShowTextValue: true,
               SelectorComponent: CustomScriptSelector,
             },
             Args: {
@@ -1039,7 +1035,6 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
               allowMultiples: false,
               about: MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS.runscript.args.args.about,
               mustHaveValue: 'non-empty-string',
-              selectorShowTextValue: true,
               SelectorComponent: MicrosoftScriptInputParams,
             },
             ...commandCommentArgument(),

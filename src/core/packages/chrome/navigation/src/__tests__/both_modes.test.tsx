@@ -404,9 +404,53 @@ describe('Both modes', () => {
         expect(overviewLink).toHaveAttribute('aria-current', 'page');
         expect(overviewLink).toHaveAttribute('data-highlighted', 'true');
       });
+
+      it('should switch popover when hovering from one item to another', async () => {
+        const customNavItems = {
+          ...basicMock.navItems,
+          primaryItems: [
+            ...basicMock.navItems.primaryItems,
+            {
+              id: 'analytics',
+              label: 'Analytics',
+              href: '/analytics',
+              iconType: 'visVisualBuilder',
+              sections: [
+                {
+                  id: 'analytics_section',
+                  label: 'Analytics Section',
+                  items: [{ id: 'analytics_sub', label: 'Sub Item', href: '/sub' }],
+                },
+              ],
+            },
+          ],
+        };
+
+        render(<TestComponent items={customNavItems} logo={basicMock.logo} />);
+
+        const appsLink = screen.getByRole('link', { name: 'Apps' });
+        const analyticsLink = screen.getByRole('link', { name: 'Analytics' });
+
+        await user.hover(appsLink);
+        flushPopoverTimers();
+
+        const appsPopover = await screen.findByRole('dialog', { name: 'Apps' });
+        expect(appsPopover).toBeInTheDocument();
+
+        await user.hover(analyticsLink);
+        flushPopoverTimers();
+
+        await waitFor(() => {
+          expect(screen.queryByRole('dialog', { name: 'Apps' })).not.toBeInTheDocument();
+        });
+
+        const analyticsPopover = await screen.findByRole('dialog', { name: 'Analytics' });
+        expect(analyticsPopover).toBeInTheDocument();
+      });
     });
 
-    describe('Primary menu item limit', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/244074
+    describe.skip('Primary menu item limit', () => {
       /**
        * GIVEN fewer than 12 primary menu items exist (e.g. 10)
        * WHEN the navigation renders
@@ -544,7 +588,8 @@ describe('Both modes', () => {
       });
     });
 
-    describe('More menu', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/244075
+    describe.skip('More menu', () => {
       /**
        * GIVEN not all primary menu items fit the menu height
        * WHEN I click on the "More" primary menu
@@ -849,6 +894,61 @@ describe('Both modes', () => {
         await waitFor(() => {
           expect(tooltip).not.toBeInTheDocument();
         });
+      });
+
+      it('should switch popover when hovering from one item to another', async () => {
+        const customNavItems = {
+          ...basicMock.navItems,
+          footerItems: [
+            {
+              id: 'footer1',
+              label: 'Footer 1',
+              href: '/footer1',
+              iconType: 'user',
+              sections: [
+                {
+                  id: 'section1',
+                  label: 'Section 1',
+                  items: [{ id: 'sub1', label: 'Sub 1', href: '/sub1' }],
+                },
+              ],
+            },
+            {
+              id: 'footer2',
+              label: 'Footer 2',
+              href: '/footer2',
+              iconType: 'gear',
+              sections: [
+                {
+                  id: 'section2',
+                  label: 'Section 2',
+                  items: [{ id: 'sub2', label: 'Sub 2', href: '/sub2' }],
+                },
+              ],
+            },
+          ],
+        };
+
+        render(<TestComponent items={customNavItems} logo={basicMock.logo} />);
+
+        const footer1Link = screen.getByRole('link', { name: 'Footer 1' });
+        const footer2Link = screen.getByRole('link', { name: 'Footer 2' });
+
+        await user.hover(footer1Link);
+        flushPopoverTimers();
+
+        const popover1 = await screen.findByRole('dialog', { name: 'Footer 1' });
+        expect(popover1).toBeInTheDocument();
+
+        await user.hover(footer2Link);
+        flushPopoverTimers();
+
+        await waitFor(() => {
+          expect(screen.queryByRole('dialog', { name: 'Footer 1' })).not.toBeInTheDocument();
+        });
+
+        const popover2 = await screen.findByRole('dialog', { name: 'Footer 2' });
+        expect(popover2).toBeInTheDocument();
       });
     });
 

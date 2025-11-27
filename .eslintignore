@@ -36,3 +36,4 @@ snapshots.js
 /src/platform/packages/shared/kbn-monaco/src/**/antlr
 /src/platform/packages/shared/kbn-esql-ast/src/**/antlr
 /src/platform/packages/shared/kbn-workflows/common/generated
+/x-pack/platform/plugins/shared/screenshotting/chromium

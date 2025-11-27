@@ -67,6 +67,7 @@ describe('requestOAuthClientCredentialsToken', () => {
       Array [
         "https://test",
         Object {
+          "beforeRedirect": [Function],
           "data": "client_id=123456&client_secret=secrert123&grant_type=client_credentials&scope=test",
           "headers": Object {
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",

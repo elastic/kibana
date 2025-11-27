@@ -315,12 +315,7 @@ export function AddSignificantEventFlyout({
                         }}
                         definition={definition}
                         dataViews={dataViewsFetch.value ?? []}
-                        features={
-                          features.map((feature) => ({
-                            name: feature.name,
-                            filter: feature.filter,
-                          })) || []
-                        }
+                        features={features}
                       />
                     </>
                   )}

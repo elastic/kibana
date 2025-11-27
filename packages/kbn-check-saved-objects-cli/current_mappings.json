@@ -651,9 +651,6 @@
         },
         "type": "nested"
       },
-      "total_observables": {
-        "type": "integer"
-      },
       "owner": {
         "type": "keyword"
       },
@@ -691,6 +688,9 @@
         "type": "integer"
       },
       "total_events": {
+        "type": "integer"
+      },
+      "total_observables": {
         "type": "integer"
       },
       "updated_at": {
@@ -2635,6 +2635,10 @@
       "has_seen_add_data_notice": {
         "index": false,
         "type": "boolean"
+      },
+      "ilm_migration_status": {
+        "dynamic": false,
+        "properties": {}
       },
       "output_secret_storage_requirements_met": {
         "type": "boolean"

@@ -67,7 +67,8 @@ import { muteInstance } from '../application/rule/methods/mute_alert/mute_instan
 import { unmuteAll } from '../application/rule/methods/unmute_all';
 import { muteAll } from '../application/rule/methods/mute_all';
 import { unmuteInstance } from '../application/rule/methods/unmute_alert/unmute_instance';
-import { runSoon } from './methods/run_soon';
+import type { RunSoonParams } from '../application/rule/methods/run_soon';
+import { runSoon } from '../application/rule/methods/run_soon';
 import { listRuleTypes } from '../application/rule/methods/rule_types/rule_types';
 import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
 import type { BulkUntrackBody } from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
@@ -80,26 +81,27 @@ import { deleteBackfill } from '../application/backfill/methods/delete';
 import type { FindBackfillParams } from '../application/backfill/methods/find/types';
 import type { DisableRuleParams } from '../application/rule/methods/disable';
 import type { EnableRuleParams } from '../application/rule/methods/enable_rule';
-import { findGaps } from '../application/rule/methods/find_gaps';
-import { fillGapById } from '../application/rule/methods/fill_gap_by_id';
-import type { FillGapByIdParams } from '../application/rule/methods/fill_gap_by_id/types';
-import type { GetRuleIdsWithGapsParams } from '../application/rule/methods/get_rule_ids_with_gaps/types';
-
-import { getRuleIdsWithGaps } from '../application/rule/methods/get_rule_ids_with_gaps';
-import { getGapsSummaryByRuleIds } from '../application/rule/methods/get_gaps_summary_by_rule_ids';
-import type { GetGapsSummaryByRuleIdsParams } from '../application/rule/methods/get_gaps_summary_by_rule_ids/types';
-import type { FindGapsParams } from '../lib/rule_gaps/types';
 import type { GetGlobalExecutionSummaryParams } from './methods/get_execution_summary';
 import { getGlobalExecutionSummaryWithAuth } from './methods/get_execution_summary';
-import { bulkFillGapsByRuleIds } from '../application/rule/methods/bulk_fill_gaps_by_rule_ids';
-import type {
-  BulkFillGapsByRuleIdsOptions,
-  BulkFillGapsByRuleIdsParams,
-} from '../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
 import type { GetRuleTypesByQueryParams } from '../application/rule/methods/get_rule_types_by_query/types';
 import { getRuleTypesByQuery } from '../application/rule/methods/get_rule_types_by_query/get_rule_types_by_query';
 import type { GetRuleTemplateParams } from '../application/rule_template/methods/get/types';
 import { getRuleTemplate } from '../application/rule_template/methods/get/get_rule_template';
+
+// Gap methods
+import { findGaps } from '../application/gaps/methods/find_gaps';
+import { fillGapById } from '../application/gaps/methods/fill_gap_by_id';
+import type { FillGapByIdParams } from '../application/gaps/methods/fill_gap_by_id/types';
+import type { GetRuleIdsWithGapsParams } from '../application/gaps/methods/get_rule_ids_with_gaps/types';
+import { getRuleIdsWithGaps } from '../application/gaps/methods/get_rule_ids_with_gaps';
+import { getGapsSummaryByRuleIds } from '../application/gaps/methods/get_gaps_summary_by_rule_ids';
+import type { GetGapsSummaryByRuleIdsParams } from '../application/gaps/methods/get_gaps_summary_by_rule_ids/types';
+import type { FindGapsParams } from '../application/gaps/types';
+import { bulkFillGapsByRuleIds } from '../application/gaps/methods/bulk_fill_gaps_by_rule_ids';
+import type {
+  BulkFillGapsByRuleIdsOptions,
+  BulkFillGapsByRuleIdsParams,
+} from '../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -210,7 +212,7 @@ export class RulesClient {
 
   public bulkUntrackAlerts = (options: BulkUntrackBody) => bulkUntrackAlerts(this.context, options);
 
-  public runSoon = (options: { id: string }) => runSoon(this.context, options);
+  public runSoon = (options: RunSoonParams) => runSoon(this.context, options);
 
   public listRuleTypes = () => listRuleTypes(this.context);
 

@@ -9,6 +9,8 @@ import type { RootSchema, SchemaArray } from '@elastic/ebt';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIGrokSuggestionLatencyProps,
+  StreamsAIDissectSuggestionAcceptedProps,
+  StreamsAIDissectSuggestionLatencyProps,
   StreamsAttachmentClickEventProps,
   StreamsAttachmentCountProps,
   StreamsChildStreamCreatedProps,
@@ -150,6 +152,75 @@ const streamsAIGrokSuggestionAcceptedSchema: RootSchema<StreamsAIGrokSuggestionA
   },
 };
 
+const streamsAIDissectSuggestionLatencySchema: RootSchema<StreamsAIDissectSuggestionLatencyProps> =
+  {
+    name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+    field: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the field used.',
+      },
+    },
+    connector_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID of the LLM connector',
+      },
+    },
+    suggestion_count: {
+      type: 'long',
+      _meta: {
+        description: 'The number of suggestions in the response',
+      },
+    },
+    match_rate: matchRate,
+    duration_ms: {
+      type: 'long',
+      _meta: {
+        description: 'The duration of the request',
+      },
+    },
+  };
+
+const streamsAIDissectSuggestionAcceptedSchema: RootSchema<StreamsAIDissectSuggestionAcceptedProps> =
+  {
+    name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+    field: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the field used.',
+      },
+    },
+    connector_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID of the LLM connector',
+      },
+    },
+    match_rate: {
+      type: 'float',
+      _meta: {
+        description: 'The success rate of suggestion',
+      },
+    },
+    detected_fields: {
+      type: 'long',
+      _meta: {
+        description: 'The number of detected fields',
+      },
+    },
+  };
+
 const wiredStreamsStatusChangedSchema: RootSchema<WiredStreamsStatusChangedProps> = {
   is_enabled: {
     type: 'boolean',
@@ -251,6 +322,8 @@ export {
   streamsAttachmentClickEventSchema,
   streamsAIGrokSuggestionLatencySchema,
   streamsAIGrokSuggestionAcceptedSchema,
+  streamsAIDissectSuggestionLatencySchema,
+  streamsAIDissectSuggestionAcceptedSchema,
   streamsRetentionChangedSchema,
   streamsProcessingSavedSchema,
   streamsChildStreamCreatedSchema,

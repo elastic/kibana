@@ -113,6 +113,10 @@ export function getSchemaAtPath(
       return { schema: current.unwrap(), scopedToPath: segments.join('.') };
     }
 
+    if (current instanceof z.ZodDefault) {
+      return { schema: current.removeDefault(), scopedToPath: segments.join('.') };
+    }
+
     return { schema: current as z.ZodType, scopedToPath: segments.join('.') };
   } catch {
     return { schema: null, scopedToPath: null };
