@@ -17,11 +17,13 @@ export function NoSuggestionsCallout({
   isLoadingSuggestions,
   onRegenerate,
   onDismiss,
+  isDisabled = false,
 }: {
   aiFeatures: AIFeatures;
   isLoadingSuggestions: boolean;
   onRegenerate: (connectorId: string) => void;
   onDismiss: () => void;
+  isDisabled?: boolean;
 }) {
   return (
     <EuiCallOut
@@ -52,6 +54,7 @@ export function NoSuggestionsCallout({
         onClick={onRegenerate}
         isLoading={isLoadingSuggestions}
         aiFeatures={aiFeatures}
+        isDisabled={isDisabled}
       >
         {i18n.translate(
           'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',

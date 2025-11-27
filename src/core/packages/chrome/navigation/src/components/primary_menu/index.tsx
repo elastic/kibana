@@ -11,7 +11,12 @@ import React, { forwardRef, useMemo } from 'react';
 import type { ForwardedRef, ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import {
+  EuiScreenReaderOnly,
+  useEuiTheme,
+  useGeneratedHtmlId,
+  type UseEuiTheme,
+} from '@elastic/eui';
 
 import { PrimaryMenuItem } from './item';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
@@ -28,8 +33,14 @@ const getPrimaryMenuStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boole
   min-height: 0;
 `;
 
+export interface PrimaryMenuIds {
+  mainNavigationInstructionsId: string;
+}
+
+export type PrimaryMenuChildren = ReactNode | ((ids: PrimaryMenuIds) => ReactNode);
+
 export interface PrimaryMenuProps {
-  children: ReactNode;
+  children: PrimaryMenuChildren;
   isCollapsed: boolean;
 }
 
@@ -41,6 +52,9 @@ interface PrimaryMenuComponent
 export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
   ({ children, isCollapsed }, ref: ForwardedRef<HTMLElement>): JSX.Element => {
     const { euiTheme } = useEuiTheme();
+    const mainNavigationInstructionsId = useGeneratedHtmlId({
+      prefix: 'main-navigation-instructions',
+    });
 
     const styles = useMemo(
       () => getPrimaryMenuStyles(euiTheme, isCollapsed),
@@ -57,20 +71,38 @@ export const PrimaryMenuBase = forwardRef<HTMLElement, PrimaryMenuProps>(
       else if (ref && 'current' in ref) ref.current = node;
     };
 
+    const renderChildren = () => {
+      if (typeof children === 'function') {
+        return children({ mainNavigationInstructionsId });
+      }
+      return children;
+    };
+
     return (
-      // The nav itself is not interactive but the children are
-      // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-      <nav
-        aria-label={i18n.translate('core.ui.chrome.sideNavigation.primaryMenuAriaLabel', {
-          defaultMessage: 'Main',
-        })}
-        css={styles}
-        id={PRIMARY_NAVIGATION_ID}
-        onKeyDown={handleRovingIndex}
-        ref={handleRef}
-      >
-        {children}
-      </nav>
+      <>
+        <EuiScreenReaderOnly>
+          <p id={mainNavigationInstructionsId}>
+            {i18n.translate('core.ui.chrome.sideNavigation.primaryMenuInstructions', {
+              defaultMessage:
+                'You are in the main navigation primary menu. Use Up and Down arrow keys to navigate the menu.',
+            })}
+          </p>
+        </EuiScreenReaderOnly>
+        {/* The footer itself is not interactive but the children are */}
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+        <nav
+          aria-label={i18n.translate('core.ui.chrome.sideNavigation.primaryMenuAriaLabel', {
+            defaultMessage: 'Main',
+          })}
+          css={styles}
+          id={PRIMARY_NAVIGATION_ID}
+          data-test-subj={PRIMARY_NAVIGATION_ID}
+          onKeyDown={handleRovingIndex}
+          ref={handleRef}
+        >
+          {renderChildren()}
+        </nav>
+      </>
     );
   }
 );
