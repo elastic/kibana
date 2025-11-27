@@ -13,8 +13,7 @@ test.describe(
   'Stream data processing - error handling and recovery',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await apiServices.streams.enable();
+    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
     });
 
@@ -27,8 +26,8 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+      await apiServices.streams.clearStreamProcessors('logs-generic-default');
       await logsSynthtraceEsClient.clean();
-      await apiServices.streams.disable();
     });
 
     test('should handle network failures during a processor creation', async ({
