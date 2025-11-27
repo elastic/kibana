@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type React from 'react';
+import React from 'react';
 import type { z } from '@kbn/zod/v4';
+import { EuiSpacer } from '@elastic/eui';
 import type { BaseWidgetProps } from '../types';
 import { getFieldsFromSchema, renderField } from '../../field_builder';
 
@@ -36,5 +37,12 @@ export const ObjectWidget: React.FC<ObjectWidgetProps> = ({
     formConfig,
   });
 
-  return fields.map((field) => renderField({ field }));
+  return fields.map((field) => {
+    return (
+      <>
+        {renderField({ field })}
+        <EuiSpacer size="m" />
+      </>
+    );
+  });
 };

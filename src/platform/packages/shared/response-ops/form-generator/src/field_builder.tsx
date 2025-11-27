@@ -11,7 +11,6 @@ import React from 'react';
 import type { z } from '@kbn/zod/v4';
 import { ZodError } from '@kbn/zod/v4';
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { EuiSpacer } from '@elastic/eui';
 import type { FormConfig } from './form';
 import { getWidgetComponent } from './widgets';
 import { extractSchemaCore } from './schema_extract_core';
@@ -151,7 +150,6 @@ export const renderField = ({ field }: RenderFieldProps) => {
           },
         }}
       />
-      <EuiSpacer size="m" />
     </React.Fragment>
   );
 };
