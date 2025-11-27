@@ -17,6 +17,15 @@ import { css } from '@emotion/react';
 export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) => {
   const { euiTheme } = euiThemeContext;
   return css`
+    /* Template expression hover highlight - blue for high contrast */
+    .template-expression-hover-inline {
+      background-color: rgba(0, 119, 204, 0.25) !important; /* Bright blue with opacity */
+      border-radius: 2px;
+      border: 1px solid ${euiTheme.colors.primary} !important;
+      padding: 0 1px;
+      box-shadow: 0 0 0 2px rgba(0, 119, 204, 0.15) !important;
+    }
+
     /* Enhanced Monaco hover styling for workflow editor */
     .monaco-editor .monaco-editor-hover:not([class*='contrib']):not([class*='glyph']),
     .monaco-hover:not([class*='contrib']):not([class*='glyph']) {

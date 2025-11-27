@@ -45,6 +45,7 @@ import {
 } from '../../../entities/workflows/store';
 import {
   selectEditorYaml,
+  selectExecution,
   selectHasChanges,
   selectIsExecutionsTab,
   selectIsSavingYaml,
@@ -61,6 +62,8 @@ import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/
 import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
+import { buildExecutionContext } from '../lib/execution_context/build_execution_context';
+import type { ExecutionContext } from '../lib/execution_context/build_execution_context';
 import {
   ElasticsearchMonacoConnectorHandler,
   GenericMonacoConnectorHandler,
@@ -70,6 +73,7 @@ import {
   registerMonacoConnectorHandler,
   registerUnifiedHoverProvider,
 } from '../lib/monaco_providers';
+import { registerTemplateExpressionHoverProvider } from '../lib/monaco_providers/template_expression_hover_provider';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
@@ -163,6 +167,18 @@ export const WorkflowYAMLEditor = ({
   const stepExecutions = useSelector(selectStepExecutions);
   const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
   stepExecutionsRef.current = stepExecutions;
+
+  const execution = useSelector(selectExecution);
+  const executionContextRef = useRef<ExecutionContext | null>(null);
+
+  // Build execution context when step executions are available
+  useEffect(() => {
+    if (isExecutionYaml && stepExecutions) {
+      executionContextRef.current = buildExecutionContext(stepExecutions, execution?.context);
+    } else {
+      executionContextRef.current = null;
+    }
+  }, [isExecutionYaml, stepExecutions, execution?.context]);
 
   // Ref to track saving state for keyboard handlers
   const isSavingRef = useRef<boolean>(false);
@@ -327,6 +343,16 @@ export const WorkflowYAMLEditor = ({
 
         const genericHandler = new GenericMonacoConnectorHandler();
         registerMonacoConnectorHandler(genericHandler);
+
+        // Register template expression hover provider FIRST (higher priority)
+        // This ensures it handles {{ }} expressions before the unified provider
+        const templateHoverDisposable = registerTemplateExpressionHoverProvider(
+          {
+            getExecutionContext: () => executionContextRef.current,
+          },
+          editor
+        );
+        disposablesRef.current.push(templateHoverDisposable);
 
         // Create unified providers
         const providerConfig = {
