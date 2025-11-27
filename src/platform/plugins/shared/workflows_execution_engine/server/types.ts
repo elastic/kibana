@@ -18,6 +18,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { IWorkflowEventLoggerService } from './workflow_event_logger';
 
 export interface ExecuteWorkflowResponse {
   workflowExecutionId: string;
@@ -30,6 +31,8 @@ export interface ExecuteWorkflowStepResponse {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExecutionEnginePluginSetup {}
 export interface WorkflowsExecutionEnginePluginStart {
+  workflowEventLoggerService: IWorkflowEventLoggerService;
+
   executeWorkflow(
     workflow: WorkflowExecutionEngineModel,
     context: Record<string, any>,

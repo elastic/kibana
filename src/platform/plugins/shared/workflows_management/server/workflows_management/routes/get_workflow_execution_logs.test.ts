@@ -115,17 +115,15 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(workflowsApi.getWorkflowExecutionLogs).toHaveBeenCalledWith(
-        {
-          executionId: 'execution-123',
-          size: 100,
-          page: 1,
-          sortField: 'timestamp',
-          sortOrder: 'desc',
-          stepExecutionId: undefined,
-        },
-        'default'
-      );
+      expect(workflowsApi.getWorkflowExecutionLogs).toHaveBeenCalledWith({
+        executionId: 'execution-123',
+        size: 100,
+        page: 1,
+        sortField: 'timestamp',
+        sortOrder: 'desc',
+        stepExecutionId: undefined,
+        spaceId: 'default',
+      });
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockLogs });
     });
 
@@ -174,12 +172,15 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(workflowsApi.getWorkflowExecutionLogs).toHaveBeenCalledWith(
-        {
-          executionId: 'execution-456',
-        },
-        'custom-space'
-      );
+      expect(workflowsApi.getWorkflowExecutionLogs).toHaveBeenCalledWith({
+        executionId: 'execution-456',
+        spaceId: 'custom-space',
+        page: undefined,
+        size: undefined,
+        sortField: undefined,
+        sortOrder: undefined,
+        stepExecutionId: undefined,
+      });
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockLogs });
     });
 
@@ -231,16 +232,14 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(workflowsApi.getWorkflowExecutionLogs).toHaveBeenCalledWith(
-        {
-          executionId: 'execution-123',
-          size: 10,
-          page: 3,
-          sortField: 'level',
-          sortOrder: 'asc',
-        },
-        'default'
-      );
+      expect(workflowsApi.getWorkflowExecutionLogs).toHaveBeenCalledWith({
+        executionId: 'execution-123',
+        size: 10,
+        page: 3,
+        sortField: 'level',
+        sortOrder: 'asc',
+        spaceId: 'default',
+      });
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockLogs });
     });
 
