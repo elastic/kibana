@@ -22,6 +22,7 @@ import type {
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
 } from './types';
+import { logEntryAttachmentType } from './attachments/log';
 
 export class ObservabilityAgentPlugin
   implements
@@ -58,6 +59,7 @@ export class ObservabilityAgentPlugin
         registerObservabilityAgent({ plugins, logger: this.logger }).catch((error) => {
           this.logger.error(`Error registering observability agent: ${error}`);
         });
+        plugins.onechat.attachments.registerType(logEntryAttachmentType);
       })
       .catch((error) => {
         this.logger.error(`Error checking whether the observability agent is enabled: ${error}`);

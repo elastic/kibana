@@ -215,7 +215,7 @@ export class DiscoverPlugin
         const unmount = renderApp({
           element: params.element,
           onAppLeave: params.onAppLeave,
-          services,
+          services: { ...services, onechat: discoverStartPlugins.onechat },
           customizationContext: defaultCustomizationContext,
         });
 

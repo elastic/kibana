@@ -6,14 +6,25 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import dedent from 'dedent';
+import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { type LogDocumentOverview, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
 import type {
   Message,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import type { LogEntryField } from '../../../common';
-import { explainLogMessageTitle, similarLogMessagesTitle } from './translations';
+import {
+  explainLogMessageTitle,
+  similarLogMessagesTitle,
+  openConversationButtonLabel,
+} from './translations';
+
+interface LogAIAssistantServices {
+  onechat?: OnechatPluginStart;
+}
 
 export interface LogAIAssistantDocument {
   fields: LogEntryField[];
@@ -31,6 +42,7 @@ export const LogAIAssistant = ({
     getContextualInsightMessages,
   },
 }: LogAIAssistantProps) => {
+  const { services } = useKibana<LogAIAssistantServices>();
   const explainLogMessageMessages = useMemo<Message[] | undefined>(() => {
     if (!doc) {
       return undefined;
@@ -95,6 +107,56 @@ export const LogAIAssistant = ({
           />
         </EuiFlexItem>
       ) : null}
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          color="primary"
+          onClick={() => {
+            if (!services.onechat) {
+              return;
+            }
+            services.onechat.openConversationFlyout({
+              newConversation: true,
+              agentId: 'observability.agent',
+              initialMessage:
+                'Explain this log message: what it means, where it is from, whether it is expected, and if it is an issue.',
+              attachments: [
+                {
+                  id: `log-entry-${Date.now()}`,
+                  type: 'observability.log_entry',
+                  getContent: () => {
+                    return {
+                      content: JSON.stringify({
+                        logEntry: {
+                          fields: doc?.fields,
+                        },
+                      }),
+                    };
+                  },
+                },
+                {
+                  id: `instructions-${Date.now()}`,
+                  type: 'text',
+                  getContent: () => ({
+                    content: dedent(`
+                <contextual_insight_instructions>
+                You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
+                Using the provided data produce a concise, action-oriented response.
+                  
+                - Only call tools if the attachments do not contain the necessary data to analyze the log message.
+                - Prefer using attachment data if possible and only call tools to fetch missing context when required.
+                </contextual_insight_instructions>
+              `),
+                  }),
+                },
+              ],
+            });
+          }}
+          disabled={!services.onechat}
+          data-test-subj="logAiAssistantOpenConversationButton"
+        >
+          {openConversationButtonLabel}
+        </EuiButton>
+      </EuiFlexItem>
     </EuiFlexGroup>
   ) : null;
 };
