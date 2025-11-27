@@ -7,31 +7,19 @@
 
 import React, { type Dispatch, memo, type SetStateAction, useCallback, useMemo } from 'react';
 import type { Filter, TimeRange } from '@kbn/es-query';
-import { TableId } from '@kbn/securitysolution-data-table';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { PageFilters } from './page_filters';
-import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
-import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
-import {
-  buildAlertAssigneesFilter,
-  buildShowBuildingBlockFilter,
-  buildThreatMatchFilter,
-} from '../../alerts_table/default_config';
 import type { Status } from '../../../../../common/api/detection_engine';
 
 export interface FiltersSectionProps {
   /**
-   * List of assignees retrieved from the assignees button on the alert page
-   */
-  assignees: AssigneesIdsSelection[];
-  /**
    * Data view used for the alerts page
    */
-  dataView: DataView | DataViewSpec;
+  dataView: DataView;
   /**
    * Callback to set the page filter handler for the alerts page to allow a refresh after the table has reloaded
    */
@@ -47,16 +35,10 @@ export interface FiltersSectionProps {
 }
 
 /**
- * UI section of the alerts page that renders the page filters
+ * UI section of the attacks page that renders the page filters
  */
 export const FiltersSection = memo(
-  ({
-    assignees,
-    dataView,
-    setPageFilterHandler,
-    setPageFilters,
-    setStatusFilter,
-  }: FiltersSectionProps) => {
+  ({ dataView, setPageFilterHandler, setPageFilters, setStatusFilter }: FiltersSectionProps) => {
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
       []
@@ -66,19 +48,6 @@ export const FiltersSection = memo(
     const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
     const { to, from } = useGlobalTime();
-
-    const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
-      TableId.alertsOnAlertsPage
-    );
-
-    const topLevelFilters = useMemo(() => {
-      return [
-        ...filters,
-        ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-        ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
-        ...buildAlertAssigneesFilter(assignees),
-      ];
-    }, [assignees, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filters]);
 
     const onFilterControlsChange = useCallback(
       (newFilters: Filter[]) => {
@@ -111,7 +80,7 @@ export const FiltersSection = memo(
 
     return (
       <PageFilters
-        filters={topLevelFilters}
+        filters={filters}
         onFiltersChange={onFilterControlsChange}
         query={query}
         timeRange={pageFiltersTimeRange}
