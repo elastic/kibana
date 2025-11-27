@@ -1989,6 +1989,38 @@
           },
           {
             "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManager.validateRole",
+            "type": "Function",
+            "tags": [],
+            "label": "validateRole",
+            "description": [],
+            "signature": [
+              "(role: string) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.SamlSessionManager.validateRole.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
             "id": "def-common.SamlSessionManager.getApiCredentialsForRole",
             "type": "Function",
             "tags": [],
