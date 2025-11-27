@@ -168,7 +168,7 @@ export const AddColumnPopover = ({
                 data-test-subj="indexEditorColumnNameInput"
                 value={columnName}
                 placeholder={i18n.translate('indexEditor.columnHeaderEdit.columnNamePlaceholder', {
-                  defaultMessage: 'Choose the name of the field',
+                  defaultMessage: 'Enter field name',
                 })}
                 fullWidth
                 controlOnly
