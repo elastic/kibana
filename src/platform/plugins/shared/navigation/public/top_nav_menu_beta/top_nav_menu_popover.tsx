@@ -1,0 +1,56 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useMemo, type ReactElement } from 'react';
+import { EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { getPopoverPanels, getTooltip } from './utils';
+import type { TopNavMenuPopoverItemBeta } from './types';
+
+interface TopNavContextMenuProps {
+  tooltipContent?: string | (() => string | undefined);
+  tooltipTitle?: string | (() => string | undefined);
+  anchorElement: ReactElement;
+  items: TopNavMenuPopoverItemBeta[];
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const TopNavMenuPopover = ({
+  items,
+  anchorElement,
+  tooltipContent,
+  tooltipTitle,
+  isOpen,
+  onClose,
+}: TopNavContextMenuProps) => {
+  const panels = useMemo(() => getPopoverPanels(items), [items]);
+  const { content, title } = getTooltip({ tooltipContent, tooltipTitle });
+  const showTooltip = Boolean(content || title);
+
+  const button = showTooltip ? (
+    <EuiToolTip delay="long" content={content} title={title}>
+      {anchorElement}
+    </EuiToolTip>
+  ) : (
+    anchorElement
+  );
+
+  return (
+    <EuiPopover
+      button={button}
+      isOpen={isOpen}
+      closePopover={onClose}
+      panelPaddingSize="none"
+      hasArrow={false}
+      anchorPosition="upLeft"
+    >
+      <EuiContextMenu initialPanelId={0} panels={panels} />
+    </EuiPopover>
+  );
+};

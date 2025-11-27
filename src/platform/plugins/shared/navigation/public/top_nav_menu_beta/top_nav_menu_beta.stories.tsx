@@ -74,12 +74,11 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
       iconType: 'exit', // use 'logOut' when added to EUI
     },
     {
-      run: () => action('export-clicked'),
       id: 'export',
       order: 2,
       label: 'export',
       testId: 'exportButton',
-      iconType: 'download',
+      iconType: 'exportAction',
       items: [
         {
           run: () => action('export-pdf-clicked'),
@@ -133,7 +132,6 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
     },
   ],
   secondaryActionItem: {
-    run: () => action('add-clicked'),
     id: 'add',
     label: 'add',
     testId: 'addButton',
@@ -165,7 +163,6 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
         testId: 'addCollapsibleSectionButton',
       },
       {
-        run: () => action('add-controls-clicked'),
         id: 'controls',
         order: 4,
         label: 'Controls',
@@ -177,7 +174,6 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
             id: 'control',
             order: 1,
             label: 'control',
-            iconType: 'analyzeEvent', // find a better icon
             testId: 'controlButton',
           },
           {
@@ -185,7 +181,6 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
             id: 'variableControl',
             order: 2,
             label: 'variable control',
-            iconType: 'analyzeEvent', // find a better icon
             testId: 'variableControlButton',
           },
           {
@@ -193,7 +188,6 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
             id: 'timeSliderControl',
             order: 3,
             label: 'time slider control',
-            iconType: 'analyzeEvent', // find a better icon
             testId: 'timeSliderControlButton',
           },
           {
@@ -201,7 +195,6 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
             id: 'settings',
             order: 4,
             label: 'setting',
-            iconType: 'gear',
             testId: 'settingButton',
           },
         ],
@@ -222,28 +215,11 @@ const dashboardEditModeConfig: TopNavMenuConfigBeta = {
     label: 'save',
     testId: 'saveButton',
     iconType: 'save',
-    items: [
-      {
-        run: () => action('save-option-clicked'),
-        id: 'saveAs',
-        order: 1,
-        label: 'Save as',
-        iconType: 'save',
-        testId: 'interactiveSaveMenuItem',
-      },
-      {
-        run: () => action('discard-changes-clicked'),
-        id: 'resetChanges',
-        order: 2,
-        label: 'Reset changes',
-        iconType: 'editorUndo',
-        testId: 'discardChangesMenuItem',
-      },
-    ],
     splitButtonProps: {
-      run: action('save-secondary-clicked'),
       secondaryButtonAriaLabel: 'Save options',
       secondaryButtonIcon: 'arrowDown',
+      notifcationIndicatorTooltipContent: 'You have unsaved changes',
+      showNotificationIndicator: true,
       items: [
         {
           run: () => action('save-option-clicked'),
@@ -324,9 +300,10 @@ const discoverConfig: TopNavMenuConfigBeta = {
     testId: 'saveButton',
     iconType: 'save',
     splitButtonProps: {
-      run: action('save-secondary-clicked'),
       secondaryButtonAriaLabel: 'Save options',
       secondaryButtonIcon: 'arrowDown',
+      notifcationIndicatorTooltipContent: 'You have unsaved changes',
+      showNotificationIndicator: true,
       items: [
         {
           run: () => action('save-option-clicked'),

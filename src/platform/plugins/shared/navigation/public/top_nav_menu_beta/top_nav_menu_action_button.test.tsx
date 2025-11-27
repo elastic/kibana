@@ -18,6 +18,9 @@ describe('TopNavMenuActionButton', () => {
     run: jest.fn(),
     iconType: 'save',
     id: 'saveButton',
+    isPopoverOpen: false,
+    onPopoverToggle: jest.fn(),
+    onPopoverClose: jest.fn(),
   };
 
   const splitButtonProps = {
@@ -43,7 +46,7 @@ describe('TopNavMenuActionButton', () => {
     await user.click(screen.getByTestId('test-action-button'));
 
     expect(defaultProps.run).toHaveBeenCalledTimes(1);
-    expect(defaultProps.run).toHaveBeenCalledWith(expect.any(HTMLElement));
+    expect(defaultProps.run).toHaveBeenCalledWith();
   });
 
   it('renders as split button', () => {

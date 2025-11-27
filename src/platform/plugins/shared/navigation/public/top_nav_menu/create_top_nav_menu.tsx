@@ -11,8 +11,7 @@ import React, { Suspense, lazy } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { RegisteredTopNavMenuDataBeta } from '../top_nav_menu_beta';
-import type { TopNavMenuPropsBeta } from '../top_nav_menu_beta/top_nav_menu_beta';
+import type { RegisteredTopNavMenuDataBeta, TopNavMenuPropsBeta } from '../top_nav_menu_beta';
 import type { TopNavMenuProps } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
@@ -47,7 +46,7 @@ export function createTopNav(
             props.config
               ? {
                   items: [
-                    ...(props.config as TopNavMenuPropsBeta<QT>['config'])!.items,
+                    ...((props.config as TopNavMenuPropsBeta<QT>['config'])?.items || []),
                     ...relevantConfig,
                   ],
                   primaryActionItem: (props.config as TopNavMenuPropsBeta<QT>['config'])!
@@ -64,7 +63,9 @@ export function createTopNav(
         <LazyTopNavMenu
           {...(props as any)}
           unifiedSearch={unifiedSearch}
-          config={((props.config as TopNavMenuProps<QT>['config']) || []).concat(relevantConfig)}
+          config={((props.config as TopNavMenuProps<QT>['config']) || []).concat(
+            relevantConfig as RegisteredTopNavMenuData[]
+          )}
         />
       </Suspense>
     );

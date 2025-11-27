@@ -8,23 +8,31 @@
  */
 
 import React from 'react';
-import { SplitButton } from '@kbn/split-button';
+import { SplitButtonWithNotification } from '@kbn/split-button';
 import { upperFirst } from 'lodash';
-import type { MouseEvent } from 'react';
-import { EuiButton, EuiToolTip } from '@elastic/eui';
-import { getTooltip, isDisabled } from './utils';
+import type { EuiButtonColor } from '@elastic/eui';
+import { EuiButton, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { getIsSelectedColor, getTooltip, isDisabled } from './utils';
 import type {
   TopNavMenuPrimaryActionItemBeta,
   TopNavMenuSecondaryActionItemBeta,
   TopNavMenuSplitButtonProps,
 } from './types';
-import { TopNavPopover } from './top_nav_popover';
+import { TopNavMenuPopover } from './top_nav_menu_popover';
 
-type TopNavMenuActionButtonProps =
+type TopNavMenuActionButtonProps = (
   | TopNavMenuPrimaryActionItemBeta
-  | TopNavMenuSecondaryActionItemBeta;
+  | TopNavMenuSecondaryActionItemBeta
+) & {
+  isPopoverOpen: boolean;
+  onPopoverToggle: () => void;
+  onPopoverClose: () => void;
+};
 
 export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const {
     run,
     htmlId,
@@ -35,40 +43,51 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
     href,
     target,
     isLoading,
-    tooltip,
-    items,
+    tooltipContent,
+    tooltipTitle,
+    isPopoverOpen,
+    onPopoverToggle,
+    onPopoverClose,
   } = props;
+
   const itemText = upperFirst(label);
+  const { title, content } = getTooltip({ tooltipContent, tooltipTitle });
+  const showTooltip = Boolean(content || title);
 
   const splitButtonProps = 'splitButtonProps' in props ? props.splitButtonProps : undefined;
   const colorProp = 'color' in props ? props.color : undefined;
-  const [isMainPopoverOpen, setIsMainPopoverOpen] = React.useState(false);
-  const [isSplitPopoverOpen, setIsSplitPopoverOpen] = React.useState(false);
+  const isFilledProp = 'isFilled' in props ? props.isFilled : undefined;
+  const items = 'items' in props ? props.items : undefined;
 
-  const splitButtonItems = splitButtonProps?.items;
-  const hasMainItems = items && items.length > 0;
+  const {
+    items: splitButtonItems,
+    run: splitButtonRun,
+    ...otherSplitButtonProps
+  } = splitButtonProps || ({} as TopNavMenuSplitButtonProps);
+
+  const hasItems = items && items.length > 0;
   const hasSplitItems = splitButtonItems && splitButtonItems.length > 0;
 
-  const handleClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+  const handleClick = () => {
     if (isDisabled(disableButton)) return;
 
-    if (hasMainItems) {
-      setIsMainPopoverOpen(!isMainPopoverOpen);
+    if (hasItems) {
+      onPopoverToggle();
       return;
     }
 
-    run();
+    run?.();
   };
 
   const handleSecondaryButtonClick = () => {
-    if (splitButtonProps?.isSecondaryButtonDisabled) return;
+    if (isDisabled(splitButtonProps?.isSecondaryButtonDisabled)) return;
 
     if (hasSplitItems) {
-      setIsSplitPopoverOpen(!isSplitPopoverOpen);
+      onPopoverToggle();
       return;
     }
 
-    splitButtonProps?.run?.();
+    splitButtonRun?.();
   };
 
   const commonProps = {
@@ -84,58 +103,82 @@ export const TopNavMenuActionButton = (props: TopNavMenuActionButtonProps) => {
     iconSize: 'm' as const,
   };
 
-  const button = splitButtonProps ? (
-    <SplitButton
-      {...(splitButtonProps as TopNavMenuSplitButtonProps)}
+  // Target the split part of the button for popover behavior
+  const splitButtonCss = css`
+    & + button {
+      background-color: ${isPopoverOpen
+        ? getIsSelectedColor({
+            color: 'text',
+            euiTheme,
+            isFilled: false,
+          })
+        : undefined};
+    }
+  `;
+
+  const buttonCss = css`
+    background-color: ${isPopoverOpen
+      ? getIsSelectedColor({
+          color: colorProp as EuiButtonColor,
+          euiTheme,
+          isFilled: Boolean(isFilledProp),
+        })
+      : undefined};
+  `;
+
+  const buttonComponent = splitButtonProps ? (
+    <SplitButtonWithNotification
+      {...otherSplitButtonProps}
       {...commonProps}
       secondaryButtonFill={false}
       onSecondaryButtonClick={handleSecondaryButtonClick}
       color="text"
+      aria-haspopup={hasSplitItems ? 'menu' : undefined}
+      isSelected={isPopoverOpen}
+      css={splitButtonCss}
     >
       {itemText}
-    </SplitButton>
+    </SplitButtonWithNotification>
   ) : (
-    <EuiButton {...commonProps} iconSide="left" color={colorProp}>
+    <EuiButton
+      {...commonProps}
+      iconSide="left"
+      color={colorProp}
+      aria-haspopup={hasItems ? 'menu' : undefined}
+      isSelected={isPopoverOpen}
+      css={buttonCss}
+    >
       {itemText}
     </EuiButton>
   );
 
-  const tooltipContent = getTooltip(tooltip);
+  /**
+   * There is an issue with passing down a button wrapped in a tooltip to popover.
+   * Because of that, popover has its own tooltip handling.
+   * So we only wrap in tooltip if there are no items (no popover).
+   */
+  const button =
+    showTooltip && !hasSplitItems && !hasItems ? (
+      <EuiToolTip content={content} title={title} delay="long">
+        {buttonComponent}
+      </EuiToolTip>
+    ) : (
+      buttonComponent
+    );
 
-  const buttonWithTooltip = tooltipContent ? (
-    <EuiToolTip content={tooltipContent}>{button}</EuiToolTip>
-  ) : (
-    button
-  );
-
-  // Handle both main items and split button items - wrap in separate popovers if needed
-  let result = buttonWithTooltip;
-
-  // First wrap with main items popover (if exists)
-  if (hasMainItems) {
-    result = (
-      <TopNavPopover
-        items={items}
-        anchorElement={result}
-        isOpen={isMainPopoverOpen}
-        onToggle={() => setIsMainPopoverOpen(!isMainPopoverOpen)}
-        onClose={() => setIsMainPopoverOpen(false)}
+  if (hasItems || hasSplitItems) {
+    return (
+      <TopNavMenuPopover
+        // For split button, only allow popover behavior on the split part of the split button
+        items={hasSplitItems ? splitButtonItems : items ?? []}
+        tooltipContent={tooltipContent}
+        tooltipTitle={tooltipTitle}
+        anchorElement={button}
+        isOpen={isPopoverOpen}
+        onClose={onPopoverClose}
       />
     );
   }
 
-  // Then wrap with split button items popover (if exists)
-  if (hasSplitItems) {
-    result = (
-      <TopNavPopover
-        items={splitButtonItems}
-        anchorElement={result}
-        isOpen={isSplitPopoverOpen}
-        onToggle={() => setIsSplitPopoverOpen(!isSplitPopoverOpen)}
-        onClose={() => setIsSplitPopoverOpen(false)}
-      />
-    );
-  }
-
-  return result;
+  return button;
 };

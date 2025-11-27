@@ -13,14 +13,12 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
-
-import type { TopNavMenuPropsBeta } from './top_nav_menu_beta/top_nav_menu_beta';
+import type { TopNavMenuPropsBeta } from './top_nav_menu_beta';
 import type {
   TopNavMenuProps,
   TopNavMenuExtensionsRegistrySetup,
   createTopNav,
 } from './top_nav_menu';
-
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
 export interface NavigationPublicSetup {

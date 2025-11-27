@@ -12,17 +12,10 @@ import type { ReactElement } from 'react';
 import React from 'react';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import type { TopNavMenuConfigBeta } from './types';
-import type { TopNavMenuProps } from '../top_nav_menu/top_nav_menu';
+import type { TopNavMenuPropsBeta } from './types';
+import { hasNoItems } from './utils';
 import { TopNavMenuBadges } from '../top_nav_menu/top_nav_menu_badges';
 import { TopNavMenuItemsBeta } from './top_nav_menu_items_beta';
-
-export type TopNavMenuPropsBeta<QT extends Query | AggregateQuery = Query> = Omit<
-  TopNavMenuProps<QT>,
-  'config'
-> & {
-  config?: TopNavMenuConfigBeta;
-};
 
 const styles = {
   badgeWrapper: css`
@@ -45,20 +38,13 @@ export function TopNavMenuBeta<QT extends AggregateQuery | Query = Query>({
   setMenuMountPoint,
   visible,
   unifiedSearch,
-  className,
   ...searchBarProps
 }: TopNavMenuPropsBeta<QT>): ReactElement | null {
-  if ((!config || config.items.length === 0) && (!showSearchBar || !unifiedSearch)) {
-    return null;
-  }
+  if ((!config || hasNoItems(config)) && (!showSearchBar || !unifiedSearch)) return null;
 
   const badgesComponent = <TopNavMenuBadges badges={badges} />;
   const menuComponent = (
-    <TopNavMenuItemsBeta
-      config={config}
-      className={className}
-      data-test-subj="kbn-top-nav-menu-wrapper"
-    />
+    <TopNavMenuItemsBeta config={config} data-test-subj="kbn-top-nav-menu-wrapper" />
   );
 
   const renderSearchBar = (): ReactElement | null => {

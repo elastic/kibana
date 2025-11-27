@@ -8,11 +8,18 @@
  */
 
 import React from 'react';
-import { EuiHeaderLink, EuiToolTip } from '@elastic/eui';
+import { EuiHeaderLink, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { upperFirst } from 'lodash';
-import { getTooltip, isDisabled } from './utils';
+import { css } from '@emotion/react';
+import { getIsSelectedColor, getTooltip, isDisabled } from './utils';
 import type { TopNavMenuItemBetaType } from './types';
-import { TopNavPopover } from './top_nav_popover';
+import { TopNavMenuPopover } from './top_nav_menu_popover';
+
+type TopNavMenuItemBetaProps = TopNavMenuItemBetaType & {
+  isPopoverOpen: boolean;
+  onPopoverToggle: () => void;
+  onPopoverClose: () => void;
+};
 
 export const TopNavMenuItemBeta = ({
   run,
@@ -24,24 +31,42 @@ export const TopNavMenuItemBeta = ({
   href,
   target,
   isLoading,
-  tooltip,
+  tooltipContent,
+  tooltipTitle,
   items,
-}: TopNavMenuItemBetaType) => {
+  isPopoverOpen,
+  onPopoverToggle,
+  onPopoverClose,
+}: TopNavMenuItemBetaProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const itemText = upperFirst(label);
+  const { title, content } = getTooltip({ tooltipContent, tooltipTitle });
+  const showTooltip = Boolean(content || title);
+  const hasItems = items && items.length > 0;
 
   const handleClick = () => {
     if (isDisabled(disableButton)) return;
 
-    if (items && items.length > 0) {
+    if (hasItems) {
+      onPopoverToggle();
       return;
     }
 
-    run();
+    run?.();
   };
 
-  const tooltipContent = getTooltip(tooltip);
+  const buttonCss = css`
+    background-color: ${isPopoverOpen
+      ? getIsSelectedColor({
+          color: 'text',
+          euiTheme,
+          isFilled: false,
+        })
+      : undefined};
+  `;
 
-  const button = (
+  const buttonComponent = (
     <EuiHeaderLink
       onClick={href ? undefined : handleClick}
       id={htmlId}
@@ -55,20 +80,39 @@ export const TopNavMenuItemBeta = ({
       iconSide="left"
       iconSize="m"
       color="text"
+      aria-haspopup={hasItems ? 'menu' : undefined}
+      isSelected={hasItems ? isPopoverOpen : undefined}
+      css={buttonCss}
     >
       {itemText}
     </EuiHeaderLink>
   );
 
-  const buttonWithTooltip = tooltipContent ? (
-    <EuiToolTip content={tooltipContent}>{button}</EuiToolTip>
-  ) : (
-    button
-  );
+  /**
+   * There is an issue with passing down a button wrapped in a tooltip to popover.
+   * Because of that, popover has its own tooltip handling.
+   * So we only wrap in tooltip if there are no items (no popover).
+   */
+  const button =
+    showTooltip && !hasItems ? (
+      <EuiToolTip content={content} title={title} delay="long">
+        {buttonComponent}
+      </EuiToolTip>
+    ) : (
+      buttonComponent
+    );
 
-  if (items && items.length > 0) {
-    return <TopNavPopover items={items} anchorElement={buttonWithTooltip} />;
+  if (hasItems) {
+    return (
+      <TopNavMenuPopover
+        items={items}
+        anchorElement={button}
+        tooltipContent={tooltipContent}
+        isOpen={isPopoverOpen}
+        onClose={onPopoverClose}
+      />
+    );
   }
 
-  return buttonWithTooltip;
+  return button;
 };

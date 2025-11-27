@@ -8,26 +8,66 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { getIsSelectedColor } from './utils';
 import type { TopNavMenuItemBetaType } from './types';
-import { TopNavPopover } from './top_nav_popover';
+import { TopNavMenuPopover } from './top_nav_menu_popover';
 
 interface TopNavMenuShowMoreButtonProps {
   items: TopNavMenuItemBetaType[];
+  isPopoverOpen: boolean;
+  onPopoverToggle: () => void;
+  onPopoverClose: () => void;
 }
 
-export const TopNavMenuShowMoreButton = ({ items }: TopNavMenuShowMoreButtonProps) => {
+export const TopNavMenuShowMoreButton = ({
+  items,
+  isPopoverOpen,
+  onPopoverToggle,
+  onPopoverClose,
+}: TopNavMenuShowMoreButtonProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  const handleClick = () => {
+    onPopoverToggle();
+  };
+
+  const buttonCss = css`
+    background-color: ${isPopoverOpen
+      ? getIsSelectedColor({
+          color: 'text',
+          euiTheme,
+          isFilled: false,
+        })
+      : undefined};
+  `;
+
   const button = (
     <EuiButtonIcon
       iconType="boxesHorizontal" // Change to "ellipsis" when available in EUI
       size="s"
       aria-label={i18n.translate('navigation.topNavMenu.showMoreButtonLabel', {
-        defaultMessage: 'Show more',
+        defaultMessage: 'More',
       })}
       color="text"
+      aria-haspopup="menu"
+      onClick={handleClick}
+      isSelected={isPopoverOpen}
+      css={buttonCss}
     />
   );
 
-  return <TopNavPopover items={items} anchorElement={button} />;
+  return (
+    <TopNavMenuPopover
+      items={items}
+      anchorElement={button}
+      tooltipContent={i18n.translate('navigation.topNavMenu.showMoreButtonTooltip', {
+        defaultMessage: 'More',
+      })}
+      isOpen={isPopoverOpen}
+      onClose={onPopoverClose}
+    />
+  );
 };

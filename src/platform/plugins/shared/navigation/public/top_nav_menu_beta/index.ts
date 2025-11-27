@@ -12,18 +12,26 @@ export { TopNavMenuActionButton } from './top_nav_menu_action_button';
 export { TopNavMenuItemBeta } from './top_nav_menu_item_beta';
 export { TopNavMenuShowMoreButton } from './top_nav_menu_show_more_button';
 export { TopNavMenuBeta } from './top_nav_menu_beta';
-export { TopNavPopover } from './top_nav_popover';
+export { TopNavMenuPopover } from './top_nav_menu_popover';
 
 export type {
-  TopNavMenuActionBeta,
+  TopNavMenuPropsBeta,
   TopNavMenuSplitButtonProps,
   TopNavMenuItemBetaType,
   TopNavMenuActionItemBeta,
   TopNavMenuSecondaryActionItemBeta,
   TopNavMenuPrimaryActionItemBeta,
   TopNavMenuConfigBeta,
+  TopNavMenuPopoverItemBeta as TopNavPopoverItemBeta,
   RegisteredTopNavMenuDataBeta,
 } from './types';
 
 export { TOP_NAV_MENU_ITEM_LIMIT } from './constants';
-export { getTopNavItems, isDisabled, getTooltip } from './utils';
+export {
+  getTopNavItems,
+  isDisabled,
+  getTooltip,
+  getPopoverPanels,
+  getIsSelectedColor,
+  hasNoItems,
+} from './utils';

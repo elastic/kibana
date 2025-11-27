@@ -8,12 +8,50 @@
  */
 
 import type { EuiButtonColor, IconType } from '@elastic/eui';
-import type { SplitButtonProps } from '@kbn/split-button';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { SplitButtonWithNotificationProps } from '@kbn/split-button';
+import type {
+  StatefulSearchBarProps,
+  UnifiedSearchPublicPluginStart,
+} from '@kbn/unified-search-plugin/public';
+import type { MountPoint } from '@kbn/core/public';
+import type { TopNavMenuBadgeProps } from '../top_nav_menu/top_nav_menu_badges';
 
-export type TopNavMenuActionBeta = () => void;
+export type TopNavMenuPropsBeta<QT extends Query | AggregateQuery = Query> = Omit<
+  StatefulSearchBarProps<QT>,
+  'kibana' | 'intl' | 'timeHistory'
+> & {
+  config?: TopNavMenuConfigBeta;
+  badges?: TopNavMenuBadgeProps[];
+  showSearchBar?: boolean;
+  showQueryInput?: boolean;
+  showDatePicker?: boolean;
+  showFilterBar?: boolean;
+  unifiedSearch?: UnifiedSearchPublicPluginStart;
+  visible?: boolean;
+  /**
+   * If provided, the menu part of the component will be rendered as a portal inside the given mount point.
+   *
+   * This is meant to be used with the `setHeaderActionMenu` core API.
+   *
+   * @example
+   * ```ts
+   * export renderApp = ({ element, history, setHeaderActionMenu }: AppMountParameters) => {
+   *   const topNavConfig = ...; // TopNavMenuProps
+   *   return (
+   *     <Router history=history>
+   *       <TopNavMenu {...topNavConfig} setMenuMountPoint={setHeaderActionMenu}>
+   *       <MyRoutes />
+   *     </Router>
+   *   )
+   * }
+   * ```
+   */
+  setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
+};
 
-export type TopNavMenuSplitButtonProps = Pick<
-  SplitButtonProps,
+type BaseSplitProps = Pick<
+  SplitButtonWithNotificationProps,
   | 'isMainButtonLoading'
   | 'isMainButtonDisabled'
   | 'isSecondaryButtonLoading'
@@ -22,46 +60,59 @@ export type TopNavMenuSplitButtonProps = Pick<
   | 'secondaryButtonTitle'
   | 'secondaryButtonIcon'
   | 'iconType'
-> & {
-  run: TopNavMenuActionBeta;
-  items?: TopNavMenuItemBetaType[];
-};
+  | 'showNotificationIndicator'
+  | 'notifcationIndicatorTooltipContent'
+>;
 
-export interface TopNavMenuItemCommonBeta {
+export type TopNavMenuSplitButtonProps =
+  // If `items` is provided then `run` shouldn't be, as having items means the button opens a popover
+  | (BaseSplitProps & { items?: undefined; run: () => void })
+  | (BaseSplitProps & { items: TopNavMenuPopoverItemBeta[]; run?: never });
+
+interface TopNavItemBase {
   id: string;
   htmlId?: string;
   label: string;
   iconType: IconType;
-  run: TopNavMenuActionBeta;
   testId?: string;
   disableButton?: boolean | (() => boolean);
   isLoading?: boolean;
   target?: string;
   href?: string;
-  tooltip?: string | (() => string | undefined);
-  items?: TopNavMenuItemBetaType[];
+  tooltipContent?: string | (() => string | undefined);
+  tooltipTitle?: string | (() => string | undefined);
 }
 
-export interface TopNavMenuItemBetaType extends TopNavMenuItemCommonBeta {
+export type TopNavMenuItemCommonBeta =
+  // If `items` is provided then `run` shouldn't be, as having items means the button opens a popover
+  | (TopNavItemBase & { run: () => void; items?: undefined })
+  | (TopNavItemBase & { run?: never; items: TopNavMenuPopoverItemBeta[] });
+
+export type TopNavMenuItemBetaType = TopNavMenuItemCommonBeta & {
   order: number;
-}
+};
+
+export type TopNavMenuPopoverItemBeta = Omit<TopNavMenuItemBetaType, 'iconType'> & {
+  iconType?: IconType;
+};
 
 export type TopNavMenuActionItemBeta = TopNavMenuItemCommonBeta;
 
-export interface TopNavMenuSecondaryActionItemBeta extends TopNavMenuActionItemBeta {
+export type TopNavMenuSecondaryActionItemBeta = TopNavMenuActionItemBeta & {
   color?: EuiButtonColor;
-}
+  isFilled?: boolean;
+};
 
-export interface TopNavMenuPrimaryActionItemBeta extends TopNavMenuActionItemBeta {
+export type TopNavMenuPrimaryActionItemBeta = Omit<TopNavMenuActionItemBeta, 'items'> & {
   splitButtonProps?: TopNavMenuSplitButtonProps;
-}
+};
 
 export interface TopNavMenuConfigBeta {
-  items: TopNavMenuItemBetaType[];
+  items?: TopNavMenuItemBetaType[];
   secondaryActionItem?: TopNavMenuSecondaryActionItemBeta;
   primaryActionItem?: TopNavMenuPrimaryActionItemBeta;
 }
 
-export interface RegisteredTopNavMenuDataBeta extends TopNavMenuItemBetaType {
+export type RegisteredTopNavMenuDataBeta = TopNavMenuItemBetaType & {
   appName?: string;
-}
+};

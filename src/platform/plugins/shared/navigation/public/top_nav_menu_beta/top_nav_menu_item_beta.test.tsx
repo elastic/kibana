@@ -10,15 +10,17 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TopNavMenuItemBeta } from './top_nav_menu_item_beta';
-import type { TopNavMenuItemBetaType } from './types';
 
 describe('TopNavMenuItemBeta', () => {
-  const defaultProps: TopNavMenuItemBetaType = {
+  const defaultProps = {
     label: 'elastic',
     run: jest.fn(),
     id: 'elasticButton',
     iconType: 'logoElastic',
     order: 1,
+    isPopoverOpen: false,
+    onPopoverToggle: jest.fn(),
+    onPopoverClose: jest.fn(),
   };
 
   beforeEach(() => {
