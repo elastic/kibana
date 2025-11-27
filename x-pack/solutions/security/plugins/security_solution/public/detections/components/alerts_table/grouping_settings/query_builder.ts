@@ -25,6 +25,7 @@ export interface AlertsGroupingQueryParams {
   selectedGroup: string;
   uniqueValue: string;
   to: string;
+  multiValueFieldsToFlatten?: string[];
 }
 
 export const getAlertsGroupingQuery = ({
@@ -37,6 +38,7 @@ export const getAlertsGroupingQuery = ({
   selectedGroup,
   uniqueValue,
   to,
+  multiValueFieldsToFlatten,
 }: AlertsGroupingQueryParams) =>
   getGroupingQuery({
     additionalFilters,
@@ -51,4 +53,5 @@ export const getAlertsGroupingQuery = ({
     uniqueValue,
     size: pageSize,
     sort: [{ unitsCount: { order: 'desc' } }],
+    multiValueFieldsToFlatten,
   });

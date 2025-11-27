@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { render, fireEvent, waitFor, act } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { SearchBarComponent } from '.';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
@@ -16,6 +16,8 @@ import { inputsActions } from '../../store/inputs';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useKibana } from '../../lib/kibana';
 import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 const mockSetAppFilters = jest.fn();
 const mockFilterManager = new FilterManager(coreMock.createStart().uiSettings);
@@ -26,6 +28,9 @@ const mockUpdateUrlParam = jest.fn();
 jest.mock('../../utils/global_query_string', () => ({
   useUpdateUrlParam: () => mockUpdateUrlParam,
 }));
+
+const dataView: DataView = createStubDataView({ spec: {} });
+const dataViewSpec: DataViewSpec = dataView.toSpec();
 
 const original = mockUseKibana();
 const useKibanaMock = {
@@ -60,7 +65,8 @@ describe('SearchBarComponent', () => {
       fields: [],
       title: '',
     },
-    sourcererDataView: {},
+    dataView,
+    sourcererDataViewSpec: dataViewSpec,
     updateSearch: jest.fn(),
     setSavedQuery: jest.fn(),
     setSearchBarFilter: jest.fn(),

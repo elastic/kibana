@@ -21,7 +21,7 @@ const ENV_DEFAULTS = {
   UIAM_COSMOS_DB_GATEWAY_PORT: '8081',
   UIAM_COSMOS_DB_UI_PORT: '8082',
   // Taken from GitOps version file for UIAM service (dev env, services/uiam/versions.yaml)
-  UIAM_GIT_REVISION: 'git-806e6f8e5206',
+  UIAM_GIT_REVISION: 'git-fb324ba1e88f',
   UIAM_LOGGING_LEVEL: 'INFO',
 };
 

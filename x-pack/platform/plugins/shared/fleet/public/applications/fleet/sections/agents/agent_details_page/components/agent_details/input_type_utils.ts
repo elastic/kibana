@@ -16,8 +16,9 @@ import {
   AGENT_DATASET_OSQUERYBEAT,
   AGENT_DATASET_HEARTBEAT,
 } from '../agent_logs/constants';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../../../../common/constants';
 
-export function displayInputType(inputType: string): string {
+export function displayInputType(inputType: string, id?: string): string {
   if (inputType === 'logfile') {
     return i18n.translate('xpack.fleet.agentDetailsIntegrations.inputTypeLogText', {
       defaultMessage: 'Logs',
@@ -32,6 +33,11 @@ export function displayInputType(inputType: string): string {
     return i18n.translate('xpack.fleet.agentDetailsIntegrations.inputTypeMetricsText', {
       defaultMessage: 'Metrics',
     });
+  }
+
+  // show the input id to differentiate multiple otelcol inputs, if present
+  if (inputType === OTEL_COLLECTOR_INPUT_TYPE && id) {
+    return id;
   }
 
   return inputType;

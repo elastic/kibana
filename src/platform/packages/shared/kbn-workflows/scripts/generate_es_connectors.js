@@ -64,7 +64,9 @@ function convertUrlParamToZodString(paramName, paramValue, isRequired = false) {
 
   if (Array.isArray(paramValue)) {
     if (paramValue.length === 0) {
-      return `z.array(z.string())${optionalSuffix}.describe('Array parameter: ${paramName}${requiredMarker}')`;
+      // Empty array in Console definitions means "unknown allowed values" - be fully permissive
+      // Use z.unknown() to be semantically correct (we don't know the type, so consumers should validate)
+      return `z.unknown()${optionalSuffix}.describe('Parameter: ${paramName}${requiredMarker}')`;
     }
 
     // Check if all values are numeric
@@ -611,7 +613,7 @@ function generateConnectorDefinition(endpointName, definition) {
     paramsSchema: z.object({
 ${schemaFields.join('\n')}
     }),
-    outputSchema: z.any().describe('Response from ${endpointName} API'),
+    outputSchema: EsGenericResponseSchema.describe('Response from ${endpointName} API'),
   }`;
 }
 
@@ -670,6 +672,7 @@ function generateElasticsearchConnectors() {
 
 import { z } from '@kbn/zod';
 import type { InternalConnectorContract } from '../../types/v1';
+import { EsGenericResponseSchema } from '../elasticsearch_generic_response_schema';
 
 export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
 ${connectorDefinitions.join(',\n')}

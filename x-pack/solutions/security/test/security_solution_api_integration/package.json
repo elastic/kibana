@@ -1,6 +1,6 @@
 {
   "author": "Elastic",
-  "name": "@kbn/security_solution_api_integration",
+  "name": "@kbn/test-suites-security-solution-apis",
   "version": "1.0.0",
   "private": true,
   "license": "Elastic License 2.0",
@@ -319,6 +319,13 @@
     "alerts:essentials:qa:serverless:release": "npm run run-tests:de:basic_essentials alerts serverless qaEnv",
     "alerts:basic:server:ess": "npm run initialize-server:de:basic_essentials alerts ess",
     "alerts:basic:runner:ess": "npm run run-tests:de:basic_essentials alerts ess essEnv",
+
+    "unified_alerts:essentials:server:serverless": "npm run initialize-server:de:basic_essentials unified_alerts serverless",
+    "unified_alerts:essentials:runner:serverless": "npm run run-tests:de:basic_essentials unified_alerts serverless serverlessEnv",
+    "unified_alerts:essentials:qa:serverless": "npm run run-tests:de:basic_essentials unified_alerts serverless qaPeriodicEnv",
+    "unified_alerts:essentials:qa:serverless:release": "npm run run-tests:de:basic_essentials unified_alerts serverless qaEnv",
+    "unified_alerts:basic:server:ess": "npm run initialize-server:de:basic_essentials unified_alerts ess",
+    "unified_alerts:basic:runner:ess": "npm run run-tests:de:basic_essentials unified_alerts ess essEnv",
 
     "rule_execution_logic:eql:server:serverless": "npm run initialize-server:de rule_execution_logic/eql serverless",
     "rule_execution_logic:eql:runner:serverless": "npm run run-tests:de rule_execution_logic/eql serverless serverlessEnv",

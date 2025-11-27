@@ -53,7 +53,7 @@ export function createDataCollectorActor({ data }: Pick<DataSourceMachineDeps, '
  * Returns the appropriate data collector function based on the data source type
  */
 function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAttributes) {
-  if (dataSource.type === 'random-samples') {
+  if (dataSource.type === 'latest-samples') {
     return (args: CollectorParams) => collectKqlData(args);
   }
   if (dataSource.type === 'kql-samples') {
@@ -136,7 +136,10 @@ function buildSamplesSearchParams({
 /**
  * Adds time range to the query definition if provided
  */
-function addTimeRangeToQuery(queryDefinition: any, timeRange?: TimeRange): void {
+function addTimeRangeToQuery(
+  queryDefinition: ReturnType<typeof buildEsQuery>,
+  timeRange?: TimeRange
+): void {
   if (timeRange) {
     queryDefinition.bool.must.unshift({
       range: {
@@ -152,7 +155,7 @@ function addTimeRangeToQuery(queryDefinition: any, timeRange?: TimeRange): void 
 /**
  * Creates a notifier for data collection failures
  */
-export function createDataCollectionFailureNofitier({
+export function createDataCollectionFailureNotifier({
   toasts,
 }: {
   toasts: DataSourceMachineDeps['toasts'];

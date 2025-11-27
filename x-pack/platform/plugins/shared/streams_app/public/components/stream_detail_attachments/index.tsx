@@ -8,7 +8,7 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
-import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
+import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
 import { useDashboardsApi } from '../../hooks/use_dashboards_api';
@@ -40,7 +40,7 @@ export function StreamDetailAttachments({
     });
   }, [linkedDashboards, query]);
 
-  const [selectedDashboards, setSelectedDashboards] = useState<SanitizedDashboardAsset[]>([]);
+  const [selectedDashboards, setSelectedDashboards] = useState<Attachment[]>([]);
 
   const {
     core: {

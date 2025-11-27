@@ -16,8 +16,8 @@ import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@kbn/react-query';
 
-import { DASHBOARD_APP_ID } from '../../common/constants';
-import { DASHBOARD_CONTENT_ID } from '../utils/telemetry_constants';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 import {
   coreServices,
   savedObjectsTaggingService,
@@ -54,7 +54,7 @@ export const DashboardListing = ({
   });
 
   const dashboardFavoritesClient = useMemo(() => {
-    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
+    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_SAVED_OBJECT_TYPE, {
       http: coreServices.http,
       usageCollection: usageCollectionService,
       userProfile: coreServices.userProfile,

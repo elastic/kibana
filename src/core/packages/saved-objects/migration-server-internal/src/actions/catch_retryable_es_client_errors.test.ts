@@ -62,7 +62,7 @@ describe('catchRetryableEsClientErrors', () => {
         type: 'retryable_es_client_error',
       });
     });
-    it.each([503, 401, 403, 408, 410, 429])(
+    it.each([504, 503, 502, 401, 403, 408, 410, 429])(
       'ResponseError with retryable status code (%d)',
       async (status) => {
         const error = new esErrors.ResponseError(

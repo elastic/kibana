@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -21,6 +21,7 @@
     "@kbn/dev-cli-errors",
     "@kbn/repo-info",
     "@kbn/jest-serializers",
+    "@kbn/apm-utils",
   ],
   "exclude": [
     "target/**/*",

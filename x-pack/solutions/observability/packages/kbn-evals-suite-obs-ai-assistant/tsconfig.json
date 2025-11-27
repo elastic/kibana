@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -27,6 +27,10 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/alerts-ui-shared",
     "@kbn/alerting-comparators",
+    "@kbn/test",
+    "@kbn/scout",
     "@kbn/some-dev-log",
+    "@kbn/apm-synthtrace",
+    "@kbn/onechat-common",
   ]
 }

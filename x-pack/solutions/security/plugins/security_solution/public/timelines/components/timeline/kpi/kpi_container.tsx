@@ -11,13 +11,13 @@ import { useSelector } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { TimerangeInput } from '@kbn/timelines-plugin/common';
 import { EuiPanel } from '@elastic/eui';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
 import { TimelineId } from '../../../../../common/types';
 import type { State } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { TimelineKPIs } from './kpis';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -37,15 +37,15 @@ interface KpiExpandedProps {
 
 export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const experimentalBrowserFields = useBrowserFields(PageScope.timeline);
+  const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
 
   const {
     browserFields: oldBrowserFields,
     sourcererDataView: oldSourcererDataViewSpec,
     selectedPatterns: oldSelectedPatterns,
-  } = useSourcererDataView(SourcererScopeName.timeline);
+  } = useSourcererDataView(PageScope.timeline);
 
   const browserFields = useMemo(
     () => (newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields),

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -167,7 +167,6 @@
     "@kbn/product-intercept-plugin",
     "@kbn/onechat-common",
     "@kbn/reindex-service-plugin",
-    "@kbn/streamlang",
     "@kbn/onechat-plugin",
     "@kbn/field-formats-common",
     "@kbn/reporting-test-routes",
@@ -175,7 +174,8 @@
     "@kbn/visualizations-common",
     "@kbn/test-subj-selector",
     "@kbn/onechat-server",
-    "@kbn/es-types",
+    "@kbn/setup-node-env",
     "@kbn/connector-schemas",
+    "@kbn/es-types",
   ]
 }

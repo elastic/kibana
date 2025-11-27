@@ -7,6 +7,7 @@
 
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { isEmpty } from 'lodash/fp';
+import type { OriginalRule } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { getEcsMappingNode } from './nodes/ecs_mapping';
 import { getFixQueryErrorsNode } from './nodes/fix_query_errors';
 import { getInlineQueryNode } from './nodes/inline_query';
@@ -50,7 +51,16 @@ export function getTranslateRuleGraph({
     .addNode('ecsMapping', ecsMappingNode)
     .addNode('translationResult', translationResultNode)
     // Edges
-    .addEdge(START, 'inlineQuery')
+    .addConditionalEdges(START, getVendorRouter('splunk'), {
+      /**
+       *  For now inlineQuery node is only for splunk rules because we resolve dependencies such as `lookups` and `macros`
+       *  in this step. For new vendors and for splunk, resolve dependencies node should be used instead of inlineQuery node.
+       *
+       *  TODO : as of now we do not want to change splunk rule migration flow, so keeping inlineQuery node for splunk as it is.
+       */
+      is_splunk: 'inlineQuery',
+      is_not_splunk: 'retrieveIntegrations',
+    })
     .addConditionalEdges('inlineQuery', translatableRouter, [
       'retrieveIntegrations',
       'translationResult',
@@ -82,9 +92,23 @@ const validationRouter = (state: TranslateRuleState) => {
   if (state.validation_errors.retries_left > 0 && !isEmpty(state.validation_errors?.esql_errors)) {
     return 'fixQueryErrors';
   }
+  if (state.original_rule.vendor === 'qradar') {
+    // we do not need ecs mapping for qradar rules
+    return 'translationResult';
+  }
+
   if (!state.includes_ecs_mapping) {
     return 'ecsMapping';
   }
 
   return 'translationResult';
 };
+
+export function getVendorRouter(vendor: OriginalRule['vendor']) {
+  return function qradarConditionalEdge(state: TranslateRuleState): string {
+    if (state.original_rule.vendor === vendor) {
+      return `is_${vendor}`;
+    }
+    return `is_not_${vendor}`;
+  };
+}
