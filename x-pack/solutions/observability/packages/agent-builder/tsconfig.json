@@ -17,7 +17,5 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/core",
-    "@elastic/eui"
   ]
 }
