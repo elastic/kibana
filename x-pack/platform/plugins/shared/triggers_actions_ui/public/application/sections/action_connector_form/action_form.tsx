@@ -93,8 +93,6 @@ interface ActiveActionConnectorState {
   indices: number[];
 }
 
-const SYSTEM_ACTIONS_ALLOWING_MULTIPLE_INSTANCES = new Set(['.workflows']);
-
 export const ActionForm = ({
   actions,
   defaultActionGroupId,
@@ -321,7 +319,6 @@ export const ActionForm = ({
 
         const isSystemActionSelected = Boolean(
           actionTypesIndex[item.id].isSystemActionType &&
-            !SYSTEM_ACTIONS_ALLOWING_MULTIPLE_INSTANCES.has(item.id) &&
             actions.find((action) => action.actionTypeId === item.id)
         );
 
