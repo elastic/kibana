@@ -9,7 +9,7 @@
 
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { buildExecutionContext, resolveExecutionContextPath } from './build_execution_context';
+import { buildExecutionContext } from './build_execution_context';
 
 describe('buildExecutionContext', () => {
   const mockExecution: WorkflowExecutionDto = {
@@ -46,59 +46,14 @@ describe('buildExecutionContext', () => {
     },
   };
 
-  it('should return null when execution is undefined', () => {
-    const result = buildExecutionContext(undefined, []);
+  it('should return null when stepExecutions is undefined', () => {
+    const result = buildExecutionContext(undefined, mockExecution.context);
     expect(result).toBeNull();
   });
 
-  it('should build context with basic execution data', () => {
-    const result = buildExecutionContext(mockExecution, []);
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        execution: {
-          id: 'exec-123',
-          isTestRun: false,
-          startedAt: expect.any(Date),
-          url: '',
-        },
-        workflow: {
-          id: 'workflow-456',
-          name: 'Test Workflow',
-          enabled: true,
-          spaceId: 'default',
-        },
-        inputs: {
-          userId: 'user-123',
-          count: 10,
-        },
-        consts: {
-          API_URL: 'https://api.example.com',
-          TIMEOUT: 5000,
-        },
-        event: {
-          type: 'manual',
-        },
-        steps: {},
-      })
-    );
-  });
-
-  it('should handle missing context gracefully', () => {
-    const executionWithoutContext: WorkflowExecutionDto = {
-      ...mockExecution,
-      context: undefined,
-    };
-
-    const result = buildExecutionContext(executionWithoutContext, []);
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        inputs: {},
-        steps: {},
-      })
-    );
-    expect(result?.event).toBeUndefined();
+  it('should return null when stepExecutions is empty', () => {
+    const result = buildExecutionContext([], mockExecution.context);
+    expect(result).toBeNull();
   });
 
   it('should build steps map from stepExecutions', () => {
@@ -135,17 +90,22 @@ describe('buildExecutionContext', () => {
       },
     ];
 
-    const result = buildExecutionContext(mockExecution, stepExecutions);
+    const result = buildExecutionContext(stepExecutions, mockExecution.context);
 
     expect(result?.steps).toEqual({
       fetchData: {
         input: { url: 'https://api.example.com/data' },
         output: { data: ['item1', 'item2'], total: 2 },
         error: undefined,
+        status: ExecutionStatus.COMPLETED,
+        state: undefined,
       },
       processData: {
+        input: undefined,
         output: { processed: true },
         error: null,
+        status: ExecutionStatus.COMPLETED,
+        state: undefined,
       },
     });
   });
@@ -184,12 +144,15 @@ describe('buildExecutionContext', () => {
       },
     ];
 
-    const result = buildExecutionContext(mockExecution, stepExecutions);
+    const result = buildExecutionContext(stepExecutions, mockExecution.context);
 
     // Should have the latest execution (retry 1) based on globalExecutionIndex
     expect(result?.steps.fetchData).toEqual({
+      input: undefined,
       output: { data: ['item1'] },
       error: null,
+      status: ExecutionStatus.COMPLETED,
+      state: undefined,
     });
   });
 
@@ -209,180 +172,24 @@ describe('buildExecutionContext', () => {
         workflowId: 'workflow-456',
         output: { results: [] },
         state: {
+          items: [{ id: 1 }, { id: 2 }, { id: 3 }],
           currentIndex: 2,
           totalItems: 3,
         },
       },
     ];
 
-    const result = buildExecutionContext(mockExecution, stepExecutions);
+    const result = buildExecutionContext(stepExecutions, mockExecution.context);
 
     expect(result?.steps.foreachStep).toEqual({
       output: { results: [] },
       error: undefined,
-      currentIndex: 2,
-      totalItems: 3,
-    });
-  });
-});
-
-describe('resolveExecutionContextPath', () => {
-  const mockContext = {
-    execution: {
-      id: 'exec-123',
-      isTestRun: false,
-      startedAt: new Date('2024-01-01T00:00:00Z'),
-      url: '',
-    },
-    workflow: {
-      id: 'workflow-456',
-      name: 'Test Workflow',
-      enabled: true,
-      spaceId: 'default',
-    },
-    kibanaUrl: 'http://localhost:5601',
-    inputs: {
-      userId: 'user-123',
-      count: 10,
-      nested: {
-        deep: {
-          value: 'found',
-        },
-      },
-    },
-    consts: {
-      API_URL: 'https://api.example.com',
-    },
-    now: new Date(),
-    steps: {
-      fetchData: {
-        output: {
-          data: ['item1', 'item2'],
-          total: 2,
-        },
-        error: null,
-      },
-      processData: {
-        output: { processed: true },
-      },
-    },
-  };
-
-  it('should return context when path is empty', () => {
-    const result = resolveExecutionContextPath(mockContext, '');
-
-    expect(result.exists).toBe(true);
-    expect(result.type).toBe('object');
-    expect(result.value).toBe(mockContext);
-  });
-
-  it('should return not available when context is null', () => {
-    const result = resolveExecutionContextPath(null, 'inputs.userId');
-
-    expect(result.exists).toBe(false);
-    expect(result.type).toBe('undefined');
-    expect(result.preview).toBe('No execution context available');
-  });
-
-  it('should resolve top-level property', () => {
-    const result = resolveExecutionContextPath(mockContext, 'inputs');
-
-    expect(result.exists).toBe(true);
-    expect(result.type).toBe('object');
-    expect(result.value).toEqual({
-      userId: 'user-123',
-      count: 10,
-      nested: {
-        deep: {
-          value: 'found',
-        },
+      status: ExecutionStatus.COMPLETED,
+      state: {
+        items: [{ id: 1 }, { id: 2 }, { id: 3 }],
+        currentIndex: 2,
+        totalItems: 3,
       },
     });
-  });
-
-  it('should resolve nested property', () => {
-    const result = resolveExecutionContextPath(mockContext, 'inputs.userId');
-
-    expect(result.exists).toBe(true);
-    expect(result.type).toBe('string');
-    expect(result.value).toBe('user-123');
-  });
-
-  it('should resolve deeply nested property', () => {
-    const result = resolveExecutionContextPath(mockContext, 'inputs.nested.deep.value');
-
-    expect(result.exists).toBe(true);
-    expect(result.type).toBe('string');
-    expect(result.value).toBe('found');
-  });
-
-  it('should resolve steps property', () => {
-    const result = resolveExecutionContextPath(mockContext, 'steps.fetchData.output.data');
-
-    expect(result.exists).toBe(true);
-    expect(result.type).toBe('array');
-    expect(result.value).toEqual(['item1', 'item2']);
-  });
-
-  it('should handle non-existent path', () => {
-    const result = resolveExecutionContextPath(mockContext, 'inputs.nonExistent');
-
-    expect(result.exists).toBe(false);
-    expect(result.type).toBe('undefined');
-    expect(result.preview).toContain('Path not found');
-  });
-
-  it('should handle non-existent nested path', () => {
-    const result = resolveExecutionContextPath(mockContext, 'steps.nonExistentStep.output');
-
-    expect(result.exists).toBe(false);
-    expect(result.type).toBe('undefined');
-  });
-
-  it('should handle array access notation', () => {
-    const result = resolveExecutionContextPath(mockContext, 'steps.fetchData.output.data[0]');
-
-    expect(result.exists).toBe(true);
-    expect(result.type).toBe('string');
-    expect(result.value).toBe('item1');
-  });
-
-  it('should handle number values', () => {
-    const result = resolveExecutionContextPath(mockContext, 'inputs.count');
-
-    expect(result.exists).toBe(true);
-    expect(result.type).toBe('number');
-    expect(result.value).toBe(10);
-  });
-
-  it('should truncate large values in preview', () => {
-    const largeObject = {
-      data: Array(1000)
-        .fill(null)
-        .map((_, i) => ({ id: i, value: `item-${i}` })),
-    };
-
-    const contextWithLargeData = {
-      ...mockContext,
-      steps: {
-        ...mockContext.steps,
-        largeData: {
-          output: largeObject,
-        },
-      },
-    };
-
-    const result = resolveExecutionContextPath(contextWithLargeData, 'steps.largeData.output');
-
-    expect(result.exists).toBe(true);
-    expect(result.preview).toContain('... (truncated)');
-  });
-
-  it('should identify null values correctly', () => {
-    const result = resolveExecutionContextPath(mockContext, 'steps.fetchData.error');
-
-    expect(result.exists).toBe(true);
-    expect(result.type).toBe('null');
-    expect(result.value).toBe(null);
   });
 });
