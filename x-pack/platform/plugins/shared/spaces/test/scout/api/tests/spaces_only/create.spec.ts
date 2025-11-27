@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { RoleApiCredentials } from '@kbn/scout';
 import { apiTest, expect, tags } from '@kbn/scout';
+import type { ApiClientFixture, KbnClient } from '@kbn/scout/src/playwright/fixtures/scope/worker';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -142,39 +144,57 @@ const ALIAS_CONFLICT_OBJ = {
   id: 'alias-match',
 };
 
-apiTest.describe('_create', { tag: tags.ESS_ONLY }, () => {
-  apiTest.beforeAll(async ({ esArchiver }) => {
-    await esArchiver.loadIfNeeded(
-      'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-    );
+apiTest.describe('_create within the default space', { tag: tags.ESS_ONLY }, () => {
+  let adminApiCredentials: RoleApiCredentials;
+
+  apiTest.beforeAll(async ({ requestAuth }) => {
+    adminApiCredentials = await requestAuth.getApiKey('admin');
   });
 
-  apiTest.only(
+  const createSavedObject = async (
+    apiClient: ApiClientFixture,
+    spaceId: string,
+    type: string,
+    id: string | undefined,
+    overwrite: boolean
+  ) => {
+    const path = id ? `${type}/${id}` : type;
+    return await apiClient.post(`s/${spaceId}/api/saved_objects/${path}?overwrite=${overwrite}`, {
+      headers: { ...COMMON_HEADERS, ...adminApiCredentials.apiKeyHeader },
+      body: { attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL } },
+    });
+  };
+
+  const deleteSavedObject = async (kbnClient: KbnClient, id: string, type: string) => {
+    kbnClient.savedObjects.delete({ id, type });
+  };
+
+  apiTest(
     'default: should return 409 when trying to create dashboard that already exists',
-    async ({ apiClient, requestAuth }) => {
-      // const adminCredentials = await requestAuth.getApiKey('adjddddmin');
-      /*
-      const spaceId = DEFAULT_SPACE_ID;
-      const { type, id } = SINGLE_NAMESPACE_DEFAULT_SPACE;
-      const path = `${type}/${id}`;
-      const requestBody = {
-        attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
-      };
+    async ({ apiClient, kbnClient }) => {
+      const dashboardCreation1Response = await createSavedObject(
+        apiClient,
+        DEFAULT_SPACE_ID,
+        'dashboard',
+        'my-dashboard-id',
+        true
+      );
+      expect(dashboardCreation1Response.statusCode).toBe(200);
 
-      const { body, statusCode } = await apiClient.post(`s/${spaceId}/api/saved_objects/${path}`, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminCredentials.apiKeyHeader,
-        },
-        body: requestBody,
-        responseType: 'json',
-      });
+      const dashboardCreation2Response = await createSavedObject(
+        apiClient,
+        DEFAULT_SPACE_ID,
+        'dashboard',
+        'my-dashboard-id',
+        false
+      );
+      expect(dashboardCreation2Response.statusCode).toBe(409);
+      expect(dashboardCreation2Response.body.error).toBe('Conflict');
+      expect(dashboardCreation2Response.body.message).toBe(
+        `Saved object [dashboard/my-dashboard-id] conflict`
+      );
 
-      expect(statusCode).toBe(409);
-      expect(body.error).toBe('Conflict');
-      expect(body.message).toContain(`Saved object [${type}/${id}] conflict`);
-
-      */
+      deleteSavedObject(kbnClient, 'my-dashboard-id', 'dashboard');
     }
   );
 
