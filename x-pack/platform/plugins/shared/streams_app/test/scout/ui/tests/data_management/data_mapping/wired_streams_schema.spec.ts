@@ -42,9 +42,8 @@ test.describe(
       await pageObjects.streams.verifyWiredBadge();
     });
 
-    test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    test.afterAll(async ({ logsSynthtraceEsClient }) => {
       await logsSynthtraceEsClient.clean();
-      await apiServices.streams.disable();
     });
 
     test('inherited fields display with parent links', async ({ page, pageObjects }) => {

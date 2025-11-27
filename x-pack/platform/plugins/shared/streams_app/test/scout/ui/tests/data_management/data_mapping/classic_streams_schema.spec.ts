@@ -31,9 +31,8 @@ test.describe(
       await pageObjects.streams.verifyClassicBadge();
     });
 
-    test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    test.afterAll(async ({ logsSynthtraceEsClient }) => {
       await logsSynthtraceEsClient.clean();
-      await apiServices.streams.disable();
     });
 
     test('read-only user cannot add/edit fields', async ({ page, browserAuth, pageObjects }) => {
