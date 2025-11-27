@@ -9,6 +9,7 @@
 
 const SERVERLESS_ONLY = [
   '@svlSecurity',
+  '@svlSecurityEssentials',
   '@svlOblt',
   '@svlLogsEssentials',
   '@svlSearch',
@@ -19,6 +20,7 @@ const ESS_ONLY = ['@ess'];
 const DEPLOYMENT_AGNOSTIC = [
   '@ess',
   '@svlSecurity',
+  '@svlSecurityEssentials',
   '@svlOblt',
   '@svlLogsEssentials',
   '@svlSearch',
