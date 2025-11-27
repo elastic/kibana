@@ -388,7 +388,6 @@ export const streamEnrichmentMachine = setup({
           actions: [
             { type: 'storeDefinition', params: ({ event }) => event },
             { type: 'sendResetEventToSimulator' },
-            { type: 'sendStreamProcessingUpdatedAtToDataSources' },
           ],
           reenter: true,
         },
