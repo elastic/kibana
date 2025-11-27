@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { ExecutionStatus as WorkflowExecutionStatus } from '@kbn/workflows/types/v1';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ToolHandlerResult } from '@kbn/onechat-server/tools';
+import { WORKFLOW_WAIT_FOR_DEFAULT } from '@kbn/onechat-common/tools/types/workflow';
 import {
   getExecutionState,
   type WorkflowExecutionState,
@@ -17,7 +18,6 @@ import { errorResult, otherResult } from '@kbn/onechat-genai-utils/tools/utils/r
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
-const DEFAULT_WAIT_FOR = 60;
 const DEFAULT_INITIAL_WAIT = 1;
 const DEFAULT_CHECK_INTERVAL = 2.5;
 
@@ -29,7 +29,7 @@ export const executeWorkflow = async ({
   request,
   spaceId,
   workflowApi,
-  waitFor = DEFAULT_WAIT_FOR,
+  waitFor = WORKFLOW_WAIT_FOR_DEFAULT,
   initialWait = DEFAULT_INITIAL_WAIT,
   checkInterval = DEFAULT_CHECK_INTERVAL,
 }: {
