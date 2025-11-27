@@ -11,10 +11,12 @@ import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthTypeSpec } from '../connector_spec';
 
-const authSchema = z.object({
-  username: z.string().meta({ sensitive: true }).describe('Username'),
-  password: z.string().meta({ sensitive: true }).describe('Password'),
-});
+const authSchema = z
+  .object({
+    username: z.string().meta({ sensitive: true }).describe('Username'),
+    password: z.string().meta({ sensitive: true }).describe('Password'),
+  })
+  .meta({ label: 'Basic Authentication' });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 

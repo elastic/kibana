@@ -56,7 +56,9 @@
           "EuiThemeShapeBase",
           " & { overrides?: ",
           "_EuiThemeOverrides",
-          " | undefined; }> | undefined; }"
+          " | undefined; }> | undefined; coreEnv?: ",
+          "CoreEnv",
+          " | undefined; }"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/render/render_provider.tsx",
         "deprecated": false,
