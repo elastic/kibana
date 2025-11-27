@@ -9,72 +9,7 @@
 
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
-
-export interface CreateSavedObjectParams {
-  type: string;
-  id?: string;
-  attributes: Record<string, any>;
-  initialNamespaces?: string[];
-  overwrite?: boolean;
-}
-
-export interface UpdateSavedObjectParams {
-  type: string;
-  id: string;
-  attributes: Record<string, any>;
-  upsert?: boolean;
-}
-
-export interface BulkCreateSavedObjectsParams {
-  objects: Array<{
-    type: string;
-    id?: string;
-    attributes: Record<string, any>;
-    initialNamespaces?: string[];
-  }>;
-  overwrite?: boolean;
-}
-
-export interface ApiResponse<T = any> {
-  data: T;
-  status: number;
-}
-
-export interface SavedObjectsApiService {
-  create: (params: CreateSavedObjectParams, spaceId?: string) => Promise<ApiResponse>;
-  get: (type: string, id: string, spaceId?: string) => Promise<ApiResponse>;
-  update: (params: UpdateSavedObjectParams, spaceId?: string) => Promise<ApiResponse>;
-  delete: (type: string, id: string, spaceId?: string, force?: boolean) => Promise<ApiResponse>;
-  bulkCreate: (params: BulkCreateSavedObjectsParams, spaceId?: string) => Promise<ApiResponse>;
-  bulkGet: (
-    objects: Array<{ type: string; id: string; namespaces?: string[] }>,
-    spaceId?: string
-  ) => Promise<ApiResponse>;
-  bulkUpdate: (
-    objects: Array<{
-      type: string;
-      id: string;
-      attributes: Record<string, any>;
-      namespace?: string;
-    }>,
-    spaceId?: string
-  ) => Promise<ApiResponse>;
-  bulkDelete: (
-    objects: Array<{ type: string; id: string; force?: boolean }>,
-    spaceId?: string
-  ) => Promise<ApiResponse>;
-  find: (
-    options: {
-      type?: string | string[];
-      search?: string;
-      page?: number;
-      perPage?: number;
-      fields?: string[];
-      namespaces?: string[];
-    },
-    spaceId?: string
-  ) => Promise<ApiResponse>;
-}
+import type { SavedObjectsApiService } from './types';
 
 export const getSavedObjectsApiHelper = (
   log: ScoutLogger,
@@ -90,6 +25,11 @@ export const getSavedObjectsApiHelper = (
         log,
         `savedObjectsApi.create [${params.type}/${params.id || 'auto'}]`,
         async () => {
+          log.debug(
+            `Creating saved object of type '${params.type}'${
+              params.id ? ` with ID '${params.id}'` : ''
+            } in space '${spaceId || 'default'}'`
+          );
           const path = params.id ? `${params.type}/${params.id}` : params.type;
           const response = await kbnClient.request({
             method: 'POST',
@@ -100,7 +40,17 @@ export const getSavedObjectsApiHelper = (
               attributes: params.attributes,
               ...(params.initialNamespaces && { initialNamespaces: params.initialNamespaces }),
             },
+            ignoreErrors: [409, 400],
           });
+
+          if (response.status === 200 || response.status === 201) {
+            log.debug(
+              `Created saved object of type '${params.type}' with ID '${
+                response.data.id
+              }' in space '${spaceId || 'default'}'`
+            );
+          }
+
           return { data: response.data, status: response.status };
         }
       );
