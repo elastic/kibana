@@ -32,7 +32,5 @@
     "@kbn/apm-synthtrace-client",
     "@kbn/zod",
     "@kbn/core-http-common",
-    "@kbn/streams-schema",
-    "@kbn/streamlang",
   ]
 }
