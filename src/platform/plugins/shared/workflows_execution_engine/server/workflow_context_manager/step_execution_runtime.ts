@@ -15,7 +15,7 @@ import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
 import { parseDuration } from '../utils';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
@@ -150,13 +150,13 @@ export class StepExecutionRuntime {
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
       status: ExecutionStatus.COMPLETED,
-      completedAt: new Date().toISOString(),
+      finishedAt: new Date().toISOString(),
       output: stepOutput,
     } as Partial<EsWorkflowStepExecution>;
 
     if (startedStepExecution?.startedAt) {
       stepExecutionUpdate.executionTimeMs =
-        new Date(stepExecutionUpdate.completedAt as string).getTime() -
+        new Date(stepExecutionUpdate.finishedAt as string).getTime() -
         new Date(startedStepExecution.startedAt).getTime();
     }
 
@@ -172,14 +172,14 @@ export class StepExecutionRuntime {
       id: this.stepExecutionId,
       status: ExecutionStatus.FAILED,
       scopeStack: this.stackFrames,
-      completedAt: new Date().toISOString(),
+      finishedAt: new Date().toISOString(),
       output: null,
       error: String(error),
     } as Partial<EsWorkflowStepExecution>;
 
     if (startedStepExecution && startedStepExecution.startedAt) {
       stepExecutionUpdate.executionTimeMs =
-        new Date(stepExecutionUpdate.completedAt as string).getTime() -
+        new Date(stepExecutionUpdate.finishedAt as string).getTime() -
         new Date(startedStepExecution.startedAt).getTime();
     }
     this.workflowExecutionState.updateWorkflowExecution({
@@ -188,6 +188,10 @@ export class StepExecutionRuntime {
     this.workflowExecutionState.upsertStep(stepExecutionUpdate);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.logStepFail(stepExecutionUpdate.id!, error);
+  }
+
+  public async flushEventLogs(): Promise<void> {
+    await this.stepLogger?.flushEvents();
   }
 
   /**

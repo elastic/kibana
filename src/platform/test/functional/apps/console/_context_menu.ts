@@ -33,10 +33,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.isContextMenuOpen()).to.be.eql(true);
     });
 
-    it('should have options to copy as, open documentation, and auto indent', async () => {
+    it('should have options to copy to language, open documentation, and auto indent', async () => {
       await PageObjects.console.clickContextMenu();
       expect(PageObjects.console.isContextMenuOpen()).to.be.eql(true);
-      expect(PageObjects.console.isCopyAsButtonVisible()).to.be.eql(true);
+      expect(PageObjects.console.isCopyToLanguageButtonVisible()).to.be.eql(true);
       expect(PageObjects.console.isOpenDocumentationButtonVisible()).to.be.eql(true);
       expect(PageObjects.console.isAutoIndentButtonVisible()).to.be.eql(true);
     });
@@ -49,9 +49,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.enterText('GET _search');
       });
 
-      it('by default it should copy as curl and show toast when copy as button is clicked', async () => {
+      it('by default it should copy as curl and show toast when copy to language button is clicked', async () => {
         await PageObjects.console.clickContextMenu();
-        await PageObjects.console.clickCopyAsButton();
+        await PageObjects.console.clickCopyToLanguageButton();
 
         const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.selectAllRequests();
 
         await PageObjects.console.clickContextMenu();
-        await PageObjects.console.clickCopyAsButton();
+        await PageObjects.console.clickCopyToLanguageButton();
 
         const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
@@ -102,32 +102,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Focus editor once again
         await PageObjects.console.focusInputEditor();
 
-        // Verify that the Change language button is not displayed for kbn request
+        // Verify that the Select language button is hidden for kbn request
         await PageObjects.console.clickContextMenu();
-        expect(await testSubjects.exists('changeLanguageButton')).to.be(false);
+        const selectLanguageVisible = await PageObjects.console.isSelectLanguageButtonVisible();
+        expect(selectLanguageVisible).to.be(false);
       });
 
       it('allows to change default language', async () => {
         await PageObjects.console.clickContextMenu();
 
-        // By default should be copy as cURL
-        let copyAsButton = await testSubjects.find('consoleMenuCopyAsButton');
-        let buttonLabel = await copyAsButton.getVisibleText();
-        expect(buttonLabel).to.contain('curl');
+        // Wait for menu to be fully open
+        await retry.waitFor('context menu to open', async () => {
+          return await testSubjects.exists('consoleMenuCopyAsButton');
+        });
 
-        // Select python as default language
+        // Check default language shows "Copy to curl"
+        let copyMenuItem = await testSubjects.find('consoleMenuCopyAsButton');
+        let menuItemText = await copyMenuItem.getVisibleText();
+        expect(menuItemText.toLowerCase()).to.contain('curl');
+
+        // Change default language to Python
         await PageObjects.console.changeDefaultLanguage('python');
-        // Wait until async operation is done
-        await PageObjects.common.sleep(2000);
-        // Select requests to display context menu button
-        await PageObjects.console.selectAllRequests();
-        // Open the context menu once again
-        await PageObjects.console.clickContextMenu();
 
-        // By default should be copy as cURL
-        copyAsButton = await testSubjects.find('consoleMenuCopyAsButton');
-        buttonLabel = await copyAsButton.getVisibleText();
-        expect(buttonLabel).to.contain('Python');
+        // Wait for context menu to be visible again
+        await retry.waitFor('context menu to be visible', async () => {
+          return await testSubjects.exists('consoleMenuCopyAsButton');
+        });
+
+        // Wait for UI to update
+        await PageObjects.common.sleep(300);
+
+        // Check that the menu item now shows "Copy to Python"
+        copyMenuItem = await testSubjects.find('consoleMenuCopyAsButton');
+        menuItemText = await copyMenuItem.getVisibleText();
+        expect(menuItemText).to.contain('Python');
       });
 
       it('allows to select a different language to copy as and should copy it right away to clipboard', async () => {
@@ -149,6 +157,87 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const clipboardText = await browser.getClipboardValue();
           expect(clipboardText).to.contain('require("@elastic/elasticsearch")');
         }
+      });
+
+      it('should allow setting default language via Set as default button and Cancel', async () => {
+        await PageObjects.console.clickContextMenu();
+
+        // Open language selector modal
+        await testSubjects.click('consoleMenuSelectLanguage');
+
+        // Wait for modal to open
+        await retry.waitFor('language selector modal to open', async () => {
+          return await testSubjects.exists('languageOption-ruby');
+        });
+
+        // Select Ruby option
+        await testSubjects.click('languageOption-ruby');
+
+        // Click "Set as default" button
+        await testSubjects.click('setAsDefaultLanguage');
+
+        // Badge should have moved but modal is still open
+        await retry.waitFor('modal to remain open', async () => {
+          return await testSubjects.exists('setAsDefaultLanguage');
+        });
+
+        // Close modal with Cancel button to save the default
+        await testSubjects.click('closeCopyAsModal');
+
+        // Wait for context menu to be visible
+        await retry.waitFor('context menu to be visible', async () => {
+          return await testSubjects.exists('consoleMenuCopyAsButton');
+        });
+
+        // Wait for UI to update
+        await PageObjects.common.sleep(300);
+
+        // Verify the default language changed to Ruby
+        const copyMenuItem = await testSubjects.find('consoleMenuCopyAsButton');
+        const menuItemText = await copyMenuItem.getVisibleText();
+        expect(menuItemText).to.contain('Ruby');
+      });
+
+      it('should save default language when using Set as default button and Copy code', async () => {
+        await PageObjects.console.clickContextMenu();
+
+        // Open language selector modal
+        await testSubjects.click('consoleMenuSelectLanguage');
+
+        // Wait for modal to open
+        await retry.waitFor('language selector modal to open', async () => {
+          return await testSubjects.exists('languageOption-php');
+        });
+
+        // Select PHP option
+        await testSubjects.click('languageOption-php');
+
+        // Click "Set as default" button
+        await testSubjects.click('setAsDefaultLanguage');
+
+        // Click "Copy code" button to save and close
+        await testSubjects.click('copyAsLanguageSubmit');
+
+        // Wait for modal to close
+        await retry.waitFor('modal to close', async () => {
+          return !(await testSubjects.exists('closeCopyAsModal'));
+        });
+
+        // Select the request again to show action panel
+        await PageObjects.console.selectAllRequests();
+
+        // Open context menu again
+        await PageObjects.console.clickContextMenu();
+
+        // Wait for context menu to be visible
+        await retry.waitFor('context menu to be visible', async () => {
+          return await testSubjects.exists('consoleMenuCopyAsButton');
+        });
+
+        // Verify the default language changed to PHP
+        const copyMenuItem = await testSubjects.find('consoleMenuCopyAsButton');
+        const menuItemText = await copyMenuItem.getVisibleText();
+        expect(menuItemText).to.contain('PHP');
       });
     });
 
@@ -185,6 +274,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const request = await PageObjects.console.getEditorText();
         expect(request).to.be.eql('GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}');
       });
+    });
+
+    it('should display keyboard shortcut badges for Auto indent and API reference', async () => {
+      // Setup: clear editor and enter a request
+      await PageObjects.console.clearEditorText();
+      await PageObjects.console.enterText('GET _search');
+
+      // Select the request to show action panel
+      await PageObjects.console.selectAllRequests();
+
+      // Click context menu
+      await PageObjects.console.clickContextMenu();
+
+      // Wait for context menu to be fully open
+      await retry.waitFor('context menu to be visible', async () => {
+        return await testSubjects.exists('consoleMenu');
+      });
+
+      // Check Auto indent shortcut badge exists
+      const autoIndentShortcutExists = await testSubjects.exists('consoleMenuAutoIndentShortcut');
+      expect(autoIndentShortcutExists).to.be(true);
+
+      // Check API reference shortcut badge exists
+      const openDocsShortcutExists = await testSubjects.exists('consoleMenuOpenDocsShortcut');
+      expect(openDocsShortcutExists).to.be(true);
     });
   });
 }

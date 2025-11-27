@@ -93,10 +93,10 @@ export interface ESQLEditorProps {
 }
 
 interface ESQLVariableService {
-  areSuggestionsEnabled: boolean;
+  isCreateControlSuggestionEnabled: boolean;
   esqlVariables: ESQLControlVariable[];
-  enableSuggestions: () => void;
-  disableSuggestions: () => void;
+  enableCreateControlSuggestion: () => void;
+  disableCreateControlSuggestion: () => void;
   clearVariables: () => void;
   addVariable: (variable: ESQLControlVariable) => void;
 }
