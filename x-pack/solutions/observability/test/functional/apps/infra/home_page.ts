@@ -606,19 +606,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraSavedViews.createView('view2');
           await pageObjects.infraSavedViews.ensureViewIsLoaded('view2');
 
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
           await pageObjects.infraSavedViews.clickSavedViewsButton();
-          views = await pageObjects.infraSavedViews.getManageViewsEntries();
-          expect(views.length).to.equal(3);
+          await retry.tryForTime(5000, async () => {
+            views = await pageObjects.infraSavedViews.getManageViewsEntries();
+            expect(views.length).to.equal(3);
+          });
+
           await pageObjects.infraSavedViews.pressEsc();
 
           await pageObjects.infraSavedViews.clickSavedViewsButton();
           await pageObjects.infraSavedViews.updateView('view3');
           await pageObjects.infraSavedViews.ensureViewIsLoaded('view3');
 
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
           await pageObjects.infraSavedViews.clickSavedViewsButton();
-          views = await pageObjects.infraSavedViews.getManageViewsEntries();
-          expect(views.length).to.equal(3);
-          await pageObjects.infraSavedViews.pressEsc();
+          await retry.tryForTime(5000, async () => {
+            views = await pageObjects.infraSavedViews.getManageViewsEntries();
+            expect(views.length).to.equal(3);
+          });
         });
       });
     });

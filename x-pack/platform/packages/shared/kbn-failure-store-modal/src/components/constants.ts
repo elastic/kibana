@@ -67,4 +67,10 @@ export const failureStorePeriodOptions = [
       defaultMessage: 'Custom period',
     }),
   },
+  {
+    id: 'disabledLifecycle',
+    label: i18n.translate('xpack.failureStoreModal.form.options.disabledPeriodLabel', {
+      defaultMessage: 'Disabled',
+    }),
+  },
 ];

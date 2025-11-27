@@ -19,6 +19,9 @@ import type {
   MetricsDataPluginStart,
 } from '@kbn/metrics-data-access-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
 export type ObservabilityAgentPluginSetup = Record<string, never>;
 export type ObservabilityAgentPluginStart = Record<string, never>;
 
@@ -28,6 +31,7 @@ export interface ObservabilityAgentPluginSetupDependencies {
   logsDataAccess: LogsDataAccessPluginSetup;
   metricsDataAccess: MetricsDataPluginSetup;
   security: SecurityPluginSetup;
+  ml?: MlPluginSetup;
 }
 
 export interface ObservabilityAgentPluginStartDependencies {
@@ -36,4 +40,7 @@ export interface ObservabilityAgentPluginStartDependencies {
   logsDataAccess: LogsDataAccessPluginStart;
   metricsDataAccess: MetricsDataPluginStart;
   security: SecurityPluginStart;
+  ruleRegistry: RuleRegistryPluginStartContract;
+  dataViews: DataViewsServerPluginStart;
+  ml?: MlPluginStart;
 }

@@ -47,6 +47,8 @@ const useStyles = () => {
   return {
     editorActions: css`
       ${actions}
+      padding-left: ${euiTheme.size.xs};
+      padding-right: ${euiTheme.size.xs};
 
       // For IE11
       min-width: calc(${euiTheme.size.l} * 2);
@@ -59,6 +61,7 @@ export interface EditorProps {
   value: string;
   setValue: (value: string) => void;
   customParsedRequestsProvider?: (model: any) => any;
+  enableSuggestWidgetRepositioning: boolean;
 }
 
 export const MonacoEditor = ({
@@ -66,6 +69,7 @@ export const MonacoEditor = ({
   value,
   setValue,
   customParsedRequestsProvider,
+  enableSuggestWidgetRepositioning,
 }: EditorProps) => {
   const context = useServicesContext();
   const {
@@ -271,13 +275,13 @@ export const MonacoEditor = ({
             })}
           >
             <EuiButtonIcon
-              iconType="playFilled"
+              display="fill"
+              iconType="play"
               onClick={sendRequestsCallback}
               data-test-subj="sendRequestButton"
               aria-label={i18n.translate('console.monaco.sendRequestButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to send request',
               })}
-              iconSize={'s'}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -314,6 +318,7 @@ export const MonacoEditor = ({
         suggestionProvider={suggestionProvider}
         enableFindAction={true}
         enableCustomContextMenu={true}
+        enableSuggestWidgetRepositioning={enableSuggestWidgetRepositioning}
       />
     </div>
   );

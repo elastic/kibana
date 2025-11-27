@@ -9,6 +9,12 @@
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import {
+  LOOKUP_INDEX_CREATE_ROUTE,
+  LOOKUP_INDEX_PRIVILEGES_ROUTE,
+  LOOKUP_INDEX_RECREATE_ROUTE,
+  LOOKUP_INDEX_UPDATE_ROUTE,
+} from '@kbn/esql-types';
 
 export const registerLookupIndexRoutes = (
   router: IRouter,
@@ -16,7 +22,7 @@ export const registerLookupIndexRoutes = (
 ) => {
   router.post(
     {
-      path: '/internal/esql/lookup_index/{indexName}/update',
+      path: `${LOOKUP_INDEX_UPDATE_ROUTE}/{indexName}`,
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -59,7 +65,7 @@ export const registerLookupIndexRoutes = (
 
   router.post(
     {
-      path: '/internal/esql/lookup_index/{indexName}',
+      path: `${LOOKUP_INDEX_CREATE_ROUTE}/{indexName}`,
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -99,9 +105,56 @@ export const registerLookupIndexRoutes = (
     }
   );
 
+  router.post(
+    {
+      path: `${LOOKUP_INDEX_RECREATE_ROUTE}/{indexName}`,
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
+      options: {
+        description: 'Recreates an index with lookup mode, used to reset the mapping of the index.',
+      },
+    },
+    async (requestHandlerContext, request, response) => {
+      try {
+        const core = await requestHandlerContext.core;
+        const client = core.elasticsearch.client.asCurrentUser;
+
+        const indexName = request.params.indexName;
+
+        await client.indices.delete({
+          index: indexName,
+          ignore_unavailable: true,
+        });
+
+        const result = await client.indices.create({
+          index: indexName,
+          settings: {
+            mode: 'lookup',
+          },
+        });
+
+        return response.ok({
+          body: result,
+        });
+      } catch (error) {
+        logger.get().debug(error);
+        throw error;
+      }
+    }
+  );
+
   router.get(
     {
-      path: '/internal/esql/lookup_index/privileges',
+      path: LOOKUP_INDEX_PRIVILEGES_ROUTE,
       validate: {
         query: schema.object({ indexName: schema.maybe(schema.string()) }),
       },
@@ -126,7 +179,7 @@ export const registerLookupIndexRoutes = (
           index: [
             {
               names: ['*', ...indices],
-              privileges: ['create_index', 'read', 'write'],
+              privileges: ['create_index', 'read', 'write', 'delete_index'],
             },
           ],
         });

@@ -104,3 +104,10 @@ export interface AgentAnswerStepConfiguration {
    */
   instructions?: string;
 }
+
+/**
+ * Runtime configuration overrides for agent execution.
+ * These override the stored agent configuration for a single execution instance.
+ * Each field, if provided, completely replaces the corresponding field in the stored configuration.
+ */
+export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
