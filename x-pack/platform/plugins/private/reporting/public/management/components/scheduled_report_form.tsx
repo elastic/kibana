@@ -93,7 +93,6 @@ export interface ScheduledReportFormProps {
   onClose: () => void;
   onSubmitForm?: (params: FormData) => Promise<void>;
   isSubmitLoading?: boolean;
-  defaultEmail?: string;
   editMode?: boolean;
   readOnly?: boolean;
 }
@@ -103,12 +102,11 @@ const CcBccFields = ({ readOnly }: { readOnly?: boolean }) => (
     <FormField
       path="emailCcRecipients"
       componentProps={{
-        compressed: true,
         fullWidth: true,
         euiFieldProps: {
           compressed: true,
           fullWidth: true,
-          isDisabled: readOnly,
+          readOnly,
           'data-test-subj': 'emailCcRecipientsCombobox',
         },
       }}
@@ -116,12 +114,11 @@ const CcBccFields = ({ readOnly }: { readOnly?: boolean }) => (
     <FormField
       path="emailBccRecipients"
       componentProps={{
-        compressed: true,
         fullWidth: true,
         euiFieldProps: {
           compressed: true,
           fullWidth: true,
-          isDisabled: readOnly,
+          readOnly,
           'data-test-subj': 'emailBccRecipientsCombobox',
         },
       }}
@@ -171,7 +168,7 @@ export const ScheduledReportForm = ({
   const hasCcBcc =
     Boolean(scheduledReport.emailCcRecipients?.length) ||
     Boolean(scheduledReport.emailBccRecipients?.length);
-  const [showCcBccFields, setShowCcBccFields] = useState(editMode ? hasCcBcc : false);
+  const [showCcBccFields, setShowCcBccFields] = useState(hasCcBcc);
   const schema = useMemo(
     () =>
       getScheduledReportFormSchema(
@@ -243,13 +240,17 @@ export const ScheduledReportForm = ({
     [emailMessage, emailSubject, form]
   );
 
+  // Autofill the user's email if they have one and are not a reporting manager
   useEffect(() => {
     if (
-      !editMode &&
-      !readOnly &&
       !hasManageReportingPrivilege &&
       !isUserProfileLoading &&
-      userProfile?.user.email
+      userProfile?.user.email &&
+      // Even though auto-updating the recipients when editing an existing schedule would be useful
+      // for non-managers that changed their profile email, it could also be disruptive
+      // see https://github.com/elastic/kibana/issues/228050#issuecomment-3563309593
+      !editMode &&
+      !readOnly
     ) {
       form.setFieldValue('emailRecipients', [userProfile.user.email]);
       form.validate();
@@ -458,7 +459,6 @@ export const ScheduledReportForm = ({
                   euiFieldProps: {
                     compressed: true,
                     'data-test-subj': 'sendByEmailToggle',
-                    isLoading: isUserProfileLoading,
                     disabled:
                       readOnly ||
                       !reportingHealth.areNotificationsEnabled ||
@@ -504,8 +504,6 @@ export const ScheduledReportForm = ({
                     <FormField
                       path="emailSubject"
                       componentProps={{
-                        compressed: true,
-                        fullWidth: true,
                         labelAppend: (
                           <AddMessageVariablesOptional
                             isOptionalField
@@ -520,7 +518,7 @@ export const ScheduledReportForm = ({
                           inputRef: emailSubjectFieldRef,
                           compressed: true,
                           fullWidth: true,
-                          isDisabled: readOnly,
+                          disabled: readOnly,
                           'data-test-subj': 'emailSubjectInput',
                         },
                       }}
@@ -529,8 +527,6 @@ export const ScheduledReportForm = ({
                     <FormField
                       path="emailMessage"
                       componentProps={{
-                        compressed: true,
-                        fullWidth: true,
                         labelAppend: (
                           <AddMessageVariablesOptional
                             isOptionalField
@@ -546,7 +542,7 @@ export const ScheduledReportForm = ({
                           inputRef: emailMessageFieldRef,
                           compressed: true,
                           fullWidth: true,
-                          isDisabled: readOnly,
+                          disabled: readOnly,
                           'data-test-subj': 'emailMessageTextArea',
                           rows: 4,
                         },

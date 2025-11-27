@@ -158,89 +158,92 @@ describe('ScheduledReportForm', () => {
     });
   });
 
-  it('should not allow showing the Cc and Bcc fields when user is not reporting manager', async () => {
-    user = userEvent.setup({ delay: null });
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        ...mockKibanaServices,
-        application: {
-          capabilities: { ...application.capabilities, manageReporting: { show: false } },
+  describe('when user is not reporting manager', () => {
+    it('should disable the email to field, autofill it with user email and hide cc and bcc fields', async () => {
+      user = userEvent.setup({ delay: null });
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          ...mockKibanaServices,
+          application: {
+            capabilities: { ...application.capabilities, manageReporting: { show: false } },
+          },
         },
-      },
+      });
+
+      renderWithProviders(<ScheduledReportForm {...defaultProps} />);
+
+      const toggle = await screen.findByText('Send by email');
+      await user.click(toggle);
+
+      const emailField = await screen.findByTestId('emailRecipientsCombobox');
+      const emailInput = within(emailField).getByTestId('comboBoxSearchInput');
+      expect(emailInput).toBeDisabled();
+      expect(emailField).toHaveTextContent('test@example.com');
+      expect(screen.queryByTestId('showCcBccButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('emailCcRecipientsCombobox')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('emailBccRecipientsCombobox')).not.toBeInTheDocument();
+      expect(screen.getByText('Sensitive information')).toBeInTheDocument();
     });
-
-    renderWithProviders(<ScheduledReportForm {...defaultProps} />);
-
-    const toggle = await screen.findByText('Send by email');
-    await user.click(toggle);
-
-    const emailField = await screen.findByTestId('emailRecipientsCombobox');
-    const emailInput = within(emailField).getByTestId('comboBoxSearchInput');
-    expect(emailInput).toBeDisabled();
-    expect(screen.queryByTestId('showCcBccButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('emailCcRecipientsCombobox')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('emailBccRecipientsCombobox')).not.toBeInTheDocument();
-    expect(screen.getByText('Sensitive information')).toBeInTheDocument();
   });
 
-  describe('Edit mode', () => {
-    it('disables report type in edit mode', async () => {
-      const props = { ...defaultProps, editMode: true };
-      renderWithProviders(<ScheduledReportForm {...props} />);
+  it('shows cc and bcc fields if they have a value', async () => {
+    user = userEvent.setup({ delay: null });
+    renderWithProviders(
+      <ScheduledReportForm
+        {...defaultProps}
+        editMode
+        scheduledReport={{
+          ...defaultProps.scheduledReport,
+          sendByEmail: true,
+          emailRecipients: ['to@email.com'],
+          emailCcRecipients: ['cc@email.com'],
+          emailBccRecipients: ['bccemail.com'],
+        }}
+      />
+    );
+
+    // Wait for email fields to be rendered
+    await screen.findByTestId('emailRecipientsCombobox');
+    expect(screen.getByTestId('emailCcRecipientsCombobox')).toBeInTheDocument();
+    expect(screen.getByTestId('emailBccRecipientsCombobox')).toBeInTheDocument();
+  });
+
+  it("hides cc and bcc fields if they don't have a value", async () => {
+    user = userEvent.setup({ delay: null });
+    renderWithProviders(
+      <ScheduledReportForm
+        {...defaultProps}
+        editMode
+        scheduledReport={{
+          ...defaultProps.scheduledReport,
+          sendByEmail: true,
+          emailRecipients: ['to@email.com'],
+        }}
+      />
+    );
+
+    // Wait for email fields to be rendered
+    await screen.findByTestId('emailRecipientsCombobox');
+    expect(screen.queryByTestId('emailCcRecipientsCombobox')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('emailBccRecipientsCombobox')).not.toBeInTheDocument();
+  });
+
+  describe('when in edit mode', () => {
+    it('disables report type', async () => {
+      renderWithProviders(<ScheduledReportForm {...defaultProps} editMode />);
 
       expect(await screen.findByTestId('reportTypeIdSelect')).toBeDisabled();
     });
 
-    it('automatically shows cc and bcc fields if they have a valu', async () => {
+    it('calls onSubmit correctly', async () => {
       user = userEvent.setup({ delay: null });
       renderWithProviders(
         <ScheduledReportForm
           {...defaultProps}
           editMode
-          scheduledReport={{
-            ...defaultProps.scheduledReport,
-            sendByEmail: true,
-            emailRecipients: ['to@email.com'],
-            emailCcRecipients: ['cc@email.com'],
-            emailBccRecipients: ['bccemail.com'],
-          }}
+          availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
         />
       );
-
-      // Wait for email fields to be rendered
-      await screen.findByTestId('emailRecipientsCombobox');
-      expect(screen.getByTestId('emailCcRecipientsCombobox')).toBeInTheDocument();
-      expect(screen.getByTestId('emailBccRecipientsCombobox')).toBeInTheDocument();
-    });
-
-    it("automatically hides cc and bcc fields if they don't have a value", async () => {
-      user = userEvent.setup({ delay: null });
-      renderWithProviders(
-        <ScheduledReportForm
-          {...defaultProps}
-          editMode
-          scheduledReport={{
-            ...defaultProps.scheduledReport,
-            sendByEmail: true,
-            emailRecipients: ['to@email.com'],
-          }}
-        />
-      );
-
-      // Wait for email fields to be rendered
-      await screen.findByTestId('emailRecipientsCombobox');
-      expect(screen.queryByTestId('emailCcRecipientsCombobox')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('emailBccRecipientsCombobox')).not.toBeInTheDocument();
-    });
-
-    it('calls onSubmit correctly in edit mode', async () => {
-      user = userEvent.setup({ delay: null });
-      const props = {
-        ...defaultProps,
-        editMode: true,
-        availableReportTypes: [{ label: 'PDF', id: 'printablePdfV2' }],
-      };
-      renderWithProviders(<ScheduledReportForm {...props} />);
 
       const titleInput = await screen.findByTestId('reportTitleInput');
       await user.clear(titleInput);
@@ -268,51 +271,62 @@ describe('ScheduledReportForm', () => {
     });
   });
 
-  describe('Readonly Mode', () => {
-    it('disables title in read-only mode', async () => {
-      const props = { ...defaultProps, readOnly: true };
-      renderWithProviders(<ScheduledReportForm {...props} />);
+  describe('when in readonly mode', () => {
+    it('disables title', async () => {
+      renderWithProviders(<ScheduledReportForm {...defaultProps} readOnly />);
 
       expect(await screen.findByTestId('reportTitleInput')).toHaveAttribute('readonly');
     });
 
-    it('disables report type in read-only mode', async () => {
-      const props = { ...defaultProps, readOnly: true };
-      renderWithProviders(<ScheduledReportForm {...props} />);
+    it('disables report type', async () => {
+      renderWithProviders(<ScheduledReportForm {...defaultProps} readOnly />);
 
       expect(await screen.findByTestId('reportTypeIdSelect')).toBeDisabled();
     });
 
-    it('disables date picker in read-only mode', async () => {
-      const props = { ...defaultProps, readOnly: true };
-      renderWithProviders(<ScheduledReportForm {...props} />);
+    it('disables date picker', async () => {
+      renderWithProviders(<ScheduledReportForm {...defaultProps} readOnly />);
 
       expect(await screen.findByTestId('startDatePicker-input')).toHaveAttribute('readonly');
     });
 
-    it('disables schedule in read-only mode', async () => {
-      const props = { ...defaultProps, readOnly: true };
-      renderWithProviders(<ScheduledReportForm {...props} />);
+    it('disables schedule', async () => {
+      renderWithProviders(<ScheduledReportForm {...defaultProps} readOnly />);
 
       expect(await screen.findByTestId('recurringScheduleRepeatSelect')).toBeDisabled();
     });
 
-    it('disables send email in read-only mode', async () => {
-      const props = { ...defaultProps, readOnly: true };
-      renderWithProviders(<ScheduledReportForm {...props} />);
+    it('disables all email fields', async () => {
+      renderWithProviders(
+        <ScheduledReportForm
+          {...defaultProps}
+          readOnly
+          scheduledReport={{
+            ...defaultProps.scheduledReport,
+            sendByEmail: true,
+            emailRecipients: ['to@email.com'],
+            emailCcRecipients: ['cc@email.com'],
+            emailBccRecipients: ['bccemail.com'],
+          }}
+        />
+      );
 
       expect(await screen.findByTestId('sendByEmailToggle')).toBeDisabled();
+      expect(screen.getByTestId('emailRecipientsCombobox')).toHaveAttribute('readonly');
+      expect(screen.getByTestId('emailCcRecipientsCombobox')).toHaveAttribute('readonly');
+      expect(screen.getByTestId('emailBccRecipientsCombobox')).toHaveAttribute('readonly');
+      expect(screen.getByTestId('emailSubjectInput')).toHaveAttribute('disabled');
+      expect(screen.getByTestId('emailMessageTextArea')).toHaveAttribute('disabled');
     });
 
-    it('disables submit button in read-only mode', async () => {
-      const props = { ...defaultProps, readOnly: true };
-      renderWithProviders(<ScheduledReportForm {...props} />);
+    it('disables submit button', async () => {
+      renderWithProviders(<ScheduledReportForm {...defaultProps} readOnly />);
 
       expect(await screen.findByTestId('scheduleExportSubmitButton')).toBeDisabled();
     });
   });
 
-  describe('Validation', () => {
+  describe('validation', () => {
     it('shows validation error when title is empty', async () => {
       user = userEvent.setup({ delay: null });
       renderWithProviders(<ScheduledReportForm {...defaultProps} />);
@@ -330,13 +344,13 @@ describe('ScheduledReportForm', () => {
 
     it('does not throw error for previous start date when it is not updated in edit mode', async () => {
       user = userEvent.setup();
-      const props = {
-        ...defaultProps,
-        availableReportTypes: [{ id: 'printablePdfV2', label: 'PDF' }],
-        editMode: true,
-      };
-
-      renderWithProviders(<ScheduledReportForm {...props} />);
+      renderWithProviders(
+        <ScheduledReportForm
+          {...defaultProps}
+          editMode
+          availableReportTypes={[{ id: 'printablePdfV2', label: 'PDF' }]}
+        />
+      );
 
       const submitButton = await screen.findByTestId('scheduleExportSubmitButton');
       await user.click(submitButton);

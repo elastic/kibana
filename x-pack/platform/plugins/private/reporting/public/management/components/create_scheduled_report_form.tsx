@@ -21,7 +21,6 @@ import { ScheduledReportForm } from './scheduled_report_form';
 import * as i18n from '../translations';
 import { getReportParams } from '../report_params';
 import { useScheduleReport } from '../hooks/use_schedule_report';
-import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
 
 export interface CreateScheduledReportFormProps {
   // create
@@ -42,14 +41,9 @@ export const CreateScheduledReportForm = ({
   onClose,
 }: CreateScheduledReportFormProps) => {
   const {
-    application: { capabilities },
     http,
     notifications: { toasts },
-    userProfile: userProfileService,
   } = useKibana().services;
-  const { data: userProfile } = useGetUserProfileQuery({
-    userProfileService,
-  });
   const reportingPageLink = useMemo(
     () => (
       <EuiLink href={http.basePath.prepend(REPORTING_MANAGEMENT_SCHEDULES)}>
@@ -62,13 +56,6 @@ export const CreateScheduledReportForm = ({
   const { mutateAsync: createScheduledReport, isLoading: isSubmitLoading } = useScheduleReport({
     http,
   });
-
-  const hasManageReportingPrivilege = useMemo(() => {
-    if (!capabilities) {
-      return false;
-    }
-    return capabilities.manageReporting.show === true;
-  }, [capabilities]);
 
   const onSubmit = async (formData: FormData) => {
     if (!sharingData || !objectType) {
@@ -144,9 +131,6 @@ export const CreateScheduledReportForm = ({
       onClose={onClose}
       onSubmitForm={onSubmit}
       isSubmitLoading={isSubmitLoading}
-      defaultEmail={
-        !hasManageReportingPrivilege && userProfile?.user.email ? userProfile.user.email : undefined
-      }
     />
   );
 };
