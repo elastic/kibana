@@ -42,7 +42,7 @@ function UntrackedAlert({ alert, alertStatus, onUntrackAlert }: UntrackedAlertPr
           announceOnMount
           data-test-subj="o11yAlertDetailsUntrackedAlertCallout"
           title={i18n.translate('xpack.observability.alertDetails.untrackedAlertCallout.title', {
-            defaultMessage: 'This alert is untracked',
+            defaultMessage: 'This alert is orphaned',
           })}
           color="warning"
           iconType="warning"

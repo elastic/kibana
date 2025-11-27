@@ -293,6 +293,18 @@ export function AlertDetails() {
     ) : (
       <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel" paddingSize="none">
         <EuiSpacer size="l" />
+        <UntrackedAlert
+          alert={alertDetail.formatted}
+          alertStatus={alertStatus}
+          onUntrackAlert={onUntrackAlert}
+        />
+        <StaleAlert
+          alert={alertDetail.formatted}
+          alertStatus={alertStatus}
+          rule={rule}
+          onUntrackAlert={onUntrackAlert}
+          refetchRule={refetch}
+        />
         <ProximalAlertsCallout
           alertDetail={alertDetail}
           switchTabs={showRelatedAlertsFromCallout}
