@@ -470,7 +470,13 @@ export class CstToAstConverter {
       return this.fromForkCommand(forkCommandCtx);
     }
 
-    // throw new Error(`Unknown processing command: ${this.getSrc(ctx)}`);
+    const promqlCommandCtx = ctx.promqlCommand();
+
+    if (promqlCommandCtx) {
+      return this.fromPromqlCommand(promqlCommandCtx);
+    }
+
+    // throw new Error(`Unknown processing command: ${this.getSrc(ctx)}`;
   }
 
   private createCommand<
@@ -1703,6 +1709,185 @@ export class CstToAstConverter {
     }
 
     return null;
+  }
+
+  // ------------------------------------------------------------------ PROMQL
+
+  private fromPromqlCommand(ctx: cst.PromqlCommandContext): ast.ESQLCommand<'promql'> {
+    const command = this.createCommand('promql', ctx);
+
+    // Process promql params (name-value pairs)
+    const paramCtxs = ctx.promqlParam_list();
+    for (const paramCtx of paramCtxs) {
+      const param = this.fromPromqlParam(paramCtx);
+      if (param) {
+        command.args.push(param);
+      }
+    }
+
+    // Reconstruct the PromQL query text from promqlQueryPart nodes
+    const queryPartCtxs = ctx.promqlQueryPart_list();
+    const queryText = this.reconstructPromqlQuery(queryPartCtxs);
+
+    if (queryText) {
+      const queryLocation =
+        queryPartCtxs.length > 0
+          ? getPosition(queryPartCtxs[0].start, queryPartCtxs[queryPartCtxs.length - 1].stop)
+          : getPosition(ctx.LP()?.symbol ?? ctx.start, ctx.RP()?.symbol ?? ctx.stop);
+
+      const queryLiteral = Builder.expression.literal.string(
+        queryText,
+        { name: 'query' },
+        {
+          text: queryText,
+          location: queryLocation,
+          incomplete: false,
+        }
+      );
+      command.args.push(queryLiteral);
+    }
+
+    // Check if the command is incomplete (missing closing paren)
+    const closeParen = ctx.RP();
+    const closeParenText = closeParen?.getText() ?? '';
+    const hasCloseParen = closeParen && !/<missing /.test(closeParenText);
+    if (!hasCloseParen) {
+      command.incomplete = true;
+    }
+
+    return command;
+  }
+
+  private fromPromqlParam(ctx: cst.PromqlParamContext): ast.ESQLCommandOption | undefined {
+    const nameCtx = ctx._name;
+    const valueCtx = ctx._value;
+
+    if (!nameCtx) {
+      return undefined;
+    }
+
+    const paramName = this.fromPromqlParamContent(nameCtx);
+    if (!paramName) {
+      return undefined;
+    }
+
+    const option = this.toOption(paramName.toLowerCase(), ctx);
+
+    if (valueCtx) {
+      const paramValue = this.fromPromqlParamContentToAst(valueCtx);
+      if (paramValue) {
+        option.args.push(paramValue);
+      }
+    }
+
+    return option;
+  }
+
+  private fromPromqlParamContent(ctx: cst.PromqlParamContentContext): string | undefined {
+    const unquotedId = ctx.PROMQL_UNQUOTED_IDENTIFIER();
+    if (unquotedId) {
+      return unquotedId.getText();
+    }
+
+    const quotedId = ctx.QUOTED_IDENTIFIER();
+    if (quotedId) {
+      const text = quotedId.getText();
+      // Remove backticks and unescape
+      return text.slice(1, -1).replace(/``/g, '`');
+    }
+
+    const quotedString = ctx.QUOTED_STRING();
+    if (quotedString) {
+      const text = quotedString.getText();
+      // Remove quotes
+      if (text.startsWith('"""') && text.endsWith('"""')) {
+        return text.slice(3, -3);
+      }
+      return text.slice(1, -1).replace(/\\"/g, '"');
+    }
+
+    const namedParam = ctx.NAMED_OR_POSITIONAL_PARAM();
+    if (namedParam) {
+      return namedParam.getText();
+    }
+
+    return undefined;
+  }
+
+  private fromPromqlParamContentToAst(
+    ctx: cst.PromqlParamContentContext
+  ): ast.ESQLAstExpression | undefined {
+    const parserFields = this.getParserFields(ctx);
+
+    const unquotedId = ctx.PROMQL_UNQUOTED_IDENTIFIER();
+    if (unquotedId) {
+      return Builder.identifier({ name: unquotedId.getText() }, parserFields);
+    }
+
+    const quotedId = ctx.QUOTED_IDENTIFIER();
+    if (quotedId) {
+      const text = quotedId.getText();
+      const name = text.slice(1, -1).replace(/``/g, '`');
+      return Builder.identifier({ name }, parserFields);
+    }
+
+    const quotedString = ctx.QUOTED_STRING();
+    if (quotedString) {
+      const text = quotedString.getText();
+      let valueUnquoted: string;
+      if (text.startsWith('"""') && text.endsWith('"""')) {
+        valueUnquoted = text.slice(3, -3);
+      } else {
+        valueUnquoted = text.slice(1, -1).replace(/\\"/g, '"');
+      }
+      return Builder.expression.literal.string(valueUnquoted, { name: text }, parserFields);
+    }
+
+    const namedParam = ctx.NAMED_OR_POSITIONAL_PARAM();
+    if (namedParam) {
+      const text = namedParam.getText();
+      // Text starts with '?' - parse it as named or positional param
+      const value = text.slice(1); // Remove the leading '?'
+      const valueAsNumber = Number(value);
+      const isPositional = String(valueAsNumber) === value;
+
+      if (isPositional) {
+        return Builder.param.positional({ value: valueAsNumber }, parserFields);
+      } else {
+        return Builder.param.named({ value }, parserFields);
+      }
+    }
+
+    return undefined;
+  }
+
+  private reconstructPromqlQuery(ctxs: cst.PromqlQueryPartContext[]): string {
+    const parts: string[] = [];
+
+    for (const ctx of ctxs) {
+      parts.push(this.reconstructPromqlQueryPart(ctx));
+    }
+
+    return parts.join('');
+  }
+
+  private reconstructPromqlQueryPart(ctx: cst.PromqlQueryPartContext): string {
+    const queryText = ctx.PROMQL_QUERY_TEXT();
+    if (queryText) {
+      return queryText.getText();
+    }
+
+    // Handle nested parens: LP promqlQueryPart* RP
+    const lp = ctx.LP();
+    const rp = ctx.RP();
+    const nestedParts = ctx.promqlQueryPart_list();
+
+    if (lp) {
+      const inner = this.reconstructPromqlQuery(nestedParts);
+      return `(${inner}${rp ? ')' : ''}`;
+    }
+
+    return '';
   }
 
   // --------------------------------------------------------------------- FORK
