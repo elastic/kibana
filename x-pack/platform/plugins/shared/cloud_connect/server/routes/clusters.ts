@@ -231,7 +231,7 @@ export const registerClustersRoute = ({
 
           if (eisRequest?.enabled && !eisKey) {
             logger.warn(
-              'EIS service was enabled but Cloud API did not return an API key for inference CCM'
+              'EIS was enabled but Cloud API did not return an API key for Cloud Connect inference'
             );
             return response.ok({
               body: {
