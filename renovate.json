@@ -2365,9 +2365,10 @@
       "enabled": true
     },
     {
-      "groupName": "search-ui ai @ai-sdk/langchain dependency",
+      "groupName": "search-ui ai dependency",
       "matchDepNames": [
-        "ai"
+        "ai",
+        "@ai-sdk/langchain"
       ],
       "reviewers": [
         "team:search-kibana"
