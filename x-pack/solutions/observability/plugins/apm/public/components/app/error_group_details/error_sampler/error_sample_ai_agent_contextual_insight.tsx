@@ -10,7 +10,6 @@ import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { AT_TIMESTAMP } from '@kbn/apm-types';
 import { AiInsight } from '@kbn/observability-agent-builder';
-import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '../../../../../common/agent_builder/attachment_ids';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { getIsObservabilityAgentEnabled } from '../../../../../common/agent_builder/get_is_obs_agent_enabled';
@@ -76,20 +75,23 @@ export function ErrorSampleAiAgentContextualInsight({
 
     setIsLoading(true);
     try {
-      const response = await callApmApi('POST /internal/apm/ai_agent/contextual_insights/error', {
-        params: {
-          body: {
-            serviceName: error.service.name,
-            errorId: error.error.id,
-            start,
-            end,
-            environment,
-            kuery,
-            connectorId: lastUsedConnectorId,
+      const response = await callApmApi(
+        'POST /internal/apm/agent_builder/contextual_insights/error',
+        {
+          params: {
+            body: {
+              serviceName: error.service.name,
+              errorId: error.error.id,
+              start,
+              end,
+              environment,
+              kuery,
+              connectorId: lastUsedConnectorId,
+            },
           },
-        },
-        signal: null,
-      });
+          signal: null,
+        }
+      );
 
       setLlmResponse(response?.llmResponse ?? undefined);
     } catch (e) {
@@ -158,34 +160,27 @@ export function ErrorSampleAiAgentContextualInsight({
         }),
       },
       {
-        id: 'apm_error_details_error_attachment',
-        type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
+        id: 'apm_error_ai_insight',
+        type: 'observability.ai_insight',
         getContent: () => ({
-          service: {
-            name: serviceName,
-            environment: error.service.environment,
-            language: languageName,
-            runtime_name: runtimeName,
-            runtime_version: runtimeVersion,
-          },
-          transaction_name: transactionName,
-          error_id: error.error.id,
-          occurred_at: error['@timestamp'],
-          log_stacktrace: logStacktrace,
-          exception_stacktrace: exceptionStacktrace,
+          summary: llmResponse?.content ?? '',
+          context: dedent(`
+            Service: ${serviceName}
+            Environment: ${error.service.environment ?? ''}
+            Language: ${languageName}
+            Runtime: ${runtimeName} ${runtimeVersion}
+            Transaction: ${transactionName}
+            Error ID: ${error.error.id}
+            Occurred at: ${error['@timestamp']}
+
+            Log stacktrace:
+            ${logStacktrace}
+
+            Exception stacktrace:
+            ${exceptionStacktrace}
+          `),
         }),
       },
-      ...(llmResponse?.content
-        ? [
-            {
-              id: 'apm_error_details_llm_summary',
-              type: 'text',
-              getContent: () => ({
-                content: llmResponse.content,
-              }),
-            },
-          ]
-        : []),
     ];
   }, [
     error,

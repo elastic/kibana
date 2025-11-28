@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
 import { first } from 'lodash';
@@ -58,7 +57,7 @@ import { buildUrl } from '../../../../utils/build_url';
 import { OpenErrorInDiscoverButton } from '../../../shared/links/discover_links/open_error_in_discover_button';
 
 const TransactionLinkName = styled.div`
-  margin-left: ${euiThemeVars.euiSizeS};
+  margin-left: ${({ theme }) => theme.euiTheme.size.s};
   display: inline-block;
   vertical-align: middle;
 `;

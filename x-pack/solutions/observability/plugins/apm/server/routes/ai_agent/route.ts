@@ -14,7 +14,7 @@ import { getErrorContextualInsights } from './contextual_insights/get_error_cont
 import { parseDatemath } from '../../agent_builder/utils/time';
 
 const errorContextRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/ai_agent/contextual_insights/error',
+  endpoint: 'POST /internal/apm/agent_builder/contextual_insights/error',
   options: {
     access: 'internal',
   },
@@ -73,7 +73,7 @@ const errorContextRoute = createApmServerRoute({
     let connectorId = lastUsedConnectorId;
     if (!connectorId) {
       const defaultConnector = await inferenceStart.getDefaultConnector(resources.request);
-      connectorId = defaultConnector?.id;
+      connectorId = defaultConnector?.connectorId;
     }
 
     const inferenceClient = inferenceStart.getClient({ request: resources.request });
