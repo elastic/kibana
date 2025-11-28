@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnterSwitchDefaultNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { NodeImplementation } from '../node_implementation';
 
 export class EnterSwitchDefaultNodeImpl implements NodeImplementation {
-  constructor(
-    private node: EnterSwitchDefaultNode,
-    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
-  ) {}
+  constructor(private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager) {}
 
   public run(): void {
     this.wfExecutionRuntimeManager.enterScope('default');
