@@ -13,50 +13,68 @@ export const cloudDefendUsageSchema: MakeSchemaFrom<CloudDefendUsage> = {
     alerts: {
       doc_count: {
         type: 'long',
+        _meta: { description: 'Cloud defend alerts doc count' },
       },
       deleted: {
         type: 'long',
+        _meta: { description: 'Cloud defend alerts deleted' },
       },
       size_in_bytes: {
         type: 'long',
+        _meta: { description: 'Cloud defend alerts size in bytes' },
       },
       last_doc_timestamp: {
         type: 'date',
+        _meta: { description: 'Cloud defend alerts last doc timestamp' },
       },
     },
     file: {
       doc_count: {
         type: 'long',
+        _meta: { description: 'Cloud defend file doc count' },
       },
       deleted: {
         type: 'long',
+        _meta: { description: 'Cloud defend file deleted' },
       },
       size_in_bytes: {
         type: 'long',
+        _meta: { description: 'Cloud defend file size in bytes' },
       },
       last_doc_timestamp: {
         type: 'date',
+        _meta: { description: 'Cloud defend file last doc timestamp' },
       },
     },
     process: {
       doc_count: {
         type: 'long',
+        _meta: { description: 'Cloud defend process doc count' },
       },
       deleted: {
         type: 'long',
+        _meta: { description: 'Cloud defend process deleted' },
       },
       size_in_bytes: {
         type: 'long',
+        _meta: { description: 'Cloud defend process size in bytes' },
       },
       last_doc_timestamp: {
         type: 'date',
+        _meta: { description: 'Cloud defend process last doc timestamp' },
       },
     },
-    latestPackageVersion: { type: 'keyword' },
+    latestPackageVersion: {
+      type: 'keyword',
+      _meta: { description: 'Cloud defend latest package version' },
+    },
     packageStatus: {
-      status: { type: 'keyword' },
-      installedPackagePolicies: { type: 'long' },
-      healthyAgents: { type: 'long' },
+      status: { type: 'keyword', _meta: { description: 'Cloud defend package status' } },
+      installedPackagePolicies: {
+        type: 'long',
+        _meta: { description: 'Cloud defend installed package policies' },
+      },
+      healthyAgents: { type: 'long', _meta: { description: 'Cloud defend healthy agents' } },
     },
   },
   pods_stats: {

@@ -198,64 +198,112 @@
             "alerts": {
               "properties": {
                 "doc_count": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cloud defend alerts doc count"
+                  }
                 },
                 "deleted": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cloud defend alerts deleted"
+                  }
                 },
                 "size_in_bytes": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cloud defend alerts size in bytes"
+                  }
                 },
                 "last_doc_timestamp": {
-                  "type": "date"
+                  "type": "date",
+                  "_meta": {
+                    "description": "Cloud defend alerts last doc timestamp"
+                  }
                 }
               }
             },
             "file": {
               "properties": {
                 "doc_count": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cloud defend file doc count"
+                  }
                 },
                 "deleted": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cloud defend file deleted"
+                  }
                 },
                 "size_in_bytes": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cloud defend file size in bytes"
+                  }
                 },
                 "last_doc_timestamp": {
-                  "type": "date"
+                  "type": "date",
+                  "_meta": {
+                    "description": "Cloud defend file last doc timestamp"
+                  }
                 }
               }
             },
             "process": {
               "properties": {
                 "doc_count": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cloud defend process doc count"
+                  }
                 },
                 "deleted": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cloud defend process deleted"
+                  }
                 },
                 "size_in_bytes": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cloud defend process size in bytes"
+                  }
                 },
                 "last_doc_timestamp": {
-                  "type": "date"
+                  "type": "date",
+                  "_meta": {
+                    "description": "Cloud defend process last doc timestamp"
+                  }
                 }
               }
             },
             "latestPackageVersion": {
-              "type": "keyword"
+              "type": "keyword",
+              "_meta": {
+                "description": "Cloud defend latest package version"
+              }
             },
             "packageStatus": {
               "properties": {
                 "status": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "Cloud defend package status"
+                  }
                 },
                 "installedPackagePolicies": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cloud defend installed package policies"
+                  }
                 },
                 "healthyAgents": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cloud defend healthy agents"
+                  }
                 }
               }
             }
