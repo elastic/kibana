@@ -44,7 +44,7 @@ export async function ensureFleetGlobalEsAssets(
     ensureFleetEventIngestedPipelineIsInstalled(esClient, logger),
   ]);
 
-  if (options?.reinstallPackages !== true) {
+  if (options?.reinstallPackages) {
     const assetResults = globalAssetsRes.flat();
     if (assetResults.some((asset) => asset.isCreated)) {
       // Update existing index template
