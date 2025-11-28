@@ -22,6 +22,11 @@ import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
 import { useGetGenerateDiscoverLink } from '../../../../hooks/use_generate_discover_link';
 import { getEsqlQuery } from './get_esql_query';
 import { SimilarErrorsOccurrencesChart } from './similar_errors_occurrences_chart';
+import { buildSectionDescription, type FieldInfo } from './build_section_description';
+
+const createFieldInfo = (value: unknown, field: string | undefined): FieldInfo | undefined => {
+  return value && field ? { value, field } : undefined;
+};
 
 const sectionTitle = i18n.translate(
   'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.title',
@@ -44,55 +49,46 @@ export interface SimilarErrorsProps {
 }
 
 export function SimilarErrors({ hit }: SimilarErrorsProps) {
+  const { indexes } = useDataSourcesContext();
+  const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.logs });
   const hitFlattened = hit.flattened;
-  const { value: serviceNameValue } = getFieldValueWithFallback(
+  const { field: serviceNameField, value: serviceNameValue } = getFieldValueWithFallback(
     hitFlattened,
     fieldConstants.SERVICE_NAME_FIELD
   );
-  const { value: groupingNameValue } = getFieldValueWithFallback(
+  const { field: groupingNameField, value: groupingNameValue } = getFieldValueWithFallback(
     hitFlattened,
     fieldConstants.ERROR_GROUPING_NAME_FIELD
   );
-  const { value: culpritValue } = getFieldValueWithFallback(
+  const { field: culpritField, value: culpritValue } = getFieldValueWithFallback(
     hitFlattened,
     fieldConstants.ERROR_CULPRIT_FIELD
   );
   const { field: messageField, value: messageValue } = getMessageFieldWithFallbacks(hitFlattened);
   const { field: typeField, value: typeValue } = getLogExceptionTypeFieldWithFallback(hitFlattened);
 
-  const sectionDescription = useMemo(() => {
-    const fieldsWithValues: string[] = [fieldConstants.SERVICE_NAME_FIELD];
-
-    if (culpritValue) {
-      fieldsWithValues.push(fieldConstants.ERROR_CULPRIT_FIELD);
-    }
-    if (messageValue) {
-      fieldsWithValues.push(messageField || 'message');
-    }
-    if (typeValue) {
-      fieldsWithValues.push(typeField || 'exception.type');
-    }
-    if (groupingNameValue) {
-      fieldsWithValues.push(fieldConstants.ERROR_GROUPING_NAME_FIELD);
-    }
-
-    if (fieldsWithValues.length === 0) {
-      return undefined;
-    }
-
-    return i18n.translate(
-      'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.description',
-      {
-        defaultMessage: 'These errors are based on the following fields: {fields}.',
-        values: {
-          fields: fieldsWithValues.join(', '),
-        },
-      }
-    );
-  }, [culpritValue, messageValue, typeValue, messageField, typeField, groupingNameValue]);
-
-  const { indexes } = useDataSourcesContext();
-  const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.logs });
+  const sectionDescription = useMemo(
+    () =>
+      buildSectionDescription({
+        serviceName: createFieldInfo(serviceNameValue, serviceNameField),
+        culprit: createFieldInfo(culpritValue, culpritField),
+        message: createFieldInfo(messageValue, messageField),
+        type: createFieldInfo(typeValue, typeField),
+        groupingName: createFieldInfo(groupingNameValue, groupingNameField),
+      }),
+    [
+      serviceNameValue,
+      serviceNameField,
+      culpritValue,
+      culpritField,
+      messageValue,
+      messageField,
+      typeValue,
+      typeField,
+      groupingNameValue,
+      groupingNameField,
+    ]
+  );
 
   const esqlQuery = getEsqlQuery({
     serviceName: serviceNameValue ? String(serviceNameValue) : undefined,
