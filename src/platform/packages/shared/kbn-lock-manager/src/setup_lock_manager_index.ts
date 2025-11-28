@@ -106,11 +106,11 @@ export async function ensureTemplatesAndIndexCreated(
       error.body.error.type === 'resource_already_exists_exception';
 
     // Handle the case where the index name already exists as an alias (e.g., after a reindex operation during cluster upgrade)
-    const isIndexNameExistsAsAlias =
+    const isIndexNameExistsAsAliasError =
       error instanceof errors.ResponseError &&
       error.body.error.type === 'invalid_index_name_exception';
 
-    if (isIndexAlreadyExistsError || isIndexNameExistsAsAlias) {
+    if (isIndexAlreadyExistsError || isIndexNameExistsAsAliasError) {
       logger.debug(`Index ${LOCKS_CONCRETE_INDEX_NAME} already exists. Skipping creation.`);
       return;
     }
