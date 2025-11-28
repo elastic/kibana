@@ -21,15 +21,7 @@ export const ProjectRoutingSwitch: React.FC<ProjectRoutingSwitchProps> = ({
   onChange,
 }) => {
   return (
-    <EuiFormRow
-      fullWidth
-      helpText={
-        <FormattedMessage
-          id="discover.topNav.saveModal.storeProjectRoutingWithSearchToggleDescription"
-          defaultMessage="Update the project routing to the current selection when using this session."
-        />
-      }
-    >
+    <EuiFormRow fullWidth>
       <EuiSwitch
         data-test-subj="storeProjectRoutingWithSearch"
         checked={checked}
@@ -37,7 +29,7 @@ export const ProjectRoutingSwitch: React.FC<ProjectRoutingSwitchProps> = ({
         label={
           <FormattedMessage
             id="discover.topNav.saveModal.storeProjectRoutingWithSearchToggleLabel"
-            defaultMessage="Store project routing with Discover session"
+            defaultMessage="Include cross-project search scope customizations "
           />
         }
       />

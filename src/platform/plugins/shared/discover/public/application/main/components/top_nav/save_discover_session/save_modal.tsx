@@ -81,15 +81,7 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
   ) : null;
 
   const timeSwitch = isTimeBased ? (
-    <EuiFormRow
-      fullWidth
-      helpText={
-        <FormattedMessage
-          id="discover.topNav.saveModal.storeTimeWithSearchToggleDescription"
-          defaultMessage="Update the time filter and refresh interval to the current selection when using this session."
-        />
-      }
-    >
+    <EuiFormRow fullWidth>
       <EuiSwitch
         data-test-subj="storeTimeWithSearch"
         checked={timeRestore}
@@ -97,7 +89,7 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
         label={
           <FormattedMessage
             id="discover.topNav.saveModal.storeTimeWithSearchToggleLabel"
-            defaultMessage="Store time with Discover session"
+            defaultMessage="Include time range and refresh interval customizations"
           />
         }
       />
@@ -107,10 +99,10 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
   const options = (
     <>
       {tagSelector}
-      {timeSwitch}
       {showStoreProjectRoutingOnSave && (
         <ProjectRoutingSwitch checked={projectRoutingRestore} onChange={setProjectRoutingRestore} />
       )}
+      {timeSwitch}
     </>
   );
 
