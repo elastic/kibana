@@ -24,7 +24,6 @@ import { css } from '@emotion/react';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { BasicPrettyPrinter, Parser } from '@kbn/esql-ast';
 import {
   ESQLVariableType,
   EsqlControlType,
@@ -105,11 +104,8 @@ export function ValueControlForm({
       ? initialState?.esqlQuery ?? INITIAL_EMPTY_STATE_QUERY
       : ''
   );
-  const { root } = Parser.parse(valuesQuery);
-  const prettyQuery = BasicPrettyPrinter.print(root);
-  const isQueryPresent = prettyQuery.trim() !== '';
-  const [hasQueryResults, setHasQueryResults] = useState<boolean | null>(null);
 
+  const [hasQueryResults, setHasQueryResults] = useState<boolean | null>(null);
   const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();
   const [queryColumns, setQueryColumns] = useState<string[]>(
     valuesRetrieval ? [valuesRetrieval] : []
@@ -303,7 +299,7 @@ export function ValueControlForm({
               defaultMessage: 'Values query',
             })}
           />
-          {isQueryPresent && hasQueryResults === false && (
+          {hasQueryResults === false && (
             <EuiFormRow
               label={i18n.translate('esql.flyout.previewValues.placeholder', {
                 defaultMessage: 'Values preview',
