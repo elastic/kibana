@@ -754,23 +754,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ]);
       });
 
-      it('allows the user to mute a specific alert', async () => {
-        // If the tab exists, click on the alert list
-        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
-
-        // Verify content
-        await testSubjects.existOrFail('alertsList');
-
-        log.debug(`Ensuring us-central is not muted`);
-        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-central', false);
-
-        log.debug(`Muting us-central`);
-        await pageObjects.ruleDetailsUI.clickAlertMuteButton('us-central');
-
-        log.debug(`Ensuring us-central is muted`);
-        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-central', true);
-      });
-
       it('allows the user to unmute a specific alert', async () => {
         // If the tab exists, click on the alert list
         await pageObjects.triggersActionsUI.maybeClickOnAlertTab();

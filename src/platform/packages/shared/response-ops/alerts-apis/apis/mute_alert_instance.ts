@@ -20,6 +20,6 @@ export const muteAlertInstance = ({ id, instanceId, http }: MuteAlertInstancePar
   return http.post<void>(
     `${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}/alert/${encodeURIComponent(
       instanceId
-    )}/_mute?validateAlertsExistence=false`
+    )}/_mute`
   );
 };
