@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ROTATEENCRYPTIONKEY_CONTRACT: InternalConnectorContract = {
+export const ROTATE_ENCRYPTION_KEY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.rotateEncryptionKey',
   connectorGroup: 'internal',
   summary: `Rotate a key for encrypted saved objects`,

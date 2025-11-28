@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   ccr_resume_auto_follow_pattern_request,
   ccr_resume_auto_follow_pattern_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CCR_RESUME_AUTO_FOLLOW_PATTERN_CONTRACT: InternalConnectorContract = {

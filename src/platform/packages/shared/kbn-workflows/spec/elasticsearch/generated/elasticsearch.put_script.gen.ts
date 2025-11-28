@@ -30,7 +30,7 @@ import {
   put_script2_response,
   put_script3_request,
   put_script3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const PUT_SCRIPT_CONTRACT: InternalConnectorContract = {

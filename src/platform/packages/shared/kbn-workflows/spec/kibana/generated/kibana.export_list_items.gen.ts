@@ -25,7 +25,7 @@ import { export_list_items_request } from './schemas/kibana_openapi_zod.gen';
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const EXPORTLISTITEMS_CONTRACT: InternalConnectorContract = {
+export const EXPORT_LIST_ITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ExportListItems',
   connectorGroup: 'internal',
   summary: `Export value list items`,

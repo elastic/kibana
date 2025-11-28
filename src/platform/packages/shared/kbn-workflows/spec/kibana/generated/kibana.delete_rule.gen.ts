@@ -25,7 +25,7 @@ import { delete_rule_request, delete_rule_response } from './schemas/kibana_open
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETERULE_CONTRACT: InternalConnectorContract = {
+export const DELETE_RULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteRule',
   connectorGroup: 'internal',
   summary: `Delete a detection rule`,

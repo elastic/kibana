@@ -19,7 +19,7 @@ import { z } from '@kbn/zod/v4';
 import type { InternalConnectorContract } from '../../../types/latest';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import {} from './es_openapi_zod.gen';
+import {} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CONNECTOR_SECRET_GET_CONTRACT: InternalConnectorContract = {

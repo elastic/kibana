@@ -26,7 +26,7 @@ import {
   ml_get_data_frame_analytics_stats_response,
   ml_get_data_frame_analytics_stats1_request,
   ml_get_data_frame_analytics_stats1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ML_GET_DATA_FRAME_ANALYTICS_STATS_CONTRACT: InternalConnectorContract = {

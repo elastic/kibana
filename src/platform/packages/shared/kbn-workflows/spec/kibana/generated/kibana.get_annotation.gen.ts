@@ -25,7 +25,7 @@ import { get_annotation_request, get_annotation_response } from './schemas/kiban
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETANNOTATION_CONTRACT: InternalConnectorContract = {
+export const GET_ANNOTATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAnnotation',
   connectorGroup: 'internal',
   summary: `Search for annotations`,

@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   inference_stream_completion_request,
   inference_stream_completion_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INFERENCE_STREAM_COMPLETION_CONTRACT: InternalConnectorContract = {

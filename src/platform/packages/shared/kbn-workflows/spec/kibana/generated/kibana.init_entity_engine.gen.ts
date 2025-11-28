@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const INITENTITYENGINE_CONTRACT: InternalConnectorContract = {
+export const INIT_ENTITY_ENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InitEntityEngine',
   connectorGroup: 'internal',
   summary: `Initialize an Entity Engine`,

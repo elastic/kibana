@@ -25,7 +25,7 @@ import { cancel_action_request, cancel_action_response } from './schemas/kibana_
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CANCELACTION_CONTRACT: InternalConnectorContract = {
+export const CANCEL_ACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CancelAction',
   connectorGroup: 'internal',
   summary: `Cancel a response action`,

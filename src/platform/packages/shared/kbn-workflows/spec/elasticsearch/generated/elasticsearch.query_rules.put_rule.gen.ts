@@ -21,7 +21,10 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { query_rules_put_rule_request, query_rules_put_rule_response } from './es_openapi_zod.gen';
+import {
+  query_rules_put_rule_request,
+  query_rules_put_rule_response,
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const QUERY_RULES_PUT_RULE_CONTRACT: InternalConnectorContract = {

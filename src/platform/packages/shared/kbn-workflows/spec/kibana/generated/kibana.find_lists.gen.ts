@@ -25,7 +25,7 @@ import { find_lists_request, find_lists_response } from './schemas/kibana_openap
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const FINDLISTS_CONTRACT: InternalConnectorContract = {
+export const FIND_LISTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindLists',
   connectorGroup: 'internal',
   summary: `Get value lists`,

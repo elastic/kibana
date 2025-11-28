@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const RUNSCRIPTACTION_CONTRACT: InternalConnectorContract = {
+export const RUN_SCRIPT_ACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.RunScriptAction',
   connectorGroup: 'internal',
   summary: `Run a script`,

@@ -26,7 +26,7 @@ import {
   rollup_get_rollup_caps_response,
   rollup_get_rollup_caps1_request,
   rollup_get_rollup_caps1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ROLLUP_GET_ROLLUP_CAPS_CONTRACT: InternalConnectorContract = {

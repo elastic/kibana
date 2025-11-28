@@ -26,7 +26,7 @@ import {
   watcher_deactivate_watch_response,
   watcher_deactivate_watch1_request,
   watcher_deactivate_watch1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const WATCHER_DEACTIVATE_WATCH_CONTRACT: InternalConnectorContract = {

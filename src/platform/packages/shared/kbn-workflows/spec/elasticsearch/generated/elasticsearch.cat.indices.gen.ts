@@ -26,7 +26,7 @@ import {
   cat_indices_response,
   cat_indices1_request,
   cat_indices1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CAT_INDICES_CONTRACT: InternalConnectorContract = {

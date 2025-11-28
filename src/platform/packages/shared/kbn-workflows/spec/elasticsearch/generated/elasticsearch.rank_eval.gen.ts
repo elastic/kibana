@@ -30,7 +30,7 @@ import {
   rank_eval2_response,
   rank_eval3_request,
   rank_eval3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const RANK_EVAL_CONTRACT: InternalConnectorContract = {

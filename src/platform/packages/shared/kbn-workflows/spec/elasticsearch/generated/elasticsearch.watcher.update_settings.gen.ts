@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   watcher_update_settings_request,
   watcher_update_settings_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const WATCHER_UPDATE_SETTINGS_CONTRACT: InternalConnectorContract = {

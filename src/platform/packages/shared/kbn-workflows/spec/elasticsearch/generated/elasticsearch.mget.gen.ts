@@ -30,7 +30,7 @@ import {
   mget2_response,
   mget3_request,
   mget3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const MGET_CONTRACT: InternalConnectorContract = {

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const READENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
+export const READ_ENDPOINT_LIST_ITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadEndpointListItem',
   connectorGroup: 'internal',
   summary: `Get an Elastic Endpoint rule exception list item`,

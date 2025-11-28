@@ -25,7 +25,7 @@ import { read_tags_request, read_tags_response } from './schemas/kibana_openapi_
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const READTAGS_CONTRACT: InternalConnectorContract = {
+export const READ_TAGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadTags',
   connectorGroup: 'internal',
   summary: `List all detection rule tags`,

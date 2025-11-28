@@ -26,7 +26,7 @@ import {
   watcher_query_watches_response,
   watcher_query_watches1_request,
   watcher_query_watches1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const WATCHER_QUERY_WATCHES_CONTRACT: InternalConnectorContract = {

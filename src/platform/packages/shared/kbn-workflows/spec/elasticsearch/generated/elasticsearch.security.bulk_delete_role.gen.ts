@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   security_bulk_delete_role_request,
   security_bulk_delete_role_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_BULK_DELETE_ROLE_CONTRACT: InternalConnectorContract = {

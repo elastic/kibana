@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETATTACKDISCOVERYGENERATION_CONTRACT: InternalConnectorContract = {
+export const GET_ATTACK_DISCOVERY_GENERATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetAttackDiscoveryGeneration',
   connectorGroup: 'internal',
   summary: `Get a single Attack discovery generation, including its discoveries and (optional) generation metadata`,

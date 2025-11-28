@@ -25,7 +25,7 @@ import { delete_runtime_field_default_request } from './schemas/kibana_openapi_z
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
+export const DELETE_RUNTIME_FIELD_DEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteRuntimeFieldDefault',
   connectorGroup: 'internal',
   summary: `Delete a runtime field from a data view`,

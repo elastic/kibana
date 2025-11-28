@@ -26,7 +26,7 @@ import {
   cluster_get_component_template_response,
   cluster_get_component_template1_request,
   cluster_get_component_template1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CLUSTER_GET_COMPONENT_TEMPLATE_CONTRACT: InternalConnectorContract = {

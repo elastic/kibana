@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETDEFINITIONSOP_CONTRACT: InternalConnectorContract = {
+export const GET_DEFINITIONS_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getDefinitionsOp',
   connectorGroup: 'internal',
   summary: `Get the SLO definitions`,

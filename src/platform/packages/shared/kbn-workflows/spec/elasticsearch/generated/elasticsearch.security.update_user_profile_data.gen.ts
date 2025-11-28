@@ -26,7 +26,7 @@ import {
   security_update_user_profile_data_response,
   security_update_user_profile_data1_request,
   security_update_user_profile_data1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_UPDATE_USER_PROFILE_DATA_CONTRACT: InternalConnectorContract = {

@@ -25,7 +25,7 @@ import { delete_case_comments_default_space_request } from './schemas/kibana_ope
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETECASECOMMENTSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
+export const DELETE_CASE_COMMENTS_DEFAULT_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteCaseCommentsDefaultSpace',
   connectorGroup: 'internal',
   summary: `Delete all case comments and alerts`,

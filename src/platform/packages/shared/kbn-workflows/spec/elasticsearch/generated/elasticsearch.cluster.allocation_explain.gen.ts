@@ -26,7 +26,7 @@ import {
   cluster_allocation_explain_response,
   cluster_allocation_explain1_request,
   cluster_allocation_explain1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CLUSTER_ALLOCATION_EXPLAIN_CONTRACT: InternalConnectorContract = {

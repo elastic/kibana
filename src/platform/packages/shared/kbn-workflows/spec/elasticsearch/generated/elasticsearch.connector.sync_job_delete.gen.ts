@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   connector_sync_job_delete_request,
   connector_sync_job_delete_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CONNECTOR_SYNC_JOB_DELETE_CONTRACT: InternalConnectorContract = {

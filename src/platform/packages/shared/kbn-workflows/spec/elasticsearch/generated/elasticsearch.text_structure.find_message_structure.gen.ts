@@ -26,7 +26,7 @@ import {
   text_structure_find_message_structure_response,
   text_structure_find_message_structure1_request,
   text_structure_find_message_structure1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const TEXT_STRUCTURE_FIND_MESSAGE_STRUCTURE_CONTRACT: InternalConnectorContract = {

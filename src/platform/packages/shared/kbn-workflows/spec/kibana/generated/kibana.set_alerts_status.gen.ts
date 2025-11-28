@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const SETALERTSSTATUS_CONTRACT: InternalConnectorContract = {
+export const SET_ALERTS_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SetAlertsStatus',
   connectorGroup: 'internal',
   summary: `Set a detection alert status`,

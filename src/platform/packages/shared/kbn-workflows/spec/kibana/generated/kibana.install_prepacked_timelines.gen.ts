@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const INSTALLPREPACKEDTIMELINES_CONTRACT: InternalConnectorContract = {
+export const INSTALL_PREPACKED_TIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InstallPrepackedTimelines',
   connectorGroup: 'internal',
   summary: `Install prepackaged Timelines`,

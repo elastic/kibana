@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   ml_delete_trained_model_request,
   ml_delete_trained_model_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ML_DELETE_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {

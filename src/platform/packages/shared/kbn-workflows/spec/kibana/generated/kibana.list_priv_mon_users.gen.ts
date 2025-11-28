@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const LISTPRIVMONUSERS_CONTRACT: InternalConnectorContract = {
+export const LIST_PRIV_MON_USERS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ListPrivMonUsers',
   connectorGroup: 'internal',
   summary: `List all monitored users`,

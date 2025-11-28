@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   ml_get_calendar_events_request,
   ml_get_calendar_events_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ML_GET_CALENDAR_EVENTS_CONTRACT: InternalConnectorContract = {

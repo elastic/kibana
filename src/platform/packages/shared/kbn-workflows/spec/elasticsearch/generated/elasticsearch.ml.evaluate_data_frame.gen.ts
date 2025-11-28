@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   ml_evaluate_data_frame_request,
   ml_evaluate_data_frame_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ML_EVALUATE_DATA_FRAME_CONTRACT: InternalConnectorContract = {

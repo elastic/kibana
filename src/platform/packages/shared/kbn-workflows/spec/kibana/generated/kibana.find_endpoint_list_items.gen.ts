@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const FINDENDPOINTLISTITEMS_CONTRACT: InternalConnectorContract = {
+export const FIND_ENDPOINT_LIST_ITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindEndpointListItems',
   connectorGroup: 'internal',
   summary: `Get Elastic Endpoint exception list items`,

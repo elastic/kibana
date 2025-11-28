@@ -25,7 +25,7 @@ import { set_alert_assignees_request } from './schemas/kibana_openapi_zod.gen';
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const SETALERTASSIGNEES_CONTRACT: InternalConnectorContract = {
+export const SET_ALERT_ASSIGNEES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SetAlertAssignees',
   connectorGroup: 'internal',
   summary: `Assign and unassign users from detection alerts`,

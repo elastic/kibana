@@ -25,7 +25,7 @@ import { get_slo_op_request, get_slo_op_response } from './schemas/kibana_openap
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETSLOOP_CONTRACT: InternalConnectorContract = {
+export const GET_SLO_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSloOp',
   connectorGroup: 'internal',
   summary: `Get an SLO`,

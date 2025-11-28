@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETRUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
+export const GET_RUNTIME_FIELD_DEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getRuntimeFieldDefault',
   connectorGroup: 'internal',
   summary: `Get a runtime field`,

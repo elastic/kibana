@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   fleet_global_checkpoints_request,
   fleet_global_checkpoints_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const FLEET_GLOBAL_CHECKPOINTS_CONTRACT: InternalConnectorContract = {

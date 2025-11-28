@@ -25,7 +25,7 @@ import { upsert_entities_bulk_request } from './schemas/kibana_openapi_zod.gen';
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const UPSERTENTITIESBULK_CONTRACT: InternalConnectorContract = {
+export const UPSERT_ENTITIES_BULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpsertEntitiesBulk',
   connectorGroup: 'internal',
   summary: `Upsert many entities in Entity Store`,

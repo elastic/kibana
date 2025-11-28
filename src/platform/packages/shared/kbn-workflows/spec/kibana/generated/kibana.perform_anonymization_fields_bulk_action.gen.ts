@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const PERFORMANONYMIZATIONFIELDSBULKACTION_CONTRACT: InternalConnectorContract = {
+export const PERFORM_ANONYMIZATION_FIELDS_BULK_ACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PerformAnonymizationFieldsBulkAction',
   connectorGroup: 'internal',
   summary: `Apply a bulk action to anonymization fields`,

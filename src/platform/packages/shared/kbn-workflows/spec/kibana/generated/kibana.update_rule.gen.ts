@@ -25,7 +25,7 @@ import { update_rule_request, update_rule_response } from './schemas/kibana_open
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const UPDATERULE_CONTRACT: InternalConnectorContract = {
+export const UPDATE_RULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateRule',
   connectorGroup: 'internal',
   summary: `Update a detection rule`,

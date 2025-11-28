@@ -25,7 +25,7 @@ import { upsert_entity_request, upsert_entity_response } from './schemas/kibana_
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const UPSERTENTITY_CONTRACT: InternalConnectorContract = {
+export const UPSERT_ENTITY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpsertEntity',
   connectorGroup: 'internal',
   summary: `Upsert an entity in Entity Store`,

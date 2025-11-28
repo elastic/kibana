@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const READALERTSINDEX_CONTRACT: InternalConnectorContract = {
+export const READ_ALERTS_INDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadAlertsIndex',
   connectorGroup: 'internal',
   summary: `Reads the alert index name if it exists`,

@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   security_activate_user_profile_request,
   security_activate_user_profile_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_ACTIVATE_USER_PROFILE_CONTRACT: InternalConnectorContract = {

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ATTACKDISCOVERYFIND_CONTRACT: InternalConnectorContract = {
+export const ATTACK_DISCOVERY_FIND_CONTRACT: InternalConnectorContract = {
   type: 'kibana.AttackDiscoveryFind',
   connectorGroup: 'internal',
   summary: `Find Attack discoveries that match the search criteria`,

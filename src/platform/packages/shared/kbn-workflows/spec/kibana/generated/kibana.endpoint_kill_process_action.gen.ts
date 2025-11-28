@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ENDPOINTKILLPROCESSACTION_CONTRACT: InternalConnectorContract = {
+export const ENDPOINT_KILL_PROCESS_ACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointKillProcessAction',
   connectorGroup: 'internal',
   summary: `Terminate a process`,

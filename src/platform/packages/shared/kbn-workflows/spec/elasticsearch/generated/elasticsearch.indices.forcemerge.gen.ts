@@ -26,7 +26,7 @@ import {
   indices_forcemerge_response,
   indices_forcemerge1_request,
   indices_forcemerge1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_FORCEMERGE_CONTRACT: InternalConnectorContract = {

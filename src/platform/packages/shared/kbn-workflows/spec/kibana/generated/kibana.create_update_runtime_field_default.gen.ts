@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CREATEUPDATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
+export const CREATE_UPDATE_RUNTIME_FIELD_DEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createUpdateRuntimeFieldDefault',
   connectorGroup: 'internal',
   summary: `Create or update a runtime field`,

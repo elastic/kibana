@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   ml_infer_trained_model_request,
   ml_infer_trained_model_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ML_INFER_TRAINED_MODEL_CONTRACT: InternalConnectorContract = {

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const PERFORMKNOWLEDGEBASEENTRYBULKACTION_CONTRACT: InternalConnectorContract = {
+export const PERFORM_KNOWLEDGE_BASE_ENTRY_BULK_ACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PerformKnowledgeBaseEntryBulkAction',
   connectorGroup: 'internal',
   summary: `Applies a bulk action to multiple Knowledge Base Entries`,

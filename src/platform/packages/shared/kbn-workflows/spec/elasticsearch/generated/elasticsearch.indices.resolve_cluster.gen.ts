@@ -26,7 +26,7 @@ import {
   indices_resolve_cluster_response,
   indices_resolve_cluster1_request,
   indices_resolve_cluster1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_RESOLVE_CLUSTER_CONTRACT: InternalConnectorContract = {

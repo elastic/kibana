@@ -26,7 +26,7 @@ import {
   security_query_role_response,
   security_query_role1_request,
   security_query_role1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_QUERY_ROLE_CONTRACT: InternalConnectorContract = {

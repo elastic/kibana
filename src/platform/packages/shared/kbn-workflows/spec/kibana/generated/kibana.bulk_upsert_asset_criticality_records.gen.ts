@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const BULKUPSERTASSETCRITICALITYRECORDS_CONTRACT: InternalConnectorContract = {
+export const BULK_UPSERT_ASSET_CRITICALITY_RECORDS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.BulkUpsertAssetCriticalityRecords',
   connectorGroup: 'internal',
   summary: `Bulk upsert asset criticality records`,

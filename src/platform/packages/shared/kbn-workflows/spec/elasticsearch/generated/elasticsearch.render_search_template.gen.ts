@@ -30,7 +30,7 @@ import {
   render_search_template2_response,
   render_search_template3_request,
   render_search_template3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const RENDER_SEARCH_TEMPLATE_CONTRACT: InternalConnectorContract = {

@@ -25,7 +25,7 @@ import { read_list_request, read_list_response } from './schemas/kibana_openapi_
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const READLIST_CONTRACT: InternalConnectorContract = {
+export const READ_LIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadList',
   connectorGroup: 'internal',
   summary: `Get value list details`,

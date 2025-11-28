@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ALERTSMIGRATIONCLEANUP_CONTRACT: InternalConnectorContract = {
+export const ALERTS_MIGRATION_CLEANUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.AlertsMigrationCleanup',
   connectorGroup: 'internal',
   summary: `Clean up detection alert migrations`,

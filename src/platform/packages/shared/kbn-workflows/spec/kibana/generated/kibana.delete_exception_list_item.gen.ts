@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETEEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
+export const DELETE_EXCEPTION_LIST_ITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteExceptionListItem',
   connectorGroup: 'internal',
   summary: `Delete an exception list item`,

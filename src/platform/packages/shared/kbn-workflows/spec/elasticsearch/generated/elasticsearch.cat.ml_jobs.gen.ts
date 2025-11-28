@@ -26,7 +26,7 @@ import {
   cat_ml_jobs_response,
   cat_ml_jobs1_request,
   cat_ml_jobs1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CAT_ML_JOBS_CONTRACT: InternalConnectorContract = {

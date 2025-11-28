@@ -25,7 +25,7 @@ import { ml_sync_request, ml_sync_response } from './schemas/kibana_openapi_zod.
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const MLSYNC_CONTRACT: InternalConnectorContract = {
+export const ML_SYNC_CONTRACT: InternalConnectorContract = {
   type: 'kibana.mlSync',
   connectorGroup: 'internal',
   summary: `Sync saved objects in the default space`,

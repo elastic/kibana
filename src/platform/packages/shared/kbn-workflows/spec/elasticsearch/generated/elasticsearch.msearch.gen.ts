@@ -30,7 +30,7 @@ import {
   msearch2_response,
   msearch3_request,
   msearch3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const MSEARCH_CONTRACT: InternalConnectorContract = {

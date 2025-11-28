@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   security_clear_cached_roles_request,
   security_clear_cached_roles_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_CLEAR_CACHED_ROLES_CONTRACT: InternalConnectorContract = {

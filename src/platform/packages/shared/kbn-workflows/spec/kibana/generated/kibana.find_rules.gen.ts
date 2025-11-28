@@ -25,7 +25,7 @@ import { find_rules_request, find_rules_response } from './schemas/kibana_openap
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const FINDRULES_CONTRACT: InternalConnectorContract = {
+export const FIND_RULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindRules',
   connectorGroup: 'internal',
   summary: `List all detection rules`,

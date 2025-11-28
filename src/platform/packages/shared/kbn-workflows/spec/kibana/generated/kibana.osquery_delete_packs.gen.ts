@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const OSQUERYDELETEPACKS_CONTRACT: InternalConnectorContract = {
+export const OSQUERY_DELETE_PACKS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryDeletePacks',
   connectorGroup: 'internal',
   summary: `Delete a pack`,

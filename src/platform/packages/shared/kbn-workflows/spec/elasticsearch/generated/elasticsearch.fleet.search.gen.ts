@@ -26,7 +26,7 @@ import {
   fleet_search_response,
   fleet_search1_request,
   fleet_search1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const FLEET_SEARCH_CONTRACT: InternalConnectorContract = {

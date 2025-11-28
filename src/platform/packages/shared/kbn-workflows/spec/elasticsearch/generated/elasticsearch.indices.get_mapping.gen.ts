@@ -26,7 +26,7 @@ import {
   indices_get_mapping_response,
   indices_get_mapping1_request,
   indices_get_mapping1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_GET_MAPPING_CONTRACT: InternalConnectorContract = {

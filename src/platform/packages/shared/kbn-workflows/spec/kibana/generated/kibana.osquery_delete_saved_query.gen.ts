@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const OSQUERYDELETESAVEDQUERY_CONTRACT: InternalConnectorContract = {
+export const OSQUERY_DELETE_SAVED_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryDeleteSavedQuery',
   connectorGroup: 'internal',
   summary: `Delete a saved query`,

@@ -25,7 +25,7 @@ import { find_slos_op_request, find_slos_op_response } from './schemas/kibana_op
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const FINDSLOSOP_CONTRACT: InternalConnectorContract = {
+export const FIND_SLOS_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findSlosOp',
   connectorGroup: 'internal',
   summary: `Get a paginated list of SLOs`,

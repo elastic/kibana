@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CLEANUPRISKENGINE_CONTRACT: InternalConnectorContract = {
+export const CLEAN_UP_RISK_ENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CleanUpRiskEngine',
   connectorGroup: 'internal',
   summary: `Cleanup the Risk Engine`,

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
+export const DELETE_AGENT_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteAgentConfiguration',
   connectorGroup: 'internal',
   summary: `Delete agent configuration`,

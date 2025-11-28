@@ -26,7 +26,7 @@ import {
   cat_transforms_response,
   cat_transforms1_request,
   cat_transforms1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CAT_TRANSFORMS_CONTRACT: InternalConnectorContract = {

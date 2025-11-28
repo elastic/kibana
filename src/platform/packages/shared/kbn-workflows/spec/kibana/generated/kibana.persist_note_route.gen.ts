@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const PERSISTNOTEROUTE_CONTRACT: InternalConnectorContract = {
+export const PERSIST_NOTE_ROUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PersistNoteRoute',
   connectorGroup: 'internal',
   summary: `Add or update a note`,

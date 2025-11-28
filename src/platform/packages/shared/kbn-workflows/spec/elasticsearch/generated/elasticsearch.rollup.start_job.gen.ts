@@ -21,7 +21,7 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { rollup_start_job_request, rollup_start_job_response } from './es_openapi_zod.gen';
+import { rollup_start_job_request, rollup_start_job_response } from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ROLLUP_START_JOB_CONTRACT: InternalConnectorContract = {

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const READPRIVILEGES_CONTRACT: InternalConnectorContract = {
+export const READ_PRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadPrivileges',
   connectorGroup: 'internal',
   summary: `Returns user privileges for the Kibana space`,

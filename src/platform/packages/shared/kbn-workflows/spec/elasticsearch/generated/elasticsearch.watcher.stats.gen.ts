@@ -26,7 +26,7 @@ import {
   watcher_stats_response,
   watcher_stats1_request,
   watcher_stats1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const WATCHER_STATS_CONTRACT: InternalConnectorContract = {

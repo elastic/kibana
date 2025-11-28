@@ -21,7 +21,7 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { slm_stop_request, slm_stop_response } from './es_openapi_zod.gen';
+import { slm_stop_request, slm_stop_response } from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SLM_STOP_CONTRACT: InternalConnectorContract = {

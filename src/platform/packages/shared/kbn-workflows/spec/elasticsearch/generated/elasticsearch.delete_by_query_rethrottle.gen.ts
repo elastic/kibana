@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   delete_by_query_rethrottle_request,
   delete_by_query_rethrottle_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const DELETE_BY_QUERY_RETHROTTLE_CONTRACT: InternalConnectorContract = {

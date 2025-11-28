@@ -26,7 +26,7 @@ import {
   indices_clone_response,
   indices_clone1_request,
   indices_clone1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_CLONE_CONTRACT: InternalConnectorContract = {

@@ -26,7 +26,7 @@ import {
   enrich_get_policy_response,
   enrich_get_policy1_request,
   enrich_get_policy1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ENRICH_GET_POLICY_CONTRACT: InternalConnectorContract = {

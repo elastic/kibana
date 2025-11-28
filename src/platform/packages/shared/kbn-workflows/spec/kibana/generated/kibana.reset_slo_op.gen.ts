@@ -25,7 +25,7 @@ import { reset_slo_op_request, reset_slo_op_response } from './schemas/kibana_op
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const RESETSLOOP_CONTRACT: InternalConnectorContract = {
+export const RESET_SLO_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.resetSloOp',
   connectorGroup: 'internal',
   summary: `Reset an SLO`,

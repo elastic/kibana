@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const UPDATEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
+export const UPDATE_PRIV_MON_USER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdatePrivMonUser',
   connectorGroup: 'internal',
   summary: `Update a monitored user`,

@@ -28,7 +28,7 @@ import {
   security_create_service_token1_response,
   security_create_service_token2_request,
   security_create_service_token2_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_CREATE_SERVICE_TOKEN_CONTRACT: InternalConnectorContract = {

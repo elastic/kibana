@@ -25,7 +25,7 @@ import { delete_timelines_request } from './schemas/kibana_openapi_zod.gen';
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETETIMELINES_CONTRACT: InternalConnectorContract = {
+export const DELETE_TIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteTimelines',
   connectorGroup: 'internal',
   summary: `Delete Timelines or Timeline templates`,

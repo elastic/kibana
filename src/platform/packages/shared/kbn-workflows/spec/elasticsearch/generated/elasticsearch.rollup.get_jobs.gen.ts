@@ -26,7 +26,7 @@ import {
   rollup_get_jobs_response,
   rollup_get_jobs1_request,
   rollup_get_jobs1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ROLLUP_GET_JOBS_CONTRACT: InternalConnectorContract = {

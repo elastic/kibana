@@ -30,7 +30,7 @@ import {
   security_change_password2_response,
   security_change_password3_request,
   security_change_password3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_CHANGE_PASSWORD_CONTRACT: InternalConnectorContract = {

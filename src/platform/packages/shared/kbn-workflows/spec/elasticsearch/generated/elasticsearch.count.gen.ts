@@ -30,7 +30,7 @@ import {
   count2_response,
   count3_request,
   count3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const COUNT_CONTRACT: InternalConnectorContract = {

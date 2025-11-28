@@ -26,7 +26,7 @@ import {
   security_put_role_mapping_response,
   security_put_role_mapping1_request,
   security_put_role_mapping1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_PUT_ROLE_MAPPING_CONTRACT: InternalConnectorContract = {

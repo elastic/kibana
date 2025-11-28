@@ -26,7 +26,7 @@ import {
   async_search_submit_response,
   async_search_submit1_request,
   async_search_submit1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ASYNC_SEARCH_SUBMIT_CONTRACT: InternalConnectorContract = {

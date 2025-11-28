@@ -25,7 +25,7 @@ import { endpoint_file_download_request } from './schemas/kibana_openapi_zod.gen
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ENDPOINTFILEDOWNLOAD_CONTRACT: InternalConnectorContract = {
+export const ENDPOINT_FILE_DOWNLOAD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointFileDownload',
   connectorGroup: 'internal',
   summary: `Download a file`,

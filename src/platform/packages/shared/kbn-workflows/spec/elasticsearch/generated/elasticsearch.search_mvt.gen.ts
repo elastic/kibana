@@ -26,7 +26,7 @@ import {
   search_mvt_response,
   search_mvt1_request,
   search_mvt1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SEARCH_MVT_CONTRACT: InternalConnectorContract = {

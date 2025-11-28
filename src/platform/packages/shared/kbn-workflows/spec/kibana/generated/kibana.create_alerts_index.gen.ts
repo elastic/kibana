@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CREATEALERTSINDEX_CONTRACT: InternalConnectorContract = {
+export const CREATE_ALERTS_INDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateAlertsIndex',
   connectorGroup: 'internal',
   summary: `Create an alerts index`,

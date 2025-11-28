@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETEROLLUPDATAOP_CONTRACT: InternalConnectorContract = {
+export const DELETE_ROLLUP_DATA_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteRollupDataOp',
   connectorGroup: 'internal',
   summary: `Batch delete rollup and summary data`,

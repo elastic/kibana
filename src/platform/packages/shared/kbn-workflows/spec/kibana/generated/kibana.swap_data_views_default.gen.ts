@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const SWAPDATAVIEWSDEFAULT_CONTRACT: InternalConnectorContract = {
+export const SWAP_DATA_VIEWS_DEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.swapDataViewsDefault',
   connectorGroup: 'internal',
   summary: `Swap saved object references`,

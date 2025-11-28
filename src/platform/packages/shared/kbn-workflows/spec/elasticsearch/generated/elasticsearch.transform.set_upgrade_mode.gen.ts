@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   transform_set_upgrade_mode_request,
   transform_set_upgrade_mode_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const TRANSFORM_SET_UPGRADE_MODE_CONTRACT: InternalConnectorContract = {

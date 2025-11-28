@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const INITMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
+export const INIT_MONITORING_ENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InitMonitoringEngine',
   connectorGroup: 'internal',
   summary: `Initialize the Privilege Monitoring Engine`,

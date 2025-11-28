@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const RESOLVEIMPORTERRORS_CONTRACT: InternalConnectorContract = {
+export const RESOLVE_IMPORT_ERRORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.resolveImportErrors',
   connectorGroup: 'internal',
   summary: `Resolve import errors`,

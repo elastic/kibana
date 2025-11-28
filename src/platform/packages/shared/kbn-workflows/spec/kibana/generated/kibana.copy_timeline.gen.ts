@@ -25,7 +25,7 @@ import { copy_timeline_request, copy_timeline_response } from './schemas/kibana_
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const COPYTIMELINE_CONTRACT: InternalConnectorContract = {
+export const COPY_TIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CopyTimeline',
   connectorGroup: 'internal',
   summary: `Copies timeline or timeline template`,

@@ -26,7 +26,7 @@ import {
   ingest_get_geoip_database_response,
   ingest_get_geoip_database1_request,
   ingest_get_geoip_database1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INGEST_GET_GEOIP_DATABASE_CONTRACT: InternalConnectorContract = {

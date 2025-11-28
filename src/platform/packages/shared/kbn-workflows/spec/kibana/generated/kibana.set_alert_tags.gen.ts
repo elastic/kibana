@@ -25,7 +25,7 @@ import { set_alert_tags_request, set_alert_tags_response } from './schemas/kiban
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const SETALERTTAGS_CONTRACT: InternalConnectorContract = {
+export const SET_ALERT_TAGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SetAlertTags',
   connectorGroup: 'internal',
   summary: `Add and remove detection alert tags`,

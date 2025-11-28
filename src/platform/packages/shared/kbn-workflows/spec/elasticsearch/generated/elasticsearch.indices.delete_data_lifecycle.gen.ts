@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   indices_delete_data_lifecycle_request,
   indices_delete_data_lifecycle_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_DELETE_DATA_LIFECYCLE_CONTRACT: InternalConnectorContract = {

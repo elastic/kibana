@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const UPDATEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
+export const UPDATE_ATTACK_DISCOVERY_SCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateAttackDiscoverySchedules',
   connectorGroup: 'internal',
   summary: `Update Attack discovery schedule`,

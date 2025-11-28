@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const UPLOADSOURCEMAP_CONTRACT: InternalConnectorContract = {
+export const UPLOAD_SOURCE_MAP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.uploadSourceMap',
   connectorGroup: 'internal',
   summary: `Upload a source map`,

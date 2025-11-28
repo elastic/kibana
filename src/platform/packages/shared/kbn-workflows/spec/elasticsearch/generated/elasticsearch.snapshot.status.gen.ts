@@ -28,7 +28,7 @@ import {
   snapshot_status1_response,
   snapshot_status2_request,
   snapshot_status2_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SNAPSHOT_STATUS_CONTRACT: InternalConnectorContract = {

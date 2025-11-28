@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DUPLICATEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
+export const DUPLICATE_EXCEPTION_LIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DuplicateExceptionList',
   connectorGroup: 'internal',
   summary: `Duplicate an exception list`,

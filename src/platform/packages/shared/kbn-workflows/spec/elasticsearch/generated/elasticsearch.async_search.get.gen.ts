@@ -21,7 +21,7 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { async_search_get_request, async_search_get_response } from './es_openapi_zod.gen';
+import { async_search_get_request, async_search_get_response } from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ASYNC_SEARCH_GET_CONTRACT: InternalConnectorContract = {

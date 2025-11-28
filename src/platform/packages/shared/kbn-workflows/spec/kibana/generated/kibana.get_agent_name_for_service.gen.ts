@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETAGENTNAMEFORSERVICE_CONTRACT: InternalConnectorContract = {
+export const GET_AGENT_NAME_FOR_SERVICE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAgentNameForService',
   connectorGroup: 'internal',
   summary: `Get agent name for service`,

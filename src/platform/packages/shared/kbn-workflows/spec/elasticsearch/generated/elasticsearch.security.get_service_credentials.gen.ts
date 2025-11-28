@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   security_get_service_credentials_request,
   security_get_service_credentials_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_GET_SERVICE_CREDENTIALS_CONTRACT: InternalConnectorContract = {

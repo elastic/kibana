@@ -26,7 +26,7 @@ import {
   sql_translate_response,
   sql_translate1_request,
   sql_translate1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SQL_TRANSLATE_CONTRACT: InternalConnectorContract = {

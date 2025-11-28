@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CLEANDRAFTTIMELINES_CONTRACT: InternalConnectorContract = {
+export const CLEAN_DRAFT_TIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CleanDraftTimelines',
   connectorGroup: 'internal',
   summary: `Create a clean draft Timeline or Timeline template`,

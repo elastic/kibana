@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const PERFORMPROMPTSBULKACTION_CONTRACT: InternalConnectorContract = {
+export const PERFORM_PROMPTS_BULK_ACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PerformPromptsBulkAction',
   connectorGroup: 'internal',
   summary: `Apply a bulk action to prompts`,

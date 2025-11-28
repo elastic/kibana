@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETCASETAGSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
+export const GET_CASE_TAGS_DEFAULT_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseTagsDefaultSpace',
   connectorGroup: 'internal',
   summary: `Get case tags`,

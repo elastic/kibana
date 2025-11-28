@@ -26,7 +26,7 @@ import {
   inference_delete_response,
   inference_delete1_request,
   inference_delete1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INFERENCE_DELETE_CONTRACT: InternalConnectorContract = {

@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   security_enroll_kibana_request,
   security_enroll_kibana_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_ENROLL_KIBANA_CONTRACT: InternalConnectorContract = {

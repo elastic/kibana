@@ -21,7 +21,7 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { indices_exists_template_request } from './es_openapi_zod.gen';
+import { indices_exists_template_request } from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_EXISTS_TEMPLATE_CONTRACT: InternalConnectorContract = {

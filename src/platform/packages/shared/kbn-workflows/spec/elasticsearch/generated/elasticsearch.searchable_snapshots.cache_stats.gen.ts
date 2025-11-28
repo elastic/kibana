@@ -26,7 +26,7 @@ import {
   searchable_snapshots_cache_stats_response,
   searchable_snapshots_cache_stats1_request,
   searchable_snapshots_cache_stats1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SEARCHABLE_SNAPSHOTS_CACHE_STATS_CONTRACT: InternalConnectorContract = {

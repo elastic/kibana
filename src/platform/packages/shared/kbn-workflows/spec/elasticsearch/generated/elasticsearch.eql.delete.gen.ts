@@ -21,7 +21,7 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { eql_delete_request, eql_delete_response } from './es_openapi_zod.gen';
+import { eql_delete_request, eql_delete_response } from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const EQL_DELETE_CONTRACT: InternalConnectorContract = {

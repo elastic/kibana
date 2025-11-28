@@ -21,7 +21,10 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { security_enroll_node_request, security_enroll_node_response } from './es_openapi_zod.gen';
+import {
+  security_enroll_node_request,
+  security_enroll_node_response,
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_ENROLL_NODE_CONTRACT: InternalConnectorContract = {

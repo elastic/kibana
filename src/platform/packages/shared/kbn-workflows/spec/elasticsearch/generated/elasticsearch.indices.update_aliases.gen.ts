@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   indices_update_aliases_request,
   indices_update_aliases_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_UPDATE_ALIASES_CONTRACT: InternalConnectorContract = {

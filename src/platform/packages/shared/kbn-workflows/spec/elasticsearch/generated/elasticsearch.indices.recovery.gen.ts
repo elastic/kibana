@@ -26,7 +26,7 @@ import {
   indices_recovery_response,
   indices_recovery1_request,
   indices_recovery1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_RECOVERY_CONTRACT: InternalConnectorContract = {

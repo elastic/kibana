@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   license_post_start_basic_request,
   license_post_start_basic_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const LICENSE_POST_START_BASIC_CONTRACT: InternalConnectorContract = {

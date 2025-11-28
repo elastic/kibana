@@ -21,7 +21,10 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { cluster_get_settings_request, cluster_get_settings_response } from './es_openapi_zod.gen';
+import {
+  cluster_get_settings_request,
+  cluster_get_settings_response,
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CLUSTER_GET_SETTINGS_CONTRACT: InternalConnectorContract = {

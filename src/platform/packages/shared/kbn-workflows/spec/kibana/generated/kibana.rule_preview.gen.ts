@@ -25,7 +25,7 @@ import { rule_preview_request, rule_preview_response } from './schemas/kibana_op
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const RULEPREVIEW_CONTRACT: InternalConnectorContract = {
+export const RULE_PREVIEW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.RulePreview',
   connectorGroup: 'internal',
   summary: `Preview rule alerts generated on specified time range`,

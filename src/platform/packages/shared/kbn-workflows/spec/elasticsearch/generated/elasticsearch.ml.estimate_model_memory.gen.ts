@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   ml_estimate_model_memory_request,
   ml_estimate_model_memory_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ML_ESTIMATE_MODEL_MEMORY_CONTRACT: InternalConnectorContract = {

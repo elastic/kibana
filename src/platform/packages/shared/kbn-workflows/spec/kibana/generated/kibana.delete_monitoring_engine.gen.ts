@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
+export const DELETE_MONITORING_ENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteMonitoringEngine',
   connectorGroup: 'internal',
   summary: `Delete the Privilege Monitoring Engine`,

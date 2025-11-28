@@ -26,7 +26,7 @@ import {
   cat_fielddata_response,
   cat_fielddata1_request,
   cat_fielddata1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CAT_FIELDDATA_CONTRACT: InternalConnectorContract = {

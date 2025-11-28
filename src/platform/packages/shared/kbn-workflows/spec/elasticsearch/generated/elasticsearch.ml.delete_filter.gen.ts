@@ -21,7 +21,7 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { ml_delete_filter_request, ml_delete_filter_response } from './es_openapi_zod.gen';
+import { ml_delete_filter_request, ml_delete_filter_response } from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ML_DELETE_FILTER_CONTRACT: InternalConnectorContract = {

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CREATEUPDATEPROTECTIONUPDATESNOTE_CONTRACT: InternalConnectorContract = {
+export const CREATE_UPDATE_PROTECTION_UPDATES_NOTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateUpdateProtectionUpdatesNote',
   connectorGroup: 'internal',
   summary: `Create or update a protection updates note`,

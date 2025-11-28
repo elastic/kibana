@@ -26,7 +26,7 @@ import {
   indices_shrink_response,
   indices_shrink1_request,
   indices_shrink1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_SHRINK_CONTRACT: InternalConnectorContract = {

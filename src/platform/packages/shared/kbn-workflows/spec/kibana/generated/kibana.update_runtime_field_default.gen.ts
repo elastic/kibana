@@ -25,7 +25,7 @@ import { update_runtime_field_default_request } from './schemas/kibana_openapi_z
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const UPDATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
+export const UPDATE_RUNTIME_FIELD_DEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateRuntimeFieldDefault',
   connectorGroup: 'internal',
   summary: `Update a runtime field`,

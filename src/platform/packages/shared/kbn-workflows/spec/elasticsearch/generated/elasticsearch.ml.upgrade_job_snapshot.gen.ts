@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   ml_upgrade_job_snapshot_request,
   ml_upgrade_job_snapshot_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ML_UPGRADE_JOB_SNAPSHOT_CONTRACT: InternalConnectorContract = {

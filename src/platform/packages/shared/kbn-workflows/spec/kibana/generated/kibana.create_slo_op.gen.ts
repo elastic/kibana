@@ -25,7 +25,7 @@ import { create_slo_op_request, create_slo_op_response } from './schemas/kibana_
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CREATESLOOP_CONTRACT: InternalConnectorContract = {
+export const CREATE_SLO_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createSloOp',
   connectorGroup: 'internal',
   summary: `Create an SLO`,

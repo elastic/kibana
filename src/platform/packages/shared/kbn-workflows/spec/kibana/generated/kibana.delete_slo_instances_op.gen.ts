@@ -25,7 +25,7 @@ import { delete_slo_instances_op_request } from './schemas/kibana_openapi_zod.ge
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETESLOINSTANCESOP_CONTRACT: InternalConnectorContract = {
+export const DELETE_SLO_INSTANCES_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteSloInstancesOp',
   connectorGroup: 'internal',
   summary: `Batch delete rollup and summary data`,

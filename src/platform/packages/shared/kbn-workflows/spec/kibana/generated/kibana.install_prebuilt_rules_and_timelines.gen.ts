@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const INSTALLPREBUILTRULESANDTIMELINES_CONTRACT: InternalConnectorContract = {
+export const INSTALL_PREBUILT_RULES_AND_TIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InstallPrebuiltRulesAndTimelines',
   connectorGroup: 'internal',
   summary: `Install prebuilt detection rules and Timelines`,

@@ -25,7 +25,7 @@ import { patch_list_request, patch_list_response } from './schemas/kibana_openap
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const PATCHLIST_CONTRACT: InternalConnectorContract = {
+export const PATCH_LIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PatchList',
   connectorGroup: 'internal',
   summary: `Patch a value list`,

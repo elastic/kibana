@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETEASSETCRITICALITYRECORD_CONTRACT: InternalConnectorContract = {
+export const DELETE_ASSET_CRITICALITY_RECORD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteAssetCriticalityRecord',
   connectorGroup: 'internal',
   summary: `Delete an asset criticality record`,

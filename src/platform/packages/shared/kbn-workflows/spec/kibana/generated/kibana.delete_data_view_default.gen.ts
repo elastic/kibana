@@ -25,7 +25,7 @@ import { delete_data_view_default_request } from './schemas/kibana_openapi_zod.g
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETEDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
+export const DELETE_DATA_VIEW_DEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteDataViewDefault',
   connectorGroup: 'internal',
   summary: `Delete a data view`,

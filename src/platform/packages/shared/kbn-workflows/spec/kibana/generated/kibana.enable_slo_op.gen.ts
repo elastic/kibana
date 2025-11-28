@@ -25,7 +25,7 @@ import { enable_slo_op_request } from './schemas/kibana_openapi_zod.gen';
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ENABLESLOOP_CONTRACT: InternalConnectorContract = {
+export const ENABLE_SLO_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.enableSloOp',
   connectorGroup: 'internal',
   summary: `Enable an SLO`,

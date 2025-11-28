@@ -30,7 +30,7 @@ import {
   ml_explain_data_frame_analytics2_response,
   ml_explain_data_frame_analytics3_request,
   ml_explain_data_frame_analytics3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ML_EXPLAIN_DATA_FRAME_ANALYTICS_CONTRACT: InternalConnectorContract = {

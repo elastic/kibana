@@ -26,7 +26,7 @@ import {
   cat_snapshots_response,
   cat_snapshots1_request,
   cat_snapshots1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CAT_SNAPSHOTS_CONTRACT: InternalConnectorContract = {

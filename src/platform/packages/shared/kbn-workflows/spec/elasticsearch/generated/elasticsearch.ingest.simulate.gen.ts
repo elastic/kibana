@@ -30,7 +30,7 @@ import {
   ingest_simulate2_response,
   ingest_simulate3_request,
   ingest_simulate3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INGEST_SIMULATE_CONTRACT: InternalConnectorContract = {

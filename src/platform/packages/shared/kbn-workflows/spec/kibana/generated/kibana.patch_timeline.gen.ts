@@ -25,7 +25,7 @@ import { patch_timeline_request, patch_timeline_response } from './schemas/kiban
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const PATCHTIMELINE_CONTRACT: InternalConnectorContract = {
+export const PATCH_TIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PatchTimeline',
   connectorGroup: 'internal',
   summary: `Update a Timeline`,

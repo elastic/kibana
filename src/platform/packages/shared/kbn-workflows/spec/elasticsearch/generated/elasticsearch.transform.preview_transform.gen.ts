@@ -30,7 +30,7 @@ import {
   transform_preview_transform2_response,
   transform_preview_transform3_request,
   transform_preview_transform3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const TRANSFORM_PREVIEW_TRANSFORM_CONTRACT: InternalConnectorContract = {

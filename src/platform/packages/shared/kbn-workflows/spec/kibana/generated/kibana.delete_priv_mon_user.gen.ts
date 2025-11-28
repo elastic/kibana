@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
+export const DELETE_PRIV_MON_USER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeletePrivMonUser',
   connectorGroup: 'internal',
   summary: `Delete a monitored user`,

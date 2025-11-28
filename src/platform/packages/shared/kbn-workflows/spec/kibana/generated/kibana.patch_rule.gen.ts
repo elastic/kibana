@@ -25,7 +25,7 @@ import { patch_rule_request, patch_rule_response } from './schemas/kibana_openap
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const PATCHRULE_CONTRACT: InternalConnectorContract = {
+export const PATCH_RULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PatchRule',
   connectorGroup: 'internal',
   summary: `Patch a detection rule`,

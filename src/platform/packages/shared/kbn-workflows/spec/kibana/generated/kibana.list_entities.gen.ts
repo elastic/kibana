@@ -25,7 +25,7 @@ import { list_entities_request, list_entities_response } from './schemas/kibana_
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const LISTENTITIES_CONTRACT: InternalConnectorContract = {
+export const LIST_ENTITIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ListEntities',
   connectorGroup: 'internal',
   summary: `List Entity Store Entities`,

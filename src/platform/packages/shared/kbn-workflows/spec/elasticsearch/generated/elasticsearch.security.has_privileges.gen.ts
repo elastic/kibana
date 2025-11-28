@@ -30,7 +30,7 @@ import {
   security_has_privileges2_response,
   security_has_privileges3_request,
   security_has_privileges3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_HAS_PRIVILEGES_CONTRACT: InternalConnectorContract = {

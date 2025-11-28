@@ -25,7 +25,7 @@ import { export_rules_request } from './schemas/kibana_openapi_zod.gen';
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const EXPORTRULES_CONTRACT: InternalConnectorContract = {
+export const EXPORT_RULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ExportRules',
   connectorGroup: 'internal',
   summary: `Export detection rules`,

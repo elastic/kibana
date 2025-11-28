@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const UPDATECONVERSATION_CONTRACT: InternalConnectorContract = {
+export const UPDATE_CONVERSATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateConversation',
   connectorGroup: 'internal',
   summary: `Update a conversation`,

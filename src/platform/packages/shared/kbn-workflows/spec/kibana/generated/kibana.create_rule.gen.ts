@@ -25,7 +25,7 @@ import { create_rule_request, create_rule_response } from './schemas/kibana_open
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CREATERULE_CONTRACT: InternalConnectorContract = {
+export const CREATE_RULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateRule',
   connectorGroup: 'internal',
   summary: `Create a detection rule`,

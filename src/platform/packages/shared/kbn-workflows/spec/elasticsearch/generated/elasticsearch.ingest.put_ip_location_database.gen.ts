@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   ingest_put_ip_location_database_request,
   ingest_put_ip_location_database_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INGEST_PUT_IP_LOCATION_DATABASE_CONTRACT: InternalConnectorContract = {

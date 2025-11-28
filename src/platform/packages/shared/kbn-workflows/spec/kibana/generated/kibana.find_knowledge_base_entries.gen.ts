@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const FINDKNOWLEDGEBASEENTRIES_CONTRACT: InternalConnectorContract = {
+export const FIND_KNOWLEDGE_BASE_ENTRIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindKnowledgeBaseEntries',
   connectorGroup: 'internal',
   summary: `Finds Knowledge Base Entries that match the given query.`,

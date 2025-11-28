@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const READEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
+export const READ_EXCEPTION_LIST_ITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadExceptionListItem',
   connectorGroup: 'internal',
   summary: `Get an exception list item`,

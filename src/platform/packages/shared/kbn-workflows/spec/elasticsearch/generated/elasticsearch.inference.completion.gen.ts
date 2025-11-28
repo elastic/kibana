@@ -21,7 +21,10 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { inference_completion_request, inference_completion_response } from './es_openapi_zod.gen';
+import {
+  inference_completion_request,
+  inference_completion_response,
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INFERENCE_COMPLETION_CONTRACT: InternalConnectorContract = {

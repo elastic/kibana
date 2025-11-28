@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const SCHEDULERISKENGINENOW_CONTRACT: InternalConnectorContract = {
+export const SCHEDULE_RISK_ENGINE_NOW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ScheduleRiskEngineNow',
   connectorGroup: 'internal',
   summary: `Run the risk scoring engine`,

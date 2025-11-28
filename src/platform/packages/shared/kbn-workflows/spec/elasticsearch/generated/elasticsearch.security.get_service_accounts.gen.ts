@@ -28,7 +28,7 @@ import {
   security_get_service_accounts1_response,
   security_get_service_accounts2_request,
   security_get_service_accounts2_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_GET_SERVICE_ACCOUNTS_CONTRACT: InternalConnectorContract = {

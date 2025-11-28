@@ -26,7 +26,7 @@ import {
   ml_get_records_response,
   ml_get_records1_request,
   ml_get_records1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ML_GET_RECORDS_CONTRACT: InternalConnectorContract = {

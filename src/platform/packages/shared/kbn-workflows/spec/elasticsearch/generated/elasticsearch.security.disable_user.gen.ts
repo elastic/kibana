@@ -26,7 +26,7 @@ import {
   security_disable_user_response,
   security_disable_user1_request,
   security_disable_user1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_DISABLE_USER_CONTRACT: InternalConnectorContract = {

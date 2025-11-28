@@ -21,7 +21,7 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { cluster_post_voting_config_exclusions_request } from './es_openapi_zod.gen';
+import { cluster_post_voting_config_exclusions_request } from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CLUSTER_POST_VOTING_CONFIG_EXCLUSIONS_CONTRACT: InternalConnectorContract = {

@@ -26,7 +26,7 @@ import {
   cat_templates_response,
   cat_templates1_request,
   cat_templates1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CAT_TEMPLATES_CONTRACT: InternalConnectorContract = {

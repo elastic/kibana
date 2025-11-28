@@ -25,7 +25,7 @@ import { read_rule_request, read_rule_response } from './schemas/kibana_openapi_
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const READRULE_CONTRACT: InternalConnectorContract = {
+export const READ_RULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadRule',
   connectorGroup: 'internal',
   summary: `Retrieve a detection rule`,

@@ -26,7 +26,7 @@ import {
   security_query_api_keys_response,
   security_query_api_keys1_request,
   security_query_api_keys1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_QUERY_API_KEYS_CONTRACT: InternalConnectorContract = {

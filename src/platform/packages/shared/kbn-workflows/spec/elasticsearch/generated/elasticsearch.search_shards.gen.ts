@@ -30,7 +30,7 @@ import {
   search_shards2_response,
   search_shards3_request,
   search_shards3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SEARCH_SHARDS_CONTRACT: InternalConnectorContract = {

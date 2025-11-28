@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETESINGLEENTITY_CONTRACT: InternalConnectorContract = {
+export const DELETE_SINGLE_ENTITY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteSingleEntity',
   connectorGroup: 'internal',
   summary: `Delete an entity in Entity Store`,

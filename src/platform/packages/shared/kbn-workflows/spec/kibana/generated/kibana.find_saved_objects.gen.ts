@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const FINDSAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
+export const FIND_SAVED_OBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findSavedObjects',
   connectorGroup: 'internal',
   summary: `Search for saved objects`,

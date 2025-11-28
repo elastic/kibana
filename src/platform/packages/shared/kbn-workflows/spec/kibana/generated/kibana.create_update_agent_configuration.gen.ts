@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CREATEUPDATEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
+export const CREATE_UPDATE_AGENT_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createUpdateAgentConfiguration',
   connectorGroup: 'internal',
   summary: `Create or update agent configuration`,

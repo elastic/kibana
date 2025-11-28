@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETSOURCEMAPS_CONTRACT: InternalConnectorContract = {
+export const GET_SOURCE_MAPS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSourceMaps',
   connectorGroup: 'internal',
   summary: `Get source maps`,

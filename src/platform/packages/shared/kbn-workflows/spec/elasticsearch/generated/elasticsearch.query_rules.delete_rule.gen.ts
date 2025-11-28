@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   query_rules_delete_rule_request,
   query_rules_delete_rule_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const QUERY_RULES_DELETE_RULE_CONTRACT: InternalConnectorContract = {

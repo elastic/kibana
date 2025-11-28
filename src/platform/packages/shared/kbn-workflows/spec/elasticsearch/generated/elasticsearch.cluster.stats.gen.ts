@@ -26,7 +26,7 @@ import {
   cluster_stats_response,
   cluster_stats1_request,
   cluster_stats1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CLUSTER_STATS_CONTRACT: InternalConnectorContract = {

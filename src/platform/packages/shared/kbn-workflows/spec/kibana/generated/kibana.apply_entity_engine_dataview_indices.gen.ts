@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const APPLYENTITYENGINEDATAVIEWINDICES_CONTRACT: InternalConnectorContract = {
+export const APPLY_ENTITY_ENGINE_DATAVIEW_INDICES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ApplyEntityEngineDataviewIndices',
   connectorGroup: 'internal',
   summary: `Apply DataView indices to all installed engines`,

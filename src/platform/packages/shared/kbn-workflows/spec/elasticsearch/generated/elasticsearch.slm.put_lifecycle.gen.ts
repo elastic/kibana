@@ -21,7 +21,10 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { slm_put_lifecycle_request, slm_put_lifecycle_response } from './es_openapi_zod.gen';
+import {
+  slm_put_lifecycle_request,
+  slm_put_lifecycle_response,
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SLM_PUT_LIFECYCLE_CONTRACT: InternalConnectorContract = {

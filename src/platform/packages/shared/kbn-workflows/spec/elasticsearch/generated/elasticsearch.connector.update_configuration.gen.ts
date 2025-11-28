@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   connector_update_configuration_request,
   connector_update_configuration_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CONNECTOR_UPDATE_CONFIGURATION_CONTRACT: InternalConnectorContract = {

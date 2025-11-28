@@ -26,7 +26,7 @@ import {
   security_suggest_user_profiles_response,
   security_suggest_user_profiles1_request,
   security_suggest_user_profiles1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_SUGGEST_USER_PROFILES_CONTRACT: InternalConnectorContract = {

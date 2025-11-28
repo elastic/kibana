@@ -21,7 +21,10 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { esql_async_query_get_request, esql_async_query_get_response } from './es_openapi_zod.gen';
+import {
+  esql_async_query_get_request,
+  esql_async_query_get_response,
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ESQL_ASYNC_QUERY_GET_CONTRACT: InternalConnectorContract = {

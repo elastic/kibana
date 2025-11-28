@@ -25,7 +25,7 @@ import { find_prompts_request, find_prompts_response } from './schemas/kibana_op
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const FINDPROMPTS_CONTRACT: InternalConnectorContract = {
+export const FIND_PROMPTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindPrompts',
   connectorGroup: 'internal',
   summary: `Get prompts`,

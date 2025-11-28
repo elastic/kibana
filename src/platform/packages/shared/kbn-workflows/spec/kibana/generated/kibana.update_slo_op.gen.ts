@@ -25,7 +25,7 @@ import { update_slo_op_request, update_slo_op_response } from './schemas/kibana_
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const UPDATESLOOP_CONTRACT: InternalConnectorContract = {
+export const UPDATE_SLO_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateSloOp',
   connectorGroup: 'internal',
   summary: `Update an SLO`,

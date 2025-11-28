@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   indices_resolve_index_request,
   indices_resolve_index_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_RESOLVE_INDEX_CONTRACT: InternalConnectorContract = {

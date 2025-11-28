@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   nodes_get_repositories_metering_info_request,
   nodes_get_repositories_metering_info_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const NODES_GET_REPOSITORIES_METERING_INFO_CONTRACT: InternalConnectorContract = {

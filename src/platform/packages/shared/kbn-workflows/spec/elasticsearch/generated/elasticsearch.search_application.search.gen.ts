@@ -26,7 +26,7 @@ import {
   search_application_search_response,
   search_application_search1_request,
   search_application_search1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SEARCH_APPLICATION_SEARCH_CONTRACT: InternalConnectorContract = {

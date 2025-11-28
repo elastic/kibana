@@ -26,7 +26,7 @@ import {
   logstash_get_pipeline_response,
   logstash_get_pipeline1_request,
   logstash_get_pipeline1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const LOGSTASH_GET_PIPELINE_CONTRACT: InternalConnectorContract = {

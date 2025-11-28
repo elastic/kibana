@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const POSTATTACKDISCOVERYGENERATIONSDISMISS_CONTRACT: InternalConnectorContract = {
+export const POST_ATTACK_DISCOVERY_GENERATIONS_DISMISS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PostAttackDiscoveryGenerationsDismiss',
   connectorGroup: 'internal',
   summary: `Dismiss an attack discovery generation`,

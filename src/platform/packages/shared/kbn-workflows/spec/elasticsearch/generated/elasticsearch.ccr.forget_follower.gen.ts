@@ -21,7 +21,10 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { ccr_forget_follower_request, ccr_forget_follower_response } from './es_openapi_zod.gen';
+import {
+  ccr_forget_follower_request,
+  ccr_forget_follower_response,
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CCR_FORGET_FOLLOWER_CONTRACT: InternalConnectorContract = {

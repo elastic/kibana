@@ -30,7 +30,7 @@ import {
   bulk2_response,
   bulk3_request,
   bulk3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const BULK_CONTRACT: InternalConnectorContract = {

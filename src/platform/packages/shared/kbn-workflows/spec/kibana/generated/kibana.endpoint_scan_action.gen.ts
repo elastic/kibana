@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ENDPOINTSCANACTION_CONTRACT: InternalConnectorContract = {
+export const ENDPOINT_SCAN_ACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointScanAction',
   connectorGroup: 'internal',
   summary: `Scan a file or directory`,

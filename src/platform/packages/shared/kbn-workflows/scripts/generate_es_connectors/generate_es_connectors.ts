@@ -34,8 +34,8 @@ import {
   getLicenseHeader,
   getRequestSchemaName,
   getResponseSchemaName,
+  getSchemaNamePrefix,
   StaticImports,
-  toSnakeCase,
 } from '../shared';
 
 export async function run() {
@@ -146,7 +146,7 @@ import { z } from '@kbn/zod/v4';
 ${StaticImports}
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { ${contract.schemaImports.join(',\n')} } from './${OPENAPI_TS_OUTPUT_FILENAME}.gen';
+import { ${contract.schemaImports.join(',\n')} } from './schemas/${OPENAPI_TS_OUTPUT_FILENAME}.gen';
 
 // export contract
 ${generateContractBlock(contract)}
@@ -244,7 +244,7 @@ function generateContractMeta(
 }
 
 function generateContractName(endpoint: SpecificationTypes.Endpoint): string {
-  return `${toSnakeCase(endpoint.name).toUpperCase()}_CONTRACT`;
+  return `${getSchemaNamePrefix(endpoint.name).toUpperCase()}_CONTRACT`;
 }
 
 function getRelatedOperations(

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CREATEAGENTKEY_CONTRACT: InternalConnectorContract = {
+export const CREATE_AGENT_KEY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createAgentKey',
   connectorGroup: 'internal',
   summary: `Create an APM agent key`,

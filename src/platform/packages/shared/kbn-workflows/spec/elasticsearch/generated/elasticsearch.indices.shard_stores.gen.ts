@@ -26,7 +26,7 @@ import {
   indices_shard_stores_response,
   indices_shard_stores1_request,
   indices_shard_stores1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_SHARD_STORES_CONTRACT: InternalConnectorContract = {

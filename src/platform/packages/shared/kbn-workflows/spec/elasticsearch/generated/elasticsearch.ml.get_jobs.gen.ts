@@ -26,7 +26,7 @@ import {
   ml_get_jobs_response,
   ml_get_jobs1_request,
   ml_get_jobs1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ML_GET_JOBS_CONTRACT: InternalConnectorContract = {

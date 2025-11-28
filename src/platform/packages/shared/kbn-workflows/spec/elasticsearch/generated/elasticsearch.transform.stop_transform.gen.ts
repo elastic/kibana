@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   transform_stop_transform_request,
   transform_stop_transform_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const TRANSFORM_STOP_TRANSFORM_CONTRACT: InternalConnectorContract = {

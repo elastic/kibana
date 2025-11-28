@@ -26,7 +26,7 @@ import {
   watcher_put_watch_response,
   watcher_put_watch1_request,
   watcher_put_watch1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const WATCHER_PUT_WATCH_CONTRACT: InternalConnectorContract = {

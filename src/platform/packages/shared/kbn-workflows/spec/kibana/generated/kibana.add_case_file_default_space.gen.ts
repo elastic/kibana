@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ADDCASEFILEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
+export const ADD_CASE_FILE_DEFAULT_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.addCaseFileDefaultSpace',
   connectorGroup: 'internal',
   summary: `Attach a file to a case`,

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const POSTKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
+export const POST_KNOWLEDGE_BASE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PostKnowledgeBase',
   connectorGroup: 'internal',
   summary: `Create a KnowledgeBase`,

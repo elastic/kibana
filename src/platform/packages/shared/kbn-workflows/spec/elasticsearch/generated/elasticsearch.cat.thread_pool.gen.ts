@@ -26,7 +26,7 @@ import {
   cat_thread_pool_response,
   cat_thread_pool1_request,
   cat_thread_pool1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CAT_THREAD_POOL_CONTRACT: InternalConnectorContract = {

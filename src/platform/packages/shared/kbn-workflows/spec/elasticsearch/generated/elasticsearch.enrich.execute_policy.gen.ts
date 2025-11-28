@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   enrich_execute_policy_request,
   enrich_execute_policy_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ENRICH_EXECUTE_POLICY_CONTRACT: InternalConnectorContract = {

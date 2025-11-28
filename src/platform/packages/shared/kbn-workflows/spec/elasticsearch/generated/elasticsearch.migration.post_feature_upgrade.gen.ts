@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   migration_post_feature_upgrade_request,
   migration_post_feature_upgrade_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const MIGRATION_POST_FEATURE_UPGRADE_CONTRACT: InternalConnectorContract = {

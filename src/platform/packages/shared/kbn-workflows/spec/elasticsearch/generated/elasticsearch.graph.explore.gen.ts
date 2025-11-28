@@ -26,7 +26,7 @@ import {
   graph_explore_response,
   graph_explore1_request,
   graph_explore1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const GRAPH_EXPLORE_CONTRACT: InternalConnectorContract = {

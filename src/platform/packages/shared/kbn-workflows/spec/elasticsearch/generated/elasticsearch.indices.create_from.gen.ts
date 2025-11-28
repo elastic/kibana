@@ -26,7 +26,7 @@ import {
   indices_create_from_response,
   indices_create_from1_request,
   indices_create_from1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_CREATE_FROM_CONTRACT: InternalConnectorContract = {

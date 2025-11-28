@@ -25,7 +25,7 @@ import { get_timelines_request, get_timelines_response } from './schemas/kibana_
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETTIMELINES_CONTRACT: InternalConnectorContract = {
+export const GET_TIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetTimelines',
   connectorGroup: 'internal',
   summary: `Get Timelines or Timeline templates`,

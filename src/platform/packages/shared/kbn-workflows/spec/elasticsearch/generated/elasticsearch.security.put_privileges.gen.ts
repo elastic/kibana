@@ -26,7 +26,7 @@ import {
   security_put_privileges_response,
   security_put_privileges1_request,
   security_put_privileges1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_PUT_PRIVILEGES_CONTRACT: InternalConnectorContract = {

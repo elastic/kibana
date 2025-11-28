@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ENDPOINTGETFILEACTION_CONTRACT: InternalConnectorContract = {
+export const ENDPOINT_GET_FILE_ACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetFileAction',
   connectorGroup: 'internal',
   summary: `Get a file`,

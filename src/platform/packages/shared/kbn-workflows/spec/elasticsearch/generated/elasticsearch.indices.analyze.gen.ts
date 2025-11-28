@@ -30,7 +30,7 @@ import {
   indices_analyze2_response,
   indices_analyze3_request,
   indices_analyze3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_ANALYZE_CONTRACT: InternalConnectorContract = {

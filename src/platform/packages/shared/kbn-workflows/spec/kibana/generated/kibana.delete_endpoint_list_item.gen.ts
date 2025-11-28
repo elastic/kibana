@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETEENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
+export const DELETE_ENDPOINT_LIST_ITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteEndpointListItem',
   connectorGroup: 'internal',
   summary: `Delete an Elastic Endpoint exception list item`,

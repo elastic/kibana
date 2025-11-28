@@ -25,7 +25,7 @@ import { export_exception_list_request } from './schemas/kibana_openapi_zod.gen'
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const EXPORTEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
+export const EXPORT_EXCEPTION_LIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ExportExceptionList',
   connectorGroup: 'internal',
   summary: `Export an exception list`,

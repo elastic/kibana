@@ -26,7 +26,7 @@ import {
   indices_put_settings_response,
   indices_put_settings1_request,
   indices_put_settings1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_PUT_SETTINGS_CONTRACT: InternalConnectorContract = {

@@ -26,7 +26,7 @@ import {
   indices_simulate_template_response,
   indices_simulate_template1_request,
   indices_simulate_template1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_SIMULATE_TEMPLATE_CONTRACT: InternalConnectorContract = {

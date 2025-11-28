@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETENVIRONMENTSFORSERVICE_CONTRACT: InternalConnectorContract = {
+export const GET_ENVIRONMENTS_FOR_SERVICE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getEnvironmentsForService',
   connectorGroup: 'internal',
   summary: `Get environments for service`,

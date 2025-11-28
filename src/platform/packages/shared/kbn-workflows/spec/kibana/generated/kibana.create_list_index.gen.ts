@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CREATELISTINDEX_CONTRACT: InternalConnectorContract = {
+export const CREATE_LIST_INDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateListIndex',
   connectorGroup: 'internal',
   summary: `Create list data streams`,

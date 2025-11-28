@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   indices_migrate_reindex_request,
   indices_migrate_reindex_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_MIGRATE_REINDEX_CONTRACT: InternalConnectorContract = {

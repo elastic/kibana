@@ -30,7 +30,7 @@ import {
   field_caps2_response,
   field_caps3_request,
   field_caps3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const FIELD_CAPS_CONTRACT: InternalConnectorContract = {

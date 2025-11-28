@@ -30,7 +30,7 @@ import {
   indices_validate_query2_response,
   indices_validate_query3_request,
   indices_validate_query3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_VALIDATE_QUERY_CONTRACT: InternalConnectorContract = {

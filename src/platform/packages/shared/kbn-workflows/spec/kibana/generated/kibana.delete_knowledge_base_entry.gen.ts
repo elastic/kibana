@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
+export const DELETE_KNOWLEDGE_BASE_ENTRY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteKnowledgeBaseEntry',
   connectorGroup: 'internal',
   summary: `Deletes a single Knowledge Base Entry using the \`id\` field`,

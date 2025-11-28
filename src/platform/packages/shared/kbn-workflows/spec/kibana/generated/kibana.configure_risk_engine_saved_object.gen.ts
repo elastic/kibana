@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CONFIGURERISKENGINESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
+export const CONFIGURE_RISK_ENGINE_SAVED_OBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ConfigureRiskEngineSavedObject',
   connectorGroup: 'internal',
   summary: `Configure the Risk Engine Saved Object`,

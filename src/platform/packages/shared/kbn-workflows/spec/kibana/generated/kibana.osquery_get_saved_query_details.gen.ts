@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const OSQUERYGETSAVEDQUERYDETAILS_CONTRACT: InternalConnectorContract = {
+export const OSQUERY_GET_SAVED_QUERY_DETAILS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryGetSavedQueryDetails',
   connectorGroup: 'internal',
   summary: `Get saved query details`,

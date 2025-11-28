@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const UPDATEFIELDSMETADATADEFAULT_CONTRACT: InternalConnectorContract = {
+export const UPDATE_FIELDS_METADATA_DEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateFieldsMetadataDefault',
   connectorGroup: 'internal',
   summary: `Update data view fields metadata`,

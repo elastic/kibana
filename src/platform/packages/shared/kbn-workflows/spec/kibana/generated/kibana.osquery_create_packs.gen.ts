@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const OSQUERYCREATEPACKS_CONTRACT: InternalConnectorContract = {
+export const OSQUERY_CREATE_PACKS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryCreatePacks',
   connectorGroup: 'internal',
   summary: `Create a pack`,

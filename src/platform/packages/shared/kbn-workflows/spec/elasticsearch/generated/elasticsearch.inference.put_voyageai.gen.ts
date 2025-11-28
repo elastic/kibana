@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   inference_put_voyageai_request,
   inference_put_voyageai_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INFERENCE_PUT_VOYAGEAI_CONTRACT: InternalConnectorContract = {

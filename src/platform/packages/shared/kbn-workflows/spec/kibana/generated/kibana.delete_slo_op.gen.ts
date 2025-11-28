@@ -25,7 +25,7 @@ import { delete_slo_op_request } from './schemas/kibana_openapi_zod.gen';
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETESLOOP_CONTRACT: InternalConnectorContract = {
+export const DELETE_SLO_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteSloOp',
   connectorGroup: 'internal',
   summary: `Delete an SLO`,

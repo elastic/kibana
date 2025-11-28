@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const PRIVMONBULKUPLOADUSERSCSV_CONTRACT: InternalConnectorContract = {
+export const PRIVMON_BULK_UPLOAD_USERS_CSV_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PrivmonBulkUploadUsersCSV',
   connectorGroup: 'internal',
   summary: `Upsert multiple monitored users via CSV upload`,

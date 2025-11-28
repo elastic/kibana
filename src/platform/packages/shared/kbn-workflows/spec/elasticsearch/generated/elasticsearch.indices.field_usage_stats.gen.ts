@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   indices_field_usage_stats_request,
   indices_field_usage_stats_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_FIELD_USAGE_STATS_CONTRACT: InternalConnectorContract = {

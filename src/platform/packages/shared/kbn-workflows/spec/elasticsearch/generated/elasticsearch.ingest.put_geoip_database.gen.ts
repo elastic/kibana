@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   ingest_put_geoip_database_request,
   ingest_put_geoip_database_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INGEST_PUT_GEOIP_DATABASE_CONTRACT: InternalConnectorContract = {

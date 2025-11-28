@@ -30,7 +30,7 @@ import {
   nodes_usage2_response,
   nodes_usage3_request,
   nodes_usage3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const NODES_USAGE_CONTRACT: InternalConnectorContract = {

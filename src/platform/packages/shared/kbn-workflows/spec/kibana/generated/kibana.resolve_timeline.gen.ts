@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const RESOLVETIMELINE_CONTRACT: InternalConnectorContract = {
+export const RESOLVE_TIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ResolveTimeline',
   connectorGroup: 'internal',
   summary: `Get an existing saved Timeline or Timeline template`,

@@ -26,7 +26,7 @@ import {
   license_post_response,
   license_post1_request,
   license_post1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const LICENSE_POST_CONTRACT: InternalConnectorContract = {

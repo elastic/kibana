@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ENDPOINTSUSPENDPROCESSACTION_CONTRACT: InternalConnectorContract = {
+export const ENDPOINT_SUSPEND_PROCESS_ACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointSuspendProcessAction',
   connectorGroup: 'internal',
   summary: `Suspend a process`,

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETPOLICYRESPONSE_CONTRACT: InternalConnectorContract = {
+export const GET_POLICY_RESPONSE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetPolicyResponse',
   connectorGroup: 'internal',
   summary: `Get a policy response`,

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETCASESBYALERTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
+export const GET_CASES_BY_ALERT_DEFAULT_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCasesByAlertDefaultSpace',
   connectorGroup: 'internal',
   summary: `Get cases for an alert`,

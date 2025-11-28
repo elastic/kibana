@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   snapshot_cleanup_repository_request,
   snapshot_cleanup_repository_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SNAPSHOT_CLEANUP_REPOSITORY_CONTRACT: InternalConnectorContract = {

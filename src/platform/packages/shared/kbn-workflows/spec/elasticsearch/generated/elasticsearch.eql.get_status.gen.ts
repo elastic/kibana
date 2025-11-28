@@ -21,7 +21,7 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { eql_get_status_request, eql_get_status_response } from './es_openapi_zod.gen';
+import { eql_get_status_request, eql_get_status_response } from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const EQL_GET_STATUS_CONTRACT: InternalConnectorContract = {

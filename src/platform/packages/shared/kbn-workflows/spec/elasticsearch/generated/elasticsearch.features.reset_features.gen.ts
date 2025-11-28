@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   features_reset_features_request,
   features_reset_features_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const FEATURES_RESET_FEATURES_CONTRACT: InternalConnectorContract = {

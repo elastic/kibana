@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   indices_migrate_to_data_stream_request,
   indices_migrate_to_data_stream_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_MIGRATE_TO_DATA_STREAM_CONTRACT: InternalConnectorContract = {

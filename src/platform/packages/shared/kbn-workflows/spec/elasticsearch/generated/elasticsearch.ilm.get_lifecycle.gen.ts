@@ -26,7 +26,7 @@ import {
   ilm_get_lifecycle_response,
   ilm_get_lifecycle1_request,
   ilm_get_lifecycle1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ILM_GET_LIFECYCLE_CONTRACT: InternalConnectorContract = {

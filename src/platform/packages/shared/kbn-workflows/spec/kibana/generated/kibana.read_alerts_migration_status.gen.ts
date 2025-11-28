@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const READALERTSMIGRATIONSTATUS_CONTRACT: InternalConnectorContract = {
+export const READ_ALERTS_MIGRATION_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadAlertsMigrationStatus',
   connectorGroup: 'internal',
   summary: `Retrieve the status of detection alert migrations`,

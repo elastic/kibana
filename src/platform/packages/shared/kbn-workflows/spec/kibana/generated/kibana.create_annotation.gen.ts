@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CREATEANNOTATION_CONTRACT: InternalConnectorContract = {
+export const CREATE_ANNOTATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createAnnotation',
   connectorGroup: 'internal',
   summary: `Create a service annotation`,

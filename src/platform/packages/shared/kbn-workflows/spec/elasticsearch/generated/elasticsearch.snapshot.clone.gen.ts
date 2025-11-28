@@ -21,7 +21,7 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { snapshot_clone_request, snapshot_clone_response } from './es_openapi_zod.gen';
+import { snapshot_clone_request, snapshot_clone_response } from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SNAPSHOT_CLONE_CONTRACT: InternalConnectorContract = {

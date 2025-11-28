@@ -25,7 +25,7 @@ import { chat_complete_request } from './schemas/kibana_openapi_zod.gen';
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CHATCOMPLETE_CONTRACT: InternalConnectorContract = {
+export const CHAT_COMPLETE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ChatComplete',
   connectorGroup: 'internal',
   summary: `Create a model response`,

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const FINDCASECOMMENTSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
+export const FIND_CASE_COMMENTS_DEFAULT_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findCaseCommentsDefaultSpace',
   connectorGroup: 'internal',
   summary: `Find case comments and alerts`,

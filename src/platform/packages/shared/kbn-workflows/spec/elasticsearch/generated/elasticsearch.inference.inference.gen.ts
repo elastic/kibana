@@ -26,7 +26,7 @@ import {
   inference_inference_response,
   inference_inference1_request,
   inference_inference1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INFERENCE_INFERENCE_CONTRACT: InternalConnectorContract = {

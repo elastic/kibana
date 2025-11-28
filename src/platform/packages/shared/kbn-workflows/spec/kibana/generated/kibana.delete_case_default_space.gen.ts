@@ -25,7 +25,7 @@ import { delete_case_default_space_request } from './schemas/kibana_openapi_zod.
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETECASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
+export const DELETE_CASE_DEFAULT_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteCaseDefaultSpace',
   connectorGroup: 'internal',
   summary: `Delete cases`,

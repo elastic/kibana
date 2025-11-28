@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const SAVEAPMSERVERSCHEMA_CONTRACT: InternalConnectorContract = {
+export const SAVE_APM_SERVER_SCHEMA_CONTRACT: InternalConnectorContract = {
   type: 'kibana.saveApmServerSchema',
   connectorGroup: 'internal',
   summary: `Save APM server schema`,

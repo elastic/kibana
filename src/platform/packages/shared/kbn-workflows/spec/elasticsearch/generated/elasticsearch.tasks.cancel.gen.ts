@@ -26,7 +26,7 @@ import {
   tasks_cancel_response,
   tasks_cancel1_request,
   tasks_cancel1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const TASKS_CANCEL_CONTRACT: InternalConnectorContract = {

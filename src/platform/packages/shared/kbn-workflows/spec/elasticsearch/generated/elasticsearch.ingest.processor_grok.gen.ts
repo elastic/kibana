@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   ingest_processor_grok_request,
   ingest_processor_grok_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INGEST_PROCESSOR_GROK_CONTRACT: InternalConnectorContract = {

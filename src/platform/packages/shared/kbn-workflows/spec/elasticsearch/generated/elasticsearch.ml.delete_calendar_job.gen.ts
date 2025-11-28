@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   ml_delete_calendar_job_request,
   ml_delete_calendar_job_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ML_DELETE_CALENDAR_JOB_CONTRACT: InternalConnectorContract = {

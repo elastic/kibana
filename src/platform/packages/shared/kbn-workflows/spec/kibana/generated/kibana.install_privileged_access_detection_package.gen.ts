@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const INSTALLPRIVILEGEDACCESSDETECTIONPACKAGE_CONTRACT: InternalConnectorContract = {
+export const INSTALL_PRIVILEGED_ACCESS_DETECTION_PACKAGE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InstallPrivilegedAccessDetectionPackage',
   connectorGroup: 'internal',
   summary: `Installs the privileged access detection package for the Entity Analytics privileged user monitoring experience`,

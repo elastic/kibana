@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   snapshot_repository_analyze_request,
   snapshot_repository_analyze_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SNAPSHOT_REPOSITORY_ANALYZE_CONTRACT: InternalConnectorContract = {

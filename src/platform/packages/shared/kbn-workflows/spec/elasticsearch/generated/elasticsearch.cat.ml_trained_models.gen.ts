@@ -26,7 +26,7 @@ import {
   cat_ml_trained_models_response,
   cat_ml_trained_models1_request,
   cat_ml_trained_models1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CAT_ML_TRAINED_MODELS_CONTRACT: InternalConnectorContract = {

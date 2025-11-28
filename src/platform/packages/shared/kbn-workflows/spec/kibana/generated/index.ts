@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Kibana connector definitions generated from Kibana OpenAPI specification.
- * Generated at: 2025-11-27T13:15:48.158Z
+ * Generated at: 2025-11-28T12:21:42.140Z
  * Source: /oas_docs/output/kibana.yaml (526 APIs)
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
@@ -47,8 +47,8 @@ import { POST_AGENT_BUILDER_TOOLS_EXECUTE_CONTRACT } from './kibana.post_agent_b
 import { DELETE_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT } from './kibana.delete_agent_builder_tools_toolid.gen';
 import { GET_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT } from './kibana.get_agent_builder_tools_toolid.gen';
 import { PUT_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT } from './kibana.put_agent_builder_tools_toolid.gen';
-import { GETALERTINGHEALTH_CONTRACT } from './kibana.get_alerting_health.gen';
-import { GETRULETYPES_CONTRACT } from './kibana.get_rule_types.gen';
+import { GET_ALERTING_HEALTH_CONTRACT } from './kibana.get_alerting_health.gen';
+import { GET_RULE_TYPES_CONTRACT } from './kibana.get_rule_types.gen';
 import { DELETE_ALERTING_RULE_ID_CONTRACT } from './kibana.delete_alerting_rule_id.gen';
 import { GET_ALERTING_RULE_ID_CONTRACT } from './kibana.get_alerting_rule_id.gen';
 import { POST_ALERTING_RULE_ID_CONTRACT } from './kibana.post_alerting_rule_id.gen';
@@ -63,172 +63,172 @@ import { POST_ALERTING_RULE_RULE_ID_ALERT_ALERT_ID_MUTE_CONTRACT } from './kiban
 import { POST_ALERTING_RULE_RULE_ID_ALERT_ALERT_ID_UNMUTE_CONTRACT } from './kibana.post_alerting_rule_rule_id_alert_alert_id_unmute.gen';
 import { DELETE_ALERTING_RULE_RULEID_SNOOZE_SCHEDULE_SCHEDULEID_CONTRACT } from './kibana.delete_alerting_rule_ruleid_snooze_schedule_scheduleid.gen';
 import { GET_ALERTING_RULES_FIND_CONTRACT } from './kibana.get_alerting_rules_find.gen';
-import { CREATEAGENTKEY_CONTRACT } from './kibana.create_agent_key.gen';
-import { SAVEAPMSERVERSCHEMA_CONTRACT } from './kibana.save_apm_server_schema.gen';
-import { CREATEANNOTATION_CONTRACT } from './kibana.create_annotation.gen';
-import { GETANNOTATION_CONTRACT } from './kibana.get_annotation.gen';
-import { DELETEAGENTCONFIGURATION_CONTRACT } from './kibana.delete_agent_configuration.gen';
-import { GETAGENTCONFIGURATIONS_CONTRACT } from './kibana.get_agent_configurations.gen';
-import { CREATEUPDATEAGENTCONFIGURATION_CONTRACT } from './kibana.create_update_agent_configuration.gen';
-import { GETAGENTNAMEFORSERVICE_CONTRACT } from './kibana.get_agent_name_for_service.gen';
-import { GETENVIRONMENTSFORSERVICE_CONTRACT } from './kibana.get_environments_for_service.gen';
-import { SEARCHSINGLECONFIGURATION_CONTRACT } from './kibana.search_single_configuration.gen';
-import { GETSINGLEAGENTCONFIGURATION_CONTRACT } from './kibana.get_single_agent_configuration.gen';
-import { GETSOURCEMAPS_CONTRACT } from './kibana.get_source_maps.gen';
-import { UPLOADSOURCEMAP_CONTRACT } from './kibana.upload_source_map.gen';
-import { DELETESOURCEMAP_CONTRACT } from './kibana.delete_source_map.gen';
-import { DELETEASSETCRITICALITYRECORD_CONTRACT } from './kibana.delete_asset_criticality_record.gen';
-import { GETASSETCRITICALITYRECORD_CONTRACT } from './kibana.get_asset_criticality_record.gen';
-import { CREATEASSETCRITICALITYRECORD_CONTRACT } from './kibana.create_asset_criticality_record.gen';
-import { BULKUPSERTASSETCRITICALITYRECORDS_CONTRACT } from './kibana.bulk_upsert_asset_criticality_records.gen';
-import { FINDASSETCRITICALITYRECORDS_CONTRACT } from './kibana.find_asset_criticality_records.gen';
-import { POSTATTACKDISCOVERYBULK_CONTRACT } from './kibana.post_attack_discovery_bulk.gen';
-import { ATTACKDISCOVERYFIND_CONTRACT } from './kibana.attack_discovery_find.gen';
-import { POSTATTACKDISCOVERYGENERATE_CONTRACT } from './kibana.post_attack_discovery_generate.gen';
-import { GETATTACKDISCOVERYGENERATIONS_CONTRACT } from './kibana.get_attack_discovery_generations.gen';
-import { GETATTACKDISCOVERYGENERATION_CONTRACT } from './kibana.get_attack_discovery_generation.gen';
-import { POSTATTACKDISCOVERYGENERATIONSDISMISS_CONTRACT } from './kibana.post_attack_discovery_generations_dismiss.gen';
-import { CREATEATTACKDISCOVERYSCHEDULES_CONTRACT } from './kibana.create_attack_discovery_schedules.gen';
-import { FINDATTACKDISCOVERYSCHEDULES_CONTRACT } from './kibana.find_attack_discovery_schedules.gen';
-import { DELETEATTACKDISCOVERYSCHEDULES_CONTRACT } from './kibana.delete_attack_discovery_schedules.gen';
-import { GETATTACKDISCOVERYSCHEDULES_CONTRACT } from './kibana.get_attack_discovery_schedules.gen';
-import { UPDATEATTACKDISCOVERYSCHEDULES_CONTRACT } from './kibana.update_attack_discovery_schedules.gen';
-import { DISABLEATTACKDISCOVERYSCHEDULES_CONTRACT } from './kibana.disable_attack_discovery_schedules.gen';
-import { ENABLEATTACKDISCOVERYSCHEDULES_CONTRACT } from './kibana.enable_attack_discovery_schedules.gen';
-import { DELETECASEDEFAULTSPACE_CONTRACT } from './kibana.delete_case_default_space.gen';
-import { UPDATECASEDEFAULTSPACE_CONTRACT } from './kibana.update_case_default_space.gen';
-import { CREATECASEDEFAULTSPACE_CONTRACT } from './kibana.create_case_default_space.gen';
-import { FINDCASESDEFAULTSPACE_CONTRACT } from './kibana.find_cases_default_space.gen';
-import { GETCASEDEFAULTSPACE_CONTRACT } from './kibana.get_case_default_space.gen';
-import { GETCASEALERTSDEFAULTSPACE_CONTRACT } from './kibana.get_case_alerts_default_space.gen';
-import { DELETECASECOMMENTSDEFAULTSPACE_CONTRACT } from './kibana.delete_case_comments_default_space.gen';
-import { UPDATECASECOMMENTDEFAULTSPACE_CONTRACT } from './kibana.update_case_comment_default_space.gen';
-import { ADDCASECOMMENTDEFAULTSPACE_CONTRACT } from './kibana.add_case_comment_default_space.gen';
-import { FINDCASECOMMENTSDEFAULTSPACE_CONTRACT } from './kibana.find_case_comments_default_space.gen';
-import { DELETECASECOMMENTDEFAULTSPACE_CONTRACT } from './kibana.delete_case_comment_default_space.gen';
-import { GETCASECOMMENTDEFAULTSPACE_CONTRACT } from './kibana.get_case_comment_default_space.gen';
-import { PUSHCASEDEFAULTSPACE_CONTRACT } from './kibana.push_case_default_space.gen';
-import { ADDCASEFILEDEFAULTSPACE_CONTRACT } from './kibana.add_case_file_default_space.gen';
-import { FINDCASEACTIVITYDEFAULTSPACE_CONTRACT } from './kibana.find_case_activity_default_space.gen';
-import { GETCASESBYALERTDEFAULTSPACE_CONTRACT } from './kibana.get_cases_by_alert_default_space.gen';
-import { GETCASECONFIGURATIONDEFAULTSPACE_CONTRACT } from './kibana.get_case_configuration_default_space.gen';
-import { SETCASECONFIGURATIONDEFAULTSPACE_CONTRACT } from './kibana.set_case_configuration_default_space.gen';
-import { UPDATECASECONFIGURATIONDEFAULTSPACE_CONTRACT } from './kibana.update_case_configuration_default_space.gen';
-import { FINDCASECONNECTORSDEFAULTSPACE_CONTRACT } from './kibana.find_case_connectors_default_space.gen';
-import { GETCASEREPORTERSDEFAULTSPACE_CONTRACT } from './kibana.get_case_reporters_default_space.gen';
-import { GETCASETAGSDEFAULTSPACE_CONTRACT } from './kibana.get_case_tags_default_space.gen';
-import { GETALLDATAVIEWSDEFAULT_CONTRACT } from './kibana.get_all_data_views_default.gen';
-import { CREATEDATAVIEWDEFAULTW_CONTRACT } from './kibana.create_data_view_defaultw.gen';
-import { DELETEDATAVIEWDEFAULT_CONTRACT } from './kibana.delete_data_view_default.gen';
-import { GETDATAVIEWDEFAULT_CONTRACT } from './kibana.get_data_view_default.gen';
-import { UPDATEDATAVIEWDEFAULT_CONTRACT } from './kibana.update_data_view_default.gen';
-import { UPDATEFIELDSMETADATADEFAULT_CONTRACT } from './kibana.update_fields_metadata_default.gen';
-import { CREATERUNTIMEFIELDDEFAULT_CONTRACT } from './kibana.create_runtime_field_default.gen';
-import { CREATEUPDATERUNTIMEFIELDDEFAULT_CONTRACT } from './kibana.create_update_runtime_field_default.gen';
-import { DELETERUNTIMEFIELDDEFAULT_CONTRACT } from './kibana.delete_runtime_field_default.gen';
-import { GETRUNTIMEFIELDDEFAULT_CONTRACT } from './kibana.get_runtime_field_default.gen';
-import { UPDATERUNTIMEFIELDDEFAULT_CONTRACT } from './kibana.update_runtime_field_default.gen';
-import { GETDEFAULTDATAVIEWDEFAULT_CONTRACT } from './kibana.get_default_data_view_default.gen';
-import { SETDEFAULTDATAILVIEWDEFAULT_CONTRACT } from './kibana.set_default_datail_view_default.gen';
-import { SWAPDATAVIEWSDEFAULT_CONTRACT } from './kibana.swap_data_views_default.gen';
-import { PREVIEWSWAPDATAVIEWSDEFAULT_CONTRACT } from './kibana.preview_swap_data_views_default.gen';
-import { DELETEALERTSINDEX_CONTRACT } from './kibana.delete_alerts_index.gen';
-import { READALERTSINDEX_CONTRACT } from './kibana.read_alerts_index.gen';
-import { CREATEALERTSINDEX_CONTRACT } from './kibana.create_alerts_index.gen';
-import { READPRIVILEGES_CONTRACT } from './kibana.read_privileges.gen';
-import { DELETERULE_CONTRACT } from './kibana.delete_rule.gen';
-import { READRULE_CONTRACT } from './kibana.read_rule.gen';
-import { PATCHRULE_CONTRACT } from './kibana.patch_rule.gen';
-import { CREATERULE_CONTRACT } from './kibana.create_rule.gen';
-import { UPDATERULE_CONTRACT } from './kibana.update_rule.gen';
-import { PERFORMRULESBULKACTION_CONTRACT } from './kibana.perform_rules_bulk_action.gen';
-import { EXPORTRULES_CONTRACT } from './kibana.export_rules.gen';
-import { FINDRULES_CONTRACT } from './kibana.find_rules.gen';
-import { IMPORTRULES_CONTRACT } from './kibana.import_rules.gen';
-import { CREATERULEEXCEPTIONLISTITEMS_CONTRACT } from './kibana.create_rule_exception_list_items.gen';
-import { INSTALLPREBUILTRULESANDTIMELINES_CONTRACT } from './kibana.install_prebuilt_rules_and_timelines.gen';
-import { READPREBUILTRULESANDTIMELINESSTATUS_CONTRACT } from './kibana.read_prebuilt_rules_and_timelines_status.gen';
-import { RULEPREVIEW_CONTRACT } from './kibana.rule_preview.gen';
-import { SETALERTASSIGNEES_CONTRACT } from './kibana.set_alert_assignees.gen';
-import { FINALIZEALERTSMIGRATION_CONTRACT } from './kibana.finalize_alerts_migration.gen';
-import { ALERTSMIGRATIONCLEANUP_CONTRACT } from './kibana.alerts_migration_cleanup.gen';
-import { CREATEALERTSMIGRATION_CONTRACT } from './kibana.create_alerts_migration.gen';
-import { READALERTSMIGRATIONSTATUS_CONTRACT } from './kibana.read_alerts_migration_status.gen';
-import { SEARCHALERTS_CONTRACT } from './kibana.search_alerts.gen';
-import { SETALERTSSTATUS_CONTRACT } from './kibana.set_alerts_status.gen';
-import { SETALERTTAGS_CONTRACT } from './kibana.set_alert_tags.gen';
-import { READTAGS_CONTRACT } from './kibana.read_tags.gen';
-import { ROTATEENCRYPTIONKEY_CONTRACT } from './kibana.rotate_encryption_key.gen';
-import { CREATEENDPOINTLIST_CONTRACT } from './kibana.create_endpoint_list.gen';
-import { DELETEENDPOINTLISTITEM_CONTRACT } from './kibana.delete_endpoint_list_item.gen';
-import { READENDPOINTLISTITEM_CONTRACT } from './kibana.read_endpoint_list_item.gen';
-import { CREATEENDPOINTLISTITEM_CONTRACT } from './kibana.create_endpoint_list_item.gen';
-import { UPDATEENDPOINTLISTITEM_CONTRACT } from './kibana.update_endpoint_list_item.gen';
-import { FINDENDPOINTLISTITEMS_CONTRACT } from './kibana.find_endpoint_list_items.gen';
-import { ENDPOINTGETACTIONSLIST_CONTRACT } from './kibana.endpoint_get_actions_list.gen';
-import { ENDPOINTGETACTIONSSTATUS_CONTRACT } from './kibana.endpoint_get_actions_status.gen';
-import { ENDPOINTGETACTIONSDETAILS_CONTRACT } from './kibana.endpoint_get_actions_details.gen';
-import { ENDPOINTFILEINFO_CONTRACT } from './kibana.endpoint_file_info.gen';
-import { ENDPOINTFILEDOWNLOAD_CONTRACT } from './kibana.endpoint_file_download.gen';
-import { CANCELACTION_CONTRACT } from './kibana.cancel_action.gen';
-import { ENDPOINTEXECUTEACTION_CONTRACT } from './kibana.endpoint_execute_action.gen';
-import { ENDPOINTGETFILEACTION_CONTRACT } from './kibana.endpoint_get_file_action.gen';
-import { ENDPOINTISOLATEACTION_CONTRACT } from './kibana.endpoint_isolate_action.gen';
-import { ENDPOINTKILLPROCESSACTION_CONTRACT } from './kibana.endpoint_kill_process_action.gen';
-import { ENDPOINTGETPROCESSESACTION_CONTRACT } from './kibana.endpoint_get_processes_action.gen';
-import { RUNSCRIPTACTION_CONTRACT } from './kibana.run_script_action.gen';
-import { ENDPOINTSCANACTION_CONTRACT } from './kibana.endpoint_scan_action.gen';
-import { ENDPOINTGETACTIONSSTATE_CONTRACT } from './kibana.endpoint_get_actions_state.gen';
-import { ENDPOINTSUSPENDPROCESSACTION_CONTRACT } from './kibana.endpoint_suspend_process_action.gen';
-import { ENDPOINTUNISOLATEACTION_CONTRACT } from './kibana.endpoint_unisolate_action.gen';
-import { ENDPOINTUPLOADACTION_CONTRACT } from './kibana.endpoint_upload_action.gen';
-import { GETENDPOINTMETADATALIST_CONTRACT } from './kibana.get_endpoint_metadata_list.gen';
-import { GETENDPOINTMETADATA_CONTRACT } from './kibana.get_endpoint_metadata.gen';
-import { GETPOLICYRESPONSE_CONTRACT } from './kibana.get_policy_response.gen';
-import { GETPROTECTIONUPDATESNOTE_CONTRACT } from './kibana.get_protection_updates_note.gen';
-import { CREATEUPDATEPROTECTIONUPDATESNOTE_CONTRACT } from './kibana.create_update_protection_updates_note.gen';
-import { DELETEMONITORINGENGINE_CONTRACT } from './kibana.delete_monitoring_engine.gen';
-import { DISABLEMONITORINGENGINE_CONTRACT } from './kibana.disable_monitoring_engine.gen';
-import { INITMONITORINGENGINE_CONTRACT } from './kibana.init_monitoring_engine.gen';
-import { SCHEDULEMONITORINGENGINE_CONTRACT } from './kibana.schedule_monitoring_engine.gen';
-import { PRIVMONHEALTH_CONTRACT } from './kibana.priv_mon_health.gen';
-import { PRIVMONPRIVILEGES_CONTRACT } from './kibana.priv_mon_privileges.gen';
-import { CREATEPRIVMONUSER_CONTRACT } from './kibana.create_priv_mon_user.gen';
-import { PRIVMONBULKUPLOADUSERSCSV_CONTRACT } from './kibana.privmon_bulk_upload_users_csv.gen';
-import { DELETEPRIVMONUSER_CONTRACT } from './kibana.delete_priv_mon_user.gen';
-import { UPDATEPRIVMONUSER_CONTRACT } from './kibana.update_priv_mon_user.gen';
-import { LISTPRIVMONUSERS_CONTRACT } from './kibana.list_priv_mon_users.gen';
-import { INSTALLPRIVILEGEDACCESSDETECTIONPACKAGE_CONTRACT } from './kibana.install_privileged_access_detection_package.gen';
-import { GETPRIVILEGEDACCESSDETECTIONPACKAGESTATUS_CONTRACT } from './kibana.get_privileged_access_detection_package_status.gen';
-import { INITENTITYSTORE_CONTRACT } from './kibana.init_entity_store.gen';
-import { DELETEENTITYENGINES_CONTRACT } from './kibana.delete_entity_engines.gen';
-import { LISTENTITYENGINES_CONTRACT } from './kibana.list_entity_engines.gen';
-import { DELETEENTITYENGINE_CONTRACT } from './kibana.delete_entity_engine.gen';
-import { GETENTITYENGINE_CONTRACT } from './kibana.get_entity_engine.gen';
-import { INITENTITYENGINE_CONTRACT } from './kibana.init_entity_engine.gen';
-import { STARTENTITYENGINE_CONTRACT } from './kibana.start_entity_engine.gen';
-import { STOPENTITYENGINE_CONTRACT } from './kibana.stop_entity_engine.gen';
-import { APPLYENTITYENGINEDATAVIEWINDICES_CONTRACT } from './kibana.apply_entity_engine_dataview_indices.gen';
-import { DELETESINGLEENTITY_CONTRACT } from './kibana.delete_single_entity.gen';
-import { UPSERTENTITY_CONTRACT } from './kibana.upsert_entity.gen';
-import { UPSERTENTITIESBULK_CONTRACT } from './kibana.upsert_entities_bulk.gen';
-import { LISTENTITIES_CONTRACT } from './kibana.list_entities.gen';
-import { GETENTITYSTORESTATUS_CONTRACT } from './kibana.get_entity_store_status.gen';
-import { DELETEEXCEPTIONLIST_CONTRACT } from './kibana.delete_exception_list.gen';
-import { READEXCEPTIONLIST_CONTRACT } from './kibana.read_exception_list.gen';
-import { CREATEEXCEPTIONLIST_CONTRACT } from './kibana.create_exception_list.gen';
-import { UPDATEEXCEPTIONLIST_CONTRACT } from './kibana.update_exception_list.gen';
-import { DUPLICATEEXCEPTIONLIST_CONTRACT } from './kibana.duplicate_exception_list.gen';
-import { EXPORTEXCEPTIONLIST_CONTRACT } from './kibana.export_exception_list.gen';
-import { FINDEXCEPTIONLISTS_CONTRACT } from './kibana.find_exception_lists.gen';
-import { IMPORTEXCEPTIONLIST_CONTRACT } from './kibana.import_exception_list.gen';
-import { DELETEEXCEPTIONLISTITEM_CONTRACT } from './kibana.delete_exception_list_item.gen';
-import { READEXCEPTIONLISTITEM_CONTRACT } from './kibana.read_exception_list_item.gen';
-import { CREATEEXCEPTIONLISTITEM_CONTRACT } from './kibana.create_exception_list_item.gen';
-import { UPDATEEXCEPTIONLISTITEM_CONTRACT } from './kibana.update_exception_list_item.gen';
-import { FINDEXCEPTIONLISTITEMS_CONTRACT } from './kibana.find_exception_list_items.gen';
-import { READEXCEPTIONLISTSUMMARY_CONTRACT } from './kibana.read_exception_list_summary.gen';
-import { CREATESHAREDEXCEPTIONLIST_CONTRACT } from './kibana.create_shared_exception_list.gen';
+import { CREATE_AGENT_KEY_CONTRACT } from './kibana.create_agent_key.gen';
+import { SAVE_APM_SERVER_SCHEMA_CONTRACT } from './kibana.save_apm_server_schema.gen';
+import { CREATE_ANNOTATION_CONTRACT } from './kibana.create_annotation.gen';
+import { GET_ANNOTATION_CONTRACT } from './kibana.get_annotation.gen';
+import { DELETE_AGENT_CONFIGURATION_CONTRACT } from './kibana.delete_agent_configuration.gen';
+import { GET_AGENT_CONFIGURATIONS_CONTRACT } from './kibana.get_agent_configurations.gen';
+import { CREATE_UPDATE_AGENT_CONFIGURATION_CONTRACT } from './kibana.create_update_agent_configuration.gen';
+import { GET_AGENT_NAME_FOR_SERVICE_CONTRACT } from './kibana.get_agent_name_for_service.gen';
+import { GET_ENVIRONMENTS_FOR_SERVICE_CONTRACT } from './kibana.get_environments_for_service.gen';
+import { SEARCH_SINGLE_CONFIGURATION_CONTRACT } from './kibana.search_single_configuration.gen';
+import { GET_SINGLE_AGENT_CONFIGURATION_CONTRACT } from './kibana.get_single_agent_configuration.gen';
+import { GET_SOURCE_MAPS_CONTRACT } from './kibana.get_source_maps.gen';
+import { UPLOAD_SOURCE_MAP_CONTRACT } from './kibana.upload_source_map.gen';
+import { DELETE_SOURCE_MAP_CONTRACT } from './kibana.delete_source_map.gen';
+import { DELETE_ASSET_CRITICALITY_RECORD_CONTRACT } from './kibana.delete_asset_criticality_record.gen';
+import { GET_ASSET_CRITICALITY_RECORD_CONTRACT } from './kibana.get_asset_criticality_record.gen';
+import { CREATE_ASSET_CRITICALITY_RECORD_CONTRACT } from './kibana.create_asset_criticality_record.gen';
+import { BULK_UPSERT_ASSET_CRITICALITY_RECORDS_CONTRACT } from './kibana.bulk_upsert_asset_criticality_records.gen';
+import { FIND_ASSET_CRITICALITY_RECORDS_CONTRACT } from './kibana.find_asset_criticality_records.gen';
+import { POST_ATTACK_DISCOVERY_BULK_CONTRACT } from './kibana.post_attack_discovery_bulk.gen';
+import { ATTACK_DISCOVERY_FIND_CONTRACT } from './kibana.attack_discovery_find.gen';
+import { POST_ATTACK_DISCOVERY_GENERATE_CONTRACT } from './kibana.post_attack_discovery_generate.gen';
+import { GET_ATTACK_DISCOVERY_GENERATIONS_CONTRACT } from './kibana.get_attack_discovery_generations.gen';
+import { GET_ATTACK_DISCOVERY_GENERATION_CONTRACT } from './kibana.get_attack_discovery_generation.gen';
+import { POST_ATTACK_DISCOVERY_GENERATIONS_DISMISS_CONTRACT } from './kibana.post_attack_discovery_generations_dismiss.gen';
+import { CREATE_ATTACK_DISCOVERY_SCHEDULES_CONTRACT } from './kibana.create_attack_discovery_schedules.gen';
+import { FIND_ATTACK_DISCOVERY_SCHEDULES_CONTRACT } from './kibana.find_attack_discovery_schedules.gen';
+import { DELETE_ATTACK_DISCOVERY_SCHEDULES_CONTRACT } from './kibana.delete_attack_discovery_schedules.gen';
+import { GET_ATTACK_DISCOVERY_SCHEDULES_CONTRACT } from './kibana.get_attack_discovery_schedules.gen';
+import { UPDATE_ATTACK_DISCOVERY_SCHEDULES_CONTRACT } from './kibana.update_attack_discovery_schedules.gen';
+import { DISABLE_ATTACK_DISCOVERY_SCHEDULES_CONTRACT } from './kibana.disable_attack_discovery_schedules.gen';
+import { ENABLE_ATTACK_DISCOVERY_SCHEDULES_CONTRACT } from './kibana.enable_attack_discovery_schedules.gen';
+import { DELETE_CASE_DEFAULT_SPACE_CONTRACT } from './kibana.delete_case_default_space.gen';
+import { UPDATE_CASE_DEFAULT_SPACE_CONTRACT } from './kibana.update_case_default_space.gen';
+import { CREATE_CASE_DEFAULT_SPACE_CONTRACT } from './kibana.create_case_default_space.gen';
+import { FIND_CASES_DEFAULT_SPACE_CONTRACT } from './kibana.find_cases_default_space.gen';
+import { GET_CASE_DEFAULT_SPACE_CONTRACT } from './kibana.get_case_default_space.gen';
+import { GET_CASE_ALERTS_DEFAULT_SPACE_CONTRACT } from './kibana.get_case_alerts_default_space.gen';
+import { DELETE_CASE_COMMENTS_DEFAULT_SPACE_CONTRACT } from './kibana.delete_case_comments_default_space.gen';
+import { UPDATE_CASE_COMMENT_DEFAULT_SPACE_CONTRACT } from './kibana.update_case_comment_default_space.gen';
+import { ADD_CASE_COMMENT_DEFAULT_SPACE_CONTRACT } from './kibana.add_case_comment_default_space.gen';
+import { FIND_CASE_COMMENTS_DEFAULT_SPACE_CONTRACT } from './kibana.find_case_comments_default_space.gen';
+import { DELETE_CASE_COMMENT_DEFAULT_SPACE_CONTRACT } from './kibana.delete_case_comment_default_space.gen';
+import { GET_CASE_COMMENT_DEFAULT_SPACE_CONTRACT } from './kibana.get_case_comment_default_space.gen';
+import { PUSH_CASE_DEFAULT_SPACE_CONTRACT } from './kibana.push_case_default_space.gen';
+import { ADD_CASE_FILE_DEFAULT_SPACE_CONTRACT } from './kibana.add_case_file_default_space.gen';
+import { FIND_CASE_ACTIVITY_DEFAULT_SPACE_CONTRACT } from './kibana.find_case_activity_default_space.gen';
+import { GET_CASES_BY_ALERT_DEFAULT_SPACE_CONTRACT } from './kibana.get_cases_by_alert_default_space.gen';
+import { GET_CASE_CONFIGURATION_DEFAULT_SPACE_CONTRACT } from './kibana.get_case_configuration_default_space.gen';
+import { SET_CASE_CONFIGURATION_DEFAULT_SPACE_CONTRACT } from './kibana.set_case_configuration_default_space.gen';
+import { UPDATE_CASE_CONFIGURATION_DEFAULT_SPACE_CONTRACT } from './kibana.update_case_configuration_default_space.gen';
+import { FIND_CASE_CONNECTORS_DEFAULT_SPACE_CONTRACT } from './kibana.find_case_connectors_default_space.gen';
+import { GET_CASE_REPORTERS_DEFAULT_SPACE_CONTRACT } from './kibana.get_case_reporters_default_space.gen';
+import { GET_CASE_TAGS_DEFAULT_SPACE_CONTRACT } from './kibana.get_case_tags_default_space.gen';
+import { GET_ALL_DATA_VIEWS_DEFAULT_CONTRACT } from './kibana.get_all_data_views_default.gen';
+import { CREATE_DATA_VIEW_DEFAULTW_CONTRACT } from './kibana.create_data_view_defaultw.gen';
+import { DELETE_DATA_VIEW_DEFAULT_CONTRACT } from './kibana.delete_data_view_default.gen';
+import { GET_DATA_VIEW_DEFAULT_CONTRACT } from './kibana.get_data_view_default.gen';
+import { UPDATE_DATA_VIEW_DEFAULT_CONTRACT } from './kibana.update_data_view_default.gen';
+import { UPDATE_FIELDS_METADATA_DEFAULT_CONTRACT } from './kibana.update_fields_metadata_default.gen';
+import { CREATE_RUNTIME_FIELD_DEFAULT_CONTRACT } from './kibana.create_runtime_field_default.gen';
+import { CREATE_UPDATE_RUNTIME_FIELD_DEFAULT_CONTRACT } from './kibana.create_update_runtime_field_default.gen';
+import { DELETE_RUNTIME_FIELD_DEFAULT_CONTRACT } from './kibana.delete_runtime_field_default.gen';
+import { GET_RUNTIME_FIELD_DEFAULT_CONTRACT } from './kibana.get_runtime_field_default.gen';
+import { UPDATE_RUNTIME_FIELD_DEFAULT_CONTRACT } from './kibana.update_runtime_field_default.gen';
+import { GET_DEFAULT_DATA_VIEW_DEFAULT_CONTRACT } from './kibana.get_default_data_view_default.gen';
+import { SET_DEFAULT_DATAIL_VIEW_DEFAULT_CONTRACT } from './kibana.set_default_datail_view_default.gen';
+import { SWAP_DATA_VIEWS_DEFAULT_CONTRACT } from './kibana.swap_data_views_default.gen';
+import { PREVIEW_SWAP_DATA_VIEWS_DEFAULT_CONTRACT } from './kibana.preview_swap_data_views_default.gen';
+import { DELETE_ALERTS_INDEX_CONTRACT } from './kibana.delete_alerts_index.gen';
+import { READ_ALERTS_INDEX_CONTRACT } from './kibana.read_alerts_index.gen';
+import { CREATE_ALERTS_INDEX_CONTRACT } from './kibana.create_alerts_index.gen';
+import { READ_PRIVILEGES_CONTRACT } from './kibana.read_privileges.gen';
+import { DELETE_RULE_CONTRACT } from './kibana.delete_rule.gen';
+import { READ_RULE_CONTRACT } from './kibana.read_rule.gen';
+import { PATCH_RULE_CONTRACT } from './kibana.patch_rule.gen';
+import { CREATE_RULE_CONTRACT } from './kibana.create_rule.gen';
+import { UPDATE_RULE_CONTRACT } from './kibana.update_rule.gen';
+import { PERFORM_RULES_BULK_ACTION_CONTRACT } from './kibana.perform_rules_bulk_action.gen';
+import { EXPORT_RULES_CONTRACT } from './kibana.export_rules.gen';
+import { FIND_RULES_CONTRACT } from './kibana.find_rules.gen';
+import { IMPORT_RULES_CONTRACT } from './kibana.import_rules.gen';
+import { CREATE_RULE_EXCEPTION_LIST_ITEMS_CONTRACT } from './kibana.create_rule_exception_list_items.gen';
+import { INSTALL_PREBUILT_RULES_AND_TIMELINES_CONTRACT } from './kibana.install_prebuilt_rules_and_timelines.gen';
+import { READ_PREBUILT_RULES_AND_TIMELINES_STATUS_CONTRACT } from './kibana.read_prebuilt_rules_and_timelines_status.gen';
+import { RULE_PREVIEW_CONTRACT } from './kibana.rule_preview.gen';
+import { SET_ALERT_ASSIGNEES_CONTRACT } from './kibana.set_alert_assignees.gen';
+import { FINALIZE_ALERTS_MIGRATION_CONTRACT } from './kibana.finalize_alerts_migration.gen';
+import { ALERTS_MIGRATION_CLEANUP_CONTRACT } from './kibana.alerts_migration_cleanup.gen';
+import { CREATE_ALERTS_MIGRATION_CONTRACT } from './kibana.create_alerts_migration.gen';
+import { READ_ALERTS_MIGRATION_STATUS_CONTRACT } from './kibana.read_alerts_migration_status.gen';
+import { SEARCH_ALERTS_CONTRACT } from './kibana.search_alerts.gen';
+import { SET_ALERTS_STATUS_CONTRACT } from './kibana.set_alerts_status.gen';
+import { SET_ALERT_TAGS_CONTRACT } from './kibana.set_alert_tags.gen';
+import { READ_TAGS_CONTRACT } from './kibana.read_tags.gen';
+import { ROTATE_ENCRYPTION_KEY_CONTRACT } from './kibana.rotate_encryption_key.gen';
+import { CREATE_ENDPOINT_LIST_CONTRACT } from './kibana.create_endpoint_list.gen';
+import { DELETE_ENDPOINT_LIST_ITEM_CONTRACT } from './kibana.delete_endpoint_list_item.gen';
+import { READ_ENDPOINT_LIST_ITEM_CONTRACT } from './kibana.read_endpoint_list_item.gen';
+import { CREATE_ENDPOINT_LIST_ITEM_CONTRACT } from './kibana.create_endpoint_list_item.gen';
+import { UPDATE_ENDPOINT_LIST_ITEM_CONTRACT } from './kibana.update_endpoint_list_item.gen';
+import { FIND_ENDPOINT_LIST_ITEMS_CONTRACT } from './kibana.find_endpoint_list_items.gen';
+import { ENDPOINT_GET_ACTIONS_LIST_CONTRACT } from './kibana.endpoint_get_actions_list.gen';
+import { ENDPOINT_GET_ACTIONS_STATUS_CONTRACT } from './kibana.endpoint_get_actions_status.gen';
+import { ENDPOINT_GET_ACTIONS_DETAILS_CONTRACT } from './kibana.endpoint_get_actions_details.gen';
+import { ENDPOINT_FILE_INFO_CONTRACT } from './kibana.endpoint_file_info.gen';
+import { ENDPOINT_FILE_DOWNLOAD_CONTRACT } from './kibana.endpoint_file_download.gen';
+import { CANCEL_ACTION_CONTRACT } from './kibana.cancel_action.gen';
+import { ENDPOINT_EXECUTE_ACTION_CONTRACT } from './kibana.endpoint_execute_action.gen';
+import { ENDPOINT_GET_FILE_ACTION_CONTRACT } from './kibana.endpoint_get_file_action.gen';
+import { ENDPOINT_ISOLATE_ACTION_CONTRACT } from './kibana.endpoint_isolate_action.gen';
+import { ENDPOINT_KILL_PROCESS_ACTION_CONTRACT } from './kibana.endpoint_kill_process_action.gen';
+import { ENDPOINT_GET_PROCESSES_ACTION_CONTRACT } from './kibana.endpoint_get_processes_action.gen';
+import { RUN_SCRIPT_ACTION_CONTRACT } from './kibana.run_script_action.gen';
+import { ENDPOINT_SCAN_ACTION_CONTRACT } from './kibana.endpoint_scan_action.gen';
+import { ENDPOINT_GET_ACTIONS_STATE_CONTRACT } from './kibana.endpoint_get_actions_state.gen';
+import { ENDPOINT_SUSPEND_PROCESS_ACTION_CONTRACT } from './kibana.endpoint_suspend_process_action.gen';
+import { ENDPOINT_UNISOLATE_ACTION_CONTRACT } from './kibana.endpoint_unisolate_action.gen';
+import { ENDPOINT_UPLOAD_ACTION_CONTRACT } from './kibana.endpoint_upload_action.gen';
+import { GET_ENDPOINT_METADATA_LIST_CONTRACT } from './kibana.get_endpoint_metadata_list.gen';
+import { GET_ENDPOINT_METADATA_CONTRACT } from './kibana.get_endpoint_metadata.gen';
+import { GET_POLICY_RESPONSE_CONTRACT } from './kibana.get_policy_response.gen';
+import { GET_PROTECTION_UPDATES_NOTE_CONTRACT } from './kibana.get_protection_updates_note.gen';
+import { CREATE_UPDATE_PROTECTION_UPDATES_NOTE_CONTRACT } from './kibana.create_update_protection_updates_note.gen';
+import { DELETE_MONITORING_ENGINE_CONTRACT } from './kibana.delete_monitoring_engine.gen';
+import { DISABLE_MONITORING_ENGINE_CONTRACT } from './kibana.disable_monitoring_engine.gen';
+import { INIT_MONITORING_ENGINE_CONTRACT } from './kibana.init_monitoring_engine.gen';
+import { SCHEDULE_MONITORING_ENGINE_CONTRACT } from './kibana.schedule_monitoring_engine.gen';
+import { PRIV_MON_HEALTH_CONTRACT } from './kibana.priv_mon_health.gen';
+import { PRIV_MON_PRIVILEGES_CONTRACT } from './kibana.priv_mon_privileges.gen';
+import { CREATE_PRIV_MON_USER_CONTRACT } from './kibana.create_priv_mon_user.gen';
+import { PRIVMON_BULK_UPLOAD_USERS_CSV_CONTRACT } from './kibana.privmon_bulk_upload_users_csv.gen';
+import { DELETE_PRIV_MON_USER_CONTRACT } from './kibana.delete_priv_mon_user.gen';
+import { UPDATE_PRIV_MON_USER_CONTRACT } from './kibana.update_priv_mon_user.gen';
+import { LIST_PRIV_MON_USERS_CONTRACT } from './kibana.list_priv_mon_users.gen';
+import { INSTALL_PRIVILEGED_ACCESS_DETECTION_PACKAGE_CONTRACT } from './kibana.install_privileged_access_detection_package.gen';
+import { GET_PRIVILEGED_ACCESS_DETECTION_PACKAGE_STATUS_CONTRACT } from './kibana.get_privileged_access_detection_package_status.gen';
+import { INIT_ENTITY_STORE_CONTRACT } from './kibana.init_entity_store.gen';
+import { DELETE_ENTITY_ENGINES_CONTRACT } from './kibana.delete_entity_engines.gen';
+import { LIST_ENTITY_ENGINES_CONTRACT } from './kibana.list_entity_engines.gen';
+import { DELETE_ENTITY_ENGINE_CONTRACT } from './kibana.delete_entity_engine.gen';
+import { GET_ENTITY_ENGINE_CONTRACT } from './kibana.get_entity_engine.gen';
+import { INIT_ENTITY_ENGINE_CONTRACT } from './kibana.init_entity_engine.gen';
+import { START_ENTITY_ENGINE_CONTRACT } from './kibana.start_entity_engine.gen';
+import { STOP_ENTITY_ENGINE_CONTRACT } from './kibana.stop_entity_engine.gen';
+import { APPLY_ENTITY_ENGINE_DATAVIEW_INDICES_CONTRACT } from './kibana.apply_entity_engine_dataview_indices.gen';
+import { DELETE_SINGLE_ENTITY_CONTRACT } from './kibana.delete_single_entity.gen';
+import { UPSERT_ENTITY_CONTRACT } from './kibana.upsert_entity.gen';
+import { UPSERT_ENTITIES_BULK_CONTRACT } from './kibana.upsert_entities_bulk.gen';
+import { LIST_ENTITIES_CONTRACT } from './kibana.list_entities.gen';
+import { GET_ENTITY_STORE_STATUS_CONTRACT } from './kibana.get_entity_store_status.gen';
+import { DELETE_EXCEPTION_LIST_CONTRACT } from './kibana.delete_exception_list.gen';
+import { READ_EXCEPTION_LIST_CONTRACT } from './kibana.read_exception_list.gen';
+import { CREATE_EXCEPTION_LIST_CONTRACT } from './kibana.create_exception_list.gen';
+import { UPDATE_EXCEPTION_LIST_CONTRACT } from './kibana.update_exception_list.gen';
+import { DUPLICATE_EXCEPTION_LIST_CONTRACT } from './kibana.duplicate_exception_list.gen';
+import { EXPORT_EXCEPTION_LIST_CONTRACT } from './kibana.export_exception_list.gen';
+import { FIND_EXCEPTION_LISTS_CONTRACT } from './kibana.find_exception_lists.gen';
+import { IMPORT_EXCEPTION_LIST_CONTRACT } from './kibana.import_exception_list.gen';
+import { DELETE_EXCEPTION_LIST_ITEM_CONTRACT } from './kibana.delete_exception_list_item.gen';
+import { READ_EXCEPTION_LIST_ITEM_CONTRACT } from './kibana.read_exception_list_item.gen';
+import { CREATE_EXCEPTION_LIST_ITEM_CONTRACT } from './kibana.create_exception_list_item.gen';
+import { UPDATE_EXCEPTION_LIST_ITEM_CONTRACT } from './kibana.update_exception_list_item.gen';
+import { FIND_EXCEPTION_LIST_ITEMS_CONTRACT } from './kibana.find_exception_list_items.gen';
+import { READ_EXCEPTION_LIST_SUMMARY_CONTRACT } from './kibana.read_exception_list_summary.gen';
+import { CREATE_SHARED_EXCEPTION_LIST_CONTRACT } from './kibana.create_shared_exception_list.gen';
 import { GET_FEATURES_CONTRACT } from './kibana.get_features.gen';
 import { GET_FLEET_AGENT_DOWNLOAD_SOURCES_CONTRACT } from './kibana.get_fleet_agent_download_sources.gen';
 import { POST_FLEET_AGENT_DOWNLOAD_SOURCES_CONTRACT } from './kibana.post_fleet_agent_download_sources.gen';
@@ -358,24 +358,24 @@ import { GET_FLEET_SPACE_SETTINGS_CONTRACT } from './kibana.get_fleet_space_sett
 import { PUT_FLEET_SPACE_SETTINGS_CONTRACT } from './kibana.put_fleet_space_settings.gen';
 import { GET_FLEET_UNINSTALL_TOKENS_CONTRACT } from './kibana.get_fleet_uninstall_tokens.gen';
 import { GET_FLEET_UNINSTALL_TOKENS_UNINSTALLTOKENID_CONTRACT } from './kibana.get_fleet_uninstall_tokens_uninstalltokenid.gen';
-import { DELETELIST_CONTRACT } from './kibana.delete_list.gen';
-import { READLIST_CONTRACT } from './kibana.read_list.gen';
-import { PATCHLIST_CONTRACT } from './kibana.patch_list.gen';
-import { CREATELIST_CONTRACT } from './kibana.create_list.gen';
-import { UPDATELIST_CONTRACT } from './kibana.update_list.gen';
-import { FINDLISTS_CONTRACT } from './kibana.find_lists.gen';
-import { DELETELISTINDEX_CONTRACT } from './kibana.delete_list_index.gen';
-import { READLISTINDEX_CONTRACT } from './kibana.read_list_index.gen';
-import { CREATELISTINDEX_CONTRACT } from './kibana.create_list_index.gen';
-import { DELETELISTITEM_CONTRACT } from './kibana.delete_list_item.gen';
-import { READLISTITEM_CONTRACT } from './kibana.read_list_item.gen';
-import { PATCHLISTITEM_CONTRACT } from './kibana.patch_list_item.gen';
-import { CREATELISTITEM_CONTRACT } from './kibana.create_list_item.gen';
-import { UPDATELISTITEM_CONTRACT } from './kibana.update_list_item.gen';
-import { EXPORTLISTITEMS_CONTRACT } from './kibana.export_list_items.gen';
-import { FINDLISTITEMS_CONTRACT } from './kibana.find_list_items.gen';
-import { IMPORTLISTITEMS_CONTRACT } from './kibana.import_list_items.gen';
-import { READLISTPRIVILEGES_CONTRACT } from './kibana.read_list_privileges.gen';
+import { DELETE_LIST_CONTRACT } from './kibana.delete_list.gen';
+import { READ_LIST_CONTRACT } from './kibana.read_list.gen';
+import { PATCH_LIST_CONTRACT } from './kibana.patch_list.gen';
+import { CREATE_LIST_CONTRACT } from './kibana.create_list.gen';
+import { UPDATE_LIST_CONTRACT } from './kibana.update_list.gen';
+import { FIND_LISTS_CONTRACT } from './kibana.find_lists.gen';
+import { DELETE_LIST_INDEX_CONTRACT } from './kibana.delete_list_index.gen';
+import { READ_LIST_INDEX_CONTRACT } from './kibana.read_list_index.gen';
+import { CREATE_LIST_INDEX_CONTRACT } from './kibana.create_list_index.gen';
+import { DELETE_LIST_ITEM_CONTRACT } from './kibana.delete_list_item.gen';
+import { READ_LIST_ITEM_CONTRACT } from './kibana.read_list_item.gen';
+import { PATCH_LIST_ITEM_CONTRACT } from './kibana.patch_list_item.gen';
+import { CREATE_LIST_ITEM_CONTRACT } from './kibana.create_list_item.gen';
+import { UPDATE_LIST_ITEM_CONTRACT } from './kibana.update_list_item.gen';
+import { EXPORT_LIST_ITEMS_CONTRACT } from './kibana.export_list_items.gen';
+import { FIND_LIST_ITEMS_CONTRACT } from './kibana.find_list_items.gen';
+import { IMPORT_LIST_ITEMS_CONTRACT } from './kibana.import_list_items.gen';
+import { READ_LIST_PRIVILEGES_CONTRACT } from './kibana.read_list_privileges.gen';
 import { DELETE_LOGSTASH_PIPELINE_CONTRACT } from './kibana.delete_logstash_pipeline.gen';
 import { GET_LOGSTASH_PIPELINE_CONTRACT } from './kibana.get_logstash_pipeline.gen';
 import { PUT_LOGSTASH_PIPELINE_CONTRACT } from './kibana.put_logstash_pipeline.gen';
@@ -387,64 +387,64 @@ import { GET_MAINTENANCE_WINDOW_ID_CONTRACT } from './kibana.get_maintenance_win
 import { PATCH_MAINTENANCE_WINDOW_ID_CONTRACT } from './kibana.patch_maintenance_window_id.gen';
 import { POST_MAINTENANCE_WINDOW_ID_ARCHIVE_CONTRACT } from './kibana.post_maintenance_window_id_archive.gen';
 import { POST_MAINTENANCE_WINDOW_ID_UNARCHIVE_CONTRACT } from './kibana.post_maintenance_window_id_unarchive.gen';
-import { MLSYNC_CONTRACT } from './kibana.ml_sync.gen';
-import { DELETENOTE_CONTRACT } from './kibana.delete_note.gen';
-import { GETNOTES_CONTRACT } from './kibana.get_notes.gen';
-import { PERSISTNOTEROUTE_CONTRACT } from './kibana.persist_note_route.gen';
+import { ML_SYNC_CONTRACT } from './kibana.ml_sync.gen';
+import { DELETE_NOTE_CONTRACT } from './kibana.delete_note.gen';
+import { GET_NOTES_CONTRACT } from './kibana.get_notes.gen';
+import { PERSIST_NOTE_ROUTE_CONTRACT } from './kibana.persist_note_route.gen';
 import { OBSERVABILITY_AI_ASSISTANT_CHAT_COMPLETE_CONTRACT } from './kibana.observability_ai_assistant_chat_complete.gen';
-import { OSQUERYFINDLIVEQUERIES_CONTRACT } from './kibana.osquery_find_live_queries.gen';
-import { OSQUERYCREATELIVEQUERY_CONTRACT } from './kibana.osquery_create_live_query.gen';
-import { OSQUERYGETLIVEQUERYDETAILS_CONTRACT } from './kibana.osquery_get_live_query_details.gen';
-import { OSQUERYGETLIVEQUERYRESULTS_CONTRACT } from './kibana.osquery_get_live_query_results.gen';
-import { OSQUERYFINDPACKS_CONTRACT } from './kibana.osquery_find_packs.gen';
-import { OSQUERYCREATEPACKS_CONTRACT } from './kibana.osquery_create_packs.gen';
-import { OSQUERYDELETEPACKS_CONTRACT } from './kibana.osquery_delete_packs.gen';
-import { OSQUERYGETPACKSDETAILS_CONTRACT } from './kibana.osquery_get_packs_details.gen';
-import { OSQUERYUPDATEPACKS_CONTRACT } from './kibana.osquery_update_packs.gen';
-import { OSQUERYFINDSAVEDQUERIES_CONTRACT } from './kibana.osquery_find_saved_queries.gen';
-import { OSQUERYCREATESAVEDQUERY_CONTRACT } from './kibana.osquery_create_saved_query.gen';
-import { OSQUERYDELETESAVEDQUERY_CONTRACT } from './kibana.osquery_delete_saved_query.gen';
-import { OSQUERYGETSAVEDQUERYDETAILS_CONTRACT } from './kibana.osquery_get_saved_query_details.gen';
-import { OSQUERYUPDATESAVEDQUERY_CONTRACT } from './kibana.osquery_update_saved_query.gen';
-import { PERSISTPINNEDEVENTROUTE_CONTRACT } from './kibana.persist_pinned_event_route.gen';
-import { CLEANUPRISKENGINE_CONTRACT } from './kibana.clean_up_risk_engine.gen';
-import { CONFIGURERISKENGINESAVEDOBJECT_CONTRACT } from './kibana.configure_risk_engine_saved_object.gen';
-import { SCHEDULERISKENGINENOW_CONTRACT } from './kibana.schedule_risk_engine_now.gen';
-import { BULKCREATESAVEDOBJECTS_CONTRACT } from './kibana.bulk_create_saved_objects.gen';
-import { BULKDELETESAVEDOBJECTS_CONTRACT } from './kibana.bulk_delete_saved_objects.gen';
-import { BULKGETSAVEDOBJECTS_CONTRACT } from './kibana.bulk_get_saved_objects.gen';
-import { BULKRESOLVESAVEDOBJECTS_CONTRACT } from './kibana.bulk_resolve_saved_objects.gen';
-import { BULKUPDATESAVEDOBJECTS_CONTRACT } from './kibana.bulk_update_saved_objects.gen';
+import { OSQUERY_FIND_LIVE_QUERIES_CONTRACT } from './kibana.osquery_find_live_queries.gen';
+import { OSQUERY_CREATE_LIVE_QUERY_CONTRACT } from './kibana.osquery_create_live_query.gen';
+import { OSQUERY_GET_LIVE_QUERY_DETAILS_CONTRACT } from './kibana.osquery_get_live_query_details.gen';
+import { OSQUERY_GET_LIVE_QUERY_RESULTS_CONTRACT } from './kibana.osquery_get_live_query_results.gen';
+import { OSQUERY_FIND_PACKS_CONTRACT } from './kibana.osquery_find_packs.gen';
+import { OSQUERY_CREATE_PACKS_CONTRACT } from './kibana.osquery_create_packs.gen';
+import { OSQUERY_DELETE_PACKS_CONTRACT } from './kibana.osquery_delete_packs.gen';
+import { OSQUERY_GET_PACKS_DETAILS_CONTRACT } from './kibana.osquery_get_packs_details.gen';
+import { OSQUERY_UPDATE_PACKS_CONTRACT } from './kibana.osquery_update_packs.gen';
+import { OSQUERY_FIND_SAVED_QUERIES_CONTRACT } from './kibana.osquery_find_saved_queries.gen';
+import { OSQUERY_CREATE_SAVED_QUERY_CONTRACT } from './kibana.osquery_create_saved_query.gen';
+import { OSQUERY_DELETE_SAVED_QUERY_CONTRACT } from './kibana.osquery_delete_saved_query.gen';
+import { OSQUERY_GET_SAVED_QUERY_DETAILS_CONTRACT } from './kibana.osquery_get_saved_query_details.gen';
+import { OSQUERY_UPDATE_SAVED_QUERY_CONTRACT } from './kibana.osquery_update_saved_query.gen';
+import { PERSIST_PINNED_EVENT_ROUTE_CONTRACT } from './kibana.persist_pinned_event_route.gen';
+import { CLEAN_UP_RISK_ENGINE_CONTRACT } from './kibana.clean_up_risk_engine.gen';
+import { CONFIGURE_RISK_ENGINE_SAVED_OBJECT_CONTRACT } from './kibana.configure_risk_engine_saved_object.gen';
+import { SCHEDULE_RISK_ENGINE_NOW_CONTRACT } from './kibana.schedule_risk_engine_now.gen';
+import { BULK_CREATE_SAVED_OBJECTS_CONTRACT } from './kibana.bulk_create_saved_objects.gen';
+import { BULK_DELETE_SAVED_OBJECTS_CONTRACT } from './kibana.bulk_delete_saved_objects.gen';
+import { BULK_GET_SAVED_OBJECTS_CONTRACT } from './kibana.bulk_get_saved_objects.gen';
+import { BULK_RESOLVE_SAVED_OBJECTS_CONTRACT } from './kibana.bulk_resolve_saved_objects.gen';
+import { BULK_UPDATE_SAVED_OBJECTS_CONTRACT } from './kibana.bulk_update_saved_objects.gen';
 import { POST_SAVED_OBJECTS_EXPORT_CONTRACT } from './kibana.post_saved_objects_export.gen';
-import { FINDSAVEDOBJECTS_CONTRACT } from './kibana.find_saved_objects.gen';
+import { FIND_SAVED_OBJECTS_CONTRACT } from './kibana.find_saved_objects.gen';
 import { POST_SAVED_OBJECTS_IMPORT_CONTRACT } from './kibana.post_saved_objects_import.gen';
-import { RESOLVEIMPORTERRORS_CONTRACT } from './kibana.resolve_import_errors.gen';
-import { CREATESAVEDOBJECT_CONTRACT } from './kibana.create_saved_object.gen';
-import { GETSAVEDOBJECT_CONTRACT } from './kibana.get_saved_object.gen';
-import { CREATESAVEDOBJECTID_CONTRACT } from './kibana.create_saved_object_id.gen';
-import { UPDATESAVEDOBJECT_CONTRACT } from './kibana.update_saved_object.gen';
-import { RESOLVESAVEDOBJECT_CONTRACT } from './kibana.resolve_saved_object.gen';
-import { PERFORMANONYMIZATIONFIELDSBULKACTION_CONTRACT } from './kibana.perform_anonymization_fields_bulk_action.gen';
-import { FINDANONYMIZATIONFIELDS_CONTRACT } from './kibana.find_anonymization_fields.gen';
-import { CHATCOMPLETE_CONTRACT } from './kibana.chat_complete.gen';
-import { DELETEALLCONVERSATIONS_CONTRACT } from './kibana.delete_all_conversations.gen';
-import { CREATECONVERSATION_CONTRACT } from './kibana.create_conversation.gen';
-import { FINDCONVERSATIONS_CONTRACT } from './kibana.find_conversations.gen';
-import { DELETECONVERSATION_CONTRACT } from './kibana.delete_conversation.gen';
-import { READCONVERSATION_CONTRACT } from './kibana.read_conversation.gen';
-import { UPDATECONVERSATION_CONTRACT } from './kibana.update_conversation.gen';
-import { GETKNOWLEDGEBASE_CONTRACT } from './kibana.get_knowledge_base.gen';
-import { POSTKNOWLEDGEBASE_CONTRACT } from './kibana.post_knowledge_base.gen';
-import { READKNOWLEDGEBASE_CONTRACT } from './kibana.read_knowledge_base.gen';
-import { CREATEKNOWLEDGEBASE_CONTRACT } from './kibana.create_knowledge_base.gen';
-import { CREATEKNOWLEDGEBASEENTRY_CONTRACT } from './kibana.create_knowledge_base_entry.gen';
-import { PERFORMKNOWLEDGEBASEENTRYBULKACTION_CONTRACT } from './kibana.perform_knowledge_base_entry_bulk_action.gen';
-import { FINDKNOWLEDGEBASEENTRIES_CONTRACT } from './kibana.find_knowledge_base_entries.gen';
-import { DELETEKNOWLEDGEBASEENTRY_CONTRACT } from './kibana.delete_knowledge_base_entry.gen';
-import { READKNOWLEDGEBASEENTRY_CONTRACT } from './kibana.read_knowledge_base_entry.gen';
-import { UPDATEKNOWLEDGEBASEENTRY_CONTRACT } from './kibana.update_knowledge_base_entry.gen';
-import { PERFORMPROMPTSBULKACTION_CONTRACT } from './kibana.perform_prompts_bulk_action.gen';
-import { FINDPROMPTS_CONTRACT } from './kibana.find_prompts.gen';
+import { RESOLVE_IMPORT_ERRORS_CONTRACT } from './kibana.resolve_import_errors.gen';
+import { CREATE_SAVED_OBJECT_CONTRACT } from './kibana.create_saved_object.gen';
+import { GET_SAVED_OBJECT_CONTRACT } from './kibana.get_saved_object.gen';
+import { CREATE_SAVED_OBJECT_ID_CONTRACT } from './kibana.create_saved_object_id.gen';
+import { UPDATE_SAVED_OBJECT_CONTRACT } from './kibana.update_saved_object.gen';
+import { RESOLVE_SAVED_OBJECT_CONTRACT } from './kibana.resolve_saved_object.gen';
+import { PERFORM_ANONYMIZATION_FIELDS_BULK_ACTION_CONTRACT } from './kibana.perform_anonymization_fields_bulk_action.gen';
+import { FIND_ANONYMIZATION_FIELDS_CONTRACT } from './kibana.find_anonymization_fields.gen';
+import { CHAT_COMPLETE_CONTRACT } from './kibana.chat_complete.gen';
+import { DELETE_ALL_CONVERSATIONS_CONTRACT } from './kibana.delete_all_conversations.gen';
+import { CREATE_CONVERSATION_CONTRACT } from './kibana.create_conversation.gen';
+import { FIND_CONVERSATIONS_CONTRACT } from './kibana.find_conversations.gen';
+import { DELETE_CONVERSATION_CONTRACT } from './kibana.delete_conversation.gen';
+import { READ_CONVERSATION_CONTRACT } from './kibana.read_conversation.gen';
+import { UPDATE_CONVERSATION_CONTRACT } from './kibana.update_conversation.gen';
+import { GET_KNOWLEDGE_BASE_CONTRACT } from './kibana.get_knowledge_base.gen';
+import { POST_KNOWLEDGE_BASE_CONTRACT } from './kibana.post_knowledge_base.gen';
+import { READ_KNOWLEDGE_BASE_CONTRACT } from './kibana.read_knowledge_base.gen';
+import { CREATE_KNOWLEDGE_BASE_CONTRACT } from './kibana.create_knowledge_base.gen';
+import { CREATE_KNOWLEDGE_BASE_ENTRY_CONTRACT } from './kibana.create_knowledge_base_entry.gen';
+import { PERFORM_KNOWLEDGE_BASE_ENTRY_BULK_ACTION_CONTRACT } from './kibana.perform_knowledge_base_entry_bulk_action.gen';
+import { FIND_KNOWLEDGE_BASE_ENTRIES_CONTRACT } from './kibana.find_knowledge_base_entries.gen';
+import { DELETE_KNOWLEDGE_BASE_ENTRY_CONTRACT } from './kibana.delete_knowledge_base_entry.gen';
+import { READ_KNOWLEDGE_BASE_ENTRY_CONTRACT } from './kibana.read_knowledge_base_entry.gen';
+import { UPDATE_KNOWLEDGE_BASE_ENTRY_CONTRACT } from './kibana.update_knowledge_base_entry.gen';
+import { PERFORM_PROMPTS_BULK_ACTION_CONTRACT } from './kibana.perform_prompts_bulk_action.gen';
+import { FIND_PROMPTS_CONTRACT } from './kibana.find_prompts.gen';
 import { GET_SECURITY_ROLE_CONTRACT } from './kibana.get_security_role.gen';
 import { POST_SECURITY_ROLE_QUERY_CONTRACT } from './kibana.post_security_role_query.gen';
 import { DELETE_SECURITY_ROLE_NAME_CONTRACT } from './kibana.delete_security_role_name.gen';
@@ -518,35 +518,35 @@ import { DELETE_PRIVATE_LOCATION_CONTRACT } from './kibana.delete_private_locati
 import { GET_PRIVATE_LOCATION_CONTRACT } from './kibana.get_private_location.gen';
 import { PUT_PRIVATE_LOCATION_CONTRACT } from './kibana.put_private_location.gen';
 import { TASK_MANAGER_HEALTH_CONTRACT } from './kibana.task_manager_health.gen';
-import { DELETETIMELINES_CONTRACT } from './kibana.delete_timelines.gen';
-import { GETTIMELINE_CONTRACT } from './kibana.get_timeline.gen';
-import { PATCHTIMELINE_CONTRACT } from './kibana.patch_timeline.gen';
-import { CREATETIMELINES_CONTRACT } from './kibana.create_timelines.gen';
-import { COPYTIMELINE_CONTRACT } from './kibana.copy_timeline.gen';
-import { GETDRAFTTIMELINES_CONTRACT } from './kibana.get_draft_timelines.gen';
-import { CLEANDRAFTTIMELINES_CONTRACT } from './kibana.clean_draft_timelines.gen';
-import { EXPORTTIMELINES_CONTRACT } from './kibana.export_timelines.gen';
-import { PERSISTFAVORITEROUTE_CONTRACT } from './kibana.persist_favorite_route.gen';
-import { IMPORTTIMELINES_CONTRACT } from './kibana.import_timelines.gen';
-import { INSTALLPREPACKEDTIMELINES_CONTRACT } from './kibana.install_prepacked_timelines.gen';
-import { RESOLVETIMELINE_CONTRACT } from './kibana.resolve_timeline.gen';
-import { GETTIMELINES_CONTRACT } from './kibana.get_timelines.gen';
+import { DELETE_TIMELINES_CONTRACT } from './kibana.delete_timelines.gen';
+import { GET_TIMELINE_CONTRACT } from './kibana.get_timeline.gen';
+import { PATCH_TIMELINE_CONTRACT } from './kibana.patch_timeline.gen';
+import { CREATE_TIMELINES_CONTRACT } from './kibana.create_timelines.gen';
+import { COPY_TIMELINE_CONTRACT } from './kibana.copy_timeline.gen';
+import { GET_DRAFT_TIMELINES_CONTRACT } from './kibana.get_draft_timelines.gen';
+import { CLEAN_DRAFT_TIMELINES_CONTRACT } from './kibana.clean_draft_timelines.gen';
+import { EXPORT_TIMELINES_CONTRACT } from './kibana.export_timelines.gen';
+import { PERSIST_FAVORITE_ROUTE_CONTRACT } from './kibana.persist_favorite_route.gen';
+import { IMPORT_TIMELINES_CONTRACT } from './kibana.import_timelines.gen';
+import { INSTALL_PREPACKED_TIMELINES_CONTRACT } from './kibana.install_prepacked_timelines.gen';
+import { RESOLVE_TIMELINE_CONTRACT } from './kibana.resolve_timeline.gen';
+import { GET_TIMELINES_CONTRACT } from './kibana.get_timelines.gen';
 import { GET_UPGRADE_STATUS_CONTRACT } from './kibana.get_upgrade_status.gen';
 import { GET_UPTIME_SETTINGS_CONTRACT } from './kibana.get_uptime_settings.gen';
 import { PUT_UPTIME_SETTINGS_CONTRACT } from './kibana.put_uptime_settings.gen';
-import { FINDSLOSOP_CONTRACT } from './kibana.find_slos_op.gen';
-import { CREATESLOOP_CONTRACT } from './kibana.create_slo_op.gen';
-import { BULKDELETEOP_CONTRACT } from './kibana.bulk_delete_op.gen';
-import { BULKDELETESTATUSOP_CONTRACT } from './kibana.bulk_delete_status_op.gen';
-import { DELETEROLLUPDATAOP_CONTRACT } from './kibana.delete_rollup_data_op.gen';
-import { DELETESLOINSTANCESOP_CONTRACT } from './kibana.delete_slo_instances_op.gen';
-import { DELETESLOOP_CONTRACT } from './kibana.delete_slo_op.gen';
-import { GETSLOOP_CONTRACT } from './kibana.get_slo_op.gen';
-import { UPDATESLOOP_CONTRACT } from './kibana.update_slo_op.gen';
-import { RESETSLOOP_CONTRACT } from './kibana.reset_slo_op.gen';
-import { DISABLESLOOP_CONTRACT } from './kibana.disable_slo_op.gen';
-import { ENABLESLOOP_CONTRACT } from './kibana.enable_slo_op.gen';
-import { GETDEFINITIONSOP_CONTRACT } from './kibana.get_definitions_op.gen';
+import { FIND_SLOS_OP_CONTRACT } from './kibana.find_slos_op.gen';
+import { CREATE_SLO_OP_CONTRACT } from './kibana.create_slo_op.gen';
+import { BULK_DELETE_OP_CONTRACT } from './kibana.bulk_delete_op.gen';
+import { BULK_DELETE_STATUS_OP_CONTRACT } from './kibana.bulk_delete_status_op.gen';
+import { DELETE_ROLLUP_DATA_OP_CONTRACT } from './kibana.delete_rollup_data_op.gen';
+import { DELETE_SLO_INSTANCES_OP_CONTRACT } from './kibana.delete_slo_instances_op.gen';
+import { DELETE_SLO_OP_CONTRACT } from './kibana.delete_slo_op.gen';
+import { GET_SLO_OP_CONTRACT } from './kibana.get_slo_op.gen';
+import { UPDATE_SLO_OP_CONTRACT } from './kibana.update_slo_op.gen';
+import { RESET_SLO_OP_CONTRACT } from './kibana.reset_slo_op.gen';
+import { DISABLE_SLO_OP_CONTRACT } from './kibana.disable_slo_op.gen';
+import { ENABLE_SLO_OP_CONTRACT } from './kibana.enable_slo_op.gen';
+import { GET_DEFINITIONS_OP_CONTRACT } from './kibana.get_definitions_op.gen';
 
 // export contracts
 export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
@@ -576,8 +576,8 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
   DELETE_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT,
   GET_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT,
   PUT_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT,
-  GETALERTINGHEALTH_CONTRACT,
-  GETRULETYPES_CONTRACT,
+  GET_ALERTING_HEALTH_CONTRACT,
+  GET_RULE_TYPES_CONTRACT,
   DELETE_ALERTING_RULE_ID_CONTRACT,
   GET_ALERTING_RULE_ID_CONTRACT,
   POST_ALERTING_RULE_ID_CONTRACT,
@@ -592,172 +592,172 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
   POST_ALERTING_RULE_RULE_ID_ALERT_ALERT_ID_UNMUTE_CONTRACT,
   DELETE_ALERTING_RULE_RULEID_SNOOZE_SCHEDULE_SCHEDULEID_CONTRACT,
   GET_ALERTING_RULES_FIND_CONTRACT,
-  CREATEAGENTKEY_CONTRACT,
-  SAVEAPMSERVERSCHEMA_CONTRACT,
-  CREATEANNOTATION_CONTRACT,
-  GETANNOTATION_CONTRACT,
-  DELETEAGENTCONFIGURATION_CONTRACT,
-  GETAGENTCONFIGURATIONS_CONTRACT,
-  CREATEUPDATEAGENTCONFIGURATION_CONTRACT,
-  GETAGENTNAMEFORSERVICE_CONTRACT,
-  GETENVIRONMENTSFORSERVICE_CONTRACT,
-  SEARCHSINGLECONFIGURATION_CONTRACT,
-  GETSINGLEAGENTCONFIGURATION_CONTRACT,
-  GETSOURCEMAPS_CONTRACT,
-  UPLOADSOURCEMAP_CONTRACT,
-  DELETESOURCEMAP_CONTRACT,
-  DELETEASSETCRITICALITYRECORD_CONTRACT,
-  GETASSETCRITICALITYRECORD_CONTRACT,
-  CREATEASSETCRITICALITYRECORD_CONTRACT,
-  BULKUPSERTASSETCRITICALITYRECORDS_CONTRACT,
-  FINDASSETCRITICALITYRECORDS_CONTRACT,
-  POSTATTACKDISCOVERYBULK_CONTRACT,
-  ATTACKDISCOVERYFIND_CONTRACT,
-  POSTATTACKDISCOVERYGENERATE_CONTRACT,
-  GETATTACKDISCOVERYGENERATIONS_CONTRACT,
-  GETATTACKDISCOVERYGENERATION_CONTRACT,
-  POSTATTACKDISCOVERYGENERATIONSDISMISS_CONTRACT,
-  CREATEATTACKDISCOVERYSCHEDULES_CONTRACT,
-  FINDATTACKDISCOVERYSCHEDULES_CONTRACT,
-  DELETEATTACKDISCOVERYSCHEDULES_CONTRACT,
-  GETATTACKDISCOVERYSCHEDULES_CONTRACT,
-  UPDATEATTACKDISCOVERYSCHEDULES_CONTRACT,
-  DISABLEATTACKDISCOVERYSCHEDULES_CONTRACT,
-  ENABLEATTACKDISCOVERYSCHEDULES_CONTRACT,
-  DELETECASEDEFAULTSPACE_CONTRACT,
-  UPDATECASEDEFAULTSPACE_CONTRACT,
-  CREATECASEDEFAULTSPACE_CONTRACT,
-  FINDCASESDEFAULTSPACE_CONTRACT,
-  GETCASEDEFAULTSPACE_CONTRACT,
-  GETCASEALERTSDEFAULTSPACE_CONTRACT,
-  DELETECASECOMMENTSDEFAULTSPACE_CONTRACT,
-  UPDATECASECOMMENTDEFAULTSPACE_CONTRACT,
-  ADDCASECOMMENTDEFAULTSPACE_CONTRACT,
-  FINDCASECOMMENTSDEFAULTSPACE_CONTRACT,
-  DELETECASECOMMENTDEFAULTSPACE_CONTRACT,
-  GETCASECOMMENTDEFAULTSPACE_CONTRACT,
-  PUSHCASEDEFAULTSPACE_CONTRACT,
-  ADDCASEFILEDEFAULTSPACE_CONTRACT,
-  FINDCASEACTIVITYDEFAULTSPACE_CONTRACT,
-  GETCASESBYALERTDEFAULTSPACE_CONTRACT,
-  GETCASECONFIGURATIONDEFAULTSPACE_CONTRACT,
-  SETCASECONFIGURATIONDEFAULTSPACE_CONTRACT,
-  UPDATECASECONFIGURATIONDEFAULTSPACE_CONTRACT,
-  FINDCASECONNECTORSDEFAULTSPACE_CONTRACT,
-  GETCASEREPORTERSDEFAULTSPACE_CONTRACT,
-  GETCASETAGSDEFAULTSPACE_CONTRACT,
-  GETALLDATAVIEWSDEFAULT_CONTRACT,
-  CREATEDATAVIEWDEFAULTW_CONTRACT,
-  DELETEDATAVIEWDEFAULT_CONTRACT,
-  GETDATAVIEWDEFAULT_CONTRACT,
-  UPDATEDATAVIEWDEFAULT_CONTRACT,
-  UPDATEFIELDSMETADATADEFAULT_CONTRACT,
-  CREATERUNTIMEFIELDDEFAULT_CONTRACT,
-  CREATEUPDATERUNTIMEFIELDDEFAULT_CONTRACT,
-  DELETERUNTIMEFIELDDEFAULT_CONTRACT,
-  GETRUNTIMEFIELDDEFAULT_CONTRACT,
-  UPDATERUNTIMEFIELDDEFAULT_CONTRACT,
-  GETDEFAULTDATAVIEWDEFAULT_CONTRACT,
-  SETDEFAULTDATAILVIEWDEFAULT_CONTRACT,
-  SWAPDATAVIEWSDEFAULT_CONTRACT,
-  PREVIEWSWAPDATAVIEWSDEFAULT_CONTRACT,
-  DELETEALERTSINDEX_CONTRACT,
-  READALERTSINDEX_CONTRACT,
-  CREATEALERTSINDEX_CONTRACT,
-  READPRIVILEGES_CONTRACT,
-  DELETERULE_CONTRACT,
-  READRULE_CONTRACT,
-  PATCHRULE_CONTRACT,
-  CREATERULE_CONTRACT,
-  UPDATERULE_CONTRACT,
-  PERFORMRULESBULKACTION_CONTRACT,
-  EXPORTRULES_CONTRACT,
-  FINDRULES_CONTRACT,
-  IMPORTRULES_CONTRACT,
-  CREATERULEEXCEPTIONLISTITEMS_CONTRACT,
-  INSTALLPREBUILTRULESANDTIMELINES_CONTRACT,
-  READPREBUILTRULESANDTIMELINESSTATUS_CONTRACT,
-  RULEPREVIEW_CONTRACT,
-  SETALERTASSIGNEES_CONTRACT,
-  FINALIZEALERTSMIGRATION_CONTRACT,
-  ALERTSMIGRATIONCLEANUP_CONTRACT,
-  CREATEALERTSMIGRATION_CONTRACT,
-  READALERTSMIGRATIONSTATUS_CONTRACT,
-  SEARCHALERTS_CONTRACT,
-  SETALERTSSTATUS_CONTRACT,
-  SETALERTTAGS_CONTRACT,
-  READTAGS_CONTRACT,
-  ROTATEENCRYPTIONKEY_CONTRACT,
-  CREATEENDPOINTLIST_CONTRACT,
-  DELETEENDPOINTLISTITEM_CONTRACT,
-  READENDPOINTLISTITEM_CONTRACT,
-  CREATEENDPOINTLISTITEM_CONTRACT,
-  UPDATEENDPOINTLISTITEM_CONTRACT,
-  FINDENDPOINTLISTITEMS_CONTRACT,
-  ENDPOINTGETACTIONSLIST_CONTRACT,
-  ENDPOINTGETACTIONSSTATUS_CONTRACT,
-  ENDPOINTGETACTIONSDETAILS_CONTRACT,
-  ENDPOINTFILEINFO_CONTRACT,
-  ENDPOINTFILEDOWNLOAD_CONTRACT,
-  CANCELACTION_CONTRACT,
-  ENDPOINTEXECUTEACTION_CONTRACT,
-  ENDPOINTGETFILEACTION_CONTRACT,
-  ENDPOINTISOLATEACTION_CONTRACT,
-  ENDPOINTKILLPROCESSACTION_CONTRACT,
-  ENDPOINTGETPROCESSESACTION_CONTRACT,
-  RUNSCRIPTACTION_CONTRACT,
-  ENDPOINTSCANACTION_CONTRACT,
-  ENDPOINTGETACTIONSSTATE_CONTRACT,
-  ENDPOINTSUSPENDPROCESSACTION_CONTRACT,
-  ENDPOINTUNISOLATEACTION_CONTRACT,
-  ENDPOINTUPLOADACTION_CONTRACT,
-  GETENDPOINTMETADATALIST_CONTRACT,
-  GETENDPOINTMETADATA_CONTRACT,
-  GETPOLICYRESPONSE_CONTRACT,
-  GETPROTECTIONUPDATESNOTE_CONTRACT,
-  CREATEUPDATEPROTECTIONUPDATESNOTE_CONTRACT,
-  DELETEMONITORINGENGINE_CONTRACT,
-  DISABLEMONITORINGENGINE_CONTRACT,
-  INITMONITORINGENGINE_CONTRACT,
-  SCHEDULEMONITORINGENGINE_CONTRACT,
-  PRIVMONHEALTH_CONTRACT,
-  PRIVMONPRIVILEGES_CONTRACT,
-  CREATEPRIVMONUSER_CONTRACT,
-  PRIVMONBULKUPLOADUSERSCSV_CONTRACT,
-  DELETEPRIVMONUSER_CONTRACT,
-  UPDATEPRIVMONUSER_CONTRACT,
-  LISTPRIVMONUSERS_CONTRACT,
-  INSTALLPRIVILEGEDACCESSDETECTIONPACKAGE_CONTRACT,
-  GETPRIVILEGEDACCESSDETECTIONPACKAGESTATUS_CONTRACT,
-  INITENTITYSTORE_CONTRACT,
-  DELETEENTITYENGINES_CONTRACT,
-  LISTENTITYENGINES_CONTRACT,
-  DELETEENTITYENGINE_CONTRACT,
-  GETENTITYENGINE_CONTRACT,
-  INITENTITYENGINE_CONTRACT,
-  STARTENTITYENGINE_CONTRACT,
-  STOPENTITYENGINE_CONTRACT,
-  APPLYENTITYENGINEDATAVIEWINDICES_CONTRACT,
-  DELETESINGLEENTITY_CONTRACT,
-  UPSERTENTITY_CONTRACT,
-  UPSERTENTITIESBULK_CONTRACT,
-  LISTENTITIES_CONTRACT,
-  GETENTITYSTORESTATUS_CONTRACT,
-  DELETEEXCEPTIONLIST_CONTRACT,
-  READEXCEPTIONLIST_CONTRACT,
-  CREATEEXCEPTIONLIST_CONTRACT,
-  UPDATEEXCEPTIONLIST_CONTRACT,
-  DUPLICATEEXCEPTIONLIST_CONTRACT,
-  EXPORTEXCEPTIONLIST_CONTRACT,
-  FINDEXCEPTIONLISTS_CONTRACT,
-  IMPORTEXCEPTIONLIST_CONTRACT,
-  DELETEEXCEPTIONLISTITEM_CONTRACT,
-  READEXCEPTIONLISTITEM_CONTRACT,
-  CREATEEXCEPTIONLISTITEM_CONTRACT,
-  UPDATEEXCEPTIONLISTITEM_CONTRACT,
-  FINDEXCEPTIONLISTITEMS_CONTRACT,
-  READEXCEPTIONLISTSUMMARY_CONTRACT,
-  CREATESHAREDEXCEPTIONLIST_CONTRACT,
+  CREATE_AGENT_KEY_CONTRACT,
+  SAVE_APM_SERVER_SCHEMA_CONTRACT,
+  CREATE_ANNOTATION_CONTRACT,
+  GET_ANNOTATION_CONTRACT,
+  DELETE_AGENT_CONFIGURATION_CONTRACT,
+  GET_AGENT_CONFIGURATIONS_CONTRACT,
+  CREATE_UPDATE_AGENT_CONFIGURATION_CONTRACT,
+  GET_AGENT_NAME_FOR_SERVICE_CONTRACT,
+  GET_ENVIRONMENTS_FOR_SERVICE_CONTRACT,
+  SEARCH_SINGLE_CONFIGURATION_CONTRACT,
+  GET_SINGLE_AGENT_CONFIGURATION_CONTRACT,
+  GET_SOURCE_MAPS_CONTRACT,
+  UPLOAD_SOURCE_MAP_CONTRACT,
+  DELETE_SOURCE_MAP_CONTRACT,
+  DELETE_ASSET_CRITICALITY_RECORD_CONTRACT,
+  GET_ASSET_CRITICALITY_RECORD_CONTRACT,
+  CREATE_ASSET_CRITICALITY_RECORD_CONTRACT,
+  BULK_UPSERT_ASSET_CRITICALITY_RECORDS_CONTRACT,
+  FIND_ASSET_CRITICALITY_RECORDS_CONTRACT,
+  POST_ATTACK_DISCOVERY_BULK_CONTRACT,
+  ATTACK_DISCOVERY_FIND_CONTRACT,
+  POST_ATTACK_DISCOVERY_GENERATE_CONTRACT,
+  GET_ATTACK_DISCOVERY_GENERATIONS_CONTRACT,
+  GET_ATTACK_DISCOVERY_GENERATION_CONTRACT,
+  POST_ATTACK_DISCOVERY_GENERATIONS_DISMISS_CONTRACT,
+  CREATE_ATTACK_DISCOVERY_SCHEDULES_CONTRACT,
+  FIND_ATTACK_DISCOVERY_SCHEDULES_CONTRACT,
+  DELETE_ATTACK_DISCOVERY_SCHEDULES_CONTRACT,
+  GET_ATTACK_DISCOVERY_SCHEDULES_CONTRACT,
+  UPDATE_ATTACK_DISCOVERY_SCHEDULES_CONTRACT,
+  DISABLE_ATTACK_DISCOVERY_SCHEDULES_CONTRACT,
+  ENABLE_ATTACK_DISCOVERY_SCHEDULES_CONTRACT,
+  DELETE_CASE_DEFAULT_SPACE_CONTRACT,
+  UPDATE_CASE_DEFAULT_SPACE_CONTRACT,
+  CREATE_CASE_DEFAULT_SPACE_CONTRACT,
+  FIND_CASES_DEFAULT_SPACE_CONTRACT,
+  GET_CASE_DEFAULT_SPACE_CONTRACT,
+  GET_CASE_ALERTS_DEFAULT_SPACE_CONTRACT,
+  DELETE_CASE_COMMENTS_DEFAULT_SPACE_CONTRACT,
+  UPDATE_CASE_COMMENT_DEFAULT_SPACE_CONTRACT,
+  ADD_CASE_COMMENT_DEFAULT_SPACE_CONTRACT,
+  FIND_CASE_COMMENTS_DEFAULT_SPACE_CONTRACT,
+  DELETE_CASE_COMMENT_DEFAULT_SPACE_CONTRACT,
+  GET_CASE_COMMENT_DEFAULT_SPACE_CONTRACT,
+  PUSH_CASE_DEFAULT_SPACE_CONTRACT,
+  ADD_CASE_FILE_DEFAULT_SPACE_CONTRACT,
+  FIND_CASE_ACTIVITY_DEFAULT_SPACE_CONTRACT,
+  GET_CASES_BY_ALERT_DEFAULT_SPACE_CONTRACT,
+  GET_CASE_CONFIGURATION_DEFAULT_SPACE_CONTRACT,
+  SET_CASE_CONFIGURATION_DEFAULT_SPACE_CONTRACT,
+  UPDATE_CASE_CONFIGURATION_DEFAULT_SPACE_CONTRACT,
+  FIND_CASE_CONNECTORS_DEFAULT_SPACE_CONTRACT,
+  GET_CASE_REPORTERS_DEFAULT_SPACE_CONTRACT,
+  GET_CASE_TAGS_DEFAULT_SPACE_CONTRACT,
+  GET_ALL_DATA_VIEWS_DEFAULT_CONTRACT,
+  CREATE_DATA_VIEW_DEFAULTW_CONTRACT,
+  DELETE_DATA_VIEW_DEFAULT_CONTRACT,
+  GET_DATA_VIEW_DEFAULT_CONTRACT,
+  UPDATE_DATA_VIEW_DEFAULT_CONTRACT,
+  UPDATE_FIELDS_METADATA_DEFAULT_CONTRACT,
+  CREATE_RUNTIME_FIELD_DEFAULT_CONTRACT,
+  CREATE_UPDATE_RUNTIME_FIELD_DEFAULT_CONTRACT,
+  DELETE_RUNTIME_FIELD_DEFAULT_CONTRACT,
+  GET_RUNTIME_FIELD_DEFAULT_CONTRACT,
+  UPDATE_RUNTIME_FIELD_DEFAULT_CONTRACT,
+  GET_DEFAULT_DATA_VIEW_DEFAULT_CONTRACT,
+  SET_DEFAULT_DATAIL_VIEW_DEFAULT_CONTRACT,
+  SWAP_DATA_VIEWS_DEFAULT_CONTRACT,
+  PREVIEW_SWAP_DATA_VIEWS_DEFAULT_CONTRACT,
+  DELETE_ALERTS_INDEX_CONTRACT,
+  READ_ALERTS_INDEX_CONTRACT,
+  CREATE_ALERTS_INDEX_CONTRACT,
+  READ_PRIVILEGES_CONTRACT,
+  DELETE_RULE_CONTRACT,
+  READ_RULE_CONTRACT,
+  PATCH_RULE_CONTRACT,
+  CREATE_RULE_CONTRACT,
+  UPDATE_RULE_CONTRACT,
+  PERFORM_RULES_BULK_ACTION_CONTRACT,
+  EXPORT_RULES_CONTRACT,
+  FIND_RULES_CONTRACT,
+  IMPORT_RULES_CONTRACT,
+  CREATE_RULE_EXCEPTION_LIST_ITEMS_CONTRACT,
+  INSTALL_PREBUILT_RULES_AND_TIMELINES_CONTRACT,
+  READ_PREBUILT_RULES_AND_TIMELINES_STATUS_CONTRACT,
+  RULE_PREVIEW_CONTRACT,
+  SET_ALERT_ASSIGNEES_CONTRACT,
+  FINALIZE_ALERTS_MIGRATION_CONTRACT,
+  ALERTS_MIGRATION_CLEANUP_CONTRACT,
+  CREATE_ALERTS_MIGRATION_CONTRACT,
+  READ_ALERTS_MIGRATION_STATUS_CONTRACT,
+  SEARCH_ALERTS_CONTRACT,
+  SET_ALERTS_STATUS_CONTRACT,
+  SET_ALERT_TAGS_CONTRACT,
+  READ_TAGS_CONTRACT,
+  ROTATE_ENCRYPTION_KEY_CONTRACT,
+  CREATE_ENDPOINT_LIST_CONTRACT,
+  DELETE_ENDPOINT_LIST_ITEM_CONTRACT,
+  READ_ENDPOINT_LIST_ITEM_CONTRACT,
+  CREATE_ENDPOINT_LIST_ITEM_CONTRACT,
+  UPDATE_ENDPOINT_LIST_ITEM_CONTRACT,
+  FIND_ENDPOINT_LIST_ITEMS_CONTRACT,
+  ENDPOINT_GET_ACTIONS_LIST_CONTRACT,
+  ENDPOINT_GET_ACTIONS_STATUS_CONTRACT,
+  ENDPOINT_GET_ACTIONS_DETAILS_CONTRACT,
+  ENDPOINT_FILE_INFO_CONTRACT,
+  ENDPOINT_FILE_DOWNLOAD_CONTRACT,
+  CANCEL_ACTION_CONTRACT,
+  ENDPOINT_EXECUTE_ACTION_CONTRACT,
+  ENDPOINT_GET_FILE_ACTION_CONTRACT,
+  ENDPOINT_ISOLATE_ACTION_CONTRACT,
+  ENDPOINT_KILL_PROCESS_ACTION_CONTRACT,
+  ENDPOINT_GET_PROCESSES_ACTION_CONTRACT,
+  RUN_SCRIPT_ACTION_CONTRACT,
+  ENDPOINT_SCAN_ACTION_CONTRACT,
+  ENDPOINT_GET_ACTIONS_STATE_CONTRACT,
+  ENDPOINT_SUSPEND_PROCESS_ACTION_CONTRACT,
+  ENDPOINT_UNISOLATE_ACTION_CONTRACT,
+  ENDPOINT_UPLOAD_ACTION_CONTRACT,
+  GET_ENDPOINT_METADATA_LIST_CONTRACT,
+  GET_ENDPOINT_METADATA_CONTRACT,
+  GET_POLICY_RESPONSE_CONTRACT,
+  GET_PROTECTION_UPDATES_NOTE_CONTRACT,
+  CREATE_UPDATE_PROTECTION_UPDATES_NOTE_CONTRACT,
+  DELETE_MONITORING_ENGINE_CONTRACT,
+  DISABLE_MONITORING_ENGINE_CONTRACT,
+  INIT_MONITORING_ENGINE_CONTRACT,
+  SCHEDULE_MONITORING_ENGINE_CONTRACT,
+  PRIV_MON_HEALTH_CONTRACT,
+  PRIV_MON_PRIVILEGES_CONTRACT,
+  CREATE_PRIV_MON_USER_CONTRACT,
+  PRIVMON_BULK_UPLOAD_USERS_CSV_CONTRACT,
+  DELETE_PRIV_MON_USER_CONTRACT,
+  UPDATE_PRIV_MON_USER_CONTRACT,
+  LIST_PRIV_MON_USERS_CONTRACT,
+  INSTALL_PRIVILEGED_ACCESS_DETECTION_PACKAGE_CONTRACT,
+  GET_PRIVILEGED_ACCESS_DETECTION_PACKAGE_STATUS_CONTRACT,
+  INIT_ENTITY_STORE_CONTRACT,
+  DELETE_ENTITY_ENGINES_CONTRACT,
+  LIST_ENTITY_ENGINES_CONTRACT,
+  DELETE_ENTITY_ENGINE_CONTRACT,
+  GET_ENTITY_ENGINE_CONTRACT,
+  INIT_ENTITY_ENGINE_CONTRACT,
+  START_ENTITY_ENGINE_CONTRACT,
+  STOP_ENTITY_ENGINE_CONTRACT,
+  APPLY_ENTITY_ENGINE_DATAVIEW_INDICES_CONTRACT,
+  DELETE_SINGLE_ENTITY_CONTRACT,
+  UPSERT_ENTITY_CONTRACT,
+  UPSERT_ENTITIES_BULK_CONTRACT,
+  LIST_ENTITIES_CONTRACT,
+  GET_ENTITY_STORE_STATUS_CONTRACT,
+  DELETE_EXCEPTION_LIST_CONTRACT,
+  READ_EXCEPTION_LIST_CONTRACT,
+  CREATE_EXCEPTION_LIST_CONTRACT,
+  UPDATE_EXCEPTION_LIST_CONTRACT,
+  DUPLICATE_EXCEPTION_LIST_CONTRACT,
+  EXPORT_EXCEPTION_LIST_CONTRACT,
+  FIND_EXCEPTION_LISTS_CONTRACT,
+  IMPORT_EXCEPTION_LIST_CONTRACT,
+  DELETE_EXCEPTION_LIST_ITEM_CONTRACT,
+  READ_EXCEPTION_LIST_ITEM_CONTRACT,
+  CREATE_EXCEPTION_LIST_ITEM_CONTRACT,
+  UPDATE_EXCEPTION_LIST_ITEM_CONTRACT,
+  FIND_EXCEPTION_LIST_ITEMS_CONTRACT,
+  READ_EXCEPTION_LIST_SUMMARY_CONTRACT,
+  CREATE_SHARED_EXCEPTION_LIST_CONTRACT,
   GET_FEATURES_CONTRACT,
   GET_FLEET_AGENT_DOWNLOAD_SOURCES_CONTRACT,
   POST_FLEET_AGENT_DOWNLOAD_SOURCES_CONTRACT,
@@ -887,24 +887,24 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
   PUT_FLEET_SPACE_SETTINGS_CONTRACT,
   GET_FLEET_UNINSTALL_TOKENS_CONTRACT,
   GET_FLEET_UNINSTALL_TOKENS_UNINSTALLTOKENID_CONTRACT,
-  DELETELIST_CONTRACT,
-  READLIST_CONTRACT,
-  PATCHLIST_CONTRACT,
-  CREATELIST_CONTRACT,
-  UPDATELIST_CONTRACT,
-  FINDLISTS_CONTRACT,
-  DELETELISTINDEX_CONTRACT,
-  READLISTINDEX_CONTRACT,
-  CREATELISTINDEX_CONTRACT,
-  DELETELISTITEM_CONTRACT,
-  READLISTITEM_CONTRACT,
-  PATCHLISTITEM_CONTRACT,
-  CREATELISTITEM_CONTRACT,
-  UPDATELISTITEM_CONTRACT,
-  EXPORTLISTITEMS_CONTRACT,
-  FINDLISTITEMS_CONTRACT,
-  IMPORTLISTITEMS_CONTRACT,
-  READLISTPRIVILEGES_CONTRACT,
+  DELETE_LIST_CONTRACT,
+  READ_LIST_CONTRACT,
+  PATCH_LIST_CONTRACT,
+  CREATE_LIST_CONTRACT,
+  UPDATE_LIST_CONTRACT,
+  FIND_LISTS_CONTRACT,
+  DELETE_LIST_INDEX_CONTRACT,
+  READ_LIST_INDEX_CONTRACT,
+  CREATE_LIST_INDEX_CONTRACT,
+  DELETE_LIST_ITEM_CONTRACT,
+  READ_LIST_ITEM_CONTRACT,
+  PATCH_LIST_ITEM_CONTRACT,
+  CREATE_LIST_ITEM_CONTRACT,
+  UPDATE_LIST_ITEM_CONTRACT,
+  EXPORT_LIST_ITEMS_CONTRACT,
+  FIND_LIST_ITEMS_CONTRACT,
+  IMPORT_LIST_ITEMS_CONTRACT,
+  READ_LIST_PRIVILEGES_CONTRACT,
   DELETE_LOGSTASH_PIPELINE_CONTRACT,
   GET_LOGSTASH_PIPELINE_CONTRACT,
   PUT_LOGSTASH_PIPELINE_CONTRACT,
@@ -916,64 +916,64 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
   PATCH_MAINTENANCE_WINDOW_ID_CONTRACT,
   POST_MAINTENANCE_WINDOW_ID_ARCHIVE_CONTRACT,
   POST_MAINTENANCE_WINDOW_ID_UNARCHIVE_CONTRACT,
-  MLSYNC_CONTRACT,
-  DELETENOTE_CONTRACT,
-  GETNOTES_CONTRACT,
-  PERSISTNOTEROUTE_CONTRACT,
+  ML_SYNC_CONTRACT,
+  DELETE_NOTE_CONTRACT,
+  GET_NOTES_CONTRACT,
+  PERSIST_NOTE_ROUTE_CONTRACT,
   OBSERVABILITY_AI_ASSISTANT_CHAT_COMPLETE_CONTRACT,
-  OSQUERYFINDLIVEQUERIES_CONTRACT,
-  OSQUERYCREATELIVEQUERY_CONTRACT,
-  OSQUERYGETLIVEQUERYDETAILS_CONTRACT,
-  OSQUERYGETLIVEQUERYRESULTS_CONTRACT,
-  OSQUERYFINDPACKS_CONTRACT,
-  OSQUERYCREATEPACKS_CONTRACT,
-  OSQUERYDELETEPACKS_CONTRACT,
-  OSQUERYGETPACKSDETAILS_CONTRACT,
-  OSQUERYUPDATEPACKS_CONTRACT,
-  OSQUERYFINDSAVEDQUERIES_CONTRACT,
-  OSQUERYCREATESAVEDQUERY_CONTRACT,
-  OSQUERYDELETESAVEDQUERY_CONTRACT,
-  OSQUERYGETSAVEDQUERYDETAILS_CONTRACT,
-  OSQUERYUPDATESAVEDQUERY_CONTRACT,
-  PERSISTPINNEDEVENTROUTE_CONTRACT,
-  CLEANUPRISKENGINE_CONTRACT,
-  CONFIGURERISKENGINESAVEDOBJECT_CONTRACT,
-  SCHEDULERISKENGINENOW_CONTRACT,
-  BULKCREATESAVEDOBJECTS_CONTRACT,
-  BULKDELETESAVEDOBJECTS_CONTRACT,
-  BULKGETSAVEDOBJECTS_CONTRACT,
-  BULKRESOLVESAVEDOBJECTS_CONTRACT,
-  BULKUPDATESAVEDOBJECTS_CONTRACT,
+  OSQUERY_FIND_LIVE_QUERIES_CONTRACT,
+  OSQUERY_CREATE_LIVE_QUERY_CONTRACT,
+  OSQUERY_GET_LIVE_QUERY_DETAILS_CONTRACT,
+  OSQUERY_GET_LIVE_QUERY_RESULTS_CONTRACT,
+  OSQUERY_FIND_PACKS_CONTRACT,
+  OSQUERY_CREATE_PACKS_CONTRACT,
+  OSQUERY_DELETE_PACKS_CONTRACT,
+  OSQUERY_GET_PACKS_DETAILS_CONTRACT,
+  OSQUERY_UPDATE_PACKS_CONTRACT,
+  OSQUERY_FIND_SAVED_QUERIES_CONTRACT,
+  OSQUERY_CREATE_SAVED_QUERY_CONTRACT,
+  OSQUERY_DELETE_SAVED_QUERY_CONTRACT,
+  OSQUERY_GET_SAVED_QUERY_DETAILS_CONTRACT,
+  OSQUERY_UPDATE_SAVED_QUERY_CONTRACT,
+  PERSIST_PINNED_EVENT_ROUTE_CONTRACT,
+  CLEAN_UP_RISK_ENGINE_CONTRACT,
+  CONFIGURE_RISK_ENGINE_SAVED_OBJECT_CONTRACT,
+  SCHEDULE_RISK_ENGINE_NOW_CONTRACT,
+  BULK_CREATE_SAVED_OBJECTS_CONTRACT,
+  BULK_DELETE_SAVED_OBJECTS_CONTRACT,
+  BULK_GET_SAVED_OBJECTS_CONTRACT,
+  BULK_RESOLVE_SAVED_OBJECTS_CONTRACT,
+  BULK_UPDATE_SAVED_OBJECTS_CONTRACT,
   POST_SAVED_OBJECTS_EXPORT_CONTRACT,
-  FINDSAVEDOBJECTS_CONTRACT,
+  FIND_SAVED_OBJECTS_CONTRACT,
   POST_SAVED_OBJECTS_IMPORT_CONTRACT,
-  RESOLVEIMPORTERRORS_CONTRACT,
-  CREATESAVEDOBJECT_CONTRACT,
-  GETSAVEDOBJECT_CONTRACT,
-  CREATESAVEDOBJECTID_CONTRACT,
-  UPDATESAVEDOBJECT_CONTRACT,
-  RESOLVESAVEDOBJECT_CONTRACT,
-  PERFORMANONYMIZATIONFIELDSBULKACTION_CONTRACT,
-  FINDANONYMIZATIONFIELDS_CONTRACT,
-  CHATCOMPLETE_CONTRACT,
-  DELETEALLCONVERSATIONS_CONTRACT,
-  CREATECONVERSATION_CONTRACT,
-  FINDCONVERSATIONS_CONTRACT,
-  DELETECONVERSATION_CONTRACT,
-  READCONVERSATION_CONTRACT,
-  UPDATECONVERSATION_CONTRACT,
-  GETKNOWLEDGEBASE_CONTRACT,
-  POSTKNOWLEDGEBASE_CONTRACT,
-  READKNOWLEDGEBASE_CONTRACT,
-  CREATEKNOWLEDGEBASE_CONTRACT,
-  CREATEKNOWLEDGEBASEENTRY_CONTRACT,
-  PERFORMKNOWLEDGEBASEENTRYBULKACTION_CONTRACT,
-  FINDKNOWLEDGEBASEENTRIES_CONTRACT,
-  DELETEKNOWLEDGEBASEENTRY_CONTRACT,
-  READKNOWLEDGEBASEENTRY_CONTRACT,
-  UPDATEKNOWLEDGEBASEENTRY_CONTRACT,
-  PERFORMPROMPTSBULKACTION_CONTRACT,
-  FINDPROMPTS_CONTRACT,
+  RESOLVE_IMPORT_ERRORS_CONTRACT,
+  CREATE_SAVED_OBJECT_CONTRACT,
+  GET_SAVED_OBJECT_CONTRACT,
+  CREATE_SAVED_OBJECT_ID_CONTRACT,
+  UPDATE_SAVED_OBJECT_CONTRACT,
+  RESOLVE_SAVED_OBJECT_CONTRACT,
+  PERFORM_ANONYMIZATION_FIELDS_BULK_ACTION_CONTRACT,
+  FIND_ANONYMIZATION_FIELDS_CONTRACT,
+  CHAT_COMPLETE_CONTRACT,
+  DELETE_ALL_CONVERSATIONS_CONTRACT,
+  CREATE_CONVERSATION_CONTRACT,
+  FIND_CONVERSATIONS_CONTRACT,
+  DELETE_CONVERSATION_CONTRACT,
+  READ_CONVERSATION_CONTRACT,
+  UPDATE_CONVERSATION_CONTRACT,
+  GET_KNOWLEDGE_BASE_CONTRACT,
+  POST_KNOWLEDGE_BASE_CONTRACT,
+  READ_KNOWLEDGE_BASE_CONTRACT,
+  CREATE_KNOWLEDGE_BASE_CONTRACT,
+  CREATE_KNOWLEDGE_BASE_ENTRY_CONTRACT,
+  PERFORM_KNOWLEDGE_BASE_ENTRY_BULK_ACTION_CONTRACT,
+  FIND_KNOWLEDGE_BASE_ENTRIES_CONTRACT,
+  DELETE_KNOWLEDGE_BASE_ENTRY_CONTRACT,
+  READ_KNOWLEDGE_BASE_ENTRY_CONTRACT,
+  UPDATE_KNOWLEDGE_BASE_ENTRY_CONTRACT,
+  PERFORM_PROMPTS_BULK_ACTION_CONTRACT,
+  FIND_PROMPTS_CONTRACT,
   GET_SECURITY_ROLE_CONTRACT,
   POST_SECURITY_ROLE_QUERY_CONTRACT,
   DELETE_SECURITY_ROLE_NAME_CONTRACT,
@@ -1047,33 +1047,33 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
   GET_PRIVATE_LOCATION_CONTRACT,
   PUT_PRIVATE_LOCATION_CONTRACT,
   TASK_MANAGER_HEALTH_CONTRACT,
-  DELETETIMELINES_CONTRACT,
-  GETTIMELINE_CONTRACT,
-  PATCHTIMELINE_CONTRACT,
-  CREATETIMELINES_CONTRACT,
-  COPYTIMELINE_CONTRACT,
-  GETDRAFTTIMELINES_CONTRACT,
-  CLEANDRAFTTIMELINES_CONTRACT,
-  EXPORTTIMELINES_CONTRACT,
-  PERSISTFAVORITEROUTE_CONTRACT,
-  IMPORTTIMELINES_CONTRACT,
-  INSTALLPREPACKEDTIMELINES_CONTRACT,
-  RESOLVETIMELINE_CONTRACT,
-  GETTIMELINES_CONTRACT,
+  DELETE_TIMELINES_CONTRACT,
+  GET_TIMELINE_CONTRACT,
+  PATCH_TIMELINE_CONTRACT,
+  CREATE_TIMELINES_CONTRACT,
+  COPY_TIMELINE_CONTRACT,
+  GET_DRAFT_TIMELINES_CONTRACT,
+  CLEAN_DRAFT_TIMELINES_CONTRACT,
+  EXPORT_TIMELINES_CONTRACT,
+  PERSIST_FAVORITE_ROUTE_CONTRACT,
+  IMPORT_TIMELINES_CONTRACT,
+  INSTALL_PREPACKED_TIMELINES_CONTRACT,
+  RESOLVE_TIMELINE_CONTRACT,
+  GET_TIMELINES_CONTRACT,
   GET_UPGRADE_STATUS_CONTRACT,
   GET_UPTIME_SETTINGS_CONTRACT,
   PUT_UPTIME_SETTINGS_CONTRACT,
-  FINDSLOSOP_CONTRACT,
-  CREATESLOOP_CONTRACT,
-  BULKDELETEOP_CONTRACT,
-  BULKDELETESTATUSOP_CONTRACT,
-  DELETEROLLUPDATAOP_CONTRACT,
-  DELETESLOINSTANCESOP_CONTRACT,
-  DELETESLOOP_CONTRACT,
-  GETSLOOP_CONTRACT,
-  UPDATESLOOP_CONTRACT,
-  RESETSLOOP_CONTRACT,
-  DISABLESLOOP_CONTRACT,
-  ENABLESLOOP_CONTRACT,
-  GETDEFINITIONSOP_CONTRACT,
+  FIND_SLOS_OP_CONTRACT,
+  CREATE_SLO_OP_CONTRACT,
+  BULK_DELETE_OP_CONTRACT,
+  BULK_DELETE_STATUS_OP_CONTRACT,
+  DELETE_ROLLUP_DATA_OP_CONTRACT,
+  DELETE_SLO_INSTANCES_OP_CONTRACT,
+  DELETE_SLO_OP_CONTRACT,
+  GET_SLO_OP_CONTRACT,
+  UPDATE_SLO_OP_CONTRACT,
+  RESET_SLO_OP_CONTRACT,
+  DISABLE_SLO_OP_CONTRACT,
+  ENABLE_SLO_OP_CONTRACT,
+  GET_DEFINITIONS_OP_CONTRACT,
 ];

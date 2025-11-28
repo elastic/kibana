@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   security_delete_privileges_request,
   security_delete_privileges_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_DELETE_PRIVILEGES_CONTRACT: InternalConnectorContract = {

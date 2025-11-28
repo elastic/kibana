@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const UPDATEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
+export const UPDATE_KNOWLEDGE_BASE_ENTRY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateKnowledgeBaseEntry',
   connectorGroup: 'internal',
   summary: `Update a Knowledge Base Entry`,

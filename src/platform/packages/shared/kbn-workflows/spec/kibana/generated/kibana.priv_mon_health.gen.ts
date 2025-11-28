@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const PRIVMONHEALTH_CONTRACT: InternalConnectorContract = {
+export const PRIV_MON_HEALTH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PrivMonHealth',
   connectorGroup: 'internal',
   summary: `Health check on Privilege Monitoring`,

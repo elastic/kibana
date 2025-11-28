@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETALERTINGHEALTH_CONTRACT: InternalConnectorContract = {
+export const GET_ALERTING_HEALTH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAlertingHealth',
   connectorGroup: 'internal',
   summary: `Get the alerting framework health`,

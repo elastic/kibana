@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const BULKDELETESTATUSOP_CONTRACT: InternalConnectorContract = {
+export const BULK_DELETE_STATUS_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkDeleteStatusOp',
   connectorGroup: 'internal',
   summary: `Retrieve the status of the bulk deletion`,

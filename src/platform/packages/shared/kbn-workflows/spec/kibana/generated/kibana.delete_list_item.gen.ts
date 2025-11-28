@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETELISTITEM_CONTRACT: InternalConnectorContract = {
+export const DELETE_LIST_ITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteListItem',
   connectorGroup: 'internal',
   summary: `Delete a value list item`,

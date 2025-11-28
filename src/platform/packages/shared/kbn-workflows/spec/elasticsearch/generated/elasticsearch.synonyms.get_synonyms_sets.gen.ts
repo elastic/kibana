@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   synonyms_get_synonyms_sets_request,
   synonyms_get_synonyms_sets_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SYNONYMS_GET_SYNONYMS_SETS_CONTRACT: InternalConnectorContract = {

@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   ingest_delete_pipeline_request,
   ingest_delete_pipeline_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INGEST_DELETE_PIPELINE_CONTRACT: InternalConnectorContract = {

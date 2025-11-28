@@ -21,7 +21,7 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { watcher_stop_request, watcher_stop_response } from './es_openapi_zod.gen';
+import { watcher_stop_request, watcher_stop_response } from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const WATCHER_STOP_CONTRACT: InternalConnectorContract = {

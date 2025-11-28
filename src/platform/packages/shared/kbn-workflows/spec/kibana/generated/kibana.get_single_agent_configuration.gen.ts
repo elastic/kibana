@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETSINGLEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
+export const GET_SINGLE_AGENT_CONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSingleAgentConfiguration',
   connectorGroup: 'internal',
   summary: `Get single agent configuration`,

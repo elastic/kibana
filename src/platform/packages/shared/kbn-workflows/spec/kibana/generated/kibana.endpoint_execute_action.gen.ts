@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ENDPOINTEXECUTEACTION_CONTRACT: InternalConnectorContract = {
+export const ENDPOINT_EXECUTE_ACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointExecuteAction',
   connectorGroup: 'internal',
   summary: `Run a command`,

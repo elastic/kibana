@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const READLISTINDEX_CONTRACT: InternalConnectorContract = {
+export const READ_LIST_INDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadListIndex',
   connectorGroup: 'internal',
   summary: `Get status of value list data streams`,

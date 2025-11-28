@@ -21,7 +21,7 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { ccr_stats_request, ccr_stats_response } from './es_openapi_zod.gen';
+import { ccr_stats_request, ccr_stats_response } from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CCR_STATS_CONTRACT: InternalConnectorContract = {

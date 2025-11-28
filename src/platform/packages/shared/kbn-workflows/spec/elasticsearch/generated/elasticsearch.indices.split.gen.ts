@@ -26,7 +26,7 @@ import {
   indices_split_response,
   indices_split1_request,
   indices_split1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_SPLIT_CONTRACT: InternalConnectorContract = {

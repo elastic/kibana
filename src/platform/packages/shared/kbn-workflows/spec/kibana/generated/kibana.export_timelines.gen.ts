@@ -25,7 +25,7 @@ import { export_timelines_request } from './schemas/kibana_openapi_zod.gen';
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const EXPORTTIMELINES_CONTRACT: InternalConnectorContract = {
+export const EXPORT_TIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ExportTimelines',
   connectorGroup: 'internal',
   summary: `Export Timelines`,

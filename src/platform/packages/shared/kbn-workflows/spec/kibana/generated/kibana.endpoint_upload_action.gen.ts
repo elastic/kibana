@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ENDPOINTUPLOADACTION_CONTRACT: InternalConnectorContract = {
+export const ENDPOINT_UPLOAD_ACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointUploadAction',
   connectorGroup: 'internal',
   summary: `Upload a file`,

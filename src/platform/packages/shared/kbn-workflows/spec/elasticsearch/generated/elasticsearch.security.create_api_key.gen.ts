@@ -26,7 +26,7 @@ import {
   security_create_api_key_response,
   security_create_api_key1_request,
   security_create_api_key1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_CREATE_API_KEY_CONTRACT: InternalConnectorContract = {

@@ -26,7 +26,7 @@ import {
   cat_allocation_response,
   cat_allocation1_request,
   cat_allocation1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CAT_ALLOCATION_CONTRACT: InternalConnectorContract = {

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETESOURCEMAP_CONTRACT: InternalConnectorContract = {
+export const DELETE_SOURCE_MAP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteSourceMap',
   connectorGroup: 'internal',
   summary: `Delete source map`,

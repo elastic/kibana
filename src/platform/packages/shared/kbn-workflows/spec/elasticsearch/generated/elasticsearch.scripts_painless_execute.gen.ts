@@ -26,7 +26,7 @@ import {
   scripts_painless_execute_response,
   scripts_painless_execute1_request,
   scripts_painless_execute1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SCRIPTS_PAINLESS_EXECUTE_CONTRACT: InternalConnectorContract = {

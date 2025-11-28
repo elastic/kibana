@@ -26,7 +26,7 @@ import {
   cat_ml_datafeeds_response,
   cat_ml_datafeeds1_request,
   cat_ml_datafeeds1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CAT_ML_DATAFEEDS_CONTRACT: InternalConnectorContract = {

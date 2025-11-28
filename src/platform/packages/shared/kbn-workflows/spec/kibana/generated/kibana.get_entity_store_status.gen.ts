@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETENTITYSTORESTATUS_CONTRACT: InternalConnectorContract = {
+export const GET_ENTITY_STORE_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetEntityStoreStatus',
   connectorGroup: 'internal',
   summary: `Get the status of the Entity Store`,

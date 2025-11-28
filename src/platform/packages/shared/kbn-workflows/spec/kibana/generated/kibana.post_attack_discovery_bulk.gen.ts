@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const POSTATTACKDISCOVERYBULK_CONTRACT: InternalConnectorContract = {
+export const POST_ATTACK_DISCOVERY_BULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PostAttackDiscoveryBulk',
   connectorGroup: 'internal',
   summary: `Bulk update Attack discoveries`,

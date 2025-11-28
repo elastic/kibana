@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const IMPORTTIMELINES_CONTRACT: InternalConnectorContract = {
+export const IMPORT_TIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ImportTimelines',
   connectorGroup: 'internal',
   summary: `Import Timelines`,

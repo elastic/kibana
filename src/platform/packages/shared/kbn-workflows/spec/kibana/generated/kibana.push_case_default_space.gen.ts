@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const PUSHCASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
+export const PUSH_CASE_DEFAULT_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.pushCaseDefaultSpace',
   connectorGroup: 'internal',
   summary: `Push a case to an external service`,

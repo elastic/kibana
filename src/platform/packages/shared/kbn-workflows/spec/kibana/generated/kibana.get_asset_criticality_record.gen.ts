@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETASSETCRITICALITYRECORD_CONTRACT: InternalConnectorContract = {
+export const GET_ASSET_CRITICALITY_RECORD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetAssetCriticalityRecord',
   connectorGroup: 'internal',
   summary: `Get an asset criticality record`,

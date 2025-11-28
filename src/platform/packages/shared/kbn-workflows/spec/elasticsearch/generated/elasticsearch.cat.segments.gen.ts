@@ -26,7 +26,7 @@ import {
   cat_segments_response,
   cat_segments1_request,
   cat_segments1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CAT_SEGMENTS_CONTRACT: InternalConnectorContract = {

@@ -26,7 +26,7 @@ import {
   snapshot_create_response,
   snapshot_create1_request,
   snapshot_create1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SNAPSHOT_CREATE_CONTRACT: InternalConnectorContract = {

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const OSQUERYFINDLIVEQUERIES_CONTRACT: InternalConnectorContract = {
+export const OSQUERY_FIND_LIVE_QUERIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryFindLiveQueries',
   connectorGroup: 'internal',
   summary: `Get live queries`,

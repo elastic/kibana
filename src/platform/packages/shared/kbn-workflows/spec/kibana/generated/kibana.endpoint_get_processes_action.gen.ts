@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ENDPOINTGETPROCESSESACTION_CONTRACT: InternalConnectorContract = {
+export const ENDPOINT_GET_PROCESSES_ACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetProcessesAction',
   connectorGroup: 'internal',
   summary: `Get running processes`,

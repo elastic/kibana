@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   esql_async_query_stop_request,
   esql_async_query_stop_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ESQL_ASYNC_QUERY_STOP_CONTRACT: InternalConnectorContract = {

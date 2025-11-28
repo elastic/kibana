@@ -21,7 +21,7 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
-import { ml_flush_job_request, ml_flush_job_response } from './es_openapi_zod.gen';
+import { ml_flush_job_request, ml_flush_job_response } from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ML_FLUSH_JOB_CONTRACT: InternalConnectorContract = {

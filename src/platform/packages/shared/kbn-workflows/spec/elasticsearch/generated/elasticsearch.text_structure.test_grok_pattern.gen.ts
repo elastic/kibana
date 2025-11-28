@@ -26,7 +26,7 @@ import {
   text_structure_test_grok_pattern_response,
   text_structure_test_grok_pattern1_request,
   text_structure_test_grok_pattern1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const TEXT_STRUCTURE_TEST_GROK_PATTERN_CONTRACT: InternalConnectorContract = {

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CREATEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
+export const CREATE_PRIV_MON_USER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreatePrivMonUser',
   connectorGroup: 'internal',
   summary: `Create a new monitored user`,

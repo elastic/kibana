@@ -35,6 +35,7 @@ import {
   getLicenseHeader,
   getRequestSchemaName,
   getResponseSchemaName,
+  getSchemaNamePrefix,
   StaticImports,
   toSnakeCase,
 } from '../shared';
@@ -204,7 +205,7 @@ async function generateZodSchemas() {
 }
 
 function generateContractName(operationId: string): string {
-  return `${toSnakeCase(operationId).toUpperCase()}_CONTRACT`;
+  return `${getSchemaNamePrefix(operationId).toUpperCase()}_CONTRACT`;
 }
 
 function generateContractMetasFromPath(

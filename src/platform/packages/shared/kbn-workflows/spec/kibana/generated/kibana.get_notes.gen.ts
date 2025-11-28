@@ -25,7 +25,7 @@ import { get_notes_request, get_notes_response } from './schemas/kibana_openapi_
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETNOTES_CONTRACT: InternalConnectorContract = {
+export const GET_NOTES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetNotes',
   connectorGroup: 'internal',
   summary: `Get notes`,

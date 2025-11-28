@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const PERSISTFAVORITEROUTE_CONTRACT: InternalConnectorContract = {
+export const PERSIST_FAVORITE_ROUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PersistFavoriteRoute',
   connectorGroup: 'internal',
   summary: `Favorite a Timeline or Timeline template`,

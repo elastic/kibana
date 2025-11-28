@@ -26,7 +26,7 @@ import {
   search_application_get_behavioral_analytics_response,
   search_application_get_behavioral_analytics1_request,
   search_application_get_behavioral_analytics1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SEARCH_APPLICATION_GET_BEHAVIORAL_ANALYTICS_CONTRACT: InternalConnectorContract = {

@@ -26,7 +26,7 @@ import {
   indices_data_streams_stats_response,
   indices_data_streams_stats1_request,
   indices_data_streams_stats1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_DATA_STREAMS_STATS_CONTRACT: InternalConnectorContract = {

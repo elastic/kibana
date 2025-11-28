@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const FINDANONYMIZATIONFIELDS_CONTRACT: InternalConnectorContract = {
+export const FIND_ANONYMIZATION_FIELDS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindAnonymizationFields',
   connectorGroup: 'internal',
   summary: `Get anonymization fields`,

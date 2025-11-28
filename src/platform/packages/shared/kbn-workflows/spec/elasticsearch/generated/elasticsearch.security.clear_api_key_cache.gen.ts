@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   security_clear_api_key_cache_request,
   security_clear_api_key_cache_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_CLEAR_API_KEY_CACHE_CONTRACT: InternalConnectorContract = {

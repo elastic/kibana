@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CREATESHAREDEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
+export const CREATE_SHARED_EXCEPTION_LIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateSharedExceptionList',
   connectorGroup: 'internal',
   summary: `Create a shared exception list`,

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const UPDATESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
+export const UPDATE_SAVED_OBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateSavedObject',
   connectorGroup: 'internal',
   summary: `Update a saved object`,

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const UPDATEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
+export const UPDATE_EXCEPTION_LIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateExceptionList',
   connectorGroup: 'internal',
   summary: `Update an exception list`,

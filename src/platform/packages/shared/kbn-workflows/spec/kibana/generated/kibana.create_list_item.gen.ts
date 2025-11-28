@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CREATELISTITEM_CONTRACT: InternalConnectorContract = {
+export const CREATE_LIST_ITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateListItem',
   connectorGroup: 'internal',
   summary: `Create a value list item`,

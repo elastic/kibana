@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const BULKRESOLVESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
+export const BULK_RESOLVE_SAVED_OBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkResolveSavedObjects',
   connectorGroup: 'internal',
   summary: `Resolve saved objects`,

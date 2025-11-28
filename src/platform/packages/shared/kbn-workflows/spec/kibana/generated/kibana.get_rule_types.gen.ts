@@ -25,7 +25,7 @@ import { get_rule_types_request, get_rule_types_response } from './schemas/kiban
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETRULETYPES_CONTRACT: InternalConnectorContract = {
+export const GET_RULE_TYPES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getRuleTypes',
   connectorGroup: 'internal',
   summary: `Get the rule types`,

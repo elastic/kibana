@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const PERFORMRULESBULKACTION_CONTRACT: InternalConnectorContract = {
+export const PERFORM_RULES_BULK_ACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PerformRulesBulkAction',
   connectorGroup: 'internal',
   summary: `Apply a bulk action to detection rules`,

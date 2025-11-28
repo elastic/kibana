@@ -26,7 +26,7 @@ import {
   indices_reload_search_analyzers_response,
   indices_reload_search_analyzers1_request,
   indices_reload_search_analyzers1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_RELOAD_SEARCH_ANALYZERS_CONTRACT: InternalConnectorContract = {

@@ -25,7 +25,7 @@ import { bulk_delete_op_request, bulk_delete_op_response } from './schemas/kiban
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const BULKDELETEOP_CONTRACT: InternalConnectorContract = {
+export const BULK_DELETE_OP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkDeleteOp',
   connectorGroup: 'internal',
   summary: `Bulk delete SLO definitions and their associated summary and rollup data.`,

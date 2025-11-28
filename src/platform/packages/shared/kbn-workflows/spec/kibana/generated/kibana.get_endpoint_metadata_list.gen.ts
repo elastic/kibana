@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETENDPOINTMETADATALIST_CONTRACT: InternalConnectorContract = {
+export const GET_ENDPOINT_METADATA_LIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetEndpointMetadataList',
   connectorGroup: 'internal',
   summary: `Get a metadata list`,

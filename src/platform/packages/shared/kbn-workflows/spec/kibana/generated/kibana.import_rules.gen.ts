@@ -25,7 +25,7 @@ import { import_rules_request, import_rules_response } from './schemas/kibana_op
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const IMPORTRULES_CONTRACT: InternalConnectorContract = {
+export const IMPORT_RULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ImportRules',
   connectorGroup: 'internal',
   summary: `Import detection rules`,

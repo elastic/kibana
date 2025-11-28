@@ -26,7 +26,7 @@ import {
   nodes_hot_threads_response,
   nodes_hot_threads1_request,
   nodes_hot_threads1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const NODES_HOT_THREADS_CONTRACT: InternalConnectorContract = {

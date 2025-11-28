@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETEALERTSINDEX_CONTRACT: InternalConnectorContract = {
+export const DELETE_ALERTS_INDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteAlertsIndex',
   connectorGroup: 'internal',
   summary: `Delete an alerts index`,

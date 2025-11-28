@@ -26,7 +26,7 @@ import {
   health_report_response,
   health_report1_request,
   health_report1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const HEALTH_REPORT_CONTRACT: InternalConnectorContract = {

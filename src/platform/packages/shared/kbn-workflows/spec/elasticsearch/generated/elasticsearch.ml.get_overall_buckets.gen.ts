@@ -26,7 +26,7 @@ import {
   ml_get_overall_buckets_response,
   ml_get_overall_buckets1_request,
   ml_get_overall_buckets1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ML_GET_OVERALL_BUCKETS_CONTRACT: InternalConnectorContract = {

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const UPDATEDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
+export const UPDATE_DATA_VIEW_DEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateDataViewDefault',
   connectorGroup: 'internal',
   summary: `Update a data view`,

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const FINALIZEALERTSMIGRATION_CONTRACT: InternalConnectorContract = {
+export const FINALIZE_ALERTS_MIGRATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FinalizeAlertsMigration',
   connectorGroup: 'internal',
   summary: `Finalize detection alert migrations`,

@@ -26,7 +26,7 @@ import {
   nodes_reload_secure_settings_response,
   nodes_reload_secure_settings1_request,
   nodes_reload_secure_settings1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const NODES_RELOAD_SECURE_SETTINGS_CONTRACT: InternalConnectorContract = {

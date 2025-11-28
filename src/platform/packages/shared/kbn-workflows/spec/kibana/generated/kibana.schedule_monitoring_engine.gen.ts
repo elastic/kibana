@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const SCHEDULEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
+export const SCHEDULE_MONITORING_ENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ScheduleMonitoringEngine',
   connectorGroup: 'internal',
   summary: `Schedule the Privilege Monitoring Engine`,

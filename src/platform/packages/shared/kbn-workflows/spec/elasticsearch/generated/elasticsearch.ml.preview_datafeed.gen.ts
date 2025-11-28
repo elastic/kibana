@@ -30,7 +30,7 @@ import {
   ml_preview_datafeed2_response,
   ml_preview_datafeed3_request,
   ml_preview_datafeed3_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ML_PREVIEW_DATAFEED_CONTRACT: InternalConnectorContract = {

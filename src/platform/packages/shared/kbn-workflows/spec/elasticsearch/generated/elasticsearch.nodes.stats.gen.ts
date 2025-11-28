@@ -34,7 +34,7 @@ import {
   nodes_stats4_response,
   nodes_stats5_request,
   nodes_stats5_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const NODES_STATS_CONTRACT: InternalConnectorContract = {

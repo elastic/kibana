@@ -25,7 +25,7 @@ import { search_alerts_request, search_alerts_response } from './schemas/kibana_
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const SEARCHALERTS_CONTRACT: InternalConnectorContract = {
+export const SEARCH_ALERTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SearchAlerts',
   connectorGroup: 'internal',
   summary: `Find and/or aggregate detection alerts`,

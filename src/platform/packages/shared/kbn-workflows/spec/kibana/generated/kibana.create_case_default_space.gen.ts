@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const CREATECASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
+export const CREATE_CASE_DEFAULT_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createCaseDefaultSpace',
   connectorGroup: 'internal',
   summary: `Create a case`,

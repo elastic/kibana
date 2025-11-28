@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const PERSISTPINNEDEVENTROUTE_CONTRACT: InternalConnectorContract = {
+export const PERSIST_PINNED_EVENT_ROUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PersistPinnedEventRoute',
   connectorGroup: 'internal',
   summary: `Pin/unpin an event`,

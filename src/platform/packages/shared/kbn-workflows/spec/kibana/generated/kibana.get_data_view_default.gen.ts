@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const GETDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
+export const GET_DATA_VIEW_DEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getDataViewDefault',
   connectorGroup: 'internal',
   summary: `Get a data view`,

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ENDPOINTGETACTIONSLIST_CONTRACT: InternalConnectorContract = {
+export const ENDPOINT_GET_ACTIONS_LIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetActionsList',
   connectorGroup: 'internal',
   summary: `Get response actions`,

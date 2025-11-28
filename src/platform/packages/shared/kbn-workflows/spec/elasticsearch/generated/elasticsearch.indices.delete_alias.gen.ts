@@ -26,7 +26,7 @@ import {
   indices_delete_alias_response,
   indices_delete_alias1_request,
   indices_delete_alias1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const INDICES_DELETE_ALIAS_CONTRACT: InternalConnectorContract = {

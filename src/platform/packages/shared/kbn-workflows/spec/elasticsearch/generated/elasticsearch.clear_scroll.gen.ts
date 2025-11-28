@@ -26,7 +26,7 @@ import {
   clear_scroll_response,
   clear_scroll1_request,
   clear_scroll1_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CLEAR_SCROLL_CONTRACT: InternalConnectorContract = {

@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ENDPOINTUNISOLATEACTION_CONTRACT: InternalConnectorContract = {
+export const ENDPOINT_UNISOLATE_ACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointUnisolateAction',
   connectorGroup: 'internal',
   summary: `Release an isolated endpoint`,

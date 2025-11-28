@@ -25,7 +25,7 @@ import { delete_note_request } from './schemas/kibana_openapi_zod.gen';
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const DELETENOTE_CONTRACT: InternalConnectorContract = {
+export const DELETE_NOTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteNote',
   connectorGroup: 'internal',
   summary: `Delete a note`,

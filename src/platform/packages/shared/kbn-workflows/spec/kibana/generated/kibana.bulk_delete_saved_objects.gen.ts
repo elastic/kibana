@@ -28,7 +28,7 @@ import {
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const BULKDELETESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
+export const BULK_DELETE_SAVED_OBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkDeleteSavedObjects',
   connectorGroup: 'internal',
   summary: `Delete saved objects`,

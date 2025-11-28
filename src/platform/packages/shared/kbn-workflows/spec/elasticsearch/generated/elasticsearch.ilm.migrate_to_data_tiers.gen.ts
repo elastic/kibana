@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   ilm_migrate_to_data_tiers_request,
   ilm_migrate_to_data_tiers_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const ILM_MIGRATE_TO_DATA_TIERS_CONTRACT: InternalConnectorContract = {

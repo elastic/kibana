@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   security_get_user_privileges_request,
   security_get_user_privileges_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const SECURITY_GET_USER_PRIVILEGES_CONTRACT: InternalConnectorContract = {

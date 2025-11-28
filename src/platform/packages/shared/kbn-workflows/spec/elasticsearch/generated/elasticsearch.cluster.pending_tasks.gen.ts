@@ -24,7 +24,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 import {
   cluster_pending_tasks_request,
   cluster_pending_tasks_response,
-} from './es_openapi_zod.gen';
+} from './schemas/es_openapi_zod.gen';
 
 // export contract
 export const CLUSTER_PENDING_TASKS_CONTRACT: InternalConnectorContract = {
