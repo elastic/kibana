@@ -17,6 +17,7 @@ import { AlternateSolutions } from '../alternate_solutions/alternate_solutions';
 import { Footer } from '../footer/footer';
 import { HomepageNavLinks } from './homepage_nav_links';
 import { CloudResources } from './cloud_resources';
+import { RecentActivity } from './recent_activity';
 
 export const SearchHomepageBody = () => {
   const { euiTheme } = useEuiTheme();
@@ -27,6 +28,10 @@ export const SearchHomepageBody = () => {
       <MetricPanels />
 
       <EuiFlexGroup gutterSize="l" direction="column">
+        <EuiFlexItem>
+          <EuiSpacer size="l" />
+          <RecentActivity />
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiSpacer size="l" />
           <CloudResources />

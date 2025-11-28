@@ -23,6 +23,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
+import { useIndicesStats } from '../../hooks/api/use_indices_stats';
+import { useDashboardsStats } from '../../hooks/api/use_dashboards_stats';
 
 interface MetricPanelProps {
   title: string;
@@ -280,6 +282,9 @@ interface MetricPanelsProps {
   panelType?: 'basic' | 'complex';
 }
 export const MetricPanels = ({ panelType = 'basic' }: MetricPanelsProps) => {
+  const { data: indicesData, isLoading: isLoadingIndices } = useIndicesStats();
+  const { data: dashboardsData, isLoading: isLoadingDashboards } = useDashboardsStats();
+
   const basicPanels = [
     {
       id: 'indices',
@@ -287,6 +292,7 @@ export const MetricPanels = ({ panelType = 'basic' }: MetricPanelsProps) => {
       title: i18n.translate('xpack.searchHomepage.metricPanel.basic.indices.title', {
         defaultMessage: 'Indices',
       }),
+      metric: isLoadingIndices ? '-' : String(indicesData?.normalIndices ?? 0),
     },
     {
       id: 'storage',
@@ -294,6 +300,7 @@ export const MetricPanels = ({ panelType = 'basic' }: MetricPanelsProps) => {
       title: i18n.translate('xpack.searchHomepage.metricPanel.basic.storage.title', {
         defaultMessage: 'Storage',
       }),
+      metric: '0 B',
     },
     {
       id: 'agents',
@@ -301,6 +308,7 @@ export const MetricPanels = ({ panelType = 'basic' }: MetricPanelsProps) => {
       title: i18n.translate('xpack.searchHomepage.metricPanel.basic.agents.title', {
         defaultMessage: 'Agents',
       }),
+      metric: '0',
     },
     {
       id: 'discover',
@@ -308,6 +316,7 @@ export const MetricPanels = ({ panelType = 'basic' }: MetricPanelsProps) => {
       title: i18n.translate('xpack.searchHomepage.metricPanel.basic.discover.title', {
         defaultMessage: 'Dashboards',
       }),
+      metric: isLoadingDashboards ? '-' : String(dashboardsData?.totalDashboards ?? 0),
     },
   ];
   const complexPanels: Array<{ id: string; type: MetricPanelType }> = [
@@ -348,7 +357,7 @@ export const MetricPanels = ({ panelType = 'basic' }: MetricPanelsProps) => {
   ) : (
     <EuiFlexGroup>
       {basicPanels.map((panel) => {
-        return <BasicMetricPanel title={panel.title} metric={'0'} key={panel.id} />;
+        return <BasicMetricPanel title={panel.title} metric={panel.metric} key={panel.id} />;
       })}
     </EuiFlexGroup>
   );
