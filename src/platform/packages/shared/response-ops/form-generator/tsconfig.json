@@ -11,5 +11,6 @@
     "@kbn/i18n-react",
     "@kbn/connector-specs",
     "@kbn/es-ui-shared-plugin",
+    "@kbn/i18n",
   ]
 }
