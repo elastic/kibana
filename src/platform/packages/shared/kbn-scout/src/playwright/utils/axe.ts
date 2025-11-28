@@ -21,6 +21,14 @@ export interface RunA11yScanOptions {
   timeoutMs?: number;
 }
 
+/**
+ * Runs an Axe accessibility scan
+ *
+ * Failure modes:
+ * - Timeout: Can occur on large or complex DOMs. The scan rejects with a timeout Error; tests should
+ *   be made more isolated by narrowing scope via the `include` option.
+ * - Axe/Playwright errors: Underlying errors propagate and indicate a failed scan.
+ */
 const runA11yScan = async (
   page: Page,
   { include = [], exclude = [], timeoutMs = 10000 }: RunA11yScanOptions = {}
