@@ -35,3 +35,9 @@ export const DASHBOARD_SAVED_OBJECT = {
   type: 'dashboard',
   attributes: { [ATTRIBUTE_TITLE_KEY]: ATTRIBUTE_TITLE_VALUE },
 };
+
+export const COMMON_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'kibana',
+  'Content-Type': 'application/json;charset=UTF-8',
+};

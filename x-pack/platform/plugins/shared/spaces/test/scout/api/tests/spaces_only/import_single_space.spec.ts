@@ -5,21 +5,46 @@
  * 2.0.
  */
 
+import FormData from 'form-data';
+
+import type { RoleApiCredentials } from '@kbn/scout';
 import { apiTest, expect, tags } from '@kbn/scout';
 
 import {
   ATTRIBUTE_TITLE_KEY,
   ATTRIBUTE_TITLE_VALUE,
+  COMMON_HEADERS,
   DASHBOARD_SAVED_OBJECT,
   SPACES,
   TEST_SPACES,
 } from './constants';
 
+/**
+ * Helper to prepare FormData for saved objects import
+ * Returns buffer and headers ready to use with apiClient
+ */
+const prepareImportFormData = (objects: Array<Record<string, any>>) => {
+  const ndjsonContent = objects.map((obj) => JSON.stringify(obj)).join('\n');
+  const formData = new FormData();
+  formData.append('file', ndjsonContent, 'import.ndjson');
+
+  return {
+    buffer: formData.getBuffer(),
+    headers: formData.getHeaders(),
+  };
+};
+
 // tests importing saved objects into a single space at a time
 TEST_SPACES.forEach((space) => {
+  // Determine space path at test definition time (not runtime)
+  const spacePath = space.spaceId === 'default' ? '' : `s/${space.spaceId}/`;
+
   apiTest.describe(`_import API within the ${space.name} space`, { tag: tags.ESS_ONLY }, () => {
-    // create all spaces
-    apiTest.beforeAll(async ({ kbnClient, log }) => {
+    let editorApiCredentials: RoleApiCredentials;
+
+    apiTest.beforeAll(async ({ kbnClient, log, requestAuth }) => {
+      // Get API key with 'editor' role which has savedObjectsManagement privileges
+      editorApiCredentials = await requestAuth.getApiKey('editor');
       // Create the space (skip for default which always exists)
       if (space.spaceId !== SPACES.DEFAULT.spaceId) {
         log.info(`Creating space [${space.spaceId}] for test suite`);
@@ -42,158 +67,201 @@ TEST_SPACES.forEach((space) => {
     });
     apiTest(
       'should return 409 when trying to create dashboard that already exists',
-      async ({ apiServices }) => {
+      async ({ apiClient, apiServices }) => {
         // Use unique ID to prevent conflicts between test runs and spaces
         const uniqueId = `dashboard-${Date.now()}-${space.spaceId}`;
 
         // First import should succeed
-        const response1 = await apiServices.savedObjects.import(
+        const formData1 = prepareImportFormData([
           {
-            objects: [
-              {
-                ...DASHBOARD_SAVED_OBJECT,
-                id: uniqueId,
-              },
-            ],
-            overwrite: true,
+            ...DASHBOARD_SAVED_OBJECT,
+            id: uniqueId,
           },
-          space.spaceId
+        ]);
+
+        const response1 = await apiClient.post(
+          `${spacePath}api/saved_objects/_import?overwrite=true`,
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              ...editorApiCredentials.apiKeyHeader,
+              ...formData1.headers,
+            },
+            body: formData1.buffer,
+          }
         );
-        expect(response1.status).toBe(200);
-        expect(response1.data.success).toBe(true);
-        expect(response1.data.successCount).toBe(1);
+
+        expect(response1.statusCode).toBe(200);
+        expect(response1.body.success).toBe(true);
+        expect(response1.body.successCount).toBe(1);
 
         // Second import without overwrite should fail with conflict
-        const response2 = await apiServices.savedObjects.import(
+        const formData2 = prepareImportFormData([
           {
-            objects: [
-              {
-                ...DASHBOARD_SAVED_OBJECT,
-                id: uniqueId,
-              },
-            ],
-            overwrite: false,
+            ...DASHBOARD_SAVED_OBJECT,
+            id: uniqueId,
           },
-          space.spaceId
-        );
-        expect(response2.status).toBe(200);
-        expect(response2.data.success).toBe(false);
-        expect(response2.data.errors).toBeDefined();
-        expect(response2.data.errors).toHaveLength(1);
-        expect(response2.data.errors![0].error.type).toBe('conflict');
+        ]);
 
-        // Cleanup
+        const response2 = await apiClient.post(
+          `${spacePath}api/saved_objects/_import?overwrite=false`,
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              ...editorApiCredentials.apiKeyHeader,
+              ...formData2.headers,
+            },
+            body: formData2.buffer,
+          }
+        );
+
+        expect(response2.statusCode).toBe(200);
+        expect(response2.body.success).toBe(false);
+        expect(response2.body.errors).toBeDefined();
+        expect(response2.body.errors).toHaveLength(1);
+        expect(response2.body.errors[0].error.type).toBe('conflict');
+
+        // Cleanup - using apiServices is appropriate for teardown
         await apiServices.savedObjects.delete('dashboard', uniqueId, space.spaceId);
       }
     );
 
-    apiTest('should return 200 when creating with overwrite=true', async ({ apiServices }) => {
-      const uniqueId = `dashboard-overwrite-${Date.now()}-${space.spaceId}`;
+    apiTest(
+      'should return 200 when creating with overwrite=true',
+      async ({ apiClient, apiServices }) => {
+        const uniqueId = `dashboard-overwrite-${Date.now()}-${space.spaceId}`;
 
-      // Import initial object
-      const response1 = await apiServices.savedObjects.import(
-        {
-          objects: [
-            {
-              ...DASHBOARD_SAVED_OBJECT,
-              id: uniqueId,
+        // Import initial object
+        const formData1 = prepareImportFormData([
+          {
+            ...DASHBOARD_SAVED_OBJECT,
+            id: uniqueId,
+          },
+        ]);
+
+        const response1 = await apiClient.post(
+          `${spacePath}api/saved_objects/_import?overwrite=false`,
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              ...editorApiCredentials.apiKeyHeader,
+              ...formData1.headers,
             },
-          ],
-          overwrite: false,
-        },
-        space.spaceId
-      );
-      expect(response1.status).toBe(200);
-      expect(response1.data.success).toBe(true);
-      expect(response1.data.successCount).toBe(1);
+            body: formData1.buffer,
+          }
+        );
 
-      // Import with overwrite should succeed
-      const response2 = await apiServices.savedObjects.import(
-        {
-          objects: [
-            {
-              ...DASHBOARD_SAVED_OBJECT,
-              attributes: { title: `${ATTRIBUTE_TITLE_VALUE} - Overwritten` },
-              id: uniqueId,
+        expect(response1.statusCode).toBe(200);
+        expect(response1.body.success).toBe(true);
+        expect(response1.body.successCount).toBe(1);
+
+        // Import with overwrite should succeed
+        const formData2 = prepareImportFormData([
+          {
+            ...DASHBOARD_SAVED_OBJECT,
+            attributes: { title: `${ATTRIBUTE_TITLE_VALUE} - Overwritten` },
+            id: uniqueId,
+          },
+        ]);
+
+        const response2 = await apiClient.post(
+          `${spacePath}api/saved_objects/_import?overwrite=true`,
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              ...editorApiCredentials.apiKeyHeader,
+              ...formData2.headers,
             },
-          ],
-          overwrite: true,
-        },
-        space.spaceId
-      );
-      expect(response2.status).toBe(200);
-      expect(response2.data.success).toBe(true);
-      expect(response2.data.successCount).toBe(1);
-      expect(response2.data.successResults).toBeDefined();
-      expect(response2.data.successResults![0].type).toBe('dashboard');
-      expect(response2.data.successResults![0].id).toBe(uniqueId);
+            body: formData2.buffer,
+          }
+        );
 
-      // export to verify title was updated
-      const exportResponse = await apiServices.savedObjects.export(
-        { objects: [{ type: 'dashboard', id: uniqueId }] },
-        space.spaceId
-      );
-      expect(exportResponse.status).toBe(200);
-      expect(exportResponse.data.exportedObjects).toHaveLength(1);
-      expect(exportResponse.data.exportedObjects[0].attributes[ATTRIBUTE_TITLE_KEY]).toBe(
-        `${ATTRIBUTE_TITLE_VALUE} - Overwritten`
-      );
+        expect(response2.statusCode).toBe(200);
+        expect(response2.body.success).toBe(true);
+        expect(response2.body.successCount).toBe(1);
+        expect(response2.body.successResults).toBeDefined();
+        expect(response2.body.successResults[0].type).toBe('dashboard');
+        expect(response2.body.successResults[0].id).toBe(uniqueId);
 
-      // Cleanup
-      await apiServices.savedObjects.delete('dashboard', uniqueId, space.spaceId);
-    });
+        // Export to verify title was updated - use apiServices for verification/teardown
+        const exportResponse = await apiServices.savedObjects.export(
+          { objects: [{ type: 'dashboard', id: uniqueId }] },
+          space.spaceId
+        );
+        expect(exportResponse.status).toBe(200);
+        expect(exportResponse.data.exportedObjects).toHaveLength(1);
+        expect(exportResponse.data.exportedObjects[0].attributes[ATTRIBUTE_TITLE_KEY]).toBe(
+          `${ATTRIBUTE_TITLE_VALUE} - Overwritten`
+        );
+
+        // Cleanup - using apiServices is appropriate for teardown
+        await apiServices.savedObjects.delete('dashboard', uniqueId, space.spaceId);
+      }
+    );
 
     apiTest(
       'should return 200 and auto-generate ID when creating without ID',
-      async ({ apiServices }) => {
+      async ({ apiClient, apiServices }) => {
         const uniqueId = `dashboard-autogen-${Date.now()}-${space.spaceId}`;
 
-        const response = await apiServices.savedObjects.import(
+        const formData = prepareImportFormData([
           {
-            objects: [
-              {
-                ...DASHBOARD_SAVED_OBJECT,
-                id: uniqueId,
-              },
-            ],
-            overwrite: false,
+            ...DASHBOARD_SAVED_OBJECT,
+            id: uniqueId,
           },
-          space.spaceId
+        ]);
+
+        const response = await apiClient.post(
+          `${spacePath}api/saved_objects/_import?overwrite=false`,
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              ...editorApiCredentials.apiKeyHeader,
+              ...formData.headers,
+            },
+            body: formData.buffer,
+          }
         );
 
-        expect(response.status).toBe(200);
-        expect(response.data.success).toBe(true);
-        expect(response.data.successCount).toBe(1);
-        expect(response.data.successResults).toBeDefined();
-        expect(response.data.successResults![0].type).toBe('dashboard');
-        expect(response.data.successResults![0].id).toBe(uniqueId);
+        expect(response.statusCode).toBe(200);
+        expect(response.body.success).toBe(true);
+        expect(response.body.successCount).toBe(1);
+        expect(response.body.successResults).toBeDefined();
+        expect(response.body.successResults[0].type).toBe('dashboard');
+        expect(response.body.successResults[0].id).toBe(uniqueId);
 
-        // Cleanup
+        // Cleanup - using apiServices is appropriate for teardown
         await apiServices.savedObjects.delete('dashboard', uniqueId, space.spaceId);
       }
     );
 
-    apiTest('should return 400 when creating hidden type object', async ({ apiServices }) => {
-      const response = await apiServices.savedObjects.import(
+    apiTest('should return 400 when creating hidden type object', async ({ apiClient }) => {
+      const formData = prepareImportFormData([
         {
-          objects: [
-            {
-              type: 'hiddentype',
-              id: 'some-id',
-              attributes: {},
-            },
-          ],
-          overwrite: false,
+          type: 'hiddentype',
+          id: 'some-id',
+          attributes: {},
         },
-        space.spaceId
+      ]);
+
+      const response = await apiClient.post(
+        `${spacePath}api/saved_objects/_import?overwrite=false`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...editorApiCredentials.apiKeyHeader,
+            ...formData.headers,
+          },
+          body: formData.buffer,
+        }
       );
 
       // Import API returns 200 but with success=false and errors for invalid types
-      expect(response.status).toBe(200);
-      expect(response.data.success).toBe(false);
-      expect(response.data.errors).toBeDefined();
-      expect(response.data.errors).toHaveLength(1);
-      expect(response.data.errors![0].error.type).toBe('unsupported_type');
+      expect(response.statusCode).toBe(200);
+      expect(response.body.success).toBe(false);
+      expect(response.body.errors).toBeDefined();
+      expect(response.body.errors).toHaveLength(1);
+      expect(response.body.errors[0].error.type).toBe('unsupported_type');
     });
   });
 });
