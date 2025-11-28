@@ -90,6 +90,7 @@ export const useToolbarActions = ({
           timeRange={timeRange}
           onClear={onClearValues}
           fullWidth={isSmallScreen}
+          isLoading={isLoading}
         />
       ) : null,
     ],

@@ -38,6 +38,8 @@ export interface ValuesFilterProps {
   disabled?: boolean;
   fullWidth?: boolean;
   timeRange?: TimeRange;
+
+  isLoading?: boolean;
   onChange: (values: string[]) => void;
   onClear: () => void;
 }
@@ -48,6 +50,7 @@ export const ValuesSelector = ({
   timeRange,
   fullWidth = false,
   disabled = false,
+  isLoading: isFieldsLoading = false,
   indices = [],
   onClear,
 }: ValuesFilterProps) => {
@@ -58,7 +61,7 @@ export const ValuesSelector = ({
 
   const {
     data: values = [],
-    isLoading,
+    isLoading: isValuesLoading,
     error,
   } = useDimensionsQuery({
     dimensions: selectedDimensionNames,
@@ -113,6 +116,8 @@ export const ValuesSelector = ({
     },
     [onChange]
   );
+
+  const isLoading = isValuesLoading || isFieldsLoading;
 
   const buttonLabel = useMemo(() => {
     const count = selectedValues.length;

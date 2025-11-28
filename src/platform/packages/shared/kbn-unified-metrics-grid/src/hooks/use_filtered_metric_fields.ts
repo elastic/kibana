@@ -39,7 +39,7 @@ export const useFilteredMetricFields = ({
 
   // Client-side filtering by dimensions and search term
   const dimensionFieldNamesSet = useMemo(
-    () => (dimensions.length > 0 ? new Set(dimensions.map((d) => d.name)) : new Set<string>()),
+    () => new Set(dimensions.map((d) => d.name)),
     [dimensions]
   );
   const searchTermLower = useMemo(() => searchTerm?.toLowerCase(), [searchTerm]);
