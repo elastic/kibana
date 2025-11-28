@@ -6,17 +6,10 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useConversationTitle, useHasActiveConversation } from '../../../hooks/use_conversation';
-import { DeleteConversationModal } from './delete_conversation_modal';
 import { RenameConversationModal } from './rename_conversation_modal';
 
 const labels = {
@@ -24,10 +17,7 @@ const labels = {
     defaultMessage: 'Conversation title',
   }),
   rename: i18n.translate('xpack.onechat.conversationTitle.rename', {
-    defaultMessage: 'Rename',
-  }),
-  delete: i18n.translate('xpack.onechat.conversationTitle.delete', {
-    defaultMessage: 'Delete',
+    defaultMessage: 'Rename conversation',
   }),
 };
 
@@ -38,77 +28,52 @@ interface ConversationTitleProps {
 export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabelledBy }) => {
   const { title, isLoading } = useConversationTitle();
   const hasActiveConversation = useHasActiveConversation();
-  const { euiTheme } = useEuiTheme();
-  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
 
-  const shouldShowButton = hasActiveConversation && !isLoading && title;
+  const shouldShow = hasActiveConversation && !isLoading && title;
 
-  const menuItems = [
-    <EuiContextMenuItem
-      key="rename"
-      icon="pencil"
-      size="s"
-      data-test-subj="agentBuilderConversationRenameButton"
-      onClick={() => {
-        setIsContextMenuOpen(false);
-        setIsRenameModalOpen(true);
-      }}
-    >
-      {labels.rename}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="delete"
-      icon="trash"
-      size="s"
-      css={css`
-        color: ${euiTheme.colors.textDanger};
-      `}
-      data-test-subj="agentBuilderConversationDeleteButton"
-      onClick={() => {
-        setIsContextMenuOpen(false);
-        setIsDeleteModalOpen(true);
-      }}
-    >
-      {labels.delete}
-    </EuiContextMenuItem>,
-  ];
+  const handlePencilClick = () => {
+    setIsEditing(true);
+    setIsHovering(false);
+  };
 
-  if (shouldShowButton) {
-    return (
-      <>
-        <EuiPopover
-          button={
-            <EuiButtonEmpty
-              onClick={() => setIsContextMenuOpen(!isContextMenuOpen)}
-              aria-label={labels.ariaLabel}
-              iconType="arrowDown"
-              iconSide="right"
-              color="text"
-              data-test-subj="agentBuilderConversationTitle"
-            >
-              <h1 id={ariaLabelledBy}>{title}</h1>
-            </EuiButtonEmpty>
-          }
-          isOpen={isContextMenuOpen}
-          closePopover={() => setIsContextMenuOpen(false)}
-          panelPaddingSize="s"
-          anchorPosition="downCenter"
-        >
-          <EuiContextMenuPanel size="s" items={menuItems} />
-        </EuiPopover>
-        <DeleteConversationModal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-        />
-        <RenameConversationModal
-          isOpen={isRenameModalOpen}
-          onClose={() => setIsRenameModalOpen(false)}
-        />
-      </>
-    );
+  const handleCancel = () => {
+    setIsEditing(false);
+  };
+
+  if (!shouldShow) {
+    return null;
   }
 
-  return null;
+  if (isEditing) {
+    return <RenameConversationModal isOpen={true} onClose={handleCancel} />;
+  }
+
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      <EuiFlexItem grow={false}>
+        <h1 id={ariaLabelledBy}>{title}</h1>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="pencil"
+          aria-label={labels.rename}
+          onClick={handlePencilClick}
+          color="text"
+          data-test-subj="agentBuilderConversationRenameButton"
+          css={css`
+            opacity: ${isHovering ? 1 : 0};
+            transition: opacity 0.2s ease;
+          `}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };
