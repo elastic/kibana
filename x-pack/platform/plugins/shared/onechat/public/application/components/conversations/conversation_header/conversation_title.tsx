@@ -23,12 +23,17 @@ const labels = {
 
 interface ConversationTitleProps {
   ariaLabelledBy?: string;
+  isEditing: boolean;
+  setIsEditing: (isEditing: boolean) => void;
 }
 
-export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabelledBy }) => {
+export const ConversationTitle: React.FC<ConversationTitleProps> = ({
+  ariaLabelledBy,
+  isEditing,
+  setIsEditing,
+}) => {
   const { title, isLoading } = useConversationTitle();
   const hasActiveConversation = useHasActiveConversation();
-  const [isEditing, setIsEditing] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
 
   const shouldShow = hasActiveConversation && !isLoading && title;

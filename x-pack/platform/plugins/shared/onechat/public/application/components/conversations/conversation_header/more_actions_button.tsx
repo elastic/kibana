@@ -27,7 +27,6 @@ import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { DeleteConversationModal } from './delete_conversation_modal';
-import { RenameConversationModal } from './rename_conversation_modal';
 
 const fullscreenLabels = {
   actions: i18n.translate('xpack.onechat.conversationActions.actions', {
@@ -94,10 +93,13 @@ const MenuSectionTitle = ({ title }: { title: string }) => {
   );
 };
 
-export const MoreActionsButton: React.FC = () => {
+interface MoreActionsButtonProps {
+  onRenameConversation: () => void;
+}
+
+export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameConversation }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const hasActiveConversation = useHasActiveConversation();
   const agentId = useAgentId();
   const { isEmbeddedContext } = useConversationContext();
@@ -130,7 +132,7 @@ export const MoreActionsButton: React.FC = () => {
             data-test-subj="agentBuilderConversationRenameButton"
             onClick={() => {
               closePopover();
-              setIsRenameModalOpen(true);
+              onRenameConversation();
             }}
           >
             {fullscreenLabels.rename}
@@ -244,10 +246,6 @@ export const MoreActionsButton: React.FC = () => {
       <DeleteConversationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
-      />
-      <RenameConversationModal
-        isOpen={isRenameModalOpen}
-        onClose={() => setIsRenameModalOpen(false)}
       />
     </>
   );

@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
@@ -50,13 +50,17 @@ export const RenameConversationInput: React.FC<RenameConversationInputProps> = (
   const { conversationActions } = useConversationContext();
   const [isLoading, setIsLoading] = useState(false);
   const [newTitle, setNewTitle] = useState(title || '');
-  const inputRef = useRef<HTMLInputElement>(null);
+  const hasFocusedRef = useRef(false);
 
-  // Focus input on mount
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
+  // Callback ref that focuses only on first mount
+  const inputRefCallback = useCallback((el: HTMLInputElement | null) => {
+    if (el && !hasFocusedRef.current) {
+      hasFocusedRef.current = true;
+      // Use requestAnimationFrame to ensure the element is fully mounted
+      requestAnimationFrame(() => {
+        el.focus();
+        el.select();
+      });
     }
   }, []);
 
@@ -95,7 +99,7 @@ export const RenameConversationInput: React.FC<RenameConversationInputProps> = (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false} css={inputWidthStyles}>
         <EuiFieldText
-          inputRef={inputRef}
+          inputRef={inputRefCallback}
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
           onKeyDown={handleKeyDown}
