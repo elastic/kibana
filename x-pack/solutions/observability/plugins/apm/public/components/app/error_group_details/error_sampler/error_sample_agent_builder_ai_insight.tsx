@@ -62,6 +62,8 @@ export function ErrorSampleAgentBuilderAiInsight({
   const [lastUsedConnectorId] = useLocalStorage('agentBuilder.lastUsedConnector', '');
 
   const fetchAiInsights = async () => {
+    // TODO: display the error and disable the start conversation button if there is an error
+    // TODO: llm response should be mandatory and should not be empty (if it's empty, consider it as an error)
     // if (!onechat || !isObservabilityAgentEnabled || !start || !end || !error?.error?.id) {
     //   return;
     // }
