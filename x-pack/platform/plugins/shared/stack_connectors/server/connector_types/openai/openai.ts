@@ -325,6 +325,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         connectorUsageCollector
       );
 
+      // @ts-expect-error upgrade typescript v5.9.3
       return stream ? pipeStreamingResponse(response) : response.data;
     } catch (error) {
       // special error handling for PKI errors
