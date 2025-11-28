@@ -7,8 +7,9 @@
 
 /* eslint-disable playwright/no-nth-methods */
 
-import type { ScoutPage } from '@kbn/scout';
-import { EuiComboBoxWrapper, expect } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout';
+import { EuiComboBoxWrapper } from '@kbn/scout';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
@@ -360,7 +361,7 @@ export class StreamsApp {
   }
 
   async expectPreviewPanelVisible() {
-    await expect(this.page.getByTestId('routingPreviewPanelWithResults')).toBeVisible();
+    await expect(this.page.getByTestId('streamsAppRoutingPreviewPanelWithResults')).toBeVisible();
   }
 
   async saveRuleOrder() {
@@ -755,6 +756,77 @@ export class StreamsApp {
 
   async checkDraggingOver() {
     await expect(this.page.getByTestId('droppable')).not.toHaveAttribute('class', /isDragging/);
+  }
+
+  private async clickCellActionButton(testId: string, cell: Locator) {
+    // Get the cell action button scoped to the specific cell
+    // EuiDataGrid renders cell actions for all cells in the DOM, but only the one
+    // for the hovered/clicked cell is visible. We find the button within the cell's actions wrapper.
+    const cellActionsWrapper = cell.locator('.euiDataGridRowCell__actionsWrapper');
+    const button = cellActionsWrapper.getByTestId(testId);
+    await button.scrollIntoViewIfNeeded();
+    await button.click();
+  }
+
+  async clickFilterForButton(cell: Locator) {
+    await this.clickCellActionButton('streamsAppCellActionFilterFor', cell);
+  }
+
+  async clickFilterOutButton(cell: Locator) {
+    await this.clickCellActionButton('streamsAppCellActionFilterOut', cell);
+  }
+
+  /**
+   * AI Suggestions utility methods
+   */
+  async clickSuggestPartitionsButton() {
+    const button = this.page.getByTestId('streamsAppGenerateSuggestionButton');
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  async expectSuggestionsVisible(count?: number) {
+    await expect(this.page.getByText('Review partitioning suggestions')).toBeVisible();
+    if (count !== undefined) {
+      const suggestions = await this.page
+        .locator('[data-test-subj^="suggestionEditButton-"]')
+        .all();
+      expect(suggestions.length).toHaveLength(count);
+    }
+  }
+
+  async previewSuggestion(suggestionName: string) {
+    const previewButton = this.page.getByTestId(`suggestionPreviewButton-${suggestionName}`);
+    await previewButton.click();
+  }
+
+  async editSuggestion(suggestionName: string) {
+    const editButton = this.page.getByTestId(`suggestionEditButton-${suggestionName}`);
+    await editButton.click();
+  }
+
+  async rejectSuggestion(suggestionName: string) {
+    const rejectButton = this.page.getByTestId(`suggestionRejectButton-${suggestionName}`);
+    await rejectButton.click();
+  }
+
+  async acceptSuggestion(suggestionName: string) {
+    const acceptButton = this.page.getByTestId(`suggestionAcceptButton-${suggestionName}`);
+    await acceptButton.click();
+  }
+
+  async regenerateSuggestions() {
+    const regenerateButton = this.page
+      .getByTestId('streamsAppGenerateSuggestionButton')
+      .filter({ hasText: 'Regenerate' });
+    await expect(regenerateButton).toBeVisible();
+    await regenerateButton.click();
+  }
+
+  async expectConfirmationModalVisible() {
+    const modal = this.page.getByTestId('streamsAppCreateStreamConfirmationModal');
+    await expect(modal).toBeVisible();
+    await expect(modal.getByTestId('streamsAppCreateStreamConfirmationModalTitle')).toBeVisible();
   }
 
   /**
