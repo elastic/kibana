@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server/src/saved_objects_client';
-import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { createPatternMatcherService } from '../../integrations/update_detection/privileged_status_match';
 import type { PrivMonBulkUser } from '../../../../types';
