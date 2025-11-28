@@ -373,8 +373,8 @@ export function Detail() {
                         </EuiText>
                       </EuiFlexItem>
                       {!isDevMode && (
-                        <EuiFlexItem grow={false} style={{ paddingBottom: theme.euiTheme.size.xs, paddingLeft: theme.euiTheme.size.s }}>
-                          <EuiText size="s">
+                        <EuiFlexItem grow={false} style={{ paddingBottom: theme.euiTheme.size.xs }}>
+                          <EuiText size="s" style={{ whiteSpace: 'nowrap' }}>
                             <EuiLink href={INTEGRATIONS_DIRECTED_FEEDBACK_LINK} external target="_blank">
                               <FormattedMessage
                                 id="xpack.fleet.integrationDetailsHeaderFeedbackLink"

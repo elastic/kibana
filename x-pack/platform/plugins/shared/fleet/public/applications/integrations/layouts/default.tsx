@@ -68,8 +68,8 @@ export const DefaultLayout: React.FC<Props> = memo(
                 </EuiText>
               </EuiFlexItem>
               {!isDevMode && (
-                <EuiFlexItem grow={false} style={{ paddingBottom: euiTheme.size.xs, paddingLeft: euiTheme.size.s }}>
-                  <EuiText size="s">
+                <EuiFlexItem grow={false} style={{ paddingBottom: euiTheme.size.xs }}>
+                  <EuiText size="s" style={{ whiteSpace: 'nowrap' }}>
                     <EuiLink href={INTEGRATIONS_OVERVIEW_FEEDBACK_LINK} external target="_blank">
                       <FormattedMessage
                         id="xpack.fleet.integrationsHeaderFeedbackLink"
