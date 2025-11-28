@@ -132,7 +132,8 @@ export const registerClustersRoute = ({
       security: {
         authz: {
           enabled: false,
-          reason: 'This route performs internal cleanup of stored credentials.',
+          reason:
+            'This route delegates to the Cloud Connect API for authentication and authorization.',
         },
       },
       validate: false,
@@ -142,10 +143,29 @@ export const registerClustersRoute = ({
     },
     async (context, request, response) => {
       try {
-        // Initialize storage service for deleting the API key
+        // Initialize storage service for retrieving and deleting the API key
         const storageService = await createStorageService(context, getStartServices, logger);
 
-        // Delete the stored API key
+        // Retrieve stored API key
+        const apiKeyData = await storageService.getApiKey();
+
+        if (!apiKeyData) {
+          logger.warn('No API key found in saved object');
+          return response.customError({
+            statusCode: 503,
+            body: {
+              message: 'Failed to retrieve API key from saved object',
+            },
+          });
+        }
+
+        // Delete cluster from Cloud Connect API first
+        const cloudConnectClient = new CloudConnectClient(logger);
+        await cloudConnectClient.deleteCluster(apiKeyData.apiKey, apiKeyData.clusterId);
+
+        logger.debug(`Successfully deleted cluster from Cloud API: ${apiKeyData.clusterId}`);
+
+        // Only delete the saved object after successful Cloud API deletion
         await storageService.deleteApiKey();
 
         logger.info('Cluster disconnected successfully - API key removed');
@@ -158,6 +178,16 @@ export const registerClustersRoute = ({
         });
       } catch (error) {
         logger.error('Failed to disconnect cluster', { error });
+
+        if (axios.isAxiosError(error)) {
+          const status = error.response?.status || 500;
+          const errorData = error.response?.data;
+
+          return response.customError({
+            statusCode: status,
+            body: errorData || { message: 'An error occurred while disconnecting the cluster' },
+          });
+        }
 
         return response.customError({
           statusCode: 500,

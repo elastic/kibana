@@ -224,4 +224,25 @@ export class CloudConnectClient {
       throw error;
     }
   }
+
+  /**
+   * Deletes a cluster from Cloud Connect
+   * This removes the cluster registration from the Cloud API
+   */
+  async deleteCluster(apiKey: string, clusterId: string): Promise<void> {
+    try {
+      this.logger.debug(`Deleting cluster from Cloud API: ${clusterId}`);
+
+      await this.axiosInstance.delete(`/cloud-connected/clusters/${clusterId}`, {
+        headers: {
+          Authorization: `apiKey ${apiKey}`,
+        },
+      });
+
+      this.logger.debug(`Successfully deleted cluster from Cloud API: ${clusterId}`);
+    } catch (error) {
+      this.logger.error(`Failed to delete cluster from Cloud API: ${clusterId}`, { error });
+      throw error;
+    }
+  }
 }
