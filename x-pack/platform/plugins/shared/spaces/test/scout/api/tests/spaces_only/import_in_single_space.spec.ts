@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import FormData from 'form-data';
-
 import type { RoleApiCredentials } from '@kbn/scout';
 import { apiTest, expect, tags } from '@kbn/scout';
 
@@ -18,24 +16,18 @@ import {
   SPACES,
   TEST_SPACES,
 } from './constants';
+import { prepareImportFormData } from './helpers';
 
 /**
- * Helper to prepare FormData for saved objects import
- * Returns buffer and headers ready to use with apiClient
+ * Tests for the Saved Objects Import API (_import) within individual spaces (default space and a "space_1" space).
+ *
+ * This test suite validates import behavior when operating within a single space at a time to ensure
+ * consistent behavior regardless of the space context.
  */
-const prepareImportFormData = (objects: Array<Record<string, any>>) => {
-  const ndjsonContent = objects.map((obj) => JSON.stringify(obj)).join('\n');
-  const formData = new FormData();
-  formData.append('file', ndjsonContent, 'import.ndjson');
-
-  return {
-    buffer: formData.getBuffer(),
-    headers: formData.getHeaders(),
-  };
-};
-
-// tests importing saved objects into a single space at a time
 TEST_SPACES.forEach((space) => {
+  // Note: since version 8.0, Kibana requires most saved objects to have globally unique IDs
+  // Learn more: https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects
+
   const spacePath = space.spaceId === 'default' ? '' : `s/${space.spaceId}/`;
 
   apiTest.describe(`_import API within the ${space.name} space`, { tag: tags.ESS_ONLY }, () => {
