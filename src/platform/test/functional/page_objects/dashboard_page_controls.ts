@@ -357,7 +357,7 @@ export class DashboardPageControls extends FtrService {
       await this.testSubjects.click(
         `optionsList-control-${controlId}`,
         500,
-        !ignoreTopOffsetOrOptions ? await this.panelActions.getContainerTopOffset() : undefined``
+        !ignoreTopOffsetOrOptions ? await this.panelActions.getContainerTopOffset() : undefined
       );
       await this.retry.waitForWithTimeout('popover to open', 500, async () => {
         return await this.testSubjects.exists(`optionsList-control-popover`);
