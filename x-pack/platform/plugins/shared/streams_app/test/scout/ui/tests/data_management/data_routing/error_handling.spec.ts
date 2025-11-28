@@ -12,10 +12,6 @@ test.describe(
   'Stream data routing - error handling and recovery',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    test.beforeAll(async ({ apiServices }) => {
-      await apiServices.streams.enable();
-    });
-
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.streams.gotoPartitioningTab('logs');
@@ -24,7 +20,6 @@ test.describe(
     test.afterAll(async ({ apiServices }) => {
       // Clear existing rules
       await apiServices.streams.clearStreamChildren('logs');
-      await apiServices.streams.disable();
     });
 
     test('should handle network failures during rule creation', async ({
