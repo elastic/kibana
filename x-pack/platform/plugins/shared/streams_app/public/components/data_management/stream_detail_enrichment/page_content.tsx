@@ -250,9 +250,11 @@ export function StreamDetailEnrichmentContentImpl() {
   );
 }
 
-const StepsEditor = React.memo(() => {
-  const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
+interface ErrorPanelsProps {
+  showBottomBar: boolean;
+}
 
+const ErrorPanels = React.memo<ErrorPanelsProps>(({ showBottomBar }) => {
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
 
   const validationErrors = useStreamEnrichmentSelector((state) =>
@@ -292,12 +294,22 @@ const StepsEditor = React.memo(() => {
     };
   }, [simulation]);
 
-  const hasSteps = !isEmpty(stepRefs);
+  const hasValidationErrors = !isEmpty(allValidationErrors);
+  const hasSimulationErrors =
+    !isEmpty(errors.ignoredFields) || !isEmpty(errors.mappingFailures) || errors.definition_error;
+  const hasAnyErrors = hasValidationErrors || hasSimulationErrors;
+
+  if (!hasAnyErrors) {
+    return null;
+  }
 
   return (
-    <>
-      {hasSteps ? <RootSteps stepRefs={stepRefs} /> : <NoStepsEmptyPrompt />}
-      {!isEmpty(allValidationErrors) && (
+    <div
+      css={css`
+        ${showBottomBar ? 'margin-bottom: 30px;' : ''}
+      `}
+    >
+      {hasValidationErrors && (
         <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
           <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
             <EuiAccordion
@@ -332,9 +344,7 @@ const StepsEditor = React.memo(() => {
           </EuiPanel>
         </EuiPanel>
       )}
-      {(!isEmpty(errors.ignoredFields) ||
-        !isEmpty(errors.mappingFailures) ||
-        errors.definition_error) && (
+      {hasSimulationErrors && (
         <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
           {errors.definition_error && (
             <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
@@ -367,7 +377,7 @@ const StepsEditor = React.memo(() => {
                   <p>
                     <FormattedMessage
                       id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
-                      defaultMessage="Some fields are malformed and won’t be stored correctly: {fields}"
+                      defaultMessage="Some fields are malformed and won't be stored correctly: {fields}"
                       values={{
                         fields: errors.ignoredFields.map((field) => (
                           <>
@@ -433,6 +443,21 @@ const StepsEditor = React.memo(() => {
           )}
         </EuiPanel>
       )}
+    </div>
+  );
+});
+
+const StepsEditor = React.memo(() => {
+  const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
+  const hasSteps = !isEmpty(stepRefs);
+  const canUpdate = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
+  const hasChanges = canUpdate && !isSimulating;
+
+  return (
+    <>
+      {hasSteps ? <RootSteps stepRefs={stepRefs} /> : <NoStepsEmptyPrompt />}
+      <ErrorPanels showBottomBar={hasChanges} />
     </>
   );
 });
