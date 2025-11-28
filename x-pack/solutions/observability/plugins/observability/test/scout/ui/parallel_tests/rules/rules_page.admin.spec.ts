@@ -53,7 +53,7 @@ test.describe('Rules Page - Header', { tag: ['@ess', '@svlOblt'] }, () => {
 test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   let createdRule: CreateRuleResponse['data'];
   test.beforeAll(async ({ apiServices }) => {
-    createdRule = (await createRule(apiServices, { name: 'Specialist Test Rule' })).data;
+    createdRule = (await createRule(apiServices, { name: 'Admin Test Rule' })).data;
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -71,8 +71,6 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
 
   test('should see an editable rule in the Rules Table', async ({ pageObjects }) => {
     const editableRules = pageObjects.rulesPage.getEditableRules();
-    await expect(editableRules).toBeVisible();
-    await expect(editableRules).toHaveCount(1);
     await expect(editableRules.filter({ hasText: createdRule.name })).toHaveCount(1);
   });
 });

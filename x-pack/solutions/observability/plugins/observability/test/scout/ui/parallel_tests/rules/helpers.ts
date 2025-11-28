@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApiServicesFixture, BrowserAuthFixture, SamlAuth } from '@kbn/scout-oblt';
+import type { ApiServicesFixture } from '@kbn/scout-oblt';
 
 import type { CreateRuleResponse } from './types';
 
