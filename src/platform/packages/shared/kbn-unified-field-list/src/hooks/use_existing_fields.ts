@@ -16,20 +16,17 @@ import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import useLatest from 'react-use/lib/useLatest';
 import { loadFieldExisting } from '../services/field_existing';
-import { ExistenceFetchStatus } from '../types';
+import {
+  ExistenceFetchStatus,
+  type ExistingFieldsInfo,
+  type ExistingFieldsByDataViewMap,
+} from '../types';
 
 const getBuildEsQueryAsync = async () => (await import('@kbn/es-query')).buildEsQuery;
 const generateId = htmlIdGenerator();
 const DEFAULT_EMPTY_NEW_FIELDS: FieldSpec[] = [];
-
-export interface ExistingFieldsInfo {
-  fetchStatus: ExistenceFetchStatus;
-  existingFieldsByFieldNameMap: Record<string, boolean>;
-  newFields?: FieldSpec[];
-  numberOfFetches: number;
-  hasDataViewRestrictions?: boolean;
-}
 
 export interface ExistingFieldsFetcherParams {
   disableAutoFetching?: boolean;
@@ -44,9 +41,12 @@ export interface ExistingFieldsFetcherParams {
     dataViews: DataViewsContract;
   };
   onNoData?: (dataViewId: string) => unknown;
+  /**
+   * Custom container for existing fields info map
+   */
+  initialExistingFieldsInfoMap?: ExistingFieldsByDataViewMap;
+  onInitialExistingFieldsInfoMapChange?: (map: ExistingFieldsByDataViewMap) => void;
 }
-
-type ExistingFieldsByDataViewMap = Record<string, ExistingFieldsInfo>;
 
 export interface ExistingFieldsFetcher {
   refetchFieldsExistenceInfo: (dataViewId?: string) => Promise<void>;
@@ -79,9 +79,16 @@ let lastFetchId: string = ''; // persist last fetch id to skip older requests/re
 export const useExistingFieldsFetcher = (
   params: ExistingFieldsFetcherParams
 ): ExistingFieldsFetcher => {
+  const { initialExistingFieldsInfoMap, onInitialExistingFieldsInfoMapChange } = params;
   const mountedRef = useRef<boolean>(true);
   const [activeRequests, setActiveRequests] = useState<number>(0);
   const isProcessing = activeRequests > 0;
+  const restoredMapRef = useRef<ExistingFieldsByDataViewMap | undefined>(
+    initialExistingFieldsInfoMap && Object.keys(initialExistingFieldsInfoMap).length
+      ? initialExistingFieldsInfoMap
+      : undefined
+  );
+  const onInitialExistingFieldsInfoMapChangeRef = useLatest(onInitialExistingFieldsInfoMapChange);
 
   const fetchFieldsExistenceInfo = useCallback(
     async ({
@@ -98,7 +105,26 @@ export const useExistingFieldsFetcher = (
       fetchId: string;
     }): Promise<void> => {
       if (!dataViewId || !query || !fromDate || !toDate) {
+        if (restoredMapRef.current) {
+          restoredMapRef.current = undefined;
+          onInitialExistingFieldsInfoMapChangeRef?.current?.({});
+        }
         return;
+      }
+
+      if (restoredMapRef.current) {
+        const currentMap = globalMap$.getValue();
+        const restoredMap = restoredMapRef.current;
+        const restoredInfo = restoredMap[dataViewId];
+        restoredMapRef.current = undefined;
+        if (restoredInfo?.fetchStatus === ExistenceFetchStatus.succeeded) {
+          globalMap$.next({
+            ...currentMap,
+            [dataViewId]: restoredInfo,
+          });
+          // already have data for this data view from the restored state
+          return;
+        }
       }
 
       const currentInfo = globalMap$.getValue()?.[dataViewId];
@@ -169,16 +195,20 @@ export const useExistingFieldsFetcher = (
       }
 
       // skip redundant and older results
-      if (mountedRef.current && fetchId === lastFetchId) {
-        globalMap$.next({
+      if (fetchId === lastFetchId) {
+        const nextMap = {
           ...globalMap$.getValue(),
           [dataViewId]: info,
-        });
+        };
+        onInitialExistingFieldsInfoMapChangeRef.current?.(nextMap);
+        if (mountedRef.current) {
+          globalMap$.next(nextMap);
+        }
       }
 
       setActiveRequests((value) => value - 1);
     },
-    [mountedRef, setActiveRequests]
+    [mountedRef, setActiveRequests, onInitialExistingFieldsInfoMapChangeRef]
   );
 
   const dataViewsHash = getDataViewsHash(params.dataViews);

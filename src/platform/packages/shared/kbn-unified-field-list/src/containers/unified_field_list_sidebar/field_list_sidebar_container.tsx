@@ -39,6 +39,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { prepareDataViewForEditing } from '@kbn/discover-utils';
 import {
   useExistingFieldsFetcher,
+  type ExistingFieldsFetcherParams,
   type ExistingFieldsFetcher,
 } from '../../hooks/use_existing_fields';
 import { useQuerySubscriber } from '../../hooks/use_query_subscriber';
@@ -154,6 +155,12 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
 
   initialState?: UnifiedFieldListSidebarContainerPropsWithRestorableState['initialState'];
   onInitialStateChange?: UnifiedFieldListSidebarContainerPropsWithRestorableState['onInitialStateChange'];
+
+  /**
+   * Custom container for existing fields info map
+   */
+  initialExistingFieldsInfoMap?: ExistingFieldsFetcherParams['initialExistingFieldsInfoMap'];
+  onInitialExistingFieldsInfoMapChange?: ExistingFieldsFetcherParams['onInitialExistingFieldsInfoMapChange'];
 };
 
 /**
@@ -177,6 +184,8 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     variant = 'responsive',
     onFieldEdited,
     additionalFilters,
+    initialExistingFieldsInfoMap,
+    onInitialExistingFieldsInfoMapChange,
   } = props;
   const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
     createStateService({ options: getCreationOptions() })
@@ -230,6 +239,8 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     fromDate: querySubscriberResult.fromDate,
     toDate: querySubscriberResult.toDate,
     services,
+    initialExistingFieldsInfoMap,
+    onInitialExistingFieldsInfoMapChange,
   });
 
   const editField = useMemo(

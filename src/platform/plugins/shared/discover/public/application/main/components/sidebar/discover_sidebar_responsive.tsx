@@ -384,6 +384,23 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [dispatch, setFieldListUiState]
   );
 
+  const fieldListExistingFieldsInfoMapUiState = useCurrentTabSelector(
+    (state) => state.uiState.fieldListExistingFieldsInfoMap
+  );
+  const setFieldListExistingFieldsInfoMapUiState = useCurrentTabAction(
+    internalStateActions.setFieldListExistingFieldsInfoMapUiState
+  );
+  const onInitialExistingFieldsInfoMapChange = useCallback(
+    (newUiState: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfoMap']) => {
+      dispatch(
+        setFieldListExistingFieldsInfoMapUiState({
+          fieldListExistingFieldsInfoMap: newUiState,
+        })
+      );
+    },
+    [dispatch, setFieldListExistingFieldsInfoMapUiState]
+  );
+
   return (
     <EuiFlexGroup
       gutterSize="none"
@@ -416,6 +433,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             workspaceSelectedFieldNames={columns}
             initialState={fieldListUiState}
             onInitialStateChange={onInitialStateChange}
+            initialExistingFieldsInfoMap={fieldListExistingFieldsInfoMapUiState}
+            onInitialExistingFieldsInfoMapChange={onInitialExistingFieldsInfoMapChange}
           />
         ) : null}
       </EuiFlexItem>
