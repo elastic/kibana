@@ -101,7 +101,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onSe
     {
       key: 'synthetics',
       title: i18n.translate('xpack.cloudConnect.services.synthetics.title', {
-        defaultMessage: 'Synthetic',
+        defaultMessage: 'Synthetics',
       }),
       enabled: false,
       badge: i18n.translate('xpack.cloudConnect.services.comingSoon', {
