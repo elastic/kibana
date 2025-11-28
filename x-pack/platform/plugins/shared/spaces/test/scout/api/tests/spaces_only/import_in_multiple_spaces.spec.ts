@@ -246,7 +246,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
       expect(importResponse2.body.successResults[0].id).toBe(uniqueId);
 
       const newID = importResponse2.body.successResults[0].destinationId;
-      createdSavedObjects.push({ type: 'dashboard', id: newID });
+      createdSavedObjects.push({ type: 'dashboard', id: newID, spaceId: SPACES.SPACE_2.spaceId });
 
       // Verify that a new ID was generated
       expect(newID).not.toBe(uniqueId);
