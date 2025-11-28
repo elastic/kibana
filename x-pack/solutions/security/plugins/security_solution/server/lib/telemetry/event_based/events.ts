@@ -403,7 +403,6 @@ export const ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT: EventTypeOpts<{
   snapshotIndex: string;
   entityCount: number;
   durationMs: number;
-  interval: string;
   success: boolean;
   errorMessage: string | undefined;
 }> = {
@@ -454,7 +453,7 @@ export const ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT: EventTypeOpts<{
       },
     },
     errorMessage: {
-      type: 'string',
+      type: 'keyword',
       _meta: {
         optional: true,
         description: 'Contains the error message in case the task run failed (success: false)',
@@ -464,40 +463,152 @@ export const ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT: EventTypeOpts<{
 };
 
 export const ENTITY_STORE_HEALTH_REPORT_EVENT: EventTypeOpts<{
-  engines: [
-    {
-      type: string;
-      status: string;
-      delay: string;
-      frequency: string;
-      docsPerSecond: number;
-      lookbackPeriod: string;
-      fieldHistoryLength: number;
-      indexPattern: string;
-      filter: string;
-      timestampField: string;
-      maxPageSearchSize: number;
-      components: [
-        {
-          id: string;
-          resource: string;
-          installed: boolean;
-          health: string | undefined;
-          enabled: bool | undefined;
-          status: string | undefined;
-          lastRun: string | undefined;
-          nextRun: string | undefined;
-        }
-      ];
-    }
-  ];
+  engines: Array<{
+    type: string;
+    status: string;
+    delay: string;
+    frequency: string;
+    docsPerSecond: number;
+    lookbackPeriod: string;
+    fieldHistoryLength: number;
+    indexPattern: string;
+    filter: string;
+    timestampField: string;
+    maxPageSearchSize: number;
+    components: Array<{
+      id: string;
+      resource: string;
+      installed: boolean;
+      health?: string;
+      enabled?: boolean;
+      status?: string;
+      lastRun?: string;
+      nextRun?: string;
+    }>;
+  }>;
 }> = {
   eventType: 'entity_store_health_report',
   schema: {
     engines: {
       type: 'array',
-      _meta: {
-        description: 'TODO',
+      items: {
+        properties: {
+          type: {
+            type: 'keyword',
+            _meta: { description: 'Engine type (e.g "host" or "generic")' },
+          },
+          status: {
+            type: 'keyword',
+            _meta: {
+              description: 'Overall engine status',
+            },
+          },
+          delay: {
+            type: 'keyword',
+            _meta: {
+              description: 'Initial data processing delay (human readable, e.g., "5s")',
+            },
+          },
+          frequency: {
+            type: 'keyword',
+            _meta: { description: 'Run frequency (e.g., "1m", "15m")' },
+          },
+          docsPerSecond: {
+            type: 'double',
+            _meta: { description: 'Indexing rate in documents per second' },
+          },
+          lookbackPeriod: {
+            type: 'keyword',
+            _meta: {
+              description: 'Lookback period used by the engine (e.g., "7d")',
+            },
+          },
+          fieldHistoryLength: {
+            type: 'long',
+            _meta: {
+              description: 'Number of historical field entries retained',
+            },
+          },
+          indexPattern: {
+            type: 'keyword',
+            _meta: { description: 'Additional index pattern ingested by the transform' },
+          },
+          filter: {
+            type: 'keyword',
+            _meta: {
+              description: 'Optional filter applied to ingested documents',
+            },
+          },
+          timestampField: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'Name of the timestamp field used for all operations (e.g. "@timestamp")',
+            },
+          },
+          maxPageSearchSize: {
+            type: 'long',
+            _meta: {
+              description: 'Maximum page size',
+            },
+          },
+          components: {
+            type: 'array',
+            items: {
+              properties: {
+                id: {
+                  type: 'keyword',
+                  _meta: { description: 'Component identifier' },
+                },
+                resource: {
+                  type: 'keyword',
+                  _meta: {
+                    description: 'Type of the component (e.g. "index" or "transform")',
+                  },
+                },
+                installed: {
+                  type: 'boolean',
+                  _meta: { description: 'Whether the component is installed' },
+                },
+                health: {
+                  type: 'keyword',
+                  _meta: {
+                    optional: true,
+                    description: 'Reported component health; Present for transforms',
+                  },
+                },
+                enabled: {
+                  type: 'boolean',
+                  _meta: {
+                    optional: true,
+                    description: 'Whether the task is enabled; Present for tasks',
+                  },
+                },
+                status: {
+                  type: 'keyword',
+                  _meta: {
+                    optional: true,
+                    description: 'Task status (e.g., "running", "idle")',
+                  },
+                },
+                lastRun: {
+                  type: 'keyword',
+                  _meta: {
+                    optional: true,
+                    description: 'Last run timestamp; Present for tasks',
+                  },
+                },
+                nextRun: {
+                  type: 'keyword',
+                  _meta: {
+                    optional: true,
+                    description: 'Next scheduled run timestamp; Present for tasks',
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
   },

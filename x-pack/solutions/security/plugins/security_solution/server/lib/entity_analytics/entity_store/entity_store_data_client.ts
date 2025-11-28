@@ -101,6 +101,7 @@ import {
   createEntityResetIndex,
   deleteEntityResetIndex,
   getEntityResetIndexStatus,
+  getEntitySnapshotIndexStatus,
 } from './elasticsearch_assets';
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import {
@@ -271,6 +272,11 @@ export class EntityStoreDataClient {
             esClient: this.esClient,
             namespace,
           }),
+          ...(await getEntitySnapshotIndexStatus({
+            entityType: type,
+            esClient: this.esClient,
+            namespace,
+          })),
           getEntityUpdatesDataStreamStatus(type, this.esClient, namespace),
           ...(await getEntityILMPolicyStatuses({
             esClient: this.esClient,

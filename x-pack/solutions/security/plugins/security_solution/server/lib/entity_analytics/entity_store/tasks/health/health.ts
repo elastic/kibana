@@ -28,21 +28,31 @@ import { SCOPE, TIMEOUT, TYPE, VERSION, MAX_ATTEMPTS, SCHEDULE } from './constan
 import { entityStoreTaskLogMessageFactory } from '../utils';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { ENTITY_STORE_HEALTH_REPORT_EVENT } from '../../../../telemetry/event_based/events';
+import type {
+  GetEntityStoreStatusRequestQuery,
+  GetEntityStoreStatusResponse,
+} from '../../../../../../common/api/entity_analytics/entity_store/status.gen';
 
 function getTaskId(namespace: string): string {
   return `${TYPE}:${namespace}:${VERSION}`;
 }
+
+export type EntityStoreStatusHandler = ({
+  include_components,
+}: GetEntityStoreStatusRequestQuery) => Promise<GetEntityStoreStatusResponse>;
 
 export function registerEntityStoreHealthTask({
   logger,
   telemetry,
   taskManager,
   getStartServices,
+  entityStoreStatusHandler,
 }: {
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
   taskManager: TaskManagerSetupContract | undefined;
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
+  entityStoreStatusHandler: EntityStoreStatusHandler;
 }): void {
   if (!taskManager) {
     logger.warn(
@@ -71,6 +81,7 @@ export function registerEntityStoreHealthTask({
               telemetry,
               context,
               esClientGetter,
+              entityStoreStatusHandler,
             });
           },
           async cancel() {
@@ -146,11 +157,13 @@ export async function runTask({
   telemetry,
   context,
   esClientGetter,
+  entityStoreStatusHandler,
 }: {
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
   context: RunContext;
   esClientGetter: () => Promise<ElasticsearchClient>;
+  entityStoreStatusHandler: EntityStoreStatusHandler;
 }): Promise<{
   state: EntityStoreHealthTaskState;
 }> {
@@ -159,14 +172,16 @@ export async function runTask({
   const abort: AbortController = context.abortController;
   const msg = entityStoreTaskLogMessageFactory(taskId);
   const esClient: ElasticsearchClient = await esClientGetter();
-  const event = {};
+  const namespace = context.taskInstance.params.namespace as string;
   const taskStartTime = moment().utc();
   try {
     // TODO
-    telemetry.reportEvent(ENTITY_STORE_HEALTH_REPORT_EVENT.eventType, event);
-    return {
-      state: updatedState,
-    };
+
+    const statusResponse = await entityStoreStatusHandler({ include_components: true });
+    statusResponse.engines.forEach((engine) => {
+      telemetry.reportEvent(ENTITY_STORE_HEALTH_REPORT_EVENT.eventType, engine);
+    });
+    return { state };
   } catch (e) {
     logger.error(msg(`error running task, received ${e.message}`));
     throw e;
