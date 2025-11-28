@@ -19,7 +19,7 @@ import { setUnifiedDocViewerServices } from '../../plugin';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { merge } from 'lodash';
 import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
-import type { TraceIndexes } from '@kbn/discover-utils/src';
+import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { hasErrorFields } from './utils/has_error_fields';
 
 jest.mock('@elastic/eui', () => ({
@@ -152,7 +152,7 @@ setUnifiedDocViewerServices(
   merge(mockUnifiedDocViewerServices, getCustomUnifedDocViewerServices())
 );
 
-const indexes: TraceIndexes = {
+const indexes: ObservabilityIndexes = {
   apm: {
     errors: 'apm-error-index',
     traces: 'apm-trace-index',

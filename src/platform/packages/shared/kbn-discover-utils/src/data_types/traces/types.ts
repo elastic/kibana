@@ -57,8 +57,7 @@ export interface TraceDocument extends DataTableRecord {
   };
 }
 
-export interface TraceIndexes {
-  logs?: string;
+export interface ObservabilityIndexes {
   apm: {
     errors?: string;
     traces?: string;

@@ -21,7 +21,7 @@ import type {
   ObservabilityLogsAIAssistantFeature,
   ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
-import type { LogDocument, TraceIndexes } from '@kbn/discover-utils/src';
+import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { getStacktraceFields } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
 import { LogsOverviewHeader } from './logs_overview_header';
@@ -43,7 +43,7 @@ export type LogsOverviewProps = DocViewRenderProps & {
   renderAIAssistant?: ObservabilityLogsAIAssistantFeature['render'];
   renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
-  indexes: TraceIndexes;
+  indexes: ObservabilityIndexes;
   showTraceWaterfall?: boolean;
 };
 
