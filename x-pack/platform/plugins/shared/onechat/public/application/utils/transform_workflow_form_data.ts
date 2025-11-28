@@ -6,7 +6,6 @@
  */
 
 import type { WorkflowToolDefinition } from '@kbn/onechat-common/tools';
-import { WORKFLOW_WAIT_FOR_DEFAULT } from '@kbn/onechat-common/tools/types/workflow';
 import { ToolType } from '@kbn/onechat-common';
 import { omit } from 'lodash';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
@@ -19,7 +18,7 @@ export const transformWorkflowToolToFormData = (
     toolId: tool.id,
     description: tool.description,
     workflow_id: tool.configuration.workflow_id,
-    wait_for: tool.configuration.wait_for ?? WORKFLOW_WAIT_FOR_DEFAULT,
+    wait_for_completion: String(tool.configuration.wait_for_completion ?? true),
     labels: tool.tags,
     type: ToolType.workflow,
   };
@@ -34,7 +33,7 @@ export const transformFormDataToWorkflowTool = (
     readonly: false,
     configuration: {
       workflow_id: data.workflow_id,
-      wait_for: data.wait_for,
+      wait_for_completion: data.wait_for_completion === 'true',
     },
     type: ToolType.workflow,
     tags: data.labels,

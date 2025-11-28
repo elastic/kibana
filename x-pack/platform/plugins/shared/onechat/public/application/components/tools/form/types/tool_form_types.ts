@@ -50,7 +50,7 @@ export interface IndexSearchToolFormData extends BaseToolFormData {
 export interface WorkflowToolFormData extends BaseToolFormData {
   type: ToolType.workflow;
   workflow_id: string;
-  wait_for: number;
+  wait_for_completion: string;
 }
 
 export type ToolFormData =

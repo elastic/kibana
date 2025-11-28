@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { ExecutionStatus as WorkflowExecutionStatus } from '@kbn/workflows/types/v1';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ToolHandlerResult } from '@kbn/onechat-server/tools';
-import { WORKFLOW_WAIT_FOR_DEFAULT } from '@kbn/onechat-common/tools/types/workflow';
+import { WAIT_FOR_COMPLETION_TIMEOUT_SEC } from '@kbn/onechat-common/tools/types/workflow';
 import {
   getExecutionState,
   type WorkflowExecutionState,
@@ -18,8 +18,8 @@ import { errorResult, otherResult } from '@kbn/onechat-genai-utils/tools/utils/r
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
-const DEFAULT_INITIAL_WAIT = 1;
-const DEFAULT_CHECK_INTERVAL = 2.5;
+const INITIAL_WAIT_MS = 1_000;
+const CHECK_INTERVAL_MS = 2_500;
 
 const finalStatuses = [WorkflowExecutionStatus.COMPLETED, WorkflowExecutionStatus.FAILED];
 
@@ -29,15 +29,11 @@ export const executeWorkflow = async ({
   request,
   spaceId,
   workflowApi,
-  waitFor = WORKFLOW_WAIT_FOR_DEFAULT,
-  initialWait = DEFAULT_INITIAL_WAIT,
-  checkInterval = DEFAULT_CHECK_INTERVAL,
+  waitForCompletion = true,
 }: {
   workflowId: string;
   workflowParams: Record<string, unknown>;
-  waitFor?: number;
-  initialWait?: number;
-  checkInterval?: number;
+  waitForCompletion?: boolean;
   request: KibanaRequest;
   spaceId: string;
   workflowApi: WorkflowApi;
@@ -73,7 +69,7 @@ export const executeWorkflow = async ({
   const waitStart = Date.now();
   const waitLimit = waitStart + waitFor * 1000;
 
-  await waitMs(initialWait * 1000);
+  await waitMs(INITIAL_WAIT_MS);
 
   let execution: WorkflowExecutionState | null | undefined;
   do {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { useFormContext, Controller } from 'react-hook-form';
 import { WorkflowPicker } from '../../components/workflow/workflow_picker';
 import type { WorkflowToolFormData } from '../../types/tool_form_types';
@@ -28,22 +28,28 @@ export const WorkflowConfiguration = () => {
         <WorkflowPicker />
       </EuiFormRow>
       <EuiFormRow
-        label={i18nMessages.configuration.form.workflow.waitForLabel}
-        helpText={i18nMessages.configuration.form.workflow.waitForHelpText}
-        isInvalid={!!errors.wait_for}
-        error={errors.wait_for?.message}
+        label={i18nMessages.configuration.form.workflow.waitForCompletionLabel}
+        helpText={i18nMessages.configuration.form.workflow.waitForCompletionHelpText}
+        isInvalid={!!errors.wait_for_completion}
+        error={errors.wait_for_completion?.message}
       >
         <Controller
-          name="wait_for"
+          name="wait_for_completion"
           control={control}
-          render={({ field }) => (
-            <EuiFieldNumber
+          render={({ field: { ref, ...field } }) => (
+            <EuiSelect
+              options={[
+                {
+                  value: 'true',
+                  text: i18nMessages.configuration.form.workflow.waitForCompletionYesLabel,
+                },
+                {
+                  value: 'false',
+                  text: i18nMessages.configuration.form.workflow.waitForCompletionNoLabel,
+                },
+              ]}
               {...field}
-              onChange={(e) =>
-                field.onChange(isNaN(e.target.valueAsNumber) ? undefined : e.target.valueAsNumber)
-              }
-              min={1}
-              step={1}
+              inputRef={ref}
             />
           )}
         />

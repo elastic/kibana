@@ -11,10 +11,10 @@ import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from '..
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type WorkflowToolConfig = {
   workflow_id: string;
-  wait_for?: number;
+  wait_for_completion?: boolean;
 };
 
-export const WORKFLOW_WAIT_FOR_DEFAULT = 60;
+export const WAIT_FOR_COMPLETION_TIMEOUT_SEC = 60;
 
 export type WorkflowToolDefinition = ToolDefinition<ToolType.workflow, WorkflowToolConfig>;
 export type WorkflowToolDefinitionWithSchema = ToolDefinitionWithSchema<
