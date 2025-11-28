@@ -40,7 +40,7 @@ check_for_changed_files() {
       echo "'$1' caused changes to the following files:"
       echo "$GIT_CHANGES"
       echo ""
-      echo "Auto-committing & pushing these changes now."
+      echo "Auto-committing these changes (will push after all checks complete)."
 
       git config --global user.name kibanamachine
       git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
@@ -48,11 +48,12 @@ check_for_changed_files() {
       git add -A -- . ':!config/node.options' ':!config/kibana.yml'
 
       git commit -m "$CUSTOM_FIX_MESSAGE"
-      git push
 
-      # Wait to ensure all commits arrive before we terminate the build
-      sleep 300
-      # Still exit with error to fail the current build, a new build should be started after the push
+      # Mark that commits were made (for batch push at the end)
+      # Use a file to track this across processes
+      QUICK_CHECKS_COMMITS_FILE="${QUICK_CHECKS_COMMITS_FILE:-.quick_checks_commits_marker}"
+      touch "$QUICK_CHECKS_COMMITS_FILE"
+      echo "$CUSTOM_FIX_MESSAGE" >> "$QUICK_CHECKS_COMMITS_FILE"
       exit 1
     else
       echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
