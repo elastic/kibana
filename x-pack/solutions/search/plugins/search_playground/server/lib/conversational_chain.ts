@@ -98,6 +98,29 @@ position: ${i + 1}
   return serializedDocs.join('\n');
 };
 
+const messageContentToString = (content: BaseMessage['content']): string => {
+  if (typeof content === 'string') {
+    return content;
+  }
+  if (Array.isArray(content)) {
+    return content
+      .map((part) => {
+        if (typeof part === 'string') {
+          return part;
+        }
+        if (typeof part === 'object' && part !== null) {
+          if ('text' in part && typeof part.text === 'string') {
+            return part.text;
+          }
+        }
+        return '';
+      })
+      .filter(Boolean)
+      .join('\n');
+  }
+  return '';
+};
+
 export function contextLimitCheck(
   modelLimit: number | undefined,
   prompt: ChatPromptTemplate
@@ -129,10 +152,11 @@ type PlaygroundAnnotation =
   | { type: 'search_query'; question: string };
 
 interface PlaygroundDataTypes {
+  [key: string]: unknown;
   message_annotations: PlaygroundAnnotation[];
 }
 
-type PlaygroundUIMessage = UIMessage<undefined, PlaygroundDataTypes>;
+type PlaygroundUIMessage = UIMessage<unknown, PlaygroundDataTypes>;
 type PlaygroundStreamWriter = UIMessageStreamWriter<PlaygroundUIMessage>;
 type PlaygroundMessageChunk = InferUIMessageChunk<PlaygroundUIMessage>;
 
@@ -171,7 +195,8 @@ class ConversationalChainFn {
         const messages = msgs ?? [];
         const lcMessages = getMessages(messages);
         const previousMessages = lcMessages.slice(0, -1);
-        const question = lcMessages[lcMessages.length - 1]!.content;
+        const lastMessageContent = lcMessages[lcMessages.length - 1]?.content;
+        const question = messageContentToString(lastMessageContent ?? '');
         const retrievedDocs: Document[] = [];
 
         let retrievalChain: Runnable = RunnableLambda.from(() => '');

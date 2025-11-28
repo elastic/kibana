@@ -130,7 +130,7 @@ export async function parseDataStream({
     } else if (type === 'data-message_annotations' && 'data' in chunk) {
       const annotationsChunk = chunk as Extract<
         UIMessageChunk,
-        { type: 'data-message_annotations' }
+        { type: `data-${string}`; data: unknown }
       >;
       const annotationValues = annotationsChunk.data as Annotation[];
       if (!messageAnnotations) {
