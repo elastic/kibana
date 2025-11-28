@@ -155,13 +155,13 @@ test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     await expect(pageObjects.rulesPage.statusFilter).toBeEnabled();
   });
 
-  test('should persist logs tab selection in URL', async ({ pageObjects }) => {
+  test('should persist logs tab selection in URL', async ({ page, pageObjects }) => {
     // Navigate to logs tab
     await pageObjects.rulesPage.clickLogsTab();
     await pageObjects.rulesPage.expectLogsContentLoaded();
 
     // Verify URL contains logs tab indicator
-    const url = pageObjects.rulesPage.page.url();
+    const url = page.url();
     expect(url).toContain('logs');
   });
 });
