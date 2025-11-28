@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/test'
   - '@kbn/inference-prompt-utils'
+  - '@kbn/tracing-utils'
 tags:
   - test-helper
   - package
