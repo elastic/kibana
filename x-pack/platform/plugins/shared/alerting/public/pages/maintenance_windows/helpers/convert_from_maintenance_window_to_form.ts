@@ -74,6 +74,13 @@ export const convertFromMaintenanceWindowToForm = (
     }
   }
 
+  if (frequency === Frequency.DAILY && rRule.byweekday) {
+    recurringSchedule.byweekday = getInitialByWeekday(
+      rRule.byweekday as string[],
+      moment(startDate)
+    );
+  }
+
   form.recurringSchedule = recurringSchedule;
 
   return form;

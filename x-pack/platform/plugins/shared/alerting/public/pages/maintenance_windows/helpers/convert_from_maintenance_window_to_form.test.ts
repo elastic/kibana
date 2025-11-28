@@ -239,6 +239,34 @@ describe('convertFromMaintenanceWindowToForm', () => {
     });
   });
 
+  test('should handle a maintenance window with recurring on a daily schedule and weekdays', () => {
+    const maintenanceWindow = convertFromMaintenanceWindowToForm({
+      title,
+      duration,
+      rRule: {
+        dtstart: startDate.toISOString(),
+        tzid: 'UTC',
+        freq: Frequency.DAILY,
+        interval: 1,
+        byweekday: ['MO', 'TU', 'WE', 'TH', 'FR'],
+      },
+    } as MaintenanceWindow);
+
+    expect(maintenanceWindow).toEqual({
+      title,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      timezone: ['UTC'],
+      recurring: true,
+      recurringSchedule: {
+        ends: 'never',
+        frequency: Frequency.DAILY,
+        interval: 1,
+        byweekday: { 1: true, 2: true, 3: true, 4: true, 5: true, 6: false, 7: false },
+      },
+    });
+  });
+
   test('should convert a maintenance window that is recurring on a custom weekly schedule', () => {
     const maintenanceWindow = convertFromMaintenanceWindowToForm({
       title,

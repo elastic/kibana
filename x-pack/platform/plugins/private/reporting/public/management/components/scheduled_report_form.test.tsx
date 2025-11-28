@@ -142,15 +142,6 @@ describe('ScheduledReportForm', () => {
       expect(onSubmitForm).toHaveBeenCalledWith(
         {
           recurringSchedule: {
-            byweekday: {
-              1: true,
-              2: false,
-              3: false,
-              4: false,
-              5: false,
-              6: false,
-              7: false,
-            },
             frequency: 3,
           },
           reportTypeId: 'printablePdfV2',
@@ -200,15 +191,6 @@ describe('ScheduledReportForm', () => {
         expect(onSubmitForm).toHaveBeenCalledWith(
           {
             recurringSchedule: {
-              byweekday: {
-                1: true,
-                2: false,
-                3: false,
-                4: false,
-                5: false,
-                6: false,
-                7: false,
-              },
               frequency: 3,
             },
             reportTypeId: 'printablePdfV2',

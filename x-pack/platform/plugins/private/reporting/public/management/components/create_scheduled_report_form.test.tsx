@@ -170,7 +170,6 @@ describe('createScheduledReportForm', () => {
               rrule: {
                 byhour: [12],
                 byminute: [0],
-                byweekday: ['MO'],
                 freq: 3,
                 interval: 1,
                 dtstart: '2025-11-10T12:00:00.000Z',
