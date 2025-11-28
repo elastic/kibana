@@ -236,8 +236,7 @@ export const registerClustersRoute = ({
             return response.ok({
               body: {
                 success: true,
-                warning:
-                  'EIS was enabled but inference could not be configured. Contact support.',
+                warning: 'EIS was enabled but inference could not be configured. Contact support.',
               },
             });
           }
@@ -252,7 +251,8 @@ export const registerClustersRoute = ({
             return response.ok({
               body: {
                 success: true,
-                warning: 'Cluster service updated, but failed to update Cloud Connect inference settings.',
+                warning:
+                  'Cluster service updated, but failed to update Cloud Connect inference settings.',
                 warningError: (inferenceError as Error).message,
               },
             });
