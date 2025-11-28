@@ -652,21 +652,14 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   private getInheritedFailureStoreFromAncestors(
     ancestors: Streams.WiredStream.Definition[]
   ): FailureStore {
-    const ancestorIds = getAncestorsAndSelf(this._definition.name).reverse();
+    const ancestorsAndSelf = [...ancestors, this._definition].reverse();
 
-    for (const ancestorId of ancestorIds) {
-      const ancestorDefinition =
-        ancestorId === this._definition.name
-          ? this._definition
-          : ancestors.find((ancestor) => ancestor.name === ancestorId);
-
-      if (!ancestorDefinition) {
-        throw new Error(
-          `Failed to resolve failure store for stream ${this._definition.name}: ancestor ${ancestorId} not found`
-        );
+    for (const ancestor of ancestorsAndSelf) {
+      if (!ancestor) {
+        throw new Error(`Failed to resolve failure store for stream ${this._definition.name}`);
       }
 
-      const ancestorFailureStore = ancestorDefinition.ingest.failure_store;
+      const ancestorFailureStore = ancestor.ingest.failure_store;
       if (!isInheritFailureStore(ancestorFailureStore)) {
         return ancestorFailureStore;
       }
