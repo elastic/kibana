@@ -56,6 +56,10 @@ export type StepEvent =
       type: 'step.changeCondition';
       step: StreamlangWhereBlockWithUIAttributes;
     }
+  | {
+      type: 'step.changeDescription';
+      description?: string;
+    }
   | { type: 'step.delete' }
   | { type: 'step.edit' }
   | { type: 'step.save' };
