@@ -61,7 +61,7 @@ export function ErrorSampleAgentBuilderAiInsight({
 
   const [lastUsedConnectorId] = useLocalStorage('agentBuilder.lastUsedConnector', '');
 
-  const fetchContextualInsights = async () => {
+  const fetchAiInsights = async () => {
     // if (!onechat || !isObservabilityAgentEnabled || !start || !end || !error?.error?.id) {
     //   return;
     // }
@@ -149,9 +149,9 @@ export function ErrorSampleAgentBuilderAiInsight({
         type: 'text',
         getContent: () => ({
           content: dedent(`
-            <contextual_instructions>
+            <ai_insight_instructions>
               Only call tools if the attachments do not contain the necessary data to analyze the error.
-            </contextual_instructions>`),
+            </ai_insight_instructions>`),
         }),
       },
       {
@@ -172,22 +172,19 @@ export function ErrorSampleAgentBuilderAiInsight({
   return (
     <>
       <AiInsight
-        title={i18n.translate('xpack.apm.errorGroupContextualInsight.explainErrorTitle', {
+        title={i18n.translate('xpack.apm.errorGroupAiInsight.explainErrorTitle', {
           defaultMessage: "What's this error?",
         })}
-        description={i18n.translate(
-          'xpack.apm.errorGroupContextualInsight.explainErrorDescription',
-          {
-            defaultMessage: 'Get helpful insights from our Elastic AI Agent',
-          }
-        )}
+        description={i18n.translate('xpack.apm.errorGroupAiInsight.explainErrorDescription', {
+          defaultMessage: 'Get helpful insights from our Elastic AI Agent',
+        })}
         content={summary}
         isLoading={isLoading}
-        onOpen={fetchContextualInsights}
+        onOpen={fetchAiInsights}
         onStartConversation={() => {
           onechat.openConversationFlyout({
             attachments,
-            sessionTag: 'apm-error-context',
+            sessionTag: 'apm-error-ai-insight',
             newConversation: true,
           });
         }}

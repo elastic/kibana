@@ -48,7 +48,7 @@ const observabilityAgentBuilderAiInsightsRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
 
     if (!plugins.inference) {
-      throw new Error('Unable to generate contextual insights');
+      throw new Error('Unable to generate AI insights');
     }
 
     const inferenceStart = await plugins.inference.start();
