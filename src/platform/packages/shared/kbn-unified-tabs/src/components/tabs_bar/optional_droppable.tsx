@@ -11,7 +11,7 @@ import React, { type FC } from 'react';
 import { css } from '@emotion/react';
 
 import type { DropResult } from '@elastic/eui';
-import { EuiDragDropContext, EuiDroppable } from '@elastic/eui';
+import { EuiDragDropContext, EuiDroppable, useEuiTheme } from '@elastic/eui';
 
 /** Unique identifier for the droppable zone containing tabs */
 const DROPPABLE_ID = 'unifiedTabsOrder';
@@ -24,15 +24,6 @@ const droppableCss = css`
   display: flex;
   align-items: center;
   wrap: no-wrap;
-`;
-
-/**
- * Additional styling when dragging is active.
- */
-const draggingCss = css`
-  .unifiedTabs__tabWithBackground:not(.unifiedTabs__tabWithBackground--selected) {
-    background-color: transparent;
-  }
 `;
 
 interface DroppableWrapperProps {
@@ -57,6 +48,18 @@ export const OptionalDroppable: FC<DroppableWrapperProps> = ({
   disableDragAndDrop,
   onDragEnd,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const draggingCss = css`
+    .unifiedTabs__tabWithBackground:not(.unifiedTabs__tabWithBackground--selected) {
+      background-color: transparent;
+
+      &::before {
+        background-color: ${euiTheme.colors.accentSecondary};
+      }
+    }
+  `;
+
   // When drag-and-drop is disabled, render children in a plain flex container
   if (disableDragAndDrop) {
     return (
