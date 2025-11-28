@@ -12,7 +12,7 @@ import { DynamicStepContextSchema, ForEachContextSchema } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import { getContextSchemaForPath } from './get_context_for_path';
-import { expectZodSchemaEqual } from '../../../../common/lib/zod/zod_utils';
+import { expectZodSchemaEqual } from '../../../../common/lib/zod/test_utils/expect_zod_schema_equal';
 
 describe('getContextSchemaForPath', () => {
   const definition = {

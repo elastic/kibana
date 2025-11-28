@@ -11,8 +11,8 @@
 import type { Document } from 'yaml';
 import type { ZodError } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
+import { getSchemaAtPath } from './get_schema_at_path';
 import { getCompactTypeDescription, getDetailedTypeDescription } from './zod_type_description';
-import { getSchemaAtPath } from './zod_utils';
 import { getAllConnectors } from '../../schema';
 import type { FormattedZodError, MockZodError } from '../errors/invalid_yaml_schema';
 

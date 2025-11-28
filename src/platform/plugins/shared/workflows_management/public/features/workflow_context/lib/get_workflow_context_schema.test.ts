@@ -10,7 +10,7 @@
 import { WorkflowContextSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
-import { expectZodSchemaEqual } from '../../../../common/lib/zod/zod_utils';
+import { expectZodSchemaEqual } from '../../../../common/lib/zod/test_utils/expect_zod_schema_equal';
 
 describe('getWorkflowContextSchema', () => {
   it('should return the workflow context schema with empty inputs and consts', () => {

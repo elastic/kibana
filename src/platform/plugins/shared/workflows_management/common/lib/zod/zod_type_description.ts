@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { getLiteralDescription, getZodTypeName } from './zod_utils';
+import { getLiteralDescription, getZodTypeName } from './get_zod_type_name';
 
 export interface TypeDescriptionOptions {
   /** Maximum depth for nested objects */

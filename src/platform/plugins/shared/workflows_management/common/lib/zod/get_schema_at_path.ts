@@ -64,8 +64,26 @@ export function getSchemaAtPath(
         current = shape[segment];
       } else if (current instanceof z.ZodUnion) {
         const branches = current.options;
-        const validBranch = branches.find((branch) =>
-          isValidSchemaPath(branch as z.ZodType, segment)
+        const validBranch = branches.find(
+          (branch) => getSchemaAtPath(branch as z.ZodType, segment).schema !== null
+        );
+        if (!validBranch) {
+          return partial
+            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+            : { schema: null, scopedToPath: null };
+        }
+        // We found a valid branch, now we need to traverse into it with the current segment
+        const branchResult = getSchemaAtPath(validBranch as ZodType, segment);
+        if (!branchResult.schema) {
+          return partial
+            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+            : { schema: null, scopedToPath: null };
+        }
+        current = branchResult.schema;
+      } else if (current instanceof z.ZodIntersection) {
+        const branches = [current.def.left as ZodType, current.def.right as ZodType];
+        const validBranch = branches.find(
+          (branch) => getSchemaAtPath(branch as z.ZodType, segment).schema !== null
         );
         if (!validBranch) {
           return partial
@@ -141,139 +159,4 @@ export function getSchemaAtPath(
   } catch {
     return { schema: null, scopedToPath: null };
   }
-}
-
-/**
- * Check if a path is valid for a given zod schema.
- * @param schema - The zod schema to check the path for.
- * @param path - The path to check. e.g. `choices[0].message['content']`
- * @returns True if the path is valid, false otherwise.
- */
-export function isValidSchemaPath(schema: z.ZodType, path: string) {
-  return getSchemaAtPath(schema, path).schema !== null;
-}
-
-/**
- * Infer a zod schema from an object.
- * @param obj - The object to infer the schema from.
- * @param isConst - If true, the schema will use a literal instead of the inferred type.
- * @returns The inferred zod schema.
- */
-export function inferZodType(
-  obj: unknown,
-  { isConst = false }: { isConst?: boolean } = {}
-): z.ZodType {
-  if (obj === null) return z.null();
-  if (obj === undefined) return z.undefined();
-
-  const type = typeof obj;
-
-  if (type === 'string') {
-    if (isConst) {
-      return z.literal(obj as string);
-    }
-    return z.string();
-  }
-  if (type === 'number') {
-    if (isConst) {
-      return z.literal(obj as number);
-    }
-    return z.number();
-  }
-  if (type === 'boolean') {
-    if (isConst) {
-      return z.literal(obj as boolean);
-    }
-    return z.boolean();
-  }
-
-  if (Array.isArray(obj)) {
-    if (obj.length === 0) return z.array(z.unknown());
-    const first = obj[0] as unknown;
-    return z.array(inferZodType(first, { isConst })).length(obj.length);
-  }
-
-  if (type === 'object') {
-    const shape: Record<string, z.ZodSchema> = {};
-    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
-      shape[key] = inferZodType(value, { isConst });
-    }
-    return z.object(shape);
-  }
-
-  return z.unknown();
-}
-
-const options: Parameters<typeof z.toJSONSchema>[1] = {
-  target: 'draft-7',
-  unrepresentable: 'any',
-};
-export function expectZodSchemaEqual(a: z.ZodType, b: z.ZodType) {
-  expect(z.toJSONSchema(a, options)).toEqual(z.toJSONSchema(b, options));
-}
-
-export function getArrayDescription(arraySchema: z.ZodArray, depth: number = 0): string {
-  const elementType = getZodTypeName(arraySchema.element as z.ZodType);
-  if (elementType === 'array') {
-    if (depth > 10) {
-      return 'array[][]';
-    }
-    return getArrayDescription(arraySchema.element as z.ZodArray, depth + 1);
-  }
-  return `${elementType}[]`;
-}
-
-export function getUnionDescription(unionSchema: z.ZodUnion): string {
-  // Check if all union members are arrays - if so, treat as array type
-  const optionsTypes = unionSchema.options.map((option) => getZodTypeName(option as z.ZodType));
-  if (new Set(optionsTypes).size === 1) {
-    return optionsTypes[0];
-  }
-  return `(${optionsTypes.join(' | ')})`;
-}
-
-export function getEnumDescription(schema: z.ZodEnum): string {
-  return schema.options.map((o) => `"${o}"`).join(' | ');
-}
-
-export function getLiteralDescription(schema: z.ZodLiteral): string {
-  const literalValue = schema.value;
-  return typeof literalValue === 'string' ? `"${literalValue}"` : String(literalValue);
-}
-
-/**
- * Get the string representation of the zod schema type
- * @param schema - The zod schema to get the name of.
- * @param depth - The depth of the schema.
- * @returns String representation of the zod schema type, unwrapping optional and default wrappers and resolving literals to their value.
- * @private
- */
-function getZodTypeNameRecursively(schema: z.ZodType, depth: number = 0) {
-  if (depth > 10) {
-    return 'unknown';
-  }
-  if (
-    schema instanceof z.ZodOptional ||
-    schema instanceof z.ZodDefault ||
-    schema instanceof z.ZodLazy
-  ) {
-    return getZodTypeNameRecursively(schema.unwrap() as ZodType, depth + 1);
-  }
-  const def = schema.def;
-  switch (def.type) {
-    case 'array':
-      return getArrayDescription(schema as z.ZodArray, depth + 1);
-    case 'union':
-      return getUnionDescription(schema as z.ZodUnion);
-    case 'enum':
-      return getEnumDescription(schema as z.ZodEnum);
-    case 'literal':
-      return getLiteralDescription(schema as z.ZodLiteral);
-    default:
-      return def.type;
-  }
-}
-
-export function getZodTypeName(schema: z.ZodType): string {
-  return getZodTypeNameRecursively(schema);
 }

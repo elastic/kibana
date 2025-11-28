@@ -12,7 +12,7 @@ import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { BuildAutocompleteContextParams } from './build_autocomplete_context';
 import { buildAutocompleteContext } from './build_autocomplete_context';
-import { expectZodSchemaEqual } from '../../../../../../common/lib/zod';
+import { expectZodSchemaEqual } from '../../../../../../common/lib/zod/test_utils/expect_zod_schema_equal';
 import { createFakeMonacoModel } from '../../../../../../common/mocks/monaco_model';
 import type { WorkflowDetailState } from '../../../../../entities/workflows/store/workflow_detail/types';
 import { performComputation } from '../../../../../entities/workflows/store/workflow_detail/utils/computation';

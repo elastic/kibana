@@ -8,13 +8,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { getZodTypeName } from './get_zod_type_name';
 import {
   getCompactTypeDescription,
   getDetailedTypeDescription,
   getJsonSchemaDescription,
   getTypeScriptLikeDescription,
 } from './zod_type_description';
-import { getZodTypeName } from './zod_utils';
 
 describe('zod_type_description', () => {
   describe('getDetailedTypeDescription', () => {
