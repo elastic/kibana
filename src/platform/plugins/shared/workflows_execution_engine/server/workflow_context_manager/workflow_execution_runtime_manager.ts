@@ -19,7 +19,7 @@ import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
@@ -395,9 +395,9 @@ export class WorkflowExecutionRuntimeManager {
       isTerminalStatus(workflowExecution.status)
     ) {
       const startedAt = new Date(workflowExecution.startedAt);
-      const completeDate = new Date();
-      workflowExecutionUpdate.finishedAt = completeDate.toISOString();
-      workflowExecutionUpdate.duration = completeDate.getTime() - startedAt.getTime();
+      const finishDate = new Date();
+      workflowExecutionUpdate.finishedAt = finishDate.toISOString();
+      workflowExecutionUpdate.duration = finishDate.getTime() - startedAt.getTime();
       workflowExecutionUpdate.context = buildWorkflowContext(
         this.workflowExecution,
         this.coreStart,

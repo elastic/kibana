@@ -71,6 +71,11 @@ export const allowedExperimentalValues = Object.freeze({
   enableRiskScoreResetToZero: true,
 
   /**
+   * Enable privmon modifier in risk scoring calculation
+   */
+  enableRiskScorePrivmonModifier: false,
+
+  /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
@@ -194,6 +199,15 @@ export const allowedExperimentalValues = Object.freeze({
    *  Enables the QRadar rules import feature
    */
   qradarRulesMigration: false,
+  /**
+   * Enables the Kubernetes Dashboard in Security Solution
+   */
+  kubernetesEnabled: false,
+
+  /**
+   * Enables the Entity Analytics Watchlist feature.
+   */
+  entityAnalyticsWatchlistEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
