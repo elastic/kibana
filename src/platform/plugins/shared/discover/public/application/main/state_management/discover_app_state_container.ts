@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
-import {
-  createStateContainer,
-  createStateContainerReactHelpers,
-} from '@kbn/kibana-utils-plugin/common';
+import type { BaseStateContainer } from '@kbn/kibana-utils-plugin/common';
 import type { AggregateQuery, Filter, FilterCompareOptions, Query } from '@kbn/es-query';
 import {
   COMPARE_ALL_OPTIONS,
@@ -31,6 +27,7 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { distinctUntilChanged, from, map } from 'rxjs';
+import defaultComparator from 'fast-deep-equal';
 import type { DiscoverServices } from '../../../build_services';
 import { addLog } from '../../../utils/add_log';
 import { cleanupUrlState } from './utils/cleanup_url_state';
@@ -46,19 +43,11 @@ import {
 } from '../../../../common/data_sources';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import type { DiscoverInternalState, InternalStateStore, TabActionInjector } from './redux';
-import { internalStateActions, selectTab } from './redux';
+import { internalStateActions, selectTab, useCurrentTabSelector } from './redux';
 import { APP_STATE_URL_KEY } from '../../../../common';
 import { GLOBAL_STATE_URL_KEY } from '../../../../common/constants';
 
-export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {
-  /**
-   * Returns the previous state, used for diffing e.g. if fetching new data is necessary
-   */
-  getPrevious: () => DiscoverAppState;
-  /**
-   * Determines if the current state is different from the initial state
-   */
-  hasChanged: () => boolean;
+export interface DiscoverAppStateContainer extends BaseStateContainer<DiscoverAppState> {
   /**
    * Initializes the app state and starts syncing it with the URL
    */
@@ -73,14 +62,6 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    * @param merge if true, the given state is merged with the current state
    */
   replaceUrlState: (newPartial: DiscoverAppState, merge?: boolean) => Promise<void>;
-  /**
-   * Resets the state container to a given state, clearing the previous state
-   */
-  resetToState: (state: DiscoverAppState) => void;
-  /**
-   * Resets the current state to the initial state
-   */
-  resetInitialState: () => void;
   /**
    * Updates the state, if replace is true, a history.replace is performed instead of history.push
    * @param newPartial
@@ -176,8 +157,8 @@ export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
   index?: string;
 }
 
-export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelector } =
-  createStateContainerReactHelpers<ReduxLikeStateContainer<DiscoverAppState>>();
+export const useAppStateSelector = <T>(selector: (state: DiscoverAppState) => T): T =>
+  useCurrentTabSelector((tab) => selector(tab.appState), defaultComparator);
 
 /**
  * This is the app state container for Discover main, it's responsible for syncing state with the URL
@@ -200,34 +181,20 @@ export const getDiscoverAppStateContainer = ({
   services: DiscoverServices;
   injectCurrentTab: TabActionInjector;
 }): DiscoverAppStateContainer => {
-  let initialState = getInitialState({
-    initialUrlState: getCurrentUrlState(stateStorage, services),
-    savedSearch: savedSearchContainer.getState(),
-    services,
-  });
-  let previousState = initialState;
-  const appStateContainer = createStateContainer<DiscoverAppState>(initialState);
+  const getAppState = (state: DiscoverInternalState): DiscoverAppState => {
+    return selectTab(state, tabId).appState;
+  };
 
-  const enhancedAppContainer = {
-    ...appStateContainer,
-    set: (value: DiscoverAppState | null) => {
-      if (!value) {
+  const appStateContainer: INullableBaseStateContainer<DiscoverAppState> = {
+    get: () => getAppState(internalState.getState()),
+    set: (appState) => {
+      if (!appState) {
         return;
       }
 
-      previousState = appStateContainer.getState();
-
-      // When updating to an ES|QL query, sync the data source
-      if (isOfAggregateQueryType(value.query)) {
-        value = { ...value, dataSource: createEsqlDataSource() };
-      }
-
-      appStateContainer.set(value);
+      internalState.dispatch(injectCurrentTab(internalStateActions.setAppState)({ appState }));
     },
-  };
-
-  const hasChanged = () => {
-    return !isEqualState(initialState, enhancedAppContainer.getState());
+    state$: from(internalState).pipe(map(getAppState), distinctUntilChanged(isEqual)),
   };
 
   const getAppStateFromSavedSearch = (newSavedSearch: SavedSearch) => {
@@ -238,24 +205,13 @@ export const getDiscoverAppStateContainer = ({
     });
   };
 
-  const resetToState = (state: DiscoverAppState) => {
-    addLog('[appState] reset state to', state);
-    previousState = state;
-    enhancedAppContainer.set(state);
-  };
-
-  const resetInitialState = () => {
-    addLog('[appState] reset initial state to the current state');
-    initialState = enhancedAppContainer.getState();
-  };
-
   const replaceUrlState = async (newPartial: DiscoverAppState = {}, merge = true) => {
     addLog('[appState] replaceUrlState', { newPartial, merge });
-    const state = merge ? { ...enhancedAppContainer.getState(), ...newPartial } : newPartial;
+    const state = merge ? { ...appStateContainer.get(), ...newPartial } : newPartial;
     if (internalState.getState().tabs.unsafeCurrentId === tabId) {
       await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
     } else {
-      enhancedAppContainer.set(state);
+      appStateContainer.set(state);
     }
   };
 
@@ -323,7 +279,7 @@ export const getDiscoverAppStateContainer = ({
 
     const { data } = services;
     const savedSearchDataView = currentSavedSearch.searchSource.getField('index');
-    const appState = enhancedAppContainer.getState();
+    const appState = appStateContainer.get();
     const setDataViewFromSavedSearch =
       !appState.dataSource ||
       (isDataSourceType(appState.dataSource, DataSourceType.DataView) &&
@@ -331,7 +287,7 @@ export const getDiscoverAppStateContainer = ({
 
     if (setDataViewFromSavedSearch) {
       // used data view is different from the given by url/state which is invalid
-      setState(enhancedAppContainer, {
+      setState(appStateContainer, {
         dataSource: savedSearchDataView?.id
           ? createDataViewDataSource({ dataViewId: savedSearchDataView.id })
           : undefined,
@@ -341,7 +297,7 @@ export const getDiscoverAppStateContainer = ({
     // syncs `_a` portion of url with query services
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
       data.query,
-      enhancedAppContainer,
+      appStateContainer,
       {
         filters: FilterStateStore.APP_STATE,
         query: true,
@@ -350,7 +306,7 @@ export const getDiscoverAppStateContainer = ({
 
     const { start: startSyncingAppStateWithUrl, stop: stopSyncingAppStateWithUrl } = syncState({
       storageKey: APP_STATE_URL_KEY,
-      stateContainer: enhancedAppContainer,
+      stateContainer: appStateContainer,
       stateStorage,
     });
 
@@ -391,20 +347,13 @@ export const getDiscoverAppStateContainer = ({
     if (replace) {
       return replaceUrlState(newPartial);
     } else {
-      previousState = { ...enhancedAppContainer.getState() };
-      setState(enhancedAppContainer, newPartial);
+      setState(appStateContainer, newPartial);
     }
   };
 
-  const getPrevious = () => previousState;
-
   return {
-    ...enhancedAppContainer,
-    getPrevious,
-    hasChanged,
+    ...appStateContainer,
     initAndSync,
-    resetToState,
-    resetInitialState,
     updateUrlWithCurrentState,
     replaceUrlState,
     update,
@@ -412,7 +361,7 @@ export const getDiscoverAppStateContainer = ({
   };
 };
 
-function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: DiscoverServices) {
+export function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: DiscoverServices) {
   return (
     cleanupUrlState(stateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {}, services.uiSettings) ??
     {}
@@ -455,11 +404,11 @@ export function getInitialState({
  * container
  */
 export function setState(
-  stateContainer: ReduxLikeStateContainer<DiscoverAppState>,
+  stateContainer: BaseStateContainer<DiscoverAppState>,
   newState: DiscoverAppState
 ) {
   addLog('[appstate] setState', { newState });
-  const oldState = stateContainer.getState();
+  const oldState = stateContainer.get();
   const mergedState = { ...oldState, ...newState };
   if (!isEqualState(oldState, mergedState)) {
     stateContainer.set(mergedState);

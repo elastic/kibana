@@ -13,6 +13,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowInputChoiceSchema, WorkflowInputSchema, WorkflowYaml } from '@kbn/workflows';
 import { z } from '@kbn/zod';
+import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputSchema>>) => {
   return z.object(
@@ -158,11 +159,11 @@ export const WorkflowExecuteManualForm = ({
         <>
           <EuiFlexItem>
             <EuiCallOut
+              announceOnMount
               title="Input data is not valid"
               color="danger"
               iconType="help"
               size="s"
-              announceOnMount
             >
               <p>{errors}</p>
             </EuiCallOut>
@@ -206,7 +207,7 @@ export const WorkflowExecuteManualForm = ({
               renderWhitespace: 'all',
               wordWrapColumn: 80,
               wrappingIndent: 'indent',
-              theme: 'vs-light',
+              theme: WORKFLOWS_MONACO_EDITOR_THEME,
               formatOnType: true,
               quickSuggestions: false,
               suggestOnTriggerCharacters: false,

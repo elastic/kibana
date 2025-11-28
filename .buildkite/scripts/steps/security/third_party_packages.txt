@@ -13,3 +13,10 @@ canvas-confetti
 @types/canvas-confetti
 undici
 liquidjs
+xml-formatter
+@tanstack/react-table
+@tanstack/react-virtual
+@storybook/addon-docs
+dompurify
+magic-bytes.js
+@opentelemetry/exporter-trace-otlp-grpc

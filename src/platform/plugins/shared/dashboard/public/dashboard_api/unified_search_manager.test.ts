@@ -58,10 +58,7 @@ describe('initializeUnifiedSearchManager', () => {
       });
 
       test('Should return timeRanage change when timeRestore is true', (done) => {
-        const lastSavedState$ = new BehaviorSubject<DashboardState>({
-          ...getSampleDashboardState(),
-          timeRestore: true,
-        });
+        const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
         const unifiedSearchManager = initializeUnifiedSearchManager(
           lastSavedState$.value,
           new BehaviorSubject<ControlGroupApi | undefined>(undefined),

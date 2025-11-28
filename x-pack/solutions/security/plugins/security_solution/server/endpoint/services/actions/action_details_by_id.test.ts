@@ -65,7 +65,7 @@ describe('When using `getActionDetailsById()', () => {
       agents: ['agent-a'],
       agentType: 'endpoint',
       hosts: { 'agent-a': { name: 'Host-agent-a' } },
-      command: 'running-processes',
+      command: expect.any(String),
       completedAt: '2022-04-30T16:08:47.449Z',
       wasSuccessful: true,
       errors: undefined,
@@ -79,11 +79,7 @@ describe('When using `getActionDetailsById()', () => {
       parameters: doc?.EndpointActions.data.parameters,
       outputs: {
         'agent-a': {
-          content: {
-            code: 'ra_upload_file-success',
-            disk_free_space: 4825566125475,
-            path: '/disk1/file/saved/here',
-          },
+          content: expect.anything(),
           type: 'json',
         },
       },

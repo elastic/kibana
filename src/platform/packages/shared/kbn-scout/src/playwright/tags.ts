@@ -35,7 +35,7 @@ export const tags = {
 export const tagsByMode = {
   stateful: '@ess',
   serverless: {
-    workplace_ai: '@svlWorkplaceAI',
+    workplaceai: '@svlWorkplaceAI',
     es: '@svlSearch',
     oblt: '@svlOblt',
     'oblt-logs-essentials': '@svlLogsEssentials',

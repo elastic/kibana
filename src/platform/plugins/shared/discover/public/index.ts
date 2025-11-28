@@ -35,10 +35,8 @@ export {
   type PublishesSavedSearch,
   type PublishesWritableSavedSearch,
   type HasTimeRange,
-  type SearchEmbeddableSerializedState,
   type SearchEmbeddableRuntimeState,
   type SearchEmbeddableApi,
-  type NonPersistedDisplayOptions,
 } from './embeddable';
 export type { DiscoverServices } from './build_services';
 

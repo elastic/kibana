@@ -21280,7 +21280,7 @@
         "label": "CustomErrorParams",
         "description": [],
         "signature": [
-          "{ params?: { [k: string]: any; } | undefined; path?: (string | number)[] | undefined; message?: string | undefined; }"
+          "{ params?: { [k: string]: any; } | undefined; message?: string | undefined; path?: (string | number)[] | undefined; }"
         ],
         "path": "node_modules/zod/v3/types.d.cts",
         "deprecated": false,
@@ -22653,9 +22653,9 @@
           " | ",
           "ZodUnion",
           "<any> | ",
-          "ZodAny",
-          " | ",
           "ZodUndefined",
+          " | ",
+          "ZodAny",
           " | ",
           "ZodDate",
           " | ",

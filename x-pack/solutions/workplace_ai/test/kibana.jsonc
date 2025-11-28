@@ -1,8 +1,0 @@
-{
-  "type": "test-helper",
-  "id": "@kbn/test-suites-xpack-workplace-ai",
-  "owner": ["@elastic/workchat-eng"],
-  "group": "workplace_ai",
-  "visibility": "private",
-  "devOnly": true
-}

@@ -68,6 +68,24 @@ components:
           type: array
           items:
             type: string
+        filters:
+          description: Custom KQL filters to exclude from risk scoring queries, allowing more targeted risk analysis by filtering out specific alerts.
+          type: array
+          items:
+            type: object
+            properties:
+              entity_types:
+                type: array
+                items:
+                  type: string
+                  enum: [host, user, service]
+                description: The entity types this filter applies to
+              filter:
+                type: string
+                description: KQL filter expression to exclude (alerts matching this filter will be excluded from risk score calculation)
+            required:
+              - entity_types
+              - filter
           
 
     RiskScoresPreviewResponse:

@@ -45,7 +45,7 @@ _search_ai_lake_analyst:
     - application: "kibana-.kibana"
       privileges:
         - "feature_ml.read"
-        - "feature_siemV3.all"
+        - "feature_siemV4.all"
         - "feature_securitySolutionCasesV2.all"
         - "feature_securitySolutionAssistant.all"
         - "feature_securitySolutionAttackDiscovery.minimal_all"
@@ -119,9 +119,10 @@ _search_ai_lake_soc_manager:
   applications:
     - application: "kibana-.kibana"
       privileges:
-        - "feature_siemV3.all"
-        - "feature_siemV3.global_artifact_management_all"
-        - "feature_siemV3.workflow_insights_all"
+        - "feature_siemV4.all"
+        - "feature_siemV4.global_artifact_management_all"
+        - "feature_siemV4.workflow_insights_all"
+        - "feature_siemV4.soc_management_all"
         - "feature_securitySolutionCasesV2.all"
         - "feature_securitySolutionAssistant.all"
         - "feature_securitySolutionAttackDiscovery.all"

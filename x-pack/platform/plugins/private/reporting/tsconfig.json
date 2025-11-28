@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -68,7 +68,8 @@
     "@kbn/core-capabilities-common",
     "@kbn/core-ui-settings-common",
     "@kbn/licensing-types",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/core-user-profile-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }

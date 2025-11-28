@@ -73,8 +73,8 @@ export const GcpCredentialsFormAgentless = ({
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
   const commandText = `gcloud config set project ${
-    isOrganization ? `<PROJECT_ID> && ORG_ID=<ORG_ID_VALUE>` : `<PROJECT_ID>`
-  } ./deploy_service_account.sh`;
+    isOrganization ? `<PROJECT_ID> && ORG_ID=<ORG_ID_VALUE> && ` : `<PROJECT_ID> && `
+  }./deploy_service_account.sh`;
 
   return (
     <>
@@ -82,7 +82,7 @@ export const GcpCredentialsFormAgentless = ({
       <EuiSpacer size="m" />
       {!showCloudTemplates && (
         <>
-          <EuiCallOut color="warning">
+          <EuiCallOut announceOnMount={false} color="warning">
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudFormationSupportedMessage"
               defaultMessage="Launch Cloud Shell for automated credentials not supported in current integration version. Please upgrade to the latest version to enable Launch Cloud Shell for automated credentials."

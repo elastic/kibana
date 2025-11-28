@@ -41,6 +41,15 @@ export type ScoutPage = Page & {
    */
   keyTo: (selector: string, key: string, maxElementsToTraverse?: number) => Promise<void>;
   /**
+   * Types text into an input field character by character with a specified delay between each character.
+   * @param selector - The css selector for the input element.
+   * @param text - The text to type into the input field.
+   * @param options - Optional configuration object.
+   * @param options.delay - The delay in milliseconds between typing each character (default: 25ms).
+   * @returns A Promise that resolves once the text has been typed.
+   */
+  typeWithDelay: (selector: string, text: string, options?: { delay: number }) => Promise<void>;
+  /**
    * Simplified API to interact with elements using Kibana's 'data-test-subj' attribute.
    */
   testSubj: {
@@ -107,8 +116,15 @@ export type ScoutPage = Page & {
      * @returns A Promise that resolves once the text has been cleared.
      */
     clearInput: (selector: string) => Promise<void>;
+    /**
+     * Drags an element with the source selector to the element with the target selector.
+     * @param sourceSelector The selector for the source element to drag (supports 'data-test-subj' attributes).
+     * @param targetSelector The selector for the target element to drop onto (supports 'data-test-subj' attributes).
+     * @returns A Promise that resolves once the drag operation is complete.
+     */
+    dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>;
   };
 };
 
-export { scoutPageFixture } from './single_thread';
 export { scoutPageParallelFixture } from './parallel';
+export { scoutPageFixture } from './single_thread';

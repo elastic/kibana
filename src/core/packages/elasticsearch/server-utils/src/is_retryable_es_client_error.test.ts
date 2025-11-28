@@ -51,7 +51,7 @@ describe('isRetryableEsClientError', () => {
       expect(isRetryableEsClientError(error)).toEqual(true);
     });
 
-    it.each([503, 504, 408, 410, 429])('ResponseError with %p status code', (statusCode) => {
+    it.each([502, 503, 504, 408, 410, 429])('ResponseError with %p status code', (statusCode) => {
       const error = new esErrors.ResponseError(
         elasticsearchClientMock.createApiResponse({
           statusCode,

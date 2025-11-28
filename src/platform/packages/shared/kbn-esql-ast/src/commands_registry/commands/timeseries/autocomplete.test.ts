@@ -81,6 +81,13 @@ describe('TS Autocomplete', () => {
       ]);
     });
 
+    test('can suggest timeseries after one already selected', async () => {
+      const suggestions = await suggest('TS timeseries_index,  ');
+      const labels = suggestions.map((s) => s.label);
+
+      expect(labels).toEqual(['timeseries_index_with_alias', 'time_series_index']);
+    });
+
     test('discriminates between indices and aliases', async () => {
       const suggestions = await suggest('TS ');
       const indices: string[] = suggestions

@@ -24,12 +24,12 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
 import { type RecommendedQuery, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
-import {
-  getRecommendedQueriesTemplatesFromExtensions,
-  getRecommendedQueriesTemplates,
-} from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
+import { getRecommendedQueriesTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import { getCategorizationField } from '@kbn/aiops-utils';
+import { prettifyQueryTemplate } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries/utils';
+import { ESQLEditorTelemetryService } from '@kbn/esql-editor/src/telemetry/telemetry_service';
+import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 export interface ESQLMenuPopoverProps {
@@ -44,7 +44,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
   onESQLQuerySubmit,
 }) => {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { docLinks, http, chrome } = kibana.services;
+  const { docLinks, http, chrome, analytics } = kibana.services;
 
   const { euiTheme } = useEuiTheme();
 
@@ -55,6 +55,8 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
   const [solutionsRecommendedQueries, setSolutionsRecommendedQueries] = useState<
     RecommendedQuery[]
   >([]);
+
+  const telemetryServiceRef = useRef(new ESQLEditorTelemetryService(analytics));
 
   const { queryForRecommendedQueries, timeFieldName, categorizationField } = useMemo(() => {
     if (adHocDataview && typeof adHocDataview !== 'string') {
@@ -127,19 +129,27 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
 
   const esqlContextMenuPanels = useMemo(() => {
     const recommendedQueries = [];
-    // If there are specific recommended queries for the current solution, process them.
-    if (solutionsRecommendedQueries.length) {
-      // Extract the core query templates by removing the 'FROM' clause.
-      const recommendedQueriesTemplatesFromExtensions =
-        getRecommendedQueriesTemplatesFromExtensions(solutionsRecommendedQueries);
-
+    if (solutionsRecommendedQueries.length && typeof adHocDataview !== 'string') {
       // Construct the full recommended queries by prepending the base 'FROM' command
       // and add them to the main list of recommended queries.
+
       recommendedQueries.push(
-        ...recommendedQueriesTemplatesFromExtensions.map((template) => ({
-          label: template.label,
-          queryString: `${queryForRecommendedQueries}${template.text}`,
-        }))
+        ...solutionsRecommendedQueries.map((recommendedQuery) => {
+          const template = prettifyQueryTemplate(recommendedQuery.query);
+
+          // Check if query starts with FROM or TS
+          const startsWithTs = recommendedQuery.query.startsWith('TS');
+
+          // Use the information to conditionally format the query
+          const queryString = startsWithTs
+            ? `TS ${adHocDataview?.name} ${template}`
+            : `${queryForRecommendedQueries} ${template}`;
+
+          return {
+            label: recommendedQuery.name,
+            queryString,
+          };
+        })
       );
     }
 
@@ -238,7 +248,15 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
           return {
             name: query.label,
             onClick: () => {
+              telemetryServiceRef.current.trackRecommendedQueryClicked(
+                QuerySource.HELP,
+                query.label
+              );
               onESQLQuerySubmit?.(query.queryString);
+              telemetryServiceRef.current.trackQuerySubmitted({
+                source: QuerySource.HELP,
+                query: query.queryString,
+              });
               setIsESQLMenuPopoverOpen(false);
             },
           };
@@ -247,6 +265,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     ];
     return panels as EuiContextMenuPanelDescriptor[];
   }, [
+    adHocDataview,
     docLinks.links.query.queryESQL,
     onESQLQuerySubmit,
     queryForRecommendedQueries,

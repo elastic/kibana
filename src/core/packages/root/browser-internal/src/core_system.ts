@@ -359,6 +359,7 @@ export class CoreSystem {
         i18n,
         theme,
         userProfile,
+        coreEnv: this.coreContext.env,
       });
 
       const notifications = this.notifications.start({

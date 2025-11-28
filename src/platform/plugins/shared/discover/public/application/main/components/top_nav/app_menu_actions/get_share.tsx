@@ -52,13 +52,13 @@ export const getShareAppMenuItem = ({
 
     const searchSourceSharingData = await getSharingData(
       stateContainer.savedSearchState.getState().searchSource,
-      stateContainer.appState.getState(),
+      stateContainer.appState.get(),
       services,
       isEsqlMode
     );
 
     const { locator, discoverFeatureFlags } = services;
-    const appState = stateContainer.appState.getState();
+    const appState = stateContainer.appState.get();
     const { timefilter } = services.data.query.timefilter;
     const timeRange = timefilter.getTime();
     const refreshInterval = timefilter.getRefreshInterval();
@@ -133,6 +133,9 @@ export const getShareAppMenuItem = ({
                 draftModeCallOut: true,
               },
             },
+          },
+          link: {
+            draftModeCallOut: tabsEnabled,
           },
         },
       },

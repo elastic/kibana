@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -69,7 +69,10 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import type { CellRenderersExtensionParams } from '../../../../context_awareness';
+import type {
+  CellRenderersExtensionParams,
+  DocViewerExtensionParams,
+} from '../../../../context_awareness';
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER,
   useAdditionalCellActions,
@@ -91,7 +94,7 @@ export const onResize = (
   colSettings: { columnId: string; width: number | undefined },
   stateContainer: DiscoverStateContainer
 ) => {
-  const state = stateContainer.appState.getState();
+  const state = stateContainer.appState.get();
   const newGrid = onResizeGridColumn(colSettings, state.grid);
   stateContainer.appState.update({ grid: newGrid });
 };
@@ -109,6 +112,7 @@ function DiscoverDocumentsComponent({
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: (options: { editedDataView: DataView }) => void;
 }) {
+  const [isDataGridFullScreen, setIsDataGridFullScreen] = useState(false);
   const styles = useMemoCss(componentStyles);
   const services = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
@@ -296,6 +300,14 @@ function DiscoverDocumentsComponent({
     timeRange: requestParams.timeRangeAbsolute,
   });
 
+  const docViewerExtensionActions = useMemo<DocViewerExtensionParams['actions']>(
+    () => ({
+      openInNewTab: (params) => dispatch(internalStateActions.openInNewTabExtPointAction(params)),
+      updateESQLQuery: stateContainer.actions.updateESQLQuery,
+    }),
+    [dispatch, stateContainer.actions.updateESQLQuery]
+  );
+
   const renderDocumentView = useCallback(
     (
       hit: DataTableRecord,
@@ -319,6 +331,7 @@ function DiscoverDocumentsComponent({
         query={query}
         initialTabId={initialDocViewerTabId}
         docViewerRef={docViewerRef}
+        docViewerExtensionActions={docViewerExtensionActions}
       />
     ),
     [
@@ -330,6 +343,7 @@ function DiscoverDocumentsComponent({
       setExpandedDoc,
       query,
       initialDocViewerTabId,
+      docViewerExtensionActions,
     ]
   );
 
@@ -409,7 +423,7 @@ function DiscoverDocumentsComponent({
   const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
-        leftSide: viewModeToggle,
+        leftSide: isDataGridFullScreen ? undefined : viewModeToggle,
         bottomSection: (
           <>
             {callouts}
@@ -417,7 +431,7 @@ function DiscoverDocumentsComponent({
           </>
         ),
       }),
-    [viewModeToggle, callouts, loadingIndicator]
+    [viewModeToggle, callouts, loadingIndicator, isDataGridFullScreen]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
@@ -500,6 +514,7 @@ function DiscoverDocumentsComponent({
             cellActionsHandling="append"
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
+            onFullScreenChange={setIsDataGridFullScreen}
           />
         </CellActionsProvider>
       </div>

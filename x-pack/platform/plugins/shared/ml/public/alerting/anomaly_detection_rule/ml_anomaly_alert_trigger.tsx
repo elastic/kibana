@@ -36,7 +36,6 @@ import { type CombinedJobWithStats } from '../../../common/types/anomaly_detecti
 import { AdvancedSettings } from './advanced_settings';
 import { getLookbackInterval, getTopNBuckets } from '../../../common/util/alerts';
 import { AnomalyKqlFilter } from './anomaly_kql_filter';
-import type { AnomalyAlertFieldUsage } from '../../../common/util/alerting/detect_anomaly_alert_field_usage';
 
 export type MlAnomalyAlertTriggerProps =
   RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams> & {
@@ -59,10 +58,6 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   } = useKibana();
 
   const [newJobUrl, setNewJobUrl] = useState<string | undefined>(undefined);
-  const [kqlFieldUsage, setKqlFieldUsage] = useState<AnomalyAlertFieldUsage>({
-    hasAnomalyScoreFilter: false,
-    hasInterimFilter: false,
-  });
 
   const [savedFilterForNonBucketTypes, setSavedFilterForNonBucketTypes] = useState<string | null>(
     null
@@ -152,18 +147,13 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       const isBucketType = ruleParams.resultType === ML_ANOMALY_RESULT_TYPE.BUCKET;
 
       if (isBucketType) {
-        if (ruleParams.customFilter) {
-          setSavedFilterForNonBucketTypes(ruleParams.customFilter);
-          setRuleParams('customFilter', null);
-
-          setKqlFieldUsage({
-            hasAnomalyScoreFilter: false,
-            hasInterimFilter: false,
-          });
+        if (ruleParams.kqlQueryString) {
+          setSavedFilterForNonBucketTypes(ruleParams.kqlQueryString);
+          setRuleParams('kqlQueryString', null);
         }
       } else {
-        if (savedFilterForNonBucketTypes && !ruleParams.customFilter) {
-          setRuleParams('customFilter', savedFilterForNonBucketTypes);
+        if (savedFilterForNonBucketTypes && !ruleParams.kqlQueryString) {
+          setRuleParams('kqlQueryString', savedFilterForNonBucketTypes);
         }
       }
     },
@@ -247,26 +237,20 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         onChange={onAlertParamChange('resultType')}
       />
       <EuiSpacer size="m" />
+      <SeverityControl value={ruleParams.severity} onChange={onAlertParamChange('severity')} />
       <AnomalyKqlFilter
-        value={ruleParams.customFilter}
-        onChange={onAlertParamChange('customFilter')}
+        value={ruleParams.kqlQueryString}
+        onChange={onAlertParamChange('kqlQueryString')}
         jobConfigs={jobConfigs}
         resultType={ruleParams.resultType}
         jobId={ruleParams.jobSelection?.jobIds?.[0]}
-        onFieldUsageChange={setKqlFieldUsage}
-        errors={Array.isArray(errors.customFilter) ? errors.customFilter : []}
+        errors={Array.isArray(errors.kqlQueryString) ? errors.kqlQueryString : []}
         disabled={ruleParams.resultType === ML_ANOMALY_RESULT_TYPE.BUCKET}
-      />
-      <SeverityControl
-        value={ruleParams.severity}
-        onChange={onAlertParamChange('severity')}
-        disabled={kqlFieldUsage.hasAnomalyScoreFilter}
       />
       <EuiSpacer size="m" />
       <InterimResultsControl
         value={ruleParams.includeInterim}
         onChange={onAlertParamChange('includeInterim')}
-        disabled={kqlFieldUsage.hasInterimFilter}
       />
       <EuiSpacer size="m" />
       <AdvancedSettings

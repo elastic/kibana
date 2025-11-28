@@ -76,6 +76,7 @@ export const useGridLayoutSectionEvents = ({ sectionId }: { sectionId: string })
           onStart,
           onMove,
           onEnd,
+          scrollContainer: gridLayoutStateManager.scrollContainer$.getValue(),
         });
       } else if (isTouchEvent(e)) {
         startTouchInteraction({

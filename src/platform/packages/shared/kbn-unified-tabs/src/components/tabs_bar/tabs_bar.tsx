@@ -34,7 +34,7 @@ import type { TabItem, TabsServices, TabsEBTEvent } from '../../types';
 import { TabsEventName } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
-import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
+import { TabsBarWithBackground } from '../tabs_visual_glue_to_app_container/tabs_bar_with_background';
 import { TabsBarMenu, type TabsBarMenuProps } from '../tabs_bar_menu';
 import { TabsEventDataKeys } from '../../event_data_keys';
 import { OptionalDraggable } from './optional_draggable';
@@ -62,7 +62,6 @@ export type TabsBarProps = Pick<
   | 'tabContentId'
   | 'disableCloseButton'
   | 'disableInlineLabelEditing'
-  | 'disablePreview'
   | 'disableDragAndDrop'
 > & {
   items: TabItem[];
@@ -107,7 +106,6 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       customNewTabButton,
       disableCloseButton = false,
       disableInlineLabelEditing = false,
-      disablePreview = false,
       disableDragAndDrop = false,
       disableTabsBarMenu = false,
     },
@@ -316,7 +314,6 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                           onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
                           disableCloseButton={disableCloseButton}
                           disableInlineLabelEditing={disableInlineLabelEditing}
-                          disablePreview={disablePreview}
                           disableDragAndDrop={disableDragAndDrop}
                         />
                       )}

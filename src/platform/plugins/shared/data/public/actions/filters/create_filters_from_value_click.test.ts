@@ -271,8 +271,8 @@ describe('createFiltersFromClickEvent', () => {
         query: { esql: 'from meow' },
       });
       expect(queryString).toEqual(`from meow
-| WHERE \`columnA\`=="2048"
-AND \`columnB\`=="2048"`);
+| WHERE \`columnA\` == "2048"
+AND \`columnB\` == "2048"`);
     });
 
     test('should return null if no aggregate query is present', async () => {
@@ -304,7 +304,7 @@ AND \`columnB\`=="2048"`);
       });
 
       expect(queryString).toEqual(`from meow
-| WHERE \`columnA\`=="2048"`);
+| WHERE \`columnA\` == "2048"`);
     });
 
     test('should return the update query string for negated action', async () => {
@@ -322,7 +322,7 @@ AND \`columnB\`=="2048"`);
       });
 
       expect(queryString).toEqual(`from meow
-| WHERE \`columnA\`!="2048"`);
+| WHERE \`columnA\` != "2048"`);
     });
   });
 });

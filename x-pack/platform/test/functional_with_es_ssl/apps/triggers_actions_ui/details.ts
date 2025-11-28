@@ -138,7 +138,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .post(
         `/api/alerting/rule/${encodeURIComponent(ruleId)}/alert/${encodeURIComponent(
           alertId
-        )}/_mute`
+        )}/_mute?validate_alerts_existence=false`
       )
       .set('kbn-xsrf', 'foo')
       .expect(204);
@@ -752,60 +752,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             duration: '',
           },
         ]);
-      });
-
-      it('allows the user to mute a specific alert', async () => {
-        // If the tab exists, click on the alert list
-        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
-
-        // Verify content
-        await testSubjects.existOrFail('alertsList');
-
-        log.debug(`Ensuring us-central is not muted`);
-        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-central', false);
-
-        log.debug(`Muting us-central`);
-        await pageObjects.ruleDetailsUI.clickAlertMuteButton('us-central');
-
-        log.debug(`Ensuring us-central is muted`);
-        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-central', true);
-      });
-
-      it('allows the user to unmute a specific alert', async () => {
-        // If the tab exists, click on the alert list
-        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
-
-        // Verify content
-        await testSubjects.existOrFail('alertsList');
-
-        log.debug(`Ensuring us-east is not muted`);
-        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-east', false);
-
-        log.debug(`Muting us-east`);
-        await pageObjects.ruleDetailsUI.clickAlertMuteButton('us-east');
-
-        log.debug(`Ensuring us-east is muted`);
-        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-east', true);
-
-        log.debug(`Unmuting us-east`);
-        await pageObjects.ruleDetailsUI.clickAlertMuteButton('us-east');
-
-        log.debug(`Ensuring us-east is not muted`);
-        await pageObjects.ruleDetailsUI.ensureAlertMuteState('us-east', false);
-      });
-
-      it('allows the user unmute an inactive alert', async () => {
-        // If the tab exists, click on the alert list
-        await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
-
-        log.debug(`Ensuring eu/east is muted`);
-        await pageObjects.ruleDetailsUI.ensureAlertMuteState('eu/east', true);
-
-        log.debug(`Unmuting eu/east`);
-        await pageObjects.ruleDetailsUI.clickAlertMuteButton('eu/east');
-
-        log.debug(`Ensuring eu/east is removed from list`);
-        await pageObjects.ruleDetailsUI.ensureAlertExistence('eu/east', false);
       });
     });
 

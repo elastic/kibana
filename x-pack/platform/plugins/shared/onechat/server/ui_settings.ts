@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   AGENT_BUILDER_ENABLED_SETTING_ID,
   AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID,
+  AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
@@ -30,16 +31,31 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
     },
     [AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID]: {
       description: i18n.translate('xpack.onechat.uiSettings.createVisualizations.description', {
-        defaultMessage: 'Enables the dashDashboard Agent and related tools for Agent Builder.',
+        defaultMessage: 'Enables the Dashboard Agent and related tools for Elastic Agent Builder.',
       }),
       name: i18n.translate('xpack.onechat.uiSettings.createVisualizations.name', {
-        defaultMessage: 'Agent Builder: Dashboard Agent and tools',
+        defaultMessage: 'Elastic Agent Builder: Dashboard Agent and tools',
       }),
       schema: schema.boolean(),
       value: false,
       technicalPreview: true,
       requiresPageReload: true,
-      readonly: false,
+      readonly: true,
+      readonlyMode: 'ui',
+    },
+    [AGENT_BUILDER_NAV_ENABLED_SETTING_ID]: {
+      description: i18n.translate('xpack.onechat.uiSettings.nav.description', {
+        defaultMessage: 'Enables the Elastic Agent Builder icon in the global navigation bar.',
+      }),
+      name: i18n.translate('xpack.onechat.uiSettings.nav.name', {
+        defaultMessage: 'Elastic Agent Builder Navigation Icon',
+      }),
+      schema: schema.boolean(),
+      value: false,
+      technicalPreview: true,
+      requiresPageReload: true,
+      readonly: true,
+      readonlyMode: 'ui',
     },
   });
 };

@@ -6,8 +6,9 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { AgentCapabilities, ChatEvent, RoundInput } from '@kbn/onechat-common';
+import type { AgentCapabilities, ChatEvent, RawRoundInput } from '@kbn/onechat-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
 
 export interface ChatService {
   converse(params: ChatConverseParams): Observable<ChatEvent>;
@@ -50,9 +51,14 @@ export interface ChatConverseParams {
   /**
    * Next user input to start the round.
    */
-  nextInput: RoundInput;
+  nextInput: RawRoundInput;
   /**
    * Request bound to this call.
    */
   request: KibanaRequest;
+  /**
+   * Browser API tools to make available to the agent.
+   * These tools will be registered as LLM tools with browser.* namespace.
+   */
+  browserApiTools?: BrowserApiToolMetadata[];
 }

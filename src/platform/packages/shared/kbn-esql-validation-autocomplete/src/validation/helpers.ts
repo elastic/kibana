@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
-import { type ESQLCommand, type FunctionDefinition, Walker, Builder } from '@kbn/esql-ast';
-import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
+import {
+  type ESQLCommand,
+  type FunctionDefinition,
+  Walker,
+  Builder,
+  isSubQuery,
+} from '@kbn/esql-ast';
+import type { ESQLAstAllCommands, ESQLAstForkCommand } from '@kbn/esql-ast/src/types';
 import { expandEvals } from '../shared/expand_evals';
 
 /**
@@ -52,9 +57,18 @@ export function getSubqueriesToValidate(rootCommands: ESQLCommand[]) {
 
     // every command within FORK's branches is its own subquery to be validated
     if (command.name.toLowerCase() === 'fork') {
-      const branchSubqueries = getForkBranchSubqueries(command as ESQLCommand<'fork'>);
+      const branchSubqueries = getForkBranchSubqueries(command as ESQLAstForkCommand);
       for (const subquery of branchSubqueries) {
         subsequences.push([...expandedCommands.slice(0, i), ...subquery]);
+      }
+    }
+
+    // every command within FROM's subqueries is its own subquery to be validated
+    if (command.name.toLowerCase() === 'from') {
+      const fromSubqueries = getFromSubqueries(command as ESQLCommand<'from'>);
+
+      for (const subquery of fromSubqueries) {
+        subsequences.push(subquery);
       }
     }
 
@@ -74,9 +88,10 @@ export function getSubqueriesToValidate(rootCommands: ESQLCommand[]) {
  * @param command a FORK command
  * @returns an array of expanded subqueries
  */
-function getForkBranchSubqueries(command: ESQLCommand<'fork'>): ESQLCommand[][] {
+function getForkBranchSubqueries(command: ESQLAstForkCommand): ESQLCommand[][] {
   const expanded: ESQLCommand[][] = [];
-  const branches = command.args as ESQLAstQueryExpression[];
+  const branches = command.args.map((parens) => parens.child);
+
   for (let j = 0; j < branches.length; j++) {
     for (let k = 0; k < branches[j].commands.length; k++) {
       const partialQuery = branches[j].commands.slice(0, k + 1);
@@ -84,4 +99,40 @@ function getForkBranchSubqueries(command: ESQLCommand<'fork'>): ESQLCommand[][] 
     }
   }
   return expanded;
+}
+
+/**
+ * Expands a FROM command into flat subqueries for each command in each subquery.
+ *
+ * E.g. FROM index1, (FROM index2 | WHERE x > 10), (FROM index3, (FROM index4) | KEEP a)
+ *
+ * becomes [
+ *   [FROM index2],
+ *   [FROM index2 | WHERE x > 10],
+ *   [FROM index4],
+ *   [FROM index3, (FROM index4)],
+ *   [FROM index3, (FROM index4) | KEEP a]
+ * ]
+ *
+ * @param command a FROM command
+ * @returns an array of expanded subqueries
+ */
+function getFromSubqueries(command: ESQLCommand<'from'>): ESQLCommand[][] {
+  return command.args.filter(isSubQuery).flatMap((arg) => {
+    const subquery = arg.child;
+
+    return subquery.commands.flatMap((currentCommand, k) => {
+      const results: ESQLCommand[][] = [];
+
+      // If this command is a FROM with nested subqueries, expand recursively first
+      if (currentCommand.name.toLowerCase() === 'from') {
+        results.push(...getFromSubqueries(currentCommand as ESQLCommand<'from'>));
+      }
+
+      // Always add the partial query (includes current command and all previous ones)
+      results.push(subquery.commands.slice(0, k + 1));
+
+      return results;
+    });
+  });
 }

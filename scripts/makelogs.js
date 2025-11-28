@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env/node_version_validator');
+require('@kbn/setup-node-env/node_version_validator');
 require('@elastic/makelogs');

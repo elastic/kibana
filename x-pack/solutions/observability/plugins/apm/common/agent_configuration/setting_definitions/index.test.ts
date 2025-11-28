@@ -211,6 +211,8 @@ describe('filterByAgent', () => {
           'deactivate_all_instrumentations',
           'deactivate_instrumentations',
           'logging_level',
+          'opamp_polling_interval',
+          'sampling_rate',
           'send_logs',
           'send_metrics',
           'send_traces',
@@ -226,7 +228,7 @@ describe('filterByAgent', () => {
 
     it('opentelemetry/php/elastic', () => {
       expect(getSettingKeysForAgent('opentelemetry/php/elastic')).toEqual(
-        expect.arrayContaining(['logging_level', 'infer_spans'])
+        expect.arrayContaining(['infer_spans', 'logging_level', 'sampling_rate'])
       );
     });
 

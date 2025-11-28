@@ -33,6 +33,7 @@ export const TestRunErrorInfo = ({
     <>
       {(hasNoSteps || isDownMonitor) && showErrorTitle && (
         <EuiCallOut
+          announceOnMount
           data-test-subj="monitorTestRunErrorCallout"
           title={ERROR_RUNNING_TEST}
           color="danger"

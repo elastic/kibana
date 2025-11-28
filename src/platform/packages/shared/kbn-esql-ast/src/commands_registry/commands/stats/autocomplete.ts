@@ -8,7 +8,6 @@
  */
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { FunctionParameterContext } from '../../../definitions/utils/autocomplete/expressions/types';
-import { Walker } from '../../../walker';
 import { isAssignment, isColumn, isFunctionExpression } from '../../../ast/is';
 import type { ICommandCallbacks } from '../../types';
 import { Location } from '../../types';
@@ -65,12 +64,13 @@ export async function autocomplete(
   // Find the function at cursor position for suggestions
   const foundFunction = cursorPosition ? findFunctionForSuggestions(command, cursorPosition) : null;
 
+  let functionParameterContext: FunctionParameterContext | undefined;
+
   if (
     foundFunction &&
     (foundFunction.subtype === 'variadic-call' || foundFunction.subtype === 'binary-expression')
   ) {
-    // Build STATS-specific filtering context
-    const functionParameterContext = buildCustomFilteringContext(command, foundFunction, context);
+    functionParameterContext = buildCustomFilteringContext(command, foundFunction, context);
     const isInBy = isNodeWithinByClause(foundFunction, command);
     const isTimeseriesSource = query.trimStart().toLowerCase().startsWith('ts ');
 
@@ -123,7 +123,7 @@ export async function autocomplete(
         command,
         cursorPosition,
         expressionRoot,
-        lastArg: expressionRoot,
+        lastArg: foundFunction || expressionRoot,
         location: Location.STATS,
         context,
         callbacks,
@@ -146,6 +146,7 @@ export async function autocomplete(
         suggestColumns: false,
         suggestFunctions: true,
         controlType: ESQLVariableType.FUNCTIONS,
+        functionParameterContext,
       });
 
       return expressionSuggestions;
@@ -177,7 +178,7 @@ export async function autocomplete(
         command,
         cursorPosition,
         expressionRoot,
-        lastArg: lastArgRhs,
+        lastArg: foundFunction || lastArgRhs,
         location: Location.STATS,
         context,
         callbacks,
@@ -190,6 +191,7 @@ export async function autocomplete(
         suggestColumns: false,
         suggestFunctions: true,
         controlType: ESQLVariableType.FUNCTIONS,
+        functionParameterContext,
       });
 
       return expressionSuggestions;
@@ -256,7 +258,7 @@ export async function autocomplete(
         command,
         cursorPosition,
         expressionRoot,
-        lastArg: lastArgRhs,
+        lastArg: foundFunction || lastArgRhs,
         location: Location.STATS_BY,
         context,
         callbacks,
@@ -265,6 +267,7 @@ export async function autocomplete(
         addSpaceAfterFirstField: false,
         ignoredColumns,
         openSuggestions: true,
+        functionParameterContext,
       });
     }
 
@@ -287,7 +290,7 @@ export async function autocomplete(
         command,
         cursorPosition,
         expressionRoot,
-        lastArg: expressionRoot,
+        lastArg: foundFunction || expressionRoot,
         location: Location.STATS_BY,
         context,
         callbacks,
@@ -299,6 +302,7 @@ export async function autocomplete(
         addSpaceAfterFirstField: false,
         ignoredColumns,
         openSuggestions: true,
+        functionParameterContext,
       });
     }
 
@@ -326,6 +330,7 @@ async function getExpressionSuggestions({
   controlType,
   ignoredColumns = [],
   openSuggestions,
+  functionParameterContext,
 }: {
   query: string;
   command: ESQLAstAllCommands;
@@ -343,9 +348,13 @@ async function getExpressionSuggestions({
   controlType?: ESQLVariableType;
   ignoredColumns?: string[];
   openSuggestions?: boolean;
+  functionParameterContext?: FunctionParameterContext;
 }): Promise<ISuggestionItem[]> {
   const suggestions: ISuggestionItem[] = [];
   const innerText = query.substring(0, cursorPosition);
+
+  const insideFunction =
+    lastArg && isFunctionExpression(lastArg) && within(cursorPosition, lastArg);
 
   if (!rightAfterColumn(innerText, expressionRoot, (name) => _columnExists(name, context))) {
     const modifiedCallbacks = suggestColumns ? callbacks : { ...callbacks, getByType: undefined };
@@ -366,6 +375,7 @@ async function getExpressionSuggestions({
           suggestFunctions,
           controlType,
           openSuggestions,
+          functionParameterContext,
         },
       }))
     );
@@ -374,13 +384,11 @@ async function getExpressionSuggestions({
   if (
     (!expressionRoot ||
       (isColumn(expressionRoot) && !_columnExists(expressionRoot.parts.join('.'), context))) &&
-    !/not\s+$/i.test(innerText)
+    !/not\s+$/i.test(innerText) &&
+    !insideFunction
   ) {
     suggestions.push(...emptySuggestions);
   }
-
-  const insideFunction =
-    lastArg && isFunctionExpression(lastArg) && within(cursorPosition, lastArg);
 
   if (
     isExpressionComplete(getExpressionType(expressionRoot, context?.columns), innerText) &&
@@ -457,24 +465,19 @@ function buildCustomFilteringContext(
   };
 }
 
-/** Finds the function at cursor position that should handle suggestions. */
 function findFunctionForSuggestions(
   command: ESQLAstAllCommands,
   cursorPosition: number
 ): ESQLFunction | null {
-  const { node } = findAstPosition([command], cursorPosition);
+  const { node, containingFunction } = findAstPosition([command], cursorPosition);
 
-  // Check if the node at cursor is a function
   if (node && node.type === 'function') {
     const fn = node as ESQLFunction;
 
-    // Check if it's a special operator that needs custom handling
     const isSpecialOperator =
       inOperators.some((op) => op.name === fn.name) ||
       nullCheckOperators.some((op) => op.name === fn.name);
 
-    // Accept variadic-call functions or special binary-expression operators
-    // Exclude regular binary operators (comparison, assignment) that are handled generically
     if (
       fn.subtype === 'variadic-call' ||
       (fn.subtype === 'binary-expression' && isSpecialOperator)
@@ -483,22 +486,5 @@ function findFunctionForSuggestions(
     }
   }
 
-  // If no special operator found at cursor position, look for containing variadic-call functions
-  const allFunctions: ESQLFunction[] = [];
-  Walker.walk(command, {
-    visitFunction: (fn) => {
-      if (fn.subtype === 'variadic-call' && within(cursorPosition, fn)) {
-        allFunctions.push(fn);
-      }
-    },
-  });
-
-  // Get the innermost variadic-call function
-  return (
-    allFunctions.sort((a, b) => {
-      const aSize = a.location.max - a.location.min;
-      const bSize = b.location.max - b.location.min;
-      return aSize - bSize;
-    })[0] || null
-  );
+  return containingFunction || null;
 }

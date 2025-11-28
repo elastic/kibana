@@ -201,16 +201,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       getLicense: async () => await licensing?.getLicense(),
     };
 
-    setKibanaServices(
-      start,
-      core,
-      dataViews,
-      data,
-      storage,
-      uiActions,
-      fieldsMetadata,
-      usageCollection
-    );
+    setKibanaServices(start, core, data, storage, uiActions, fieldsMetadata, usageCollection);
 
     return start;
   }

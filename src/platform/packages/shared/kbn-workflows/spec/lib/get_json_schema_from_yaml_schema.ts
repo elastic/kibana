@@ -10,6 +10,7 @@
 import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { z } from '@kbn/zod';
+import { FetcherConfigSchema } from '../schema';
 
 type WorkflowJsonSchema = JsonSchema7Type & {
   $ref: '#/definitions/WorkflowSchema';
@@ -27,7 +28,12 @@ export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): WorkflowJson
   });
 
   // Apply targeted fixes to make it valid for JSON Schema validators
-  return fixBrokenSchemaReferencesAndEnforceStrictValidation(jsonSchema);
+  const fixedSchema = fixBrokenSchemaReferencesAndEnforceStrictValidation(jsonSchema);
+
+  // Add fetcher parameter to all Kibana connector steps
+  addFetcherToKibanaConnectors(fixedSchema);
+
+  return fixedSchema;
 }
 
 /**
@@ -185,4 +191,48 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
     // If parsing fails, throw an error, since replacing with regexp isn't safe
     throw new Error('Failed to fix additionalProperties in json schema');
   }
+}
+
+/**
+ * Add fetcher parameter to all Kibana connector "with" schemas
+ * This allows HTTP configuration for all Kibana API calls
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function addFetcherToKibanaConnectors(schema: any): void {
+  // The actual step schemas are stored in the fallback items
+  // (steps.items references this location via $ref)
+  const fallbackItems =
+    schema?.definitions?.WorkflowSchema?.properties?.settings?.properties?.['on-failure']
+      ?.properties?.fallback?.items;
+
+  if (!fallbackItems?.anyOf) {
+    return;
+  }
+
+  // Convert FetcherConfigSchema to JSON Schema (single source of truth)
+  const fetcherJsonSchema = zodToJsonSchema(FetcherConfigSchema, {
+    target: 'jsonSchema7',
+    $refStrategy: 'none', // Inline the schema
+  });
+
+  const allStepSchemas = fallbackItems.anyOf;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  allStepSchemas.forEach((stepSchema: any) => {
+    // Only add to Kibana connector steps (type starts with "kibana.")
+    const stepType = stepSchema?.properties?.type?.const;
+    if (stepType && typeof stepType === 'string' && stepType.startsWith('kibana.')) {
+      const withSchema = stepSchema.properties?.with;
+
+      if (withSchema) {
+        if (!withSchema.properties) {
+          withSchema.properties = {};
+        }
+
+        if (!withSchema.properties.fetcher) {
+          withSchema.properties.fetcher = fetcherJsonSchema;
+        }
+      }
+    }
+  });
 }

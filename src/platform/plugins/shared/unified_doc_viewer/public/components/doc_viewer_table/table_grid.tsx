@@ -216,7 +216,7 @@ export function TableGrid({
           {Boolean(warningMessage) && (
             <div>
               <EuiSpacer size="xs" />
-              <EuiCallOut title={warningMessage} color="warning" size="s" />
+              <EuiCallOut announceOnMount={false} title={warningMessage} color="warning" size="s" />
             </div>
           )}
         </>

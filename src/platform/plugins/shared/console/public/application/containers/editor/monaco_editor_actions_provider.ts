@@ -879,8 +879,8 @@ export class MonacoEditorActionsProvider {
    */
   public async appendRequestToEditor(
     req: RequestToRestore,
-    dispatch: Dispatch<Actions>,
-    context: ContextValue
+    dispatch?: Dispatch<Actions>,
+    context?: ContextValue
   ) {
     const model = this.editor.getModel();
 
@@ -905,30 +905,25 @@ export class MonacoEditorActionsProvider {
 
     // 2 - Since we add two new lines, the cursor should be at the beginning of the new request
     const beginningOfNewReq = lastLineNumber + 2;
-    const selectedRequests = await this.getRequestsBetweenLines(
-      model,
-      beginningOfNewReq,
-      beginningOfNewReq
-    );
-    // We can assume that there is only one request given that we only add one
-    // request at a time.
-    const restoredRequest = selectedRequests[0];
 
     // 3 - Set the cursor to the beginning of the new request,
     this.editor.setSelection({
-      startLineNumber: restoredRequest.startLineNumber,
+      startLineNumber: beginningOfNewReq,
       startColumn: 1,
-      endLineNumber: restoredRequest.startLineNumber,
+      endLineNumber: beginningOfNewReq,
       endColumn: 1,
     });
 
     // 4 - Scroll to the beginning of the new request
     this.editor.setScrollPosition({
-      scrollTop: this.editor.getTopForLineNumber(restoredRequest.startLineNumber),
+      scrollTop: this.editor.getTopForLineNumber(beginningOfNewReq),
     });
 
+    // Focus on the editor so that the selection is highlighted
+    this.editor.focus();
+
     // 5 - Optionally send the request
-    if (req.restoreMethod === RestoreMethod.RESTORE_AND_EXECUTE) {
+    if (dispatch && context && req.restoreMethod === RestoreMethod.RESTORE_AND_EXECUTE) {
       this.sendRequests(dispatch, context);
     }
   }

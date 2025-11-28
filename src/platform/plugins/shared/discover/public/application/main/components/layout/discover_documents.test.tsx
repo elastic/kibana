@@ -138,7 +138,7 @@ describe('Discover documents layout', () => {
       container
     );
 
-    expect(container.appState.getState().grid?.columns?.someField.width).toEqual(206);
+    expect(container.appState.get().grid?.columns?.someField.width).toEqual(206);
   });
 
   test('should render customisations', async () => {

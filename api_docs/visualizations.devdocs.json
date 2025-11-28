@@ -3200,6 +3200,14 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
+              "[] | undefined; nonHighlightingFilters?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined; sort?: ",
               {
                 "pluginId": "data",
@@ -7757,6 +7765,14 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
+              "[] | undefined; nonHighlightingFilters?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[] | undefined; sort?: ",
               {
                 "pluginId": "data",
@@ -8923,7 +8939,7 @@
         "label": "Operation",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"date_histogram\" | \"average\" | \"percentile\" | \"last_value\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
+          "\"count\" | \"min\" | \"max\" | \"sum\" | \"median\" | \"filters\" | \"range\" | \"terms\" | \"cumulative_sum\" | \"date_histogram\" | \"average\" | \"percentile\" | \"last_value\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types.ts",
         "deprecated": false,
@@ -8953,7 +8969,7 @@
         "label": "OperationWithSourceField",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"range\" | \"terms\" | \"date_histogram\" | \"average\" | \"percentile\" | \"last_value\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\""
+          "\"count\" | \"min\" | \"max\" | \"sum\" | \"median\" | \"filters\" | \"range\" | \"terms\" | \"date_histogram\" | \"average\" | \"percentile\" | \"last_value\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types.ts",
         "deprecated": false,

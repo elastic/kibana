@@ -24,6 +24,7 @@ import type {
 } from './types';
 import { RequestContextFactory } from './request_context_factory';
 import { AutomaticImportService } from './services';
+import { AUTOMATIC_IMPORT_FEATURE } from './feature';
 
 export class AutomaticImportV2Plugin
   implements
@@ -57,12 +58,19 @@ export class AutomaticImportV2Plugin
   ) {
     this.logger.debug('automaticImportV2: Setup');
 
-    const coreStartServices = core.getStartServices().then(([coreStart, startPlugins]) => ({
+    plugins.features.registerKibanaFeature(AUTOMATIC_IMPORT_FEATURE);
+
+    const coreStartServices = core.getStartServices().then(([coreStart]) => ({
       esClient: coreStart.elasticsearch.client.asInternalUser as ElasticsearchClient,
     }));
     const esClientPromise = coreStartServices.then(({ esClient }) => esClient);
 
-    this.automaticImportService = new AutomaticImportService(this.logger, esClientPromise);
+    this.automaticImportService = new AutomaticImportService(
+      this.logger,
+      esClientPromise,
+      core.savedObjects,
+      plugins.taskManager
+    );
 
     const requestContextFactory = new RequestContextFactory({
       logger: this.logger,
@@ -76,8 +84,6 @@ export class AutomaticImportV2Plugin
       AutomaticImportV2PluginRequestHandlerContext,
       'automaticImportv2'
     >('automaticImportv2', (context, request) => requestContextFactory.create(context, request));
-
-    this.logger.debug('automaticImportV2: Setup complete');
     return {
       actions: plugins.actions,
     };
@@ -95,16 +101,38 @@ export class AutomaticImportV2Plugin
   ): AutomaticImportV2PluginStart {
     this.logger.debug('automaticImportV2: Started');
 
-    if (this.automaticImportService) {
-      if (plugins.security) {
-        this.automaticImportService.setSecurityService(core.security);
-      }
+    if (!plugins.security) {
+      throw new Error('Security service not initialized.');
     }
+
+    if (!core.savedObjects) {
+      throw new Error('SavedObjects service not initialized.');
+    }
+
+    if (!plugins.taskManager) {
+      throw new Error('TaskManager service not initialized.');
+    }
+
+    if (!this.automaticImportService) {
+      throw new Error('AutomaticImportService not initialized during setup');
+    }
+
+    this.automaticImportService
+      .initialize(core.security, core.savedObjects, plugins.taskManager)
+      .then(() => {
+        this.logger.debug('AutomaticImportService initialized successfully');
+      })
+      .catch((error) => {
+        this.logger.error('Failed to initialize AutomaticImportService', error);
+      });
+
+    this.logger.info('TaskManagerService initialized successfully');
 
     return {
       actions: plugins.actions,
       inference: plugins.inference,
       licensing: plugins.licensing,
+      security: plugins.security,
     };
   }
 

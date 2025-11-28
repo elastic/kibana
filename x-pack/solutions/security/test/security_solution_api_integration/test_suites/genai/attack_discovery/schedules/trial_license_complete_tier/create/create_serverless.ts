@@ -43,7 +43,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Happy path for predefined users', () => {
       const roles = [
-        'viewer',
         'editor',
         ROLES.t1_analyst,
         ROLES.t2_analyst,
@@ -75,6 +74,24 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('RBAC', () => {
+      it('should not be able to create a schedule with the "viewer" role', async () => {
+        const testAgent = await utils.createSuperTest('viewer');
+
+        const apis = getAttackDiscoverySchedulesApis({ supertest: testAgent });
+
+        const result = await apis.create({
+          schedule: getSimpleAttackDiscoverySchedule(),
+          kibanaSpace: kibanaSpace1,
+          expectedHttpCode: 403,
+        });
+
+        expect(result).toEqual(
+          getMissingScheduleKibanaPrivilegesError({
+            routeDetails: `POST ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}`,
+          })
+        );
+      });
+
       it('should not be able to create a schedule without `assistant` kibana privileges', async () => {
         const superTest = await utils.createSuperTestWithCustomRole(noKibanaPrivileges);
 

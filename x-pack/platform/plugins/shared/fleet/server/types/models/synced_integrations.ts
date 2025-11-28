@@ -49,6 +49,12 @@ export const CustomAssetsDataSchema = schema.object({
   ]),
   error: schema.maybe(schema.string()),
   is_deleted: schema.maybe(schema.boolean()),
+  warning: schema.maybe(
+    schema.object({
+      title: schema.string(),
+      message: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 export const GetRemoteSyncedIntegrationsStatusResponseSchema = schema.object({

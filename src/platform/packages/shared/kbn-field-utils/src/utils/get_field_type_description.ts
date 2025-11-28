@@ -83,6 +83,14 @@ export function getFieldTypeDescription(type?: string) {
       return i18n.translate('fieldUtils.fieldNameDescription.histogramField', {
         defaultMessage: 'Pre-aggregated numerical values in the form of a histogram.',
       });
+    case KNOWN_FIELD_TYPES.EXPONENTIAL_HISTOGRAM:
+      return i18n.translate('fieldUtils.fieldNameDescription.exponentialHistogramField', {
+        defaultMessage: 'Pre-aggregated numerical values in the form of an exponential histogram.',
+      });
+    case KNOWN_FIELD_TYPES.TDIGEST:
+      return i18n.translate('fieldUtils.fieldNameDescription.tdigestField', {
+        defaultMessage: 'Pre-aggregated numerical values for percentile calculations.',
+      });
     case KNOWN_FIELD_TYPES.IP:
       return i18n.translate('fieldUtils.fieldNameDescription.ipAddressField', {
         defaultMessage: 'IPv4 and IPv6 addresses.',

@@ -31,7 +31,6 @@ import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ANOMALY_RESULT_TYPE_SCORE_FIELDS } from '../../../common/constants/alerts';
-import { detectAnomalyAlertFieldUsage } from '../../../common/util/alerting/detect_anomaly_alert_field_usage';
 import { getAnomalyDescription } from '../../../common/util/anomaly_description';
 import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
 import type { MlClient } from '../ml_client';
@@ -83,7 +82,7 @@ interface AnomalyESQueryParams {
   includeInterimResults: boolean;
   /** Source index from the datafeed. Required for retrieving field types for formatting results. */
   indexPattern: string;
-  customFilter?: string;
+  kqlQueryString?: string;
 }
 
 const TIME_RANGE_PADDING = 10;
@@ -92,12 +91,12 @@ const TIME_RANGE_PADDING = 10;
  * Parse KQL filter and convert to Elasticsearch Query DSL.
  */
 function parseCustomKqlFilter(
-  customFilter: string | null | undefined
+  kqlQueryString: string | null | undefined
 ): QueryDslQueryContainer | undefined {
-  if (!customFilter) return undefined;
+  if (!kqlQueryString) return undefined;
 
   try {
-    const ast = fromKueryExpression(customFilter);
+    const ast = fromKueryExpression(kqlQueryString);
     return toElasticsearchQuery(ast);
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -689,11 +688,7 @@ export function alertingServiceProvider(
 
     const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
 
-    const parsedCustomFilter = parseCustomKqlFilter(params.customFilter);
-
-    const anomalyAlertFieldUsage = detectAnomalyAlertFieldUsage(params.customFilter);
-
-    const effectiveSeverity = anomalyAlertFieldUsage.hasAnomalyScoreFilter ? 0 : params.severity;
+    const parsedCustomFilter = parseCustomKqlFilter(params.kqlQueryString);
 
     const requestBody = {
       size: 0,
@@ -717,8 +712,7 @@ export function alertingServiceProvider(
                 result_type: Object.values(ML_ANOMALY_RESULT_TYPE) as string[],
               },
             },
-            // Only apply interim filter if KQL doesn't already filter on is_interim
-            ...(!anomalyAlertFieldUsage.hasInterimFilter && !params.includeInterim
+            ...(!params.includeInterim
               ? [
                   {
                     term: { is_interim: false },
@@ -738,10 +732,10 @@ export function alertingServiceProvider(
                 // Ignore empty buckets
                 min_doc_count: 1,
               },
-              aggs: getResultTypeAggRequest(params.resultType, effectiveSeverity, true),
+              aggs: getResultTypeAggRequest(params.resultType, params.severity, true),
             },
           }
-        : getResultTypeAggRequest(params.resultType, effectiveSeverity),
+        : getResultTypeAggRequest(params.resultType, params.severity),
     };
 
     const body = await mlClient.anomalySearch(
@@ -845,7 +839,7 @@ export function alertingServiceProvider(
       resultType: params.resultType,
       indexPattern: datafeeds![0]!.indices[0],
       anomalyScoreThreshold: params.severity,
-      customFilter: params.customFilter ?? undefined,
+      kqlQueryString: params.kqlQueryString ?? undefined,
     };
   };
 
@@ -867,16 +861,10 @@ export function alertingServiceProvider(
       anomalyScoreField,
       includeInterimResults,
       anomalyScoreThreshold,
-      customFilter,
+      kqlQueryString,
     } = params;
 
-    const parsedCustomFilter = parseCustomKqlFilter(customFilter);
-
-    const anomalyAlertFieldUsage = detectAnomalyAlertFieldUsage(customFilter);
-
-    const effectiveSeverity = anomalyAlertFieldUsage.hasAnomalyScoreFilter
-      ? 0
-      : anomalyScoreThreshold;
+    const parsedCustomFilter = parseCustomKqlFilter(kqlQueryString);
 
     const requestBody = {
       size: 0,
@@ -895,16 +883,17 @@ export function alertingServiceProvider(
               range: {
                 timestamp: {
                   gte: `now-${lookBackTimeInterval}`,
+                  lte: 'now',
                 },
               },
             },
-            ...(!anomalyAlertFieldUsage.hasInterimFilter && !includeInterimResults
-              ? []
-              : [
+            ...(!includeInterimResults
+              ? [
                   {
                     term: { is_interim: false },
                   },
-                ]),
+                ]
+              : []),
             ...(parsedCustomFilter ? [parsedCustomFilter] : []),
           ],
         },
@@ -924,7 +913,7 @@ export function alertingServiceProvider(
                 field: anomalyScoreField,
               },
             },
-            ...getResultTypeAggRequest(resultType, effectiveSeverity),
+            ...getResultTypeAggRequest(resultType, anomalyScoreThreshold),
             truncate: {
               bucket_sort: {
                 size: topNBuckets,
