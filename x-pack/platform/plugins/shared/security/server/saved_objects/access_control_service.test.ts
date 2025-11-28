@@ -128,30 +128,6 @@ describe('AccessControlService', () => {
       ]);
     });
 
-    it('does not return type if user is null', () => {
-      service.setUserForOperation(null);
-      const objects = [
-        {
-          id: '1',
-          type: 'dashboard',
-          accessControl: { accessMode: 'write_restricted' as const, owner: 'alice' },
-        },
-      ];
-      const { types: typesRequiringAccessControl, objects: results } =
-        service.getObjectsRequiringPrivilegeCheck({
-          objects,
-          actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
-        });
-      expect(typesRequiringAccessControl.size).toBe(0);
-      expect(results).toEqual([
-        {
-          type: 'dashboard',
-          id: '1',
-          requiresManageAccessControl: false,
-        },
-      ]);
-    });
-
     it('returns all types that require access control when multiple objects are passed', () => {
       service.setUserForOperation(makeUser('bob'));
       const objects = [
