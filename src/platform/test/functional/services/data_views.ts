@@ -53,7 +53,7 @@ export class DataViewsService extends FtrService {
 
     await this.testSubjects.waitForAttributeToChange('timestampField', 'data-is-loading', '0');
 
-    if (await this.testSubjects.isEnabled('timestampField')) {
+    if (await this.testSubjects.isEnabled('timestampField > comboBoxSearchInput')) {
       if (!hasTimeField) {
         await this.comboBox.set('timestampField', "--- I don't want to use the time filter ---");
       } else if (changeTimestampField) {
