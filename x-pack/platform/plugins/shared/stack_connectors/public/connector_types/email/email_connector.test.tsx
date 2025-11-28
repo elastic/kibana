@@ -290,13 +290,15 @@ describe('EmailActionConnectorFields', () => {
       };
 
       appMockRenderer.render(
-        <ConnectorFormTestProvider connector={actionConnector}>
-          <EmailActionConnectorFields
-            readOnly={false}
-            isEdit={false}
-            registerPreSubmitValidator={() => {}}
-          />
-        </ConnectorFormTestProvider>
+        <Suspense fallback={null}>
+          <ConnectorFormTestProvider connector={actionConnector}>
+            <EmailActionConnectorFields
+              readOnly={false}
+              isEdit={false}
+              registerPreSubmitValidator={() => {}}
+            />
+          </ConnectorFormTestProvider>
+        </Suspense>
       );
 
       expect(screen.queryByTestId('emailHostInput')).not.toBeInTheDocument();
