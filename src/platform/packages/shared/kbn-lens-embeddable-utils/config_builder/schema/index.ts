@@ -18,7 +18,12 @@ import { pieStateSchema } from './charts/pie';
 import { treemapStateSchema } from './charts/treemap';
 import { waffleStateSchema } from './charts/waffle';
 import type { LensApiAllMetricOperations } from './metric_ops';
+import type {
+  LensApiAllMetricOrFormulaOperations,
+  LensApiStaticValueOperation,
+} from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
+import { xyStateSchema } from './charts/xy';
 
 export const partitionStateSchema = schema.oneOf([
   mosaicStateSchema,
@@ -30,6 +35,7 @@ export const partitionStateSchema = schema.oneOf([
 export const lensApiStateSchema = schema.oneOf([
   metricStateSchema,
   legacyMetricStateSchema,
+  xyStateSchema,
   gaugeStateSchema,
   tagcloudStateSchema,
   // disable for now to avoid type issues at the config builder root level
@@ -41,6 +47,7 @@ export type LensApiState = TypeOf<typeof lensApiStateSchema>;
 
 export type { MetricState, metricStateSchemaNoESQL } from './charts/metric';
 export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';
+export type { XYState } from './charts/xy';
 export type { GaugeState, gaugeStateSchemaNoESQL } from './charts/gauge';
 export type { TagcloudState, TagcloudStateNoESQL, TagcloudStateESQL } from './charts/tagcloud';
 export { tagcloudStateSchema } from './charts/tagcloud';
@@ -51,6 +58,9 @@ export type {
 } from './metric_ops';
 export type { LensApiBucketOperations } from './bucket_ops';
 
-export type NarrowByType<T, U> = T extends { type: U } ? T : never;
+export type NarrowByType<T, U> = T extends { type?: U } ? T : never;
 
-export type LensApiAllOperations = LensApiAllMetricOperations | LensApiBucketOperations;
+export type LensApiAllOperations =
+  | LensApiAllMetricOrFormulaOperations
+  | LensApiBucketOperations
+  | LensApiStaticValueOperation;
