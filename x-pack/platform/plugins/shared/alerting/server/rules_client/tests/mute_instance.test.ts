@@ -106,7 +106,10 @@ describe('muteInstance()', () => {
       references: [],
     });
 
-    await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
+     await rulesClient.muteInstance({
+      params: { alertId: '1', alertInstanceId: '2' },
+      query: { validateAlertsExistence: false },
+    });
 
     expect(alertsService.muteAlertInstance).toHaveBeenCalledWith({
       ruleId: '1',
@@ -114,7 +117,6 @@ describe('muteInstance()', () => {
       indices: ['.alerts-default'],
       logger: rulesClientParams.logger,
     });
-
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       '1',
@@ -144,8 +146,12 @@ describe('muteInstance()', () => {
       },
       references: [],
     });
-
-    await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
+    
+    await rulesClient.muteInstance({
+      params: { alertId: '1', alertInstanceId: '2' },
+      query: { validateAlertsExistence: false },
+    });
+    
     expect(alertsService.muteAlertInstance).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
@@ -167,9 +173,13 @@ describe('muteInstance()', () => {
       references: [],
     });
 
-    await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(alertsService.muteAlertInstance).not.toHaveBeenCalled();
+    await rulesClient.muteInstance({
+      params: { alertId: '1', alertInstanceId: '2' },
+      query: { validateAlertsExistence: false },
+    });
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(alertsService.muteAlertInstance).not.toHaveBeenCalled();
+
   });
 
   describe('authorization', () => {
@@ -203,7 +213,10 @@ describe('muteInstance()', () => {
 
     test('ensures user is authorised to muteInstance this type of alert under the consumer', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
-      await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
+      await rulesClient.muteInstance({
+        params: { alertId: '1', alertInstanceId: '2' },
+        query: { validateAlertsExistence: false },
+      });
 
       expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
@@ -221,7 +234,10 @@ describe('muteInstance()', () => {
       );
 
       await expect(
-        rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' })
+        rulesClient.muteInstance({
+          params: { alertId: '1', alertInstanceId: '2' },
+          query: { validateAlertsExistence: false },
+        })
       ).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to muteAlert a "myType" alert for "myApp"]`
       );
@@ -252,7 +268,10 @@ describe('muteInstance()', () => {
         version: '123',
         references: [],
       });
-      await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
+      await rulesClient.muteInstance({
+        params: { alertId: '1', alertInstanceId: '2' },
+        query: { validateAlertsExistence: false },
+      });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
@@ -283,7 +302,10 @@ describe('muteInstance()', () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
       await expect(
-        rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' })
+        rulesClient.muteInstance({
+          params: { alertId: '1', alertInstanceId: '2' },
+          query: { validateAlertsExistence: false },
+        })
       ).rejects.toThrow();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
