@@ -196,13 +196,14 @@ export const useExistingFieldsFetcher = (
 
       // skip redundant and older results
       if (fetchId === lastFetchId) {
-        const nextMap = {
-          ...globalMap$.getValue(),
+        onInitialExistingFieldsInfoMapChangeRef.current?.({
           [dataViewId]: info,
-        };
-        onInitialExistingFieldsInfoMapChangeRef.current?.(nextMap);
+        });
         if (mountedRef.current) {
-          globalMap$.next(nextMap);
+          globalMap$.next({
+            ...globalMap$.getValue(),
+            [dataViewId]: info,
+          });
         }
       }
 
