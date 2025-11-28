@@ -13,9 +13,9 @@ import {
   getLogExceptionTypeFieldWithFallback,
   getMessageFieldWithFallbacks,
   type DataTableRecord,
-  type LogDocumentOverview,
+  fieldConstants,
 } from '@kbn/discover-utils';
-import { fieldConstants } from '@kbn/discover-utils';
+import { getFieldValueWithFallback } from '@kbn/discover-utils/src/utils';
 import { ContentFrameworkSection } from '../../../content_framework/lazy_content_framework_section';
 import type { ContentFrameworkSectionProps } from '../../../content_framework/section/section';
 import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
@@ -26,7 +26,7 @@ import { SimilarErrorsOccurrencesChart } from './similar_errors_occurrences_char
 const sectionTitle = i18n.translate(
   'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.title',
   {
-    defaultMessage: 'Similar errors', // TODO should this be configurable between error and exception?
+    defaultMessage: 'Similar errors',
   }
 );
 
@@ -41,17 +41,24 @@ const discoverBtnAria = i18n.translate(
 
 export interface SimilarErrorsProps {
   hit: DataTableRecord;
-  formattedDoc: LogDocumentOverview;
 }
 
-export function SimilarErrors({ hit, formattedDoc }: SimilarErrorsProps) {
-  const serviceNameValue = formattedDoc[fieldConstants.SERVICE_NAME_FIELD];
-  const groupingNameValue = formattedDoc[fieldConstants.ERROR_GROUPING_NAME_FIELD];
-  const culpritValue = formattedDoc[fieldConstants.ERROR_CULPRIT_FIELD];
-  const { field: messageField, value: messageValue } = getMessageFieldWithFallbacks(hit.flattened);
-  const { field: typeField, value: typeValue } = getLogExceptionTypeFieldWithFallback(
-    hit.flattened
+export function SimilarErrors({ hit }: SimilarErrorsProps) {
+  const hitFlattened = hit.flattened;
+  const { value: serviceNameValue } = getFieldValueWithFallback(
+    hitFlattened,
+    fieldConstants.SERVICE_NAME_FIELD
   );
+  const { value: groupingNameValue } = getFieldValueWithFallback(
+    hitFlattened,
+    fieldConstants.ERROR_GROUPING_NAME_FIELD
+  );
+  const { value: culpritValue } = getFieldValueWithFallback(
+    hitFlattened,
+    fieldConstants.ERROR_CULPRIT_FIELD
+  );
+  const { field: messageField, value: messageValue } = getMessageFieldWithFallbacks(hitFlattened);
+  const { field: typeField, value: typeValue } = getLogExceptionTypeFieldWithFallback(hitFlattened);
 
   const sectionDescription = useMemo(() => {
     const fieldsWithValues: string[] = [fieldConstants.SERVICE_NAME_FIELD];
@@ -87,12 +94,9 @@ export function SimilarErrors({ hit, formattedDoc }: SimilarErrorsProps) {
   const { indexes } = useDataSourcesContext();
   const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.logs });
 
-  // TODO should we keep in mind mixed sources?
-  // TODO when there's only 1 occurence and is the doc that I have opened, the chart shows empty.
-  // should we show it anyway?
   const esqlQuery = getEsqlQuery({
-    serviceName: formattedDoc[fieldConstants.SERVICE_NAME_FIELD],
-    culprit: culpritValue,
+    serviceName: serviceNameValue ? String(serviceNameValue) : undefined,
+    culprit: culpritValue ? String(culpritValue) : undefined,
     message:
       messageValue && messageField
         ? { fieldName: messageField, value: String(messageValue) }

@@ -135,7 +135,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             />
           )}
           <DataSourcesProvider indexes={indexes}>
-            {showSimilarErrors ? <SimilarErrors hit={hit} formattedDoc={parsedDoc} /> : null}
+            {showSimilarErrors ? <SimilarErrors hit={hit} /> : null}
             {parsedDoc[TRACE_ID_FIELD] && showTraceWaterfall ? (
               <TraceWaterfall
                 traceId={parsedDoc[TRACE_ID_FIELD]}
