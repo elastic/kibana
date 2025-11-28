@@ -48,7 +48,11 @@ import {
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
-import { getSharedChartAPIToLensState, getSharedChartLensStateToAPI } from './utils';
+import {
+  getDatasourceLayers,
+  getSharedChartAPIToLensState,
+  getSharedChartLensStateToAPI,
+} from './utils';
 
 const ACCESSOR = 'region_map_accessor';
 function getAccessorName(type: 'metric' | 'region') {
@@ -69,7 +73,7 @@ function buildVisualizationState(config: RegionMapState): ChoroplethChartState {
 }
 
 function getRegionMapDataset(
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[] = [],
@@ -85,7 +89,7 @@ function getRegionMapDataset(
 }
 
 function getRegionMapMetric(
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: ChoroplethChartState
 ): RegionMapState['metric'] | undefined {
   if (visualization.valueAccessor == null) {
@@ -101,7 +105,7 @@ function getRegionMapMetric(
 }
 
 function getRegionMapRegion(
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: ChoroplethChartState
 ): RegionMapState['region'] | undefined {
   if (visualization.regionAccessor == null) {
@@ -120,7 +124,7 @@ function getRegionMapRegion(
 
 function reverseBuildVisualizationState(
   visualization: ChoroplethChartState,
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
@@ -198,12 +202,7 @@ export function fromLensStateToAPI(
 ): Extract<LensApiState, { type: 'region_map' }> {
   const { state } = config;
   const visualization = state.visualization as ChoroplethChartState;
-  const layers =
-    state.datasourceStates.formBased?.layers ??
-    state.datasourceStates.textBased?.layers ??
-    // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
-    (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
-    [];
+  const layers = getDatasourceLayers(state);
 
   // Necessary for ESQL panels to find the correct layer, since the old layers are not removed from the state
   const visLayerId = Object.entries(layers).find(([id]) => id === visualization.layerId);
