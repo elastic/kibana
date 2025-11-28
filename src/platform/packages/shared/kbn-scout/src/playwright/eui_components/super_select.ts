@@ -48,7 +48,6 @@ export class EuiSuperSelectWrapper {
   }
 
   toggleDropdown = async (): Promise<void> => {
-    await this.button.waitFor({ state: 'attached' });
     await this.button.click();
   };
 
@@ -65,7 +64,6 @@ export class EuiSuperSelectWrapper {
    * EuiSuperSelect stores the selected value in a hidden input element.
    */
   async getSelectedValue(): Promise<string> {
-    await this.superSelectControlWrapper.waitFor({ state: 'attached' });
     const hiddenInput = this.superSelectControlWrapper.locator('input[type="hidden"]');
     const inputExists = (await hiddenInput.count()) > 0;
 
@@ -105,12 +103,7 @@ export class EuiSuperSelectWrapper {
    * @throws Error if the super select is disabled
    */
   async selectOption(value: string): Promise<void> {
-    await this.superSelectControlWrapper.waitFor({ state: 'attached' });
-    await this.button.waitFor({ state: 'attached' });
-
-    // Check if disabled before attempting to select
-    const disabled = await this.isDisabled();
-    if (disabled) {
+    if (await this.isDisabled()) {
       throw new Error('Cannot select option: super select is disabled');
     }
 
@@ -135,7 +128,7 @@ export class EuiSuperSelectWrapper {
     }
 
     // Wait for dropdown to close
-    await this.page.waitForTimeout(100); // slight delay to allow UI to update
+    await this.dropdown.waitFor({ state: 'detached' });
     if (isToggled) {
       await this.toggleDropdown();
     }
@@ -145,7 +138,6 @@ export class EuiSuperSelectWrapper {
    * Check if the super select is disabled
    */
   async isDisabled(): Promise<boolean> {
-    await this.button.waitFor({ state: 'attached' });
     return await this.button.isDisabled();
   }
 }
