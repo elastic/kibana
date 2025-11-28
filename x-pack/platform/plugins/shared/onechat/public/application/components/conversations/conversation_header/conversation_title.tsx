@@ -10,7 +10,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useConversationTitle, useHasActiveConversation } from '../../../hooks/use_conversation';
-import { RenameConversationModal } from './rename_conversation_modal';
+import { RenameConversationInput } from './rename_conversation_input';
 
 const labels = {
   ariaLabel: i18n.translate('xpack.onechat.conversationTitle.ariaLabel', {
@@ -47,7 +47,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
   }
 
   if (isEditing) {
-    return <RenameConversationModal isOpen={true} onClose={handleCancel} />;
+    return <RenameConversationInput onCancel={handleCancel} />;
   }
 
   return (
