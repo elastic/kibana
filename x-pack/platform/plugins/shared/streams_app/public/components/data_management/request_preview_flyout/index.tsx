@@ -79,7 +79,7 @@ export const RequestPreviewFlyout = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>{cancelButtonLabel}</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={onClose}>{closeButtonLabel}</EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiCopy textToCopy={codeContent}>
@@ -101,7 +101,7 @@ const defaultTitle = i18n.translate('xpack.streams.requestPreviewFlyout.defaultT
 });
 
 const defaultDescription = i18n.translate('xpack.streams.requestPreviewFlyout.defaultDescription', {
-  defaultMessage: 'Copy your current config, and use the REST API with the following JSON object.',
+  defaultMessage: 'Use the REST API with the following request.',
 });
 
 const downloadAriaLabel = i18n.translate(
@@ -111,10 +111,10 @@ const downloadAriaLabel = i18n.translate(
   }
 );
 
-const cancelButtonLabel = i18n.translate(
-  'xpack.streams.requestPreviewFlyout.cancelButtonEmptyLabel',
+const closeButtonLabel = i18n.translate(
+  'xpack.streams.requestPreviewFlyout.closeButtonEmptyLabel',
   {
-    defaultMessage: 'Cancel',
+    defaultMessage: 'Close',
   }
 );
 

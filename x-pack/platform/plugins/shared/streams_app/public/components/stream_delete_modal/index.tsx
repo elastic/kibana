@@ -183,5 +183,5 @@ export function StreamDeleteModal({
 
 const copyCodeButtonText = i18n.translate(
   'xpack.streams.streamDetailView.deleteStreamModal.copyCodeButton',
-  { defaultMessage: 'Copy code' }
+  { defaultMessage: 'Copy API request' }
 );

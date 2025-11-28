@@ -143,26 +143,26 @@ export const EditRoutingRuleControls = ({
     <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
-            <EuiButtonIcon
-              data-test-subj="streamsAppRoutingEditRoutingRuleViewCodeButton"
-              aria-label={viewCodeButtonLabel}
-              size="s"
-              iconType="editorCodeBlock"
-              display="base"
-              onClick={onViewCodeClick}
-            />
-            <RemoveButton
-              onDelete={removeRule}
-              isDisabled={!canRemoveRoutingRule}
-              streamName={routingRuleName}
-            />
-          </EuiFlexGroup>
+          <RemoveButton
+            onDelete={removeRule}
+            isDisabled={!canRemoveRoutingRule}
+            streamName={routingRuleName}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" wrap>
+          <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
             <CancelButton isDisabled={isUpdating} onClick={cancelChanges} />
+            <EuiToolTip position="top" content={viewCodeButtonLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj="streamsAppRoutingEditRoutingRuleViewCodeButton"
+                aria-label={viewCodeButtonLabel}
+                size="s"
+                iconType="editorCodeBlock"
+                display="base"
+                onClick={onViewCodeClick}
+              />
+            </EuiToolTip>
             <PrivilegesTooltip hasPrivileges={hasPrivileges}>
               <UpdateButton
                 isLoading={isUpdating}
@@ -242,16 +242,15 @@ const RemoveButton = ({
 
   return (
     <>
-      <EuiButtonIcon
+      <EuiButton
         data-test-subj="streamsAppRoutingStreamEntryRemoveButton"
-        aria-label={removeButtonLabel}
-        iconType="trash"
         color="danger"
         size="s"
-        display="base"
         isDisabled={isDisabled}
         onClick={openDeleteModal}
-      />
+      >
+        {removeButtonLabel}
+      </EuiButton>
       {isDeleteModalOpen && (
         <StreamDeleteModal
           onClose={closeDeleteModal}
@@ -323,7 +322,7 @@ const PrivilegesTooltip = ({
 
 const viewCodeButtonLabel = i18n.translate(
   'xpack.streams.editRoutingRuleControls.viewCodeButtonLabel',
-  { defaultMessage: 'View code' }
+  { defaultMessage: 'View API request' }
 );
 
 const removeButtonLabel = i18n.translate(

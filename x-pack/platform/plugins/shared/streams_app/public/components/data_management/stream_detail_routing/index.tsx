@@ -25,7 +25,7 @@ import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { RequestPreviewFlyout } from '../request_preview_flyout';
-import { buildRequestPreviewCodeContent } from '../shared/utils';
+import { useRequestPreviewFlyoutState } from '../request_preview_flyout/use_request_preview_flyout_state';
 import { ChildStreamList } from './child_stream_list';
 import { PreviewPanel } from './preview_panel';
 import {
@@ -110,27 +110,23 @@ export function StreamDetailRoutingImpl() {
   });
 
   const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
-  const [isRequestPreviewFlyoutOpen, setIsRequestPreviewFlyoutOpen] = React.useState(false);
-  const [requestPreviewCodeContent, setRequestPreviewCodeContent] = React.useState<string>('');
+  const {
+    isRequestPreviewFlyoutOpen,
+    requestPreviewFlyoutCodeContent,
+    openRequestPreviewFlyout,
+    closeRequestPreviewFlyout,
+  } = useRequestPreviewFlyoutState();
 
   const onBottomBarViewCodeClick = () => {
     const routing = routingSnapshot.context.routing.map(routingConverter.toAPIDefinition);
     const body = buildRoutingSaveRequestPayload(routingSnapshot.context.definition, routing);
 
-    setRequestPreviewCodeContent(
-      buildRequestPreviewCodeContent({
-        method: 'PUT',
-        url: `/api/streams/${routingSnapshot.context.definition.stream.name}/_ingest`,
-        body,
-      })
-    );
-    setIsRequestPreviewFlyoutOpen(true);
+    openRequestPreviewFlyout({
+      method: 'PUT',
+      url: `/api/streams/${routingSnapshot.context.definition.stream.name}/_ingest`,
+      body,
+    });
   };
-
-  const closeRequestPreviewFlyout = React.useCallback(() => {
-    setIsRequestPreviewFlyoutOpen(false);
-    setRequestPreviewCodeContent('');
-  }, []);
 
   return (
     <EuiFlexItem
@@ -211,7 +207,7 @@ export function StreamDetailRoutingImpl() {
       </EuiFlexGroup>
       {isRequestPreviewFlyoutOpen && (
         <RequestPreviewFlyout
-          codeContent={requestPreviewCodeContent}
+          codeContent={requestPreviewFlyoutCodeContent}
           onClose={closeRequestPreviewFlyout}
         />
       )}

@@ -130,7 +130,7 @@ const defaultConfirmButtonText = i18n.translate(
 
 const viewCodeButtonText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.bottomBar.viewCode',
-  { defaultMessage: 'View code' }
+  { defaultMessage: 'View API request' }
 );
 
 const discardUnsavedChangesLabel = i18n.translate(

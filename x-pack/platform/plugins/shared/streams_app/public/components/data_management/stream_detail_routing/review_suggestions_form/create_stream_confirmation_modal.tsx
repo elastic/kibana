@@ -142,5 +142,5 @@ export function CreateStreamConfirmationModal({
 }
 
 const copyCodeButtonText = i18n.translate('xpack.streams.streamDetailRouting.copyCodeButton', {
-  defaultMessage: 'Copy code',
+  defaultMessage: 'Copy API request',
 });

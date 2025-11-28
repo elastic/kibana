@@ -16,7 +16,6 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { getFormattedError } from '../../../../util/errors';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
-import { buildLifecycleSaveRequestPayload } from '../helpers/helpers';
 import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
 import { IngestionCard } from './cards/ingestion_card';
 import { RetentionCard } from './cards/retention_card';
@@ -60,12 +59,17 @@ export const StreamDetailGeneralData = ({
     try {
       setUpdateInProgress(true);
 
-      const request = buildLifecycleSaveRequestPayload(definition, lifecycle);
+      const body = {
+        ingest: {
+          ...definition.stream.ingest,
+          lifecycle,
+        },
+      };
 
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
         params: {
           path: { name: definition.stream.name },
-          body: request,
+          body,
         },
         signal,
       });

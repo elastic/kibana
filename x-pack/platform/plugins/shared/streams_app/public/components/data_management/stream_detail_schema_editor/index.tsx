@@ -27,12 +27,12 @@ import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { RequestPreviewFlyout } from '../request_preview_flyout';
+import { useRequestPreviewFlyoutState } from '../request_preview_flyout/use_request_preview_flyout_state';
 import { SchemaEditor } from '../schema_editor';
 import { DEFAULT_TABLE_COLUMN_NAMES } from '../schema_editor/constants';
 import { getDefinitionFields, useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
 import { SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
 import { buildSchemaSavePayload } from '../schema_editor/utils';
-import { buildRequestPreviewCodeContent } from '../shared/utils';
 
 interface SchemaEditorProps {
   definition: Streams.ingest.all.GetResponse;
@@ -46,8 +46,12 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
   const context = useKibana();
   const { loading } = useStreamDetail();
   const [selectedFields, setSelectedFields] = React.useState<string[]>([]);
-  const [isRequestFlyoutOpen, setIsRequestFlyoutOpen] = React.useState(false);
-  const [requestCodeContent, setRequestCodeContent] = React.useState<string>('');
+  const {
+    isRequestPreviewFlyoutOpen,
+    requestPreviewFlyoutCodeContent,
+    openRequestPreviewFlyout,
+    closeRequestPreviewFlyout,
+  } = useRequestPreviewFlyoutState();
 
   const {
     fields,
@@ -82,22 +86,14 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
     defaultFocusedButton: 'cancel',
   });
 
-  const openRequestPreviewFlyout = () => {
+  const onBottomBarViewCodeClick = () => {
     const body = buildSchemaSavePayload(definition, fields);
 
-    setRequestCodeContent(
-      buildRequestPreviewCodeContent({
-        method: 'PUT',
-        url: `/api/streams/${definition.stream.name}/_ingest`,
-        body,
-      })
-    );
-    setIsRequestFlyoutOpen(true);
-  };
-
-  const closeRequestPreviewFlyout = () => {
-    setIsRequestFlyoutOpen(false);
-    setRequestCodeContent('');
+    openRequestPreviewFlyout({
+      method: 'PUT',
+      url: `/api/streams/${definition.stream.name}/_ingest`,
+      body,
+    });
   };
 
   const openConfirmationModal = () => {
@@ -180,7 +176,7 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
                   color="text"
                   size="s"
                   iconType="editorCodeBlock"
-                  onClick={openRequestPreviewFlyout}
+                  onClick={onBottomBarViewCodeClick}
                 >
                   {viewCodeButtonText}
                 </EuiButtonEmpty>
@@ -225,9 +221,9 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
           </EuiBottomBar>
         </EuiFlexItem>
       )}
-      {isRequestFlyoutOpen && (
+      {isRequestPreviewFlyoutOpen && (
         <RequestPreviewFlyout
-          codeContent={requestCodeContent}
+          codeContent={requestPreviewFlyoutCodeContent}
           onClose={closeRequestPreviewFlyout}
         />
       )}
@@ -236,5 +232,5 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
 };
 
 const viewCodeButtonText = i18n.translate('xpack.streams.schemaEditor.viewCodeButtonText', {
-  defaultMessage: 'View code',
+  defaultMessage: 'View API request',
 });

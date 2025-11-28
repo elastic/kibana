@@ -42,7 +42,6 @@ import {
 import React, { useMemo, useState } from 'react';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { buildRequestPreviewCodeContent } from '../../../shared/utils';
-import { buildLifecycleSaveRequestPayload } from '../../helpers/helpers';
 import { DEFAULT_RETENTION_UNIT, DEFAULT_RETENTION_VALUE, DslField } from './dsl';
 import { IlmField } from './ilm';
 
@@ -121,14 +120,20 @@ export function EditLifecycleModal({
     `${DEFAULT_RETENTION_VALUE}${DEFAULT_RETENTION_UNIT.value}`;
 
   const copyCodeContent = React.useMemo(() => {
-    if (isDisabledLifecycle(lifecycle) || isErrorLifecycle(lifecycle)) {
+    const updatedLifecycle = buildUpdatedLifecycle(lifecycle, {
+      isInheritToggleOn,
+    });
+
+    if (!updatedLifecycle) {
       return '';
     }
 
-    const body = buildLifecycleSaveRequestPayload(
-      definition,
-      isInheritToggleOn ? { inherit: {} } : lifecycle
-    );
+    const body = {
+      ingest: {
+        ...definition.stream.ingest,
+        lifecycle: updatedLifecycle,
+      },
+    };
 
     return buildRequestPreviewCodeContent({
       method: 'PUT',
@@ -311,16 +316,13 @@ export function EditLifecycleModal({
                   disabled={isSaveButtonDisabled}
                   isLoading={updateInProgress}
                   onClick={() => {
-                    if (isInheritToggleOn) {
-                      updateLifecycle({ inherit: {} });
-                      return;
-                    }
+                    const updatedLifecycle = buildUpdatedLifecycle(lifecycle, {
+                      isInheritToggleOn,
+                    });
 
-                    if (isDisabledLifecycle(lifecycle) || isErrorLifecycle(lifecycle)) {
-                      return;
+                    if (updatedLifecycle) {
+                      updateLifecycle(updatedLifecycle);
                     }
-
-                    updateLifecycle(lifecycle);
                   }}
                 >
                   {i18n.translate('xpack.streams.streamDetailLifecycle.saveButton', {
@@ -337,5 +339,20 @@ export function EditLifecycleModal({
 }
 
 const copyCodeButtonText = i18n.translate('xpack.streams.streamDetailLifecycle.copyCodeButton', {
-  defaultMessage: 'Copy code',
+  defaultMessage: 'Copy API Request',
 });
+
+function buildUpdatedLifecycle(
+  lifecycle: IngestStreamLifecycleAll,
+  { isInheritToggleOn }: { isInheritToggleOn: boolean }
+): IngestStreamLifecycle | undefined {
+  if (isDisabledLifecycle(lifecycle) || isErrorLifecycle(lifecycle)) {
+    return;
+  }
+
+  if (isInheritToggleOn) {
+    return { inherit: {} };
+  }
+
+  return lifecycle;
+}

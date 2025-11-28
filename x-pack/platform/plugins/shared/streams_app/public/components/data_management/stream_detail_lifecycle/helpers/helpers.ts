@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type {
-  IlmPolicyDeletePhase,
-  IlmPolicyPhase,
-  IlmPolicyPhases,
-  IngestStreamLifecycle,
-  Streams,
-} from '@kbn/streams-schema';
+import type { IlmPolicyDeletePhase, IlmPolicyPhase, IlmPolicyPhases } from '@kbn/streams-schema';
 import { first } from 'lodash';
 
 export const parseDuration = (duration: string = '') => {
@@ -73,15 +67,3 @@ export const getILMRatios = (
     };
   });
 };
-
-export function buildLifecycleSaveRequestPayload(
-  definition: Streams.ingest.all.GetResponse,
-  lifecycle: IngestStreamLifecycle
-): { ingest: Streams.ingest.all.GetResponse['stream']['ingest'] } {
-  return {
-    ingest: {
-      ...definition.stream.ingest,
-      lifecycle,
-    },
-  };
-}

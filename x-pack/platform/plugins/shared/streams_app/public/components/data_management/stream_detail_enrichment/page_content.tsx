@@ -27,7 +27,7 @@ import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_st
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { RequestPreviewFlyout } from '../request_preview_flyout';
-import { buildRequestPreviewCodeContent } from '../shared/utils';
+import { useRequestPreviewFlyoutState } from '../request_preview_flyout/use_request_preview_flyout_state';
 import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
 import type { SchemaEditorField } from '../schema_editor/types';
@@ -164,10 +164,14 @@ export function StreamDetailEnrichmentContentImpl() {
   );
 
   const hasChanges = canUpdate && !isSimulating;
-  const [isRequestPreviewFlyoutOpen, setIsRequestPreviewFlyoutOpen] = React.useState(false);
-  const [requestPreviewCodeContent, setRequestPreviewCodeContent] = React.useState<string>('');
+  const {
+    isRequestPreviewFlyoutOpen,
+    requestPreviewFlyoutCodeContent,
+    openRequestPreviewFlyout,
+    closeRequestPreviewFlyout,
+  } = useRequestPreviewFlyoutState();
 
-  const openRequestPreviewFlyout = () => {
+  const onBottomBarViewCodeClick = () => {
     const { context: enrichmentContext } = getStreamEnrichmentState();
     const body = buildUpsertStreamRequestPayload(
       enrichmentContext.definition,
@@ -175,19 +179,11 @@ export function StreamDetailEnrichmentContentImpl() {
       getUpsertFields(enrichmentContext)
     );
 
-    setRequestPreviewCodeContent(
-      buildRequestPreviewCodeContent({
-        method: 'PUT',
-        url: `/api/streams/${enrichmentContext.definition.stream.name}/_ingest`,
-        body,
-      })
-    );
-    setIsRequestPreviewFlyoutOpen(true);
-  };
-
-  const closeRequestPreviewFlyout = () => {
-    setIsRequestPreviewFlyoutOpen(false);
-    setRequestPreviewCodeContent('');
+    openRequestPreviewFlyout({
+      method: 'PUT',
+      url: `/api/streams/${enrichmentContext.definition.stream.name}/_ingest`,
+      body,
+    });
   };
 
   useUnsavedChangesPrompt({
@@ -272,12 +268,12 @@ export function StreamDetailEnrichmentContentImpl() {
           disabled={!hasChanges}
           insufficientPrivileges={!canManage}
           isInvalid={hasDefinitionError}
-          onViewCodeClick={openRequestPreviewFlyout}
+          onViewCodeClick={onBottomBarViewCodeClick}
         />
       )}
       {isRequestPreviewFlyoutOpen && (
         <RequestPreviewFlyout
-          codeContent={requestPreviewCodeContent}
+          codeContent={requestPreviewFlyoutCodeContent}
           onClose={closeRequestPreviewFlyout}
         />
       )}
