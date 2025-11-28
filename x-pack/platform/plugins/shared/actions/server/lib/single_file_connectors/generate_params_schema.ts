@@ -15,7 +15,7 @@ export const generateParamsSchema = (
 ): ValidatorType<ActionTypeParams> => {
   const actionKeys = Object.keys(actions);
 
-  if (!actionKeys.length) throw new Error();
+  if (!actionKeys.length) throw new Error('No actions defined');
 
   const actionParamSchemas = actionKeys.map((key) =>
     z4
