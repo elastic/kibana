@@ -31,6 +31,7 @@ import {
   convertTimeseriesCommandToFrom,
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
+  hasTimeseriesBucketAggregation,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -1050,6 +1051,114 @@ describe('esql query helpers', () => {
     });
     it('should return true if limit is before sort', () => {
       expect(missingSortBeforeLimit('FROM index | LIMIT 10 | SORT field')).toBe(true);
+    });
+  });
+
+  describe('hasTimeseriesBucketAggregation', () => {
+    const mockColumns = [
+      {
+        id: 'BUCKET(@timestamp, 1h)',
+        isNull: false,
+        meta: { type: 'date', esType: 'date' },
+        name: 'BUCKET(@timestamp, 1h)',
+      },
+      {
+        id: 'agent.name',
+        isNull: false,
+        meta: { type: 'string', esType: 'keyword' },
+        name: 'agent.name',
+      },
+      {
+        id: '@timestamp',
+        isNull: false,
+        meta: { type: 'date', esType: 'date' },
+        name: '@timestamp',
+      },
+      {
+        id: 'c3',
+        isNull: false,
+        meta: { type: 'number', esType: 'long' },
+        name: 'c3',
+      },
+    ] as DatatableColumn[];
+
+    it('should return false if the query is empty', () => {
+      expect(hasTimeseriesBucketAggregation('')).toBe(false);
+    });
+    it('should return false if it is not a timeseries command', () => {
+      expect(
+        hasTimeseriesBucketAggregation('FROM index | STATS COUNT() BY bucket(@timestamp, 1h)')
+      ).toBe(false);
+    });
+    it('should return false if there is no bucket aggregation', () => {
+      expect(hasTimeseriesBucketAggregation('TS index | STATS COUNT() BY @timestamp')).toBe(false);
+    });
+    it('should return false if the bucket aggregation is not a date column', () => {
+      expect(
+        hasTimeseriesBucketAggregation(
+          'TS index | STATS COUNT() BY bucket(c3, 20, 100, 200), agent.name',
+          mockColumns
+        )
+      ).toBe(false);
+    });
+    it('should return false if bucket column cannot be identified', () => {
+      expect(
+        hasTimeseriesBucketAggregation('TS index | STATS COUNT() BY bucket(@timestamp, 1h)')
+      ).toBe(false);
+    });
+    it('should return false if the last stats command does not contain a bucket aggregation', () => {
+      expect(
+        hasTimeseriesBucketAggregation(
+          `TS index 
+            | STATS count_per_day=COUNT(*) BY category=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day) 
+            | STATS count = SUM(count_per_day), Trend=VALUES(count_per_day) BY category
+            | KEEP category, count
+            | STATS sample = SAMPLE(count, 10) BY category`,
+          mockColumns
+        )
+      ).toBe(false);
+    });
+    it('should return true if the query contains a bucket aggregation', () => {
+      expect(
+        hasTimeseriesBucketAggregation(
+          'TS index | STATS COUNT() BY bucket(@timestamp, 1h)',
+          mockColumns
+        )
+      ).toBe(true);
+    });
+    it('should return true if the query contains aliased bucket aggregation', () => {
+      const columns = [
+        {
+          id: 't',
+          isNull: false,
+          meta: { type: 'date', esType: 'date' },
+          name: 't',
+        },
+      ] as DatatableColumn[];
+
+      expect(
+        hasTimeseriesBucketAggregation(
+          'TS index | STATS COUNT() BY t=bucket(@timestamp, 1h)',
+          columns
+        )
+      ).toBe(true);
+    });
+    it('should return true if the query contains a bucket aggregation with multiple breakdowns', () => {
+      expect(
+        hasTimeseriesBucketAggregation(
+          'TS index | STATS COUNT() BY bucket(@timestamp, 1h), agent.name',
+          mockColumns
+        )
+      ).toBe(true);
+    });
+
+    it('should return true if the query bucket aggregation, case insensitive and ignoring spaces', () => {
+      expect(
+        hasTimeseriesBucketAggregation(
+          'TS index | STATS COUNT() BY BUCKET(@timestamp,    1h), agent.name',
+          mockColumns
+        )
+      ).toBe(true);
     });
   });
 });
