@@ -40,7 +40,7 @@ export async function disableInferenceCCM(
 
     logger.info('Inference CCM disabled successfully');
   } catch (error) {
-    logger.error('Failed to disable inference CCM', { error });
+    logger.error('Failed to disable Cloud Connect inference', { error });
     throw error;
   }
 }
