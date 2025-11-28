@@ -303,7 +303,28 @@ export function ValueControlForm({
               defaultMessage: 'Values query',
             })}
           />
-          {isQueryPresent && hasQueryResults === false && <div>no results</div>}
+          {isQueryPresent && hasQueryResults === false && (
+            <EuiFormRow
+              label={i18n.translate('esql.flyout.previewValues.placeholder', {
+                defaultMessage: 'Values preview',
+              })}
+              fullWidth
+              css={css`
+                margin-block-start: ${theme.euiTheme.size.base};
+              `}
+            >
+              <EuiCallOut
+                announceOnMount
+                title={i18n.translate('esql.flyout.displayNoValuesForControlCallout.title', {
+                  defaultMessage: "Your query didn't return any values, change it and try again.",
+                })}
+                color="warning"
+                iconType="warning"
+                size="s"
+                data-test-subj="esqlNoValuesForControlCallout"
+              />
+            </EuiFormRow>
+          )}
           {queryColumns.length > 0 && (
             <EuiFormRow
               label={i18n.translate('esql.flyout.previewValues.placeholder', {
