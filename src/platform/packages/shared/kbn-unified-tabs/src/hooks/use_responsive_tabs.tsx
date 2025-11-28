@@ -38,15 +38,16 @@ export const useResponsiveTabs = ({
 }: UseResponsiveTabsProps) => {
   const { euiTheme } = useEuiTheme();
   const dimensions = useResizeObserver(tabsContainerWithPlusElement);
+  const horizontalGap = parseInt(euiTheme.size.s, 10); // matches gap between tabs
+
   const tabsSizeConfig = useMemo(() => {
-    const horizontalGap = parseInt(euiTheme.size.s, 10); // matches gap between tabs
     return calculateResponsiveTabs({
       items,
       containerWidth: dimensions.width,
       hasReachedMaxItemsCount,
       horizontalGap,
     });
-  }, [items, dimensions.width, hasReachedMaxItemsCount, euiTheme.size.s]);
+  }, [items, dimensions.width, hasReachedMaxItemsCount, horizontalGap]);
 
   const [scrollState, setScrollState] = useState<ScrollState>();
 
@@ -135,8 +136,8 @@ export const useResponsiveTabs = ({
         mask-image: linear-gradient(
           to right,
           rgba(255, 0, 0, 0.1) 0%,
-          rgb(255, 0, 0) ${euiTheme.size.s},
-          rgb(255, 0, 0) calc(100% - ${euiTheme.size.s}),
+          rgb(255, 0, 0) ${euiTheme.size.l},
+          rgb(255, 0, 0) calc(100% - ${euiTheme.size.l}),
           rgba(255, 0, 0, 0.1) 100%
         );
       `;
@@ -145,14 +146,14 @@ export const useResponsiveTabs = ({
         mask-image: linear-gradient(
           to right,
           rgba(255, 0, 0, 0.1) 0%,
-          rgb(255, 0, 0) ${euiTheme.size.s}
+          rgb(255, 0, 0) ${euiTheme.size.l}
         );
       `;
     } else if (scrollState?.isScrollableRight) {
       overflowGradient = `
         mask-image: linear-gradient(
           to right,
-          rgb(255, 0, 0) calc(100% - ${euiTheme.size.s}),
+          rgb(255, 0, 0) calc(100% - ${euiTheme.size.l}),
           rgba(255, 0, 0, 0.1) 100%
         );
       `;
@@ -164,13 +165,14 @@ export const useResponsiveTabs = ({
       user-select: none;
       scrollbar-width: none; // hide the scrollbar
       scroll-behavior: smooth;
+      padding-inline: ${euiTheme.size.xs}; // space for curved notch
       &::-webkit-scrollbar {
         display: none;
       }
       transform: translateZ(0);
       ${overflowGradient}
     `;
-  }, [scrollState, euiTheme.size.s]);
+  }, [scrollState, euiTheme.size.l, euiTheme.size.xs]);
 
   return {
     tabsSizeConfig,

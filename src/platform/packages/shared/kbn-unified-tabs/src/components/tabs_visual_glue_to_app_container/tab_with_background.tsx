@@ -40,13 +40,13 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
           transition: background ${euiTheme.animation.fast};
           margin: ${euiTheme.size.xs};
           margin-bottom: 0;
-          padding-bottom: ${euiTheme.size.xs};
 
           ${isSelected
             ? `
               position: relative;
               border-bottom-left-radius: 0;
               border-bottom-right-radius: 0;
+              padding-bottom: ${euiTheme.size.xs};
               filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.06))
                       drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.04));
             `
