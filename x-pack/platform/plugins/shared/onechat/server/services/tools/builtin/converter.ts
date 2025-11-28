@@ -6,8 +6,11 @@
  */
 
 import { ToolType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server/tools';
-import type { InternalToolDefinition } from '../tool_provider';
+import type {
+  BuiltinToolDefinition,
+  StaticToolRegistration,
+  InternalToolDefinition,
+} from '@kbn/onechat-server/tools';
 import type {
   ToolTypeDefinition,
   BuiltinToolTypeDefinition,

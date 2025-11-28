@@ -13,6 +13,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./enrichment'));
     loadTestFile(require.resolve('./classic'));
     loadTestFile(require.resolve('./flush_config'));
+    loadTestFile(require.resolve('./attachments/attachments'));
     loadTestFile(require.resolve('./attachments/dashboard'));
     loadTestFile(require.resolve('./attachments/rule'));
     loadTestFile(require.resolve('./schema'));
