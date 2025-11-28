@@ -17,7 +17,6 @@ import { mosaicStateSchema } from './charts/mosaic';
 import { pieStateSchema } from './charts/pie';
 import { treemapStateSchema } from './charts/treemap';
 import { waffleStateSchema } from './charts/waffle';
-import type { LensApiAllMetricOperations } from './metric_ops';
 import type {
   LensApiAllMetricOrFormulaOperations,
   LensApiStaticValueOperation,
