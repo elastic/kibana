@@ -195,6 +195,7 @@ export function fromAPItoLensState(config: TagcloudState): LensAttributes {
     visualizationType: 'lnsTagcloud',
     ...getSharedChartAPIToLensState(config),
     references,
+    version: 1,
     state: {
       datasourceStates: layers,
       internalReferences,
