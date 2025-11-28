@@ -14,9 +14,8 @@ import {
   loadManifestFileMock,
   majorMinorMock,
   latestVersionMock,
+  deleteFileMock,
 } from './artifact_manager.test.mocks';
-
-import { deleteFile } from '@kbn/fs';
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { getArtifactName } from '@kbn/product-doc-common';
@@ -274,8 +273,8 @@ describe('ArtifactManager', () => {
       });
       const expectedArtifactPath = `${artifactsFolder}/${expectedArtifactName}`;
 
-      expect(deleteFile).toHaveBeenCalledWith(expectedArtifactPath);
-      expect(deleteFile).toHaveBeenCalledTimes(1);
+      expect(deleteFileMock).toHaveBeenCalledWith(expectedArtifactPath);
+      expect(deleteFileMock).toHaveBeenCalledTimes(1);
     });
   });
 });
