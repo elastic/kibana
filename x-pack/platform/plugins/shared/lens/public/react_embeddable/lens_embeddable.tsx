@@ -141,7 +141,12 @@ export const createLensEmbeddableFactory = (
       const unsavedChangesApi = initializeUnsavedChanges<LensSerializedAPIConfig>({
         uuid,
         parentApi,
-        serializeState: integrationsConfig.api.serializeState,
+        serializeState: () => {
+          if (internalApi.isEditingInProgress()) {
+            return initialState;
+          }
+          return integrationsConfig.api.serializeState();
+        },
         anyStateChange$: merge(
           actionsConfig.anyStateChange$,
           dashboardConfig.anyStateChange$,
@@ -149,14 +154,23 @@ export const createLensEmbeddableFactory = (
           searchContextConfig.anyStateChange$
         ),
         getComparators: () => {
-          return {
+          const comparators = {
             ...stateConfig.getComparators(),
             ...actionsConfig.getComparators(),
             ...dashboardServicesComparators,
             ...searchContextComparators,
             isNewPanel: 'skip',
             references: 'skip',
-          };
+          } as const;
+          // set all comparators to 'skip' when inline editing is in progress
+          if (internalApi.isEditingInProgress()) {
+            const keys = Object.keys(comparators) as (keyof typeof comparators)[];
+            return keys.reduce((acc, key) => {
+              acc[key] = 'skip';
+              return acc;
+            }, {} as Record<keyof typeof comparators, 'skip'>);
+          }
+          return comparators;
         },
         onReset: async (lastSaved) => {
           actionsConfig.reinitializeState(lastSaved?.rawState);
