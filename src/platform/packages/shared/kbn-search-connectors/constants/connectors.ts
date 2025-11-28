@@ -333,8 +333,9 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       defaultMessage: 'Search over your projects and repos on GitLab.',
     }),
     iconPath: 'gitlab.svg',
-    isBeta: false,
+    isBeta: true,
     isNative: true,
+    isTechPreview: false,
     keywords: ['gitlab', 'cloud', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.gitlab.name', {
       defaultMessage: 'GitLab',
