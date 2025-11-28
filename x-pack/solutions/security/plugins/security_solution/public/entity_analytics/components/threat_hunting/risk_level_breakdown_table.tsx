@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import { RiskScoreLevel } from '../severity/common';
 import type { SeverityCount } from '../severity/types';
@@ -92,12 +91,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
           />
         ),
         render: (scoreRange: string) => (
-          <EuiText
-            size="s"
-            css={css`
-              font-weight: ${euiTheme.font.weight.medium};
-            `}
-          >
+          <EuiText size="s" style={{ fontWeight: euiTheme.font.weight.medium }}>
             {scoreRange}
           </EuiText>
         ),
@@ -112,12 +106,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
         ),
         dataType: 'number',
         render: (count: number) => (
-          <EuiText
-            size="s"
-            css={css`
-              font-weight: ${euiTheme.font.weight.semiBold};
-            `}
-          >
+          <EuiText size="s" style={{ fontWeight: euiTheme.font.weight.semiBold }}>
             {count.toLocaleString()}
           </EuiText>
         ),
