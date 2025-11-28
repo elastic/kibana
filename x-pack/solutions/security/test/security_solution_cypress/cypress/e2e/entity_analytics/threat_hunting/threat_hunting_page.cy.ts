@@ -51,7 +51,7 @@ describe(
 
     it('renders anomalies placeholder panel', () => {
       cy.get(ANOMALIES_PLACEHOLDER_PANEL).should('be.visible');
-      cy.get(ANOMALIES_PLACEHOLDER_PANEL).contains('Anomalies explorer');
+      cy.get(ANOMALIES_PLACEHOLDER_PANEL).contains('Anomaly explorer');
     });
 
     it('renders entities table', () => {
