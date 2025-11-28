@@ -68,6 +68,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
         null,
         false,
         true,
+        true,
         existingIndex,
         { index: { mode: 'lookup' } },
         'lookup-index-editor',

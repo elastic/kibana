@@ -50,6 +50,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   const { indexUpdateService } = services;
   const { fileUploadManager, filesStatus, uploadStatus, indexName, reset } = useFileUploadContext();
   const isSaving = useObservable(indexUpdateService.isSaving$, false);
+  const [dropzoneDisabled, setDropzoneDisabled] = React.useState(false);
 
   // const isAnalyzing =
   //   uploadStatus.analysisStatus === STATUS.STARTED &&
@@ -98,6 +99,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
           .join('\n');
 
         indexUpdateService.setError(IndexEditorErrors.FILE_ANALYSIS_ERROR, errorDetail);
+        // move this to FileUploadManager under a flag "autoRemoveFilesOnAnalysisFailure"
         const filesToRemove = analysisErrors.map((f) => f.fileName);
         removeFilesByName(filesToRemove);
       }
@@ -118,7 +120,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
   const onFilesSelected = useCallback(
     async (files: File[]) => {
-      if (!files?.length) {
+      if (!files?.length || dropzoneDisabled) {
         return;
       }
 
@@ -131,7 +133,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
       await fileUploadManager.addFiles(files);
     },
-    [services, indexUpdateService, fileUploadManager]
+    [dropzoneDisabled, services, indexUpdateService, fileUploadManager]
   );
 
   const onDropRejected = useCallback(
@@ -154,6 +156,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
     multiple: true,
     noClick: true, // we'll trigger open manually
     noKeyboard: true,
+    disabled: dropzoneDisabled,
   });
 
   const onFileSelectorClick = useCallback(() => {
@@ -248,8 +251,10 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
           location: '',
         }}
         setIsSaving={(saving: boolean) => indexUpdateService.setIsSaving(saving)}
+        setDropzoneDisabled={setDropzoneDisabled}
         onClose={async () => {
           await indexUpdateService.onFileUploadFinished(indexName);
+          setDropzoneDisabled(false);
           reset?.(indexName);
         }}
       />

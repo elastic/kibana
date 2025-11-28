@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { STATUS, useFileUploadContext } from '../../..';
 import { FileClashWarning } from './file_clash_warning';
 import { FileStatus } from './file_status';
-import { Mappings } from './file_status/mappings';
+import { MappingEditor } from './mapping_editor';
 
 interface Props {
   resultLinks?: ResultLinks;
@@ -25,6 +25,7 @@ interface Props {
   props: OpenFileUploadLiteContext;
   onClose?: () => void;
   setIsSaving: (saving: boolean) => void;
+  setDropzoneDisabled?: (disabled: boolean) => void;
 }
 
 interface StepsStatus {
@@ -34,7 +35,12 @@ interface StepsStatus {
   finish: STATUS;
 }
 
-export const FileUploadLiteLookUpView: FC<Props> = ({ props, onClose, setIsSaving }) => {
+export const FileUploadLiteLookUpView: FC<Props> = ({
+  props,
+  onClose,
+  setIsSaving,
+  setDropzoneDisabled,
+}) => {
   const { flyoutContent } = props;
   const {
     fileUploadManager,
@@ -65,6 +71,10 @@ export const FileUploadLiteLookUpView: FC<Props> = ({ props, onClose, setIsSavin
       setStep('finish', STATUS.COMPLETED);
     }
   }, [uploadStatus.overallImportStatus, setStep]);
+
+  useEffect(() => {
+    setDropzoneDisabled?.(stepsStatus.analysis !== STATUS.STARTED);
+  }, [stepsStatus.analysis, setDropzoneDisabled]);
 
   if (indexName === null) {
     return null;
@@ -120,13 +130,15 @@ export const FileUploadLiteLookUpView: FC<Props> = ({ props, onClose, setIsSavin
       children:
         stepsStatus.mapping === STATUS.STARTED ? (
           <>
-            <Mappings
+            {/* <Mappings
               mappings={mappings?.json ?? {}}
               setMappings={(m) => fileUploadManager.updateMappings(m)}
               showTitle={false}
               fileCount={filesStatus.length}
               showBorder={true}
-            />
+            /> */}
+
+            <MappingEditor />
 
             <EuiSpacer />
 

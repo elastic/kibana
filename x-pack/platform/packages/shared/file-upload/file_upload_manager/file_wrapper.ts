@@ -110,7 +110,8 @@ export class FileWrapper {
     private fileUpload: FileUploadPluginStartApi,
     private data: DataPublicPluginStart,
     private fileUploadTelemetryService: FileUploadTelemetryService,
-    private uploadSessionId: string
+    private uploadSessionId: string,
+    private autoRemoveConvertProcessors: boolean = false
   ) {
     this.fileId = Math.random().toString(36).substring(2, 15);
     this.fileSizeChecker = new FileSizeChecker(fileUpload, file);
@@ -162,7 +163,13 @@ export class FileWrapper {
         data,
         supportedFormat,
       });
-      this.setPipeline(analysisResults.results?.ingest_pipeline);
+
+      const tempPipeline =
+        this.autoRemoveConvertProcessors && analysisResults.results?.ingest_pipeline
+          ? this.removeConvertProcessors(analysisResults.results.ingest_pipeline)
+          : analysisResults.results?.ingest_pipeline;
+
+      this.setPipeline(tempPipeline);
 
       this.analyzeFileTelemetry(analysisResults, overrides, new Date().getTime() - startTime);
     });
@@ -374,6 +381,43 @@ export class FileWrapper {
       this.uploadFileTelemetry(undefined, getFileClashes, new Date().getTime() - startTime);
       return;
     }
+  }
+
+  private removeConvertProcessors(pipeline: IngestPipeline) {
+    return {
+      ...pipeline,
+      processors: pipeline.processors.filter((processor) => processor.convert === undefined),
+    };
+  }
+
+  public renameTargetFields(
+    changes: {
+      oldName: string;
+      newName: string;
+    }[]
+  ) {
+    const pipeline = this.getPipeline();
+    if (pipeline?.processors === undefined) {
+      return;
+    }
+
+    // Create a Map for quick lookup
+    const renameMap = new Map<string, string>();
+    changes.forEach((change) => {
+      if (change.oldName !== change.newName) {
+        renameMap.set(change.oldName, change.newName);
+      }
+    });
+
+    // Update the target_fields in CSV processors
+    pipeline.processors.forEach((processor) => {
+      if (Array.isArray(processor?.csv?.target_fields)) {
+        processor.csv.target_fields = (processor.csv.target_fields as string[]).map((fieldName) => {
+          return renameMap.has(fieldName) ? renameMap.get(fieldName)! : fieldName;
+        });
+      }
+    });
+    this.setPipeline(pipeline);
   }
 
   private analyzeFileTelemetry(
