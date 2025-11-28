@@ -15,7 +15,6 @@ import type {
   EnterIfNode,
   EnterRetryNode,
   EnterSwitchCaseNode,
-  EnterSwitchDefaultNode,
   EnterSwitchNode,
   EnterTryBlockNode,
   ExitConditionBranchNode,
@@ -237,7 +236,7 @@ export class NodesFactory {
           this.workflowRuntime
         );
       case 'enter-switch-default':
-        return new EnterSwitchDefaultNodeImpl(node as EnterSwitchDefaultNode, this.workflowRuntime);
+        return new EnterSwitchDefaultNodeImpl(this.workflowRuntime);
       case 'exit-switch-default':
         return new ExitSwitchDefaultNodeImpl(
           node as ExitSwitchDefaultNode,

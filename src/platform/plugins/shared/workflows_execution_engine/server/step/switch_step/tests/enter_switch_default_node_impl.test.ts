@@ -29,7 +29,7 @@ describe('EnterSwitchDefaultNodeImpl', () => {
       navigateToNextNode: jest.fn(),
     } as any;
 
-    impl = new EnterSwitchDefaultNodeImpl(node, mockWorkflowRuntime);
+    impl = new EnterSwitchDefaultNodeImpl(mockWorkflowRuntime);
   });
 
   it('should enter scope with "default"', () => {
