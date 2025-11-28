@@ -7,10 +7,10 @@
 
 import type { IRouter } from '@kbn/core/server';
 import {
-  connectorWithExtraFindDataSchemaV2,
-  type AllConnectorsResponseV1,
+  getAllConnectorsResponseSchemaV1,
+  type GetAllConnectorsResponseV1,
 } from '../../../../common/routes/connector/response';
-import { transformGetAllConnectorsResponseV2 } from './transforms';
+import { transformGetAllConnectorsResponseV1 } from './transforms';
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { BASE_ACTION_API_PATH } from '../../../../common';
 import type { ILicenseState } from '../../../lib';
@@ -34,7 +34,7 @@ export const getAllConnectorsRoute = (
         request: {},
         response: {
           200: {
-            body: () => connectorWithExtraFindDataSchemaV2,
+            body: () => getAllConnectorsResponseSchemaV1,
             description: 'Indicates a successful call.',
           },
           403: {
@@ -48,7 +48,8 @@ export const getAllConnectorsRoute = (
         const actionsClient = (await context.actions).getActionsClient();
         const result = await actionsClient.getAll();
 
-        const responseBody: AllConnectorsResponseV1[] = transformGetAllConnectorsResponseV2(result);
+        const responseBody: GetAllConnectorsResponseV1 =
+          transformGetAllConnectorsResponseV1(result);
         return res.ok({ body: responseBody });
       })
     )

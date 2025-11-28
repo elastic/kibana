@@ -7,12 +7,12 @@
 
 import type { IRouter } from '@kbn/core/server';
 import {
-  connectorTypeResponseSchemaV2,
-  type ConnectorTypesResponseV2,
+  getAllConnectorTypesResponseSchemaV1,
+  type GetAllConnectorTypesResponseV1,
 } from '../../../../common/routes/connector/response';
 import type { ConnectorTypesRequestQueryV1 } from '../../../../common/routes/connector/apis/connector_types';
 import { connectorTypesQuerySchemaV1 } from '../../../../common/routes/connector/apis/connector_types';
-import { transformListTypesResponseV2 } from './transforms';
+import { transformListTypesResponseV1 } from './transforms';
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { BASE_ACTION_API_PATH } from '../../../../common';
 import type { ILicenseState } from '../../../lib';
@@ -43,7 +43,7 @@ export const listTypesRoute = (
         },
         response: {
           200: {
-            body: () => connectorTypeResponseSchemaV2,
+            body: () => getAllConnectorTypesResponseSchemaV1,
             description: 'Indicates a successful call.',
           },
           403: {
@@ -63,8 +63,8 @@ export const listTypesRoute = (
           featureId: query?.feature_id,
         });
 
-        const responseBody: ConnectorTypesResponseV2[] =
-          transformListTypesResponseV2(connectorTypes);
+        const responseBody: GetAllConnectorTypesResponseV1 =
+          transformListTypesResponseV1(connectorTypes);
 
         return res.ok({ body: responseBody });
       })
