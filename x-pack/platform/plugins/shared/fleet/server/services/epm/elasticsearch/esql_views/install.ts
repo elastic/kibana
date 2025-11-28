@@ -6,6 +6,7 @@
  */
 
 import pMap from 'p-map';
+import { load } from 'js-yaml';
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
@@ -20,7 +21,6 @@ import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import { retryTransientEsErrors } from '../retry';
 import { MAX_CONCURRENT_ESQL_VIEWS_OPERATIONS } from '../../../../constants';
-import { load } from 'js-yaml';
 
 export async function installEsqlViews({
   packageInstallContext,
@@ -52,7 +52,8 @@ export async function installEsqlViews({
   );
 
   const esqlViews = esqlViewPaths.map((path) => {
-    const data = load(getAssetFromAssetsMap(esqlViewAssetsMap, path).toString('utf-8'));
+    const assetData = getAssetFromAssetsMap(esqlViewAssetsMap, path).toString('utf-8');
+    const data = path.endsWith('.yml') ? load(assetData) : JSON.parse(assetData);
 
     return { name: data.name, query: data.query };
   });

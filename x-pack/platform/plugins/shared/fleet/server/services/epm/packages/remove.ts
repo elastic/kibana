@@ -50,13 +50,12 @@ import { auditLoggingService } from '../../audit_logging';
 import { FleetError, PackageRemovalError } from '../../../errors';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies/populate_package_policy_assigned_agents_count';
-
+import { deleteEsqlViews } from '../elasticsearch/esql_views/remove';
 import type { PackageSpecConditions } from '../../../../common';
 
 import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
 import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
 import { deletePackageKnowledgeBase } from './knowledge_base_index';
-import { deleteEsqlViews } from '../elasticsearch/esql_views/remove';
 
 const MAX_ASSETS_TO_DELETE = 1000;
 
