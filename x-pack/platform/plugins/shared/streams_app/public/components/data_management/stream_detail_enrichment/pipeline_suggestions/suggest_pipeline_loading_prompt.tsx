@@ -7,7 +7,6 @@
 
 import React from 'react';
 import {
-  EuiText,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
