@@ -136,6 +136,36 @@ describe('SamlSessionManager', () => {
       expect(cookieStr1).not.toEqual(cookieStr2);
     });
 
+    test(`'getSessionCookieForRole' should call 'createLocalSAMLSession' with UIAM properties when in UIAM mode`, async () => {
+      const samlSessionManager = new SamlSessionManager({
+        ...samlSessionManagerOptions,
+        serverless: { organizationId: 'org123', projectType: 'oblt', uiam: true },
+      });
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleEditor);
+
+      expect(createLocalSAMLSessionMock).toHaveBeenCalledTimes(2);
+      expect(createLocalSAMLSessionMock).toHaveBeenCalledWith({
+        username: '1806480617',
+        email: 'elastic_viewer@elastic.co',
+        fullname: 'test viewer',
+        role: 'viewer',
+        serverless: { organizationId: 'org123', projectType: 'oblt', uiamEnabled: true },
+        kbnHost: 'http://localhost:5620',
+        log: expect.any(ToolingLog),
+      });
+      expect(createLocalSAMLSessionMock).toHaveBeenCalledWith({
+        username: '2180895557',
+        email: 'elastic_editor@elastic.co',
+        fullname: 'test editor',
+        role: 'editor',
+        serverless: { organizationId: 'org123', projectType: 'oblt', uiamEnabled: true },
+        kbnHost: 'http://localhost:5620',
+        log: expect.any(ToolingLog),
+      });
+      expect(createCloudSAMLSessionMock).not.toHaveBeenCalled();
+    });
+
     test(`'getEmail' return the correct email`, async () => {
       const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
       const email = await samlSessionManager.getEmail(roleEditor);
