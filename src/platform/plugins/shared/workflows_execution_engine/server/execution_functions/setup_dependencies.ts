@@ -14,7 +14,6 @@ import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
 import { UrlValidator } from '../lib/url_validator';
-import { LogsRepository } from '../repositories/logs_repository';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
@@ -22,7 +21,8 @@ import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_ex
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
-import { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+
+import { WorkflowEventLoggerService } from '../workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 const defaultWorkflowSettings: WorkflowSettings = {
@@ -42,7 +42,6 @@ export async function setupDependencies(
   // Get ES client from core services (guaranteed to be available at task execution time)
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
 
-  const logsRepository = new LogsRepository(internalEsClient);
   const workflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient);
   const stepExecutionRepository = new StepExecutionRepository(internalEsClient);
 
@@ -75,19 +74,18 @@ export async function setupDependencies(
   const scopedActionsClient = await actions.getActionsClientWithRequest(fakeRequest);
   const connectorExecutor = new ConnectorExecutor(scopedActionsClient);
 
-  const workflowLogger = new WorkflowEventLogger(
-    logsRepository,
+  const workflowEventLoggerService = new WorkflowEventLoggerService(
+    dependencies.coreStart.dataStreams,
     logger,
-    {
-      workflowId: workflowExecution.workflowId,
-      workflowName: workflowExecution.workflowDefinition.name,
-      executionId: workflowExecution.id,
-      spaceId: workflowExecution.spaceId,
-    },
-    {
-      enableConsoleLogging: config.logging.console,
-    }
+    config.logging.console
   );
+
+  const workflowLogger = workflowEventLoggerService.createLogger({
+    workflowId: workflowExecution.workflowId,
+    workflowName: workflowExecution.workflowDefinition.name,
+    executionId: workflowExecution.id,
+    spaceId: workflowExecution.spaceId,
+  });
 
   const workflowExecutionState = new WorkflowExecutionState(
     workflowExecution as EsWorkflowExecution,
@@ -139,13 +137,10 @@ export async function setupDependencies(
     workflowRuntime,
     stepExecutionRuntimeFactory,
     workflowExecutionState,
-    connectorExecutor,
     workflowLogger,
     workflowTaskManager,
     nodesFactory,
     workflowExecutionRepository,
-    logsRepository,
-    stepExecutionRepository,
     esClient,
   };
 }

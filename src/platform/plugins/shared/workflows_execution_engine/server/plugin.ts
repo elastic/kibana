@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Client } from '@elastic/elasticsearch';
 import { v4 as generateUuid } from 'uuid';
 import type {
   CoreSetup,
@@ -29,6 +26,7 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
+import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
   CancelWorkflowExecution,
@@ -42,10 +40,12 @@ import type {
 
 import { generateExecutionTaskScope } from './utils';
 import type { ContextDependencies } from './workflow_context_manager/types';
+import { WorkflowEventLoggerService } from './workflow_event_logger';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
+
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
 
@@ -78,6 +78,8 @@ export class WorkflowsExecutionEnginePlugin
 
     const logger = this.logger;
     const config = this.config;
+
+    initializeLogsRepositoryDataStream(core.dataStreams);
 
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
@@ -202,11 +204,10 @@ export class WorkflowsExecutionEnginePlugin
                 taskManager: pluginsStart.taskManager,
                 workflowsExtensions: pluginsStart.workflowsExtensions,
               };
+              const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-              const workflowRepository = new WorkflowRepository({
-                esClient: coreStart.elasticsearch.client.asInternalUser as Client,
-                logger,
-              });
+              const workflowRepository = new WorkflowRepository({ esClient, logger });
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
               const workflow = await workflowRepository.getWorkflow(workflowId, spaceId);
               if (!workflow) {
@@ -214,9 +215,6 @@ export class WorkflowsExecutionEnginePlugin
                 return;
               }
               logger.info(`Running scheduled workflow task for workflow ${workflow.id}`);
-
-              const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
               // Guard check: Check if there's already a scheduled workflow execution in non-terminal state
               const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
@@ -310,9 +308,8 @@ export class WorkflowsExecutionEnginePlugin
     const executeWorkflow: ExecuteWorkflow = async (workflow, context, request) => {
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
-
       // Get ES client and create repository for this execution
-      const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
+      const esClient = coreStart.elasticsearch.client.asInternalUser;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
@@ -394,21 +391,13 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    const executeWorkflowStep: ExecuteWorkflowStep = async (
-      workflow,
-      stepId,
-      contextOverride,
-      request
-    ) => {
+    const executeWorkflowStep: ExecuteWorkflowStep = async (workflow, stepId, context, request) => {
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
 
       // Get ES client and create repository for this execution
-      const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
+      const esClient = coreStart.elasticsearch.client.asInternalUser;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-      const context: Record<string, any> = {
-        contextOverride,
-      };
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution = {
@@ -472,7 +461,7 @@ export class WorkflowsExecutionEnginePlugin
       spaceId
     ) => {
       await this.initialize(coreStart);
-      const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
+      const esClient = coreStart.elasticsearch.client.asInternalUser;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
       const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
         workflowExecutionId,
@@ -503,7 +492,14 @@ export class WorkflowsExecutionEnginePlugin
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
     };
 
+    const workflowEventLoggerService = new WorkflowEventLoggerService(
+      coreStart.dataStreams,
+      this.logger,
+      this.config.logging.console
+    );
+
     return {
+      workflowEventLoggerService,
       executeWorkflow,
       executeWorkflowStep,
       cancelWorkflowExecution,

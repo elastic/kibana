@@ -22,6 +22,7 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type { IWorkflowEventLoggerService } from './workflow_event_logger';
 
 export interface ExecuteWorkflowResponse {
   workflowExecutionId: string;
@@ -37,6 +38,7 @@ export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;
   cancelWorkflowExecution: CancelWorkflowExecution;
+  workflowEventLoggerService: IWorkflowEventLoggerService;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
