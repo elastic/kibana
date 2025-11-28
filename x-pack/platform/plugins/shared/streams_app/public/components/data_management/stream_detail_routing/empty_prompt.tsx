@@ -61,7 +61,7 @@ export const NoDataEmptyPrompt = ({
             <EuiText size="s">
               {i18n.translate('xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.body', {
                 defaultMessage:
-                  'Define how your data is split into streams. You can create partitions yourself, or let Elastic suggest a AI-generated proposal based on your data.',
+                  'Define how your data is split into streams. You can create partitions yourself, or let Elastic suggest an AI-generated proposal based on your data.',
               })}
             </EuiText>
           </EuiFlexItem>
