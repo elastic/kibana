@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { errors } from '@elastic/elasticsearch';
+import { errors, type MappingTypeMapping } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
@@ -20,7 +20,7 @@ describe('removeLockIndexWithIncorrectMappings', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
   const logger = loggingSystemMock.createLogger();
 
-  const correctMappings = {
+  const correctMappings: MappingTypeMapping = {
     dynamic: 'false',
     properties: {
       token: { type: 'keyword' },
@@ -30,7 +30,7 @@ describe('removeLockIndexWithIncorrectMappings', () => {
     },
   };
 
-  const incorrectMappings = {
+  const incorrectMappings: MappingTypeMapping = {
     dynamic: 'false',
     properties: {
       token: { type: 'text' }, // incorrect - should be keyword
