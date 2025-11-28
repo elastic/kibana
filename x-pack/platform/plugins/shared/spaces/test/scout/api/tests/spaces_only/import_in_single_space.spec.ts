@@ -22,7 +22,8 @@ import { prepareImportFormData } from './helpers';
  * Tests for the Saved Objects Import API (_import) within individual spaces (default space and a "space_1" space).
  *
  * This test suite validates import behavior when operating within a single space at a time to ensure
- * consistent behavior regardless of the space context.
+ * consistent behavior regardless of the space context. The test suite uses an API key with minimal 'savedObjectsManagement' privileges to ensure
+ * proper role-based access control.
  *
  * Note: since version 8.0, Kibana requires most saved objects to have globally unique IDs
  * Learn more: https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects

@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+/**
+ * Tests for the Saved Objects Import API (_import) with operations across multiple spaces.
+ *
+ * This test suite validates import behavior when working with saved objects across different
+ * Kibana Spaces. The test suite uses an API key with minimal 'savedObjectsManagement' privileges to ensure
+ * proper role-based access control.
+ */
+
 import type { KbnClient, RequestAuthFixture, RoleApiCredentials, ScoutLogger } from '@kbn/scout';
 import { apiTest, expect, tags } from '@kbn/scout';
 
@@ -274,9 +282,3 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
     }
   );
 });
-
-// TODO
-// cover scenarios highlighted here:
-// https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects#saved-object-ids-impact-when-using-import-and-copy
-// * 2. Multi-namespace objects: Should be shareable across spaces (TODO: requires index-pattern or sharedtype)
-// * 3. Namespace-agnostic objects: Should conflict globally across all spaces (TODO: requires globaltype)
