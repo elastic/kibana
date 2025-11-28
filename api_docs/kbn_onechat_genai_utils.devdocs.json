@@ -1187,7 +1187,7 @@
         "label": "generateEsql",
         "description": [],
         "signature": [
-          "({ nlQuery, index, executeQuery, additionalInstructions, additionalContext, maxRetries, model, esClient, logger, events, }: ",
+          "({ nlQuery, index, executeQuery, additionalInstructions, additionalContext, maxRetries, rowLimit, model, esClient, logger, events, }: ",
           "GenerateEsqlParams",
           ") => Promise<",
           {
@@ -1208,7 +1208,7 @@
             "id": "def-server.generateEsql.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  nlQuery,\n  index,\n  executeQuery = true,\n  additionalInstructions,\n  additionalContext,\n  maxRetries = 3,\n  model,\n  esClient,\n  logger,\n  events,\n}",
+            "label": "{\n  nlQuery,\n  index,\n  executeQuery = true,\n  additionalInstructions,\n  additionalContext,\n  maxRetries = 3,\n  rowLimit,\n  model,\n  esClient,\n  logger,\n  events,\n}",
             "description": [],
             "signature": [
               "GenerateEsqlParams"
@@ -5647,7 +5647,7 @@
         "label": "naturalLanguageSearch",
         "description": [],
         "signature": [
-          "({ nlQuery, target, model, esClient, logger, events, }: { nlQuery: string; target: string; model: ",
+          "({ nlQuery, target, model, esClient, logger, events, rowLimit, customInstructions, }: { nlQuery: string; target: string; model: ",
           {
             "pluginId": "@kbn/onechat-server",
             "scope": "common",
@@ -5673,7 +5673,7 @@
             "section": "def-common.ToolEventEmitter",
             "text": "ToolEventEmitter"
           },
-          "; }) => Promise<",
+          "; rowLimit?: number | undefined; customInstructions?: string | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/onechat-genai-utils",
             "scope": "server",
@@ -5692,7 +5692,7 @@
             "id": "def-server.naturalLanguageSearch.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  nlQuery,\n  target,\n  model,\n  esClient,\n  logger,\n  events,\n}",
+            "label": "{\n  nlQuery,\n  target,\n  model,\n  esClient,\n  logger,\n  events,\n  rowLimit,\n  customInstructions,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
             "deprecated": false,
@@ -6775,6 +6775,34 @@
                     "section": "def-common.ToolEventEmitter",
                     "text": "ToolEventEmitter"
                   }
+                ],
+                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/onechat-genai-utils",
+                "id": "def-server.naturalLanguageSearch.$1.rowLimit",
+                "type": "number",
+                "tags": [],
+                "label": "rowLimit",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/onechat-genai-utils",
+                "id": "def-server.naturalLanguageSearch.$1.customInstructions",
+                "type": "string",
+                "tags": [],
+                "label": "customInstructions",
+                "description": [],
+                "signature": [
+                  "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
                 "deprecated": false,
@@ -7893,7 +7921,7 @@
         "label": "runSearchTool",
         "description": [],
         "signature": [
-          "({ nlQuery, index, model, esClient, logger, events, }: { nlQuery: string; index?: string | undefined; model: ",
+          "({ nlQuery, index, rowLimit, customInstructions, model, esClient, logger, events, }: { nlQuery: string; index?: string | undefined; rowLimit?: number | undefined; customInstructions?: string | undefined; model: ",
           {
             "pluginId": "@kbn/onechat-server",
             "scope": "common",
@@ -7938,7 +7966,7 @@
             "id": "def-server.runSearchTool.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  nlQuery,\n  index,\n  model,\n  esClient,\n  logger,\n  events,\n}",
+            "label": "{\n  nlQuery,\n  index,\n  rowLimit,\n  customInstructions,\n  model,\n  esClient,\n  logger,\n  events,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",
             "deprecated": false,
@@ -7961,6 +7989,34 @@
                 "type": "string",
                 "tags": [],
                 "label": "index",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/onechat-genai-utils",
+                "id": "def-server.runSearchTool.$1.rowLimit",
+                "type": "number",
+                "tags": [],
+                "label": "rowLimit",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/search/run_search_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/onechat-genai-utils",
+                "id": "def-server.runSearchTool.$1.customInstructions",
+                "type": "string",
+                "tags": [],
+                "label": "customInstructions",
                 "description": [],
                 "signature": [
                   "string | undefined"

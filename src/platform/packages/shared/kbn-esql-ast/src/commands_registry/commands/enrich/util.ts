@@ -11,6 +11,7 @@ import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers
 import type { ESQLAstAllCommands } from '../../../types';
 import type { ESQLPolicy, ISuggestionItem } from '../../types';
 import { getSafeInsertText } from '../../../definitions/utils/autocomplete/helpers';
+import { SuggestionCategory } from '../../../sorting/types';
 
 export const ENRICH_MODES = [
   {
@@ -123,6 +124,7 @@ export const noPoliciesAvailableSuggestion: ISuggestionItem = {
     defaultMessage: 'Click to create',
   }),
   sortText: 'D',
+  category: SuggestionCategory.CUSTOM_ACTION,
   command: {
     id: 'esql.policies.create',
     title: i18n.translate('kbn-esql-ast.esql.autocomplete.createNewPolicy', {
@@ -187,5 +189,6 @@ export const buildMatchingFieldsDefinition = (
         },
       }),
       sortText: 'D',
+      category: SuggestionCategory.FIELD,
     })
   );

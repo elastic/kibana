@@ -265,6 +265,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchHomepage",
+        "id": "def-common.SEARCH_HOMEPAGE_V2_UI_FLAG",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_HOMEPAGE_V2_UI_FLAG",
+        "description": [],
+        "signature": [
+          "\"searchHomepage:searchHomepageV2Enabled\""
+        ],
+        "path": "x-pack/solutions/search/plugins/search_homepage/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []
