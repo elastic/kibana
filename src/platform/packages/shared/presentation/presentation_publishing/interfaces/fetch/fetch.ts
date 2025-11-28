@@ -61,9 +61,16 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
     observables.query = api.parentApi.query$;
   }
 
-  if (apiHasParentApi(api) && apiPublishesProjectRouting(api.parentApi)) {
-    observables.projectRouting = api.parentApi.projectRouting$;
-  }
+  observables.projectRouting = combineLatest({
+    local: apiPublishesProjectRouting(api) ? api.projectRouting$ : of(undefined),
+    parent:
+      apiHasParentApi(api) && apiPublishesProjectRouting(api.parentApi)
+        ? api.parentApi.projectRouting$
+        : of(undefined),
+  }).pipe(
+    // Local projectRouting (from saved search) takes precedence over parent (from dashboard)
+    map(({ local, parent }) => local ?? parent)
+  );
 
   observables.timeRange = combineLatest({
     local: apiPublishesTimeRange(api) ? api.timeRange$ : of(undefined),
