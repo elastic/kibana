@@ -6,6 +6,7 @@
  */
 
 import { omit } from 'lodash';
+import pMap from 'p-map';
 
 import type {
   ElasticsearchClient,
@@ -349,6 +350,7 @@ class FleetServerHostService {
       return [];
     }
 
+    // Bulk get saved objects with default client (not encrypted).
     const res = await this.soClient.bulkGet<FleetServerHostSOAttributes>(
       ids.map((id) => ({
         id,
@@ -356,21 +358,39 @@ class FleetServerHostService {
       }))
     );
 
-    return res.saved_objects
-      .map((so) => {
+    // Decrypt each saved object in parallel
+    const decryptedSavedObjects = await pMap(
+      res.saved_objects,
+      async (so) => {
         if (so.error) {
           if (!ignoreNotFound || so.error.statusCode !== 404) {
-            throw so.error;
+            const error = new Error(so.error.message || so.error.error);
+            (error as any).statusCode = so.error.statusCode;
+            throw error;
           }
           return undefined;
         }
+        try {
+          const decryptedSo =
+            await this.encryptedSoClient.getDecryptedAsInternalUser<FleetServerHostSOAttributes>(
+              FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+              so.id
+            );
+          return savedObjectToFleetServerHost(decryptedSo);
+        } catch (error) {
+          if (ignoreNotFound && error.statusCode === 404) {
+            return undefined;
+          }
+          throw error;
+        }
+      },
+      { concurrency: 50 }
+    );
 
-        return savedObjectToFleetServerHost(so);
-      })
-      .filter(
-        (fleetServerHostOrUndefined): fleetServerHostOrUndefined is FleetServerHost =>
-          typeof fleetServerHostOrUndefined !== 'undefined'
-      );
+    return decryptedSavedObjects.filter(
+      (fleetServerHostOrUndefined): fleetServerHostOrUndefined is FleetServerHost =>
+        typeof fleetServerHostOrUndefined !== 'undefined'
+    );
   }
 
   /**

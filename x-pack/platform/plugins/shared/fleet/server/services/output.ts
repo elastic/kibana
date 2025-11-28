@@ -765,22 +765,47 @@ class OutputService {
   }
 
   public async bulkGet(ids: string[], { ignoreNotFound = false } = { ignoreNotFound: true }) {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    // Bulk get saved objects with default client (not encrypted).
     const res = await this.soClient.bulkGet<OutputSOAttributes>(
       ids.map((id) => ({ id: outputIdToUuid(id), type: SAVED_OBJECT_TYPE }))
     );
 
-    return res.saved_objects
-      .map((so) => {
+    // Decrypt each saved object in parallel
+    const decryptedSavedObjects = await pMap(
+      res.saved_objects,
+      async (so) => {
         if (so.error) {
           if (!ignoreNotFound || so.error.statusCode !== 404) {
-            throw so.error;
+            const error = new Error(so.error.message || so.error.error);
+            (error as any).statusCode = so.error.statusCode;
+            throw error;
           }
           return undefined;
         }
+        try {
+          const decryptedSo =
+            await this.encryptedSoClient.getDecryptedAsInternalUser<OutputSOAttributes>(
+              SAVED_OBJECT_TYPE,
+              so.id
+            );
+          return outputSavedObjectToOutput(decryptedSo);
+        } catch (error) {
+          if (ignoreNotFound && error.statusCode === 404) {
+            return undefined;
+          }
+          throw error;
+        }
+      },
+      { concurrency: 50 } // Match the concurrency used in createPointInTimeFinderDecryptedAsInternalUser
+    );
 
-        return outputSavedObjectToOutput(so);
-      })
-      .filter((output): output is Output => typeof output !== 'undefined');
+    return decryptedSavedObjects.filter(
+      (output): output is Output => typeof output !== 'undefined'
+    );
   }
 
   public async list() {
