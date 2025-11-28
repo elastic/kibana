@@ -7,28 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
-import type { AggregateQuery, Query } from '@kbn/es-query';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { hasTransformationalCommand } from '@kbn/esql-utils';
-import type { RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { useCallback, useEffect, useMemo } from 'react';
 import type {
   UnifiedHistogramChartLoadEvent,
-  UnifiedHistogramExternalVisContextStatus,
+  UnifiedHistogramFetchParams,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramServices,
-  UnifiedHistogramSuggestionContext,
   UnifiedHistogramTopPanelHeightContext,
-  UnifiedHistogramVisContext,
 } from '../types';
 import type { UnifiedHistogramStateService } from '../services/state_service';
 import {
   chartHiddenSelector,
-  timeIntervalSelector,
   totalHitsResultSelector,
   totalHitsStatusSelector,
   lensAdaptersSelector,
@@ -37,58 +27,30 @@ import {
 } from '../utils/state_selectors';
 import { useStateSelector } from './use_state_selector';
 import { setBreakdownField } from '../utils/local_storage_utils';
-import { exportVisContext } from '../utils/external_vis_context';
-import type { UseUnifiedHistogramProps } from './use_unified_histogram';
 
 export const useStateProps = ({
   services,
   localStorageKeyPrefix,
   stateService,
-  dataView,
-  query,
-  searchSessionId,
-  requestAdapter,
-  columns,
-  breakdownField,
+  fetchParams,
   onBreakdownFieldChange: originalOnBreakdownFieldChange,
-  onVisContextChanged: originalOnVisContextChanged,
+  onTimeIntervalChange: originalOnTimeIntervalChange,
 }: {
   services: UnifiedHistogramServices;
   localStorageKeyPrefix: string | undefined;
   stateService: UnifiedHistogramStateService | undefined;
-  dataView: DataView;
-  query: Query | AggregateQuery | undefined;
-  searchSessionId: string | undefined;
-  requestAdapter: RequestAdapter | undefined;
-  columns: DatatableColumn[] | undefined;
-  breakdownField: string | undefined;
+  fetchParams: UnifiedHistogramFetchParams | undefined;
   onBreakdownFieldChange: ((breakdownField: string | undefined) => void) | undefined;
-  onVisContextChanged:
-    | ((
-        nextVisContext: UnifiedHistogramVisContext | undefined,
-        externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
-      ) => void)
-    | undefined;
+  onTimeIntervalChange: ((timeInterval: string | undefined) => void) | undefined;
 }) => {
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
   const chartHidden = useStateSelector(stateService?.state$, chartHiddenSelector);
-  const timeInterval = useStateSelector(stateService?.state$, timeIntervalSelector);
   const totalHitsResult = useStateSelector(stateService?.state$, totalHitsResultSelector);
   const totalHitsStatus = useStateSelector(stateService?.state$, totalHitsStatusSelector);
   const lensAdapters = useStateSelector(stateService?.state$, lensAdaptersSelector);
   const lensDataLoading$ = useStateSelector(stateService?.state$, lensDataLoadingSelector$);
 
-  /**
-   * Contexts
-   */
-
-  const isPlainRecord = useMemo(() => {
-    return query && isOfAggregateQueryType(query);
-  }, [query]);
-
-  const isTimeBased = useMemo(() => {
-    return dataView && dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
-  }, [dataView]);
+  const { breakdown, isTimeBased, isESQLQuery, timeInterval } = fetchParams || {};
 
   const hits = useMemo(() => {
     if (totalHitsResult instanceof Error) {
@@ -102,7 +64,7 @@ export const useStateProps = ({
   }, [totalHitsResult, totalHitsStatus]);
 
   const chart = useMemo(() => {
-    if (!isTimeBased && !isPlainRecord) {
+    if (!isTimeBased && !isESQLQuery) {
       return undefined;
     }
 
@@ -110,39 +72,7 @@ export const useStateProps = ({
       hidden: chartHidden,
       timeInterval,
     };
-  }, [chartHidden, isPlainRecord, isTimeBased, timeInterval]);
-
-  const breakdown = useMemo(() => {
-    if (!isTimeBased) {
-      return undefined;
-    }
-
-    // hide the breakdown field selector when the ES|QL query has a transformational command (STATS, KEEP etc)
-    if (query && isOfAggregateQueryType(query) && hasTransformationalCommand(query.esql)) {
-      return undefined;
-    }
-
-    if (isPlainRecord) {
-      const breakdownColumn = columns?.find((column) => column.name === breakdownField);
-      const field = breakdownColumn
-        ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
-        : undefined;
-      return {
-        field,
-      };
-    }
-
-    return {
-      field: breakdownField ? dataView?.getFieldByName(breakdownField) : undefined,
-    };
-  }, [isTimeBased, query, isPlainRecord, breakdownField, dataView, columns]);
-
-  const request = useMemo(() => {
-    return {
-      searchSessionId,
-      adapter: requestAdapter,
-    };
-  }, [requestAdapter, searchSessionId]);
+  }, [chartHidden, isESQLQuery, isTimeBased, timeInterval]);
 
   /**
    * Callbacks
@@ -151,13 +81,6 @@ export const useStateProps = ({
   const onTopPanelHeightChange = useCallback(
     (newTopPanelHeight: UnifiedHistogramTopPanelHeightContext) => {
       stateService?.setTopPanelHeight(newTopPanelHeight);
-    },
-    [stateService]
-  );
-
-  const onTimeIntervalChange = useCallback(
-    (newTimeInterval: string) => {
-      stateService?.setTimeInterval(newTimeInterval);
     },
     [stateService]
   );
@@ -196,29 +119,18 @@ export const useStateProps = ({
     [originalOnBreakdownFieldChange]
   );
 
-  const onSuggestionContextChange = useCallback(
-    (suggestionContext: UnifiedHistogramSuggestionContext | undefined) => {
-      stateService?.setCurrentSuggestionContext(suggestionContext);
+  const onTimeIntervalChange = useCallback(
+    (nextTimeInterval: string | undefined) => {
+      originalOnTimeIntervalChange?.(nextTimeInterval);
     },
-    [stateService]
+    [originalOnTimeIntervalChange]
   );
-
-  const onVisContextChanged: UseUnifiedHistogramProps['onVisContextChanged'] = useMemo(() => {
-    if (!originalOnVisContextChanged || !isPlainRecord) {
-      return undefined;
-    }
-
-    return (visContext, externalVisContextStatus) => {
-      const minifiedVisContext = exportVisContext(visContext);
-
-      originalOnVisContextChanged(minifiedVisContext, externalVisContextStatus);
-    };
-  }, [isPlainRecord, originalOnVisContextChanged]);
 
   /**
    * Effects
    */
 
+  const breakdownField = breakdown?.field?.name ?? '';
   // Sync the breakdown field with local storage
   useEffect(() => {
     if (localStorageKeyPrefix) {
@@ -237,9 +149,6 @@ export const useStateProps = ({
     topPanelHeight,
     hits,
     chart,
-    breakdown,
-    request,
-    isPlainRecord,
     lensAdapters,
     dataLoading$: lensDataLoading$,
     onTopPanelHeightChange,
@@ -248,7 +157,5 @@ export const useStateProps = ({
     onChartHiddenChange,
     onChartLoad,
     onBreakdownFieldChange,
-    onSuggestionContextChange,
-    onVisContextChanged,
   };
 };
