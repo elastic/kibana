@@ -50,7 +50,10 @@ import {
   useGetSettingsQuery,
 } from '../../../../hooks';
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
-import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_DIRECTED_FEEDBACK_LINK } from '../../../../constants';
+import {
+  INTEGRATIONS_ROUTING_PATHS,
+  INTEGRATIONS_DIRECTED_FEEDBACK_LINK,
+} from '../../../../constants';
 import { useGetPackageInfoByKeyQuery, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type { PackageInfo } from '../../../../types';
@@ -375,7 +378,11 @@ export function Detail() {
                       {!isDevMode && (
                         <EuiFlexItem grow={false} style={{ paddingBottom: theme.euiTheme.size.xs }}>
                           <EuiText size="s" style={{ whiteSpace: 'nowrap' }}>
-                            <EuiLink href={INTEGRATIONS_DIRECTED_FEEDBACK_LINK} external target="_blank">
+                            <EuiLink
+                              href={INTEGRATIONS_DIRECTED_FEEDBACK_LINK}
+                              external
+                              target="_blank"
+                            >
                               <FormattedMessage
                                 id="xpack.fleet.integrationDetailsHeaderFeedbackLink"
                                 defaultMessage="Give feedback"
