@@ -97,7 +97,8 @@ export function LensEditConfigurationFlyout({
             previousAttrs.state.datasourceStates[datasourceId],
             previousAttrs.references,
             datasourceStates[datasourceId].state,
-            attributes.references
+            datasourceMap[datasourceId].getPersistableState(datasourceStates[datasourceId].state)
+              .references
           )
         : false;
 
