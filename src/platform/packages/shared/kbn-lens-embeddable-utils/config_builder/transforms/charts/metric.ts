@@ -477,7 +477,6 @@ export function fromLensStateToAPI(config: LensAttributes): MetricState {
   const { state } = config;
   const visualization = state.visualization as MetricVisualizationState;
   const layers = getDatasourceLayers(state);
-
   const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
 
   const visualizationState = {

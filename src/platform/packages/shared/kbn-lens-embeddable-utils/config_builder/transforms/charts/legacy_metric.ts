@@ -40,6 +40,7 @@ import {
   getSharedChartLensStateToAPI,
   getSharedChartAPIToLensState,
   getLensStateLayer,
+  getDatasourceLayers,
 } from './utils';
 import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
 import { isEsqlTableTypeDataset } from '../../utils';
@@ -180,13 +181,7 @@ export function fromLensStateToAPI(
 ): Extract<LensApiState, { type: 'legacy_metric' }> {
   const { state } = config;
   const visualization = state.visualization as LegacyMetricVisualizationState;
-  const layers =
-    state.datasourceStates.formBased?.layers ??
-    state.datasourceStates.textBased?.layers ??
-    // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
-    (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
-    [];
-
+  const layers = getDatasourceLayers(state);
   const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
 
   const visualizationState = {

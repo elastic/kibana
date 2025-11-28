@@ -10,7 +10,6 @@ import type {
   FormBasedLayer,
   GaugeVisualizationState,
   MetricVisualizationState,
-  PersistedIndexPatternLayer,
   TextBasedLayer,
 } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
@@ -58,9 +57,7 @@ export function getDatasourceLayers(
 }
 
 export function getLensStateLayer(
-  layers:
-    | Record<string, Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer>
-    | PersistedIndexPatternLayer[],
+  layers: Record<string, Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer>,
   visLayerId: string | undefined
 ) {
   // Filter to keep non-linked layers (layers without linkToLayers or with linkToLayers set to null)
