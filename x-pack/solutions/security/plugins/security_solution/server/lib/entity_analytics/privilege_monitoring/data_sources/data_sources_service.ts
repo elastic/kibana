@@ -81,7 +81,5 @@ export const createDataSourcesService = (
     createImportIndex,
     searchPrivilegesIndices,
     syncAllSources,
-    ...indexSyncService,
-    ...createIntegrationsSyncService(dataClient, soClient),
   };
 };
