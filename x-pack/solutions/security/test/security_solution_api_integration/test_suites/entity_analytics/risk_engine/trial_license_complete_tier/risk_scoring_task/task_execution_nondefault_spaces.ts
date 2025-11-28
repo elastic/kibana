@@ -24,7 +24,6 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
 
   const doTests = () => {
     describe('with alerts in a non-default space', () => {
