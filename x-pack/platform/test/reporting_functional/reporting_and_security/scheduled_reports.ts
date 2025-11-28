@@ -71,7 +71,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
     };
 
     before(async () => {
-      await retry.try(() => reportingFunctional.loginReportingManager());
+      await reportingFunctional.loginReportingManager();
       await reportingFunctional.initEcommerce();
     });
 
@@ -231,7 +231,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
 
     describe('without reporting management privileges', async () => {
       it('disables and hides the email recipient fields', async () => {
-        await retry.try(() => reportingFunctional.loginReportingUser());
+        await reportingFunctional.loginReportingUser();
         await openFlyout();
 
         // Enable email

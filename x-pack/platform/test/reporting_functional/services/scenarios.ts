@@ -44,14 +44,14 @@ export function createScenarios(
   const loginDataAnalyst = async () => {
     await PageObjects.security.forceLogout();
     await PageObjects.security.login(DATA_ANALYST_USERNAME, DATA_ANALYST_PASSWORD, {
-      expectSpaceSelector: false,
+      expectSuccess: true,
     });
   };
 
   const loginReportingUser = async () => {
     await PageObjects.security.forceLogout();
     await PageObjects.security.login(REPORTING_USER_USERNAME, REPORTING_USER_PASSWORD, {
-      expectSpaceSelector: false,
+      expectSuccess: true,
     });
   };
 
@@ -61,7 +61,7 @@ export function createScenarios(
       MANAGE_REPORTING_USER_USERNAME,
       MANAGE_REPORTING_USER_PASSWORD,
       {
-        expectSpaceSelector: false,
+        expectSuccess: true,
       }
     );
   };
