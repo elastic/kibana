@@ -46,6 +46,7 @@ export const FormattedError = memo<FormattedErrorProps>(
 
       if (isHttpFetchError(error)) {
         content = (
+          // @ts-expect-error upgrade typescript v5.9.3
           <>
             <div>{`${error.response?.status}: ${error.response?.statusText}`}</div>
             {error.body && <ObjectContent data={error.body} />}
