@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { types_mapping_property } from './generated/es_openapi_zod.gen';
+import { types_mapping_property } from './generated/schemas/es_openapi_zod.gen';
 
 describe('types_mapping_property', () => {
   it('should be a valid zod schema', () => {
