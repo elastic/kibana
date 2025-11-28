@@ -181,8 +181,11 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
   );
 
   apiTest(
-    'should import a dashboard object in space 1 and then import the same object in space 2 but with a new ID',
+    'should import a dashboard object in space_1 and import the same object into space_2 but with a new destination ID',
     async ({ apiClient, apiServices }) => {
+      // Premise: if a saved object with the exact same ID exists in a different space, then Kibana will generate a random ID for the import destination
+      // Learn more: https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects#saved-objects-copy-to-other-spaces
+
       const uniqueId = `unique-dashboard-id`;
 
       // Import dashboard with a specific ID to space_1 - should succeed
@@ -262,6 +265,9 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
       expect(importResponse2.statusCode).toBe(200);
       expect(importResponse2.body.success).toBe(true);
       expect(exportResponse.data.exportedObjects).toHaveLength(1);
+
+      // The originId should point to the original object's ID
+      expect(exportResponse.data.exportedObjects[0].originId).toBe(uniqueId);
       expect(exportResponse.data.exportedObjects[0].attributes[ATTRIBUTE_TITLE_KEY]).toBe(
         `${ATTRIBUTE_TITLE_VALUE} in Space 2`
       );

@@ -268,6 +268,10 @@ TEST_SPACES.forEach((space) => {
         );
 
         expect(exportResponse.status).toBe(200);
+        expect(exportResponse.data.exportedObjects).toHaveLength(1);
+
+        // the copy does not have the originId set since it was created as a new object
+        expect(exportResponse.data.exportedObjects[0].originId).toBeUndefined();
       }
     );
 
