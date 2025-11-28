@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { dockerRegistryPort } from '@kbn/test';
 import { resolve } from 'path';
+import type { CreateTestConfigOptions } from '../shared/types';
 import { pageObjects } from './page_objects';
 import { services } from './services';
-import type { CreateTestConfigOptions } from '../shared/types';
 
 export function createTestConfig<
   TServices extends {} = typeof services,
@@ -18,6 +19,7 @@ export function createTestConfig<
 >(options: CreateTestConfigOptions<TServices, TPageObjects>) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
+    const enableFleetDockerRegistry = options.enableFleetDockerRegistry ?? true;
 
     return {
       ...svlSharedConfig.getAll(),
@@ -25,6 +27,7 @@ export function createTestConfig<
       testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
       pageObjects: { ...pageObjects, ...options.pageObjects },
       services: { ...services, ...options.services },
+      ...(!enableFleetDockerRegistry && { dockerServers: undefined }),
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
@@ -39,6 +42,9 @@ export function createTestConfig<
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
           ...(options.kbnServerArgs ?? []),
+          ...(enableFleetDockerRegistry && dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
         ],
       },
       testFiles: options.testFiles,
