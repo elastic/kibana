@@ -40,6 +40,7 @@ import { NoSuggestionsCallout } from './review_suggestions_form/no_suggestions_c
 import { useReviewSuggestionsForm } from './review_suggestions_form/use_review_suggestions_form';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
+import { NoDataEmptyPrompt } from './empty_prompt';
 
 function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
   if (maxNestingLevel) {
@@ -83,6 +84,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   const isEditingOrReorderingStreams =
     routingSnapshot.matches({ ready: 'editingRule' }) ||
     routingSnapshot.matches({ ready: 'reorderingRules' });
+  const hasData = routing.length > 0 || (aiFeatures && aiFeatures.enabled && suggestions);
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -164,93 +166,110 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
     >
       <CurrentStreamEntry definition={definition} />
 
-      {/* Scrollable routing rules container */}
-      <EuiFlexItem
-        grow={false}
-        className={css`
-          display: flex;
-          flex-direction: column;
-          overflow-y: auto;
-          max-height: calc(100% - 80px);
-        `}
-      >
-        <EuiDragDropContext onDragEnd={handlerItemDrag}>
-          <EuiDroppable droppableId="routing_children_reordering" spacing="none">
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              {routing.map((routingRule, pos) => (
-                <EuiFlexItem key={routingRule.id} grow={false}>
-                  <EuiDraggable
-                    index={pos}
-                    isDragDisabled={!canReorderRoutingRules}
-                    draggableId={routingRule.id}
-                    hasInteractiveChildren={true}
-                    customDragHandle={true}
-                    spacing="none"
-                  >
-                    {(provided, snapshot) => (
-                      <NestedView
-                        last={pos === routing.length - 1}
-                        first={pos === 0}
-                        isBeingDragged={snapshot.isDragging}
-                      >
-                        {routingRule.isNew ? (
-                          <NewRoutingStreamEntry />
-                        ) : currentRuleId === routingRule.id ? (
-                          <EditRoutingStreamEntry onChange={changeRule} routingRule={routingRule} />
-                        ) : (
-                          <IdleRoutingStreamEntry
-                            availableStreams={availableStreams}
-                            draggableProvided={provided}
-                            isEditingEnabled={routingSnapshot.can({
-                              type: 'routingRule.edit',
-                              id: routingRule.id,
-                            })}
-                            onEditClick={editRule}
-                            routingRule={routingRule}
-                            canReorder={canReorderRoutingRules}
-                          />
-                        )}
-                      </NestedView>
-                    )}
-                  </EuiDraggable>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiDroppable>
-        </EuiDragDropContext>
+      {!hasData ? (
+        <NoDataEmptyPrompt
+          aiFeatures={aiFeatures}
+          getSuggestionsForStream={getSuggestionsForStream}
+          isLoadingSuggestions={isLoadingSuggestions}
+          isEditingOrReorderingStreams={isEditingOrReorderingStreams}
+          createNewRule={createNewRule}
+        />
+      ) : (
+        <>
+          {/* Scrollable routing rules container */}
+          <EuiFlexItem
+            grow={false}
+            className={css`
+              display: flex;
+              flex-direction: column;
+              overflow-y: auto;
+              max-height: calc(100% - 80px);
+            `}
+          >
+            {routing.length > 0 && (
+              <EuiDragDropContext onDragEnd={handlerItemDrag}>
+                <EuiDroppable droppableId="routing_children_reordering" spacing="none">
+                  <EuiFlexGroup direction="column" gutterSize="xs">
+                    {routing.map((routingRule, pos) => (
+                      <EuiFlexItem key={routingRule.id} grow={false}>
+                        <EuiDraggable
+                          index={pos}
+                          isDragDisabled={!canReorderRoutingRules}
+                          draggableId={routingRule.id}
+                          hasInteractiveChildren={true}
+                          customDragHandle={true}
+                          spacing="none"
+                        >
+                          {(provided, snapshot) => (
+                            <NestedView
+                              last={pos === routing.length - 1}
+                              first={pos === 0}
+                              isBeingDragged={snapshot.isDragging}
+                            >
+                              {routingRule.isNew ? (
+                                <NewRoutingStreamEntry />
+                              ) : currentRuleId === routingRule.id ? (
+                                <EditRoutingStreamEntry
+                                  onChange={changeRule}
+                                  routingRule={routingRule}
+                                />
+                              ) : (
+                                <IdleRoutingStreamEntry
+                                  availableStreams={availableStreams}
+                                  draggableProvided={provided}
+                                  isEditingEnabled={routingSnapshot.can({
+                                    type: 'routingRule.edit',
+                                    id: routingRule.id,
+                                  })}
+                                  onEditClick={editRule}
+                                  routingRule={routingRule}
+                                  canReorder={canReorderRoutingRules}
+                                />
+                              )}
+                            </NestedView>
+                          )}
+                        </EuiDraggable>
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </EuiDroppable>
+              </EuiDragDropContext>
+            )}
 
-        {aiFeatures && aiFeatures.enabled && shouldDisplayCreateButton && (
-          <div ref={scrollToSuggestions}>
-            <EuiSpacer size="m" />
-            {suggestions ? (
-              isEmpty(suggestions) ? (
-                <NoSuggestionsCallout
-                  aiFeatures={aiFeatures}
-                  isLoadingSuggestions={isLoadingSuggestions}
-                  onDismiss={resetForm}
-                  onRegenerate={getSuggestionsForStream}
-                  isDisabled={isEditingOrReorderingStreams}
-                />
-              ) : (
-                <ReviewSuggestionsForm
-                  acceptSuggestion={acceptSuggestion}
-                  aiFeatures={aiFeatures}
-                  definition={definition}
-                  isLoadingSuggestions={isLoadingSuggestions}
-                  onRegenerate={getSuggestionsForStream}
-                  previewSuggestion={previewSuggestion}
-                  rejectSuggestion={rejectSuggestion}
-                  resetForm={resetForm}
-                  suggestions={suggestions}
-                  updateSuggestion={updateSuggestion}
-                />
-              )
-            ) : null}
-          </div>
-        )}
-      </EuiFlexItem>
+            {aiFeatures && aiFeatures.enabled && shouldDisplayCreateButton && (
+              <div ref={scrollToSuggestions}>
+                <EuiSpacer size="m" />
+                {suggestions ? (
+                  isEmpty(suggestions) ? (
+                    <NoSuggestionsCallout
+                      aiFeatures={aiFeatures}
+                      isLoadingSuggestions={isLoadingSuggestions}
+                      onDismiss={resetForm}
+                      onRegenerate={getSuggestionsForStream}
+                      isDisabled={isEditingOrReorderingStreams}
+                    />
+                  ) : (
+                    <ReviewSuggestionsForm
+                      acceptSuggestion={acceptSuggestion}
+                      aiFeatures={aiFeatures}
+                      definition={definition}
+                      isLoadingSuggestions={isLoadingSuggestions}
+                      onRegenerate={getSuggestionsForStream}
+                      previewSuggestion={previewSuggestion}
+                      rejectSuggestion={rejectSuggestion}
+                      resetForm={resetForm}
+                      suggestions={suggestions}
+                      updateSuggestion={updateSuggestion}
+                    />
+                  )
+                ) : null}
+              </div>
+            )}
+          </EuiFlexItem>
 
-      {shouldDisplayCreateButton && renderCreateButton()}
+          {shouldDisplayCreateButton && renderCreateButton()}
+        </>
+      )}
     </EuiFlexGroup>
   );
 }
