@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics';
 import type { createSyncMarkersService } from './integrations/sync_markers/sync_markers';
 import { isTimestampGreaterThan } from './utils';
