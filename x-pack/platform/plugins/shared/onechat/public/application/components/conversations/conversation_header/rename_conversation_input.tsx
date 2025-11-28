@@ -70,14 +70,14 @@ export const RenameConversationInput: React.FC<RenameConversationInputProps> = (
     setIsLoading(true);
     try {
       await conversationActions.renameConversation(conversationId, newTitle.trim());
-      setIsLoading(false);
       onCancel();
     } catch (error) {
-      setIsLoading(false);
       addErrorToast({
         title: labels.renameErrorToast,
         text: formatOnechatErrorMessage(error),
       });
+    } finally {
+      setIsLoading(false);
     }
   }, [conversationId, newTitle, conversationActions, onCancel, isFormDirty, addErrorToast]);
 
