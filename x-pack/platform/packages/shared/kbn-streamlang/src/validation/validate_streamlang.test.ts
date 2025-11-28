@@ -195,6 +195,54 @@ describe('validateStreamlang', () => {
       expect(result.errors[0].field).toBe('abc');
       expect(result.errors[0].message).toContain('does not match the streams recommended schema');
     });
+
+    it('should detect same field with different type suffixes in single grok pattern', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'grok',
+            from: 'message',
+            patterns: [
+              '%{NUMBER:attributes.count:int} total, %{NUMBER:attributes.count} remaining',
+            ],
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
+
+      // This should fail because the same field has different types in one pattern
+      // ES|QL rejects this: "the attribute [attributes.count] is defined multiple times with different types"
+      // Ingest pipeline produces array of mixed types: [420, "425"]
+      expect(result.isValid).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.errors[0].type).toBe('mixed_type');
+      expect(result.errors[0].field).toBe('attributes.count');
+    });
+
+    it('should allow same field multiple times with same type in single grok pattern', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'grok',
+            from: 'message',
+            patterns: [
+              '%{NUMBER:attributes.count:int} total, %{NUMBER:attributes.count:int} remaining',
+            ],
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
+
+      // This should pass - same field with same type is OK (though unusual)
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
   });
 
   describe('dissect processor field extraction', () => {

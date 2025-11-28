@@ -211,6 +211,10 @@ function extractModifiedFields(processor: StreamlangProcessorDefinition): string
     case 'manual_ingest_pipeline':
       // These processors don't create new fields, they remove or drop
       break;
+    default: {
+      const _exhaustiveCheck: never = processor;
+      return _exhaustiveCheck;
+    }
   }
 
   return fields;
@@ -338,6 +342,10 @@ function getProcessorOutputType(
     case 'manual_ingest_pipeline':
       // These processors don't produce typed output or type is unknown
       return 'unknown';
+    default: {
+      const _exhaustiveCheck: never = processor;
+      return _exhaustiveCheck;
+    }
   }
 }
 
@@ -391,6 +399,10 @@ function getExpectedInputType(
     case 'manual_ingest_pipeline':
       // These processors don't have strict type requirements for their inputs
       return null;
+    default: {
+      const _exhaustiveCheck: never = processor;
+      return _exhaustiveCheck;
+    }
   }
 }
 
@@ -454,6 +466,16 @@ function trackFieldTypesAndValidate(
       case 'set':
         if (step.copy_from) fieldsUsed.push(step.copy_from);
         break;
+      case 'append':
+      case 'drop_document':
+      case 'manual_ingest_pipeline':
+      case 'remove_by_prefix':
+        // These processors don't use specific fields in a way that requires type validation
+        break;
+      default: {
+        const _exhaustiveCheck: never = step;
+        return _exhaustiveCheck;
+      }
     }
 
     // Validate each field usage against current types
@@ -480,6 +502,63 @@ function trackFieldTypesAndValidate(
             expectedType: expectedTypes.length === 1 ? expectedTypes[0] : expectedTypes,
             actualType,
           });
+        }
+      }
+    }
+
+    // Check for duplicate fields with different types in grok patterns
+    if (step.action === 'grok' && step.patterns) {
+      const patterns = Array.isArray(step.patterns) ? step.patterns : [step.patterns];
+      for (const pattern of patterns) {
+        // Extract all occurrences of each field in this pattern with their types
+        const fieldOccurrences = new Map<string, Set<string>>();
+        const regex = /%\{([^:}]+):([^:}]+)(?::([^}]+))?\}/g;
+        let match: RegExpExecArray | null;
+
+        while ((match = regex.exec(pattern)) !== null) {
+          const fieldName = match[2]?.trim();
+          const typeModifier = match[3]?.trim().toLowerCase();
+
+          if (!fieldName) continue;
+
+          // Determine the type for this occurrence
+          let occurrenceType: string;
+          if (typeModifier) {
+            if (['int', 'long', 'float', 'double'].includes(typeModifier)) {
+              occurrenceType = 'number';
+            } else if (['boolean', 'bool'].includes(typeModifier)) {
+              occurrenceType = 'boolean';
+            } else {
+              occurrenceType = 'string';
+            }
+          } else {
+            occurrenceType = 'string';
+          }
+
+          if (!fieldOccurrences.has(fieldName)) {
+            fieldOccurrences.set(fieldName, new Set());
+          }
+          fieldOccurrences.get(fieldName)!.add(occurrenceType);
+        }
+
+        // Check if any field has multiple different types
+        for (const [fieldName, types] of fieldOccurrences.entries()) {
+          if (types.size > 1) {
+            errors.push({
+              type: 'mixed_type',
+              message: i18n.translate('xpack.streamlang.validation.grokDuplicateFieldTypes', {
+                defaultMessage:
+                  'Field "{fieldName}" is defined multiple times with different types in grok pattern of processor #{processorNumber}.',
+                values: {
+                  fieldName,
+                  processorNumber: i + 1,
+                  types: Array.from(types).join(', '),
+                },
+              }),
+              processorId,
+              field: fieldName,
+            });
+          }
         }
       }
     }
