@@ -20,7 +20,7 @@ import { useLocalStorage } from '../../../../hooks/use_local_storage';
 import { ErrorSampleDetailTabContent } from './error_sample_detail';
 import { exceptionStacktraceTab, logStacktraceTab } from './error_tabs';
 
-export function ErrorSampleAiAgentContextualInsight({
+export function ErrorSampleAgentBuilderAiInsight({
   error,
   transaction,
 }: {

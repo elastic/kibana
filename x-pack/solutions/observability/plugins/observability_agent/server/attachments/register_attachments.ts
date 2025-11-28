@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createErrorAttachmentType } from './error';
 import { createAiInsightAttachmentType } from './ai_insight';
 import type { ObservabilityAgentPluginSetupDependencies } from '../types';
 
@@ -14,7 +13,7 @@ export async function registerAttachments({
 }: {
   plugins: ObservabilityAgentPluginSetupDependencies;
 }) {
-  const attachmentTypes = [createAiInsightAttachmentType(), createErrorAttachmentType()];
+  const attachmentTypes = [createAiInsightAttachmentType()];
 
   for (const attachment of attachmentTypes) {
     plugins.onechat.attachments.registerType(attachment);
