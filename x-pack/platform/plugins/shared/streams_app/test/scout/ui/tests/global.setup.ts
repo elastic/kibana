@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { ScoutPage } from '@kbn/scout';
+import { globalSetupHook } from '@kbn/scout';
 
-export class OnboardingHomePage {
-  constructor(private readonly page: ScoutPage) {}
-
-  async goto() {
-    await this.page.gotoApp('observabilityOnboarding');
-  }
-}
+globalSetupHook('Setup environment for streams tests', async ({ apiServices, log }) => {
+  log.debug('[setup] Enabling streams...');
+  await apiServices.streams.enable();
+});
