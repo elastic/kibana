@@ -10,14 +10,8 @@
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
-import {
-  selectHasChanges,
-  selectIsTestModalOpen,
-  selectWorkflowDefinition,
-  selectWorkflowId,
-} from '../../../entities/workflows/store';
+import { selectIsTestModalOpen, selectWorkflowDefinition } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
-import { runWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/run_workflow_thunk';
 import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
 import { TestWrapper } from '../../../shared/test_utils';
 
@@ -46,7 +40,6 @@ jest.mock('../../../entities/workflows/store/workflow_detail/selectors', () => (
   selectIsTestModalOpen: jest.fn(),
   selectWorkflowDefinition: jest.fn(),
   selectWorkflowId: jest.fn(),
-  selectHasChanges: jest.fn(),
   selectWorkflow: jest.fn(),
 }));
 
@@ -87,7 +80,6 @@ describe('WorkflowDetailTestModal', () => {
   };
 
   let mockTestWorkflow: jest.Mock;
-  let mockRunWorkflow: jest.Mock;
 
   const renderModal = () => {
     const store = createMockStore();
@@ -102,7 +94,6 @@ describe('WorkflowDetailTestModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockTestWorkflow = jest.fn();
-    mockRunWorkflow = jest.fn();
 
     (selectIsTestModalOpen as unknown as jest.Mock).mockReturnValue(true);
     (selectWorkflowDefinition as unknown as jest.Mock).mockReturnValue(mockDefinition);
@@ -110,8 +101,6 @@ describe('WorkflowDetailTestModal', () => {
     mockUseAsyncThunk.mockImplementation((thunk) => {
       if (thunk === testWorkflowThunk) {
         return mockTestWorkflow;
-      } else if (thunk === runWorkflowThunk) {
-        return mockRunWorkflow;
       }
     });
 
@@ -186,57 +175,22 @@ describe('WorkflowDetailTestModal', () => {
     });
   });
 
-  describe.each([
-    {
-      workflowIdDefined: true,
-      hasChanges: false,
-      enabled: false,
-      expectedMode: 'test',
-    },
-    {
-      workflowIdDefined: true,
-      hasChanges: true,
-      enabled: true,
-      expectedMode: 'test',
-    },
-    {
-      workflowIdDefined: false,
-      hasChanges: false,
-      enabled: true,
-      expectedMode: 'test',
-    },
-    {
-      workflowIdDefined: true,
-      hasChanges: false,
-      enabled: true,
-      expectedMode: 'run',
-    },
-  ])('when %s', ({ workflowIdDefined, hasChanges, enabled, expectedMode }) => {
-    beforeEach(() => {
-      (selectWorkflowId as unknown as jest.Mock).mockReturnValue(
-        workflowIdDefined ? 'workflow-123' : undefined
-      );
-      (selectHasChanges as unknown as jest.Mock).mockReturnValue(hasChanges);
-      (selectWorkflowDefinition as unknown as jest.Mock).mockReturnValue({ enabled });
+  it(`should call testWorkflow workflow when submit button is clicked`, async () => {
+    const expectedCalledFunction = mockTestWorkflow;
+    expectedCalledFunction.mockResolvedValue({ workflowExecutionId: 'exec-123' });
+
+    const mockSetSelectedExecution = jest.fn();
+    mockUseWorkflowUrlState.mockReturnValue({
+      setSelectedExecution: mockSetSelectedExecution,
     });
 
-    it(`should call ${expectedMode} workflow when submit button is clicked`, async () => {
-      const expectedCalledFunction = expectedMode === 'test' ? mockTestWorkflow : mockRunWorkflow;
-      expectedCalledFunction.mockResolvedValue({ workflowExecutionId: 'exec-123' });
+    const { getByTestId } = renderModal();
 
-      const mockSetSelectedExecution = jest.fn();
-      mockUseWorkflowUrlState.mockReturnValue({
-        setSelectedExecution: mockSetSelectedExecution,
-      });
+    const submitButton = getByTestId('submit-modal');
+    fireEvent.click(submitButton);
 
-      const { getByTestId } = renderModal();
-
-      const submitButton = getByTestId('submit-modal');
-      fireEvent.click(submitButton);
-
-      await waitFor(() => {
-        expect(expectedCalledFunction).toHaveBeenCalledWith({ inputs: { test: 'input' } });
-      });
+    await waitFor(() => {
+      expect(expectedCalledFunction).toHaveBeenCalledWith({ inputs: { test: 'input' } });
     });
   });
 
