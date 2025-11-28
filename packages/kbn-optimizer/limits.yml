@@ -103,6 +103,7 @@ pageLoadAssetSize:
   logsDataAccess: 7900
   logsShared: 101273
   logstash: 15882
+  maintenanceWindows: 3883
   management: 12951
   maps: 45917
   mapsEms: 6734
