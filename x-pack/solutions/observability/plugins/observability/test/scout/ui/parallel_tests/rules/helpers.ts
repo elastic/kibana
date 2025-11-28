@@ -59,31 +59,3 @@ export async function getDisposableRule(apiServices: ApiServicesFixture) {
     },
   };
 }
-
-export const Analyst = {
-  async login(browserAuth: BrowserAuthFixture) {
-    await browserAuth.loginAsViewer();
-  },
-};
-
-export const LogsSpecialist = {
-  /**
-   * This method can be called in the `beforeAll` hook of a test suite to set up
-   * the necessary role for the Logs Specialist user.
-   *
-   * Once set up, the role can be used by logging in with the `await browserAuth.loginAs(samlAuth.customRoleName)` method in the `beforeEach` hook.
-   * @param samlAuth
-   */
-  async setUp(samlAuth: SamlAuth) {
-    await samlAuth.setCustomRole({
-      kibana: [{ base: [], feature: { logs: ['all'] }, spaces: ['*'] }],
-      elasticsearch: {
-        cluster: ['monitor'],
-      },
-    });
-  },
-
-  async login(browserAuth: BrowserAuthFixture, samlAuth: SamlAuth) {
-    await browserAuth.loginAs(samlAuth.customRoleName);
-  },
-};
