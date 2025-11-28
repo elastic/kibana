@@ -70,7 +70,7 @@ export const SchemaEditorFlyout = ({
   }: {
     isValid: boolean;
     isIgnored: boolean;
-    isExpensiveQueriesError: boolean;
+    isExpensiveQueries: boolean;
   }) => {
     setIsIgnoredField(isIgnored);
     setValidSimulation(isValid);

@@ -26,11 +26,11 @@ interface SamplePreviewTableProps {
   onValidate?: ({
     isValid,
     isIgnored,
-    isExpensiveQueriesError,
+    isExpensiveQueries,
   }: {
     isValid: boolean;
     isIgnored: boolean;
-    isExpensiveQueriesError: boolean;
+    isExpensiveQueries: boolean;
   }) => void;
 }
 
@@ -89,7 +89,7 @@ const SamplePreviewTableContent = ({
           )
             ? true
             : false,
-        isExpensiveQueriesError: isExpensiveQueriesError ?? false,
+        isExpensiveQueries: isExpensiveQueriesError ?? false,
       });
     }
   }, [value, error, onValidate]);
@@ -123,9 +123,9 @@ const SamplePreviewTableContent = ({
   if ((value && value.status === 'failure') || error) {
     const formattedError = error && getFormattedError(error);
 
-    const isExpensiveQueriesError = formattedError?.message.includes('allow_expensive_queries');
+    const isExpensiveQueries = formattedError?.message.includes('allow_expensive_queries');
 
-    if (isExpensiveQueriesError) {
+    if (isExpensiveQueries) {
       return (
         <EuiCallOut
           announceOnMount
