@@ -8,7 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useGetGenerateDiscoverLink } from './use_get_generate_discover_link';
+import { useGetGenerateDiscoverLink } from '.';
 
 jest.mock('../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
