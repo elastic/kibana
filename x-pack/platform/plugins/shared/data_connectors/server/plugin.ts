@@ -12,7 +12,6 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import { registerDataSources } from './data/data_sources';
 import type {
   DataConnectorsServerSetup,
   DataConnectorsServerSetupDependencies,
@@ -25,6 +24,7 @@ import { WorkflowCreator } from './services/workflow_creator';
 import { registerConnectorRoutes } from './routes';
 import { SecretResolver } from './services/secret_resolver';
 import { StackConnectorCreator } from './services/ksc_creator';
+import { getNotionConnectorWithMetadata } from './connector_types/notion';
 
 export class DataConnectorsServerPlugin
   implements
@@ -43,15 +43,31 @@ export class DataConnectorsServerPlugin
     this.logger = context.logger.get();
   }
 
+  /**
+   * Register workplace connectors with extended metadata.
+   * The metadata is stored directly in the actions registry and can be retrieved later.
+   */
+  private registerWorkplaceConnectors(actions: DataConnectorsServerSetupDependencies['actions']) {
+    // Register Notion with extended metadata
+    const notionConnector = getNotionConnectorWithMetadata();
+
+    // TypeScript allows this because ExtendedConnectorType extends SubActionConnectorType
+    // The extra workplaceMetadata property is preserved at runtime
+    actions.registerSubActionConnectorType(notionConnector);
+
+    this.logger.info('Registered Notion connector with workplace metadata');
+  }
+
   setup(
     core: CoreSetup,
     plugins: DataConnectorsServerSetupDependencies
   ): DataConnectorsServerSetup {
     const { savedObjects, uiSettings } = core;
-    const { encryptedSavedObjects, workflowsManagement, dataSourcesRegistry } = plugins;
+    const { encryptedSavedObjects, workflowsManagement, actions } = plugins;
 
-    // Register WorkplaceAI-owned data sources
-    registerDataSources(dataSourcesRegistry);
+    // Register workplace connectors with extended metadata directly with actions plugin
+    // The metadata is preserved in the actions registry and can be accessed later
+    this.registerWorkplaceConnectors(actions);
 
     registerUISettings({ uiSettings });
 

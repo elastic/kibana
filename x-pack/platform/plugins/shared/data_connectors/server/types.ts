@@ -18,10 +18,6 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import type {
-  DataSourcesRegistryPluginSetup,
-  DataSourcesRegistryPluginStart,
-} from '@kbn/data-sources-registry-plugin/server';
 import type { SecretResolverService } from './services/secret_resolver';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
@@ -36,7 +32,6 @@ export interface DataConnectorsServerSetupDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
   actions: ActionsPluginSetup;
-  dataSourcesRegistry: DataSourcesRegistryPluginSetup;
 }
 
 export interface DataConnectorsServerStartDependencies {
@@ -44,5 +39,4 @@ export interface DataConnectorsServerStartDependencies {
   workflowsManagement: WorkflowsServerPluginStart;
   onechat?: OnechatPluginStart;
   actions: ActionsPluginStart;
-  dataSourcesRegistry: DataSourcesRegistryPluginStart;
 }

@@ -28,7 +28,7 @@ export function getNotionConnectorType(): ActionTypeModel<
     actionTypeTitle: CONNECTOR_NAME,
     iconClass: lazy(() => import('./logo')),
     selectMessage: 'Extract information from Notion',
-    getHideInUi: () => true, // This will hide the Notion tile
+    // getHideInUi: () => true, // This will hide the Notion tile
     validateParams: async (
       actionParams: NotionActionParams
     ): Promise<GenericValidationResult<ValidationErrors>> => {
