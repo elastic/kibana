@@ -151,7 +151,7 @@ export const createAgentGraph = ({
 
     if (maxCycleReached && !isHandoverAction(lastAction)) {
       return {
-        actions: [handoverAction('', true)],
+        mainActions: [handoverAction('', true)],
       };
     } else {
       return {};
