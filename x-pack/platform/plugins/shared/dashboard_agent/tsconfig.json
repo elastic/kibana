@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -12,7 +12,11 @@
     "@kbn/onechat-server",
     "@kbn/dashboard-plugin",
     "@kbn/zod",
-    "@kbn/content-management-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/lens-common-2",
+    "@kbn/share-plugin",
   ],
   "exclude": ["target/**/*"]
 }
