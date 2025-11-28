@@ -91,6 +91,7 @@ export const MappingEditor: FC<Props> = ({}) => {
               <EuiFlexGroup gutterSize="m" alignItems="center">
                 <EuiFlexItem>
                   <EuiFieldText
+                    compressed
                     value={name}
                     placeholder={i18n.translate(
                       'xpack.fileUpload.mappingEditor.fieldNamePlaceholder',
