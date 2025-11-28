@@ -11,7 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDocViewerObservabilityTracesOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
-import type { ObservabilityIndexes } from '@kbn/discover-utils/src/data_types/traces/types';
+import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import type { DocumentProfileProvider } from '../../../../../profiles';
 import type { DocViewerExtensionParams, DocViewerExtension } from '../../../../../types';
 
