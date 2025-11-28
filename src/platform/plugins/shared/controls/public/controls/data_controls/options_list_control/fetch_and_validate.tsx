@@ -26,6 +26,7 @@ import type { DataControlStateManager } from '../data_control_manager';
 
 export function fetchAndValidate$({
   api,
+  allowExpensiveQueries$,
   requestSize$,
   runPastTimeout$,
   selectedOptions$,
@@ -38,6 +39,7 @@ export function fetchAndValidate$({
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
     };
+  allowExpensiveQueries$: PublishingSubject<boolean>;
   requestSize$: PublishingSubject<number>;
   runPastTimeout$: PublishingSubject<boolean | undefined>;
   selectedOptions$: PublishingSubject<OptionsListSelection[] | undefined>;
@@ -56,6 +58,7 @@ export function fetchAndValidate$({
     ignoreValidations: api.ignoreValidations$,
     sort: sort$,
     searchTechnique: searchTechnique$,
+    allowExpensiveQueries: allowExpensiveQueries$,
     // cannot use requestSize directly, because we need to be able to reset the size to the default without refetching
     loadMore: api.loadMoreSubject.pipe(
       startWith(null), // start with null so that `combineLatest` subscription fires
@@ -73,6 +76,7 @@ export function fetchAndValidate$({
     switchMap(
       async ([
         {
+          allowExpensiveQueries,
           dataViews,
           field,
           fetchContext,
@@ -111,9 +115,7 @@ export function fetchAndValidate$({
           ignoreValidations,
           ...fetchContext,
           filters: getFetchContextFilters(fetchContext, useGlobalFilters),
-
-          // TODO: get expensive queries setting
-          allowExpensiveQueries: true,
+          allowExpensiveQueries,
         };
 
         const newAbortController = new AbortController();

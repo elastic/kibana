@@ -142,6 +142,21 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           temporaryStateManager.api.setRequestSize(MIN_OPTIONS_LIST_REQUEST_SIZE);
         });
 
+      // we do not want to delay the embeddable creation waiting for this, so do not await promise
+      const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
+      coreServices.http
+        .get<{
+          allowExpensiveQueries: boolean;
+        }>('/internal/controls/getExpensiveQueriesSetting', {
+          version: '1',
+        })
+        .catch(() => {
+          return { allowExpensiveQueries: true }; // default to true on error
+        })
+        .then(({ allowExpensiveQueries }) => {
+          if (!allowExpensiveQueries) allowExpensiveQueries$.next(false);
+        });
+
       /** Fetch the suggestions and perform validation */
       const suggestionLoadError$ = new BehaviorSubject<Error | undefined>(undefined);
       const loadMoreSubject = new Subject<void>();
@@ -154,6 +169,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           parentApi,
           uuid,
         },
+        allowExpensiveQueries$,
         requestSize$: temporaryStateManager.api.requestSize$,
         runPastTimeout$: editorStateManager.api.runPastTimeout$,
         selectedOptions$: selectionsManager.api.selectedOptions$,
@@ -309,21 +325,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
         setSelectedOptions: selectionsManager.api.setSelectedOptions,
       });
-
-      // we do not want to delay the embeddable creation waiting for this, so do not await promise
-      const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
-      coreServices.http
-        .get<{
-          allowExpensiveQueries: boolean;
-        }>('/internal/controls/getExpensiveQueriesSetting', {
-          version: '1',
-        })
-        .catch(() => {
-          return { allowExpensiveQueries: true }; // default to true on error
-        })
-        .then(({ allowExpensiveQueries }) => {
-          if (!allowExpensiveQueries) allowExpensiveQueries$.next(false);
-        });
 
       const componentApi: OptionsListComponentApi = {
         ...api,
