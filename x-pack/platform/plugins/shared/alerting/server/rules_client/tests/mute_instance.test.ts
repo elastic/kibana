@@ -106,7 +106,7 @@ describe('muteInstance()', () => {
       references: [],
     });
 
-     await rulesClient.muteInstance({
+    await rulesClient.muteInstance({
       params: { alertId: '1', alertInstanceId: '2' },
       query: { validateAlertsExistence: false },
     });
@@ -146,12 +146,12 @@ describe('muteInstance()', () => {
       },
       references: [],
     });
-    
+
     await rulesClient.muteInstance({
       params: { alertId: '1', alertInstanceId: '2' },
       query: { validateAlertsExistence: false },
     });
-    
+
     expect(alertsService.muteAlertInstance).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
@@ -179,7 +179,6 @@ describe('muteInstance()', () => {
     });
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(alertsService.muteAlertInstance).not.toHaveBeenCalled();
-
   });
 
   describe('authorization', () => {

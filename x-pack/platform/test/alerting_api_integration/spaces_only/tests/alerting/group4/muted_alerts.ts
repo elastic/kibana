@@ -144,7 +144,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const mutedRule = rules.data.find((rule: { id: string }) => rule.id === createdRule1);
       expect(mutedRule.muted_alert_ids).to.contain(alertFromRule1._source[ALERT_INSTANCE_ID]);
     });
-    
+
     it('should add a nonexistent alert instance id to muted_alert_ids if validation is false', async () => {
       const createdRule1 = await createRule();
 

@@ -520,7 +520,7 @@ export class AlertsService implements IAlertsService {
       ...opts,
     });
   }
-  
+
   public async isExistingAlert(params: IsExistingAlertParams): Promise<boolean> {
     return isExistingAlert({
       logger: this.options.logger,
