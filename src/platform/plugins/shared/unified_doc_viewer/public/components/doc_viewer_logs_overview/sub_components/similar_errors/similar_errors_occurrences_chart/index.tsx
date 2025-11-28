@@ -17,9 +17,9 @@ import {
 } from '@kbn/lens-embeddable-utils/config_builder';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
 import { EuiLoadingChart, EuiFlexGroup, EuiCallOut, EuiFlexItem } from '@elastic/eui';
-import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
-import { getUnifiedDocViewerServices } from '../../../../plugin';
-import { ContentFrameworkChart } from '../../../content_framework/chart';
+import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
+import { getUnifiedDocViewerServices } from '../../../../../plugin';
+import { ContentFrameworkChart } from '../../../../content_framework/chart';
 
 const chartTitle = i18n.translate(
   'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.occurrences.title',
@@ -68,7 +68,7 @@ const defaultLensConfig: Omit<LensXYConfig, 'title' | 'dataset'> = {
 };
 
 export interface SimilarErrorsOccurrencesChartProps {
-  baseEsqlQuery: ReturnType<typeof import('./get_esql_query').getEsqlQuery>;
+  baseEsqlQuery: ReturnType<typeof import('../get_esql_query').getEsqlQuery>;
 }
 
 export function SimilarErrorsOccurrencesChart({

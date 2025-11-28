@@ -9,10 +9,10 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { SimilarErrorsOccurrencesChart } from './similar_errors_occurrences_chart';
+import { SimilarErrorsOccurrencesChart } from '.';
 import { where } from '@kbn/esql-composer';
-import { setUnifiedDocViewerServices } from '../../../../plugin';
-import { mockUnifiedDocViewerServices } from '../../../../__mocks__';
+import { setUnifiedDocViewerServices } from '../../../../../plugin';
+import { mockUnifiedDocViewerServices } from '../../../../../__mocks__';
 import { merge } from 'lodash';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 
@@ -20,11 +20,11 @@ const mockUseDataSourcesContext = jest.fn(() => ({
   indexes: { logs: 'logs-*', apm: {} },
 }));
 
-jest.mock('../../../../hooks/use_data_sources', () => ({
+jest.mock('../../../../../hooks/use_data_sources', () => ({
   useDataSourcesContext: () => mockUseDataSourcesContext(),
 }));
 
-jest.mock('../../../content_framework/chart', () => ({
+jest.mock('../../../../content_framework/chart', () => ({
   ContentFrameworkChart: ({ children, title, ...rest }: any) => (
     <div data-test-subj="ContentFrameworkChart" {...rest}>
       <h3>{title}</h3>
