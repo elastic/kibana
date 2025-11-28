@@ -9,7 +9,7 @@
 
 import type { RoleApiCredentials } from '@kbn/scout';
 import { apiTest, expect } from '@kbn/scout';
-import { APPROVED_STEP_DEFINITIONS } from './approved_step_definitions';
+import { APPROVED_STEP_DEFINITIONS } from '../fixtures/approved_step_definitions';
 
 apiTest.describe(
   'Workflows Extensions - Custom Step Definitions Approval',

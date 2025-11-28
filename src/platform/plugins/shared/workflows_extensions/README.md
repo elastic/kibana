@@ -341,7 +341,7 @@ All custom step definitions must be approved by the workflows-eng team before be
 
 3. **Approval Required**: The test compares registered steps against the approved list in:
    ```
-   test/scout/api/tests/approved_step_definitions.ts
+   test/scout/api/fixtures/approved_step_definitions.ts
    ```
 
 ### Adding a New Step
@@ -355,7 +355,7 @@ When registering a new step, you must:
      --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts
    ```
 
-2. **Add the step to the approved list** in `test/scout/api/tests/approved_step_definitions.ts`:
+2. **Add the step to the approved list** in `test/scout/api/fixtures/approved_step_definitions.ts`:
 
    ```typescript
    export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
