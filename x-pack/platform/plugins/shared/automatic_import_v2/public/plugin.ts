@@ -17,7 +17,7 @@ import type {
 export class AutomaticImportPlugin
   implements Plugin<AutomaticImportPluginSetup, AutomaticImportPluginStart>
 {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(_: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): AutomaticImportPluginSetup {
     return {};
