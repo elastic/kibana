@@ -6,16 +6,17 @@
  */
 
 export type {
-  CreateAutoImportIntegrationRequestBody,
   CreateAutoImportIntegrationResponse,
   DeleteAutoImportIntegrationRequestParams,
-  GetAutoImportIntegrationRequestParams,
   GetAutoImportIntegrationResponse,
   GetAutoImportIntegrationsResponse,
   UpdateAutoImportIntegrationRequestBody,
   UpdateAutoImportIntegrationRequestParams,
 } from './model/api/integrations/integration.gen';
 
-export type { DataStreamSamples } from './model/index_samples.gen';
+export {
+  CreateAutoImportIntegrationRequestBody,
+  GetAutoImportIntegrationRequestParams,
+} from './model/api/integrations/integration.gen';
 
-export type { Integration } from './model/common_attributes.gen';
+export type { Integration, DataStream, InputType } from './model/common_attributes.gen';

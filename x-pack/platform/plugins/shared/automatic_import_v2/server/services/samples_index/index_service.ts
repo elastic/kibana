@@ -7,13 +7,21 @@
 
 import type { ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
-import type { DataStreamSamples } from '../../../common';
 import type {
   AutomaticImportSamplesIndexAdapter,
   AutomaticImportSamplesProperties,
 } from './storage';
 import { createIndexAdapter } from './storage';
-
+export interface AddSamplesToDataStreamParams {
+  integrationId: string;
+  dataStreamId: string;
+  rawSamples: string[];
+  originalSource: {
+    sourceType: 'file' | 'index';
+    sourceValue: string;
+  };
+  authenticatedUser: AuthenticatedUser;
+}
 export class AutomaticImportSamplesIndexService {
   private logger: Logger;
   private samplesIndexAdapter: AutomaticImportSamplesIndexAdapter | null = null;
@@ -35,21 +43,19 @@ export class AutomaticImportSamplesIndexService {
   /**
    * Creates samples documents in the samples index.
    */
-  public async addSamplesToDataStream(
-    currentAuthenticatedUser: AuthenticatedUser,
-    dataStream: DataStreamSamples
-  ) {
+  public async addSamplesToDataStream(params: AddSamplesToDataStreamParams) {
+    const { integrationId, dataStreamId, rawSamples, originalSource, authenticatedUser } = params;
     if (!this.samplesIndexAdapter) {
       throw new Error('Samples index adapter not initialized');
     }
 
-    const operations = dataStream.logData.map((logData: string) => {
+    const operations = rawSamples.map((sample: string) => {
       const document: Omit<AutomaticImportSamplesProperties, '_id'> = {
-        integration_id: dataStream.integrationId,
-        data_stream_id: dataStream.dataStreamId,
-        log_data: logData,
-        created_by: currentAuthenticatedUser.username,
-        original_filename: dataStream.originalFilename,
+        integration_id: integrationId,
+        data_stream_id: dataStreamId,
+        log_data: sample,
+        created_by: authenticatedUser.username,
+        original_filename: originalSource.sourceValue,
         metadata: {
           created_at: new Date().toISOString(),
         },

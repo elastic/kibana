@@ -57,7 +57,13 @@ export class RequestContextFactory implements IRequestContextFactory {
       logger: this.logger,
       getServerBasePath: () => core.http.basePath.serverBasePath,
       getSpaceId,
-      getCurrentUser: async () => coreContext.security.authc.getCurrentUser(),
+      getCurrentUser: async () => {
+        const user = await coreContext.security.authc.getCurrentUser();
+        if (!user) {
+          throw new Error('User not authenticated');
+        }
+        return user;
+      },
       automaticImportService: this.options.automaticImportService,
       inference: startPlugins.inference,
       savedObjectsClient,

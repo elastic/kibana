@@ -203,7 +203,7 @@ describe('TaskManagerService Integration Tests', () => {
           sample_count: 0,
           created_at: new Date().toISOString(),
           version: '1.0.0',
-          input_type: INPUT_TYPES.filestream,
+          input_type: [INPUT_TYPES.filestream],
         },
         result: {},
       };

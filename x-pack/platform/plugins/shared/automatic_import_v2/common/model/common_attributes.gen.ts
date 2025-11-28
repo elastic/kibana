@@ -51,19 +51,34 @@ export const DataStream = z.object({
   /**
    * The title of the data stream
    */
-  title: NonEmptyString.optional(),
+  title: NonEmptyString,
   /**
    * The description of the data stream
    */
-  description: NonEmptyString.optional(),
+  description: NonEmptyString,
   /**
    * The input types of the data stream
    */
-  inputTypes: z.array(InputType).optional(),
+  inputTypes: z.array(InputType),
   /**
    * The raw samples of the data stream
    */
-  rawSamples: z.array(z.string()).optional(),
+  rawSamples: z.array(z.string()),
+  /**
+   * The original filename of the samples or the data stream they are picked up from.
+   */
+  originalSource: z
+    .object({
+      /**
+       * The type of the original source
+       */
+      sourceType: z.enum(['index', 'file']),
+      /**
+       * The value of the original source (e.g. index name or filename)
+       */
+      sourceValue: NonEmptyString,
+    })
+    .strict(),
 });
 
 /**
@@ -72,10 +87,6 @@ export const DataStream = z.object({
 export type Integration = z.infer<typeof Integration>;
 export const Integration = z
   .object({
-    /**
-     * The integration id
-     */
-    integration_id: NonEmptyString,
     /**
      * The data streams of the integration
      */
@@ -87,10 +98,76 @@ export const Integration = z
     /**
      * The description of the integration
      */
-    description: NonEmptyString.optional(),
+    description: NonEmptyString,
     /**
      * The title of the integration
      */
-    title: NonEmptyString.optional(),
+    title: NonEmptyString,
   })
   .strict();
+
+/**
+ * The status of the task
+ */
+export type TaskStatus = z.infer<typeof TaskStatus>;
+export const TaskStatus = z.enum(['pending', 'processing', 'completed', 'failed', 'cancelled']);
+export type TaskStatusEnum = typeof TaskStatus.enum;
+export const TaskStatusEnum = TaskStatus.enum;
+
+/**
+ * The data stream response object with its settings.
+ */
+export type DataStreamResponse = z.infer<typeof DataStreamResponse>;
+export const DataStreamResponse = z.object({
+  /**
+   * The ID of the data stream
+   */
+  dataStreamId: NonEmptyString,
+  /**
+   * The title of the data stream
+   */
+  title: NonEmptyString,
+  /**
+   * The description of the data stream
+   */
+  description: NonEmptyString,
+  /**
+   * The input types of the data stream
+   */
+  inputTypes: z.array(InputType),
+  /**
+   * The status of the data stream
+   */
+  status: TaskStatus,
+});
+
+/**
+ * The integration response object with its settings.
+ */
+export type IntegrationResponse = z.infer<typeof IntegrationResponse>;
+export const IntegrationResponse = z.object({
+  /**
+   * The ID of the integration
+   */
+  integrationId: NonEmptyString,
+  /**
+   * The title of the integration
+   */
+  title: NonEmptyString,
+  /**
+   * The logo of the integration
+   */
+  logo: z.string().optional(),
+  /**
+   * The description of the integration
+   */
+  description: NonEmptyString,
+  /**
+   * The data streams of the integration
+   */
+  dataStreams: z.array(DataStreamResponse),
+  /**
+   * The status of the integration
+   */
+  status: TaskStatus,
+});

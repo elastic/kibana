@@ -1,0 +1,194 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { IRouter, Logger } from '@kbn/core/server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { AutomaticImportV2PluginRequestHandlerContext } from '../types';
+import type {
+  CreateAutoImportIntegrationResponse,
+  GetAllAutoImportIntegrationsResponse,
+  GetAutoImportIntegrationResponse,
+} from '../../common';
+import {
+  CreateAutoImportIntegrationRequestBody,
+  GetAutoImportIntegrationRequestParams,
+} from '../../common';
+import { buildAutomaticImportResponse } from './utils';
+import { IntegrationParams, DataStreamParams } from './types';
+import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
+import { IntegrationResponse } from '@kbn/automatic-import-v2-plugin/common/model/common_attributes.gen';
+
+export const registerIntegrationRoutes = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) => {
+  getAllIntegrationsRoute(router, logger);
+  getIntegrationByIdRoute(router, logger);
+  createIntegrationRoute(router, logger);
+};
+
+const getAllIntegrationsRoute = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) =>
+  router.versioned
+    .get({
+      access: 'internal',
+      path: '/api/automatic_import_v2/integrations',
+      security: {
+        authz: {
+          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.READ}`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      async (context, _, response) => {
+        try {
+          const automaticImportv2 = await context.automaticImportv2;
+          const automaticImportService = automaticImportv2.automaticImportService;
+          const integrations = await automaticImportService.getAllIntegrations();
+
+          const body: GetAllAutoImportIntegrationsResponse = {
+            integrationResponse: integrationResponses,
+          };
+          return response.ok({ body });
+        } catch (err) {
+          logger.error(`registerIntegrationRoutes: Caught error:`, err);
+          const automaticImportResponse = buildAutomaticImportResponse(response);
+          return automaticImportResponse.error({
+            statusCode: 500,
+            body: err,
+          });
+        }
+      }
+    );
+
+const getIntegrationByIdRoute = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) =>
+  router.versioned
+    .get({
+      access: 'internal',
+      path: '/api/automatic_import_v2/integrations/{integration_id}',
+      security: {
+        authz: {
+          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.READ}`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(GetAutoImportIntegrationRequestParams),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const automaticImportv2 = await context.automaticImportv2;
+          const automaticImportService = automaticImportv2.automaticImportService;
+          const { integration_id: integrationId } = request.params;
+          const integration = await automaticImportService.getIntegrationById(integrationId);
+          const body: GetAutoImportIntegrationResponse = { integration };
+          return response.ok({ body });
+        } catch (err) {
+          logger.error(`getIntegrationByIdRoute: Caught error:`, err);
+          const automaticImportResponse = buildAutomaticImportResponse(response);
+          return automaticImportResponse.error({
+            statusCode: 500,
+            body: err,
+          });
+        }
+      }
+    );
+
+const createIntegrationRoute = (
+  router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
+  logger: Logger
+) =>
+  router.versioned
+    .put({
+      access: 'internal',
+      path: '/api/automatic_import_v2/integrations',
+      security: {
+        authz: {
+          requiredPrivileges: [`${AUTOMATIC_IMPORT_API_PRIVILEGES.MANAGE}`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(CreateAutoImportIntegrationRequestBody),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const automaticImportv2 = await context.automaticImportv2;
+          const automaticImportService = automaticImportv2.automaticImportService;
+          const integrationRequestBody = request.body;
+          const authenticatedUser = await automaticImportv2.getCurrentUser();
+          const integrationId = createId(integrationRequestBody.title);
+
+          const integrationParams: IntegrationParams = {
+            integrationId,
+            title: integrationRequestBody.title,
+            logo: integrationRequestBody.logo,
+            description: integrationRequestBody.description,
+          };
+
+          await automaticImportService.createIntegration({ authenticatedUser, integrationParams });
+
+          if (integrationRequestBody.dataStreams) {
+            const dataStreamsParams: DataStreamParams[] = integrationRequestBody.dataStreams.map(
+              (dataStream) => ({
+                ...dataStream,
+                integrationId,
+                dataStreamId: createId(dataStream.title),
+                metadata: { createdAt: new Date().toISOString() },
+              })
+            );
+            await Promise.all(
+              dataStreamsParams.map((dataStreamParams) =>
+                automaticImportService.createDataStream({
+                  authenticatedUser,
+                  dataStreamParams,
+                })
+              )
+            );
+          }
+          const body: CreateAutoImportIntegrationResponse = {
+            integration_id: integrationId,
+          };
+          return response.ok({ body });
+        } catch (err) {
+          logger.error(`createIntegrationRoute: Caught error:`, err);
+          const automaticImportResponse = buildAutomaticImportResponse(response);
+          return automaticImportResponse.error({
+            statusCode: 500,
+            body: err,
+          });
+        }
+      }
+    );
+
+function createId(title: string | undefined): string {
+  if (!title || title.trim() === '') {
+    throw new Error('Title is required to generate an id');
+  }
+  return title.toLowerCase().replace(/ /g, '_');
+}

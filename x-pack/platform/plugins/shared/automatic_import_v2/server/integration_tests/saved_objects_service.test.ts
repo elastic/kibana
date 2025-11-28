@@ -637,7 +637,7 @@ describe('AutomaticImportSavedObjectService', () => {
             job_type: 'import',
             status: TASK_STATUSES.completed,
           },
-          metadata: { sample_count: 200, input_type: INPUT_TYPES.awsCloudwatch },
+          metadata: { sample_count: 200, input_type: [INPUT_TYPES.awsCloudwatch] },
           result: { ingest_pipeline: 'test-pipeline' },
         });
 
@@ -668,7 +668,7 @@ describe('AutomaticImportSavedObjectService', () => {
             job_type: 'import',
             status: TASK_STATUSES.pending,
           },
-          metadata: { sample_count: 100, input_type: INPUT_TYPES.awsCloudwatch },
+          metadata: { sample_count: 100, input_type: [INPUT_TYPES.awsCloudwatch] },
           result: {},
         });
 
