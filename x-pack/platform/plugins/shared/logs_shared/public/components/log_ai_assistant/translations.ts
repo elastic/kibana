@@ -19,3 +19,10 @@ export const similarLogMessagesTitle = i18n.translate(
     defaultMessage: 'How do I find similar log messages?',
   }
 );
+
+export const openConversationButtonLabel = i18n.translate(
+  'xpack.logsShared.logFlyout.openConversationButtonLabel',
+  {
+    defaultMessage: 'Explain this log message',
+  }
+);

@@ -71,6 +71,9 @@ export function openConversationFlyout(
       type: 'push',
       hideCloseButton: true,
       'aria-labelledby': ariaLabelledBy,
+      style: {
+        zIndex: 10000,
+      },
     }
   );
 

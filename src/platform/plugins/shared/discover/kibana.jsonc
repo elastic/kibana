@@ -31,7 +31,8 @@
       "expressions",
       "unifiedDocViewer",
       "unifiedSearch",
-      "contentManagement"
+      "contentManagement",
+      "onechat"
     ],
     "optionalPlugins": [
       "dataVisualizer",
