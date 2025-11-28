@@ -28,7 +28,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
-import { selectTabRuntimeState } from '../state_management/redux';
+import { internalStateActions, selectTabRuntimeState } from '../state_management/redux';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 jest.mock('./fetch_documents', () => ({
@@ -67,9 +67,7 @@ describe('test fetchAll', () => {
       totalHits$: new BehaviorSubject<DataTotalHitsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
     };
     searchSource = savedSearchMock.searchSource.createChild();
-    const { appState, internalState, runtimeStateManager, getCurrentTab } = getDiscoverStateMock(
-      {}
-    );
+    const { internalState, runtimeStateManager, getCurrentTab } = getDiscoverStateMock({});
     const { scopedProfilesManager$, scopedEbtManager$ } = selectTabRuntimeState(
       runtimeStateManager,
       getCurrentTab().id
@@ -79,7 +77,6 @@ describe('test fetchAll', () => {
       reset: false,
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
-      appStateContainer: appState,
       internalState,
       scopedProfilesManager: scopedProfilesManager$.getValue(),
       scopedEbtManager: scopedEbtManager$.getValue(),
@@ -253,7 +250,12 @@ describe('test fetchAll', () => {
       esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
     });
     const query = { esql: 'from foo' };
-    deps.appStateContainer.update({ query });
+    deps.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: deps.getCurrentTab().id,
+        appState: { query },
+      })
+    );
     fetchAll(deps);
     await waitForNextTick();
 
@@ -354,7 +356,12 @@ describe('test fetchAll', () => {
       const collect = subjectCollector(subjects.documents$);
       mockfetchEsql.mockRejectedValue({ msg: 'The query was aborted' });
       const query = { esql: 'from foo' };
-      deps.appStateContainer.update({ query });
+      deps.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: deps.getCurrentTab().id,
+          appState: { query },
+        })
+      );
       fetchAll(deps);
       deps.abortController.abort();
       await waitForNextTick();
