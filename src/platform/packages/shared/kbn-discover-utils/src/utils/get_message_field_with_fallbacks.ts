@@ -24,5 +24,6 @@ export const getMessageFieldWithFallbacks = (
   doc: Record<string, unknown> | LogDocumentOverview,
   { includeFormattedValue = false }: { includeFormattedValue?: boolean } = {}
 ) => {
-  return getLogFieldWithFallback(doc, rankingOrder, includeFormattedValue);
+  const result = getLogFieldWithFallback(doc, rankingOrder, includeFormattedValue);
+  return result.field ? { ...result, value: String(result.value) } : result;
 };
