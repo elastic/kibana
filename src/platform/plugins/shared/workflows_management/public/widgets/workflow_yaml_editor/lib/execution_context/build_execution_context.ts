@@ -7,29 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+
+type JsonPrimitive = string | number | boolean | null;
+type JsonValue = JsonPrimitive | JsonObject | JsonArray;
+interface JsonObject {
+  [key: string]: JsonValue;
+}
+type JsonArray = JsonValue[];
 
 /**
  * Execution context structure that mirrors the server-side StepContext
  * Used for template expression hover to show actual runtime values
  */
 export interface ExecutionContext {
-  inputs?: Record<string, any>;
+  inputs?: JsonObject;
   steps: Record<string, StepExecutionData>;
-  workflow?: Record<string, any>;
-  execution?: Record<string, any>;
-  event?: Record<string, any>;
-  consts?: Record<string, any>;
+  workflow?: JsonObject;
+  execution?: JsonObject;
+  event?: JsonObject;
+  consts?: JsonObject;
 }
 
 export interface StepExecutionData {
-  output?: any;
+  output?: JsonValue;
   error?: string | null;
-  input?: any;
+  input?: JsonValue;
   status?: string;
-  state?: Record<string, any>; // For foreach steps: { items, item, index, total }
+  state?: JsonObject; // For foreach steps: { items, item, index, total }
 }
 
 /**
@@ -38,7 +43,7 @@ export interface StepExecutionData {
  */
 export function buildExecutionContext(
   stepExecutions: WorkflowStepExecutionDto[] | undefined,
-  executionContextData?: Record<string, any>
+  executionContextData?: Record<string, unknown>
 ): ExecutionContext | null {
   if (!stepExecutions || stepExecutions.length === 0) {
     return null;
@@ -49,11 +54,11 @@ export function buildExecutionContext(
 
   for (const stepExecution of stepExecutions) {
     steps[stepExecution.stepId] = {
-      output: stepExecution.output,
+      output: stepExecution.output as JsonValue | undefined,
       error: stepExecution.error,
-      input: stepExecution.input,
+      input: stepExecution.input as JsonValue | undefined,
       status: stepExecution.status,
-      state: stepExecution.state as Record<string, any> | undefined,
+      state: stepExecution.state as JsonObject | undefined,
     };
   }
 
@@ -65,23 +70,23 @@ export function buildExecutionContext(
   // Add execution context data if available
   if (executionContextData) {
     if (executionContextData.inputs) {
-      context.inputs = executionContextData.inputs as Record<string, any>;
+      context.inputs = executionContextData.inputs as JsonObject;
     }
 
     if (executionContextData.workflow) {
-      context.workflow = executionContextData.workflow as Record<string, any>;
+      context.workflow = executionContextData.workflow as JsonObject;
     }
 
     if (executionContextData.execution) {
-      context.execution = executionContextData.execution as Record<string, any>;
+      context.execution = executionContextData.execution as JsonObject;
     }
 
     if (executionContextData.event) {
-      context.event = executionContextData.event as Record<string, any>;
+      context.event = executionContextData.event as JsonObject;
     }
 
     if (executionContextData.consts) {
-      context.consts = executionContextData.consts as Record<string, any>;
+      context.consts = executionContextData.consts as JsonObject;
     }
   }
 

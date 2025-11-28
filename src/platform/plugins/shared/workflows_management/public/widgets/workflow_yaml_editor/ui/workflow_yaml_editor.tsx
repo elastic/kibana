@@ -73,7 +73,6 @@ import {
   registerMonacoConnectorHandler,
   registerUnifiedHoverProvider,
 } from '../lib/monaco_providers';
-import { registerTemplateExpressionHoverProvider } from '../lib/monaco_providers/template_expression_hover_provider';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
@@ -344,19 +343,10 @@ export const WorkflowYAMLEditor = ({
         const genericHandler = new GenericMonacoConnectorHandler();
         registerMonacoConnectorHandler(genericHandler);
 
-        // Register template expression hover provider FIRST (higher priority)
-        // This ensures it handles {{ }} expressions before the unified provider
-        const templateHoverDisposable = registerTemplateExpressionHoverProvider(
-          {
-            getExecutionContext: () => executionContextRef.current,
-          },
-          editor
-        );
-        disposablesRef.current.push(templateHoverDisposable);
-
-        // Create unified providers
+        // Register the unified hover provider with template expression support
         const providerConfig = {
           getYamlDocument: () => yamlDocumentRef.current || null,
+          getExecutionContext: () => executionContextRef.current,
           options: {
             http,
             notifications,
@@ -365,8 +355,7 @@ export const WorkflowYAMLEditor = ({
           },
         };
 
-        // Register the unified hover provider for API documentation and other content
-        const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
+        const hoverDisposable = registerUnifiedHoverProvider(providerConfig, editor);
         disposablesRef.current.push(hoverDisposable);
       }
     },

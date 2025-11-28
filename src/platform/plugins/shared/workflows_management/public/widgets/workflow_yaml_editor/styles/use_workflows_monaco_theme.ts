@@ -36,6 +36,8 @@ export function useWorkflowsMonacoTheme() {
         'editorHoverWidget.foreground': euiTheme.colors.textParagraph,
         'editorHoverWidget.background': euiTheme.colors.backgroundBasePlain,
         'editorHoverWidget.border': euiTheme.colors.borderBaseSubdued,
+        // Disable hover highlight by default - we use custom decorations for template expressions only
+        'editor.hoverHighlightBackground': '#00000000',
         'editorLineNumber.foreground': euiTheme.colors.textPrimary,
         'editorLineNumber.activeForeground': euiTheme.colors.textSubdued,
         'editorIndentGuide.background1': euiTheme.colors.backgroundLightText,

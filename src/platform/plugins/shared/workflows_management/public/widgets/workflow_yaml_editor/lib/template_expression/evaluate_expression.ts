@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { Liquid } from 'liquidjs';
 import { resolvePathValue } from './resolve_path_value';
 import type { ExecutionContext } from '../execution_context/build_execution_context';
+
+type JsonPrimitive = string | number | boolean | null;
+type JsonValue = JsonPrimitive | JsonObject | JsonArray;
+interface JsonObject {
+  [key: string]: JsonValue;
+}
+type JsonArray = JsonValue[];
 
 // Create a liquid engine instance with the same configuration as the server
 const liquidEngine = new Liquid({
@@ -45,7 +50,7 @@ export interface EvaluateExpressionOptions {
  * This handles both simple paths and expressions with filters like "| json"
  * Also handles foreach.item by finding the current foreach step context
  */
-export function evaluateExpression(options: EvaluateExpressionOptions): any {
+export function evaluateExpression(options: EvaluateExpressionOptions): JsonValue | undefined {
   const { expression, context, currentStepId } = options;
   try {
     // Build enhanced context with foreach if needed
@@ -54,7 +59,7 @@ export function evaluateExpression(options: EvaluateExpressionOptions): any {
     // Use LiquidJS to evaluate the expression
     // This handles filters automatically (e.g., "steps.search.output | json")
     const result = liquidEngine.evalValueSync(expression, enhancedContext);
-    return result;
+    return result as JsonValue;
   } catch (error) {
     // If liquid evaluation fails, try simple path resolution as fallback
     return fallbackPathResolution(expression, context);
@@ -69,8 +74,8 @@ export function evaluateExpression(options: EvaluateExpressionOptions): any {
 function buildEnhancedContext(
   context: ExecutionContext,
   _currentStepId?: string
-): Record<string, any> {
-  const enhancedContext: Record<string, any> = { ...context };
+): JsonObject & ExecutionContext {
+  const enhancedContext: JsonObject & ExecutionContext = { ...context };
 
   // Always try to find foreach context (not dependent on current step ID)
   const foreachContext = findForeachContext(context);
@@ -87,16 +92,16 @@ function buildEnhancedContext(
  */
 function findForeachContext(
   context: ExecutionContext
-): { item: any; index: number; total: number; items: any[] } | null {
+): (JsonObject & { item: JsonValue; index: number; total: number; items: JsonArray }) | null {
   // Look through all steps to find foreach steps
   for (const [, stepData] of Object.entries(context.steps)) {
     // Check if this step has foreach state (items array)
     if (stepData.state && 'items' in stepData.state && Array.isArray(stepData.state.items)) {
       // This is a foreach step
-      const items = stepData.state.items as any[];
+      const items = stepData.state.items as JsonArray;
       // For simplicity, use the first item (as requested by user)
       return {
-        item: items.length > 0 ? items[0] : undefined,
+        item: items.length > 0 ? items[0] : null,
         index: 0,
         total: items.length,
         items,
@@ -110,7 +115,10 @@ function findForeachContext(
  * Fallback path resolution without filters
  * Used when LiquidJS evaluation fails
  */
-function fallbackPathResolution(expression: string, context: ExecutionContext): any {
+function fallbackPathResolution(
+  expression: string,
+  context: ExecutionContext
+): JsonValue | undefined {
   // Remove any filters for fallback
   const pipeIndex = expression.indexOf('|');
   const variablePath =
@@ -119,5 +127,5 @@ function fallbackPathResolution(expression: string, context: ExecutionContext): 
   // Parse path into segments
   const pathSegments = variablePath.split('.').filter(Boolean);
 
-  return resolvePathValue(context, pathSegments);
+  return resolvePathValue(context as unknown as JsonObject, pathSegments);
 }

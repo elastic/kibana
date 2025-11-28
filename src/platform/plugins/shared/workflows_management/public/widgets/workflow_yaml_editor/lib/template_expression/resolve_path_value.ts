@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+type JsonPrimitive = string | number | boolean | null;
+type JsonValue = JsonPrimitive | JsonObject | JsonArray;
+interface JsonObject {
+  [key: string]: JsonValue;
+}
+type JsonArray = JsonValue[];
 
 /**
  * Resolve a value from an object using a path array
  * e.g., resolvePath({ steps: { stepA: { output: { bla: 'value' } } } }, ['steps', 'stepA', 'output', 'bla'])
  * returns 'value'
  */
-export function resolvePathValue(context: Record<string, any>, path: string[]): any {
+export function resolvePathValue(context: JsonObject, path: string[]): JsonValue | undefined {
   if (path.length === 0) {
     return context;
   }
 
-  let current: any = context;
+  let current: JsonValue = context;
 
   for (const segment of path) {
     if (current === null || current === undefined) {
@@ -30,7 +35,15 @@ export function resolvePathValue(context: Record<string, any>, path: string[]): 
       return undefined;
     }
 
-    current = current[segment];
+    if (Array.isArray(current)) {
+      const index = parseInt(segment, 10);
+      if (isNaN(index) || index < 0 || index >= current.length) {
+        return undefined;
+      }
+      current = current[index];
+    } else {
+      current = current[segment];
+    }
   }
 
   return current;
@@ -41,14 +54,14 @@ export function resolvePathValue(context: Record<string, any>, path: string[]): 
  * Limits depth and number of properties to prevent huge tooltips
  */
 export function truncateForDisplay(
-  value: any,
+  value: JsonValue,
   options: {
     maxDepth?: number;
     maxProperties?: number;
     maxArrayItems?: number;
     currentDepth?: number;
   } = {}
-): any {
+): JsonValue | string {
   const { maxDepth = 5, maxProperties = 15, maxArrayItems = 5, currentDepth = 0 } = options;
 
   // Max depth reached
@@ -70,7 +83,7 @@ export function truncateForDisplay(
 
   // Array
   if (Array.isArray(value)) {
-    const truncated = value.slice(0, maxArrayItems).map((item) =>
+    const truncated: Array<JsonValue | string> = value.slice(0, maxArrayItems).map((item) =>
       truncateForDisplay(item, {
         maxDepth,
         maxProperties,
@@ -88,7 +101,7 @@ export function truncateForDisplay(
 
   // Object
   const keys = Object.keys(value);
-  const truncatedObj: Record<string, any> = {};
+  const truncatedObj: JsonObject = {};
   const keysToShow = keys.slice(0, maxProperties);
 
   for (const key of keysToShow) {
@@ -110,7 +123,7 @@ export function truncateForDisplay(
 /**
  * Format value as JSON string for display
  */
-export function formatValueAsJson(value: any, truncate: boolean = true): string {
+export function formatValueAsJson(value: JsonValue, truncate: boolean = true): string {
   const displayValue = truncate ? truncateForDisplay(value) : value;
 
   try {
