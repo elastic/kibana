@@ -56,6 +56,7 @@ import { createActionEventLogRecordObject } from './create_action_event_log_reco
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
+import { AxiosInstance } from 'axios';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -99,6 +100,12 @@ type ExecuteHelperOptions<Source = unknown> = Omit<ExecuteOptions<Source>, 'requ
   request?: KibanaRequest;
   services: Services | UnsecuredServices;
   spaceId?: string;
+};
+
+type GetAxiosInstanceParams = {
+  actionId: string;
+  request: KibanaRequest;
+  getAxiosInstanceWithAuth: (validatedSecrets: Record<string, unknown>) => Promise<AxiosInstance>;
 };
 
 type UnsecuredExecuteOptions<Source = unknown> = Pick<
@@ -192,6 +199,45 @@ export class ActionExecutor {
       spaceId,
       taskInfo,
     });
+  }
+
+  public async getAxiosInstance({
+    actionId,
+    request,
+    getAxiosInstanceWithAuth,
+  }: GetAxiosInstanceParams): Promise<AxiosInstance> {
+    if (!this.isInitialized) {
+      throw new Error('ActionExecutor not initialized');
+    }
+
+    const { spaces, actionTypeRegistry } = this.actionExecutorContext!;
+    const spaceId = spaces && spaces.getSpaceId(request);
+    const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
+
+    const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
+
+    const { actionTypeId, secrets } = actionInfo;
+
+    if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
+      this.actionInfo = actionInfo;
+    }
+
+    const actionType = actionTypeRegistry.get(actionTypeId);
+    const configurationUtilities = actionTypeRegistry.getUtils();
+
+    let validatedSecrets;
+    try {
+      validatedSecrets = validateSecrets(actionType, secrets, { configurationUtilities });
+    } catch (err) {
+      throw new ActionExecutionError(err.message, ActionExecutionErrorReason.Validation, {
+        actionId,
+        status: 'error',
+        message: err.message,
+        errorSource: TaskErrorSource.FRAMEWORK,
+      });
+    }
+
+    return await getAxiosInstanceWithAuth(validatedSecrets);
   }
 
   public async executeUnsecured({

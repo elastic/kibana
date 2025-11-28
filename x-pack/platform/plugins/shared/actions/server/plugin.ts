@@ -378,15 +378,6 @@ export class ActionsPlugin
       usageCounter: this.usageCounter,
     });
 
-    const getAxiosInstanceFn = getAxiosInstanceWithAuth({
-      authTypeRegistry: this.authTypeRegistry!,
-      configurationUtilities: actionsConfigUtils,
-      logger: this.logger,
-    });
-    const getAxiosInstanceWithAuthHelper = async (validatedSecrets: Record<string, unknown>) => {
-      return await getAxiosInstanceFn(validatedSecrets);
-    };
-
     return {
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
@@ -407,7 +398,7 @@ export class ActionsPlugin
       ) => {
         subActionFramework.registerConnector(connector);
       },
-      getAxiosInstanceWithAuth: getAxiosInstanceWithAuthHelper,
+      getAxiosInstanceWithAuth: this.getAxiosInstanceWithAuthHelper(actionsConfigUtils),
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(
           (inMemoryConnector) =>
@@ -518,6 +509,7 @@ export class ActionsPlugin
         async getEventLogClient() {
           return plugins.eventLog.getClient(request);
         },
+        getAxiosInstanceWithAuth: this.getAxiosInstanceWithAuthHelper(actionsConfigUtils),
       });
     };
 
@@ -757,6 +749,7 @@ export class ActionsPlugin
       security,
       usageCounter,
       logger,
+      getAxiosInstanceWithAuthHelper,
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
@@ -807,6 +800,7 @@ export class ActionsPlugin
             async getEventLogClient() {
               return eventLog.getClient(request);
             },
+            getAxiosInstanceWithAuth: getAxiosInstanceWithAuthHelper(actionsConfigUtils),
           });
         },
         listTypes: (featureId?: string) => {
@@ -827,6 +821,18 @@ export class ActionsPlugin
         this.actionTypeRegistry?.get(connectorType);
       });
     }
+  };
+
+  private getAxiosInstanceWithAuthHelper = (actionsConfigUtils: ActionsConfigurationUtilities) => {
+    const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+      authTypeRegistry: this.authTypeRegistry!,
+      configurationUtilities: actionsConfigUtils,
+      logger: this.logger,
+    });
+
+    return async (validatedSecrets: Record<string, unknown>) => {
+      return await getAxiosInstanceFn(validatedSecrets);
+    };
   };
 
   public stop() {

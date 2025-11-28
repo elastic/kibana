@@ -81,6 +81,8 @@ import { isPreconfigured } from '../lib/is_preconfigured';
 import { isSystemAction } from '../lib/is_system_action';
 import type { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
 import { connectorFromInMemoryConnector } from '../application/connector/lib/connector_from_in_memory_connector';
+import { getAxiosInstance } from '../application/connector/methods/get_axios_instance';
+import { AxiosInstance } from 'axios';
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -97,6 +99,7 @@ export interface ConstructorOptions {
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
+  getAxiosInstanceWithAuth: (validatedSecrets: Record<string, unknown>) => Promise<AxiosInstance>;
 }
 
 export interface ActionsClientContext {
@@ -114,6 +117,7 @@ export interface ActionsClientContext {
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
+  getAxiosInstanceWithAuth: (validatedSecrets: Record<string, unknown>) => Promise<AxiosInstance>;
 }
 
 export class ActionsClient {
@@ -134,6 +138,7 @@ export class ActionsClient {
     usageCounter,
     connectorTokenClient,
     getEventLogClient,
+    getAxiosInstanceWithAuth,
   }: ConstructorOptions) {
     this.context = {
       logger,
@@ -150,6 +155,7 @@ export class ActionsClient {
       usageCounter,
       connectorTokenClient,
       getEventLogClient,
+      getAxiosInstanceWithAuth,
     };
   }
 
@@ -497,6 +503,12 @@ export class ActionsClient {
     connectorExecuteParams: ConnectorExecuteParams
   ): Promise<ActionTypeExecutorResult<unknown>> {
     return execute(this.context, connectorExecuteParams);
+  }
+
+  public async getAxiosInstance(
+    connectorExecuteParams: ConnectorExecuteParams
+  ): Promise<AxiosInstance> {
+    return getAxiosInstance(this.context, connectorExecuteParams);
   }
 
   public async bulkEnqueueExecution(
