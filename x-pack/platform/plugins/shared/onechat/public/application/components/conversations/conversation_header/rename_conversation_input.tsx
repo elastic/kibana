@@ -9,9 +9,11 @@ import { EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic
 import React, { useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationTitle } from '../../../hooks/use_conversation';
+import { useToasts } from '../../../hooks/use_toasts';
 
 const labels = {
   inputPlaceholder: i18n.translate(
@@ -32,6 +34,12 @@ const labels = {
       defaultMessage: 'Cancel rename',
     }
   ),
+  renameErrorToast: i18n.translate(
+    'xpack.onechat.conversationTitle.renameConversationInput.renameErrorToast',
+    {
+      defaultMessage: 'Failed to rename conversation',
+    }
+  ),
 };
 
 const INPUT_WIDTH = '240px';
@@ -48,6 +56,7 @@ export const RenameConversationInput: React.FC<RenameConversationInputProps> = (
   const conversationId = useConversationId();
   const { title } = useConversationTitle();
   const { conversationActions } = useConversationContext();
+  const { addErrorToast } = useToasts();
   const [isLoading, setIsLoading] = useState(false);
   const [newTitle, setNewTitle] = useState(title || '');
   const hasFocusedRef = useRef(false);
@@ -71,10 +80,18 @@ export const RenameConversationInput: React.FC<RenameConversationInputProps> = (
       return;
     }
     setIsLoading(true);
-    await conversationActions.renameConversation(conversationId, newTitle.trim());
-    setIsLoading(false);
-    onCancel();
-  }, [conversationId, newTitle, conversationActions, onCancel, isFormDirty]);
+    try {
+      await conversationActions.renameConversation(conversationId, newTitle.trim());
+      setIsLoading(false);
+      onCancel();
+    } catch (error) {
+      setIsLoading(false);
+      addErrorToast({
+        title: labels.renameErrorToast,
+        text: formatOnechatErrorMessage(error),
+      });
+    }
+  }, [conversationId, newTitle, conversationActions, onCancel, isFormDirty, addErrorToast]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
