@@ -57,10 +57,6 @@ export interface DiscoverSavedSearchContainer {
    */
   getInitial$: () => BehaviorSubject<SavedSearch>;
   /**
-   * Get the title of the current saved search
-   */
-  getTitle: () => string | undefined;
-  /**
    * Get the current state of the saved search
    */
   getState: () => SavedSearch;
@@ -117,7 +113,6 @@ export function getSavedSearchContainer({
   const getState = () => savedSearchCurrent$.getValue();
   const getInitial$ = () => savedSearchInitial$;
   const getCurrent$ = () => savedSearchCurrent$;
-  const getTitle = () => savedSearchCurrent$.getValue().title;
 
   const initUrlTracking = () => {
     const subscription = savedSearchCurrent$.subscribe((savedSearch) => {
@@ -227,7 +222,6 @@ export function getSavedSearchContainer({
     getCurrent$,
     getInitial$,
     getState,
-    getTitle,
     set,
     assignNextSavedSearch: (nextSavedSearch) => assignNextSavedSearch({ nextSavedSearch }),
     update,

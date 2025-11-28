@@ -55,27 +55,6 @@ describe('DiscoverSavedSearchContainer', () => {
     );
   });
 
-  describe('getTitle', () => {
-    it('returns undefined for new saved searches', () => {
-      const container = getSavedSearchContainer({
-        services,
-        internalState,
-        getCurrentTab,
-      });
-      expect(container.getTitle()).toBe(undefined);
-    });
-
-    it('returns the title of a persisted saved searches', () => {
-      const container = getSavedSearchContainer({
-        services,
-        internalState,
-        getCurrentTab,
-      });
-      container.set(savedSearch);
-      expect(container.getTitle()).toBe(savedSearch.title);
-    });
-  });
-
   describe('set', () => {
     it('should update the current and initial state of the saved search', () => {
       const container = getSavedSearchContainer({
