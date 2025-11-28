@@ -19,6 +19,8 @@ export {
   apiTest,
   globalSetupHook,
   tags,
+  createTest,
+  AbstractPageObject,
 } from './src/playwright';
 
 // Fixtures & configuration

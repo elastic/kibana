@@ -49,3 +49,5 @@ export { apiTest } from './test/api';
 
 // Test helpers for EUI components
 export * from './eui_components';
+
+export * from './test/utils';

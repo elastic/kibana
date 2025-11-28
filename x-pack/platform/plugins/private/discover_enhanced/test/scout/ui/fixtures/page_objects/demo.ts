@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import { AbstractPageObject } from '@kbn/scout';
 
-export class DemoPage {
-  constructor(private readonly page: ScoutPage) {}
-
+export class DemoPage extends AbstractPageObject {
   async goto() {
     await this.page.gotoApp('not_implemented');
   }
