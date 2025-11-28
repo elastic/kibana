@@ -13,10 +13,13 @@ import type {
   IKibanaResponse,
   IRouter,
   IScopedClusterClient,
+  FakeRawRequest,
 } from '@kbn/core/server';
 import type { EventEmitter } from 'events';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '@kbn/task-manager-plugin/server/saved_objects';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 const scope = 'testing';
 const taskManagerQuery = {
@@ -69,6 +72,7 @@ const taskSchema = schema.object({
 export function initRoutes(
   router: IRouter,
   taskManagerStart: Promise<TaskManagerStartContract>,
+  securityStart: Promise<SecurityPluginStart | undefined>,
   taskTestingEvents: EventEmitter
 ) {
   async function ensureIndexIsRefreshed(client: IScopedClusterClient) {
@@ -134,6 +138,52 @@ export function initRoutes(
       };
 
       const taskResult = await taskManager.schedule(task, { request: req });
+
+      return res.ok({ body: taskResult });
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/sample_tasks/schedule_with_fake_request`,
+      validate: {
+        body: taskSchema,
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    },
+    async function (
+      _: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const taskManager = await taskManagerStart;
+      const security = await securityStart;
+      const { task: taskFields } = req.body;
+
+      const apiKeyCreateResult = await security?.authc.apiKeys.grantAsInternalUser(req, {
+        name: `test task-manager schedule from fake request`,
+        role_descriptors: {},
+        metadata: { managed: true },
+      });
+
+      const fakeRawRequest: FakeRawRequest = {
+        headers: {
+          authorization: `ApiKey ${apiKeyCreateResult?.api_key}`,
+        },
+        path: '/',
+      };
+      const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+      const task = {
+        ...taskFields,
+        scope: [scope],
+      };
+
+      const taskResult = await taskManager.schedule(task, { request: fakeRequest });
 
       return res.ok({ body: taskResult });
     }

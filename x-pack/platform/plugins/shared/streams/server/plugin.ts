@@ -45,6 +45,7 @@ import type {
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
+import { getDefaultFeatureRegistry } from './lib/streams/feature/feature_type_registry';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -106,7 +107,7 @@ export class StreamsPlugin
     const assetService = new AssetService(core, this.logger);
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
-    const featureService = new FeatureService(core, this.logger);
+    const featureService = new FeatureService(core, this.logger, getDefaultFeatureRegistry());
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
 
@@ -118,9 +119,6 @@ export class StreamsPlugin
       order: 600,
       category: DEFAULT_APP_CATEGORIES.management,
       app: [STREAMS_FEATURE_ID],
-      privilegesTooltip: i18n.translate('xpack.streams.featureRegistry.privilegesTooltip', {
-        defaultMessage: 'All Spaces is required for Streams access.',
-      }),
       alerting: alertingFeatures,
       privileges: {
         all: {
@@ -129,7 +127,6 @@ export class StreamsPlugin
             all: [],
             read: [],
           },
-          requireAllSpaces: true,
           alerting: {
             rule: {
               all: alertingFeatures,
@@ -147,7 +144,6 @@ export class StreamsPlugin
             all: [],
             read: [],
           },
-          requireAllSpaces: true,
           alerting: {
             rule: {
               read: alertingFeatures,

@@ -10,8 +10,8 @@
 import { type IconType } from '@elastic/eui';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { HardcodedIcons } from './hardcoded_icons';
 import { ElasticsearchLogo } from './icons/elasticsearch.svg';
-import { HARDCODED_ICONS } from './icons/hardcoded_icons';
 import { KibanaLogo } from './icons/kibana.svg';
 
 export interface GetStepIconBase64Params {
@@ -85,7 +85,7 @@ export async function getStepIconBase64(connector: GetStepIconBase64Params): Pro
       return getDataUrlFromReactComponent(KibanaLogo);
     }
 
-    const hardcodedIcon = HARDCODED_ICONS[connector.actionTypeId];
+    const hardcodedIcon = HardcodedIcons[connector.actionTypeId];
     if (hardcodedIcon) {
       if (hardcodedIcon.startsWith('data:')) {
         return hardcodedIcon;
