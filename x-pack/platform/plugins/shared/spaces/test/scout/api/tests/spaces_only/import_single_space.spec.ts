@@ -39,12 +39,10 @@ TEST_SPACES.forEach((space) => {
   const spacePath = space.spaceId === 'default' ? '' : `s/${space.spaceId}/`;
 
   apiTest.describe(`_import API within the ${space.name} space`, { tag: tags.ESS_ONLY }, () => {
-    let editorApiCredentials: RoleApiCredentials;
+    let savedObjectsManagementCredentials: RoleApiCredentials;
     let createdSavedObjects: Array<{ type: string; id: string }>;
 
     apiTest.beforeAll(async ({ kbnClient, log, requestAuth }) => {
-      // Get API key with 'editor' role which has savedObjectsManagement privileges
-      editorApiCredentials = await requestAuth.getApiKey('editor');
       // Create the space (skip for default which always exists)
       if (space.spaceId !== SPACES.DEFAULT.spaceId) {
         log.info(`Creating space [${space.spaceId}] for test suite`);
@@ -57,6 +55,22 @@ TEST_SPACES.forEach((space) => {
       } else {
         log.info(`Using default space for test suite`);
       }
+
+      savedObjectsManagementCredentials = await requestAuth.getApiKeyForCustomRole({
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+        },
+        kibana: [
+          {
+            base: [],
+            feature: {
+              savedObjectsManagement: ['all'],
+            },
+            spaces: [space.spaceId],
+          },
+        ],
+      });
     });
 
     apiTest.beforeEach(() => {
@@ -107,7 +121,7 @@ TEST_SPACES.forEach((space) => {
           {
             headers: {
               ...COMMON_HEADERS,
-              ...editorApiCredentials.apiKeyHeader,
+              ...savedObjectsManagementCredentials.apiKeyHeader,
               ...formData1.headers,
             },
             body: formData1.buffer,
@@ -132,7 +146,7 @@ TEST_SPACES.forEach((space) => {
           {
             headers: {
               ...COMMON_HEADERS,
-              ...editorApiCredentials.apiKeyHeader,
+              ...savedObjectsManagementCredentials.apiKeyHeader,
               ...formData2.headers,
             },
             body: formData2.buffer,
@@ -165,7 +179,7 @@ TEST_SPACES.forEach((space) => {
           {
             headers: {
               ...COMMON_HEADERS,
-              ...editorApiCredentials.apiKeyHeader,
+              ...savedObjectsManagementCredentials.apiKeyHeader,
               ...formData1.headers,
             },
             body: formData1.buffer,
@@ -191,7 +205,7 @@ TEST_SPACES.forEach((space) => {
           {
             headers: {
               ...COMMON_HEADERS,
-              ...editorApiCredentials.apiKeyHeader,
+              ...savedObjectsManagementCredentials.apiKeyHeader,
               ...formData2.headers,
             },
             body: formData2.buffer,
@@ -235,7 +249,7 @@ TEST_SPACES.forEach((space) => {
           {
             headers: {
               ...COMMON_HEADERS,
-              ...editorApiCredentials.apiKeyHeader,
+              ...savedObjectsManagementCredentials.apiKeyHeader,
               ...formData.headers,
             },
             body: formData.buffer,
@@ -266,7 +280,7 @@ TEST_SPACES.forEach((space) => {
         {
           headers: {
             ...COMMON_HEADERS,
-            ...editorApiCredentials.apiKeyHeader,
+            ...savedObjectsManagementCredentials.apiKeyHeader,
             ...formData.headers,
           },
           body: formData.buffer,
