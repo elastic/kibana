@@ -14,6 +14,7 @@ import type {
   SavedObject,
   KibanaRequest,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { normalizeHostsForAgents } from '../../common/services';
 import {
@@ -349,42 +350,24 @@ class FleetServerHostService {
     if (ids.length === 0) {
       return [];
     }
-
-    // Bulk get saved objects with default client (not encrypted).
-    const res = await this.soClient.bulkGet<FleetServerHostSOAttributes>(
-      ids.map((id) => ({
-        id,
-        type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-      }))
-    );
-
-    // Decrypt each saved object in parallel
     const decryptedSavedObjects = await pMap(
-      res.saved_objects,
-      async (so) => {
-        if (so.error) {
-          if (!ignoreNotFound || so.error.statusCode !== 404) {
-            const error = new Error(so.error.message || so.error.error);
-            (error as any).statusCode = so.error.statusCode;
-            throw error;
-          }
-          return undefined;
-        }
+      ids,
+      async (id) => {
         try {
           const decryptedSo =
             await this.encryptedSoClient.getDecryptedAsInternalUser<FleetServerHostSOAttributes>(
               FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-              so.id
+              id
             );
           return savedObjectToFleetServerHost(decryptedSo);
-        } catch (error) {
-          if (ignoreNotFound && error.statusCode === 404) {
+        } catch (error: any) {
+          if (ignoreNotFound && SavedObjectsErrorHelpers.isNotFoundError(error)) {
             return undefined;
           }
           throw error;
         }
       },
-      { concurrency: 50 }
+      { concurrency: 50 } // Match the concurrency used in x-pack/platform/plugins/shared/encrypted_saved_objects/server/saved_objects/index.ts#L172
     );
 
     return decryptedSavedObjects.filter(

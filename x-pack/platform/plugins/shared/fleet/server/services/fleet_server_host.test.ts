@@ -9,6 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import { createSavedObjectClientMock } from '../mocks';
@@ -320,25 +321,7 @@ describe('bulkGet', () => {
   });
 
   it('should decrypt and return multiple fleet server hosts', async () => {
-    const soClient = getMockedSoClient();
     const esoClient = getMockedEncryptedSoClient();
-
-    soClient.bulkGet.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'host-1',
-          type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-          attributes: { name: 'Host 1', host_urls: [], is_default: false },
-          references: [],
-        },
-        {
-          id: 'host-2',
-          type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-          attributes: { name: 'Host 2', host_urls: [], is_default: false },
-          references: [],
-        },
-      ],
-    });
 
     esoClient.getDecryptedAsInternalUser
       .mockResolvedValueOnce({
@@ -356,48 +339,36 @@ describe('bulkGet', () => {
 
     const hosts = await fleetServerHostService.bulkGet(['host-1', 'host-2']);
 
-    expect(soClient.bulkGet).toHaveBeenCalledWith([
-      { id: 'host-1', type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE },
-      { id: 'host-2', type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE },
-    ]);
     expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
+    expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+      'host-1'
+    );
+    expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+      'host-2'
+    );
     expect(hosts).toHaveLength(2);
     expect(hosts[0].id).toEqual('host-1');
     expect(hosts[1].id).toEqual('host-2');
   });
 
   it('should filter out not found errors when ignoreNotFound is true', async () => {
-    const soClient = getMockedSoClient();
     const esoClient = getMockedEncryptedSoClient();
 
-    soClient.bulkGet.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'host-1',
-          type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-          attributes: { name: 'Host 1', host_urls: [], is_default: false },
-          references: [],
-        },
-        {
-          id: 'host-2',
-          type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-          attributes: {},
-          references: [],
-          error: {
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not found',
-          },
-        },
-      ],
-    });
+    const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+      FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+      'host-2'
+    );
 
-    esoClient.getDecryptedAsInternalUser.mockResolvedValue({
-      id: 'host-1',
-      type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-      attributes: { name: 'Host 1', host_urls: [], is_default: false },
-      references: [],
-    } as any);
+    esoClient.getDecryptedAsInternalUser
+      .mockResolvedValueOnce({
+        id: 'host-1',
+        type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+        attributes: { name: 'Host 1', host_urls: [], is_default: false },
+        references: [],
+      } as any)
+      .mockRejectedValueOnce(notFoundError);
 
     const hosts = await fleetServerHostService.bulkGet(['host-1', 'host-2'], {
       ignoreNotFound: true,
@@ -408,25 +379,14 @@ describe('bulkGet', () => {
   });
 
   it('should throw error for not found when ignoreNotFound is false', async () => {
-    const soClient = getMockedSoClient();
+    const esoClient = getMockedEncryptedSoClient();
 
-    const notFoundError = {
-      error: 'Not Found',
-      message: 'Not found',
-      statusCode: 404,
-    };
+    const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+      FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+      'host-1'
+    );
 
-    soClient.bulkGet.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'host-1',
-          type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-          attributes: {},
-          references: [],
-          error: notFoundError,
-        },
-      ],
-    });
+    esoClient.getDecryptedAsInternalUser.mockRejectedValue(notFoundError);
 
     await expect(
       fleetServerHostService.bulkGet(['host-1'], { ignoreNotFound: false } as any)
@@ -434,22 +394,12 @@ describe('bulkGet', () => {
   });
 
   it('should handle decryption errors when ignoreNotFound is true', async () => {
-    const soClient = getMockedSoClient();
     const esoClient = getMockedEncryptedSoClient();
 
-    soClient.bulkGet.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'host-1',
-          type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-          attributes: { name: 'Host 1', host_urls: [], is_default: false },
-          references: [],
-        },
-      ],
-    });
-
-    const notFoundError = new Error('Not found');
-    (notFoundError as any).statusCode = 404;
+    const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+      FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+      'host-1'
+    );
     esoClient.getDecryptedAsInternalUser.mockRejectedValue(notFoundError);
 
     const hosts = await fleetServerHostService.bulkGet(['host-1'], {
@@ -460,19 +410,7 @@ describe('bulkGet', () => {
   });
 
   it('should throw decryption errors when ignoreNotFound is false', async () => {
-    const soClient = getMockedSoClient();
     const esoClient = getMockedEncryptedSoClient();
-
-    soClient.bulkGet.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'host-1',
-          type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-          attributes: { name: 'Host 1', host_urls: [], is_default: false },
-          references: [],
-        },
-      ],
-    });
 
     const decryptionError = new Error('Decryption failed');
     esoClient.getDecryptedAsInternalUser.mockRejectedValue(decryptionError);
@@ -483,11 +421,11 @@ describe('bulkGet', () => {
   });
 
   it('should return empty array when ids is empty', async () => {
-    const soClient = getMockedSoClient();
+    const esoClient = getMockedEncryptedSoClient();
 
     const hosts = await fleetServerHostService.bulkGet([]);
 
-    expect(soClient.bulkGet).not.toHaveBeenCalled();
+    expect(esoClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
     expect(hosts).toEqual([]);
   });
 });

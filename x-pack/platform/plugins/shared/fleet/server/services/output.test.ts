@@ -6,6 +6,7 @@
  */
 
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { Logger } from '@kbn/logging';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -2573,25 +2574,7 @@ describe('Output Service', () => {
     });
 
     it('should decrypt and return multiple outputs', async () => {
-      const soClient = getMockedSoClient();
       const esoClient = getMockedEncryptedSoClient();
-
-      soClient.bulkGet.mockResolvedValue({
-        saved_objects: [
-          {
-            id: outputIdToUuid('output-1'),
-            type: OUTPUT_SAVED_OBJECT_TYPE,
-            attributes: { name: 'Output 1', output_id: 'output-1' },
-            references: [],
-          },
-          {
-            id: outputIdToUuid('output-2'),
-            type: OUTPUT_SAVED_OBJECT_TYPE,
-            attributes: { name: 'Output 2', output_id: 'output-2' },
-            references: [],
-          },
-        ],
-      });
 
       esoClient.getDecryptedAsInternalUser
         .mockResolvedValueOnce({
@@ -2609,48 +2592,36 @@ describe('Output Service', () => {
 
       const outputs = await outputService.bulkGet(['output-1', 'output-2']);
 
-      expect(soClient.bulkGet).toHaveBeenCalledWith([
-        { id: outputIdToUuid('output-1'), type: OUTPUT_SAVED_OBJECT_TYPE },
-        { id: outputIdToUuid('output-2'), type: OUTPUT_SAVED_OBJECT_TYPE },
-      ]);
       expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
+      expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        outputIdToUuid('output-1')
+      );
+      expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        outputIdToUuid('output-2')
+      );
       expect(outputs).toHaveLength(2);
       expect(outputs[0].id).toEqual('output-1');
       expect(outputs[1].id).toEqual('output-2');
     });
 
     it('should filter out not found errors when ignoreNotFound is true', async () => {
-      const soClient = getMockedSoClient();
       const esoClient = getMockedEncryptedSoClient();
 
-      soClient.bulkGet.mockResolvedValue({
-        saved_objects: [
-          {
-            id: outputIdToUuid('output-1'),
-            type: OUTPUT_SAVED_OBJECT_TYPE,
-            attributes: { name: 'Output 1', output_id: 'output-1' },
-            references: [],
-          },
-          {
-            id: outputIdToUuid('output-2'),
-            type: OUTPUT_SAVED_OBJECT_TYPE,
-            attributes: {},
-            references: [],
-            error: {
-              statusCode: 404,
-              error: 'Not Found',
-              message: 'Not found',
-            },
-          },
-        ],
-      });
+      const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        outputIdToUuid('output-2')
+      );
 
-      esoClient.getDecryptedAsInternalUser.mockResolvedValue({
-        id: outputIdToUuid('output-1'),
-        type: OUTPUT_SAVED_OBJECT_TYPE,
-        attributes: { name: 'Output 1', output_id: 'output-1' },
-        references: [],
-      } as any);
+      esoClient.getDecryptedAsInternalUser
+        .mockResolvedValueOnce({
+          id: outputIdToUuid('output-1'),
+          type: OUTPUT_SAVED_OBJECT_TYPE,
+          attributes: { name: 'Output 1', output_id: 'output-1' },
+          references: [],
+        } as any)
+        .mockRejectedValueOnce(notFoundError);
 
       const outputs = await outputService.bulkGet(['output-1', 'output-2'], {
         ignoreNotFound: true,
@@ -2661,25 +2632,14 @@ describe('Output Service', () => {
     });
 
     it('should throw error for not found when ignoreNotFound is false', async () => {
-      const soClient = getMockedSoClient();
+      const esoClient = getMockedEncryptedSoClient();
 
-      const notFoundError = {
-        error: 'Not Found',
-        message: 'Not found',
-        statusCode: 404,
-      };
+      const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        outputIdToUuid('output-1')
+      );
 
-      soClient.bulkGet.mockResolvedValue({
-        saved_objects: [
-          {
-            id: outputIdToUuid('output-1'),
-            type: OUTPUT_SAVED_OBJECT_TYPE,
-            attributes: {},
-            references: [],
-            error: notFoundError,
-          },
-        ],
-      });
+      esoClient.getDecryptedAsInternalUser.mockRejectedValue(notFoundError);
 
       await expect(
         outputService.bulkGet(['output-1'], { ignoreNotFound: false } as any)
@@ -2687,22 +2647,12 @@ describe('Output Service', () => {
     });
 
     it('should handle decryption errors when ignoreNotFound is true', async () => {
-      const soClient = getMockedSoClient();
       const esoClient = getMockedEncryptedSoClient();
 
-      soClient.bulkGet.mockResolvedValue({
-        saved_objects: [
-          {
-            id: outputIdToUuid('output-1'),
-            type: OUTPUT_SAVED_OBJECT_TYPE,
-            attributes: { name: 'Output 1', output_id: 'output-1' },
-            references: [],
-          },
-        ],
-      });
-
-      const notFoundError = new Error('Not found');
-      (notFoundError as any).statusCode = 404;
+      const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+        OUTPUT_SAVED_OBJECT_TYPE,
+        outputIdToUuid('output-1')
+      );
       esoClient.getDecryptedAsInternalUser.mockRejectedValue(notFoundError);
 
       const outputs = await outputService.bulkGet(['output-1'], {
@@ -2713,19 +2663,7 @@ describe('Output Service', () => {
     });
 
     it('should throw decryption errors when ignoreNotFound is false', async () => {
-      const soClient = getMockedSoClient();
       const esoClient = getMockedEncryptedSoClient();
-
-      soClient.bulkGet.mockResolvedValue({
-        saved_objects: [
-          {
-            id: outputIdToUuid('output-1'),
-            type: OUTPUT_SAVED_OBJECT_TYPE,
-            attributes: { name: 'Output 1', output_id: 'output-1' },
-            references: [],
-          },
-        ],
-      });
 
       const decryptionError = new Error('Decryption failed');
       esoClient.getDecryptedAsInternalUser.mockRejectedValue(decryptionError);
@@ -2736,11 +2674,11 @@ describe('Output Service', () => {
     });
 
     it('should return empty array when ids is empty', async () => {
-      const soClient = getMockedSoClient();
+      const esoClient = getMockedEncryptedSoClient();
 
       const outputs = await outputService.bulkGet([]);
 
-      expect(soClient.bulkGet).not.toHaveBeenCalled();
+      expect(esoClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
       expect(outputs).toEqual([]);
     });
   });
