@@ -254,7 +254,7 @@ export const i18nMessages = {
           'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionHelpText',
           {
             defaultMessage:
-              'If checked, the tool will wait synchronously until the workflow completes (fine with workflows taking less than a few minutes). If unchecked, the tool will just execute the workflow and return immediately.',
+              'If checked, the tool will wait until the workflow completes (up to 120s) and return the results. If unchecked, the tool will run the workflow in the background and return an ID which can be used later by the agent to retrieve the results.',
           }
         ),
         waitForCompletionCheckboxLabel: i18n.translate(
