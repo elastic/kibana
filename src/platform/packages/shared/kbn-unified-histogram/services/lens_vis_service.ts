@@ -679,7 +679,7 @@ export class LensVisService {
         context,
         dataView,
         ['lnsDatatable'],
-        preferredChartType,
+        hasESQLBucketAggregation(query.esql) ? ChartType.Line : preferredChartType,
         visAttributes
       ) ?? []
     );
@@ -858,4 +858,30 @@ function areSuggestionAndVisContextAndQueryParamsStillCompatible({
     // vis shape should match
     isSuggestionShapeAndVisContextCompatible(suggestion, externalVisContext)
   );
+}
+
+function hasESQLBucketAggregation(esql?: string): boolean {
+  if (!esql) {
+    return false;
+  }
+
+  const { root } = Parser.parse(esql);
+  const statsCommands = Walker.matchAll(root, { type: 'command', name: 'stats' });
+  if (statsCommands.length === 0) {
+    return false;
+  }
+
+  if (!Walker.hasFunction(statsCommands[statsCommands.length - 1], 'bucket')) {
+    return false;
+  }
+
+  const hasValidAggregations = Walker.findAll(
+    statsCommands,
+    (node) =>
+      isFunctionExpression(node) &&
+      node.subtype === 'variadic-call' &&
+      node.name.toLowerCase() !== 'bucket'
+  );
+
+  return hasValidAggregations.length > 0;
 }
