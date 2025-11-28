@@ -12,6 +12,7 @@ import type {
   TaskManagerStartContract,
   IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_task_manager';
 import {
   getTotalCountAggregations,
@@ -26,7 +27,6 @@ import {
 import { getBackfillTelemetryPerDay } from './lib/get_backfill_telemetry';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../common';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
