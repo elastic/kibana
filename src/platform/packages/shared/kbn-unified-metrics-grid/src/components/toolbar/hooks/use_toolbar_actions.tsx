@@ -14,7 +14,7 @@ import { useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { css } from '@emotion/react';
-import type { AggregateQuery } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useMetricsExperienceState } from '../../../context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
 import { ValuesSelector } from '../values_selector';
@@ -54,6 +54,13 @@ export const useToolbarActions = ({
     () => (isFullscreen ? undefined : renderToggleActions()),
     [isFullscreen, renderToggleActions]
   );
+  const query = useMemo(() => {
+    if (isOfAggregateQueryType(fetchParams.query)) {
+      return fetchParams.query.esql;
+    }
+    return undefined;
+  }, [fetchParams]);
+
   const indices = useMemo(() => {
     return [...new Set(fields.map((field) => field.index))];
   }, [fields]);
@@ -76,7 +83,7 @@ export const useToolbarActions = ({
           onChange={onValuesChange}
           disabled={dimensions.length === 0}
           indices={indices}
-          query={(fetchParams.query as AggregateQuery).esql}
+          query={query}
           timeRange={fetchParams.timeRange}
           onClear={onClearValues}
           fullWidth={isSmallScreen}
@@ -92,7 +99,7 @@ export const useToolbarActions = ({
       valueFilters,
       onValuesChange,
       indices,
-      fetchParams.query,
+      query,
       fetchParams.timeRange,
       onClearValues,
     ]

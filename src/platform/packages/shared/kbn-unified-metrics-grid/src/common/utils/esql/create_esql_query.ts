@@ -18,6 +18,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { Walker, Parser, BasicPrettyPrinter } from '@kbn/esql-ast';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DIMENSIONS_COLUMN } from './constants';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 
@@ -75,13 +76,12 @@ export function createESQLQuery({
   filters = {},
   requestParams,
 }: CreateESQLQueryParams) {
-  const whereCommand =
-    requestParams?.query && 'esql' in requestParams.query
-      ? Walker.find(
-          Parser.parse(requestParams.query.esql).root,
-          (node) => node.type === 'command' && node.name === 'where'
-        )
-      : undefined;
+  const whereCommand = isOfAggregateQueryType(requestParams?.query)
+    ? Walker.find(
+        Parser.parse(requestParams.query.esql).root,
+        (node) => node.type === 'command' && node.name === 'where'
+      )
+    : undefined;
 
   const { name: metricField, instrument, index } = metric;
   const source = timeseries(index);

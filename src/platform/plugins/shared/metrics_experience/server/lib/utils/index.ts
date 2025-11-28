@@ -8,6 +8,8 @@
  */
 import { notFound } from '@hapi/boom';
 import type { FeatureFlagsRequestHandlerContext } from '@kbn/core-feature-flags-server';
+import { Parser, Walker } from '@kbn/esql-ast';
+import type { ESQLCommand } from '@kbn/esql-ast';
 import { METRICS_EXPERIENCE_FEATURE_FLAG_KEY } from '../../../common/constants';
 
 export const throwNotFoundIfMetricsExperienceDisabled = async (
@@ -19,3 +21,27 @@ export const throwNotFoundIfMetricsExperienceDisabled = async (
     throw notFound();
   }
 };
+
+/**
+ * Extracts the WHERE command from an ES|QL query string.
+ * This is useful for preserving user-applied filters from Discover queries.
+ *
+ * @param esqlQuery - The ES|QL query string to parse
+ * @returns The WHERE command node if found, undefined otherwise
+ */
+export function extractWhereCommand(esqlQuery: string) {
+  if (!esqlQuery || esqlQuery.trim().length === 0) {
+    return undefined;
+  }
+
+  try {
+    const ast = Parser.parse(esqlQuery);
+    const whereNode = Walker.find(
+      ast.root,
+      (node): node is ESQLCommand => node.type === 'command' && node.name === 'where'
+    );
+    return whereNode;
+  } catch (error) {
+    return undefined;
+  }
+}

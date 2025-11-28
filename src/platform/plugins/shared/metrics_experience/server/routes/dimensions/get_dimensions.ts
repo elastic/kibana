@@ -19,7 +19,8 @@ import {
   limit,
   append,
 } from '@kbn/esql-composer';
-import { BasicPrettyPrinter, Parser, Walker } from '@kbn/esql-ast';
+import { BasicPrettyPrinter } from '@kbn/esql-ast';
+import { extractWhereCommand } from '../../lib/utils';
 
 interface CreateDimensionsParams {
   esClient: TracedElasticsearchClient;
@@ -44,12 +45,7 @@ export const getDimensions = async ({
     return [];
   }
 
-  const whereCommand = originalQuery
-    ? Walker.find(
-        Parser.parse(originalQuery).root,
-        (node) => node.type === 'command' && node.name === 'where'
-      )
-    : undefined;
+  const whereCommand = originalQuery ? extractWhereCommand(originalQuery) : undefined;
 
   const source = fromCommand(indices);
   const query = source

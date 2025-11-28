@@ -13,13 +13,14 @@ import { semconvFlat } from '@kbn/otel-semantic-conventions';
 import { dateRangeQuery } from '@kbn/es-query';
 import { from as fromCommand, where, limit, append } from '@kbn/esql-composer';
 import type { QueryOperator } from '@kbn/esql-composer';
-import { Parser, Walker, BasicPrettyPrinter } from '@kbn/esql-ast';
+import { BasicPrettyPrinter } from '@kbn/esql-ast';
 import pLimit from 'p-limit';
 import { chunk } from 'lodash';
 import type { IndexFieldCapsMap, EpochTimeRange } from '../../types';
 import type { Dimension, MetricField, DimensionFilters } from '../../../common/types';
 import { extractDimensions } from '../dimensions/extract_dimensions';
 import { normalizeUnit } from './normalize_unit';
+import { extractWhereCommand } from '../utils';
 
 export interface MetricMetadata {
   dimensions: string[];
@@ -112,19 +113,19 @@ function buildFilterConditions(
     .map(([dimensionName, values]) => {
       const dimension = dimensionMap.get(dimensionName);
 
-      // Build IN condition using composer's format
+      if (!dimension || !dimension?.name || values.length === 0) {
+        return null;
+      }
+
       return where(`??dim::STRING IN (${values.map(() => '?').join(', ')})`, {
-        dim: dimension?.name,
+        dim: dimension.name,
         ...values,
       });
     })
     .filter((c): c is QueryOperator => c !== null);
 
   if (query.length > 0) {
-    const whereCommand = Walker.find(
-      Parser.parse(query).root,
-      (node) => node.type === 'command' && node.name === 'where'
-    );
+    const whereCommand = extractWhereCommand(query);
 
     if (whereCommand) {
       filterConditions.push(append({ command: BasicPrettyPrinter.print(whereCommand) }));
