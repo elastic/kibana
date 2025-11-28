@@ -49,13 +49,3 @@ export async function createRule(
     actions: [],
   }) as Promise<CreateRuleResponse>;
 }
-
-export async function getDisposableRule(apiServices: ApiServicesFixture) {
-  const rule = await createRule(apiServices);
-  return {
-    instance: rule,
-    async [Symbol.asyncDispose]() {
-      await apiServices.alerting.rules.delete(rule.data.id);
-    },
-  };
-}
