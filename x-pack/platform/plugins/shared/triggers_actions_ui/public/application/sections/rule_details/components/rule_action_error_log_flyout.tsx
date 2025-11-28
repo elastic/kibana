@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTitle,
@@ -37,14 +37,6 @@ export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) =
   const { runLog, refreshToken, onClose, activeSpaceId } = props;
 
   const { euiTheme } = useEuiTheme();
-
-  const initialFocusRef = useRef<HTMLButtonElement | null>(null);
-
-  useEffect(() => {
-    if (initialFocusRef.current) {
-      initialFocusRef.current.focus();
-    }
-  }, []);
 
   const {
     id,
@@ -118,11 +110,7 @@ export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) =
         <EuiSpacer />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButton
-          data-test-subj="ruleActionErrorLogFlyoutCloseButton"
-          onClick={onClose}
-          buttonRef={initialFocusRef}
-        >
+        <EuiButton data-test-subj="ruleActionErrorLogFlyoutCloseButton" onClick={onClose}>
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.ruleDetails.ruleActionErrorLogFlyout.close"
             defaultMessage="Close"
