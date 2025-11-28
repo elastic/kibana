@@ -37,7 +37,7 @@ export async function removeLockIndexWithIncorrectMappings(
 
   const indexMappings = Object.values(res);
   if (indexMappings.length === 0) {
-    logger.debug(`No mappings found for "${LOCKS_CONCRETE_INDEX_NAME}"`);
+    logger.warn(`No mappings found for "${LOCKS_CONCRETE_INDEX_NAME}"`);
     return;
   }
   const { mappings } = indexMappings[0];
