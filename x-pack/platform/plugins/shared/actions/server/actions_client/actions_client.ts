@@ -83,12 +83,15 @@ import type { ConnectorExecuteParams } from '../application/connector/methods/ex
 import { connectorFromInMemoryConnector } from '../application/connector/lib/connector_from_in_memory_connector';
 import { getAxiosInstance } from '../application/connector/methods/get_axios_instance';
 import { AxiosInstance } from 'axios';
+import { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 
 export interface ConstructorOptions {
   logger: Logger;
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
@@ -100,12 +103,15 @@ export interface ConstructorOptions {
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
   getAxiosInstanceWithAuth: (validatedSecrets: Record<string, unknown>) => Promise<AxiosInstance>;
+  spaces?: SpacesServiceSetup;
+  isESOCanEncrypt: boolean;
 }
 
 export interface ActionsClientContext {
   logger: Logger;
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   actionTypeRegistry: ActionTypeRegistry;
   inMemoryConnectors: InMemoryConnector[];
@@ -118,6 +124,8 @@ export interface ActionsClientContext {
   connectorTokenClient: ConnectorTokenClientContract;
   getEventLogClient: () => Promise<IEventLogClient>;
   getAxiosInstanceWithAuth: (validatedSecrets: Record<string, unknown>) => Promise<AxiosInstance>;
+  spaces?: SpacesServiceSetup;
+  isESOCanEncrypt: boolean;
 }
 
 export class ActionsClient {
@@ -128,6 +136,7 @@ export class ActionsClient {
     actionTypeRegistry,
     kibanaIndices,
     scopedClusterClient,
+    encryptedSavedObjectsClient,
     unsecuredSavedObjectsClient,
     inMemoryConnectors,
     actionExecutor,
@@ -139,10 +148,13 @@ export class ActionsClient {
     connectorTokenClient,
     getEventLogClient,
     getAxiosInstanceWithAuth,
+    spaces,
+    isESOCanEncrypt,
   }: ConstructorOptions) {
     this.context = {
       logger,
       actionTypeRegistry,
+      encryptedSavedObjectsClient,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -156,6 +168,8 @@ export class ActionsClient {
       connectorTokenClient,
       getEventLogClient,
       getAxiosInstanceWithAuth,
+      spaces,
+      isESOCanEncrypt,
     };
   }
 
@@ -505,10 +519,8 @@ export class ActionsClient {
     return execute(this.context, connectorExecuteParams);
   }
 
-  public async getAxiosInstance(
-    connectorExecuteParams: ConnectorExecuteParams
-  ): Promise<AxiosInstance> {
-    return getAxiosInstance(this.context, connectorExecuteParams);
+  public async getAxiosInstance(actionId: string): Promise<AxiosInstance> {
+    return getAxiosInstance(this.context, actionId);
   }
 
   public async bulkEnqueueExecution(

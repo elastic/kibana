@@ -216,6 +216,7 @@ export class ActionsPlugin
   private actionExecutor?: ActionExecutor;
   private licenseState: ILicenseState | null = null;
   private security?: SecurityPluginSetup;
+  private spaces?: SpacesPluginSetup;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private isESOCanEncrypt?: boolean;
@@ -304,6 +305,7 @@ export class ActionsPlugin
     this.actionTypeRegistry = actionTypeRegistry;
     this.actionExecutor = actionExecutor;
     this.security = plugins.security;
+    this.spaces = plugins.spaces;
 
     this.authTypeRegistry = new AuthTypeRegistry();
     registerAuthTypes(this.authTypeRegistry);
@@ -510,6 +512,9 @@ export class ActionsPlugin
           return plugins.eventLog.getClient(request);
         },
         getAxiosInstanceWithAuth: this.getAxiosInstanceWithAuthHelper(actionsConfigUtils),
+        spaces: this.spaces?.spacesService,
+        isESOCanEncrypt: isESOCanEncrypt!,
+        encryptedSavedObjectsClient,
       });
     };
 
@@ -750,6 +755,7 @@ export class ActionsPlugin
       usageCounter,
       logger,
       getAxiosInstanceWithAuthHelper,
+      spaces,
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
@@ -770,6 +776,10 @@ export class ActionsPlugin
             excludedExtensions: [SECURITY_EXTENSION_ID],
             includedHiddenTypes,
           });
+          const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
+            includedHiddenTypes,
+          });
+
           return new ActionsClient({
             logger,
             unsecuredSavedObjectsClient,
@@ -792,15 +802,16 @@ export class ActionsPlugin
             usageCounter,
             connectorTokenClient: new ConnectorTokenClient({
               unsecuredSavedObjectsClient,
-              encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
-                includedHiddenTypes,
-              }),
+              encryptedSavedObjectsClient,
               logger,
             }),
             async getEventLogClient() {
               return eventLog.getClient(request);
             },
             getAxiosInstanceWithAuth: getAxiosInstanceWithAuthHelper(actionsConfigUtils),
+            spaces: spaces?.spacesService,
+            isESOCanEncrypt: isESOCanEncrypt!,
+            encryptedSavedObjectsClient,
           });
         },
         listTypes: (featureId?: string) => {
