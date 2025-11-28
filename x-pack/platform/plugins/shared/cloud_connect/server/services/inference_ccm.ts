@@ -23,7 +23,7 @@ export async function enableInferenceCCM(
 
     logger.info('Inference CCM enabled successfully');
   } catch (error) {
-    logger.error('Failed to enable inference CCM', { error });
+    logger.error('Failed to enable Cloud Connect inference', { error });
     throw error;
   }
 }
