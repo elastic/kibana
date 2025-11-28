@@ -20,27 +20,6 @@ export class KibanaCodeEditorWrapper {
   constructor(private readonly page: ScoutPage) {}
 
   /**
-   * Waits until the code editor inside the given test-subject container is ready.
-   *
-   * @param containerTestSubjId - The `data-test-subj` of the editor container.
-   *   Defaults to `'kibanaCodeEditor'`, which is the common test subject used
-   *   for Kibana code editors.
-   * @returns A Playwright `Locator` pointing at the underlying `<textarea>`
-   *   element used by Monaco.
-   */
-  async waitCodeEditorReady(containerTestSubjId: string = 'kibanaCodeEditor'): Promise<Locator> {
-    const editorContainer = this.page.testSubj.locator(containerTestSubjId);
-    const editor = editorContainer.locator('textarea');
-
-    await editor.waitFor({
-      state: 'visible',
-      timeout: 10_000,
-    });
-
-    return editor;
-  }
-
-  /**
    * Returns the current value of the Monaco editor model at the given index.
    *
    * This uses the globally registered `window.MonacoEnvironment.monaco.editor`

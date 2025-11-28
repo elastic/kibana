@@ -52,7 +52,6 @@ export class EuiSuperSelectWrapper {
   };
 
   getIsDropdownOpened = async (): Promise<boolean> => {
-    await this.button.waitFor({ state: 'attached' });
     const classes = await this.button.getAttribute('class');
 
     return classes?.includes('-open') || false;
