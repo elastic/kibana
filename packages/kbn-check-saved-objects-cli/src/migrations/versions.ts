@@ -37,7 +37,3 @@ export function latestVersionIdentifier(
   const latest = ids.sort(collator.compare).pop() as ModelVersionIdentifier;
   return latest;
 }
-
-export function latestVersion(type: SavedObjectsType<any>): string {
-  return `10.${latestVersionIdentifier(type) ?? 0}.0`;
-}

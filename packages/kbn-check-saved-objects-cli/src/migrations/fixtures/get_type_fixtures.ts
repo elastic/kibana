@@ -7,56 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { join, relative } from 'path';
+import { join } from 'path';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { fileToJson } from '../../util';
 import type { ModelVersionFixtures } from './types';
 import { FIXTURES_BASE_PATH } from './constants';
 import { createFixtureFile } from './create_fixture_file';
 import { isValidFixtureFile } from './is_valid_fixture_file';
 
-export function getFixturesRelativePath(type: string, modelVersion: string): string {
-  return relative(REPO_ROOT, getFixturesBasePath(type, modelVersion));
-}
-
 export function getFixturesBasePath(type: string, modelVersion: string): string {
   return join(FIXTURES_BASE_PATH, type, `${modelVersion}.json`);
 }
 
 export async function getTypeFixtures({
+  path,
   type,
   previous,
   current,
   generate,
 }: {
+  path: string;
   type: SavedObjectsType<any>;
   previous: string;
   current: string;
   generate: boolean;
 }) {
   const name = type.name;
-  const fixturesPath = getFixturesBasePath(name, current);
-  const fixtures = (await fileToJson(fixturesPath)) as ModelVersionFixtures;
+  const fixtures = (await fileToJson(path)) as ModelVersionFixtures;
   if (!fixtures) {
     if (generate) {
       await createFixtureFile({
         type,
-        path: fixturesPath,
+        path,
         current,
         previous,
       });
       throw new Error(
-        `❌ '${name}' SO type is missing test fixtures for '${current}'. Please populate sample data on '${fixturesPath}'.`
+        `❌ '${name}' SO type is missing test fixtures for '${current}'. Please populate sample data on '${path}'.`
       );
     } else {
       throw new Error(
-        `❌ '${name}' SO type is missing test fixtures for the new modelVersion '${current}'. Please run with --fix to generate '${fixturesPath}' and then add sample data.`
+        `❌ '${name}' SO type is missing test fixtures for the new modelVersion '${current}'. Please run with --fix to generate '${path}' and then add sample data.`
       );
     }
   } else if (!isValidFixtureFile(fixtures, previous, current)) {
     throw new Error(
-      `❌ The contents of '${fixturesPath}' are invalid. Please ensure it:
+      `❌ The contents of '${path}' are invalid. Please ensure it:
 {
   "${previous}": [
     // has one or more documents of type ${name} on version ${previous}

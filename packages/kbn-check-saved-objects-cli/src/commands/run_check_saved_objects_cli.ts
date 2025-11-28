@@ -40,9 +40,7 @@ export function runCheckSavedObjectsCli() {
 
       const context: TaskContext = {
         gitRev: gitRev!,
-        newTypes: [],
         updatedTypes: [],
-        newVersions: {},
         currentRemovedTypes: [],
         newRemovedTypes: [],
         fixtures: {

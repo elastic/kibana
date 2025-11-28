@@ -8,4 +8,3 @@
  */
 
 export { getPreviousVersionType } from './previous_version_type';
-export { latestVersion } from './versions';

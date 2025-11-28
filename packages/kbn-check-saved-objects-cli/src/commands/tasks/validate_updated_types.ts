@@ -10,9 +10,9 @@
 import type { ListrTask } from 'listr2';
 import { defaultKibanaIndex } from '@kbn/migrator-test-kit';
 import type { Task, TaskContext } from '../types';
-import { getUpdatedTypes, validateChanges } from '../../snapshots';
+import { getUpdatedTypes, validateChangesExistingType } from '../../snapshots';
 import { getLatestTypeFixtures } from '../../migrations/fixtures';
-import { latestVersion } from '../../migrations';
+import { getVersions } from '../../migrations/versions';
 
 export const validateUpdatedTypes: Task = (ctx, task) => {
   const subtasks: ListrTask<TaskContext>[] = [
@@ -24,10 +24,6 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
           .registeredTypes!.filter(({ name }) => updatedList.includes(name))
           // we tweak the types to store them all in the `.kibana_migrator` index for our checks
           .map((type) => ({ ...type, indexPattern: defaultKibanaIndex }));
-        ctx.newVersions = ctx.updatedTypes.reduce<Record<string, string>>((acc, type) => {
-          acc[type.name] = latestVersion(type);
-          return acc;
-        }, {});
       },
     },
     {
@@ -36,8 +32,8 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
         const validateChangesTasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map(({ name }) => ({
           title: `Checking updates on type '${name}'`,
           task: () =>
-            validateChanges({
-              from: ctx.from?.typeDefinitions[name],
+            validateChangesExistingType({
+              from: ctx.from!.typeDefinitions[name],
               to: ctx.to?.typeDefinitions[name]!,
             }),
         }));
@@ -52,22 +48,25 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
     {
       title: 'Verifying fixtures for updated types',
       task: (_, subtask) => {
-        const fixturesTasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map((type) => {
+        const loadFixturesTasks: ListrTask<TaskContext>[] = ctx.updatedTypes.map((type) => {
           const { name } = type;
           return {
             title: `Loading fixtures for type '${name}'`,
-            task: async () => {
+            task: async (__, loadFixturesTask) => {
+              const [current, previous] = getVersions(ctx.to!.typeDefinitions[name]);
               const typeFixtures = await getLatestTypeFixtures({
                 type,
-                snapshot: ctx.to!,
+                current,
+                previous,
                 fix: ctx.fix,
               });
               ctx.fixtures.previous[name] = typeFixtures.previous;
               ctx.fixtures.current[name] = typeFixtures.current;
+              loadFixturesTask.title += `: ${typeFixtures.current.relativePath}`;
             },
           };
         });
-        return subtask.newListr<TaskContext>(fixturesTasks, {
+        return subtask.newListr<TaskContext>(loadFixturesTasks, {
           exitOnError: false,
           rendererOptions: { showErrorMessage: true },
         });
