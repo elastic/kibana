@@ -59,6 +59,7 @@
       "serverless",
       "observabilityAIAssistant",
       "investigate",
+      "onechat",
     ],
     "requiredBundles": [
       "aiops",

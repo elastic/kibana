@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+
 import React, { useMemo, useEffect, useCallback, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -112,7 +113,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     onConversationCreated,
     onDeleteConversation,
   });
-
   const attachmentMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
 
   const setAttachmentMap = useCallback((attachments: Map<string, Record<string, unknown>>) => {

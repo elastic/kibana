@@ -1,0 +1,8 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/contextual-insights-button",
+  "owner": "@elastic/obs-ai-assistant",
+  "group": "platform",
+  "visibility": "shared"
+}
+
