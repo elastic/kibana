@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
   FormBasedLayer,
@@ -90,13 +89,22 @@ export function isTextBasedLayer(
   return 'index' in layer && 'query' in layer;
 }
 
+function generateAdHocDataViewId(dataView: {
+  type: 'adHocDataView';
+  index: string;
+  timeFieldName: string;
+}) {
+  return `${dataView.index}-${dataView.timeFieldName ?? 'no_time_field'}`;
+}
+
 function getAdHocDataViewSpec(dataView: {
   type: 'adHocDataView';
   index: string;
   timeFieldName: string;
 }) {
   return {
-    id: uuidv4({}),
+    // Improve id genertation to be more predictable and hit cache more often
+    id: generateAdHocDataViewId(dataView),
     title: dataView.index,
     name: dataView.index,
     timeFieldName: dataView.timeFieldName,
@@ -129,7 +137,10 @@ export const getAdhocDataviews = (
   // dedupe and map multiple layer references to the same ad hoc dataview
   for (const [layerId, dataViewEntry] of adHocDataViewsFiltered) {
     if (!internalReferencesMap.has(dataViewEntry)) {
-      internalReferencesMap.set(dataViewEntry, { layerIds: [], id: uuidv4({}) });
+      internalReferencesMap.set(dataViewEntry, {
+        layerIds: [],
+        id: generateAdHocDataViewId(dataViewEntry),
+      });
     }
     const internalRef = internalReferencesMap.get(dataViewEntry)!;
     internalRef.layerIds.push(layerId);
