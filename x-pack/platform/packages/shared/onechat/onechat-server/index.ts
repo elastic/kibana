@@ -64,3 +64,6 @@ export type {
   RunAgentOnEventFn,
 } from './agents';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
+export { registerSkill, getSkillsRegistry } from './skills_registry';
+export type { SkillDefinition, SkillsRegistry } from './skills_registry';
+export type { ToolHandlerContext } from './tools/handler';

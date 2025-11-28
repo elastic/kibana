@@ -48,6 +48,8 @@ import { createDataViews } from './create_data_views';
 import { registerFeatures } from './utils/register_features';
 import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 import { createActionService } from './handlers/action/create_action_service';
+import { registerSkill } from '@kbn/onechat-server';
+import { createLiveQueriesSkills } from './skills/live_queries_skill';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -106,6 +108,20 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
     plugins.cases?.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
+
+    // Register live queries skills
+    try {
+      const liveQueriesSkills = createLiveQueriesSkills({
+        coreSetup: core,
+        osqueryContext,
+      });
+      liveQueriesSkills.forEach((skill) => {
+        registerSkill(skill);
+        this.logger.info(`Registered ${skill.id} skill`);
+      });
+    } catch (error) {
+      this.logger.error(`Error registering live queries skills: ${error}`);
+    }
 
     return {
       createActionService: this.createActionService,

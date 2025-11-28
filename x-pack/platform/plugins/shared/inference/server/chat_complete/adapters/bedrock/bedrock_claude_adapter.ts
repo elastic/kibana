@@ -161,7 +161,13 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
             contentArr.push({
               json: message.response as ToolResultContentBlock.JsonMember['json'],
             });
-          } else {
+          } else if (Array.isArray(message.response)) {
+            contentArr.push({
+              json: {
+                result: message.response as ToolResultContentBlock.JsonMember['json'],
+              }
+            });
+          }else {
             throw createInferenceInternalError(
               `Unsupported tool response type for toolCallId "${message.toolCallId}"; expected string or plain object`
             );

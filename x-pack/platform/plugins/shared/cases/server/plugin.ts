@@ -49,6 +49,8 @@ import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
 import type { ServerlessProjectType } from '../common/constants/types';
+import { registerSkill } from '@kbn/onechat-server';
+import { createCasesSkills } from './skills/cases_skill';
 
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
@@ -274,13 +276,28 @@ export class CasePlugin
       filesPluginStart: plugins.files,
     });
 
-    return {
+    const casesServerStart: CasesServerStart = {
       getCasesClientWithRequest: this.getCasesClientWithRequest(core),
       getExternalReferenceAttachmentTypeRegistry: () =>
         this.externalReferenceAttachmentTypeRegistry,
       getPersistableStateAttachmentTypeRegistry: () => this.persistableStateAttachmentTypeRegistry,
       config: this.caseConfig,
     };
+
+    // Register cases skills
+    try {
+      const casesSkills = createCasesSkills({
+        casesPluginStart: casesServerStart,
+      });
+      casesSkills.forEach((skill) => {
+        registerSkill(skill);
+        this.logger.info(`Registered ${skill.id} skill`);
+      });
+    } catch (error) {
+      this.logger.error(`Error registering cases skills: ${error}`);
+    }
+
+    return casesServerStart;
   }
 
   public stop() {

@@ -10,7 +10,7 @@ import { from, filter, shareReplay, merge, Subject, finalize } from 'rxjs';
 import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
 import type { ChatAgentEvent, RoundInput } from '@kbn/onechat-common';
 import type { BrowserApiToolMetadata } from '@kbn/onechat-common';
-import type { AgentHandlerContext, AgentEventEmitterFn } from '@kbn/onechat-server';
+import type { AgentHandlerContext, AgentEventEmitterFn, ToolHandlerContext } from '@kbn/onechat-server';
 import {
   addRoundCompleteEvent,
   extractRound,
@@ -24,6 +24,9 @@ import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
+import { createToolEventEmitter } from '../../../runner/utils/events';
+import type { InternalToolProgressEvent } from '@kbn/onechat-server/runner';
+import { ChatEventType } from '@kbn/onechat-common';
 
 const chatAgentGraphName = 'onechat-deep-agent';
 
@@ -52,7 +55,7 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     browserApiTools,
     startTime = new Date(),
   },
-  { logger, request, modelProvider, toolProvider, attachments, events }
+  { logger, request, modelProvider, toolProvider, attachments, events, esClient, runner, resultStore }
 ) => {
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -105,6 +108,31 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     conversation: processedConversation,
   });
 
+  // Create tool handler context for skills middleware
+  const toolEventEmitter = createToolEventEmitter({
+    eventHandler: (event: InternalToolProgressEvent) => {
+      // Convert tool progress event to agent event format
+      eventEmitter({
+        type: ChatEventType.toolProgress,
+        data: event.data,
+      });
+    },
+    context: { runId, stack: [] },
+  });
+
+  const toolHandlerContext: ToolHandlerContext | undefined = request && esClient && runner && resultStore
+    ? {
+        request,
+        esClient,
+        modelProvider,
+        toolProvider,
+        runner,
+        resultStore: resultStore.asReadonly ? resultStore.asReadonly() : resultStore,
+        logger,
+        events: toolEventEmitter,
+      }
+    : undefined;
+
   const agentGraph = createAgentGraph({
     logger,
     events: { emit: eventEmitter },
@@ -112,6 +140,8 @@ export const runDeepAgentMode: RunChatAgentFn = async (
     tools: allTools,
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
+    request,
+    toolHandlerContext,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
