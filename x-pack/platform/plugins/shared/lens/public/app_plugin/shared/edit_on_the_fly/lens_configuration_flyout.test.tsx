@@ -162,6 +162,11 @@ describe('LensEditConfigurationFlyout', () => {
           },
           activeDatasourceId: 'testDatasource',
           query: query as Query,
+          visualization: {
+            state: {},
+            activeId: 'testVis',
+            selectedLayerId: 'layer1',
+          },
         },
       }
     );

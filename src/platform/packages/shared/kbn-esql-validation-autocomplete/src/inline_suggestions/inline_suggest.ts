@@ -35,7 +35,7 @@ function processQuery(query: string): string {
   return query
     .replace(/\/\*[^*]*(?:\*(?!\/)[^*]*)*\*\//g, '') // Remove block comments (/* */)
     .replace(/\/\/.*$/gm, '') // Remove line comments (//)
-    .replace(/[\n\r]/g, '') // Remove newlines
+    .replace(/[\n\r]/g, ' ') // Remove newlines
     .replace(/\s*\|\s*/g, ' | ') // Normalize pipe spacing
     .trim();
 }

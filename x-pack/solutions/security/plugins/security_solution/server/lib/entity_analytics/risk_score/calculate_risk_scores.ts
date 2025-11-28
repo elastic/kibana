@@ -38,7 +38,7 @@ import {
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 import { applyCriticalityToScore, getCriticalityModifier } from '../asset_criticality/helpers';
-import { getAfterKeyForIdentifierType, getFieldForIdentifier } from './helpers';
+import { getAfterKeyForIdentifierType, getFieldForIdentifier, max10DecimalPlaces } from './helpers';
 import type {
   CalculateRiskScoreAggregations,
   CalculateScoresParams,
@@ -46,8 +46,6 @@ import type {
 } from '../types';
 import { RIEMANN_ZETA_VALUE, RIEMANN_ZETA_S_VALUE } from './constants';
 import { getPainlessScripts, type PainlessScripts } from './painless';
-
-const max10DecimalPlaces = (num: number) => Math.round(num * 1e10) / 1e10;
 
 const formatForResponse = ({
   bucket,

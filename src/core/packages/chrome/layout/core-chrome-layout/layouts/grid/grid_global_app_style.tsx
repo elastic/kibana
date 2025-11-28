@@ -38,9 +38,11 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     --kbnProjectHeaderAppActionMenuHeight: ${layoutVar('application.topBar.height', '0px')};
   }
 
-  :root {
-    // disable document-level scroll, since the application area handles it
-    overflow: hidden;
+  // disable document-level scroll, since the application area handles it, but only when not printing
+  @media screen {
+    :root {
+      overflow: hidden;
+    }
   }
 
   #kibana-body {

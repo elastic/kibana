@@ -2083,6 +2083,26 @@
       }
     }
   },
+  "gap_auto_fill_scheduler": {
+    "dynamic": false,
+    "properties": {
+      "createdAt": {
+        "type": "date"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "ruleTypeConsumerPairs": {
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "graph-workspace": {
     "properties": {
       "description": {

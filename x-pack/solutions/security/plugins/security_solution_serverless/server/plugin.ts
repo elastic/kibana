@@ -14,13 +14,7 @@ import type {
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
-import { isSupportedConnector } from '@kbn/inference-common';
-import {
-  getDefaultAIConnectorSetting,
-  getDefaultValueReportSettings,
-} from '@kbn/security-solution-plugin/server/ui_settings';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED } from '@kbn/security-solution-plugin/common/constants';
+import { getDefaultValueReportSettings } from '@kbn/security-solution-plugin/server/ui_settings';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -97,35 +91,9 @@ export class SecuritySolutionServerlessPlugin
     pluginsSetup.serverless.setupProjectSettings(projectSettings);
 
     // Serverless Advanced Settings setup
-    coreSetup
-      .getStartServices()
-      .then(async ([coreStart, depsStart]) => {
-        const isNewDefaultConnectorEnabled = await coreStart.featureFlags.getBooleanValue(
-          AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-          false
-        );
-        try {
-          const unsecuredActionsClient = depsStart.actions.getUnsecuredActionsClient();
-          // using "default" space actually forces the api to use undefined space (see getAllUnsecured)
-          const aiConnectors = (await unsecuredActionsClient.getAll('default')).filter(
-            (connector: Connector) => isSupportedConnector(connector)
-          );
-
-          // hide the setting if the new default connector feature is enabled
-          const defaultAIConnectorSetting = getDefaultAIConnectorSetting(
-            aiConnectors,
-            isNewDefaultConnectorEnabled ? 'ui' : undefined
-          );
-
-          coreSetup.uiSettings.register({
-            ...defaultAIConnectorSetting,
-            ...getDefaultValueReportSettings(),
-          });
-        } catch (error) {
-          this.logger.error(`Error registering default AI connector: ${error}`);
-        }
-      })
-      .catch(() => {}); // it shouldn't reject, but just in case
+    coreSetup.uiSettings.register({
+      ...getDefaultValueReportSettings(),
+    });
 
     // Tasks
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({

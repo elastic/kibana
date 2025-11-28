@@ -17,6 +17,7 @@ import { ChartType } from '@kbn/visualization-utils';
 import { customInstructionsBlock, formatDate } from './prompts/prompt_helpers';
 import type { ResearchAgentAction, AnswerAgentAction } from './actions';
 import { formatResearcherActionHistory, formatAnswerActionHistory } from './prompts/format_actions';
+import type { ProcessedAttachmentType } from '../utils/prepare_conversation';
 
 const tools = {
   indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
@@ -29,11 +30,13 @@ export const getActPrompt = ({
   capabilities,
   initialMessages,
   actions,
+  attachmentTypes,
 }: {
   customInstructions?: string;
   capabilities: ResolvedAgentCapabilities;
   initialMessages: BaseMessageLike[];
   actions: ResearchAgentAction[];
+  attachmentTypes: ProcessedAttachmentType[];
 }): BaseMessageLike[] => {
   return [
     [
@@ -126,6 +129,8 @@ Constraints:
 
 ${customInstructionsBlock(customInstructions)}
 
+${renderAttachmentTypeInstructions(attachmentTypes)}
+
 ## ADDITIONAL INFO
 - Current date: ${formatDate()}
 
@@ -204,6 +209,70 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
   ];
 };
 
+export const getStructuredAnswerPrompt = ({
+  customInstructions,
+  initialMessages,
+  actions,
+  answerActions,
+  capabilities,
+}: {
+  customInstructions?: string;
+  initialMessages: BaseMessageLike[];
+  actions: ResearchAgentAction[];
+  answerActions: AnswerAgentAction[];
+  capabilities: ResolvedAgentCapabilities;
+}): BaseMessageLike[] => {
+  const visEnabled = capabilities.visualizations;
+
+  return [
+    [
+      'system',
+      `You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
+
+Your role is to be the **final answering agent** in a multi-agent flow. You must respond using the structured output format that is provided to you.
+
+## INSTRUCTIONS
+- Carefully read the original discussion and the gathered information.
+- Synthesize an accurate response that directly answers the user's question.
+- Do not hedge. If the information is complete, provide a confident and final answer.
+- If there are still uncertainties or unresolved issues, acknowledge them clearly and state what is known and what is not.
+- You must respond using the structured output format available to you. Fill in all required fields with appropriate values from your response.
+
+## GUIDELINES
+- Do not mention the research process or that you are an AI or assistant.
+- Do not mention that the answer was generated based on previous steps.
+- Do not repeat the user's question or summarize the JSON input.
+- Do not speculate beyond the gathered information unless logically inferred from it.
+- Do not mention internal reasoning or tool names unless user explicitly asks.
+
+${customInstructionsBlock(customInstructions)}
+
+## OUTPUT STYLE
+- Clear, direct, and scoped. No extraneous commentary.
+- Use custom rendering when appropriate.
+- Use minimal Markdown for readability (short bullets; code blocks for queries/JSON when helpful).
+
+## CUSTOM RENDERING
+
+${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
+
+## ADDITIONAL INFO
+- Current date: ${formatDate()}
+
+## PRE-RESPONSE COMPLIANCE CHECK
+- [ ] I responded using the structured output format with all required fields filled
+- [ ] All claims are grounded in tool output, conversation history or user-provided content.
+- [ ] I asked for missing mandatory parameters only when required.
+- [ ] The answer stays within the user's requested scope.
+- [ ] I answered every part of the user's request (identified sub-questions/requirements). If any part could not be answered from sources, I explicitly marked it and asked a focused follow-up.
+- [ ] No internal tool process or names revealed (unless user asked).`,
+    ],
+    ...initialMessages,
+    ...formatResearcherActionHistory({ actions }),
+    ...formatAnswerActionHistory({ actions: answerActions }),
+  ];
+};
+
 function renderVisualizationPrompt() {
   const { tabularData, visualization } = ToolResultType;
   const { tagName, attributes } = visualizationElement;
@@ -243,3 +312,23 @@ function renderVisualizationPrompt() {
       To visualize this response as a bar chart your reply should be:
       <${tagName} ${attributes.toolResultId}="LiDoF1" ${attributes.chartType}="${ChartType.Bar}"/>`;
 }
+
+const renderAttachmentTypeInstructions = (attachmentTypes: ProcessedAttachmentType[]): string => {
+  if (attachmentTypes.length === 0) {
+    return '';
+  }
+
+  const perTypeInstructions = attachmentTypes.map(({ type, description }) => {
+    return `### ${type} attachments
+
+${description ?? 'No instructions available.'}
+`;
+  });
+
+  return `## ATTACHMENT TYPES
+
+  The current conversation contains attachments. Here is the list of attachment types present in the conversation and their corresponding instructions:
+
+${perTypeInstructions.join('\n\n')}
+  `;
+};

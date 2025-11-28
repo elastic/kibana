@@ -19,9 +19,8 @@
  * MVP implementation focusing on core community intelligence actions.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../connector_spec';
-import { UISchemas } from '../connector_spec_ui';
 
 export const AlienVaultOTXConnector: ConnectorSpec = {
   metadata: {
@@ -29,17 +28,17 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
     displayName: 'AlienVault OTX',
     description: 'Community-driven threat intelligence from Open Threat Exchange',
     minimumLicense: 'gold',
-    supportedFeatureIds: ['alerting', 'siem'],
+    supportedFeatureIds: ['workflows'],
   },
 
-  schema: z.discriminatedUnion('method', [
-    z.object({
-      method: z.literal('headers'),
-      headers: z.object({
-        'X-OTX-API-KEY': UISchemas.secret().describe('API Key'),
-      }),
-    }),
-  ]),
+  authTypes: [
+    {
+      type: 'api_key_header',
+      defaults: {
+        headerField: 'X-OTX-API-KEY',
+      },
+    },
+  ],
 
   actions: {
     getIndicator: {

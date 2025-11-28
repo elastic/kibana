@@ -3522,12 +3522,14 @@
         "css.escape",
         "dependency-check",
         "dependency-cruiser",
+        "dompurify",
         "fast-deep-equal",
         "node-forge",
         "formik",
         "handlebars",
         "js-sha256",
         "js-yaml",
+        "magic-bytes.js",
         "minimist",
         "object-hash",
         "require-in-the-middle",
@@ -3685,8 +3687,8 @@
     {
       "groupName": "inquirer",
       "matchDepNames": [
-        "inquirer",
-        "@types/inquirer"
+        "@types/inquirer",
+        "inquirer"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -4400,6 +4402,7 @@
         "@opentelemetry/exporter-metrics-otlp-http",
         "@opentelemetry/exporter-metrics-otlp-grpc",
         "@opentelemetry/exporter-prometheus",
+        "@opentelemetry/exporter-trace-otlp-grpc",
         "@opentelemetry/exporter-trace-otlp-http",
         "@opentelemetry/exporter-trace-otlp-proto",
         "@opentelemetry/instrumentation",

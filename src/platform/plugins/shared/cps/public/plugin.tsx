@@ -39,6 +39,7 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
       const manager = new CPSManager({
         http: core.http,
         logger: this.initializerContext.logger.get('cps'),
+        application: core.application,
       });
 
       // Register project picker in the navigation

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import { isOtherResult } from '@kbn/onechat-common/tools';
 import type { ToolResult, OtherResult } from '@kbn/onechat-common';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
@@ -123,7 +123,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             indexPatterns: ['logs-*-*', 'logs-*', 'filebeat-*'],
           },
           metrics: {
-            indexPatterns: ['metrics-*'],
+            indexPatterns: ['metrics-*', 'metricbeat-*'],
           },
           alerts: {
             indexPattern: ['alerts-observability-*'],
