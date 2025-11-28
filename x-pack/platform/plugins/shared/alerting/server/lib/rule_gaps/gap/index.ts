@@ -27,6 +27,7 @@ interface GapConstructorParams {
   filledIntervals?: StringInterval[];
   inProgressIntervals?: StringInterval[];
   internalFields?: InternalFields;
+  updatedAt?: string;
 }
 
 export class Gap {
@@ -35,7 +36,8 @@ export class Gap {
   private _inProgressIntervals: Interval[];
   private _internalFields?: InternalFields;
   private _timestamp?: string;
-  readonly ruleId: string;
+  private _updatedAt?: string;
+  readonly _ruleId: string;
 
   constructor({
     ruleId,
@@ -44,6 +46,7 @@ export class Gap {
     filledIntervals = [],
     inProgressIntervals = [],
     internalFields,
+    updatedAt,
   }: GapConstructorParams) {
     this._range = normalizeInterval(range);
     this._filledIntervals = mergeIntervals(filledIntervals.map(normalizeInterval));
@@ -54,7 +57,9 @@ export class Gap {
     if (timestamp) {
       this._timestamp = timestamp;
     }
-    this.ruleId = ruleId;
+
+    this._updatedAt = updatedAt ?? new Date().toISOString();
+    this._ruleId = ruleId;
   }
 
   public fillGap(interval: Interval): void {
@@ -95,6 +100,14 @@ export class Gap {
 
   public get timestamp() {
     return this._timestamp;
+  }
+
+  public get updatedAt() {
+    return this._updatedAt;
+  }
+
+  public setUpdatedAt(updatedAt: string): void {
+    this._updatedAt = updatedAt;
   }
 
   /**
@@ -139,6 +152,10 @@ export class Gap {
     return this._internalFields;
   }
 
+  public get ruleId() {
+    return this._ruleId;
+  }
+
   public getState() {
     return {
       range: denormalizeInterval(this.range),
@@ -167,6 +184,7 @@ export class Gap {
       filled_duration_ms: this.filledGapDurationMs,
       unfilled_duration_ms: this.unfilledGapDurationMs,
       in_progress_duration_ms: this.inProgressGapDurationMs,
+      updated_at: this._updatedAt,
     };
   }
 }

@@ -80,14 +80,34 @@ export const findGapsSearchAfter = async ({
   searchAfter?: SortResults[];
   pitId?: string;
 }> => {
-  const { ruleIds, start, end, perPage, statuses, sortField, sortOrder } = params;
+  const {
+    ruleIds,
+    start,
+    end,
+    perPage,
+    statuses,
+    sortField,
+    sortOrder,
+    hasUnfilledIntervals,
+    hasInProgressIntervals,
+    hasFilledIntervals,
+    updatedBefore,
+  } = params;
 
   if (ruleIds.length > FIND_GAPS_SEARCH_AFTER_MAX_RULES) {
     throw new Error(`ruleIds max size must be ${FIND_GAPS_SEARCH_AFTER_MAX_RULES}`);
   }
 
   try {
-    const filter = buildGapsFilter({ start, end, statuses });
+    const filter = buildGapsFilter({
+      start,
+      end,
+      statuses,
+      hasUnfilledIntervals,
+      hasInProgressIntervals,
+      hasFilledIntervals,
+      updatedBefore,
+    });
     const gapsResponse = await eventLogClient.findEventsBySavedObjectIdsSearchAfter(
       RULE_SAVED_OBJECT_TYPE,
       ruleIds,
