@@ -6,13 +6,13 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test } from '../fixtures';
-import { createRule } from './rules/helpers';
-import type { CreateRuleResponse } from './rules/types';
+import { test } from '../../fixtures';
+import { createRule } from './helpers';
+import type { CreateRuleResponse } from './types';
 
-test.describe('Rules Page', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Rules Page - Header', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsViewer();
     // Navigate to the rules list page
     await pageObjects.rulesPage.goto();
     // Verify we're on the rules page
@@ -38,36 +38,6 @@ test.describe('Rules Page', { tag: ['@ess', '@svlOblt'] }, () => {
     // Verify the flyout is closed
     await expect(pageObjects.rulesPage.settingsFlyout).toBeHidden();
   });
-
-  test('should filter rule types using search, verify counts, and close modal', async ({
-    pageObjects,
-  }) => {
-    // Open the rule type modal
-    await pageObjects.rulesPage.openRuleTypeModal();
-
-    await pageObjects.rulesPage.expectAllRuleTypesCount(14);
-
-    // Type in the search input
-    const searchInput = pageObjects.rulesPage.ruleTypeModalSearch;
-    await searchInput.fill('log');
-
-    await pageObjects.rulesPage.expectAllRuleTypesCount(1);
-
-    // Verify the search input contains the text
-    await expect(searchInput).toHaveValue('log');
-
-    // Clear the search
-    await searchInput.clear();
-    await expect(searchInput).toHaveValue('');
-
-    await pageObjects.rulesPage.expectAllRuleTypesCount(1);
-
-    // Close the modal
-    await pageObjects.rulesPage.closeRuleTypeModal();
-
-    // Verify the modal is closed
-    await expect(pageObjects.rulesPage.ruleTypeModal).toBeHidden();
-  });
 });
 
 test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
@@ -79,7 +49,7 @@ test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsViewer();
     // Navigate to the rules list page
     await pageObjects.rulesPage.goto();
     // Verify we're on the rules page
@@ -163,5 +133,32 @@ test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     // Verify URL contains logs tab indicator
     const url = page.url();
     expect(url).toContain('logs');
+  });
+});
+
+test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
+  let createdRule: CreateRuleResponse['data'];
+  test.beforeAll(async ({ apiServices }) => {
+    createdRule = (await createRule(apiServices)).data;
+  });
+
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsViewer();
+    await pageObjects.rulesPage.goto();
+  });
+
+  test.afterAll(async ({ apiServices }) => {
+    await apiServices.alerting.rules.delete(createdRule.id);
+  });
+
+  test('should see the Rules Table container', async ({ pageObjects }) => {
+    await expect(pageObjects.rulesPage.rulesTableContainer).toBeVisible();
+  });
+
+  test('should see a non-editable rule in the Rules Table', async ({ pageObjects }) => {
+    const nonEditableRules = pageObjects.rulesPage.getNonEditableRules();
+    await expect(nonEditableRules).toBeVisible();
+    await expect(nonEditableRules).toHaveCount(1);
+    await expect(nonEditableRules.filter({ hasText: createdRule.name })).toHaveCount(1);
   });
 });
