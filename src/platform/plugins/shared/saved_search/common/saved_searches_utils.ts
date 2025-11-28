@@ -16,7 +16,7 @@ export const fromSavedSearchAttributes = <
   ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
 >(
   id: string | undefined,
-  { title, description, tabs }: SavedSearchAttributes,
+  { title, description, tabs, projectRouting }: SavedSearchAttributes,
   tags: string[] | undefined,
   searchSource: SavedSearch['searchSource'] | SerializedSearchSourceFields,
   managed: boolean,
@@ -50,6 +50,7 @@ export const fromSavedSearchAttributes = <
     visContext: attributes.visContext,
     controlGroupJson: attributes.controlGroupJson,
     density: attributes.density,
+    projectRouting,
     tabs,
     managed,
   } as ReturnType;

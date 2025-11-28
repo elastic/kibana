@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import { waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject, skip } from 'rxjs';
 import { fetch$ } from './fetch';
@@ -373,6 +373,103 @@ describe('onFetchContextChanged', () => {
           from: 'now-25h',
           to: 'now',
         });
+        subscription.unsubscribe();
+      });
+    });
+
+    describe('local and parent project routing', () => {
+      const api = {
+        parentApi: {
+          ...parentApi,
+          projectRouting$: new BehaviorSubject<ProjectRouting | undefined>('ALL'),
+        },
+        projectRouting$: new BehaviorSubject<ProjectRouting | undefined>('_alias:_origin'),
+      };
+
+      test('should emit on subscribe (projectRouting is local projectRouting)', async () => {
+        const subscription = fetch$(api).subscribe(onFetchMock);
+        await waitFor(() => {
+          expect(onFetchMock).toHaveBeenCalledTimes(1);
+        });
+        const fetchContext = onFetchMock.mock.calls[0][0];
+        expect(fetchContext.projectRouting).toEqual('_alias:_origin');
+        subscription.unsubscribe();
+      });
+
+      test('should emit once on local project routing change', async () => {
+        const subscription = fetch$(api).pipe(skip(1)).subscribe(onFetchMock);
+        await waitForSearchSession();
+
+        api.projectRouting$.next('project1');
+        await waitFor(() => {
+          expect(onFetchMock).toHaveBeenCalledTimes(1);
+        });
+
+        const fetchContext = onFetchMock.mock.calls[0][0];
+        expect(fetchContext.projectRouting).toEqual('project1');
+        subscription.unsubscribe();
+      });
+
+      test('should not emit on parent project routing change', async () => {
+        const subscription = fetch$(api).pipe(skip(1)).subscribe(onFetchMock);
+        await waitForSearchSession();
+        expect(onFetchMock).not.toHaveBeenCalled();
+
+        api.parentApi.projectRouting$.next('project2');
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        expect(onFetchMock).not.toHaveBeenCalled();
+        subscription.unsubscribe();
+      });
+
+      test('should emit once when local project routing is cleared (projectRouting is parent projectRouting)', async () => {
+        // Reset parent projectRouting to 'ALL' in case previous test changed it
+        api.parentApi.projectRouting$.next('ALL');
+        api.projectRouting$.next('_alias:_origin'); // Reset local to initial value
+
+        const subscription = fetch$(api).pipe(skip(1)).subscribe(onFetchMock);
+        await waitForSearchSession();
+        expect(onFetchMock).not.toHaveBeenCalled();
+
+        api.projectRouting$.next(undefined);
+        await waitFor(() => {
+          expect(onFetchMock).toHaveBeenCalledTimes(1);
+        });
+        const fetchContext = onFetchMock.mock.calls[0][0];
+        expect(fetchContext.projectRouting).toEqual('ALL');
+        subscription.unsubscribe();
+      });
+    });
+
+    describe('only parent project routing', () => {
+      const api = {
+        parentApi: {
+          ...parentApi,
+          projectRouting$: new BehaviorSubject<ProjectRouting | undefined>('ALL'),
+        },
+      };
+
+      test('should emit on subscribe (projectRouting is parent projectRouting)', async () => {
+        const subscription = fetch$(api).subscribe(onFetchMock);
+        await waitFor(() => {
+          expect(onFetchMock).toHaveBeenCalledTimes(1);
+        });
+        const fetchContext = onFetchMock.mock.calls[0][0];
+        expect(fetchContext.projectRouting).toEqual('ALL');
+        subscription.unsubscribe();
+      });
+
+      test('should emit once on parent project routing change', async () => {
+        const subscription = fetch$(api).pipe(skip(1)).subscribe(onFetchMock);
+        await waitForSearchSession();
+        expect(onFetchMock).not.toHaveBeenCalled();
+
+        api.parentApi.projectRouting$.next('_alias:_origin');
+
+        await waitFor(() => {
+          expect(onFetchMock).toHaveBeenCalledTimes(1);
+        });
+        const fetchContext = onFetchMock.mock.calls[0][0];
+        expect(fetchContext.projectRouting).toEqual('_alias:_origin');
         subscription.unsubscribe();
       });
     });

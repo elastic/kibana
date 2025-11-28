@@ -29,7 +29,9 @@ import {
   type AggregateQuery,
   type Filter,
   type Query,
+  type ProjectRouting,
 } from '@kbn/es-query';
+import type { PublishesProjectRouting } from '@kbn/presentation-publishing';
 import type { DiscoverServices } from '../build_services';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
 import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
@@ -88,6 +90,7 @@ export const initializeSearchEmbeddableApi = async (
 ): Promise<{
   api: PublishesWritableSavedSearch &
     PublishesWritableDataViews &
+    PublishesProjectRouting &
     Partial<PublishesWritableUnifiedSearch>;
   stateManager: SearchEmbeddableStateManager;
   anyStateChange$: Observable<void>;
@@ -115,6 +118,9 @@ export const initializeSearchEmbeddableApi = async (
   const density$ = new BehaviorSubject<DataGridDensity | undefined>(initialState.density);
   const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
+  const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(
+    initialState.projectRouting ?? undefined
+  );
 
   /**
    * This is the state that comes from the search source that needs individual publishing subjects for the API
@@ -217,6 +223,7 @@ export const initializeSearchEmbeddableApi = async (
       setQuery,
       canEditUnifiedSearch,
       setColumns,
+      projectRouting$,
     },
     stateManager,
     anyStateChange$: onAnyStateChange.pipe(map(() => undefined)),
@@ -243,6 +250,7 @@ export const initializeSearchEmbeddableApi = async (
       headerRowHeight$.next(lastSaved?.headerRowHeight);
       savedSearchViewMode$.next(lastSaved?.viewMode);
       density$.next(lastSaved?.density);
+      projectRouting$.next(lastSaved?.projectRouting ?? undefined);
     },
   };
 };
