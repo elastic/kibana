@@ -21,6 +21,7 @@ import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { TraceWarning } from './trace_warning';
 import { WaterfallLegends } from './waterfall_legends';
+import { TraceStateProvider } from '../../../../../../../../../src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_trace_state';
 
 export interface Props {
   traceItems: TraceItem[];
@@ -49,24 +50,27 @@ export function TraceWaterfall({
   serviceName,
   isFiltered,
 }: Props) {
+  // If we don't add the TraceStateProvider here, the TraceWaterfallContextProvider won't "see" it.
   return (
-    <TraceWaterfallContextProvider
-      traceItems={traceItems}
-      showAccordion={showAccordion}
-      highlightedTraceId={highlightedTraceId}
-      onClick={onClick}
-      onErrorClick={onErrorClick}
-      scrollElement={scrollElement}
-      getRelatedErrorsHref={getRelatedErrorsHref}
-      isEmbeddable={isEmbeddable}
-      showLegend={showLegend}
-      serviceName={serviceName}
-      isFiltered={isFiltered}
-    >
-      <TraceWarning>
-        <TraceWaterfallComponent />
-      </TraceWarning>
-    </TraceWaterfallContextProvider>
+    <TraceStateProvider>
+      <TraceWaterfallContextProvider
+        traceItems={traceItems}
+        showAccordion={showAccordion}
+        highlightedTraceId={highlightedTraceId}
+        onClick={onClick}
+        onErrorClick={onErrorClick}
+        scrollElement={scrollElement}
+        getRelatedErrorsHref={getRelatedErrorsHref}
+        isEmbeddable={isEmbeddable}
+        showLegend={showLegend}
+        serviceName={serviceName}
+        isFiltered={isFiltered}
+      >
+        <TraceWarning>
+          <TraceWaterfallComponent />
+        </TraceWarning>
+      </TraceWaterfallContextProvider>
+    </TraceStateProvider>
   );
 }
 

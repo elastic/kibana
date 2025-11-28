@@ -11,11 +11,8 @@ import { useState } from 'react';
 import createContainer from 'constate';
 import { TraceDataState } from '../../../../../../../x-pack/solutions/observability/plugins/apm/public/components/shared/trace_waterfall/use_trace_waterfall';
 
-/**
- * Hook that manages trace state as a string
- */
 const useTraceState = () => {
-  const [traceState, setTraceState] = useState<TraceDataState>(TraceDataState.Empty);
+  const [traceState, setTraceState] = useState<TraceDataState>(TraceDataState.Invalid);
 
   return {
     traceState,

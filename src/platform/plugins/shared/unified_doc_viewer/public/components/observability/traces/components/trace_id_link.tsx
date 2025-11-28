@@ -33,6 +33,7 @@ export function TraceIdLink({
   } = getUnifiedDocViewerServices();
   const traceStateContext = useTraceStateContext();
   const traceState = traceStateContext ? traceStateContext.traceState : undefined;
+  console.log('TRACE_LINK traceStateContext', traceStateContext);
 
   const canViewApm = core.application.capabilities.apm?.show || false;
   const { from: timeRangeFrom, to: timeRangeTo } =
@@ -64,7 +65,11 @@ export function TraceIdLink({
 
   return (
     <>
-      {canViewApm && routeLinkProps && traceState && traceState !== TraceDataState.Empty ? (
+      {canViewApm &&
+      routeLinkProps &&
+      traceState &&
+      traceState !== TraceDataState.Empty &&
+      traceState !== TraceDataState.Invalid ? (
         <EuiLink {...routeLinkProps} data-test-subj={dataTestSubj}>
           {formattedTraceId}
         </EuiLink>
