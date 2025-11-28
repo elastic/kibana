@@ -43,7 +43,7 @@ const NBA_M1: NBA = toNBA(
   'Add data from integrations',
   [
     {
-      app: '/fleet/policies',
+      app: '/integrations',
       text: 'Add data from integrations',
     },
   ]
