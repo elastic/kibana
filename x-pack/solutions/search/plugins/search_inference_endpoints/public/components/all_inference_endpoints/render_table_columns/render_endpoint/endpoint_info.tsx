@@ -17,7 +17,7 @@ import { docLinks } from '../../../../../common/doc_links';
 export interface EndpointInfoProps {
   inferenceId: string;
   endpointInfo: InferenceInferenceEndpointInfo;
-  isCloudEnabled: boolean;
+  isCloudEnabled?: boolean;
 }
 
 const EIS_TOUR_ENDPOINT = '.elser-2-elastic';
@@ -35,7 +35,7 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({
             <EisPromotionalTour
               promoId="eisInferenceEndpoint"
               ctaLink={docLinks.elasticInferenceService}
-              isCloudEnabled={isCloudEnabled}
+              isCloudEnabled={isCloudEnabled ?? false}
               anchorPosition="rightCenter"
             >
               <span>
