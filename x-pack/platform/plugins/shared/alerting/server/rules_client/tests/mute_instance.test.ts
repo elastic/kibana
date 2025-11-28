@@ -348,7 +348,6 @@ describe('muteInstance()', () => {
 
       await rulesClient.muteInstance({
         params: { alertId: '1', alertInstanceId: '2' },
-        alertInstanceId: '2',
         query: { validateAlertsExistence: false },
       });
 
@@ -378,7 +377,6 @@ describe('muteInstance()', () => {
       await expect(
         rulesClient.muteInstance({
           params: { alertId: '1', alertInstanceId: '2' },
-          alertInstanceId: '2',
           query: { validateAlertsExistence: false },
         })
       ).rejects.toThrow('ES connection failed');
