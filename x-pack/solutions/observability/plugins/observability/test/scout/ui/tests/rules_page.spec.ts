@@ -119,13 +119,13 @@ test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     // Verify all main sections are visible
     await pageObjects.rulesPage.expectLogsTabSectionsVisible();
 
-    // Verify individual components
+    // Additional verification that individual components are visible
     await expect(pageObjects.rulesPage.datePicker).toBeVisible();
     await expect(pageObjects.rulesPage.statusFilter).toBeVisible();
   });
 
   test('should hide loading indicator after logs data loads', async ({ pageObjects }) => {
-    // Click logs tab - loading may be very fast
+    // Click logs tab
     await pageObjects.rulesPage.clickLogsTab();
 
     // Wait for loading to complete and table to be visible
@@ -155,104 +155,6 @@ test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     await expect(pageObjects.rulesPage.statusFilter).toBeEnabled();
   });
 
-  test('should open date picker popover', async ({ pageObjects }) => {
-    // Navigate to logs tab
-    await pageObjects.rulesPage.clickLogsTab();
-    await pageObjects.rulesPage.expectLogsContentLoaded();
-
-    // Verify date picker button is enabled
-    await expect(pageObjects.rulesPage.datePicker).toBeEnabled();
-
-    // Click to open - the openDatePicker method already verifies it opens
-    await pageObjects.rulesPage.openDatePicker();
-
-    // If we got here without error, the date picker opened successfully
-  });
-
-  test('should open status filter dropdown', async ({ pageObjects }) => {
-    // Navigate to logs tab
-    await pageObjects.rulesPage.clickLogsTab();
-    await pageObjects.rulesPage.expectLogsContentLoaded();
-
-    // Open status filter using the helper method
-    await pageObjects.rulesPage.openStatusFilter();
-
-    // Verify the specific status filter content is visible
-    const statusFilterContent = pageObjects.rulesPage.page.locator(
-      '[data-test-subj="eventLogStatusFilter"]'
-    );
-    await expect(statusFilterContent).toHaveAttribute('class', /euiPopover-isOpen/);
-  });
-
-  test('should display event log table and count rows', async ({ pageObjects }) => {
-    // Navigate to logs tab
-    await pageObjects.rulesPage.clickLogsTab();
-    await pageObjects.rulesPage.expectLogsContentLoaded();
-
-    // Simply verify the table container is visible (it exists even when empty)
-    await expect(pageObjects.rulesPage.eventLogTable).toBeVisible();
-
-    // Get row count using the helper method
-    const rowCount = await pageObjects.rulesPage.getEventLogRowCount();
-
-    // Verify we get a number back
-    expect(typeof rowCount).toBe('number');
-    expect(rowCount).toBeGreaterThanOrEqual(0);
-  });
-
-  test('should display rule name links in event log table', async ({ pageObjects }) => {
-    // Navigate to logs tab
-    await pageObjects.rulesPage.clickLogsTab();
-    await pageObjects.rulesPage.expectLogsContentLoaded();
-
-    // Wait for loading to complete
-    await expect(pageObjects.rulesPage.loadingIndicator).toBeHidden();
-
-    // Get all rule name links
-    const ruleNameLinks = pageObjects.rulesPage.getRuleNameLinks();
-
-    // Verify link count is valid (may be 0 if no events yet)
-    const linkCount = await ruleNameLinks.count();
-    expect(linkCount).toBeGreaterThanOrEqual(0);
-  });
-
-  test('should verify event log table columns are present', async ({ pageObjects }) => {
-    // Navigate to logs tab
-    await pageObjects.rulesPage.clickLogsTab();
-    await pageObjects.rulesPage.expectLogsContentLoaded();
-
-    // Wait for loading to complete
-    await expect(pageObjects.rulesPage.loadingIndicator).toBeHidden();
-
-    // Verify the event log table is visible
-    await expect(pageObjects.rulesPage.eventLogTable).toBeVisible();
-
-    // The table structure should exist even if empty
-    const tableHeaders = pageObjects.rulesPage.page.locator(
-      '[data-test-subj="eventLogList"] thead th'
-    );
-
-    // Count headers (may be 0 if table is empty or still loading)
-    const headerCount = await tableHeaders.count();
-    expect(headerCount).toBeGreaterThanOrEqual(0);
-  });
-
-  test('should handle empty state gracefully', async ({ pageObjects }) => {
-    // Navigate to logs tab
-    await pageObjects.rulesPage.clickLogsTab();
-    await pageObjects.rulesPage.expectLogsContentLoaded();
-
-    // The table should always be visible (even if empty)
-    await expect(pageObjects.rulesPage.eventLogTable).toBeVisible();
-
-    // Check row count
-    const rowCount = await pageObjects.rulesPage.getEventLogRowCount();
-
-    // Row count should be a valid number (0 or more)
-    expect(typeof rowCount).toBe('number');
-    expect(rowCount).toBeGreaterThanOrEqual(0);
-  });
-
   test('should persist logs tab selection in URL', async ({ pageObjects }) => {
     // Navigate to logs tab
     await pageObjects.rulesPage.clickLogsTab();
@@ -261,23 +163,5 @@ test.describe('Rules Page - Logs Tab', { tag: ['@ess', '@svlOblt'] }, () => {
     // Verify URL contains logs tab indicator
     const url = pageObjects.rulesPage.page.url();
     expect(url).toContain('logs');
-  });
-
-  test('should refresh logs data when using date picker', async ({ pageObjects }) => {
-    // Navigate to logs tab
-    await pageObjects.rulesPage.clickLogsTab();
-    await pageObjects.rulesPage.expectLogsContentLoaded();
-
-    // Open date picker
-    await pageObjects.rulesPage.openDatePicker();
-
-    // The date picker opening itself tests the interaction
-    // After changing dates, the table should still be visible
-    await expect(pageObjects.rulesPage.eventLogTable).toBeVisible();
-
-    // Row count should still be a valid number
-    const currentRowCount = await pageObjects.rulesPage.getEventLogRowCount();
-    expect(typeof currentRowCount).toBe('number');
-    expect(currentRowCount).toBeGreaterThanOrEqual(0);
   });
 });

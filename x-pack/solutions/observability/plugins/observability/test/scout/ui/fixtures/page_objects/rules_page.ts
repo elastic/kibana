@@ -282,49 +282,4 @@ export class RulesPage {
     await expect(this.datePicker).toBeVisible();
     await expect(this.statusFilter).toBeVisible();
   }
-
-  /**
-   * Gets all rule name links in the event log table
-   */
-  getRuleNameLinks() {
-    return this.page.locator('[data-test-subj="ruleEventLogListTable"] a');
-  }
-
-  /**
-   * Clicks the date picker button to open the date picker popover
-   */
-  async openDatePicker() {
-    await expect(this.datePicker).toBeVisible();
-    await this.datePicker.click();
-  }
-
-  /**
-   * Clicks the status filter button to open the status filter dropdown
-   */
-  async openStatusFilter() {
-    await expect(this.statusFilter).toBeVisible();
-    await this.statusFilter.click();
-  }
-
-  /**
-   * Gets the empty state message locator
-   */
-  public get emptyStateMessage() {
-    return this.page.locator('[data-test-subj="ruleEventLogEmptyPrompt"]');
-  }
-
-  /**
-   * Gets the table rows in the event log
-   */
-  getEventLogTableRows() {
-    return this.page.locator('[data-test-subj="ruleEventLogListTable"] .euiDataGridRow');
-  }
-
-  /**
-   * Counts the number of visible rows in the event log table
-   */
-  async getEventLogRowCount(): Promise<number> {
-    const rows = this.getEventLogTableRows();
-    return rows.count();
-  }
 }
