@@ -16,7 +16,7 @@ import { getApmToolAvailability } from '../utils/get_apm_tool_availability';
 import { getApmServiceList } from '../../routes/assistant_functions/get_apm_service_list';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import { ServiceHealthStatus } from '../../../common/service_health_status';
-import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '../../../common/agent_builder/agent_tool_ids';
+import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '../../../common/agent_builder/tool_ids';
 
 const getServicesSchema = z.object({
   ...timeRangeSchema.shape,
