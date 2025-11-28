@@ -144,12 +144,19 @@ export function StreamsSettingsFlyout({
   const [isChangingSignificantEvents, setIsChangingSignificantEvents] = React.useState(false);
   const toggleSignificantEvents = useCallback(async () => {
     setIsChangingSignificantEvents(true);
-    await core.uiSettings.set(
-      OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-      !significantEvents?.enabled
+    const isEnabled = !significantEvents?.enabled;
+    await core.uiSettings.set(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS, isEnabled);
+    core.notifications.toasts.addInfo(
+      isEnabled
+        ? i18n.translate('xpack.streams.streamsListView.significantEventsEnabledToast', {
+            defaultMessage: 'Significant events enabled',
+          })
+        : i18n.translate('xpack.streams.streamsListView.significantEventsDisabledToast', {
+            defaultMessage: 'Significant events disabled',
+          })
     );
     setIsChangingSignificantEvents(false);
-  }, [core.uiSettings, significantEvents?.enabled]);
+  }, [core.notifications.toasts, core.uiSettings, significantEvents?.enabled]);
 
   // Shipper button group state
   const shipperButtonGroupPrefix = useGeneratedHtmlId({ prefix: 'shipperButtonGroup' });
@@ -328,7 +335,7 @@ output.elasticsearch:
                 <p>
                   {i18n.translate('xpack.streams.streamsListView.significantEventsDescription', {
                     defaultMessage:
-                      'Significant events enable you to automatically detect and highlight important occurrences in your log data, helping you quickly identify issues and trends.',
+                      "A Significant event is a single, 'interesting' log event identified by an automated rule as being important for understanding a system's behavior.",
                   })}
                 </p>
               }
@@ -451,25 +458,17 @@ output.elasticsearch:
                         id="xpack.streams.streamsListView.shipperConfigCurlDescription"
                         defaultMessage="Send data to the {logsEndpoint} endpoint using the {bulkApiLink}. Refer to the following example for more information:"
                         values={{
-                          logsEndpoint: (
-                            <code>
-                              {i18n.translate(
-                                'xpack.streams.streamsSettingsFlyout.code.logsLabel',
-                                { defaultMessage: '/logs/' }
-                              )}
-                            </code>
-                          ),
+                          // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
+                          logsEndpoint: <code>/logs/</code>,
                           bulkApiLink: (
                             <EuiLink
                               href="https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk"
                               target="_blank"
                               rel="noopener noreferrer"
                               external
+                              // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
                             >
-                              {i18n.translate(
-                                'xpack.streams.streamsSettingsFlyout.bulkAPILinkLabel',
-                                { defaultMessage: 'Bulk API' }
-                              )}
+                              Bulk API
                             </EuiLink>
                           ),
                         }}
