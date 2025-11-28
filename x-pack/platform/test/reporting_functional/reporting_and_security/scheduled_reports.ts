@@ -22,7 +22,8 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const find = getService('find');
 
-  describe('Scheduled Reports Flyout', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/244651
+  describe.skip('Scheduled Reports Flyout', () => {
     const hasFocus = async (element: WebElementWrapper) => {
       const activeElement = await find.activeElement();
       return (await element._webElement.getId()) === (await activeElement._webElement.getId());
