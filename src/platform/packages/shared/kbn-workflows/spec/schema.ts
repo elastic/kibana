@@ -415,6 +415,7 @@ export const WorkflowInputSchema = z.union([
   WorkflowInputChoiceSchema,
   WorkflowInputArraySchema,
 ]);
+export type WorkflowInput = z.infer<typeof WorkflowInputSchema>;
 
 /* --- Consts --- */
 export const WorkflowConstsSchema = z.record(
