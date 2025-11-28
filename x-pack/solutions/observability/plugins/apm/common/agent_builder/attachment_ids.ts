@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-// Duplicate of the attachment type ID defined in @kbn/observability-agent-plugin/server/attachments/error.ts
+// Duplicate of the attachment type ID defined in @kbn/observability-agent-plugin/server/attachments/ai_insight.ts
 // Re-defined here to avoid cross-plugin dependency cycles
-export const OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID = 'observability.error';
+export const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';

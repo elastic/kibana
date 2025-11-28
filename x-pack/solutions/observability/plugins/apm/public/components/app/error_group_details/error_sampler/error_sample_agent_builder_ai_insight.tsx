@@ -10,6 +10,7 @@ import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { AT_TIMESTAMP } from '@kbn/apm-types';
 import { AiInsight } from '@kbn/observability-agent-builder';
+import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '../../../../../common/agent_builder/attachment_ids';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { getIsObservabilityAgentEnabled } from '../../../../../common/agent_builder/get_is_obs_agent_enabled';
@@ -17,8 +18,6 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
-// import { ErrorSampleDetailTabContent } from './error_sample_detail';
-// import { exceptionStacktraceTab, logStacktraceTab } from './error_tabs';
 
 export function ErrorSampleAgentBuilderAiInsight({
   error,
@@ -93,7 +92,7 @@ export function ErrorSampleAgentBuilderAiInsight({
       setContext(response?.context);
     } catch (e) {
       setSummary('');
-      setContext(undefined);
+      setContext('');
     } finally {
       setIsLoading(false);
     }
@@ -157,7 +156,7 @@ export function ErrorSampleAgentBuilderAiInsight({
       },
       {
         id: 'apm_error_ai_insight',
-        type: 'observability.ai_insight',
+        type: OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
         getContent: () => ({
           summary,
           context,
