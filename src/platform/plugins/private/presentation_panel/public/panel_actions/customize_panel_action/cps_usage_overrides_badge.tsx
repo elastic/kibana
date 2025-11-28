@@ -17,10 +17,7 @@ import React, { useState } from 'react';
 import { EuiPopover, EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import {
-  apiPublishesProjectRouting,
-  apiHasParentApi,
-} from '@kbn/presentation-publishing';
+import { apiPublishesProjectRouting, apiHasParentApi } from '@kbn/presentation-publishing';
 import { combineLatest, map } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { CPS_USAGE_OVERRIDES_BADGE } from './constants';
@@ -135,9 +132,10 @@ export class CpsUsageOverridesBadge
                 defaultMessage: 'Dashboard scope:',
               })}
             </strong>{' '}
-            {formatProjectRoutingValue(dashboardValue) ?? i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.notSet', {
-              defaultMessage: 'Not set',
-            })}
+            {formatProjectRoutingValue(dashboardValue) ??
+              i18n.translate('presentationPanel.badge.cpsUsageOverrides.popover.notSet', {
+                defaultMessage: 'Not set',
+              })}
           </p>
         </EuiText>
         <EuiSpacer size="s" />
@@ -204,8 +202,7 @@ export class CpsUsageOverridesBadge
 
     // Only show badge if embeddable has an explicit (non-undefined) override that differs from dashboard
     return (
-      embeddableProjectRouting !== undefined &&
-      embeddableProjectRouting !== parentProjectRouting
+      embeddableProjectRouting !== undefined && embeddableProjectRouting !== parentProjectRouting
     );
   }
 }
