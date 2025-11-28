@@ -95,11 +95,9 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
     const selectedTab = allTabs.find((tab) => tab.id === selectedTabId) ?? allTabs[0];
 
     if (services.cps?.cpsManager) {
-      // Restore projectRouting from persisted session
       const restoredProjectRouting = discoverSession.projectRouting;
-
       // If a saved value exists, restore it
-      if (restoredProjectRouting !== undefined && restoredProjectRouting !== null) {
+      if (restoredProjectRouting) {
         dispatch(internalStateSlice.actions.setProjectRouting(restoredProjectRouting));
         services.cps.cpsManager.setProjectRouting(restoredProjectRouting);
       } else if (!updatedDiscoverSession) {
@@ -109,8 +107,6 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
         dispatch(internalStateSlice.actions.setProjectRouting(defaultRouting));
         services.cps.cpsManager.setProjectRouting(defaultRouting);
       }
-      // If updatedDiscoverSession is provided and projectRouting is undefined/null,
-      // we preserve the current picker value (no reset)
     }
     await dispatch(
       updateTabs({ items: allTabs, selectedItem: selectedTab, updatedDiscoverSession })

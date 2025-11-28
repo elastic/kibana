@@ -66,11 +66,8 @@ export interface SavedSearchAttributes {
   timeRestore?: boolean;
   timeRange?: Pick<TimeRange, 'from' | 'to'>;
   refreshInterval?: RefreshInterval;
-
-  projectRoutingRestore?: boolean;
   // projectRouting can be null to explicitly clear the value in storage
   projectRouting?: ProjectRouting | null;
-
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;

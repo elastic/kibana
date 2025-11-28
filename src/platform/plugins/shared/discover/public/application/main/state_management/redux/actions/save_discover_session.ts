@@ -210,7 +210,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     // Determine projectRouting value to save:
     // - Toggle ON: save current value
     // - Toggle OFF + original had value: save null (explicitly clear it)
-    // - Toggle OFF + original had NO value: save undefined (don't persist it)
+    // - Toggle OFF + original had NO value: save undefined (leave as is)
     const hasSavedProjectRouting = state.persistedDiscoverSession?.projectRouting !== undefined;
 
     const saveParams: SaveDiscoverSessionParams = {
@@ -222,8 +222,8 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       projectRouting: newProjectRoutingRestore
         ? state.projectRouting
         : hasSavedProjectRouting
-          ? null
-          : undefined,
+        ? null
+        : undefined,
     };
 
     const saveOptions: SaveDiscoverSessionOptions = {

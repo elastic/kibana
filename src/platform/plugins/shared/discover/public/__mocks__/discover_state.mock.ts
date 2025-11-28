@@ -290,7 +290,8 @@ export function getDiscoverStateMock({
           }),
           ...additionalPersistedTabs,
         ],
-        projectRouting: finalSavedSearch.projectRouting === null ? undefined : finalSavedSearch.projectRouting,
+        projectRouting:
+          finalSavedSearch.projectRouting === null ? undefined : finalSavedSearch.projectRouting,
       }
     : undefined;
   const mockUserId = 'mockUserId';

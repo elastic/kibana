@@ -67,13 +67,10 @@ export const selectHasUnsavedChanges = (
     persistedProjectRouting !== undefined && persistedProjectRouting !== state.projectRouting;
 
   if (projectRoutingChanged) {
-    addLog(
-      '[DiscoverSession] difference between initial and changed version: projectRouting',
-      {
-        before: persistedProjectRouting,
-        after: state.projectRouting,
-      }
-    );
+    addLog('[DiscoverSession] difference between initial and changed version: projectRouting', {
+      before: persistedProjectRouting,
+      after: state.projectRouting,
+    });
   }
 
   const unsavedTabIds: string[] = [];

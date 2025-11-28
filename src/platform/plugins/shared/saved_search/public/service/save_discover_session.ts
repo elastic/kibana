@@ -152,7 +152,8 @@ export const saveDiscoverSession = async (
 
   return {
     ...discoverSession,
-    projectRouting: discoverSession.projectRouting === null ? undefined : discoverSession.projectRouting,
+    projectRouting:
+      discoverSession.projectRouting === null ? undefined : discoverSession.projectRouting,
     id,
     references,
     managed: false,
