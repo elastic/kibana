@@ -269,6 +269,28 @@ export const removeProcessorSchema = processorBaseWithWhereSchema.extend({
 }) satisfies z.Schema<RemoveProcessor>;
 
 /**
+ * Geoip processor
+ */
+
+export interface GeoipProcessor extends ProcessorBaseWithWhere {
+  action: 'geoip';
+  from: string;
+  to?: string;
+  database_file?: string;
+  properties?: string[];
+  ignore_missing?: boolean;
+}
+
+export const geoipProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('geoip'),
+  from: StreamlangSourceField,
+  to: z.optional(StreamlangTargetField),
+  database_file: z.optional(NonEmptyString),
+  properties: z.optional(z.array(NonEmptyString)),
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<GeoipProcessor>;
+
+/**
  * Drop processor
  */
 
@@ -310,6 +332,7 @@ export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
   | DropDocumentProcessor
+  | GeoipProcessor
   | GrokProcessor
   | RenameProcessor
   | SetProcessor
@@ -325,6 +348,7 @@ export const streamlangProcessorSchema = z.union([
   dissectProcessorSchema,
   dateProcessorSchema,
   dropDocumentProcessorSchema,
+  geoipProcessorSchema,
   renameProcessorSchema,
   setProcessorSchema,
   appendProcessorSchema,
@@ -348,6 +372,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     dissectProcessorSchema,
     convertProcessorSchema,
     replaceProcessorSchema,
+    geoipProcessorSchema,
   ])
 );
 

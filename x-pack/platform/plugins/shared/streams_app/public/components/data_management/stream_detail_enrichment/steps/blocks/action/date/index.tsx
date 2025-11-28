@@ -45,8 +45,9 @@ export const DateProcessorForm = () => {
   const form = useFormContext<DateFormState>();
 
   const definition = useStreamEnrichmentSelector((snapshot) => snapshot.context.definition);
+  const getEnrichmentState = useGetStreamEnrichmentState();
   const previewDocuments = useSimulatorSelector((snapshot) =>
-    selectPreviewRecords(snapshot.context)
+    selectPreviewRecords(snapshot.context, getEnrichmentState().context)
   );
 
   const applySuggestions = async ({ field }: { field: string }) => {

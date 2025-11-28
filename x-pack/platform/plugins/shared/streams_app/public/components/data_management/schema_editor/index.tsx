@@ -176,6 +176,7 @@ export function SchemaEditor({
       fieldSelection={fieldSelection}
       isLoading={isLoading}
       onFieldUpdate={onFieldUpdate}
+      onAddField={onAddField}
       stream={stream}
       withControls={withControls}
       withFieldSimulation={withFieldSimulation}

@@ -26,7 +26,10 @@ import type { GrokProcessorResult } from '@kbn/grok-heuristics';
 import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { useStreamDetail } from '../../../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../../../state_management/simulation_state_machine/selectors';
-import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
+import {
+  useSimulatorSelector,
+  useGetStreamEnrichmentState,
+} from '../../../../state_management/stream_enrichment_state_machine';
 import type { ProcessorFormState } from '../../../../types';
 import { AdditionalChargesCallout } from './additional_charges_callout';
 import { GenerateSuggestionButton } from '../../../../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
@@ -48,8 +51,9 @@ export const GrokPatternAISuggestions = ({
     definition: { stream },
   } = useStreamDetail();
 
+  const getEnrichmentState = useGetStreamEnrichmentState();
   const previewDocuments = useSimulatorSelector((snapshot) =>
-    selectPreviewRecords(snapshot.context)
+    selectPreviewRecords(snapshot.context, getEnrichmentState().context)
   );
 
   const [suggestionsState, refreshSuggestions] = useGrokPatternSuggestion();

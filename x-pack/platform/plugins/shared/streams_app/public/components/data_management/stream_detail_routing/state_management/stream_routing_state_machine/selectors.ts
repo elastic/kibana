@@ -10,6 +10,10 @@ import { flattenObject } from '@kbn/object-utils';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import type { StreamRoutingContext } from './types';
 import type { RoutingSamplesContext } from './routing_samples_state_machine';
+import {
+  regroupGeoPointFieldsForDisplay,
+  normalizeGeoPointsInObject,
+} from '../../../utils/geo_point_utils';
 
 /**
  * Selects the set of dotted fields that are not supported by the current simulation.
@@ -34,8 +38,19 @@ export const selectCurrentRule = createSelector(
  * Selects the documents used for the data preview table.
  */
 export const selectPreviewDocuments = createSelector(
-  [(context: RoutingSamplesContext) => context.documents],
-  (documents) => {
-    return documents.map((doc) => flattenObject(doc)) as FlattenRecord[];
+  [
+    (context: RoutingSamplesContext) => context.documents,
+    (context: RoutingSamplesContext) => context.definition,
+  ],
+  (documents, definition) => {
+    const fieldDefinitions = definition.stream.ingest.wired.fields;
+    const fields = Object.entries(fieldDefinitions).map(([name, field]) => ({
+      name,
+      ...field,
+    }));
+    return documents
+      .map((doc) => normalizeGeoPointsInObject(doc, fields))
+      .map((doc) => flattenObject(doc) as FlattenRecord)
+      .map((record) => regroupGeoPointFieldsForDisplay(record, fields));
   }
 );

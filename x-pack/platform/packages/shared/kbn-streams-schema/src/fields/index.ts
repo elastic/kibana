@@ -13,6 +13,7 @@ import type {
   MappingKeywordProperty,
   MappingLongNumberProperty,
   MappingMatchOnlyTextProperty,
+  MappingGeoPointProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
@@ -27,6 +28,7 @@ export const FIELD_DEFINITION_TYPES = [
   'date',
   'boolean',
   'ip',
+  'geo_point',
 ] as const;
 
 export type FieldDefinitionType = (typeof FIELD_DEFINITION_TYPES)[number];
@@ -71,7 +73,8 @@ export type AllowedMappingProperty =
   | MappingDoubleNumberProperty
   | MappingDateProperty
   | MappingBooleanProperty
-  | MappingIpProperty;
+  | MappingIpProperty
+  | MappingGeoPointProperty;
 
 export type StreamsMappingProperties = Record<string, AllowedMappingProperty>;
 

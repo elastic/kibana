@@ -72,9 +72,13 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
       return;
     }
     const type = selectedOptions[0].value!;
+    const enrichmentContext = getEnrichmentState().context;
     const formState = getDefaultFormStateByType(
       type,
-      selectPreviewRecords(getEnrichmentState().context.simulatorRef.getSnapshot().context),
+      selectPreviewRecords(
+        enrichmentContext.simulatorRef.getSnapshot().context,
+        enrichmentContext
+      ),
       { grokCollection }
     );
     reset(formState);
@@ -344,6 +348,7 @@ const PROCESSOR_GROUP_MAP: Record<
   convert: 'convert',
   date: 'convert',
   replace: 'convert',
+  geoip: 'other',
   append: 'set',
   set: 'set',
   rename: 'set',

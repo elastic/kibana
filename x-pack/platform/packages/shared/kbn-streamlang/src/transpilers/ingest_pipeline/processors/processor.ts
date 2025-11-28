@@ -18,6 +18,7 @@ import type {
   IngestPipelineRemoveProcessor,
   IngestPipelineDropProcessor,
   IngestPipelineReplaceProcessor,
+  IngestPipelineGeoipProcessor,
 } from '../../../../types/processors/ingest_pipeline_processors';
 
 type WithOptionalTracingTag<T> = T & { tag?: string };
@@ -34,5 +35,6 @@ export interface ActionToIngestType {
   remove: WithOptionalTracingTag<IngestPipelineRemoveProcessor>;
   drop_document: WithOptionalTracingTag<IngestPipelineDropProcessor>;
   replace: WithOptionalTracingTag<IngestPipelineReplaceProcessor>;
+  geoip: WithOptionalTracingTag<IngestPipelineGeoipProcessor>;
   manual_ingest_pipeline: WithOptionalTracingTag<IngestPipelineManualIngestPipelineProcessor>;
 }
