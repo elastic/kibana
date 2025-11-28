@@ -106,7 +106,6 @@ TEST_SPACES.forEach((space) => {
     apiTest(
       'should return 409 when trying to create dashboard that already exists when overwrite=false',
       async ({ apiClient }) => {
-        // Use unique ID to prevent conflicts between test runs and spaces
         const uniqueId = `dashboard-${Date.now()}-${space.spaceId}`;
 
         // First import should succeed
@@ -164,8 +163,7 @@ TEST_SPACES.forEach((space) => {
 
     apiTest(
       'should return 200 and override existing dashboard when importing a dashboard that already exists when overwrite=true',
-      async ({ apiClient }) => {
-        // Use unique ID to prevent conflicts between test runs and spaces
+      async ({ apiClient, apiServices }) => {
         const uniqueId = `dashboard-${Date.now()}-${space.spaceId}`;
 
         // First import should succeed
@@ -198,6 +196,7 @@ TEST_SPACES.forEach((space) => {
           {
             ...DASHBOARD_SAVED_OBJECT,
             id: uniqueId,
+            attributes: { title: `${ATTRIBUTE_TITLE_VALUE} - Overwritten` },
           },
         ]);
 
@@ -215,6 +214,16 @@ TEST_SPACES.forEach((space) => {
 
         expect(response2.statusCode).toBe(200);
         expect(response2.body.success).toBe(true);
+
+        const exportResponse = await apiServices.savedObjects.export(
+          { objects: [{ type: 'dashboard', id: uniqueId }] },
+          space.spaceId
+        );
+
+        expect(exportResponse.data.exportedObjects).toHaveLength(1);
+        expect(exportResponse.data.exportedObjects[0].attributes[ATTRIBUTE_TITLE_KEY]).toBe(
+          `${ATTRIBUTE_TITLE_VALUE} - Overwritten`
+        );
       }
     );
 
@@ -260,114 +269,6 @@ TEST_SPACES.forEach((space) => {
         );
 
         expect(exportResponse.status).toBe(200);
-      }
-    );
-
-    apiTest(
-      'should return 200 and override existing dashboard while giving it a new ID (a new ID is generated)',
-      async ({ apiClient, apiServices }) => {
-        const uniqueId = `dashboard-overwrite-${Date.now()}-${space.spaceId}`;
-
-        // Import initial object
-        const formData1 = prepareImportFormData([
-          {
-            ...DASHBOARD_SAVED_OBJECT,
-            id: uniqueId,
-          },
-        ]);
-
-        const response1 = await apiClient.post(
-          `${spacePath}api/saved_objects/_import?createNewCopies=true`,
-          {
-            headers: {
-              ...COMMON_HEADERS,
-              ...savedObjectsManagementCredentials.apiKeyHeader,
-              ...formData1.headers,
-            },
-            body: formData1.buffer,
-          }
-        );
-        createdSavedObjects.push({ type: 'dashboard', id: uniqueId });
-
-        expect(response1.statusCode).toBe(200);
-        expect(response1.body.success).toBe(true);
-        expect(response1.body.successCount).toBe(1);
-
-        // Import with overwrite should succeed
-        const formData2 = prepareImportFormData([
-          {
-            ...DASHBOARD_SAVED_OBJECT,
-            attributes: { title: `${ATTRIBUTE_TITLE_VALUE} - Overwritten` },
-            id: uniqueId,
-          },
-        ]);
-
-        const response2 = await apiClient.post(
-          `${spacePath}api/saved_objects/_import?overwrite=true`,
-          {
-            headers: {
-              ...COMMON_HEADERS,
-              ...savedObjectsManagementCredentials.apiKeyHeader,
-              ...formData2.headers,
-            },
-            body: formData2.buffer,
-          }
-        );
-
-        expect(response2.statusCode).toBe(200);
-        expect(response2.body.success).toBe(true);
-        expect(response2.body.successCount).toBe(1);
-        expect(response2.body.successResults).toBeDefined();
-        expect(response2.body.successResults[0].type).toBe('dashboard');
-        expect(response2.body.successResults[0].id).toBe(uniqueId);
-
-        // Export to verify title was updated - use apiServices for verification/teardown
-        const exportResponse = await apiServices.savedObjects.export(
-          { objects: [{ type: 'dashboard', id: uniqueId }] },
-          space.spaceId
-        );
-        expect(exportResponse.status).toBe(200);
-
-        // Verify that the exported object's ID is different from the original uniqueId
-        expect(response2.body.successResults[0].destinationId).not.toBe(uniqueId);
-        expect(exportResponse.data.exportedObjects).toHaveLength(1);
-        expect(exportResponse.data.exportedObjects[0].attributes[ATTRIBUTE_TITLE_KEY]).toBe(
-          `${ATTRIBUTE_TITLE_VALUE} - Overwritten`
-        );
-      }
-    );
-
-    apiTest(
-      'should return 200 and auto-generate ID when creating without ID',
-      async ({ apiClient }) => {
-        const uniqueId = `dashboard-autogen-${Date.now()}-${space.spaceId}`;
-
-        const formData = prepareImportFormData([
-          {
-            ...DASHBOARD_SAVED_OBJECT,
-            id: uniqueId,
-          },
-        ]);
-
-        const response = await apiClient.post(
-          `${spacePath}api/saved_objects/_import?overwrite=false`,
-          {
-            headers: {
-              ...COMMON_HEADERS,
-              ...savedObjectsManagementCredentials.apiKeyHeader,
-              ...formData.headers,
-            },
-            body: formData.buffer,
-          }
-        );
-        createdSavedObjects.push({ type: 'dashboard', id: uniqueId });
-
-        expect(response.statusCode).toBe(200);
-        expect(response.body.success).toBe(true);
-        expect(response.body.successCount).toBe(1);
-        expect(response.body.successResults).toBeDefined();
-        expect(response.body.successResults[0].type).toBe('dashboard');
-        expect(response.body.successResults[0].id).toBe(uniqueId);
       }
     );
 
