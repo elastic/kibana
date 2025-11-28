@@ -8,7 +8,7 @@
 import React, { useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
 
-import { EuiSpacer } from '@elastic/eui';
+import { useEuiTheme, EuiSpacer } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
@@ -62,6 +62,7 @@ export interface EditorFrameProps {
 }
 
 export function EditorFrame(props: EditorFrameProps) {
+  const { euiTheme } = useEuiTheme();
   const { datasourceMap, visualizationMap } = useEditorFrameService();
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -167,7 +168,11 @@ export function EditorFrame(props: EditorFrameProps) {
         configPanel={
           areDatasourcesLoaded && (
             <ErrorBoundary onError={onError}>
-              <>
+              <div
+                css={css`
+                  background-color: ${euiTheme.colors.emptyShade};
+                `}
+              >
                 <EuiFlexGroup
                   gutterSize="s"
                   css={styles.visualizationToolbar}
@@ -198,7 +203,7 @@ export function EditorFrame(props: EditorFrameProps) {
                   indexPatternService={props.indexPatternService}
                   getUserMessages={props.getUserMessages}
                 />
-              </>
+              </div>
             </ErrorBoundary>
           )
         }
