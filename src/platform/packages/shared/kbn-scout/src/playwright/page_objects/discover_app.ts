@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Download } from 'playwright-core';
+import type { Download } from '@playwright/test';
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
