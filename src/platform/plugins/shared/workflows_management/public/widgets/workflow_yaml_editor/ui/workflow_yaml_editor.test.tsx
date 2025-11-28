@@ -15,8 +15,10 @@ import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
+import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
+import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
 import type { YamlEditorProps } from '../../../shared/ui';
 import { getCompletionItemProvider } from '../lib/autocomplete/get_completion_item_provider';
 
@@ -58,8 +60,8 @@ jest.mock('../../../shared/ui/unsaved_changes_prompt', () => ({
 }));
 
 // Mock the validation errors component
-jest.mock('./workflow_yaml_validation_errors', () => ({
-  WorkflowYAMLValidationErrors: () => null,
+jest.mock('./workflow_yaml_validation_accordion', () => ({
+  WorkflowYamlValidationAccordion: () => null,
 }));
 
 // Mock the useAvailableConnectors hook
@@ -70,9 +72,12 @@ jest.mock('../../../entities/connectors/model/use_available_connectors', () => (
   }),
 }));
 
-// Mock the useSaveYaml hook
+const mockSaveYaml = jest.fn();
+const mockUseSaveYaml = useSaveYaml as jest.MockedFunction<typeof useSaveYaml>;
+
+// Mock the useSaveYaml hook - now returns just the function, not an array
 jest.mock('../../../entities/workflows/model/use_save_yaml', () => ({
-  useSaveYaml: jest.fn(() => jest.fn()),
+  useSaveYaml: jest.fn(),
 }));
 
 // Mock the useKibana hook
@@ -102,10 +107,25 @@ jest.mock('../lib/monaco_providers', () => ({
   registerUnifiedHoverProvider: jest.fn(() => jest.fn()),
 }));
 
+const mockRegisterKeyboardCommands = jest.fn();
+const mockUnregisterKeyboardCommands = jest.fn();
+let capturedKeyboardHandlers: {
+  save?: () => void;
+  run?: () => void;
+  saveAndRun?: () => void;
+} = {};
+
 jest.mock('../lib/use_register_keyboard_commands', () => ({
   useRegisterKeyboardCommands: jest.fn(() => ({
-    registerKeyboardCommands: jest.fn(),
-    unregisterKeyboardCommands: jest.fn(),
+    registerKeyboardCommands: (params: any) => {
+      capturedKeyboardHandlers = {
+        save: params.save,
+        run: params.run,
+        saveAndRun: params.saveAndRun,
+      };
+      mockRegisterKeyboardCommands(params);
+    },
+    unregisterKeyboardCommands: mockUnregisterKeyboardCommands,
   })),
 }));
 
@@ -113,8 +133,8 @@ jest.mock('./step_actions', () => ({
   StepActions: () => null,
 }));
 
-jest.mock('./workflow_yaml_editor_shortcuts', () => ({
-  WorkflowYAMLEditorShortcuts: () => null,
+jest.mock('./actions_menu_button', () => ({
+  ActionsMenuButton: () => null,
 }));
 
 jest.mock('./decorations', () => ({
@@ -177,6 +197,11 @@ jest.mock('../lib/autocomplete/get_completion_item_provider', () => ({
   getCompletionItemProvider: jest.fn(() => mockCompletionProvider),
 }));
 
+// Mock interceptMonacoYamlProvider to be a no-op so the original mock remains
+jest.mock('../lib/autocomplete/intercept_monaco_yaml_provider', () => ({
+  interceptMonacoYamlProvider: jest.fn(),
+}));
+
 jest.mock('@kbn/monaco', () => ({
   monaco: {
     editor: {
@@ -212,11 +237,18 @@ describe('WorkflowYAMLEditor', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    capturedKeyboardHandlers = {};
+    mockSaveYaml.mockResolvedValue(undefined);
+    // useSaveYaml now returns just the function, not an array
+    mockUseSaveYaml.mockReturnValue(mockSaveYaml);
   });
 
-  it('renders without crashing', () => {
+  it('renders without crashing', async () => {
     renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />);
-    expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+    // Wait for async state updates (setTimeout in handleEditorDidMount)
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+    });
   });
 
   it('updates store when editor content changes', async () => {
@@ -260,17 +292,20 @@ steps:
       message: "Alert triggered!"
 `.trim();
 
-    it('renders without crashing with alert trigger YAML', () => {
+    it('renders without crashing with alert trigger YAML', async () => {
       const store = createMockStore();
       store.dispatch(setYamlString(yamlWithAlertTrigger));
       store.dispatch(setActiveTab('workflow'));
 
       renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
-      expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+      // Wait for async state updates (setTimeout in handleEditorDidMount)
+      await waitFor(() => {
+        expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+      });
     });
 
-    it('renders in readOnly mode when isExecutionYaml is true', () => {
+    it('renders in readOnly mode when isExecutionYaml is true', async () => {
       const store = createMockStore();
       store.dispatch(setActiveTab('executions'));
       store.dispatch(
@@ -282,10 +317,13 @@ steps:
 
       renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
-      expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+      // Wait for async state updates (setTimeout in handleEditorDidMount)
+      await waitFor(() => {
+        expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+      });
     });
 
-    it('handles invalid YAML gracefully', () => {
+    it('handles invalid YAML gracefully', async () => {
       const invalidYaml = `
 version: "1"
 name: "test workflow"
@@ -307,12 +345,15 @@ steps:
         renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
       }).not.toThrow();
 
-      expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+      // Wait for async state updates (setTimeout in handleEditorDidMount)
+      await waitFor(() => {
+        expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+      });
     });
   });
 
   describe('editor initialization', () => {
-    it('renders correctly when editor mounts with content', () => {
+    it('renders correctly when editor mounts with content', async () => {
       const yamlContent = 'version: "1"\nname: "test"';
       const store = createMockStore();
       store.dispatch(setYamlString(yamlContent));
@@ -320,8 +361,11 @@ steps:
 
       renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
-      expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
-      expect(document.querySelector('[data-testid="yaml-textarea"]')).toBeInTheDocument();
+      // Wait for async state updates (setTimeout in handleEditorDidMount)
+      await waitFor(() => {
+        expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+        expect(document.querySelector('[data-testid="yaml-textarea"]')).toBeInTheDocument();
+      });
 
       const textarea = document.querySelector(
         '[data-testid="yaml-textarea"]'
@@ -331,7 +375,7 @@ steps:
   });
 
   describe('completion provider', () => {
-    it('registers the completion provider when the editor mounts', () => {
+    it('registers the completion provider when the editor mounts', async () => {
       const yamlContent = 'version: "1"\nname: "test"';
       const store = createMockStore();
       store.dispatch(setYamlString(yamlContent));
@@ -339,11 +383,14 @@ steps:
 
       renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
 
-      // Verify that registerCompletionItemProvider was called with the correct parameters
-      expect(monaco.languages.registerCompletionItemProvider).toHaveBeenCalledWith(
-        YAML_LANG_ID,
-        mockCompletionProvider
-      );
+      // Wait for async state updates (setTimeout in handleEditorDidMount)
+      await waitFor(() => {
+        // Verify that registerCompletionItemProvider was called with the correct parameters
+        expect(monaco.languages.registerCompletionItemProvider).toHaveBeenCalledWith(
+          YAML_LANG_ID,
+          mockCompletionProvider
+        );
+      });
 
       // Verify that getCompletionItemProvider was called
       expect(getCompletionItemProvider).toHaveBeenCalled();
@@ -358,21 +405,144 @@ steps:
       expect(registeredProvider).toHaveProperty('provideCompletionItems');
     });
 
-    it('should dispose the completion provider when the editor unmounts', () => {
+    it('should dispose the completion provider when the editor unmounts', async () => {
       const yamlContent = 'version: "1"\nname: "test"';
       const store = createMockStore();
       store.dispatch(setYamlString(yamlContent));
       store.dispatch(setActiveTab('workflow'));
 
-      const { unmount } = renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+      const mockDispose = jest.fn();
+      (monaco.languages.registerCompletionItemProvider as jest.Mock).mockReturnValue({
+        dispose: mockDispose,
+      });
 
-      const registeredProvider = (monaco.languages.registerCompletionItemProvider as jest.Mock).mock
-        .results[0].value;
+      const { unmount } = renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+      // Wait for async state updates (setTimeout in handleEditorDidMount)
+      await waitFor(() => {
+        expect(monaco.languages.registerCompletionItemProvider).toHaveBeenCalled();
+      });
 
       unmount();
 
       // Verify that dispose was called on the completion provider
-      expect(registeredProvider.dispose).toHaveBeenCalled();
+      expect(mockDispose).toHaveBeenCalled();
+    });
+  });
+
+  describe('keyboard commands', () => {
+    it('should register keyboard commands when editor mounts', async () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString('version: "1"\nname: "test"'));
+      store.dispatch(setActiveTab('workflow'));
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      // Wait for async state updates (setTimeout in handleEditorDidMount)
+      await waitFor(() => {
+        expect(mockRegisterKeyboardCommands).toHaveBeenCalled();
+      });
+
+      const callArgs = mockRegisterKeyboardCommands.mock.calls[0][0];
+      expect(callArgs).toHaveProperty('save');
+      expect(callArgs).toHaveProperty('run');
+      expect(callArgs).toHaveProperty('saveAndRun');
+    });
+
+    it('should call save handler when save keyboard shortcut is triggered', () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString('version: "1"\nname: "test"'));
+      store.dispatch(setActiveTab('workflow'));
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      expect(capturedKeyboardHandlers.save).toBeDefined();
+      capturedKeyboardHandlers.save!();
+
+      expect(mockSaveYaml).toHaveBeenCalledTimes(1);
+    });
+
+    it('should prevent multiple saves when one is already in progress', async () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString('version: "1"\nname: "test"'));
+      store.dispatch(setActiveTab('workflow'));
+
+      // Set loading state to true in the store to simulate a save in progress
+      store.dispatch(saveYamlThunk.pending('', undefined));
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      // Wait for handlers to be registered
+      await waitFor(() => {
+        expect(capturedKeyboardHandlers.save).toBeDefined();
+      });
+
+      // Try to save multiple times
+      capturedKeyboardHandlers.save!();
+      capturedKeyboardHandlers.save!();
+      capturedKeyboardHandlers.save!();
+
+      // Should not call saveYaml because isSaving is true
+      expect(mockSaveYaml).not.toHaveBeenCalled();
+    });
+
+    it('should call saveAndRun handler when saveAndRun keyboard shortcut is triggered', () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString('version: "1"\nname: "test"'));
+      store.dispatch(setActiveTab('workflow'));
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      expect(capturedKeyboardHandlers.saveAndRun).toBeDefined();
+      capturedKeyboardHandlers.saveAndRun!();
+
+      expect(mockSaveYaml).toHaveBeenCalledTimes(1);
+    });
+
+    it('should prevent multiple saveAndRun when one is already in progress', async () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString('version: "1"\nname: "test"'));
+      store.dispatch(setActiveTab('workflow'));
+
+      // Set loading state to true in the store to simulate a save in progress
+      store.dispatch(saveYamlThunk.pending('', undefined));
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      // Wait for handlers to be registered
+      await waitFor(() => {
+        expect(capturedKeyboardHandlers.saveAndRun).toBeDefined();
+      });
+
+      // Try to saveAndRun multiple times
+      capturedKeyboardHandlers.saveAndRun!();
+      capturedKeyboardHandlers.saveAndRun!();
+
+      // Should not call saveYaml because isSaving is true
+      expect(mockSaveYaml).not.toHaveBeenCalled();
+    });
+
+    it('should allow save after previous save completes', async () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString('version: "1"\nname: "test"'));
+      store.dispatch(setActiveTab('workflow'));
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      // Wait for handlers to be registered
+      await waitFor(() => {
+        expect(capturedKeyboardHandlers.save).toBeDefined();
+      });
+
+      // First save should work
+      capturedKeyboardHandlers.save!();
+      expect(mockSaveYaml).toHaveBeenCalledTimes(1);
+
+      // Clear the mock call count and simulate save completing (still not loading)
+      mockSaveYaml.mockClear();
+
+      // Second save should also work since isSaving is false
+      capturedKeyboardHandlers.save!();
+      expect(mockSaveYaml).toHaveBeenCalledTimes(1);
     });
   });
 });

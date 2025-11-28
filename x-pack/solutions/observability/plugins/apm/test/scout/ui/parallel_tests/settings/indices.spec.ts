@@ -10,7 +10,6 @@ import { test } from '../../fixtures';
 
 test.describe('Indices', { tag: ['@ess'] }, () => {
   test('Viewer should not be able to modify settings', async ({
-    page,
     pageObjects: { indicesPage },
     browserAuth,
   }) => {

@@ -40,7 +40,7 @@ export function deserializeLayout(
     };
   }
 
-  panels.forEach((widget) => {
+  panels?.forEach((widget) => {
     if (isDashboardSection(widget)) {
       const { panels: sectionPanels, uid, ...restOfSection } = widget;
       const sectionId = uid ?? v4();

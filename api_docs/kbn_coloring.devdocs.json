@@ -4031,7 +4031,7 @@
         "label": "RequiredPaletteParamTypes",
         "description": [],
         "signature": [
-          "{ reverse: boolean; name: string; steps: number; rangeType: \"number\" | \"percent\"; continuity: ",
+          "{ name: string; reverse: boolean; steps: number; rangeType: \"number\" | \"percent\"; continuity: ",
           {
             "pluginId": "@kbn/coloring",
             "scope": "common",

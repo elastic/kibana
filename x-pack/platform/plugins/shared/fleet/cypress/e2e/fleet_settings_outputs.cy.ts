@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RESERVED_CONFIG_YML_KEYS } from '../../common/constants';
+import { RESERVED_CONFIG_YML_KEYS } from '@kbn/fleet-plugin/common/constants';
 
 import {
   getSpecificSelectorId,

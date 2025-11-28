@@ -9,9 +9,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { timeRangeSchema } from '@kbn/es-query-server';
-import { dashboardMetaSchema } from '../../content_management/v1/schema';
+import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
-export const searchRequestBody = schema.object({
+export const searchRequestBodySchema = schema.object({
   page: schema.maybe(
     schema.number({
       meta: {
@@ -42,7 +42,7 @@ export const searchRequestBody = schema.object({
   ),
 });
 
-export const searchResponseBody = schema.object({
+export const searchResponseBodySchema = schema.object({
   dashboards: schema.arrayOf(
     schema.object({
       id: schema.string(),
@@ -52,7 +52,7 @@ export const searchResponseBody = schema.object({
         timeRange: schema.maybe(timeRangeSchema),
         title: schema.string(),
       }),
-      meta: dashboardMetaSchema,
+      meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
     })
   ),
   total: schema.number(),

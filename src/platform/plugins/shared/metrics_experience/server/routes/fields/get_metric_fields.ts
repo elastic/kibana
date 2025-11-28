@@ -11,7 +11,7 @@ import type { Fields } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import { isNumber } from 'lodash';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import type { MetricField, MetricFieldsResponse } from '../../../common/types';
+import type { MetricField, MetricFieldsResponse, DimensionFilters } from '../../../common/types';
 import { deduplicateFields } from '../../lib/fields/deduplicate_fields';
 import { extractMetricFields } from '../../lib/fields/extract_metric_fields';
 import { enrichMetricFields, generateMapKey } from '../../lib/fields/enrich_metric_fields';
@@ -29,6 +29,7 @@ export async function getMetricFields({
   size,
   logger,
   timerange,
+  filters,
 }: {
   esClient: TracedElasticsearchClient;
   indexPattern: string;
@@ -37,6 +38,7 @@ export async function getMetricFields({
   page: number;
   size: number;
   logger: Logger;
+  filters?: DimensionFilters;
 }): Promise<MetricFieldsResponse> {
   if (!indexPattern) return { fields: [], total: 0 };
 
@@ -80,14 +82,22 @@ export async function getMetricFields({
     indexFieldCapsMap,
     logger,
     timerange,
+    filters,
   });
 
-  const finalFields = enrichedMetricFields.map((field) => {
-    return {
-      ...field,
-      dimensions: field.dimensions.sort((a, b) => a.name.localeCompare(b.name)),
-    };
-  });
+  const hasFilters = filters && Object.keys(filters).length > 0;
 
-  return { fields: finalFields, total: allMetricFields.length };
+  const fieldsWithSortedDimensions = enrichedMetricFields.map((field) => ({
+    ...field,
+    dimensions: [...field.dimensions].sort((a, b) => a.name.localeCompare(b.name)),
+  }));
+
+  const resultFields = hasFilters
+    ? fieldsWithSortedDimensions.filter((field) => !field.noData)
+    : fieldsWithSortedDimensions;
+
+  return {
+    fields: resultFields,
+    total: hasFilters ? resultFields.length : allMetricFields.length,
+  };
 }

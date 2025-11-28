@@ -7,17 +7,17 @@
 
 import { TheHiveConnector } from './thehive';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { THEHIVE_CONNECTOR_ID } from '../../../common/thehive/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
+  CONNECTOR_ID,
   TheHiveIncidentResponseSchema,
   TheHiveUpdateIncidentResponseSchema,
   TheHiveAddCommentResponseSchema,
   TheHiveCreateAlertResponseSchema,
   PushToServiceIncidentSchema,
-} from '../../../common/thehive/schema';
-import type { ExecutorSubActionCreateAlertParams, Incident } from '../../../common/thehive/types';
+} from '@kbn/connector-schemas/thehive';
+import type { ExecutorSubActionCreateAlertParams, Incident } from '@kbn/connector-schemas/thehive';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 const mockTime = new Date('2024-04-03T09:10:30.000');
@@ -28,7 +28,7 @@ describe('TheHiveConnector', () => {
   const connector = new TheHiveConnector(
     {
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: THEHIVE_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: { url: 'https://example.com', organisation: null },
       secrets: { apiKey: 'test123' },
       logger,

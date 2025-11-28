@@ -69,7 +69,11 @@ export const DashboardAppNoDataPage = ({
       const abc = new AbortController();
       const { dataViews } = dataService;
       const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
-      const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
+      const dataView = await getESQLAdHocDataview({
+        dataViewsService: dataViews,
+        query: `FROM ${indexName}`,
+        http: coreServices.http,
+      });
       const esqlQuery = getInitialESQLQuery(dataView);
 
       try {

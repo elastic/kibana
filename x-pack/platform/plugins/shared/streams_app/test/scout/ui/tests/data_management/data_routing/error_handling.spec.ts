@@ -8,15 +8,10 @@
 import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/242445
-test.describe.skip(
+test.describe(
   'Stream data routing - error handling and recovery',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    test.beforeAll(async ({ apiServices }) => {
-      await apiServices.streams.enable();
-    });
-
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.streams.gotoPartitioningTab('logs');
@@ -25,7 +20,6 @@ test.describe.skip(
     test.afterAll(async ({ apiServices }) => {
       // Clear existing rules
       await apiServices.streams.clearStreamChildren('logs');
-      await apiServices.streams.disable();
     });
 
     test('should handle network failures during rule creation', async ({
@@ -55,11 +49,7 @@ test.describe.skip(
       await pageObjects.streams.expectRoutingRuleVisible('logs.network-test');
     });
 
-    test('should recover from API errors during rule updates', async ({
-      context,
-      page,
-      pageObjects,
-    }) => {
+    test('should recover from API errors during rule updates', async ({ context, pageObjects }) => {
       // Create a rule first
       await pageObjects.streams.clickCreateRoutingRule();
       await pageObjects.streams.fillRoutingRuleName('error-test');
