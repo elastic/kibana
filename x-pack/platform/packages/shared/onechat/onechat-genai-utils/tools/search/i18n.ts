@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { RelevantResource } from '../index_explorer';
 
 export const progressMessages = {
   selectingTarget: () => {
@@ -13,12 +14,17 @@ export const progressMessages = {
       defaultMessage: 'Identifying the most relevant data source',
     });
   },
-  resolvingSearchStrategy: ({ target }: { target: string }) => {
-    return i18n.translate('xpack.onechat.tools.search.progress.searchStrategy', {
-      defaultMessage: 'Analyzing strategy to search against "{target}"',
+  selectedTarget: (resource: RelevantResource) => {
+    return i18n.translate('xpack.onechat.tools.search.progress.selectingTarget', {
+      defaultMessage: 'Selecting "{target}" as the search target',
       values: {
-        target,
+        target: resource.name,
       },
+    });
+  },
+  resolvingSearchStrategy: () => {
+    return i18n.translate('xpack.onechat.tools.search.progress.searchStrategy', {
+      defaultMessage: 'Analyzing search strategy',
     });
   },
   performingRelevanceSearch: ({ term }: { term: string }) => {

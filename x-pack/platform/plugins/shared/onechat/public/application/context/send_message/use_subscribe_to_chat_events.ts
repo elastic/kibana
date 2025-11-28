@@ -51,7 +51,7 @@ export const useSubscribeToChatEvents = ({
             });
           } else if (isToolProgressEvent(event)) {
             conversationActions.setToolCallProgress({
-              progress: { message: event.data.message },
+              progress: { message: event.data.message, transient: event.data.transient },
               toolCallId: event.data.tool_call_id,
             });
             // Individual tool progression message should also be displayed as reasoning

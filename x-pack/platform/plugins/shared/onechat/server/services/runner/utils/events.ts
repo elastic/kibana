@@ -51,11 +51,12 @@ export const createToolEventEmitter = ({
   }
 
   return {
-    reportProgress: (progressMessage) => {
+    reportProgress: (progressMessage, opts = {}) => {
       const event: InternalToolProgressEvent = {
         type: ChatEventType.toolProgress,
         data: {
           message: progressMessage,
+          transient: opts.transient,
         },
       };
       eventHandler(event);

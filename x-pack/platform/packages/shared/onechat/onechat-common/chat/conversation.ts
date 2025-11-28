@@ -67,6 +67,10 @@ export interface ToolCallProgress {
    * The full text message
    */
   message: string;
+  /**
+   * if true, will not be displayed in the thinking panel, only used as "current thinking"
+   **/
+  transient?: boolean;
 }
 
 /**

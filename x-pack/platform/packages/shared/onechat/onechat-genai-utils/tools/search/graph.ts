@@ -57,7 +57,7 @@ export const createSearchToolGraph = ({
   const relevanceTool = createRelevanceSearchTool({ model, esClient, events });
 
   const selectAndValidateIndex = async (state: StateType) => {
-    events?.reportProgress(progressMessages.selectingTarget());
+    events?.reportProgress(progressMessages.selectingTarget(), { transient: true });
 
     const explorerRes = await indexExplorer({
       nlQuery: state.nlQuery,
@@ -70,6 +70,9 @@ export const createSearchToolGraph = ({
 
     if (explorerRes.resources.length > 0) {
       const selectedResource = explorerRes.resources[0];
+
+      events?.reportProgress(progressMessages.selectedTarget(selectedResource));
+
       return {
         indexIsValid: true,
         searchTarget: { type: selectedResource.type, name: selectedResource.name },
@@ -87,11 +90,7 @@ export const createSearchToolGraph = ({
   };
 
   const callSearchAgent = async (state: StateType) => {
-    events?.reportProgress(
-      progressMessages.resolvingSearchStrategy({
-        target: state.searchTarget.name,
-      })
-    );
+    events?.reportProgress(progressMessages.resolvingSearchStrategy());
 
     const nlSearchTool = createNaturalLanguageSearchTool({
       model,
