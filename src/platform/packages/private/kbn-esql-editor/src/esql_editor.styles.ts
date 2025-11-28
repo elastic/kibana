@@ -67,7 +67,7 @@ export const esqlEditorStyles = (
           ? `2px solid ${euiTheme.colors.danger}`
           : `2px solid ${euiTheme.colors.lightestShade}`
         : `2px solid ${bottomContainerBorderColor}`,
-      backgroundColor: euiTheme.colors.body,
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
       paddingLeft: euiTheme.size.xs,
       paddingRight: euiTheme.size.xs,
       paddingTop: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
@@ -77,7 +77,7 @@ export const esqlEditorStyles = (
       marginTop: 0,
       marginLeft: 0,
       marginBottom: 0,
-      border: hasOutline ? euiTheme.border.thin : 'none',
+      border: euiTheme.border.thin,
       borderBottomLeftRadius: 0,
       borderBottomRightRadius: 0,
     },
