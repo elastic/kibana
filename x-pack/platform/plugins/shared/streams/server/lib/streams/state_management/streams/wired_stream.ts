@@ -652,7 +652,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   private getInheritedFailureStoreFromAncestors(
     ancestors: Streams.WiredStream.Definition[]
   ): FailureStore {
-    const ancestorIds = getAncestorsAndSelf(this._definition.name);
+    const ancestorIds = getAncestorsAndSelf(this._definition.name).reverse();
 
     for (const ancestorId of ancestorIds) {
       const ancestorDefinition =
