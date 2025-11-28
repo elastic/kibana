@@ -7559,6 +7559,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-agent-builder@link:x-pack/solutions/observability/packages/agent-builder":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-agent-plugin@link:x-pack/solutions/observability/plugins/observability_agent":
   version "0.0.0"
   uid ""
@@ -9152,10 +9156,6 @@
   uid ""
 
 "@kbn/ui-theme@link:src/platform/packages/shared/kbn-ui-theme":
-  version "0.0.0"
-  uid ""
-
-"@kbn/uiam-dev-cli@link:x-pack/platform/packages/private/security/kbn_uiam_dev_cli":
   version "0.0.0"
   uid ""
 
