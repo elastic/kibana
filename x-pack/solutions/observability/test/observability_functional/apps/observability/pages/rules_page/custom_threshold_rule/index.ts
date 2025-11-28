@@ -101,8 +101,10 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         async () => await testSubjects.exists('ruleForm')
       );
 
-      // Set rule name
-      await testSubjects.setValue('ruleDetailsNameInput', CUSTOM_THRESHOLD_RULE_NAME);
+      // Set rule name (clear default value first)
+      const ruleNameInput = await testSubjects.find('ruleDetailsNameInput');
+      await ruleNameInput.clearValueWithKeyboard();
+      await ruleNameInput.type(CUSTOM_THRESHOLD_RULE_NAME);
 
       // Type the pattern to trigger "Explore matching indices" button
       await testSubjects.click('selectDataViewExpression');
