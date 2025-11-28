@@ -18,7 +18,7 @@ export const transformWorkflowToolToFormData = (
     toolId: tool.id,
     description: tool.description,
     workflow_id: tool.configuration.workflow_id,
-    wait_for_completion: String(tool.configuration.wait_for_completion ?? true),
+    wait_for_completion: tool.configuration.wait_for_completion ?? true,
     labels: tool.tags,
     type: ToolType.workflow,
   };
@@ -33,7 +33,7 @@ export const transformFormDataToWorkflowTool = (
     readonly: false,
     configuration: {
       workflow_id: data.workflow_id,
-      wait_for_completion: data.wait_for_completion === 'true',
+      wait_for_completion: data.wait_for_completion,
     },
     type: ToolType.workflow,
     tags: data.labels,

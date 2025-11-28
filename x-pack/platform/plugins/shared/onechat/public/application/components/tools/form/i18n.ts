@@ -247,26 +247,20 @@ export const i18nMessages = {
         waitForCompletionLabel: i18n.translate(
           'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionLabel',
           {
-            defaultMessage: 'Execution strategy',
+            defaultMessage: 'Workflow execution',
           }
         ),
         waitForCompletionHelpText: i18n.translate(
           'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionHelpText',
           {
             defaultMessage:
-              'Should the tool wait synchronously for the workflow to complete (fine with workflows taking less than a few minutes) or just execute it and return immediately?',
+              'If checked, the tool will wait synchronously until the workflow completes (fine with workflows taking less than a few minutes). If unchecked, the tool will just execute the workflow and return immediately.',
           }
         ),
-        waitForCompletionYesLabel: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionYesLabel',
+        waitForCompletionCheckboxLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionCheckboxLabel',
           {
             defaultMessage: 'Wait until the workflow completes',
-          }
-        ),
-        waitForCompletionNoLabel: i18n.translate(
-          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionNoLabel',
-          {
-            defaultMessage: 'Execute and return immediately',
           }
         ),
       },

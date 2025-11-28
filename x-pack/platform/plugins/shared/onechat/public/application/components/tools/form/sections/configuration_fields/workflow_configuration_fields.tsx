@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiCheckbox } from '@elastic/eui';
 import { useFormContext, Controller } from 'react-hook-form';
 import { WorkflowPicker } from '../../components/workflow/workflow_picker';
 import type { WorkflowToolFormData } from '../../types/tool_form_types';
@@ -34,22 +34,18 @@ export const WorkflowConfiguration = () => {
         error={errors.wait_for_completion?.message}
       >
         <Controller
-          name="wait_for_completion"
           control={control}
-          render={({ field: { ref, ...field } }) => (
-            <EuiSelect
-              options={[
-                {
-                  value: 'true',
-                  text: i18nMessages.configuration.form.workflow.waitForCompletionYesLabel,
-                },
-                {
-                  value: 'false',
-                  text: i18nMessages.configuration.form.workflow.waitForCompletionNoLabel,
-                },
-              ]}
-              {...field}
+          name="wait_for_completion"
+          render={({ field: { ref, onChange, value, ...field } }) => (
+            <EuiCheckbox
+              id="agentBuilderWorkflowToolWaitForCompletionCheckbox"
+              label={i18nMessages.configuration.form.workflow.waitForCompletionCheckboxLabel}
               inputRef={ref}
+              onChange={(e) => {
+                onChange(e.target.checked);
+              }}
+              checked={value}
+              {...field}
             />
           )}
         />
