@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await dashboardControls.deleteAllControls();
+      await dashboardControls.deleteAllPinnedControls();
       await dashboardPanelActions.removePanelByTitle('Rendering Test: animal sounds pie');
       await dashboard.clickQuickSave();
     });
@@ -317,7 +317,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           `emit(doc['sound.keyword'].value.substring(0, 1).toUpperCase())`
         );
         await returnToDashboard();
-        await dashboardControls.deleteAllControls();
+        await dashboardControls.deleteAllPinnedControls();
       });
 
       it('can create options list control on runtime field', async () => {
@@ -347,7 +347,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await dashboardControls.deleteAllControls();
+        await dashboardControls.deleteAllPinnedControls();
         await dashboard.clickQuickSave();
         await header.waitUntilLoadingHasFinished();
 

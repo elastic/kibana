@@ -24,6 +24,7 @@ import type { ControlWidth } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
 import { apiCanLockHoverActions } from '@kbn/presentation-publishing';
 import type { PinnableControlApi } from './types';
+import { ACTION_EDIT_CONTROL_DISPLAY_SETTINGS } from '../constants';
 
 interface Props {
   api: PinnableControlApi;
@@ -99,6 +100,7 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
   const settingsButton = (
     <EuiToolTip disableScreenReaderOutput content={displayName}>
       <EuiButtonIcon
+        data-test-subj={`control-action-${api.uuid}-${ACTION_EDIT_CONTROL_DISPLAY_SETTINGS}`}
         iconType={iconType}
         color="text"
         aria-label={displayName}
@@ -137,7 +139,7 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
   return (
     <>
       {!isToRightOfGrowControl && settingsButton}
-      <PopoverComponent>
+      <PopoverComponent data-test-subj={`controlDisplaySettings-${api.uuid}`}>
         <EuiFormRow
           label={i18n.translate(
             'controls.controlGroup.floatingActions.editDisplaySettings.minimumWidth.label',
@@ -188,6 +190,7 @@ const widthOptions = [
         defaultMessage: 'Small',
       }
     ),
+    'data-test-subj': 'controlWidthOption-small',
   },
   {
     id: `medium`,
@@ -197,6 +200,7 @@ const widthOptions = [
         defaultMessage: 'Medium',
       }
     ),
+    'data-test-subj': 'controlWidthOption-medium',
   },
   {
     id: `large`,
@@ -206,5 +210,6 @@ const widthOptions = [
         defaultMessage: 'Large',
       }
     ),
+    'data-test-subj': 'controlWidthOption-large',
   },
 ];

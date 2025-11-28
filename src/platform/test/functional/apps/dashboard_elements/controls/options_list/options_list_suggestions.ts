@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await dashboardControls.deleteAllControls();
+      await dashboardControls.deleteAllPinnedControls();
       await dashboard.clickQuickSave();
     });
 

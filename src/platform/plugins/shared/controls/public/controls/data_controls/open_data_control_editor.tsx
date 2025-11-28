@@ -24,6 +24,7 @@ export const openDataControlEditor = <State extends DataControlState = DataContr
   initialDefaultPanelTitle,
   onUpdate,
   isPinned,
+  setLastUsedDataViewId,
 }: {
   initialState: Partial<State>;
   parentApi: unknown;
@@ -33,6 +34,7 @@ export const openDataControlEditor = <State extends DataControlState = DataContr
   initialDefaultPanelTitle?: string;
   onUpdate?: (newState: Partial<State & SerializedTitles>) => void;
   isPinned?: boolean;
+  setLastUsedDataViewId?: (dataViewId: string) => void;
 }) => {
   const onCancel = (newState: Partial<State>, closeFlyout: () => void) => {
     if (deepEqual(initialState, newState)) {
@@ -81,8 +83,9 @@ export const openDataControlEditor = <State extends DataControlState = DataContr
           onCancel={(state) => {
             onCancel(state, closeFlyout);
           }}
-          onSave={() => {
+          onSave={(dataViewId) => {
             closeFlyout();
+            if (setLastUsedDataViewId && dataViewId) setLastUsedDataViewId(dataViewId);
           }}
           isPinned={isPinned}
         />

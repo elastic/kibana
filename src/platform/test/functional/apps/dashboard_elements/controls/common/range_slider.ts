@@ -85,7 +85,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'logstash-*',
           fieldName: 'bytes',
-          width: 'small',
           additionalSettings: { step: 10 },
         });
         expect(await dashboardControls.getControlsCount()).to.be(1);
@@ -106,7 +105,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'kibana_sample_data_flights',
           fieldName: 'AvgTicketPrice',
-          width: 'medium',
           additionalSettings: { step: 100 },
         });
         expect(await dashboardControls.getControlsCount()).to.be(2);
@@ -124,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clearUnsavedChanges();
       });
 
-      it('edits title and size of an existing control and retains existing range selection', async () => {
+      it('edits title of an existing control and retains existing range selection', async () => {
         const secondId = (await dashboardControls.getAllControlIds())[1];
         const newTitle = 'Average ticket price';
         await dashboardControls.editExistingControl(secondId);
@@ -133,7 +131,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           selectedType: RANGE_SLIDER_CONTROL,
         });
         await dashboardControls.controlEditorSetTitle(newTitle);
-        await dashboardControls.controlEditorSetWidth('large');
         await dashboardControls.controlEditorSave();
         expect(await dashboardControls.doesControlTitleExist(newTitle)).to.be(true);
         await dashboardControls.validateRange('value', secondId, '200', '1000');
@@ -277,7 +274,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           controlType: RANGE_SLIDER_CONTROL,
           dataViewTitle: 'logstash-*',
           fieldName: 'bytes',
-          width: 'small',
         });
         const secondId = (await dashboardControls.getAllControlIds())[1];
         await testSubjects.click(

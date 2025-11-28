@@ -125,6 +125,36 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
+  public async deleteAllPinnedControls() {
+    this.log.debug('Delete all pinned controls');
+    if ((await this.getControlsCount()) === 0) return;
+
+    const controls = await this.testSubjects.findAll('control-frame');
+    await asyncForEach(controls, async (control) => {
+      const controlId = await control.getAttribute('data-control-id');
+      if (controlId !== null) await this.removeExistingControl(controlId);
+    });
+    expect(await this.getControlsCount()).to.be(0);
+  }
+
+  public async setPinnedControlWidth(controlId: string, width: ControlWidth) {
+    this.log.debug(`Setting control's ${controlId} width to ${width}`);
+    await this.hoverOverExistingControl(controlId);
+    await this.testSubjects.click(`control-action-${controlId}-editControlDisplaySettings`);
+    await this.retry.try(async () => {
+      // wait for popover to open
+      await this.testSubjects.existOrFail(`controlDisplaySettings-${controlId}`);
+    });
+
+    await this.testSubjects.click(`controlWidthOption-${width}`);
+
+    await this.testSubjects.click(`control-action-${controlId}-editControlDisplaySettings`);
+    await this.retry.try(async () => {
+      // wait for popover to close
+      await this.testSubjects.missingOrFail(`controlDisplaySettings-${controlId}`);
+    });
+  }
+
   /* -----------------------------------------------------------
      Control editor flyout
      ----------------------------------------------------------- */
@@ -177,17 +207,13 @@ export class DashboardPageControls extends FtrService {
     controlType,
     dataViewTitle,
     fieldName,
-    grow,
     title,
-    width,
     additionalSettings,
   }: {
     controlType: string;
     title?: string;
     fieldName: string;
-    width?: ControlWidth;
     dataViewTitle?: string;
-    grow?: boolean;
     additionalSettings?: OptionsListAdditionalSettings | RangeSliderAdditionalSettings;
   }) {
     this.log.debug(`Creating ${controlType} control ${title ?? fieldName}`);
@@ -199,8 +225,6 @@ export class DashboardPageControls extends FtrService {
       await this.controlsEditorSetControlType(controlType);
     }
     if (title) await this.controlEditorSetTitle(title);
-    if (width) await this.controlEditorSetWidth(width);
-    if (grow !== undefined) await this.controlEditorSetGrow(grow);
 
     if (additionalSettings) {
       if (controlType === OPTIONS_LIST_CONTROL) {
@@ -257,8 +281,9 @@ export class DashboardPageControls extends FtrService {
   public async removeExistingControl(controlId: string) {
     this.log.debug(`Removing control: ${controlId}`);
     await this.hoverOverExistingControl(controlId);
+    debugger;
     await this.testSubjects.click(`control-action-${controlId}-deletePanel`);
-    await this.common.clickConfirmOnModal();
+    debugger;
   }
 
   public async clearControlSelections(controlId: string) {
@@ -332,7 +357,7 @@ export class DashboardPageControls extends FtrService {
       await this.testSubjects.click(
         `optionsList-control-${controlId}`,
         500,
-        !ignoreTopOffsetOrOptions ? await this.panelActions.getContainerTopOffset() : undefined
+        !ignoreTopOffsetOrOptions ? await this.panelActions.getContainerTopOffset() : undefined``
       );
       await this.retry.waitForWithTimeout('popover to open', 500, async () => {
         return await this.testSubjects.exists(`optionsList-control-popover`);
@@ -513,11 +538,6 @@ export class DashboardPageControls extends FtrService {
   public async controlEditorSetTitle(title: string) {
     this.log.debug(`Setting control title to ${title}`);
     await this.testSubjects.setValue('control-editor-title-input', title);
-  }
-
-  public async controlEditorSetWidth(width: ControlWidth) {
-    this.log.debug(`Setting control width to ${width}`);
-    await this.testSubjects.click(`control-editor-width-${width}`);
   }
 
   public async controlEditorSetGrow(grow: boolean) {
