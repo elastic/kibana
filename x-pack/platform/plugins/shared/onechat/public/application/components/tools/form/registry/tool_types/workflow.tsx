@@ -31,7 +31,7 @@ export const workflowToolRegistryEntry: ToolTypeRegistryEntry<WorkflowToolFormDa
     ...commonToolFormDefaultValues,
     type: ToolType.workflow,
     workflow_id: '',
-    wait_for_completion: true,
+    wait_for_completion: 'true',
   },
   toolToFormData: (tool: ToolDefinitionWithSchema) => {
     if (!isWorkflowTool(tool)) {
