@@ -347,7 +347,7 @@ describe('muteInstance()', () => {
       });
 
       await rulesClient.muteInstance({
-        alertId: '1',
+        params: { alertId: '1', alertInstanceId: '2' },
         alertInstanceId: '2',
         query: { validateAlertsExistence: false },
       });
@@ -377,7 +377,7 @@ describe('muteInstance()', () => {
 
       await expect(
         rulesClient.muteInstance({
-          alertId: '1',
+          params: { alertId: '1', alertInstanceId: '2' },
           alertInstanceId: '2',
           query: { validateAlertsExistence: false },
         })
