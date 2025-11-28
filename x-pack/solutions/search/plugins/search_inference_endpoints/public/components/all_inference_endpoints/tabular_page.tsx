@@ -262,6 +262,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             pagination={pagination}
             sorting={sorting}
             data-test-subj="inferenceEndpointTable"
+            tableCaption={i18n.INFERENCE_ENDPOINTS_TABLE_CAPTION}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
