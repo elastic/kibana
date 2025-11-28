@@ -208,7 +208,7 @@ describe('RetentionCard', () => {
 
     expect(screen.getByTestId('failureStoreRetention-metric')).toHaveTextContent('∞');
     expect(screen.getByTestId('failureStoreRetention-metric-subtitle')).toHaveTextContent(
-      /Infinite retention/i
+      /Indefinite retention/i
     );
   });
 
