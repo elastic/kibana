@@ -10,7 +10,6 @@
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import type { ServerStepDefinition, StepHandlerContext } from '@kbn/workflows-extensions/server';
-import type { z } from '@kbn/zod';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
@@ -25,13 +24,10 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
  * It validates input against the step's schema, executes the handler function,
  * and validates the output.
  */
-export class CustomStepImpl<
-  TInputSchema extends z.ZodTypeAny = z.ZodTypeAny,
-  TOutputSchema extends z.ZodTypeAny = z.ZodTypeAny
-> extends BaseAtomicNodeImplementation<BaseStep> {
+export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   constructor(
     private node: AtomicGraphNode,
-    private stepDefinition: ServerStepDefinition<CommonStepDefinition<TInputSchema, TOutputSchema>>,
+    private stepDefinition: ServerStepDefinition<CommonStepDefinition>,
     stepExecutionRuntime: StepExecutionRuntime,
     connectorExecutor: ConnectorExecutor,
     workflowExecutionRuntime: WorkflowExecutionRuntimeManager,
@@ -49,7 +45,7 @@ export class CustomStepImpl<
   /**
    * Get and validate the input for this step
    */
-  public override getInput(): z.infer<TInputSchema> {
+  public override getInput(): unknown {
     const withData = this.node.configuration.with || {};
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(withData);
   }
@@ -57,7 +53,7 @@ export class CustomStepImpl<
   /**
    * Execute the custom step handler
    */
-  protected override async _run(input: z.infer<TInputSchema>): Promise<RunStepResult> {
+  protected override async _run(input: unknown): Promise<RunStepResult> {
     try {
       const handlerContext = this.createHandlerContext(input);
       const result = await this.stepDefinition.handler(handlerContext);
@@ -71,9 +67,7 @@ export class CustomStepImpl<
   /**
    * Create the handler context
    */
-  private createHandlerContext(
-    input: z.infer<TInputSchema>
-  ): StepHandlerContext<z.infer<TInputSchema>> {
+  private createHandlerContext(input: unknown): StepHandlerContext<unknown> {
     return {
       input,
       contextManager: {
