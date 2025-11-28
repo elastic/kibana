@@ -8,6 +8,7 @@
 import moment from 'moment';
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics';
 import type { createSyncMarkersService } from './integrations/sync_markers/sync_markers';
+import { isTimestampGreaterThan } from './utils';
 
 interface SyncMarkersStrategy {
   getLastProcessedMarker: (source: MonitoringEntitySource) => Promise<string | undefined>;
@@ -48,9 +49,6 @@ export const createSyncMarkersStrategy = (
       syncMarkerService.updateLastProcessedMarker(source, ensureTimestamp(timestamp)),
   };
 };
-
-const isTimestampGreaterThan = (candidate: string, baseline: string) =>
-  moment(candidate).isAfter(moment(baseline));
 
 const ensureTimestamp = (timestamp?: string): string => {
   if (!timestamp) {
