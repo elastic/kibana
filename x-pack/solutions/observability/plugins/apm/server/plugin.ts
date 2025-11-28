@@ -252,12 +252,12 @@ export class APMPlugin
     if (plugins.onechat) {
       registerAgentTools({ core, plugins, logger: this.logger!.get('observabilityAgent') }).catch(
         (e) => {
-          this.logger?.error(`Failed to register AI agent APM tools: ${e.message}`);
+          this.logger?.error(`Failed to register agent builder APM tools: ${e.message}`);
           this.logger?.debug(e);
         }
       );
 
-      this.logger?.debug('Successfully registered AI agent APM tools');
+      this.logger?.debug('Successfully registered agent builder APM tools');
     }
 
     registerDeprecations({

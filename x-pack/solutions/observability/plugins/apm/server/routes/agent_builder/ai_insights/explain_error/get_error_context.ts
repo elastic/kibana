@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getErrorSampleDetails } from '../../errors/get_error_groups/get_error_sample_details';
-import { getErrorGroupSampleIds } from '../../errors/get_error_groups/get_error_group_sample_ids';
-import { getRootTransactionByTraceId } from '../../transactions/get_transaction_by_trace';
-import { getTraceSummaryCount } from '../../traces/get_trace_summary_count';
-import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { getErrorSampleDetails } from '../../../errors/get_error_groups/get_error_sample_details';
+import { getErrorGroupSampleIds } from '../../../errors/get_error_groups/get_error_group_sample_ids';
+import { getRootTransactionByTraceId } from '../../../transactions/get_transaction_by_trace';
+import { getTraceSummaryCount } from '../../../traces/get_trace_summary_count';
+import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
-export interface GetErrorContextDataParams {
+export interface GetErrorContextParams {
   apmEventClient: APMEventClient;
   serviceName: string;
   errorId: string;
@@ -21,7 +21,7 @@ export interface GetErrorContextDataParams {
   kuery: string;
 }
 
-export async function getErrorContextData({
+export async function getErrorContext({
   apmEventClient,
   serviceName,
   errorId,
@@ -29,7 +29,7 @@ export async function getErrorContextData({
   end,
   environment,
   kuery,
-}: GetErrorContextDataParams): Promise<{ errorData: any }> {
+}: GetErrorContextParams): Promise<{ errorData: any }> {
   const errorSample = await getErrorSampleDetails({
     apmEventClient,
     environment,

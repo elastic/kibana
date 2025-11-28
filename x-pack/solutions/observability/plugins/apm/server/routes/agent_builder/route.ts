@@ -9,12 +9,10 @@ import * as t from 'io-ts';
 import { apiPrivileges } from '@kbn/onechat-plugin/common/features';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { getErrorContextData } from './contextual_insights/get_error_context_data';
-import { getErrorContextualInsights } from './contextual_insights/get_error_contextual_insights';
-import { parseDatemath } from '../../agent_builder/utils/time';
+import { getErrorAiInsights } from './ai_insights/explain_error/get_error_ai_insights';
 
-const errorContextRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/agent_builder/contextual_insights/error',
+const observabilityAgentBuilderAiInsightsRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/agent_builder/ai_insights/error',
   options: {
     access: 'internal',
   },
@@ -34,9 +32,7 @@ const errorContextRoute = createApmServerRoute({
       connectorId: t.union([t.string, t.undefined]),
     }),
   }),
-  handler: async (
-    resources
-  ): Promise<{ errorData: any; llmResponse: { content: string } | null }> => {
+  handler: async (resources): Promise<{ context: string; summary: string }> => {
     const { params, plugins } = resources;
 
     const {
@@ -51,19 +47,6 @@ const errorContextRoute = createApmServerRoute({
 
     const apmEventClient = await getApmEventClient(resources);
 
-    const startMs = parseDatemath(start);
-    const endMs = parseDatemath(end);
-
-    const { errorData } = await getErrorContextData({
-      apmEventClient,
-      serviceName,
-      errorId,
-      start: startMs,
-      end: endMs,
-      environment,
-      kuery,
-    });
-
     if (!plugins.inference) {
       throw new Error('Unable to generate contextual insights');
     }
@@ -77,16 +60,22 @@ const errorContextRoute = createApmServerRoute({
     }
 
     const inferenceClient = inferenceStart.getClient({ request: resources.request });
-    const llmResponse = await getErrorContextualInsights({
-      errorData,
+    const { context, summary } = await getErrorAiInsights({
+      apmEventClient,
+      serviceName,
+      errorId,
+      start,
+      end,
+      environment,
+      kuery,
       inferenceClient,
       connectorId,
     });
 
-    return { errorData, llmResponse };
+    return { context, summary };
   },
 });
 
-export const aiAgentRouteRepository = {
-  ...errorContextRoute,
+export const observabilityAgentBuilderRouteRepository = {
+  ...observabilityAgentBuilderAiInsightsRoute,
 };

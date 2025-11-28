@@ -17,8 +17,8 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
-import { ErrorSampleDetailTabContent } from './error_sample_detail';
-import { exceptionStacktraceTab, logStacktraceTab } from './error_tabs';
+// import { ErrorSampleDetailTabContent } from './error_sample_detail';
+// import { exceptionStacktraceTab, logStacktraceTab } from './error_tabs';
 
 export function ErrorSampleAgentBuilderAiInsight({
   error,
@@ -48,9 +48,6 @@ export function ErrorSampleAgentBuilderAiInsight({
   const { onechat, core, inference } = useApmPluginContext();
   const isObservabilityAgentEnabled = getIsObservabilityAgentEnabled(core);
 
-  const [logStacktrace, setLogStacktrace] = useState('');
-  const [exceptionStacktrace, setExceptionStacktrace] = useState('');
-
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
@@ -60,7 +57,9 @@ export function ErrorSampleAgentBuilderAiInsight({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [llmResponse, setLlmResponse] = useState<{ content: string } | undefined>(undefined);
+  const [summary, setSummary] = useState('');
+  const [context, setContext] = useState('');
+
   const [lastUsedConnectorId] = useLocalStorage('agentBuilder.lastUsedConnector', '');
 
   const fetchContextualInsights = async () => {
@@ -75,27 +74,26 @@ export function ErrorSampleAgentBuilderAiInsight({
 
     setIsLoading(true);
     try {
-      const response = await callApmApi(
-        'POST /internal/apm/agent_builder/contextual_insights/error',
-        {
-          params: {
-            body: {
-              serviceName: error.service.name,
-              errorId: error.error.id,
-              start,
-              end,
-              environment,
-              kuery,
-              connectorId: lastUsedConnectorId,
-            },
+      const response = await callApmApi('POST /internal/apm/agent_builder/ai_insights/error', {
+        params: {
+          body: {
+            serviceName: error.service.name,
+            errorId: error.error.id,
+            start,
+            end,
+            environment,
+            kuery,
+            connectorId: lastUsedConnectorId,
           },
-          signal: null,
-        }
-      );
+        },
+        signal: null,
+      });
 
-      setLlmResponse(response?.llmResponse ?? undefined);
+      setSummary(response?.summary ?? '');
+      setContext(response?.context);
     } catch (e) {
-      setLlmResponse(undefined);
+      setSummary('');
+      setContext(undefined);
     } finally {
       setIsLoading(false);
     }
@@ -107,10 +105,7 @@ export function ErrorSampleAgentBuilderAiInsight({
     }
 
     const serviceName = error.service.name;
-    const languageName = error.service.language?.name ?? '';
-    const runtimeName = error.service.runtime?.name ?? '';
-    const runtimeVersion = error.service.runtime?.version ?? '';
-    const transactionName = transaction?.transaction.name ?? '';
+    // context and summary now come from the API response
 
     return [
       {
@@ -122,6 +117,7 @@ export function ErrorSampleAgentBuilderAiInsight({
           description: `APM error details page for ${serviceName}`,
         }),
       },
+      // TODO: move this to the server-side
       // {
       //   id: 'apm_error_details_instructions',
       //   type: 'text',
@@ -163,34 +159,12 @@ export function ErrorSampleAgentBuilderAiInsight({
         id: 'apm_error_ai_insight',
         type: 'observability.ai_insight',
         getContent: () => ({
-          summary: llmResponse?.content ?? '',
-          context: dedent(`
-            Service: ${serviceName}
-            Environment: ${error.service.environment ?? ''}
-            Language: ${languageName}
-            Runtime: ${runtimeName} ${runtimeVersion}
-            Transaction: ${transactionName}
-            Error ID: ${error.error.id}
-            Occurred at: ${error['@timestamp']}
-
-            Log stacktrace:
-            ${logStacktrace}
-
-            Exception stacktrace:
-            ${exceptionStacktrace}
-          `),
+          summary,
+          context,
         }),
       },
     ];
-  }, [
-    error,
-    transaction,
-    logStacktrace,
-    exceptionStacktrace,
-    onechat,
-    isObservabilityAgentEnabled,
-    llmResponse,
-  ]);
+  }, [error, onechat, isObservabilityAgentEnabled, summary, context]);
 
   if (!onechat || !isObservabilityAgentEnabled || !inference) {
     return <></>;
@@ -208,7 +182,7 @@ export function ErrorSampleAgentBuilderAiInsight({
             defaultMessage: 'Get helpful insights from our Elastic AI Agent',
           }
         )}
-        content={llmResponse?.content ?? ''}
+        content={summary}
         isLoading={isLoading}
         onOpen={fetchContextualInsights}
         onStartConversation={() => {
@@ -220,26 +194,6 @@ export function ErrorSampleAgentBuilderAiInsight({
         }}
       />
       <EuiSpacer size="s" />
-      <div
-        ref={(next) => {
-          setLogStacktrace(next?.innerText ?? '');
-        }}
-        style={{ display: 'none' }}
-      >
-        {error.error.log?.message && (
-          <ErrorSampleDetailTabContent error={error} currentTab={logStacktraceTab} />
-        )}
-      </div>
-      <div
-        ref={(next) => {
-          setExceptionStacktrace(next?.innerText ?? '');
-        }}
-        style={{ display: 'none' }}
-      >
-        {error.error.exception?.length && (
-          <ErrorSampleDetailTabContent error={error} currentTab={exceptionStacktraceTab} />
-        )}
-      </div>
     </>
   );
 }
