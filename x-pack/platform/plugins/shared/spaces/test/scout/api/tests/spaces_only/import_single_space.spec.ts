@@ -36,11 +36,11 @@ const prepareImportFormData = (objects: Array<Record<string, any>>) => {
 
 // tests importing saved objects into a single space at a time
 TEST_SPACES.forEach((space) => {
-  // Determine space path at test definition time (not runtime)
   const spacePath = space.spaceId === 'default' ? '' : `s/${space.spaceId}/`;
 
   apiTest.describe(`_import API within the ${space.name} space`, { tag: tags.ESS_ONLY }, () => {
     let editorApiCredentials: RoleApiCredentials;
+    let createdSavedObjects: Array<{ type: string; id: string }>;
 
     apiTest.beforeAll(async ({ kbnClient, log, requestAuth }) => {
       // Get API key with 'editor' role which has savedObjectsManagement privileges
@@ -58,6 +58,29 @@ TEST_SPACES.forEach((space) => {
         log.info(`Using default space for test suite`);
       }
     });
+
+    apiTest.beforeEach(() => {
+      createdSavedObjects = [];
+    });
+
+    apiTest.afterEach(async ({ apiServices, log }) => {
+      if (createdSavedObjects.length > 0) {
+        try {
+          await apiServices.savedObjects.bulkDelete(createdSavedObjects, space.spaceId);
+          log.debug(
+            `Cleaned up ${createdSavedObjects.length} saved object(s) in space [${space.spaceId}]`
+          );
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          log.error(
+            `Error during cleanup of saved objects [${createdSavedObjects
+              .map((o) => `${o.type}:${o.id}`)
+              .join(', ')}] in space [${space.spaceId}]: ${errorMessage}`
+          );
+        }
+      }
+    });
+
     apiTest.afterAll(async ({ kbnClient, log }) => {
       // Delete the space (skip for default)
       if (space.spaceId !== SPACES.DEFAULT.spaceId) {
@@ -67,7 +90,7 @@ TEST_SPACES.forEach((space) => {
     });
     apiTest(
       'should return 409 when trying to create dashboard that already exists',
-      async ({ apiClient, apiServices }) => {
+      async ({ apiClient }) => {
         // Use unique ID to prevent conflicts between test runs and spaces
         const uniqueId = `dashboard-${Date.now()}-${space.spaceId}`;
 
@@ -90,6 +113,7 @@ TEST_SPACES.forEach((space) => {
             body: formData1.buffer,
           }
         );
+        createdSavedObjects.push({ type: 'dashboard', id: uniqueId });
 
         expect(response1.statusCode).toBe(200);
         expect(response1.body.success).toBe(true);
@@ -120,9 +144,6 @@ TEST_SPACES.forEach((space) => {
         expect(response2.body.errors).toBeDefined();
         expect(response2.body.errors).toHaveLength(1);
         expect(response2.body.errors[0].error.type).toBe('conflict');
-
-        // Cleanup - using apiServices is appropriate for teardown
-        await apiServices.savedObjects.delete('dashboard', uniqueId, space.spaceId);
       }
     );
 
@@ -150,6 +171,7 @@ TEST_SPACES.forEach((space) => {
             body: formData1.buffer,
           }
         );
+        createdSavedObjects.push({ type: 'dashboard', id: uniqueId });
 
         expect(response1.statusCode).toBe(200);
         expect(response1.body.success).toBe(true);
@@ -193,15 +215,12 @@ TEST_SPACES.forEach((space) => {
         expect(exportResponse.data.exportedObjects[0].attributes[ATTRIBUTE_TITLE_KEY]).toBe(
           `${ATTRIBUTE_TITLE_VALUE} - Overwritten`
         );
-
-        // Cleanup - using apiServices is appropriate for teardown
-        await apiServices.savedObjects.delete('dashboard', uniqueId, space.spaceId);
       }
     );
 
     apiTest(
       'should return 200 and auto-generate ID when creating without ID',
-      async ({ apiClient, apiServices }) => {
+      async ({ apiClient }) => {
         const uniqueId = `dashboard-autogen-${Date.now()}-${space.spaceId}`;
 
         const formData = prepareImportFormData([
@@ -222,6 +241,7 @@ TEST_SPACES.forEach((space) => {
             body: formData.buffer,
           }
         );
+        createdSavedObjects.push({ type: 'dashboard', id: uniqueId });
 
         expect(response.statusCode).toBe(200);
         expect(response.body.success).toBe(true);
@@ -229,9 +249,6 @@ TEST_SPACES.forEach((space) => {
         expect(response.body.successResults).toBeDefined();
         expect(response.body.successResults[0].type).toBe('dashboard');
         expect(response.body.successResults[0].id).toBe(uniqueId);
-
-        // Cleanup - using apiServices is appropriate for teardown
-        await apiServices.savedObjects.delete('dashboard', uniqueId, space.spaceId);
       }
     );
 
