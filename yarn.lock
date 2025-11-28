@@ -4727,14 +4727,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-synthtrace-client@link:src/platform/packages/shared/kbn-apm-synthtrace-client":
-  version "0.0.0"
-  uid ""
-
-"@kbn/apm-synthtrace@link:src/platform/packages/shared/kbn-apm-synthtrace":
-  version "0.0.0"
-  uid ""
-
 "@kbn/apm-types-shared@link:src/platform/packages/shared/kbn-apm-types-shared":
   version "0.0.0"
   uid ""
@@ -7571,6 +7563,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-agent-builder@link:x-pack/solutions/observability/packages/agent-builder":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-agent-plugin@link:x-pack/solutions/observability/plugins/observability_agent":
   version "0.0.0"
   uid ""
@@ -8919,6 +8915,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/synthtrace-client@link:src/platform/packages/shared/kbn-synthtrace-client":
+  version "0.0.0"
+  uid ""
+
+"@kbn/synthtrace@link:src/platform/packages/shared/kbn-synthtrace":
+  version "0.0.0"
+  uid ""
+
 "@kbn/task-manager-dependencies-plugin@link:x-pack/platform/plugins/private/task_manager_dependencies":
   version "0.0.0"
   uid ""
@@ -9156,10 +9160,6 @@
   uid ""
 
 "@kbn/ui-theme@link:src/platform/packages/shared/kbn-ui-theme":
-  version "0.0.0"
-  uid ""
-
-"@kbn/uiam-dev-cli@link:x-pack/platform/packages/private/security/kbn_uiam_dev_cli":
   version "0.0.0"
   uid ""
 

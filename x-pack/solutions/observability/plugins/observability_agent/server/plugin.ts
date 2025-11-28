@@ -52,16 +52,16 @@ export class ObservabilityAgentPlugin
           return;
         }
 
+        registerObservabilityAgent({ plugins, logger: this.logger }).catch((error) => {
+          this.logger.error(`Error registering observability agent: ${error}`);
+        });
+
         registerTools({ core, plugins, logger: this.logger }).catch((error) => {
-          this.logger.error(`Error registering observability agent tools: ${error}`);
+          this.logger.error(`Error registering observability tools: ${error}`);
         });
 
         registerAttachments({ plugins }).catch((error) => {
           this.logger.error(`Error registering observability attachments: ${error}`);
-        });
-
-        registerObservabilityAgent({ plugins, logger: this.logger }).catch((error) => {
-          this.logger.error(`Error registering observability agent: ${error}`);
         });
       })
       .catch((error) => {
