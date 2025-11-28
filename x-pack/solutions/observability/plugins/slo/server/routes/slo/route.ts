@@ -7,7 +7,7 @@
 
 import { bulkDeleteSLORoute, getBulkDeleteStatusRoute } from './bulk_delete';
 import { bulkPurgeRollupRoute } from './bulk_purge_rollup';
-import { bulkPurgeSummaryRoute, getBulkPurgeSummaryStatusRoute } from './bulk_purge_summary';
+import { purgeInstancesRoute, getPurgeInstancesStatusRoute } from './purge_instances';
 import { createSLORoute } from './create_slo';
 import { deleteSloInstancesRoute } from './delete_instances';
 import { deleteSLORoute } from './delete_slo';
@@ -58,7 +58,7 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...getSLOStatsOverview,
     ...bulkDeleteSLORoute,
     ...getBulkDeleteStatusRoute,
-    ...bulkPurgeSummaryRoute,
-    ...getBulkPurgeSummaryStatusRoute,
+    ...purgeInstancesRoute,
+    ...getPurgeInstancesStatusRoute,
   };
 };

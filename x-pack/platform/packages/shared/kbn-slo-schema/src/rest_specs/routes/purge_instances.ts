@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { durationType, sloIdSchema } from '../../schema';
 
-const bulkPurgeSummaryParamsSchema = t.type({
+const purgeInstancesParamsSchema = t.type({
   body: t.partial({
     list: t.array(sloIdSchema),
     staleDuration: durationType,
@@ -15,20 +15,20 @@ const bulkPurgeSummaryParamsSchema = t.type({
   }),
 });
 
-interface BulkPurgeSummaryResponse {
+interface PurgeInstancesResponse {
   taskId?: string;
 }
 
-type BulkPurgeSummaryInput = t.OutputOf<typeof bulkPurgeSummaryParamsSchema.props.body>;
-type BulkPurgeSummaryParams = t.TypeOf<typeof bulkPurgeSummaryParamsSchema.props.body>;
+type PurgeInstancesInput = t.OutputOf<typeof purgeInstancesParamsSchema.props.body>;
+type PurgeInstancesParams = t.TypeOf<typeof purgeInstancesParamsSchema.props.body>;
 
-const bulkPurgeSummaryStatusParamsSchema = t.type({
+const purgeInstancesStatusParamsSchema = t.type({
   path: t.type({
     taskId: t.string,
   }),
 });
 
-interface BulkPurgeSummaryStatusResponse {
+interface PurgeInstancesStatusResponse {
   completed: boolean;
   error?: string;
   status?: {
@@ -40,10 +40,10 @@ interface BulkPurgeSummaryStatusResponse {
   };
 }
 
-export { bulkPurgeSummaryParamsSchema, bulkPurgeSummaryStatusParamsSchema };
+export { purgeInstancesParamsSchema, purgeInstancesStatusParamsSchema };
 export type {
-  BulkPurgeSummaryInput,
-  BulkPurgeSummaryParams,
-  BulkPurgeSummaryResponse,
-  BulkPurgeSummaryStatusResponse,
+  PurgeInstancesInput,
+  PurgeInstancesParams,
+  PurgeInstancesResponse,
+  PurgeInstancesStatusResponse,
 };

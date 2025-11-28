@@ -7,16 +7,16 @@
 
 import type { TasksGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
-  bulkPurgeSummaryParamsSchema,
-  bulkPurgeSummaryStatusParamsSchema,
-  type BulkPurgeSummaryStatusResponse,
+  purgeInstancesParamsSchema,
+  purgeInstancesStatusParamsSchema,
+  type PurgeInstancesStatusResponse,
 } from '@kbn/slo-schema';
-import { bulkPurgeSummary } from '../../services/bulk_purge_summary';
+import { purgeInstances } from '../../services/purge_instances';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 
-export const bulkPurgeSummaryRoute = createSloServerRoute({
-  endpoint: 'POST /api/observability/slos/_bulk_purge_summary',
+export const purgeInstancesRoute = createSloServerRoute({
+  endpoint: 'POST /api/observability/slos/_purge_instances',
   options: {
     access: 'internal',
   },
@@ -25,18 +25,18 @@ export const bulkPurgeSummaryRoute = createSloServerRoute({
       requiredPrivileges: ['slo_write'],
     },
   },
-  params: bulkPurgeSummaryParamsSchema,
+  params: purgeInstancesParamsSchema,
   handler: async ({ request, params, logger, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
     const { scopedClusterClient, spaceId, soClient } = await getScopedClients({ request, logger });
 
-    return await bulkPurgeSummary(params.body, { scopedClusterClient, spaceId, soClient });
+    return await purgeInstances(params.body, { scopedClusterClient, spaceId, soClient });
   },
 });
 
-export const getBulkPurgeSummaryStatusRoute = createSloServerRoute({
-  endpoint: 'GET /api/observability/slos/_bulk_purge_summary/{taskId}',
+export const getPurgeInstancesStatusRoute = createSloServerRoute({
+  endpoint: 'GET /api/observability/slos/_purge_instances/{taskId}',
   options: {
     access: 'internal',
   },
@@ -45,7 +45,7 @@ export const getBulkPurgeSummaryStatusRoute = createSloServerRoute({
       requiredPrivileges: ['slo_write'],
     },
   },
-  params: bulkPurgeSummaryStatusParamsSchema,
+  params: purgeInstancesStatusParamsSchema,
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
     const { scopedClusterClient } = await getScopedClients({ request, logger });
@@ -58,24 +58,24 @@ export const getBulkPurgeSummaryStatusRoute = createSloServerRoute({
       return {
         completed: false,
         error: 'Task not found',
-      } satisfies BulkPurgeSummaryStatusResponse;
+      } satisfies PurgeInstancesStatusResponse;
     }
 
     if (!task.completed) {
       return {
         completed: false,
         status: toStatus(task),
-      } satisfies BulkPurgeSummaryStatusResponse;
+      } satisfies PurgeInstancesStatusResponse;
     }
 
     return {
       completed: true,
       status: toStatus(task),
-    } satisfies BulkPurgeSummaryStatusResponse;
+    } satisfies PurgeInstancesStatusResponse;
   },
 });
 
-function toStatus(task: TasksGetResponse): BulkPurgeSummaryStatusResponse['status'] {
+function toStatus(task: TasksGetResponse): PurgeInstancesStatusResponse['status'] {
   return {
     total: task.task.status?.total ?? 0,
     deleted: task.task.status?.deleted ?? 0,

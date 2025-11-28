@@ -8,22 +8,22 @@
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMutation } from '@kbn/react-query';
-import { type BulkPurgeSummaryInput, type BulkPurgeSummaryResponse } from '@kbn/slo-schema';
+import { type PurgeInstancesInput, type PurgeInstancesResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useBulkPurgeSummary({ onConfirm }: { onConfirm?: () => void } = {}) {
+export function usePurgeInstances({ onConfirm }: { onConfirm?: () => void } = {}) {
   const {
     notifications: { toasts },
   } = useKibana().services;
   const { sloClient } = usePluginContext();
 
-  return useMutation<BulkPurgeSummaryResponse, ServerError, BulkPurgeSummaryInput>(
+  return useMutation<PurgeInstancesResponse, ServerError, PurgeInstancesInput>(
     ['bulkPurgeSummary'],
     ({ force, staleDuration, list }) => {
-      return sloClient.fetch('POST /api/observability/slos/_bulk_purge_summary', {
+      return sloClient.fetch('POST /api/observability/slos/_purge_instances', {
         params: {
           body: {
             staleDuration,
@@ -37,14 +37,14 @@ export function useBulkPurgeSummary({ onConfirm }: { onConfirm?: () => void } = 
       onError: (error) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate('xpack.slo.bulkPurgeSummary.errorNotification', {
-            defaultMessage: 'Failed to schedule bulk purge of stale SLO instances',
+            defaultMessage: 'Failed to schedule purge of stale SLO instances',
           }),
         });
       },
       onSuccess: () => {
         toasts.addSuccess(
           i18n.translate('xpack.slo.bulkPurgeSummary.successNotification', {
-            defaultMessage: 'Bulk purge of stale SLO instances scheduled',
+            defaultMessage: 'Purge of stale SLO instances scheduled',
           })
         );
         onConfirm?.();
