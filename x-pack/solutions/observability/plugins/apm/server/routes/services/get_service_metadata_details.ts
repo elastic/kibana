@@ -46,8 +46,8 @@ export interface ServiceMetadataDetails {
   service?: {
     versions?: string[];
     runtime?: {
-      name: string;
-      version: string;
+      name?: string;
+      version?: string;
     };
     framework?: string;
     agent: {
@@ -200,12 +200,12 @@ export async function getServiceMetadataDetails({
     event[AGENT_NAME] ?? null,
     event[TELEMETRY_SDK_LANGUAGE] ?? null,
     event[TELEMETRY_SDK_NAME] ?? null
-  );
-  const agentVersion = event[AGENT_VERSION] ?? event[TELEMETRY_SDK_VERSION];
+  ) as string;
+  const agentVersion = (event[AGENT_VERSION] ?? event[TELEMETRY_SDK_VERSION]) as string;
   const runtimeName = event[SERVICE_RUNTIME_NAME];
   const runtimeVersion = event[SERVICE_RUNTIME_VERSION];
 
-  if (!event || !agentName || !agentVersion) {
+  if (!event) {
     return {
       service: undefined,
       container: undefined,
@@ -216,7 +216,7 @@ export async function getServiceMetadataDetails({
   const serviceMetadataDetails = {
     versions: aggregations?.serviceVersions.buckets.map((bucket) => bucket.key as string),
     runtime:
-      runtimeName && runtimeVersion
+      runtimeName || runtimeVersion
         ? {
             name: runtimeName,
             version: runtimeVersion,
