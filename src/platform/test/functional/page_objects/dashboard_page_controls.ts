@@ -281,9 +281,7 @@ export class DashboardPageControls extends FtrService {
   public async removeExistingControl(controlId: string) {
     this.log.debug(`Removing control: ${controlId}`);
     await this.hoverOverExistingControl(controlId);
-    debugger;
     await this.testSubjects.click(`control-action-${controlId}-deletePanel`);
-    debugger;
   }
 
   public async clearControlSelections(controlId: string) {
