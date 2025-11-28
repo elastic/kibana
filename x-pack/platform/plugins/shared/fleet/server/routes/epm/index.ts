@@ -1238,8 +1238,8 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
                       examples: {
                         successResponse: {
                           value: {
-                            version: '1.0.0',
-                            success: true,
+                            reason: 'reason',
+                            isAvailable: false,
                           },
                         },
                       },
