@@ -252,7 +252,7 @@ export const registerClustersRoute = ({
             return response.ok({
               body: {
                 success: true,
-                warning: 'Cluster service updated, but failed to update inference ccm settings.',
+                warning: 'Cluster service updated, but failed to update Cloud Connect inference settings.',
                 warningError: (inferenceError as Error).message,
               },
             });
