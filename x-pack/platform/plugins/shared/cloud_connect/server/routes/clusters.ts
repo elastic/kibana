@@ -237,7 +237,7 @@ export const registerClustersRoute = ({
               body: {
                 success: true,
                 warning:
-                  'EIS service was enabled but inference could not be configured. Please contact support.',
+                  'EIS was enabled but inference could not be configured. Contact support.',
               },
             });
           }
