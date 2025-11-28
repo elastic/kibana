@@ -33,7 +33,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
 
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
