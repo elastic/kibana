@@ -27,12 +27,13 @@ import {
 import React, { memo, useCallback } from 'react';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
-import type { ESQLRequestStats } from '@kbn/esql-types';
+import type { ESQLQueryStats as QueryStats } from '@kbn/esql-types';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';
 import { StatusIndicator } from './errors_warnings_popover';
 import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_starred_queries';
 import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
+import { ESQLQueryStats } from './query_stats';
 import { QuickSearchAction } from '../editor_visor/quick_search_action';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -64,7 +65,7 @@ interface EditorFooterProps {
   displayDocumentationAsFlyout?: boolean;
   dataErrorsControl?: DataErrorsControl;
   toggleVisor: () => void;
-  requestStats?: ESQLRequestStats;
+  queryStats?: QueryStats;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -89,10 +90,9 @@ export const EditorFooter = memo(function EditorFooter({
   measuredContainerWidth,
   code,
   dataErrorsControl,
-  requestStats,
+  queryStats,
   toggleVisor,
 }: EditorFooterProps) {
-  console.log(requestStats);
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
 
@@ -132,6 +132,7 @@ export const EditorFooter = memo(function EditorFooter({
                 onErrorClick={onErrorClick}
                 dataErrorsControl={dataErrorsControl}
               />
+              {queryStats && <ESQLQueryStats queryStats={queryStats} />}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

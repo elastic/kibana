@@ -20,7 +20,7 @@ import type {
   IndicesAutocompleteResult,
   RecommendedQuery,
   RecommendedField,
-  ESQLRequestStats,
+  ESQLQueryStats,
   ESQLControlsContext,
 } from '@kbn/esql-types';
 import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
@@ -89,7 +89,7 @@ export interface ESQLEditorProps {
   /** Whether to merge external messages into the editor's message list */
   mergeExternalMessages?: boolean;
   /** Stats about the last request made */
-  requestStats?: ESQLRequestStats;
+  queryStats?: ESQLQueryStats;
 }
 
 interface ESQLVariableService {

@@ -111,7 +111,7 @@ const ESQLEditorInternal = function ESQLEditor({
   formLabel,
   mergeExternalMessages,
   hideQuickSearch,
-  requestStats,
+  queryStats,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -1205,7 +1205,7 @@ const ESQLEditorInternal = function ESQLEditor({
         dataErrorsControl={dataErrorsControl}
         toggleVisor={() => setIsVisorOpen(!isVisorOpen)}
         hideQuickSearch={hideQuickSearch}
-        requestStats={requestStats}
+        queryStats={queryStats}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

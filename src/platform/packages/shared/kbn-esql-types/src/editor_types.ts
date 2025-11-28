@@ -18,7 +18,7 @@ export interface ESQLControlsContext {
   onCancelControl: () => void;
 }
 
-export interface ESQLRequestStats {
+export interface ESQLQueryStats {
   /** Duration of the last query in milliseconds */
   durationInMs: string;
   /** Total number of documents processed in the last query */

@@ -9,14 +9,14 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { ESQLRequestStats } from '@kbn/esql-types';
+import type { ESQLQueryStats } from '@kbn/esql-types';
 import { isEqual } from 'lodash';
 
-export function useESQLRequestStats(
+export function useESQLQueryStats(
   isEsqlMode: boolean,
   requestAdapter?: RequestAdapter
-): ESQLRequestStats | undefined {
-  const [requestStats, setRequestStats] = useState<ESQLRequestStats | undefined>(undefined);
+): ESQLQueryStats | undefined {
+  const [queryStats, setQueryStats] = useState<ESQLQueryStats | undefined>(undefined);
 
   const handleRequestAdapterChange = useCallback(() => {
     const requests = requestAdapter?.getRequests() ?? [];
@@ -28,9 +28,9 @@ export function useESQLRequestStats(
         const updatedStats = {
           durationInMs: stats.queryTime.value,
           totalDocumentsProcessed: stats.documentsProcessed.value,
-          lastRunAt: stats.queryTime.value,
+          lastRunAt: stats.requestTimestamp.value,
         };
-        setRequestStats((currentStats) => {
+        setQueryStats((currentStats) => {
           if (!isEqual(currentStats, updatedStats)) {
             return updatedStats;
           }
@@ -52,5 +52,5 @@ export function useESQLRequestStats(
     };
   }, [handleRequestAdapterChange, isEsqlMode, requestAdapter]);
 
-  return requestStats;
+  return queryStats;
 }
