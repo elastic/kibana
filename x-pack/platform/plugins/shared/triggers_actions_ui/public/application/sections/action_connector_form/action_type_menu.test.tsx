@@ -14,7 +14,6 @@ import type { GenericValidationResult } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import type { AppMockRenderer } from '../test_utils';
 import { createAppMockRenderer } from '../test_utils';
-import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -220,125 +219,6 @@ describe('connector_add_flyout', () => {
 
       expect(screen.queryByTestId('my-action-type-1-card')).not.toBeInTheDocument();
       expect(await screen.findByTestId('my-action-type-2-card')).toBeInTheDocument();
-    });
-
-    // TODO: remove this describe block when workflows UI setting is cleaned
-    describe('workflows UI setting', () => {
-      it('hides workflows connector when workflows UI is disabled', async () => {
-        const onActionTypeChange = jest.fn();
-        const workflowsActionType = actionTypeRegistryMock.createMockActionTypeModel({
-          id: 'workflows-action-type',
-          iconClass: 'test',
-          selectMessage: 'test workflows',
-          validateParams: (): Promise<GenericValidationResult<unknown>> => {
-            const validationResult = { errors: {} };
-            return Promise.resolve(validationResult);
-          },
-          actionConnectorFields: null,
-        });
-        const regularActionType = actionTypeRegistryMock.createMockActionTypeModel({
-          id: 'regular-action-type',
-          iconClass: 'test',
-          selectMessage: 'test regular',
-          validateParams: (): Promise<GenericValidationResult<unknown>> => {
-            const validationResult = { errors: {} };
-            return Promise.resolve(validationResult);
-          },
-          actionConnectorFields: null,
-        });
-
-        // Mock uiSettings to return false for workflows:ui:enabled
-        useKibanaMock().services.uiSettings.get = jest.fn().mockImplementation((value: string) => {
-          if (value === 'workflows:ui:enabled') {
-            return false;
-          }
-          return false;
-        });
-
-        // Mock get return for filter
-        actionTypeRegistry.get.mockImplementation((id) => {
-          if (id === 'workflows-action-type') {
-            return workflowsActionType;
-          }
-          return regularActionType;
-        });
-
-        loadActionTypes.mockResolvedValue([
-          {
-            id: workflowsActionType.id,
-            enabled: true,
-            name: 'Workflows Connector',
-            enabledInConfig: true,
-            enabledInLicense: true,
-            minimumLicenseRequired: 'basic',
-            supportedFeatureIds: [WorkflowsConnectorFeatureId],
-          },
-          {
-            id: regularActionType.id,
-            enabled: true,
-            name: 'Regular Connector',
-            enabledInConfig: true,
-            enabledInLicense: true,
-            minimumLicenseRequired: 'basic',
-            supportedFeatureIds: ['alerting'],
-          },
-        ]);
-
-        appMockRenderer.render(
-          <ActionTypeMenu
-            onActionTypeChange={onActionTypeChange}
-            actionTypeRegistry={actionTypeRegistry}
-          />
-        );
-
-        expect(screen.queryByTestId('workflows-action-type-card')).not.toBeInTheDocument();
-        expect(await screen.findByTestId('regular-action-type-card')).toBeInTheDocument();
-      });
-
-      it('shows workflows connector when workflows UI is enabled', async () => {
-        const onActionTypeChange = jest.fn();
-        const workflowsActionType = actionTypeRegistryMock.createMockActionTypeModel({
-          id: 'workflows-action-type',
-          iconClass: 'test',
-          selectMessage: 'test workflows',
-          validateParams: (): Promise<GenericValidationResult<unknown>> => {
-            const validationResult = { errors: {} };
-            return Promise.resolve(validationResult);
-          },
-          actionConnectorFields: null,
-        });
-
-        // Mock uiSettings to return true for workflows:ui:enabled
-        useKibanaMock().services.uiSettings.get = jest.fn().mockImplementation((value: string) => {
-          if (value === 'workflows:ui:enabled') {
-            return true;
-          }
-          return false;
-        });
-
-        actionTypeRegistry.get.mockReturnValue(workflowsActionType);
-
-        loadActionTypes.mockResolvedValue([
-          {
-            id: workflowsActionType.id,
-            enabled: true,
-            name: 'Workflows Connector',
-            enabledInConfig: true,
-            enabledInLicense: true,
-            minimumLicenseRequired: 'basic',
-            supportedFeatureIds: [WorkflowsConnectorFeatureId],
-          },
-        ]);
-
-        appMockRenderer.render(
-          <ActionTypeMenu
-            onActionTypeChange={onActionTypeChange}
-            actionTypeRegistry={actionTypeRegistry}
-          />
-        );
-
-        expect(await screen.findByTestId('workflows-action-type-card')).toBeInTheDocument();
-      });
     });
   });
 

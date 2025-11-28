@@ -13,7 +13,6 @@ import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
-import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import type { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
@@ -65,11 +64,9 @@ export const ActionTypeMenu = ({
   const {
     http,
     notifications: { toasts },
-    uiSettings,
   } = useKibana().services;
   const [loadingActionTypes, setLoadingActionTypes] = useState<boolean>(false);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
-  const isWorkflowsEnabled = uiSettings.get<boolean>('workflows:ui:enabled', false);
 
   useEffect(() => {
     (async () => {
@@ -112,19 +109,9 @@ export const ActionTypeMenu = ({
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
     .filter(([id, details]) => {
       const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
-      let shouldHideInUi = actionTypeModel?.getHideInUi?.(
+      const shouldHideInUi = actionTypeModel?.getHideInUi?.(
         actionTypesIndex ? Object.values(actionTypesIndex) : []
       );
-
-      // TODO: remove this code when workflows UI setting is cleaned
-      if (!isWorkflowsEnabled) {
-        if (
-          details.supportedFeatureIds.length === 1 &&
-          details.supportedFeatureIds[0] === WorkflowsConnectorFeatureId
-        ) {
-          shouldHideInUi = true; // only workflows connector should be hidden when workflows UI is disabled
-        }
-      }
 
       return details.enabledInConfig === true && !shouldHideInUi;
     })
