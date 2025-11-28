@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiCallOut, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiBadge, EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import React, { Fragment, useRef, useState } from 'react';
 
 import type { NotificationsStart } from '@kbn/core/public';
