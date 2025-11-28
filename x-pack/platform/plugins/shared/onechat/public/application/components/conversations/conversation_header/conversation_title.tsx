@@ -62,6 +62,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({
       responsive={false}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
+      data-test-subj="agentBuilderConversationTitle"
     >
       <EuiFlexItem grow={false}>
         <h1 id={ariaLabelledBy}>{title}</h1>

@@ -220,7 +220,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     color: 'text' as const,
     'aria-label': fullscreenLabels.actionsAriaLabel,
     onClick: togglePopover,
-    'data-test-subj': 'onechatFullScreenActionsButton',
+    'data-test-subj': 'agentBuilderMoreActionsButton',
   };
   const showButtonIcon = isEmbeddedContext || hasActiveConversation;
   const button = showButtonIcon ? (
