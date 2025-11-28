@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import { createRulesPageHelpers } from './helpers';
 
 const RULE_ALERT_INDEX_PATTERN = '.alerts-stack.alerts-*';
 
@@ -20,38 +21,16 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
   const RULE_ENDPOINT = '/api/alerting/rule';
-  const INTERNAL_RULE_ENDPOINT = '/internal/alerting/rules';
 
   const PageObjects = getPageObjects(['header']);
+
+  const { getRuleByName, deleteRuleById, navigateAndOpenRuleTypeModal } =
+    createRulesPageHelpers(getService);
 
   async function createRule(rule: any): Promise<string> {
     const ruleResponse = await supertest.post(RULE_ENDPOINT).set('kbn-xsrf', 'foo').send(rule);
     expect(ruleResponse.status).to.eql(200);
     return ruleResponse.body.id;
-  }
-
-  async function getRuleByName(name: string) {
-    const {
-      body: { data: rules },
-    } = await supertest
-      .post(`${INTERNAL_RULE_ENDPOINT}/_find`)
-      .set('kbn-xsrf', 'kibana')
-      .send({
-        search: name,
-        search_fields: ['name'],
-      })
-      .expect(200);
-
-    return rules.find((rule: any) => rule.name === name);
-  }
-
-  async function deleteRuleById(ruleId: string) {
-    await supertest
-      .patch(`${INTERNAL_RULE_ENDPOINT}/_bulk_delete`)
-      .set('kbn-xsrf', 'foo')
-      .send({ ids: [ruleId] })
-      .expect(200);
-    return true;
   }
 
   const getRulesList = async (tableRows: any[]) => {
@@ -94,23 +73,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     this.tags('includeFirefox');
 
     const observability = getService('observability');
-
-    const navigateAndOpenRuleTypeModal = async () => {
-      await observability.alerts.common.navigateToRulesPage();
-      await retry.waitFor(
-        'Create Rule button is visible',
-        async () => await testSubjects.exists('createRuleButton')
-      );
-      await retry.waitFor(
-        'Create Rule button is enabled',
-        async () => await testSubjects.isEnabled('createRuleButton')
-      );
-      await observability.alerts.rulesPage.clickCreateRuleButton();
-      await retry.waitFor(
-        'Rule Type Modal is visible',
-        async () => await testSubjects.exists('ruleTypeModal')
-      );
-    };
 
     before(async () => {
       await esArchiver.load(
