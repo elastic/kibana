@@ -88,8 +88,6 @@ export const EditSignificantEventFlyout = ({
                   count: 1,
                   count_by_feature_type: {
                     system: 0,
-                    infrastructure: 0,
-                    technology: 0,
                     ...(data.query.feature && {
                       [(data.query.feature as GeneratedSignificantEventQuery['feature'])!.type]: 1,
                     }),
