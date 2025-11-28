@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Get the grammar type from the first argument (esql or promql)
+GRAMMAR_TYPE="${1:-esql}"
+
 # Function to add @ts-nocheck to a file
 add_ts_nocheck() {
   local file=$1
@@ -12,16 +15,36 @@ add_ts_nocheck() {
   fi
 }
 
-# Add @ts-nocheck to the parser file
-add_ts_nocheck src/antlr/esql_parser.ts
+if [ "$GRAMMAR_TYPE" == "esql" ]; then
+  # Add @ts-nocheck to the parser file
+  add_ts_nocheck src/antlr/esql_parser.ts
 
-# Add @ts-nocheck to the lexer file
-add_ts_nocheck src/antlr/esql_lexer.ts
+  # Add @ts-nocheck to the lexer file
+  add_ts_nocheck src/antlr/esql_lexer.ts
 
-# Rename the parser listener file if it exists
-if [ -f src/antlr/esql_parserListener.ts ]; then
-  echo "Renaming src/antlr/esql_parserListener.ts to src/antlr/esql_parser_listener.ts"
-  mv src/antlr/esql_parserListener.ts src/antlr/esql_parser_listener.ts
+  # Rename the parser listener file if it exists
+  if [ -f src/antlr/esql_parserListener.ts ]; then
+    echo "Renaming src/antlr/esql_parserListener.ts to src/antlr/esql_parser_listener.ts"
+    mv src/antlr/esql_parserListener.ts src/antlr/esql_parser_listener.ts
+  else
+    echo "src/antlr/esql_parserListener.ts not found!"
+  fi
+elif [ "$GRAMMAR_TYPE" == "promql" ]; then
+  # Add @ts-nocheck to the parser file
+  add_ts_nocheck src/antlr/promql_parser.ts
+
+  # Add @ts-nocheck to the lexer file
+  add_ts_nocheck src/antlr/promql_lexer.ts
+
+  # Rename the parser listener file if it exists
+  if [ -f src/antlr/promql_parserListener.ts ]; then
+    echo "Renaming src/antlr/promql_parserListener.ts to src/antlr/promql_parser_listener.ts"
+    mv src/antlr/promql_parserListener.ts src/antlr/promql_parser_listener.ts
+  else
+    echo "src/antlr/promql_parserListener.ts not found!"
+  fi
 else
-  echo "src/antlr/esql_parserListener.ts not found!"
+  echo "Unknown grammar type: $GRAMMAR_TYPE"
+  echo "Usage: $0 [esql|promql]"
+  exit 1
 fi

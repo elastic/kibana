@@ -20,6 +20,7 @@ export const buildGapsFilter = ({
   hasUnfilledIntervals,
   hasInProgressIntervals,
   hasFilledIntervals,
+  updatedBefore,
 }: {
   start?: string;
   end?: string;
@@ -27,6 +28,7 @@ export const buildGapsFilter = ({
   hasUnfilledIntervals?: boolean;
   hasInProgressIntervals?: boolean;
   hasFilledIntervals?: boolean;
+  updatedBefore?: string;
 }) => {
   const baseFilter =
     'event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true';
@@ -48,6 +50,10 @@ export const buildGapsFilter = ({
   );
   const hasFilledIntervalsFilter = getFilterForInterval(hasFilledIntervals, 'filled_intervals');
 
+  const updatedBeforeFilter = updatedBefore
+    ? `kibana.alert.rule.gap.updated_at < "${updatedBefore}"`
+    : null;
+
   return [
     baseFilter,
     endFilter,
@@ -56,6 +62,7 @@ export const buildGapsFilter = ({
     hasUnfilledIntervalsFilter,
     hasInProgressIntervalsFilter,
     hasFilledIntervalsFilter,
+    updatedBeforeFilter,
   ]
     .filter(Boolean)
     .join(' AND ');
