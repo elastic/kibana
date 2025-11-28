@@ -6,6 +6,12 @@
  */
 
 /**
+ * Feature flag for enabling the dashboard agent
+ */
+export const DASHBOARD_AGENT_FEATURE_FLAG = 'dashboardAgent.enabled';
+export const DASHBOARD_AGENT_FEATURE_FLAG_DEFAULT = false;
+
+/**
  * Namespace for dashboard-related tools and agents
  */
 export const DASHBOARD_NAMESPACE = 'platform.dashboard';
