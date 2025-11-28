@@ -59,60 +59,51 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
       }
     }
 
-    if (columnForType) {
-      // After a value but not after comma: suggest comma
-      if (
-        shouldSuggestComma({
-          position: 'inside_list',
-          innerText,
-          listHasValues: list.values && list.values.length > 0,
-        })
-      ) {
-        return [{ ...commaCompleteItem, text: ', ' }];
-      }
-
-      // After comma or empty list: suggest values
-      // For empty lists, don't ignore the left column - we want to suggest fields of the same type
-      const isEmptyList = !list.values || list.values.length === 0;
-      const ignoredColumns = isEmptyList
-        ? []
-        : [
-            columnForType.parts.join('.'),
-            ...(list.values || []).filter(isColumn).map((col: ESQLColumn) => col.parts.join('.')),
-          ].filter(Boolean);
-
-      return getSuggestionsForColumn(columnForType, ctx, ignoredColumns);
+    // After a value but not after comma: suggest comma
+    if (
+      shouldSuggestComma({
+        position: 'inside_list',
+        innerText,
+        listHasValues: list.values && list.values.length > 0,
+      })
+    ) {
+      return [{ ...commaCompleteItem, text: ', ' }];
     }
+
+    // After comma or empty list: suggest values
+    const isEmptyList = !list.values || list.values.length === 0;
+    const ignoredColumns = isEmptyList
+      ? []
+      : [
+          ...(columnForType ? [columnForType.parts.join('.')] : []),
+          ...(list.values || []).filter(isColumn).map((col: ESQLColumn) => col.parts.join('.')),
+        ].filter(Boolean);
+
+    return getListValueSuggestions(ctx, columnForType, ignoredColumns);
   }
 
   return [];
 }
 
-async function getSuggestionsForColumn(
-  column: ESQLColumn,
+async function getListValueSuggestions(
   ctx: ExpressionContext,
+  column: ESQLColumn | undefined,
   ignoredColumns: string[]
 ): Promise<ISuggestionItem[]> {
-  const argType = getExpressionType(column, ctx.context?.columns);
-
-  if (!argType) {
-    return [];
-  }
-
-  // Use SuggestionBuilder to eliminate duplicated suggestion patterns
+  const argType = column ? getExpressionType(column, ctx.context?.columns) : undefined;
   const builder = new SuggestionBuilder(ctx);
 
   await builder.addFields({
-    types: [argType],
+    types: argType ? [argType] : undefined,
     ignoredColumns,
   });
 
   builder
     .addFunctions({
-      types: [argType],
+      types: argType ? [argType] : undefined,
     })
     .addLiterals({
-      types: [argType],
+      types: argType ? [argType] : undefined,
       includeDateLiterals: true,
       includeCompatibleLiterals: true,
     });
