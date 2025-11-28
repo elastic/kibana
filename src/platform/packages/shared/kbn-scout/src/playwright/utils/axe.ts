@@ -12,8 +12,6 @@ import type { Result } from 'axe-core';
 import AxeBuilder from '@axe-core/playwright';
 import { AXE_OPTIONS, AXE_IMPACT_LEVELS } from '@kbn/axe-config';
 
-import type { KibanaUrl } from '../../..';
-
 export interface RunA11yScanOptions {
   /** Optional CSS selectors to include in analysis */
   include?: string[];
@@ -64,13 +62,13 @@ const runA11yScan = async (
   return { violations };
 };
 
-export const checkA11y = async (page: Page, kbnUrl?: KibanaUrl, options?: RunA11yScanOptions) => {
+export const checkA11y = async (page: Page, options?: RunA11yScanOptions) => {
   const { violations } = await runA11yScan(page, options);
 
   const formatA11yViolation = (v: Result): string => {
     const nodesSection = v.nodes
       .map((n, idx) => {
-        const selectors = n.target.join(', ');
+        const selectors = `${n.target.join(', ')}(xpath: ${n.xpath})`;
         const failure = n.failureSummary?.trim() || 'No failure summary provided';
         return `  ${idx + 1}. Selectors: ${selectors}\n     Failure: ${failure}`;
       })
@@ -81,7 +79,7 @@ export const checkA11y = async (page: Page, kbnUrl?: KibanaUrl, options?: RunA11
       `  Rule: ${v.id}. Impact: (${v.impact ?? 'impact unknown'})`,
       `  Description: ${v.description}`,
       `  Help: ${v.help}. See more: ${v.helpUrl}`,
-      `  Page: ${kbnUrl}`,
+      `  Page: ${page.url()}`,
       `  Nodes:\n${nodesSection}`,
     ]
       .join('\n')

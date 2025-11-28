@@ -116,7 +116,7 @@ export function extendPlaywrightPage({
     return await keyTo(page, selector, key, maxElementsToTraverse);
   };
 
-  extendedPage.checkA11y = (options) => checkA11y(page, kbnUrl, options);
+  extendedPage.checkA11y = (options) => checkA11y(page, options);
 
   // Method to type text with delay character by character
   extendedPage.typeWithDelay = (selector: string, text: string, options?: { delay: number }) =>
