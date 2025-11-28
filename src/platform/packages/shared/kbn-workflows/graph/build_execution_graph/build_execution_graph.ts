@@ -257,9 +257,9 @@ function createIfGraph(
   const graph = createTypedGraph({ directed: true });
   const enterConditionNodeId = `enterCondition_${stepId}`;
   const exitConditionNodeId = `exitCondition_${stepId}`;
-  const ifElseStep = ifStep as IfStep;
-  const trueSteps: BaseStep[] = ifElseStep.steps || [];
-  const falseSteps: BaseStep[] = ifElseStep.else || [];
+  const trueSteps: BaseStep[] = ifStep.steps || [];
+  const elseIfBranches = ifStep.elseIf || [];
+  const falseSteps: BaseStep[] = ifStep.else || [];
 
   const conditionNode: EnterIfNode = {
     id: enterConditionNodeId,
@@ -268,7 +268,7 @@ function createIfGraph(
     stepId,
     stepType: ifStep.type,
     configuration: {
-      ...omit(ifElseStep, ['steps', 'else']), // No need to include them as they will be represented in the graph
+      ...omit(ifStep, ['steps', 'elseIf', 'else']), // No need to include them as they will be represented in the graph
     },
   };
   context.stack.push(conditionNode);
@@ -282,7 +282,7 @@ function createIfGraph(
   const enterThenBranchNode: EnterConditionBranchNode = {
     id: `enterThen_${stepId}`,
     type: 'enter-then-branch',
-    condition: ifElseStep.condition,
+    condition: ifStep.condition,
     stepId,
     stepType: ifStep.type,
   };
@@ -301,6 +301,32 @@ function createIfGraph(
   insertGraphBetweenNodes(graph, thenGraph, enterThenBranchNode.id, exitThenBranchNode.id);
   graph.setNode(exitThenBranchNode.id, exitThenBranchNode);
   graph.setEdge(exitThenBranchNode.id, exitConditionNode.id);
+
+  // Create elseIf branches
+  for (let i = 0; i < elseIfBranches.length; i++) {
+    const elseIfBranch = elseIfBranches[i];
+    const enterElseIfBranchNode: EnterConditionBranchNode = {
+      id: `enterElseIf_${stepId}_${i}`,
+      type: 'enter-else-if-branch',
+      condition: elseIfBranch.condition,
+      stepId,
+      stepType: ifStep.type,
+    };
+    graph.setNode(enterElseIfBranchNode.id, enterElseIfBranchNode);
+    graph.setEdge(enterConditionNodeId, enterElseIfBranchNode.id);
+
+    const exitElseIfBranchNode: ExitConditionBranchNode = {
+      id: `exitElseIf_${stepId}_${i}`,
+      type: 'exit-else-if-branch',
+      startNodeId: enterElseIfBranchNode.id,
+      stepId,
+      stepType: ifStep.type,
+    };
+    const elseIfGraph = createStepsSequence(elseIfBranch.steps, context);
+    insertGraphBetweenNodes(graph, elseIfGraph, enterElseIfBranchNode.id, exitElseIfBranchNode.id);
+    graph.setNode(exitElseIfBranchNode.id, exitElseIfBranchNode);
+    graph.setEdge(exitElseIfBranchNode.id, exitConditionNode.id);
+  }
 
   if (falseSteps?.length > 0) {
     const enterElseBranchNode: EnterConditionBranchNode = {

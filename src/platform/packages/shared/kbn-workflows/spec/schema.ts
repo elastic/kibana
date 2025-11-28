@@ -308,6 +308,14 @@ export const IfStepSchema = BaseStepSchema.extend({
   type: z.literal('if'),
   condition: z.string(),
   steps: z.array(BaseStepSchema).min(1),
+  elseIf: z
+    .array(
+      z.object({
+        condition: z.string(),
+        steps: z.array(BaseStepSchema).min(1),
+      })
+    )
+    .optional(),
   else: z.array(BaseStepSchema).optional(),
 });
 export type IfStep = z.infer<typeof IfStepSchema>;
@@ -315,6 +323,14 @@ export type IfStep = z.infer<typeof IfStepSchema>;
 export const getIfStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
   const schema = IfStepSchema.extend({
     steps: z.array(stepSchema).min(1),
+    elseIf: z
+      .array(
+        z.object({
+          condition: z.string(),
+          steps: z.array(stepSchema).min(1),
+        })
+      )
+      .optional(),
     else: z.array(stepSchema).optional(),
   });
 

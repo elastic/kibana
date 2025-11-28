@@ -20,6 +20,8 @@ export class EnterConditionBranchNodeImpl implements NodeImplementation {
   public run(): void {
     if (this.node.type === 'enter-then-branch') {
       this.wfExecutionRuntimeManager.enterScope('true');
+    } else if (this.node.type === 'enter-else-if-branch') {
+      this.wfExecutionRuntimeManager.enterScope('else-if');
     } else {
       this.wfExecutionRuntimeManager.enterScope('false');
     }

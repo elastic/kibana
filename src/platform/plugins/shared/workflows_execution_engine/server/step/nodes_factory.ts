@@ -193,12 +193,14 @@ export class NodesFactory {
           stepLogger
         );
       case 'enter-then-branch':
+      case 'enter-else-if-branch':
       case 'enter-else-branch':
         return new EnterConditionBranchNodeImpl(
           node as EnterConditionBranchNode,
           this.workflowRuntime
         );
       case 'exit-then-branch':
+      case 'exit-else-if-branch':
       case 'exit-else-branch':
         return new ExitConditionBranchNodeImpl(
           node as ExitConditionBranchNode,

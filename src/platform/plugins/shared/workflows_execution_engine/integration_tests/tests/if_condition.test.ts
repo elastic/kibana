@@ -319,7 +319,7 @@ steps:
         connector-id: ${FakeConnectors.slack2.name}
         with:
           message: 'Outer condition was true!'
-      
+
       - name: innerCondition
         type: if
         condition: steps.outerThenStep.output.text:"ok"
@@ -369,6 +369,362 @@ steps:
         workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'innerElseStep');
       expect(innerElseStepExecutions.length).toBe(0);
+    });
+  });
+
+  describe('elseIf branches', () => {
+    describe('when first elseIf condition matches', () => {
+      beforeEach(async () => {
+        jest.clearAllMocks();
+        await workflowRunFixture.runWorkflow({
+          workflowYaml: `
+steps:
+  - name: setupStep
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'Setting up data'
+
+  - name: conditionalStep
+    type: if
+    condition: steps.setupStep.output.text:"nonexistent"
+    steps:
+      - name: thenStep
+        type: slack
+        connector-id: ${FakeConnectors.slack2.name}
+        with:
+          message: 'Condition was true!'
+    elseIf:
+      - condition: steps.setupStep.output.text:"ok"
+        steps:
+          - name: firstElseIfStep
+            type: slack
+            connector-id: ${FakeConnectors.slack1.name}
+            with:
+              message: 'First elseIf matched!'
+      - condition: steps.setupStep.output.text:"other"
+        steps:
+          - name: secondElseIfStep
+            type: slack
+            connector-id: ${FakeConnectors.slack2.name}
+            with:
+              message: 'Second elseIf matched!'
+    else:
+      - name: elseStep
+        type: slack
+        connector-id: ${FakeConnectors.slack1.name}
+        with:
+          message: 'Else branch executed!'
+
+  - name: finalStep
+    type: slack
+    connector-id: ${FakeConnectors.slack2.name}
+    with:
+      message: 'Final step executed'
+`,
+        });
+      });
+
+      it('should execute first elseIf branch when condition matches', async () => {
+        const firstElseIfStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'firstElseIfStep');
+        expect(firstElseIfStepExecutions.length).toBe(1);
+        expect(firstElseIfStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
+      });
+
+      it('should not execute then branch', async () => {
+        const thenStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'thenStep');
+        expect(thenStepExecutions.length).toBe(0);
+      });
+
+      it('should not execute second elseIf branch', async () => {
+        const secondElseIfStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'secondElseIfStep');
+        expect(secondElseIfStepExecutions.length).toBe(0);
+      });
+
+      it('should not execute else branch', async () => {
+        const elseStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'elseStep');
+        expect(elseStepExecutions.length).toBe(0);
+      });
+    });
+
+    describe('when middle elseIf condition matches', () => {
+      beforeEach(async () => {
+        jest.clearAllMocks();
+        await workflowRunFixture.runWorkflow({
+          workflowYaml: `
+steps:
+  - name: setupStep
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'Setting up data'
+
+  - name: conditionalStep
+    type: if
+    condition: steps.setupStep.output.text:"nonexistent"
+    steps:
+      - name: thenStep
+        type: slack
+        connector-id: ${FakeConnectors.slack2.name}
+        with:
+          message: 'Condition was true!'
+    elseIf:
+      - condition: steps.setupStep.output.text:"also-nonexistent"
+        steps:
+          - name: firstElseIfStep
+            type: slack
+            connector-id: ${FakeConnectors.slack1.name}
+            with:
+              message: 'First elseIf matched!'
+      - condition: steps.setupStep.output.text:"ok"
+        steps:
+          - name: secondElseIfStep
+            type: slack
+            connector-id: ${FakeConnectors.slack2.name}
+            with:
+              message: 'Second elseIf matched!'
+    else:
+      - name: elseStep
+        type: slack
+        connector-id: ${FakeConnectors.slack1.name}
+        with:
+          message: 'Else branch executed!'
+`,
+        });
+      });
+
+      it('should execute second elseIf branch when condition matches', async () => {
+        const secondElseIfStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'secondElseIfStep');
+        expect(secondElseIfStepExecutions.length).toBe(1);
+        expect(secondElseIfStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
+      });
+
+      it('should not execute first elseIf branch', async () => {
+        const firstElseIfStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'firstElseIfStep');
+        expect(firstElseIfStepExecutions.length).toBe(0);
+      });
+    });
+
+    describe('when last elseIf condition matches', () => {
+      beforeEach(async () => {
+        jest.clearAllMocks();
+        await workflowRunFixture.runWorkflow({
+          workflowYaml: `
+steps:
+  - name: setupStep
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'Setting up data'
+
+  - name: conditionalStep
+    type: if
+    condition: steps.setupStep.output.text:"nonexistent"
+    steps:
+      - name: thenStep
+        type: slack
+        connector-id: ${FakeConnectors.slack2.name}
+        with:
+          message: 'Condition was true!'
+    elseIf:
+      - condition: steps.setupStep.output.text:"also-nonexistent"
+        steps:
+          - name: firstElseIfStep
+            type: slack
+            connector-id: ${FakeConnectors.slack1.name}
+            with:
+              message: 'First elseIf matched!'
+      - condition: steps.setupStep.output.text:"also-nonexistent-2"
+        steps:
+          - name: secondElseIfStep
+            type: slack
+            connector-id: ${FakeConnectors.slack2.name}
+            with:
+              message: 'Second elseIf matched!'
+      - condition: steps.setupStep.output.text:"ok"
+        steps:
+          - name: thirdElseIfStep
+            type: slack
+            connector-id: ${FakeConnectors.slack1.name}
+            with:
+              message: 'Third elseIf matched!'
+    else:
+      - name: elseStep
+        type: slack
+        connector-id: ${FakeConnectors.slack1.name}
+        with:
+          message: 'Else branch executed!'
+`,
+        });
+      });
+
+      it('should execute third elseIf branch when condition matches', async () => {
+        const thirdElseIfStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'thirdElseIfStep');
+        expect(thirdElseIfStepExecutions.length).toBe(1);
+        expect(thirdElseIfStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
+      });
+    });
+
+    describe('when no conditions match and else is provided', () => {
+      beforeEach(async () => {
+        jest.clearAllMocks();
+        await workflowRunFixture.runWorkflow({
+          workflowYaml: `
+steps:
+  - name: setupStep
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'Setting up data'
+
+  - name: conditionalStep
+    type: if
+    condition: steps.setupStep.output.text:"nonexistent"
+    steps:
+      - name: thenStep
+        type: slack
+        connector-id: ${FakeConnectors.slack2.name}
+        with:
+          message: 'Condition was true!'
+    elseIf:
+      - condition: steps.setupStep.output.text:"also-nonexistent"
+        steps:
+          - name: firstElseIfStep
+            type: slack
+            connector-id: ${FakeConnectors.slack1.name}
+            with:
+              message: 'First elseIf matched!'
+      - condition: steps.setupStep.output.text:"also-nonexistent-2"
+        steps:
+          - name: secondElseIfStep
+            type: slack
+            connector-id: ${FakeConnectors.slack2.name}
+            with:
+              message: 'Second elseIf matched!'
+    else:
+      - name: elseStep
+        type: slack
+        connector-id: ${FakeConnectors.slack1.name}
+        with:
+          message: 'Else branch executed!'
+`,
+        });
+      });
+
+      it('should execute else branch when no conditions match', async () => {
+        const elseStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'elseStep');
+        expect(elseStepExecutions.length).toBe(1);
+        expect(elseStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
+      });
+
+      it('should not execute any elseIf branches', async () => {
+        const firstElseIfStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'firstElseIfStep');
+        expect(firstElseIfStepExecutions.length).toBe(0);
+
+        const secondElseIfStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'secondElseIfStep');
+        expect(secondElseIfStepExecutions.length).toBe(0);
+      });
+    });
+
+    describe('when no conditions match and no else is provided', () => {
+      beforeEach(async () => {
+        jest.clearAllMocks();
+        await workflowRunFixture.runWorkflow({
+          workflowYaml: `
+steps:
+  - name: setupStep
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'Setting up data'
+
+  - name: conditionalStep
+    type: if
+    condition: steps.setupStep.output.text:"nonexistent"
+    steps:
+      - name: thenStep
+        type: slack
+        connector-id: ${FakeConnectors.slack2.name}
+        with:
+          message: 'Condition was true!'
+    elseIf:
+      - condition: steps.setupStep.output.text:"also-nonexistent"
+        steps:
+          - name: firstElseIfStep
+            type: slack
+            connector-id: ${FakeConnectors.slack1.name}
+            with:
+              message: 'First elseIf matched!'
+      - condition: steps.setupStep.output.text:"also-nonexistent-2"
+        steps:
+          - name: secondElseIfStep
+            type: slack
+            connector-id: ${FakeConnectors.slack2.name}
+            with:
+              message: 'Second elseIf matched!'
+
+  - name: finalStep
+    type: slack
+    connector-id: ${FakeConnectors.slack2.name}
+    with:
+      message: 'Final step executed'
+`,
+        });
+      });
+
+      it('should successfully complete workflow', async () => {
+        const workflowExecutionDoc =
+          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            'fake_workflow_execution_id'
+          );
+        expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
+        expect(workflowExecutionDoc?.error).toBe(undefined);
+      });
+
+      it('should not execute any branches', async () => {
+        const thenStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'thenStep');
+        expect(thenStepExecutions.length).toBe(0);
+
+        const firstElseIfStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'firstElseIfStep');
+        expect(firstElseIfStepExecutions.length).toBe(0);
+
+        const secondElseIfStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'secondElseIfStep');
+        expect(secondElseIfStepExecutions.length).toBe(0);
+      });
+
+      it('should execute finalStep', async () => {
+        const finalStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'finalStep');
+        expect(finalStepExecutions.length).toBe(1);
+        expect(finalStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
+      });
     });
   });
 });

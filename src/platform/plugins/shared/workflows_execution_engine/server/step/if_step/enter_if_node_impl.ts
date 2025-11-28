@@ -30,40 +30,69 @@ export class EnterIfNodeImpl implements NodeImplementation {
     const successors: any[] = this.workflowGraph.getDirectSuccessors(this.node.id);
 
     if (
-      successors.some((node) => !['enter-then-branch', 'enter-else-branch'].includes(node.type))
+      successors.some(
+        (node) =>
+          !['enter-then-branch', 'enter-else-if-branch', 'enter-else-branch'].includes(node.type)
+      )
     ) {
       throw new Error(
         `EnterIfNode with id ${
           this.node.id
-        } must have only 'enter-then-branch' or 'enter-else-branch' successors, but found: ${successors
+        } must have only 'enter-then-branch', 'enter-else-if-branch', or 'enter-else-branch' successors, but found: ${successors
           .map((node) => node.type)
           .join(', ')}.`
       );
     }
 
-    const thenNode = successors?.find((node) =>
-      Object.hasOwn(node, 'condition')
-    ) as EnterConditionBranchNode;
-    // multiple else-if could be implemented similarly to thenNode
-    const elseNode = successors?.find(
-      (node) => !Object.hasOwn(node, 'condition')
-    ) as EnterConditionBranchNode;
-    const renderedCondition =
-      this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(thenNode.condition);
-    const evaluatedConditionResult = this.evaluateCondition(renderedCondition);
-    this.stepExecutionRuntime.setInput({
-      condition: renderedCondition,
-      conditionResult: evaluatedConditionResult,
-    });
+    // Find then node (has condition and is enter-then-branch)
+    const thenNode = successors?.find(
+      (node) => node.type === 'enter-then-branch' && Object.hasOwn(node, 'condition')
+    ) as EnterConditionBranchNode | undefined;
 
-    if (evaluatedConditionResult) {
+    if (!thenNode) {
+      throw new Error(
+        `EnterIfNode with id ${this.node.id} must have a 'enter-then-branch' successor, but none was found.`
+      );
+    }
+
+    // Find all elseIf nodes (has condition and is enter-else-if-branch), sorted by their order
+    // Extract numeric index from id format: enterElseIf_${stepId}_${i}
+    const extractIndex = (id: string): number => {
+      const match = id.match(/_(\d+)$/);
+      return match ? parseInt(match[1], 10) : 0;
+    };
+    const elseIfNodes =
+      successors
+        ?.filter((node) => node.type === 'enter-else-if-branch' && Object.hasOwn(node, 'condition'))
+        .map((node) => node as EnterConditionBranchNode)
+        .sort((a, b) => extractIndex(a.id) - extractIndex(b.id)) || [];
+
+    // Find else node (no condition and is enter-else-branch)
+    const elseNode = successors?.find(
+      (node) => node.type === 'enter-else-branch' && !Object.hasOwn(node, 'condition')
+    ) as EnterConditionBranchNode | undefined;
+
+    // Evaluate then condition first
+    if (this.evaluateAndSetCondition(thenNode.condition)) {
       this.goToThenBranch(thenNode);
-    } else if (elseNode) {
-      this.goToElseBranch(thenNode, elseNode);
+      return;
+    }
+
+    // Evaluate elseIf conditions in order
+    for (const elseIfNode of elseIfNodes) {
+      if (this.evaluateAndSetCondition(elseIfNode.condition)) {
+        this.goToElseIfBranch(elseIfNode);
+        return;
+      }
+    }
+
+    // If no conditions matched, go to else or exit
+    if (elseNode) {
+      this.goToElseBranch(elseNode);
     } else {
       // in the case when the condition evaluates to false and no else branch is defined
-      // we go straight to the exit node skipping "then" branch
-      this.goToExitNode(thenNode);
+      // we go straight to the exit node skipping all branches
+      this.goToExitNode();
     }
   }
 
@@ -74,19 +103,34 @@ export class EnterIfNodeImpl implements NodeImplementation {
     this.wfExecutionRuntimeManager.navigateToNode(thenNode.id);
   }
 
-  private goToElseBranch(
-    thenNode: EnterConditionBranchNode,
-    elseNode: EnterConditionBranchNode
-  ): void {
+  private goToElseIfBranch(elseIfNode: EnterConditionBranchNode): void {
     this.workflowContextLogger.logDebug(
-      `Condition "${thenNode.condition}" evaluated to false for step ${this.node.stepId}. Going to else branch.`
+      `Condition "${elseIfNode.condition}" evaluated to true for step ${this.node.stepId}. Going to else-if branch.`
+    );
+    this.wfExecutionRuntimeManager.navigateToNode(elseIfNode.id);
+  }
+
+  private evaluateAndSetCondition(condition: string | undefined): boolean {
+    const renderedCondition =
+      this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(condition);
+    const evaluatedConditionResult = this.evaluateCondition(renderedCondition);
+    this.stepExecutionRuntime.setInput({
+      condition: renderedCondition,
+      conditionResult: evaluatedConditionResult,
+    });
+    return evaluatedConditionResult;
+  }
+
+  private goToElseBranch(elseNode: EnterConditionBranchNode): void {
+    this.workflowContextLogger.logDebug(
+      `All conditions evaluated to false for step ${this.node.stepId}. Going to else branch.`
     );
     this.wfExecutionRuntimeManager.navigateToNode(elseNode.id);
   }
 
-  private goToExitNode(thenNode: EnterConditionBranchNode): void {
+  private goToExitNode(): void {
     this.workflowContextLogger.logDebug(
-      `Condition "${thenNode.condition}" evaluated to false for step ${this.node.stepId}. No else branch defined. Exiting if condition.`
+      `All conditions evaluated to false for step ${this.node.stepId}. No else branch defined. Exiting if condition.`
     );
     this.wfExecutionRuntimeManager.navigateToNode(this.node.exitNodeId);
   }

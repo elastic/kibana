@@ -156,7 +156,7 @@ describe('EnterIfNodeImpl', () => {
     it('should log debug message for else branch', async () => {
       await impl.run();
       expect(workflowContextLoggerMock.logDebug).toHaveBeenCalledWith(
-        `Condition "event.type:rule" evaluated to false for step testStep. Going to else branch.`
+        `All conditions evaluated to false for step testStep. Going to else branch.`
       );
     });
   });
@@ -181,7 +181,7 @@ describe('EnterIfNodeImpl', () => {
     it('should log debug message for no else branch defined', async () => {
       await impl.run();
       expect(workflowContextLoggerMock.logDebug).toHaveBeenCalledWith(
-        `Condition "event.type:rule" evaluated to false for step testStep. No else branch defined. Exiting if condition.`
+        `All conditions evaluated to false for step testStep. No else branch defined. Exiting if condition.`
       );
     });
   });
@@ -191,7 +191,7 @@ describe('EnterIfNodeImpl', () => {
       .fn()
       .mockReturnValueOnce([{ id: 'someOtherNode', type: 'some-other-type' }]);
     await expect(impl.run()).rejects.toThrow(
-      `EnterIfNode with id ${node.id} must have only 'enter-then-branch' or 'enter-else-branch' successors, but found: some-other-type`
+      `EnterIfNode with id ${node.id} must have only 'enter-then-branch', 'enter-else-if-branch', or 'enter-else-branch' successors, but found: some-other-type`
     );
   });
 
@@ -368,6 +368,192 @@ describe('EnterIfNodeImpl', () => {
       await expect(impl.run()).rejects.toThrow(
         new RegExp(`Invalid condition type for step ${node.stepId}`)
       );
+    });
+  });
+
+  describe('elseIf branches', () => {
+    describe('when first elseIf condition matches', () => {
+      beforeEach(() => {
+        workflowGraph.getDirectSuccessors = jest.fn().mockReturnValueOnce([
+          {
+            id: 'thenNode',
+            type: 'enter-then-branch',
+            condition: 'event.type:rule',
+          } as EnterConditionBranchNode,
+          {
+            id: 'elseIfNode1',
+            type: 'enter-else-if-branch',
+            condition: 'event.type:alert',
+          } as EnterConditionBranchNode,
+          {
+            id: 'elseIfNode2',
+            type: 'enter-else-if-branch',
+            condition: 'event.type:other',
+          } as EnterConditionBranchNode,
+          {
+            id: 'elseNode',
+            type: 'enter-else-branch',
+          } as EnterConditionBranchNode,
+        ]);
+      });
+
+      it('should evaluate then condition first and skip to first elseIf when false', async () => {
+        await impl.run();
+        expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledTimes(1);
+        expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledWith('elseIfNode1');
+      });
+
+      it('should log debug message for elseIf branch', async () => {
+        await impl.run();
+        expect(workflowContextLoggerMock.logDebug).toHaveBeenCalledWith(
+          `Condition "event.type:alert" evaluated to true for step testStep. Going to else-if branch.`
+        );
+      });
+    });
+
+    describe('when middle elseIf condition matches', () => {
+      beforeEach(() => {
+        workflowGraph.getDirectSuccessors = jest.fn().mockReturnValueOnce([
+          {
+            id: 'thenNode',
+            type: 'enter-then-branch',
+            condition: 'event.type:rule',
+          } as EnterConditionBranchNode,
+          {
+            id: 'elseIfNode1',
+            type: 'enter-else-if-branch',
+            condition: 'event.type:other',
+          } as EnterConditionBranchNode,
+          {
+            id: 'elseIfNode2',
+            type: 'enter-else-if-branch',
+            condition: 'event.type:alert',
+          } as EnterConditionBranchNode,
+          {
+            id: 'elseNode',
+            type: 'enter-else-branch',
+          } as EnterConditionBranchNode,
+        ]);
+      });
+
+      it('should evaluate conditions in order and route to matching elseIf', async () => {
+        await impl.run();
+        expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledTimes(1);
+        expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledWith('elseIfNode2');
+      });
+    });
+
+    describe('when no elseIf conditions match and else is provided', () => {
+      beforeEach(() => {
+        workflowGraph.getDirectSuccessors = jest.fn().mockReturnValueOnce([
+          {
+            id: 'thenNode',
+            type: 'enter-then-branch',
+            condition: 'event.type:rule',
+          } as EnterConditionBranchNode,
+          {
+            id: 'elseIfNode1',
+            type: 'enter-else-if-branch',
+            condition: 'event.type:other',
+          } as EnterConditionBranchNode,
+          {
+            id: 'elseIfNode2',
+            type: 'enter-else-if-branch',
+            condition: 'event.type:another',
+          } as EnterConditionBranchNode,
+          {
+            id: 'elseNode',
+            type: 'enter-else-branch',
+          } as EnterConditionBranchNode,
+        ]);
+      });
+
+      it('should route to else branch when no conditions match', async () => {
+        await impl.run();
+        expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledTimes(1);
+        expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledWith('elseNode');
+      });
+
+      it('should log debug message for else branch', async () => {
+        await impl.run();
+        expect(workflowContextLoggerMock.logDebug).toHaveBeenCalledWith(
+          `All conditions evaluated to false for step testStep. Going to else branch.`
+        );
+      });
+    });
+
+    describe('when no elseIf conditions match and no else is provided', () => {
+      beforeEach(() => {
+        workflowGraph.getDirectSuccessors = jest.fn().mockReturnValueOnce([
+          {
+            id: 'thenNode',
+            type: 'enter-then-branch',
+            condition: 'event.type:rule',
+          } as EnterConditionBranchNode,
+          {
+            id: 'elseIfNode1',
+            type: 'enter-else-if-branch',
+            condition: 'event.type:other',
+          } as EnterConditionBranchNode,
+          {
+            id: 'elseIfNode2',
+            type: 'enter-else-if-branch',
+            condition: 'event.type:another',
+          } as EnterConditionBranchNode,
+        ]);
+      });
+
+      it('should route to exit node when no conditions match and no else', async () => {
+        await impl.run();
+        expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledTimes(1);
+        expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledWith('exitIfNode');
+      });
+
+      it('should log debug message for exit', async () => {
+        await impl.run();
+        expect(workflowContextLoggerMock.logDebug).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'evaluated to false for step testStep. No else branch defined. Exiting if condition.'
+          )
+        );
+      });
+    });
+
+    describe('when then condition matches', () => {
+      beforeEach(() => {
+        workflowGraph.getDirectSuccessors = jest.fn().mockReturnValueOnce([
+          {
+            id: 'thenNode',
+            type: 'enter-then-branch',
+            condition: 'event.type:alert',
+          } as EnterConditionBranchNode,
+          {
+            id: 'elseIfNode1',
+            type: 'enter-else-if-branch',
+            condition: 'event.type:other',
+          } as EnterConditionBranchNode,
+          {
+            id: 'elseIfNode2',
+            type: 'enter-else-if-branch',
+            condition: 'event.type:another',
+          } as EnterConditionBranchNode,
+          {
+            id: 'elseNode',
+            type: 'enter-else-branch',
+          } as EnterConditionBranchNode,
+        ]);
+      });
+
+      it('should route to then branch and not evaluate elseIf conditions', async () => {
+        await impl.run();
+        expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledTimes(1);
+        expect(mockWorkflowRuntime.navigateToNode).toHaveBeenCalledWith('thenNode');
+        // Verify that only then condition was evaluated
+        expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledTimes(1);
+        expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledWith(
+          'event.type:alert'
+        );
+      });
     });
   });
 });

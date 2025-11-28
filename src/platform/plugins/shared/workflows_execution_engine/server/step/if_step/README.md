@@ -11,6 +11,13 @@ steps:
     condition: "{{ steps.getData.output.status }}: active"
     steps:
       ...
+    elseIf:
+      - condition: "{{ steps.getData.output.status }}: pending"
+        steps:
+          ...
+      - condition: "{{ steps.getData.output.status }}: inactive"
+        steps:
+          ...
     else:
       ...
 ```
@@ -21,7 +28,10 @@ steps:
 - **`type`**: Must be `"if"`
 - **`condition`**: Boolean expression or KQL condition string (required)
 - **`steps`**: Array of steps to execute when condition is `true` (minimum 1 step, required)
-- **`else`**: Array of steps to execute when condition is `false` (optional)
+- **`elseIf`**: Optional array of conditional branches, each with:
+  - **`condition`**: Boolean expression or KQL condition string (required)
+  - **`steps`**: Array of steps to execute when condition is `true` (minimum 1 step, required)
+- **`else`**: Array of steps to execute when all conditions are `false` (optional)
 
 ## Condition Evaluation Flow
 
@@ -109,6 +119,7 @@ Boolean   String    Undefined   Other
     Final Boolean
          ↓
     Branch Selection
+    (Evaluated in order: if → elseIf[0] → elseIf[1] → ... → else)
 ```
 
 ## Condition Types
@@ -222,14 +233,90 @@ steps:
         type: http
 ```
 
+### elseIf Branches
+
+```yaml
+steps:
+  - name: route-by-severity
+    type: if
+    condition: "{{ event.severity }}: critical"
+    steps:
+      - name: page-oncall
+        type: kibana.notify
+        with:
+          message: "Paging on-call for critical issue"
+    elseIf:
+      - condition: "{{ event.severity }}: high"
+        steps:
+          - name: notify-team
+            type: kibana.notify
+            with:
+              message: "High severity issue detected"
+      - condition: "{{ event.severity }}: medium"
+        steps:
+          - name: log-event
+            type: kibana.notify
+            with:
+              message: "Medium severity issue logged"
+    else:
+      - name: log-low-severity
+        type: kibana.notify
+        with:
+          message: "Low severity issue logged"
+```
+
+### Multiple elseIf Conditions
+
+```yaml
+steps:
+  - name: route-by-status
+    type: if
+    condition: "{{ steps.getStatus.output }}: active"
+    steps:
+      - name: handle-active
+        type: http
+        with:
+          url: "https://api.example.com/active"
+    elseIf:
+      - condition: "{{ steps.getStatus.output }}: pending"
+        steps:
+          - name: handle-pending
+            type: http
+            with:
+              url: "https://api.example.com/pending"
+      - condition: "{{ steps.getStatus.output }}: suspended"
+        steps:
+          - name: handle-suspended
+            type: http
+            with:
+              url: "https://api.example.com/suspended"
+    else:
+      - name: handle-unknown
+        type: http
+        with:
+          url: "https://api.example.com/unknown"
+```
+
+## Evaluation Order
+
+Conditions are evaluated in the following order:
+
+1. **Main `condition`** - If `true`, execute `steps` and skip all elseIf and else branches
+2. **`elseIf` conditions** - Evaluated sequentially in array order. First matching condition executes its `steps` and skips remaining elseIf and else branches
+3. **`else` branch** - Executes only if all previous conditions evaluated to `false`
+
+**Important:** Once a condition evaluates to `true`, its branch executes and all subsequent conditions are skipped.
+
 ## Best Practices
 
 1. **Use boolean expressions for simple checks**: `${{ }}` syntax is clearer for boolean values
 2. **Use KQL for complex conditions**: KQL provides powerful query capabilities
 3. **Template conditions when needed**: Use `{{ }}` to inject dynamic values into KQL
-4. **Handle both branches**: Use `else` when both paths need processing
-5. **Keep conditions readable**: Complex conditions can be hard to debug
-6. **Test edge cases**: Test with `true`, `false`, `undefined`, and missing fields
+4. **Handle all branches**: Use `elseIf` for multiple conditions and `else` as a fallback
+5. **Order conditions by priority**: Place most common or important conditions first in elseIf arrays
+6. **Keep conditions readable**: Complex conditions can be hard to debug
+7. **Test edge cases**: Test with `true`, `false`, `undefined`, and missing fields
+8. **Use elseIf for mutually exclusive conditions**: When you have multiple possible values, elseIf provides cleaner logic than nested if statements
 
 ## Error Scenarios
 
