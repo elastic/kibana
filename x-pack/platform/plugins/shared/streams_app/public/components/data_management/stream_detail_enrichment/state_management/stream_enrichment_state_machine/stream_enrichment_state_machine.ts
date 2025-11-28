@@ -115,8 +115,7 @@ export const streamEnrichmentMachine = setup({
       );
       const streamlangDSL = convertUIStepsToDSL(allStepsWithUI, false);
       const validationResult = validateStreamlang(streamlangDSL, {
-        validateTypes: true,
-        isWiredStream: true,
+        reservedFields: [],
       });
 
       const errorsByStep = new Map<string, typeof validationResult.errors>();

@@ -52,21 +52,9 @@ export const validationErrorTypeLabels = {
 
 export interface StreamlangValidationOptions {
   /**
-   * Whether to validate for wired streams (requires namespaced fields)
-   */
-  isWiredStream?: boolean;
-  /**
    * List of reserved/forbidden field names that cannot be modified by processors
    */
-  reservedFields?: string[];
-  /**
-   * Whether to perform type checking on field usage
-   */
-  validateTypes?: boolean;
-  /**
-   * Initial field types (e.g., from parent stream or existing fields)
-   */
-  initialFieldTypes?: FieldTypeMap;
+  reservedFields: string[];
 }
 
 export interface StreamlangValidationResult {
@@ -81,6 +69,37 @@ export interface StreamlangValidationResult {
 }
 
 /**
+ * List of special fields that are allowed without namespacing (from kbn-streams-schema)
+ * These are OTel standard fields that don't require custom namespace prefixes
+ */
+export const KEEP_FIELDS = [
+  '@timestamp',
+  'observed_timestamp',
+  'trace_id',
+  'span_id',
+  'severity_text',
+  'body',
+  'severity_number',
+  'event_name',
+  'dropped_attributes_count',
+  'scope',
+  'body.text',
+  'body.structured',
+  'resource.schema_url',
+  'resource.dropped_attributes_count',
+] as const;
+
+/**
+ * Valid namespace prefixes for custom fields in wired streams
+ */
+export const NAMESPACE_PREFIXES = [
+  'body.structured.',
+  'attributes.',
+  'scope.attributes.',
+  'resource.attributes.',
+] as const;
+
+/**
  * Check if a field is a namespaced ECS field or an allowed keep field.
  * Based on the logic from @kbn/streams-schema/src/helpers/namespaced_ecs.ts
  *
@@ -91,38 +110,13 @@ export interface StreamlangValidationResult {
  * @timestamp, trace_id, span_id, severity_text, body, severity_number, event_name, etc.
  */
 function isNamespacedEcsField(fieldName: string): boolean {
-  // List of special fields that are allowed without namespacing (from kbn-streams-schema)
-  const keepFields = [
-    '@timestamp',
-    'observed_timestamp',
-    'trace_id',
-    'span_id',
-    'severity_text',
-    'body',
-    'severity_number',
-    'event_name',
-    'dropped_attributes_count',
-    'scope',
-    'body.text',
-    'body.structured',
-    'resource.schema_url',
-    'resource.dropped_attributes_count',
-  ];
-
   // Check if it's a keep field
-  if (keepFields.includes(fieldName)) {
+  if (KEEP_FIELDS.includes(fieldName as any)) {
     return true;
   }
 
   // Check if it starts with a namespace prefix
-  const namespacePrefixes = [
-    'body.structured.',
-    'attributes.',
-    'scope.attributes.',
-    'resource.attributes.',
-  ];
-
-  return namespacePrefixes.some((prefix) => fieldName.startsWith(prefix));
+  return NAMESPACE_PREFIXES.some((prefix) => fieldName.startsWith(prefix));
 }
 
 /**
@@ -225,8 +219,12 @@ function extractModifiedFields(processor: StreamlangProcessorDefinition): string
 /**
  * Infer the type of a value from its JavaScript type.
  * Used for static values in the Streamlang DSL (e.g., set processor values).
+ * @throws {Error} if value is null
  */
 function inferTypeFromValue(value: unknown): FieldType {
+  if (value === null) {
+    throw new Error('Null values are not supported in type inference');
+  }
   if (typeof value === 'string') return 'string';
   if (typeof value === 'number') return 'number';
   if (typeof value === 'boolean') return 'boolean';
@@ -576,59 +574,35 @@ export function trackFieldTypes(
 }
 
 /**
- * Validate type usage across processors (convenience wrapper).
- * Checks if fields are used with compatible types throughout the pipeline.
- *
- * @param flattenedSteps - The flattened processor steps
- * @param fieldTypes - Map of field names to their types
- * @returns Array of type mismatch errors
- */
-export function validateTypeUsage(
-  flattenedSteps: StreamlangProcessorDefinition[],
-  fieldTypes: FieldTypeMap
-): StreamlangValidationError[] {
-  return trackFieldTypesAndValidate(flattenedSteps, fieldTypes).errors;
-}
-
-/**
  * Validates a Streamlang DSL for wired stream requirements, reserved field usage, and type safety.
  *
- * For wired streams, this validates that:
+ * This validates that:
  * - All generated fields are properly namespaced (contain at least one dot)
  * - Custom fields are placed in approved namespaces like: attributes, body.structured, resource.attributes
- *
- * For all streams, this validates that:
  * - Processors don't modify reserved/system fields
- * - Fields are used with compatible types (when validateTypes is enabled)
+ * - Fields are used with compatible types
  *
  * @param streamlangDSL - The Streamlang DSL to validate
- * @param options - Validation options (isWiredStream, reservedFields, validateTypes, initialFieldTypes)
+ * @param options - Validation options (reservedFields)
  * @returns Validation result with any errors found
  */
 export function validateStreamlang(
   streamlangDSL: StreamlangDSL,
-  options: StreamlangValidationOptions = {}
+  options: StreamlangValidationOptions
 ): StreamlangValidationResult {
-  const {
-    isWiredStream = false,
-    reservedFields = [],
-    validateTypes = false,
-    initialFieldTypes = new Map(),
-  } = options;
+  const { reservedFields } = options;
   const errors: StreamlangValidationError[] = [];
   let fieldTypesByProcessor = new Map<string, FieldTypeMap>();
 
   // Flatten the steps to get all processors with their conditions resolved
   const flattenedSteps = flattenSteps(streamlangDSL.steps);
 
-  // Track field types and validate type usage if type validation is enabled
-  if (validateTypes) {
-    const typeResult = trackFieldTypesAndValidate(flattenedSteps, initialFieldTypes);
-    // Add type validation errors
-    errors.push(...typeResult.errors);
-    // Capture field types at each processor
-    fieldTypesByProcessor = typeResult.fieldTypesByProcessor;
-  }
+  // Track field types and validate type usage
+  const typeResult = trackFieldTypesAndValidate(flattenedSteps, new Map());
+  // Add type validation errors
+  errors.push(...typeResult.errors);
+  // Capture field types at each processor
+  fieldTypesByProcessor = typeResult.fieldTypesByProcessor;
 
   // Check each processor
   for (let i = 0; i < flattenedSteps.length; i++) {
@@ -644,26 +618,24 @@ export function validateStreamlang(
     const modifiedFields = extractModifiedFields(step);
 
     // Validate namespacing for wired streams
-    if (isWiredStream) {
-      const nonNamespacedFields = modifiedFields.filter((field) => !isNamespacedEcsField(field));
+    const nonNamespacedFields = modifiedFields.filter((field) => !isNamespacedEcsField(field));
 
-      if (nonNamespacedFields.length > 0) {
-        for (const field of nonNamespacedFields) {
-          errors.push({
-            type: 'non_namespaced_field',
-            message: i18n.translate('xpack.streamlang.validation.nonNamespacedFieldMessage', {
-              defaultMessage:
-                'The field "{fieldName}" generated by processor #{processorNumber} ({processorAction}) does not match the streams recommended schema - put custom fields into attributes, body.structured or resource.attributes',
-              values: {
-                fieldName: field,
-                processorNumber: i + 1,
-                processorAction: step.action,
-              },
-            }),
-            processorId,
-            field,
-          });
-        }
+    if (nonNamespacedFields.length > 0) {
+      for (const field of nonNamespacedFields) {
+        errors.push({
+          type: 'non_namespaced_field',
+          message: i18n.translate('xpack.streamlang.validation.nonNamespacedFieldMessage', {
+            defaultMessage:
+              'The field "{fieldName}" generated by processor #{processorNumber} ({processorAction}) does not match the streams recommended schema - put custom fields into attributes, body.structured or resource.attributes',
+            values: {
+              fieldName: field,
+              processorNumber: i + 1,
+              processorAction: step.action,
+            },
+          }),
+          processorId,
+          field,
+        });
       }
     }
 

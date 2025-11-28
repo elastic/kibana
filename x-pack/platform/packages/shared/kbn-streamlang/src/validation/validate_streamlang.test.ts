@@ -31,7 +31,9 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
@@ -48,7 +50,9 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
       expect(result.isValid).toBe(false);
       expect(result.errors).toHaveLength(1);
@@ -73,29 +77,14 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
       expect(result.isValid).toBe(false);
       expect(result.errors).toHaveLength(2);
       expect(result.errors[0].field).toBe('field1');
       expect(result.errors[1].field).toBe('field2');
-    });
-
-    it('should not validate namespacing when isWiredStream is false', () => {
-      const dsl: StreamlangDSL = {
-        steps: [
-          {
-            action: 'set',
-            to: 'custom_field',
-            value: 'test',
-          },
-        ],
-      };
-
-      const result = validateStreamlang(dsl, { isWiredStream: false });
-
-      expect(result.isValid).toBe(true);
-      expect(result.errors).toHaveLength(0);
     });
   });
 
@@ -127,7 +116,7 @@ describe('validateStreamlang', () => {
         steps: [
           {
             action: 'set',
-            to: 'custom.field',
+            to: 'attributes.field',
             value: 'test',
           },
         ],
@@ -149,16 +138,19 @@ describe('validateStreamlang', () => {
           {
             action: 'grok',
             from: 'message',
-            patterns: ['%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:level} %{GREEDYDATA:msg}'],
+            patterns: [
+              '%{TIMESTAMP_ISO8601:attributes.timestamp} %{LOGLEVEL:attributes.level} %{GREEDYDATA:attributes.msg}',
+            ],
           },
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
-      expect(result.isValid).toBe(false);
-      expect(result.errors).toHaveLength(3);
-      expect(result.errors.map((e) => e.field).sort()).toEqual(['level', 'msg', 'timestamp']);
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toHaveLength(0);
     });
 
     it('should validate namespaced grok fields correctly', () => {
@@ -174,7 +166,9 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
@@ -191,7 +185,9 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
       expect(result.isValid).toBe(false);
       expect(result.errors).toHaveLength(1);
@@ -213,7 +209,9 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
       expect(result.isValid).toBe(false);
       expect(result.errors).toHaveLength(3);
@@ -231,7 +229,9 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
@@ -250,7 +250,9 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
       expect(result.isValid).toBe(false);
       expect(result.errors).toHaveLength(1);
@@ -270,7 +272,9 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
       expect(result.isValid).toBe(false);
       expect(result.errors).toHaveLength(1);
@@ -298,7 +302,9 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
       expect(result.isValid).toBe(false);
       expect(result.errors).toHaveLength(1);
@@ -324,7 +330,6 @@ describe('validateStreamlang', () => {
       };
 
       const result = validateStreamlang(dsl, {
-        isWiredStream: true,
         reservedFields: ['@timestamp'],
       });
 
@@ -352,7 +357,9 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
       expect(result.isValid).toBe(false);
       expect(result.errors[0].processorId).toBe('my-custom-processor');
@@ -368,7 +375,6 @@ describe('validateStreamlang', () => {
       };
 
       const result = validateStreamlang(dsl, {
-        isWiredStream: true,
         reservedFields: ['@timestamp'],
       });
 
@@ -414,7 +420,9 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
@@ -436,7 +444,9 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
@@ -463,34 +473,12 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
-    });
-
-    it('should still reject truly non-namespaced custom fields', () => {
-      const dsl: StreamlangDSL = {
-        steps: [
-          {
-            action: 'set',
-            to: 'my_custom_field',
-            value: 'test',
-          },
-          {
-            action: 'set',
-            to: 'another_field',
-            value: 'test',
-          },
-        ],
-      };
-
-      const result = validateStreamlang(dsl, { isWiredStream: true });
-
-      expect(result.isValid).toBe(false);
-      expect(result.errors).toHaveLength(2);
-      expect(result.errors[0].field).toBe('my_custom_field');
-      expect(result.errors[1].field).toBe('another_field');
     });
   });
 
@@ -521,7 +509,9 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
       expect(result.isValid).toBe(true);
       expect(result.errors).toHaveLength(0);
@@ -543,7 +533,9 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { isWiredStream: true });
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+      });
 
       expect(result.isValid).toBe(false);
       expect(result.errors).toHaveLength(2);
@@ -570,7 +562,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // Grok produces string, date processor expects string - should be valid
         expect(result.isValid).toBe(true);
@@ -594,7 +588,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // Dissect produces string, replace expects string - should be valid
         expect(result.isValid).toBe(true);
@@ -608,25 +604,40 @@ describe('validateStreamlang', () => {
               action: 'set',
               to: 'attributes.count',
               value: 42,
+              customIdentifier: 'set_count',
             },
             {
               action: 'set',
               to: 'attributes.enabled',
               value: true,
+              customIdentifier: 'set_enabled',
             },
             {
               action: 'set',
               to: 'attributes.name',
               value: 'test',
+              customIdentifier: 'set_name',
             },
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // No type conflicts - all fields are set with their values
         expect(result.isValid).toBe(true);
         expect(result.errors).toHaveLength(0);
+
+        // Verify inferred types are tracked correctly
+        const countTypes = result.fieldTypesByProcessor.get('set_count');
+        const enabledTypes = result.fieldTypesByProcessor.get('set_enabled');
+        const nameTypes = result.fieldTypesByProcessor.get('set_name');
+
+        expect(countTypes?.get('attributes.count')).toBeUndefined(); // Not yet set before this processor
+        expect(enabledTypes?.get('attributes.count')).toBe('number'); // Set by previous processor
+        expect(nameTypes?.get('attributes.count')).toBe('number');
+        expect(nameTypes?.get('attributes.enabled')).toBe('boolean');
       });
 
       it('should track type changes through convert processor', () => {
@@ -645,9 +656,13 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // Grok produces string, convert changes it to number - no validation errors
+        // Note: Static analysis cannot detect all runtime conversion errors
+        // (e.g., converting 123 to boolean would fail at runtime but passes here)
         expect(result.isValid).toBe(true);
         expect(result.errors).toHaveLength(0);
       });
@@ -657,25 +672,27 @@ describe('validateStreamlang', () => {
           steps: [
             {
               action: 'set',
-              to: 'abc',
+              to: 'attributes.abc',
               value: '123',
             },
             {
               action: 'convert',
-              from: 'abc',
-              to: 'xyz',
+              from: 'attributes.abc',
+              to: 'attributes.xyz',
               type: 'long',
             },
             {
               action: 'replace',
-              from: 'xyz',
+              from: 'attributes.xyz',
               pattern: '123',
               replacement: '456',
             },
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // Set creates string field 'abc'
         // Convert creates number field 'xyz' from 'abc'
@@ -683,7 +700,7 @@ describe('validateStreamlang', () => {
         expect(result.isValid).toBe(false);
         expect(result.errors).toHaveLength(1);
         expect(result.errors[0].type).toBe('type_mismatch');
-        expect(result.errors[0].field).toBe('xyz');
+        expect(result.errors[0].field).toBe('attributes.xyz');
         expect(result.errors[0].expectedType).toBe('string');
         expect(result.errors[0].actualType).toBe('number');
       });
@@ -705,7 +722,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // Grok with :int produces number, replace expects string - should be invalid
         expect(result.isValid).toBe(false);
@@ -732,7 +751,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // Grok with :float produces number, date expects string - should be invalid
         expect(result.isValid).toBe(false);
@@ -758,7 +779,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         expect(result.isValid).toBe(false);
         expect(result.errors).toHaveLength(1);
@@ -788,7 +811,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         expect(result.isValid).toBe(false);
         expect(result.errors).toHaveLength(1);
@@ -814,7 +839,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         expect(result.isValid).toBe(false);
         expect(result.errors).toHaveLength(1);
@@ -840,7 +867,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         expect(result.isValid).toBe(false);
         expect(result.errors).toHaveLength(1);
@@ -877,7 +906,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         expect(result.isValid).toBe(false);
         expect(result.errors).toHaveLength(2);
@@ -911,7 +942,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // Type should propagate from old_field to new_field, replace should succeed
         expect(result.isValid).toBe(true);
@@ -940,7 +973,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // Type should propagate through copy_from
         expect(result.isValid).toBe(true);
@@ -969,7 +1004,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // String operations happen before convert, so it's valid
         expect(result.isValid).toBe(true);
@@ -998,7 +1035,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // After convert, it's a number, so replace shouldn't work
         expect(result.isValid).toBe(false);
@@ -1030,7 +1069,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // Type should propagate through rename, and then fail on replace
         expect(result.isValid).toBe(false);
@@ -1062,7 +1103,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // Type should propagate through copy_from, and then fail on replace
         expect(result.isValid).toBe(false);
@@ -1070,58 +1113,6 @@ describe('validateStreamlang', () => {
         expect(result.errors[0].type).toBe('type_mismatch');
         expect(result.errors[0].field).toBe('attributes.copied_price');
         expect(result.errors[0].actualType).toBe('number');
-      });
-    });
-
-    describe('initial field types', () => {
-      it('should use initial field types for validation', () => {
-        const dsl: StreamlangDSL = {
-          steps: [
-            {
-              action: 'replace',
-              from: 'attributes.existing_string',
-              pattern: 'old',
-              replacement: 'new',
-            },
-          ],
-        };
-
-        const initialTypes = new Map();
-        initialTypes.set('attributes.existing_string', 'string');
-
-        const result = validateStreamlang(dsl, {
-          validateTypes: true,
-          initialFieldTypes: initialTypes,
-        });
-
-        expect(result.isValid).toBe(true);
-        expect(result.errors).toHaveLength(0);
-      });
-
-      it('should detect type mismatch with initial field types', () => {
-        const dsl: StreamlangDSL = {
-          steps: [
-            {
-              action: 'date',
-              from: 'attributes.existing_number',
-              formats: ['ISO8601'],
-            },
-          ],
-        };
-
-        const initialTypes = new Map();
-        initialTypes.set('attributes.existing_number', 'number');
-
-        const result = validateStreamlang(dsl, {
-          validateTypes: true,
-          initialFieldTypes: initialTypes,
-        });
-
-        expect(result.isValid).toBe(false);
-        expect(result.errors).toHaveLength(1);
-        expect(result.errors[0].type).toBe('type_mismatch');
-        expect(result.errors[0].actualType).toBe('number');
-        expect(result.errors[0].expectedType).toBe('string');
       });
     });
 
@@ -1143,34 +1134,30 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // Unknown type from copy_from, so validation doesn't flag error
         expect(result.isValid).toBe(true);
         expect(result.errors).toHaveLength(0);
       });
 
-      it('should not validate types when validateTypes is false', () => {
+      it('should throw error when set processor has null value', () => {
         const dsl: StreamlangDSL = {
           steps: [
             {
               action: 'set',
               to: 'attributes.value',
-              value: 123,
-            },
-            {
-              action: 'date',
-              from: 'attributes.value',
-              formats: ['ISO8601'],
+              value: null,
             },
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: false });
-
-        // Type validation disabled, so no errors
-        expect(result.isValid).toBe(true);
-        expect(result.errors).toHaveLength(0);
+        // Null values should throw an error during validation
+        expect(() => validateStreamlang(dsl, { reservedFields: [] })).toThrow(
+          'Null values are not supported in type inference'
+        );
       });
 
       it('should handle date processor producing date type', () => {
@@ -1190,7 +1177,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // Date processor parses string to date type - valid
         expect(result.isValid).toBe(true);
@@ -1218,7 +1207,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // Multiple conversions on same field - last one wins
         expect(result.isValid).toBe(true);
@@ -1244,8 +1235,7 @@ describe('validateStreamlang', () => {
         };
 
         const result = validateStreamlang(dsl, {
-          isWiredStream: true,
-          validateTypes: true,
+          reservedFields: [],
         });
 
         expect(result.isValid).toBe(false);
@@ -1264,12 +1254,12 @@ describe('validateStreamlang', () => {
           steps: [
             {
               action: 'set',
-              to: 'myfield',
+              to: 'attributes.myfield',
               value: 42, // Sets myfield to number
             },
             {
               action: 'set',
-              to: 'myfield',
+              to: 'attributes.myfield',
               value: 'hello', // Conditionally sets myfield to string
               where: {
                 field: 'somecondition',
@@ -1279,12 +1269,14 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         expect(result.isValid).toBe(false);
         expect(result.errors).toHaveLength(1);
         expect(result.errors[0].type).toBe('mixed_type');
-        expect(result.errors[0].field).toBe('myfield');
+        expect(result.errors[0].field).toBe('attributes.myfield');
         expect(result.errors[0].conflictingTypes).toEqual(
           expect.arrayContaining(['number', 'string'])
         );
@@ -1297,13 +1289,13 @@ describe('validateStreamlang', () => {
           steps: [
             {
               action: 'set',
-              to: 'myfield',
+              to: 'attributes.myfield',
               value: 'initial string',
             },
             {
               action: 'grok',
               from: 'message',
-              patterns: ['%{NUMBER:myfield:int}'], // Conditionally extracts as number
+              patterns: ['%{NUMBER:attributes.myfield:int}'], // Conditionally extracts as number
               where: {
                 field: 'needs_parsing',
                 eq: true,
@@ -1312,12 +1304,14 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         expect(result.isValid).toBe(false);
         expect(result.errors).toHaveLength(1);
         expect(result.errors[0].type).toBe('mixed_type');
-        expect(result.errors[0].field).toBe('myfield');
+        expect(result.errors[0].field).toBe('attributes.myfield');
         expect(result.errors[0].conflictingTypes).toEqual(
           expect.arrayContaining(['string', 'number'])
         );
@@ -1328,12 +1322,12 @@ describe('validateStreamlang', () => {
           steps: [
             {
               action: 'set',
-              to: 'amount',
+              to: 'attributes.amount',
               value: '100', // String
             },
             {
               action: 'convert',
-              from: 'amount',
+              from: 'attributes.amount',
               type: 'integer', // Conditionally convert to number
               where: {
                 field: 'should_convert',
@@ -1343,12 +1337,14 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         expect(result.isValid).toBe(false);
         expect(result.errors).toHaveLength(1);
         expect(result.errors[0].type).toBe('mixed_type');
-        expect(result.errors[0].field).toBe('amount');
+        expect(result.errors[0].field).toBe('attributes.amount');
         expect(result.errors[0].conflictingTypes).toEqual(
           expect.arrayContaining(['string', 'number'])
         );
@@ -1382,7 +1378,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         expect(result.isValid).toBe(false);
         expect(result.errors.length).toBeGreaterThanOrEqual(1);
@@ -1402,18 +1400,20 @@ describe('validateStreamlang', () => {
           steps: [
             {
               action: 'set',
-              to: 'myfield',
+              to: 'attributes.myfield',
               value: 42, // Number
             },
             {
               action: 'set',
-              to: 'myfield',
+              to: 'attributes.myfield',
               value: 'hello', // Unconditionally changes to string
             },
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         expect(result.isValid).toBe(true);
         expect(result.errors).toHaveLength(0);
@@ -1424,12 +1424,12 @@ describe('validateStreamlang', () => {
           steps: [
             {
               action: 'set',
-              to: 'myfield',
+              to: 'attributes.myfield',
               value: 42,
             },
             {
               action: 'set',
-              to: 'myfield',
+              to: 'attributes.myfield',
               value: 'hello',
               where: {
                 always: {},
@@ -1438,7 +1438,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         expect(result.isValid).toBe(true);
         expect(result.errors).toHaveLength(0);
@@ -1449,18 +1451,20 @@ describe('validateStreamlang', () => {
           steps: [
             {
               action: 'set',
-              to: 'amount',
+              to: 'attributes.amount',
               value: '100',
             },
             {
               action: 'convert',
-              from: 'amount',
+              from: 'attributes.amount',
               type: 'integer', // Unconditionally convert
             },
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         expect(result.isValid).toBe(true);
         expect(result.errors).toHaveLength(0);
@@ -1471,18 +1475,20 @@ describe('validateStreamlang', () => {
           steps: [
             {
               action: 'set',
-              to: 'port',
+              to: 'attributes.port',
               value: 'unknown',
             },
             {
               action: 'grok',
               from: 'message',
-              patterns: ['Port: %{NUMBER:port:int}'], // Unconditionally extracts as number
+              patterns: ['Port: %{NUMBER:attributes.port:int}'], // Unconditionally extracts as number
             },
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         expect(result.isValid).toBe(true);
         expect(result.errors).toHaveLength(0);
@@ -1519,7 +1525,9 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         expect(result.isValid).toBe(false);
         // Should have 2 errors: one for string, one for boolean
@@ -1533,12 +1541,12 @@ describe('validateStreamlang', () => {
           steps: [
             {
               action: 'set',
-              to: 'value',
+              to: 'attributes.value',
               value: 1,
             },
             {
               action: 'set',
-              to: 'value',
+              to: 'attributes.value',
               value: 'one',
               where: {
                 field: 'format',
@@ -1547,7 +1555,7 @@ describe('validateStreamlang', () => {
             },
             {
               action: 'set',
-              to: 'value',
+              to: 'attributes.value',
               value: true,
               where: {
                 field: 'format',
@@ -1557,11 +1565,13 @@ describe('validateStreamlang', () => {
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         expect(result.isValid).toBe(false);
         const mixedErrors = result.errors.filter(
-          (e) => e.type === 'mixed_type' && e.field === 'value'
+          (e) => e.type === 'mixed_type' && e.field === 'attributes.value'
         );
         expect(mixedErrors.length).toBeGreaterThanOrEqual(1);
         // Check that we've accumulated all three types
@@ -1578,12 +1588,12 @@ describe('validateStreamlang', () => {
           steps: [
             {
               action: 'set',
-              to: 'myfield',
+              to: 'attributes.myfield',
               value: 42, // Number
             },
             {
               action: 'set',
-              to: 'myfield',
+              to: 'attributes.myfield',
               value: 'hello', // Conditionally string
               where: {
                 field: 'condition',
@@ -1592,23 +1602,25 @@ describe('validateStreamlang', () => {
             },
             {
               action: 'replace',
-              from: 'myfield', // Expects string, but myfield might still be number
+              from: 'attributes.myfield', // Expects string, but myfield might still be number
               pattern: 'test',
               replacement: 'replaced',
             },
           ],
         };
 
-        const result = validateStreamlang(dsl, { validateTypes: true });
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+        });
 
         // Should have both mixed type error AND type mismatch error
         expect(result.isValid).toBe(false);
         expect(result.errors.some((e) => e.type === 'mixed_type')).toBe(true);
         // The replace processor should still see myfield as potentially a number
         // because the set is conditional
-        expect(result.errors.some((e) => e.type === 'type_mismatch' && e.field === 'myfield')).toBe(
-          true
-        );
+        expect(
+          result.errors.some((e) => e.type === 'type_mismatch' && e.field === 'attributes.myfield')
+        ).toBe(true);
       });
     });
   });
