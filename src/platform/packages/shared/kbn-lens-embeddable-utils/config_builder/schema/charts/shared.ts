@@ -112,6 +112,28 @@ export function mergeAllMetricsWithChartDimensionSchemaWithTimeBasedAndStaticOps
   ]);
 }
 
+export function mergeAllMetricsWithChartDimensionSchemaWithStaticOps<T extends Props>(
+  baseSchema: ObjectType<T>
+) {
+  return schema.oneOf([
+    // oneOf allows only 12 items
+    // so break down metrics based on the type: field-based, reference-based, formula-like
+    schema.oneOf([
+      schema.allOf([baseSchema, countMetricOperationSchema]),
+      schema.allOf([baseSchema, uniqueCountMetricOperationSchema]),
+      schema.allOf([baseSchema, metricOperationSchema]),
+      schema.allOf([baseSchema, sumMetricOperationSchema]),
+      schema.allOf([baseSchema, lastValueOperationSchema]),
+      schema.allOf([baseSchema, percentileOperationSchema]),
+      schema.allOf([baseSchema, percentileRanksOperationSchema]),
+    ]),
+    schema.oneOf([
+      schema.allOf([baseSchema, staticOperationDefinitionSchema]),
+      schema.allOf([baseSchema, formulaOperationDefinitionSchema]),
+    ]),
+  ]);
+}
+
 export function mergeAllBucketsWithChartDimensionSchema<T extends Props>(
   baseSchema: ObjectType<T>
 ) {
