@@ -5139,7 +5139,7 @@
           },
           "; getAuditLogger: () => ",
           "AuditLogger",
-          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; ruleTypeIds?: string[] | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; data: string[]; perPage: number; total: number; }>>; getTemplate: (params: Readonly<{} & { id: string; }>) => Promise<Readonly<{ alertDelay?: Readonly<{} & { active: number; }> | undefined; flapping?: Readonly<{} & { lookBackWindow: number; statusChangeThreshold: number; }> | null | undefined; } & { params: Record<string, any>; id: string; name: string; tags: string[]; schedule: Readonly<{} & { interval: string; }>; ruleTypeId: string; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; findGaps: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortField?: \"@timestamp\" | \"kibana.alert.rule.gap.status\" | \"kibana.alert.rule.gap.total_gap_duration_ms\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; statuses?: (\"unfilled\" | \"filled\" | \"partially_filled\")[] | undefined; } & { page: number; perPage: number; ruleId: string; }>) => Promise<{ total: number; data: ",
+          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; ruleTypeIds?: string[] | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; data: string[]; perPage: number; total: number; }>>; getTemplate: (params: Readonly<{} & { id: string; }>) => Promise<Readonly<{ alertDelay?: Readonly<{} & { active: number; }> | undefined; flapping?: Readonly<{} & { lookBackWindow: number; statusChangeThreshold: number; }> | null | undefined; } & { params: Record<string, any>; id: string; name: string; tags: string[]; schedule: Readonly<{} & { interval: string; }>; ruleTypeId: string; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; findGaps: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortField?: \"@timestamp\" | \"kibana.alert.rule.gap.status\" | \"kibana.alert.rule.gap.total_gap_duration_ms\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; statuses?: (\"unfilled\" | \"filled\" | \"partially_filled\")[] | undefined; hasUnfilledIntervals?: boolean | undefined; hasInProgressIntervals?: boolean | undefined; hasFilledIntervals?: boolean | undefined; } & { page: number; perPage: number; ruleId: string; }>) => Promise<{ total: number; data: ",
           "Gap",
           "[]; page: number; perPage: number; }>; fillGapById: (params: Readonly<{} & { ruleId: string; gapId: string; }>) => Promise<(Readonly<{ end?: string | undefined; initiatorId?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; enabled: boolean; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; enabled: boolean; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
@@ -5155,7 +5155,13 @@
           "BulkFillGapsByRuleIdsOptions",
           ") => Promise<",
           "BulkFillGapsByRuleIdsResult",
-          ">; getRuleIdsWithGaps: (params: Readonly<{ statuses?: string[] | undefined; hasUnfilledIntervals?: boolean | undefined; hasInProgressIntervals?: boolean | undefined; hasFilledIntervals?: boolean | undefined; } & { start: string; end: string; }>) => Promise<Readonly<{ latestGapTimestamp?: number | undefined; } & { ruleIds: string[]; total: number; }>>; getGapsSummaryByRuleIds: (params: Readonly<{} & { start: string; end: string; ruleIds: string[]; }>) => Promise<Readonly<{} & { data: Readonly<{} & { ruleId: string; totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; }>[]; }>>; getRuleTypesByQuery: (params: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; } & {}>) => Promise<Readonly<{} & { ruleTypes: string[]; }>>; }"
+          ">; getRuleIdsWithGaps: (params: Readonly<{ sortOrder?: \"asc\" | \"desc\" | undefined; statuses?: string[] | undefined; hasUnfilledIntervals?: boolean | undefined; hasInProgressIntervals?: boolean | undefined; hasFilledIntervals?: boolean | undefined; ruleTypes?: Readonly<{} & { type: string; consumer: string; }>[] | undefined; maxRulesToFetch?: number | undefined; } & { start: string; end: string; }>) => Promise<Readonly<{ latestGapTimestamp?: number | undefined; } & { ruleIds: string[]; total: number; }>>; getGapsSummaryByRuleIds: (params: Readonly<{} & { start: string; end: string; ruleIds: string[]; }>) => Promise<Readonly<{} & { data: Readonly<{} & { ruleId: string; totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; }>[]; }>>; getRuleTypesByQuery: (params: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; } & {}>) => Promise<Readonly<{} & { ruleTypes: string[]; }>>; createGapAutoFillScheduler: (params: ",
+          "CreateGapAutoFillSchedulerParams",
+          ") => Promise<",
+          "GapAutoFillSchedulerResponse",
+          ">; getContext: () => ",
+          "RulesClientContext",
+          "; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/index.ts",
         "deprecated": false,
@@ -10307,6 +10313,21 @@
         "description": [],
         "signature": [
           "\"/internal/alerting/rules/gaps\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/alerting/rules/gaps/auto_fill_scheduler\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
         "deprecated": false,

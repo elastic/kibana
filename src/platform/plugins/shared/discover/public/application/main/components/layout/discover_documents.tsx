@@ -69,7 +69,10 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import type { CellRenderersExtensionParams } from '../../../../context_awareness';
+import type {
+  CellRenderersExtensionParams,
+  DocViewerExtensionParams,
+} from '../../../../context_awareness';
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER,
   useAdditionalCellActions,
@@ -297,6 +300,14 @@ function DiscoverDocumentsComponent({
     timeRange: requestParams.timeRangeAbsolute,
   });
 
+  const docViewerExtensionActions = useMemo<DocViewerExtensionParams['actions']>(
+    () => ({
+      openInNewTab: (params) => dispatch(internalStateActions.openInNewTabExtPointAction(params)),
+      updateESQLQuery: stateContainer.actions.updateESQLQuery,
+    }),
+    [dispatch, stateContainer.actions.updateESQLQuery]
+  );
+
   const renderDocumentView = useCallback(
     (
       hit: DataTableRecord,
@@ -320,6 +331,7 @@ function DiscoverDocumentsComponent({
         query={query}
         initialTabId={initialDocViewerTabId}
         docViewerRef={docViewerRef}
+        docViewerExtensionActions={docViewerExtensionActions}
       />
     ),
     [
@@ -331,6 +343,7 @@ function DiscoverDocumentsComponent({
       setExpandedDoc,
       query,
       initialDocViewerTabId,
+      docViewerExtensionActions,
     ]
   );
 
