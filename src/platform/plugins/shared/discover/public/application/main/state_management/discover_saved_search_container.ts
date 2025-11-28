@@ -52,10 +52,6 @@ export interface DiscoverSavedSearchContainer {
    */
   getCurrent$: () => BehaviorSubject<SavedSearch>;
   /**
-   * Get the id of the current saved search
-   */
-  getId: () => string | undefined;
-  /**
    * Get an BehaviorSubject which contains the initial state of the current saved search
    * This is set when a saved search is loaded or a new saved search is initialized
    */
@@ -122,7 +118,6 @@ export function getSavedSearchContainer({
   const getInitial$ = () => savedSearchInitial$;
   const getCurrent$ = () => savedSearchCurrent$;
   const getTitle = () => savedSearchCurrent$.getValue().title;
-  const getId = () => savedSearchCurrent$.getValue().id;
 
   const initUrlTracking = () => {
     const subscription = savedSearchCurrent$.subscribe((savedSearch) => {
@@ -230,7 +225,6 @@ export function getSavedSearchContainer({
   return {
     initUrlTracking,
     getCurrent$,
-    getId,
     getInitial$,
     getState,
     getTitle,

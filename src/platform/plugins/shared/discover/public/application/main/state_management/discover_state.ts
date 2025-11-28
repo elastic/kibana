@@ -336,7 +336,8 @@ export function getDiscoverStateContainer({
       );
     }
 
-    const trackingEnabled = Boolean(nextDataView.isPersisted() || savedSearchContainer.getId());
+    const { persistedDiscoverSession } = internalState.getState();
+    const trackingEnabled = Boolean(nextDataView.isPersisted() || persistedDiscoverSession?.id);
     services.urlTracker.setTrackingEnabled(trackingEnabled);
 
     return nextDataView;
