@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import type { AT_TIMESTAMP } from '@kbn/apm-types';
+import { i18n } from '@kbn/i18n';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
+import React, { useMemo, useState } from 'react';
+import type { AT_TIMESTAMP } from '@kbn/apm-types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { ErrorSampleDetailTabContent } from './error_sample_detail';
