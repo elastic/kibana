@@ -25,15 +25,41 @@ type ProductInterceptPrompterStartDeps = Omit<
   Pick<CoreStart, 'http'>;
 
 export class InterceptPrompter {
+  public static readonly CLIENT_STORAGE_KEY = 'intercepts.prompter.clientCache';
+
   private userInterceptRunPersistenceService = new UserInterceptRunPersistenceService();
   private interceptDialogService = new InterceptDialogService();
   private queueIntercept?: ReturnType<InterceptDialogService['start']>['add'];
   // observer for page visibility changes, shared across all intercepts
   private pageHidden$?: Rx.Observable<boolean>;
-  // Defines safe timer bound at 24 days, javascript browser timers are not reliable for longer intervals
-  // see https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout#maximum_delay_value,
-  // rxjs can do longer intervals, but we want to avoid the risk of running into issues with browser timers.
-  private readonly MAX_TIMER_INTERVAL = 0x7b98a000; // 24 days in milliseconds
+  // Check every hour if the trigger time has elapsed
+  private readonly CHECK_INTERVAL = 1 * 60 * 60 * 1000; // 1 hour in milliseconds
+
+  // Registry for intercept timers, used to track activation of a particular intercept for each user
+  private interceptTimerRegistry = new Proxy<Record<Intercept['id'], { timerStart: Date }>>(
+    {},
+    {
+      get: (target, prop) => {
+        if (typeof prop === 'symbol') return undefined;
+        const storage = JSON.parse(
+          localStorage.getItem(InterceptPrompter.CLIENT_STORAGE_KEY) || JSON.stringify(target)
+        );
+        return storage[prop];
+      },
+      set: (target, prop, value) => {
+        if (typeof prop === 'symbol') return false;
+        target[prop] = value;
+        localStorage.setItem(InterceptPrompter.CLIENT_STORAGE_KEY, JSON.stringify(target));
+        return true;
+      },
+      deleteProperty: (target, prop) => {
+        if (typeof prop === 'symbol') return false;
+        delete target[prop];
+        localStorage.setItem(InterceptPrompter.CLIENT_STORAGE_KEY, JSON.stringify(target));
+        return true;
+      },
+    }
+  );
 
   setup({ analytics, notifications }: ProductInterceptPrompterSetupDeps) {
     this.interceptDialogService.setup({ analytics, notifications });
@@ -76,8 +102,6 @@ export class InterceptPrompter {
       config: () => Promise<Omit<Intercept, 'id'>>;
     }
   ) {
-    let nextRunId: number;
-
     return Rx.from(
       http.post<NonNullable<TriggerInfo>>(TRIGGER_INFO_API_ROUTE, {
         body: JSON.stringify({
@@ -87,83 +111,124 @@ export class InterceptPrompter {
     )
       .pipe(Rx.filter((response) => !!response))
       .pipe(
-        Rx.mergeMap((response) => {
+        Rx.combineLatestWith(getUserTriggerData$(intercept.id)),
+        Rx.switchMap(([response, userTriggerData]) => {
+          if (!response.recurrent && userTriggerData && userTriggerData.lastInteractedInterceptId) {
+            // if the intercept is not recurrent and the user has already interacted with it,
+            // there's nothing to do
+            return Rx.EMPTY;
+          }
+
+          let nextRunId: number;
+
           return this.pageHidden$!.pipe(
             Rx.switchMap((isHidden) => {
-              // if the page is hidden, there's no need to run computations on wether to display the intercept or not
+              // if the page is hidden, there's no need to run computations on whether to display the intercept or not
               if (isHidden) return Rx.EMPTY;
 
-              // anchor for all calculations, this is the current time at which we are considering displaying the intercept
-              const timePoint = Date.now();
-
-              // difference between the current time and the time when the trigger was registered
-              let diff = 0;
-
-              // Calculate the number of runs since the trigger was registered
-              const runs = Math.floor(
-                (diff = timePoint - Date.parse(response.registeredAt)) /
-                  response.triggerIntervalInMs
+              const timerCalculations = this.calculateTimeTillTrigger(
+                response.registeredAt,
+                response.triggerIntervalInMs
               );
 
-              nextRunId = runs + 1;
+              // set the next run id
+              nextRunId = timerCalculations.nextRunId;
 
-              return Rx.timer(
-                // create a timer that will not exceed browser's max timer interval
-                Math.min(nextRunId * response.triggerIntervalInMs - diff, this.MAX_TIMER_INTERVAL),
-                Math.min(response.triggerIntervalInMs, this.MAX_TIMER_INTERVAL)
-              ).pipe(
+              // Start immediately and check every hour  if the trigger time has elapsed
+              return Rx.timer(0, Math.min(response.triggerIntervalInMs, this.CHECK_INTERVAL)).pipe(
                 Rx.switchMap((timerIterationCount) => {
-                  if (response.triggerIntervalInMs < this.MAX_TIMER_INTERVAL) {
-                    return getUserTriggerData$(intercept.id);
+                  const now = Date.now();
+                  const timerStart = this.interceptTimerStartRecord(intercept.id).getTime();
+                  const timeElapsedSinceTimerStart = now - timerStart;
+
+                  if (timeElapsedSinceTimerStart >= response.triggerIntervalInMs) {
+                    // Reset the timer start record, so the next interval starts fresh
+                    this.clearInterceptTimerStartRecord(intercept.id);
+                    // Time has elapsed for the next trigger
+                    // Return user trigger data to check if they've already interacted with this run
+                    return timerIterationCount === 0
+                      ? // if it's the first timer iteration it's safe to return the user trigger data we'd requested because it has a low chance of being stale just yet
+                        Rx.of(userTriggerData)
+                      : getUserTriggerData$(intercept.id);
                   } else {
-                    const timeElapsedSinceRegistration =
-                      diff + this.MAX_TIMER_INTERVAL * timerIterationCount;
-
-                    const timeTillTriggerEvent =
-                      nextRunId * response.triggerIntervalInMs - timeElapsedSinceRegistration;
-
-                    if (timeTillTriggerEvent <= this.MAX_TIMER_INTERVAL) {
-                      // trigger event would happen sometime within this current slice
-                      // set up a single use timer that will emit the trigger event
-                      return Rx.timer(timeTillTriggerEvent).pipe(
-                        Rx.switchMap(() => {
-                          return getUserTriggerData$(intercept.id);
-                        })
-                      );
-                    } else {
-                      // current timer slice requires no action
-                      return Rx.EMPTY;
-                    }
+                    // Not yet time, return EMPTY to skip this iteration
+                    return Rx.EMPTY;
                   }
                 }),
                 Rx.takeWhile((triggerData) => {
-                  // Stop the timer if lastInteractedInterceptId is defined and matches nextRunId
+                  // Stop the timer if the current intercept being processed is not a recurring one and the user has already interacted with it
                   if (!response.recurrent && triggerData.lastInteractedInterceptId) {
                     return false;
                   }
+
                   return true;
                 })
               );
             })
-          );
-        })
-      )
-      .pipe(
-        Rx.tap(async (triggerData) => {
-          if (nextRunId !== triggerData.lastInteractedInterceptId) {
-            try {
-              const interceptConfig = await intercept.config();
-              this.queueIntercept?.({ id: intercept.id, runId: nextRunId, ...interceptConfig });
-              nextRunId++;
-            } catch (err) {
-              apm.captureError(err, {
+          ).pipe(
+            Rx.tap(async (triggerData) => {
+              if (nextRunId !== triggerData.lastInteractedInterceptId) {
+                try {
+                  const interceptConfig = await intercept.config();
+                  this.queueIntercept?.({ id: intercept.id, runId: nextRunId, ...interceptConfig });
+                  // Reset the timer start record, so the next interval starts fresh
+                  // this.clearInterceptTimerStartRecord(intercept.id);
+                  nextRunId++;
+                } catch (err) {
+                  apm.captureError(err, {
+                    labels: {
+                      interceptId: intercept.id,
+                    },
+                  });
+                }
+              }
+            }),
+            Rx.catchError((error) => {
+              apm.captureError(error, {
                 labels: {
                   interceptId: intercept.id,
+                  errorContext: 'registerIntercept',
                 },
               });
-            }
-          }
+              return Rx.EMPTY;
+            })
+          );
         })
       );
+  }
+
+  public calculateTimeTillTrigger(registeredAt: string, triggerIntervalInMs: number) {
+    const now = Date.now();
+    const diff = now - Date.parse(registeredAt);
+    const runs = Math.floor(diff / triggerIntervalInMs);
+    const nextRunId = runs + 1;
+    const timeTillNextRun = nextRunId * triggerIntervalInMs - diff;
+
+    return {
+      runs,
+      shouldTriggerImmediately: timeTillNextRun <= 0,
+      timeTillNextRun,
+      nextRunId,
+    };
+  }
+
+  private markInterceptTimerStart(interceptId: Intercept['id']) {
+    this.interceptTimerRegistry[interceptId] = { timerStart: new Date() };
+  }
+
+  /**
+   * Returns the date and time when the intercept timer was started for the given intercept id
+   * If no record exists, it sets it to the current date and time and returns this value
+   */
+  private interceptTimerStartRecord(interceptId: Intercept['id']) {
+    if (!this.interceptTimerRegistry[interceptId]) {
+      this.markInterceptTimerStart(interceptId);
+    }
+
+    return new Date(this.interceptTimerRegistry[interceptId].timerStart);
+  }
+
+  private clearInterceptTimerStartRecord(interceptId: Intercept['id']) {
+    delete this.interceptTimerRegistry[interceptId];
   }
 }
