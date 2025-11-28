@@ -27,13 +27,16 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
 import { buildFilter, combineFilters } from '../../../client/utils';
-import type { AlertAttachmentAttributes, AttachmentTotals } from '../../../../common/types/domain';
-import { AttachmentType, AlertAttachmentAttributesRt } from '../../../../common/types/domain';
+import type {
+  AttachmentTotals,
+  DocumentAttachmentAttributes,
+} from '../../../../common/types/domain';
+import { AttachmentType, DocumentAttachmentAttributesRt } from '../../../../common/types/domain';
 import type {
   AlertIdsAggsResult,
   BulkOptionalAttributes,
   EventIdsAggsResult,
-  GetAllAlertsAttachToCaseArgs,
+  GetAllAlertsAttachToCaseArgs as GetAllDocumentsAttachedToCaseArgs,
   GetAttachmentArgs,
   ServiceContext,
 } from '../types';
@@ -137,22 +140,23 @@ export class AttachmentGetter {
   }
 
   /**
-   * Retrieves all the alerts attached to a case.
+   * Retrieves all the documents attached to a case.
    */
-  public async getAllAlertsAttachToCase({
+  public async getAllDocumentsAttachedToCase({
     caseId,
     filter,
-  }: GetAllAlertsAttachToCaseArgs): Promise<Array<SavedObject<AlertAttachmentAttributes>>> {
+    attachmentTypes = [AttachmentType.alert, AttachmentType.event],
+  }: GetAllDocumentsAttachedToCaseArgs): Promise<Array<SavedObject<DocumentAttachmentAttributes>>> {
     try {
-      this.context.log.debug(`Attempting to GET all alerts for case id ${caseId}`);
-      const alertsFilter = buildFilter({
-        filters: [AttachmentType.alert],
+      this.context.log.debug(`Attempting to GET all documents for case id ${caseId}`);
+      const documentsFilter = buildFilter({
+        filters: attachmentTypes,
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,
       });
 
-      const combinedFilter = combineFilters([alertsFilter, filter]);
+      const combinedFilter = combineFilters([documentsFilter, filter]);
 
       const finder =
         this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<AttachmentPersistedAttributes>(
@@ -166,23 +170,23 @@ export class AttachmentGetter {
           }
         );
 
-      let result: Array<SavedObject<AlertAttachmentAttributes>> = [];
+      let result: Array<SavedObject<DocumentAttachmentAttributes>> = [];
       for await (const userActionSavedObject of finder.find()) {
-        result = result.concat(AttachmentGetter.decodeAlerts(userActionSavedObject));
+        result = result.concat(AttachmentGetter.decodeDocuments(userActionSavedObject));
       }
 
       return result;
     } catch (error) {
-      this.context.log.error(`Error on GET all alerts for case id ${caseId}: ${error}`);
+      this.context.log.error(`Error on GET all documents for case id ${caseId}: ${error}`);
       throw error;
     }
   }
 
-  private static decodeAlerts(
+  private static decodeDocuments(
     response: SavedObjectsFindResponse<AttachmentPersistedAttributes>
-  ): Array<SavedObject<AlertAttachmentAttributes>> {
+  ): Array<SavedObject<DocumentAttachmentAttributes>> {
     return response.saved_objects.map((so) => {
-      const validatedAttributes = decodeOrThrow(AlertAttachmentAttributesRt)(so.attributes);
+      const validatedAttributes = decodeOrThrow(DocumentAttachmentAttributesRt)(so.attributes);
 
       return Object.assign(so, { attributes: validatedAttributes });
     });

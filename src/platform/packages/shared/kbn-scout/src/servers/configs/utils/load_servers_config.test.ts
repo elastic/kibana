@@ -45,6 +45,7 @@ const mockScoutTestConfig: ScoutTestConfig = {
     password: 'changeme',
   },
   serverless: true,
+  uiam: false,
   projectType: 'oblt',
   isCloud: true,
   license: 'trial',

@@ -12,9 +12,9 @@ import type { Schema } from 'joi';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
 import Path from 'path';
 import * as Url from 'url';
-import type { ScoutServerConfig, ScoutTestConfig } from '../../types';
 import { schema } from './schema';
-import { formatCurrentDate, getProjectType } from './utils/utils';
+import { formatCurrentDate, getProjectType, getOrganizationId } from './utils/common';
+import type { ScoutServerConfig, ScoutTestConfig } from '../../types';
 
 const $values = Symbol('values');
 
@@ -107,8 +107,12 @@ export class Config {
   public getScoutTestConfig(): ScoutTestConfig {
     return {
       serverless: this.get('serverless'),
+      uiam: this.get('esServerlessOptions.uiam', false),
       projectType: this.get('serverless')
         ? getProjectType(this.get('kbnTestServer.serverArgs'))
+        : undefined,
+      organizationId: this.get('serverless')
+        ? getOrganizationId(this.get('kbnTestServer.serverArgs'))
         : undefined,
       isCloud: false,
       license: this.get('esTestCluster.license'),
