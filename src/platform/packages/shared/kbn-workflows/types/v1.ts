@@ -112,7 +112,7 @@ export interface EsWorkflowStepExecution {
   workflowId: string;
   status: ExecutionStatus;
   startedAt: string;
-  completedAt?: string;
+  finishedAt?: string;
   executionTimeMs?: number;
 
   /** Topological index of step in workflow graph. */
