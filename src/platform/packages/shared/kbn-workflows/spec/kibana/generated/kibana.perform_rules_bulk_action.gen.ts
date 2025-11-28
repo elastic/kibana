@@ -25,6 +25,7 @@ import {
   perform_rules_bulk_action_request,
   perform_rules_bulk_action_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

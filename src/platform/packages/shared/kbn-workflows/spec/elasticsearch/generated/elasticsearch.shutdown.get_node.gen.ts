@@ -18,9 +18,6 @@
 import { z } from '@kbn/zod/v4';
 import type { InternalConnectorContract } from '../../../types/latest';
 
-// import all needed request and response schemas generated from the OpenAPI spec
-import {} from './schemas/es_openapi_zod.gen';
-
 // export contract
 export const SHUTDOWN_GET_NODE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.shutdown.get_node',

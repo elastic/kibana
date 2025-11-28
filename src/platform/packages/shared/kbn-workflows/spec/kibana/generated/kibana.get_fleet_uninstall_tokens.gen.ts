@@ -25,6 +25,7 @@ import {
   get_fleet_uninstall_tokens_request,
   get_fleet_uninstall_tokens_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

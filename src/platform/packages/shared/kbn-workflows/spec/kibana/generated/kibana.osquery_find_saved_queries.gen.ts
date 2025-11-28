@@ -25,6 +25,7 @@ import {
   osquery_find_saved_queries_request,
   osquery_find_saved_queries_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

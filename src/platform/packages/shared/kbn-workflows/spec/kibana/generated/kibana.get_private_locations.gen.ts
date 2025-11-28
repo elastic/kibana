@@ -25,6 +25,7 @@ import {
   get_private_locations_request,
   get_private_locations_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

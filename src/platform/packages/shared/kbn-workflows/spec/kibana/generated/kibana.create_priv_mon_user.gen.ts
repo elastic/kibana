@@ -25,6 +25,7 @@ import {
   create_priv_mon_user_request,
   create_priv_mon_user_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
@@ -44,7 +45,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
     headerParams: [],
     pathParams: [],
     urlParams: [],
-    bodyParams: ['user'],
+    bodyParams: ['entity_analytics_monitoring', 'user'],
   },
   paramsSchema: z.object({
     ...getShapeAt(create_priv_mon_user_request, 'body'),

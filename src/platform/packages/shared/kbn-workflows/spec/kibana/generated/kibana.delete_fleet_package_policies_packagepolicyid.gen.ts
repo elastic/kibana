@@ -25,6 +25,7 @@ import {
   delete_fleet_package_policies_packagepolicyid_request,
   delete_fleet_package_policies_packagepolicyid_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

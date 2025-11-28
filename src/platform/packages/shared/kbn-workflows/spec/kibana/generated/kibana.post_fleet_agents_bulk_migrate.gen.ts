@@ -25,6 +25,7 @@ import {
   post_fleet_agents_bulk_migrate_request,
   post_fleet_agents_bulk_migrate_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

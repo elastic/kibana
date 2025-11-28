@@ -25,6 +25,7 @@ import {
   set_case_configuration_default_space_request,
   set_case_configuration_default_space_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

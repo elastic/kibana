@@ -25,6 +25,7 @@ import {
   get_logstash_pipeline_request,
   get_logstash_pipeline_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

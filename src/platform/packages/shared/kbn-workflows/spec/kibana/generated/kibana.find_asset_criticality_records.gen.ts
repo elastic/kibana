@@ -25,6 +25,7 @@ import {
   find_asset_criticality_records_request,
   find_asset_criticality_records_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

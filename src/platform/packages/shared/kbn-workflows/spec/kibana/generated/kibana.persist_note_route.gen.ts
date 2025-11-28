@@ -25,6 +25,7 @@ import {
   persist_note_route_request,
   persist_note_route_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

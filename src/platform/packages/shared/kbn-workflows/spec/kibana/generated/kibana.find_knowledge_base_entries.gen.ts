@@ -25,6 +25,7 @@ import {
   find_knowledge_base_entries_request,
   find_knowledge_base_entries_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

@@ -25,6 +25,7 @@ import {
   delete_fleet_enrollment_api_keys_keyid_request,
   delete_fleet_enrollment_api_keys_keyid_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

@@ -25,6 +25,7 @@ import {
   resolve_timeline_request,
   resolve_timeline_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

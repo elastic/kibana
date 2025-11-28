@@ -25,6 +25,7 @@ import {
   get_maintenance_window_find_request,
   get_maintenance_window_find_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

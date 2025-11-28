@@ -25,6 +25,7 @@ import {
   post_security_session_invalidate_request,
   post_security_session_invalidate_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

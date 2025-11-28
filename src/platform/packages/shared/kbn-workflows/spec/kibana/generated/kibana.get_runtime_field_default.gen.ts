@@ -25,6 +25,7 @@ import {
   get_runtime_field_default_request,
   get_runtime_field_default_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

@@ -25,6 +25,7 @@ import {
   install_prebuilt_rules_and_timelines_request,
   install_prebuilt_rules_and_timelines_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

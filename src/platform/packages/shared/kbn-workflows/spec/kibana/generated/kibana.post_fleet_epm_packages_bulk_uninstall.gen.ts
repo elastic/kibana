@@ -25,6 +25,7 @@ import {
   post_fleet_epm_packages_bulk_uninstall_request,
   post_fleet_epm_packages_bulk_uninstall_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

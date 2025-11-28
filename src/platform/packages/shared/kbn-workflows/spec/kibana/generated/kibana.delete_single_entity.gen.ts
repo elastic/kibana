@@ -25,6 +25,7 @@ import {
   delete_single_entity_request,
   delete_single_entity_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

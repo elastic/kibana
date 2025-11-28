@@ -3485,11 +3485,21 @@ export const types_aggregations_holt_winters_moving_average_aggregation = types_
 }));
 
 export const types_aggregations_moving_average_aggregation = z.union([
-    types_aggregations_linear_moving_average_aggregation,
-    types_aggregations_simple_moving_average_aggregation,
-    types_aggregations_ewma_moving_average_aggregation,
-    types_aggregations_holt_moving_average_aggregation,
-    types_aggregations_holt_winters_moving_average_aggregation
+    z.object({
+        model: z.literal('linear')
+    }).and(types_aggregations_linear_moving_average_aggregation),
+    z.object({
+        model: z.literal('simple')
+    }).and(types_aggregations_simple_moving_average_aggregation),
+    z.object({
+        model: z.literal('ewma')
+    }).and(types_aggregations_ewma_moving_average_aggregation),
+    z.object({
+        model: z.literal('holt')
+    }).and(types_aggregations_holt_moving_average_aggregation),
+    z.object({
+        model: z.literal('holt_winters')
+    }).and(types_aggregations_holt_winters_moving_average_aggregation)
 ]);
 
 export const types_aggregations_moving_percentiles_aggregation = types_aggregations_pipeline_aggregation_base.and(z.object({
@@ -8177,55 +8187,153 @@ export const types_analysis_thai_analyzer = z.object({
 });
 
 export const types_analysis_analyzer = z.union([
-    types_analysis_custom_analyzer,
-    types_analysis_fingerprint_analyzer,
-    types_analysis_keyword_analyzer,
-    types_analysis_nori_analyzer,
-    types_analysis_pattern_analyzer,
-    types_analysis_simple_analyzer,
-    types_analysis_standard_analyzer,
-    types_analysis_stop_analyzer,
-    types_analysis_whitespace_analyzer,
-    types_analysis_icu_analyzer,
-    types_analysis_kuromoji_analyzer,
-    types_analysis_snowball_analyzer,
-    types_analysis_arabic_analyzer,
-    types_analysis_armenian_analyzer,
-    types_analysis_basque_analyzer,
-    types_analysis_bengali_analyzer,
-    types_analysis_brazilian_analyzer,
-    types_analysis_bulgarian_analyzer,
-    types_analysis_catalan_analyzer,
-    types_analysis_chinese_analyzer,
-    types_analysis_cjk_analyzer,
-    types_analysis_czech_analyzer,
-    types_analysis_danish_analyzer,
-    types_analysis_dutch_analyzer,
-    types_analysis_english_analyzer,
-    types_analysis_estonian_analyzer,
-    types_analysis_finnish_analyzer,
-    types_analysis_french_analyzer,
-    types_analysis_galician_analyzer,
-    types_analysis_german_analyzer,
-    types_analysis_greek_analyzer,
-    types_analysis_hindi_analyzer,
-    types_analysis_hungarian_analyzer,
-    types_analysis_indonesian_analyzer,
-    types_analysis_irish_analyzer,
-    types_analysis_italian_analyzer,
-    types_analysis_latvian_analyzer,
-    types_analysis_lithuanian_analyzer,
-    types_analysis_norwegian_analyzer,
-    types_analysis_persian_analyzer,
-    types_analysis_portuguese_analyzer,
-    types_analysis_romanian_analyzer,
-    types_analysis_russian_analyzer,
-    types_analysis_serbian_analyzer,
-    types_analysis_sorani_analyzer,
-    types_analysis_spanish_analyzer,
-    types_analysis_swedish_analyzer,
-    types_analysis_turkish_analyzer,
-    types_analysis_thai_analyzer
+    z.object({
+        type: z.literal('custom')
+    }).and(types_analysis_custom_analyzer),
+    z.object({
+        type: z.literal('fingerprint')
+    }).and(types_analysis_fingerprint_analyzer),
+    z.object({
+        type: z.literal('keyword')
+    }).and(types_analysis_keyword_analyzer),
+    z.object({
+        type: z.literal('nori')
+    }).and(types_analysis_nori_analyzer),
+    z.object({
+        type: z.literal('pattern')
+    }).and(types_analysis_pattern_analyzer),
+    z.object({
+        type: z.literal('simple')
+    }).and(types_analysis_simple_analyzer),
+    z.object({
+        type: z.literal('standard')
+    }).and(types_analysis_standard_analyzer),
+    z.object({
+        type: z.literal('stop')
+    }).and(types_analysis_stop_analyzer),
+    z.object({
+        type: z.literal('whitespace')
+    }).and(types_analysis_whitespace_analyzer),
+    z.object({
+        type: z.literal('icu_analyzer')
+    }).and(types_analysis_icu_analyzer),
+    z.object({
+        type: z.literal('kuromoji')
+    }).and(types_analysis_kuromoji_analyzer),
+    z.object({
+        type: z.literal('snowball')
+    }).and(types_analysis_snowball_analyzer),
+    z.object({
+        type: z.literal('arabic')
+    }).and(types_analysis_arabic_analyzer),
+    z.object({
+        type: z.literal('armenian')
+    }).and(types_analysis_armenian_analyzer),
+    z.object({
+        type: z.literal('basque')
+    }).and(types_analysis_basque_analyzer),
+    z.object({
+        type: z.literal('bengali')
+    }).and(types_analysis_bengali_analyzer),
+    z.object({
+        type: z.literal('brazilian')
+    }).and(types_analysis_brazilian_analyzer),
+    z.object({
+        type: z.literal('bulgarian')
+    }).and(types_analysis_bulgarian_analyzer),
+    z.object({
+        type: z.literal('catalan')
+    }).and(types_analysis_catalan_analyzer),
+    z.object({
+        type: z.literal('chinese')
+    }).and(types_analysis_chinese_analyzer),
+    z.object({
+        type: z.literal('cjk')
+    }).and(types_analysis_cjk_analyzer),
+    z.object({
+        type: z.literal('czech')
+    }).and(types_analysis_czech_analyzer),
+    z.object({
+        type: z.literal('danish')
+    }).and(types_analysis_danish_analyzer),
+    z.object({
+        type: z.literal('dutch')
+    }).and(types_analysis_dutch_analyzer),
+    z.object({
+        type: z.literal('english')
+    }).and(types_analysis_english_analyzer),
+    z.object({
+        type: z.literal('estonian')
+    }).and(types_analysis_estonian_analyzer),
+    z.object({
+        type: z.literal('finnish')
+    }).and(types_analysis_finnish_analyzer),
+    z.object({
+        type: z.literal('french')
+    }).and(types_analysis_french_analyzer),
+    z.object({
+        type: z.literal('galician')
+    }).and(types_analysis_galician_analyzer),
+    z.object({
+        type: z.literal('german')
+    }).and(types_analysis_german_analyzer),
+    z.object({
+        type: z.literal('greek')
+    }).and(types_analysis_greek_analyzer),
+    z.object({
+        type: z.literal('hindi')
+    }).and(types_analysis_hindi_analyzer),
+    z.object({
+        type: z.literal('hungarian')
+    }).and(types_analysis_hungarian_analyzer),
+    z.object({
+        type: z.literal('indonesian')
+    }).and(types_analysis_indonesian_analyzer),
+    z.object({
+        type: z.literal('irish')
+    }).and(types_analysis_irish_analyzer),
+    z.object({
+        type: z.literal('italian')
+    }).and(types_analysis_italian_analyzer),
+    z.object({
+        type: z.literal('latvian')
+    }).and(types_analysis_latvian_analyzer),
+    z.object({
+        type: z.literal('lithuanian')
+    }).and(types_analysis_lithuanian_analyzer),
+    z.object({
+        type: z.literal('norwegian')
+    }).and(types_analysis_norwegian_analyzer),
+    z.object({
+        type: z.literal('persian')
+    }).and(types_analysis_persian_analyzer),
+    z.object({
+        type: z.literal('portuguese')
+    }).and(types_analysis_portuguese_analyzer),
+    z.object({
+        type: z.literal('romanian')
+    }).and(types_analysis_romanian_analyzer),
+    z.object({
+        type: z.literal('russian')
+    }).and(types_analysis_russian_analyzer),
+    z.object({
+        type: z.literal('serbian')
+    }).and(types_analysis_serbian_analyzer),
+    z.object({
+        type: z.literal('sorani')
+    }).and(types_analysis_sorani_analyzer),
+    z.object({
+        type: z.literal('spanish')
+    }).and(types_analysis_spanish_analyzer),
+    z.object({
+        type: z.literal('swedish')
+    }).and(types_analysis_swedish_analyzer),
+    z.object({
+        type: z.literal('turkish')
+    }).and(types_analysis_turkish_analyzer),
+    z.object({
+        type: z.literal('thai')
+    }).and(types_analysis_thai_analyzer)
 ]);
 
 export const types_analysis_char_filter_base = z.object({
@@ -8264,11 +8372,21 @@ export const types_analysis_kuromoji_iteration_mark_char_filter = types_analysis
 }));
 
 export const types_analysis_char_filter_definition = z.union([
-    types_analysis_html_strip_char_filter,
-    types_analysis_mapping_char_filter,
-    types_analysis_pattern_replace_char_filter,
-    types_analysis_icu_normalization_char_filter,
-    types_analysis_kuromoji_iteration_mark_char_filter
+    z.object({
+        type: z.literal('html_strip')
+    }).and(types_analysis_html_strip_char_filter),
+    z.object({
+        type: z.literal('mapping')
+    }).and(types_analysis_mapping_char_filter),
+    z.object({
+        type: z.literal('pattern_replace')
+    }).and(types_analysis_pattern_replace_char_filter),
+    z.object({
+        type: z.literal('icu_normalizer')
+    }).and(types_analysis_icu_normalization_char_filter),
+    z.object({
+        type: z.literal('kuromoji_iteration_mark')
+    }).and(types_analysis_kuromoji_iteration_mark_char_filter)
 ]);
 
 export const types_analysis_char_filter = z.union([
@@ -8959,8 +9077,12 @@ export const types_analysis_custom_normalizer = z.object({
 });
 
 export const types_analysis_normalizer = z.union([
-    types_analysis_lowercase_normalizer,
-    types_analysis_custom_normalizer
+    z.object({
+        type: z.literal('lowercase')
+    }).and(types_analysis_lowercase_normalizer),
+    z.object({
+        type: z.literal('custom')
+    }).and(types_analysis_custom_normalizer)
 ]);
 
 export const types_analysis_tokenizer_base = z.object({
@@ -9086,24 +9208,60 @@ export const types_analysis_nori_tokenizer = types_analysis_tokenizer_base.and(z
 }));
 
 export const types_analysis_tokenizer_definition = z.union([
-    types_analysis_char_group_tokenizer,
-    types_analysis_classic_tokenizer,
-    types_analysis_edge_n_gram_tokenizer,
-    types_analysis_keyword_tokenizer,
-    types_analysis_letter_tokenizer,
-    types_analysis_lowercase_tokenizer,
-    types_analysis_n_gram_tokenizer,
-    types_analysis_path_hierarchy_tokenizer,
-    types_analysis_pattern_tokenizer,
-    types_analysis_simple_pattern_tokenizer,
-    types_analysis_simple_pattern_split_tokenizer,
-    types_analysis_standard_tokenizer,
-    types_analysis_thai_tokenizer,
-    types_analysis_uax_email_url_tokenizer,
-    types_analysis_whitespace_tokenizer,
-    types_analysis_icu_tokenizer,
-    types_analysis_kuromoji_tokenizer,
-    types_analysis_nori_tokenizer
+    z.object({
+        type: z.literal('char_group')
+    }).and(types_analysis_char_group_tokenizer),
+    z.object({
+        type: z.literal('classic')
+    }).and(types_analysis_classic_tokenizer),
+    z.object({
+        type: z.literal('edge_ngram')
+    }).and(types_analysis_edge_n_gram_tokenizer),
+    z.object({
+        type: z.literal('keyword')
+    }).and(types_analysis_keyword_tokenizer),
+    z.object({
+        type: z.literal('letter')
+    }).and(types_analysis_letter_tokenizer),
+    z.object({
+        type: z.literal('lowercase')
+    }).and(types_analysis_lowercase_tokenizer),
+    z.object({
+        type: z.literal('ngram')
+    }).and(types_analysis_n_gram_tokenizer),
+    z.object({
+        type: z.literal('path_hierarchy')
+    }).and(types_analysis_path_hierarchy_tokenizer),
+    z.object({
+        type: z.literal('pattern')
+    }).and(types_analysis_pattern_tokenizer),
+    z.object({
+        type: z.literal('simple_pattern')
+    }).and(types_analysis_simple_pattern_tokenizer),
+    z.object({
+        type: z.literal('simple_pattern_split')
+    }).and(types_analysis_simple_pattern_split_tokenizer),
+    z.object({
+        type: z.literal('standard')
+    }).and(types_analysis_standard_tokenizer),
+    z.object({
+        type: z.literal('thai')
+    }).and(types_analysis_thai_tokenizer),
+    z.object({
+        type: z.literal('uax_url_email')
+    }).and(types_analysis_uax_email_url_tokenizer),
+    z.object({
+        type: z.literal('whitespace')
+    }).and(types_analysis_whitespace_tokenizer),
+    z.object({
+        type: z.literal('icu_tokenizer')
+    }).and(types_analysis_icu_tokenizer),
+    z.object({
+        type: z.literal('kuromoji_tokenizer')
+    }).and(types_analysis_kuromoji_tokenizer),
+    z.object({
+        type: z.literal('nori_tokenizer')
+    }).and(types_analysis_nori_tokenizer)
 ]);
 
 export const types_analysis_tokenizer = z.union([
@@ -10295,8 +10453,12 @@ export const cluster_remote_info_cluster_remote_proxy_info = z.object({
 });
 
 export const cluster_remote_info_cluster_remote_info = z.union([
-    cluster_remote_info_cluster_remote_sniff_info,
-    cluster_remote_info_cluster_remote_proxy_info
+    z.object({
+        mode: z.literal('sniff')
+    }).and(cluster_remote_info_cluster_remote_sniff_info),
+    z.object({
+        mode: z.literal('proxy')
+    }).and(cluster_remote_info_cluster_remote_proxy_info)
 ]);
 
 export const cluster_reroute_command_cancel_action = z.object({
@@ -11327,11 +11489,21 @@ export const connector_types_regex_validation = z.object({
 });
 
 export const connector_types_validation = z.union([
-    connector_types_less_than_validation,
-    connector_types_greater_than_validation,
-    connector_types_list_type_validation,
-    connector_types_included_in_validation,
-    connector_types_regex_validation
+    z.object({
+        type: z.literal('less_than')
+    }).and(connector_types_less_than_validation),
+    z.object({
+        type: z.literal('greater_than')
+    }).and(connector_types_greater_than_validation),
+    z.object({
+        type: z.literal('list_type')
+    }).and(connector_types_list_type_validation),
+    z.object({
+        type: z.literal('included_in')
+    }).and(connector_types_included_in_validation),
+    z.object({
+        type: z.literal('regex')
+    }).and(connector_types_regex_validation)
 ]);
 
 export const connector_types_connector_config_properties = z.object({
@@ -12407,8 +12579,12 @@ export const ilm_explain_lifecycle_lifecycle_explain_unmanaged = z.object({
 });
 
 export const ilm_explain_lifecycle_lifecycle_explain = z.union([
-    ilm_explain_lifecycle_lifecycle_explain_managed,
-    ilm_explain_lifecycle_lifecycle_explain_unmanaged
+    z.object({
+        managed: z.literal('true')
+    }).and(ilm_explain_lifecycle_lifecycle_explain_managed),
+    z.object({
+        managed: z.literal('false')
+    }).and(ilm_explain_lifecycle_lifecycle_explain_unmanaged)
 ]);
 
 export const ilm_types_phases = z.object({
@@ -19634,12 +19810,24 @@ export const snapshot_types_source_only_repository = snapshot_types_repository_b
 }));
 
 export const snapshot_types_repository = z.union([
-    snapshot_types_azure_repository,
-    snapshot_types_gcs_repository,
-    snapshot_types_s3_repository,
-    snapshot_types_shared_file_system_repository,
-    snapshot_types_read_only_url_repository,
-    snapshot_types_source_only_repository
+    z.object({
+        type: z.literal('azure')
+    }).and(snapshot_types_azure_repository),
+    z.object({
+        type: z.literal('gcs')
+    }).and(snapshot_types_gcs_repository),
+    z.object({
+        type: z.literal('s3')
+    }).and(snapshot_types_s3_repository),
+    z.object({
+        type: z.literal('fs')
+    }).and(snapshot_types_shared_file_system_repository),
+    z.object({
+        type: z.literal('url')
+    }).and(snapshot_types_read_only_url_repository),
+    z.object({
+        type: z.literal('source')
+    }).and(snapshot_types_source_only_repository)
 ]);
 
 export const snapshot_types_snapshot_sort = z.enum([
@@ -23160,80 +23348,228 @@ export const types_analysis_token_filter = z.union([
 ]);
 
 export const types_analysis_token_filter_definition = z.union([
-    types_analysis_apostrophe_token_filter,
-    types_analysis_arabic_stem_token_filter,
-    types_analysis_arabic_normalization_token_filter,
-    types_analysis_ascii_folding_token_filter,
-    types_analysis_bengali_normalization_token_filter,
-    types_analysis_brazilian_stem_token_filter,
-    types_analysis_cjk_bigram_token_filter,
-    types_analysis_cjk_width_token_filter,
-    types_analysis_classic_token_filter,
-    types_analysis_common_grams_token_filter,
-    z.lazy((): any => types_analysis_condition_token_filter),
-    types_analysis_czech_stem_token_filter,
-    types_analysis_decimal_digit_token_filter,
-    types_analysis_delimited_payload_token_filter,
-    types_analysis_dutch_stem_token_filter,
-    types_analysis_edge_n_gram_token_filter,
-    types_analysis_elision_token_filter,
-    types_analysis_fingerprint_token_filter,
-    types_analysis_flatten_graph_token_filter,
-    types_analysis_french_stem_token_filter,
-    types_analysis_german_normalization_token_filter,
-    types_analysis_german_stem_token_filter,
-    types_analysis_hindi_normalization_token_filter,
-    types_analysis_hunspell_token_filter,
-    types_analysis_hyphenation_decompounder_token_filter,
-    types_analysis_indic_normalization_token_filter,
-    types_analysis_keep_types_token_filter,
-    types_analysis_keep_words_token_filter,
-    types_analysis_keyword_marker_token_filter,
-    types_analysis_keyword_repeat_token_filter,
-    types_analysis_k_stem_token_filter,
-    types_analysis_length_token_filter,
-    types_analysis_limit_token_count_token_filter,
-    types_analysis_lowercase_token_filter,
-    types_analysis_min_hash_token_filter,
-    types_analysis_multiplexer_token_filter,
-    types_analysis_n_gram_token_filter,
-    types_analysis_nori_part_of_speech_token_filter,
-    types_analysis_pattern_capture_token_filter,
-    types_analysis_pattern_replace_token_filter,
-    types_analysis_persian_normalization_token_filter,
-    types_analysis_persian_stem_token_filter,
-    types_analysis_porter_stem_token_filter,
-    z.lazy((): any => types_analysis_predicate_token_filter),
-    types_analysis_remove_duplicates_token_filter,
-    types_analysis_reverse_token_filter,
-    types_analysis_russian_stem_token_filter,
-    types_analysis_scandinavian_folding_token_filter,
-    types_analysis_scandinavian_normalization_token_filter,
-    types_analysis_serbian_normalization_token_filter,
-    types_analysis_shingle_token_filter,
-    types_analysis_snowball_token_filter,
-    types_analysis_sorani_normalization_token_filter,
-    types_analysis_stemmer_override_token_filter,
-    types_analysis_stemmer_token_filter,
-    types_analysis_stop_token_filter,
-    types_analysis_synonym_graph_token_filter,
-    types_analysis_synonym_token_filter,
-    types_analysis_trim_token_filter,
-    types_analysis_truncate_token_filter,
-    types_analysis_unique_token_filter,
-    types_analysis_uppercase_token_filter,
-    types_analysis_word_delimiter_graph_token_filter,
-    types_analysis_word_delimiter_token_filter,
-    types_analysis_ja_stop_token_filter,
-    types_analysis_kuromoji_stemmer_token_filter,
-    types_analysis_kuromoji_reading_form_token_filter,
-    types_analysis_kuromoji_part_of_speech_token_filter,
-    types_analysis_icu_collation_token_filter,
-    types_analysis_icu_folding_token_filter,
-    types_analysis_icu_normalization_token_filter,
-    types_analysis_icu_transform_token_filter,
-    types_analysis_phonetic_token_filter,
-    types_analysis_dictionary_decompounder_token_filter
+    z.object({
+        type: z.literal('apostrophe')
+    }).and(types_analysis_apostrophe_token_filter),
+    z.object({
+        type: z.literal('arabic_stem')
+    }).and(types_analysis_arabic_stem_token_filter),
+    z.object({
+        type: z.literal('arabic_normalization')
+    }).and(types_analysis_arabic_normalization_token_filter),
+    z.object({
+        type: z.literal('asciifolding')
+    }).and(types_analysis_ascii_folding_token_filter),
+    z.object({
+        type: z.literal('bengali_normalization')
+    }).and(types_analysis_bengali_normalization_token_filter),
+    z.object({
+        type: z.literal('brazilian_stem')
+    }).and(types_analysis_brazilian_stem_token_filter),
+    z.object({
+        type: z.literal('cjk_bigram')
+    }).and(types_analysis_cjk_bigram_token_filter),
+    z.object({
+        type: z.literal('cjk_width')
+    }).and(types_analysis_cjk_width_token_filter),
+    z.object({
+        type: z.literal('classic')
+    }).and(types_analysis_classic_token_filter),
+    z.object({
+        type: z.literal('common_grams')
+    }).and(types_analysis_common_grams_token_filter),
+    z.object({
+        type: z.literal('condition')
+    }).and(z.lazy(() => z.lazy((): any => types_analysis_condition_token_filter))),
+    z.object({
+        type: z.literal('czech_stem')
+    }).and(types_analysis_czech_stem_token_filter),
+    z.object({
+        type: z.literal('decimal_digit')
+    }).and(types_analysis_decimal_digit_token_filter),
+    z.object({
+        type: z.literal('delimited_payload')
+    }).and(types_analysis_delimited_payload_token_filter),
+    z.object({
+        type: z.literal('dutch_stem')
+    }).and(types_analysis_dutch_stem_token_filter),
+    z.object({
+        type: z.literal('edge_ngram')
+    }).and(types_analysis_edge_n_gram_token_filter),
+    z.object({
+        type: z.literal('elision')
+    }).and(types_analysis_elision_token_filter),
+    z.object({
+        type: z.literal('fingerprint')
+    }).and(types_analysis_fingerprint_token_filter),
+    z.object({
+        type: z.literal('flatten_graph')
+    }).and(types_analysis_flatten_graph_token_filter),
+    z.object({
+        type: z.literal('french_stem')
+    }).and(types_analysis_french_stem_token_filter),
+    z.object({
+        type: z.literal('german_normalization')
+    }).and(types_analysis_german_normalization_token_filter),
+    z.object({
+        type: z.literal('german_stem')
+    }).and(types_analysis_german_stem_token_filter),
+    z.object({
+        type: z.literal('hindi_normalization')
+    }).and(types_analysis_hindi_normalization_token_filter),
+    z.object({
+        type: z.literal('hunspell')
+    }).and(types_analysis_hunspell_token_filter),
+    z.object({
+        type: z.literal('hyphenation_decompounder')
+    }).and(types_analysis_hyphenation_decompounder_token_filter),
+    z.object({
+        type: z.literal('indic_normalization')
+    }).and(types_analysis_indic_normalization_token_filter),
+    z.object({
+        type: z.literal('keep_types')
+    }).and(types_analysis_keep_types_token_filter),
+    z.object({
+        type: z.literal('keep')
+    }).and(types_analysis_keep_words_token_filter),
+    z.object({
+        type: z.literal('keyword_marker')
+    }).and(types_analysis_keyword_marker_token_filter),
+    z.object({
+        type: z.literal('keyword_repeat')
+    }).and(types_analysis_keyword_repeat_token_filter),
+    z.object({
+        type: z.literal('kstem')
+    }).and(types_analysis_k_stem_token_filter),
+    z.object({
+        type: z.literal('length')
+    }).and(types_analysis_length_token_filter),
+    z.object({
+        type: z.literal('limit')
+    }).and(types_analysis_limit_token_count_token_filter),
+    z.object({
+        type: z.literal('lowercase')
+    }).and(types_analysis_lowercase_token_filter),
+    z.object({
+        type: z.literal('min_hash')
+    }).and(types_analysis_min_hash_token_filter),
+    z.object({
+        type: z.literal('multiplexer')
+    }).and(types_analysis_multiplexer_token_filter),
+    z.object({
+        type: z.literal('ngram')
+    }).and(types_analysis_n_gram_token_filter),
+    z.object({
+        type: z.literal('nori_part_of_speech')
+    }).and(types_analysis_nori_part_of_speech_token_filter),
+    z.object({
+        type: z.literal('pattern_capture')
+    }).and(types_analysis_pattern_capture_token_filter),
+    z.object({
+        type: z.literal('pattern_replace')
+    }).and(types_analysis_pattern_replace_token_filter),
+    z.object({
+        type: z.literal('persian_normalization')
+    }).and(types_analysis_persian_normalization_token_filter),
+    z.object({
+        type: z.literal('persian_stem')
+    }).and(types_analysis_persian_stem_token_filter),
+    z.object({
+        type: z.literal('porter_stem')
+    }).and(types_analysis_porter_stem_token_filter),
+    z.object({
+        type: z.literal('predicate_token_filter')
+    }).and(z.lazy(() => z.lazy((): any => types_analysis_predicate_token_filter))),
+    z.object({
+        type: z.literal('remove_duplicates')
+    }).and(types_analysis_remove_duplicates_token_filter),
+    z.object({
+        type: z.literal('reverse')
+    }).and(types_analysis_reverse_token_filter),
+    z.object({
+        type: z.literal('russian_stem')
+    }).and(types_analysis_russian_stem_token_filter),
+    z.object({
+        type: z.literal('scandinavian_folding')
+    }).and(types_analysis_scandinavian_folding_token_filter),
+    z.object({
+        type: z.literal('scandinavian_normalization')
+    }).and(types_analysis_scandinavian_normalization_token_filter),
+    z.object({
+        type: z.literal('serbian_normalization')
+    }).and(types_analysis_serbian_normalization_token_filter),
+    z.object({
+        type: z.literal('shingle')
+    }).and(types_analysis_shingle_token_filter),
+    z.object({
+        type: z.literal('snowball')
+    }).and(types_analysis_snowball_token_filter),
+    z.object({
+        type: z.literal('sorani_normalization')
+    }).and(types_analysis_sorani_normalization_token_filter),
+    z.object({
+        type: z.literal('stemmer_override')
+    }).and(types_analysis_stemmer_override_token_filter),
+    z.object({
+        type: z.literal('stemmer')
+    }).and(types_analysis_stemmer_token_filter),
+    z.object({
+        type: z.literal('stop')
+    }).and(types_analysis_stop_token_filter),
+    z.object({
+        type: z.literal('synonym_graph')
+    }).and(types_analysis_synonym_graph_token_filter),
+    z.object({
+        type: z.literal('synonym')
+    }).and(types_analysis_synonym_token_filter),
+    z.object({
+        type: z.literal('trim')
+    }).and(types_analysis_trim_token_filter),
+    z.object({
+        type: z.literal('truncate')
+    }).and(types_analysis_truncate_token_filter),
+    z.object({
+        type: z.literal('unique')
+    }).and(types_analysis_unique_token_filter),
+    z.object({
+        type: z.literal('uppercase')
+    }).and(types_analysis_uppercase_token_filter),
+    z.object({
+        type: z.literal('word_delimiter_graph')
+    }).and(types_analysis_word_delimiter_graph_token_filter),
+    z.object({
+        type: z.literal('word_delimiter')
+    }).and(types_analysis_word_delimiter_token_filter),
+    z.object({
+        type: z.literal('ja_stop')
+    }).and(types_analysis_ja_stop_token_filter),
+    z.object({
+        type: z.literal('kuromoji_stemmer')
+    }).and(types_analysis_kuromoji_stemmer_token_filter),
+    z.object({
+        type: z.literal('kuromoji_readingform')
+    }).and(types_analysis_kuromoji_reading_form_token_filter),
+    z.object({
+        type: z.literal('kuromoji_part_of_speech')
+    }).and(types_analysis_kuromoji_part_of_speech_token_filter),
+    z.object({
+        type: z.literal('icu_collation')
+    }).and(types_analysis_icu_collation_token_filter),
+    z.object({
+        type: z.literal('icu_folding')
+    }).and(types_analysis_icu_folding_token_filter),
+    z.object({
+        type: z.literal('icu_normalizer')
+    }).and(types_analysis_icu_normalization_token_filter),
+    z.object({
+        type: z.literal('icu_transform')
+    }).and(types_analysis_icu_transform_token_filter),
+    z.object({
+        type: z.literal('phonetic')
+    }).and(types_analysis_phonetic_token_filter),
+    z.object({
+        type: z.literal('dictionary_decompounder')
+    }).and(types_analysis_dictionary_decompounder_token_filter)
 ]);
 
 export const types_analysis_condition_token_filter = types_analysis_token_filter_base.and(z.object({
@@ -23250,14 +23586,30 @@ export const types_analysis_predicate_token_filter = types_analysis_token_filter
 }));
 
 export const indices_types_settings_similarity = z.union([
-    indices_types_settings_similarity_bm25,
-    indices_types_settings_similarity_boolean,
-    indices_types_settings_similarity_dfi,
-    indices_types_settings_similarity_dfr,
-    indices_types_settings_similarity_ib,
-    indices_types_settings_similarity_lmd,
-    indices_types_settings_similarity_lmj,
-    z.lazy((): any => indices_types_settings_similarity_scripted)
+    z.object({
+        type: z.literal('BM25')
+    }).and(indices_types_settings_similarity_bm25),
+    z.object({
+        type: z.literal('boolean')
+    }).and(indices_types_settings_similarity_boolean),
+    z.object({
+        type: z.literal('DFI')
+    }).and(indices_types_settings_similarity_dfi),
+    z.object({
+        type: z.literal('DFR')
+    }).and(indices_types_settings_similarity_dfr),
+    z.object({
+        type: z.literal('IB')
+    }).and(indices_types_settings_similarity_ib),
+    z.object({
+        type: z.literal('LMDirichlet')
+    }).and(indices_types_settings_similarity_lmd),
+    z.object({
+        type: z.literal('LMJelinekMercer')
+    }).and(indices_types_settings_similarity_lmj),
+    z.object({
+        type: z.literal('scripted')
+    }).and(z.lazy(() => z.lazy((): any => indices_types_settings_similarity_scripted)))
 ]);
 
 export const indices_types_settings_similarity_scripted = z.object({
@@ -23362,58 +23714,162 @@ export const types_mapping_dynamic_template = z.object({
 })));
 
 export const types_mapping_property = z.union([
-    z.lazy((): any => types_mapping_binary_property),
-    z.lazy((): any => types_mapping_boolean_property),
-    z.lazy((): any => types_mapping_dynamic_property),
-    z.lazy((): any => types_mapping_join_property),
-    z.lazy((): any => types_mapping_keyword_property),
-    z.lazy((): any => types_mapping_match_only_text_property),
-    z.lazy((): any => types_mapping_percolator_property),
-    z.lazy((): any => types_mapping_rank_feature_property),
-    z.lazy((): any => types_mapping_rank_features_property),
-    z.lazy((): any => types_mapping_search_as_you_type_property),
-    z.lazy((): any => types_mapping_text_property),
-    z.lazy((): any => types_mapping_version_property),
-    z.lazy((): any => types_mapping_wildcard_property),
-    z.lazy((): any => types_mapping_date_nanos_property),
-    z.lazy((): any => types_mapping_date_property),
-    z.lazy((): any => types_mapping_aggregate_metric_double_property),
-    z.lazy((): any => types_mapping_dense_vector_property),
-    z.lazy((): any => types_mapping_flattened_property),
-    z.lazy((): any => types_mapping_nested_property),
-    z.lazy((): any => types_mapping_object_property),
-    z.lazy((): any => types_mapping_passthrough_object_property),
-    z.lazy((): any => types_mapping_rank_vector_property),
-    z.lazy((): any => types_mapping_semantic_text_property),
-    z.lazy((): any => types_mapping_sparse_vector_property),
-    z.lazy((): any => types_mapping_completion_property),
-    z.lazy((): any => types_mapping_constant_keyword_property),
-    z.lazy((): any => types_mapping_counted_keyword_property),
-    z.lazy((): any => types_mapping_field_alias_property),
-    z.lazy((): any => types_mapping_histogram_property),
-    z.lazy((): any => types_mapping_ip_property),
-    z.lazy((): any => types_mapping_murmur3_hash_property),
-    z.lazy((): any => types_mapping_token_count_property),
-    z.lazy((): any => types_mapping_geo_point_property),
-    z.lazy((): any => types_mapping_geo_shape_property),
-    z.lazy((): any => types_mapping_point_property),
-    z.lazy((): any => types_mapping_shape_property),
-    z.lazy((): any => types_mapping_byte_number_property),
-    z.lazy((): any => types_mapping_double_number_property),
-    z.lazy((): any => types_mapping_float_number_property),
-    z.lazy((): any => types_mapping_half_float_number_property),
-    z.lazy((): any => types_mapping_integer_number_property),
-    z.lazy((): any => types_mapping_long_number_property),
-    z.lazy((): any => types_mapping_scaled_float_number_property),
-    z.lazy((): any => types_mapping_short_number_property),
-    z.lazy((): any => types_mapping_unsigned_long_number_property),
-    z.lazy((): any => types_mapping_date_range_property),
-    z.lazy((): any => types_mapping_double_range_property),
-    z.lazy((): any => types_mapping_float_range_property),
-    z.lazy((): any => types_mapping_integer_range_property),
-    z.lazy((): any => types_mapping_ip_range_property),
-    z.lazy((): any => types_mapping_long_range_property),
-    z.lazy((): any => types_mapping_icu_collation_property)
+    z.object({
+        type: z.literal('binary')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_binary_property))),
+    z.object({
+        type: z.literal('boolean')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_boolean_property))),
+    z.object({
+        type: z.literal('{dynamic_type}')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_dynamic_property))),
+    z.object({
+        type: z.literal('join')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_join_property))),
+    z.object({
+        type: z.literal('keyword')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_keyword_property))),
+    z.object({
+        type: z.literal('match_only_text')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_match_only_text_property))),
+    z.object({
+        type: z.literal('percolator')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_percolator_property))),
+    z.object({
+        type: z.literal('rank_feature')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_rank_feature_property))),
+    z.object({
+        type: z.literal('rank_features')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_rank_features_property))),
+    z.object({
+        type: z.literal('search_as_you_type')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_search_as_you_type_property))),
+    z.object({
+        type: z.literal('text')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_text_property))),
+    z.object({
+        type: z.literal('version')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_version_property))),
+    z.object({
+        type: z.literal('wildcard')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_wildcard_property))),
+    z.object({
+        type: z.literal('date_nanos')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_date_nanos_property))),
+    z.object({
+        type: z.literal('date')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_date_property))),
+    z.object({
+        type: z.literal('aggregate_metric_double')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_aggregate_metric_double_property))),
+    z.object({
+        type: z.literal('dense_vector')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_dense_vector_property))),
+    z.object({
+        type: z.literal('flattened')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_flattened_property))),
+    z.object({
+        type: z.literal('nested')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_nested_property))),
+    z.object({
+        type: z.literal('object')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_object_property))),
+    z.object({
+        type: z.literal('passthrough')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_passthrough_object_property))),
+    z.object({
+        type: z.literal('rank_vectors')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_rank_vector_property))),
+    z.object({
+        type: z.literal('semantic_text')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_semantic_text_property))),
+    z.object({
+        type: z.literal('sparse_vector')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_sparse_vector_property))),
+    z.object({
+        type: z.literal('completion')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_completion_property))),
+    z.object({
+        type: z.literal('constant_keyword')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_constant_keyword_property))),
+    z.object({
+        type: z.literal('counted_keyword')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_counted_keyword_property))),
+    z.object({
+        type: z.literal('alias')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_field_alias_property))),
+    z.object({
+        type: z.literal('histogram')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_histogram_property))),
+    z.object({
+        type: z.literal('ip')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_ip_property))),
+    z.object({
+        type: z.literal('murmur3')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_murmur3_hash_property))),
+    z.object({
+        type: z.literal('token_count')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_token_count_property))),
+    z.object({
+        type: z.literal('geo_point')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_geo_point_property))),
+    z.object({
+        type: z.literal('geo_shape')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_geo_shape_property))),
+    z.object({
+        type: z.literal('point')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_point_property))),
+    z.object({
+        type: z.literal('shape')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_shape_property))),
+    z.object({
+        type: z.literal('byte')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_byte_number_property))),
+    z.object({
+        type: z.literal('double')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_double_number_property))),
+    z.object({
+        type: z.literal('float')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_float_number_property))),
+    z.object({
+        type: z.literal('half_float')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_half_float_number_property))),
+    z.object({
+        type: z.literal('integer')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_integer_number_property))),
+    z.object({
+        type: z.literal('long')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_long_number_property))),
+    z.object({
+        type: z.literal('scaled_float')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_scaled_float_number_property))),
+    z.object({
+        type: z.literal('short')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_short_number_property))),
+    z.object({
+        type: z.literal('unsigned_long')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_unsigned_long_number_property))),
+    z.object({
+        type: z.literal('date_range')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_date_range_property))),
+    z.object({
+        type: z.literal('double_range')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_double_range_property))),
+    z.object({
+        type: z.literal('float_range')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_float_range_property))),
+    z.object({
+        type: z.literal('integer_range')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_integer_range_property))),
+    z.object({
+        type: z.literal('ip_range')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_ip_range_property))),
+    z.object({
+        type: z.literal('long_range')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_long_range_property))),
+    z.object({
+        type: z.literal('icu_collation_keyword')
+    }).and(z.lazy(() => z.lazy((): any => types_mapping_icu_collation_property)))
 ]);
 
 export const types_mapping_binary_property = z.lazy((): any => types_mapping_doc_values_property_base).and(z.object({
@@ -25057,15 +25513,10 @@ export const ingest_types_user_agent_processor = ingest_types_processor_base.and
         description: 'Controls what properties are added to `target_field`.'
     })).default([
         'name',
-        'major',
-        'minor',
-        'patch',
-        'build',
         'os',
-        'os_name',
-        'os_major',
-        'os_minor',
-        'device'
+        'device',
+        'original',
+        'version'
     ]),
     extract_device_type: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Extracts device type from the user agent string on a best-effort basis.'

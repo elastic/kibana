@@ -25,6 +25,7 @@ import {
   find_anonymization_fields_request,
   find_anonymization_fields_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

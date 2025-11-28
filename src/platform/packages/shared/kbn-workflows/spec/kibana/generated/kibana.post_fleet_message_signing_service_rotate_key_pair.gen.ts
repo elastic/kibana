@@ -25,6 +25,7 @@ import {
   post_fleet_message_signing_service_rotate_key_pair_request,
   post_fleet_message_signing_service_rotate_key_pair_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

@@ -25,6 +25,7 @@ import {
   post_synthetics_monitor_test_request,
   post_synthetics_monitor_test_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

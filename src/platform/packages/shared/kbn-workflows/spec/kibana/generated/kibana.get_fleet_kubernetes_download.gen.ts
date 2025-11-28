@@ -25,6 +25,7 @@ import {
   get_fleet_kubernetes_download_request,
   get_fleet_kubernetes_download_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

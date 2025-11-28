@@ -25,6 +25,7 @@ import {
   read_alerts_index_request,
   read_alerts_index_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

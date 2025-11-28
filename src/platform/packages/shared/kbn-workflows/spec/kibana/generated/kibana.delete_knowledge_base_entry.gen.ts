@@ -25,6 +25,7 @@ import {
   delete_knowledge_base_entry_request,
   delete_knowledge_base_entry_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

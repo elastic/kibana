@@ -25,6 +25,7 @@ import {
   post_fleet_epm_packages_pkgname_pkgversion_rule_assets_request,
   post_fleet_epm_packages_pkgname_pkgversion_rule_assets_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

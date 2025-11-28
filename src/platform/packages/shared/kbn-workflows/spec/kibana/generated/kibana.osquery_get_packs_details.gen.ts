@@ -25,6 +25,7 @@ import {
   osquery_get_packs_details_request,
   osquery_get_packs_details_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

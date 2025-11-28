@@ -25,6 +25,7 @@ import {
   post_fleet_logstash_api_keys_request,
   post_fleet_logstash_api_keys_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

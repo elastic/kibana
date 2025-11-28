@@ -25,6 +25,7 @@ import {
   find_attack_discovery_schedules_request,
   find_attack_discovery_schedules_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

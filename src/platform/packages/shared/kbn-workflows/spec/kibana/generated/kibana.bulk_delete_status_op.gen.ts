@@ -25,6 +25,7 @@ import {
   bulk_delete_status_op_request,
   bulk_delete_status_op_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

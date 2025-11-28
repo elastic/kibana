@@ -25,6 +25,7 @@ import {
   create_update_protection_updates_note_request,
   create_update_protection_updates_note_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

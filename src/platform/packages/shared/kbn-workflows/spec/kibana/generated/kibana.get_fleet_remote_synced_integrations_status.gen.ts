@@ -25,6 +25,7 @@ import {
   get_fleet_remote_synced_integrations_status_request,
   get_fleet_remote_synced_integrations_status_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

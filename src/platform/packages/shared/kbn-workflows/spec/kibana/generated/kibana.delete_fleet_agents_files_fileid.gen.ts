@@ -25,6 +25,7 @@ import {
   delete_fleet_agents_files_fileid_request,
   delete_fleet_agents_files_fileid_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

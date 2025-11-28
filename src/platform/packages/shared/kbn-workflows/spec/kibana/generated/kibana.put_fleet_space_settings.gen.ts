@@ -25,6 +25,7 @@ import {
   put_fleet_space_settings_request,
   put_fleet_space_settings_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

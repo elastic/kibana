@@ -25,6 +25,7 @@ import {
   install_privileged_access_detection_package_request,
   install_privileged_access_detection_package_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

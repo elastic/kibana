@@ -25,6 +25,7 @@ import {
   create_saved_object_id_request,
   create_saved_object_id_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

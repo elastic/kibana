@@ -25,6 +25,7 @@ import {
   create_agent_key_request,
   create_agent_key_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

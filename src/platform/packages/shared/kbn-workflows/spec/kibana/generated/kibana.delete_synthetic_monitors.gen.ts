@@ -25,6 +25,7 @@ import {
   delete_synthetic_monitors_request,
   delete_synthetic_monitors_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

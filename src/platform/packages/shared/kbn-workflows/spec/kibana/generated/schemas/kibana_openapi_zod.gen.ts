@@ -9258,6 +9258,7 @@ export const security_entity_analytics_api_monitored_user_update_doc = z.object(
 export const security_entity_analytics_api_monitored_user_doc = security_entity_analytics_api_monitored_user_update_doc.and(z.object({
     '@timestamp': z.optional(z.iso.datetime()),
     event: z.optional(z.object({
+        '@timestamp': z.optional(z.iso.datetime()),
         ingested: z.optional(z.iso.datetime())
     })),
     user: z.optional(z.object({
@@ -9516,6 +9517,27 @@ export const security_entity_analytics_api_entities_container = z.object({
 });
 
 export const security_entity_analytics_api_user_name = z.object({
+    entity_analytics_monitoring: z.optional(z.object({
+        labels: z.optional(z.array(z.object({
+            field: z.optional(z.string().register(z.globalRegistry, {
+                description: 'The field name for the label'
+            })),
+            source: z.optional(z.enum([
+                'api',
+                'csv',
+                'index_sync'
+            ]).register(z.globalRegistry, {
+                description: 'The source where this label was created (api, csv, or index_sync)'
+            })),
+            value: z.optional(z.string().register(z.globalRegistry, {
+                description: 'The value of the label'
+            }))
+        })).register(z.globalRegistry, {
+            description: 'Array of labels associated with the user'
+        }))
+    }).register(z.globalRegistry, {
+        description: 'Entity analytics monitoring configuration for the user'
+    })),
     user: z.optional(z.object({
         name: z.optional(z.string().register(z.globalRegistry, {
             description: 'The name of the user.'
@@ -18636,7 +18658,11 @@ export const post_alerting_rule_rule_id_alert_alert_id_mute_request = z.object({
             description: 'The identifier for the alert.'
         })
     }),
-    query: z.optional(z.never()),
+    query: z.optional(z.object({
+        validate_alerts_existence: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'Whether to validate the existence of the alert.'
+        }))
+    })),
     headers: z.object({
         'kbn-xsrf': z.string().register(z.globalRegistry, {
             description: 'A required header to protect against CSRF attacks'
@@ -37811,6 +37837,18 @@ export const ml_sync_request = z.object({
  * Indicates a successful call
  */
 export const ml_sync_response = machine_learning_ap_is_ml_sync200_response;
+
+export const ml_update_jobs_spaces_request = z.object({
+    body: z.optional(z.unknown()),
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+export const ml_update_trained_models_spaces_request = z.object({
+    body: z.optional(z.unknown()),
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
 
 export const delete_note_request = z.object({
     body: z.union([

@@ -11,8 +11,8 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Kibana connector definitions generated from Kibana OpenAPI specification.
- * Generated at: 2025-11-28T12:21:42.140Z
- * Source: /oas_docs/output/kibana.yaml (526 APIs)
+ * Generated at: 2025-11-28T12:43:51.817Z
+ * Source: /oas_docs/output/kibana.yaml (528 APIs)
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
@@ -388,6 +388,8 @@ import { PATCH_MAINTENANCE_WINDOW_ID_CONTRACT } from './kibana.patch_maintenance
 import { POST_MAINTENANCE_WINDOW_ID_ARCHIVE_CONTRACT } from './kibana.post_maintenance_window_id_archive.gen';
 import { POST_MAINTENANCE_WINDOW_ID_UNARCHIVE_CONTRACT } from './kibana.post_maintenance_window_id_unarchive.gen';
 import { ML_SYNC_CONTRACT } from './kibana.ml_sync.gen';
+import { ML_UPDATE_JOBS_SPACES_CONTRACT } from './kibana.ml_update_jobs_spaces.gen';
+import { ML_UPDATE_TRAINED_MODELS_SPACES_CONTRACT } from './kibana.ml_update_trained_models_spaces.gen';
 import { DELETE_NOTE_CONTRACT } from './kibana.delete_note.gen';
 import { GET_NOTES_CONTRACT } from './kibana.get_notes.gen';
 import { PERSIST_NOTE_ROUTE_CONTRACT } from './kibana.persist_note_route.gen';
@@ -917,6 +919,8 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
   POST_MAINTENANCE_WINDOW_ID_ARCHIVE_CONTRACT,
   POST_MAINTENANCE_WINDOW_ID_UNARCHIVE_CONTRACT,
   ML_SYNC_CONTRACT,
+  ML_UPDATE_JOBS_SPACES_CONTRACT,
+  ML_UPDATE_TRAINED_MODELS_SPACES_CONTRACT,
   DELETE_NOTE_CONTRACT,
   GET_NOTES_CONTRACT,
   PERSIST_NOTE_ROUTE_CONTRACT,

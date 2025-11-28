@@ -22,6 +22,7 @@ import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 import { post_alerting_rule_rule_id_alert_alert_id_mute_request } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
@@ -40,7 +41,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
     pathParams: ['rule_id', 'alert_id'],
-    urlParams: [],
+    urlParams: ['validate_alerts_existence'],
     bodyParams: [],
   },
   paramsSchema: z.object({

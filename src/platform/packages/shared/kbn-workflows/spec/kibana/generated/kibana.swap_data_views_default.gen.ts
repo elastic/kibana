@@ -25,6 +25,7 @@ import {
   swap_data_views_default_request,
   swap_data_views_default_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

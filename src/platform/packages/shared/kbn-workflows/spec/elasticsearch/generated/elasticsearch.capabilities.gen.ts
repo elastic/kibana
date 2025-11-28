@@ -18,15 +18,12 @@
 import { z } from '@kbn/zod/v4';
 import type { InternalConnectorContract } from '../../../types/latest';
 
-// import all needed request and response schemas generated from the OpenAPI spec
-import {} from './schemas/es_openapi_zod.gen';
-
 // export contract
 export const CAPABILITIES_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.capabilities',
   connectorGroup: 'internal',
   summary: null,
-  description: `Checks if the specified combination of method, API, parameters, and arbitrary capabilities are supported
+  description: `Checks if the specified combination of method, API, parameters, and arbitrary capabilities are supported.
 
  Documentation: https://github.com/elastic/elasticsearch/blob/main/rest-api-spec/src/yamlRestTest/resources/rest-api-spec/test/README.asciidoc#require-or-skip-api-capabilities`,
   methods: ['GET'],

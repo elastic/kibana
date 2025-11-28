@@ -25,6 +25,7 @@ import {
   post_fleet_agent_policies_outputs_request,
   post_fleet_agent_policies_outputs_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

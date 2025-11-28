@@ -25,6 +25,7 @@ import {
   delete_fleet_agentless_policies_policyid_request,
   delete_fleet_agentless_policies_policyid_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

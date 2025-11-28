@@ -25,6 +25,7 @@ import {
   observability_ai_assistant_chat_complete_request,
   observability_ai_assistant_chat_complete_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

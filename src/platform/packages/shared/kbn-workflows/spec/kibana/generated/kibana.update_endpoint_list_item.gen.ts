@@ -25,6 +25,7 @@ import {
   update_endpoint_list_item_request,
   update_endpoint_list_item_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

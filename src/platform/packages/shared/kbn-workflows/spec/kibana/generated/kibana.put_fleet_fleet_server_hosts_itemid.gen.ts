@@ -25,6 +25,7 @@ import {
   put_fleet_fleet_server_hosts_itemid_request,
   put_fleet_fleet_server_hosts_itemid_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

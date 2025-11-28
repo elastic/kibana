@@ -25,6 +25,7 @@ import {
   post_alerting_rule_id_request,
   post_alerting_rule_id_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

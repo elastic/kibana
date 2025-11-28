@@ -25,6 +25,7 @@ import {
   search_single_configuration_request,
   search_single_configuration_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

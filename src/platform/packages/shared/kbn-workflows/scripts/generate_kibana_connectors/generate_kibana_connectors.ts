@@ -147,8 +147,13 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { z } from '@kbn/zod/v4';
 ${StaticImports}
 
-// import all needed request and response schemas generated from the OpenAPI spec
+${
+  contract.schemaImports.length > 0
+    ? `// import all needed request and response schemas generated from the OpenAPI spec
 import { ${contract.schemaImports.join(',\n')} } from './schemas/${OPENAPI_TS_OUTPUT_FILENAME}.gen';
+`
+    : ''
+}
 ${contract.additionalImports?.join('\n')}
 
 // export contract

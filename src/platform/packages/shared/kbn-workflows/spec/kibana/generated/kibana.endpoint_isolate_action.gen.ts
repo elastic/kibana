@@ -25,6 +25,7 @@ import {
   endpoint_isolate_action_request,
   endpoint_isolate_action_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

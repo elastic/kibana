@@ -25,6 +25,7 @@ import {
   get_alerting_health_request,
   get_alerting_health_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

@@ -25,6 +25,7 @@ import {
   create_list_index_request,
   create_list_index_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

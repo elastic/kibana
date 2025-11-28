@@ -25,6 +25,7 @@ import {
   update_fields_metadata_default_request,
   update_fields_metadata_default_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

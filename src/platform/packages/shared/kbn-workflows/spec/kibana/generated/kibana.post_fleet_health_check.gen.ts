@@ -25,6 +25,7 @@ import {
   post_fleet_health_check_request,
   post_fleet_health_check_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

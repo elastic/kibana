@@ -25,6 +25,7 @@ import {
   post_parameters_request,
   post_parameters_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract

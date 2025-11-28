@@ -18,9 +18,6 @@
 import { z } from '@kbn/zod/v4';
 import type { InternalConnectorContract } from '../../../types/latest';
 
-// import all needed request and response schemas generated from the OpenAPI spec
-import {} from './schemas/es_openapi_zod.gen';
-
 // export contract
 export const CONNECTOR_SECRET_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'elasticsearch.connector.secret_delete',

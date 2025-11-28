@@ -25,6 +25,7 @@ import {
   get_fleet_epm_templates_pkgname_pkgversion_inputs_request,
   get_fleet_epm_templates_pkgname_pkgversion_inputs_response,
 } from './schemas/kibana_openapi_zod.gen';
+
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
