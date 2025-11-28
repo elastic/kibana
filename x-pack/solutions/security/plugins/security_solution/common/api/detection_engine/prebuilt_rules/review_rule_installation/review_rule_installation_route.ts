@@ -6,41 +6,42 @@
  */
 
 import { z } from '@kbn/zod';
-import { SortOrder } from '../../model';
 import type { RuleTagArray } from '../../model';
 import type { RuleResponse } from '../../model/rule_schema';
-import { FindRulesSortField } from '../../rule_management';
 import { ReviewPrebuiltRuleInstallationFilter } from '../common/review_prebuilt_rules_installation_filter';
-
-export type ReviewRuleInstallationSort = z.infer<typeof ReviewRuleInstallationSort>;
-export const ReviewRuleInstallationSort = z.array(
-  z.object({
-    /**
-     * Field to sort by
-     */
-    field: z.string().optional(), // TODO: Check if we want a narrower type?
-    /**
-     * Sort order
-     */
-    order: SortOrder.optional(),
-  })
-);
+import { ReviewPrebuiltRuleInstallationSort } from '../common/review_prebuilt_rules_installation_sort';
 
 export type ReviewRuleInstallationRequestBody = z.infer<typeof ReviewRuleInstallationRequestBody>;
 export const ReviewRuleInstallationRequestBody = z
   .object({
-    filter: ReviewPrebuiltRuleInstallationFilter.optional(),
-    sort: ReviewRuleInstallationSort.optional(),
-
+    /**
+     * Page number starting from 1
+     */
     page: z.coerce.number().int().min(1).optional().default(1),
     /**
      * Rules per page
      */
     per_page: z.coerce.number().int().min(0).optional().default(20),
+
+    /**
+     * Filtering criteria
+     */
+    filter: ReviewPrebuiltRuleInstallationFilter.optional(),
+
+    /**
+     * Sorting criteria
+     */
+    sort: ReviewPrebuiltRuleInstallationSort.optional(),
   })
-  .nullable();
+  .optional();
 
 export interface ReviewRuleInstallationResponseBody {
+  /** Current page number */
+  page: number;
+
+  /** Rules per page */
+  per_page: number;
+
   /** Aggregated info about all rules available for installation */
   stats: RuleInstallationStatsForReview;
 

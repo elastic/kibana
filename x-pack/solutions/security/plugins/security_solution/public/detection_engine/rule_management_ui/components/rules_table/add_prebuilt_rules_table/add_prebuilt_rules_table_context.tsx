@@ -9,10 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useIsMutating } from '@kbn/react-query';
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import type {
-  ReviewRuleInstallationSort,
-  RuleSignatureId,
-} from '../../../../../../common/api/detection_engine';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
@@ -26,21 +23,16 @@ import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logi
 import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
 import { isUpgradeReviewRequestEnabled } from './add_prebuilt_rules_utils';
 import * as i18n from './translations';
-import type { AddPrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_install';
-import { useFilterPrebuiltRulesToInstall } from './use_filter_prebuilt_rules_to_install';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 import type { PaginationOptions } from '../../../../rule_management/logic';
+import type { ReviewPrebuiltRuleInstallationSort } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_installation_sort';
 
 export interface AddPrebuiltRulesTableState {
   /**
    * Rules available to be installed after applying `filterOptions`
    */
   rules: RuleResponse[];
-  /**
-   * Currently selected table filter
-   */
-  filterOptions: AddPrebuiltRulesTableFilterOptions;
   /**
    * All unique tags for all rules
    */
@@ -128,17 +120,17 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const canEditRules = useUserPrivileges().rulesPrivileges.edit;
 
-  const [filterOptions, setFilterOptions] = useState<AddPrebuiltRulesTableFilterOptions>({
-    filter: '',
-    tags: [],
-  });
-
   const [pagination, setPagination] = useState({
     page: 1,
     perPage: RULES_TABLE_INITIAL_PAGE_SIZE,
   });
 
-  const [sortingOptions, setSortingOptions] = useState<ReviewRuleInstallationSort>([
+  const [filterOptions, setFilterOptions] = useState<AddPrebuiltRulesTableFilterOptions>({
+    name: '',
+    tags: [],
+  });
+
+  const [sortingOptions, setSortingOptions] = useState<ReviewPrebuiltRuleInstallationSort>([
     {
       field: 'name',
       order: 'asc',
@@ -169,9 +161,9 @@ export const AddPrebuiltRulesTableContextProvider = ({
   } = usePrebuiltRulesInstallReview(
     {
       page: pagination.page,
-      per_page: pagination.perPage,
-      filter: {},
-      sort: sortingOptions,
+      perPage: pagination.perPage,
+      filterOptions,
+      sortingOptions,
     },
     {
       refetchInterval: 60000, // Refetch available rules for installation every minute
@@ -187,7 +179,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const rules = useMemo(() => reviewResponse?.rules ?? [], [reviewResponse]);
 
-  const total = reviewResponse?.total ?? 0;
+  const rulesMatchingFilterCount = reviewResponse?.total ?? 0;
+  const installableRulesCount = reviewResponse?.stats.num_rules_to_install ?? 0;
 
   const tags = useMemo(() => reviewResponse?.stats?.tags ?? [], [reviewResponse]);
 
@@ -195,9 +188,6 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const { mutateAsync: installAllRulesRequest } = usePerformInstallAllRules();
   const { mutateAsync: installSpecificRulesRequest } = usePerformInstallSpecificRules();
-
-  // TODO: Remove when replacing with BE implementation
-  const filteredRules = useFilterPrebuiltRulesToInstall({ filterOptions, rules });
 
   const installOneRule = useCallback(
     async (ruleId: RuleSignatureId, enable?: boolean) => {
@@ -293,7 +283,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
   );
 
   const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
-    rules: filteredRules,
+    rules,
     ruleActionsFactory,
     flyoutProps: {
       id: PREBUILT_RULE_INSTALL_FLYOUT_ANCHOR,
@@ -327,10 +317,10 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const providerValue = useMemo<AddPrebuiltRulesContextType>(() => {
     return {
       state: {
-        rules: filteredRules,
+        rules,
         filterOptions,
         tags,
-        hasRulesToInstall: total > 0,
+        hasRulesToInstall: installableRulesCount > 0,
         isFetched,
         isLoading,
         isFetching,
@@ -343,16 +333,18 @@ export const AddPrebuiltRulesTableContextProvider = ({
         lastUpdated: dataUpdatedAt,
         pagination: {
           ...pagination,
-          total: total ?? 0,
+          total: rulesMatchingFilterCount,
         },
         sortingOptions,
       },
       actions,
     };
   }, [
-    filteredRules,
+    rules,
     filterOptions,
     tags,
+    rulesMatchingFilterCount,
+    installableRulesCount,
     isFetched,
     isFetching,
     isLoading,
@@ -364,7 +356,6 @@ export const AddPrebuiltRulesTableContextProvider = ({
     selectedRules,
     dataUpdatedAt,
     pagination,
-    total,
     sortingOptions,
     actions,
   ]);
