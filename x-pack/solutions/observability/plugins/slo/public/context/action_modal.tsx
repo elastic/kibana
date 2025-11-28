@@ -101,6 +101,14 @@ export function ActionModalProvider({ children }: { children: ReactNode }) {
             onConfirm={handleOnConfirm}
           />
         );
+      case 'purge_instances':
+        return (
+          <PurgeInstancesConfirmationModal
+            items={action.items}
+            onCancel={handleOnCancel}
+            onConfirm={handleOnConfirm}
+          />
+        );
       default:
         return null;
     }
