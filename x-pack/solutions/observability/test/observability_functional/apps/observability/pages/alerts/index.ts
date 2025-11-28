@@ -289,11 +289,21 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       describe('Actions Button', () => {
         it('Opens rule details page when click on "View Rule Details"', async () => {
           await observability.alerts.common.openActionsMenuForRow(0);
+
+          // Wait with retry for the viewRuleDetails button to be available
+          await retry.waitFor('viewRuleDetails button to be present', async () => {
+            return await testSubjects.exists('viewRuleDetails', { timeout: 2500 });
+          });
+
           await observability.alerts.common.viewRuleDetailsButtonClick();
 
-          expect(
-            await (await find.byCssSelector('[data-test-subj="breadcrumb first"]')).getVisibleText()
-          ).to.eql('Observability');
+          await retry.try(async () => {
+            expect(
+              await (
+                await find.byCssSelector('[data-test-subj="breadcrumb first"]')
+              ).getVisibleText()
+            ).to.eql('Observability');
+          });
         });
       });
     });
