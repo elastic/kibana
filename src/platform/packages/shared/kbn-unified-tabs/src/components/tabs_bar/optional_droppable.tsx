@@ -30,7 +30,7 @@ const droppableCss = css`
  * Additional styling when dragging is active.
  */
 const draggingCss = css`
-  .unifiedTabs__tabWithBackground {
+  .unifiedTabs__tabWithBackground:not(.unifiedTabs__tabWithBackground--selected) {
     background-color: transparent;
   }
 `;

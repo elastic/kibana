@@ -10,6 +10,7 @@
 import React, { type HTMLAttributes } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, euiSlightShadowHover, type EuiThemeComputed } from '@elastic/eui';
+import classNames from 'classnames';
 import type { TabsServices } from '../../types';
 
 export interface TabWithBackgroundProps extends HTMLAttributes<HTMLElement> {
@@ -29,7 +30,9 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
       <div
         {...otherProps}
         ref={ref}
-        className="unifiedTabs__tabWithBackground"
+        className={classNames('unifiedTabs__tabWithBackground', {
+          'unifiedTabs__tabWithBackground--selected': isSelected,
+        })}
         // tab main background and another background color on hover
         css={css`
           position: relative;
