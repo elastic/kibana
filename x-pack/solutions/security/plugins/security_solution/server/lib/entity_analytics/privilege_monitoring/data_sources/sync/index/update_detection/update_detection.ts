@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server/src/saved_objects_client';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { MonitoringEntitySource } from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import { createPatternMatcherService } from '../../integrations/update_detection/privileged_status_match';
