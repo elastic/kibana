@@ -19,9 +19,9 @@ import type { ConversationRoundStep } from '@kbn/onechat-common';
 import classNames from 'classnames';
 import { EuiCode, EuiText, useEuiTheme } from '@elastic/eui';
 
-import type { OnechatStartDependencies } from '../../../../types';
-import { VisualizeESQL } from '../../tools/esql/visualize_esql';
-import { VisualizeLens } from '../../tools/esql/visualize_lens';
+import type { OnechatStartDependencies } from '../../../../../types';
+import { VisualizeESQL } from '../../../tools/esql/visualize_esql';
+import { VisualizeLens } from '../../../tools/esql/visualize_lens';
 
 type MutableNode = Node & {
   value?: string;
