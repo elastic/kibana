@@ -35,7 +35,7 @@ import {
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
 import { TraceWaterfall } from '../observability/traces/components/trace_waterfall';
-import { DataSourcesProvider } from '../observability/traces/hooks/use_data_sources';
+import { DataSourcesProvider } from '../../hooks/use_data_sources';
 import { SimilarErrors } from './sub_components/similar_errors';
 import { hasErrorFields } from './utils/has_error_fields';
 

@@ -32,7 +32,7 @@ import type { SpanLinkDetails } from '@kbn/apm-types';
 import { SPAN_LINKS_SPAN_ID } from '@kbn/apm-types';
 import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import { ContentFrameworkSection } from '../../../../content_framework/lazy_content_framework_section';
-import { useDataSourcesContext } from '../../hooks/use_data_sources';
+import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 import { getColumns } from './get_columns';
 import { useFetchSpanLinks } from './use_fetch_span_links';

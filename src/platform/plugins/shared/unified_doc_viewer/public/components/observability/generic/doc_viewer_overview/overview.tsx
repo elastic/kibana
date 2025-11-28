@@ -14,7 +14,7 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { SERVICE_NAME, SPAN_ID, TRACE_ID, TRANSACTION_ID } from '@kbn/apm-types';
-import { DataSourcesProvider } from '../../traces/hooks/use_data_sources';
+import { DataSourcesProvider } from '../../../../hooks/use_data_sources';
 import {
   getTabContentAvailableHeight,
   DEFAULT_MARGIN_BOTTOM,

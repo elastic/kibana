@@ -37,7 +37,7 @@ import { SpanLinks } from '../components/span_links';
 import { TraceContextLogEvents } from '../components/trace_context_log_events';
 import { TraceWaterfall } from '../components/trace_waterfall';
 import { isTransaction } from '../helpers';
-import { DataSourcesProvider } from '../hooks/use_data_sources';
+import { DataSourcesProvider } from '../../../../hooks/use_data_sources';
 import { TraceRootSpanProvider } from './hooks/use_fetch_trace_root_span';
 
 export type OverviewProps = DocViewRenderProps & {
