@@ -13,7 +13,6 @@ import { ACTION_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
 import type { ActionsClientContext } from '../../../../actions_client';
 import { AxiosInstance } from 'axios';
 import { validateSecrets } from '@kbn/actions-plugin/server/lib';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 type ValidatedSecrets = Record<string, unknown>;
 
@@ -56,6 +55,7 @@ export async function getAxiosInstance(
     }
   } catch (err) {
     log.debug(`Failed to retrieve actionTypeId for action [${actionId}]`, err);
+    throw err;
   }
 
   await authorization.ensureAuthorized({
@@ -78,30 +78,19 @@ export async function getAxiosInstance(
       );
     }
 
-    try {
-      const spaceId = spaces && spaces.getSpaceId(request);
-      const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
-        'action',
-        actionId,
-        spaceId && spaceId !== 'default' ? { namespace: spaceId } : {}
-      );
+    const spaceId = spaces && spaces.getSpaceId(request);
+    const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
+      'action',
+      actionId,
+      spaceId && spaceId !== 'default' ? { namespace: spaceId } : {}
+    );
 
-      secrets = rawAction.attributes.secrets;
-    } catch (err) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        throw err;
-      }
-      throw err;
-    }
+    secrets = rawAction.attributes.secrets;
   }
 
-  try {
-    const actionType = actionTypeRegistry.get(actionTypeId!);
-    const configurationUtilities = actionTypeRegistry.getUtils();
-    const validatedSecrets = validateSecrets(actionType, secrets, { configurationUtilities });
+  const actionType = actionTypeRegistry.get(actionTypeId!);
+  const configurationUtilities = actionTypeRegistry.getUtils();
+  const validatedSecrets = validateSecrets(actionType, secrets, { configurationUtilities });
 
-    return await getAxiosInstanceWithAuth(validatedSecrets);
-  } catch (err) {
-    throw err;
-  }
+  return await getAxiosInstanceWithAuth(validatedSecrets);
 }
