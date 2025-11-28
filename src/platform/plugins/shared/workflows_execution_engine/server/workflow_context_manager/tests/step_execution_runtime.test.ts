@@ -10,7 +10,8 @@
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import { createMockWorkflowEventLogger } from '../../workflow_event_logger/mocks';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/types';
 import { StepExecutionRuntime } from '../step_execution_runtime';
 import type { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
@@ -46,6 +47,7 @@ describe('StepExecutionRuntime', () => {
   });
 
   beforeEach(() => {
+    workflowLogger = createMockWorkflowEventLogger();
     workflowContextManager = {} as unknown as WorkflowContextManager;
     mockDateNow = new Date('2025-07-05T20:00:00.000Z');
     workflowExecution = {
@@ -59,13 +61,6 @@ describe('StepExecutionRuntime', () => {
       createdAt: new Date('2025-08-05T19:00:00.000Z').toISOString(),
       startedAt: new Date('2025-08-05T20:00:00.000Z').toISOString(),
     } as EsWorkflowExecution;
-
-    workflowLogger = {
-      logInfo: jest.fn(),
-      logWarn: jest.fn(),
-      logDebug: jest.fn(),
-      logError: jest.fn(),
-    } as unknown as IWorkflowEventLogger;
 
     workflowExecutionState = {
       getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
@@ -298,14 +293,14 @@ describe('StepExecutionRuntime', () => {
       });
     });
 
-    it('should correctly calculate step completedAt and executionTimeMs', () => {
-      const expectedCompletedAt = new Date('2025-08-06T00:00:02.000Z');
-      mockDateNow = expectedCompletedAt;
+    it('should correctly calculate step finishedAt and executionTimeMs', () => {
+      const expectedFinishedAt = new Date('2025-08-06T00:00:02.000Z');
+      mockDateNow = expectedFinishedAt;
       underTest.finishStep();
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
-          completedAt: expectedCompletedAt.toISOString(),
+          finishedAt: expectedFinishedAt.toISOString(),
           executionTimeMs: 2000,
         })
       );
