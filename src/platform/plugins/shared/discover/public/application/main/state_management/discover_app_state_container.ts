@@ -328,6 +328,17 @@ export const getDiscoverAppStateContainer = ({
         stateStorage,
       });
 
+    // Subscribe to CPS projectRouting changes (global subscription affects all tabs)
+    const cpsProjectRoutingSubscription = services.cps?.cpsManager
+      ?.getProjectRouting$()
+      .subscribe((cpsProjectRouting) => {
+        const currentProjectRouting = internalState.getState().projectRouting;
+
+        if (cpsProjectRouting !== currentProjectRouting) {
+          internalState.dispatch(internalStateActions.setProjectRouting(cpsProjectRouting));
+        }
+      });
+
     // current state needs to be pushed to url
     updateUrlWithCurrentState().then(() => {
       startSyncingAppStateWithUrl();
@@ -339,6 +350,7 @@ export const getDiscoverAppStateContainer = ({
       stopSyncingQueryGlobalStateWithStateContainer();
       stopSyncingAppStateWithUrl();
       stopSyncingGlobalStateWithUrl();
+      cpsProjectRoutingSubscription?.unsubscribe();
     };
   };
 

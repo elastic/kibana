@@ -46,6 +46,7 @@ const getOnSaveProps = (props?: Partial<OnSaveProps>): OnSaveProps => ({
   newCopyOnSave: false,
   newDescription: 'description',
   newTimeRestore: false,
+  newProjectRoutingRestore: false,
   newTags: [],
   isTitleDuplicateConfirmed: false,
   onTitleDuplicate: jest.fn(),
@@ -62,6 +63,7 @@ const setup = async ({
       ...discoverSession,
       id: discoverSession.id ?? 'new-session',
       managed: false,
+      projectRouting: discoverSession.projectRouting === null ? undefined : discoverSession.projectRouting,
     });
   },
   onSaveCb,
@@ -133,6 +135,9 @@ describe('onSaveDiscoverSession', () => {
       onSave: expect.any(Function),
       onClose: expect.any(Function),
       managed: true,
+      initialCopyOnSave: undefined,
+      projectRoutingRestore: false,
+      showStoreProjectRoutingOnSave: false,
     });
   });
 

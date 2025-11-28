@@ -50,6 +50,8 @@ export const getDiscoverSession = async (
       visContext: tab.attributes.visContext,
       controlGroupJson: tab.attributes.controlGroupJson,
     })),
+    // Session-level projectRouting - normalize null to undefined for runtime usage
+    projectRouting: so.item.attributes.projectRouting === null ? undefined : so.item.attributes.projectRouting,
     managed: Boolean(so.item.managed),
     tags: deps.savedObjectsTagging
       ? deps.savedObjectsTagging.ui.getTagIdsFromReferences(so.item.references)

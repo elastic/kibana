@@ -11,7 +11,7 @@ import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-pl
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { Filter, TimeRange } from '@kbn/es-query';
+import type { Filter, ProjectRouting, TimeRange } from '@kbn/es-query';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
@@ -90,6 +90,7 @@ export interface DiscoverInternalState {
   userId: string | undefined;
   spaceId: string | undefined;
   persistedDiscoverSession: DiscoverSession | undefined;
+  projectRouting?: ProjectRouting;
   hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];

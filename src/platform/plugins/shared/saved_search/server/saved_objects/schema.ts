@@ -182,6 +182,7 @@ const SCHEMA_DISCOVER_SESSION_TAB_VERSION_8 = SCHEMA_DISCOVER_SESSION_TAB.extend
 
 export const SCHEMA_SEARCH_MODEL_VERSION_8 = SCHEMA_SEARCH_MODEL_VERSION_7.extends({
   ...CONTROL_GROUP_JSON_SCHEMA,
+  projectRouting: schema.maybe(schema.nullable(schema.string())),
   tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_8, { minSize: 1 }),
 });
 

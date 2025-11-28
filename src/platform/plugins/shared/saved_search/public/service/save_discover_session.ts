@@ -23,7 +23,10 @@ export type SaveDiscoverSessionParams = Pick<
   DiscoverSession,
   'title' | 'description' | 'tabs' | 'tags'
 > &
-  Partial<Pick<DiscoverSession, 'id'>>;
+  Partial<Pick<DiscoverSession, 'id'>> & {
+    // projectRouting can be undefined (not provided), a value, or null (to explicitly clear)
+    projectRouting?: DiscoverSession['projectRouting'] | null;
+  };
 
 export interface SaveDiscoverSessionOptions {
   onTitleDuplicate?: () => void;
@@ -133,6 +136,7 @@ export const saveDiscoverSession = async (
     ...tabs[0].attributes,
     sort: tabs[0].attributes.sort as SortOrder[],
     density: tabs[0].attributes.density as DataGridDensity,
+    projectRouting: discoverSession.projectRouting,
   };
 
   const references = savedObjectsTagging
@@ -146,5 +150,11 @@ export const saveDiscoverSession = async (
     contentManagement
   );
 
-  return { ...discoverSession, id, references, managed: false };
+  return {
+    ...discoverSession,
+    projectRouting: discoverSession.projectRouting === null ? undefined : discoverSession.projectRouting,
+    id,
+    references,
+    managed: false,
+  };
 };

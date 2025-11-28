@@ -14,6 +14,7 @@ import type {
   SerializedSearchSourceFields,
   TimeRange,
 } from '@kbn/data-plugin/common';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -66,6 +67,10 @@ export interface SavedSearchAttributes {
   timeRange?: Pick<TimeRange, 'from' | 'to'>;
   refreshInterval?: RefreshInterval;
 
+  projectRoutingRestore?: boolean;
+  // projectRouting can be null to explicitly clear the value in storage
+  projectRouting?: ProjectRouting | null;
+
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
@@ -87,7 +92,6 @@ export type SavedSearch = Partial<SavedSearchAttributes> & {
   searchSource: ISearchSource;
   id?: string;
   tags?: string[] | undefined;
-
   // Whether or not this saved search is managed by the system
   managed: boolean;
   references?: SavedObjectReference[];
@@ -134,6 +138,7 @@ export interface DiscoverSession {
   title: string;
   description: string;
   tabs: DiscoverSessionTab[];
+  projectRouting?: ProjectRouting;
   managed: boolean;
   tags?: string[] | undefined;
   references?: SavedObjectReference[];

@@ -33,6 +33,7 @@ type AdHocDataViewAction = 'copy' | 'replace';
 export interface SaveDiscoverSessionThunkParams {
   newTitle: string;
   newTimeRestore: boolean;
+  newProjectRoutingRestore: boolean;
   newCopyOnSave: boolean;
   newDescription: string;
   newTags: string[];
@@ -47,6 +48,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       newTitle,
       newCopyOnSave,
       newTimeRestore,
+      newProjectRoutingRestore,
       newDescription,
       newTags,
       isTitleDuplicateConfirmed,
@@ -205,12 +207,23 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       }
     }
 
+    // Determine projectRouting value to save:
+    // - Toggle ON: save current value
+    // - Toggle OFF + original had value: save null (explicitly clear it)
+    // - Toggle OFF + original had NO value: save undefined (don't persist it)
+    const hasSavedProjectRouting = state.persistedDiscoverSession?.projectRouting !== undefined;
+
     const saveParams: SaveDiscoverSessionParams = {
       id: state.persistedDiscoverSession?.id,
       title: newTitle,
       description: newDescription,
       tabs: updatedTabs,
       tags: services.savedObjectsTagging ? newTags : state.persistedDiscoverSession?.tags,
+      projectRouting: newProjectRoutingRestore
+        ? state.projectRouting
+        : hasSavedProjectRouting
+          ? null
+          : undefined,
     };
 
     const saveOptions: SaveDiscoverSessionOptions = {
