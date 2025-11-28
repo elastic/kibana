@@ -288,11 +288,16 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
       describe('Actions Button', () => {
         it('Opens rule details page when click on "View Rule Details"', async () => {
-          await observability.alerts.common.openActionsMenuForRow(0);
+          await observability.alerts.common.waitForAlertTableToLoad();
+          await retry.try(async () => {
+            const actionsButtons = await testSubjects.findAll('alertsTableRowActionMore');
+            expect(actionsButtons.length).to.be.greaterThan(0);
+            await actionsButtons[0].click();
+            await testSubjects.existOrFail('alertsTableActionsMenu');
+          });
 
-          // Wait with retry for the viewRuleDetails button to be available
-          await retry.waitFor('viewRuleDetails button to be present', async () => {
-            return await testSubjects.exists('viewRuleDetails', { timeout: 2500 });
+          await retry.waitForWithTimeout('viewRuleDetails button', 20000, async () => {
+            return await testSubjects.exists('viewRuleDetails');
           });
 
           await observability.alerts.common.viewRuleDetailsButtonClick();
