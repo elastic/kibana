@@ -1,0 +1,53 @@
+# @kbn/superdatepicker
+
+This package is a wrapper around `EuiSuperDatePicker`.
+
+## Entire time range
+
+To enable this functionality you need to provide a callback function `getEntireTimeRange` that will return an object containing `start` and `end` values, which are valid dates.
+
+```typescript
+type GetEntireTimeRange = (signal?: AbortSignal) =>
+  | Promise<{ start: string; end: string }>
+  | { start: string; end: string };
+```
+
+### getEntireTimeRange example
+
+The function receives an optional `AbortSignal` parameter that allows you to cancel in-flight requests. The abort signal is automatically managed by the component - you only need to pass it through to your HTTP request.
+When a user clicks the cancel button (X icon) in the UI, The `AbortController` will abort the request.
+
+```typescript
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KbnSuperDatePicker, type GetEntireTimeRange } from '@kbn/superdatepicker';
+
+function MyComponent() {
+  const { services } = useKibana();
+  const { http } = services;
+
+  const getEntireTimeRange: GetEntireTimeRange = async (signal?: AbortSignal) => {
+    try {
+      const response = await http.get('/example/api/time-range/entire', {
+        signal, // Pass the abort signal to the HTTP request
+      });
+
+      return {
+        start: response.start,
+        end: response.end,
+      };
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw error;
+      }
+      console.error('Failed to fetch entire time range:', error);
+      throw error;
+    }
+  };
+
+  return (
+    <KbnSuperDatePicker
+      getEntireTimeRange={getEntireTimeRange}
+      // ...props
+    />
+  );
+}
