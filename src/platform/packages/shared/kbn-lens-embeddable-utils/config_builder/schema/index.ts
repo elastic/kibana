@@ -15,12 +15,14 @@ import { gaugeStateSchema } from './charts/gauge';
 import { tagcloudStateSchema } from './charts/tagcloud';
 import type { LensApiAllMetricOperations } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
+import { regionMapStateSchema } from './charts/region_map';
 
 export const lensApiStateSchema = schema.oneOf([
   metricStateSchema,
   legacyMetricStateSchema,
   gaugeStateSchema,
   tagcloudStateSchema,
+  regionMapStateSchema,
 ]);
 
 export type LensApiState = TypeOf<typeof lensApiStateSchema>;
@@ -29,7 +31,9 @@ export type { MetricState, metricStateSchemaNoESQL } from './charts/metric';
 export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';
 export type { GaugeState, gaugeStateSchemaNoESQL } from './charts/gauge';
 export type { TagcloudState, TagcloudStateNoESQL, TagcloudStateESQL } from './charts/tagcloud';
+export type { RegionMapState, RegionMapStateNoESQL, RegionMapStateESQL } from './charts/region_map';
 export { tagcloudStateSchema } from './charts/tagcloud';
+export { regionMapStateSchema } from './charts/region_map';
 
 export type {
   LensApiFieldMetricOrFormulaOperation,

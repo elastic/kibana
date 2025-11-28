@@ -63,7 +63,7 @@ const regionMapStateSchemaESQL = schema.object({
   /**
    * Configure how to break down to regions
    */
-  region: schema.maybe(schema.allOf([regionMapStateRegionOptionsSchema, esqlColumnSchema])),
+  region: schema.allOf([regionMapStateRegionOptionsSchema, esqlColumnSchema]),
 });
 
 export const regionMapStateSchema = schema.oneOf([
