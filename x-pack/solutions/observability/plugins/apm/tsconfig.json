@@ -152,7 +152,7 @@
     "@kbn/onechat-server",
     "@kbn/onechat-common",
     "@kbn/onechat-plugin",
-    "@kbn/ai-agent"
+    "@kbn/observability-agent-builder"
   ],
   "exclude": ["target/**/*"]
 }

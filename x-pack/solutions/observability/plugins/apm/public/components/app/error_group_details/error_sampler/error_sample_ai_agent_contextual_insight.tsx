@@ -9,11 +9,11 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { AT_TIMESTAMP } from '@kbn/apm-types';
-import { ContextualInsight } from '@kbn/ai-agent';
-import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '../../../../../common/observability_agent/attachment_ids';
+import { AiInsight } from '@kbn/observability-agent-builder';
+import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '../../../../../common/agent_builder/attachment_ids';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import { getIsObservabilityAgentEnabled } from '../../../../../common/observability_agent/get_is_obs_agent_enabled';
+import { getIsObservabilityAgentEnabled } from '../../../../../common/agent_builder/get_is_obs_agent_enabled';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
@@ -88,11 +88,12 @@ export function ErrorSampleAiAgentContextualInsight({
             connectorId: lastUsedConnectorId,
           },
         },
+        signal: null,
       });
 
-      setLlmResponse(response?.llmResponse);
+      setLlmResponse(response?.llmResponse ?? undefined);
     } catch (e) {
-      setLlmResponse(null);
+      setLlmResponse(undefined);
     } finally {
       setIsLoading(false);
     }
@@ -202,7 +203,7 @@ export function ErrorSampleAiAgentContextualInsight({
 
   return (
     <>
-      <ContextualInsight
+      <AiInsight
         title={i18n.translate('xpack.apm.errorGroupContextualInsight.explainErrorTitle', {
           defaultMessage: "What's this error?",
         })}

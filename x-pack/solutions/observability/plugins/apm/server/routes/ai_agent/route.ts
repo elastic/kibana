@@ -11,7 +11,7 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getErrorContextData } from './contextual_insights/get_error_context_data';
 import { getErrorContextualInsights } from './contextual_insights/get_error_contextual_insights';
-import { parseDatemath } from '../../ai_agent/utils/time';
+import { parseDatemath } from '../../agent_builder/utils/time';
 
 const errorContextRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/ai_agent/contextual_insights/error',

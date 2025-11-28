@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
 import { first } from 'lodash';
@@ -51,13 +52,13 @@ import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
 import { SampleSummary } from './sample_summary';
 import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
 import { ErrorSampleAiAgentContextualInsight } from './error_sample_ai_agent_contextual_insight';
-import { getIsObservabilityAgentEnabled } from '../../../../../common/observability_agent/get_is_obs_agent_enabled';
+import { getIsObservabilityAgentEnabled } from '../../../../../common/agent_builder/get_is_obs_agent_enabled';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { buildUrl } from '../../../../utils/build_url';
 import { OpenErrorInDiscoverButton } from '../../../shared/links/discover_links/open_error_in_discover_button';
 
 const TransactionLinkName = styled.div`
-  margin-left: ${({ theme }) => theme.euiTheme.size.s};
+  margin-left: ${euiThemeVars.euiSizeS};
   display: inline-block;
   vertical-align: middle;
 `;

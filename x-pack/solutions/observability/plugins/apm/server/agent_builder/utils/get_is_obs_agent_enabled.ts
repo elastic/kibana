@@ -9,7 +9,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import {
   OBSERVABILITY_AGENT_FEATURE_FLAG,
   OBSERVABILITY_AGENT_FEATURE_FLAG_DEFAULT,
-} from '../../../common/observability_agent/feature_flag';
+} from '../../../common/agent_builder/feature_flag';
 import type { APMPluginStartDependencies } from '../../types';
 
 export async function getIsObservabilityAgentEnabled(

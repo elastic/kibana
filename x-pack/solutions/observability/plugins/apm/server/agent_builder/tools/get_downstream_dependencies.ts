@@ -13,32 +13,22 @@ import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { timeRangeSchema } from '../utils/tool_schemas';
 import { buildApmToolResources } from '../utils/build_apm_tool_resources';
 import { getApmToolAvailability } from '../utils/get_apm_tool_availability';
-import { getApmServiceList } from '../../routes/assistant_functions/get_apm_service_list';
+import { getApmDownstreamDependencies } from '../../routes/assistant_functions/get_apm_downstream_dependencies';
+import { OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '../../../common/agent_builder/agent_tool_ids';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
-import { ServiceHealthStatus } from '../../../common/service_health_status';
-import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '../../../common/observability_agent/agent_tool_ids';
 
-const getServicesSchema = z.object({
+const getDownstreamDependenciesToolSchema = z.object({
   ...timeRangeSchema.shape,
+  serviceName: z.string().min(1).describe('The name of the service'),
   serviceEnvironment: z
     .string()
-    .min(1)
     .optional()
-    .describe('Optionally filter the services by the environments that they are running in.'),
-  healthStatus: z
-    .array(
-      z.enum([
-        ServiceHealthStatus.unknown,
-        ServiceHealthStatus.healthy,
-        ServiceHealthStatus.warning,
-        ServiceHealthStatus.critical,
-      ])
-    )
-    .optional()
-    .describe('Optionally filter the services by their health status.'),
+    .describe(
+      'The environment that the service is running in. Leave empty to query for all environments.'
+    ),
 });
 
-export function createGetServicesTool({
+export function createDownstreamDependenciesTool({
   core,
   plugins,
   logger,
@@ -46,13 +36,14 @@ export function createGetServicesTool({
   core: CoreSetup<APMPluginStartDependencies>;
   plugins: APMPluginSetupDependencies;
   logger: Logger;
-}): StaticToolRegistration<typeof getServicesSchema> {
-  const toolDefinition: BuiltinToolDefinition<typeof getServicesSchema> = {
-    id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
+}): StaticToolRegistration<typeof getDownstreamDependenciesToolSchema> {
+  const toolDefinition: BuiltinToolDefinition<typeof getDownstreamDependenciesToolSchema> = {
+    id: OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
     type: ToolType.builtin,
-    description: 'Get the list of monitored services, their health status, and alerts.',
-    schema: getServicesSchema,
-    tags: ['observability', 'services'],
+    description:
+      'Get downstream dependencies (services or uninstrumented backends) for a given service and time range.',
+    schema: getDownstreamDependenciesToolSchema,
+    tags: ['observability', 'apm', 'dependencies'],
     availability: {
       cacheMode: 'space',
       handler: async ({ request }) => {
@@ -63,34 +54,30 @@ export function createGetServicesTool({
       const { request, esClient, logger: scopedLogger } = context;
 
       try {
-        const { apmEventClient, randomSampler, mlClient, apmAlertsClient } =
-          await buildApmToolResources({
-            core,
-            plugins,
-            request,
-            esClient,
-            logger: scopedLogger,
-          });
-
-        const services = await getApmServiceList({
-          apmEventClient,
-          apmAlertsClient,
-          randomSampler,
-          mlClient,
+        const { apmEventClient, randomSampler } = await buildApmToolResources({
+          core,
+          plugins,
+          request,
+          esClient,
           logger: scopedLogger,
+        });
+
+        const result = await getApmDownstreamDependencies({
           arguments: args,
+          apmEventClient,
+          randomSampler,
         });
 
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: { services },
+              data: { dependencies: result },
             },
           ],
         };
       } catch (error) {
-        logger.error(`Error getting services: ${error.message}`);
+        logger.error(`Error getting APM downstream dependencies: ${error.message}`);
         logger.debug(error);
 
         return {
@@ -98,7 +85,7 @@ export function createGetServicesTool({
             {
               type: ToolResultType.error,
               data: {
-                message: `Failed to fetch services: ${error.message}`,
+                message: `Failed to fetch downstream dependencies: ${error.message}`,
                 stack: error.stack,
               },
             },
