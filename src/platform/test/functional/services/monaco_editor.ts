@@ -44,9 +44,33 @@ export class MonacoEditorService extends FtrService {
   }
 
   public async typeCodeEditorValue(value: string, testSubjId: string) {
-    const editor = await this.testSubjects.find(testSubjId);
-    const textarea = await editor.findByCssSelector('textarea');
-    await textarea.type(value);
+    await this.browser.execute(
+      (id: string, text: string) => {
+        const container = document.querySelector(`[data-test-subj="${id}"]`);
+        const editor = window
+          .MonacoEnvironment!.monaco.editor.getEditors()
+          .find((e: any) => container?.contains(e.getDomNode()));
+
+        if (!editor) return;
+
+        editor.focus();
+        const pos = editor.getPosition() || { lineNumber: 1, column: 1 };
+        editor.executeEdits('test', [
+          {
+            range: {
+              startLineNumber: pos.lineNumber,
+              startColumn: pos.column,
+              endLineNumber: pos.lineNumber,
+              endColumn: pos.column,
+            },
+            text,
+          },
+        ]);
+        editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+      },
+      testSubjId,
+      value
+    );
   }
 
   public async setCodeEditorValue(value: string, nthIndex?: number) {
