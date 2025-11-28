@@ -232,7 +232,6 @@ TEST_SPACES.forEach((space) => {
       async ({ apiClient, apiServices }) => {
         const uniqueId = `dashboard-overwrite-${Date.now()}-${space.spaceId}`;
 
-        // Import initial object
         const formData1 = prepareImportFormData([
           {
             ...DASHBOARD_SAVED_OBJECT,
@@ -260,7 +259,7 @@ TEST_SPACES.forEach((space) => {
         const newID = response1.body.successResults[0].destinationId;
         createdSavedObjects.push({ type: 'dashboard', id: newID });
 
-        // verify that a new ID was generated
+        // Verify that a new ID was generated
         expect(newID).not.toBe(uniqueId);
 
         const exportResponse = await apiServices.savedObjects.export(
@@ -293,7 +292,6 @@ TEST_SPACES.forEach((space) => {
         }
       );
 
-      // Import API returns 200 but with success=false and errors for invalid types
       expect(response.statusCode).toBe(200);
       expect(response.body.success).toBe(false);
       expect(response.body.errors).toBeDefined();

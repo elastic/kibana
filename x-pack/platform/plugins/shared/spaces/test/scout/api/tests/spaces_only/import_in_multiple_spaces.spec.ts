@@ -92,10 +92,9 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
   apiTest(
     'should import and export saved objects across different spaces',
     async ({ apiClient, apiServices }) => {
-      const objectId1 = `dashboard-${Date.now()}-space1`;
-      const objectId2 = `dashboard-${Date.now()}-space2`;
+      const objectId1 = `dashboard-id-1-space1`;
+      const objectId2 = `dashboard-id-2-space2`;
 
-      // Import dashboard to space_1 using apiClient
       const formData1 = prepareImportFormData([
         {
           type: 'dashboard',
@@ -127,7 +126,6 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
       expect(importResponse1.body.success).toBe(true);
       expect(importResponse1.body.successCount).toBe(1);
 
-      // Import dashboard with a different ID to space_2 using apiClient
       const formData2 = prepareImportFormData([
         {
           type: 'dashboard',
@@ -183,21 +181,23 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
   );
 
   apiTest(
-    'createNewCopies should create separate objects in different spaces',
+    'should import a dashboard object in space 1 and then import the same object in space 2 but with a new ID',
     async ({ apiClient, apiServices }) => {
-      const objectId = `dashboard-${Date.now()}`;
+      const uniqueId = `unique-dashboard-id`;
 
-      // Import with createNewCopies to space_1 using apiClient
+      // Import dashboard with a specific ID to space_1 - should succeed
       const formData1 = prepareImportFormData([
         {
           type: 'dashboard',
-          id: objectId,
-          attributes: { [ATTRIBUTE_TITLE_KEY]: 'Copy in Space 1' },
+          id: uniqueId,
+          attributes: {
+            [ATTRIBUTE_TITLE_KEY]: `${ATTRIBUTE_TITLE_VALUE} in Space 1`,
+          },
         },
       ]);
 
       const importResponse1 = await apiClient.post(
-        `s/${SPACES.SPACE_1.spaceId}/api/saved_objects/_import?createNewCopies=true`,
+        `s/${SPACES.SPACE_1.spaceId}/api/saved_objects/_import?overwrite=false`,
         {
           headers: {
             ...COMMON_HEADERS,
@@ -207,32 +207,29 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
           body: formData1.buffer,
         }
       );
-
-      expect(importResponse1.statusCode).toBe(200);
-      expect(importResponse1.body.success).toBe(true);
-      expect(importResponse1.body.successResults).toBeDefined();
-
-      // createNewCopies generates a new random UUID
-      const newId1 = importResponse1.body.successResults[0].destinationId;
-      expect(newId1).toBeDefined();
-      expect(newId1).toMatch(/^[0-9a-f-]{36}$/);
       createdSavedObjects.push({
         type: 'dashboard',
-        id: newId1,
+        id: uniqueId,
         spaceId: SPACES.SPACE_1.spaceId,
       });
 
-      // Import with createNewCopies to space_2 (same original ID) using apiClient
+      expect(importResponse1.statusCode).toBe(200);
+      expect(importResponse1.body.success).toBe(true);
+      expect(importResponse1.body.successCount).toBe(1);
+
+      // Attempt to import dashboard with the SAME ID to space_2 - should create a saved object with a new ID
       const formData2 = prepareImportFormData([
         {
           type: 'dashboard',
-          id: objectId,
-          attributes: { [ATTRIBUTE_TITLE_KEY]: 'Copy in Space 2' },
+          id: uniqueId,
+          attributes: {
+            [ATTRIBUTE_TITLE_KEY]: `${ATTRIBUTE_TITLE_VALUE} in Space 2`,
+          },
         },
       ]);
 
       const importResponse2 = await apiClient.post(
-        `s/${SPACES.SPACE_2.spaceId}/api/saved_objects/_import?createNewCopies=true`,
+        `s/${SPACES.SPACE_2.spaceId}/api/saved_objects/_import?overwrite=false`,
         {
           headers: {
             ...COMMON_HEADERS,
@@ -245,40 +242,28 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
 
       expect(importResponse2.statusCode).toBe(200);
       expect(importResponse2.body.success).toBe(true);
-      expect(importResponse2.body.successResults).toBeDefined();
+      expect(importResponse2.body.successCount).toBe(1);
+      expect(importResponse2.body.successResults[0].id).toBe(uniqueId);
 
-      // createNewCopies generates a new random UUID
-      const newId2 = importResponse2.body.successResults[0].destinationId;
-      expect(newId2).toBeDefined();
-      expect(newId2).toMatch(/^[0-9a-f-]{36}$/);
-      createdSavedObjects.push({
-        type: 'dashboard',
-        id: newId2,
-        spaceId: SPACES.SPACE_2.spaceId,
-      });
+      const newID = importResponse2.body.successResults[0].destinationId;
+      createdSavedObjects.push({ type: 'dashboard', id: newID });
 
-      // The two generated IDs should be different (different UUIDs per space)
-      expect(newId1).not.toBe(newId2);
+      // Verify that a new ID was generated
+      expect(newID).not.toBe(uniqueId);
 
-      // Verify both objects exist in their respective spaces using apiServices (verification)
-      const export1 = await apiServices.savedObjects.export(
-        { objects: [{ type: 'dashboard', id: newId1 }] },
-        SPACES.SPACE_1.spaceId
-      );
-      expect(export1.status).toBe(200);
-      expect(export1.data.exportedObjects).toHaveLength(1);
-      expect(export1.data.exportedObjects[0].attributes[ATTRIBUTE_TITLE_KEY]).toBe(
-        'Copy in Space 1'
-      );
-
-      const export2 = await apiServices.savedObjects.export(
-        { objects: [{ type: 'dashboard', id: newId2 }] },
+      const exportResponse = await apiServices.savedObjects.export(
+        { objects: [{ type: 'dashboard', id: newID }] },
         SPACES.SPACE_2.spaceId
       );
-      expect(export2.status).toBe(200);
-      expect(export2.data.exportedObjects).toHaveLength(1);
-      expect(export2.data.exportedObjects[0].attributes[ATTRIBUTE_TITLE_KEY]).toBe(
-        'Copy in Space 2'
+
+      expect(exportResponse.status).toBe(200);
+
+      // Import should succeed and the object should exist in space 2 with the new ID
+      expect(importResponse2.statusCode).toBe(200);
+      expect(importResponse2.body.success).toBe(true);
+      expect(exportResponse.data.exportedObjects).toHaveLength(1);
+      expect(exportResponse.data.exportedObjects[0].attributes[ATTRIBUTE_TITLE_KEY]).toBe(
+        `${ATTRIBUTE_TITLE_VALUE} in Space 2`
       );
     }
   );
