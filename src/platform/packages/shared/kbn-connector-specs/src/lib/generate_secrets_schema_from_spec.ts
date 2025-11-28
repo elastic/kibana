@@ -18,6 +18,8 @@ export const generateSecretsSchemaFromSpec = (authTypes: ConnectorSpec['authType
   }
   return secretSchemas.length > 0
     ? // to make zod types happy
-      z.discriminatedUnion('authType', [secretSchemas[0], ...secretSchemas.slice(1)])
+      z
+        .discriminatedUnion('authType', [secretSchemas[0], ...secretSchemas.slice(1)])
+        .meta({ label: 'Authentication' })
     : z.object({}).default({});
 };

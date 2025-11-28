@@ -292,6 +292,8 @@ export const convertFormStateToProcessor = (
   processorDefinition: StreamlangProcessorDefinition;
   processorResources?: ProcessorResources;
 } => {
+  const description = 'description' in formState ? formState.description : undefined;
+
   if ('action' in formState) {
     if (formState.action === 'grok') {
       const { patterns, from, ignore_failure, ignore_missing } = formState;
@@ -300,6 +302,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'grok',
           where: formState.where,
+          description,
           patterns: patterns
             .map((pattern) => pattern.getExpression().trim())
             .filter((pattern) => !isEmpty(pattern)),
@@ -320,6 +323,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'dissect',
           where: formState.where,
+          description,
           from,
           pattern,
           append_separator: isEmpty(append_separator) ? undefined : append_separator,
@@ -336,6 +340,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'manual_ingest_pipeline',
           where: formState.where,
+          description,
           processors,
           ignore_failure,
         },
@@ -349,6 +354,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'date',
           where: formState.where,
+          description,
           from,
           formats,
           ignore_failure,
@@ -367,6 +373,7 @@ export const convertFormStateToProcessor = (
           action: 'drop_document',
           where,
           ignore_failure,
+          description,
         },
       };
     }
@@ -388,6 +395,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'set',
           where: formState.where,
+          description,
           to,
           ...getValueOrCopyFrom(),
           override,
@@ -407,6 +415,7 @@ export const convertFormStateToProcessor = (
           to: isEmpty(to) ? undefined : to,
           ignore_failure,
           ignore_missing,
+          description,
           where: 'where' in formState ? formState.where : undefined,
         } as ConvertProcessor,
       };
@@ -424,6 +433,7 @@ export const convertFormStateToProcessor = (
           to: isEmpty(to) ? undefined : to,
           ignore_failure,
           ignore_missing,
+          description,
           where: 'where' in formState ? formState.where : undefined,
         } as ReplaceProcessor,
       };
@@ -431,9 +441,10 @@ export const convertFormStateToProcessor = (
 
     if (configDrivenProcessors[formState.action]) {
       return {
-        processorDefinition: configDrivenProcessors[formState.action].convertFormStateToConfig(
-          formState as any
-        ),
+        processorDefinition: {
+          ...configDrivenProcessors[formState.action].convertFormStateToConfig(formState as any),
+          description,
+        },
       };
     }
   }
