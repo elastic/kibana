@@ -9,7 +9,7 @@
 
 import type { LensAttributes, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { LensConfigBuilder, type LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
+import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
@@ -42,14 +42,14 @@ export type LensProps = Pick<
   | 'searchSessionId'
   | 'executionContext'
   | 'onLoad'
+  | 'lastReloadRequestTime'
 >;
 
 export const useLensProps = ({
   title,
   query,
   services,
-  getTimeRange,
-  searchSessionId,
+  fetchParams,
   discoverFetch$,
   chartRef,
   chartLayers,
@@ -57,12 +57,11 @@ export const useLensProps = ({
 }: {
   title: string;
   query: string;
-  discoverFetch$: Observable<UnifiedHistogramInputMessage>;
-  getTimeRange: () => TimeRange;
+  discoverFetch$: ChartSectionProps['fetch$'];
   chartRef?: React.RefObject<HTMLDivElement>;
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
-} & Pick<ChartSectionProps, 'services' | 'searchSessionId'>) => {
+} & Pick<ChartSectionProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
 
@@ -86,12 +85,13 @@ export const useLensProps = ({
   const buildLensProps = useCallback(
     (attributes: LensAttributes) => {
       return getLensProps({
-        searchSessionId,
-        getTimeRange,
+        searchSessionId: fetchParams.searchSessionId,
+        timeRange: fetchParams.relativeTimeRange, // same as in the time picker
         attributes,
+        lastReloadRequestTime: Date.now(),
       });
     },
-    [searchSessionId, getTimeRange]
+    [fetchParams.searchSessionId, fetchParams.relativeTimeRange]
   );
 
   const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
@@ -183,20 +183,23 @@ const buildLensParams = ({
 
 const getLensProps = ({
   searchSessionId,
-  getTimeRange,
+  timeRange,
   attributes,
+  lastReloadRequestTime,
 }: {
   searchSessionId?: string;
   attributes: LensAttributes;
-  getTimeRange: () => TimeRange;
+  timeRange: TimeRange;
+  lastReloadRequestTime?: number;
 }): LensProps => ({
   id: 'metricsExperienceLensComponent',
   viewMode: 'view',
-  timeRange: getTimeRange(),
+  timeRange,
   attributes,
   noPadding: true,
   searchSessionId,
   executionContext: {
     description: 'metrics experience chart data',
   },
+  lastReloadRequestTime,
 });
