@@ -12,6 +12,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   removeLockIndexWithIncorrectMappings,
+  ensureTemplatesAndIndexCreated,
   LOCKS_CONCRETE_INDEX_NAME,
 } from './setup_lock_manager_index';
 
@@ -156,5 +157,64 @@ describe('removeLockIndexWithIncorrectMappings', () => {
 
       await expect(removeLockIndexWithIncorrectMappings(esClient, logger)).resolves.not.toThrow();
     });
+  });
+});
+
+describe('ensureTemplatesAndIndexCreated', () => {
+  let esClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
+  const logger = loggingSystemMock.createLogger();
+
+  beforeEach(() => {
+    esClient = elasticsearchClientMock.createInternalClient();
+  });
+
+  it('creates index successfully', async () => {
+    await ensureTemplatesAndIndexCreated(esClient, logger);
+
+    expect(esClient.cluster.putComponentTemplate).toHaveBeenCalled();
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalled();
+    expect(esClient.indices.create).toHaveBeenCalledWith({ index: LOCKS_CONCRETE_INDEX_NAME });
+  });
+
+  it('handles resource_already_exists_exception without throwing', async () => {
+    esClient.indices.create.mockRejectedValueOnce(
+      new errors.ResponseError({
+        statusCode: 400,
+        body: { error: { type: 'resource_already_exists_exception' } },
+        headers: {},
+        meta: {} as any,
+        warnings: [],
+      })
+    );
+
+    await expect(ensureTemplatesAndIndexCreated(esClient, logger)).resolves.not.toThrow();
+  });
+
+  it('handles invalid_index_name_exception (index name exists as alias) without throwing', async () => {
+    esClient.indices.create.mockRejectedValueOnce(
+      new errors.ResponseError({
+        statusCode: 400,
+        body: { error: { type: 'invalid_index_name_exception' } },
+        headers: {},
+        meta: {} as any,
+        warnings: [],
+      })
+    );
+
+    await expect(ensureTemplatesAndIndexCreated(esClient, logger)).resolves.not.toThrow();
+  });
+
+  it('throws on other errors', async () => {
+    esClient.indices.create.mockRejectedValueOnce(
+      new errors.ResponseError({
+        statusCode: 500,
+        body: { error: { type: 'internal_server_error' } },
+        headers: {},
+        meta: {} as any,
+        warnings: [],
+      })
+    );
+
+    await expect(ensureTemplatesAndIndexCreated(esClient, logger)).rejects.toThrow();
   });
 });
