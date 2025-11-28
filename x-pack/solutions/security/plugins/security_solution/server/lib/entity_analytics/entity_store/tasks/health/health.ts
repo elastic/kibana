@@ -93,7 +93,7 @@ export async function startEntityStoreHealthTask({
   entityType: EntityType;
   taskManager: TaskManagerStartContract;
 }) {
-  const taskId = getTaskId(namespace, entityType);
+  const taskId = getTaskId(namespace);
   const msg = entityStoreTaskLogMessageFactory(taskId);
 
   logger.info(msg('attempting to schedule'));
@@ -128,10 +128,10 @@ export async function removeEntityStoreHealthTask({
   entityType: EntityType;
   taskManager: TaskManagerStartContract;
 }) {
-  const taskId = getTaskId(namespace, entityType);
+  const taskId = getTaskId(namespace);
   const msg = entityStoreTaskLogMessageFactory(taskId);
   try {
-    await taskManager.remove(getTaskId(namespace, entityType));
+    await taskManager.remove(getTaskId(namespace));
     logger.info(msg(`removed health task`));
   } catch (err) {
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {

@@ -464,14 +464,40 @@ export const ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT: EventTypeOpts<{
 };
 
 export const ENTITY_STORE_HEALTH_REPORT_EVENT: EventTypeOpts<{
-  error: string;
+  engines: [
+    {
+      type: string;
+      status: string;
+      delay: string;
+      frequency: string;
+      docsPerSecond: number;
+      lookbackPeriod: string;
+      fieldHistoryLength: number;
+      indexPattern: string;
+      filter: string;
+      timestampField: string;
+      maxPageSearchSize: number;
+      components: [
+        {
+          id: string;
+          resource: string;
+          installed: boolean;
+          health: string | undefined;
+          enabled: bool | undefined;
+          status: string | undefined;
+          lastRun: string | undefined;
+          nextRun: string | undefined;
+        }
+      ];
+    }
+  ];
 }> = {
   eventType: 'entity_store_health_report',
   schema: {
-    error: {
-      type: 'keyword',
+    engines: {
+      type: 'array',
       _meta: {
-        description: 'Error message for a resource initialization failure',
+        description: 'TODO',
       },
     },
   },
