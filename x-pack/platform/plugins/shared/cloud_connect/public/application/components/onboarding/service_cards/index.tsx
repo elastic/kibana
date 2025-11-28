@@ -66,7 +66,7 @@ export const ServiceCards: React.FC<ServiceCardsProps> = ({ hasPermissions }) =>
             hasBorder
             layout="horizontal"
             title={i18n.translate('xpack.cloudConnect.serviceCards.synthetic.title', {
-              defaultMessage: 'Synthetic',
+              defaultMessage: 'Synthetics',
             })}
             description={i18n.translate('xpack.cloudConnect.serviceCards.synthetic.description', {
               defaultMessage:
