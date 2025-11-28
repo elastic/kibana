@@ -29,6 +29,7 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
       <div
         {...otherProps}
         ref={ref}
+        className="unifiedTabs__tabWithBackground"
         // tab main background and another background color on hover
         css={css`
           position: relative;
@@ -72,7 +73,7 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
             height: ${euiTheme.size.base};
             background: ${euiTheme.colors.borderBasePlain};
             transition: opacity ${euiTheme.animation.fast};
-            opacity: ${hideRightSeparator ? '0' : '1'};
+            opacity: ${hideRightSeparator || isDragging ? '0' : '1'};
             pointer-events: none;
           }
         `}

@@ -26,6 +26,15 @@ const droppableCss = css`
   wrap: no-wrap;
 `;
 
+/**
+ * Additional styling when dragging is active.
+ */
+const draggingCss = css`
+  .unifiedTabs__tabWithBackground {
+    background-color: transparent;
+  }
+`;
+
 interface DroppableWrapperProps {
   /** Content to render inside the droppable zone */
   children: React.ReactNode;
@@ -67,7 +76,15 @@ export const OptionalDroppable: FC<DroppableWrapperProps> = ({
         grow
         data-test-subj="unifiedTabs_droppable_enabled"
       >
-        {() => <>{children}</>}
+        {(provided, snapshot) => (
+          <div
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+            css={[droppableCss, snapshot.isDraggingOver && draggingCss]}
+          >
+            {children}
+          </div>
+        )}
       </EuiDroppable>
     </EuiDragDropContext>
   );
