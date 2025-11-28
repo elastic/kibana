@@ -2365,7 +2365,7 @@
       "enabled": true
     },
     {
-      "groupName": "search-ui ai dependency",
+      "groupName": "search-ui ai @ai-sdk/langchain dependency",
       "matchDepNames": [
         "ai"
       ],
