@@ -318,7 +318,6 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
       return (
         <>
           <EuiCallOut
-            announceOnMount
             color="warning"
             size="s"
             iconType="alert"

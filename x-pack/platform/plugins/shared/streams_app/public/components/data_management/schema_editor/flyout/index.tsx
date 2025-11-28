@@ -87,7 +87,6 @@ export const SchemaEditorFlyout = ({
 
       {isIgnoredField && (
         <EuiCallOut
-          announceOnMount
           color="warning"
           iconType="warning"
           title={i18n.translate('xpack.streams.samplePreviewTable.ignoredFieldsCallOutTitle', {
