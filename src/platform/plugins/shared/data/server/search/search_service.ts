@@ -331,7 +331,7 @@ export class SearchService {
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
   ) => {
-    this.logger.debug(`Register strategy ${name}`);
+    this.logger.debug(`[SearchService] Register strategy ${name}`);
     this.searchStrategies[name] = strategy;
   };
 
@@ -341,7 +341,7 @@ export class SearchService {
   >(
     name: string = ENHANCED_ES_SEARCH_STRATEGY
   ): ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse> => {
-    this.logger.debug(`Get strategy ${name}`);
+    this.logger.debug(`[SearchService] Get strategy ${name}`);
     const strategy = this.searchStrategies[name];
     if (!strategy) {
       throw new KbnServerError(`Search strategy ${name} not found`, 404);
@@ -368,14 +368,14 @@ export class SearchService {
         } else {
           try {
             const id = await deps.searchSessionsClient.getId(request, options);
-            this.logger.debug(`Found search session id for request ${id}`);
+            this.logger.debug(`[SearchService] Found search session id for request ${id}`);
             return {
               ...request,
               id,
             };
           } catch (e) {
             if (e instanceof NoSearchIdInSessionError) {
-              this.logger.debug('Ignoring missing search ID');
+              this.logger.debug(`[SearchService] Ignoring missing search ${JSON.stringify(e)}`);
               return request;
             } else {
               throw e;
@@ -420,7 +420,7 @@ export class SearchService {
                     })),
                     catchError((e) => {
                       this.logger.error(
-                        `Error while trying to track search id: ${e?.message}. This might lead to untracked long-running search.`
+                        `[SearchService] Error while trying to track search id: ${e?.message}. This might lead to untracked long-running search.`
                       );
                       return of(response);
                     })
@@ -441,6 +441,7 @@ export class SearchService {
   };
 
   private cancel = (deps: SearchStrategyDependencies, id: string, options: ISearchOptions = {}) => {
+    this.logger.debug(`[SearchService] Canceling search session ${id}`);
     const strategy = this.getSearchStrategy(options.strategy);
     if (!strategy.cancel) {
       throw new KbnServerError(
@@ -477,7 +478,7 @@ export class SearchService {
         try {
           await this.cancel(deps, searchId, searchOptions);
         } catch (e) {
-          this.logger.error(`cancelSessionSearches error: ${e.message}`);
+          this.logger.error(`[SearchService] cancelSessionSearches error: ${e.message}`);
         }
       })
     );
