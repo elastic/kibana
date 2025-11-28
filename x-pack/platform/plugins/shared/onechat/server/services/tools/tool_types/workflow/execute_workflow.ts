@@ -30,10 +30,12 @@ export const executeWorkflow = async ({
   spaceId,
   workflowApi,
   waitForCompletion = true,
+  completionTimeoutSec = WAIT_FOR_COMPLETION_TIMEOUT_SEC,
 }: {
   workflowId: string;
   workflowParams: Record<string, unknown>;
   waitForCompletion?: boolean;
+  completionTimeoutSec?: number;
   request: KibanaRequest;
   spaceId: string;
   workflowApi: WorkflowApi;
@@ -66,31 +68,35 @@ export const executeWorkflow = async ({
     request
   );
 
-  const waitStart = Date.now();
-  const waitLimit = waitStart + waitFor * 1000;
-
+  const waitLimit = Date.now() + completionTimeoutSec * 1000;
   await waitMs(INITIAL_WAIT_MS);
 
   let execution: WorkflowExecutionState | null | undefined;
   do {
     try {
       execution = await getExecutionState({ executionId, spaceId, workflowApi });
-      // if final status is reached, return result directly
-      if (execution && finalStatuses.includes(execution.status)) {
+
+      const shouldReturn = waitForCompletion
+        ? execution && finalStatuses.includes(execution.status)
+        : execution;
+
+      if (shouldReturn) {
         return [otherResult({ execution })];
       }
     } catch (e) {
       // trap - we just keep waiting until timeout
     }
 
-    await waitMs(checkInterval * 1000);
+    await waitMs(CHECK_INTERVAL_MS);
   } while (Date.now() < waitLimit);
 
   if (execution) {
     return [otherResult({ execution })];
   } else {
     return [
-      errorResult(`Workflow '${workflowId}' executed but execution not found after ${waitFor}s.`),
+      errorResult(
+        `Workflow '${workflowId}' executed but execution not found after ${WAIT_FOR_COMPLETION_TIMEOUT_SEC}s.`
+      ),
     ];
   }
 };

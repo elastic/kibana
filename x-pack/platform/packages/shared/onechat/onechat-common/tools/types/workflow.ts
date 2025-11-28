@@ -14,7 +14,7 @@ export type WorkflowToolConfig = {
   wait_for_completion?: boolean;
 };
 
-export const WAIT_FOR_COMPLETION_TIMEOUT_SEC = 60;
+export const WAIT_FOR_COMPLETION_TIMEOUT_SEC = 120;
 
 export type WorkflowToolDefinition = ToolDefinition<ToolType.workflow, WorkflowToolConfig>;
 export type WorkflowToolDefinitionWithSchema = ToolDefinitionWithSchema<
