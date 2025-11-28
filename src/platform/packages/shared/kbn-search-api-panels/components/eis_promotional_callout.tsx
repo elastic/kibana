@@ -45,6 +45,8 @@ export const EisPromotionalCallout = ({
     isCloudEnabled,
   });
 
+  const dataId = `${promoId}-eis-promo-callout`;
+
   if (!isPromoVisible) {
     return null;
   }
@@ -52,7 +54,8 @@ export const EisPromotionalCallout = ({
   return (
     <EuiPanel
       grow={false}
-      data-telemetry-id={`${promoId}-eis-promo-callout`}
+      data-telemetry-id={dataId}
+      data-test-subj={dataId}
       css={({ euiTheme }) => ({
         color: euiTheme.colors.primaryText,
         border: `1px ${euiTheme.colors.borderBaseSubdued} solid`,
@@ -80,7 +83,7 @@ export const EisPromotionalCallout = ({
             color="text"
             size="s"
             href={ctaLink}
-            data-test-subj={`${promoId}-eisPromoCalloutCtaBtn`}
+            data-test-subj="eisPromoCalloutCtaBtn"
             target="_blank"
             iconSide="right"
             iconType="popout"

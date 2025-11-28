@@ -42,6 +42,7 @@ export const EisPromotionalTour = ({
     promoId: `${promoId}Tour`,
     isCloudEnabled,
   });
+  const dataId = `${promoId}-eis-promo-tour`;
 
   if (!isPromoVisible) {
     return children;
@@ -49,7 +50,8 @@ export const EisPromotionalTour = ({
 
   return (
     <EuiTourStep
-      data-telemetry-id={`${promoId}-eis-promo-tour`}
+      data-telemetry-id={dataId}
+      data-test-subj={dataId}
       title={EIS_PROMO_TOUR_TITLE}
       maxWidth="400px"
       content={
@@ -63,14 +65,14 @@ export const EisPromotionalTour = ({
       stepsTotal={1}
       onFinish={onSkipTour}
       footerAction={[
-        <EuiButtonEmpty data-test-subj={`${promoId}-eisPromoTourCloseBtn`} onClick={onSkipTour}>
+        <EuiButtonEmpty data-test-subj="eisPromoTourCloseBtn" onClick={onSkipTour}>
           {EIS_PROMO_TOUR_CLOSE}
         </EuiButtonEmpty>,
         ...(ctaLink
           ? [
               <EuiButton
                 href={ctaLink}
-                data-test-subj={`${promoId}-eisPromoTourCtaBtn`}
+                data-test-subj="eisPromoTourCtaBtn"
                 target="_blank"
                 iconSide="right"
                 iconType="popout"
