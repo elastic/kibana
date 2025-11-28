@@ -16,20 +16,14 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import type { BulkPurgePolicyInput } from '@kbn/slo-schema';
 import type { Moment } from 'moment';
 import moment from 'moment';
+import React from 'react';
 
-export interface PurgePolicyData {
-  purgeType: string;
-  purgeDate: Moment | null;
-  forcePurge: boolean;
-  age: string;
-}
-
-export interface Props {
+interface Props {
   onCancel: () => void;
-  onConfirm: (purgePolicyData: PurgePolicyData) => void;
+  onConfirm: (purgePolicy: BulkPurgePolicyInput, force: boolean) => void;
   modalTitle: string;
   purgePolicyHelpText: string;
 }
@@ -45,7 +39,7 @@ export function PurgeRollupConfirmationModal({
   const [forcePurge, setForgePurge] = React.useState<boolean>(false);
   const [age, setAge] = React.useState('7d');
 
-  const basicCheckboxId = useGeneratedHtmlId({ prefix: 'basicCheckbox' });
+  const checkboxId = useGeneratedHtmlId();
   const modalTitleId = useGeneratedHtmlId();
 
   const purgeTimeLabel = i18n.translate('xpack.slo.purgeConfirmationModal.purgeDataDescription', {
@@ -53,7 +47,15 @@ export function PurgeRollupConfirmationModal({
   });
 
   const onClickConfirm = () => {
-    onConfirm({ purgeDate, purgeType, forcePurge, age });
+    if (purgeType === 'fixed_age') {
+      onConfirm({ purgeType, age }, forcePurge);
+    }
+
+    if (purgeType === 'fixed_time' && purgeDate) {
+      onConfirm({ purgeType, timestamp: purgeDate.toISOString() }, forcePurge);
+    }
+
+    throw new Error('Unsupported purge type');
   };
 
   return (
@@ -138,7 +140,7 @@ export function PurgeRollupConfirmationModal({
       )}
       <EuiFormRow>
         <EuiCheckbox
-          id={basicCheckboxId}
+          id={checkboxId}
           checked={forcePurge}
           onChange={(e) => {
             setForgePurge(e.target.checked);

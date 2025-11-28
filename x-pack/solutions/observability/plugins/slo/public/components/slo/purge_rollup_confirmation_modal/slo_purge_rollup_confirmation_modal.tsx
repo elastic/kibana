@@ -6,59 +6,41 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SLODefinitionResponse } from '@kbn/slo-schema';
+import type { BulkPurgePolicyInput, SLODefinitionResponse } from '@kbn/slo-schema';
 import React from 'react';
-import type { PurgePolicyData } from './purge_rollup_confirmation_modal';
+import { useBulkPurgeRollup } from '../../../pages/slo_management/hooks/use_bulk_purge_rollup';
 import { PurgeRollupConfirmationModal } from './purge_rollup_confirmation_modal';
-import { useBulkPurgeRollupData } from '../../../pages/slo_management/hooks/use_bulk_purge_rollup_data';
 
-export interface Props {
+interface Props {
   onCancel: () => void;
   onConfirm: () => void;
   item: SLODefinitionResponse;
 }
 
 export function SloPurgeRollupConfirmationModal({ item, onCancel, onConfirm }: Props) {
-  const { mutate: purge } = useBulkPurgeRollupData({ onConfirm });
+  const { mutate: purge } = useBulkPurgeRollup({ onConfirm });
 
-  const onClickConfirm = (purgePolicyData: PurgePolicyData) => {
-    const { purgeDate, purgeType, forcePurge, age } = purgePolicyData;
+  const onClickConfirm = (purgePolicy: BulkPurgePolicyInput, force: boolean) => {
     purge({
-      list: [item.id],
-      purgePolicy:
-        purgeType === 'fixed_age'
-          ? {
-              purgeType: 'fixed_age',
-              age,
-            }
-          : {
-              purgeType: 'fixed_time',
-              timestamp: purgeDate!.toISOString(),
-            },
-      force: forcePurge,
+      list: [item],
+      purgePolicy,
+      force,
     });
   };
-
-  const MODAL_TITLE = i18n.translate('xpack.slo.purgeConfirmationModal.title', {
-    defaultMessage: 'Purge {name}',
-    values: { name: item.name },
-  });
-
-  const PURGE_POLICY_HELP_TEXT = i18n.translate(
-    'xpack.slo.purgeConfirmationModal.descriptionText',
-    {
-      defaultMessage:
-        'Rollup data for {name} will be purged according to the policy provided below.',
-      values: { name: item.name },
-    }
-  );
 
   return (
     <PurgeRollupConfirmationModal
       onCancel={onCancel}
       onConfirm={onClickConfirm}
-      modalTitle={MODAL_TITLE}
-      purgePolicyHelpText={PURGE_POLICY_HELP_TEXT}
+      modalTitle={i18n.translate('xpack.slo.purgeConfirmationModal.title', {
+        defaultMessage: 'Purge {name}',
+        values: { name: item.name },
+      })}
+      purgePolicyHelpText={i18n.translate('xpack.slo.purgeConfirmationModal.descriptionText', {
+        defaultMessage:
+          'Rollup data for {name} will be purged according to the policy provided below.',
+        values: { name: item.name },
+      })}
     />
   );
 }

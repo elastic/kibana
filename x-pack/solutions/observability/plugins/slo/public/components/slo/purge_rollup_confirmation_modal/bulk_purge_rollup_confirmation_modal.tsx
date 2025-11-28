@@ -6,59 +6,41 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SLODefinitionResponse } from '@kbn/slo-schema';
+import type { BulkPurgePolicyInput, SLODefinitionResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { useBulkPurgeRollupData } from '../../../pages/slo_management/hooks/use_bulk_purge_rollup_data';
-import type { PurgePolicyData } from './purge_rollup_confirmation_modal';
+import { useBulkPurgeRollup } from '../../../pages/slo_management/hooks/use_bulk_purge_rollup';
 import { PurgeRollupConfirmationModal } from './purge_rollup_confirmation_modal';
 
-export interface Props {
+interface Props {
   onCancel: () => void;
   onConfirm: () => void;
   items: SLODefinitionResponse[];
 }
 
 export function BulkPurgeRollupConfirmationModal({ items, onCancel, onConfirm }: Props) {
-  const { mutate: bulkPurge } = useBulkPurgeRollupData({ onConfirm });
+  const { mutate: bulkPurge } = useBulkPurgeRollup({ onConfirm });
 
-  const onClickConfirm = (purgePolicyData: PurgePolicyData) => {
-    const { purgeDate, purgeType, forcePurge, age } = purgePolicyData;
+  const onClickConfirm = (purgePolicy: BulkPurgePolicyInput, force: boolean) => {
     bulkPurge({
-      list: items.map(({ id }) => id),
-      purgePolicy:
-        purgeType === 'fixed_age'
-          ? {
-              purgeType: 'fixed_age',
-              age,
-            }
-          : {
-              purgeType: 'fixed_time',
-              timestamp: purgeDate!.toISOString(),
-            },
-      force: forcePurge,
+      list: items,
+      purgePolicy,
+      force,
     });
   };
-
-  const MODAL_TITLE = i18n.translate('xpack.slo.bulkPurgeConfirmationModal.title', {
-    defaultMessage: 'Purge {count} SLOs',
-    values: { count: items.length },
-  });
-
-  const PURGE_POLICY_HELP_TEXT = i18n.translate(
-    'xpack.slo.bulkPurgeConfirmationModal.descriptionText',
-    {
-      defaultMessage:
-        'Rollup data for {count} SLOs will be purged according to the policy provided below.',
-      values: { count: items.length },
-    }
-  );
 
   return (
     <PurgeRollupConfirmationModal
       onCancel={onCancel}
       onConfirm={onClickConfirm}
-      modalTitle={MODAL_TITLE}
-      purgePolicyHelpText={PURGE_POLICY_HELP_TEXT}
+      modalTitle={i18n.translate('xpack.slo.bulkPurgeConfirmationModal.title', {
+        defaultMessage: 'Purge {count} SLOs',
+        values: { count: items.length },
+      })}
+      purgePolicyHelpText={i18n.translate('xpack.slo.bulkPurgeConfirmationModal.descriptionText', {
+        defaultMessage:
+          'Rollup data for {count} SLOs will be purged according to the policy provided below.',
+        values: { count: items.length },
+      })}
     />
   );
 }
