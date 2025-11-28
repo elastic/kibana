@@ -91,7 +91,7 @@ interface AssetBulkDeleteOperation {
 function fromStorage(link: StoredAssetLink): AssetLink {
   const storedQueryLink: StoredQueryLink & {
     [QUERY_FEATURE_NAME]: string;
-    [QUERY_FEATURE_FILTER]: string;
+    [QUERY_FEATURE_FILTER]?: string;
   } = link as any;
   return {
     ...storedQueryLink,
@@ -104,7 +104,9 @@ function fromStorage(link: StoredAssetLink): AssetLink {
       feature: storedQueryLink[QUERY_FEATURE_NAME]
         ? {
             name: storedQueryLink[QUERY_FEATURE_NAME],
-            filter: JSON.parse(storedQueryLink[QUERY_FEATURE_FILTER]),
+            filter: storedQueryLink[QUERY_FEATURE_FILTER]
+              ? JSON.parse(storedQueryLink[QUERY_FEATURE_FILTER])
+              : undefined,
           }
         : undefined,
     },

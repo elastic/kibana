@@ -72,6 +72,13 @@ export function StreamExistingFeaturesTable({
       sortable: true,
       truncateText: true,
     },
+    {
+      field: 'type',
+      name: TYPE_LABEL,
+      width: '10%',
+      sortable: true,
+      truncateText: true,
+    },
     descriptionColumn,
     {
       name: FILTER_LABEL,
@@ -291,6 +298,10 @@ const GENERATE_SIGNIFICANT_EVENTS = i18n.translate(
 // i18n labels moved to end of file
 const TITLE_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.columns.title', {
   defaultMessage: 'Title',
+});
+
+const TYPE_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.columns.type', {
+  defaultMessage: 'Type',
 });
 
 const FILTER_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.columns.filter', {

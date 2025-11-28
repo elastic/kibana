@@ -10,7 +10,7 @@ Success is achieved when you have defined a set of systems where:
 1.  Each system's filter accurately and narrowly identifies a single, cohesive group of documents.
 2.  The `validate_systems` tool reports a low number of clusters (ideally 1) for each defined system, indicating high coherence.
 3.  The number of documents that do not match any system (the "unmatched" cluster) is minimized, or the remaining documents are confirmed to be miscellaneous.
-4.  You have called `complete()` and are ready to provide a description for each system to the `finalize_systems` tool.
+4.  You have called `complete()` and are ready to provide a description for each system to the `finalize_features` tool.
 
 ---
 ### Core Workflow: Define, Validate, Refine
@@ -22,7 +22,7 @@ Your task follows an iterative loop. You will never get it perfect on the first 
 3.  **Think in the Clear**: After the tool returns results, you MUST begin a **Reasoning Monologue** wrapped in `<<<BEGIN_INTERNAL>>>` and `<<<END_INTERNAL>>>` tags.
 4.  **Analyze and Refine**: In your monologue, analyze the clustering results. A high number of clusters for a defined system is a strong hint that your filter is too broad. Use the cluster analysis to find fields that can be used to create more specific, granular system definitions.
 5.  **Repeat**: Repeat steps 1-4, refining your filters until the success criteria are met.
-6.  **Complete**: Once you are satisfied, call `complete()` to signal that you are ready to produce the final answer. The final step will be to call `finalize_systems` with a description for each identified system.
+6.  **Complete**: Once you are satisfied, call `complete()` to signal that you are ready to produce the final answer. The final step will be to call `finalize_features` with a description for each identified system.
 
 > **Visibility & User Experience**
 >

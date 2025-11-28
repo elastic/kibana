@@ -9,6 +9,7 @@ import { formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
+import type { InfrastructureFeature, TechnologyFeature } from '@kbn/streams-schema';
 import {
   isFeatureWithFilter,
   type Feature,
@@ -16,7 +17,11 @@ import {
   type SystemFeature,
 } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
-import { IdentifySystemsPrompt } from './prompt';
+import {
+  IdentifyInfrastructurePrompt,
+  IdentifySystemsPrompt,
+  IdentifyTechnologyPrompt,
+} from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
 import conditionSchemaText from '../shared/condition_schema.text';
 import { generateStreamDescription } from '../description/generate_description';
@@ -88,7 +93,7 @@ export async function identifySystemFeatures({
     prompt: IdentifySystemsPrompt,
     inferenceClient,
     finalToolChoice: {
-      function: 'finalize_systems',
+      function: 'finalize_features',
     },
     toolCallbacks: {
       validate_systems: async (toolCall) => {
@@ -118,7 +123,7 @@ export async function identifySystemFeatures({
           },
         };
       },
-      finalize_systems: async (toolCall) => {
+      finalize_features: async (toolCall) => {
         return {
           response: {},
         };
@@ -156,6 +161,90 @@ export async function identifySystemFeatures({
             description,
           };
         })
+    ),
+  };
+}
+
+export async function identifyInfrastructureFeatures({
+  stream,
+  inferenceClient,
+  signal,
+  analysis,
+  dropUnmapped = false,
+}: IdentifyFeaturesOptions & {
+  dropUnmapped?: boolean;
+}): Promise<{ features: InfrastructureFeature[] }> {
+  const response = await inferenceClient.prompt({
+    input: {
+      stream: {
+        name: stream.name,
+        description: stream.description || 'This stream has no description.',
+      },
+      dataset_analysis: JSON.stringify(
+        formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped })
+      ),
+    },
+    prompt: IdentifyInfrastructurePrompt,
+    inferenceClient,
+    finalToolChoice: {
+      function: 'finalize_features',
+    },
+    abortSignal: signal,
+  });
+
+  return {
+    features: await Promise.all(
+      response.toolCalls.flatMap((toolCall) =>
+        toolCall.function.arguments.features.map((args) => {
+          const feature = {
+            ...args,
+            type: 'infrastructure' as const,
+          };
+          return feature;
+        })
+      )
+    ),
+  };
+}
+
+export async function identifyTechnologyFeatures({
+  stream,
+  inferenceClient,
+  signal,
+  analysis,
+  dropUnmapped = false,
+}: IdentifyFeaturesOptions & {
+  dropUnmapped?: boolean;
+}): Promise<{ features: TechnologyFeature[] }> {
+  const response = await inferenceClient.prompt({
+    input: {
+      stream: {
+        name: stream.name,
+        description: stream.description || 'This stream has no description.',
+      },
+      dataset_analysis: JSON.stringify(
+        formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped })
+      ),
+    },
+    prompt: IdentifyTechnologyPrompt,
+    inferenceClient,
+    finalToolChoice: {
+      function: 'finalize_features',
+    },
+    abortSignal: signal,
+  });
+
+  return {
+    features: await Promise.all(
+      response.toolCalls.flatMap((toolCall) =>
+        toolCall.function.arguments.features.map((args) => {
+          const feature = {
+            ...args,
+            type: 'technology' as const,
+          };
+          return feature;
+        })
+      )
     ),
   };
 }

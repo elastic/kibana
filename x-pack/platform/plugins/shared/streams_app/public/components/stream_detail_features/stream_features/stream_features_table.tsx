@@ -82,6 +82,15 @@ export function StreamFeaturesTable({
       sortable: true,
       truncateText: true,
     },
+    {
+      field: 'type',
+      name: i18n.translate('xpack.streams.streamFeatureTable.columns.type', {
+        defaultMessage: 'Type',
+      }),
+      width: '15%',
+      sortable: true,
+      truncateText: true,
+    },
     descriptionColumn,
     {
       name: i18n.translate('xpack.streams.streamFeatureTable.columns.filter', {

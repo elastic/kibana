@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Streams, Feature } from '@kbn/streams-schema';
+import { type Streams, type Feature, isFeatureWithFilter } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MessageRole, type BoundInferenceClient } from '@kbn/inference-common';
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
@@ -51,7 +51,8 @@ export async function generateSignificantEvents({
     end,
     esClient,
     index: stream.name,
-    filter: feature?.filter ? conditionToQueryDsl(feature.filter) : undefined,
+    filter:
+      feature && isFeatureWithFilter(feature) ? conditionToQueryDsl(feature.filter) : undefined,
   });
 
   const response = await executeAsReasoningAgent({

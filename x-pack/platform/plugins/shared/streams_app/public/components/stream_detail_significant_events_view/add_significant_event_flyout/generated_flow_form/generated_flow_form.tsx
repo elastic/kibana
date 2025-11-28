@@ -22,7 +22,7 @@ interface Props {
   isSubmitting: boolean;
   setQueries: (queries: StreamQueryKql[]) => void;
   setCanSave: (canSave: boolean) => void;
-  features: Omit<Feature, 'description'>[];
+  features: Feature[];
   dataViews: DataView[];
 }
 

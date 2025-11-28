@@ -35,7 +35,7 @@ const previewSignificantEventsRoute = createServerRoute({
         feature: z
           .object({
             name: z.string(),
-            filter: conditionSchema,
+            filter: z.optional(conditionSchema),
           })
           .optional(),
         kql: z.object({

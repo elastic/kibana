@@ -17,7 +17,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { StreamQueryKql, Streams, Feature } from '@kbn/streams-schema';
+import {
+  type StreamQueryKql,
+  type Streams,
+  type Feature,
+  isFeatureWithFilter,
+} from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
@@ -129,7 +134,7 @@ export function ManualFlowForm({
                   ...query,
                   feature: {
                     name: value.name,
-                    filter: value.filter,
+                    filter: isFeatureWithFilter(value) ? value.filter : undefined,
                   },
                 });
                 setTouched((prev) => ({ ...prev, feature: true }));

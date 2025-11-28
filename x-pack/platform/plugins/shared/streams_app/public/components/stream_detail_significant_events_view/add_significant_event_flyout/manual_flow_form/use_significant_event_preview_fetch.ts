@@ -27,7 +27,7 @@ export function useSignificantEventPreviewFetch({
   noOfBuckets?: number;
   name: string;
   kqlQuery: string;
-  feature?: { name: string; filter: Condition };
+  feature?: { name: string; filter?: Condition };
   timeState: TimeState;
   isQueryValid: boolean;
 }): AbortableAsyncState<Promise<SignificantEventsPreviewResponse>> {
