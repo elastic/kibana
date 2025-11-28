@@ -250,6 +250,7 @@ export class RulesPage {
     // Verify the edit button itself is visible
     const editButton = this.getEditActionButton(ruleRow);
     await expect(editButton).toBeVisible();
+  }
   // Logs Tab methods
   /**
    * Gets the logs tab button locator
