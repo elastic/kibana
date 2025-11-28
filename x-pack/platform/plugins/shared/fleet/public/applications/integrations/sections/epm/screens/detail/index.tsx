@@ -18,6 +18,7 @@ import {
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -49,7 +50,7 @@ import {
   useGetSettingsQuery,
 } from '../../../../hooks';
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
-import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
+import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_DIRECTED_FEEDBACK_LINK } from '../../../../constants';
 import { useGetPackageInfoByKeyQuery, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type { PackageInfo } from '../../../../types';
@@ -159,6 +160,8 @@ export function Detail() {
 
   const services = useStartServices();
   const isCloud = !!services?.cloud?.cloudId;
+  // Hide feedback links in development mode
+  const isDevMode = process.env.NODE_ENV === 'development';
   const agentPolicyIdFromContext = getAgentPolicyId();
   // edit readme state
 
@@ -362,10 +365,26 @@ export function Detail() {
               {packageInfo ? (
                 <EuiFlexGroup direction="column" justifyContent="flexStart" gutterSize="xs">
                   <EuiFlexItem grow={false}>
-                    <EuiText>
-                      {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                      <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
-                    </EuiText>
+                    <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
+                      <EuiFlexItem grow={false}>
+                        <EuiText>
+                          {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
+                          <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
+                        </EuiText>
+                      </EuiFlexItem>
+                      {!isDevMode && (
+                        <EuiFlexItem grow={false} style={{ paddingBottom: theme.euiTheme.size.xs, paddingLeft: theme.euiTheme.size.s }}>
+                          <EuiText size="s">
+                            <EuiLink href={INTEGRATIONS_DIRECTED_FEEDBACK_LINK} external target="_blank">
+                              <FormattedMessage
+                                id="xpack.fleet.integrationDetailsHeaderFeedbackLink"
+                                defaultMessage="Give feedback"
+                              />
+                            </EuiLink>
+                          </EuiText>
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiFlexGroup gutterSize="xs">

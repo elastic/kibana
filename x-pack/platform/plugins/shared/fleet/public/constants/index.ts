@@ -70,3 +70,6 @@ export type TOUR_STORAGE_CONFIG = {
 };
 
 export const MAX_FLYOUT_WIDTH = 800;
+
+export const INTEGRATIONS_OVERVIEW_FEEDBACK_LINK = 'https://ela.st/integrations-overview-feedback';
+export const INTEGRATIONS_DIRECTED_FEEDBACK_LINK = 'https://ela.st/integrations-directed-feedback';
