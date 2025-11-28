@@ -480,13 +480,11 @@ src/platform/packages/shared/kbn-dev-cli-errors @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-cli-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-proc-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-utils @elastic/kibana-operations
-src/platform/packages/shared/kbn-developer-toolbar @elastic/appex-sharedux
 src/platform/packages/shared/kbn-discover-contextual-components @elastic/obs-exploration-team @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-discover-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-ebt-tools @elastic/kibana-core
-src/platform/packages/shared/kbn-edot-collector @elastic/obs-ai-assistant
 src/platform/packages/shared/kbn-elastic-agent-utils @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-encrypted-saved-objects-shared @elastic/kibana-security
 src/platform/packages/shared/kbn-es @elastic/kibana-operations
@@ -835,6 +833,7 @@ src/platform/test/plugin_functional/plugins/ui_settings_plugin @elastic/kibana-c
 src/platform/test/plugin_functional/plugins/usage_collection @elastic/kibana-core
 src/platform/test/server_integration/plugins/status_plugin_a @elastic/kibana-core
 src/platform/test/server_integration/plugins/status_plugin_b @elastic/kibana-core
+src/setup_node_env @elastic/kibana-operations
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/examples/embedded_lens_example @elastic/kibana-visualizations
 x-pack/examples/exploratory_view_example @elastic/obs-ux-infra_services-team
@@ -920,7 +919,6 @@ x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-g
 x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/packages/shared/kbn-evals @elastic/appex-ai-infra
-x-pack/platform/packages/shared/kbn-evals-suite-streams @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-ux-infra_services-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-failure-store-modal @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-fs @elastic/kibana-security
@@ -1026,6 +1024,7 @@ x-pack/platform/plugins/shared/event_log @elastic/response-ops
 x-pack/platform/plugins/shared/features @elastic/kibana-core
 x-pack/platform/plugins/shared/fields_metadata @elastic/obs-onboarding-team
 x-pack/platform/plugins/shared/fleet @elastic/fleet
+x-pack/platform/plugins/shared/fleet/cypress @elastic/fleet
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
@@ -1042,6 +1041,7 @@ x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/obs-ai-assistant
 x-pack/platform/plugins/shared/onechat @elastic/workchat-eng
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
+x-pack/platform/plugins/shared/osquery/cypress @elastic/security-defend-workflows
 x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/platform/plugins/shared/sample_data_ingest @elastic/search-kibana
 x-pack/platform/plugins/shared/saved_objects_tagging @elastic/appex-sharedux
@@ -1201,6 +1201,9 @@ x-pack/solutions/security/plugins/security_solution_serverless @elastic/security
 x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/test
 x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/security-solution
+x-pack/solutions/security/test/security_solution_api_integration @elastic/secutity-detection-engine
+x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response @elastic/security-detection-engine
+x-pack/solutions/security/test/security_solution_endpoint @elastic/security-defend-workflows
 ####
 ## Everything below this line overrides the default assignments for each package.
 ## Items lower in the file have higher precedence:
