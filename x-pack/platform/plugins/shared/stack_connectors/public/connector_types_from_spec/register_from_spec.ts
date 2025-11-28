@@ -10,13 +10,25 @@ import type { ActionTypeModel } from '@kbn/alerts-ui-shared';
 import { type ConnectorSpec } from '@kbn/connector-specs';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { z } from '@kbn/zod/v4';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { getIcon } from './get_icon';
 
 export function registerConnectorTypesFromSpecs({
   connectorTypeRegistry,
+  uiSettingsPromise,
 }: {
   connectorTypeRegistry: TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'];
+  uiSettingsPromise: Promise<IUiSettingsClient>;
 }) {
+  // TODO: Clean this up when workflows:ui:enabled setting is removed.
+  // This is a workaround to avoid making the whole thing async.
+  // UI Settings will be used by components much later (via getHideInUi), it should be already defined by the time we need it.
+  const ref: { uiSettings?: IUiSettingsClient } = {};
+  uiSettingsPromise.then((uiSettings) => {
+    ref.uiSettings = uiSettings;
+  });
+
   Promise.all([
     // Creating an async chunk for the connectors specs.
     // This is a workaround to avoid webpack from bundling the entire @kbn/connector-specs package into the main stackConnectors plugin bundle.
@@ -36,7 +48,7 @@ export function registerConnectorTypesFromSpecs({
   ]).then(([{ connectorsSpecs }, { generateFormFields }, { generateSchema }]) => {
     for (const spec of Object.values(connectorsSpecs)) {
       connectorTypeRegistry.register(
-        createConnectorTypeFromSpec(spec, generateFormFields, generateSchema)
+        createConnectorTypeFromSpec(spec, ref, generateFormFields, generateSchema)
       );
     }
   });
@@ -44,6 +56,7 @@ export function registerConnectorTypesFromSpecs({
 
 const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
+  ref: { uiSettings?: IUiSettingsClient },
   generateFormFields: typeof import('@kbn/response-ops-form-generator').generateFormFields,
   generateSchema: typeof import('./generate_schema').generateSchema
 ): ActionTypeModel => {
@@ -54,6 +67,16 @@ const createConnectorTypeFromSpec = (
     actionTypeTitle: spec.metadata.displayName,
     selectMessage: spec.metadata.description,
     iconClass: getIcon(spec),
+    // Temporary workaround to hide workflows connector when workflows UI setting is disabled.
+    getHideInUi: () => {
+      if (
+        spec.metadata.supportedFeatureIds.length === 1 &&
+        spec.metadata.supportedFeatureIds[0] === WorkflowsConnectorFeatureId
+      ) {
+        return !ref.uiSettings?.get<boolean>('workflows:ui:enabled') ?? false;
+      }
+      return false;
+    },
     actionConnectorFields: lazy(() =>
       Promise.resolve({
         default: (props) => {
