@@ -9,6 +9,7 @@ import { lazy } from 'react';
 import type { ActionTypeModel } from '@kbn/alerts-ui-shared';
 import { type ConnectorSpec } from '@kbn/connector-specs';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import type { z } from '@kbn/zod/v4';
 import { getIcon } from './get_icon';
 
 export function registerConnectorTypesFromSpecs({
@@ -65,5 +66,42 @@ const createConnectorTypeFromSpec = (
     ),
     actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),
     validateParams: async () => ({ errors: {} }),
+    connectorForm: {
+      /**
+       * Copy secrets.authType to config.authType when saving the connector.
+       * This ensures authType persists since secrets are stripped by the API.
+       */
+      serializer: (formData) => {
+        if (!formData?.secrets?.authType) return formData;
+        return {
+          ...formData,
+          config: { ...formData.config, authType: formData.secrets.authType },
+        };
+      },
+      /**
+       * Copies config.authType to secrets.authType when loading the connector.
+       * This allows the discriminated union widget to display the correct option on
+       * connector edit.
+       */
+      deserializer: (apiData) => {
+        if (!apiData?.config?.authType || apiData.secrets?.authType) {
+          return apiData;
+        }
+
+        try {
+          const secretsSchema = schema.shape.secrets as unknown as z.ZodDiscriminatedUnion<
+            z.ZodObject<z.ZodRawShape>[]
+          >;
+
+          if (!secretsSchema.options) {
+            return apiData;
+          }
+
+          return { ...apiData, secrets: { authType: apiData.config.authType } };
+        } catch (error) {
+          return apiData;
+        }
+      },
+    },
   };
 };
