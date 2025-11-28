@@ -138,7 +138,7 @@ export function SimilarErrorsOccurrencesChart({
       return (
         <EuiFlexGroup style={{ height: 120 }} justifyContent="center" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiLoadingChart size="l" />
+            <EuiLoadingChart size="l" data-test-subj="similarErrorsOccurrencesChartLoading" />
           </EuiFlexItem>
         </EuiFlexGroup>
       );
