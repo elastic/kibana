@@ -16,7 +16,7 @@ xpack.securitySolutionServerless.inaccessibleApps:
   - lens
 
 ## Disable plugin features
-xpack.alerting.maintenanceWindow.enabled: false
+xpack.maintenanceWindows.enabled: false
 xpack.alerting.rulesSettings.enabled: false
 xpack.trigger_actions_ui.rules.enabled: false
 
@@ -32,60 +32,60 @@ xpack.features.overrides:
       all.composedOf:
         ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
         ## We do not need to compose siemV4 from maps and visualizations because these functionalities are disabled in this tier
-        - feature: "discover_v2"
-          privileges: [ "all" ]
+        - feature: 'discover_v2'
+          privileges: ['all']
           ## We need limited access to fleet (v1) in order to use integrations
-        - feature: "fleet"
-          privileges: [ "all" ]
+        - feature: 'fleet'
+          privileges: ['all']
       read.composedOf:
-        - feature: "discover_v2"
-          privileges: [ "read" ]
-        - feature: "fleet"
-          privileges: [ "read" ]
+        - feature: 'discover_v2'
+          privileges: ['read']
+        - feature: 'fleet'
+          privileges: ['read']
   siemV3:
     privileges:
       all.composedOf:
         ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
         ## We do not need to compose siemV3 from maps and visualizations because these functionalities are disabled in this tier
-        - feature: "discover_v2"
-          privileges: [ "all" ]
+        - feature: 'discover_v2'
+          privileges: ['all']
           ## We need limited access to fleet (v1) in order to use integrations
-        - feature: "fleet"
-          privileges: [ "all" ]
+        - feature: 'fleet'
+          privileges: ['all']
       read.composedOf:
-        - feature: "discover_v2"
-          privileges: [ "read" ]
-        - feature: "fleet"
-          privileges: [ "read" ]
+        - feature: 'discover_v2'
+          privileges: ['read']
+        - feature: 'fleet'
+          privileges: ['read']
   siemV2:
     privileges:
       all.composedOf:
         ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
         ## We do not need to compose siemV2 from maps and visualizations because these functionalities are disabled in this tier
-        - feature: "discover_v2"
-          privileges: [ "all" ]
+        - feature: 'discover_v2'
+          privileges: ['all']
           ## We need limited access to fleet (v1) in order to use integrations
-        - feature: "fleet"
-          privileges: [ "all" ]
+        - feature: 'fleet'
+          privileges: ['all']
       read.composedOf:
-        - feature: "discover_v2"
-          privileges: [ "read" ]
-        - feature: "fleet"
-          privileges: [ "read" ]
+        - feature: 'discover_v2'
+          privileges: ['read']
+        - feature: 'fleet'
+          privileges: ['read']
   siem:
     privileges:
       all.composedOf:
         ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
         ## We do not need to compose siemV2 from maps and visualizations because these functionalities are disabled in this tier
-        - feature: "discover_v2"
-          privileges: [ "all" ]
-        - feature: "savedQueryManagement"
-          privileges: [ "all" ]
+        - feature: 'discover_v2'
+          privileges: ['all']
+        - feature: 'savedQueryManagement'
+          privileges: ['all']
       read.composedOf:
-        - feature: "discover_v2"
-          privileges: [ "read" ]
-        - feature: "savedQueryManagement"
-          privileges: [ "read" ]
+        - feature: 'discover_v2'
+          privileges: ['read']
+        - feature: 'savedQueryManagement'
+          privileges: ['read']
 
 # Custom integrations/fleet settings
 xpack.fleet.agentless.isDefault: true
@@ -101,8 +101,8 @@ xpack.actions.preconfigured:
     actionTypeId: .inference
     exposeConfig: true
     config:
-      provider: "elastic"
-      taskType: "chat_completion"
-      inferenceId: ".rainbow-sprinkles-elastic"
+      provider: 'elastic'
+      taskType: 'chat_completion'
+      inferenceId: '.rainbow-sprinkles-elastic'
       providerConfig:
-        model_id: "rainbow-sprinkles"
+        model_id: 'rainbow-sprinkles'
