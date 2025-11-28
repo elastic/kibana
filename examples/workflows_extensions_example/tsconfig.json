@@ -16,7 +16,9 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/workflows-extensions"
+    "@kbn/workflows-extensions",
+    "@kbn/zod",
+    "@kbn/i18n"
   ]
 }
 

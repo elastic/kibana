@@ -12,9 +12,10 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/core-elasticsearch-server",
     "@kbn/workflows",
-    "@kbn/utility-types"
+    "@kbn/zod",
+    "@kbn/config-schema",
+    "@kbn/crypto"
   ],
   "exclude": [
     "target/**/*"
