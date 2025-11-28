@@ -9,11 +9,13 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { CustomCellRenderer, DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { ThreatHuntingEntitiesTable } from './threat_hunting_entities_table';
 import { TestProviders } from '../../../common/mock';
 import type { AssetInventoryURLStateResult } from '../../../asset_inventory/hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
 import { useInvestigateInTimeline } from '../../../common/hooks/timeline/use_investigate_in_timeline';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { DataViewContext } from '../../../asset_inventory/hooks/data_view_context';
 
 jest.mock('../../../asset_inventory/components/asset_inventory_data_table', () => ({
   AssetInventoryDataTable: ({
@@ -51,22 +53,26 @@ jest.mock('../../../asset_inventory/components/asset_inventory_data_table', () =
       },
     ];
     const renderers = additionalCustomRenderers ? additionalCustomRenderers(mockRows) : {};
+    // Create minimal props that the renderer functions expect
+    const mockProps = {
+      rowIndex: 0,
+      row: mockRows[0],
+      columnId: '',
+      setCellProps: jest.fn(),
+      isExpandable: false,
+      isExpanded: false,
+      isDetails: false,
+    };
     return (
       <div data-test-subj="asset-inventory-data-table">
         {renderers[entityNameField] && (
           <div data-test-subj="entity-name-with-timeline">
-            {renderers[entityNameField]({
-              rowIndex: 0,
-              row: mockRows[0],
-            } as unknown as DataGridCellValueElementProps)}
+            {renderers[entityNameField](mockProps as unknown as DataGridCellValueElementProps)}
           </div>
         )}
         {renderers[entityRiskField] && (
           <div data-test-subj="risk-score-cell">
-            {renderers[entityRiskField]({
-              rowIndex: 0,
-              row: mockRows[0],
-            } as unknown as DataGridCellValueElementProps)}
+            {renderers[entityRiskField](mockProps as unknown as DataGridCellValueElementProps)}
           </div>
         )}
       </div>
@@ -88,6 +94,36 @@ jest.mock('../../../common/components/user_privileges', () => ({
 
 const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.Mock;
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+
+// Mock data view for DataViewContext
+const mockDataView: DataView = {
+  id: 'test-data-view',
+  title: 'test-*',
+  getIndexPattern: () => 'test-*',
+  fields: [
+    {
+      name: 'entity.name',
+      type: 'string',
+      esTypes: ['keyword'],
+      aggregatable: true,
+      searchable: true,
+    },
+    {
+      name: 'entity.risk',
+      type: 'number',
+      esTypes: ['float'],
+      aggregatable: true,
+      searchable: true,
+    },
+  ],
+} as unknown as DataView;
+
+const mockDataViewContextValue = {
+  dataView: mockDataView,
+  dataViewRefetch: jest.fn(),
+  dataViewIsLoading: false,
+  dataViewIsRefetching: false,
+};
 
 describe('ThreatHuntingEntitiesTable', () => {
   const mockState: AssetInventoryURLStateResult = {
@@ -126,7 +162,9 @@ describe('ThreatHuntingEntitiesTable', () => {
   it('should render the AssetInventoryDataTable', () => {
     render(
       <TestProviders>
-        <ThreatHuntingEntitiesTable state={mockState} />
+        <DataViewContext.Provider value={mockDataViewContextValue}>
+          <ThreatHuntingEntitiesTable state={mockState} />
+        </DataViewContext.Provider>
       </TestProviders>
     );
 
@@ -136,7 +174,9 @@ describe('ThreatHuntingEntitiesTable', () => {
   it('should add timeline icon to entity name column', () => {
     render(
       <TestProviders>
-        <ThreatHuntingEntitiesTable state={mockState} />
+        <DataViewContext.Provider value={mockDataViewContextValue}>
+          <ThreatHuntingEntitiesTable state={mockState} />
+        </DataViewContext.Provider>
       </TestProviders>
     );
 
@@ -147,7 +187,9 @@ describe('ThreatHuntingEntitiesTable', () => {
   it('should render risk score with correct color scheme', () => {
     render(
       <TestProviders>
-        <ThreatHuntingEntitiesTable state={mockState} />
+        <DataViewContext.Provider value={mockDataViewContextValue}>
+          <ThreatHuntingEntitiesTable state={mockState} />
+        </DataViewContext.Provider>
       </TestProviders>
     );
 
@@ -162,7 +204,9 @@ describe('ThreatHuntingEntitiesTable', () => {
 
     render(
       <TestProviders>
-        <ThreatHuntingEntitiesTable state={mockState} />
+        <DataViewContext.Provider value={mockDataViewContextValue}>
+          <ThreatHuntingEntitiesTable state={mockState} />
+        </DataViewContext.Provider>
       </TestProviders>
     );
 
@@ -179,7 +223,9 @@ describe('ThreatHuntingEntitiesTable', () => {
 
     render(
       <TestProviders>
-        <ThreatHuntingEntitiesTable state={mockState} />
+        <DataViewContext.Provider value={mockDataViewContextValue}>
+          <ThreatHuntingEntitiesTable state={mockState} />
+        </DataViewContext.Provider>
       </TestProviders>
     );
 

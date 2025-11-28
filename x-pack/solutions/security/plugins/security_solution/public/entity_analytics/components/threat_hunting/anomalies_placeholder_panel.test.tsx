@@ -19,6 +19,6 @@ describe('AnomaliesPlaceholderPanel', () => {
     );
 
     expect(screen.getByTestId('anomalies-placeholder-panel')).toBeInTheDocument();
-    expect(screen.getByText('Anomalies explorer')).toBeInTheDocument();
+    expect(screen.getByText('Anomaly explorer')).toBeInTheDocument();
   });
 });

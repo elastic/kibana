@@ -31,52 +31,23 @@ describe('useCombinedRiskScoreKpi', () => {
   });
 
   it('should aggregate severity counts from all three entity types', async () => {
-    const userSeverityCount = {
-      [RiskSeverity.Unknown]: 5,
-      [RiskSeverity.Low]: 10,
-      [RiskSeverity.Moderate]: 15,
-      [RiskSeverity.High]: 20,
-      [RiskSeverity.Critical]: 25,
+    // The implementation calls useRiskScoreKpi once with an array of entity types
+    // The API returns the combined/aggregated result
+    const combinedSeverityCount = {
+      [RiskSeverity.Unknown]: 10, // 5 + 3 + 2
+      [RiskSeverity.Low]: 22, // 10 + 7 + 5
+      [RiskSeverity.Moderate]: 35, // 15 + 12 + 8
+      [RiskSeverity.High]: 53, // 20 + 18 + 15
+      [RiskSeverity.Critical]: 67, // 25 + 22 + 20
     };
 
-    const hostSeverityCount = {
-      [RiskSeverity.Unknown]: 3,
-      [RiskSeverity.Low]: 7,
-      [RiskSeverity.Moderate]: 12,
-      [RiskSeverity.High]: 18,
-      [RiskSeverity.Critical]: 22,
-    };
-
-    const serviceSeverityCount = {
-      [RiskSeverity.Unknown]: 2,
-      [RiskSeverity.Low]: 5,
-      [RiskSeverity.Moderate]: 8,
-      [RiskSeverity.High]: 15,
-      [RiskSeverity.Critical]: 20,
-    };
-
-    mockUseRiskScoreKpi
-      .mockReturnValueOnce({
-        severityCount: userSeverityCount,
-        loading: false,
-        error: undefined,
-        isModuleDisabled: false,
-        refetch: jest.fn(),
-      })
-      .mockReturnValueOnce({
-        severityCount: hostSeverityCount,
-        loading: false,
-        error: undefined,
-        isModuleDisabled: false,
-        refetch: jest.fn(),
-      })
-      .mockReturnValueOnce({
-        severityCount: serviceSeverityCount,
-        loading: false,
-        error: undefined,
-        isModuleDisabled: false,
-        refetch: jest.fn(),
-      });
+    mockUseRiskScoreKpi.mockReturnValue({
+      severityCount: combinedSeverityCount,
+      loading: false,
+      error: undefined,
+      isModuleDisabled: false,
+      refetch: jest.fn(),
+    });
 
     const { result } = renderHook(() => useCombinedRiskScoreKpi(false), {
       wrapper: TestProviders,
@@ -86,13 +57,7 @@ describe('useCombinedRiskScoreKpi', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(result.current.severityCount).toEqual({
-      [RiskSeverity.Unknown]: 10, // 5 + 3 + 2
-      [RiskSeverity.Low]: 22, // 10 + 7 + 5
-      [RiskSeverity.Moderate]: 35, // 15 + 12 + 8
-      [RiskSeverity.High]: 53, // 20 + 18 + 15
-      [RiskSeverity.Critical]: 67, // 25 + 22 + 20
-    });
+    expect(result.current.severityCount).toEqual(combinedSeverityCount);
   });
 
   it('should return empty severity count when loading', () => {
@@ -112,7 +77,7 @@ describe('useCombinedRiskScoreKpi', () => {
     expect(result.current.severityCount).toEqual(EMPTY_SEVERITY_COUNT);
   });
 
-  it('should call useRiskScoreKpi for all three entity types', () => {
+  it('should call useRiskScoreKpi with array of all three entity types', () => {
     mockUseRiskScoreKpi.mockReturnValue({
       severityCount: EMPTY_SEVERITY_COUNT,
       loading: false,
@@ -125,48 +90,24 @@ describe('useCombinedRiskScoreKpi', () => {
       wrapper: TestProviders,
     });
 
-    expect(mockUseRiskScoreKpi).toHaveBeenCalledTimes(3);
+    // The implementation calls useRiskScoreKpi once with an array of entity types
+    expect(mockUseRiskScoreKpi).toHaveBeenCalledTimes(1);
     expect(mockUseRiskScoreKpi).toHaveBeenCalledWith(
       expect.objectContaining({
-        riskEntity: EntityType.user,
-      })
-    );
-    expect(mockUseRiskScoreKpi).toHaveBeenCalledWith(
-      expect.objectContaining({
-        riskEntity: EntityType.host,
-      })
-    );
-    expect(mockUseRiskScoreKpi).toHaveBeenCalledWith(
-      expect.objectContaining({
-        riskEntity: EntityType.service,
+        riskEntity: [EntityType.user, EntityType.host, EntityType.service],
       })
     );
   });
 
-  it('should handle errors from any entity type', () => {
+  it('should handle errors from the combined query', () => {
     const error = new Error('Test error');
-    mockUseRiskScoreKpi
-      .mockReturnValueOnce({
-        severityCount: EMPTY_SEVERITY_COUNT,
-        loading: false,
-        error: undefined,
-        isModuleDisabled: false,
-        refetch: jest.fn(),
-      })
-      .mockReturnValueOnce({
-        severityCount: EMPTY_SEVERITY_COUNT,
-        loading: false,
-        error,
-        isModuleDisabled: false,
-        refetch: jest.fn(),
-      })
-      .mockReturnValueOnce({
-        severityCount: EMPTY_SEVERITY_COUNT,
-        loading: false,
-        error: undefined,
-        isModuleDisabled: false,
-        refetch: jest.fn(),
-      });
+    mockUseRiskScoreKpi.mockReturnValue({
+      severityCount: EMPTY_SEVERITY_COUNT,
+      loading: false,
+      error,
+      isModuleDisabled: false,
+      refetch: jest.fn(),
+    });
 
     const { result } = renderHook(() => useCombinedRiskScoreKpi(false), {
       wrapper: TestProviders,
@@ -188,10 +129,12 @@ describe('useCombinedRiskScoreKpi', () => {
       wrapper: TestProviders,
     });
 
-    expect(mockUseRiskScoreKpi).toHaveBeenCalledTimes(3);
+    // The implementation calls useRiskScoreKpi once with skip flag
+    expect(mockUseRiskScoreKpi).toHaveBeenCalledTimes(1);
     expect(mockUseRiskScoreKpi).toHaveBeenCalledWith(
       expect.objectContaining({
         skip: true,
+        riskEntity: [EntityType.user, EntityType.host, EntityType.service],
       })
     );
   });
