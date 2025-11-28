@@ -18,6 +18,8 @@ import { validatePrebuiltRuleAssets } from './prebuilt_rule_assets_validation';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from './prebuilt_rule_assets_type';
 import type { RuleVersionSpecifier } from '../rule_versions/rule_version_specifier';
 import type { BasicRuleInfo } from '../basic_rule_info';
+import type { ReviewPrebuiltRuleInstallationFilter } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_installation_filter';
+import type { ReviewPrebuiltRuleInstallationSort } from '../../../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_installation_sort';
 
 // TODO: Remove this temporary debug variable
 const TEMPORARY_DEBUG_USE_RUNTIME_MAPPINGS = true;
@@ -27,10 +29,11 @@ const MAX_PREBUILT_RULES_COUNT = 10_000;
 export interface IPrebuiltRuleAssetsClient {
   fetchLatestAssets: () => Promise<PrebuiltRuleAsset[]>;
 
-  fetchLatestVersions(
-    ruleIds?: string[],
-    sort?: { field: string; order: 'asc' | 'desc' }[] // TODO: Check if a type for this exists already
-  ): Promise<BasicRuleInfo[]>;
+  fetchLatestVersions: (args?: {
+    ruleIds?: string[];
+    sort?: ReviewPrebuiltRuleInstallationSort;
+    filter?: ReviewPrebuiltRuleInstallationFilter;
+  }) => Promise<BasicRuleInfo[]>;
 
   fetchAssetsByVersion(versions: RuleVersionSpecifier[]): Promise<PrebuiltRuleAsset[]>;
 
@@ -84,14 +87,41 @@ export const createPrebuiltRuleAssetsClient = (
       });
     },
 
-    fetchLatestVersions: (
-      ruleIds?: string[],
-      sort?: { field: string; order: 'asc' | 'desc' }[]
-    ): Promise<BasicRuleInfo[]> => {
+    fetchLatestVersions: ({ ruleIds, sort, filter } = {}): Promise<BasicRuleInfo[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestVersions', async () => {
         // TODO: Check if we need to check for an empty ruleIds array.
         if (ruleIds && ruleIds.length === 0) {
           return [];
+        }
+
+        const queryFilter = [];
+
+        if (ruleIds) {
+          queryFilter.push({
+            terms: {
+              [`${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`]: ruleIds,
+            },
+          });
+        }
+
+        if (filter?.fields?.name?.include) {
+          filter.fields.name.include.forEach((name) => {
+            queryFilter.push({
+              wildcard: {
+                [`${PREBUILT_RULE_ASSETS_SO_TYPE}.name.keyword`]: `*${name}*`,
+              },
+            });
+          });
+        }
+
+        if (filter?.fields.tags?.include) {
+          filter.fields.tags.include.forEach((tag) => {
+            queryFilter.push({
+              term: {
+                [`${PREBUILT_RULE_ASSETS_SO_TYPE}.tags`]: tag,
+              },
+            });
+          });
         }
 
         const latestRuleIdsSearchResult = await savedObjectsClient.search<
@@ -102,13 +132,11 @@ export const createPrebuiltRuleAssetsClient = (
           namespaces: ['default'], // TODO: Check if this parameter has to change depending on space
           _source: false,
           size: 0,
-          query: ruleIds
-            ? {
-                terms: {
-                  [`${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`]: ruleIds,
-                },
-              }
-            : undefined,
+          query: {
+            bool: {
+              filter: queryFilter,
+            },
+          },
           aggs: {
             rules: {
               terms: {

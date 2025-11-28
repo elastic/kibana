@@ -11,12 +11,18 @@ export type ReviewPrebuiltRuleInstallationFilter = z.infer<
   typeof ReviewPrebuiltRuleInstallationFilter
 >;
 export const ReviewPrebuiltRuleInstallationFilter = z.object({
-  /**
-   * Tags to filter by
-   */
-  tags: z.array(z.string()).optional(),
-  /**
-   * Rule name to filter by
-   */
-  name: z.string().optional(),
+  fields: z.object({
+    name: z
+      .object({
+        include: z.array(z.string()).optional(),
+        exclude: z.array(z.string()).optional(),
+      })
+      .optional(),
+    tags: z
+      .object({
+        include: z.array(z.string()).optional(),
+        exclude: z.array(z.string()).optional(),
+      })
+      .optional(),
+  }),
 });

@@ -31,10 +31,10 @@ const AddPrebuiltRulesTableFiltersComponent = () => {
   const { tags: selectedTags } = filterOptions;
 
   const handleOnSearch = useCallback(
-    (filterString: string) => {
+    (nameFilter: string) => {
       setFilterOptions((filters) => ({
         ...filters,
-        filter: filterString.trim(),
+        name: nameFilter.trim(),
       }));
     },
     [setFilterOptions]
@@ -55,7 +55,7 @@ const AddPrebuiltRulesTableFiltersComponent = () => {
   return (
     <FilterWrapper gutterSize="m" justifyContent="flexEnd" wrap>
       <RuleSearchField
-        initialValue={filterOptions.filter}
+        initialValue={filterOptions.name}
         onSearch={handleOnSearch}
         placeholder={i18n.SEARCH_PLACEHOLDER}
       />
