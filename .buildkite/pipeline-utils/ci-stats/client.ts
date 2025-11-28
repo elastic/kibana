@@ -188,6 +188,48 @@ export class CiStatsClient {
     return resp.data;
   };
 
+  getTestSuiteDurations = async (body: {
+    sources: Array<
+      | { branch: string; jobName: string }
+      | { prId: string; jobName: string }
+      | { commit: string; jobName: string }
+    >;
+    configs: string[];
+    thresholdMin?: number;
+  }) => {
+    console.log('requesting test suite durations from ci-stats:');
+    console.log(JSON.stringify(body, null, 2));
+
+    const resp = await axios.request<{
+      sources: unknown;
+      configs: Record<
+        string,
+        {
+          totalDurationMin: number;
+          testFiles: Array<{
+            file: string;
+            suites: Array<{
+              file: string;
+              suites: string[];
+              avgDurationMin: number;
+              p95DurationMin: number;
+              testCount: number;
+            }>;
+            totalAvgDurationMin: number;
+          }>;
+        }
+      >;
+    }>({
+      method: 'POST',
+      baseURL: this.baseUrl,
+      headers: this.defaultHeaders,
+      url: '/v2/_test_suite_durations',
+      data: body,
+    });
+
+    return resp.data;
+  };
+
   private async request<T>({ method, path, params, body, maxAttempts = 3 }: RequestOptions) {
     let attempt = 0;
 

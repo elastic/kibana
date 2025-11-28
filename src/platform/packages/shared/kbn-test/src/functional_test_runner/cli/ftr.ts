@@ -40,6 +40,7 @@ export function runFtrCli() {
 
       const esVersion = esVersionInput ? new EsVersion(esVersionInput) : EsVersion.getDefault();
       const settingOverrides = {
+        testFileFilter: flagsReader.arrayOfStrings('test-file-filter'),
         mochaOpts: {
           bail: flagsReader.boolean('bail'),
           dryRun: flagsReader.boolean('dry-run'),
@@ -132,6 +133,7 @@ export function runFtrCli() {
           'exclude',
           'include-tag',
           'exclude-tag',
+          'test-file-filter',
           'kibana-install-dir',
           'es-version',
         ],
