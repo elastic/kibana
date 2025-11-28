@@ -9,7 +9,7 @@
 
 import { from } from '@kbn/esql-composer';
 import { fieldConstants } from '@kbn/discover-utils';
-import { getEsqlQuery } from './get_esql_query';
+import { getEsqlQuery } from '.';
 import type { QueryOperator } from '@kbn/esql-composer/src/types';
 
 const source = from('index');
