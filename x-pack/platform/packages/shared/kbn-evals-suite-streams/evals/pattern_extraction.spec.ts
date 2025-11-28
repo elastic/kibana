@@ -243,7 +243,7 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
 
       return result.documents.map((doc, idx) => ({
         parsed: doc.status === 'parsed',
-        fields: extractFields(doc.value, fieldToParse),
+        fields: extractFields(doc.value, fieldToParse, messages[idx]),
         originalMessage: messages[idx],
       }));
     } catch (error) {
@@ -255,13 +255,22 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
 
   function extractFields(
     value: Record<string, any>,
-    fieldToParse: string
+    fieldToParse: string,
+    originalMessage: string
   ): Record<string, string | number | boolean | null> {
-    const excluded = new Set([fieldToParse, 'stream.name', '@timestamp']);
+    // Only exclude metadata fields, not fieldToParse
+    // If the pattern extracts a body.text field, it's the extracted message (e.g., GREEDYDATA)
+    // which IS a valid extraction result we want to show to the evaluator
+    const excluded = new Set(['stream.name', '@timestamp']);
     const fields: Record<string, string | number | boolean | null> = {};
 
     for (const [key, val] of Object.entries(value)) {
       if (!excluded.has(key) && (typeof val === 'string' || typeof val === 'number')) {
+        // Skip the fieldToParse only if its value equals the original message
+        // (meaning it wasn't transformed/extracted, just passed through)
+        if (key === fieldToParse && val === originalMessage) {
+          continue;
+        }
         fields[key] = val;
       }
     }
@@ -401,18 +410,23 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
            Field names don't need to match exactly, but should be semantically equivalent.
            Example: "attributes.source.ip", "source_ip", "client_ip" all represent the source IP.`,
 
-          // Criterion 3: Field naming conventions
-          `FIELD NAMING: Field names should be semantic and follow conventions:
+          // Criterion 3: Field naming conventions (OTEL/ECS standards)
+          `FIELD NAMING: Field names should follow OpenTelemetry (OTEL) and Elastic Common Schema (ECS) standards.
            
-           GOOD naming patterns:
-           - "attributes.source.ip" - hierarchical, descriptive
-           - "attributes.http.status_code" - domain-specific
-           - "body.text" - standard for message body
+           EXCELLENT naming (standard-compliant):
+           - OTEL standard: "severity_text", "trace_id", "span_id", "service.name", "resource.attributes.*"
+           - ECS standard: "source.ip", "host.name", "process.pid", "http.response.status_code", "user.name"
+           - Combined: "attributes.source.ip", "attributes.http.status_code"
+           - Body field: "body.text" (standard for message content)
            
-           BAD naming patterns:
-           - "field1", "field2" - numbered fields
-           - "data", "value", "f0" - generic placeholders
-           - Single letters or abbreviations without meaning
+           GOOD naming (semantic but non-standard):
+           - Descriptive hierarchical names like "custom.timestamp", "nginx.error.connection_id"
+           - Domain-specific names that describe the data
+           
+           BAD naming (avoid):
+           - Numbered fields: "field1", "field2", "f0", "column1"
+           - Generic placeholders: "data", "value", "content", "text"
+           - Single letters or meaningless abbreviations
            
            The field name should describe what the data represents.`,
 
