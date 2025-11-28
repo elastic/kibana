@@ -281,6 +281,23 @@
             "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-root",
+            "id": "def-common.KibanaRootContextProviderProps.coreEnv",
+            "type": "Object",
+            "tags": [],
+            "label": "coreEnv",
+            "description": [
+              "`CoreEnv` from core"
+            ],
+            "signature": [
+              "CoreEnv",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
