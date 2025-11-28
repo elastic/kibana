@@ -346,7 +346,11 @@ describe('muteInstance()', () => {
         references: [],
       });
 
-      await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
+      await rulesClient.muteInstance({
+        alertId: '1',
+        alertInstanceId: '2',
+        query: { validateAlertsExistence: false },
+      });
 
       expect(alertsService.muteAlertInstance).not.toHaveBeenCalled();
       expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
@@ -372,7 +376,11 @@ describe('muteInstance()', () => {
       });
 
       await expect(
-        rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' })
+        rulesClient.muteInstance({
+          alertId: '1',
+          alertInstanceId: '2',
+          query: { validateAlertsExistence: false },
+        })
       ).rejects.toThrow('ES connection failed');
     });
   });
