@@ -70,14 +70,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('animal.keyword : "dog" error');
         await queryBar.submitQuery(); // quicker than clicking the submit button, but hides the time picker
         await header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('control-frame-error');
+        await dashboardControls.checkForControlErrorStatus(controlId, true);
       });
 
       it('Can recover from malformed query error', async () => {
         await queryBar.setQuery('animal.keyword : "dog"');
         await queryBar.submitQuery();
         await header.waitUntilLoadingHasFinished();
-        await testSubjects.missingOrFail('control-frame-error');
+        await dashboardControls.checkForControlErrorStatus(controlId, false);
       });
 
       it('Applies dashboard query to options list control', async () => {

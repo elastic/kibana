@@ -65,6 +65,8 @@ export interface PresentationPanelInternalProps<
    *       logic, then this could be removed.
    */
   setDragHandles?: (refs: Array<HTMLElement | null>) => void;
+
+  hidePanelChrome?: boolean;
 }
 
 /**

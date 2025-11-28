@@ -9,6 +9,7 @@
 
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -288,14 +289,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('AvgTicketPrice <= 300 error');
         await queryBar.submitQuery();
         await header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('control-frame-error');
+        const ids = await dashboardControls.getAllControlIds();
+        await asyncForEach(ids, async (controlId) => {
+          await dashboardControls.checkForControlErrorStatus(controlId, true);
+        });
       });
 
       it('Can recover from malformed query error', async () => {
         await queryBar.setQuery('AvgTicketPrice <= 300');
         await queryBar.submitQuery();
         await header.waitUntilLoadingHasFinished();
-        await testSubjects.missingOrFail('control-frame-error');
+        const ids = await dashboardControls.getAllControlIds();
+        await asyncForEach(ids, async (controlId) => {
+          await dashboardControls.checkForControlErrorStatus(controlId, false);
+        });
       });
 
       it('Applies dashboard query to range slider control', async () => {

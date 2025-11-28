@@ -155,6 +155,11 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
+  public async checkForControlErrorStatus(controlId: string, hasError: boolean) {
+    const wrapper = await this.find.byCssSelector(`#control-title-${controlId}`);
+    expect(await this.testSubjects.descendantExists('embeddableError', wrapper)).to.be(hasError);
+  }
+
   /* -----------------------------------------------------------
      Control editor flyout
      ----------------------------------------------------------- */
