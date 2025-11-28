@@ -66,7 +66,7 @@ export type { WorkflowGraphType } from './graph';
 
 export {
   isAtomic,
-  isElasticsearch as isElasticsearch,
+  isElasticsearch,
   isKibana,
   isHttp,
   isWait,
