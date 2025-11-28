@@ -69,6 +69,7 @@ const InputContainer: React.FC<PropsWithChildren<{ isDisabled: boolean }>> = ({
     padding: ${euiTheme.size.base};
     flex-grow: 0;
     transition: box-shadow 250ms, border-color 250ms;
+    background-color: ${euiTheme.colors.backgroundBasePlain};
 
     ${useInputBorderStyles()}
     ${useInputShadowStyles()}

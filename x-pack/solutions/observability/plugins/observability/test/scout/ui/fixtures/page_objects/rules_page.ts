@@ -7,7 +7,11 @@
 
 import type { ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt';
-import { RULES_SETTINGS_TEST_SUBJECTS, RULE_TYPE_MODAL_TEST_SUBJECTS } from '../constants';
+import {
+  RULES_SETTINGS_TEST_SUBJECTS,
+  RULE_TYPE_MODAL_TEST_SUBJECTS,
+  LOGS_TAB_TEST_SUBJECTS,
+} from '../constants';
 
 export class RulesPage {
   constructor(private readonly page: ScoutPage) {}
@@ -246,5 +250,90 @@ export class RulesPage {
     // Verify the edit button itself is visible
     const editButton = this.getEditActionButton(ruleRow);
     await expect(editButton).toBeVisible();
+  // Logs Tab methods
+  /**
+   * Gets the logs tab button locator
+   */
+  public get logsTab() {
+    return this.page.testSubj.locator(LOGS_TAB_TEST_SUBJECTS.LOGS_TAB);
+  }
+
+  /**
+   * Gets the event log table container locator
+   */
+  public get eventLogTable() {
+    return this.page.testSubj.locator(LOGS_TAB_TEST_SUBJECTS.EVENT_LOG_TABLE);
+  }
+
+  /**
+   * Gets the date picker locator
+   */
+  public get datePicker() {
+    return this.page.testSubj.locator(LOGS_TAB_TEST_SUBJECTS.DATE_PICKER);
+  }
+
+  /**
+   * Gets the status filter button locator
+   */
+  public get statusFilter() {
+    return this.page.testSubj.locator(LOGS_TAB_TEST_SUBJECTS.STATUS_FILTER);
+  }
+
+  /**
+   * Gets the loading indicator locator
+   */
+  public get loadingIndicator() {
+    return this.page.testSubj.locator(LOGS_TAB_TEST_SUBJECTS.LOADING_INDICATOR);
+  }
+
+  /**
+   * Gets the rule details page locator
+   */
+  public get ruleDetails() {
+    return this.page.testSubj.locator(LOGS_TAB_TEST_SUBJECTS.RULE_DETAILS);
+  }
+
+  /**
+   * Navigates to the logs tab page via URL
+   */
+  async gotoLogsTab() {
+    await this.page.gotoApp('observability/alerts/rules/logs');
+    await this.page.testSubj.waitForSelector(LOGS_TAB_TEST_SUBJECTS.EVENT_LOG_TABLE, {
+      timeout: 30000,
+    });
+  }
+
+  /**
+   * Clicks the logs tab to navigate to it
+   */
+  async clickLogsTab() {
+    await expect(this.logsTab).toBeVisible({ timeout: 5000 });
+    await this.logsTab.click();
+    await this.page.testSubj.waitForSelector(LOGS_TAB_TEST_SUBJECTS.EVENT_LOG_TABLE, {
+      timeout: 30000,
+    });
+  }
+
+  /**
+   * Verifies the logs tab is active/selected
+   */
+  async expectLogsTabActive() {
+    await expect(this.logsTab).toHaveAttribute('aria-selected', 'true');
+  }
+
+  /**
+   * Verifies the event log content is loaded and visible
+   */
+  async expectLogsContentLoaded() {
+    await expect(this.eventLogTable).toBeVisible({ timeout: 30000 });
+  }
+
+  /**
+   * Verifies all main sections of the logs tab are visible
+   */
+  async expectLogsTabSectionsVisible() {
+    await expect(this.eventLogTable).toBeVisible();
+    await expect(this.datePicker).toBeVisible();
+    await expect(this.statusFilter).toBeVisible();
   }
 }
