@@ -50,11 +50,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Go to dashboard app
         await dashboard.navigateToApp();
 
-        // Add a new ES|QL panel
+        // Create new dashboard
         await dashboard.clickNewDashboard();
-        await dashboardAddPanel.clickAddEsqlPanel();
-
-        await find.clickByButtonText('Apply and close');
 
         // Add a variable control
         await dashboardControls.openControlsMenu();
@@ -65,6 +62,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('ESQLEditor-run-query-button');
         expect(await testSubjects.exists('esqlValuesPreview')).to.be(true);
         await testSubjects.click('saveEsqlControlsFlyoutButton');
+
+        const createdControlId = (await dashboardControls.getAllControlIds())[0];
+
+        // Add a new ES|QL panel
+        await dashboardAddPanel.clickAddEsqlPanel();
+        await esql.setEsqlEditorQuery('FROM logstash-* | WHERE geo.dest == ?variable');
+        await find.clickByButtonText('Run query');
+        await find.clickByButtonText('Apply and close');
 
         // Wait for the control to be added
         await dashboard.waitForRenderComplete();
@@ -86,7 +91,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.expectOnDiscover();
 
         // Verify that the control exists in discover
-        await dashboardControls.doesControlTitleExist('variable');
+        const control = await dashboardControls.getControlElementById(createdControlId);
+        expect(control).to.be.ok();
       });
     });
   });

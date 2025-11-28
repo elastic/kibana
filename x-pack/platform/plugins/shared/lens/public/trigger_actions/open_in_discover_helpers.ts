@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import {
+  isOfAggregateQueryType,
+  type AggregateQuery,
+  type Filter,
+  type Query,
+  type TimeRange,
+} from '@kbn/es-query';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { LensApi } from '@kbn/lens-common-2';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { isApiESQLVariablesCompatible, isLensApi } from '../react_embeddable/type_guards';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
@@ -87,6 +94,9 @@ async function getDiscoverLocationParams({
 }
 
 function getEsqlControls(embeddable: LensApi) {
+  const embeddableQuery = embeddable.getSerializedStateByValue().rawState.query;
+  if (!isOfAggregateQueryType(embeddableQuery)) return null;
+
   const parentApi = embeddable.parentApi;
   if (!isApiESQLVariablesCompatible(parentApi)) return null;
 
@@ -96,9 +106,19 @@ function getEsqlControls(embeddable: LensApi) {
   const serializedState = controlGroupApi.serializeState?.();
   if (!serializedState) return null;
 
+  const usedVariables = getESQLQueryVariables(embeddableQuery.esql);
+
   return serializedState.rawState.controls.reduce((acc, control) => {
     if (!control.id) return acc;
     if (control.type !== ESQL_CONTROL) return acc; // only include ESQL controls
+    if (!control.controlConfig) return acc;
+
+    const variableName =
+      'variableName' in control.controlConfig && (control.controlConfig.variableName as string);
+    if (!variableName) return acc;
+
+    const isUsed = usedVariables.includes(variableName);
+    if (!isUsed) return acc;
 
     return {
       ...acc,
