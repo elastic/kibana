@@ -36,15 +36,15 @@ export interface BaseStep {
 export type StepDefinition = BaseStep;
 
 export interface NodeImplementation {
-  run(): Promise<void>;
+  run(): Promise<void> | void;
 }
 
 export interface NodeWithErrorCatching {
-  catchError(): Promise<void>;
+  catchError(): Promise<void> | void;
 }
 
 export interface MonitorableNode {
-  monitor(monitoredContext: StepExecutionRuntime): Promise<void>;
+  monitor(monitoredContext: StepExecutionRuntime): Promise<void> | void;
 }
 
 export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
@@ -77,11 +77,11 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
   public async run(): Promise<void> {
     let input: any;
-    await this.stepExecutionRuntime.startStep();
+    this.stepExecutionRuntime.startStep();
 
     try {
       input = await this.getInput();
-      await this.stepExecutionRuntime.setInput(input);
+      this.stepExecutionRuntime.setInput(input);
       const result = await this._run(input);
 
       // Don't update step execution runtime if abort was initiated
@@ -90,13 +90,13 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       }
 
       if (result.error) {
-        await this.stepExecutionRuntime.failStep(result.error);
+        this.stepExecutionRuntime.failStep(result.error);
       } else {
-        await this.stepExecutionRuntime.finishStep(result.output);
+        this.stepExecutionRuntime.finishStep(result.output);
       }
     } catch (error) {
-      const result = await this.handleFailure(input, error);
-      await this.stepExecutionRuntime.failStep(result.error);
+      const result = this.handleFailure(input, error);
+      this.stepExecutionRuntime.failStep(result.error);
     }
 
     this.workflowExecutionRuntime.navigateToNextNode();
@@ -106,7 +106,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   protected abstract _run(input?: any): Promise<RunStepResult>;
 
   // Helper for handling on-failure, retries, etc.
-  protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
+  protected handleFailure(input: any, error: any): RunStepResult {
     // Implement retry logic based on step['on-failure']
     // Build comprehensive error message including cause chain (messages only)
     const getErrorMessage = (err: any): string => {

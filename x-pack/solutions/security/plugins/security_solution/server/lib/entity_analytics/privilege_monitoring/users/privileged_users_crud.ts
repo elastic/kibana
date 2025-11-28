@@ -7,27 +7,34 @@
 
 import { merge } from 'lodash';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   UpdatePrivMonUserRequestBody,
   MonitoredUserDoc,
   CreatePrivMonUserRequestBody,
   CreatePrivMonUserResponse,
 } from '../../../../../common/api/entity_analytics';
-import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
+
 import type { PrivMonUserSource } from '../types';
 
-export const createPrivilegedUsersCrudService = ({
-  deps,
-  index,
-}: PrivilegeMonitoringDataClient) => {
-  const esClient = deps.clusterClient.asCurrentUser;
+export type PrivmonUserCrudService = ReturnType<typeof createPrivilegedUsersCrudService>;
+interface PrivmonUserCrudDeps {
+  esClient: ElasticsearchClient;
+  index: string;
+  logger: Logger;
+}
 
+export const createPrivilegedUsersCrudService = ({
+  esClient,
+  index,
+  logger,
+}: PrivmonUserCrudDeps) => {
   const create = async (
     user: CreatePrivMonUserRequestBody,
     source: PrivMonUserSource,
     maxUsersAllowed: number
   ): Promise<CreatePrivMonUserResponse> => {
-    deps.logger.info(`Maximum supported number of privileged users allowed: ${maxUsersAllowed}`);
+    logger.info(`Maximum supported number of privileged users allowed: ${maxUsersAllowed}`);
     // Check if user already exists by username
     const username = user.user?.name;
     if (username) {

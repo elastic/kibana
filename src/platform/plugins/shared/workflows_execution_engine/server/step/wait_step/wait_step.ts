@@ -28,11 +28,11 @@ export class WaitStepImpl implements NodeImplementation {
       return;
     }
 
-    await this.exitWait();
+    this.exitWait();
   }
 
-  private async exitWait(): Promise<void> {
-    await this.stepExecutionRuntime.finishStep();
+  private exitWait(): void {
+    this.stepExecutionRuntime.finishStep();
     this.workflowLogger.logDebug(
       `Finished waiting for ${this.node.configuration.with.duration} in step ${this.node.id}`
     );

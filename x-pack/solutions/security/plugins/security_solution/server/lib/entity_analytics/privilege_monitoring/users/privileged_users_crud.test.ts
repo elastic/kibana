@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
-import { auditLoggerMock } from '@kbn/core-security-server-mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import { createPrivilegedUsersCrudService } from './privileged_users_crud';
 
-import type { PrivilegeMonitoringGlobalDependencies } from '../engine/data_client';
 import type { CreatePrivMonUserRequestBody } from '../../../../../common/api/entity_analytics/monitoring/users/create.gen';
 import type { PrivMonUserSource } from '../types';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 
 describe('createPrivilegedUsersCrudService', () => {
   let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
+  const loggerMock = loggingSystemMock.createLogger();
   let crudService: ReturnType<typeof createPrivilegedUsersCrudService>;
 
   const TEST_INDEX = '.entity_analytics.monitoring.users-default';
@@ -52,19 +48,11 @@ describe('createPrivilegedUsersCrudService', () => {
     jest.clearAllMocks();
 
     mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
-    const deps: PrivilegeMonitoringGlobalDependencies = {
-      logger: loggingSystemMock.createLogger(),
-      clusterClient: mockEsClient,
-      namespace: 'default',
-      kibanaVersion: '9.0.0',
-      taskManager: taskManagerMock.createStart(),
-      auditLogger: auditLoggerMock.create(),
-      telemetry: analyticsServiceMock.createAnalyticsServiceSetup(),
-      savedObjects: savedObjectsServiceMock.createStartContract(),
-    };
-
-    const dataClient = new PrivilegeMonitoringDataClient(deps);
-    crudService = createPrivilegedUsersCrudService(dataClient);
+    crudService = createPrivilegedUsersCrudService({
+      esClient: mockEsClient.asCurrentUser,
+      index: getPrivilegedMonitorUsersIndex('default'),
+      logger: loggerMock,
+    });
   });
 
   describe('create', () => {

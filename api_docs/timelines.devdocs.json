@@ -934,6 +934,10 @@
               "path": "x-pack/platform/plugins/shared/osquery/public/timelines/add_to_timeline_button.tsx"
             },
             {
+              "plugin": "kubernetesSecurity",
+              "path": "x-pack/solutions/security/plugins/kubernetes_security/public/hooks/use_filter.ts"
+            },
+            {
               "plugin": "securitySolution",
               "path": "x-pack/solutions/security/plugins/security_solution/public/threat_intelligence/modules/timeline/hooks/use_add_to_timeline_button.ts"
             }

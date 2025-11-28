@@ -19,11 +19,11 @@ export class EnterContinueNodeImpl implements NodeImplementation, NodeWithErrorC
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
-  public async run(): Promise<void> {
+  public run(): void {
     this.workflowRuntime.navigateToNextNode();
   }
 
-  public async catchError(): Promise<void> {
+  public catchError(): void {
     this.workflowLogger.logDebug(`Error caught, continuing execution.`);
 
     // Continue step should always go to exit continue node to continue execution

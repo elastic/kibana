@@ -1132,8 +1132,6 @@ export class WorkflowsService {
       }),
     ]);
 
-    // Note: We now get display names directly from actionTypes, no need for the map
-
     // Initialize connectorsByType with ALL available action types
     const connectorsByType: Record<string, ConnectorTypeInfo> = {};
 
