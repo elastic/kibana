@@ -19,7 +19,7 @@ import { fieldConstants } from '@kbn/discover-utils';
 import { ContentFrameworkSection } from '../../../content_framework/lazy_content_framework_section';
 import type { ContentFrameworkSectionProps } from '../../../content_framework/section/section';
 import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
-import { useGetGenerateDiscoverLink } from '../../../observability/traces/hooks/use_get_generate_discover_link';
+import { useGetGenerateDiscoverLink } from '../../../../hooks/use_generate_discover_link/use_get_generate_discover_link';
 import { getEsqlQuery } from './get_esql_query';
 import { SimilarErrorsOccurrencesChart } from './similar_errors_occurrences_chart';
 
