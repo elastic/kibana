@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
+import type { RequestAuthFixture, RoleApiCredentials } from '@kbn/scout';
 import { apiTest, expect, tags } from '@kbn/scout';
 
 import {
@@ -23,12 +23,32 @@ import { prepareImportFormData } from './helpers';
  *
  * This test suite validates import behavior when operating within a single space at a time to ensure
  * consistent behavior regardless of the space context.
+ *
+ * Note: since version 8.0, Kibana requires most saved objects to have globally unique IDs
+ * Learn more: https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects
  */
 TEST_SPACES.forEach((space) => {
-  // Note: since version 8.0, Kibana requires most saved objects to have globally unique IDs
-  // Learn more: https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects
-
   const spacePath = space.spaceId === 'default' ? '' : `s/${space.spaceId}/`;
+
+  const createApiKeyWithSavedObjectsManagementPrivileges = async (
+    requestAuth: RequestAuthFixture
+  ) => {
+    return await requestAuth.getApiKeyForCustomRole({
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+      },
+      kibana: [
+        {
+          base: [],
+          feature: {
+            savedObjectsManagement: ['all'],
+          },
+          spaces: ['*'], // Access to all spaces
+        },
+      ],
+    });
+  };
 
   apiTest.describe(`_import API within the ${space.name} space`, { tag: tags.ESS_ONLY }, () => {
     let savedObjectsManagementCredentials: RoleApiCredentials;
@@ -48,21 +68,9 @@ TEST_SPACES.forEach((space) => {
         log.info(`Using default space for test suite`);
       }
 
-      savedObjectsManagementCredentials = await requestAuth.getApiKeyForCustomRole({
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-        },
-        kibana: [
-          {
-            base: [],
-            feature: {
-              savedObjectsManagement: ['all'],
-            },
-            spaces: [space.spaceId],
-          },
-        ],
-      });
+      savedObjectsManagementCredentials = await createApiKeyWithSavedObjectsManagementPrivileges(
+        requestAuth
+      );
     });
 
     apiTest.beforeEach(() => {

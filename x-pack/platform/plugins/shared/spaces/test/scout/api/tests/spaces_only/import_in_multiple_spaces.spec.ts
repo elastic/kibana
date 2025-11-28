@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
+import type { KbnClient, RequestAuthFixture, RoleApiCredentials, ScoutLogger } from '@kbn/scout';
 import { apiTest, expect, tags } from '@kbn/scout';
 
 import { ATTRIBUTE_TITLE_KEY, ATTRIBUTE_TITLE_VALUE, COMMON_HEADERS, SPACES } from './constants';
@@ -19,22 +19,10 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
   let savedObjectsManagementCredentials: RoleApiCredentials;
   let createdSavedObjects: Array<{ type: string; id: string; spaceId: string }>;
 
-  apiTest.beforeAll(async ({ kbnClient, log, requestAuth }) => {
-    // Create spaces (default always exists)
-    await Promise.all(
-      spacesToCreate.map(async (space) => {
-        log.info(`Creating ${space.spaceId} for multi-space test suite`);
-        return kbnClient.spaces.create({
-          id: space.spaceId,
-          name: space.name,
-          description: space.description,
-          disabledFeatures: [...space.disabledFeatures],
-        });
-      })
-    );
-
-    // Get API key with savedObjectsManagement privileges for all spaces
-    savedObjectsManagementCredentials = await requestAuth.getApiKeyForCustomRole({
+  const createApiKeyWithSavedObjectsManagementPrivileges = async (
+    requestAuth: RequestAuthFixture
+  ) => {
+    return await requestAuth.getApiKeyForCustomRole({
       elasticsearch: {
         cluster: [],
         indices: [],
@@ -49,6 +37,27 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
         },
       ],
     });
+  };
+
+  const createSpaces = async (kbnClient: KbnClient, log: ScoutLogger) => {
+    await Promise.all(
+      spacesToCreate.map(async (space) => {
+        log.info(`Creating ${space.spaceId} for multi-space test suite`);
+        return kbnClient.spaces.create({
+          id: space.spaceId,
+          name: space.name,
+          description: space.description,
+          disabledFeatures: [...space.disabledFeatures],
+        });
+      })
+    );
+  };
+
+  apiTest.beforeAll(async ({ kbnClient, log, requestAuth }) => {
+    await createSpaces(kbnClient, log);
+    savedObjectsManagementCredentials = await createApiKeyWithSavedObjectsManagementPrivileges(
+      requestAuth
+    );
   });
 
   apiTest.beforeEach(() => {
