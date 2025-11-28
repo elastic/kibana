@@ -50,3 +50,8 @@ export interface BulkFillGapsByRuleIdsResult {
   skipped: RuleToBackfill[];
   errored: BulkGapFillingErroredRule[];
 }
+
+export enum GapFillSchedulePerRuleStatus {
+  ERROR = 'error',
+  SUCCESS = 'success',
+}
