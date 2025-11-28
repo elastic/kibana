@@ -8,13 +8,15 @@
  */
 
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
+import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import type { ServerStepDefinition, StepHandlerContext } from '@kbn/workflows-extensions/server';
+import type { z } from '@kbn/zod';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 /**
  * Implementation for custom registered step types.
@@ -23,10 +25,13 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_eve
  * It validates input against the step's schema, executes the handler function,
  * and validates the output.
  */
-export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
+export class CustomStepImpl<
+  TInputSchema extends z.ZodTypeAny = z.ZodTypeAny,
+  TOutputSchema extends z.ZodTypeAny = z.ZodTypeAny
+> extends BaseAtomicNodeImplementation<BaseStep> {
   constructor(
     private node: AtomicGraphNode,
-    private stepDefinition: ServerStepDefinition,
+    private stepDefinition: ServerStepDefinition<CommonStepDefinition<TInputSchema, TOutputSchema>>,
     stepExecutionRuntime: StepExecutionRuntime,
     connectorExecutor: ConnectorExecutor,
     workflowExecutionRuntime: WorkflowExecutionRuntimeManager,
@@ -44,7 +49,7 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   /**
    * Get and validate the input for this step
    */
-  public override getInput(): unknown {
+  public override getInput(): z.infer<TInputSchema> {
     const withData = this.node.configuration.with || {};
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(withData);
   }
@@ -52,7 +57,7 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   /**
    * Execute the custom step handler
    */
-  protected override async _run(input: unknown): Promise<RunStepResult> {
+  protected override async _run(input: z.infer<TInputSchema>): Promise<RunStepResult> {
     try {
       const handlerContext = this.createHandlerContext(input);
       const result = await this.stepDefinition.handler(handlerContext);
@@ -66,7 +71,9 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   /**
    * Create the handler context
    */
-  private createHandlerContext(input: unknown): StepHandlerContext {
+  private createHandlerContext(
+    input: z.infer<TInputSchema>
+  ): StepHandlerContext<z.infer<TInputSchema>> {
     return {
       input,
       contextManager: {
@@ -78,12 +85,6 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
         },
         renderInputTemplate: (value) => {
           return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(value);
-        },
-        setStepState: (state) => {
-          this.stepExecutionRuntime.setCurrentStepState(state);
-        },
-        getStepState: () => {
-          return this.stepExecutionRuntime.getCurrentStepState();
         },
       },
       logger: {

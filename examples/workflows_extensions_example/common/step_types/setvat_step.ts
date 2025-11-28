@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License v 1".
- */
-
 import { z } from '@kbn/zod';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
@@ -40,14 +31,18 @@ export const OutputSchema = z.object({
   variables: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
 });
 
-export type SetVarStepInput = z.infer<typeof InputSchema>;
-export type SetVarStepOutput = z.infer<typeof OutputSchema>;
+export type SetVarStepInputSchema = typeof InputSchema;
+export type SetVarStepOutputSchema = typeof OutputSchema;
 
 /**
  * Common step definition for SetVar step.
  * This is shared between server and public implementations.
+ * Input and output types are automatically inferred from the schemas.
  */
-export const setVarStepCommonDefinition: CommonStepDefinition = {
+export const setVarStepCommonDefinition: CommonStepDefinition<
+  SetVarStepInputSchema,
+  SetVarStepOutputSchema
+> = {
   id: SetVarStepTypeId,
   inputSchema: InputSchema,
   outputSchema: OutputSchema,

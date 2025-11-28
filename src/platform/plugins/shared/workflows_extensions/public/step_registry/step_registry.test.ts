@@ -16,7 +16,7 @@ const defaultDefinition: PublicStepDefinition = {
   id: stepId,
   label: 'My Custom Step',
   description: 'A custom step implementation',
-  icon: 'document',
+  icon: jest.fn(),
   inputSchema: z.object({ name: z.string() }),
   outputSchema: z.object({ name: z.string() }),
 };

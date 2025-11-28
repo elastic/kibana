@@ -11,8 +11,12 @@ import type { z } from '@kbn/zod';
 
 /**
  * Common step definition fields shared between server and public.
+ * Input and output types are automatically inferred from the schemas.
  */
-export interface CommonStepDefinition {
+export interface CommonStepDefinition<
+  TInputSchema extends z.ZodTypeAny = z.ZodTypeAny,
+  TOutputSchema extends z.ZodTypeAny = z.ZodTypeAny
+> {
   /**
    * Unique identifier for this step type.
    * Should follow a namespaced format (e.g., "custom.myStep", "plugin.feature.step").
@@ -22,12 +26,34 @@ export interface CommonStepDefinition {
   /**
    * Zod schema for validating step input.
    * Defines the structure and validation rules for the step's input parameters.
+   * The input type is automatically inferred from this schema.
    */
-  inputSchema: z.ZodTypeAny;
+  inputSchema: TInputSchema;
 
   /**
    * Zod schema for validating step output.
    * Defines the structure and validation rules for the step's output.
+   * The output type is automatically inferred from this schema.
    */
-  outputSchema: z.ZodTypeAny;
+  outputSchema: TOutputSchema;
 }
+
+/**
+ * Helper type to infer input type from a CommonStepDefinition's inputSchema
+ */
+export type InferStepInput<T extends CommonStepDefinition> = T extends CommonStepDefinition<
+  infer TInputSchema,
+  z.ZodTypeAny
+>
+  ? z.infer<TInputSchema>
+  : unknown;
+
+/**
+ * Helper type to infer output type from a CommonStepDefinition's outputSchema
+ */
+export type InferStepOutput<T extends CommonStepDefinition> = T extends CommonStepDefinition<
+  z.ZodTypeAny,
+  infer TOutputSchema
+>
+  ? z.infer<TOutputSchema>
+  : unknown;

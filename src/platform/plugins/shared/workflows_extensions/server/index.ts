@@ -25,4 +25,11 @@ export type {
   WorkflowsExtensionsServerPluginStartDeps,
 } from './types';
 
-export type { ServerStepDefinition, StepHandler, StepHandlerContext } from './step_registry/types';
+export type {
+  ServerStepDefinition,
+  StepHandler,
+  StepHandlerContext,
+  StepHandlerResult,
+} from './step_registry/types';
+
+export { createServerStepDefinition } from './step_registry/types';
