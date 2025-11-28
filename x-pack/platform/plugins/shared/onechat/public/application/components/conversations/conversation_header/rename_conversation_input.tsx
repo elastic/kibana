@@ -16,30 +16,18 @@ import { useConversationTitle } from '../../../hooks/use_conversation';
 import { useToasts } from '../../../hooks/use_toasts';
 
 const labels = {
-  inputPlaceholder: i18n.translate(
-    'xpack.onechat.conversationTitle.renameConversationInput.inputPlaceholder',
-    {
-      defaultMessage: 'Enter conversation name',
-    }
-  ),
-  confirmButton: i18n.translate(
-    'xpack.onechat.conversationTitle.renameConversationInput.confirmButton',
-    {
-      defaultMessage: 'Confirm rename',
-    }
-  ),
-  cancelButton: i18n.translate(
-    'xpack.onechat.conversationTitle.renameConversationInput.cancelButton',
-    {
-      defaultMessage: 'Cancel rename',
-    }
-  ),
-  renameErrorToast: i18n.translate(
-    'xpack.onechat.conversationTitle.renameConversationInput.renameErrorToast',
-    {
-      defaultMessage: 'Failed to rename conversation',
-    }
-  ),
+  inputPlaceholder: i18n.translate('xpack.onechat.renameConversationInput.inputPlaceholder', {
+    defaultMessage: 'Enter conversation name',
+  }),
+  confirmButton: i18n.translate('xpack.onechat.renameConversationInput.confirmButton', {
+    defaultMessage: 'Confirm rename',
+  }),
+  cancelButton: i18n.translate('xpack.onechat.renameConversationInput.cancelButton', {
+    defaultMessage: 'Cancel rename',
+  }),
+  renameErrorToast: i18n.translate('xpack.onechat.renameConversationInput.renameErrorToast', {
+    defaultMessage: 'Failed to rename conversation',
+  }),
 };
 
 const INPUT_WIDTH = '240px';
