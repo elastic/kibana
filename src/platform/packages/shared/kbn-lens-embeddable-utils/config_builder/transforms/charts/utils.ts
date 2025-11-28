@@ -6,8 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { GaugeVisualizationState, MetricVisualizationState } from '@kbn/lens-common';
+import type {
+  FormBasedLayer,
+  GaugeVisualizationState,
+  MetricVisualizationState,
+  PersistedIndexPatternLayer,
+  TextBasedLayer,
+} from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
+import { isTextBasedLayer } from '../utils';
 
 export function getSharedChartLensStateToAPI(
   config: Pick<LensAttributes, 'title' | 'description'>
@@ -32,4 +39,24 @@ export function getMetricAccessor(
 ) {
   // @ts-expect-error Unfortunately for some obscure reasons there are SO out there with the accessor property instead of the correct one
   return visualization.metricAccessor ?? visualization.accessor;
+}
+
+export function getLensStateLayer(
+  layers:
+    | Record<string, Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer>
+    | PersistedIndexPatternLayer[],
+  visLayerId: string | undefined
+) {
+  // Filter to keep non-linked layers (layers without linkToLayers or with linkToLayers set to null)
+  // Also keep ES|QL layers with non-empty columns, as old layers persist after chart type switches and have empty columns
+  const mainLayers = Object.entries(layers).filter(
+    ([, l]) =>
+      !('linkToLayers' in l) ||
+      l.linkToLayers == null ||
+      (isTextBasedLayer(l) && 'columns' in l && Array.isArray(l.columns) && l.columns.length > 0)
+  );
+
+  const visLayer = visLayerId ? mainLayers.find(([id, l]) => id === visLayerId) : undefined;
+
+  return visLayer ?? mainLayers[0];
 }

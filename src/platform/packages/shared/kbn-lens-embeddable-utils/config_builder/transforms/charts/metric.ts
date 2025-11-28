@@ -40,6 +40,7 @@ import {
   getSharedChartLensStateToAPI,
   getSharedChartAPIToLensState,
   getMetricAccessor,
+  getLensStateLayer,
 } from './utils';
 import {
   fromColorByValueAPIToLensState,
@@ -188,7 +189,7 @@ function fromCompareLensStateToAPI(
 
 function reverseBuildVisualizationState(
   visualization: MetricVisualizationState,
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
@@ -478,14 +479,7 @@ export function fromLensStateToAPI(
     (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
     [];
 
-  // Necessary for ESQL panels to find the correct layer, since the old layers are not removed from the state
-  const visLayerId = Object.entries(layers).find(([id]) => id === visualization.layerId);
-  // Layers can be in any order, so make sure to get the main one
-  const [layerId, layer] =
-    visLayerId ??
-    Object.entries(layers).find(
-      ([, l]) => !('linkToLayers' in l) || (l as { linkToLayers?: unknown }).linkToLayers == null
-    )!;
+  const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),

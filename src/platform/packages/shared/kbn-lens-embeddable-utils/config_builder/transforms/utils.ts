@@ -54,7 +54,7 @@ export const getDefaultReferences = (
 };
 
 // Need to dance a bit to satisfy TypeScript
-function convertToTypedLayerColumns(layer: FormBasedLayer): {
+function convertToTypedLayerColumns(layer: Omit<FormBasedLayer, 'indexPatternId'>): {
   columns: Record<string, AnyLensStateColumn>;
 } {
   // @TODO move it to satisfies
@@ -67,7 +67,10 @@ function convertToTypedLayerColumns(layer: FormBasedLayer): {
  * @param layer
  * @returns
  */
-export const operationFromColumn = (columnId: string, layer: FormBasedLayer) => {
+export const operationFromColumn = (
+  columnId: string,
+  layer: Omit<FormBasedLayer, 'indexPatternId'>
+) => {
   const typedLayer = convertToTypedLayerColumns(layer);
   const column = typedLayer.columns[columnId];
   if (!column) {
@@ -85,7 +88,7 @@ export const operationFromColumn = (columnId: string, layer: FormBasedLayer) => 
 };
 
 export function isTextBasedLayer(
-  layer: LensApiState | FormBasedLayer | TextBasedLayer
+  layer: LensApiState | FormBasedLayer | TextBasedLayer | PersistedIndexPatternLayer
 ): layer is TextBasedLayer {
   return 'index' in layer && 'query' in layer;
 }
@@ -154,7 +157,7 @@ export const getAdhocDataviews = (
  * @returns Lens API Dataset configuration
  */
 export const buildDatasetState = (
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: FormBasedLayer | TextBasedLayer | Omit<FormBasedLayer, 'indexPatternId'>,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[] = [],
@@ -188,7 +191,7 @@ export const buildDatasetState = (
 
   return {
     type: 'dataView',
-    id: layer.indexPatternId,
+    id: 'indexPatternId' in layer ? layer.indexPatternId ?? '' : '',
   };
 };
 
