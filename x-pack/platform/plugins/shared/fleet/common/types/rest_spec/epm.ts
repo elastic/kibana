@@ -264,3 +264,8 @@ export interface RollbackPackageResponse {
   success: boolean;
   version: string;
 }
+
+export interface RollbackAvailableCheckResponse {
+  isAvailable: boolean;
+  reason?: string;
+}

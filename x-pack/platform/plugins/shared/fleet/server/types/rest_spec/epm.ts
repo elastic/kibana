@@ -458,6 +458,11 @@ export const RollbackPackageResponseSchema = schema.object({
   success: schema.boolean(),
 });
 
+export const RollbackAvailableCheckResponseSchema = schema.object({
+  reason: schema.maybe(schema.string()),
+  isAvailable: schema.boolean(),
+});
+
 export const GetInstalledPackagesRequestSchema = {
   query: schema.object({
     dataStreamType: schema.maybe(
