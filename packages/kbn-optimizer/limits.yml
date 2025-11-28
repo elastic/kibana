@@ -3,7 +3,7 @@ pageLoadAssetSize:
   advancedSettings: 6196
   aiAssistantManagementSelection: 10000
   aiops: 15359
-  alerting: 144525
+  alerting: 26932
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
@@ -14,7 +14,7 @@ pageLoadAssetSize:
   charts: 40269
   cloud: 10648
   cloudDataMigration: 5687
-  cloudDefend: 62958
+  cloudDefend: 8146
   cloudExperiments: 103984
   cloudFullStory: 4752
   cloudLinks: 36333
@@ -95,6 +95,7 @@ pageLoadAssetSize:
   kibanaReact: 22503
   kibanaUsageCollection: 1736
   kibanaUtils: 54848
+  kubernetesSecurity: 6807
   lens: 71718
   licenseManagement: 8265
   licensing: 10073
@@ -103,6 +104,7 @@ pageLoadAssetSize:
   logsDataAccess: 7900
   logsShared: 101273
   logstash: 15882
+  maintenanceWindows: 3905
   management: 12951
   maps: 45917
   mapsEms: 6734
