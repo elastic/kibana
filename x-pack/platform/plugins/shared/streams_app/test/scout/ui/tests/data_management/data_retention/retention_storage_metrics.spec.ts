@@ -20,10 +20,6 @@ test.describe(
   'Stream data retention - storage metrics integration',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    test.beforeAll(async ({ apiServices }) => {
-      await apiServices.streams.enable();
-    });
-
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await apiServices.streams.clearStreamChildren('logs');
@@ -40,7 +36,8 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices }) => {
-      await apiServices.streams.disable();
+      // Clear existing rules
+      await apiServices.streams.clearStreamChildren('logs');
     });
 
     test('should update retention without affecting storage display', async ({ page }) => {

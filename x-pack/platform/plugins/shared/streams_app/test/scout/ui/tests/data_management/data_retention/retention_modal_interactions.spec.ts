@@ -19,10 +19,6 @@ import {
 } from '../../../fixtures/retention_helpers';
 
 test.describe('Stream data retention - modal interactions', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices }) => {
-    await apiServices.streams.enable();
-  });
-
   test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await apiServices.streams.clearStreamChildren('logs');
@@ -37,8 +33,10 @@ test.describe('Stream data retention - modal interactions', { tag: ['@ess', '@sv
     await closeToastsIfPresent(page);
     await apiServices.streams.clearStreamChildren('logs');
   });
+
   test.afterAll(async ({ apiServices }) => {
-    await apiServices.streams.disable();
+    // Clear existing rules
+    await apiServices.streams.clearStreamChildren('logs');
   });
 
   test('should open and close modal', async ({ page }) => {

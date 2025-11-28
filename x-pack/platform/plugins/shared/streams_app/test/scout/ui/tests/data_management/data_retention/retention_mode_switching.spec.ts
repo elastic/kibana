@@ -18,10 +18,6 @@ import {
 } from '../../../fixtures/retention_helpers';
 
 test.describe('Stream data retention - mode switching', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices }) => {
-    await apiServices.streams.enable();
-  });
-
   test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await apiServices.streams.clearStreamChildren('logs');
@@ -36,8 +32,10 @@ test.describe('Stream data retention - mode switching', { tag: ['@ess', '@svlObl
     await closeToastsIfPresent(page);
     await apiServices.streams.clearStreamChildren('logs');
   });
+
   test.afterAll(async ({ apiServices }) => {
-    await apiServices.streams.disable();
+    // Clear existing rules
+    await apiServices.streams.clearStreamChildren('logs');
   });
 
   test('should switch between custom and indefinite modes', async ({ page }) => {

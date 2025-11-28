@@ -22,10 +22,6 @@ import {
 } from '../../../fixtures/retention_helpers';
 
 test.describe('Stream data retention - display values', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices }) => {
-    await apiServices.streams.enable();
-  });
-
   test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await apiServices.streams.clearStreamChildren('logs');
@@ -42,7 +38,8 @@ test.describe('Stream data retention - display values', { tag: ['@ess', '@svlObl
   });
 
   test.afterAll(async ({ apiServices }) => {
-    await apiServices.streams.disable();
+    // Clear existing rules
+    await apiServices.streams.clearStreamChildren('logs');
   });
 
   test('should display singular and plural time units correctly', async ({ page }) => {

@@ -19,10 +19,6 @@ import {
 } from '../../../fixtures/retention_helpers';
 
 test.describe('Stream data retention - inheritance', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeAll(async ({ apiServices }) => {
-    await apiServices.streams.enable();
-  });
-
   test.beforeEach(async ({ apiServices, browserAuth }) => {
     await browserAuth.loginAsAdmin();
     await apiServices.streams.clearStreamChildren('logs');
@@ -34,7 +30,8 @@ test.describe('Stream data retention - inheritance', { tag: ['@ess', '@svlOblt']
   });
 
   test.afterAll(async ({ apiServices }) => {
-    await apiServices.streams.disable();
+    // Clear existing rules
+    await apiServices.streams.clearStreamChildren('logs');
   });
 
   test('should show inherit toggle and inherit by default', async ({
