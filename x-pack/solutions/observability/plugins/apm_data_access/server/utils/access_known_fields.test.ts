@@ -71,6 +71,16 @@ describe('accessKnownApmEventFields', () => {
     });
   });
 
+  it('can be spread into a new flattened object with the correct value formats', () => {
+    const event = accessKnownApmEventFields(smallInput);
+
+    expect({ ...event }).toEqual({
+      '@timestamp': '2024-10-10T10:10:10.000Z',
+      'service.name': 'node-svc',
+      'links.span_id': ['link1', 'link2'],
+    });
+  });
+
   it('exposes a `requireFields` method, which validates the original object again to narrow its definition', () => {
     const event = accessKnownApmEventFields(smallInput).requireFields(['@timestamp']);
 

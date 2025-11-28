@@ -103,6 +103,7 @@ pageLoadAssetSize:
   logsDataAccess: 7900
   logsShared: 101273
   logstash: 15882
+  maintenanceWindows: 3883
   management: 12951
   maps: 45917
   mapsEms: 6734
@@ -170,7 +171,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 80788
   streams: 10000
-  streamsApp: 19225
+  streamsApp: 23974
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
