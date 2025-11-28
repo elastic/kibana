@@ -9,7 +9,7 @@
 
 import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { OnSaveProps, SaveModalState, SaveResult } from '.';
@@ -30,11 +30,18 @@ export interface OriginSaveModalProps {
   objectType: string;
   onClose: () => void;
   options?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
-  onSave: (props: OnSaveProps & { returnToOrigin: boolean }) => Promise<SaveResult>;
+  onSave: (
+    props: OnSaveProps & { returnToOrigin: boolean; newProjectRoutingRestore?: boolean }
+  ) => Promise<SaveResult>;
+  projectRoutingRestore?: boolean;
+  showStoreProjectRoutingOnSave?: boolean;
 }
 
 export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
   const [returnToOriginMode, setReturnToOriginMode] = useState(Boolean(props.originatingApp));
+  const [persistSelectedProjectRouting, setPersistSelectedProjectRouting] = useState(
+    props.projectRoutingRestore ?? false
+  );
   const { documentInfo } = props;
 
   const returnLabel = i18n.translate('savedObjects.saveModalOrigin.returnToOriginLabel', {
@@ -48,8 +55,34 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
     const sourceOptions =
       typeof props.options === 'function' ? props.options(state) : props.options;
 
+    const projectRoutingOptions = props.showStoreProjectRoutingOnSave ? (
+      <EuiFormRow>
+        <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              data-test-subj="storeProjectRoutingWithVisualization"
+              checked={persistSelectedProjectRouting}
+              onChange={(event) => setPersistSelectedProjectRouting(event.target.checked)}
+              label={
+                <FormattedMessage
+                  id="savedObjects.saveModalOrigin.storeProjectRoutingFormRowLabel"
+                  defaultMessage="Store project routing with {objectType}"
+                  values={{ objectType: props.objectType }}
+                />
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
+    ) : null;
+
     if (!props.originatingApp) {
-      return sourceOptions;
+      return (
+        <Fragment>
+          {sourceOptions}
+          {projectRoutingOptions}
+        </Fragment>
+      );
     }
     const origin = props.getAppNameFromId
       ? props.getAppNameFromId(props.originatingApp) || props.originatingApp
@@ -63,6 +96,7 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
       return (
         <Fragment>
           {sourceOptions}
+          {projectRoutingOptions}
           <EuiFormRow>
             <EuiSwitch
               data-test-subj="returnToOriginModeSwitch"
@@ -85,12 +119,23 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
       );
     } else {
       setReturnToOriginMode(false);
-      return sourceOptions;
+      return (
+        <Fragment>
+          {sourceOptions}
+          {projectRoutingOptions}
+        </Fragment>
+      );
     }
   };
 
   const onModalSave = async (onSaveProps: OnSaveProps): Promise<SaveResult> => {
-    return props.onSave({ ...onSaveProps, returnToOrigin: returnToOriginMode });
+    return props.onSave({
+      ...onSaveProps,
+      returnToOrigin: returnToOriginMode,
+      newProjectRoutingRestore: props.showStoreProjectRoutingOnSave
+        ? persistSelectedProjectRouting
+        : undefined,
+    });
   };
 
   const confirmButtonLabel = returnToOriginMode

@@ -32,6 +32,7 @@ const getSaveDiscoverSessionParams = (
   newTitle: 'new title',
   newCopyOnSave: false,
   newTimeRestore: false,
+  newProjectRoutingRestore: false,
   newDescription: 'new description',
   newTags: [],
   isTitleDuplicateConfirmed: false,
@@ -52,6 +53,8 @@ const setup = ({
         ...discoverSession,
         id: discoverSession.id ?? 'new-session',
         managed: false,
+        projectRouting:
+          discoverSession.projectRouting === null ? undefined : discoverSession.projectRouting,
       })
     );
   const dataViewCreateSpy = jest.spyOn(services.dataViews, 'create');
@@ -106,6 +109,7 @@ describe('saveDiscoverSession', () => {
       description: 'new description',
       tabs: discoverSession?.tabs ?? [],
       tags: ['tag1', 'tag2'],
+      projectRouting: undefined,
     };
 
     expect(saveDiscoverSessionSpy).toHaveBeenCalledWith(updatedDiscoverSession, {
@@ -117,6 +121,7 @@ describe('saveDiscoverSession', () => {
     expect(state.internalState.getState().persistedDiscoverSession).toEqual({
       ...updatedDiscoverSession,
       managed: false,
+      projectRouting: undefined,
     });
   });
 

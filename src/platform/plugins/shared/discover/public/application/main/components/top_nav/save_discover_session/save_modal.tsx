@@ -14,19 +14,26 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import type { DiscoverServices } from '../../../../../build_services';
+import { ProjectRoutingSwitch } from './project_routing_switch';
 
 export type DiscoverSessionSaveModalOnSaveCallback = (
-  props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }
+  props: OnSaveProps & {
+    newTimeRestore: boolean;
+    newProjectRoutingRestore: boolean;
+    newTags: string[];
+  }
 ) => Promise<SaveResult>;
 
 export interface DiscoverSessionSaveModalProps {
   isTimeBased: boolean;
+  showStoreProjectRoutingOnSave: boolean;
   services: DiscoverServices;
   title: string;
   showCopyOnSave: boolean;
   initialCopyOnSave?: boolean;
   description?: string;
   timeRestore?: boolean;
+  projectRoutingRestore?: boolean;
   tags: string[];
   onSave: DiscoverSessionSaveModalOnSaveCallback;
   onClose: () => void;
@@ -35,6 +42,7 @@ export interface DiscoverSessionSaveModalProps {
 
 export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> = ({
   isTimeBased,
+  showStoreProjectRoutingOnSave,
   services: { savedObjectsTagging, discoverFeatureFlags },
   title,
   description,
@@ -42,11 +50,15 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
   showCopyOnSave,
   initialCopyOnSave,
   timeRestore: savedTimeRestore,
+  projectRoutingRestore: savedProjectRoutingRestore,
   onSave,
   onClose,
   managed,
 }) => {
   const [timeRestore, setTimeRestore] = useState(Boolean(isTimeBased && savedTimeRestore));
+  const [projectRoutingRestore, setProjectRoutingRestore] = useState(
+    Boolean(savedProjectRoutingRestore)
+  );
   const [currentTags, setCurrentTags] = useState(tags);
   const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
 
@@ -54,6 +66,7 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
     await onSave({
       ...params,
       newTimeRestore: timeRestore,
+      newProjectRoutingRestore: projectRoutingRestore,
       newTags: currentTags,
     });
   };
@@ -68,14 +81,7 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
   ) : null;
 
   const timeSwitch = isTimeBased ? (
-    <EuiFormRow
-      helpText={
-        <FormattedMessage
-          id="discover.topNav.saveModal.storeTimeWithSearchToggleDescription"
-          defaultMessage="Update the time filter and refresh interval to the current selection when using this session."
-        />
-      }
-    >
+    <EuiFormRow fullWidth>
       <EuiSwitch
         data-test-subj="storeTimeWithSearch"
         checked={timeRestore}
@@ -83,7 +89,7 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
         label={
           <FormattedMessage
             id="discover.topNav.saveModal.storeTimeWithSearchToggleLabel"
-            defaultMessage="Store time with Discover session"
+            defaultMessage="Include time range and refresh interval customizations"
           />
         }
       />
@@ -93,6 +99,9 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
   const options = (
     <>
       {tagSelector}
+      {showStoreProjectRoutingOnSave && (
+        <ProjectRoutingSwitch checked={projectRoutingRestore} onChange={setProjectRoutingRestore} />
+      )}
       {timeSwitch}
     </>
   );
