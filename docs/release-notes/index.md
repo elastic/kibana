@@ -239,7 +239,7 @@ For the Elastic Security 9.1.8 release information, refer to [Elastic Security S
 * Uses long expiration for upgrading agents [#243443]({{kib-pull}}243443).
 * Fixes retrying agents stuck in auto-upgrade logic [#243326]({{kib-pull}}243326).
 * Adds retry behavior for `/api/fleet/agents` when transient issues with {{es}} are encountered [#243105]({{kib-pull}}243105).
-* Fixes Docker image in the add agent Kubernetes manifest [#242691]({{kib-pull}}242691).
+* Fixes Docker image in the **Add agent** Kubernetes manifest [#242691]({{kib-pull}}242691).
 * Fixes {{fleet}} policy name uniqueness not being consistently enforced across spaces when name or space changes occur [#239631]({{kib-pull}}239631).
 * Fixes `ignore_above` mapping for `flattened` fields [#238890]({{kib-pull}}238890).
 
