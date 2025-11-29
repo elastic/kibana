@@ -7,51 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ZodType } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 
-// copied from zod
-export type ZodTypeKind =
-  | 'string'
-  | 'number'
-  | 'int'
-  | 'boolean'
-  | 'bigint'
-  | 'symbol'
-  | 'null'
-  | 'undefined'
-  | 'void'
-  | 'never'
-  | 'any'
-  | 'unknown'
-  | 'date'
-  | 'object'
-  | 'record'
-  | 'file'
-  | 'array'
-  | 'tuple'
-  | 'union'
-  | 'intersection'
-  | 'map'
-  | 'set'
-  | 'enum'
-  | 'literal'
-  | 'nullable'
-  | 'optional'
-  | 'nonoptional'
-  | 'success'
-  | 'transform'
-  | 'default'
-  | 'prefault'
-  | 'catch'
-  | 'nan'
-  | 'pipe'
-  | 'readonly'
-  | 'template_literal'
-  | 'promise'
-  | 'lazy'
-  | 'custom';
+export type ZodTypeKind = z.core.$ZodTypeDef['type'];
 
-export function getZodSchemaType(schema: ZodType): ZodTypeKind {
+export function getZodSchemaType(schema: z.ZodType): ZodTypeKind {
   if (!schema || !schema.def) {
     return 'unknown';
   }
