@@ -68,7 +68,7 @@ For the Elastic Security 9.2.2 release information, refer to [Elastic Security S
 * Fixes the production build favicon's CSS specificity [#243351]({{kib-pull}}243351).
 
 **Machine Learning**:
-* Ensures deleted text in AI connector or Inference endpoint forms are not sent as empty strings [#244059]({{kib-pull}}244059).
+* Ensures deleted text in AI connector or Inference endpoint forms is not sent as empty strings [#244059]({{kib-pull}}244059).
 * Fixes data view showing runtime fields twice [#242557]({{kib-pull}}242557).
 * Fixes import and improves validation for Anomaly Detection and Data Frame Analytics jobs [#242263]({{kib-pull}}242263).
 
