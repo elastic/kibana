@@ -21,6 +21,7 @@ import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-plugin/public';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
+import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
 
@@ -31,7 +32,7 @@ interface StreamNameFormRowProps {
   error?: string;
   isInvalid?: boolean;
   helpText?: string;
-  dotErrorMessage?: JSX.Element | undefined;
+  errorMessage?: JSX.Element | string | undefined;
   isStreamNameValid?: boolean;
   partitionName: string;
   prefix: string;
@@ -61,6 +62,51 @@ export const getHelpText = (
   }
 };
 
+export const getErrorMessage = (
+  isDuplicatedName: boolean,
+  rootChildExists: boolean,
+  isDotPresent: boolean,
+  prefix: string,
+  rootChild: string,
+  router: StatefulStreamsAppRouter
+): JSX.Element | string | undefined => {
+  if (isDuplicatedName) {
+    return i18n.translate('xpack.streams.streamDetailRouting.nameConflictError', {
+      defaultMessage: 'A stream with this name already exists',
+    });
+  }
+  if (isDotPresent && !rootChildExists) {
+    return i18n.translate('xpack.streams.streamDetailRouting.rootChildDoesNotExistError', {
+      defaultMessage: `The child stream {rootChild} does not exist. Please create it first.`,
+      values: {
+        rootChild: prefix + rootChild,
+      },
+    });
+  }
+  if (isDotPresent) {
+    return (
+      <FormattedMessage
+        id="xpack.streams.streamDetailRouting.nameContainsDotErrorMessage"
+        defaultMessage={`Stream name cannot contain the "." character. Open the stream {childStreamLink} and create the child there.`}
+        values={{
+          childStreamLink: (
+            <EuiLink
+              data-test-subj="streamsAppChildStreamLink"
+              external
+              target="_blank"
+              href={router.link('/{key}', { path: { key: prefix + rootChild } })}
+            >
+              {prefix + rootChild}
+            </EuiLink>
+          ),
+        }}
+      />
+    );
+  }
+
+  return undefined;
+};
+
 interface ChildStreamInputHookResponse {
   localStreamName: string;
   setLocalStreamName: React.Dispatch<React.SetStateAction<string>>;
@@ -68,12 +114,29 @@ interface ChildStreamInputHookResponse {
   prefix: string;
   partitionName: string;
   helpText: string | undefined;
-  dotErrorMessage: JSX.Element | undefined;
+  errorMessage: JSX.Element | string | undefined;
 }
 
 /**
  * Custom hook that handles computations necessary for child stream input component instances.
- * TODO: finish jsdoc for this hook
+ * Used by parent components to lift up the states needed for the local input field.
+ * @param streamName - The stream name to use for the local input field.
+ * @param readOnly - Whether the input field is read only.
+ * @param onChange - The function to call when the local input field changes after debouncing.
+ * @returns An object containing local states, input validation flags, and help/error messages.
+ * @example
+ * const { localStreamName, setLocalStreamName, isStreamNameValid, prefix, partitionName, helpText, errorMessage } = useChildStreamInput('logs.linux');
+ * return (
+ *   <StreamNameFormRow
+ *     localStreamName={localStreamName}
+ *     setLocalStreamName={setLocalStreamName}
+ *     isStreamNameValid={isStreamNameValid}
+ *     prefix={prefix}
+ *     partitionName={partitionName}
+ *     helpText={helpText}
+ *     errorMessage={errorMessage}
+ *   />
+ * );
  */
 export const useChildStreamInput = (
   streamName: string,
@@ -90,12 +153,18 @@ export const useChildStreamInput = (
   );
 
   const router = useStreamsAppRouter();
-  const parentStreamName = useStreamsRoutingSelector((snapshot) => snapshot.context.definition)
-    .stream.name;
+  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const parentStreamName = routingSnapshot.context.definition.stream.name;
 
   const prefix = parentStreamName + '.';
   const partitionName = localStreamName.replace(prefix, '');
   const rootChild = partitionName.split('.')[0];
+  const isDuplicatedName = routingSnapshot.context.routing.some(
+    (r) => r.destination === localStreamName && !r.isNew
+  );
+  const rootChildExists = routingSnapshot.context.routing.some(
+    (r) => r.destination === prefix + rootChild && !r.isNew
+  );
 
   const isStreamNameEmpty = localStreamName.length <= prefix.length;
   const isStreamNameTooLong = localStreamName.length > MAX_STREAM_NAME_LENGTH;
@@ -104,34 +173,24 @@ export const useChildStreamInput = (
   const helpText = getHelpText(isStreamNameEmpty, isStreamNameTooLong, readOnly);
 
   const isDotPresent = !readOnly && partitionName.includes('.');
-  // TODO: add a check to see if the root child stream exists already, put a new error message if it does and move this logic into a helper function
-  const dotErrorMessage = isDotPresent ? (
-    <FormattedMessage
-      id="xpack.streams.streamDetailRouting.nameContainsDotErrorMessage"
-      defaultMessage={`Stream name cannot contain the "." character. Open the stream {childStreamLink} and create the child there.`}
-      values={{
-        childStreamLink: (
-          <EuiLink
-            data-test-subj="streamsAppChildStreamLink"
-            external
-            target="_blank"
-            href={router.link('/{key}', { path: { key: prefix + rootChild } })}
-          >
-            {prefix + rootChild}
-          </EuiLink>
-        ),
-      }}
-    />
-  ) : undefined;
+
+  const errorMessage = getErrorMessage(
+    isDuplicatedName,
+    rootChildExists,
+    isDotPresent,
+    prefix,
+    rootChild,
+    router
+  );
 
   return {
     localStreamName,
     setLocalStreamName,
-    isStreamNameValid: isLengthValid && !isDotPresent,
+    isStreamNameValid: isLengthValid && !isDotPresent && !isDuplicatedName,
     prefix,
     partitionName,
     helpText,
-    dotErrorMessage,
+    errorMessage,
   };
 };
 
@@ -142,7 +201,7 @@ export function StreamNameFormRow({
   error,
   isInvalid = false,
   helpText,
-  dotErrorMessage,
+  errorMessage,
   isStreamNameValid = true,
   partitionName,
   prefix,
@@ -167,7 +226,7 @@ export function StreamNameFormRow({
       helpText={helpText}
       describedByIds={[descriptionId]}
       isInvalid={isInvalid || !isStreamNameValid}
-      error={error || dotErrorMessage}
+      error={error || errorMessage}
     >
       <EuiFieldText
         isInvalid={isInvalid || !isStreamNameValid}

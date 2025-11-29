@@ -191,13 +191,11 @@ export const EditRoutingRuleControls = ({
 export const EditSuggestedRuleControls = ({
   onSave,
   onAccept,
-  nameError,
   conditionError,
   isStreamNameValid,
 }: {
   onSave?: () => void;
   onAccept: () => void;
-  nameError?: string;
   conditionError?: string;
   isStreamNameValid: boolean;
 }) => {
@@ -207,7 +205,7 @@ export const EditSuggestedRuleControls = ({
   const canSave = routingSnapshot.can({ type: 'suggestion.saveSuggestion' });
   const hasPrivileges = routingSnapshot.context.definition.privileges.manage;
 
-  const hasValidationErrors = !!nameError || !!conditionError;
+  const hasValidationErrors = !!conditionError;
   const isUpdateDisabled = hasValidationErrors || !canSave;
 
   const handleAccept = () => {

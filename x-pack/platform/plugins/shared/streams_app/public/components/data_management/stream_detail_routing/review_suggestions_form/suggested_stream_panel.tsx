@@ -71,22 +71,6 @@ export function SuggestedStreamPanel({
       selectedPreview.name === currentSuggestion.name
   );
 
-  const nameError = React.useMemo(() => {
-    if (!isEditing) return undefined;
-
-    const isDuplicateName = routingSnapshot.context.routing.some(
-      (r) => r.destination === currentSuggestion.name
-    );
-
-    if (isDuplicateName) {
-      return i18n.translate('xpack.streams.streamDetailRouting.nameConflictError', {
-        defaultMessage: 'A stream with this name already exists',
-      });
-    }
-
-    return undefined;
-  }, [isEditing, currentSuggestion.name, routingSnapshot.context.routing]);
-
   const conditionError = React.useMemo(() => {
     if (!isEditing) return undefined;
 
@@ -112,14 +96,8 @@ export function SuggestedStreamPanel({
     changeSuggestionCondition(condition);
   };
 
-  const {
-    isStreamNameValid,
-    setLocalStreamName,
-    partitionName,
-    prefix,
-    helpText,
-    dotErrorMessage,
-  } = useChildStreamInput(currentSuggestion.name, false, handleNameChange);
+  const { isStreamNameValid, setLocalStreamName, partitionName, prefix, helpText, errorMessage } =
+    useChildStreamInput(currentSuggestion.name, false, handleNameChange);
 
   if (isEditing) {
     return (
@@ -130,10 +108,8 @@ export function SuggestedStreamPanel({
             partitionName={partitionName}
             prefix={prefix}
             helpText={helpText}
-            dotErrorMessage={dotErrorMessage}
+            errorMessage={errorMessage}
             autoFocus
-            error={nameError}
-            isInvalid={!!nameError}
             isStreamNameValid={isStreamNameValid}
           />
           <RoutingConditionEditor
@@ -146,7 +122,6 @@ export function SuggestedStreamPanel({
           <EditSuggestedRuleControls
             onSave={onSave}
             onAccept={() => reviewSuggestedRule(currentSuggestion.name || partition.name)}
-            nameError={nameError}
             conditionError={conditionError}
             isStreamNameValid={isStreamNameValid}
           />

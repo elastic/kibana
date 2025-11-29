@@ -29,16 +29,10 @@ export function NewRoutingStreamEntry() {
     }
   }, []);
 
-  const {
-    setLocalStreamName,
-    isStreamNameValid,
-    partitionName,
-    prefix,
-    helpText,
-    dotErrorMessage,
-  } = useChildStreamInput(currentRule.destination, false, (value) =>
-    changeRule({ destination: value })
-  );
+  const { setLocalStreamName, isStreamNameValid, partitionName, prefix, helpText, errorMessage } =
+    useChildStreamInput(currentRule.destination, false, (value) =>
+      changeRule({ destination: value })
+    );
 
   return (
     <div ref={panelRef}>
@@ -50,7 +44,7 @@ export function NewRoutingStreamEntry() {
             partitionName={partitionName}
             prefix={prefix}
             helpText={helpText}
-            dotErrorMessage={dotErrorMessage}
+            errorMessage={errorMessage}
             isStreamNameValid={isStreamNameValid}
           />
           <EuiFlexGroup gutterSize="s" direction="column">
