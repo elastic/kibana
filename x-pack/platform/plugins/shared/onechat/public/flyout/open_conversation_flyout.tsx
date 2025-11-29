@@ -71,6 +71,7 @@ export function openConversationFlyout(
       type: 'push',
       hideCloseButton: true,
       'aria-labelledby': ariaLabelledBy,
+      maxWidth: 1200, // Maximum width for resizable flyout to prevent NaN error
     }
   );
 

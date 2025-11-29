@@ -5,22 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  logicalCSS,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
-import type { ChatResponse } from '@kbn/onechat-plugin/common/http_api/chat';
-import { useAppToasts } from '../../common/hooks/use_app_toasts';
-import { useAppUrl } from '../../common/lib/kibana/hooks';
+import { useCallback } from 'react';
+import type { UiAttachment } from '@kbn/onechat-plugin/public/embeddable/types';
+import { useKibana } from '../../common/lib/kibana/use_kibana';
 
 export interface UseAgentBuilderAttachmentParams {
   /**
@@ -39,167 +26,46 @@ export interface UseAgentBuilderAttachmentParams {
 
 export interface UseAgentBuilderAttachmentResult {
   /**
-   * Function to open the agent builder flyout
-   * TODO: This currently calls the API directly as a temporary implementation.
-   * Once the agent builder UI is ready, this will open a flyout with the attachment data instead.
+   * Function to open the agent builder flyout with attachments and prefilled conversation
    */
   openAgentBuilderFlyout: () => void;
-  /**
-   * Whether the API call is in progress
-   */
-  isLoading: boolean;
 }
-
-const AgentBuilderToastSuccessContent: React.FC<{
-  onViewConversationClick?: () => void;
-  content?: string;
-}> = ({ onViewConversationClick, content }) => {
-  const { euiTheme } = useEuiTheme();
-  return React.createElement(
-    React.Fragment,
-    null,
-    content !== undefined
-      ? React.createElement(
-          EuiText,
-          {
-            size: 's',
-            css: css`
-              ${logicalCSS('margin-bottom', euiTheme.size.s)};
-            `,
-            'data-test-subj': 'toaster-content-sync-text',
-          },
-          content
-        )
-      : null,
-    onViewConversationClick !== undefined
-      ? React.createElement(
-          EuiFlexGroup,
-          { justifyContent: 'flexEnd', gutterSize: 's' },
-          React.createElement(
-            EuiFlexItem,
-            { grow: false },
-            React.createElement(
-              EuiButton,
-              {
-                size: 's',
-                onClick: onViewConversationClick,
-                'data-test-subj': 'toaster-content-conversation-view-link',
-              },
-              i18n.translate(
-                'xpack.securitySolution.agentBuilder.attachment.viewConversationButton',
-                {
-                  defaultMessage: 'View conversation',
-                }
-              )
-            )
-          )
-        )
-      : null
-  );
-};
 
 /**
  * Hook to handle agent builder attachment functionality.
- * Temporarily calls the API directly until the agent builder UI is ready.
- * Eventually, this will open a flyout with the attachment data.
+ * Opens a conversation flyout with attachments and prefilled conversation.
  */
 export const useAgentBuilderAttachment = ({
   attachmentType,
   attachmentData,
   attachmentPrompt,
 }: UseAgentBuilderAttachmentParams): UseAgentBuilderAttachmentResult => {
-  const { http, application, i18n: i18nService, theme, userProfile } = useKibana().services;
-  const toasts = useAppToasts();
-  const { getAppUrl } = useAppUrl();
-  const [isLoading, setIsLoading] = useState(false);
+  const { onechat } = useKibana().services;
 
-  const openAgentBuilderFlyout = useCallback(async () => {
-    if (!http || !application) {
+  const openAgentBuilderFlyout = useCallback(() => {
+    if (!onechat?.openConversationFlyout) {
       return;
     }
 
-    setIsLoading(true);
-    try {
-      // TODO: This API call is temporary until the agent builder UI is ready.
-      // Once the UI is ready, this will open a flyout with the attachment data instead.
-      const result = await http.post<ChatResponse>('/api/agent_builder/converse', {
-        body: JSON.stringify({
-          input: attachmentPrompt,
-          attachments: [
-            {
-              type: attachmentType,
-              data: attachmentData,
-            },
-          ],
-        }),
-        version: '2023-10-31',
-      });
+    // Create a unique ID for the attachment
+    const attachmentId = `${attachmentType}-${Date.now()}`;
 
-      const conversationId = result?.conversation_id;
-      const conversationUrl = conversationId
-        ? getAppUrl({
-            appId: 'agent_builder',
-            path: `/conversations/${conversationId}`,
-          })
-        : null;
+    // Create the UiAttachment object
+    const attachment: UiAttachment = {
+      id: attachmentId,
+      type: attachmentType,
+      getContent: async () => attachmentData,
+    };
 
-      const onViewConversationClick = () => {
-        if (conversationUrl && application) {
-          application.navigateToUrl(conversationUrl);
-        }
-      };
-
-      const renderContent = i18n.translate(
-        'xpack.securitySolution.agentBuilder.attachment.successText',
-        {
-          defaultMessage: 'Your attachment has been sent to the agent builder.',
-        }
-      );
-
-      toasts.addSuccess({
-        color: 'success',
-        iconType: 'check',
-        title: i18n.translate('xpack.securitySolution.agentBuilder.attachment.successTitle', {
-          defaultMessage: 'Agent builder conversation started',
-        }),
-        text:
-          conversationUrl && i18nService && theme
-            ? toMountPoint(
-                React.createElement(AgentBuilderToastSuccessContent, {
-                  content: renderContent,
-                  onViewConversationClick,
-                }),
-                { i18n: i18nService, theme, userProfile }
-              )
-            : renderContent,
-      });
-    } catch (error) {
-      toasts.addError(error, {
-        title: i18n.translate('xpack.securitySolution.agentBuilder.attachment.errorTitle', {
-          defaultMessage: 'Failed to start agent builder conversation',
-        }),
-        toastMessage: i18n.translate('xpack.securitySolution.agentBuilder.attachment.errorText', {
-          defaultMessage: 'There was an error sending your attachment to the agent builder.',
-        }),
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [
-    attachmentType,
-    attachmentData,
-    attachmentPrompt,
-    http,
-    toasts,
-    getAppUrl,
-    application,
-    i18nService,
-    theme,
-    userProfile,
-  ]);
+    // Open the conversation flyout with attachment and prefilled message
+    onechat.openConversationFlyout({
+      newConversation: true,
+      initialMessage: attachmentPrompt,
+      attachments: [attachment],
+    });
+  }, [attachmentType, attachmentData, attachmentPrompt, onechat]);
 
   return {
     openAgentBuilderFlyout,
-    isLoading,
   };
 };

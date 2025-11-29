@@ -65,6 +65,7 @@ import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/pu
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-assistant-shared-state-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
+import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -164,6 +165,7 @@ export interface StartPlugins {
   productDocBase: ProductDocBasePluginStart;
   elasticAssistantSharedState: ElasticAssistantSharedStatePublicPluginStart;
   inference: InferencePublicStart;
+  onechat?: OnechatPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
