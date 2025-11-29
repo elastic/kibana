@@ -14,6 +14,8 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
 import type { RuntimeStateManager, TabState } from '../application/main/state_management/redux';
 import {
+  DEFAULT_TAB_STATE,
+  internalStateActions,
   createInternalStateStore,
   createRuntimeStateManager,
   fromSavedSearchToSavedObjectTab,
@@ -31,8 +33,6 @@ import {
 } from '../customizations';
 import { createCustomizationService } from '../customizations/customization_service';
 import { createTabsStorageManager } from '../application/main/state_management/tabs_storage_manager';
-import { internalStateActions } from '../application/main/state_management/redux';
-import { DEFAULT_TAB_STATE } from '../application/main/state_management/redux';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -40,6 +40,8 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { omit } from 'lodash';
 import { getCurrentUrlState } from '../application/main/state_management/utils/cleanup_url_state';
 import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
+import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import type { SaveDiscoverSessionThunkParams } from '../application/main/state_management/redux/actions';
 
 interface CreateInternalStateStoreMockOptions {
   runtimeStateManager?: RuntimeStateManager;
@@ -91,6 +93,8 @@ function createInternalStateStoreMock({
   };
 }
 
+export type InternalStateMockToolkit = ReturnType<typeof getDiscoverInternalStateMock>;
+
 export function getDiscoverInternalStateMock({
   persistedDataViews,
   ...options
@@ -116,6 +120,18 @@ export function getDiscoverInternalStateMock({
     return Promise.resolve(dataView);
   });
 
+  jest.spyOn(services.dataViews, 'create').mockImplementation((spec) =>
+    Promise.resolve(
+      buildDataViewMock({
+        id: spec.id,
+        title: spec.title,
+        name: spec.name ?? spec.title,
+        type: spec.type,
+        timeFieldName: spec.timeFieldName,
+      })
+    )
+  );
+
   const originalSearchSourceCreate = services.data.search.searchSource.create;
 
   services.data.search.searchSource.create = jest.fn((fields) => {
@@ -131,6 +147,14 @@ export function getDiscoverInternalStateMock({
 
     return originalSearchSourceCreate(fields);
   });
+
+  jest.spyOn(services.savedSearch, 'saveDiscoverSession').mockImplementation((discoverSession) =>
+    Promise.resolve({
+      ...discoverSession,
+      id: discoverSession.id ?? 'new-session',
+      managed: false,
+    })
+  );
 
   const assertTabsAreInitialized = <T extends (...params: Parameters<T>) => ReturnType<T>>(
     fn: T
@@ -162,11 +186,13 @@ export function getDiscoverInternalStateMock({
         internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
       );
 
-      await internalState.dispatch(
-        internalStateActions.initializeTabs({
-          discoverSessionId: persistedDiscoverSession?.id,
-        })
-      );
+      await internalState
+        .dispatch(
+          internalStateActions.initializeTabs({
+            discoverSessionId: persistedDiscoverSession?.id,
+          })
+        )
+        .unwrap();
     },
     initializeSingleTab: assertTabsAreInitialized(async ({ tabId }: { tabId: string }) => {
       await toolkit.switchToTab({ tabId });
@@ -204,6 +230,9 @@ export function getDiscoverInternalStateMock({
         })
       );
     }),
+    getCurrentTab: assertTabsAreInitialized(() => {
+      return selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);
+    }),
     addNewTab: assertTabsAreInitialized(async ({ tab }: { tab: TabState }) => {
       const currentState = internalState.getState();
 
@@ -229,6 +258,27 @@ export function getDiscoverInternalStateMock({
         })
       );
     }),
+    saveDiscoverSession: assertTabsAreInitialized(
+      async (params: Partial<SaveDiscoverSessionThunkParams> = {}) => {
+        const { persistedDiscoverSession } = internalState.getState();
+
+        await internalState
+          .dispatch(
+            internalStateActions.saveDiscoverSession({
+              newTitle: persistedDiscoverSession?.title ?? 'new title',
+              newCopyOnSave: false,
+              newTimeRestore:
+                persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? false,
+              newDescription: persistedDiscoverSession?.description ?? 'new description',
+              newTags: persistedDiscoverSession?.tags ?? [],
+              isTitleDuplicateConfirmed: false,
+              onTitleDuplicate: jest.fn(),
+              ...params,
+            })
+          )
+          .unwrap();
+      }
+    ),
   };
 
   return toolkit;
