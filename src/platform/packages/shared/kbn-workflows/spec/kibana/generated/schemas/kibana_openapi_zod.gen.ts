@@ -49145,77 +49145,6 @@ export const post_streams_name_content_import_request = z.object({
     })
 });
 
-export const get_streams_name_dashboards_request = z.object({
-    body: z.optional(z.union([
-        z.record(z.string(), z.never()),
-        z.enum(['null']),
-        z.unknown()
-    ])),
-    path: z.object({
-        name: z.string()
-    }),
-    query: z.optional(z.never())
-});
-
-export const post_streams_name_dashboards_bulk_request = z.object({
-    body: z.optional(z.object({
-        operations: z.array(z.union([z.object({
-                index: z.object({
-                    id: z.string()
-                })
-            }), z.object({
-                delete: z.object({
-                    id: z.string()
-                })
-            })]))
-    })),
-    path: z.object({
-        name: z.string()
-    }),
-    query: z.optional(z.never()),
-    headers: z.object({
-        'kbn-xsrf': z.string().register(z.globalRegistry, {
-            description: 'A required header to protect against CSRF attacks'
-        })
-    })
-});
-
-export const delete_streams_name_dashboards_dashboardid_request = z.object({
-    body: z.optional(z.union([
-        z.record(z.string(), z.never()),
-        z.enum(['null']),
-        z.unknown()
-    ])),
-    path: z.object({
-        name: z.string(),
-        dashboardId: z.string()
-    }),
-    query: z.optional(z.never()),
-    headers: z.object({
-        'kbn-xsrf': z.string().register(z.globalRegistry, {
-            description: 'A required header to protect against CSRF attacks'
-        })
-    })
-});
-
-export const put_streams_name_dashboards_dashboardid_request = z.object({
-    body: z.optional(z.union([
-        z.record(z.string(), z.never()),
-        z.enum(['null']),
-        z.unknown()
-    ])),
-    path: z.object({
-        name: z.string(),
-        dashboardId: z.string()
-    }),
-    query: z.optional(z.never()),
-    headers: z.object({
-        'kbn-xsrf': z.string().register(z.globalRegistry, {
-            description: 'A required header to protect against CSRF attacks'
-        })
-    })
-});
-
 export const get_streams_name_queries_request = z.object({
     body: z.optional(z.union([
         z.record(z.string(), z.never()),
@@ -49476,54 +49405,6 @@ export const put_streams_name_queries_queryid_request = z.object({
     path: z.object({
         name: z.string(),
         queryId: z.string()
-    }),
-    query: z.optional(z.never()),
-    headers: z.object({
-        'kbn-xsrf': z.string().register(z.globalRegistry, {
-            description: 'A required header to protect against CSRF attacks'
-        })
-    })
-});
-
-export const get_streams_name_rules_request = z.object({
-    body: z.optional(z.union([
-        z.record(z.string(), z.never()),
-        z.enum(['null']),
-        z.unknown()
-    ])),
-    path: z.object({
-        name: z.string()
-    }),
-    query: z.optional(z.never())
-});
-
-export const delete_streams_name_rules_ruleid_request = z.object({
-    body: z.optional(z.union([
-        z.record(z.string(), z.never()),
-        z.enum(['null']),
-        z.unknown()
-    ])),
-    path: z.object({
-        name: z.string(),
-        ruleId: z.string()
-    }),
-    query: z.optional(z.never()),
-    headers: z.object({
-        'kbn-xsrf': z.string().register(z.globalRegistry, {
-            description: 'A required header to protect against CSRF attacks'
-        })
-    })
-});
-
-export const put_streams_name_rules_ruleid_request = z.object({
-    body: z.optional(z.union([
-        z.record(z.string(), z.never()),
-        z.enum(['null']),
-        z.unknown()
-    ])),
-    path: z.object({
-        name: z.string(),
-        ruleId: z.string()
     }),
     query: z.optional(z.never()),
     headers: z.object({
@@ -49800,7 +49681,11 @@ export const get_streams_streamname_attachments_request = z.object({
         })
     }),
     query: z.optional(z.object({
-        attachmentType: z.optional(z.enum(['dashboard', 'rule']).register(z.globalRegistry, {
+        attachmentType: z.optional(z.enum([
+            'dashboard',
+            'rule',
+            'slo'
+        ]).register(z.globalRegistry, {
             description: 'Filter by attachment type'
         }))
     }))
@@ -49811,12 +49696,20 @@ export const post_streams_streamname_attachments_bulk_request = z.object({
         operations: z.array(z.union([z.object({
                 index: z.object({
                     id: z.string(),
-                    type: z.enum(['dashboard', 'rule'])
+                    type: z.enum([
+                        'dashboard',
+                        'rule',
+                        'slo'
+                    ])
                 })
             }), z.object({
                 delete: z.object({
                     id: z.string(),
-                    type: z.enum(['dashboard', 'rule'])
+                    type: z.enum([
+                        'dashboard',
+                        'rule',
+                        'slo'
+                    ])
                 })
             })]))
     })),
@@ -49843,7 +49736,11 @@ export const delete_streams_streamname_attachments_attachmenttype_attachmentid_r
         streamName: z.string().register(z.globalRegistry, {
             description: 'The name of the stream'
         }),
-        attachmentType: z.enum(['dashboard', 'rule']).register(z.globalRegistry, {
+        attachmentType: z.enum([
+            'dashboard',
+            'rule',
+            'slo'
+        ]).register(z.globalRegistry, {
             description: 'The type of the attachment'
         }),
         attachmentId: z.string().register(z.globalRegistry, {
@@ -49868,7 +49765,11 @@ export const put_streams_streamname_attachments_attachmenttype_attachmentid_requ
         streamName: z.string().register(z.globalRegistry, {
             description: 'The name of the stream'
         }),
-        attachmentType: z.enum(['dashboard', 'rule']).register(z.globalRegistry, {
+        attachmentType: z.enum([
+            'dashboard',
+            'rule',
+            'slo'
+        ]).register(z.globalRegistry, {
             description: 'The type of the attachment'
         }),
         attachmentId: z.string().register(z.globalRegistry, {

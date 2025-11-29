@@ -11,8 +11,8 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Kibana connector definitions generated from Kibana OpenAPI specification.
- * Generated at: 2025-11-28T12:43:51.817Z
- * Source: /oas_docs/output/kibana.yaml (528 APIs)
+ * Generated at: 2025-11-29T13:57:49.174Z
+ * Source: /oas_docs/output/kibana.yaml (521 APIs)
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
@@ -483,17 +483,10 @@ import { GET_STREAMS_NAME_INGEST_CONTRACT } from './kibana.get_streams_name_inge
 import { PUT_STREAMS_NAME_INGEST_CONTRACT } from './kibana.put_streams_name_ingest.gen';
 import { POST_STREAMS_NAME_CONTENT_EXPORT_CONTRACT } from './kibana.post_streams_name_content_export.gen';
 import { POST_STREAMS_NAME_CONTENT_IMPORT_CONTRACT } from './kibana.post_streams_name_content_import.gen';
-import { GET_STREAMS_NAME_DASHBOARDS_CONTRACT } from './kibana.get_streams_name_dashboards.gen';
-import { POST_STREAMS_NAME_DASHBOARDS_BULK_CONTRACT } from './kibana.post_streams_name_dashboards_bulk.gen';
-import { DELETE_STREAMS_NAME_DASHBOARDS_DASHBOARDID_CONTRACT } from './kibana.delete_streams_name_dashboards_dashboardid.gen';
-import { PUT_STREAMS_NAME_DASHBOARDS_DASHBOARDID_CONTRACT } from './kibana.put_streams_name_dashboards_dashboardid.gen';
 import { GET_STREAMS_NAME_QUERIES_CONTRACT } from './kibana.get_streams_name_queries.gen';
 import { POST_STREAMS_NAME_QUERIES_BULK_CONTRACT } from './kibana.post_streams_name_queries_bulk.gen';
 import { DELETE_STREAMS_NAME_QUERIES_QUERYID_CONTRACT } from './kibana.delete_streams_name_queries_queryid.gen';
 import { PUT_STREAMS_NAME_QUERIES_QUERYID_CONTRACT } from './kibana.put_streams_name_queries_queryid.gen';
-import { GET_STREAMS_NAME_RULES_CONTRACT } from './kibana.get_streams_name_rules.gen';
-import { DELETE_STREAMS_NAME_RULES_RULEID_CONTRACT } from './kibana.delete_streams_name_rules_ruleid.gen';
-import { PUT_STREAMS_NAME_RULES_RULEID_CONTRACT } from './kibana.put_streams_name_rules_ruleid.gen';
 import { GET_STREAMS_NAME_SIGNIFICANT_EVENTS_CONTRACT } from './kibana.get_streams_name_significant_events.gen';
 import { POST_STREAMS_NAME_SIGNIFICANT_EVENTS_GENERATE_CONTRACT } from './kibana.post_streams_name_significant_events_generate.gen';
 import { POST_STREAMS_NAME_SIGNIFICANT_EVENTS_PREVIEW_CONTRACT } from './kibana.post_streams_name_significant_events_preview.gen';
@@ -1014,17 +1007,10 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
   PUT_STREAMS_NAME_INGEST_CONTRACT,
   POST_STREAMS_NAME_CONTENT_EXPORT_CONTRACT,
   POST_STREAMS_NAME_CONTENT_IMPORT_CONTRACT,
-  GET_STREAMS_NAME_DASHBOARDS_CONTRACT,
-  POST_STREAMS_NAME_DASHBOARDS_BULK_CONTRACT,
-  DELETE_STREAMS_NAME_DASHBOARDS_DASHBOARDID_CONTRACT,
-  PUT_STREAMS_NAME_DASHBOARDS_DASHBOARDID_CONTRACT,
   GET_STREAMS_NAME_QUERIES_CONTRACT,
   POST_STREAMS_NAME_QUERIES_BULK_CONTRACT,
   DELETE_STREAMS_NAME_QUERIES_QUERYID_CONTRACT,
   PUT_STREAMS_NAME_QUERIES_QUERYID_CONTRACT,
-  GET_STREAMS_NAME_RULES_CONTRACT,
-  DELETE_STREAMS_NAME_RULES_RULEID_CONTRACT,
-  PUT_STREAMS_NAME_RULES_RULEID_CONTRACT,
   GET_STREAMS_NAME_SIGNIFICANT_EVENTS_CONTRACT,
   POST_STREAMS_NAME_SIGNIFICANT_EVENTS_GENERATE_CONTRACT,
   POST_STREAMS_NAME_SIGNIFICANT_EVENTS_PREVIEW_CONTRACT,
