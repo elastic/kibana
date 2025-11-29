@@ -31,7 +31,7 @@ import type { AggregatedByRuleEntry } from './utils';
 import {
   resultsFromMap,
   formatConsolidatedSummary,
-  handleCancellation,
+  isCancelled,
   filterGapsWithOverlappingBackfills,
   initRun,
   checkBackfillCapacity,
@@ -101,13 +101,7 @@ export async function processRuleBatches({
       return { aggregatedByRule, state: SchedulerLoopState.CAPACITY_EXHAUSTED };
     }
 
-    if (
-      await handleCancellation({
-        abortController,
-        aggregatedByRule,
-        logEvent,
-      })
-    ) {
+    if (isCancelled(abortController)) {
       return { aggregatedByRule, state: SchedulerLoopState.CANCELLED };
     }
 
@@ -204,13 +198,7 @@ export async function processGapsForRules({
     }
     gapFetchIterationCount++;
 
-    if (
-      await handleCancellation({
-        abortController,
-        aggregatedByRule: aggregated,
-        logEvent,
-      })
-    ) {
+    if (isCancelled(abortController)) {
       return {
         aggregatedByRule: aggregated,
         remainingBackfills,
@@ -301,28 +289,28 @@ function addChunkResultsToAggregation(
 ): Map<string, AggregatedByRuleEntry> {
   const nextAggregated = new Map(aggregatedByRule);
 
-  for (const r of chunkResults) {
-    const existing = nextAggregated.get(r.ruleId);
+  for (const chunk of chunkResults) {
+    const existing = nextAggregated.get(chunk.ruleId);
     if (!existing) {
-      nextAggregated.set(r.ruleId, {
-        ruleId: r.ruleId,
-        processedGaps: r.processedGaps,
-        status: r.status,
-        error: r.error,
+      nextAggregated.set(chunk.ruleId, {
+        ruleId: chunk.ruleId,
+        processedGaps: chunk.processedGaps,
+        status: chunk.status,
+        error: chunk.error,
       });
-    } else {
-      let combinedStatus = existing.status;
-      if (r.status === GapFillSchedulePerRuleStatus.ERROR) {
-        combinedStatus = GapFillSchedulePerRuleStatus.ERROR;
-      }
-
-      nextAggregated.set(r.ruleId, {
-        ruleId: r.ruleId,
-        processedGaps: existing.processedGaps + (r.processedGaps ?? 0),
-        status: combinedStatus,
-        error: existing.error ?? r.error,
-      });
+      continue;
     }
+    let combinedStatus = existing.status;
+    if (chunk.status === GapFillSchedulePerRuleStatus.ERROR) {
+      combinedStatus = GapFillSchedulePerRuleStatus.ERROR;
+    }
+
+    nextAggregated.set(chunk.ruleId, {
+      ruleId: chunk.ruleId,
+      processedGaps: existing.processedGaps + (chunk.processedGaps ?? 0),
+      status: combinedStatus,
+      error: existing.error ?? chunk.error,
+    });
   }
 
   return nextAggregated;
@@ -397,6 +385,7 @@ export function registerGapAutoFillSchedulerTask({
             } catch (e) {
               const errMsg = e instanceof Error ? e.message : String(e);
               logger.error(loggerMessage(`initialization failed: ${errMsg}`));
+              // There no point in retrying the task if it's not initialized.
               return { state: {}, shouldDeleteTask: true };
             }
 
@@ -483,9 +472,9 @@ export function registerGapAutoFillSchedulerTask({
               });
 
               const aggregatedByRule = gapFillsResult.aggregatedByRule;
+              const consolidated = resultsFromMap(aggregatedByRule);
 
               if (gapFillsResult.state === SchedulerLoopState.CAPACITY_EXHAUSTED) {
-                const consolidated = resultsFromMap(aggregatedByRule);
                 await logEvent({
                   status: GAP_AUTO_FILL_STATUS.SUCCESS,
                   results: consolidated,
@@ -499,11 +488,17 @@ export function registerGapAutoFillSchedulerTask({
               }
 
               if (gapFillsResult.state === SchedulerLoopState.CANCELLED) {
+                await logEvent({
+                  status: GAP_AUTO_FILL_STATUS.SUCCESS,
+                  results: consolidated,
+                  message: `Gap Auto Fill Scheduler cancelled by timeout | Results: ${formatConsolidatedSummary(
+                    consolidated
+                  )}`,
+                });
                 return { state: {} };
               }
 
               // Step 5: Finalize and log results
-              const consolidated = resultsFromMap(aggregatedByRule);
               const { status: outcomeStatus, message: outcomeMessage } =
                 getGapAutoFillRunOutcome(consolidated);
               const summary = consolidated.length

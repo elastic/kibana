@@ -14,13 +14,13 @@ import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { ReportingSharingData } from '@kbn/reporting-public/share/share_context_menu';
 import { EuiLink } from '@elastic/eui';
 import { REPORTING_MANAGEMENT_SCHEDULES } from '@kbn/reporting-common';
+import { transformEmailNotification } from '../utils';
 import type { ReportTypeData, ScheduledReport } from '../../types';
 import type { FormData } from './scheduled_report_form';
 import { ScheduledReportForm } from './scheduled_report_form';
 import * as i18n from '../translations';
 import { getReportParams } from '../report_params';
 import { useScheduleReport } from '../hooks/use_schedule_report';
-import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
 
 export interface CreateScheduledReportFormProps {
   // create
@@ -41,14 +41,9 @@ export const CreateScheduledReportForm = ({
   onClose,
 }: CreateScheduledReportFormProps) => {
   const {
-    application: { capabilities },
     http,
     notifications: { toasts },
-    userProfile: userProfileService,
   } = useKibana().services;
-  const { data: userProfile } = useGetUserProfileQuery({
-    userProfileService,
-  });
   const reportingPageLink = useMemo(
     () => (
       <EuiLink href={http.basePath.prepend(REPORTING_MANAGEMENT_SCHEDULES)}>
@@ -62,14 +57,10 @@ export const CreateScheduledReportForm = ({
     http,
   });
 
-  const hasManageReportingPrivilege = useMemo(() => {
-    if (!capabilities) {
-      return false;
-    }
-    return capabilities.manageReporting.show === true;
-  }, [capabilities]);
-
   const onSubmit = async (formData: FormData) => {
+    if (!sharingData || !objectType) {
+      return;
+    }
     try {
       const {
         title,
@@ -80,6 +71,10 @@ export const CreateScheduledReportForm = ({
         optimizedForPrinting,
         sendByEmail,
         emailRecipients,
+        emailCcRecipients,
+        emailBccRecipients,
+        emailSubject,
+        emailMessage,
       } = formData;
       const rrule = convertToRRule({
         startDate,
@@ -91,15 +86,24 @@ export const CreateScheduledReportForm = ({
         reportTypeId,
         jobParams: getReportParams({
           apiClient,
-          // The assertion at the top of the component ensures these are defined when scheduling
-          sharingData: sharingData!,
-          objectType: objectType!,
+          sharingData,
+          objectType,
           title,
           reportTypeId,
           ...(reportTypeId === 'printablePdfV2' ? { optimizedForPrinting } : {}),
         }),
         schedule: { rrule: rrule as Rrule },
-        notification: sendByEmail ? { email: { to: emailRecipients } } : undefined,
+        notification: sendByEmail
+          ? {
+              email: transformEmailNotification({
+                emailRecipients,
+                emailCcRecipients,
+                emailBccRecipients,
+                emailSubject,
+                emailMessage,
+              }),
+            }
+          : undefined,
       });
       toasts.addSuccess({
         title: i18n.SCHEDULED_REPORT_FORM_SUCCESS_TOAST_TITLE,
@@ -127,9 +131,6 @@ export const CreateScheduledReportForm = ({
       onClose={onClose}
       onSubmitForm={onSubmit}
       isSubmitLoading={isSubmitLoading}
-      defaultEmail={
-        !hasManageReportingPrivilege && userProfile?.user.email ? userProfile.user.email : undefined
-      }
     />
   );
 };

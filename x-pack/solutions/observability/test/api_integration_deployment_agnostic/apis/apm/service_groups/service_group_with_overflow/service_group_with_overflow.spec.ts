@@ -9,7 +9,7 @@ import type { ValuesType } from 'utility-types';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { createServiceGroupApi, deleteAllServiceGroups } from '../service_groups_api_methods';
 import { createServiceTransactionMetricsDocs } from './es_utils';

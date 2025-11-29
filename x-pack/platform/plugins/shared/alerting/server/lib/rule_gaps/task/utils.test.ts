@@ -21,7 +21,6 @@ import {
   getGapAutoFillRunOutcome,
   type AggregatedByRuleEntry,
 } from './utils';
-import type { GapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
 import { GapFillSchedulePerRuleStatus } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
 
 describe('gap auto fill task utils', () => {
