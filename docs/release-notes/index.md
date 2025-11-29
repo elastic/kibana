@@ -56,7 +56,7 @@ For the Elastic Security 9.2.2 release information, refer to [Elastic Security S
 * Fixes Docker image in the **Add agent** Kubernetes manifest [#242691]({{kib-pull}}242691).
 
 **Discover**:
-* Fixes truncation for longer text in Discover table [#241440]({{kib-pull}}241440).
+* Fixes truncation for longer text in the Discover table [#241440]({{kib-pull}}241440).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.2.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
