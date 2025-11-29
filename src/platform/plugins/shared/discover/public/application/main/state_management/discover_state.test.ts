@@ -304,11 +304,15 @@ describe('Discover state', () => {
     const history = createBrowserHistory<HistoryLocationState>();
     const mockDataPlugin = dataPluginMock.createStartContract();
     const state = getDiscoverStateMock({ history });
+    const { currentDataView$ } = selectTabRuntimeState(
+      state.runtimeStateManager,
+      state.getCurrentTab().id
+    );
     state.internalState.dispatch(
       state.injectCurrentTab(internalStateActions.updateAppState)({
         appState: {
           dataSource: createDataViewDataSource({
-            dataViewId: savedSearchMock.searchSource.getField('index')!.id!,
+            dataViewId: currentDataView$.getValue()?.id!,
           }),
         },
       })
@@ -503,7 +507,11 @@ describe('Discover state', () => {
                 "timeRange": undefined,
               }
           `);
-      expect(searchSource.getField('index')?.id).toEqual('the-data-view-id');
+      const { currentDataView$ } = selectTabRuntimeState(
+        state.runtimeStateManager,
+        state.getCurrentTab().id
+      );
+      expect(currentDataView$.getValue()?.id).toEqual('the-data-view-id');
       state.actions.stopSyncing();
     });
 
@@ -785,9 +793,11 @@ describe('Discover state', () => {
           },
         })
       );
-      expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
-        'the-data-view-id'
+      const { currentDataView$ } = selectTabRuntimeState(
+        state.runtimeStateManager,
+        state.getCurrentTab().id
       );
+      expect(currentDataView$.getValue()?.id).toBe('the-data-view-id');
       expect(mockServices.toastNotifications.addWarning).toHaveBeenCalledWith(
         expect.objectContaining({
           'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
@@ -833,9 +843,11 @@ describe('Discover state', () => {
           },
         })
       );
-      expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
-        'the-data-view-id'
+      const { currentDataView$ } = selectTabRuntimeState(
+        state.runtimeStateManager,
+        state.getCurrentTab().id
       );
+      expect(currentDataView$.getValue()?.id).toBe('the-data-view-id');
       expect(mockServices.toastNotifications.addWarning).toHaveBeenCalledWith(
         expect.objectContaining({
           'data-test-subj': 'dscDataViewNotFoundShowSavedWarning',
@@ -870,9 +882,11 @@ describe('Discover state', () => {
           },
         })
       );
-      expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
-        'the-data-view-id'
+      let { currentDataView$ } = selectTabRuntimeState(
+        state.runtimeStateManager,
+        state.getCurrentTab().id
       );
+      expect(currentDataView$.getValue()?.id).toBe('the-data-view-id');
       let { hasUnsavedChanges } = selectHasUnsavedChanges(state.internalState.getState(), {
         runtimeStateManager: state.runtimeStateManager,
         services: mockServices,
@@ -924,9 +938,11 @@ describe('Discover state', () => {
           },
         })
       );
-      expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
-        'index-pattern-with-timefield-id'
-      );
+      ({ currentDataView$ } = selectTabRuntimeState(
+        state.runtimeStateManager,
+        state.getCurrentTab().id
+      ));
+      expect(currentDataView$.getValue()?.id).toBe('index-pattern-with-timefield-id');
       ({ hasUnsavedChanges } = selectHasUnsavedChanges(state.internalState.getState(), {
         runtimeStateManager: state.runtimeStateManager,
         services: mockServices,
@@ -981,9 +997,11 @@ describe('Discover state', () => {
           },
         })
       );
-      expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
-        'index-pattern-with-timefield-id'
-      );
+      ({ currentDataView$ } = selectTabRuntimeState(
+        state.runtimeStateManager,
+        state.getCurrentTab().id
+      ));
+      expect(currentDataView$.getValue()?.id).toBe('index-pattern-with-timefield-id');
       ({ hasUnsavedChanges } = selectHasUnsavedChanges(state.internalState.getState(), {
         runtimeStateManager: state.runtimeStateManager,
         services: mockServices,
@@ -1108,8 +1126,11 @@ describe('Discover state', () => {
           },
         })
       );
-      const nextSavedSearch = state.savedSearchState.getState();
-      expect(persistedDataViewId).toBe(nextSavedSearch?.searchSource.getField('index')!.id);
+      const { currentDataView$ } = selectTabRuntimeState(
+        state.runtimeStateManager,
+        state.getCurrentTab().id
+      );
+      expect(persistedDataViewId).toBe(currentDataView$.getValue()?.id);
     });
 
     test('transitionFromDataViewToESQL', async () => {
@@ -1159,7 +1180,7 @@ describe('Discover state', () => {
       const { state, customizationService, getCurrentUrl } = await getState('/', {
         savedSearch: savedSearchMock,
       });
-      const { actions, savedSearchState, dataState } = state;
+      const { actions, dataState } = state;
 
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -1174,7 +1195,11 @@ describe('Discover state', () => {
       await new Promise(process.nextTick);
       // test initial state
       expect(dataState.fetch).toHaveBeenCalledTimes(1);
-      expect(savedSearchState.getState().searchSource.getField('index')!.id).toBe(dataViewMock.id);
+      const { currentDataView$ } = selectTabRuntimeState(
+        state.runtimeStateManager,
+        state.getCurrentTab().id
+      );
+      expect(currentDataView$.getValue()?.id).toBe(dataViewMock.id);
       expect(getCurrentUrl()).toContain(dataViewMock.id);
 
       // change data view
@@ -1186,9 +1211,7 @@ describe('Discover state', () => {
       expect(state.getCurrentTab().appState.dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewComplexMock.id! })
       );
-      expect(savedSearchState.getState().searchSource.getField('index')!.id).toBe(
-        dataViewComplexMock.id
-      );
+      expect(currentDataView$.getValue()?.id).toBe(dataViewComplexMock.id);
       // check if the changed data view is reflected in the URL
       expect(getCurrentUrl()).toContain(dataViewComplexMock.id);
       state.actions.stopSyncing();
@@ -1220,9 +1243,11 @@ describe('Discover state', () => {
       expect(state.getCurrentTab().appState.dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewComplexMock.id! })
       );
-      expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
-        dataViewComplexMock.id
+      const { currentDataView$ } = selectTabRuntimeState(
+        state.runtimeStateManager,
+        state.getCurrentTab().id
       );
+      expect(currentDataView$.getValue()?.id).toBe(dataViewComplexMock.id);
       state.actions.stopSyncing();
     });
 
@@ -1257,9 +1282,11 @@ describe('Discover state', () => {
       expect(state.getCurrentTab().appState.dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewAdHoc.id! })
       );
-      expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
-        dataViewAdHoc.id
+      const { currentDataView$ } = selectTabRuntimeState(
+        state.runtimeStateManager,
+        state.getCurrentTab().id
       );
+      expect(currentDataView$.getValue()?.id).toBe(dataViewAdHoc.id);
       state.actions.stopSyncing();
     });
 

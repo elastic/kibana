@@ -410,6 +410,7 @@ export function getDiscoverStateMock({
 
   if (finalSavedSearch) {
     container.savedSearchState.set(finalSavedSearch);
+    tabRuntimeState.currentDataView$.next(finalSavedSearch.searchSource.getField('index'));
   }
 
   return container;
