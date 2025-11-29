@@ -55,3 +55,22 @@ export type GapAutoFillSchedulerResponse = GapAutoFillSchedulerBase & {
   createdAt: string;
   updatedAt: string;
 };
+
+export interface GapAutoFillSchedulerLogEntry {
+  timestamp: string;
+  status: string;
+  message: string;
+  results: {
+    ruleId: string;
+    processedGaps: number;
+    status: string;
+    error: string;
+  }[];
+}
+
+export interface GapAutoFillSchedulerLogsResponse {
+  data: GapAutoFillSchedulerLogEntry[];
+  total: number;
+  page: number;
+  perPage: number;
+}

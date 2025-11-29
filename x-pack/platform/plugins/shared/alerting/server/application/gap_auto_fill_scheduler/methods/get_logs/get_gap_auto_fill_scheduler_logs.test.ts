@@ -228,7 +228,7 @@ describe('getGapAutoFillSchedulerLogs()', () => {
       end: '2023-01-02T00:00:00.000Z',
       sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
       filter:
-        'event.action:gap-auto-fill-schedule AND (event.kibana.gap_auto_fill.execution.status : success OR event.kibana.gap_auto_fill.execution.status : error)',
+        'event.action:gap-auto-fill-schedule AND (kibana.gap_auto_fill.execution.status : success OR kibana.gap_auto_fill.execution.status : error)',
     });
   });
 

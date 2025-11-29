@@ -25,6 +25,7 @@ export const getGapAutoFillSchedulerLogsParamsSchema = schema.object({
 });
 
 export const gapAutoFillSchedulerLogEntrySchema = schema.object({
+  id: schema.string(),
   timestamp: schema.maybe(schema.string()),
   status: schema.maybe(schema.string()),
   message: schema.maybe(schema.string()),

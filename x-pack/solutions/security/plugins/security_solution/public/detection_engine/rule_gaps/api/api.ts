@@ -22,7 +22,10 @@ import type { GetGapsSummaryByRuleIdsResponseBody } from '@kbn/alerting-plugin/c
 import type { GetRuleIdsWithGapResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_rules_with_gaps';
 import type { FindGapsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/find';
 import type { FillGapByIdResponseV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/fill';
-import type { GapAutoFillSchedulerResponseBodyV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler';
+import type {
+  GapAutoFillSchedulerResponseBodyV1,
+  GapAutoFillSchedulerLogsResponseBodyV1,
+} from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler';
 import dateMath from '@kbn/datemath';
 import { KibanaServices } from '../../../common/lib/kibana';
 import type { GapStatus, ScheduleBackfillProps, GapAutoFillSchedulerBase } from '../types';
@@ -73,24 +76,27 @@ export const findBackfillsForRules = async ({
   signal,
   sortField = 'createdAt',
   sortOrder = 'desc',
+  initiator,
 }: {
-  ruleIds: string[];
+  ruleIds?: string[];
   page: number;
   perPage: number;
   signal?: AbortSignal;
   sortField?: string;
   sortOrder?: string;
+  initiator?: string;
 }): Promise<FindBackfillResponseBody> =>
   KibanaServices.get().http.fetch<FindBackfillResponseBody>(
     INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
     {
       method: 'POST',
       query: {
-        rule_ids: ruleIds.join(','),
+        ...(ruleIds && ruleIds.length > 0 ? { rule_ids: ruleIds.join(',') } : {}),
         page,
         per_page: perPage,
         sort_field: sortField,
         sort_order: sortOrder,
+        initiator,
       },
       signal,
     }
@@ -314,5 +320,43 @@ export const updateGapAutoFillScheduler = async (
         num_retries: params.numRetries,
         enabled: params.enabled,
       }),
+    }
+  );
+
+export const getGapAutoFillSchedulerLogs = async ({
+  id,
+  start,
+  end,
+  page,
+  perPage,
+  sortField,
+  sortDirection,
+  statuses,
+  signal,
+}: {
+  id: string;
+  start: string;
+  end: string;
+  page: number;
+  perPage: number;
+  sortField: string;
+  sortDirection: string;
+  statuses: string[];
+  signal?: AbortSignal;
+}): Promise<GapAutoFillSchedulerLogsResponseBodyV1> =>
+  KibanaServices.get().http.fetch<GapAutoFillSchedulerLogsResponseBodyV1>(
+    `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/${id}/logs`,
+    {
+      method: 'GET',
+      signal,
+      query: {
+        start,
+        end,
+        page,
+        per_page: perPage,
+        sort_field: sortField,
+        sort_direction: sortDirection,
+        statuses: [...statuses],
+      },
     }
   );

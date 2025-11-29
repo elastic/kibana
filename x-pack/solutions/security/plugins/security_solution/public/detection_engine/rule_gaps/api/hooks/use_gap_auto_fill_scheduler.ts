@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import type { GapAutoFillSchedulerResponseBodyV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
@@ -13,6 +12,7 @@ import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import {
   createGapAutoFillScheduler,
   getGapAutoFillScheduler,
+  getGapAutoFillSchedulerLogs,
   updateGapAutoFillScheduler,
 } from '../api';
 import type { GapAutoFillSchedulerResponse, GapAutoFillSchedulerBase } from '../../types';
@@ -23,7 +23,9 @@ import {
   DEFAULT_GAP_AUTO_FILL_SCHEDULER_NUM_RETRIES,
   DEFAULT_GAP_AUTO_FILL_SCHEDULER_SCOPE,
   DEFAULT_GAP_AUTO_FILL_SCHEDULER_ID_PREFIX,
+  defaultRangeValue,
 } from '../../constants';
+import { getGapRange } from './utils';
 
 const transformGapAutoFillSchedulerResponseBody = (
   response: GapAutoFillSchedulerResponseBodyV1
@@ -54,10 +56,9 @@ export const useGetGapAutoFillScheduler = (options?: { enabled?: boolean }) => {
   const enabled = options?.enabled ?? true;
   const spaceId = useSpaceId();
   const schedulerId = getSchedulerId(spaceId);
-  const queryKey = useMemo(() => ['GET', 'gap_auto_fill_scheduler', schedulerId], [schedulerId]);
 
   return useQuery<GapAutoFillSchedulerResponse, Error>(
-    queryKey,
+    ['GET', 'gap_auto_fill_scheduler', schedulerId],
     async ({ signal }) => {
       const response = await getGapAutoFillScheduler({ id: schedulerId, signal });
       return transformGapAutoFillSchedulerResponseBody(response);
@@ -70,7 +71,6 @@ export const useCreateGapAutoFillScheduler = () => {
   const queryClient = useQueryClient();
   const spaceId = useSpaceId();
   const schedulerId = getSchedulerId(spaceId);
-  const queryKey = useMemo(() => ['GET', 'gap_auto_fill_scheduler', schedulerId], [schedulerId]);
 
   return useMutation(
     async () => {
@@ -96,7 +96,7 @@ export const useCreateGapAutoFillScheduler = () => {
     {
       mutationKey: ['POST', 'gap_auto_fill_scheduler'],
       onSettled: () => {
-        queryClient.invalidateQueries(queryKey);
+        queryClient.invalidateQueries(['GET', 'gap_auto_fill_scheduler', schedulerId]);
       },
     }
   );
@@ -106,12 +106,74 @@ export const useUpdateGapAutoFillScheduler = () => {
   const queryClient = useQueryClient();
   const spaceId = useSpaceId();
   const schedulerId = getSchedulerId(spaceId);
-  const queryKey = useMemo(() => ['GET', 'gap_auto_fill_scheduler', schedulerId], [schedulerId]);
 
   return useMutation((body: GapAutoFillSchedulerBase) => updateGapAutoFillScheduler(body), {
     mutationKey: ['PUT', 'gap_auto_fill_scheduler', schedulerId],
     onSettled: () => {
-      queryClient.invalidateQueries(queryKey);
+      queryClient.invalidateQueries(['GET', 'gap_auto_fill_scheduler', schedulerId]);
     },
   });
+};
+
+export const useGetGapAutoFillSchedulerLogs = ({
+  page,
+  perPage,
+  sortField,
+  sortDirection,
+  statuses,
+}: {
+  page: number;
+  perPage: number;
+  sortField: string;
+  sortDirection: string;
+  statuses: string[];
+}) => {
+  const spaceId = useSpaceId();
+  const schedulerId = getSchedulerId(spaceId);
+
+  const { start, end } = getGapRange(defaultRangeValue);
+
+  return useQuery(
+    [
+      'GET',
+      'gap_auto_fill_scheduler_logs',
+      schedulerId,
+      page,
+      perPage,
+      sortField,
+      sortDirection,
+      ...statuses,
+    ],
+    async ({ signal }) => {
+      const response = await getGapAutoFillSchedulerLogs({
+        id: schedulerId,
+        signal,
+        start,
+        end,
+        page,
+        perPage,
+        sortField,
+        sortDirection,
+        statuses,
+      });
+
+      return {
+        data: response?.data?.map((log) => ({
+          id: log.id,
+          timestamp: log.timestamp,
+          status: log.status,
+          message: log.message,
+          results: log.results?.map((result) => ({
+            ruleId: result.rule_id,
+            processedGaps: result.processed_gaps,
+            status: result.status,
+            error: result.error,
+          })),
+        })),
+        total: response.total,
+        page: response.page,
+        perPage: response.per_page,
+      };
+    }
+  );
 };

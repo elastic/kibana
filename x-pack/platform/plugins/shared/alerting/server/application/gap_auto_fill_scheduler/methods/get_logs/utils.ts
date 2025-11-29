@@ -15,6 +15,7 @@ export const formatGapAutoFillSchedulerLogEntry = (
   const executionResults = execution?.results ?? [];
 
   return {
+    id: entry._id,
     timestamp: entry['@timestamp'],
     status: execution?.status,
     message: entry.message,

@@ -98,7 +98,7 @@ export async function getGapAutoFillSchedulerLogs(
     const filters = ['event.action:gap-auto-fill-schedule'];
     if (params.statuses) {
       const statusFilters = `(${params.statuses
-        .map((status) => `event.kibana.gap_auto_fill.execution.status : ${status}`)
+        .map((status) => `kibana.gap_auto_fill.execution.status : ${status}`)
         .join(' OR ')})`;
       filters.push(statusFilters);
     }

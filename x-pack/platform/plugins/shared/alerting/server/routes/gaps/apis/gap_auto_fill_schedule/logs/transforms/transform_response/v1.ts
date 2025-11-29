@@ -12,6 +12,7 @@ export const transformResponse = (
   result: GapAutoFillSchedulerLogsResult
 ): GapAutoFillSchedulerLogsResponseBodyV1 => ({
   data: result.data.map((entry) => ({
+    id: entry.id,
     status: entry.status,
     message: entry.message,
     timestamp: entry.timestamp,

@@ -1,0 +1,237 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useMemo, useState } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiBasicTable,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFilterGroup,
+  EuiButtonIcon,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { GapAutoFillSchedulerLogsResponseBodyV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler';
+import { FormattedDate } from '../../../../common/components/formatted_date';
+import * as i18n from './translations';
+import {
+  useGetGapAutoFillScheduler,
+  useGetGapAutoFillSchedulerLogs,
+} from '../../api/hooks/use_gap_auto_fill_scheduler';
+import { MultiselectFilter } from '../../../../common/components/multiselect_filter';
+
+interface GapAutoFillLogsFlyoutProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyoutProps) => {
+  const { data: scheduler } = useGetGapAutoFillScheduler();
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(['success', 'error']);
+
+  const { data: logsData, isFetching: isLogsLoading } = useGetGapAutoFillSchedulerLogs({
+    page: pageIndex + 1,
+    perPage: pageSize,
+    statuses: selectedStatuses,
+    sortField: '@timestamp',
+    sortDirection: 'desc',
+  });
+
+  type SchedulerLog = GapAutoFillSchedulerLogsResponseBodyV1['data'][number];
+  const [expandedRowMap, setExpandedRowMap] = useState<Record<string, JSX.Element>>({});
+
+  const enabled = scheduler?.enabled;
+  const color = enabled ? 'success' : 'hollow';
+  const iconType = enabled ? 'checkInCircleFilled' : 'minusInCircle';
+
+  const getStatusLabel = (status: string | undefined) => {
+    if (!status) return '';
+    switch (status) {
+      case 'success':
+        return i18n.GAP_AUTO_FILL_STATUS_SUCCESS;
+      case 'error':
+        return i18n.GAP_AUTO_FILL_STATUS_ERROR;
+      case 'skipped':
+        return i18n.GAP_AUTO_FILL_STATUS_SKIPPED;
+      default:
+        return status;
+    }
+  };
+
+  const columns = useMemo(
+    () => [
+      {
+        field: 'timestamp',
+        width: '100%',
+        name: i18n.GAP_AUTO_FILL_RUN_TIME_COLUMN,
+        render: (timestamp: SchedulerLog['timestamp']) => {
+          return <FormattedDate value={timestamp} fieldName={'timestamp'} />;
+        },
+      },
+      {
+        field: 'status',
+        align: 'center',
+        width: '150px',
+        name: i18n.GAP_AUTO_FILL_LOGS_STATUS_COLUMN,
+        render: (status: SchedulerLog['status']) => {
+          const badgeColor =
+            status === 'success'
+              ? 'success'
+              : status === 'warning'
+              ? 'warning'
+              : status === 'skipped'
+              ? 'hollow'
+              : 'danger';
+          return <EuiBadge color={badgeColor}>{getStatusLabel(status)}</EuiBadge>;
+        },
+      },
+      {
+        width: '120px',
+        align: 'right',
+        isExpander: true,
+        render: (item: SchedulerLog) => {
+          const itemIdToExpandedRowMapValues = { ...expandedRowMap };
+          const isExpanded = itemIdToExpandedRowMapValues[item.id];
+
+          const toggleViewLogs = () => {
+            if (isExpanded) {
+              delete itemIdToExpandedRowMapValues[item.id];
+            } else {
+              itemIdToExpandedRowMapValues[item.id] = (
+                <>
+                  <EuiText size="s">
+                    <pre>{item.message}</pre>
+                  </EuiText>
+                </>
+              );
+            }
+            setExpandedRowMap(itemIdToExpandedRowMapValues);
+          };
+
+          return (
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiButtonEmpty size="s" color="primary" onClick={toggleViewLogs}>
+                {i18n.GAP_AUTO_FILL_LOGS_VIEW_LOGS_BUTTON}
+              </EuiButtonEmpty>
+              <EuiButtonIcon
+                onClick={toggleViewLogs}
+                aria-label={isExpanded ? 'Collapse' : 'Expand'}
+                iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+              />
+            </EuiFlexGroup>
+          );
+        },
+      },
+    ],
+    [expandedRowMap]
+  );
+
+  return (
+    <>
+      {isOpen && (
+        <EuiFlyout ownFocus onClose={onClose} size="l" aria-labelledby="gapAutoFillLogs">
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2 id="gapAutoFillLogs">{i18n.GAP_AUTO_FILL_LOGS_TITLE}</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <EuiSpacer size="m" />
+            <EuiPanel hasBorder>
+              <EuiFlexGroup gutterSize="xl">
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
+                    <EuiText>
+                      <b>{i18n.GAP_AUTO_FILL_STATUS_PANEL_TITLE}</b>
+                    </EuiText>
+
+                    <EuiBadge color={color} iconType={iconType}>
+                      {enabled ? i18n.GAP_AUTO_FILL_ON_LABEL : i18n.GAP_AUTO_FILL_OFF_LABEL}
+                    </EuiBadge>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
+                    <EuiText>
+                      <b>{i18n.GAP_AUTO_FILL_SCHEDULE_PANEL_TITLE}</b>
+                    </EuiText>
+                    <EuiBadge iconType="clockCounter" color="hollow">
+                      <FormattedMessage
+                        id="xpack.securitySolution.gapAutoFillLogs.runsEveryLabel"
+                        defaultMessage="Runs every {interval}"
+                        values={{
+                          interval: scheduler?.schedule?.interval ?? '—',
+                        }}
+                      />
+                    </EuiBadge>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+            <EuiSpacer size="m" />
+            <EuiPanel hasBorder>
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h3>{i18n.GAP_AUTO_FILL_LOGS_TITLE}</h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFilterGroup>
+                    <MultiselectFilter
+                      data-test-subj="gap-auto-fill-logs-status-filter"
+                      title={i18n.GAP_AUTO_FILL_STATUS_FILTER_TITLE}
+                      items={['success', 'error', 'skipped']}
+                      selectedItems={selectedStatuses}
+                      onSelectionChange={(items) => setSelectedStatuses(items)}
+                      renderItem={(s: string) => getStatusLabel(s)}
+                      width={200}
+                    />
+                  </EuiFilterGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EuiSpacer size="m" />
+
+              <EuiBasicTable
+                loading={isLogsLoading}
+                items={logsData?.data ?? []}
+                itemId="id"
+                columns={columns as EuiBasicTableColumn<SchedulerLog>[]}
+                pagination={{
+                  pageIndex,
+                  pageSize,
+                  totalItemCount: logsData?.total ?? 0,
+                  pageSizeOptions: [10, 25, 50],
+                }}
+                onChange={({ page }: { page?: { index: number; size: number } }) => {
+                  if (page) {
+                    setPageIndex(page.index);
+                    setPageSize(page.size);
+                  }
+                }}
+                itemIdToExpandedRowMap={expandedRowMap}
+              />
+            </EuiPanel>
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      )}
+    </>
+  );
+};
