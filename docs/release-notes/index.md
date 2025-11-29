@@ -229,7 +229,7 @@ For the Elastic Security 9.1.8 release information, refer to [Elastic Security S
 
 **Alerting and cases**:
 * Captures connector errors without interrupting the case creation flow. Issues with connectors can be resolved on the case details page  [#244188]({{kib-pull}}244188).
-* Fixes pagnition for the alerts table, which was getting stuck on rule details pages [#242275]({{kib-pull}}242275).
+* Fixes pagination for the **Alerts** table, which was getting stuck on rule details pages [#242275]({{kib-pull}}242275).
 * Fetches tracked alerts without depending on the task state [#235253]({{kib-pull}}235253).
 
 **Dashboards and Visualizations**:
