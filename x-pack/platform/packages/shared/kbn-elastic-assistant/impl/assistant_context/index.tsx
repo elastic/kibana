@@ -26,7 +26,7 @@ import type {
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import type { AIChatExperience } from '@kbn/ai-assistant-management-plugin/common/ai_chat_experience';
+import type { AIChatExperience } from '@kbn/ai-assistant-common';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,

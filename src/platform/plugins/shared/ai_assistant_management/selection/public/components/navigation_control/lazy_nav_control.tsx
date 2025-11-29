@@ -11,7 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { AIChatExperience } from '../../../common/ai_chat_experience';
+import type { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useIsNavControlVisible } from '../../hooks/use_is_nav_control_visible';
 import type { AIAssistantType } from '../../../common/ai_assistant_type';
 

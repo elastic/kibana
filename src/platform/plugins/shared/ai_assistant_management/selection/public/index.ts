@@ -16,7 +16,8 @@ import type {
 } from './plugin';
 
 export { AIAssistantType } from '../common/ai_assistant_type';
-export { AIChatExperience } from '../common/ai_chat_experience';
+export { AIChatExperience } from '@kbn/ai-assistant-common';
+export { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
 
 export type {
   AIAssistantManagementSelectionPluginPublicSetup,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export type AssistantScope = 'observability' | 'search' | 'all';
-
-export * from './chat_experience';
+export enum AIChatExperience {
+  Classic = 'classic',
+  Agents = 'agents',
+}

@@ -29,7 +29,8 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RobotIcon } from '@kbn/ai-assistant-icon';
-import { AIChatExperience } from '../../../common/ai_chat_experience';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
 import {
   PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
   PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
@@ -54,8 +55,10 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
   triggerOpenChat,
 }) => {
   const [isModalOpen, setModalOpen] = useState(false);
+  const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
 
   const { getUrlForApp } = coreStart.application;
+  const { toasts } = coreStart.notifications;
 
   const [selectedType, setSelectedType] = useState<{
     chatExperience: AIChatExperience;
@@ -81,21 +84,55 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
     []
   );
 
-  const onApply = useCallback(async () => {
+  const applySelection = useCallback(async () => {
+    try {
+      await coreStart.settings.client.set(
+        PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+        selectedType.assistant
+      );
+      await coreStart.settings.client.set(
+        PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
+        selectedType.chatExperience
+      );
+      triggerOpenChat({
+        chatExperience: selectedType.chatExperience,
+        assistant: selectedType.assistant,
+      });
+    } catch (error) {
+      toasts.addError(new Error(error.body?.message || error.message || 'Unknown error occurred'), {
+        title: i18n.translate(
+          'aiAssistantManagementSelection.headerButton.settingsSaveErrorTitle',
+          {
+            defaultMessage: 'Failed to apply AI assistant settings',
+          }
+        ),
+      });
+    }
+  }, [
+    coreStart.settings.client,
+    selectedType.assistant,
+    selectedType.chatExperience,
+    triggerOpenChat,
+    toasts,
+  ]);
+  const handleConfirmAgent = useCallback(async () => {
+    setConfirmModalOpen(false);
     setModalOpen(false);
-    await coreStart.settings.client.set(
-      PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-      selectedType.assistant
-    );
-    await coreStart.settings.client.set(
-      PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
-      selectedType.chatExperience
-    );
-    triggerOpenChat({
-      chatExperience: selectedType.chatExperience,
-      assistant: selectedType.assistant,
-    });
-  }, [selectedType, triggerOpenChat, coreStart.settings]);
+    await applySelection();
+  }, [applySelection]);
+
+  const handleCancelAgent = useCallback(() => {
+    setConfirmModalOpen(false);
+  }, []);
+
+  const onApply = useCallback(async () => {
+    if (selectedType.chatExperience === AIChatExperience.Agents) {
+      setConfirmModalOpen(true);
+    } else {
+      setModalOpen(false);
+      await applySelection();
+    }
+  }, [selectedType.chatExperience, applySelection]);
 
   return (
     <>
@@ -226,7 +263,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                       onClick: () =>
                         handleSelect({
                           chatExperience: AIChatExperience.Agents,
-                          assistant: AIAssistantType.Never, // TODO: check if this is correct
+                          assistant: AIAssistantType.Never, // TODO: Change it later, when buttons topic is clarified
                         }),
                     }}
                     title={i18n.translate(
@@ -268,7 +305,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                     data-test-subj="aiAssistantApplyButton"
                   >
                     {i18n.translate('aiAssistantManagementSelection.headerButton.applyLabel', {
-                      defaultMessage: 'Open AI Assistant',
+                      defaultMessage: 'Continue',
                     })}
                   </EuiButton>
                 </EuiFlexItem>
@@ -276,6 +313,10 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
             </EuiModalFooter>
           </EuiModal>
         </EuiOverlayMask>
+      )}
+
+      {isConfirmModalOpen && (
+        <AIAgentConfirmationModal onConfirm={handleConfirmAgent} onCancel={handleCancelAgent} />
       )}
     </>
   );

@@ -8,6 +8,7 @@
  */
 
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -22,7 +23,6 @@ import {
 import { classicSetting } from './src/settings/classic_setting';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import { chatExperienceSetting } from './src/settings/chat_experience_setting';
-import { AIChatExperience } from '../common/ai_chat_experience';
 
 export class AIAssistantManagementSelectionPlugin
   implements

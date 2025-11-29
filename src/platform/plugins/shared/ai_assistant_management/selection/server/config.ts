@@ -10,8 +10,8 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AIAssistantType } from '../common/ai_assistant_type';
-import { AIChatExperience } from '../common/ai_chat_experience';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),

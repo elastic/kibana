@@ -22,13 +22,13 @@ import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import {
   PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
   PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
 } from '../common/ui_setting_keys';
 import { NavControlInitiator } from './components/navigation_control/lazy_nav_control';
-import { AIChatExperience } from '../common/ai_chat_experience';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AIAssistantManagementSelectionPluginPublicSetup {}

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
-import { AIChatExperience } from '../../../common/ai_chat_experience';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_AGENT, CHAT_EXPERIENCE_TITLE, CLASSIC_AI_ASSISTANT } from './translations';
 
 // Define the chatExperienceSetting with proper typing
