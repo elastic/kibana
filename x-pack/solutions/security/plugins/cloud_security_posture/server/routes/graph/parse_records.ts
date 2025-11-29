@@ -160,7 +160,6 @@ const createGroupedActorAndTargetNodes = (
     actorEntitySubType,
     actorEntityName,
     actorHostIps,
-    actorEntityFieldHint,
     // target attributes
     targetNodeId,
     targetIdsCount,
@@ -169,14 +168,9 @@ const createGroupedActorAndTargetNodes = (
     targetEntitySubType,
     targetEntityName,
     targetHostIps,
-    targetEntityFieldHint,
   } = record;
   const actorHostIpsArray = actorHostIps ? castArray(actorHostIps) : [];
   const targetHostIpsArray = targetHostIps ? castArray(targetHostIps) : [];
-
-  // Convert namespace hints to arrays - each document has its own entity root namespace
-  const actorNamespaceArray = actorEntityFieldHint ? castArray(actorEntityFieldHint) : [];
-  const targetNamespaceArray = targetEntityFieldHint ? castArray(targetEntityFieldHint) : [];
 
   // Resolve entity types and labels using utility functions
   const actorEntityType = resolveEntityType(rawActorEntityType, actorIdsCount);
@@ -200,30 +194,16 @@ const createGroupedActorAndTargetNodes = (
 
   const actorsDocDataArray: NodeDocumentDataModel[] = actorsDocData
     ? castArray(actorsDocData)
-        .map((actorData, index) => {
-          if (actorData === null || actorData === undefined) {
-            return null;
-          }
-          return {
-            ...JSON.parse(actorData),
-            sourceNamespaceField: actorNamespaceArray[index],
-          };
-        })
-        .filter((doc): doc is NodeDocumentDataModel => doc !== null)
+        .filter((actorData): actorData is string => actorData !== null && actorData !== undefined)
+        .map((actorData) => JSON.parse(actorData))
     : [];
 
   const targetsDocDataArray: NodeDocumentDataModel[] = targetsDocData
     ? castArray(targetsDocData)
-        .map((targetData, index) => {
-          if (targetData === null || targetData === undefined) {
-            return null;
-          }
-          return {
-            ...JSON.parse(targetData),
-            sourceNamespaceField: targetNamespaceArray[index],
-          };
-        })
-        .filter((doc): doc is NodeDocumentDataModel => doc !== null)
+        .filter(
+          (targetData): targetData is string => targetData !== null && targetData !== undefined
+        )
+        .map((targetData) => JSON.parse(targetData))
     : [];
 
   // Target: Use node ID from ES|QL or UUID for unknown
@@ -231,30 +211,6 @@ const createGroupedActorAndTargetNodes = (
     targetIdsCount === 0
       ? `unknown-${uuidv4()}` // Multiple unknown target nodes possible - differentiate via UUID
       : targetNodeId!; // Use node ID from ES|QL (we know it's not null here)
-
-  // If we have a namespace hint but no documents, create a minimal document with just id and hint
-  // This ensures the hint is preserved for filtering
-  const actorDocDataWithHint =
-    actorsDocDataArray.length === 0 && actorNamespaceArray.length > 0 && actorIdsCount > 0
-      ? [
-          {
-            id: actorNodeId,
-            type: 'entity' as const,
-            sourceNamespaceField: actorNamespaceArray[0],
-          },
-        ]
-      : actorsDocDataArray;
-
-  const targetDocDataWithHint =
-    targetsDocDataArray.length === 0 && targetNamespaceArray.length > 0 && targetIdsCount > 0
-      ? [
-          {
-            id: targetId,
-            type: 'entity' as const,
-            sourceNamespaceField: targetNamespaceArray[0],
-          },
-        ]
-      : targetsDocDataArray;
 
   const actorGroup: {
     id: string;
@@ -266,7 +222,7 @@ const createGroupedActorAndTargetNodes = (
   } = {
     id: actorNodeId, // Actor: Always use node ID from ES|QL (single entity ID or MD5 hash)
     type: actorEntityType,
-    docData: actorDocDataWithHint,
+    docData: actorsDocDataArray,
     hostIps: actorHostIpsArray,
     ...(actorIdsCount > 1 ? { count: actorIdsCount } : {}),
     ...(actorLabel && actorLabel !== '' ? { label: actorLabel } : {}),
@@ -284,7 +240,7 @@ const createGroupedActorAndTargetNodes = (
       ? {
           id: targetId,
           type: targetEntityType,
-          docData: targetDocDataWithHint,
+          docData: targetsDocDataArray,
           hostIps: targetHostIpsArray,
           ...(targetIdsCount > 1 ? { count: targetIdsCount } : {}),
           ...(targetLabel && targetLabel !== '' ? { label: targetLabel } : {}),
