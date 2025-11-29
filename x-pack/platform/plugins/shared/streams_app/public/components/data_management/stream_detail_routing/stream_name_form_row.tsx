@@ -18,18 +18,23 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-plugin/public';
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
 
 interface StreamNameFormRowProps {
-  value: string;
-  onChange?: (value: string) => void;
+  setLocalStreamName?: React.Dispatch<React.SetStateAction<string>>;
   readOnly?: boolean;
   autoFocus?: boolean;
   error?: string;
   isInvalid?: boolean;
+  helpText?: string;
+  dotErrorMessage?: JSX.Element | undefined;
+  isStreamNameValid?: boolean;
+  partitionName: string;
+  prefix: string;
 }
 
 const MIN_NAME_LENGTH = 1;
@@ -57,6 +62,8 @@ export const getHelpText = (
 };
 
 interface ChildStreamInputHookResponse {
+  localStreamName: string;
+  setLocalStreamName: React.Dispatch<React.SetStateAction<string>>;
   isStreamNameValid: boolean;
   prefix: string;
   partitionName: string;
@@ -66,29 +73,38 @@ interface ChildStreamInputHookResponse {
 
 /**
  * Custom hook that handles computations necessary for child stream input component instances.
- * @param streamName The name of the child stream
- * @param readOnly Whether the input value is read only.
- * @returns stream name validity, prefix, partitionName, help and error texts necessary for the child stream input.
+ * TODO: finish jsdoc for this hook
  */
 export const useChildStreamInput = (
   streamName: string,
-  readOnly: boolean = false
+  readOnly: boolean = false,
+  onChange: (value: string) => void = () => {}
 ): ChildStreamInputHookResponse => {
+  const [localStreamName, setLocalStreamName] = useState(streamName);
+  useDebounce(
+    () => {
+      onChange(localStreamName);
+    },
+    500,
+    [localStreamName]
+  );
+
   const router = useStreamsAppRouter();
   const parentStreamName = useStreamsRoutingSelector((snapshot) => snapshot.context.definition)
     .stream.name;
 
   const prefix = parentStreamName + '.';
-  const partitionName = streamName.replace(prefix, '');
+  const partitionName = localStreamName.replace(prefix, '');
   const rootChild = partitionName.split('.')[0];
 
-  const isStreamNameEmpty = streamName.length <= prefix.length;
-  const isStreamNameTooLong = streamName.length > MAX_STREAM_NAME_LENGTH;
+  const isStreamNameEmpty = localStreamName.length <= prefix.length;
+  const isStreamNameTooLong = localStreamName.length > MAX_STREAM_NAME_LENGTH;
   const isLengthValid = !isStreamNameEmpty && !isStreamNameTooLong;
 
   const helpText = getHelpText(isStreamNameEmpty, isStreamNameTooLong, readOnly);
 
   const isDotPresent = !readOnly && partitionName.includes('.');
+  // TODO: add a check to see if the root child stream exists already, put a new error message if it does and move this logic into a helper function
   const dotErrorMessage = isDotPresent ? (
     <FormattedMessage
       id="xpack.streams.streamDetailRouting.nameContainsDotErrorMessage"
@@ -109,6 +125,8 @@ export const useChildStreamInput = (
   ) : undefined;
 
   return {
+    localStreamName,
+    setLocalStreamName,
     isStreamNameValid: isLengthValid && !isDotPresent,
     prefix,
     partitionName,
@@ -118,21 +136,22 @@ export const useChildStreamInput = (
 };
 
 export function StreamNameFormRow({
-  value,
-  onChange = () => {},
+  setLocalStreamName = () => {},
   readOnly = false,
   autoFocus = false,
   error,
   isInvalid = false,
+  helpText,
+  dotErrorMessage,
+  isStreamNameValid = true,
+  partitionName,
+  prefix,
 }: StreamNameFormRowProps) {
   const descriptionId = useGeneratedHtmlId();
-  const { isStreamNameValid, prefix, partitionName, helpText, dotErrorMessage } =
-    useChildStreamInput(value, readOnly);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPartitionName = e.target.value;
-
-    onChange(`${prefix}${newPartitionName}`);
+    setLocalStreamName(`${prefix}${newPartitionName}`);
   };
 
   return (

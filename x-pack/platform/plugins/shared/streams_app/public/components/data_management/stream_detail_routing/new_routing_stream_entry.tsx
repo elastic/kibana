@@ -29,16 +29,29 @@ export function NewRoutingStreamEntry() {
     }
   }, []);
 
-  const { isStreamNameValid } = useChildStreamInput(currentRule.destination);
+  const {
+    setLocalStreamName,
+    isStreamNameValid,
+    partitionName,
+    prefix,
+    helpText,
+    dotErrorMessage,
+  } = useChildStreamInput(currentRule.destination, false, (value) =>
+    changeRule({ destination: value })
+  );
 
   return (
     <div ref={panelRef}>
       <EuiPanel hasShadow={false} hasBorder paddingSize="m">
         <EuiFlexGroup gutterSize="m" direction="column">
           <StreamNameFormRow
-            value={currentRule.destination}
-            onChange={(value) => changeRule({ destination: value })}
+            setLocalStreamName={setLocalStreamName}
             autoFocus
+            partitionName={partitionName}
+            prefix={prefix}
+            helpText={helpText}
+            dotErrorMessage={dotErrorMessage}
+            isStreamNameValid={isStreamNameValid}
           />
           <EuiFlexGroup gutterSize="s" direction="column">
             <RoutingConditionEditor

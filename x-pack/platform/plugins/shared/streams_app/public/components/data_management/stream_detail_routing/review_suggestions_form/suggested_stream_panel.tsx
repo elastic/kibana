@@ -62,7 +62,6 @@ export function SuggestedStreamPanel({
     routingSnapshot.context.editingSuggestionIndex === index;
 
   const currentSuggestion = isEditing && editedSuggestion ? editedSuggestion : partition;
-  const { isStreamNameValid } = useChildStreamInput(currentSuggestion.name);
   const matchRate = useMatchRate(definition, currentSuggestion);
 
   const selectedPreview = useStreamSamplesSelector((snapshot) => snapshot.context.selectedPreview);
@@ -113,16 +112,29 @@ export function SuggestedStreamPanel({
     changeSuggestionCondition(condition);
   };
 
+  const {
+    isStreamNameValid,
+    setLocalStreamName,
+    partitionName,
+    prefix,
+    helpText,
+    dotErrorMessage,
+  } = useChildStreamInput(currentSuggestion.name, false, handleNameChange);
+
   if (isEditing) {
     return (
       <SelectablePanel paddingSize="m" isSelected={isSelected}>
         <EuiFlexGroup direction="column" gutterSize="m">
           <StreamNameFormRow
-            value={currentSuggestion.name}
-            onChange={handleNameChange}
+            setLocalStreamName={setLocalStreamName}
+            partitionName={partitionName}
+            prefix={prefix}
+            helpText={helpText}
+            dotErrorMessage={dotErrorMessage}
             autoFocus
             error={nameError}
             isInvalid={!!nameError}
+            isStreamNameValid={isStreamNameValid}
           />
           <RoutingConditionEditor
             status="enabled"
