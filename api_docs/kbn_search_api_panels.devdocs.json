@@ -2,26 +2,10 @@
   "id": "@kbn/search-api-panels",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.CodeBox",
+        "id": "def-public.CodeBox",
         "type": "Function",
         "tags": [],
         "label": "CodeBox",
@@ -35,7 +19,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.CodeBox.$1",
+            "id": "def-public.CodeBox.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  application,\n  codeSnippet,\n  consolePlugin,\n  languageType,\n  languages,\n  assetBasePath,\n  selectedLanguage,\n  setSelectedLanguage,\n  sharePlugin,\n  consoleRequest,\n  consoleTitle,\n  showTopBar = true,\n}",
@@ -54,7 +38,101 @@
       },
       {
         "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.getConsoleRequest",
+        "id": "def-public.EisPromotionalCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "EisPromotionalCallout",
+        "description": [],
+        "signature": [
+          "({ ctaLink, promoId, isCloudEnabled, direction, }: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.EisPromotionalCalloutProps",
+            "text": "EisPromotionalCalloutProps"
+          },
+          ") => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalCallout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  ctaLink,\n  promoId,\n  isCloudEnabled,\n  direction,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.EisPromotionalCalloutProps",
+                "text": "EisPromotionalCalloutProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisPromotionalTour",
+        "type": "Function",
+        "tags": [],
+        "label": "EisPromotionalTour",
+        "description": [],
+        "signature": [
+          "({ anchorPosition, ctaLink, promoId, isCloudEnabled, children, }: ",
+          {
+            "pluginId": "@kbn/search-api-panels",
+            "scope": "public",
+            "docId": "kibKbnSearchApiPanelsPluginApi",
+            "section": "def-public.EisPromotionalTourProps",
+            "text": "EisPromotionalTourProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalTour.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  anchorPosition = 'downCenter',\n  ctaLink,\n  promoId,\n  isCloudEnabled,\n  children,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-api-panels",
+                "scope": "public",
+                "docId": "kibKbnSearchApiPanelsPluginApi",
+                "section": "def-public.EisPromotionalTourProps",
+                "text": "EisPromotionalTourProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.getConsoleRequest",
         "type": "Function",
         "tags": [],
         "label": "getConsoleRequest",
@@ -63,17 +141,17 @@
           "(code: keyof ",
           {
             "pluginId": "@kbn/search-api-panels",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSearchApiPanelsPluginApi",
-            "section": "def-common.LanguageDefinition",
+            "section": "def-public.LanguageDefinition",
             "text": "LanguageDefinition"
           },
           ", args?: ",
           {
             "pluginId": "@kbn/search-api-panels",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSearchApiPanelsPluginApi",
-            "section": "def-common.LanguageDefinitionSnippetArguments",
+            "section": "def-public.LanguageDefinitionSnippetArguments",
             "text": "LanguageDefinitionSnippetArguments"
           },
           " | undefined) => string | undefined"
@@ -84,7 +162,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.getConsoleRequest.$1",
+            "id": "def-public.getConsoleRequest.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "code",
@@ -93,9 +171,9 @@
               "keyof ",
               {
                 "pluginId": "@kbn/search-api-panels",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSearchApiPanelsPluginApi",
-                "section": "def-common.LanguageDefinition",
+                "section": "def-public.LanguageDefinition",
                 "text": "LanguageDefinition"
               }
             ],
@@ -106,7 +184,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.getConsoleRequest.$2",
+            "id": "def-public.getConsoleRequest.$2",
             "type": "Object",
             "tags": [],
             "label": "args",
@@ -114,9 +192,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/search-api-panels",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSearchApiPanelsPluginApi",
-                "section": "def-common.LanguageDefinitionSnippetArguments",
+                "section": "def-public.LanguageDefinitionSnippetArguments",
                 "text": "LanguageDefinitionSnippetArguments"
               },
               " | undefined"
@@ -132,7 +210,7 @@
       },
       {
         "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.getLanguageDefinitionCodeSnippet",
+        "id": "def-public.getLanguageDefinitionCodeSnippet",
         "type": "Function",
         "tags": [],
         "label": "getLanguageDefinitionCodeSnippet",
@@ -141,25 +219,25 @@
           "(language: Partial<",
           {
             "pluginId": "@kbn/search-api-panels",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSearchApiPanelsPluginApi",
-            "section": "def-common.LanguageDefinition",
+            "section": "def-public.LanguageDefinition",
             "text": "LanguageDefinition"
           },
           ">, key: keyof ",
           {
             "pluginId": "@kbn/search-api-panels",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSearchApiPanelsPluginApi",
-            "section": "def-common.LanguageDefinition",
+            "section": "def-public.LanguageDefinition",
             "text": "LanguageDefinition"
           },
           ", args: ",
           {
             "pluginId": "@kbn/search-api-panels",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSearchApiPanelsPluginApi",
-            "section": "def-common.LanguageDefinitionSnippetArguments",
+            "section": "def-public.LanguageDefinitionSnippetArguments",
             "text": "LanguageDefinitionSnippetArguments"
           },
           ") => string"
@@ -170,7 +248,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.getLanguageDefinitionCodeSnippet.$1",
+            "id": "def-public.getLanguageDefinitionCodeSnippet.$1",
             "type": "Object",
             "tags": [],
             "label": "language",
@@ -179,9 +257,9 @@
               "Partial<",
               {
                 "pluginId": "@kbn/search-api-panels",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSearchApiPanelsPluginApi",
-                "section": "def-common.LanguageDefinition",
+                "section": "def-public.LanguageDefinition",
                 "text": "LanguageDefinition"
               },
               ">"
@@ -193,7 +271,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.getLanguageDefinitionCodeSnippet.$2",
+            "id": "def-public.getLanguageDefinitionCodeSnippet.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "key",
@@ -202,9 +280,9 @@
               "keyof ",
               {
                 "pluginId": "@kbn/search-api-panels",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSearchApiPanelsPluginApi",
-                "section": "def-common.LanguageDefinition",
+                "section": "def-public.LanguageDefinition",
                 "text": "LanguageDefinition"
               }
             ],
@@ -215,7 +293,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.getLanguageDefinitionCodeSnippet.$3",
+            "id": "def-public.getLanguageDefinitionCodeSnippet.$3",
             "type": "Object",
             "tags": [],
             "label": "args",
@@ -223,9 +301,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/search-api-panels",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSearchApiPanelsPluginApi",
-                "section": "def-common.LanguageDefinitionSnippetArguments",
+                "section": "def-public.LanguageDefinitionSnippetArguments",
                 "text": "LanguageDefinitionSnippetArguments"
               }
             ],
@@ -240,7 +318,7 @@
       },
       {
         "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.GithubLink",
+        "id": "def-public.GithubLink",
         "type": "Function",
         "tags": [],
         "label": "GithubLink",
@@ -254,7 +332,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.GithubLink.$1",
+            "id": "def-public.GithubLink.$1",
             "type": "Object",
             "tags": [],
             "label": "{ assetBasePath, label, href, 'aria-label': ariaLabel }",
@@ -275,7 +353,146 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.LanguageDefinition",
+        "id": "def-public.EisPromotionalCalloutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EisPromotionalCalloutProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalCalloutProps.ctaLink",
+            "type": "string",
+            "tags": [],
+            "label": "ctaLink",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalCalloutProps.promoId",
+            "type": "string",
+            "tags": [],
+            "label": "promoId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalCalloutProps.isCloudEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalCalloutProps.direction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "direction",
+            "description": [],
+            "signature": [
+              "\"row\" | \"column\""
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.EisPromotionalTourProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EisPromotionalTourProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalTourProps.anchorPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "anchorPosition",
+            "description": [],
+            "signature": [
+              "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalTourProps.ctaLink",
+            "type": "string",
+            "tags": [],
+            "label": "ctaLink",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalTourProps.promoId",
+            "type": "string",
+            "tags": [],
+            "label": "promoId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalTourProps.isCloudEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-public.EisPromotionalTourProps.children",
+            "type": "Object",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_tour.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-public.LanguageDefinition",
         "type": "Interface",
         "tags": [],
         "label": "LanguageDefinition",
@@ -286,7 +503,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.name",
+            "id": "def-public.LanguageDefinition.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -297,7 +514,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.id",
+            "id": "def-public.LanguageDefinition.id",
             "type": "Enum",
             "tags": [],
             "label": "id",
@@ -305,9 +522,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/search-api-panels",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSearchApiPanelsPluginApi",
-                "section": "def-common.Languages",
+                "section": "def-public.Languages",
                 "text": "Languages"
               }
             ],
@@ -317,7 +534,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.iconType",
+            "id": "def-public.LanguageDefinition.iconType",
             "type": "string",
             "tags": [],
             "label": "iconType",
@@ -328,7 +545,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.docLink",
+            "id": "def-public.LanguageDefinition.docLink",
             "type": "string",
             "tags": [],
             "label": "docLink",
@@ -342,7 +559,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.configureClient",
+            "id": "def-public.LanguageDefinition.configureClient",
             "type": "CompoundType",
             "tags": [],
             "label": "configureClient",
@@ -356,7 +573,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.ingestData",
+            "id": "def-public.LanguageDefinition.ingestData",
             "type": "CompoundType",
             "tags": [],
             "label": "ingestData",
@@ -370,7 +587,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.ingestDataIndex",
+            "id": "def-public.LanguageDefinition.ingestDataIndex",
             "type": "CompoundType",
             "tags": [],
             "label": "ingestDataIndex",
@@ -384,7 +601,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.installClient",
+            "id": "def-public.LanguageDefinition.installClient",
             "type": "string",
             "tags": [],
             "label": "installClient",
@@ -398,7 +615,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.buildSearchQuery",
+            "id": "def-public.LanguageDefinition.buildSearchQuery",
             "type": "CompoundType",
             "tags": [],
             "label": "buildSearchQuery",
@@ -412,7 +629,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.testConnection",
+            "id": "def-public.LanguageDefinition.testConnection",
             "type": "CompoundType",
             "tags": [],
             "label": "testConnection",
@@ -426,7 +643,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.advancedConfig",
+            "id": "def-public.LanguageDefinition.advancedConfig",
             "type": "string",
             "tags": [],
             "label": "advancedConfig",
@@ -440,7 +657,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.apiReference",
+            "id": "def-public.LanguageDefinition.apiReference",
             "type": "string",
             "tags": [],
             "label": "apiReference",
@@ -454,7 +671,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.basicConfig",
+            "id": "def-public.LanguageDefinition.basicConfig",
             "type": "string",
             "tags": [],
             "label": "basicConfig",
@@ -468,7 +685,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.github",
+            "id": "def-public.LanguageDefinition.github",
             "type": "Object",
             "tags": [],
             "label": "github",
@@ -482,7 +699,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinition.languageStyling",
+            "id": "def-public.LanguageDefinition.languageStyling",
             "type": "string",
             "tags": [],
             "label": "languageStyling",
@@ -499,7 +716,7 @@
       },
       {
         "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.LanguageDefinitionSnippetArguments",
+        "id": "def-public.LanguageDefinitionSnippetArguments",
         "type": "Interface",
         "tags": [],
         "label": "LanguageDefinitionSnippetArguments",
@@ -510,7 +727,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinitionSnippetArguments.url",
+            "id": "def-public.LanguageDefinitionSnippetArguments.url",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -521,7 +738,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinitionSnippetArguments.apiKey",
+            "id": "def-public.LanguageDefinitionSnippetArguments.apiKey",
             "type": "string",
             "tags": [],
             "label": "apiKey",
@@ -532,7 +749,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinitionSnippetArguments.indexName",
+            "id": "def-public.LanguageDefinitionSnippetArguments.indexName",
             "type": "string",
             "tags": [],
             "label": "indexName",
@@ -546,7 +763,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinitionSnippetArguments.cloudId",
+            "id": "def-public.LanguageDefinitionSnippetArguments.cloudId",
             "type": "string",
             "tags": [],
             "label": "cloudId",
@@ -560,7 +777,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinitionSnippetArguments.ingestPipeline",
+            "id": "def-public.LanguageDefinitionSnippetArguments.ingestPipeline",
             "type": "string",
             "tags": [],
             "label": "ingestPipeline",
@@ -574,7 +791,7 @@
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.LanguageDefinitionSnippetArguments.extraIngestDocumentValues",
+            "id": "def-public.LanguageDefinitionSnippetArguments.extraIngestDocumentValues",
             "type": "Object",
             "tags": [],
             "label": "extraIngestDocumentValues",
@@ -593,7 +810,7 @@
     "enums": [
       {
         "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.Languages",
+        "id": "def-public.Languages",
         "type": "Enum",
         "tags": [],
         "label": "Languages",
@@ -604,6 +821,22 @@
         "initialIsOpen": false
       }
     ],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
     "misc": [],
     "objects": []
   }

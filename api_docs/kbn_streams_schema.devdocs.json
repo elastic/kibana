@@ -1514,7 +1514,7 @@
                 "section": "def-common.Condition",
                 "text": "Condition"
               },
-              "; } | undefined"
+              "; type: string; } | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
             "deprecated": false,
@@ -2846,7 +2846,7 @@
         "description": [],
         "signature": [
           "Observable",
-          "<{ query: ",
+          "<{ queries: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -2854,7 +2854,15 @@
             "section": "def-common.GeneratedSignificantEventQuery",
             "text": "GeneratedSignificantEventQuery"
           },
-          "; } & { type: \"generated_query\"; }>"
+          "[]; tokensUsed: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionTokenCount",
+            "text": "ChatCompletionTokenCount"
+          },
+          "; } & { type: \"generated_queries\"; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
         "deprecated": false,

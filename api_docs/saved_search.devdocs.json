@@ -731,7 +731,7 @@
               "section": "def-public.OnSaveProps",
               "text": "OnSaveProps"
             },
-            ", \"newTitle\" | \"isTitleDuplicateConfirmed\" | \"onTitleDuplicate\">) => Promise<void>"
+            ", \"isTitleDuplicateConfirmed\" | \"newTitle\" | \"onTitleDuplicate\">) => Promise<void>"
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
           "deprecated": false,
@@ -753,7 +753,7 @@
                   "section": "def-public.OnSaveProps",
                   "text": "OnSaveProps"
                 },
-                ", \"newTitle\" | \"isTitleDuplicateConfirmed\" | \"onTitleDuplicate\">"
+                ", \"isTitleDuplicateConfirmed\" | \"newTitle\" | \"onTitleDuplicate\">"
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
               "deprecated": false,
@@ -918,7 +918,7 @@
             "section": "def-common.VIEW_MODE",
             "text": "VIEW_MODE"
           },
-          " | undefined; hideAggregatedPreview?: boolean | undefined; rowHeight?: number | undefined; headerRowHeight?: number | undefined; timeRestore?: boolean | undefined; timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; rowsPerPage?: number | undefined; sampleSize?: number | undefined; breakdownField?: string | undefined; density?: \"compact\" | \"normal\" | \"expanded\" | undefined; visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; controlGroupJson?: string | undefined; hits?: number | undefined; } & { sort: string[] | string[][]; columns: string[]; grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; hideChart: boolean; isTextBasedQuery: boolean; kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }>; }"
+          " | undefined; hideAggregatedPreview?: boolean | undefined; rowHeight?: number | undefined; headerRowHeight?: number | undefined; timeRestore?: boolean | undefined; timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; rowsPerPage?: number | undefined; sampleSize?: number | undefined; breakdownField?: string | undefined; density?: \"normal\" | \"compact\" | \"expanded\" | undefined; visContext?: Readonly<{} & { attributes: Record<string, any>; suggestionType: string; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; }> | Readonly<{} & {}> | undefined; controlGroupJson?: string | undefined; hits?: number | undefined; } & { sort: string[] | string[][]; columns: string[]; grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; hideChart: boolean; isTextBasedQuery: boolean; kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }>; }"
         ],
         "path": "src/platform/plugins/shared/saved_search/server/saved_objects/schema.ts",
         "deprecated": false,
@@ -941,7 +941,7 @@
             "section": "def-common.VIEW_MODE",
             "text": "VIEW_MODE"
           },
-          " | undefined; readonly hideAggregatedPreview?: boolean | undefined; readonly rowHeight?: number | undefined; readonly headerRowHeight?: number | undefined; readonly timeRestore?: boolean | undefined; readonly timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; readonly refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; readonly rowsPerPage?: number | undefined; readonly sampleSize?: number | undefined; readonly breakdownField?: string | undefined; readonly density?: \"compact\" | \"normal\" | \"expanded\" | undefined; readonly visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; readonly controlGroupJson?: string | undefined; readonly hits?: number | undefined; readonly sort: string[] | string[][]; readonly columns: string[]; readonly grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; readonly hideChart: boolean; readonly isTextBasedQuery: boolean; readonly kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }"
+          " | undefined; readonly hideAggregatedPreview?: boolean | undefined; readonly rowHeight?: number | undefined; readonly headerRowHeight?: number | undefined; readonly timeRestore?: boolean | undefined; readonly timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; readonly refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; readonly rowsPerPage?: number | undefined; readonly sampleSize?: number | undefined; readonly breakdownField?: string | undefined; readonly density?: \"normal\" | \"compact\" | \"expanded\" | undefined; readonly visContext?: Readonly<{} & { attributes: Record<string, any>; suggestionType: string; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; }> | Readonly<{} & {}> | undefined; readonly controlGroupJson?: string | undefined; readonly hits?: number | undefined; readonly sort: string[] | string[][]; readonly columns: string[]; readonly grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; readonly hideChart: boolean; readonly isTextBasedQuery: boolean; readonly kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }"
         ],
         "path": "src/platform/plugins/shared/saved_search/server/saved_objects/schema.ts",
         "deprecated": false,

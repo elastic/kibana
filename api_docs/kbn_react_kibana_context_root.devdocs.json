@@ -142,7 +142,7 @@
           },
           " extends Pick<",
           "EuiProviderProps",
-          "<{}>, \"colorMode\" | \"modify\">"
+          "<{}>, \"modify\" | \"colorMode\">"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
         "deprecated": false,
