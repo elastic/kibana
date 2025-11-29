@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod';
 
 const RunSubActionParamsSchema = z.object({
   workflowId: z.string(),
