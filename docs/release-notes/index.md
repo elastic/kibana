@@ -65,7 +65,7 @@ For the Elastic Observability 9.2.2 release information, refer to [Elastic Obser
 For the Elastic Security 9.2.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana platform**:
-* Fixes favicon CSS specifity [#243351]({{kib-pull}}243351).
+* Fixes the production build favicon's CSS specificity [#243351]({{kib-pull}}243351).
 
 **Machine Learning**:
 * Ensures deleted text in AI connector or Inference endpoint forms are not sent as empty strings [#244059]({{kib-pull}}244059).
