@@ -82,7 +82,7 @@ function generateAndSaveEsConnectors() {
       )}`
     );
   } catch (error) {
-    console.error('❌ Failed to generate Elasticsearch connectors:', error.message);
+    console.error('❌ Failed to generate Elasticsearch connectors:', error);
     return false;
   }
 }
@@ -200,7 +200,7 @@ async function generateZodSchemas() {
     );
     return true;
   } catch (error) {
-    console.error('❌ Failed to generate API client:', error.message);
+    console.error('❌ Failed to generate API client:', error);
     return false;
   }
 }
