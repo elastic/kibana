@@ -27,7 +27,7 @@ import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
-import { distinctUntilChanged, from, map, merge, skip } from 'rxjs';
+import { combineLatest, distinctUntilChanged, from, map, merge, skip, startWith } from 'rxjs';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { FilterStateStore, isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
@@ -444,7 +444,7 @@ export function getDiscoverStateContainer({
 
   const appState$ = from(internalState).pipe(
     map(getAppState),
-    distinctUntilChanged(isEqual),
+    distinctUntilChanged((a, b) => isEqual(a, b)),
     skip(1)
   );
 
@@ -469,7 +469,7 @@ export function getDiscoverStateContainer({
 
   const globalState$ = from(internalState).pipe(
     map(getGlobalState),
-    distinctUntilChanged(isEqual),
+    distinctUntilChanged((a, b) => isEqual(a, b)),
     skip(1)
   );
 
@@ -592,6 +592,36 @@ export function getDiscoverStateContainer({
     };
   };
 
+  const initializeUrlTracking = () => {
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+
+    const subscription = combineLatest([
+      currentDataView$,
+      appState$.pipe(startWith(getAppState(internalState.getState()))),
+    ]).subscribe(([dataView, appState]) => {
+      if (!dataView?.id) {
+        return;
+      }
+
+      const dataViewSupportsTracking =
+        // Disable for ad hoc data views, since they can't be restored after a page refresh
+        dataView.isPersisted() ||
+        // Unless it's a default profile data view, which can be restored on refresh
+        internalState.getState().defaultProfileAdHocDataViewIds.includes(dataView.id) ||
+        // Or we're in ES|QL mode, in which case we don't care about the data view
+        isOfAggregateQueryType(appState.query);
+
+      const { persistedDiscoverSession } = internalState.getState();
+      const trackingEnabled = dataViewSupportsTracking || Boolean(persistedDiscoverSession?.id);
+
+      services.urlTracker.setTrackingEnabled(trackingEnabled);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  };
+
   let internalStopSyncing = () => {};
 
   const stopSyncing = () => {
@@ -617,7 +647,7 @@ export function getDiscoverStateContainer({
     });
 
     // Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
-    const unsubscribeSavedSearchUrlTracking = savedSearchContainer.initUrlTracking();
+    const unsubscribeUrlTracking = initializeUrlTracking();
 
     // initialize syncing with _g and _a part of the URL
     const unsubscribeUrlState = initializeAndSyncUrlState();
@@ -676,7 +706,7 @@ export function getDiscoverStateContainer({
       unsubscribeData();
       appStateSubscription.unsubscribe();
       unsubscribeUrlState();
-      unsubscribeSavedSearchUrlTracking();
+      unsubscribeUrlTracking();
       filterUnsubscribe.unsubscribe();
       timefilerUnsubscribe.unsubscribe();
     };
