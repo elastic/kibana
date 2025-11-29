@@ -62,6 +62,16 @@ export function getSchemaAtPath(
             : { schema: null, scopedToPath: null };
         }
         current = shape[segment];
+      } else if (current instanceof z.ZodRecord) {
+        const valueType = current.valueType;
+        const keyType = current.keyType;
+        if (keyType instanceof z.ZodString) {
+          current = valueType as ZodType;
+        } else {
+          return partial
+            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+            : { schema: null, scopedToPath: null };
+        }
       } else if (current instanceof z.ZodUnion) {
         const branches = current.options;
         const validBranch = branches.find(

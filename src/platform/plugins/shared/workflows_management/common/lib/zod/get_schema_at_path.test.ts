@@ -127,6 +127,14 @@ describe('getSchemaAtPath', () => {
     expect(result.schema).toBeNull();
     expect(result.scopedToPath).toBeNull();
   });
+
+  it('record', () => {
+    const schema = z.record(z.string(), z.unknown());
+    const result = getSchemaAtPath(schema, 'a');
+    expect(result.schema).toBeDefined();
+    expect(result.scopedToPath).toBe('a');
+    expectZodSchemaEqual(result.schema as z.ZodType, z.unknown());
+  });
 });
 
 describe('getSchemaAtPath: real life examples', () => {
