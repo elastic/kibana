@@ -251,7 +251,6 @@ export function getDiscoverStateContainer({
    */
   const savedSearchContainer = getSavedSearchContainer({
     services,
-    internalState,
     getCurrentTab,
   });
 

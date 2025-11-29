@@ -17,7 +17,7 @@ import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import type { DiscoverAppState } from './redux';
 import type { DiscoverServices } from '../../../build_services';
-import type { InternalStateStore, TabState } from './redux';
+import type { TabState } from './redux';
 
 export interface UpdateParams {
   /**
@@ -89,11 +89,9 @@ export interface DiscoverSavedSearchContainer {
 
 export function getSavedSearchContainer({
   services,
-  internalState,
   getCurrentTab,
 }: {
   services: DiscoverServices;
-  internalState: InternalStateStore;
   getCurrentTab: () => TabState;
 }): DiscoverSavedSearchContainer {
   const initialSavedSearch = services.savedSearch.getNew();
