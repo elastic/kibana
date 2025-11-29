@@ -83,7 +83,10 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       };
     }
 
-    const LogAIAssistant = createLogAIAssistant({ observabilityAIAssistant });
+    const LogAIAssistant = createLogAIAssistant({
+      observabilityAIAssistant,
+      onechat: plugins.onechat,
+    });
 
     discoverShared.features.registry.register({
       id: 'observability-logs-ai-assistant',

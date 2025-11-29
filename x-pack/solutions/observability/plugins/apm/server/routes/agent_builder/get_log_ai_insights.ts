@@ -1,0 +1,49 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { MessageRole, type InferenceClient } from '@kbn/inference-common';
+import { safeJsonStringify } from '@kbn/std';
+import dedent from 'dedent';
+
+export interface GetLogAiInsightsParams {
+  fields: Record<string, any>;
+  inferenceClient: InferenceClient;
+  connectorId: string;
+}
+
+export async function getLogAiInsights({
+  fields,
+  inferenceClient,
+  connectorId,
+}: GetLogAiInsightsParams): Promise<{ context: string; summary: string }> {
+  const instructions = [
+    `You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
+    Using the provided data produce a concise, action-oriented response.
+     - Only call tools if the attachments do not contain the necessary data to analyze the log message.`,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+
+  const response = await inferenceClient.chatComplete({
+    connectorId,
+    system: instructions,
+    messages: [
+      {
+        role: MessageRole.User,
+        content: dedent`Explain this log message: what it means, where it is from, whether it is expected, and if it is an issue.
+        The log entry is: ${safeJsonStringify(fields)}`,
+      },
+    ],
+    functionCalling: 'auto',
+  });
+
+  let content = '';
+  if (response && typeof (response as any).content === 'string') {
+    content = (response as any).content;
+  }
+
+  return { context: safeJsonStringify(fields) ?? '', summary: content };
+}
