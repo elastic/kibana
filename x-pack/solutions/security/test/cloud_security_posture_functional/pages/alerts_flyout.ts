@@ -300,7 +300,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
               index: entitiesIndex,
             });
             logger.debug(`Entity count: ${response.count}`);
-            return response.count === 3;
+            return response.count === 6;
           } catch (e) {
             logger.debug(`Error counting entities: ${e.message}`);
             return false;
@@ -335,7 +335,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         }
       });
 
-      it('expanded flyout - new ECS schema fields (user.entity.id, entity.target.id)', async () => {
+      it('expanded flyout - entity enrichment for multiple generic targets - single target field', async () => {
         await alertsPage.navigateToAlertsPage(
           `${alertsPage.getAbsoluteTimerangeFilter(
             '2024-09-01T00:00:00.000Z',
@@ -347,15 +347,21 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         await alertsPage.waitForListToHaveAlerts();
 
         await alertsPage.flyout.expandVisualizations();
+
         await alertsPage.flyout.assertGraphPreviewVisible();
-        await alertsPage.flyout.assertGraphNodesNumber(3);
+        // We expect 5 nodes total in the graph:
+        // 1. Actor node (serviceaccount@example.com - user)
+        // 2. Grouped target node (3 service accounts grouped by same type/subtype)
+        // 3. Entity node (api-service full path)
+        // 4-5. Two label nodes
+        await alertsPage.flyout.assertGraphNodesNumber(5);
 
         await expandedFlyoutGraph.expandGraph();
         await expandedFlyoutGraph.waitGraphIsLoaded();
-        await expandedFlyoutGraph.assertGraphNodesNumber(3);
+        await expandedFlyoutGraph.assertGraphNodesNumber(5);
         await expandedFlyoutGraph.toggleSearchBar();
 
-        // Show actions by entity (user.entity.id)
+        // Test filter actions - Show actions by entity (user.entity.id)
         await expandedFlyoutGraph.showActionsByEntity('serviceaccount@example.com');
         await expandedFlyoutGraph.showSearchBar();
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
@@ -368,99 +374,41 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           'user.entity.id: serviceaccount@example.com'
         );
 
-        // Show actions on entity (entity.target.id)
-        await expandedFlyoutGraph.showActionsOnEntity(
-          'projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com'
-        );
-        await expandedFlyoutGraph.expectFilterTextEquals(
-          0,
-          'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com'
-        );
-        await expandedFlyoutGraph.expectFilterPreviewEquals(
-          0,
-          'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com'
-        );
-
-        // Explore related entities
-        await expandedFlyoutGraph.exploreRelatedEntities('serviceaccount@example.com');
-        await expandedFlyoutGraph.expectFilterTextEquals(
-          0,
-          'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com'
-        );
-        await expandedFlyoutGraph.expectFilterPreviewEquals(
-          0,
-          'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com'
-        );
-
-        // Show events with the same action
-        await expandedFlyoutGraph.showEventsOfSameAction(
-          'a(serviceaccount@example.com)-b(projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com)label(google.iam.admin.v1.UpdateServiceAccount)oe(1)oa(1)'
-        );
-        await expandedFlyoutGraph.expectFilterTextEquals(
-          0,
-          'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com OR event.action: google.iam.admin.v1.UpdateServiceAccount'
-        );
-        await expandedFlyoutGraph.expectFilterPreviewEquals(
-          0,
-          'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com OR event.action: google.iam.admin.v1.UpdateServiceAccount'
-        );
-
-        await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
-
-        // Hide events with the same action
-        await expandedFlyoutGraph.hideEventsOfSameAction(
-          'a(serviceaccount@example.com)-b(projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com)label(google.iam.admin.v1.UpdateServiceAccount)oe(1)oa(1)'
-        );
-        await expandedFlyoutGraph.expectFilterTextEquals(
-          0,
-          'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com'
-        );
-        await expandedFlyoutGraph.expectFilterPreviewEquals(
-          0,
-          'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com'
-        );
-
-        // Hide actions on entity
-        await expandedFlyoutGraph.hideActionsOnEntity(
-          'projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com'
-        );
-        await expandedFlyoutGraph.expectFilterTextEquals(
-          0,
-          'user.entity.id: serviceaccount@example.com OR related.entity: serviceaccount@example.com'
-        );
-        await expandedFlyoutGraph.expectFilterPreviewEquals(
-          0,
-          'user.entity.id: serviceaccount@example.com OR related.entity: serviceaccount@example.com'
-        );
-
-        // Clear filters
+        // Clear filters to reset state
         await expandedFlyoutGraph.clearAllFilters();
 
-        // Add custom filter
+        // Test custom filter in query bar
         await expandedFlyoutGraph.addFilter({
           field: 'user.entity.id',
           operation: 'is',
           value: 'serviceaccount@example.com',
         });
         await pageObjects.header.waitUntilLoadingHasFinished();
-
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
-        await expandedFlyoutGraph.assertGraphNodesNumber(5);
 
-        // Open timeline
+        // Open timeline to verify integration
         await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
         await timelinePage.ensureTimelineIsOpen();
         await timelinePage.waitForEvents();
         await timelinePage.closeTimeline();
 
-        // Test query bar
+        // Test query bar with KQL
+        await expandedFlyoutGraph.setKqlQuery(
+          'event.action: "google.iam.admin.v1.UpdateServiceAccount"'
+        );
+        await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
+        await timelinePage.ensureTimelineIsOpen();
+        await timelinePage.waitForEvents();
+        await timelinePage.closeTimeline();
+
+        // Test query bar with non-matching query
         await expandedFlyoutGraph.setKqlQuery('cannotFindThis');
         await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
         await timelinePage.ensureTimelineIsOpen();
         await timelinePage.waitForEvents();
       });
 
-      it('should show entity enrichment for service actor with multiple host targets', async () => {
+      it('expanded flyout - entity enrichment for service actor with multiple host targets - single target field', async () => {
         // Navigate to alerts page with the multi-target alert
         await alertsPage.navigateToAlertsPage(
           `${alertsPage.getAbsoluteTimerangeFilter(

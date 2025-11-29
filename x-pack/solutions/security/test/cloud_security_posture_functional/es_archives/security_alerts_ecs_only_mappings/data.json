@@ -258,7 +258,6 @@
       "kibana.alert.rule.updated_by": "elastic",
       "kibana.alert.rule.uuid": "c6f64115-5941-46ef-bfa3-61a4ecb4f3ba",
       "kibana.alert.rule.version": 1,
-      "kibana.alert.rule.severity": "medium",
       "kibana.alert.start": "2024-09-01T13:00:00.100Z",
       "kibana.alert.status": "active",
       "kibana.alert.uuid": "new-schema-alert-789xyz456abc123def789ghi012jkl345mno678pqr901stu234vwx567",
@@ -290,7 +289,11 @@
       },
       "entity": {
         "target": {
-          "id": "projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com"
+          "id": [
+            "projects/your-project-id/serviceAccounts/target-service-1@your-project-id.iam.gserviceaccount.com",
+            "projects/your-project-id/serviceAccounts/target-service-2@your-project-id.iam.gserviceaccount.com",
+            "projects/your-project-id/serviceAccounts/target-service-3@your-project-id.iam.gserviceaccount.com"
+          ]
         }
       },
       "source": {

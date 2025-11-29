@@ -27,6 +27,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 import { dataViewRouteHelpersFactory } from '../utils';
+import { inspect } from 'util';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
@@ -697,6 +698,17 @@ export default function (providerContext: FtrProviderContext) {
         expect(actorNode).to.have.property('color', 'primary');
         expect(actorNode).to.have.property('tag', 'Entities');
         expect(actorNode).to.have.property('icon', 'magnifyWithExclamation');
+        expect(actorNode.documentsData).to.have.length(2);
+        expectExpect(actorNode.documentsData).toContainEqual({
+          id: 'actor-mv-1',
+          type: 'entity',
+          sourceNamespaceField: 'entity',
+        });
+        expectExpect(actorNode.documentsData).toContainEqual({
+          id: 'actor-mv-2',
+          type: 'entity',
+          sourceNamespaceField: 'entity',
+        });
 
         // Find target node (should have count: 3 for 3 target IDs)
         const targetNode = entityNodes.find((node: EntityNodeDataModel) => node.count === 3);
@@ -705,6 +717,22 @@ export default function (providerContext: FtrProviderContext) {
         expect(targetNode).to.have.property('color', 'primary');
         expect(targetNode).to.have.property('tag', 'Entities');
         expect(targetNode).to.have.property('icon', 'magnifyWithExclamation');
+        expect(targetNode.documentsData).to.have.length(3);
+        expectExpect(targetNode.documentsData).toContainEqual({
+          id: 'target-mv-1',
+          type: 'entity',
+          sourceNamespaceField: 'entity',
+        });
+        expectExpect(targetNode.documentsData).toContainEqual({
+          id: 'target-mv-2',
+          type: 'entity',
+          sourceNamespaceField: 'entity',
+        });
+        expectExpect(targetNode.documentsData).toContainEqual({
+          id: 'target-mv-3',
+          type: 'entity',
+          sourceNamespaceField: 'entity',
+        });
 
         // Verify label node exists for the action with count of 6 (2 actors × 3 targets)
         const labelNodes = response.body.nodes.filter(
@@ -1069,7 +1097,8 @@ export default function (providerContext: FtrProviderContext) {
             const response = await es.count({
               index: entitiesIndex,
             });
-            return response.count === 5;
+            // 3 entities in default space + 4 entities in test space = 7 total
+            return response.count === 7;
           });
 
           // initialize security-solution-default data-view
@@ -1224,23 +1253,74 @@ export default function (providerContext: FtrProviderContext) {
               customNamespaceId
             ).expect(result(200, logger));
 
+            // Should have 3 nodes: 1 actor (single service), 1 grouped target (2 hosts), 1 label
+            expect(response.body).to.have.property('nodes').length(3);
+            expect(response.body).to.have.property('edges').length(2);
+            console.log('edges1 ', inspect(response.body, false, null, true));
+
             const actorNode = response.body.nodes.find(
               (node: NodeDataModel) =>
                 node.id === 'service-account-123@project.iam.gserviceaccount.com'
             ) as EntityNodeDataModel;
 
-            // Verify entity enrichment for service actor
+            // Verify entity enrichment for service actor (single entity)
             expect(actorNode).not.to.be(undefined);
             expect(actorNode.label).to.equal('ServiceAccount123');
             expect(actorNode.icon).to.equal('cloudStormy');
             expect(actorNode.shape).to.equal('rectangle');
             expect(actorNode.tag).to.equal('Service');
-
-            // Verify we have the target node (host-instance-1)
-            const targetNode = response.body.nodes.find(
-              (node: NodeDataModel) => node.id === 'host-instance-1'
+            expect(actorNode.count).to.be(undefined); // No count for single entity
+            expect(actorNode.documentsData).to.have.length(1);
+            expectExpect(actorNode.documentsData).toContainEqual(
+              expectExpect.objectContaining({
+                id: 'service-account-123@project.iam.gserviceaccount.com',
+                type: 'entity',
+                sourceNamespaceField: 'service',
+                entity: expectExpect.objectContaining({
+                  name: 'ServiceAccount123',
+                  type: 'Service',
+                  sub_type: 'GCP Service Account',
+                }),
+              })
             );
+
+            // Find grouped target node by checking for count property
+            const targetNode = response.body.nodes.find(
+              (node: EntityNodeDataModel) => node.shape !== 'label' && node.count === 2
+            ) as EntityNodeDataModel;
+
+            // Verify entity enrichment for grouped targets (2 hosts of same type/subtype)
             expect(targetNode).not.to.be(undefined);
+            expect(targetNode.label).to.equal('GCP Compute Instance'); // Should show sub_type for grouped entities
+            expect(targetNode.icon).to.equal('container'); // Default icon for unmapped entity type
+            expect(targetNode.shape).to.equal('rectangle'); // Default shape for grouped entities
+            expect(targetNode.tag).to.equal('Container');
+            expect(targetNode.count).to.equal(2);
+            expect(targetNode.documentsData).to.have.length(2);
+            expectExpect(targetNode.documentsData).toContainEqual(
+              expectExpect.objectContaining({
+                id: 'host-instance-1',
+                type: 'entity',
+                sourceNamespaceField: 'host',
+                entity: expectExpect.objectContaining({
+                  name: 'HostInstance1',
+                  type: 'Container',
+                  sub_type: 'GCP Compute Instance',
+                }),
+              })
+            );
+            expectExpect(targetNode.documentsData).toContainEqual(
+              expectExpect.objectContaining({
+                id: 'host-instance-2',
+                type: 'entity',
+                sourceNamespaceField: 'host',
+                entity: expectExpect.objectContaining({
+                  name: 'HostInstance2',
+                  type: 'Container',
+                  sub_type: 'GCP Compute Instance',
+                }),
+              })
+            );
           });
         });
       });

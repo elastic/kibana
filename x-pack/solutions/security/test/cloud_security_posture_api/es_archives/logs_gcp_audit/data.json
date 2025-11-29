@@ -870,13 +870,19 @@
       ],
       "target": {
         "entity": {
-          "id": "host-instance-1"
+          "id": [
+            "host-instance-1",
+            "host-instance-2"
+          ]
         }
       },
       "host": {
         "target": {
           "entity": {
-            "id": "host-instance-1"
+            "id": [
+              "host-instance-1",
+              "host-instance-2"
+            ]
           }
         }
       },

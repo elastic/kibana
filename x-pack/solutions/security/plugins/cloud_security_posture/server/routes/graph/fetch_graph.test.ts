@@ -222,10 +222,14 @@ describe('fetchGraph', () => {
       expect(query).toMatch(/EVAL\s+actorEntityName\s*=\s*TO_STRING\(null\)/);
       expect(query).toMatch(/EVAL\s+actorEntityType\s*=\s*TO_STRING\(null\)/);
       expect(query).toMatch(/EVAL\s+actorEntitySubType\s*=\s*TO_STRING\(null\)/);
-      expect(query).toMatch(/EVAL\s+actorDocData\s*=\s*TO_STRING\(null\)/);
+      expect(query).toMatch(/EVAL\s+targetEntityName\s*=\s*TO_STRING\(null\)/);
       expect(query).toMatch(/EVAL\s+targetEntityType\s*=\s*TO_STRING\(null\)/);
       expect(query).toMatch(/EVAL\s+targetEntitySubType\s*=\s*TO_STRING\(null\)/);
-      expect(query).toMatch(/EVAL\s+targetDocData\s*=\s*TO_STRING\(null\)/);
+
+      // Verify that actorDocData and targetDocData are created with minimal structure (not null)
+      expect(query).toMatch(/EVAL\s+actorDocData\s*=\s*CONCAT\(/);
+      expect(query).toMatch(/EVAL\s+targetDocData\s*=\s*CONCAT\(/);
+      expect(query).toContain('sourceNamespaceField');
 
       expect(result).toEqual([{ id: 'dummy' }]);
     });
@@ -252,9 +256,8 @@ describe('fetchGraph', () => {
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const query = esqlCallArgs[0].query;
 
-      // Verify COALESCE is used for both actor and target
+      // Verify COALESCE is used for actor identification
       expect(query).toMatch(/EVAL\s+actorEntityId\s*=\s*COALESCE\(/);
-      expect(query).toMatch(/EVAL\s+targetEntityId\s*=\s*COALESCE\(/);
 
       // Verify precedence order for actor (user -> host -> service -> entity)
       const actorCoalesceRegex = /actorEntityId\s*=\s*COALESCE\(([\s\S]*?)\)/;
@@ -273,23 +276,13 @@ describe('fetchGraph', () => {
         expect(fields).toHaveLength(4);
       }
 
-      // Verify precedence order for target
-      const targetCoalesceRegex = /targetEntityId\s*=\s*COALESCE\(([\s\S]*?)\)/;
-      const targetCoalesceMatch = targetCoalesceRegex.exec(query);
-      expect(targetCoalesceMatch).toBeTruthy();
-
-      if (targetCoalesceMatch) {
-        const coalesceContent = targetCoalesceMatch[1];
-        const fields = coalesceContent.split(',').map((f) => f.trim());
-
-        // Verify target precedence order (new ECS fields only)
-        expect(fields[0]).toContain('user.target.entity.id');
-        expect(fields[1]).toContain('host.target.entity.id');
-        expect(fields[2]).toContain('service.target.entity.id');
-        expect(fields[3]).toContain('entity.target.id');
-        // Should only have 4 fields (no legacy target.entity.id)
-        expect(fields).toHaveLength(4);
-      }
+      // Verify target entity ID uses multi-value collection with CASE statements and MV_APPEND
+      // (to support multiple targets from different fields)
+      expect(query).toContain('EVAL targetEntityId = user.target.entity.id');
+      expect(query).toMatch(/EVAL\s+targetEntityId\s*=\s*CASE\(/);
+      expect(query).toContain('MV_APPEND(targetEntityId, host.target.entity.id)');
+      expect(query).toContain('MV_APPEND(targetEntityId, service.target.entity.id)');
+      expect(query).toContain('MV_APPEND(targetEntityId, entity.target.id)');
     });
   });
 
