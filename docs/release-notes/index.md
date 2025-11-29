@@ -40,7 +40,7 @@ For the Elastic Security 9.2.2 release information, refer to [Elastic Security S
 
 **Alerting and cases**:
 * Captures connector errors without interrupting the case creation flow. Issues with connectors can be resolved on the case details page [#244188]({{kib-pull}}244188).
-* Improves error message for when {{ibm-r}} connector fails to create an incident [#244012]({{kib-pull}}244012).
+* Improves error message for {{ibm-r}} connector failing to create an incident [#244012]({{kib-pull}}244012).
 * Fixes auto-extraction of observables when alerts are added to a case using the bulk actions menu [#242325]({{kib-pull}}242325).
 * Fixes pagnition for the alerts table, which was getting stuck on rule details pages [#242275]({{kib-pull}}242275).
 
