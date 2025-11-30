@@ -176,6 +176,8 @@ const PrimaryStory = () => {
     <CreateClassicStreamFlyout
       onClose={action('onClose')}
       onCreate={action('onCreate')}
+      onCreateTemplate={action('onCreateTemplate')}
+      onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={MOCK_TEMPLATES}
       selectedTemplate={selectedTemplate}
       onTemplateSelect={(template) => {
@@ -197,6 +199,8 @@ const WithPreselectedTemplateStory = () => {
     <CreateClassicStreamFlyout
       onClose={action('onClose')}
       onCreate={action('onCreate')}
+      onCreateTemplate={action('onCreateTemplate')}
+      onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={MOCK_TEMPLATES}
       selectedTemplate={selectedTemplate}
       onTemplateSelect={(template) => {
@@ -219,6 +223,7 @@ const EmptyStateStory = () => {
       onClose={action('onClose')}
       onCreate={action('onCreate')}
       onCreateTemplate={action('onCreateTemplate')}
+      onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={[]}
       selectedTemplate={selectedTemplate}
       onTemplateSelect={(template) => {
@@ -240,6 +245,8 @@ const ErrorStateStory = () => {
     <CreateClassicStreamFlyout
       onClose={action('onClose')}
       onCreate={action('onCreate')}
+      onCreateTemplate={action('onCreateTemplate')}
+      onRetryLoadTemplates={action('onRetryLoadTemplates')}
       templates={[]}
       selectedTemplate={selectedTemplate}
       onTemplateSelect={(template) => {
@@ -247,7 +254,6 @@ const ErrorStateStory = () => {
         setSelectedTemplate(template);
       }}
       hasErrorLoadingTemplates={true}
-      onRetryLoadTemplates={action('onRetryLoadTemplates')}
     />
   );
 };
