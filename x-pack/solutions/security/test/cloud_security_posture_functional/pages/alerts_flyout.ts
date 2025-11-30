@@ -6,7 +6,13 @@
  */
 
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
-import { waitForPluginInitialized } from '../../cloud_security_posture_api/utils';
+import {
+  waitForPluginInitialized,
+  cleanupEntityStore,
+  waitForEnrichIndexPopulated,
+  waitForEntityDataIndexed,
+  enableAssetInventory,
+} from '../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
 
 // eslint-disable-next-line import/no-default-export
@@ -234,42 +240,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       const enrichPolicyName = getEnrichPolicyId(); // defaults to 'default' space
       const enrichIndexName = `.enrich-${enrichPolicyName}`;
 
-      /**
-       * Helper to clean up entity store resources
-       */
-      const cleanupEntityStore = async () => {
-        try {
-          await supertest
-            .delete('/api/entity_store/engines/generic?data=true')
-            .set('kbn-xsrf', 'xxxx')
-            .expect(200);
-          logger.debug('Deleted entity store engine');
-        } catch (e) {
-          // Ignore 404 errors if the engine doesn't exist
-          if (e.status !== 404) {
-            logger.debug(`Error deleting entity store engine: ${e.message || JSON.stringify(e)}`);
-          }
-        }
-      };
-
-      /**
-       * Helper to wait for enrich index to be populated
-       */
-      const waitForEnrichIndexPopulated = async () => {
-        await retry.waitFor('enrich index to be created and populated', async () => {
-          try {
-            const count = await es.count({
-              index: enrichIndexName,
-            });
-            logger.debug(`Enrich index count: ${count.count}`);
-            return count.count > 0;
-          } catch (e) {
-            logger.debug(`Waiting for enrich index: ${e.message}`);
-            return false;
-          }
-        });
-      };
-
       before(async () => {
         await es.deleteByQuery({
           index: '.internal.alerts-*',
@@ -282,7 +252,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         );
 
         // Clean up any leftover resources from previous runs
-        await cleanupEntityStore();
+        await cleanupEntityStore({ supertest, logger });
 
         // Enable asset inventory setting
         await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
@@ -294,33 +264,24 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         );
 
         // Wait for entity data to be fully indexed
-        await retry.waitFor('entity data to be indexed', async () => {
-          try {
-            const response = await es.count({
-              index: entitiesIndex,
-            });
-            logger.debug(`Entity count: ${response.count}`);
-            return response.count === 6;
-          } catch (e) {
-            logger.debug(`Error counting entities: ${e.message}`);
-            return false;
-          }
+        await waitForEntityDataIndexed({
+          es,
+          logger,
+          retry,
+          entitiesIndex,
+          expectedCount: 12,
         });
 
         // Enable asset inventory which creates the enrich policy
-        await supertest
-          .post('/api/asset_inventory/enable')
-          .set('kbn-xsrf', 'xxxx')
-          .send({})
-          .expect(200);
+        await enableAssetInventory({ supertest });
 
         // Wait for enrich index to be created and populated with data
-        await waitForEnrichIndexPopulated();
+        await waitForEnrichIndexPopulated({ es, logger, retry, enrichIndexName });
       });
 
       after(async () => {
         // Clean up entity store resources
-        await cleanupEntityStore();
+        await cleanupEntityStore({ supertest, logger });
 
         // Disable asset inventory setting
         await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': false });

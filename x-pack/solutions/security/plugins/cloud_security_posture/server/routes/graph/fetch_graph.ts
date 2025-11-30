@@ -242,54 +242,47 @@ ${
 | ENRICH ${enrichPolicyName} ON targetEntityId WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip
 
 // Construct actor and target entities data
-// If enrichment found a match (actorEntityType is not null), create full entity data
-// Otherwise, create minimal data with just id, type, and sourceNamespaceField
-| EVAL actorDocData = CASE(
-    actorEntityName IS NOT NULL,
-    CONCAT("{",
-      "\\"id\\":\\"", actorEntityId, "\\"",
-      ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-      ",\\"sourceNamespaceField\\":\\"", actorEntityFieldHint, "\\"",
-      ",\\"entity\\":", "{",
-        "\\"name\\":\\"", COALESCE(actorEntityName, ""), "\\"",
-        ",\\"type\\":\\"", COALESCE(actorEntityType, ""), "\\"",
-        ",\\"sub_type\\":\\"", COALESCE(actorEntitySubType, ""), "\\"",
-        CASE (
-          actorHostIp IS NOT NULL,
-          CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
-          ""
-        ),
-      "}",
+// Build entity field conditionally - only include if any enrichment field exists
+| EVAL actorEntityField = CASE(
+    actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
+    CONCAT(",\\"entity\\":", "{",
+      "\\"name\\":\\"", COALESCE(actorEntityName, ""), "\\"",
+      ",\\"type\\":\\"", COALESCE(actorEntityType, ""), "\\"",
+      ",\\"sub_type\\":\\"", COALESCE(actorEntitySubType, ""), "\\"",
+      CASE(
+        actorHostIp IS NOT NULL,
+        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
+        ""
+      ),
     "}"),
-    CONCAT("{",
-      "\\"id\\":\\"", actorEntityId, "\\"",
-      ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-      ",\\"sourceNamespaceField\\":\\"", actorEntityFieldHint, "\\"",
-    "}")
+    ""
   )
-| EVAL targetDocData = CASE(
-    targetEntityType IS NOT NULL,
-    CONCAT("{",
-      "\\"id\\":\\"", COALESCE(targetEntityId, ""), "\\"",
-      ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-      ",\\"sourceNamespaceField\\":\\"", targetEntityFieldHint, "\\"",
-      ",\\"entity\\":", "{",
-        "\\"name\\":\\"", COALESCE(targetEntityName, ""), "\\"",
-        ",\\"type\\":\\"", COALESCE(targetEntityType, ""), "\\"",
-        ",\\"sub_type\\":\\"", COALESCE(targetEntitySubType, ""), "\\"",
-        CASE (
-          targetHostIp IS NOT NULL,
-          CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
-          ""
-        ),
-      "}",
+| EVAL targetEntityField = CASE(
+    targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
+    CONCAT(",\\"entity\\":", "{",
+      "\\"name\\":\\"", COALESCE(targetEntityName, ""), "\\"",
+      ",\\"type\\":\\"", COALESCE(targetEntityType, ""), "\\"",
+      ",\\"sub_type\\":\\"", COALESCE(targetEntitySubType, ""), "\\"",
+      CASE(
+        targetHostIp IS NOT NULL,
+        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
+        ""
+      ),
     "}"),
-    CONCAT("{",
-      "\\"id\\":\\"", COALESCE(targetEntityId, ""), "\\"",
-      ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-      ",\\"sourceNamespaceField\\":\\"", targetEntityFieldHint, "\\"",
-    "}")
+    ""
   )
+| EVAL actorDocData = CONCAT("{",
+    "\\"id\\":\\"", actorEntityId, "\\"",
+    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
+    ",\\"sourceNamespaceField\\":\\"", actorEntityFieldHint, "\\"",
+    actorEntityField,
+  "}")
+| EVAL targetDocData = CONCAT("{",
+    "\\"id\\":\\"", COALESCE(targetEntityId, ""), "\\"",
+    ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
+    ",\\"sourceNamespaceField\\":\\"", targetEntityFieldHint, "\\"",
+    targetEntityField,
+  "}")
 `
     : `
 // Fallback to null string with non-enriched entity metadata

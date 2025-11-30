@@ -27,7 +27,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 import { dataViewRouteHelpersFactory } from '../utils';
-import { inspect } from 'util';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
@@ -1097,8 +1096,8 @@ export default function (providerContext: FtrProviderContext) {
             const response = await es.count({
               index: entitiesIndex,
             });
-            // 3 entities in default space + 4 entities in test space = 7 total
-            return response.count === 7;
+            // 8 entities in default space (3 original + 5 for multi-target test) + 4 in test space = 12 total
+            return response.count === 12;
           });
 
           // initialize security-solution-default data-view
@@ -1256,7 +1255,6 @@ export default function (providerContext: FtrProviderContext) {
             // Should have 3 nodes: 1 actor (single service), 1 grouped target (2 hosts), 1 label
             expect(response.body).to.have.property('nodes').length(3);
             expect(response.body).to.have.property('edges').length(2);
-            console.log('edges1 ', inspect(response.body, false, null, true));
 
             const actorNode = response.body.nodes.find(
               (node: NodeDataModel) =>
@@ -1286,7 +1284,7 @@ export default function (providerContext: FtrProviderContext) {
 
             // Find grouped target node by checking for count property
             const targetNode = response.body.nodes.find(
-              (node: EntityNodeDataModel) => node.shape !== 'label' && node.count === 2
+              (node: EntityNodeDataModel) => node.id === '599353ee39e688c8a37d9d2818d77898'
             ) as EntityNodeDataModel;
 
             // Verify entity enrichment for grouped targets (2 hosts of same type/subtype)
@@ -1425,8 +1423,7 @@ export default function (providerContext: FtrProviderContext) {
           const response = await es.count({
             index: entitiesIndex,
           });
-          // We expect 3 documents for default space
-          return response.count >= 3;
+          return response.count >= 12;
         });
 
         // Load the new ECS schema archives (ONLY new fields, no legacy actor.entity.id/target.entity.id)
@@ -1568,6 +1565,154 @@ export default function (providerContext: FtrProviderContext) {
             })
           );
 
+          response.body.edges.forEach((edge: EdgeDataModel) => {
+            expect(edge).to.have.property('color');
+            expect(edge.color).equal(
+              'subdued',
+              `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
+            );
+            expect(edge.type).equal('solid');
+          });
+        });
+      });
+
+      it('should enrich graph with multiple targets from different fields with mixed grouping', async () => {
+        await entityStoreHelpers.installCloudAssetInventoryPackage();
+
+        await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+          const response = await postGraph(supertest, {
+            query: {
+              indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+              originEventIds: [{ id: 'multi-target-mixed-event-id', isAlert: false }],
+              start: '2024-09-11T09:00:00Z',
+              end: '2024-09-11T11:00:00Z',
+            },
+          }).expect(result(200));
+
+          // Expected structure:
+          // - 1 actor node (single user)
+          // - 1 grouped target node for Storage entities (target-bucket-a, target-bucket-b from entity.target.id + target-bucket-c from service.target.entity.id)
+          // - 1 single target node for Service entity (target-sa-different from service.target.entity.id)
+          // - 2 label nodes (one for each target type due to different entity types)
+          // Total: 5 nodes, 4 edges (actor->label1->service, actor->label2->storage group)
+          expect(response.body).to.have.property('nodes').length(5);
+          expect(response.body).to.have.property('edges').length(4);
+          expect(response.body).not.to.have.property('messages');
+
+          // Verify actor node (single enriched user)
+          const actorNode = response.body.nodes.find(
+            (node: NodeDataModel) => node.id === 'multi-target-user@example.com'
+          ) as EntityNodeDataModel;
+          expect(actorNode).not.to.be(undefined);
+          expect(actorNode.label).to.equal('MultiTargetUser');
+          expect(actorNode.icon).to.equal('user');
+          expect(actorNode.shape).to.equal('ellipse');
+          expect(actorNode.tag).to.equal('Identity');
+          expect(actorNode.count).to.be(undefined); // Single entity, no count
+          expect(actorNode.documentsData).to.have.length(1);
+          expectExpect(actorNode.documentsData).toContainEqual(
+            expectExpect.objectContaining({
+              id: 'multi-target-user@example.com',
+              type: 'entity',
+              sourceNamespaceField: 'user',
+              entity: expectExpect.objectContaining({
+                name: 'MultiTargetUser',
+                type: 'Identity',
+                sub_type: 'GCP IAM User',
+              }),
+            })
+          );
+
+          // Find grouped Storage target node (should have 3 buckets: target-bucket-a, target-bucket-b, target-bucket-c)
+          const storageGroupNode = response.body.nodes.find(
+            (node: EntityNodeDataModel) => node.id === '60829c004e98c57e5a2095bb4d6608bb'
+          ) as EntityNodeDataModel;
+          expect(storageGroupNode).not.to.be(undefined);
+          expect(storageGroupNode.label).to.equal('GCP Storage Bucket'); // Shows sub_type for grouped entities
+          expect(storageGroupNode.shape).to.equal('rectangle');
+          expect(storageGroupNode.tag).to.equal('Storage');
+          expect(storageGroupNode.count).to.equal(3);
+          expect(storageGroupNode.documentsData).to.have.length(3);
+          expectExpect(storageGroupNode.documentsData).toContainEqual(
+            expectExpect.objectContaining({
+              id: 'projects/multi-target-project-id/buckets/target-bucket-a',
+              type: 'entity',
+              sourceNamespaceField: 'entity',
+              entity: expectExpect.objectContaining({
+                name: 'TargetBucketA',
+                type: 'Storage',
+                sub_type: 'GCP Storage Bucket',
+              }),
+            })
+          );
+          expectExpect(storageGroupNode.documentsData).toContainEqual(
+            expectExpect.objectContaining({
+              id: 'projects/multi-target-project-id/buckets/target-bucket-b',
+              type: 'entity',
+              sourceNamespaceField: 'entity',
+              entity: expectExpect.objectContaining({
+                name: 'TargetBucketB',
+                type: 'Storage',
+                sub_type: 'GCP Storage Bucket',
+              }),
+            })
+          );
+          expectExpect(storageGroupNode.documentsData).toContainEqual(
+            expectExpect.objectContaining({
+              id: 'projects/multi-target-project-id/buckets/target-bucket-c',
+              type: 'entity',
+              sourceNamespaceField: 'service',
+              entity: expectExpect.objectContaining({
+                name: 'TargetBucketC',
+                type: 'Storage',
+                sub_type: 'GCP Storage Bucket',
+              }),
+            })
+          );
+
+          // Find single Service target node (target-sa-different)
+          const serviceNode = response.body.nodes.find(
+            (node: EntityNodeDataModel) =>
+              node.id ===
+              'projects/multi-target-project-id/serviceAccounts/target-sa-different@multi-target-project-id.iam.gserviceaccount.com'
+          ) as EntityNodeDataModel;
+          expect(serviceNode).not.to.be(undefined);
+          expect(serviceNode.label).to.equal('TargetServiceDifferent');
+          expect(serviceNode.icon).to.equal('cloudStormy'); // Service type icon
+          expect(serviceNode.shape).to.equal('rectangle');
+          expect(serviceNode.tag).to.equal('Service');
+          expect(serviceNode.count).to.be(undefined); // Single entity, no count
+          expect(serviceNode.documentsData).to.have.length(1);
+          expectExpect(serviceNode.documentsData).toContainEqual(
+            expectExpect.objectContaining({
+              id: 'projects/multi-target-project-id/serviceAccounts/target-sa-different@multi-target-project-id.iam.gserviceaccount.com',
+              type: 'entity',
+              sourceNamespaceField: 'service',
+              entity: expectExpect.objectContaining({
+                name: 'TargetServiceDifferent',
+                type: 'Service',
+                sub_type: 'GCP Service Account',
+              }),
+            })
+          );
+
+          // Verify label nodes (should have 2 - one for each target type)
+          const labelNodes = response.body.nodes.filter(
+            (node: NodeDataModel) => node.shape === 'label'
+          ) as LabelNodeDataModel[];
+          expect(labelNodes).to.have.length(2);
+          labelNodes.forEach((labelNode) => {
+            expect(labelNode.color).equal('primary');
+            expect(labelNode.label).to.equal('google.cloud.multi.target.action');
+            expect(labelNode.documentsData).to.have.length(1);
+            expectExpect(labelNode.documentsData).toContainEqual(
+              expectExpect.objectContaining({
+                type: 'event',
+              })
+            );
+          });
+
+          // Verify edges
           response.body.edges.forEach((edge: EdgeDataModel) => {
             expect(edge).to.have.property('color');
             expect(edge.color).equal(
