@@ -34,7 +34,6 @@
       "kibanaReact"
     ],
     "optionalPlugins": [
-      "cases",
       "cloud",
       "licenseManagement",
       "workflowsManagement",

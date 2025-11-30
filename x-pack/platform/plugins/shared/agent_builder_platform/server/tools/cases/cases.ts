@@ -14,7 +14,7 @@ import type { CasesSearchRequest } from '@kbn/cases-plugin/common/types/api';
 import type { CasesClient } from '@kbn/cases-plugin/server/client';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
-import type { OnechatStartDependencies, OnechatPluginStart } from '../../../../../types';
+import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '../../types';
 import {
   normalizeTimeRange,
   createCommentSummariesFromArray,
@@ -223,7 +223,7 @@ function enhanceCases(
 }
 
 export const casesTool = (
-  coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>
+  coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>
 ): BuiltinToolDefinition<typeof casesSchema> => {
   return {
     id: platformCoreTools.cases,
