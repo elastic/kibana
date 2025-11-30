@@ -7,21 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-  formatDate,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 
+import { i18n } from '@kbn/i18n';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
@@ -35,16 +26,37 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
   ({ stepExecution }) => {
     const { euiTheme } = useEuiTheme();
 
-    // Extract execution data from stepExecution.input which contains the context
     const context = stepExecution.input as Record<string, unknown> | undefined;
     const executionStarted = stepExecution.startedAt;
     const executionEnded = context?.now as string | undefined;
     const executionDuration = stepExecution.executionTimeMs;
 
+    const formatExecutionDate = (date: string) => {
+      const dateObj = new Date(date);
+      const formatted = dateObj.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      });
+      const milliseconds = dateObj.getMilliseconds().toString().padStart(3, '0');
+      return `${formatted.replace(',', ' @')}.${milliseconds}`;
+    };
+
     return (
-      <EuiPanel hasShadow={false} paddingSize="l" css={{ height: '100%', overflowY: 'auto' }}>
-        <EuiFlexGroup direction="column" gutterSize="l">
-          {/* Status Header */}
+      <EuiPanel
+        hasShadow={false}
+        paddingSize="m"
+        css={{ height: '100%', paddingTop: '13px' /* overrides EuiPanel's paddingTop */ }}
+      >
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="m"
+          css={{ height: '100%', overflow: 'hidden' }}
+        >
           <EuiFlexItem grow={false}>
             <div
               css={css`
@@ -82,7 +94,6 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
             </div>
           </EuiFlexItem>
 
-          {/* Execution times */}
           <EuiFlexItem grow={false}>
             <div
               css={css`
@@ -102,18 +113,22 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                 `}
               >
                 <EuiText size="xs" color="subdued">
-                  <strong>
-                    {i18n.translate('workflowsManagement.executionOverview.executionStarted', {
-                      defaultMessage: 'Execution started',
-                    })}
-                  </strong>
+                  {i18n.translate('workflowsManagement.executionOverview.executionStarted', {
+                    defaultMessage: 'Execution started',
+                  })}
                 </EuiText>
-                <EuiText size="xs">
-                  <strong>
-                    {executionStarted ? formatDate(executionStarted, 'dateTime') : '-'}
-                  </strong>
+                <EuiText size="s">
+                  <strong>{executionStarted ? formatExecutionDate(executionStarted) : '-'}</strong>
                 </EuiText>
               </div>
+
+              <div
+                css={css`
+                  width: 1px;
+                  background-color: ${euiTheme.colors.lightShade};
+                  align-self: stretch;
+                `}
+              />
 
               <div
                 css={css`
@@ -124,47 +139,19 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                 `}
               >
                 <EuiText size="xs" color="subdued">
-                  <strong>
-                    {i18n.translate('workflowsManagement.executionOverview.executionEnded', {
-                      defaultMessage: 'Execution ended',
-                    })}
-                  </strong>
+                  {i18n.translate('workflowsManagement.executionOverview.executionEnded', {
+                    defaultMessage: 'Execution ended',
+                  })}
                 </EuiText>
-                <EuiText size="xs">
-                  <strong>{executionEnded ? formatDate(executionEnded, 'dateTime') : '-'}</strong>
+                <EuiText size="s">
+                  <strong>{executionEnded ? formatExecutionDate(executionEnded) : '-'}</strong>
                 </EuiText>
               </div>
             </div>
           </EuiFlexItem>
 
-          {/* Context Data */}
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiCallOut
-                  size="s"
-                  title={i18n.translate(
-                    'workflowsManagement.executionOverview.contextAccessTitle',
-                    {
-                      defaultMessage: 'Access this data in your workflow',
-                    }
-                  )}
-                  iconType="info"
-                  announceOnMount={false}
-                >
-                  <FormattedMessage
-                    id="workflowsManagement.executionOverview.contextAccessDescription"
-                    defaultMessage="You can reference these values using {code}"
-                    values={{
-                      code: <strong>{`{{ <field> }}`}</strong>,
-                    }}
-                  />
-                </EuiCallOut>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <StepExecutionDataView stepExecution={stepExecution} mode="input" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+          <EuiFlexItem css={{ overflowY: 'auto' }}>
+            <StepExecutionDataView stepExecution={stepExecution} mode="input" />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

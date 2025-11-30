@@ -26,6 +26,7 @@ import { isTerminalStatus } from '@kbn/workflows';
 
 import { StepExecutionDataView } from './step_execution_data_view';
 import { StepExecutionTimelineStateful } from './step_execution_timeline_stateful';
+import { WorkflowExecutionOverview } from './workflow_execution_overview';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
@@ -92,13 +93,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       );
     }
 
-    // For Overview pseudo-step, show empty panel for now
     if (isOverviewPseudoStep) {
-      return (
-        <EuiPanel hasShadow={false} paddingSize="m" css={{ height: '100%' }}>
-          {/* Empty panel - will be populated later */}
-        </EuiPanel>
-      );
+      return <WorkflowExecutionOverview stepExecution={stepExecution} />;
     }
 
     return (

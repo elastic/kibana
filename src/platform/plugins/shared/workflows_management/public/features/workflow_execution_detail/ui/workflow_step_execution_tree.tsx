@@ -30,7 +30,6 @@ import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { JsonValue } from '@kbn/utility-types';
 import type {
   ExecutionStatus,
   WorkflowExecutionDto,
@@ -41,7 +40,10 @@ import { isDangerousStatus, isInProgressStatus, isTerminalStatus } from '@kbn/wo
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
-import { buildTriggerStepExecutionFromContext } from './workflow_trigger_context';
+import {
+  buildOverviewStepExecutionFromContext,
+  buildTriggerStepExecutionFromContext,
+} from './workflow_pseudo_step_context';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 
 function convertTreeToEuiTreeViewItems(
@@ -236,29 +238,10 @@ export const WorkflowStepExecutionTree = ({
       execution.status
     );
 
-    // Add Overview pseudo-step to the stepExecutionMap
     const overviewPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__overview');
     if (overviewPseudoStep) {
-      let contextData: JsonValue | undefined;
-      if (execution.context) {
-        const { inputs, event, ...context } = execution.context;
-        contextData = context as JsonValue;
-      }
-      const overviewExecution: WorkflowStepExecutionDto = {
-        id: '__overview',
-        stepId: 'Overview',
-        stepType: '__overview',
-        status: execution.status,
-        stepExecutionIndex: 0,
-        startedAt: execution.startedAt,
-        input: contextData,
-        scopeStack: [],
-        workflowRunId: execution.id, // Use execution ID as the workflow run ID
-        workflowId: execution.workflowId ?? '',
-        topologicalIndex: -1, // Pseudo-step, no topological position
-        globalExecutionIndex: -1, // Pseudo-step, no execution index
-      };
-      stepExecutionMap.set('__overview', overviewExecution);
+      const executionOverview = buildOverviewStepExecutionFromContext(execution);
+      stepExecutionMap.set('__overview', executionOverview);
     }
 
     const triggerPseudoStep =

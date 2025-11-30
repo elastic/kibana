@@ -171,7 +171,7 @@ export function buildStepExecutionsTree(
 
   if (executionContext) {
     const hasEvent = executionContext.event && Object.keys(executionContext.event).length > 0;
-    const hasInputs = executionContext.inputs && Object.keys(executionContext.inputs).length > 0;
+    const hasInputs = executionContext.inputs !== undefined;
 
     if (hasEvent) {
       pseudoSteps.push({
