@@ -8,7 +8,8 @@
 import React from 'react';
 
 import type { VisualizationToolbarProps } from '@kbn/lens-common';
-import { EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
+import type { FramePublicAPI } from '@kbn/lens-common';
+import { EuiAccordion, EuiHorizontalRule, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   ValueLabelsSettings,
@@ -19,6 +20,38 @@ import {
 } from '../../../shared_components';
 import type { Orientation } from '../../../shared_components';
 import type { HeatmapVisualizationState } from '../types';
+
+/**
+ * Determines the appropriate sort predicate based on column data type and sort direction
+ */
+function getSortPredicateForColumn(
+  accessor: string | undefined,
+  direction: 'asc' | 'desc',
+  layerId: string | undefined,
+  frame: FramePublicAPI
+): 'numAsc' | 'numDesc' | 'alphaAsc' | 'alphaDesc' | undefined {
+  if (!accessor || !layerId || !frame.activeData?.[layerId]) {
+    // Fallback to alphabetical if we can't determine the type
+    return direction === 'asc' ? 'alphaAsc' : 'alphaDesc';
+  }
+
+  const table = frame.activeData[layerId];
+  const column = table.columns.find((col) => col.id === accessor);
+
+  if (!column) {
+    // Fallback to alphabetical if column not found
+    return direction === 'asc' ? 'alphaAsc' : 'alphaDesc';
+  }
+
+  // Check if column is numeric based on meta.type
+  const isNumeric = column.meta?.type === 'number';
+
+  if (direction === 'asc') {
+    return isNumeric ? 'numAsc' : 'alphaAsc';
+  } else {
+    return isNumeric ? 'numDesc' : 'alphaDesc';
+  }
+}
 
 export function HeatmapStyleSettings(props: VisualizationToolbarProps<HeatmapVisualizationState>) {
   return (
@@ -79,7 +112,44 @@ export function HeatmapTitlesAndTextSettings({
 export function HeatmapVerticalAxisSettings({
   state,
   setState,
+  frame,
 }: VisualizationToolbarProps<HeatmapVisualizationState>) {
+  const sortOptions = [
+    {
+      value: '',
+      text: i18n.translate('xpack.lens.heatmap.sortOrder.auto', {
+        defaultMessage: 'Auto',
+      }),
+    },
+    {
+      value: 'asc',
+      text: i18n.translate('xpack.lens.heatmap.sortOrder.ascending', {
+        defaultMessage: 'Ascending',
+      }),
+    },
+    {
+      value: 'desc',
+      text: i18n.translate('xpack.lens.heatmap.sortOrder.descending', {
+        defaultMessage: 'Descending',
+      }),
+    },
+    {
+      value: 'dataIndex',
+      text: i18n.translate('xpack.lens.heatmap.sortOrder.original', {
+        defaultMessage: 'Original order',
+      }),
+    },
+  ];
+
+  // Convert current predicate to display value for the select
+  const getDisplayValue = (predicate: string | undefined): string => {
+    if (!predicate) return '';
+    if (predicate === 'dataIndex') return 'dataIndex';
+    if (predicate === 'numAsc' || predicate === 'alphaAsc') return 'asc';
+    if (predicate === 'numDesc' || predicate === 'alphaDesc') return 'desc';
+    return '';
+  };
+
   return (
     <>
       <ToolbarTitleSettings
@@ -110,6 +180,53 @@ export function HeatmapVerticalAxisSettings({
         }}
         isAxisLabelVisible={state?.gridConfig.isYAxisLabelVisible}
       />
+      <EuiFormRow
+        display="columnCompressed"
+        label={i18n.translate('xpack.lens.heatmap.sortOrder.label', {
+          defaultMessage: 'Sort order',
+        })}
+        fullWidth
+      >
+        <EuiSelect
+          compressed
+          data-test-subj="lnsHeatmapYAxisSortOrder"
+          options={sortOptions}
+          value={getDisplayValue(state?.gridConfig.ySortPredicate)}
+          onChange={(e) => {
+            const selectedValue = e.target.value;
+            let predicate:
+              | 'numAsc'
+              | 'numDesc'
+              | 'alphaAsc'
+              | 'alphaDesc'
+              | 'dataIndex'
+              | undefined;
+
+            if (selectedValue === '') {
+              predicate = undefined; // Auto
+            } else if (selectedValue === 'dataIndex') {
+              predicate = 'dataIndex';
+            } else {
+              // For "Ascending" or "Descending", detect column type
+              const direction = selectedValue === 'asc' ? 'asc' : 'desc';
+              predicate = getSortPredicateForColumn(
+                state?.yAccessor,
+                direction,
+                state?.layerId,
+                frame
+              );
+            }
+
+            setState({
+              ...state,
+              gridConfig: {
+                ...state.gridConfig,
+                ySortPredicate: predicate,
+              },
+            });
+          }}
+        />
+      </EuiFormRow>
     </>
   );
 }
@@ -117,8 +234,45 @@ export function HeatmapVerticalAxisSettings({
 export function HeatmapHorizontalAxisSettings({
   state,
   setState,
+  frame,
 }: VisualizationToolbarProps<HeatmapVisualizationState>) {
   const isXAxisLabelVisible = state?.gridConfig.isXAxisLabelVisible;
+
+  const sortOptions = [
+    {
+      value: '',
+      text: i18n.translate('xpack.lens.heatmap.sortOrder.auto', {
+        defaultMessage: 'Auto',
+      }),
+    },
+    {
+      value: 'asc',
+      text: i18n.translate('xpack.lens.heatmap.sortOrder.ascending', {
+        defaultMessage: 'Ascending',
+      }),
+    },
+    {
+      value: 'desc',
+      text: i18n.translate('xpack.lens.heatmap.sortOrder.descending', {
+        defaultMessage: 'Descending',
+      }),
+    },
+    {
+      value: 'dataIndex',
+      text: i18n.translate('xpack.lens.heatmap.sortOrder.original', {
+        defaultMessage: 'Original order',
+      }),
+    },
+  ];
+
+  // Convert current predicate to display value for the select
+  const getDisplayValue = (predicate: string | undefined): string => {
+    if (!predicate) return '';
+    if (predicate === 'dataIndex') return 'dataIndex';
+    if (predicate === 'numAsc' || predicate === 'alphaAsc') return 'asc';
+    if (predicate === 'numDesc' || predicate === 'alphaDesc') return 'desc';
+    return '';
+  };
 
   return (
     <>
@@ -167,6 +321,53 @@ export function HeatmapHorizontalAxisSettings({
           }}
         />
       )}
+      <EuiFormRow
+        display="columnCompressed"
+        label={i18n.translate('xpack.lens.heatmap.sortOrder.label', {
+          defaultMessage: 'Sort order',
+        })}
+        fullWidth
+      >
+        <EuiSelect
+          compressed
+          data-test-subj="lnsHeatmapXAxisSortOrder"
+          options={sortOptions}
+          value={getDisplayValue(state?.gridConfig.xSortPredicate)}
+          onChange={(e) => {
+            const selectedValue = e.target.value;
+            let predicate:
+              | 'numAsc'
+              | 'numDesc'
+              | 'alphaAsc'
+              | 'alphaDesc'
+              | 'dataIndex'
+              | undefined;
+
+            if (selectedValue === '') {
+              predicate = undefined; // Auto
+            } else if (selectedValue === 'dataIndex') {
+              predicate = 'dataIndex';
+            } else {
+              // For "Ascending" or "Descending", detect column type
+              const direction = selectedValue === 'asc' ? 'asc' : 'desc';
+              predicate = getSortPredicateForColumn(
+                state?.xAccessor,
+                direction,
+                state?.layerId,
+                frame
+              );
+            }
+
+            setState({
+              ...state,
+              gridConfig: {
+                ...state.gridConfig,
+                xSortPredicate: predicate,
+              },
+            });
+          }}
+        />
+      </EuiFormRow>
     </>
   );
 }

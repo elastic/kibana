@@ -83,4 +83,135 @@ describe('heatmap style settings', () => {
     const updatedOrientationGroup = screen.queryByRole('group', { name: 'Orientation' });
     expect(updatedOrientationGroup).not.toBeInTheDocument();
   });
+
+  it('should update xSortPredicate when X-axis sort order is changed to descending (string column)', async () => {
+    renderComponent({
+      frame: {
+        ...defaultProps.frame,
+        activeData: {
+          '1': {
+            type: 'datatable',
+            columns: [{ id: 'x', name: 'x', meta: { type: 'string' } }],
+            rows: [],
+          },
+        },
+      },
+    });
+
+    const xAxisSortSelect = screen.getByTestId('lnsHeatmapXAxisSortOrder');
+    await userEvent.selectOptions(xAxisSortSelect, 'desc');
+
+    expect(defaultProps.setState).toBeCalledTimes(1);
+    expect(defaultProps.setState).toBeCalledWith({
+      ...defaultProps.state,
+      gridConfig: { ...defaultProps.state.gridConfig, xSortPredicate: 'alphaDesc' },
+    });
+  });
+
+  it('should update xSortPredicate to numAsc for numeric column when ascending is selected', async () => {
+    renderComponent({
+      frame: {
+        ...defaultProps.frame,
+        activeData: {
+          '1': {
+            type: 'datatable',
+            columns: [{ id: 'x', name: 'x', meta: { type: 'number' } }],
+            rows: [],
+          },
+        },
+      },
+    });
+
+    const xAxisSortSelect = screen.getByTestId('lnsHeatmapXAxisSortOrder');
+    await userEvent.selectOptions(xAxisSortSelect, 'asc');
+
+    expect(defaultProps.setState).toBeCalledTimes(1);
+    expect(defaultProps.setState).toBeCalledWith({
+      ...defaultProps.state,
+      gridConfig: { ...defaultProps.state.gridConfig, xSortPredicate: 'numAsc' },
+    });
+  });
+
+  it('should update ySortPredicate when Y-axis sort order is changed', async () => {
+    renderComponent();
+
+    const yAxisSortSelect = screen.getByTestId('lnsHeatmapYAxisSortOrder');
+    await userEvent.selectOptions(yAxisSortSelect, 'dataIndex');
+
+    expect(defaultProps.setState).toBeCalledTimes(1);
+    expect(defaultProps.setState).toBeCalledWith({
+      ...defaultProps.state,
+      gridConfig: { ...defaultProps.state.gridConfig, ySortPredicate: 'dataIndex' },
+    });
+  });
+
+  it('should set xSortPredicate to undefined when Auto is selected', async () => {
+    renderComponent({
+      state: {
+        ...defaultProps.state,
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          xSortPredicate: 'alphaAsc',
+        } as HeatmapGridConfigResult,
+      },
+    });
+
+    const xAxisSortSelect = screen.getByTestId('lnsHeatmapXAxisSortOrder');
+    await userEvent.selectOptions(xAxisSortSelect, '');
+
+    expect(defaultProps.setState).toBeCalledTimes(1);
+    expect(defaultProps.setState).toBeCalledWith({
+      ...defaultProps.state,
+      gridConfig: {
+        ...defaultProps.state.gridConfig,
+        xSortPredicate: undefined,
+      },
+    });
+  });
+
+  it('should display current xSortPredicate value in the select (converts to display value)', () => {
+    renderComponent({
+      state: {
+        ...defaultProps.state,
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          xSortPredicate: 'alphaDesc',
+        } as HeatmapGridConfigResult,
+      },
+    });
+
+    const xAxisSortSelect = screen.getByTestId('lnsHeatmapXAxisSortOrder') as HTMLSelectElement;
+    // Should display 'desc' even though the stored value is 'alphaDesc'
+    expect(xAxisSortSelect.value).toBe('desc');
+  });
+
+  it('should display numAsc as asc in the select', () => {
+    renderComponent({
+      state: {
+        ...defaultProps.state,
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          xSortPredicate: 'numAsc',
+        } as HeatmapGridConfigResult,
+      },
+    });
+
+    const xAxisSortSelect = screen.getByTestId('lnsHeatmapXAxisSortOrder') as HTMLSelectElement;
+    expect(xAxisSortSelect.value).toBe('asc');
+  });
+
+  it('should display current ySortPredicate value in the select', () => {
+    renderComponent({
+      state: {
+        ...defaultProps.state,
+        gridConfig: {
+          ...defaultProps.state.gridConfig,
+          ySortPredicate: 'dataIndex',
+        } as HeatmapGridConfigResult,
+      },
+    });
+
+    const yAxisSortSelect = screen.getByTestId('lnsHeatmapYAxisSortOrder') as HTMLSelectElement;
+    expect(yAxisSortSelect.value).toBe('dataIndex');
+  });
 });
