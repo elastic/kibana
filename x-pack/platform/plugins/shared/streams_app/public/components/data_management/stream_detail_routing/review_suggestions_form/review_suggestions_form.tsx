@@ -112,6 +112,7 @@ export function ReviewSuggestionsForm({
         className={css`
           min-block-size: auto; /* Prevent background clipping */
         `}
+        data-test-subj="streamsAppReviewPartitioningSuggestionsCallout"
       >
         <EuiText size="s">
           {i18n.translate(
@@ -126,6 +127,7 @@ export function ReviewSuggestionsForm({
         {isEditingOrReorderingStreams ? (
           <>
             <EuiCallOut
+              announceOnMount
               size="s"
               color="primary"
               iconType="info"

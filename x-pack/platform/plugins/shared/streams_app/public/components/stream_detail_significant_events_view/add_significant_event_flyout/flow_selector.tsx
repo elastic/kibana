@@ -61,6 +61,7 @@ export function FlowSelector({ selected, updateSelected, isSubmitting }: Props) 
         checked={selected === 'ai'}
         onChange={() => updateSelected('ai')}
         disabled={isSubmitting}
+        data-test-subj="significant_events_ai_generate_flow_option"
       />
       <EuiCheckableCard
         id={manualCheckableCardId}
@@ -89,6 +90,7 @@ export function FlowSelector({ selected, updateSelected, isSubmitting }: Props) 
         checked={selected === 'manual'}
         onChange={() => updateSelected('manual')}
         disabled={isSubmitting}
+        data-test-subj="significant_events_manual_entry_flow_option"
       />
     </EuiFlexGroup>
   );

@@ -19,7 +19,7 @@ import supertest from 'supertest';
 import type { UrlObject } from 'url';
 import { format } from 'url';
 import { MachineLearningAPIProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml/api';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
 import type {
