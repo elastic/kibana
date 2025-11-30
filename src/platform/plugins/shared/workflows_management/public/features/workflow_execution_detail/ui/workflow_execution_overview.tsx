@@ -21,10 +21,11 @@ import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 
 interface WorkflowExecutionOverviewProps {
   stepExecution: WorkflowStepExecutionDto;
+  workflowExecutionDuration?: number;
 }
 
 export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewProps>(
-  ({ stepExecution }) => {
+  ({ stepExecution, workflowExecutionDuration }) => {
     const { euiTheme } = useEuiTheme();
 
     const context = stepExecution.input as Record<string, unknown> | undefined;
@@ -32,7 +33,6 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     const isTestRun = executionData?.isTestRun === true;
     const executionStarted = stepExecution.startedAt;
     const executionEnded = context?.now as string | undefined;
-    const executionDuration = stepExecution.executionTimeMs;
 
     const formatExecutionDate = (date: string) => {
       const dateObj = new Date(date);
@@ -117,7 +117,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                     `}
                   />
                 )}
-                {executionDuration !== null && executionDuration !== undefined && (
+                {workflowExecutionDuration && (
                   <EuiText size="xs" color="subdued">
                     <span
                       css={css`
@@ -133,7 +133,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                       >
                         {'⏱'}
                       </span>
-                      {formatDuration(executionDuration)}
+                      {formatDuration(workflowExecutionDuration)}
                     </span>
                   </EuiText>
                 )}

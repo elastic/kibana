@@ -31,10 +31,7 @@ interface WorkflowEditorWithSidebarLayoutProps {
 }
 
 const WorkflowsSidebarWidthPrefix = 'WORKFLOWS_SIDEBAR_WIDTH_';
-const DefaultSidebarModeWidth: Record<SideBarMode, number> = {
-  list: 400,
-  detail: 600,
-};
+
 const MinSidebarModeWidth: Record<SideBarMode, number> = {
   list: 200,
   detail: 400,

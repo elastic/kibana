@@ -31,10 +31,11 @@ import { WorkflowExecutionOverview } from './workflow_execution_overview';
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
   stepExecution?: WorkflowStepExecutionDto;
+  workflowExecutionDuration?: number;
 }
 
 export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDetailsProps>(
-  ({ workflowExecutionId, stepExecution }) => {
+  ({ workflowExecutionId, stepExecution, workflowExecutionDuration }) => {
     const isFinished = useMemo(
       () => Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)),
       [stepExecution?.status]
@@ -94,7 +95,12 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     }
 
     if (isOverviewPseudoStep) {
-      return <WorkflowExecutionOverview stepExecution={stepExecution} />;
+      return (
+        <WorkflowExecutionOverview
+          stepExecution={stepExecution}
+          workflowExecutionDuration={workflowExecutionDuration}
+        />
+      );
     }
 
     return (
