@@ -156,18 +156,19 @@ export function buildStepExecutionsTree(
   }
 
   const regularSteps = toArray(root);
-  // Pseudo-steps are not real steps, an example is the trigger pseudo-step that is used to display the trigger context (the only pseudo step for now)
+  // Pseudo-steps are not real steps, an example is the trigger pseudo-step that is used to display the trigger context
   const pseudoSteps: StepExecutionTreeItem[] = [];
 
-  // Always add Overview pseudo-step at the top
-  pseudoSteps.push({
-    stepId: 'Overview',
-    stepType: '__overview',
-    executionIndex: 0,
-    stepExecutionId: '__overview',
-    status: executionStatus ?? ExecutionStatus.PENDING,
-    children: [],
-  });
+  if (executionStatus !== undefined) {
+    pseudoSteps.push({
+      stepId: 'Overview',
+      stepType: '__overview',
+      executionIndex: 0,
+      stepExecutionId: '__overview',
+      status: executionStatus,
+      children: [],
+    });
+  }
 
   if (executionContext) {
     const hasEvent = executionContext.event && Object.keys(executionContext.event).length > 0;

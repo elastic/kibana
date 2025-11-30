@@ -860,7 +860,7 @@ describe('buildStepExecutionsTree', () => {
       expect(result[0].stepId).toBe('step-1');
     });
 
-    it('should not add inputs pseudo-step when inputs object is empty', () => {
+    it('should add inputs pseudo-step even when inputs object is empty', () => {
       const stepExecutions: WorkflowStepExecutionDto[] = [
         createStepExecution({
           id: 'exec-1',
@@ -876,8 +876,11 @@ describe('buildStepExecutionsTree', () => {
 
       const result = buildStepExecutionsTree(stepExecutions, executionContext);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].stepId).toBe('step-1');
+      expect(result).toHaveLength(2);
+      expect(result[0].stepId).toBe('Inputs');
+      expect(result[0].stepType).toBe('__inputs');
+      expect(result[0].isTriggerPseudoStep).toBe(true);
+      expect(result[1].stepId).toBe('step-1');
     });
 
     it('should prepend pseudo-steps before complex nested structures', () => {
