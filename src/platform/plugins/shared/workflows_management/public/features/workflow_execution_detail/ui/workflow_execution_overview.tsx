@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
@@ -61,87 +69,53 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
           css={{ height: '100%', overflow: 'hidden' }}
         >
           <EuiFlexItem grow={false}>
-            <div
-              css={css`
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                justify-content: space-between;
-                gap: 8px;
-              `}
-            >
-              <div
-                css={css`
-                  display: flex;
-                  flex-direction: column;
-                  gap: 4px;
-                `}
-              >
-                <div
-                  css={css`
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    gap: 8px;
-                  `}
-                >
-                  {getExecutionStatusIcon(euiTheme, stepExecution.status)}
-                  <EuiText
-                    css={css`
-                      font-size: 20px;
-                      line-height: 24px;
-                      font-weight: 600;
-                    `}
-                  >
-                    {getStatusLabel(stepExecution.status)}
-                  </EuiText>
-                </div>
-                <EuiText size="xs" color="subdued">
-                  <FormattedRelativeEnhanced value={executionStarted} />
-                </EuiText>
-              </div>
-              <div
-                css={css`
-                  display: flex;
-                  flex-direction: row;
-                  align-items: center;
-                  gap: 8px;
-                `}
-              >
-                {isTestRun && (
-                  <EuiBadge
-                    color="hollow"
-                    iconType="beaker"
-                    css={css`
-                      border: 1px solid ${euiTheme.colors.warning};
-                    `}
-                  />
-                )}
-                {workflowExecutionDuration && (
-                  <EuiText size="xs" color="subdued">
-                    <span
-                      css={css`
-                        display: flex;
-                        align-items: center;
-                        gap: 4px;
-                      `}
-                    >
-                      <span
-                        css={css`
-                          font-size: 16px;
-                        `}
-                      >
-                        {'⏱'}
-                      </span>
-                      {formatDuration(workflowExecutionDuration)}
-                    </span>
-                  </EuiText>
-                )}
-              </div>
-            </div>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup direction="column" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        {getExecutionStatusIcon(euiTheme, stepExecution.status)}
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText>
+                          <h3>{getStatusLabel(stepExecution.status)}</h3>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      <FormattedRelativeEnhanced value={executionStarted} />
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  {isTestRun && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="subdued" iconType="beaker" />
+                    </EuiFlexItem>
+                  )}
+                  {workflowExecutionDuration && (
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon type="clock" size="s" color="subdued" />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="xs" color="subdued">
+                            {formatDuration(workflowExecutionDuration)}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-
-          <EuiFlexItem grow={false} />
 
           <EuiFlexItem grow={false}>
             <div
@@ -149,53 +123,57 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                 border-top: 1px solid ${euiTheme.colors.lightShade};
                 border-bottom: 1px solid ${euiTheme.colors.lightShade};
                 padding: 12px 0;
-                display: flex;
-                gap: 16px;
               `}
             >
-              <div
-                css={css`
-                  display: flex;
-                  flex-direction: column;
-                  gap: 2px;
-                  flex: 1;
-                `}
-              >
-                <EuiText size="xs" color="subdued">
-                  {i18n.translate('workflowsManagement.executionOverview.executionStarted', {
-                    defaultMessage: 'Execution started',
-                  })}
-                </EuiText>
-                <EuiText size="s">
-                  <strong>{executionStarted ? formatExecutionDate(executionStarted) : '-'}</strong>
-                </EuiText>
-              </div>
+              <EuiFlexGroup gutterSize="s" responsive={false}>
+                <EuiFlexItem>
+                  <EuiFlexGroup direction="column" gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {i18n.translate('workflowsManagement.executionOverview.executionStarted', {
+                          defaultMessage: 'Execution started',
+                        })}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <strong>
+                          {executionStarted ? formatExecutionDate(executionStarted) : '-'}
+                        </strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
 
-              <div
-                css={css`
-                  width: 1px;
-                  background-color: ${euiTheme.colors.lightShade};
-                  align-self: stretch;
-                `}
-              />
+                <EuiFlexItem
+                  grow={false}
+                  css={css`
+                    width: 1px;
+                    background-color: ${euiTheme.colors.lightShade};
+                    align-self: stretch;
+                    margin-right: 16px;
+                  `}
+                />
 
-              <div
-                css={css`
-                  display: flex;
-                  flex-direction: column;
-                  gap: 2px;
-                  flex: 1;
-                `}
-              >
-                <EuiText size="xs" color="subdued">
-                  {i18n.translate('workflowsManagement.executionOverview.executionEnded', {
-                    defaultMessage: 'Execution ended',
-                  })}
-                </EuiText>
-                <EuiText size="s">
-                  <strong>{executionEnded ? formatExecutionDate(executionEnded) : '-'}</strong>
-                </EuiText>
-              </div>
+                <EuiFlexItem>
+                  <EuiFlexGroup direction="column" gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {i18n.translate('workflowsManagement.executionOverview.executionEnded', {
+                          defaultMessage: 'Execution ended',
+                        })}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <strong>
+                          {executionEnded ? formatExecutionDate(executionEnded) : '-'}
+                        </strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </div>
           </EuiFlexItem>
 

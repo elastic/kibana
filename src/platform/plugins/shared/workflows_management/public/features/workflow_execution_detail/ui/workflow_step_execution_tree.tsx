@@ -328,6 +328,9 @@ export const WorkflowStepExecutionTree = ({
 
 const componentStyles = {
   treeViewContainer: ({ euiTheme }: UseEuiTheme) => css`
+    & .euiTreeView__expansionArrow {
+      inline-size: 12px;
+    }
     & .euiTreeView__nodeLabel {
       flex-grow: 1;
       text-align: left;
