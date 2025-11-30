@@ -15,7 +15,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { MessageEditor, useMessageEditor } from './message_editor';
@@ -24,6 +24,8 @@ import { useOnechatAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { ConversationInputActions } from './conversation_input_actions';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { AttachmentPillsRow } from './attachment_pills_row';
 
 const INPUT_MIN_HEIGHT = '150px';
 // Non-standard EUI border radius
@@ -127,6 +129,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   const agentId = useAgentId();
   const conversationId = useConversationId();
   const messageEditor = useMessageEditor();
+  const { attachments, removedAttachmentIds, removeAttachment } = useConversationContext();
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -135,6 +138,17 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   const isSubmitDisabled = messageEditor.isEmpty || isSendingMessage || !isAgentIdValid;
 
   const placeholder = isInputDisabled ? disabledPlaceholder(agentId) : enabledPlaceholder;
+
+  // Filter out removed attachments and map to the format expected by AttachmentPillsRow
+  const visibleAttachments = useMemo(() => {
+    if (!attachments) return [];
+    return attachments
+      .filter((attachment) => !removedAttachmentIds?.has(attachment.id))
+      .map((attachment) => ({
+        id: attachment.id,
+        type: attachment.type,
+      }));
+  }, [attachments, removedAttachmentIds]);
 
   // Auto-focus when conversation changes
   useEffect(() => {
@@ -159,6 +173,14 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
 
   return (
     <InputContainer isDisabled={isInputDisabled}>
+      {visibleAttachments.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <AttachmentPillsRow
+            attachments={visibleAttachments}
+            onRemoveAttachment={removeAttachment}
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem css={inputContainerStyles}>
         <MessageEditor
           messageEditor={messageEditor}

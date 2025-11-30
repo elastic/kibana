@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { EuiPanel, useEuiTheme, euiTextBreakWord, EuiText } from '@elastic/eui';
+import { EuiPanel, useEuiTheme, euiTextBreakWord, EuiText, EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
+import type { Attachment } from '@kbn/onechat-common/attachments';
 import { ROUNDED_BORDER_RADIUS_LARGE } from '../conversation.styles';
+import { AttachmentPillsRow } from '../conversation_input/attachment_pills_row';
 
 const labels = {
   userMessage: i18n.translate('xpack.onechat.round.userInput', {
@@ -19,9 +21,10 @@ const labels = {
 
 interface RoundInputProps {
   input: string;
+  attachments?: Attachment[];
 }
 
-export const RoundInput = ({ input }: RoundInputProps) => {
+export const RoundInput = ({ input, attachments }: RoundInputProps) => {
   const { euiTheme } = useEuiTheme();
 
   const backgroundColorStyle = {
@@ -41,6 +44,18 @@ export const RoundInput = ({ input }: RoundInputProps) => {
     border-radius: ${`${ROUNDED_BORDER_RADIUS_LARGE} ${ROUNDED_BORDER_RADIUS_LARGE} 0 ${ROUNDED_BORDER_RADIUS_LARGE}`};
   `;
 
+  // Map attachments to the format expected by AttachmentPillsRow
+  // Filter out hidden attachments for display in conversation history
+  const visibleAttachments = useMemo(() => {
+    if (!attachments) return [];
+    return attachments
+      .filter((attachment) => !attachment.hidden)
+      .map((attachment) => ({
+        id: attachment.id,
+        type: attachment.type,
+      }));
+  }, [attachments]);
+
   return (
     <EuiPanel
       css={inputContainerStyles}
@@ -49,7 +64,12 @@ export const RoundInput = ({ input }: RoundInputProps) => {
       hasBorder={false}
       aria-label={labels.userMessage}
     >
-      <EuiText size="s">{input}</EuiText>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiText size="s">{input}</EuiText>
+        {visibleAttachments.length > 0 && (
+          <AttachmentPillsRow attachments={visibleAttachments} />
+        )}
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };

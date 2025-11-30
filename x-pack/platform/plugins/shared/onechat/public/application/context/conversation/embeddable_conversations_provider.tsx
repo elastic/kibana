@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { useMemo, useEffect, useCallback, useRef, useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -119,15 +119,26 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     attachmentMapRef.current = attachments;
   }, []);
 
+  // Track removed attachments in this session
+  const [removedAttachmentIds, setRemovedAttachmentIds] = useState<Set<string>>(new Set());
+
+  const removeAttachment = useCallback((attachmentId: string) => {
+    setRemovedAttachmentIds((prev) => new Set([...prev, attachmentId]));
+  }, []);
+
   const handleGetProcessedAttachments = useCallback(
     (_conversation?: Conversation) => {
+      // Filter out removed attachments before processing
+      const activeAttachments = (contextProps.attachments ?? []).filter(
+        (attachment) => !removedAttachmentIds.has(attachment.id)
+      );
       return getProcessedAttachments({
-        attachments: contextProps.attachments ?? [],
+        attachments: activeAttachments,
         getAttachment: (id) => attachmentMapRef.current.get(id),
         setAttachment: (id, content) => attachmentMapRef.current.set(id, content),
       });
     },
-    [contextProps.attachments]
+    [contextProps.attachments, removedAttachmentIds]
   );
 
   const conversationContextValue = useMemo(
@@ -141,6 +152,8 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       browserApiTools: contextProps.browserApiTools,
       setConversationId,
       attachments: contextProps.attachments,
+      removedAttachmentIds,
+      removeAttachment,
       conversationActions,
       getProcessedAttachments: handleGetProcessedAttachments,
       setAttachmentMap,
@@ -153,6 +166,8 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       contextProps.attachments,
       contextProps.browserApiTools,
       conversationActions,
+      removedAttachmentIds,
+      removeAttachment,
       handleGetProcessedAttachments,
       setConversationId,
       setAttachmentMap,
