@@ -19,6 +19,9 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { registerAgent } from './agent_builder/agents';
+import { registerAttachments } from './agent_builder/attachments/register_attachments';
+import { registerTools } from './agent_builder/tools/register_tools';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
@@ -245,19 +248,15 @@ export class Plugin implements ISecuritySolutionPlugin {
       return;
     }
 
-    onechat.attachments.registerType(createAlertAttachmentType());
-    onechat.attachments.registerType(createAttackDiscoveryAttachmentType());
-    onechat.attachments.registerType(createEntityRiskAttachmentType());
-    onechat.attachments.registerType(createQueryHelpAttachmentType());
-
-    // Register tools
-    try {
-      onechat.tools.register(entityRiskScoreTool(core));
-      onechat.tools.register(attackDiscoverySearchTool());
-      onechat.tools.register(securityLabsSearchTool(core));
-    } catch (error) {
-      this.logger.warn(`Failed to register onechat tools: ${error}`);
-    }
+    registerTools(onechat, core).catch((error) => {
+      this.logger.error(`Error registering security tools: ${error}`);
+    });
+    registerAttachments(onechat).catch((error) => {
+      this.logger.error(`Error registering security attachments: ${error}`);
+    });
+    registerAgent(onechat).catch((error) => {
+      this.logger.error(`Error registering security agent: ${error}`);
+    });
   }
 
   public setup(
