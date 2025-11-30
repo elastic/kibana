@@ -37,6 +37,7 @@ export type NodeColor = typeof nodeColorSchema.type;
 export type NodeShape = TypeOf<typeof nodeShapeSchema>;
 
 export enum ApiMessageCode {
+  // @ts-expect-error upgrade typescript v5.9.3
   ReachedNodesLimit = REACHED_NODES_LIMIT,
 }
 
