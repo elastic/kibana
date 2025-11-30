@@ -34,7 +34,7 @@ export const SECURITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...SECURITY_TOOL_I
 /**
  * Registers all security agent builder tools with the onechat plugin
  */
-export const registerTools = (onechat: OnechatPluginSetup, core: CoreSetup): void => {
+export const registerTools = async (onechat: OnechatPluginSetup, core: CoreSetup) => {
   onechat.tools.register(entityRiskScoreTool(core));
   onechat.tools.register(attackDiscoverySearchTool());
   onechat.tools.register(securityLabsSearchTool(core));

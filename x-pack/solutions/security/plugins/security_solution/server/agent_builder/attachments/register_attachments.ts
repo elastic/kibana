@@ -14,7 +14,7 @@ import { createQueryHelpAttachmentType } from './query_help';
 /**
  * Registers all security agent builder attachments with the onechat plugin
  */
-export const registerAttachments = (onechat: OnechatPluginSetup): void => {
+export const registerAttachments = async (onechat: OnechatPluginSetup) => {
   onechat.attachments.registerType(createAlertAttachmentType());
   onechat.attachments.registerType(createAttackDiscoveryAttachmentType());
   onechat.attachments.registerType(createEntityRiskAttachmentType());

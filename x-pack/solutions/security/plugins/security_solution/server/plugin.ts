@@ -236,8 +236,12 @@ export class Plugin implements ISecuritySolutionPlugin {
       return;
     }
 
-    registerTools(onechat, core);
-    registerAttachments(onechat);
+    registerTools(onechat, core).catch((error) => {
+      this.logger.error(`Error registering security tools: ${error}`);
+    });
+    registerAttachments(onechat).catch((error) => {
+      this.logger.error(`Error registering security attachments: ${error}`);
+    });
   }
 
   public setup(
