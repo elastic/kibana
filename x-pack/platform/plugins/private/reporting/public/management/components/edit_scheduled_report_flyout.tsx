@@ -11,6 +11,7 @@ import { convertToRRule } from '@kbn/response-ops-recurring-schedule-form/utils/
 import { useKibana } from '@kbn/reporting-public';
 import type { Rrule } from '@kbn/task-manager-plugin/server/task';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
+import { transformEmailNotification } from '../utils';
 import type { ReportTypeData, ScheduledReport } from '../../types';
 import type { FormData } from './scheduled_report_form';
 import { ScheduledReportForm } from './scheduled_report_form';
@@ -41,7 +42,18 @@ export const EditScheduledReportFlyout = ({
 
   const onSubmit = async (formData: FormData) => {
     try {
-      const { title, startDate, timezone, recurringSchedule } = formData;
+      const {
+        title,
+        startDate,
+        timezone,
+        recurringSchedule,
+        sendByEmail,
+        emailRecipients,
+        emailCcRecipients,
+        emailBccRecipients,
+        emailSubject,
+        emailMessage,
+      } = formData;
       const rrule = convertToRRule({
         startDate,
         timezone,
@@ -53,6 +65,18 @@ export const EditScheduledReportFlyout = ({
         reportId: scheduledReport.id!,
         title,
         schedule: { rrule: rrule as Rrule },
+        notification: {
+          email: sendByEmail
+            ? transformEmailNotification({
+                emailRecipients,
+                emailCcRecipients,
+                emailBccRecipients,
+                emailSubject,
+                emailMessage,
+              })
+            : // Nullifying the email notification to remove it (undefined leaves it unchanged)
+              null,
+        },
       });
       toasts.addSuccess({
         title: i18n.SCHEDULED_REPORT_UPDATE_SUCCESS_TOAST_TITLE,
