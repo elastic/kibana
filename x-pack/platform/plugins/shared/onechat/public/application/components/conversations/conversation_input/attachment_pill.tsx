@@ -14,7 +14,7 @@ export interface AttachmentPillProps {
   /** Unique identifier for the attachment */
   id: string;
   /** Type of the attachment (e.g., 'text', 'screen_context', 'dashboard') */
-  type: string;
+  type: AttachmentType;
   /** Display name for the attachment */
   name?: string;
   /** Optional callback when the attachment is removed */
@@ -38,12 +38,6 @@ const getAttachmentIcon = (type: string): string => {
       return 'inspect';
     case AttachmentType.esql:
       return 'editorCodeBlock';
-    case 'dashboard':
-      return 'dashboardApp';
-    case 'lens':
-      return 'lensApp';
-    case 'case':
-      return 'casesApp';
     default:
       return 'document';
   }
@@ -70,18 +64,6 @@ const getAttachmentDisplayName = (type: string, name?: string): string => {
       return i18n.translate('xpack.onechat.attachmentPill.esqlAttachment', {
         defaultMessage: 'ES|QL query',
       });
-    case 'dashboard':
-      return i18n.translate('xpack.onechat.attachmentPill.dashboardAttachment', {
-        defaultMessage: 'Dashboard',
-      });
-    case 'lens':
-      return i18n.translate('xpack.onechat.attachmentPill.lensAttachment', {
-        defaultMessage: 'Lens',
-      });
-    case 'case':
-      return i18n.translate('xpack.onechat.attachmentPill.caseAttachment', {
-        defaultMessage: 'Case',
-      });
     default:
       return type;
   }
@@ -105,7 +87,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({ id, type, name, 
 
   return (
     <EuiBadge
-      color="hollow"
+      color="default"
       iconType={iconType}
       iconSide="left"
       onClickAriaLabel={handleClose ? labels.removeAttachment : undefined}

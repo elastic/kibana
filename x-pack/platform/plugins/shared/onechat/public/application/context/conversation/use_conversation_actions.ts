@@ -16,6 +16,7 @@ import type {
   ToolCallStep,
   Conversation,
 } from '@kbn/onechat-common';
+import type { Attachment } from '@kbn/onechat-common/attachments';
 import { isToolCallStep } from '@kbn/onechat-common';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import type { ConversationsService } from '../../../services/conversations';
@@ -30,7 +31,13 @@ import {
 export interface ConversationActions {
   removeNewConversationQuery: () => void;
   invalidateConversation: () => void;
-  addOptimisticRound: ({ userMessage }: { userMessage: string }) => void;
+  addOptimisticRound: ({
+    userMessage,
+    attachments,
+  }: {
+    userMessage: string;
+    attachments?: Attachment[];
+  }) => void;
   removeOptimisticRound: () => void;
   setAgentId: (agentId: string) => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
@@ -106,10 +113,16 @@ const createConversationActions = ({
       queryClient.invalidateQueries({ queryKey });
     },
 
-    addOptimisticRound: ({ userMessage }: { userMessage: string }) => {
+    addOptimisticRound: ({
+      userMessage,
+      attachments,
+    }: {
+      userMessage: string;
+      attachments?: Attachment[];
+    }) => {
       setConversation(
         produce((draft) => {
-          const nextRound = createNewRound({ userMessage });
+          const nextRound = createNewRound({ userMessage, attachments });
 
           if (!draft) {
             const newConversation = createNewConversation();

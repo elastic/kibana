@@ -6,9 +6,10 @@
  */
 
 import { useMutation } from '@kbn/react-query';
-import { useRef, useState, useMemo } from 'react';
+import { useRef, useState, useMemo, useCallback } from 'react';
 import { toToolMetadata } from '@kbn/onechat-browser/tools/browser_api_tool';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { AttachmentInput, Attachment } from '@kbn/onechat-common/attachments';
 import { useAgentId, useConversation } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
@@ -18,6 +19,12 @@ import { mutationKeys } from '../../mutation_keys';
 import { usePendingMessageState } from './use_pending_message_state';
 import { useSubscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
+
+/** Convert AttachmentInput to Attachment (ensure id is present) */
+const toAttachment = (input: AttachmentInput): Attachment => ({
+  ...input,
+  id: input.id ?? `attachment-${Date.now()}`,
+});
 
 interface UseSendMessageMutationProps {
   connectorId?: string;
@@ -60,15 +67,20 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     browserToolExecutor,
   });
 
-  const sendMessage = async ({ message }: { message: string }) => {
+  // Store processed attachments for optimistic update
+  const pendingAttachmentsRef = useRef<Attachment[]>([]);
+
+  const sendMessage = async ({
+    message,
+    attachments,
+  }: {
+    message: string;
+    attachments: AttachmentInput[];
+  }) => {
     const signal = messageControllerRef.current?.signal;
     if (!signal) {
       return Promise.reject(new Error('Abort signal not present'));
     }
-
-    const processedAttachments = getProcessedAttachments
-      ? await getProcessedAttachments(conversation)
-      : [];
 
     const events$ = chatService.chat({
       signal,
@@ -76,7 +88,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       conversationId,
       agentId,
       connectorId,
-      attachments: processedAttachments,
+      attachments,
       browserApiTools: browserApiToolsMetadata,
     });
 
@@ -86,13 +98,20 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.sendMessage,
     mutationFn: sendMessage,
-    onMutate: ({ message }) => {
+    onMutate: ({ message, attachments }) => {
       const isNewConversation = !conversationId;
       isMutatingNewConversationRef.current = isNewConversation;
       setPendingMessage(message);
       removeError();
       messageControllerRef.current = new AbortController();
-      conversationActions.addOptimisticRound({ userMessage: message });
+
+      // Convert AttachmentInput to Attachment for optimistic round
+      const attachmentsForRound = attachments.map(toAttachment);
+      conversationActions.addOptimisticRound({
+        userMessage: message,
+        attachments: attachmentsForRound,
+      });
+
       if (isNewConversation) {
         if (!agentId) {
           throw new Error('Agent id must be defined for a new conversation');
@@ -131,8 +150,23 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     messageControllerRef.current?.abort();
   };
 
+  // Wrapper to process attachments before calling mutate
+  const sendMessageWithAttachments = useCallback(
+    async ({ message }: { message: string }) => {
+      const processedAttachments = getProcessedAttachments
+        ? await getProcessedAttachments(conversation)
+        : [];
+
+      // Store for potential retry
+      pendingAttachmentsRef.current = processedAttachments.map(toAttachment);
+
+      mutate({ message, attachments: processedAttachments });
+    },
+    [getProcessedAttachments, conversation, mutate]
+  );
+
   return {
-    sendMessage: mutate,
+    sendMessage: sendMessageWithAttachments,
     isResponseLoading,
     error,
     pendingMessage,
@@ -153,7 +187,8 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
         throw new Error('Pending message is not present');
       }
 
-      mutate({ message: pendingMessage });
+      // Use stored attachments for retry
+      mutate({ message: pendingMessage, attachments: pendingAttachmentsRef.current });
     },
     canCancel,
     cancel,
@@ -163,6 +198,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       conversationActions.removeOptimisticRound();
       removeError();
       removePendingMessage();
+      pendingAttachmentsRef.current = [];
     },
   };
 };

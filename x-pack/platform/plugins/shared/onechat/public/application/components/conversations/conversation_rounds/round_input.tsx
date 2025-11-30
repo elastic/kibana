@@ -66,9 +66,7 @@ export const RoundInput = ({ input, attachments }: RoundInputProps) => {
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiText size="s">{input}</EuiText>
-        {visibleAttachments.length > 0 && (
-          <AttachmentPillsRow attachments={visibleAttachments} />
-        )}
+        {visibleAttachments.length > 0 && <AttachmentPillsRow attachments={visibleAttachments} />}
       </EuiFlexGroup>
     </EuiPanel>
   );
