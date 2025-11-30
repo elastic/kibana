@@ -100,7 +100,7 @@ const WorkflowEditorWithSidebarLayout = ({
   mode,
   sideBarPortal,
 }: WorkflowEditorWithSidebarLayoutProps) => {
-  const defaultSidebarWidth = DefaultSidebarModeWidth[mode];
+  const defaultSidebarWidth = Math.floor(window.innerWidth * 0.5);
 
   const [sidebarWidth = defaultSidebarWidth, setSidebarWidth] = useLocalStorage(
     `${WorkflowsSidebarWidthPrefix}${mode.toUpperCase()}`,

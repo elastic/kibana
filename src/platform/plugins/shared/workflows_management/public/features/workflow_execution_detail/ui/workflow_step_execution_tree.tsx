@@ -281,8 +281,7 @@ export const WorkflowStepExecutionTree = ({
       onStepExecutionClick
     );
 
-    // Split items into Overview and the rest
-    const overviewItems = items.filter(
+    const overviewItem = items.find(
       (item) => stepExecutionMap.get(item.id)?.stepType === '__overview'
     );
     const regularItems = items.filter(
@@ -292,13 +291,12 @@ export const WorkflowStepExecutionTree = ({
     return (
       <>
         <div css={styles.treeViewContainer}>
-          {/* Overview section */}
-          {overviewItems.length > 0 && (
+          {overviewItem && (
             <>
               <EuiTreeView
                 showExpansionArrows
                 expandByDefault
-                items={overviewItems}
+                items={[overviewItem]}
                 aria-label={i18n.translate(
                   'workflows.WorkflowStepExecutionTree.overviewAriaLabel',
                   {

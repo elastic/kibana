@@ -47,11 +47,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         executionId === workflowExecution?.id && // execution id matches (not stale execution used)
         workflowExecution?.stepExecutions?.length // step executions are loaded
       ) {
-        // Auto-select the first step execution
-        const firstStepExecutionId = workflowExecution.stepExecutions[0]?.id;
-        if (firstStepExecutionId) {
-          setSelectedStepExecution(firstStepExecutionId);
-        }
+        setSelectedStepExecution('__overview');
       }
     }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution, executionId]);
 
