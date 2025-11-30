@@ -125,3 +125,10 @@ export const GAP_AUTO_FILL_STATUS_SKIPPED = i18n.translate(
     defaultMessage: 'Task skipped',
   }
 );
+
+export const GAP_AUTO_FILL_LOGS_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.gapAutoFillLogs.calloutTitle',
+  {
+    defaultMessage: 'About the scheduler logs',
+  }
+);

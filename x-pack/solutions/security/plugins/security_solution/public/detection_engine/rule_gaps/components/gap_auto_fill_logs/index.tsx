@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GapAutoFillSchedulerLogsResponseBodyV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/gap_auto_fill_scheduler';
+import { CallOutSwitcher } from '../../../../common/components/callouts';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import * as i18n from './translations';
 import {
@@ -151,6 +152,24 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
+            <CallOutSwitcher
+              namespace="detections"
+              condition={true}
+              message={{
+                type: 'primary',
+                id: 'gap-auto-fill-logs',
+                title: i18n.GAP_AUTO_FILL_LOGS_CALLOUT_TITLE,
+                description: (
+                  <div>
+                    <FormattedMessage
+                      id="xpack.securitySolution.gapAutoFillLogs.caloutDescription"
+                      defaultMessage="The gap fill scheduler automatically checks for gaps in run executions and schedules backfills to cover them. The scheduler logs which gaps were scheduled to be filled, and whether they succeeded or failed. "
+                    />
+                    <EuiSpacer size="s" />
+                  </div>
+                ),
+              }}
+            />
             <EuiSpacer size="m" />
             <EuiPanel hasBorder>
               <EuiFlexGroup gutterSize="xl">
