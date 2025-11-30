@@ -94,6 +94,7 @@ export function registerQueryFunction(params: FunctionRegistrationParameters) {
       the get_dataset functions first if you need index or field names. This
       tool takes no input.`,
     },
+    // @ts-expect-error upgrade typescript v5.9.3
     async ({ messages, connectorId, simulateFunctionCalling }) => {
       const esqlFunctions = functions
         .getFunctions()
@@ -134,16 +135,16 @@ export function registerQueryFunction(params: FunctionRegistrationParameters) {
         system: `
 <CriticalInstructions>
  1. **CHECK YOUR TOOLS FIRST.** Your capabilities are strictly limited to the tools listed in the AvailableTools section below.
- 2. **DISREGARD PAST TOOLS.** 
-  * Under NO circumstances should you use any tool that is not explicitly defined in the AvailableTools section for THIS turn. 
-  * Tools used or mentioned in previous parts of the conversation are NOT available unless they are listed below. 
+ 2. **DISREGARD PAST TOOLS.**
+  * Under NO circumstances should you use any tool that is not explicitly defined in the AvailableTools section for THIS turn.
+  * Tools used or mentioned in previous parts of the conversation are NOT available unless they are listed below.
   * Calling unavailable tools will result in a **critical error and task failure**.
  3. **Critical ES|QL syntax rules:**
       * When using \`DATE_FORMAT\`, any literal text in the format string **MUST** be in single quotes. Example: \`DATE_FORMAT("d 'of' MMMM yyyy", @timestamp)\`.
       * When grouping with \`STATS\`, use the field name directly. Example: \`STATS count = COUNT(*) BY destination.domain\`
 </CriticalInstructions>
  <AvailableTools>
- * These are the only known and available tools for use: 
+ * These are the only known and available tools for use:
       \`\`\`json
       ${JSON.stringify(availableToolDefinitions, null, 4)}
       \'\'\'
