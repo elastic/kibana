@@ -74,6 +74,7 @@ RISK ENTITY DATA:
    Parameters: { identifierType: "[extracted identifierType]", identifier: "[extracted identifier]" }
 
 CRITICAL: You MUST call ${sanitizeToolId(
+        // ^^ we can say MUST here because this attachment is only exposed to the user once risk index has been installed
         SECURITY_ENTITY_RISK_SCORE_TOOL_ID
       )} with the extracted identifierType and identifier before responding.`;
       return description;

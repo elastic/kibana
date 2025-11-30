@@ -254,7 +254,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     try {
       onechat.tools.register(entityRiskScoreTool(core));
       onechat.tools.register(attackDiscoverySearchTool());
-      onechat.tools.register(securityLabsSearchTool());
+      onechat.tools.register(securityLabsSearchTool(core));
     } catch (error) {
       this.logger.warn(`Failed to register onechat tools: ${error}`);
     }

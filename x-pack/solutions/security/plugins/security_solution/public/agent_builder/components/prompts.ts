@@ -14,7 +14,7 @@ export const ALERT_ATTACHMENT_PROMPT = `Evaluate the provided security alert and
 
 * Summarize the alert using extracted data:
 
-  * **Alert ID**: \`kibana.alert.uuid\` or \`_id\`
+  * **Alert ID**: Use the \`_id\` field value (not \`kibana.alert.uuid\`)
   * **Rule Name**: \`kibana.alert.rule.name\`
   * **Entities**: \`host.name\`, \`user.name\`, \`service.name\`
   * Include associated **risk scores** for each entity (from the risk score tool)
@@ -75,9 +75,7 @@ export const ALERT_ATTACHMENT_PROMPT = `Evaluate the provided security alert and
 * Use markdown headers, tables, and code blocks for clarity
 * Organize sections visually and consistently
 * Use concise, actionable language
-* Include emojis in section headers for clarity
-
-**CRITICAL:** You MUST incorporate results from **all enrichment tools** (risk scores, attack discoveries, related cases, Security Labs) before generating the response. Do not skip any step.`;
+* Include emojis in section headers for clarity`;
 export const ENTITY_ANALYSIS = `Analyze asset data described above to provide security insights. The data contains the context of a specific asset (e.g., a host, user, service or cloud resource). Your response must be structured, contextual, and provide a general analysis based on the structure below.
 Your response must be in markdown format and include the following sections:
 **1. 🔍 Asset Overview**

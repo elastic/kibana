@@ -81,7 +81,8 @@ Complete in order:
 2. Extract rule name: kibana.alert.rule.name
 3. Extract entities: host.name, user.name, service.name
 4. Extract MITRE fields: kibana.alert.rule.threat.tactic.id, kibana.alert.rule.threat.technique.id, threat.tactic.id
-5. Query RISK SCORES for entities:
+5. IMPORTANT Skip step if ${sanitizeToolId(SECURITY_ENTITY_RISK_SCORE_TOOL_ID)} is unavailable!
+   Query RISK SCORES for entities:
    Tool: ${sanitizeToolId(SECURITY_ENTITY_RISK_SCORE_TOOL_ID)}
    Parameters: { identifierType: "host.name", identifier: "MyHostName" }
 
@@ -93,7 +94,8 @@ Complete in order:
    Tool: ${sanitizeToolId(platformCoreTools.cases)}
    Parameters: { query: "Do I have any open security cases?", alertIds: ["[alert ID]"], owner: "securitySolution" }
 
-8. Query SECURITY LABS:
+8. IMPORTANT Skip step if ${sanitizeToolId(SECURITY_LABS_SEARCH_TOOL_ID)} is unavailable!
+   Query SECURITY LABS:
    Tool: ${sanitizeToolId(SECURITY_LABS_SEARCH_TOOL_ID)}
    Parameters: { query: "Find Security Labs articles about [MITRE technique or rule name]" }
 
