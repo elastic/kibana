@@ -44,10 +44,10 @@ describe('parseRecords', () => {
         actorIdsCount: 1,
         targetIdsCount: 1,
         actorsDocData: [
-          '{"id":"actor1","type":"entity","sourceNamespaceField":"user","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users"}}',
+          '{"id":"actor1","type":"entity","entityFieldNamespace":"user","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users"}}',
         ],
         targetsDocData: [
-          '{"id":"target1","type":"entity","sourceNamespaceField":"host","entity":{"name":"Server 01","type":"host","sub_type":"Server"}}',
+          '{"id":"target1","type":"entity","entityFieldNamespace":"host","entity":{"name":"Server 01","type":"host","sub_type":"Server"}}',
         ],
         badge: 1,
         uniqueEventsCount: 1,
@@ -118,8 +118,8 @@ describe('parseRecords', () => {
         targetEntityType: '',
         actorIdsCount: 1,
         targetIdsCount: 1,
-        actorsDocData: ['{"id":"actor1","type":"entity","sourceNamespaceField":"entity"}'],
-        targetsDocData: ['{"id":"target1","type":"entity","sourceNamespaceField":"entity"}'],
+        actorsDocData: ['{"id":"actor1","type":"entity","entityFieldNamespace":"entity"}'],
+        targetsDocData: ['{"id":"target1","type":"entity","entityFieldNamespace":"entity"}'],
         badge: 1,
         uniqueEventsCount: 1,
         uniqueAlertsCount: 0,
@@ -158,10 +158,10 @@ describe('parseRecords', () => {
         actorIdsCount: 1,
         targetIdsCount: 1,
         actorsDocData: [
-          '{"id":"actor1","type":"entity","sourceNamespaceField":"user","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users"}}',
+          '{"id":"actor1","type":"entity","entityFieldNamespace":"user","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users"}}',
         ],
         targetsDocData: [
-          '{"id":"target1","type":"entity","sourceNamespaceField":"host","entity":{"name":"Server 01","type":"host","sub_type":"Server"}}',
+          '{"id":"target1","type":"entity","entityFieldNamespace":"host","entity":{"name":"Server 01","type":"host","sub_type":"Server"}}',
         ],
         badge: 1,
         uniqueEventsCount: 1,
@@ -186,10 +186,10 @@ describe('parseRecords', () => {
         actorIdsCount: 1,
         targetIdsCount: 1,
         actorsDocData: [
-          '{"id":"actor1","type":"entity","sourceNamespaceField":"user","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users"}}',
+          '{"id":"actor1","type":"entity","entityFieldNamespace":"user","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users"}}',
         ],
         targetsDocData: [
-          '{"id":"target1","type":"entity","sourceNamespaceField":"host","entity":{"name":"Server 01","type":"host","sub_type":"Server"}}',
+          '{"id":"target1","type":"entity","entityFieldNamespace":"host","entity":{"name":"Server 01","type":"host","sub_type":"Server"}}',
         ],
         badge: 1,
         uniqueEventsCount: 1,
@@ -243,8 +243,8 @@ describe('parseRecords', () => {
           targetEntityType: '',
           actorIdsCount: 1,
           targetIdsCount: 1,
-          actorsDocData: ['{"id":"actor1","type":"entity","sourceNamespaceField":"entity"}'],
-          targetsDocData: ['{"id":"target1","type":"entity","sourceNamespaceField":"entity"}'],
+          actorsDocData: ['{"id":"actor1","type":"entity","entityFieldNamespace":"entity"}'],
+          targetsDocData: ['{"id":"target1","type":"entity","entityFieldNamespace":"entity"}'],
           action: 'alert',
           docs: ['{"foo":"bar"}'],
           badge: 1,
@@ -275,8 +275,8 @@ describe('parseRecords', () => {
           targetEntityType: '',
           actorIdsCount: 1,
           targetIdsCount: 1,
-          actorsDocData: ['{"id":"actor1","type":"entity","sourceNamespaceField":"entity"}'],
-          targetsDocData: ['{"id":"target1","type":"entity","sourceNamespaceField":"entity"}'],
+          actorsDocData: ['{"id":"actor1","type":"entity","entityFieldNamespace":"entity"}'],
+          targetsDocData: ['{"id":"target1","type":"entity","entityFieldNamespace":"entity"}'],
           action: 'alert',
           docs: ['{"foo":"bar"}'],
           badge: 1,
@@ -307,8 +307,8 @@ describe('parseRecords', () => {
       targetEntityType: '',
       actorIdsCount: 1,
       targetIdsCount: 1,
-      actorsDocData: ['{"id":"actor1","type":"entity","sourceNamespaceField":"entity"}'],
-      targetsDocData: ['{"id":"target1","type":"entity","sourceNamespaceField":"entity"}'],
+      actorsDocData: ['{"id":"actor1","type":"entity","entityFieldNamespace":"entity"}'],
+      targetsDocData: ['{"id":"target1","type":"entity","entityFieldNamespace":"entity"}'],
       docs: ['{"foo":"bar"}'],
       badge: 1,
       uniqueEventsCount: 0,
@@ -370,11 +370,11 @@ describe('parseRecords', () => {
         actorIdsCount: 2,
         targetIdsCount: 1,
         actorsDocData: [
-          '{"id":"a1","type":"entity","sourceNamespaceField":"user","entity":{"name":"Actor 1","type":"user","sub_type":"Identity Users"}}',
-          '{"id":"a2","type":"entity","sourceNamespaceField":"user","entity":{"name":"Actor 2","type":"user","sub_type":"Identity Users"}}',
+          '{"id":"a1","type":"entity","entityFieldNamespace":"user","entity":{"name":"Actor 1","type":"user","sub_type":"Identity Users"}}',
+          '{"id":"a2","type":"entity","entityFieldNamespace":"user","entity":{"name":"Actor 2","type":"user","sub_type":"Identity Users"}}',
         ],
         targetsDocData: [
-          '{"id":"t1","type":"entity","sourceNamespaceField":"host","entity":{"name":"Target 1","type":"host","sub_type":"Server"}}',
+          '{"id":"t1","type":"entity","entityFieldNamespace":"host","entity":{"name":"Target 1","type":"host","sub_type":"Server"}}',
         ],
         badge: 1,
         uniqueEventsCount: 1,
@@ -397,11 +397,11 @@ describe('parseRecords', () => {
         actorIdsCount: 1,
         targetIdsCount: 2,
         actorsDocData: [
-          '{"id":"a3","type":"entity","sourceNamespaceField":"service","entity":{"name":"Actor 3","type":"service","sub_type":"Services"}}',
+          '{"id":"a3","type":"entity","entityFieldNamespace":"service","entity":{"name":"Actor 3","type":"service","sub_type":"Services"}}',
         ],
         targetsDocData: [
-          '{"id":"t2","type":"entity","sourceNamespaceField":"entity","entity":{"name":"Target 2","type":"entity","sub_type":"Entity"}}',
-          '{"id":"t3","type":"entity","sourceNamespaceField":"entity","entity":{"name":"Target 3","type":"entity","sub_type":"Entity"}}',
+          '{"id":"t2","type":"entity","entityFieldNamespace":"entity","entity":{"name":"Target 2","type":"entity","sub_type":"Entity"}}',
+          '{"id":"t3","type":"entity","entityFieldNamespace":"entity","entity":{"name":"Target 3","type":"entity","sub_type":"Entity"}}',
         ],
         badge: 1,
         uniqueEventsCount: 1,
@@ -575,7 +575,7 @@ describe('parseRecords', () => {
           actorIdsCount: 1,
           targetIdsCount: 0,
           actorsDocData: [
-            '{"id":"actor1","type":"entity","sourceNamespaceField":"user","entity":{"name":"Threat Actor","type":"user","sub_type":"Identity Users"}}',
+            '{"id":"actor1","type":"entity","entityFieldNamespace":"user","entity":{"name":"Threat Actor","type":"user","sub_type":"Identity Users"}}',
           ],
           targetsDocData: [],
           badge: 1,
@@ -630,8 +630,8 @@ describe('parseRecords', () => {
           targetEntityType: '',
           actorIdsCount: 1,
           targetIdsCount: 1,
-          actorsDocData: ['{"id":"actor1","type":"entity","sourceNamespaceField":"user"}'],
-          targetsDocData: ['{"id":"target1","type":"entity","sourceNamespaceField":"entity"}'],
+          actorsDocData: ['{"id":"actor1","type":"entity","entityFieldNamespace":"user"}'],
+          targetsDocData: ['{"id":"target1","type":"entity","entityFieldNamespace":"entity"}'],
           badge: 1,
           uniqueEventsCount: 1,
           uniqueAlertsCount: 0,
@@ -668,10 +668,10 @@ describe('parseRecords', () => {
           actorIdsCount: 1,
           targetIdsCount: 1,
           actorsDocData: [
-            '{"id":"actor1","type":"entity","sourceNamespaceField":"entity","entity":{"name":"Actor 1","type":"malware","sub_type":"Malware"}}',
+            '{"id":"actor1","type":"entity","entityFieldNamespace":"entity","entity":{"name":"Actor 1","type":"malware","sub_type":"Malware"}}',
           ],
           targetsDocData: [
-            '{"id":"target1","type":"entity","sourceNamespaceField":"entity","entity":{"name":"Target 1","type":"system","sub_type":"System"}}',
+            '{"id":"target1","type":"entity","entityFieldNamespace":"entity","entity":{"name":"Target 1","type":"system","sub_type":"System"}}',
           ],
           badge: 1,
           uniqueEventsCount: 0,
@@ -709,10 +709,10 @@ describe('parseRecords', () => {
           actorIdsCount: 1,
           targetIdsCount: 1,
           actorsDocData: [
-            '{"id":"actor1","type":"entity","sourceNamespaceField":"user","entity":{"name":"Actor 1","type":"user","sub_type":"Identity Users"}}',
+            '{"id":"actor1","type":"entity","entityFieldNamespace":"user","entity":{"name":"Actor 1","type":"user","sub_type":"Identity Users"}}',
           ],
           targetsDocData: [
-            '{"id":"target1","type":"entity","sourceNamespaceField":"entity","entity":{"name":"Target 1","type":"server","sub_type":"Server"}}',
+            '{"id":"target1","type":"entity","entityFieldNamespace":"entity","entity":{"name":"Target 1","type":"server","sub_type":"Server"}}',
           ],
           badge: 3,
           uniqueEventsCount: 3,
@@ -754,10 +754,10 @@ describe('parseRecords', () => {
           actorIdsCount: 1,
           targetIdsCount: 1,
           actorsDocData: [
-            '{"id":"actor1","type":"entity","sourceNamespaceField":"user","entity":{"name":"Actor 1","type":"user","sub_type":"Identity Users"}}',
+            '{"id":"actor1","type":"entity","entityFieldNamespace":"user","entity":{"name":"Actor 1","type":"user","sub_type":"Identity Users"}}',
           ],
           targetsDocData: [
-            '{"id":"target1","type":"entity","sourceNamespaceField":"entity","entity":{"name":"Target 1","type":"system","sub_type":"System"}}',
+            '{"id":"target1","type":"entity","entityFieldNamespace":"entity","entity":{"name":"Target 1","type":"system","sub_type":"System"}}',
           ],
           badge: 5,
           uniqueEventsCount: 3,
@@ -806,10 +806,10 @@ describe('parseRecords', () => {
           actorIdsCount: 1,
           targetIdsCount: 1,
           actorsDocData: [
-            '{"id":"actor1","type":"entity","sourceNamespaceField":"user","entity":{"name":"Global Users","type":"user","sub_type":"Identity Users"}}',
+            '{"id":"actor1","type":"entity","entityFieldNamespace":"user","entity":{"name":"Global Users","type":"user","sub_type":"Identity Users"}}',
           ],
           targetsDocData: [
-            '{"id":"target1","type":"entity","sourceNamespaceField":"entity","entity":{"name":"Distributed Systems","type":"system","sub_type":"System"}}',
+            '{"id":"target1","type":"entity","entityFieldNamespace":"entity","entity":{"name":"Distributed Systems","type":"system","sub_type":"System"}}',
           ],
           badge: 1,
           uniqueEventsCount: 1,
@@ -858,10 +858,10 @@ describe('parseRecords', () => {
           actorIdsCount: 1,
           targetIdsCount: 1,
           actorsDocData: [
-            '{"id":"actor1","type":"entity","sourceNamespaceField":"user","entity":{"name":"Local Users","type":"user","sub_type":"Identity Users"}}',
+            '{"id":"actor1","type":"entity","entityFieldNamespace":"user","entity":{"name":"Local Users","type":"user","sub_type":"Identity Users"}}',
           ],
           targetsDocData: [
-            '{"id":"target1","type":"entity","sourceNamespaceField":"entity","entity":{"name":"Local Systems","type":"system","sub_type":"System"}}',
+            '{"id":"target1","type":"entity","entityFieldNamespace":"entity","entity":{"name":"Local Systems","type":"system","sub_type":"System"}}',
           ],
           badge: 1,
           uniqueEventsCount: 1,
@@ -909,8 +909,8 @@ describe('parseRecords', () => {
           targetEntityName: '',
           actorIdsCount: 1,
           targetIdsCount: 1,
-          actorsDocData: ['{"id":"actor1","type":"entity","sourceNamespaceField":"user"}'],
-          targetsDocData: ['{"id":"target1","type":"entity","sourceNamespaceField":"service"}'],
+          actorsDocData: ['{"id":"actor1","type":"entity","entityFieldNamespace":"user"}'],
+          targetsDocData: ['{"id":"target1","type":"entity","entityFieldNamespace":"service"}'],
           badge: 1,
           uniqueEventsCount: 1,
           uniqueAlertsCount: 0,
@@ -929,13 +929,13 @@ describe('parseRecords', () => {
       const userNode = result.nodes.find((n) => n.label === 'actor1') as EntityNodeDataModel;
       expect(userNode).toBeDefined();
       expect(userNode.documentsData).toEqual([
-        { id: 'actor1', type: 'entity', sourceNamespaceField: 'user' },
+        { id: 'actor1', type: 'entity', entityFieldNamespace: 'user' },
       ]);
 
       const serviceNode = result.nodes.find((n) => n.label === 'target1') as EntityNodeDataModel;
       expect(serviceNode).toBeDefined();
       expect(serviceNode.documentsData).toEqual([
-        { id: 'target1', type: 'entity', sourceNamespaceField: 'service' },
+        { id: 'target1', type: 'entity', entityFieldNamespace: 'service' },
       ]);
     });
   });
@@ -952,10 +952,10 @@ describe('parseRecords', () => {
           actorIdsCount: 1,
           targetIdsCount: 1,
           actorsDocData: [
-            '{"id":"non-enriched-actor-123","type":"entity","sourceNamespaceField":"entity"}',
+            '{"id":"non-enriched-actor-123","type":"entity","entityFieldNamespace":"entity"}',
           ],
           targetsDocData: [
-            '{"id":"non-enriched-target-456","type":"entity","sourceNamespaceField":"entity"}',
+            '{"id":"non-enriched-target-456","type":"entity","entityFieldNamespace":"entity"}',
           ],
           badge: 1,
           uniqueEventsCount: 1,
@@ -1007,13 +1007,13 @@ describe('parseRecords', () => {
           actorIdsCount: 3,
           targetIdsCount: 2,
           actorsDocData: [
-            '{"id":"entity1","type":"entity","sourceNamespaceField":"entity"}',
-            '{"id":"entity2","type":"entity","sourceNamespaceField":"entity"}',
-            '{"id":"entity3","type":"entity","sourceNamespaceField":"entity"}',
+            '{"id":"entity1","type":"entity","entityFieldNamespace":"entity"}',
+            '{"id":"entity2","type":"entity","entityFieldNamespace":"entity"}',
+            '{"id":"entity3","type":"entity","entityFieldNamespace":"entity"}',
           ],
           targetsDocData: [
-            '{"id":" target1","type":"entity","sourceNamespaceField":"entity"}',
-            '{"id":"target2","type":"entity","sourceNamespaceField":"entity"}',
+            '{"id":" target1","type":"entity","entityFieldNamespace":"entity"}',
+            '{"id":"target2","type":"entity","entityFieldNamespace":"entity"}',
           ],
           badge: 5,
           uniqueEventsCount: 5,
@@ -1072,10 +1072,10 @@ describe('parseRecords', () => {
           actorIdsCount: 1,
           targetIdsCount: 1,
           actorsDocData: [
-            '{"id":"actor1","type":"entity","sourceNamespaceField":"user","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users"}}',
+            '{"id":"actor1","type":"entity","entityFieldNamespace":"user","entity":{"name":"John Doe","type":"user","sub_type":"Identity Users"}}',
           ],
           targetsDocData: [
-            '{"id":"target1","type":"entity","sourceNamespaceField":"host","entity":{"name":"web-server-01","type":"host","sub_type":"Server"}}',
+            '{"id":"target1","type":"entity","entityFieldNamespace":"host","entity":{"name":"web-server-01","type":"host","sub_type":"Server"}}',
           ],
           badge: 1,
           uniqueEventsCount: 1,
@@ -1125,13 +1125,13 @@ describe('parseRecords', () => {
           actorIdsCount: 3,
           targetIdsCount: 2,
           actorsDocData: [
-            '{"id":"user1","type":"entity","sourceNamespaceField":"user","entity":{"name":"User 1","type":"user","sub_type":"Identity Users"}}',
-            '{"id":"user2","type":"entity","sourceNamespaceField":"user","entity":{"name":"User 2","type":"user","sub_type":"Identity Users"}}',
-            '{"id":"user3","type":"entity","sourceNamespaceField":"user","entity":{"name":"User 3","type":"user","sub_type":"Identity Users"}}',
+            '{"id":"user1","type":"entity","entityFieldNamespace":"user","entity":{"name":"User 1","type":"user","sub_type":"Identity Users"}}',
+            '{"id":"user2","type":"entity","entityFieldNamespace":"user","entity":{"name":"User 2","type":"user","sub_type":"Identity Users"}}',
+            '{"id":"user3","type":"entity","entityFieldNamespace":"user","entity":{"name":"User 3","type":"user","sub_type":"Identity Users"}}',
           ],
           targetsDocData: [
-            '{"id":"host1","type":"entity","sourceNamespaceField":"host","entity":{"name":"Host 1","type":"host","sub_type":"Server"}}',
-            '{"id":"host2","type":"entity","sourceNamespaceField":"host","entity":{"name":"Host 2","type":"host","sub_type":"Server"}}',
+            '{"id":"host1","type":"entity","entityFieldNamespace":"host","entity":{"name":"Host 1","type":"host","sub_type":"Server"}}',
+            '{"id":"host2","type":"entity","entityFieldNamespace":"host","entity":{"name":"Host 2","type":"host","sub_type":"Server"}}',
           ],
           badge: 5,
           uniqueEventsCount: 5,
@@ -1188,13 +1188,13 @@ describe('parseRecords', () => {
           actorIdsCount: 3,
           targetIdsCount: 2,
           actorsDocData: [
-            '{"id":"user1","type":"entity","sourceNamespaceField":"user","entity":{"name":"User 1","type":"user","sub_type":""}}',
-            '{"id":"user2","type":"entity","sourceNamespaceField":"user","entity":{"name":"User 2","type":"user","sub_type":""}}',
-            '{"id":"user3","type":"entity","sourceNamespaceField":"user","entity":{"name":"User 3","type":"user","sub_type":""}}',
+            '{"id":"user1","type":"entity","entityFieldNamespace":"user","entity":{"name":"User 1","type":"user","sub_type":""}}',
+            '{"id":"user2","type":"entity","entityFieldNamespace":"user","entity":{"name":"User 2","type":"user","sub_type":""}}',
+            '{"id":"user3","type":"entity","entityFieldNamespace":"user","entity":{"name":"User 3","type":"user","sub_type":""}}',
           ],
           targetsDocData: [
-            '{"id":"host1","type":"entity","sourceNamespaceField":"host","entity":{"name":"Host 1","type":"host","sub_type":""}}',
-            '{"id":"host2","type":"entity","sourceNamespaceField":"host","entity":{"name":"Host 2","type":"host","sub_type":""}}',
+            '{"id":"host1","type":"entity","entityFieldNamespace":"host","entity":{"name":"Host 1","type":"host","sub_type":""}}',
+            '{"id":"host2","type":"entity","entityFieldNamespace":"host","entity":{"name":"Host 2","type":"host","sub_type":""}}',
           ],
           badge: 5,
           uniqueEventsCount: 5,
@@ -1351,8 +1351,8 @@ describe('parseRecords', () => {
     });
   });
 
-  describe('sourceNamespaceField handling', () => {
-    it('returns actor and target documentsData with sourceNamespaceField when there is no matching entity enrichment - single actor and target', () => {
+  describe('entityFieldNamespace handling', () => {
+    it('returns actor and target documentsData with entityFieldNamespace when there is no matching entity enrichment - single actor and target', () => {
       const records: GraphEdge[] = [
         {
           action: 'login',
@@ -1364,8 +1364,8 @@ describe('parseRecords', () => {
           targetEntityName: 'Service',
           actorIdsCount: 1,
           targetIdsCount: 1,
-          actorsDocData: ['{"id":"actor1","type":"entity","sourceNamespaceField":"user"}'],
-          targetsDocData: ['{"id":"target1","type":"entity","sourceNamespaceField":"service"}'],
+          actorsDocData: ['{"id":"actor1","type":"entity","entityFieldNamespace":"user"}'],
+          targetsDocData: ['{"id":"target1","type":"entity","entityFieldNamespace":"service"}'],
           badge: 1,
           uniqueEventsCount: 1,
           uniqueAlertsCount: 0,
@@ -1386,7 +1386,7 @@ describe('parseRecords', () => {
       expect(actorNode.documentsData![0]).toEqual({
         id: 'actor1',
         type: 'entity',
-        sourceNamespaceField: 'user',
+        entityFieldNamespace: 'user',
       });
       const targetNode = result.nodes.find((n) => n.id === 'target1') as EntityNodeDataModel;
       expect(targetNode).toBeDefined();
@@ -1394,11 +1394,11 @@ describe('parseRecords', () => {
       expect(targetNode.documentsData![0]).toEqual({
         id: 'target1',
         type: 'entity',
-        sourceNamespaceField: 'service',
+        entityFieldNamespace: 'service',
       });
     });
 
-    it('returns target documentData with sourceNamespaceField when the target has matching entity enrichment - multiple targets', () => {
+    it('returns target documentData with entityFieldNamespace when the target has matching entity enrichment - multiple targets', () => {
       const records: GraphEdge[] = [
         {
           action: 'login',
@@ -1411,11 +1411,11 @@ describe('parseRecords', () => {
           targetEntityName: ['service1', 'service2', 'service3'],
           actorIdsCount: 1,
           targetIdsCount: 3,
-          actorsDocData: ['{"id":"user1","type":"entity","sourceNamespaceField":"user"}'],
+          actorsDocData: ['{"id":"user1","type":"entity","entityFieldNamespace":"user"}'],
           targetsDocData: [
-            '{"id":"service1","type":"entity","sourceNamespaceField":"service", "entity":{"name":"Service 1","type":"service","sub_type":"Service Instance"}}',
-            '{"id":"service2","type":"entity","sourceNamespaceField":"service", "entity":{"name":"Service 2","type":"service","sub_type":"Service Instance"}}',
-            '{"id":"service3","type":"entity","sourceNamespaceField":"service", "entity":{"name":"Service 3","type":"service","sub_type":"Service Instance"}}',
+            '{"id":"service1","type":"entity","entityFieldNamespace":"service", "entity":{"name":"Service 1","type":"service","sub_type":"Service Instance"}}',
+            '{"id":"service2","type":"entity","entityFieldNamespace":"service", "entity":{"name":"Service 2","type":"service","sub_type":"Service Instance"}}',
+            '{"id":"service3","type":"entity","entityFieldNamespace":"service", "entity":{"name":"Service 3","type":"service","sub_type":"Service Instance"}}',
           ],
           actorEntityFieldHint: 'user',
           targetEntityFieldHint: 'service',
@@ -1442,7 +1442,7 @@ describe('parseRecords', () => {
       expect(targetNode.documentsData![0]).toEqual({
         id: 'service1',
         type: 'entity',
-        sourceNamespaceField: 'service',
+        entityFieldNamespace: 'service',
         entity: {
           name: 'Service 1',
           type: 'service',
@@ -1452,7 +1452,7 @@ describe('parseRecords', () => {
       expect(targetNode.documentsData![1]).toEqual({
         id: 'service2',
         type: 'entity',
-        sourceNamespaceField: 'service',
+        entityFieldNamespace: 'service',
         entity: {
           name: 'Service 2',
           type: 'service',
@@ -1462,7 +1462,7 @@ describe('parseRecords', () => {
       expect(targetNode.documentsData![2]).toEqual({
         id: 'service3',
         type: 'entity',
-        sourceNamespaceField: 'service',
+        entityFieldNamespace: 'service',
         entity: {
           name: 'Service 3',
           type: 'service',
@@ -1472,7 +1472,7 @@ describe('parseRecords', () => {
       expect(targetNode.label).toBe('Service Instance');
     });
 
-    it('returns multiple actors and targets documentsData with sourceNamespaceField when there is no entity enrichment', () => {
+    it('returns multiple actors and targets documentsData with entityFieldNamespace when there is no entity enrichment', () => {
       const records: GraphEdge[] = [
         {
           action: 'access',
@@ -1485,13 +1485,13 @@ describe('parseRecords', () => {
           actorIdsCount: 3,
           targetIdsCount: 2,
           actorsDocData: [
-            '{"id":"actor1","type":"entity","sourceNamespaceField":"user"}',
-            '{"id":"actor2","type":"entity","sourceNamespaceField":"user"}',
-            '{"id":"actor3","type":"entity","sourceNamespaceField":"host"}',
+            '{"id":"actor1","type":"entity","entityFieldNamespace":"user"}',
+            '{"id":"actor2","type":"entity","entityFieldNamespace":"user"}',
+            '{"id":"actor3","type":"entity","entityFieldNamespace":"host"}',
           ],
           targetsDocData: [
-            '{"id":"target1","type":"entity","sourceNamespaceField":"service"}',
-            '{"id":"target2","type":"entity","sourceNamespaceField":"entity"}',
+            '{"id":"target1","type":"entity","entityFieldNamespace":"service"}',
+            '{"id":"target2","type":"entity","entityFieldNamespace":"entity"}',
           ],
           badge: 1,
           uniqueEventsCount: 1,
@@ -1516,17 +1516,17 @@ describe('parseRecords', () => {
       expect(actorNode.documentsData![0]).toEqual({
         id: 'actor1',
         type: 'entity',
-        sourceNamespaceField: 'user',
+        entityFieldNamespace: 'user',
       });
       expect(actorNode.documentsData![1]).toEqual({
         id: 'actor2',
         type: 'entity',
-        sourceNamespaceField: 'user',
+        entityFieldNamespace: 'user',
       });
       expect(actorNode.documentsData![2]).toEqual({
         id: 'actor3',
         type: 'entity',
-        sourceNamespaceField: 'host',
+        entityFieldNamespace: 'host',
       });
       expect(actorNode.label).toBeUndefined();
       expect(actorNode.tag).toBe('Entities');
@@ -1542,12 +1542,12 @@ describe('parseRecords', () => {
       expect(targetNode.documentsData![0]).toEqual({
         id: 'target1',
         type: 'entity',
-        sourceNamespaceField: 'service',
+        entityFieldNamespace: 'service',
       });
       expect(targetNode.documentsData![1]).toEqual({
         id: 'target2',
         type: 'entity',
-        sourceNamespaceField: 'entity',
+        entityFieldNamespace: 'entity',
       });
       expect(targetNode.label).toBeUndefined();
       expect(targetNode.tag).toBe('Entities');

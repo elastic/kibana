@@ -246,9 +246,9 @@ ${
 | EVAL actorEntityField = CASE(
     actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
     CONCAT(",\\"entity\\":", "{",
-      "\\"name\\":\\"", COALESCE(actorEntityName, ""), "\\"",
-      ",\\"type\\":\\"", COALESCE(actorEntityType, ""), "\\"",
-      ",\\"sub_type\\":\\"", COALESCE(actorEntitySubType, ""), "\\"",
+      "\\"name\\":\\"", actorEntityName, "\\"",
+      ",\\"type\\":\\"", actorEntityType, "\\"",
+      ",\\"sub_type\\":\\"", actorEntitySubType, "\\"",
       CASE(
         actorHostIp IS NOT NULL,
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
@@ -260,9 +260,9 @@ ${
 | EVAL targetEntityField = CASE(
     targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
     CONCAT(",\\"entity\\":", "{",
-      "\\"name\\":\\"", COALESCE(targetEntityName, ""), "\\"",
-      ",\\"type\\":\\"", COALESCE(targetEntityType, ""), "\\"",
-      ",\\"sub_type\\":\\"", COALESCE(targetEntitySubType, ""), "\\"",
+      "\\"name\\":\\"", targetEntityName, "\\"",
+      ",\\"type\\":\\"", targetEntityType, "\\"",
+      ",\\"sub_type\\":\\"", targetEntitySubType, "\\"",
       CASE(
         targetHostIp IS NOT NULL,
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
@@ -274,13 +274,13 @@ ${
 | EVAL actorDocData = CONCAT("{",
     "\\"id\\":\\"", actorEntityId, "\\"",
     ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    ",\\"sourceNamespaceField\\":\\"", actorEntityFieldHint, "\\"",
+    ",\\"entityFieldNamespace\\":\\"", actorEntityFieldHint, "\\"",
     actorEntityField,
   "}")
 | EVAL targetDocData = CONCAT("{",
     "\\"id\\":\\"", COALESCE(targetEntityId, ""), "\\"",
     ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    ",\\"sourceNamespaceField\\":\\"", targetEntityFieldHint, "\\"",
+    ",\\"entityFieldNamespace\\":\\"", targetEntityFieldHint, "\\"",
     targetEntityField,
   "}")
 `
@@ -295,16 +295,16 @@ ${
 | EVAL targetEntitySubType = TO_STRING(null)
 | EVAL targetHostIp = TO_STRING(null)
 
-// Create minimal actor and target data with sourceNamespaceField even without enrichment
+// Create minimal actor and target data with entityFieldNamespace even without enrichment
 | EVAL actorDocData = CONCAT("{",
     "\\"id\\":\\"", actorEntityId, "\\"",
     ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    ",\\"sourceNamespaceField\\":\\"", actorEntityFieldHint, "\\"",
+    ",\\"entityFieldNamespace\\":\\"", actorEntityFieldHint, "\\"",
   "}")
 | EVAL targetDocData = CONCAT("{",
     "\\"id\\":\\"", COALESCE(targetEntityId, ""), "\\"",
     ",\\"type\\":\\"", "${DOCUMENT_TYPE_ENTITY}", "\\"",
-    ",\\"sourceNamespaceField\\":\\"", targetEntityFieldHint, "\\"",
+    ",\\"entityFieldNamespace\\":\\"", targetEntityFieldHint, "\\"",
   "}")
 `
 }

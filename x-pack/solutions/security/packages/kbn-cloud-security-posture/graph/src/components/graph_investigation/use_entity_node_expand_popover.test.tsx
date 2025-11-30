@@ -47,7 +47,7 @@ jest.mock('./use_node_expand_graph_popover', () => ({
 
 const createMockNode = (
   docMode: 'single-entity' | 'grouped-entities' | 'na',
-  sourceNamespaceField?: string,
+  entityFieldNamespace?: string,
   hasEntityField: boolean = true
 ): NodeProps => {
   const baseNode = {
@@ -75,7 +75,7 @@ const createMockNode = (
     const docData: Record<string, unknown> = {
       id: 'entity-123',
       type: 'entity' as const,
-      sourceNamespaceField,
+      entityFieldNamespace,
     };
 
     // Only add entity field if hasEntityField is true
@@ -100,7 +100,7 @@ const createMockNode = (
       const docData: Record<string, unknown> = {
         id,
         type: 'entity' as const,
-        sourceNamespaceField,
+        entityFieldNamespace,
       };
 
       if (hasEntityField) {
