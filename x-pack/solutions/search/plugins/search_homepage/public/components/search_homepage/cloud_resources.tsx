@@ -129,19 +129,17 @@ export const CloudResources = () => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup>
-          {CLOUD_RESOURCE_CARDS.map((card) => {
-            return (
-              <EuiFlexItem>
-                <ResourceCard
-                  title={card.title}
-                  icon={card.icon}
-                  description={card.description}
-                  actionHref={card.actionHref}
-                  actionText={card.actionText}
-                />
-              </EuiFlexItem>
-            );
-          })}
+          {CLOUD_RESOURCE_CARDS.map((card, index) => (
+            <EuiFlexItem key={`resource-${index}`}>
+              <ResourceCard
+                title={card.title}
+                icon={card.icon}
+                description={card.description}
+                actionHref={card.actionHref}
+                actionText={card.actionText}
+              />
+            </EuiFlexItem>
+          ))}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

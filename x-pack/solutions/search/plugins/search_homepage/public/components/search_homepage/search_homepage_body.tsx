@@ -12,12 +12,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, useEuiTheme } 
 
 import { css } from '@emotion/react';
 import { MetricPanels } from './metric_panels';
-import { DiveDeeperWithElasticsearch } from '../dive_deeper/dive_deeper_with_elasticsearch';
-import { AlternateSolutions } from '../alternate_solutions/alternate_solutions';
 import { Footer } from '../footer/footer';
-import { HomepageNavLinks } from './homepage_nav_links';
 import { CloudResources } from './cloud_resources';
 import { RecentActivity } from './recent_activity';
+import { BodyLinks } from './body_links';
 
 export const SearchHomepageBody = () => {
   const { euiTheme } = useEuiTheme();
@@ -40,22 +38,7 @@ export const SearchHomepageBody = () => {
           <EuiHorizontalRule margin="xxl" />
         </EuiFlexItem>
         <EuiFlexItem>
-          <HomepageNavLinks type="dataManagement" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <HomepageNavLinks type="stackManagement" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="s" />
-        </EuiFlexItem>
-        <EuiFlexItem css={itemPadding}>
-          <DiveDeeperWithElasticsearch />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHorizontalRule />
-        </EuiFlexItem>
-        <EuiFlexItem css={itemPadding}>
-          <AlternateSolutions />
+          <BodyLinks />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiHorizontalRule />

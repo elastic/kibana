@@ -1,0 +1,227 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiText,
+  EuiTextColor,
+  EuiTitle,
+} from '@elastic/eui';
+
+interface BodyLink {
+  category?: string;
+  title: string;
+  description: string;
+  link:
+    | {
+        href: string;
+        text: string;
+      }
+    | Array<{ text: string; href: string }>;
+}
+
+const BODY_LINKS: BodyLink[] = [
+  {
+    title: i18n.translate('xpack.searchHomepage.bodyLinks.askAnExpert.title', {
+      defaultMessage: 'Ask an Elastic Expert',
+    }),
+    description: i18n.translate('xpack.searchHomepage.bodyLinks.askAnExpert.description', {
+      defaultMessage:
+        'Our team of customer engineers to discuss your specific needs and offer personalized guidance to help make the most of your Elastic trial.',
+    }),
+    link: {
+      href: '#',
+      text: i18n.translate('xpack.searchHomepage.bodyLinks.askAnExpert.link.text', {
+        defaultMessage: 'Contact customer engineering',
+      }),
+    },
+  },
+  {
+    title: i18n.translate('xpack.searchHomepage.bodyLinks.elasticTraining.title', {
+      defaultMessage: 'Certified mastery of Elastic',
+    }),
+    description: i18n.translate('xpack.searchHomepage.bodyLinks.elasticTraining.description', {
+      defaultMessage:
+        'Unlock the full potential of Elastic through expert-led training, interactive labs, comprehensive certification programs, and flexible on-demand learning.',
+    }),
+    link: {
+      href: '',
+      text: i18n.translate('xpack.searchHomepage.bodyLinks.elasticTraining.linkText', {
+        defaultMessage: 'Elastic Training',
+      }),
+    },
+  },
+  {
+    title: i18n.translate('xpack.searchHomepage.bodyLinks.elasticDocumentation.title', {
+      defaultMessage: 'Elasticsearch Documentation',
+    }),
+    description: i18n.translate('xpack.searchHomepage.bodyLinks.elasticDocumentation.description', {
+      defaultMessage:
+        'A range of executable Python notebooks available to easily test features in a virtual environment.',
+    }),
+    link: {
+      href: '',
+      text: i18n.translate('xpack.searchHomepage.bodyLinks.elasticDocumentation.link.text', {
+        defaultMessage: 'View documentation',
+      }),
+    },
+  },
+  {
+    category: i18n.translate('xpack.searchHomepage.bodyLinks.elasticsearchLabs.category', {
+      defaultMessage: 'Elasticsearch Labs',
+    }),
+    title: i18n.translate('xpack.searchHomepage.bodyLinks.elasticsearchLabs.title', {
+      defaultMessage: 'Tutorials, Examples, Integrations and more',
+    }),
+    description: i18n.translate('xpack.searchHomepage.bodyLinks.elasticsearchLabs.title', {
+      defaultMessage:
+        'A one-stop destination for developers to learn how to use Elasticsearch to build advanced search experiences including generative AI, embedding models, reranking capabilities and more.',
+    }),
+    link: [
+      {
+        href: '',
+        text: i18n.translate(
+          'xpack.searchHomepage.bodyLinks.elasticsearchLabs.links.latestArticle',
+          {
+            defaultMessage: 'Read latest article',
+          }
+        ),
+      },
+      {
+        href: '',
+        text: i18n.translate('xpack.searchHomepage.bodyLinks.elasticsearchLabs.links.allArticles', {
+          defaultMessage: 'View all articles',
+        }),
+      },
+    ],
+  },
+  {
+    category: i18n.translate('xpack.searchHomepage.bodyLinks.events.category', {
+      defaultMessage: 'Upcoming events',
+    }),
+
+    title: i18n.translate('xpack.searchHomepage.bodyLinks.events.title', {
+      defaultMessage: 'The power of Elastic GenAI',
+    }),
+    description: i18n.translate('xpack.searchHomepage.bodyLinks.events.description', {
+      defaultMessage:
+        'We’ve heard from developers like you that they are under pressure to build RAG workloads that meet their latency, cost, and maintenance requirements.',
+    }),
+    link: [
+      {
+        href: '',
+        text: i18n.translate('xpack.searchHomepage.bodyLinks.events.links.register', {
+          defaultMessage: 'Register',
+        }),
+      },
+      {
+        href: '',
+        text: i18n.translate('xpack.searchHomepage.bodyLinks.events.links.allEvents', {
+          defaultMessage: 'View all events',
+        }),
+      },
+    ],
+  },
+  {
+    category: i18n.translate('xpack.searchHomepage.bodyLinks.elasticOn.category', {
+      defaultMessage: "Elastic'{ON}",
+    }),
+
+    title: i18n.translate('xpack.searchHomepage.bodyLinks.elasticOn.title', {
+      defaultMessage: 'Forge the future',
+    }),
+    description: i18n.translate('xpack.searchHomepage.bodyLinks.elasticOn.description', {
+      defaultMessage:
+        'Join the Elasticsearch community to revolutionize app development, security, and observability. Connect with experts, gain insights into the latest Elastic innovations, and level up your skills.',
+    }),
+    link: {
+      href: '',
+      text: i18n.translate('xpack.searchHomepage.bodyLinks.elasticOn.link.viewSchedule', {
+        defaultMessage: 'View schedule',
+      }),
+    },
+  },
+];
+
+const BodyLink: React.FC<BodyLink> = ({ title, description, link, category }: BodyLink) => {
+  return (
+    <EuiFlexGroup
+      direction="column"
+      css={({ euiTheme }) => ({
+        minHeight: `${euiTheme.base * 12}px`,
+      })}
+    >
+      {category && (
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h4>
+              <EuiTextColor color="success">{category}</EuiTextColor>
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h4>{title}</h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText color="subdued">
+              <p>{description}</p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {Array.isArray(link) ? (
+          <EuiFlexGroup responsive={false}>
+            {link.map((l, index) => (
+              <EuiFlexItem grow={false} key={`body-link-map-${index}`}>
+                <EuiLink
+                  data-test-subj="searchHomepageBodyLinkLink"
+                  external
+                  href={l.href}
+                  target="_blank"
+                >
+                  {l.text}
+                </EuiLink>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        ) : (
+          <EuiLink
+            data-test-subj="searchHomepageBodyLinkLink"
+            external
+            href={link.href}
+            target="_blank"
+          >
+            {link.text}
+          </EuiLink>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+export const BodyLinks = () => {
+  return (
+    <EuiFlexGrid columns={3} gutterSize="l">
+      {BODY_LINKS.map((bodyLink, index) => (
+        <EuiFlexItem key={`bodylink-${index}`}>
+          <BodyLink {...bodyLink} />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGrid>
+  );
+};
