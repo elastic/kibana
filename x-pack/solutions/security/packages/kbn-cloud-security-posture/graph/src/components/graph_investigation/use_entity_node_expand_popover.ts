@@ -29,14 +29,14 @@ import { addFilter, containsFilter, removeFilter } from './search_filters';
 type NodeToggleAction = 'show' | 'hide';
 
 /**
- * Helper function to extract sourceNamespaceField from the first document in a node's documentsData.
+ * Helper function to extract entityFieldNamespace from the first document in a node's documentsData.
  * This determines which ECS namespace field (user/host/service/entity) to use for filtering.
  */
 const getSourceNamespaceFromNode = (node: NodeProps): string | undefined => {
   if ('documentsData' in node.data) {
     const documentsData = node.data.documentsData;
     if (Array.isArray(documentsData) && documentsData.length > 0) {
-      return documentsData[0].sourceNamespaceField;
+      return documentsData[0].entityFieldNamespace;
     }
   }
   return undefined;
