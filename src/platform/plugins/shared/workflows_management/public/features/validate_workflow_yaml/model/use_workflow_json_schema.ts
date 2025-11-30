@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Note: JSON Schema manipulation requires dynamic type handling.
-// The `any` types are necessary for traversing and modifying JSON Schema structures
-// that come from zod-to-json-schema, which can have varying shapes.
+// TODO: Remove the eslint-disable comments to use the proper types.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { JSONSchema7 } from 'json-schema';
@@ -42,9 +40,9 @@ export const useWorkflowJsonSchema = ({
 }: UseWorkflowJsonSchemaOptions = {}): UseWorkflowJsonSchemaResult => {
   const connectorsData = useAvailableConnectors();
 
+  // TODO: download from server instead of generating on client
+
   // Generate JSON schema dynamically to include all current connectors (static + dynamic)
-  // Note: Schema generation happens on the client to ensure it includes all available connectors.
-  // Future optimization: Consider server-side generation with caching for better performance.
   // Now uses lazy loading to keep large generated files out of main bundle
   return useMemo(() => {
     try {
@@ -56,7 +54,7 @@ export const useWorkflowJsonSchema = ({
       }
       const zodSchema = loose
         ? getWorkflowZodSchemaLoose(connectorsData?.connectorTypes ?? {})
-        : getWorkflowZodSchema(connectorsData?.connectorTypes ?? {});
+        : getWorkflowZodSchema(connectorsData?.connectorTypes ?? {}); // TODO: remove this once we move the schema generation up to detail page or some wrapper component
       const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
 
       // Post-process to improve validation messages and add display names for connectors
