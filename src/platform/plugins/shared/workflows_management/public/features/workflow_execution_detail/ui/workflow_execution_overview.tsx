@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
@@ -16,6 +16,7 @@ import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
+import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 
 interface WorkflowExecutionOverviewProps {
@@ -27,6 +28,8 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     const { euiTheme } = useEuiTheme();
 
     const context = stepExecution.input as Record<string, unknown> | undefined;
+    const executionData = context?.execution as { isTestRun?: boolean } | undefined;
+    const isTestRun = executionData?.isTestRun === true;
     const executionStarted = stepExecution.startedAt;
     const executionEnded = context?.now as string | undefined;
     const executionDuration = stepExecution.executionTimeMs;
@@ -70,29 +73,75 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
               <div
                 css={css`
                   display: flex;
+                  flex-direction: column;
+                  gap: 4px;
+                `}
+              >
+                <div
+                  css={css`
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 8px;
+                  `}
+                >
+                  {getExecutionStatusIcon(euiTheme, stepExecution.status)}
+                  <EuiText
+                    css={css`
+                      font-size: 20px;
+                      line-height: 24px;
+                      font-weight: 600;
+                    `}
+                  >
+                    {getStatusLabel(stepExecution.status)}
+                  </EuiText>
+                </div>
+                <EuiText size="xs" color="subdued">
+                  <FormattedRelativeEnhanced value={executionStarted} />
+                </EuiText>
+              </div>
+              <div
+                css={css`
+                  display: flex;
                   flex-direction: row;
                   align-items: center;
                   gap: 8px;
                 `}
               >
-                {getExecutionStatusIcon(euiTheme, stepExecution.status)}
-                <EuiText
-                  css={css`
-                    font-size: 20px;
-                    line-height: 24px;
-                    font-weight: 600;
-                  `}
-                >
-                  {getStatusLabel(stepExecution.status)}
-                </EuiText>
+                {isTestRun && (
+                  <EuiBadge
+                    color="hollow"
+                    iconType="beaker"
+                    css={css`
+                      border: 1px solid ${euiTheme.colors.warning};
+                    `}
+                  />
+                )}
+                {executionDuration !== null && executionDuration !== undefined && (
+                  <EuiText size="xs" color="subdued">
+                    <span
+                      css={css`
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                      `}
+                    >
+                      <span
+                        css={css`
+                          font-size: 16px;
+                        `}
+                      >
+                        {'⏱'}
+                      </span>
+                      {formatDuration(executionDuration)}
+                    </span>
+                  </EuiText>
+                )}
               </div>
-              {executionDuration !== null && executionDuration !== undefined && (
-                <EuiText size="xs" color="subdued">
-                  {formatDuration(executionDuration)}
-                </EuiText>
-              )}
             </div>
           </EuiFlexItem>
+
+          <EuiFlexItem grow={false} />
 
           <EuiFlexItem grow={false}>
             <div
