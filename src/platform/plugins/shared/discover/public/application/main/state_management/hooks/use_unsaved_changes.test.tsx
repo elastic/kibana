@@ -63,7 +63,7 @@ describe('useUnsavedChanges', () => {
     return { result, stateContainer, services };
   };
 
-  const changeTabs = async (stateContainer: DiscoverStateContainer) => {
+  const changeTabs = async (stateContainer: DiscoverStateContainer, services: DiscoverServices) => {
     const newTab = getTabStateMock({ id: 'newTab' });
     await stateContainer.internalState.dispatch(
       internalStateActions.updateTabs({
@@ -82,6 +82,7 @@ describe('useUnsavedChanges', () => {
           customizationService: await getConnectedCustomizationService({
             customizationCallbacks: [],
             stateContainer,
+            services,
           }),
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -122,10 +123,10 @@ describe('useUnsavedChanges', () => {
   });
 
   it('should detect changes when tabs change', async () => {
-    const { stateContainer } = await setup();
+    const { stateContainer, services } = await setup();
     expect(stateContainer.internalState.getState().hasUnsavedChanges).toBe(false);
     expect(stateContainer.internalState.getState().tabs.unsavedIds).toEqual([]);
-    const { newTab } = await changeTabs(stateContainer);
+    const { newTab } = await changeTabs(stateContainer, services);
     expect(stateContainer.internalState.getState().hasUnsavedChanges).toBe(true);
     expect(stateContainer.internalState.getState().tabs.unsavedIds).toEqual([newTab.id]);
   });
@@ -134,7 +135,7 @@ describe('useUnsavedChanges', () => {
     const { stateContainer, services } = await setup();
     expect(stateContainer.internalState.getState().hasUnsavedChanges).toBe(false);
     expect(stateContainer.internalState.getState().tabs.unsavedIds).toEqual([]);
-    const { newTab } = await changeTabs(stateContainer);
+    const { newTab } = await changeTabs(stateContainer, services);
     expect(stateContainer.internalState.getState().hasUnsavedChanges).toBe(true);
     expect(stateContainer.internalState.getState().tabs.unsavedIds).toEqual([newTab.id]);
     const newDiscoverSession: DiscoverSession = {
