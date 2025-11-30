@@ -6,7 +6,13 @@
  */
 
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
-import { waitForPluginInitialized } from '../../cloud_security_posture_api/utils';
+import {
+  waitForPluginInitialized,
+  cleanupEntityStore,
+  waitForEnrichIndexPopulated,
+  waitForEntityDataIndexed,
+  enableAssetInventory,
+} from '../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
 
 // eslint-disable-next-line import/no-default-export
@@ -59,7 +65,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
     });
 
-    it.skip('expanded flyout - filter by node', async () => {
+    it('expanded flyout - filter by node', async () => {
       // Setting the timerange to fit the data and open the flyout for a specific alert
       await networkEventsPage.navigateToNetworkEventsPage(
         `${networkEventsPage.getAbsoluteTimerangeFilter(
@@ -171,7 +177,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await timelinePage.waitForEvents();
     });
 
-    it.skip('expanded flyout - show event details', async () => {
+    it('expanded flyout - show event details', async () => {
       // Setting the timerange to fit the data and open the flyout for a specific alert
       await networkEventsPage.navigateToNetworkEventsPage(
         `${networkEventsPage.getAbsoluteTimerangeFilter(
@@ -195,7 +201,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await networkEventsPage.flyout.assertPreviewPanelIsOpen('event');
     });
 
-    it.skip('expanded flyout - show grouped event details', async () => {
+    it('expanded flyout - show grouped event details', async () => {
       // Navigate to events page with filters for specific event action and actor entity
       await networkEventsPage.navigateToNetworkEventsPage(
         `${networkEventsPage.getAbsoluteTimerangeFilter(
@@ -239,7 +245,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
     });
 
-    it.skip('expanded flyout - test IP popover functionality', async () => {
+    it('expanded flyout - test IP popover functionality', async () => {
       await networkEventsPage.navigateToNetworkEventsPage(
         `${networkEventsPage.getAbsoluteTimerangeFilter(
           '2024-09-01T00:00:00.000Z',
@@ -271,7 +277,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.assertPreviewPopoverIsOpen();
     });
 
-    it.skip('show related alerts', async () => {
+    it('show related alerts', async () => {
       // Setting the timerange to fit the data and open the flyout for a specific alert
       await networkEventsPage.navigateToNetworkEventsPage(
         `${networkEventsPage.getAbsoluteTimerangeFilter(
@@ -302,45 +308,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       const enrichPolicyName = getEnrichPolicyId(); // defaults to 'default' space
       const enrichIndexName = `.enrich-${enrichPolicyName}`;
 
-      /**
-       * Helper to clean up entity store resources
-       */
-      const cleanupEntityStore = async () => {
-        try {
-          await supertest
-            .delete('/api/entity_store/engines/generic?data=true')
-            .set('kbn-xsrf', 'xxxx')
-            .expect(200);
-          logger.debug('Deleted entity store engine');
-        } catch (e) {
-          // Ignore 404 errors if the engine doesn't exist
-          if (e.status !== 404) {
-            logger.debug(`Error deleting entity store engine: ${e.message || JSON.stringify(e)}`);
-          }
-        }
-      };
-
-      /**
-       * Helper to wait for enrich index to be populated
-       */
-      const waitForEnrichIndexPopulated = async () => {
-        await retry.waitFor('enrich index to be created and populated', async () => {
-          try {
-            const count = await es.count({
-              index: enrichIndexName,
-            });
-            logger.debug(`Enrich index count: ${count.count}`);
-            return count.count > 0;
-          } catch (e) {
-            logger.debug(`Waiting for enrich index: ${e.message}`);
-            return false;
-          }
-        });
-      };
-
       before(async () => {
         // Clean up any leftover resources from previous runs
-        await cleanupEntityStore();
+        await cleanupEntityStore({ supertest, logger });
 
         // Enable asset inventory setting
         await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
@@ -352,33 +322,24 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         );
 
         // Wait for entity data to be fully indexed
-        await retry.waitFor('entity data to be indexed', async () => {
-          try {
-            const response = await es.count({
-              index: entitiesIndex,
-            });
-            logger.debug(`Entity count: ${response.count}`);
-            return response.count === 10;
-          } catch (e) {
-            logger.debug(`Error counting entities: ${e.message}`);
-            return false;
-          }
+        await waitForEntityDataIndexed({
+          es,
+          logger,
+          retry,
+          entitiesIndex,
+          expectedCount: 12,
         });
 
         // Enable asset inventory which creates the enrich policy
-        await supertest
-          .post('/api/asset_inventory/enable')
-          .set('kbn-xsrf', 'xxxx')
-          .send({})
-          .expect(200);
+        await enableAssetInventory({ supertest });
 
         // Wait for enrich index to be created and populated with data
-        await waitForEnrichIndexPopulated();
+        await waitForEnrichIndexPopulated({ es, logger, retry, enrichIndexName });
       });
 
       after(async () => {
         // Clean up entity store resources
-        await cleanupEntityStore();
+        await cleanupEntityStore({ supertest, logger });
 
         // Disable asset inventory setting
         await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': false });
@@ -405,21 +366,22 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
         await networkEventsPage.flyout.expandVisualizations();
         await networkEventsPage.flyout.assertGraphPreviewVisible();
-        // - 1 user actor
-        // - 1 storage bucket (grouped by same type/subtype) = 1 node
-        // - 1 service accounts (grouped by same type/subtype) = 1 node
-        // - 2 label nodes (one for each actor-target combination)
-        // - Multiple label nodes (one for each actor-target combination)
-        const expectedNodes = 5; // At minimum: 2 actors + 2 grouped target nodes
+        // Expected nodes:
+        // - 1 grouped actor node (2 actors: multi-actor-1, multi-actor-2 - same Identity/GCP IAM User)
+        // - 1 grouped storage node (2 buckets: target-bucket-1, target-bucket-2 - same Storage/GCP Storage Bucket)
+        // - 1 grouped service node (2 service accounts: target-multi-service-1, target-multi-service-2 - same Service/GCP Service Account)
+        // - 2 label nodes (actor group -> storage group, actor group -> service group)
+        const expectedNodes = 5;
         await networkEventsPage.flyout.assertGraphNodesNumber(expectedNodes);
 
         await expandedFlyoutGraph.expandGraph();
         await expandedFlyoutGraph.waitGraphIsLoaded();
-
         await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
 
-        // Verify that we have Storage bucket target node (grouped)
-        // MD5 hash of sorted bucket IDs
+        const actorNodeId = '71373527ad0e2cf75e214cd168630ad1';
+        await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Identity');
+        await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP IAM User');
+
         const storageBucketNodeId = '8a748ce026512856f76bdc6304573f1c';
         await expandedFlyoutGraph.assertNodeEntityTag(storageBucketNodeId, 'Storage');
         await expandedFlyoutGraph.assertNodeEntityDetails(
@@ -427,8 +389,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           'GCP Storage Bucket'
         );
 
-        // Verify that we have Service account target node (grouped)
-        // MD5 hash of sorted service account IDs
         const serviceNodeId = '0039c3b5dd064364a5f7edac77c2e158';
         await expandedFlyoutGraph.assertNodeEntityTag(serviceNodeId, 'Service');
         await expandedFlyoutGraph.assertNodeEntityDetails(serviceNodeId, 'GCP Service Account');

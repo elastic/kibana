@@ -309,3 +309,106 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "10",
+    "index": ".ds-logs-gcp.audit-default-2024.09.11-000001",
+    "source": {
+      "@timestamp": "2024-09-11T10:00:00.000Z",
+      "user": {
+        "entity": {
+          "id": "multi-target-user@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "multi-target-user@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "multi-target-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.cloud.multi.target.action",
+        "agent_id_status": "missing",
+        "category": [
+          "configuration"
+        ],
+        "id": "multi-target-mixed-event-id",
+        "ingested": "2024-09-11T10:00:00.000Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "change"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "storage.buckets.update",
+              "resource": "projects/multi-target-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "multi-target-operation-id"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/multi-target-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "ip": [
+          "10.0.0.15"
+        ],
+        "user": [
+          "multi-target-user@example.com"
+        ]
+      },
+      "service": {
+        "name": "storage.googleapis.com",
+        "target": {
+          "entity": {
+            "id": [
+              "projects/multi-target-project-id/buckets/target-bucket-c",
+              "projects/multi-target-project-id/serviceAccounts/target-sa-different@multi-target-project-id.iam.gserviceaccount.com"
+            ]
+          }
+        }
+      },
+      "source": {
+        "ip": "10.0.0.15"
+      },
+      "entity": {
+        "target": {
+          "id": [
+            "projects/multi-target-project-id/buckets/target-bucket-a",
+            "projects/multi-target-project-id/buckets/target-bucket-b"
+          ]
+        }
+      },
+      "tags": [],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/380.0.0"
+      }
+    }
+  }
+}
