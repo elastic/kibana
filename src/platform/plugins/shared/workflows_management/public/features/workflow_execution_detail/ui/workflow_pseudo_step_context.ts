@@ -25,16 +25,19 @@ export function buildTriggerContextFromExecution(
     return null;
   }
 
-  let triggerType: TriggerType = 'alert';
+  let triggerType: TriggerType = 'manual';
 
+  const hasEvent = executionContext.event !== undefined;
   const isScheduled =
     (executionContext.event as { type?: string } | undefined)?.type === 'scheduled';
   const hasInputs = executionContext.inputs !== undefined;
 
-  if (hasInputs) {
-    triggerType = 'manual';
-  } else if (isScheduled) {
+  if (isScheduled) {
     triggerType = 'scheduled';
+  } else if (hasEvent) {
+    triggerType = 'alert';
+  } else if (hasInputs) {
+    triggerType = 'manual';
   }
 
   const inputData = (executionContext as { event?: JsonValue; inputs?: JsonValue }).event
