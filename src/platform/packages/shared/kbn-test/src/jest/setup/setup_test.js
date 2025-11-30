@@ -13,6 +13,13 @@
 */
 import '@testing-library/jest-dom';
 
+/** if lazy requires are enabled, include a helper to work around @emotion
+ * and styled-components incompatibility.
+ */
+if (require('@kbn/lazy-require/is_enabled').isLazyRequireEnabled()) {
+  require('@kbn/lazy-require/wrap_styled');
+}
+
 // uses subpath exports
 // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
 import 'web-streams-polyfill/polyfill'; // ReadableStream polyfill

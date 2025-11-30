@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test/jest_node_lazy',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/streams'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/streams',

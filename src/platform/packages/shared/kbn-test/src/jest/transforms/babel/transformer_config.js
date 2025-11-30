@@ -7,32 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = () => ({
-  presets: [
-    [
-      require.resolve('@kbn/babel-preset/node_preset'),
-      {
-        '@babel/preset-env': {
-          // disable built-in filtering, which is more performant but strips the import of `regenerator-runtime` required by EUI
-          useBuiltIns: false,
-          corejs: false,
+/**
+ *
+ * @param {*} _
+ * @param {{ ['@kbn/lazy-require']?: import('@kbn/lazy-require').LazyRequirePluginOptions }} options
+ * @returns
+ */
+
+module.exports = (_, options = {}) => {
+  const lazyRequireOptions = options['@kbn/lazy-require'] ?? {};
+  return {
+    presets: [
+      [
+        require.resolve('@kbn/babel-preset/node_preset'),
+        {
+          '@babel/preset-env': {
+            // disable built-in filtering, which is more performant but strips the import of `regenerator-runtime` required by EUI
+            useBuiltIns: false,
+            corejs: false,
+          },
+          '@kbn/lazy-require': lazyRequireOptions,
         },
+      ],
+    ],
+    overrides: [
+      {
+        exclude: require('@kbn/babel-preset/styled_components_files').USES_STYLED_COMPONENTS,
+        presets: [
+          [
+            require.resolve('@emotion/babel-preset-css-prop'),
+            {
+              autoLabel: 'always',
+              labelFormat: '[local]',
+              sourceMap: false,
+            },
+          ],
+        ],
       },
     ],
-  ],
-  overrides: [
-    {
-      exclude: require('@kbn/babel-preset/styled_components_files').USES_STYLED_COMPONENTS,
-      presets: [
-        [
-          require.resolve('@emotion/babel-preset-css-prop'),
-          {
-            autoLabel: 'always',
-            labelFormat: '[local]',
-            sourceMap: false,
-          },
-        ],
-      ],
-    },
-  ],
-});
+  };
+};

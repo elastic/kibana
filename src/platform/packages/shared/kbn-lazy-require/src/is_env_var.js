@@ -7,5 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env/lazy');
-require('@kbn/inference-cli/scripts/phoenix');
+exports.isEnvVarExplicitlyEnabled = (value) => {
+  return value === 'true' || value === '1';
+};
+
+exports.isEnvVarExplicitlyDisabled = (value) => {
+  return value === 'false' || value === '0';
+};

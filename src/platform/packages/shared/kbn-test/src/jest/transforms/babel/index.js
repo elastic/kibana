@@ -14,9 +14,6 @@ const babelJest = require('babel-jest');
 const babel = require('@babel/core');
 const createTransformerConfig = require('./transformer_config');
 
-// Base transformer from babel-jest
-const baseTransformer = babelJest.default.createTransformer(createTransformerConfig());
-
 // Memoize materialized Babel options by (cwd, rootDir) pair to avoid recomputation
 const materializedOptionsCache = new Map();
 
@@ -98,59 +95,66 @@ function serializeJestTransformBits(cfg) {
   }
 }
 
-module.exports = {
-  // Preserve all base transformer properties
-  ...baseTransformer,
+exports.createTransformer = (options = {}) => {
+  // Base transformer from babel-jest
+  const baseTransformer = babelJest.default.createTransformer(
+    createTransformerConfig(undefined, options)
+  );
 
-  // Wrap getCacheKey to normalize the config string and rootDir before delegating
-  getCacheKey(sourceText, sourcePath, transformOptions) {
-    const cfg = (transformOptions && transformOptions.config) || {};
+  return {
+    // Preserve all base transformer properties
+    ...baseTransformer,
 
-    const normalizedRoot = path.resolve(cfg.rootDir || process.cwd());
-    const normalizedCwd = path.resolve(cfg.cwd || normalizedRoot);
+    // Wrap getCacheKey to normalize the config string and rootDir before delegating
+    getCacheKey(sourceText, sourcePath, transformOptions) {
+      const cfg = (transformOptions && transformOptions.config) || {};
 
-    // Resolve materialized Babel options and compute a compact cache key
-    const optionsJson = getMaterializedBabelOptions({
-      cwd: normalizedCwd,
-      rootDir: normalizedRoot,
-    });
+      const normalizedRoot = path.resolve(cfg.rootDir || process.cwd());
+      const normalizedCwd = path.resolve(cfg.cwd || normalizedRoot);
 
-    const relFile = path.relative(normalizedRoot, path.resolve(sourcePath || ''));
+      // Resolve materialized Babel options and compute a compact cache key
+      const optionsJson = getMaterializedBabelOptions({
+        cwd: normalizedCwd,
+        rootDir: normalizedRoot,
+      });
 
-    const hash = crypto.createHash('sha256');
-    // File contents of this transformer
+      const relFile = path.relative(normalizedRoot, path.resolve(sourcePath || ''));
 
-    hash.update(THIS_FILE);
-    hash.update('\0', 'utf8');
+      const hash = crypto.createHash('sha256');
+      // File contents of this transformer
 
-    // Materialized babel options
-    hash.update(optionsJson);
-    hash.update('\0', 'utf8');
-    // Jest transform-related config
-    hash.update(serializeJestTransformBits(cfg));
-    hash.update('\0', 'utf8');
+      hash.update(THIS_FILE);
+      hash.update('\0', 'utf8');
 
-    // Relative filename
-    hash.update(relFile);
-    hash.update('\0', 'utf8');
-    // Instrumentation flag
-    if (transformOptions && transformOptions.instrument) {
-      hash.update('instrument');
-    }
-    hash.update('\0', 'utf8');
-    // Environment variables
-    hash.update(process.env.NODE_ENV || '');
-    hash.update('\0', 'utf8');
-    hash.update(process.env.BABEL_ENV || '');
-    hash.update('\0', 'utf8');
-    // Node version
-    hash.update(process.version);
+      // Materialized babel options
+      hash.update(optionsJson);
+      hash.update('\0', 'utf8');
+      // Jest transform-related config
+      hash.update(serializeJestTransformBits(cfg));
+      hash.update('\0', 'utf8');
 
-    // Source text
-    hash.update(String(sourceText || ''));
-    hash.update('\0', 'utf8');
+      // Relative filename
+      hash.update(relFile);
+      hash.update('\0', 'utf8');
+      // Instrumentation flag
+      if (transformOptions && transformOptions.instrument) {
+        hash.update('instrument');
+      }
+      hash.update('\0', 'utf8');
+      // Environment variables
+      hash.update(process.env.NODE_ENV || '');
+      hash.update('\0', 'utf8');
+      hash.update(process.env.BABEL_ENV || '');
+      hash.update('\0', 'utf8');
+      // Node version
+      hash.update(process.version);
 
-    // Truncate to 32 chars to align with prior expectations
-    return hash.digest('hex').slice(0, 32);
-  },
+      // Source text
+      hash.update(String(sourceText || ''));
+      hash.update('\0', 'utf8');
+
+      // Truncate to 32 chars to align with prior expectations
+      return hash.digest('hex').slice(0, 32);
+    },
+  };
 };

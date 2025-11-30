@@ -9,7 +9,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import transformer from '.';
+import { createTransformer } from '.';
 import { spawnSync } from 'child_process';
 import { REPO_ROOT } from '@kbn/repo-info';
 import * as fastGlob from 'fast-glob';
@@ -33,6 +33,8 @@ describe('transformer cache key', () => {
 
   it('cache key: returns stable 32-char hex and varies with inputs', () => {
     const opts = makeTransformOptions(rootDir);
+
+    const transformer = createTransformer();
 
     const k1 = transformer.getCacheKey('console.log("a")', __filename, opts);
     expect(typeof k1).toBe('string');

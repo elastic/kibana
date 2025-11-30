@@ -12,6 +12,7 @@
   "kbn_references": [
     "@kbn/babel-register",
     "@kbn/security-hardening",
+    "@kbn/lazy-require",
   ],
   "exclude": [
     "target/**/*",

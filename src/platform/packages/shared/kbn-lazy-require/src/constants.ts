@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env/lazy');
-require('@kbn/inference-cli/scripts/phoenix');
+export const LAZY_REQUIRE_IMMEDIATE = '__kbn_lazy_require_immediate__';

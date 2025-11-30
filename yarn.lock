@@ -7151,6 +7151,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/lazy-require@link:src/platform/packages/shared/kbn-lazy-require":
+  version "0.0.0"
+  uid ""
+
 "@kbn/lens-common-2@link:src/platform/packages/shared/kbn-lens-common-2":
   version "0.0.0"
   uid ""

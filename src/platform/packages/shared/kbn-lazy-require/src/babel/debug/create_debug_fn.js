@@ -7,5 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env/lazy');
-require('@kbn/inference-cli/scripts/phoenix');
+const { format } = require('util');
+
+const noop = () => {
+  //
+};
+
+/**
+ * @param {string} filename
+ * @param {boolean} enabled
+ * @returns {( cb:( ) => any ) => void }
+ */
+exports.createDebugFn = (filename, enabled) => {
+  if (!enabled) {
+    return noop;
+  }
+
+  return (cb) => {
+    const data = cb();
+    console.log(`[${filename}] ${format(data)}`);
+  };
+};
