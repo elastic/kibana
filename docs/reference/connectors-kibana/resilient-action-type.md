@@ -64,9 +64,15 @@ Description
 Additional comments
 :   Extra information for the client, such as how to troubleshoot the issue.
 
-Additional fields {applies_to}`stack: ga 9.2`
-:   An object that contains custom field identifiers and their values. These fields must exist in the {{ibm-r}} application and must be specified in JSON format.
+Additional fields
+:   Allows you to specify custom fields and their values. These fields must already exist in your {{ibm-r}} instance. 
 
+- {applies_to}`stack: ga 9.2`: Use the JSON editor to define an object that contains custom field identifiers and their values. 
+- {applies_to}`serverless: ga` {applies_to}`stack: ga 9.3`: Use the drop-down to add or remove custom fields. Define the custom fields as needed.
+
+   ::::{note}
+   Custom fields that are set when an incident is created or changed (for example, an incident is closed) won't display as an option when selecting additional fields. 
+   ::::
 
 ## Connector networking configuration [resilient-connector-networking-configuration]
 
