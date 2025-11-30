@@ -531,14 +531,14 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     xAccessor: xColumnId || 'unifiedX',
     yAccessors: Array.isArray(accessor) ? accessor : [accessor],
     markSizeAccessor: markSizeColumnId,
-    markFormat: (value) => markFormatter.convert(value),
+    // markFormat: (value) => markFormatter.convert(value),
     data: rows,
     xScaleType: xColumnId ? layer.xScaleType ?? defaultXScaleType : 'ordinal',
     yScaleType:
       formatter?.id === 'bytes' && yScaleType === ScaleType.Linear
         ? ScaleType.LinearBinary
         : yScaleType,
-    color: colorAccessorFn,
+    // color: colorAccessorFn,
     groupId: yAxis?.groupId,
     enableHistogramMode,
     stackMode,
@@ -571,9 +571,9 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       ...(emphasizeFitting && { fit: { line: getFitLineConfig() } }),
       line: getLineConfig({ lineWidth: layer.lineWidth, showLines: layer.showLines }),
     },
-    name(d) {
-      return getSeriesNameFn(d);
-    },
+    // name(d) {
+    //   return getSeriesNameFn(d);
+    // },
     yNice: Boolean(yAxis?.extent?.niceValues),
     xNice: Boolean(xAxis?.extent?.niceValues),
   };
