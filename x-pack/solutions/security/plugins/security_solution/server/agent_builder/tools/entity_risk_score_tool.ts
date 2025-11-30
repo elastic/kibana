@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/onechat-server';
 import { getToolResultId } from '@kbn/onechat-server/tools';
 import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
 import { createGetRiskScores } from '../../lib/entity_analytics/risk_score/get_risk_score';
 import type { EntityType } from '../../../common/entity_analytics/types';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
+import { getRiskIndex } from '../../../common/search_strategy/security_solution/risk_score/common';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
 
@@ -64,12 +65,44 @@ const getAlertsById = async ({
   }, {});
 };
 
-export const entityRiskScoreTool = (): BuiltinToolDefinition<typeof entityRiskScoreSchema> => {
+export const entityRiskScoreTool = (
+  core: CoreSetup
+): BuiltinToolDefinition<typeof entityRiskScoreSchema> => {
   return {
     id: SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
     type: ToolType.builtin,
     description: `Call this tool to get the latest entity risk score and the inputs that contributed to the calculation for a specific entity (host, user, service, or generic). The risk score is sorted by 'kibana.alert.risk_score'. When reporting the risk score value, use the normalized field 'calculated_score_norm' which ranges from 0-100.`,
     schema: entityRiskScoreSchema,
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ spaceId }: ToolAvailabilityContext) => {
+        try {
+          const [coreStart] = await core.getStartServices();
+          const esClient = coreStart.elasticsearch.client.asInternalUser;
+          const riskIndex = getRiskIndex(spaceId, true);
+
+          const indexExists = await esClient.indices.exists({
+            index: riskIndex,
+          });
+
+          if (indexExists) {
+            return { status: 'available' };
+          }
+
+          return {
+            status: 'unavailable',
+            reason: 'Risk score index does not exist for this space',
+          };
+        } catch (error) {
+          return {
+            status: 'unavailable',
+            reason: `Failed to check risk score index availability: ${
+              error instanceof Error ? error.message : 'Unknown error'
+            }`,
+          };
+        }
+      },
+    },
     handler: async ({ identifierType, identifier }, { request, esClient, logger }) => {
       const spaceId = getSpaceIdFromRequest(request);
       const alertsIndexPattern = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;

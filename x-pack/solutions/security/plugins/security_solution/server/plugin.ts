@@ -238,7 +238,8 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   private registerOnechatAttachmentsAndTools(
     onechat: SecuritySolutionPluginSetupDependencies['onechat'],
-    config: ConfigType
+    config: ConfigType,
+    core: SecuritySolutionPluginCoreSetupDependencies
   ): void {
     if (!onechat || !config.experimentalFeatures.agentBuilderEnabled) {
       return;
@@ -251,7 +252,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     // Register tools
     try {
-      onechat.tools.register(entityRiskScoreTool());
+      onechat.tools.register(entityRiskScoreTool(core));
       onechat.tools.register(attackDiscoverySearchTool());
       onechat.tools.register(securityLabsSearchTool());
     } catch (error) {
@@ -641,7 +642,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     // Note: This requires onechat to be added as an optional plugin dependency
     // Note: The alert attachment type may already be registered by onechat's built-in types.
     // If so, we'll skip registration and use the built-in version.
-    this.registerOnechatAttachmentsAndTools(plugins.onechat, config);
+    this.registerOnechatAttachmentsAndTools(plugins.onechat, config, core);
 
     return {
       setProductFeaturesConfigurator:
