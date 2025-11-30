@@ -6,86 +6,18 @@
  */
 
 import React from 'react';
-import { EuiTabbedContent, EuiText, EuiSpacer, type EuiTabbedContentTab } from '@elastic/eui';
+import { EuiTabbedContent, type EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { VisibilityTabId } from './visibility_section_boxes';
+import { CoverageTab } from './tabs/coverage/coverage_tab';
+import { QualityTab } from './tabs/quality/quality_tab';
+import { ContinuityTab } from './tabs/continuity/continuity_tab';
+import { RetentionTab } from './tabs/retention/retention_tab';
 
 interface VisibilitySectionTabsProps {
   selectedTabId: VisibilityTabId;
   onTabSelect: (tabId: VisibilityTabId) => void;
 }
-
-const CoverageTabContent: React.FC = () => {
-  return (
-    <>
-      <EuiSpacer size="m" />
-      <EuiText>
-        <p>
-          {i18n.translate(
-            'xpack.securitySolution.siemReadiness.visibility.coverage.tab.placeholder',
-            {
-              defaultMessage: 'Coverage tab content will be implemented here.',
-            }
-          )}
-        </p>
-      </EuiText>
-    </>
-  );
-};
-
-const QualityTabContent: React.FC = () => {
-  return (
-    <>
-      <EuiSpacer size="m" />
-      <EuiText>
-        <p>
-          {i18n.translate(
-            'xpack.securitySolution.siemReadiness.visibility.quality.tab.placeholder',
-            {
-              defaultMessage: 'Quality tab content will be implemented here.',
-            }
-          )}
-        </p>
-      </EuiText>
-    </>
-  );
-};
-
-const ContinuityTabContent: React.FC = () => {
-  return (
-    <>
-      <EuiSpacer size="m" />
-      <EuiText>
-        <p>
-          {i18n.translate(
-            'xpack.securitySolution.siemReadiness.visibility.continuity.tab.placeholder',
-            {
-              defaultMessage: 'Continuity tab content will be implemented here.',
-            }
-          )}
-        </p>
-      </EuiText>
-    </>
-  );
-};
-
-const RetentionTabContent: React.FC = () => {
-  return (
-    <>
-      <EuiSpacer size="m" />
-      <EuiText>
-        <p>
-          {i18n.translate(
-            'xpack.securitySolution.siemReadiness.visibility.retention.tab.placeholder',
-            {
-              defaultMessage: 'Retention tab content will be implemented here.',
-            }
-          )}
-        </p>
-      </EuiText>
-    </>
-  );
-};
 
 export const VisibilitySectionTabs: React.FC<VisibilitySectionTabsProps> = ({
   selectedTabId,
@@ -97,28 +29,28 @@ export const VisibilitySectionTabs: React.FC<VisibilitySectionTabsProps> = ({
       name: i18n.translate('xpack.securitySolution.siemReadiness.visibility.coverage.tab.title', {
         defaultMessage: 'Coverage',
       }),
-      content: <CoverageTabContent />,
+      content: <CoverageTab />,
     },
     {
       id: 'quality',
       name: i18n.translate('xpack.securitySolution.siemReadiness.visibility.quality.tab.title', {
         defaultMessage: 'Quality',
       }),
-      content: <QualityTabContent />,
+      content: <QualityTab />,
     },
     {
       id: 'continuity',
       name: i18n.translate('xpack.securitySolution.siemReadiness.visibility.continuity.tab.title', {
         defaultMessage: 'Continuity',
       }),
-      content: <ContinuityTabContent />,
+      content: <ContinuityTab />,
     },
     {
       id: 'retention',
       name: i18n.translate('xpack.securitySolution.siemReadiness.visibility.retention.tab.title', {
         defaultMessage: 'Retention',
       }),
-      content: <RetentionTabContent />,
+      content: <RetentionTab />,
     },
   ];
 

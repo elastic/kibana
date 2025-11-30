@@ -21,7 +21,7 @@ export interface IndexInfo {
 }
 
 export interface CategoryGroup {
-  category: string;
+  category: 'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/SaaS';
   indices: IndexInfo[];
 }
 
