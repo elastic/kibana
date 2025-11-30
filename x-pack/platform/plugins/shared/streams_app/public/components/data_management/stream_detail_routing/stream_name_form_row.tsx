@@ -18,6 +18,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-plugin/public';
+import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -32,7 +33,7 @@ interface StreamNameFormRowProps {
   error?: string;
   isInvalid?: boolean;
   helpText?: string;
-  errorMessage?: JSX.Element | string | undefined;
+  errorMessage?: ReactNode | string | undefined;
   isStreamNameValid?: boolean;
   partitionName: string;
   prefix: string;
@@ -69,7 +70,7 @@ export const getErrorMessage = (
   prefix: string,
   rootChild: string,
   router: StatefulStreamsAppRouter
-): JSX.Element | string | undefined => {
+): ReactNode | string | undefined => {
   if (isDuplicatedName) {
     return i18n.translate('xpack.streams.streamDetailRouting.nameConflictError', {
       defaultMessage: 'A stream with this name already exists',
@@ -114,7 +115,7 @@ interface ChildStreamInputHookResponse {
   prefix: string;
   partitionName: string;
   helpText: string | undefined;
-  errorMessage: JSX.Element | string | undefined;
+  errorMessage: ReactNode | string | undefined;
 }
 
 /**
