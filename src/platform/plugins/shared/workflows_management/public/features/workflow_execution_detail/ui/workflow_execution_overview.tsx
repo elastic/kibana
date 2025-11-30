@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
@@ -95,7 +87,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                   {isTestRun && (
                     <EuiFlexItem grow={false}>
-                      <EuiBadge color="subdued" iconType="beaker" />
+                      <EuiIcon type="beaker" size="s" color="subdued" />
                     </EuiFlexItem>
                   )}
                   {workflowExecutionDuration && (
