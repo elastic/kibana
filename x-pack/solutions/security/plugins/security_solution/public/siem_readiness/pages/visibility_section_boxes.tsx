@@ -181,7 +181,6 @@ export const VisibilitySectionBoxes: React.FC<VisibilitySectionBoxesProps> = ({
     <EuiFlexGroup gutterSize="m">
       {VISIBILITY_BOXES.map((box) => {
         const isSelected = selectedTabId === box.id;
-        const hasActionsRequired = box.status === 'actionsRequired';
         const badge = getBadge(box.status);
         const currentDescription = box.statusDescriptions[box.status];
 
@@ -193,9 +192,8 @@ export const VisibilitySectionBoxes: React.FC<VisibilitySectionBoxesProps> = ({
               paddingSize="m"
               style={{
                 minHeight: '120px',
-                borderColor: hasActionsRequired ? euiTheme.colors.warning : undefined,
-                borderWidth: hasActionsRequired ? '2px' : '1px',
-                backgroundColor: isSelected ? euiTheme.colors.lightestShade : undefined,
+                border: isSelected && `1px solid ${euiTheme.colors.primary}`,
+                backgroundColor: isSelected && euiTheme.colors.lightestShade,
               }}
               onClick={() => onTabSelect(box.id)}
             >
