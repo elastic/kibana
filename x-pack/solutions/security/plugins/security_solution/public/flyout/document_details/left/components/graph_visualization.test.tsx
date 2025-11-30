@@ -234,7 +234,7 @@ describe('GraphVisualization', () => {
       );
     });
 
-    it('calls open entity preview callback for entity - without entity data', async () => {
+    it('should not call open entity preview callback for entity - without entity data', async () => {
       const { getByTestId } = render(<GraphVisualization />);
       expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
 
@@ -263,18 +263,7 @@ describe('GraphVisualization', () => {
       } satisfies NodeViewModel);
 
       // Assert
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'generic-entity-panel',
-          params: {
-            entityId: 'entity-id',
-            scopeId: 'test-scope',
-            isPreviewMode: true,
-            banner: expect.objectContaining({ title: 'Preview entity details' }),
-            isEngineMetadataExist: false,
-          },
-        })
-      );
+      expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
     });
 
     it('calls open entity preview callback for entity - with entity data', async () => {

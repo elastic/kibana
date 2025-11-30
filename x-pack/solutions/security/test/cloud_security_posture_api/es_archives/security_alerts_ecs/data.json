@@ -256,11 +256,6 @@
           "id": "new-schema-user@example.com"
         }
       },
-      "actor": {
-        "entity": {
-          "id": "new-schema-user@example.com"
-        }
-      },
       "client": {
         "user": {
           "email": "new-schema-user@example.com"
@@ -486,11 +481,6 @@
         "ip": "10.0.0.2"
       },
       "tags": [],
-      "target": {
-        "entity": {
-          "id": "projects/new-schema-project-id/serviceAccounts/test-sa"
-        }
-      },
       "entity": {
         "target": {
           "id": "projects/new-schema-project-id/serviceAccounts/test-sa"
@@ -515,11 +505,6 @@
     "source": {
       "@timestamp": "2024-09-10T14:30:30.000Z",
       "user": {
-        "entity": {
-          "id": "entity-user@example.com"
-        }
-      },
-      "actor": {
         "entity": {
           "id": "entity-user@example.com"
         }
@@ -746,11 +731,6 @@
         "ip": "10.0.0.10"
       },
       "tags": [],
-      "target": {
-        "entity": {
-          "id": "entity-service-target-1"
-        }
-      },
       "user_agent": {
         "device": {
           "name": "Other"
