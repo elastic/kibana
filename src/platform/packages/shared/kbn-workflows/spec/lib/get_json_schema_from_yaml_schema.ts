@@ -22,11 +22,13 @@ type WorkflowJsonSchema = JsonSchema7Type & {
 
 /**
  * Type for JSON Schema objects that may be modified during processing.
- * Using a flexible type is necessary here because zod-to-json-schema produces dynamic structures
- * that don't have a fixed type, and we need to traverse and modify them.
+ * Using Record<string, any> allows dynamic property access while being more descriptive than plain 'any'.
+ * This is necessary because zod-to-json-schema produces dynamic structures with varying properties
+ * depending on the schema type (object, array, string, etc.), and we need to traverse and modify them.
+ * The JsonSchema7Type union is too strict for this use case as not all properties exist on all variants.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type JsonSchemaObject = any;
+type JsonSchemaObject = Record<string, any>;
 
 export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): WorkflowJsonSchema {
   // Generate the json schema from zod schema
