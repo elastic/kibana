@@ -13,10 +13,7 @@ import { createErrorResult } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { CoreSetup } from '@kbn/core/server';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
-import type {
-  AgentBuilderPlatformPluginStart,
-  PluginStartDependencies,
-} from '@kbn/agent-builder-platform-plugin/server/types';
+import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '../types';
 
 const productDocumentationSchema = z.object({
   query: z.string().describe('Search query to retrieve documentation about Elastic products'),
