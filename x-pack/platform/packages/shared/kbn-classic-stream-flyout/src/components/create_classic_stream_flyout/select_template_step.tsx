@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiSpacer,
   EuiSelectable,
@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiCallOut,
   EuiIconTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -42,10 +43,6 @@ const formatDataRetention = (template: TemplateDeserialized): string | undefined
   return undefined;
 };
 
-const flexGroupStyles = css({
-  padding: 24,
-});
-
 interface SelectTemplateStepProps {
   templates: TemplateDeserialized[];
   selectedTemplate: string | null;
@@ -63,6 +60,12 @@ export const SelectTemplateStep = ({
   hasErrorLoadingTemplates = false,
   onRetryLoadTemplates,
 }: SelectTemplateStepProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  const flexGroupStyles = css({
+    padding: euiTheme.size.l,
+  });
+
   const selectableOptions = useMemo(
     () =>
       templates.map((template) => {
@@ -73,12 +76,12 @@ export const SelectTemplateStep = ({
           label: template.name,
           checked: template.name === selectedTemplate ? 'on' : undefined,
           'data-test-subj': `template-option-${template.name}`,
-          data: { template },
+          template,
           append: hasIlmPolicy ? (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued">
-                  {template.ilmPolicy!.name}
+                  {template.ilmPolicy?.name}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -90,7 +93,7 @@ export const SelectTemplateStep = ({
               {dataRetention}
             </EuiText>
           ) : undefined,
-        };
+        } as EuiSelectableOption<{ template: TemplateDeserialized }>;
       }),
     [templates, selectedTemplate]
   );
@@ -119,10 +122,13 @@ export const SelectTemplateStep = ({
     );
   };
 
-  const handleTemplateChange = (newOptions: EuiSelectableOption[]) => {
-    const selected = newOptions.find((option) => option.checked === 'on');
-    onTemplateSelect(selected?.label ?? null);
-  };
+  const handleTemplateChange = useCallback(
+    (newOptions: EuiSelectableOption[]) => {
+      const selected = newOptions.find((option) => option.checked === 'on');
+      onTemplateSelect(selected?.label ?? null);
+    },
+    [onTemplateSelect]
+  );
 
   if (hasErrorLoadingTemplates) {
     return (
@@ -189,7 +195,7 @@ export const SelectTemplateStep = ({
             <p>
               <FormattedMessage
                 id="xpack.createClassicStreamFlyout.selectTemplateStep.emptyState.body"
-                defaultMessage="To create a new classic stream, you must select an index template that will be used to set the initial settings for to the new stream. Currently, you don’t have any index templates. Create a new index template first, then return here to create a classic stream."
+                defaultMessage="To create a new classic stream, you must select an index template that will be used to set the initial settings for the new stream. Currently, you don’t have any index templates. Create a new index template first, then return here to create a classic stream."
               />
             </p>
           }
@@ -240,7 +246,7 @@ export const SelectTemplateStep = ({
       >
         {(list, search) => (
           <>
-            <div style={{ paddingLeft: '24px', paddingRight: '24px' }}>
+            <div style={{ paddingLeft: euiTheme.size.l, paddingRight: euiTheme.size.l }}>
               {search}
               <EuiSpacer size="s" />
             </div>
