@@ -109,7 +109,7 @@
               "AlertingKibanaPrivilege",
               " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; category: ",
               "AppCategory",
-              "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; privileges: { all: ",
+              "; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; privileges: { all: ",
               {
                 "pluginId": "features",
                 "scope": "common",
@@ -125,7 +125,7 @@
                 "section": "def-common.FeatureKibanaPrivileges",
                 "text": "FeatureKibanaPrivileges"
               },
-              "; } | null; catalogue?: readonly string[] | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; privilegesTooltip?: string | undefined; reserved?: { description: string; privileges: readonly ",
+              "; } | null; management?: { [sectionId: string]: readonly string[]; } | undefined; catalogue?: readonly string[] | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; privilegesTooltip?: string | undefined; reserved?: { description: string; privileges: readonly ",
               "ReservedKibanaPrivilege",
               "[]; } | undefined; }"
             ],
@@ -387,7 +387,7 @@
           "AlertingKibanaPrivilege",
           " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | null | undefined; category: ",
           "AppCategory",
-          "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; privileges: { all: ",
+          "; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; privileges: { all: ",
           {
             "pluginId": "features",
             "scope": "common",
@@ -403,7 +403,7 @@
             "section": "def-common.FeatureKibanaPrivileges",
             "text": "FeatureKibanaPrivileges"
           },
-          "; } | null; catalogue?: readonly string[] | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; privilegesTooltip?: string | undefined; reserved?: { description: string; privileges: readonly ",
+          "; } | null; management?: { [sectionId: string]: readonly string[]; } | undefined; catalogue?: readonly string[] | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; privilegesTooltip?: string | undefined; reserved?: { description: string; privileges: readonly ",
           "ReservedKibanaPrivilege",
           "[]; } | undefined; }"
         ],
@@ -1564,7 +1564,7 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<boolean | undefined>; ui?: readonly string[] | undefined; management?: ",
+          "<boolean | undefined>; ui?: readonly string[] | undefined; app?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -1572,7 +1572,7 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<{ [sectionId: string]: readonly string[]; } | undefined>; app?: ",
+          "<readonly string[] | undefined>; management?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -1580,7 +1580,7 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<readonly string[] | undefined>; catalogue?: ",
+          "<{ [sectionId: string]: readonly string[]; } | undefined>; catalogue?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
