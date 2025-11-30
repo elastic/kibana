@@ -63,7 +63,6 @@ QUERY HELP DATA:
 {queryHelpData}
 
 ---
-MANDATORY WORKFLOW:
 
 1. Check the queryLanguage from the query help data above.
 

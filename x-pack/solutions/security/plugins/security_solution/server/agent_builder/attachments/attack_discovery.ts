@@ -70,7 +70,7 @@ ATTACK DISCOVERY DATA:
 {attackDiscoveryData}
 
 ---
-MANDATORY WORKFLOW - Complete in order:
+Complete in order:
 
 1. Extract entities from the attack discovery:
    - host.name (extract all host names mentioned)

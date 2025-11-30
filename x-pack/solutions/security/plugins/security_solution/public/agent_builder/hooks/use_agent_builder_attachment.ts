@@ -62,6 +62,7 @@ export const useAgentBuilderAttachment = ({
       newConversation: true,
       initialMessage: attachmentPrompt,
       attachments: [attachment],
+      sessionTag: 'security',
     });
   }, [attachmentType, attachmentData, attachmentPrompt, onechat]);
 

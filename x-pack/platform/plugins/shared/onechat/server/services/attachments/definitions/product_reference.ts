@@ -46,7 +46,6 @@ PRODUCT REFERENCE DATA:
 {productReferenceData}
 
 ---
-MANDATORY WORKFLOW:
 
 1. Extract the query or topic from the product reference data above.
 

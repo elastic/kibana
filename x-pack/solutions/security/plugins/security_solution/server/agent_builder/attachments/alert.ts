@@ -75,7 +75,7 @@ SECURITY ALERT DATA:
 {alertData}
 
 ---
-MANDATORY WORKFLOW - Complete in order:
+Complete in order:
 
 1. Extract alert id: kibana.alert.uuid or _id
 2. Extract rule name: kibana.alert.rule.name

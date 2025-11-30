@@ -66,7 +66,6 @@ RISK ENTITY DATA:
 {riskEntityData}
 
 ---
-MANDATORY WORKFLOW:
 
 1. Extract the identifierType and identifier from the risk entity data above.
 
