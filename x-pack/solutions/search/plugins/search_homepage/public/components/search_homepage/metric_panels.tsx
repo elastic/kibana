@@ -25,7 +25,7 @@ import { css } from '@emotion/react';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useIndicesStats } from '../../hooks/api/use_indices_stats';
 import { useDashboardsStats } from '../../hooks/api/use_dashboards_stats';
-
+import { useAgentCount } from '../../hooks/api/use_agent_count';
 interface MetricPanelProps {
   title: string;
   onClick?: () => void;
@@ -284,6 +284,7 @@ interface MetricPanelsProps {
 export const MetricPanels = ({ panelType = 'basic' }: MetricPanelsProps) => {
   const { data: indicesData, isLoading: isLoadingIndices } = useIndicesStats();
   const { data: dashboardsData, isLoading: isLoadingDashboards } = useDashboardsStats();
+  const { tools } = useAgentCount();
 
   const basicPanels = [
     {
@@ -303,12 +304,12 @@ export const MetricPanels = ({ panelType = 'basic' }: MetricPanelsProps) => {
       metric: '0 B',
     },
     {
-      id: 'agents',
-      metricType: 'agents',
-      title: i18n.translate('xpack.searchHomepage.metricPanel.basic.agents.title', {
-        defaultMessage: 'Agents',
+      id: 'tools',
+      metricType: 'tools',
+      title: i18n.translate('xpack.searchHomepage.metricPanel.basic.tools.title', {
+        defaultMessage: 'Tools',
       }),
-      metric: '0',
+      metric: String(tools),
     },
     {
       id: 'discover',
