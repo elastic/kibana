@@ -1182,15 +1182,14 @@ describe('Create case', () => {
     }));
 
     renderWithTestingProviders(
-      <FormContext
+      <TestComponent
         selectedOwner={SECURITY_SOLUTION_OWNER}
         onSuccess={onFormSubmitSuccess}
         afterCaseCreated={afterCaseCreated}
         currentConfiguration={currentConfiguration}
       >
         <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectorsMock} />
-        <SubmitCaseButton />
-      </FormContext>
+      </TestComponent>
     );
 
     await waitForFormToRender();
