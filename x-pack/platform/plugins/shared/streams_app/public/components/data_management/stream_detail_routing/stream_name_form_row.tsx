@@ -84,7 +84,7 @@ export const getErrorMessage = (
       },
     });
   }
-  if (isDotPresent) {
+  if (isDotPresent && rootChildExists) {
     return (
       <FormattedMessage
         id="xpack.streams.streamDetailRouting.nameContainsDotErrorMessage"
