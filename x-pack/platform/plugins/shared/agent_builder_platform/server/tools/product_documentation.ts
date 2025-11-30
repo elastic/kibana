@@ -123,7 +123,7 @@ export const productDocumentationTool = (
     tags: [],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request }) => {
+      handler: async () => {
         try {
           const [, plugins] = await coreSetup.getStartServices();
           const llmTasks = plugins.llmTasks;
