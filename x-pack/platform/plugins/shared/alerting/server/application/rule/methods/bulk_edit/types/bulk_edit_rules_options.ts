@@ -22,7 +22,14 @@ export type BulkEditOperations = TypeOf<typeof bulkEditOperationsSchema>;
 
 export type BulkEditFields = keyof Pick<
   RuleDomain,
-  'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen' | 'snoozeSchedule' | 'apiKey'
+  | 'actions'
+  | 'tags'
+  | 'schedule'
+  | 'throttle'
+  | 'notifyWhen'
+  | 'snoozeSchedule'
+  | 'apiKey'
+  | 'mutedInstanceIds'
 >;
 
 export interface BulkEditOptionsCommon<Params extends RuleParams> {

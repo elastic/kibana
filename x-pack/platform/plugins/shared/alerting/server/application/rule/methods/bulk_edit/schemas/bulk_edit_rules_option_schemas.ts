@@ -68,6 +68,12 @@ const bulkEditUnsnoozeSchema = schema.object({
   value: schema.maybe(scheduleIdsSchema),
 });
 
+const bulkEditMutedInstanceIdsSchema = schema.object({
+  operation: schema.oneOf([schema.literal('add'), schema.literal('delete'), schema.literal('set')]),
+  field: schema.literal('mutedInstanceIds'),
+  value: schema.arrayOf(schema.string()),
+});
+
 const bulkEditApiKeySchema = schema.object({
   operation: schema.literal('set'),
   field: schema.literal('apiKey'),
@@ -82,6 +88,7 @@ export const bulkEditOperationSchema = schema.oneOf([
   bulkEditSnoozeSchema,
   bulkEditUnsnoozeSchema,
   bulkEditApiKeySchema,
+  bulkEditMutedInstanceIdsSchema,
 ]);
 
 export const bulkEditOperationsSchema = schema.arrayOf(bulkEditOperationSchema, { minSize: 1 });

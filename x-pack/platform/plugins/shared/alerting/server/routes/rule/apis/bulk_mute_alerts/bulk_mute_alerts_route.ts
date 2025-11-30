@@ -46,7 +46,16 @@ export const bulkMuteAlertsRoute = (
           await pMap(
             Object.entries(alertsToMuteByRule),
             async ([ruleId, alertInstanceIds]) => {
-              await rulesClient.bulkMuteInstances({ ruleId, alertInstanceIds });
+              await rulesClient.bulkEdit({
+                ids: [ruleId],
+                operations: [
+                  {
+                    field: 'mutedInstanceIds',
+                    operation: 'add',
+                    value: alertInstanceIds,
+                  },
+                ],
+              });
             },
             { concurrency: 10 }
           );
