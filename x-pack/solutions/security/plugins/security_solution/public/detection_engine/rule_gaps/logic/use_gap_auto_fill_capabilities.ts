@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useUserData } from '../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../common/utils/privileges';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 /**
  * Centralized capability helper for everything related to the rule gaps auto-fill feature. ()
@@ -16,7 +17,9 @@ import { hasUserCRUDPermission } from '../../../common/utils/privileges';
 export const useGapAutoFillCapabilities = () => {
   const license = useLicense();
   const [{ canUserCRUD }] = useUserData();
-
+  const gapAutoFillSchedulerEnabled = useIsExperimentalFeatureEnabled(
+    'gapAutoFillSchedulerEnabled'
+  );
   const hasPlatinumLicense = license.isPlatinumPlus();
   const hasCrudPrivileges = hasUserCRUDPermission(canUserCRUD);
 
@@ -24,9 +27,9 @@ export const useGapAutoFillCapabilities = () => {
     () => ({
       hasPlatinumLicense,
       hasCrudPrivileges,
-      canAccessGapAutoFill: hasPlatinumLicense,
-      canEditGapAutoFill: hasPlatinumLicense && hasCrudPrivileges,
+      canAccessGapAutoFill: gapAutoFillSchedulerEnabled && hasPlatinumLicense,
+      canEditGapAutoFill: gapAutoFillSchedulerEnabled && hasPlatinumLicense && hasCrudPrivileges,
     }),
-    [hasPlatinumLicense, hasCrudPrivileges]
+    [gapAutoFillSchedulerEnabled, hasPlatinumLicense, hasCrudPrivileges]
   );
 };

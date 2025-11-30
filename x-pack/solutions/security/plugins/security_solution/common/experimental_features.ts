@@ -203,6 +203,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Entity Analytics Watchlist feature.
    */
   entityAnalyticsWatchlistEnabled: false,
+
+  /**
+   * Enables the Gap Auto Fill Scheduler feature.
+   */
+  gapAutoFillSchedulerEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
