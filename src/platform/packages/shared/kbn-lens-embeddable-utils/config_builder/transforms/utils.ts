@@ -15,7 +15,6 @@ import type {
   TextBasedLayer,
   TextBasedLayerColumn,
   TextBasedPersistedState,
-  TypedLensSerializedState,
 } from '@kbn/lens-common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -187,9 +186,9 @@ function getReferenceCriteria(layerId: string) {
 }
 
 export function buildDatasetStateNoESQL(
-  layer: FormBasedLayer | FormBasedLayer | Omit<FormBasedLayer, 'indexPatternId'>,
+  layer: FormBasedLayer | Omit<FormBasedLayer, 'indexPatternId'>,
   layerId: string,
-  adHocDataViews: Record<string, DataViewSpec>,
+  adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[] = []
 ): DatasetTypeNoESQL {
@@ -228,9 +227,9 @@ export function buildDatasetStateNoESQL(
  * @returns Lens API Dataset configuration
  */
 export function buildDatasetState(
-  layer: FormBasedLayer | FormBasedLayer | Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
+  layer: FormBasedLayer | Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   layerId: string,
-  adHocDataViews: Record<string, DataViewSpec>,
+  adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[] = []
 ): DatasetType {
@@ -379,9 +378,7 @@ export const buildDatasourceStates = (
   > = {};
   // a few charts types support multiple layers
   const configLayers = 'layers' in config ? config.layers : [config];
-  // @ts-expect-error upgrade typescript v5.9.3
   for (let i = 0; i < configLayers.length; i++) {
-    // @ts-expect-error upgrade typescript v5.9.3
     const layer = configLayers[i];
     const layerId = `${layer.type ?? 'layer'}_${i}`;
     const dataset = 'dataset' in layer ? layer.dataset : mainDataset;
@@ -577,20 +574,6 @@ export const filtersAndQueryToLensState = (state: LensApiState) => {
     ...(state.filters ? { filters: filtersToLensState(state.filters) as Filter[] } : {}),
     ...(query ? { query } : {}),
   };
-};
-
-export const getDataSourceLayer = <T extends TypedLensSerializedState['attributes']['state']>(
-  state: T
-): [layerId: string, layer: FormBasedLayer | TextBasedLayer] => {
-  const layers =
-    state.datasourceStates.formBased?.layers ??
-    state.datasourceStates.textBased?.layers ??
-    // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
-    (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
-    [];
-
-  // Layers can be in any order, so make sure to get the main one
-  return Object.entries(layers).find(([, l]) => !('linkToLayers' in l) || l.linkToLayers == null)!;
 };
 
 export type DeepMutable<T> = T extends (...args: never[]) => unknown

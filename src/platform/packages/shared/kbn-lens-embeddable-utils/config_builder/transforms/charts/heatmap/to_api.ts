@@ -9,7 +9,7 @@
 import type { FormBasedLayer, HeatmapVisualizationState, TextBasedLayer } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
-import { getSharedChartLensStateToAPI } from '../utils';
+import { getDatasourceLayers, getSharedChartLensStateToAPI } from '../utils';
 import type { HeatmapState } from '../../../schema';
 import { fromColorByValueLensStateToAPI } from '../../coloring';
 import type { LensAttributes } from '../../../types';
@@ -17,7 +17,6 @@ import {
   buildDatasetStateESQL,
   buildDatasetStateNoESQL,
   generateApiLayer,
-  getDataSourceLayer,
   isTextBasedLayer,
   operationFromColumn,
 } from '../../utils';
@@ -136,13 +135,18 @@ function reverseBuildVisualizationState(
 export function fromLensStateToAPI(config: LensAttributes): HeatmapState {
   const { state } = config;
   const visualization = state.visualization as HeatmapVisualizationState;
-  const [layerId, layer] = getDataSourceLayer(state);
+  const layers = getDatasourceLayers(state);
+
+  // Layers can be in any order, so make sure to get the main one
+  const [layerId, layer] = Object.entries(layers).find(
+    ([, l]) => !('linkToLayers' in l) || l.linkToLayers == null
+  )!;
 
   return {
     ...getSharedChartLensStateToAPI(config),
     ...reverseBuildVisualizationState(
       visualization,
-      layer,
+      layer as FormBasedLayer | TextBasedLayer,
       layerId ?? LENS_DEFAULT_LAYER_ID,
       config.state.adHocDataViews ?? {},
       config.references,
