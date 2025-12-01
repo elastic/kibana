@@ -17,7 +17,8 @@ project:
   owner: '@elastic/workchat-eng'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/kbn-mcp-client
-dependsOn: []
+dependsOn:
+  - '@kbn/i18n'
 tags:
   - shared-common
   - package
