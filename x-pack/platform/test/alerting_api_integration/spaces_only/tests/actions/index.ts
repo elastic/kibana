@@ -38,6 +38,9 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./check_registered_connector_types'));
     loadTestFile(require.resolve('./max_queued_actions_circuit_breaker'));
 
+    loadTestFile(require.resolve('./single_file_connector_types/create'));
+    loadTestFile(require.resolve('./single_file_connector_types/execute'));
+
     // note that this test will destroy existing spaces
     loadTestFile(require.resolve('./migrations'));
   });

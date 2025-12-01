@@ -194,22 +194,6 @@ export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as con
 /** This Kibana Advanced Setting sets a default AI connector for serverless AI features (EASE) */
 export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
 
-/** Feature flag for the default AI connector setting */
-export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
-  'aiAssistant.defaultLlmSettingEnabled' as const;
-
-/** The default value for the default AI connector setting */
-export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE = true as const;
-
-/** This Kibana Advanced Setting sets a default AI value report minutes per alert */
-export const DEFAULT_VALUE_REPORT_MINUTES = 'securitySolution:defaultValueReportMinutes' as const;
-
-/** This Kibana Advanced Setting sets a default AI value report hourly analyst rate */
-export const DEFAULT_VALUE_REPORT_RATE = 'securitySolution:defaultValueReportRate' as const;
-
-/** This Kibana Advanced Setting sets a default title for the AI value report page */
-export const DEFAULT_VALUE_REPORT_TITLE = 'securitySolution:defaultValueReportTitle' as const;
-
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
@@ -324,6 +308,14 @@ export const DETECTION_ENGINE_ALERTS_INDEX_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/signal/index` as const;
 export const DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/users/_find` as const;
+
+/**
+ * Extended alerts routes
+ */
+export const DETECTION_ENGINE_UNIFIED_ALERTS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/unified_alerts` as const;
+export const DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL =
+  `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/search` as const;
 
 /**
  * Telemetry detection endpoint for any previews requested of what data we are

@@ -1,0 +1,33 @@
+openapi: 3.0.3
+info:
+  title: Automatic Import Integrations API endpoint
+  version: "1"
+paths:
+  /internal/automatic_import/integrations/{integration_id}/data_streams/{data_stream_id}/stop:
+    post:
+      summary: Stops a data stream by its id.
+      operationId: StopAutoImportDataStream
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Stops a data stream by its id.
+      tags:
+        - Automatic Import Integrations
+      parameters:
+        - name: integration_id
+          in: path
+          required: true
+          description: The integration identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+        - name: data_stream_id
+          in: path
+          required: true
+          description: The data stream identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+      responses:
+        200:
+          description: The data stream is stopped.
+        404:
+          description: The data stream is not found.

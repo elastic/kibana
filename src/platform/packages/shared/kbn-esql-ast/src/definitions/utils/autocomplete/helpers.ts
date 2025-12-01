@@ -6,7 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLControlVariable, InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import type {
+  ESQLControlVariable,
+  InferenceEndpointAutocompleteItem,
+  ControlTriggerSource,
+} from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
@@ -24,6 +28,7 @@ import type { FunctionDefinition } from '../../types';
 import type { SupportedDataType } from '../../types';
 import { argMatchesParamType, getExpressionType, getParamAtPosition } from '../expressions';
 import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../functions';
+import { SuggestionCategory } from '../../../sorting/types';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getColumnByName } from '../shared';
 
@@ -49,6 +54,7 @@ export const buildUserDefinedColumnsDefinitions = (
       defaultMessage: `Column specified by the user within the ES|QL query`,
     }),
     sortText: 'D',
+    category: SuggestionCategory.USER_DEFINED_COLUMN,
   }));
 
 export function pushItUpInTheList(suggestions: ISuggestionItem[], shouldPromote: boolean) {
@@ -309,33 +315,44 @@ export const columnExists = (col: string, context?: ICommandContext) =>
 
 export function getControlSuggestion(
   type: ESQLVariableType,
-  variables?: string[]
+  triggerSource: ControlTriggerSource,
+  variables?: string[],
+  suggestCreation = true
 ): ISuggestionItem[] {
   return [
-    {
-      label: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlLabel', {
-        defaultMessage: 'Create control',
-      }),
-      text: '',
-      kind: 'Issue',
-      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
-        defaultMessage: 'Click to create',
-      }),
-      sortText: '1',
-      command: {
-        id: `esql.control.${type}.create`,
-        title: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
-          defaultMessage: 'Click to create',
-        }),
-      },
-    } as ISuggestionItem,
+    ...(suggestCreation
+      ? [
+          {
+            label: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlLabel', {
+              defaultMessage: 'Create control',
+            }),
+            text: '',
+            kind: 'Issue',
+            detail: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
+              defaultMessage: 'Click to create',
+            }),
+            sortText: '1',
+            category: SuggestionCategory.CUSTOM_ACTION,
+            command: {
+              id: `esql.control.${type}.create`,
+              title: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
+                defaultMessage: 'Click to create',
+              }),
+              arguments: [{ triggerSource }],
+            },
+          } as ISuggestionItem,
+        ]
+      : []),
     ...(variables?.length
       ? buildConstantsDefinitions(
           variables,
           i18n.translate('kbn-esql-ast.esql.autocomplete.namedParamDefinition', {
             defaultMessage: 'Named parameter',
           }),
-          '1A'
+          '1A',
+          undefined,
+          undefined,
+          SuggestionCategory.USER_DEFINED_COLUMN
         )
       : []),
   ];
@@ -349,19 +366,18 @@ export const getVariablePrefix = (variableType: ESQLVariableType) =>
 export function getControlSuggestionIfSupported(
   supportsControls: boolean,
   type: ESQLVariableType,
+  triggerSource: ControlTriggerSource,
   variables?: ESQLControlVariable[],
   shouldBePrefixed = true
 ) {
-  if (!supportsControls) {
-    return [];
-  }
-
   const prefix = shouldBePrefixed ? getVariablePrefix(type) : '';
   const filteredVariables = variables?.filter((variable) => variable.type === type) ?? [];
 
   const controlSuggestion = getControlSuggestion(
     type,
-    filteredVariables?.map((v) => `${prefix}${v.key}`)
+    triggerSource,
+    filteredVariables?.map((v) => `${prefix}${v.key}`),
+    supportsControls
   );
 
   return controlSuggestion;
@@ -511,6 +527,7 @@ export function createInferenceEndpointToCompletionItem(
     label: inferenceEndpoint.inference_id,
     sortText: '1',
     text: inferenceEndpoint.inference_id,
+    category: SuggestionCategory.VALUE,
   };
 }
 

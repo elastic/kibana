@@ -10,6 +10,7 @@ import type { Layout } from '.';
 import { DEFAULT_SELECTORS } from '.';
 import type { LayoutParams, LayoutSelectorDictionary } from '../../common/layout';
 import { DEFAULT_VIEWPORT } from '../browsers';
+import type { PdfImageSize } from './base_layout';
 import { BaseLayout } from './base_layout';
 
 export const getPrintLayoutSelectors: () => LayoutSelectorDictionary = () => ({
@@ -51,8 +52,11 @@ export class PrintLayout extends BaseLayout implements Layout {
   public getPdfImageSize() {
     return {
       width: 500,
-    };
+    } as PdfImageSize;
   }
+
+  // Image size is not used in print layout
+  setPdfImageSize({ height, width }: PdfImageSize): void {}
 
   public getPdfPageOrientation(): PageOrientation {
     return 'portrait';

@@ -22,6 +22,7 @@ export const OnechatToolsTable = memo(() => {
   const { euiTheme } = useEuiTheme();
   const { tools, isLoading: isLoadingTools, error: toolsError } = useToolsService();
   const [tablePageIndex, setTablePageIndex] = useState(0);
+  const [tablePageSize, setTablePageSize] = useState(10);
   const [selectedTools, setSelectedTools] = useState<ToolDefinition[]>([]);
   const { searchConfig, results: tableTools } = useToolsTableSearch();
   const { manageTools } = useUiPrivileges();
@@ -61,13 +62,20 @@ export const OnechatToolsTable = memo(() => {
       itemId="id"
       error={toolsError ? labels.tools.listToolsErrorMessage : undefined}
       search={searchConfig}
-      onTableChange={({ page: { index } }: CriteriaWithPagination<ToolDefinition>) => {
-        setTablePageIndex(index);
+      onTableChange={({ page }: CriteriaWithPagination<ToolDefinition>) => {
+        if (page) {
+          setTablePageIndex(page.index);
+          if (page.size !== tablePageSize) {
+            setTablePageSize(page.size);
+            setTablePageIndex(0);
+          }
+        }
       }}
       pagination={{
         pageIndex: tablePageIndex,
-        pageSize: 10,
-        showPerPageOptions: false,
+        pageSize: tablePageSize,
+        pageSizeOptions: [10, 25, 50, 100],
+        showPerPageOptions: true,
       }}
       rowProps={(tool) => ({
         'data-test-subj': `agentBuilderToolsTableRow-${tool.id}`,

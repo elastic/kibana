@@ -21,6 +21,7 @@ import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { getOverlapRange, isRestartingExpression } from '../../../definitions/utils/shared';
 import { isSubQuery, isSource } from '../../../ast/is';
+import { esqlCommandRegistry } from '../../../..';
 
 const SOURCE_TYPE_INDEX = 'index';
 const METADATA_KEYWORD = 'METADATA';
@@ -110,8 +111,7 @@ function suggestInitialSources(
 
   const suggestions = getSourceSuggestions(sources, [], innerText);
 
-  // Only suggest subqueries when not already inside a subquery
-  if (!context?.isCursorInSubquery) {
+  if (shouldSuggestSubquery(context)) {
     suggestions.push(subqueryCompleteItem);
   }
 
@@ -174,10 +174,18 @@ async function suggestAdditionalSources(
     recommendedQueries
   );
 
-  // Add subquery suggestion when restarting after comma (only if not already in subquery)
-  if (isRestartingExpression(innerText) && !context?.isCursorInSubquery) {
+  if (isRestartingExpression(innerText) && shouldSuggestSubquery(context)) {
     suggestions.push(subqueryCompleteItem);
   }
 
   return suggestions;
+}
+
+function shouldSuggestSubquery(context: ICommandContext | undefined): boolean {
+  if (context?.isCursorInSubquery) {
+    return false;
+  }
+
+  const fromCommand = esqlCommandRegistry.getCommandByName('from');
+  return fromCommand?.metadata?.subquerySupport ?? true;
 }

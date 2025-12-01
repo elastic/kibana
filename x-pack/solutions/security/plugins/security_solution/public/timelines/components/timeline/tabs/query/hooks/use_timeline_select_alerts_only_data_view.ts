@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { useSelectDataView } from '../../../../../../data_view_manager/hooks/use_select_data_view';
 import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../../../../../common/constants';
 import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
-import { DataViewManagerScopeName } from '../../../../../../data_view_manager/constants';
+import { PageScope } from '../../../../../../data_view_manager/constants';
 
 /**
  * Returns a callback to select the alerts-only data view for the timeline
@@ -22,7 +22,7 @@ export const useTimelineSelectAlertsOnlyDataView = (): (() => void) => {
     () =>
       selectDataView({
         id: `${DEFAULT_ALERT_DATA_VIEW_ID}-${spaceId}`,
-        scope: DataViewManagerScopeName.timeline,
+        scope: PageScope.timeline,
       }),
     [selectDataView, spaceId]
   );

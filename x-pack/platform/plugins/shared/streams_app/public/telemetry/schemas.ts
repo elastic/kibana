@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { RootSchema, SchemaArray } from '@elastic/ebt';
+import type { RootSchema, SchemaArray, SchemaObject } from '@elastic/ebt';
+import type { FeatureType } from '@kbn/streams-schema';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIGrokSuggestionLatencyProps,
+  StreamsAIDissectSuggestionAcceptedProps,
+  StreamsAIDissectSuggestionLatencyProps,
   StreamsAttachmentClickEventProps,
   StreamsAttachmentCountProps,
   StreamsChildStreamCreatedProps,
@@ -18,6 +21,10 @@ import type {
   StreamsSignificantEventsCreatedProps,
   StreamsSignificantEventsSuggestionsGeneratedEventProps,
   WiredStreamsStatusChangedProps,
+  StreamsFeatureIdentificationIdentifiedProps,
+  StreamsFeatureIdentificationSavedProps,
+  StreamsFeatureIdentificationDeletedProps,
+  StreamsDescriptionGeneratedProps,
 } from './types';
 
 const streamsAttachmentCountSchema: RootSchema<StreamsAttachmentCountProps> = {
@@ -150,6 +157,75 @@ const streamsAIGrokSuggestionAcceptedSchema: RootSchema<StreamsAIGrokSuggestionA
   },
 };
 
+const streamsAIDissectSuggestionLatencySchema: RootSchema<StreamsAIDissectSuggestionLatencyProps> =
+  {
+    name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+    field: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the field used.',
+      },
+    },
+    connector_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID of the LLM connector',
+      },
+    },
+    suggestion_count: {
+      type: 'long',
+      _meta: {
+        description: 'The number of suggestions in the response',
+      },
+    },
+    match_rate: matchRate,
+    duration_ms: {
+      type: 'long',
+      _meta: {
+        description: 'The duration of the request',
+      },
+    },
+  };
+
+const streamsAIDissectSuggestionAcceptedSchema: RootSchema<StreamsAIDissectSuggestionAcceptedProps> =
+  {
+    name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+    field: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the field used.',
+      },
+    },
+    connector_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID of the LLM connector',
+      },
+    },
+    match_rate: {
+      type: 'float',
+      _meta: {
+        description: 'The success rate of suggestion',
+      },
+    },
+    detected_fields: {
+      type: 'long',
+      _meta: {
+        description: 'The number of detected fields',
+      },
+    },
+  };
+
 const wiredStreamsStatusChangedSchema: RootSchema<WiredStreamsStatusChangedProps> = {
   is_enabled: {
     type: 'boolean',
@@ -214,6 +290,20 @@ const streamsSchemaUpdatedSchema: RootSchema<StreamsSchemaUpdatedProps> = {
   },
 };
 
+const countByTypes: SchemaObject<{ [key in FeatureType]: number }> = {
+  _meta: {
+    description: 'The count of identified features grouped by type',
+  },
+  properties: {
+    system: {
+      type: 'long',
+      _meta: {
+        description: 'The count of identified system features',
+      },
+    },
+  },
+};
+
 const streamsSignificantEventsSuggestionsGeneratedSchema: RootSchema<StreamsSignificantEventsSuggestionsGeneratedEventProps> =
   {
     duration_ms: {
@@ -223,10 +313,47 @@ const streamsSignificantEventsSuggestionsGeneratedSchema: RootSchema<StreamsSign
           'The time (in milliseconds) it took to generate significant events suggestions',
       },
     },
+    input_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of input tokens used for the generation request',
+      },
+    },
+    output_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of output tokens used for the generation request',
+      },
+    },
+    count: {
+      type: 'long',
+      _meta: {
+        description: 'The number of significant event queries generated',
+      },
+    },
+    count_by_feature_type: countByTypes,
+    features_selected: {
+      type: 'long',
+      _meta: {
+        description: 'The number of features selected for generation',
+      },
+    },
+    features_total: {
+      type: 'long',
+      _meta: {
+        description: 'The number of total features available for generation',
+      },
+    },
     stream_type: {
       type: 'keyword',
       _meta: {
         description: 'The type of the stream: wired or classic',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
       },
     },
   };
@@ -238,10 +365,125 @@ const streamsSignificantEventsCreatedSchema: RootSchema<StreamsSignificantEvents
       description: 'The number of significant events created',
     },
   },
+  count_by_feature_type: countByTypes,
   stream_type: {
     type: 'keyword',
     _meta: {
       description: 'The type of the stream: wired or classic',
+    },
+  },
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+};
+
+const streamsFeatureIdentificationIdentifiedSchema: RootSchema<StreamsFeatureIdentificationIdentifiedProps> =
+  {
+    count: {
+      type: 'long',
+      _meta: {
+        description: 'The number of features identified',
+      },
+    },
+    count_by_type: countByTypes,
+    input_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of input tokens used for the generation request',
+      },
+    },
+    output_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of output tokens used for the generation request',
+      },
+    },
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired or classic',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+  };
+
+const streamsFeatureIdentificationSavedSchema: RootSchema<StreamsFeatureIdentificationSavedProps> =
+  {
+    count: {
+      type: 'long',
+      _meta: {
+        description: 'The number of features saved',
+      },
+    },
+    count_by_type: countByTypes,
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired or classic',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+  };
+
+const streamsFeatureIdentificationDeletedSchema: RootSchema<StreamsFeatureIdentificationDeletedProps> =
+  {
+    count: {
+      type: 'long',
+      _meta: {
+        description: 'The number of features deleted',
+      },
+    },
+    count_by_type: countByTypes,
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired or classic',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+  };
+
+const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedProps> = {
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
+  input_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of input tokens used for the generation request',
+    },
+  },
+  output_tokens_used: {
+    type: 'long',
+    _meta: {
+      description: 'The number of output tokens used for the generation request',
     },
   },
 };
@@ -251,6 +493,8 @@ export {
   streamsAttachmentClickEventSchema,
   streamsAIGrokSuggestionLatencySchema,
   streamsAIGrokSuggestionAcceptedSchema,
+  streamsAIDissectSuggestionLatencySchema,
+  streamsAIDissectSuggestionAcceptedSchema,
   streamsRetentionChangedSchema,
   streamsProcessingSavedSchema,
   streamsChildStreamCreatedSchema,
@@ -258,4 +502,8 @@ export {
   streamsSignificantEventsSuggestionsGeneratedSchema,
   streamsSignificantEventsCreatedSchema,
   wiredStreamsStatusChangedSchema,
+  streamsFeatureIdentificationIdentifiedSchema,
+  streamsFeatureIdentificationSavedSchema,
+  streamsFeatureIdentificationDeletedSchema,
+  streamsDescriptionGeneratedSchema,
 };
