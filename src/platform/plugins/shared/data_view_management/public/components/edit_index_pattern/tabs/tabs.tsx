@@ -333,6 +333,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     closePopover={() => setIsIndexedFilterOpen(false)}
                   >
                     <EuiSelectable
+                      data-test-subj="indexedFieldTypeSelectable"
                       options={convertToEuiSelectableOptions(
                         indexedFieldTypes,
                         filteredIndexedFieldTypeFilter
@@ -366,6 +367,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     closePopover={() => setIsSchemaFilterOpen(false)}
                   >
                     <EuiSelectable
+                      data-test-subj="schemaTypeSelectable"
                       options={convertToEuiSelectableOptions(
                         SCHEMA_ITEMS,
                         filteredSchemaFieldTypeFilter
@@ -449,6 +451,7 @@ export const Tabs: React.FC<TabsProps> = ({
                   closePopover={() => setIsScriptedFieldFilterOpen(false)}
                 >
                   <EuiSelectable
+                    data-test-subj="scriptedFieldLanguageSelectable"
                     options={convertToEuiSelectableOptions(
                       scriptedFieldLanguages,
                       scriptedFieldLanguageFilter

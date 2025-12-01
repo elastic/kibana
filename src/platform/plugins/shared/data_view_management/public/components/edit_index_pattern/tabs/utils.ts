@@ -137,6 +137,7 @@ export function convertToEuiSelectableOptionsFromArray(options: string[]): Optio
   return options.map((option) => ({
     value: option,
     label: option,
+    'data-test-subj': `selectable-option-${option}`,
   }));
 }
 
@@ -148,6 +149,7 @@ export function convertToEuiSelectableOptions(
     value: option.value,
     label: option.label,
     checked: selectedOptions.some((value) => value === option.value) ? 'on' : undefined,
+    'data-test-subj': `selectable-option-${option.value}`,
   }));
 }
 
