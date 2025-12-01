@@ -80,7 +80,14 @@ export const SelectTemplateStep = ({
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">ILM</EuiBadge>
+                <EuiBadge color="hollow">
+                  {i18n.translate(
+                    'xpack.createClassicStreamFlyout.selectTemplateStep.ilmBadgeLabel',
+                    {
+                      defaultMessage: 'ILM',
+                    }
+                  )}
+                </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : dataRetention ? (
