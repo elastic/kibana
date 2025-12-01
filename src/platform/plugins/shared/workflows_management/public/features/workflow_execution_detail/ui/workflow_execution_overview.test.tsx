@@ -10,8 +10,8 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
 
 const renderWithIntl = (component: React.ReactElement) => {
@@ -45,7 +45,7 @@ const createMockStepExecution = (
     execution: {
       id: 'exec-123',
       isTestRun: false,
-      startedAt: new Date('2024-01-15T10:30:45.123Z'),
+      startedAt: '2024-01-15T10:30:45.123Z',
       url: 'http://localhost',
     },
     now: '2024-01-15T10:35:50.456Z',
@@ -107,7 +107,7 @@ describe('WorkflowExecutionOverview', () => {
           execution: {
             id: 'exec-123',
             isTestRun: true,
-            startedAt: new Date('2024-01-15T10:30:45.123Z'),
+            startedAt: '2024-01-15T10:30:45.123Z',
             url: 'http://localhost',
           },
         },
@@ -126,7 +126,7 @@ describe('WorkflowExecutionOverview', () => {
           execution: {
             id: 'exec-123',
             isTestRun: false,
-            startedAt: new Date('2024-01-15T10:30:45.123Z'),
+            startedAt: '2024-01-15T10:30:45.123Z',
             url: 'http://localhost',
           },
         },
@@ -249,7 +249,7 @@ describe('WorkflowExecutionOverview', () => {
           execution: {
             id: 'exec-123',
             isTestRun: false,
-            startedAt: new Date('2024-01-15T10:30:45.123Z'),
+            startedAt: '2024-01-15T10:30:45.123Z',
             url: 'http://localhost',
           },
         },
@@ -285,10 +285,7 @@ describe('WorkflowExecutionOverview', () => {
 
     it('should handle undefined values in context', () => {
       const stepExecution = createMockStepExecution({
-        input: {
-          execution: undefined,
-          now: undefined,
-        },
+        input: {},
       });
       renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
 
