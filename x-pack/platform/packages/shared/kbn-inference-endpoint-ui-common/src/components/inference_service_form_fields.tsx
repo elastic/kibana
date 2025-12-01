@@ -29,6 +29,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import type { HttpSetup, IToasts } from '@kbn/core/public';
+import { EisPromotionalTour } from '@kbn/search-api-panels';
 import * as LABELS from '../translations';
 import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
 import { FieldType, isMapWithStringValues } from '../types/types';
@@ -381,24 +382,31 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         fullWidth
         icon={!config?.provider ? { type: 'sparkles', side: 'left' } : undefined}
       >
-        <EuiFieldText
-          onClick={toggleProviderPopover}
-          data-test-subj="provider-select"
-          isInvalid={isInvalid}
-          disabled={isEdit}
-          onKeyDown={handleProviderKeyboardOpen}
-          value={config?.provider ? providerName : ''}
-          fullWidth
-          placeholder={LABELS.SELECT_PROVIDER}
-          icon={{ type: 'arrowDown', side: 'right' }}
-          aria-expanded={isProviderPopoverOpen}
-          role="combobox"
-          onChange={() => {
-            /* Intentionally left blank as onChange is required to avoid console error
+        <EisPromotionalTour
+          promoId="eisInferenceEndpointFlyout"
+          // TODO: replace "true" with isCloudEnabled flag
+          isCloudEnabled={true}
+          anchorPosition="downCenter"
+        >
+          <EuiFieldText
+            onClick={toggleProviderPopover}
+            data-test-subj="provider-select"
+            isInvalid={isInvalid}
+            disabled={isEdit}
+            onKeyDown={handleProviderKeyboardOpen}
+            value={config?.provider ? providerName : ''}
+            fullWidth
+            placeholder={LABELS.SELECT_PROVIDER}
+            icon={{ type: 'arrowDown', side: 'right' }}
+            aria-expanded={isProviderPopoverOpen}
+            role="combobox"
+            onChange={() => {
+              /* Intentionally left blank as onChange is required to avoid console error
               but not used in this context
             */
-          }}
-        />
+            }}
+          />
+        </EisPromotionalTour>
       </EuiFormControlLayout>
     ),
     [

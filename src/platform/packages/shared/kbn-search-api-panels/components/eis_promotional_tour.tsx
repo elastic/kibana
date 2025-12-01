@@ -15,18 +15,14 @@ import {
   EuiTourStep,
   type EuiTourStepProps,
 } from '@elastic/eui';
-import {
-  EIS_PROMO_TOUR_CLOSE,
-  EIS_PROMO_TOUR_CTA,
-  EIS_PROMO_TOUR_DESCRIPTION,
-  EIS_PROMO_TOUR_TITLE,
-} from '../translations';
+import { EIS_PROMO_TOUR_CLOSE } from '../translations';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
+import { TOUR_CONTENT } from '../constants';
 
 export interface EisPromotionalTourProps {
   anchorPosition?: EuiTourStepProps['anchorPosition'];
   ctaLink?: string;
-  promoId: string;
+  promoId: keyof typeof TOUR_CONTENT;
   isCloudEnabled: boolean;
   children: React.ReactElement;
 }
@@ -43,6 +39,7 @@ export const EisPromotionalTour = ({
     isCloudEnabled,
   });
   const dataId = `${promoId}-eis-promo-tour`;
+  const tourCopy = TOUR_CONTENT[promoId];
 
   if (!isPromoVisible) {
     return children;
@@ -52,13 +49,14 @@ export const EisPromotionalTour = ({
     <EuiTourStep
       data-telemetry-id={dataId}
       data-test-subj={dataId}
-      title={EIS_PROMO_TOUR_TITLE}
+      title={tourCopy.title}
       maxWidth="400px"
       content={
         <EuiText>
-          <p>{EIS_PROMO_TOUR_DESCRIPTION}</p>
+          <p>{tourCopy.description}</p>
         </EuiText>
       }
+      display="block"
       isStepOpen={isPromoVisible}
       anchorPosition={anchorPosition}
       step={1}
@@ -77,7 +75,7 @@ export const EisPromotionalTour = ({
                 iconSide="right"
                 iconType="popout"
               >
-                {EIS_PROMO_TOUR_CTA}
+                {tourCopy.cta}
               </EuiButton>,
             ]
           : []),
