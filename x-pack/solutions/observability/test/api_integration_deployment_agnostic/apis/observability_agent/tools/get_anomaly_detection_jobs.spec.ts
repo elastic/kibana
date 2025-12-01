@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { GetAnomalyDetectionJobsToolResult } from '@kbn/observability-agent-plugin/server/tools/get_anomaly_detection_jobs/get_anomaly_detection_jobs';
 import { OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID } from '@kbn/observability-agent-plugin/server/tools/get_anomaly_detection_jobs/get_anomaly_detection_jobs';
 import datemath from '@elastic/datemath';
