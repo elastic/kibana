@@ -533,12 +533,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
           if (!report || !task) {
             this.opts.reporting.untrackReport(jobId);
-
-            const errorMessage = `Job ${jobId} could not be claimed. Exiting...`;
-            errorLogger(this.logger, errorMessage);
-
             // Throw so Task manager can clean up the failed task
-            throw new Error(errorMessage);
+            throw new Error(`Job ${jobId} could not be claimed. Exiting...`);
           }
 
           const { jobtype: jobType, attempts } = report;

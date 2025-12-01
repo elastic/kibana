@@ -365,7 +365,7 @@ export class CsvGenerator {
         try {
           results = await cursor.getPage(searchSource);
         } catch (err) {
-          this.logger.error(`CSV export search error: ${err}`);
+          err.message = `CSV export search error: ${err.message}`;
           throw err;
         }
 

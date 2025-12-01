@@ -65,9 +65,8 @@ export const retryOnError = async ({
       logger.error(
         `No retries left for report generation for report[${
           report._id
-        }]. No report generated after ${retries + 1} attempts due to error: ${err.toString()} ${
-          err.stack
-        }`
+        }]. No report generated after ${retries + 1} attempts due to error: ${err.toString()}`,
+        { error: { stack_trace: err.stack } }
       );
     }
 
