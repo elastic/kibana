@@ -23,19 +23,20 @@ import {
   ALWAYS_CONDITION,
   conditionSchema,
   convertStepToUIDefinition,
+  convertUIStepsToDSL,
   streamlangProcessorSchema,
 } from '@kbn/streamlang';
 import { isWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
-import { isSchema } from '@kbn/streams-schema';
+import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { ProcessorResources } from './state_management/steps_state_machine';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
 import { configDrivenProcessors } from './steps/blocks/action/config_driven';
 import type {
-  ConfigDrivenProcessors,
   ConfigDrivenProcessorType,
+  ConfigDrivenProcessors,
 } from './steps/blocks/action/config_driven/types';
 import type {
   ConvertFormState,
@@ -291,6 +292,8 @@ export const convertFormStateToProcessor = (
   processorDefinition: StreamlangProcessorDefinition;
   processorResources?: ProcessorResources;
 } => {
+  const description = 'description' in formState ? formState.description : undefined;
+
   if ('action' in formState) {
     if (formState.action === 'grok') {
       const { patterns, from, ignore_failure, ignore_missing } = formState;
@@ -299,6 +302,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'grok',
           where: formState.where,
+          description,
           patterns: patterns
             .map((pattern) => pattern.getExpression().trim())
             .filter((pattern) => !isEmpty(pattern)),
@@ -319,6 +323,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'dissect',
           where: formState.where,
+          description,
           from,
           pattern,
           append_separator: isEmpty(append_separator) ? undefined : append_separator,
@@ -335,6 +340,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'manual_ingest_pipeline',
           where: formState.where,
+          description,
           processors,
           ignore_failure,
         },
@@ -348,6 +354,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'date',
           where: formState.where,
+          description,
           from,
           formats,
           ignore_failure,
@@ -366,6 +373,7 @@ export const convertFormStateToProcessor = (
           action: 'drop_document',
           where,
           ignore_failure,
+          description,
         },
       };
     }
@@ -387,6 +395,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'set',
           where: formState.where,
+          description,
           to,
           ...getValueOrCopyFrom(),
           override,
@@ -406,6 +415,7 @@ export const convertFormStateToProcessor = (
           to: isEmpty(to) ? undefined : to,
           ignore_failure,
           ignore_missing,
+          description,
           where: 'where' in formState ? formState.where : undefined,
         } as ConvertProcessor,
       };
@@ -423,6 +433,7 @@ export const convertFormStateToProcessor = (
           to: isEmpty(to) ? undefined : to,
           ignore_failure,
           ignore_missing,
+          description,
           where: 'where' in formState ? formState.where : undefined,
         } as ReplaceProcessor,
       };
@@ -430,9 +441,10 @@ export const convertFormStateToProcessor = (
 
     if (configDrivenProcessors[formState.action]) {
       return {
-        processorDefinition: configDrivenProcessors[formState.action].convertFormStateToConfig(
-          formState as any
-        ),
+        processorDefinition: {
+          ...configDrivenProcessors[formState.action].convertFormStateToConfig(formState as any),
+          description,
+        },
       };
     }
   }
@@ -571,4 +583,38 @@ export const getValidSteps = (
 export const getStepPanelColour = (stepIndex: number) => {
   const isEven = stepIndex % 2 === 0;
   return isEven ? 'subdued' : undefined;
+};
+
+export const buildUpsertStreamRequestPayload = (
+  definition: Streams.ingest.all.GetResponse,
+  steps: StreamlangStepWithUIAttributes[],
+  fields?: FieldDefinition
+): { ingest: Streams.ingest.all.GetResponse['stream']['ingest'] } => {
+  const processing = convertUIStepsToDSL(steps);
+
+  return Streams.WiredStream.GetResponse.is(definition)
+    ? {
+        ingest: {
+          ...definition.stream.ingest,
+          processing,
+          ...(fields && {
+            wired: {
+              ...definition.stream.ingest.wired,
+              fields,
+            },
+          }),
+        },
+      }
+    : {
+        ingest: {
+          ...definition.stream.ingest,
+          processing,
+          ...(fields && {
+            classic: {
+              ...definition.stream.ingest.classic,
+              field_overrides: fields,
+            },
+          }),
+        },
+      };
 };
