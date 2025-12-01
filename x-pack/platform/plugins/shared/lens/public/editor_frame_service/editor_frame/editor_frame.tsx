@@ -168,42 +168,51 @@ export function EditorFrame(props: EditorFrameProps) {
         configPanel={
           areDatasourcesLoaded && (
             <ErrorBoundary onError={onError}>
-              <div
-                css={css`
-                  background-color: ${euiTheme.colors.emptyShade};
-                `}
-              >
-                <EuiFlexGroup
-                  gutterSize="s"
-                  css={styles.visualizationToolbar}
-                  justifyContent="flexEnd"
-                  responsive={false}
-                  wrap={true}
+              <>
+                <div
+                  css={css`
+                    background-color: ${euiTheme.colors.backgroundBaseHighlighted};
+                    border-bottom: ${euiTheme.border.thin};
+                  `}
                 >
-                  <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
-                    <VisualizationToolbarWrapper
-                      framePublicAPI={framePublicAPI}
-                      isInlineEditing={true}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    css={styles.visualizationToolbar}
+                    justifyContent="flexEnd"
+                    responsive={false}
+                    wrap={true}
+                  >
+                    <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
+                      <VisualizationToolbarWrapper
+                        framePublicAPI={framePublicAPI}
+                        isInlineEditing={true}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="s" />
+                </div>
                 <LayerTabsWrapper
                   coreStart={props.core}
                   framePublicAPI={framePublicAPI}
                   uiActions={props.plugins.uiActions}
                 />
-                <ConfigPanelWrapper
-                  core={props.core}
-                  framePublicAPI={framePublicAPI}
-                  uiActions={props.plugins.uiActions}
-                  dataViews={props.plugins.dataViews}
-                  data={props.plugins.data}
-                  indexPatternService={props.indexPatternService}
-                  getUserMessages={props.getUserMessages}
-                />
-              </div>
+                <div
+                  css={css`
+                    background-color: ${euiTheme.colors.emptyShade};
+                  `}
+                >
+                  <ConfigPanelWrapper
+                    core={props.core}
+                    framePublicAPI={framePublicAPI}
+                    uiActions={props.plugins.uiActions}
+                    dataViews={props.plugins.dataViews}
+                    data={props.plugins.data}
+                    indexPatternService={props.indexPatternService}
+                    getUserMessages={props.getUserMessages}
+                  />
+                </div>
+              </>
             </ErrorBoundary>
           )
         }
