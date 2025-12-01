@@ -57,7 +57,7 @@ describe('updateAutoFillSchedulerRoute', () => {
     updateAutoFillSchedulerRoute(router, licenseState);
 
     rulesClient.updateGapAutoFillScheduler.mockResolvedValueOnce(mockUpdateResponse);
-    const [config, handler] = router.patch.mock.calls[0];
+    const [config, handler] = router.put.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {
@@ -98,6 +98,8 @@ describe('updateAutoFillSchedulerRoute', () => {
         updated_by: 'user',
         created_at: '2024-01-01T00:00:00.000Z',
         updated_at: '2024-01-02T00:00:00.000Z',
+        scope: ['scope-a'],
+        rule_types: [{ type: 'test-rule-type', consumer: 'test-consumer' }],
       },
     });
   });
@@ -109,7 +111,7 @@ describe('updateAutoFillSchedulerRoute', () => {
     updateAutoFillSchedulerRoute(router, licenseState);
 
     rulesClient.updateGapAutoFillScheduler.mockResolvedValueOnce(mockUpdateResponse);
-    const [, handler] = router.patch.mock.calls[0];
+    const [, handler] = router.put.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {
@@ -119,7 +121,9 @@ describe('updateAutoFillSchedulerRoute', () => {
     );
 
     await handler(context, req, res);
+
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+    expect(licenseState.ensureLicenseForGapAutoFillScheduler).toHaveBeenCalled();
   });
 
   test('respects license failures', async () => {
@@ -131,7 +135,7 @@ describe('updateAutoFillSchedulerRoute', () => {
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('License check failed');
     });
-    const [, handler] = router.patch.mock.calls[0];
+    const [, handler] = router.put.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {
@@ -151,7 +155,7 @@ describe('updateAutoFillSchedulerRoute', () => {
 
     updateAutoFillSchedulerRoute(router, licenseState);
 
-    const [config] = router.patch.mock.calls[0];
+    const [config] = router.put.mock.calls[0];
     expect(config.validate).toBeDefined();
     if (
       config.validate &&

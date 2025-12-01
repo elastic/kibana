@@ -33,6 +33,8 @@ export const getAutoFillSchedulerLogsRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
+        licenseState.ensureLicenseForGapAutoFillScheduler();
+
         try {
           const { id } = req.params as { id: string };
           const body = req.body;

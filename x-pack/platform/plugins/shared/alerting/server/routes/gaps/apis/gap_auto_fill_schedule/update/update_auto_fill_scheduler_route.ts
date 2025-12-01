@@ -35,6 +35,8 @@ export const updateAutoFillSchedulerRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
+        licenseState.ensureLicenseForGapAutoFillScheduler();
+
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
         const result = await rulesClient.updateGapAutoFillScheduler(transformRequestV1(req));

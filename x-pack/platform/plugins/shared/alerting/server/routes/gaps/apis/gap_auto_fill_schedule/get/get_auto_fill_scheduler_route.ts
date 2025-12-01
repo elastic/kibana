@@ -33,6 +33,8 @@ export const getAutoFillSchedulerRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
+        licenseState.ensureLicenseForGapAutoFillScheduler();
+
         const params: GetGapAutoFillSchedulerParamsV1 = req.params;
 
         const alertingContext = await context.alerting;
