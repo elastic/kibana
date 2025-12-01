@@ -36,7 +36,6 @@ export async function getAxiosInstance(
   } = context;
 
   let actionTypeId: string | undefined;
-  let secrets;
 
   try {
     if (isPreconfigured(context, actionId) || isSystemAction(context, actionId)) {
@@ -64,10 +63,12 @@ export async function getAxiosInstance(
     actionTypeId,
   });
 
-  // check to see if it's in memory connector first
+  // check to see if it's in memory connector before fetching secrets
   const inMemoryAction = inMemoryConnectors.find(
     (inMemoryConnector) => inMemoryConnector.id === actionId
   );
+
+  let secrets;
 
   if (inMemoryAction) {
     secrets = inMemoryAction.secrets;
