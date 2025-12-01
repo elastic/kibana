@@ -71,10 +71,6 @@ apiTest.describe('APM integration not installed but setup completed', { tag: ['@
 
 apiTest.describe('Profiling is setup and data is loaded', { tag: ['@ess'] }, () => {
   apiTest.beforeAll(async ({ profilingSetup }) => {
-    await profilingSetup.cleanup();
-    if (!(await profilingSetup.checkStatus()).has_setup) {
-      await profilingSetup.setupResources();
-    }
     await profilingSetup.loadData(esArchiversPath);
   });
 
