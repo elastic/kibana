@@ -11,26 +11,22 @@ import React from 'react';
 import { AttachmentType } from '@kbn/onechat-common/attachments';
 
 export interface AttachmentPillProps {
-  /** Unique identifier for the attachment */
   id: string;
-  /** Type of the attachment (e.g., 'text', 'screen_context', 'dashboard') */
   type: AttachmentType;
-  /** Display name for the attachment */
-  name?: string;
-  /** Optional callback when the attachment is removed */
+  onClick?: (id: string) => void;
   onRemove?: (id: string) => void;
 }
 
 const labels = {
+  viewAttachment: i18n.translate('xpack.onechat.attachmentPill.viewAttachment', {
+    defaultMessage: 'View attachment',
+  }),
   removeAttachment: i18n.translate('xpack.onechat.attachmentPill.removeAttachment', {
     defaultMessage: 'Remove attachment',
   }),
 };
 
-/**
- * Gets an icon type based on the attachment type.
- */
-const getAttachmentIcon = (type: string): string => {
+const getAttachmentIcon = (type: AttachmentType): string => {
   switch (type) {
     case AttachmentType.text:
       return 'document';
@@ -43,14 +39,7 @@ const getAttachmentIcon = (type: string): string => {
   }
 };
 
-/**
- * Gets a display name for the attachment based on its type if no name is provided.
- */
-const getAttachmentDisplayName = (type: string, name?: string): string => {
-  if (name) {
-    return name;
-  }
-
+const getAttachmentDisplayName = (type: AttachmentType): string => {
   switch (type) {
     case AttachmentType.text:
       return i18n.translate('xpack.onechat.attachmentPill.textAttachment', {
@@ -69,15 +58,17 @@ const getAttachmentDisplayName = (type: string, name?: string): string => {
   }
 };
 
-/**
- * A pill component for displaying an attachment.
- * Can optionally be made removable by providing an onRemove callback.
- */
-export const AttachmentPill: React.FC<AttachmentPillProps> = ({ id, type, name, onRemove }) => {
-  const displayName = getAttachmentDisplayName(type, name);
+export const AttachmentPill: React.FC<AttachmentPillProps> = ({ id, type, onClick, onRemove }) => {
+  const displayName = getAttachmentDisplayName(type);
   const iconType = getAttachmentIcon(type);
 
-  const handleClose = onRemove
+  const handleClick = onClick
+    ? () => {
+        onClick(id);
+      }
+    : undefined;
+
+  const handleRemove = onRemove
     ? (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
         event.stopPropagation();
@@ -85,15 +76,22 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({ id, type, name, 
       }
     : undefined;
 
+  const clickProps = handleClick
+    ? { onClick: handleClick, onClickAriaLabel: labels.viewAttachment }
+    : {};
+
+  const iconClickProps = handleRemove
+    ? { iconOnClick: handleRemove, iconOnClickAriaLabel: labels.removeAttachment }
+    : {};
+
   return (
     <EuiBadge
       color="default"
       iconType={iconType}
       iconSide="left"
-      onClickAriaLabel={handleClose ? labels.removeAttachment : undefined}
-      iconOnClick={handleClose}
-      iconOnClickAriaLabel={handleClose ? labels.removeAttachment : undefined}
       data-test-subj={`onechatAttachmentPill-${id}`}
+      {...clickProps}
+      {...iconClickProps}
     >
       {displayName}
     </EuiBadge>

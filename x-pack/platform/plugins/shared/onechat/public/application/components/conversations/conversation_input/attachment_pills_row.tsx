@@ -8,23 +8,11 @@
 import { EuiBadgeGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { AttachmentDisplayInfo } from '@kbn/onechat-common/attachments';
 import { AttachmentPill } from './attachment_pill';
 
-export interface AttachmentItem {
-  /** Unique identifier for the attachment */
-  id: string;
-  /** Type of the attachment */
-  type: string;
-  /** Optional display name */
-  name?: string;
-  /** Whether the attachment is hidden from the user */
-  hidden?: boolean;
-}
-
 export interface AttachmentPillsRowProps {
-  /** List of attachments to display */
-  attachments: AttachmentItem[];
-  /** Optional callback when an attachment is removed */
+  attachments: AttachmentDisplayInfo[];
   onRemoveAttachment?: (id: string) => void;
 }
 
@@ -34,14 +22,10 @@ const labels = {
   }),
 };
 
-/**
- * A row of attachment pills. Only shows non-hidden attachments.
- */
 export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
   attachments,
   onRemoveAttachment,
 }) => {
-  // Filter out hidden attachments
   const visibleAttachments = attachments.filter((attachment) => !attachment.hidden);
 
   if (visibleAttachments.length === 0) {
@@ -60,7 +44,6 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
           key={attachment.id}
           id={attachment.id}
           type={attachment.type}
-          name={attachment.name}
           onRemove={onRemoveAttachment}
         />
       ))}

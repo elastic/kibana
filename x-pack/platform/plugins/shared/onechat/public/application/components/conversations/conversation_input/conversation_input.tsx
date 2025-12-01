@@ -139,7 +139,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
 
   const placeholder = isInputDisabled ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
-  // Filter out removed attachments and map to the format expected by AttachmentPillsRow
   const visibleAttachments = useMemo(() => {
     if (!attachments) return [];
     return attachments

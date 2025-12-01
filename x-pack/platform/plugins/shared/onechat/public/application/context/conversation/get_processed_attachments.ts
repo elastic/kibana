@@ -6,8 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import type { AttachmentInput } from '@kbn/onechat-common/attachments';
-import type { UiAttachment } from '../../../embeddable/types';
+import type { AttachmentInput, UiAttachment } from '@kbn/onechat-common/attachments';
 
 /**
  * Processes attachments and returns only those that have changed or are new.

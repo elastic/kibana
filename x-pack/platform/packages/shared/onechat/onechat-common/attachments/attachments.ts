@@ -8,6 +8,29 @@
 import type { AttachmentType, AttachmentDataOf } from './attachment_types';
 
 /**
+ * Represents a UI attachment with lazy-loaded content.
+ * Used by the embeddable API for attachments that fetch content on-demand.
+ */
+export interface UiAttachment {
+  /** Unique identifier for the attachment */
+  id: string;
+  /** Type of the attachment */
+  type: AttachmentType;
+  /** Should the attachment be hidden from the user */
+  hidden?: boolean;
+  /**
+   * Function to lazily load attachment content.
+   * Called when the attachment content is needed (e.g., when starting a conversation round).
+   */
+  getContent: () => Record<string, unknown> | Promise<Record<string, unknown>>;
+}
+
+/**
+ * Minimal attachment info for display purposes (e.g., rendering pills).
+ */
+export type AttachmentDisplayInfo = Pick<UiAttachment, 'id' | 'type' | 'hidden'>;
+
+/**
  * Represents a conversation attachment, as returned by the conversation API.
  */
 export interface Attachment<

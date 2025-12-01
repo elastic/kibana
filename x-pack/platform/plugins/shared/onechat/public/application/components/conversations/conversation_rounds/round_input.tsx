@@ -9,7 +9,7 @@ import { EuiPanel, useEuiTheme, euiTextBreakWord, EuiText, EuiFlexGroup } from '
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import type { Attachment } from '@kbn/onechat-common/attachments';
+import type { Attachment, AttachmentType } from '@kbn/onechat-common/attachments';
 import { ROUNDED_BORDER_RADIUS_LARGE } from '../conversation.styles';
 import { AttachmentPillsRow } from '../conversation_input/attachment_pills_row';
 
@@ -44,15 +44,13 @@ export const RoundInput = ({ input, attachments }: RoundInputProps) => {
     border-radius: ${`${ROUNDED_BORDER_RADIUS_LARGE} ${ROUNDED_BORDER_RADIUS_LARGE} 0 ${ROUNDED_BORDER_RADIUS_LARGE}`};
   `;
 
-  // Map attachments to the format expected by AttachmentPillsRow
-  // Filter out hidden attachments for display in conversation history
   const visibleAttachments = useMemo(() => {
     if (!attachments) return [];
     return attachments
       .filter((attachment) => !attachment.hidden)
       .map((attachment) => ({
         id: attachment.id,
-        type: attachment.type,
+        type: attachment.type as AttachmentType,
       }));
   }, [attachments]);
 

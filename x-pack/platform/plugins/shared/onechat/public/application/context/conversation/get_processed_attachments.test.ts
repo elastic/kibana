@@ -6,7 +6,7 @@
  */
 
 import { getProcessedAttachments } from './get_processed_attachments';
-import type { UiAttachment } from '../../../embeddable/types';
+import { AttachmentType, type UiAttachment } from '@kbn/onechat-common/attachments';
 
 describe('getProcessedAttachments', () => {
   const mockGetAttachment = jest.fn();
@@ -46,7 +46,7 @@ describe('getProcessedAttachments', () => {
     it('includes new attachment when no previous content exists', async () => {
       const mockAttachment: UiAttachment = {
         id: 'att-1',
-        type: 'dashboard',
+        type: AttachmentType.text,
         getContent: jest.fn().mockResolvedValue({ value: 'test' }),
       };
 
@@ -61,7 +61,7 @@ describe('getProcessedAttachments', () => {
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({
         id: 'att-1',
-        type: 'dashboard',
+        type: AttachmentType.text,
         data: { value: 'test' },
         hidden: true,
       });
@@ -73,12 +73,12 @@ describe('getProcessedAttachments', () => {
       const mockAttachments: UiAttachment[] = [
         {
           id: 'att-1',
-          type: 'dashboard',
+          type: AttachmentType.text,
           getContent: jest.fn().mockResolvedValue({ value: 'test1' }),
         },
         {
           id: 'att-2',
-          type: 'lens',
+          type: AttachmentType.text,
           getContent: jest.fn().mockResolvedValue({ value: 'test2' }),
         },
       ];
@@ -103,7 +103,7 @@ describe('getProcessedAttachments', () => {
       const content = { value: 'test', nested: { data: 123 } };
       const mockAttachment: UiAttachment = {
         id: 'att-1',
-        type: 'dashboard',
+        type: AttachmentType.text,
         getContent: jest.fn().mockResolvedValue(content),
       };
 
@@ -125,7 +125,7 @@ describe('getProcessedAttachments', () => {
 
       const mockAttachment: UiAttachment = {
         id: 'att-1',
-        type: 'dashboard',
+        type: AttachmentType.text,
         getContent: jest.fn().mockResolvedValue(currentContent),
       };
 
@@ -146,7 +146,7 @@ describe('getProcessedAttachments', () => {
     it('detects changed content with different values', async () => {
       const mockAttachment: UiAttachment = {
         id: 'att-1',
-        type: 'dashboard',
+        type: AttachmentType.text,
         getContent: jest.fn().mockResolvedValue({ value: 'new' }),
       };
 
@@ -166,7 +166,7 @@ describe('getProcessedAttachments', () => {
     it('detects changed content with added properties', async () => {
       const mockAttachment: UiAttachment = {
         id: 'att-1',
-        type: 'dashboard',
+        type: AttachmentType.text,
         getContent: jest.fn().mockResolvedValue({ value: 'test', newProp: 'added' }),
       };
 
@@ -188,7 +188,7 @@ describe('getProcessedAttachments', () => {
     it('detects changed content with removed properties', async () => {
       const mockAttachment: UiAttachment = {
         id: 'att-1',
-        type: 'dashboard',
+        type: AttachmentType.text,
         getContent: jest.fn().mockResolvedValue({ value: 'test' }),
       };
 
@@ -207,7 +207,7 @@ describe('getProcessedAttachments', () => {
     it('detects changed nested content', async () => {
       const mockAttachment: UiAttachment = {
         id: 'att-1',
-        type: 'dashboard',
+        type: AttachmentType.text,
         getContent: jest.fn().mockResolvedValue({ nested: { changed: 'new' } }),
       };
 
@@ -228,17 +228,17 @@ describe('getProcessedAttachments', () => {
       const mockAttachments: UiAttachment[] = [
         {
           id: 'att-new',
-          type: 'dashboard',
+          type: AttachmentType.text,
           getContent: jest.fn().mockResolvedValue({ value: 'new' }),
         },
         {
           id: 'att-changed',
-          type: 'lens',
+          type: AttachmentType.text,
           getContent: jest.fn().mockResolvedValue({ value: 'changed-new' }),
         },
         {
           id: 'att-unchanged',
-          type: 'map',
+          type: AttachmentType.text,
           getContent: jest.fn().mockResolvedValue({ value: 'same' }),
         },
       ];
@@ -267,7 +267,7 @@ describe('getProcessedAttachments', () => {
     it('handles getContent error gracefully', async () => {
       const mockAttachment: UiAttachment = {
         id: 'att-1',
-        type: 'dashboard',
+        type: AttachmentType.text,
         getContent: jest.fn().mockRejectedValue(new Error('Failed to load content')),
       };
 
@@ -293,12 +293,12 @@ describe('getProcessedAttachments', () => {
       const mockAttachments: UiAttachment[] = [
         {
           id: 'att-error',
-          type: 'dashboard',
+          type: AttachmentType.text,
           getContent: jest.fn().mockRejectedValue(new Error('Failed')),
         },
         {
           id: 'att-success',
-          type: 'lens',
+          type: AttachmentType.text,
           getContent: jest.fn().mockResolvedValue({ value: 'works' }),
         },
       ];
@@ -324,7 +324,7 @@ describe('getProcessedAttachments', () => {
     it('sets hidden property to true', async () => {
       const mockAttachment: UiAttachment = {
         id: 'att-1',
-        type: 'dashboard',
+        type: AttachmentType.text,
         getContent: jest.fn().mockResolvedValue({ value: 'test' }),
       };
 
@@ -342,7 +342,7 @@ describe('getProcessedAttachments', () => {
     it('preserves attachment type', async () => {
       const mockAttachment: UiAttachment = {
         id: 'att-1',
-        type: 'custom-type',
+        type: AttachmentType.text,
         getContent: jest.fn().mockResolvedValue({ value: 'test' }),
       };
 
@@ -366,7 +366,7 @@ describe('getProcessedAttachments', () => {
 
       const mockAttachment: UiAttachment = {
         id: 'att-1',
-        type: 'dashboard',
+        type: AttachmentType.text,
         getContent: jest.fn().mockResolvedValue(contentData),
       };
 

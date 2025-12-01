@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import type { MaybePromise } from '@kbn/utility-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browser_api_tool';
+import type { UiAttachment } from '@kbn/onechat-common/attachments';
 import type { OnechatInternalService } from '../services';
 
 export interface EmbeddableConversationDependencies {
   services: OnechatInternalService;
   coreStart: CoreStart;
-}
-
-export type AttachmentsGetContent = () => MaybePromise<Record<string, unknown>>;
-
-export interface UiAttachment {
-  id: string;
-  type: string;
-  getContent: AttachmentsGetContent;
 }
 
 export interface EmbeddableConversationProps {

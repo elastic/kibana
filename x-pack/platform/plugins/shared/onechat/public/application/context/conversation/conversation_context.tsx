@@ -6,10 +6,9 @@
  */
 
 import { createContext, useContext } from 'react';
-import type { AttachmentInput } from '@kbn/onechat-common/attachments';
+import type { AttachmentInput, UiAttachment } from '@kbn/onechat-common/attachments';
 import type { Conversation } from '@kbn/onechat-common/chat';
 import type { BrowserApiToolDefinition } from '@kbn/onechat-browser/tools/browser_api_tool';
-import type { UiAttachment } from '../../../embeddable/types';
 import type { ConversationActions } from './use_conversation_actions';
 
 interface ConversationContextValue {
@@ -22,11 +21,8 @@ interface ConversationContextValue {
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   setConversationId?: (conversationId?: string) => void;
   conversationActions: ConversationActions;
-  /** UI attachments from embeddable props */
   attachments?: UiAttachment[];
-  /** Set of attachment IDs that have been removed by the user */
   removedAttachmentIds?: Set<string>;
-  /** Callback to remove an attachment by ID */
   removeAttachment?: (attachmentId: string) => void;
   getProcessedAttachments?: (conversation?: Conversation) => Promise<AttachmentInput[]>;
   setAttachmentMap?: (attachmentMap: Map<string, Record<string, unknown>>) => void;
