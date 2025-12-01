@@ -40,6 +40,8 @@ export const ShapePickerPopover: FC<Props> = ({ shapes, onChange, value, ariaLab
 ShapePickerPopover.propTypes = {
   ariaLabel: PropTypes.string,
   onChange: PropTypes.func,
+  // @ts-expect-error upgrade typescript v5.9.3
   shapes: PropTypes.object.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   value: PropTypes.string,
 };
