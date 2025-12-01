@@ -64,7 +64,7 @@ QUERY HELP DATA:
 ---
 
 1. Check the queryLanguage from the query attachment provided.
-2. Use the appropriate tools to generate a query.`;
+2. Use the appropriate tools to provide a corrected query.`;
       return description;
     },
   };
