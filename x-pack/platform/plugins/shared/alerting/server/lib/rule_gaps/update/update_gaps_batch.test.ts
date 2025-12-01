@@ -16,7 +16,7 @@ import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_clien
 import { Gap } from '../gap';
 import { adHocRunStatus } from '../../../../common/constants';
 import { alertingEventLoggerMock } from '../../alerting_event_logger/alerting_event_logger.mock';
-import { findOverlappingIntervals, toScheduledItem } from './utils';
+import { findOverlappingIntervals, toScheduledItem, prepareGapsForUpdate } from './utils';
 import { applyScheduledBackfillsToGap } from './apply_scheduled_backfills_to_gap';
 
 jest.mock('./update_gaps_in_event_log', () => ({
@@ -111,6 +111,9 @@ describe('updateGapsBatch', () => {
       );
 
       toScheduledItemMock.mockImplementation(identity);
+      (prepareGapsForUpdate as unknown as jest.Mock).mockImplementation((gapsToUpdate: Gap[]) =>
+        gapsToUpdate.map((gap) => ({ gap: gap.toObject(), internalFields: gap.internalFields }))
+      );
       prepareGapsFn = updateGapsInEventLogMock.mock.calls[0][0].prepareGaps;
       result = await prepareGapsFn(gaps);
     });
@@ -138,6 +141,34 @@ describe('updateGapsBatch', () => {
           internalFields: gap.internalFields,
         }))
       );
+    });
+
+    it('sets updated_at on each gap', async () => {
+      const spies = gaps.map((g) => jest.spyOn(g, 'setUpdatedAt'));
+      await prepareGapsFn(gaps);
+      spies.forEach((s) => expect(s).toHaveBeenCalled());
+    });
+
+    it('updates the updated_at timestamp value', async () => {
+      const initial = '2025-01-01T00:00:00.000Z';
+      const customGap = new Gap({
+        ruleId,
+        range: {
+          gte: '2025-01-01T00:00:00.000Z',
+          lte: '2025-01-01T01:00:00.000Z',
+        },
+        internalFields: {
+          _id: 'custom-1',
+          _index: 'test-index',
+          _seq_no: 1,
+          _primary_term: 1,
+        },
+        updatedAt: initial,
+      });
+
+      await prepareGapsFn([customGap]);
+      expect(customGap.updatedAt).not.toEqual(initial);
+      expect(typeof customGap.updatedAt).toBe('string');
     });
   });
 });
