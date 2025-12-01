@@ -44,9 +44,6 @@ describe('xyVis', () => {
           ],
         },
         canNavigateToLens: false,
-        syncColors: false,
-        syncTooltips: false,
-        syncCursor: true,
       },
     });
   });
@@ -356,9 +353,6 @@ describe('xyVis', () => {
           ],
         },
         canNavigateToLens: false,
-        syncColors: false,
-        syncTooltips: false,
-        syncCursor: true,
       },
     });
   });
@@ -404,9 +398,6 @@ describe('xyVis', () => {
           ],
         },
         canNavigateToLens: false,
-        syncColors: false,
-        syncTooltips: false,
-        syncCursor: true,
         overrides,
       },
     });

@@ -41,7 +41,6 @@ Object {
     "params": Object {
       "listenOnChange": true,
     },
-    "syncColors": false,
     "visConfig": Object {
       "addTooltip": true,
       "ariaLabel": undefined,
