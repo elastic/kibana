@@ -14,9 +14,9 @@ import { docLinks } from '../../common/doc_links';
 import { useConversationList } from '../application/hooks/use_conversation_list';
 
 // TODO: Replace with actual user role check
-const isAdminOrAdvancedUser = true;
+const isAdminOrAdvancedUser = false;
 
-const LOCAL_STORAGE_KEY = 'onechatEmbeddedWelcomeMessageDismissed';
+const LOCAL_STORAGE_KEY = 'agentBuilder.embeddable.welcomeMessage.dismissed';
 
 export const EmbeddableWelcomeMessage = () => {
   const {
