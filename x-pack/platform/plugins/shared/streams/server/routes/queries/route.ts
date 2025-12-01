@@ -132,7 +132,7 @@ const deleteQueryRoute = createServerRoute({
       queryId: z.string(),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<DeleteQueryResponse> => {
+  handler: async ({ params, request, getScopedClients, logger }): Promise<DeleteQueryResponse> => {
     const { streamsClient, queryClient, licensing, assetClient } = await getScopedClients({
       request,
     });
@@ -150,6 +150,8 @@ const deleteQueryRoute = createServerRoute({
     }
 
     await queryClient.delete(streamName, queryId);
+
+    logger.get('significant_events').debug(`Deleting query ${queryId} for stream ${streamName}`);
 
     return {
       acknowledged: true,
@@ -189,7 +191,12 @@ const bulkQueriesRoute = createServerRoute({
       ),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<BulkUpdateAssetsResponse> => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    logger,
+  }): Promise<BulkUpdateAssetsResponse> => {
     const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
     await assertEnterpriseLicense(licensing);
 
@@ -200,6 +207,12 @@ const bulkQueriesRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
     await queryClient.bulk(streamName, operations);
+
+    logger
+      .get('significant_events')
+      .debug(
+        `Performing bulk significant events operation with ${operations.length} operations for stream ${streamName}`
+      );
 
     return { acknowledged: true };
   },
