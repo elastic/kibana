@@ -12,6 +12,10 @@ import { FollowerIndicesList } from '../../../app/sections/home/follower_indices
 import { createCrossClusterReplicationStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
 
+/**
+ * @param {object} [props]
+ * @returns {ReturnType<typeof renderWithRouter>}
+ */
 export const setup = (props = {}) => {
   const result = renderWithRouter(FollowerIndicesList, {
     store: createCrossClusterReplicationStore(),
