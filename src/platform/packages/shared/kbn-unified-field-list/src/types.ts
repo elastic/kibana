@@ -113,7 +113,8 @@ export interface ExistingFieldsInfo {
 }
 
 export interface FetchedExistingFieldsInfo {
-  hash: string;
+  dataViewId: string;
+  dataViewHash: string;
   info: ExistingFieldsInfo;
 }
 

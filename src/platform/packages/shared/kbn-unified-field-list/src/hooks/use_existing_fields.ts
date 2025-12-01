@@ -151,7 +151,7 @@ export const useExistingFieldsFetcher = (
         try {
           const providedInitialInfo = initialExistingFieldsInfoRef.current;
           if (
-            providedInitialInfo?.hash === dataViewHash &&
+            providedInitialInfo?.dataViewHash === dataViewHash &&
             !providedInitialInfo?.info?.hasDataViewRestrictions &&
             providedInitialInfo?.info?.fetchStatus === ExistenceFetchStatus.succeeded &&
             providedInitialInfo?.info?.existingFieldsByFieldNameMap &&
@@ -206,7 +206,8 @@ export const useExistingFieldsFetcher = (
       // skip redundant and older results
       if (fetchId === lastFetchId) {
         onInitialExistingFieldsInfoChangeRef.current?.({
-          hash: dataViewHash,
+          dataViewId,
+          dataViewHash,
           info,
         });
         if (mountedRef.current) {

@@ -297,6 +297,31 @@ export const internalStateSlice = createSlice({
         tab.uiState.fieldListExistingFieldsInfo = action.payload.fieldListExistingFieldsInfo;
       }),
 
+    resetAffectedFieldListExistingFieldsInfoUiState: (
+      state,
+      action: PayloadAction<{
+        dataViewId: string;
+      }>
+    ) => {
+      state.tabs.byId = Object.fromEntries(
+        Object.entries(state.tabs.byId).map(([tabId, tab]) => {
+          if (tab.uiState.fieldListExistingFieldsInfo?.dataViewId === action.payload.dataViewId) {
+            return [
+              tabId,
+              {
+                ...tab,
+                uiState: {
+                  ...tab.uiState,
+                  fieldListExistingFieldsInfo: undefined,
+                },
+              },
+            ];
+          }
+          return [tabId, tab];
+        })
+      );
+    },
+
     setLayoutUiState: (
       state,
       action: TabAction<{ layoutUiState: Partial<TabState['uiState']['layout']> }>

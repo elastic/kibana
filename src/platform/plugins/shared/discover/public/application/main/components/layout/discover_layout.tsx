@@ -292,9 +292,16 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (!editedDataView.isPersisted()) {
         await stateContainer.actions.updateAdHocDataViewId(editedDataView);
       }
+      if (editedDataView?.id) {
+        dispatch(
+          internalStateActions.resetAffectedFieldListExistingFieldsInfoUiState({
+            dataViewId: editedDataView.id,
+          })
+        );
+      }
       stateContainer.dataState.refetch$.next('reset');
     },
-    [dataView, stateContainer, currentColumns, onRemoveColumn]
+    [dataView, stateContainer, currentColumns, onRemoveColumn, dispatch]
   );
 
   const onDisableFilters = useCallback(() => {
