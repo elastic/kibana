@@ -5,62 +5,73 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import {
-  type AnalyticsServiceSetup,
   type Logger,
+  type AnalyticsServiceSetup,
+  type AuditLogger,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import type {
-  RunContext,
+  ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { EntityType } from '../../../../../../common/api/entity_analytics/entity_store';
+import type { EntityStoreConfig } from '../../types';
+import { EntityStoreDataClient } from '../../entity_store_data_client';
+import { getApiKeyManager } from '../../auth/api_key';
+import type { ExperimentalFeatures } from '../../../../../../common';
 import { EngineComponentResourceEnum } from '../../../../../../common/api/entity_analytics/entity_store';
 import {
   defaultState,
   stateSchemaByVersion,
   type LatestTaskStateSchema as EntityStoreHealthTaskState,
 } from './state';
-import { SCOPE, TIMEOUT, TYPE, VERSION, MAX_ATTEMPTS, SCHEDULE } from './constants';
-import { entityStoreTaskLogMessageFactory } from '../utils';
-import { ENTITY_STORE_HEALTH_REPORT_EVENT } from '../../../../telemetry/event_based/events';
+import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import { getApiKeyManager } from '../../auth/api_key';
 
-function getTaskId(namespace: string): string {
-  return `${TYPE}:${namespace}:${VERSION}`;
-}
+import { ENTITY_STORE_HEALTH_REPORT_EVENT } from '../../../../telemetry/event_based/events';
+import { entityStoreTaskDebugLogFactory, entityStoreTaskLogFactory } from '../utils';
+import type { AppClientFactory } from '../../../../../client';
+import { PrivilegeMonitoringDataClient } from '../../../privilege_monitoring/engine/data_client';
+import { createPrivmonIndexService } from '../../../privilege_monitoring/engine/elasticsearch/indices';
+import { checkandInitPrivilegeMonitoringResourcesNoContext } from '../../../privilege_monitoring/check_and_init_privmon_resources';
 
-export function registerEntityStoreHealthTask({
+const getTaskName = (): string => TYPE;
+
+const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION}`;
+
+export const registerEntityStoreHealthTask = ({
   getStartServices,
   logger,
   telemetry,
+  appClientFactory,
   taskManager,
+  auditLogger,
+  entityStoreConfig,
+  experimentalFeatures,
+  kibanaVersion,
+  isServerless,
 }: {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
-  taskManager: TaskManagerSetupContract | undefined;
-}): void {
+  appClientFactory: AppClientFactory;
+  taskManager?: TaskManagerSetupContract;
+  auditLogger?: AuditLogger;
+  entityStoreConfig: EntityStoreConfig;
+  experimentalFeatures: ExperimentalFeatures;
+  kibanaVersion: string;
+  isServerless: boolean;
+}): void => {
   if (!taskManager) {
-    logger.warn(
-      '[Entity Store]  Task Manager is unavailable; skipping Entity Store health task registration'
-    );
+    logger.info('[Entity Store] Task Manager is unavailable; skipping entity store health task.');
     return;
   }
 
-  type GetStoreSize = (index: string | string[]) => Promise<number>;
-  const getStoreSize: GetStoreSize = async (index) => {
-    const [coreStart] = await getStartServices();
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-
-    const { count } = await esClient.count({ index });
-    return count;
-  };
-
-  const getEnabledEntityTypesForNamespace = async (namespace: string) => {
-    const [core, { security, encryptedSavedObjects }] = await getStartServices();
+  const getStatus = async (namespace: string): Promise<void> => {
+    const [core, { dataViews, taskManager: taskManagerStart, security, encryptedSavedObjects }] =
+      await getStartServices();
 
     const apiKeyManager = getApiKeyManager({
       core,
@@ -74,138 +85,223 @@ export function registerEntityStoreHealthTask({
 
     if (!apiKey) {
       logger.info(
-        `[Entity Store] No API key found, returning all entity types as enabled in ${namespace} namespace`
+        `[Entity Store] No API key found, skipping health reporting in ${namespace} namespace`
       );
-      return getEnabledEntityTypes(true);
+      return;
     }
 
-    const { soClient } = await apiKeyManager.getClientFromApiKey(apiKey);
+    const { clusterClient, soClient } = await apiKeyManager.getClientFromApiKey(apiKey);
 
-    const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
-    const genericEntityStoreEnabled = await uiSettingsClient.get<boolean>(
-      SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
-    );
+    const internalUserClient = core.elasticsearch.client.asInternalUser;
 
-    return getEnabledEntityTypes(genericEntityStoreEnabled);
-  };
+    const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, internalUserClient);
 
-  taskManager.registerTaskDefinitions({
-    [TYPE]: {
-      title: 'Entity Store health task',
-      description: `Sends telemetry events on Entity Store health every 1h`,
-      timeout: TIMEOUT,
-      maxAttempts: MAX_ATTEMPTS,
-      stateSchemaByVersion,
-      createTaskRunner: (context: RunContext) => {
-        return {
-          async run() {
-            return runHealthTask({
-              logger,
-              telemetry,
-              context,
-              getStartServices,
-            });
-          },
-          async cancel() {
-            logger.warn(`[Entity Store]  Task ${TYPE} timed out`);
-          },
-        };
-      },
-    },
-  });
-}
+    const request = await apiKeyManager.getRequestFromApiKey(apiKey);
 
-export async function startEntityStoreHealthTask({
-  logger,
-  namespace,
-  taskManager,
-}: {
-  logger: Logger;
-  namespace: string;
-  entityType: EntityType;
-  taskManager: TaskManagerStartContract;
-}) {
-  const taskId = getTaskId(namespace);
-  const msg = entityStoreTaskLogMessageFactory(taskId);
+    const appClient = appClientFactory.create(request);
 
-  logger.info(msg('attempting to schedule'));
-  try {
-    const task = await taskManager.ensureScheduled({
-      id: taskId,
-      taskType: TYPE,
-      scope: SCOPE,
-      schedule: SCHEDULE,
-      state: { ...defaultState, namespace },
-      params: {
-        version: VERSION,
-        namespace,
-      },
+    const entityStoreClient: EntityStoreDataClient = new EntityStoreDataClient({
+      namespace,
+      clusterClient,
+      soClient,
+      logger,
+      appClient,
+      taskManager: taskManagerStart,
+      experimentalFeatures,
+      auditLogger,
+      telemetry,
+      kibanaVersion,
+      dataViewsService,
+      config: entityStoreConfig,
+      security,
+      request,
+      uiSettingsClient: core.uiSettings.asScopedToClient(soClient),
+      isServerless,
     });
-    logger.info(msg(`scheduled with ${JSON.stringify(task.schedule)}`));
-  } catch (e) {
-    logger.error(msg(`error scheduling task, received ${e.message}`));
-    throw e;
-  }
-}
 
-export async function removeEntityStoreHealthTask({
-  logger,
-  namespace,
-  taskManager,
-}: {
-  logger: Logger;
-  namespace: string;
-  entityType: EntityType;
-  taskManager: TaskManagerStartContract;
-}) {
-  const taskId = getTaskId(namespace);
-  const msg = entityStoreTaskLogMessageFactory(taskId);
-  try {
-    await taskManager.remove(getTaskId(namespace));
-    logger.info(msg(`removed health task`));
-  } catch (err) {
-    if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-      logger.error(msg(`failed to remove health task: ${err.message}`));
-      throw err;
-    }
-  }
-}
+    // as we have added the privmon index to the list of indices
+    // for existing customers, this index may not exist so we need to create it
+    const privmonDataClient = new PrivilegeMonitoringDataClient({
+      logger,
+      clusterClient,
+      namespace,
+      savedObjects: core.savedObjects,
+      taskManager: taskManagerStart,
+      auditLogger,
+      kibanaVersion,
+      telemetry,
+      experimentalFeatures,
+    });
+    const privmonIndexService = createPrivmonIndexService(privmonDataClient);
+    await checkandInitPrivilegeMonitoringResourcesNoContext(privmonIndexService, logger);
 
-export async function runHealthTask({
-  logger,
-  telemetry,
-  context,
-  getStartServices,
-}: {
-  logger: Logger;
-  telemetry: AnalyticsServiceSetup;
-  context: RunContext;
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
-}): Promise<{
-  state: EntityStoreHealthTaskState;
-}> {
-  const state = context.taskInstance.state as EntityStoreHealthTaskState;
-  const taskId: string = context.taskInstance.id;
-  const msg = entityStoreTaskLogMessageFactory(taskId);
-  try {
-    const statusResponse = await entityStoreStatusHandler({ include_components: true });
+    const statusResponse = await entityStoreClient.status({ include_components: true });
     statusResponse.engines.forEach((engine) => {
       telemetry.reportEvent(ENTITY_STORE_HEALTH_REPORT_EVENT.eventType, engine);
     });
-    return { state };
+  };
+
+  taskManager.registerTaskDefinitions({
+    [getTaskName()]: {
+      title: 'Entity Analytics Entity Store - Execute Status Task',
+      timeout: TIMEOUT,
+      stateSchemaByVersion,
+      createTaskRunner: createEntityStoreHealthTaskRunnerFactory({
+        logger,
+        telemetry,
+        getStatus,
+        experimentalFeatures,
+      }),
+    },
+  });
+};
+
+export const startEntityStoreHealthTask = async ({
+  logger,
+  namespace,
+  taskManager,
+}: {
+  logger: Logger;
+  namespace: string;
+  taskManager: TaskManagerStartContract;
+}) => {
+  const taskId = getTaskId(namespace);
+  const log = entityStoreTaskLogFactory(logger, taskId);
+
+  log('attempting to schedule');
+  try {
+    await taskManager.ensureScheduled({
+      id: taskId,
+      taskType: getTaskName(),
+      scope: SCOPE,
+      schedule: {
+        interval: INTERVAL,
+      },
+      state: { ...defaultState, namespace },
+      params: { version: VERSION },
+    });
   } catch (e) {
-    logger.error(msg(`error running task, received ${e.message}`));
+    logger.warn(`[Entity Store]  [task ${taskId}]: error scheduling task, received ${e.message}`);
     throw e;
   }
-}
+};
 
-export async function getEntityStoreHealthTaskState({
+export const removeEntityStoreHealthTask = async ({
+  logger,
+  namespace,
+  taskManager,
+}: {
+  logger: Logger;
+  namespace: string;
+  taskManager: TaskManagerStartContract;
+}) => {
+  try {
+    await taskManager.remove(getTaskId(namespace));
+    logger.info(`[Entity Store] Removed entity store health task for namespace ${namespace}`);
+  } catch (err) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      logger.error(`[Entity Store] Failed to remove entity store health task: ${err.message}`);
+      throw err;
+    }
+  }
+};
+
+export const runEntityStoreHealthTask = async ({
+  getStatus,
+  isCancelled,
+  logger,
+  taskInstance,
+  telemetry,
+  experimentalFeatures,
+}: {
+  logger: Logger;
+  isCancelled: () => boolean;
+  getStatus: (namespace: string) => Promise<void>;
+  taskInstance: ConcreteTaskInstance;
+  telemetry: AnalyticsServiceSetup;
+  experimentalFeatures: ExperimentalFeatures;
+}): Promise<{
+  state: EntityStoreHealthTaskState;
+}> => {
+  const state = taskInstance.state as EntityStoreHealthTaskState;
+  const taskId = taskInstance.id;
+  const log = entityStoreTaskLogFactory(logger, taskId);
+  const debugLog = entityStoreTaskDebugLogFactory(logger, taskId);
+  try {
+    const taskStartTime = moment().utc().toISOString();
+    log('running task');
+
+    const updatedState = {
+      lastExecutionTimestamp: taskStartTime,
+      namespace: state.namespace,
+      runs: state.runs + 1,
+    };
+
+    if (taskId !== getTaskId(state.namespace)) {
+      log('outdated task; exiting');
+      return { state: updatedState };
+    }
+
+    const start = Date.now();
+    debugLog(`Executing status retrieval`);
+    try {
+      await getStatus(state.namespace);
+      log(`Executed status retrieval in ${Date.now() - start}ms`);
+    } catch (e) {
+      log(`Error getting status: ${e.message}`);
+    }
+
+    const taskCompletionTime = moment().utc().toISOString();
+    const taskDurationInSeconds = moment(taskCompletionTime).diff(moment(taskStartTime), 'seconds');
+    log(`Task run completed in ${taskDurationInSeconds} seconds`);
+
+    return {
+      state: updatedState,
+    };
+  } catch (e) {
+    logger.error(`[Entity Store] [task ${taskId}]: error running task, received ${e.message}`);
+    throw e;
+  }
+};
+
+const createEntityStoreHealthTaskRunnerFactory =
+  ({
+    logger,
+    telemetry,
+    getStatus,
+    experimentalFeatures,
+  }: {
+    logger: Logger;
+    telemetry: AnalyticsServiceSetup;
+    getStatus: (namespace: string) => Promise<void>;
+    experimentalFeatures: ExperimentalFeatures;
+  }) =>
+  ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+    let cancelled = false;
+    const isCancelled = () => cancelled;
+    return {
+      run: async () =>
+        runEntityStoreHealthTask({
+          getStatus,
+          isCancelled,
+          logger,
+          taskInstance,
+          telemetry,
+          experimentalFeatures,
+        }),
+      cancel: async () => {
+        cancelled = true;
+      },
+    };
+  };
+
+export const getEntityStoreHealthTaskState = async ({
   namespace,
   taskManager,
 }: {
   namespace: string;
   taskManager: TaskManagerStartContract;
-}) {
+}) => {
   const taskId = getTaskId(namespace);
   try {
     const taskState = await taskManager.get(taskId);
@@ -231,4 +327,4 @@ export async function getEntityStoreHealthTaskState({
     }
     throw e;
   }
-}
+};

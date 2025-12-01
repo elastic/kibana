@@ -17,10 +17,14 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 export const stateSchemaByVersion = {
   1: {
     up: (state: Record<string, unknown>) => ({
+      lastExecutionTimestamp: state.lastExecutionTimestamp || undefined,
+      runs: state.runs || 0,
       namespace: typeof state.namespace === 'string' ? state.namespace : 'default',
     }),
     schema: schema.object({
+      lastExecutionTimestamp: schema.maybe(schema.string()),
       namespace: schema.string(),
+      runs: schema.number(),
     }),
   },
 };
@@ -29,5 +33,7 @@ const latestTaskStateSchema = stateSchemaByVersion[1].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const defaultState: LatestTaskStateSchema = {
+  lastExecutionTimestamp: undefined,
   namespace: 'default',
+  runs: 0,
 };
