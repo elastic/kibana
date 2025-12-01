@@ -16,7 +16,7 @@ import {
 import { nodeBuilder } from '@kbn/es-query';
 import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import { AlertUtils, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
 const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
 
@@ -27,6 +27,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
 
   describe('mutedAlerts', () => {
     const objectRemover = new ObjectRemover(supertest);
+    const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth: supertest });
 
     const createRule = async () => {
       const { body: createdRule } = await supertest
@@ -116,14 +117,10 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
           alert._source[ALERT_RULE_UUID] === createdRule1
       );
 
-      await supertest
-        .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${encodeURIComponent(
-            createdRule1
-          )}/alert/${encodeURIComponent(alertFromRule1._source['kibana.alert.instance.id'])}/_mute`
-        )
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
+      await alertUtils.muteInstance(
+        createdRule1,
+        alertFromRule1._source['kibana.alert.instance.id']
+      );
 
       const ruleUuids = [createdRule1, createdRule2];
 
@@ -148,15 +145,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
     it('should add a nonexistent alert instance id to muted_alert_ids if validation is false', async () => {
       const createdRule1 = await createRule();
 
-      const ruleId = encodeURIComponent(createdRule1);
-      const spaceId = getUrlPrefix(Spaces.space1.id);
-
-      await supertest
-        .post(
-          `${spaceId}/api/alerting/rule/${ruleId}/alert/nonexistent-instance-id/_mute?validate_alerts_existence=false`
-        )
-        .set('kbn-xsrf', 'foo')
-        .expect(204); // gets a 204 no content response
+      await alertUtils.muteInstance(createdRule1, 'nonexistent-instance-id');
 
       const ruleUuids = [createdRule1];
 
@@ -164,7 +153,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         ruleUuids.map((id) => nodeBuilder.is('alert.id', `alert:${id}`))
       );
       const { body: rules } = await supertest
-        .post(`${spaceId}/internal/alerting/rules/_find`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_find`)
         .set('kbn-xsrf', 'foo')
         .send({
           filter: JSON.stringify(filterNode),
@@ -193,14 +182,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       expect(alerts[0]._source[ALERT_MUTED]).to.be(false);
 
       // Mute the alert instance
-      await supertest
-        .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${encodeURIComponent(
-            ruleId
-          )}/alert/${encodeURIComponent(alertInstanceId)}/_mute`
-        )
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
+      await alertUtils.muteInstance(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
       await runRuleNow(ruleId);
@@ -229,14 +211,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
 
       // Mute the alert instance first
-      await supertest
-        .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${encodeURIComponent(
-            ruleId
-          )}/alert/${encodeURIComponent(alertInstanceId)}/_mute`
-        )
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
+      await alertUtils.muteInstance(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
       await runRuleNow(ruleId);
@@ -251,14 +226,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
 
       // Now unmute the alert instance
-      await supertest
-        .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${encodeURIComponent(
-            ruleId
-          )}/alert/${encodeURIComponent(alertInstanceId)}/_unmute`
-        )
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
+      await alertUtils.unmuteInstance(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
       await runRuleNow(ruleId);
@@ -284,14 +252,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
 
       // Mute all alerts for the rule
-      await supertest
-        .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${encodeURIComponent(
-            ruleId
-          )}/_mute_all`
-        )
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
+      await alertUtils.muteAll(ruleId);
 
       // Run the rule to trigger reconciliation
       await runRuleNow(ruleId);
@@ -316,14 +277,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
 
       // Mute all alerts first
-      await supertest
-        .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${encodeURIComponent(
-            ruleId
-          )}/_mute_all`
-        )
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
+      await alertUtils.muteAll(ruleId);
 
       // Run the rule to trigger reconciliation
       await runRuleNow(ruleId);
@@ -337,14 +291,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
 
       // Now unmute all alerts
-      await supertest
-        .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${encodeURIComponent(
-            ruleId
-          )}/_unmute_all`
-        )
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
+      await alertUtils.unmuteAll(ruleId);
 
       // Run the rule to trigger reconciliation
       await runRuleNow(ruleId);
@@ -372,14 +319,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
 
       // Mute the alert instance via API
-      await supertest
-        .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${encodeURIComponent(
-            ruleId
-          )}/alert/${encodeURIComponent(alertInstanceId)}/_mute`
-        )
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
+      await alertUtils.muteInstance(ruleId, alertInstanceId);
 
       // Manually set the alert document to have incorrect muted state
       await es.updateByQuery({
