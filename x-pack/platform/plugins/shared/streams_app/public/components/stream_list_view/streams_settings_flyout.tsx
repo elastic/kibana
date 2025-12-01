@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -31,11 +31,13 @@ import {
   useGeneratedHtmlId,
   EuiText,
   EuiLink,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
@@ -141,22 +143,37 @@ export function StreamsSettingsFlyout({
     }
   };
 
-  const [isChangingSignificantEvents, setIsChangingSignificantEvents] = React.useState(false);
-  const toggleSignificantEvents = useCallback(async () => {
-    setIsChangingSignificantEvents(true);
-    const isEnabled = !significantEvents?.enabled;
-    await core.uiSettings.set(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS, isEnabled);
-    core.notifications.toasts.addInfo(
-      isEnabled
-        ? i18n.translate('xpack.streams.streamsListView.significantEventsEnabledToast', {
-            defaultMessage: 'Significant events enabled',
-          })
-        : i18n.translate('xpack.streams.streamsListView.significantEventsDisabledToast', {
-            defaultMessage: 'Significant events disabled',
-          })
-    );
-    setIsChangingSignificantEvents(false);
-  }, [core.notifications.toasts, core.uiSettings, significantEvents?.enabled]);
+  const [{ loading: isChangingSignificantEvents }, toggleSignificantEvents] = useAsyncFn(
+    async (event) => {
+      const isEnabled = event.target.checked;
+      try {
+        await core.uiSettings.set(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS, isEnabled);
+
+        core.notifications.toasts.addInfo(
+          isEnabled
+            ? i18n.translate('xpack.streams.streamsListView.significantEventsEnabledToast', {
+                defaultMessage: 'Significant events enabled',
+              })
+            : i18n.translate('xpack.streams.streamsListView.significantEventsDisabledToast', {
+                defaultMessage: 'Significant events disabled',
+              })
+        );
+      } catch (error) {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate(
+            'xpack.streams.streamsListView.significantEventsToggleErrorToastTitle',
+            {
+              defaultMessage: 'Error updating Significant events setting',
+            }
+          ),
+          toastMessage:
+            error?.body?.message || (error instanceof Error ? error.message : String(error)),
+          toastLifeTimeMs: 5000,
+        });
+      }
+    },
+    [core]
+  );
 
   // Shipper button group state
   const shipperButtonGroupPrefix = useGeneratedHtmlId({ prefix: 'shipperButtonGroup' });
@@ -311,23 +328,25 @@ output.elasticsearch:
               title={
                 <h3>
                   <EuiFlexGroup gutterSize="s">
-                    {i18n.translate('xpack.streams.streamsListView.significantEventsTitle', {
-                      defaultMessage: 'Significant events',
-                    })}
-                    <EuiBetaBadge
-                      label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
-                        defaultMessage: 'Technical Preview',
+                    <EuiFlexItem>
+                      {i18n.translate('xpack.streams.streamsListView.significantEventsTitle', {
+                        defaultMessage: 'Significant events',
                       })}
-                      tooltipContent={i18n.translate(
-                        'xpack.streams.streamsListView.betaBadgeDescription',
-                        {
-                          defaultMessage:
-                            'This functionality is experimental and not supported. It may change or be removed at any time.',
-                        }
-                      )}
-                      alignment="middle"
-                      size="s"
-                    />
+                      <EuiBetaBadge
+                        label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
+                          defaultMessage: 'Technical Preview',
+                        })}
+                        tooltipContent={i18n.translate(
+                          'xpack.streams.streamsListView.betaBadgeDescription',
+                          {
+                            defaultMessage:
+                              'This functionality is experimental and not supported. It may change or be removed at any time.',
+                          }
+                        )}
+                        alignment="middle"
+                        size="s"
+                      />
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 </h3>
               }
