@@ -11,13 +11,13 @@ import type { AgentDefinition } from '@kbn/onechat-common';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { AgentAvatar } from '../../../../common/agent_avatar';
-import { useConversationBorderRadius } from '../../../conversation.styles';
+import { roundedBorderRadiusStyles } from '../../../conversation.styles';
 
 const AgentOptionPrepend: React.FC<{ agent: AgentDefinition }> = ({ agent }) => {
   const { euiTheme } = useEuiTheme();
   const panelStyles = css`
     background-color: ${euiTheme.colors.backgroundBaseSubdued};
-    ${useConversationBorderRadius('m')}
+    ${roundedBorderRadiusStyles}
   `;
   return (
     <EuiPanel css={panelStyles} hasShadow={false}>
