@@ -177,9 +177,6 @@ export class McpClient {
  */
 function isTextPart(part: ContentPart | null | undefined): part is TextPart {
   return (
-    part !== null &&
-    part !== undefined &&
-    part.type === 'text' &&
-    typeof part.text === 'string'
+    part !== null && part !== undefined && part.type === 'text' && typeof part.text === 'string'
   );
 }
