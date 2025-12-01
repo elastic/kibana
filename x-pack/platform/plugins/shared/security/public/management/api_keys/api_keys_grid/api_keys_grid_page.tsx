@@ -343,9 +343,8 @@ export const APIKeysGridPage: FunctionComponent = () => {
                   query={tableState.query}
                   queryFilters={tableState.filters}
                   onDelete={(apiKeysToDelete) =>
-                    invalidateApiKeyPrompt(
-                      apiKeysToDelete.map(({ name, id }) => ({ name, id })),
-                      () => queryApiKeysAndAggregations(tableState)
+                    invalidateApiKeyPrompt(apiKeysToDelete, () =>
+                      queryApiKeysAndAggregations(tableState)
                     )
                   }
                   currentUser={currentUser}
