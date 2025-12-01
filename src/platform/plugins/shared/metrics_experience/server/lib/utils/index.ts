@@ -8,7 +8,7 @@
  */
 import { notFound } from '@hapi/boom';
 import type { FeatureFlagsRequestHandlerContext } from '@kbn/core-feature-flags-server';
-import { Parser, Walker } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, Parser, Walker } from '@kbn/esql-ast';
 import type { ESQLCommand } from '@kbn/esql-ast';
 import { METRICS_EXPERIENCE_FEATURE_FLAG_KEY } from '../../../common/constants';
 
@@ -40,7 +40,7 @@ export function extractWhereCommand(esqlQuery: string) {
       ast.root,
       (node): node is ESQLCommand => node.type === 'command' && node.name === 'where'
     );
-    return whereNode;
+    return whereNode ? BasicPrettyPrinter.print(whereNode) : undefined;
   } catch (error) {
     return undefined;
   }

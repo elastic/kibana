@@ -11,9 +11,7 @@ import { type Logger } from '@kbn/core/server';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { semconvFlat } from '@kbn/otel-semantic-conventions';
 import { dateRangeQuery } from '@kbn/es-query';
-import { from as fromCommand, where, limit, append } from '@kbn/esql-composer';
-import type { QueryOperator } from '@kbn/esql-composer';
-import { BasicPrettyPrinter } from '@kbn/esql-ast';
+import { esql } from '@kbn/esql-ast';
 import pLimit from 'p-limit';
 import { chunk } from 'lodash';
 import type { IndexFieldCapsMap, EpochTimeRange } from '../../types';
@@ -98,55 +96,46 @@ function buildMetricMetadataMapFromEsql(
   return entries;
 }
 
-function buildFilterConditions(
-  filterEntries: Array<[string, string[]]>,
-  dimensions: Dimension[],
-  query: string
-): QueryOperator[] {
-  if (filterEntries.length === 0 && query.length === 0) {
-    return [];
-  }
-
-  const dimensionMap = new Map(dimensions.map((dimension) => [dimension.name, dimension]));
-
-  const filterConditions = filterEntries
-    .map(([dimensionName, values]) => {
-      const dimension = dimensionMap.get(dimensionName);
-
-      if (!dimension || !dimension?.name || values.length === 0) {
-        return null;
-      }
-
-      return where(`??dim::STRING IN (${values.map(() => '?').join(', ')})`, {
-        dim: dimension.name,
-        ...values,
-      });
-    })
-    .filter((c): c is QueryOperator => c !== null);
-
-  if (query.length > 0) {
-    const whereCommand = extractWhereCommand(query);
-
-    if (whereCommand) {
-      filterConditions.push(append({ command: BasicPrettyPrinter.print(whereCommand) }));
-    }
-  }
-
-  return filterConditions;
-}
-
-function buildEsqlQuery(metricField: MetricField, filterConditions: QueryOperator[]): string {
+export function buildEsqlQuery(
+  metricField: MetricField,
+  dimensionFilters: DimensionFilters,
+  userQuery: string
+): string {
   const { name: field, index } = metricField;
 
-  const source = fromCommand([index]);
+  // Build base query with metric field filter
+  const baseQuery = esql
+    .from(index)
+    .pipe`WHERE ??metricField IS NOT NULL`
+    .setParam('metricField', field);
 
-  const query = source.pipe(
-    where(`??metricField IS NOT NULL`, { metricField: field }),
-    ...filterConditions,
-    limit(1)
-  );
+  // Apply dimension filters using reduce to avoid let reassignment
+  const queryWithFilters = Object.entries(dimensionFilters).reduce((q, [dimensionName, values]) => {
+    if (values.length === 0) {
+      return q;
+    }
 
-  return query.toString();
+    // Build WHERE clause with parameter placeholders
+    const paramNames = values.map((_, i) => `?value${i}`).join(', ');
+    const whereClause = `WHERE \`${dimensionName}\`::STRING IN (${paramNames})`;
+
+    // Apply the WHERE clause and set parameters
+    return values.reduce(
+      (query, value, i) => query.setParam(`value${i}`, value),
+      q.pipe(whereClause)
+    );
+  }, baseQuery);
+
+  // Apply WHERE command from Discover query if present
+  const queryWithUserFilter = userQuery
+    ? (() => {
+        const whereCommand = extractWhereCommand(userQuery);
+        return whereCommand ? queryWithFilters.pipe(whereCommand) : queryWithFilters;
+      })()
+    : queryWithFilters;
+
+  // Add LIMIT and return inlined query string
+  return queryWithUserFilter.limit(1).inlineParams().print('basic');
 }
 
 async function executeEsqlQueriesForChunk(
@@ -154,10 +143,11 @@ async function executeEsqlQueriesForChunk(
   metricFields: MetricField[],
   from: number,
   to: number,
-  filterConditions: QueryOperator[],
+  dimensionFilters: DimensionFilters,
+  userQuery: string,
   logger: Logger
 ): Promise<EsqlQueryResult[]> {
-  // Build filter once for all queries in this chunk
+  // Build date range filter once for all queries in this chunk
   const dateRangeFilter = {
     bool: {
       filter: dateRangeQuery(from, to),
@@ -166,7 +156,7 @@ async function executeEsqlQueriesForChunk(
 
   const executeQuery = async (metricField: MetricField): Promise<EsqlQueryResult> => {
     try {
-      const query = buildEsqlQuery(metricField, filterConditions);
+      const query = buildEsqlQuery(metricField, dimensionFilters, userQuery);
       const response = await esClient.esql('sample_metrics_documents', {
         query,
         filter: dateRangeFilter,
@@ -213,15 +203,7 @@ export async function sampleMetricMetadata({
     return new Map();
   }
 
-  const filterEntries = Object.entries(filters);
-
   try {
-    // Build filter conditions once, as they're the same for all queries
-    const filterConditions =
-      filterEntries.length > 0 || query.length > 0
-        ? buildFilterConditions(filterEntries, metricFields[0]?.dimensions || [], query)
-        : [];
-
     logger.debug(
       `Executing ${metricFields.length} ES|QL queries in batches of ${FIELDS_PER_BATCH} with ${MAX_CONCURRENT_REQUESTS} concurrent batches`
     );
@@ -232,7 +214,7 @@ export async function sampleMetricMetadata({
     const batchResults = await Promise.allSettled(
       metricFieldChunks.map((metricFieldChunk) =>
         limiter(() =>
-          executeEsqlQueriesForChunk(esClient, metricFieldChunk, from, to, filterConditions, logger)
+          executeEsqlQueriesForChunk(esClient, metricFieldChunk, from, to, filters, query, logger)
         )
       )
     );
@@ -312,3 +294,4 @@ export async function enrichMetricFields({
     };
   });
 }
+

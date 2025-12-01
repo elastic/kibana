@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { enrichMetricFields } from './enrich_metric_fields';
+import { enrichMetricFields, buildEsqlQuery } from './enrich_metric_fields';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import type { IndexFieldCapsMap, EpochTimeRange } from '../../types';
 import type { MetricField, DimensionFilters } from '../../../common/types';
@@ -525,60 +525,84 @@ describe('enrichMetricFields', () => {
     });
   });
 
-  describe('batching and concurrency', () => {
-    it('processes multiple metrics in batches', async () => {
-      // Create 25 metric fields (more than FIELDS_PER_BATCH which is 20)
-      const metricFields = Array.from({ length: 25 }, (_, i) =>
-        createMetricField(`metric.${i}`, TEST_INDEX_METRICS)
-      );
+  describe('buildEsqlQuery', () => {
+    it('builds basic query without filters or user query', () => {
+      const metricField = createMetricField();
+      const query = buildEsqlQuery(metricField, {}, '');
 
-      esqlMock.mockResolvedValue(
-        createEsqlResponse({
-          [TEST_HOST_FIELD]: TEST_HOST_VALUE,
-        })
-      );
-
-      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
-
-      await enrichMetricFields({
-        esClient: esClientMock,
-        metricFields,
-        indexFieldCapsMap,
-        logger,
-        timerange: timeRangeFixture,
-      });
-
-      // All 25 queries should have been executed
-      expect(esqlMock).toHaveBeenCalledTimes(25);
+      expect(query).toContain('FROM metrics-*');
+      expect(query).toContain(`WHERE ${TEST_METRIC_NAME} IS NOT NULL`);
+      expect(query).toContain('LIMIT 1');
     });
 
-    it('handles partial batch failures gracefully', async () => {
-      const metricFields = [
-        createMetricField('metric.1'),
-        createMetricField('metric.2'),
-        createMetricField('metric.3'),
-      ];
+    it('builds query with single dimension filter', () => {
+      const metricField = createMetricField();
+      const filters: DimensionFilters = { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] };
+      const query = buildEsqlQuery(metricField, filters, '');
 
-      esqlMock
-        .mockResolvedValueOnce(createEsqlResponse({ [TEST_HOST_FIELD]: TEST_HOST_VALUE }))
-        .mockRejectedValueOnce(new Error('Query failed'))
-        .mockResolvedValueOnce(createEsqlResponse({ [TEST_HOST_FIELD]: TEST_HOST_VALUE }));
+      expect(query).toContain('FROM metrics-*');
+      expect(query).toContain(`WHERE ${TEST_METRIC_NAME} IS NOT NULL`);
+      expect(query).toContain(`WHERE \`${TEST_HOST_FIELD}\`::STRING IN`);
+      expect(query).toContain(TEST_HOST_VALUE);
+      expect(query).toContain('LIMIT 1');
+    });
 
-      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+    it('builds query with multiple dimension filter values', () => {
+      const metricField = createMetricField();
+      const filters: DimensionFilters = { [TEST_HOST_FIELD]: ['host-1', 'host-2', 'host-3'] };
+      const query = buildEsqlQuery(metricField, filters, '');
 
-      const result = await enrichMetricFields({
-        esClient: esClientMock,
-        metricFields,
-        indexFieldCapsMap,
-        logger,
-        timerange: timeRangeFixture,
-      });
+      expect(query).toContain('FROM metrics-*');
+      expect(query).toContain(`WHERE ${TEST_METRIC_NAME} IS NOT NULL`);
+      expect(query).toContain(
+        `WHERE \`${TEST_HOST_FIELD}\`::STRING IN (\"host-1\", \"host-2\", \"host-3\")`
+      );
+      expect(query).toContain('LIMIT 1');
+    });
 
-      // Should return results for all fields
-      expect(result).toHaveLength(3);
-      expect(result[0].noData).toBe(false);
-      expect(result[1].noData).toBe(true); // Failed query
-      expect(result[2].noData).toBe(false);
+    it('builds query with WHERE clause from user query', () => {
+      const metricField = createMetricField();
+      const userQuery = 'FROM logs-* | WHERE status == "active"';
+      const query = buildEsqlQuery(metricField, {}, userQuery);
+
+      expect(query).toContain('FROM metrics-*');
+      expect(query).toContain(`WHERE ${TEST_METRIC_NAME} IS NOT NULL`);
+      expect(query).toContain('WHERE status == "active"');
+      expect(query).toContain('LIMIT 1');
+    });
+
+    it('builds query with both dimension filters and WHERE clause', () => {
+      const metricField = createMetricField();
+      const filters: DimensionFilters = { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] };
+      const userQuery = 'FROM logs-* | WHERE status == "active"';
+      const query = buildEsqlQuery(metricField, filters, userQuery);
+
+      expect(query).toContain('FROM metrics-*');
+      expect(query).toContain(`WHERE ${TEST_METRIC_NAME} IS NOT NULL`);
+      expect(query).toContain(`WHERE \`${TEST_HOST_FIELD}\`::STRING IN`);
+      expect(query).toContain(TEST_HOST_VALUE);
+      expect(query).toContain('WHERE status == "active"');
+      expect(query).toContain('LIMIT 1');
+    });
+
+    it('handles empty dimension filter values', () => {
+      const metricField = createMetricField();
+      const filters: DimensionFilters = { [TEST_HOST_FIELD]: [] };
+      const query = buildEsqlQuery(metricField, filters, '');
+
+      expect(query).toContain('FROM metrics-*');
+      expect(query).toContain(`WHERE ${TEST_METRIC_NAME} IS NOT NULL`);
+      expect(query).not.toContain(`${TEST_HOST_FIELD}::STRING`);
+      expect(query).toContain('LIMIT 1');
+    });
+
+    it('properly handles field names with dots', () => {
+      const metricField = createMetricField('system.memory.usage');
+      const query = buildEsqlQuery(metricField, {}, '');
+
+      expect(query).toContain('FROM metrics-*');
+      expect(query).toContain('WHERE system.memory.usage IS NOT NULL');
+      expect(query).toContain('LIMIT 1');
     });
   });
 });

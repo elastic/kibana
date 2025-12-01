@@ -10,16 +10,8 @@
 import type { Logger } from '@kbn/core/server';
 import { dateRangeQuery } from '@kbn/es-query';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import {
-  from as fromCommand,
-  evaluate,
-  where,
-  stats,
-  sort,
-  limit,
-  append,
-} from '@kbn/esql-composer';
-import { esql, BasicPrettyPrinter } from '@kbn/esql-ast';
+
+import { esql } from '@kbn/esql-ast';
 import { extractWhereCommand } from '../../lib/utils';
 
 interface CreateDimensionsParams {
@@ -44,37 +36,17 @@ export const getDimensions = async ({
   if (!dimensions || dimensions.length === 0) {
     return [];
   }
-
-  // New: Build query using the platform @kbn/esql-ast
   const dim = dimensions[0];
   const whereCommandDiscover = originalQuery ? extractWhereCommand(originalQuery) : undefined;
-  
-  const query = esql.from(indices).pipe`EVAL ??dim = ??dim::string`.pipe`WHERE ??dim IS NOT NULL`
-  
-  if (whereCommandDiscover) {;
-    query.pipe(BasicPrettyPrinter.print(whereCommandDiscover));
+
+  let query = esql.from(indices).pipe`EVAL ??dim = ??dim::string`.pipe`WHERE ??dim IS NOT NULL`;
+
+  if (whereCommandDiscover) {
+    query = query.pipe(whereCommandDiscover);
   }
-  query.pipe`STATS BY ??dim`.sort(`??dim`,).limit(20).setParam('dim', dim);
-  console.log('query new',query.inlineParams().print('wrapping'));
+
+  query = query.pipe`STATS BY ??dim`.sort(`??dim`).limit(20).setParam('dim', dim);
   
-  // Old: Build query using the esql composer
-  const whereCommand = originalQuery ? extractWhereCommand(originalQuery) : undefined;
-
-  const source = fromCommand(indices);
-  const queryOld = source
-    .pipe(
-      evaluate('??dim = ??dim::string', { dim: dimensions[0] }),
-      where('??dim IS NOT NULL', { dim: dimensions[0] }),
-      whereCommand ? append({ command: BasicPrettyPrinter.print(whereCommand) }) : (q) => q,
-      stats('BY ??dim', {
-        dim: dimensions[0],
-      }),
-      sort('??dim', { dim: dimensions[0] }),
-      limit(20)
-    )
-    .toString();
-
-  console.log('queryOld', queryOld);
   try {
     const response = await esClient.esql(
       'get_dimensions',
