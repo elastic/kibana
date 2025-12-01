@@ -48,15 +48,15 @@ export const getDimensions = async ({
   // New: Build query using the platform @kbn/esql-ast
   const dim = dimensions[0];
   const whereCommandDiscover = originalQuery ? extractWhereCommand(originalQuery) : undefined;
-  
-  const query = esql.from(indices).pipe`EVAL ??dim = ??dim::string`.pipe`WHERE ??dim IS NOT NULL`
-  
-  if (whereCommandDiscover) {;
+
+  const query = esql.from(indices).pipe`EVAL ??dim = ??dim::string`.pipe`WHERE ??dim IS NOT NULL`;
+
+  if (whereCommandDiscover) {
     query.pipe(BasicPrettyPrinter.print(whereCommandDiscover));
   }
-  query.pipe`STATS BY ??dim`.sort(`??dim`,).limit(20).setParam('dim', dim);
-  console.log('query new',query.inlineParams().print('wrapping'));
-  
+  query.pipe`STATS BY ??dim`.sort(`??dim`).limit(20).setParam('dim', dim);
+  console.log('query new', query.inlineParams().print('wrapping'));
+
   // Old: Build query using the esql composer
   const whereCommand = originalQuery ? extractWhereCommand(originalQuery) : undefined;
 
