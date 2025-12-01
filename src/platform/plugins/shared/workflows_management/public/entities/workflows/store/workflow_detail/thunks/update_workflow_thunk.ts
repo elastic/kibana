@@ -52,9 +52,11 @@ export const updateWorkflowThunk = createAsyncThunk<
       if (affectsYamlMetadata(workflow)) {
         const currentYaml = selectYamlString(getState());
 
+        let updatedYaml: string = currentYaml;
+
         if (currentYaml) {
           // Update all fields that were changed, preserving formatting (optimistic update)
-          const updatedYaml = updateWorkflowYamlFields(currentYaml, workflow, workflow.enabled);
+          updatedYaml = updateWorkflowYamlFields(currentYaml, workflow, workflow.enabled);
           dispatch(setYamlString(updatedYaml));
         }
 
