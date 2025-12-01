@@ -4110,7 +4110,6 @@
       "matchDepNames": [
         "langchain",
         "@langchain/aws",
-        "@langchain/community",
         "@langchain/core",
         "@langchain/google-common",
         "@langchain/google-genai",
