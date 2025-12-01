@@ -41,6 +41,7 @@ import {
   replaceEmptyAlertFields,
 } from './format_alert';
 import { filterAlertState } from './filter_alert_state';
+import { getAlertMutedStatus } from './get_alert_muted_status';
 
 interface BuildOngoingAlertOpts<
   AlertData extends RuleAlertData,
@@ -104,9 +105,7 @@ export const buildOngoingAlert = <
   const filteredAlertState = filterAlertState(alertState);
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
   const alertInstanceId = legacyAlert.getId();
-  const isMuted = ruleData
-    ? ruleData.muteAll || ruleData.mutedInstanceIds.includes(alertInstanceId)
-    : false;
+  const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
 
   const alertUpdates = {
     // Set latest rule configuration

@@ -97,10 +97,9 @@ export const buildRecoveredAlert = <
   const alertState = legacyAlert.getState();
   const filteredAlertState = filterAlertState(alertState);
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
-  const alertInstanceId = legacyAlert.getId();
-  const isMuted = ruleData
-    ? ruleData.muteAll || ruleData.mutedInstanceIds.includes(alertInstanceId)
-    : false;
+
+  // Preserve ALERT_MUTED from existing alert
+  const alertMuted = get(alert, ALERT_MUTED);
 
   const alertUpdates = {
     // Update the timestamp to reflect latest update time
@@ -122,8 +121,8 @@ export const buildRecoveredAlert = <
     // Set latest match count, should be 0
     [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
-    // Set muted state
-    [ALERT_MUTED]: isMuted,
+    // Preserve muted state from existing alert
+    ...(alertMuted !== undefined ? { [ALERT_MUTED]: alertMuted } : {}),
     // Set status to 'recovered'
     [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
     // Set latest duration as recovered alerts should have updated duration

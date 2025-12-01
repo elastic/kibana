@@ -531,40 +531,48 @@ export class AlertsService implements IAlertsService {
 
   private async _updateMuteState({
     muted,
+    ruleId,
+    alertInstanceId,
     indices,
-    query,
     logger,
   }: {
     muted: boolean;
+    ruleId: string;
+    alertInstanceId?: string;
     indices: string[];
-    query: QueryDslQueryContainer;
     logger: Logger;
   }) {
+    if (!indices || indices.length === 0) {
+      throw new Error(
+        `Unable to update mute state for rule ${ruleId} - no alert indices available`
+      );
+    }
+
     const esClient = await this.options.elasticsearchClientPromise;
 
-    const queryWithStatusFilter = {
-      bool: {
-        must: [
-          query,
-          {
-            term: {
-              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-            },
-          },
-        ],
-      },
-    };
+    const mustClauses: QueryDslQueryContainer[] = [
+      { term: { [ALERT_RULE_UUID]: ruleId } },
+      { term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } },
+    ];
+
+    if (alertInstanceId) {
+      mustClauses.push({ term: { [ALERT_INSTANCE_ID]: alertInstanceId } });
+    }
+
+    const query = { bool: { must: mustClauses } };
 
     try {
       await esClient.updateByQuery({
         index: indices,
         conflicts: 'proceed',
+        wait_for_completion: false,
         refresh: true,
         ignore_unavailable: true,
-        query: queryWithStatusFilter,
+        query,
         script: {
-          source: `ctx._source['${ALERT_MUTED}'] = ${muted};`,
+          source: `ctx._source['${ALERT_MUTED}'] = params.muted;`,
           lang: 'painless',
+          params: { muted },
         },
       });
     } catch (error) {
@@ -586,22 +594,10 @@ export class AlertsService implements IAlertsService {
     indices: string[];
     logger: Logger;
   }) {
-    if (!indices || indices.length === 0) {
-      throw new Error(
-        `Unable to mute alert ruleId: ${ruleId}, instanceId: ${alertInstanceId} - no alert indices available`
-      );
-    }
-
     return this._updateMuteState({
       muted: true,
-      query: {
-        bool: {
-          must: [
-            { term: { [ALERT_INSTANCE_ID]: alertInstanceId } },
-            { term: { [ALERT_RULE_UUID]: ruleId } },
-          ],
-        },
-      },
+      ruleId,
+      alertInstanceId,
       indices,
       logger,
     });
@@ -618,22 +614,10 @@ export class AlertsService implements IAlertsService {
     indices: string[];
     logger: Logger;
   }) {
-    if (!indices || indices.length === 0) {
-      throw new Error(
-        `Unable to unmute alert ruleId: ${ruleId}, instanceId: ${alertInstanceId} - no alert indices available`
-      );
-    }
-
     return this._updateMuteState({
       muted: false,
-      query: {
-        bool: {
-          must: [
-            { term: { [ALERT_INSTANCE_ID]: alertInstanceId } },
-            { term: { [ALERT_RULE_UUID]: ruleId } },
-          ],
-        },
-      },
+      ruleId,
+      alertInstanceId,
       indices,
       logger,
     });
@@ -648,17 +632,9 @@ export class AlertsService implements IAlertsService {
     indices: string[];
     logger: Logger;
   }) {
-    if (!indices || indices.length === 0) {
-      throw new Error(
-        `Unable to mute all alerts for ruleId: ${ruleId} - no alert indices available`
-      );
-    }
-
     return this._updateMuteState({
       muted: true,
-      query: {
-        term: { [ALERT_RULE_UUID]: ruleId },
-      },
+      ruleId,
       indices,
       logger,
     });
@@ -673,17 +649,9 @@ export class AlertsService implements IAlertsService {
     indices: string[];
     logger: Logger;
   }) {
-    if (!indices || indices.length === 0) {
-      throw new Error(
-        `Unable to unmute all alerts for rule ${ruleId} - no alert indices available`
-      );
-    }
-
     return this._updateMuteState({
       muted: false,
-      query: {
-        term: { [ALERT_RULE_UUID]: ruleId },
-      },
+      ruleId,
       indices,
       logger,
     });

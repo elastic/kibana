@@ -84,7 +84,7 @@ async function muteInstanceWithOCC(
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (validateAlertsExistence) {
-    const indices = await context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+    const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
     const isExistingAlert = await context.alertsService?.isExistingAlert({
       indices,
       alertId: alertInstanceId,

@@ -2621,7 +2621,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to mute alert ruleId: rule-1, instanceId: alert-1 - no alert indices available"`
+            `"Unable to update mute state for rule rule-1 - no alert indices available"`
           );
         });
 
@@ -2646,26 +2646,22 @@ describe('Alerts Service', () => {
           expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
             index: ['.alerts-default'],
             conflicts: 'proceed',
+            wait_for_completion: false,
             refresh: true,
             ignore_unavailable: true,
             query: {
               bool: {
                 must: [
-                  {
-                    bool: {
-                      must: [
-                        { term: { 'kibana.alert.instance.id': 'alert-1' } },
-                        { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
-                      ],
-                    },
-                  },
+                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
                   { term: { 'kibana.alert.status': 'active' } },
+                  { term: { 'kibana.alert.instance.id': 'alert-1' } },
                 ],
               },
             },
             script: {
-              source: `ctx._source['kibana.alert.muted'] = true;`,
+              source: `ctx._source['kibana.alert.muted'] = params.muted;`,
               lang: 'painless',
+              params: { muted: true },
             },
           });
         });
@@ -2713,7 +2709,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to unmute alert ruleId: rule-1, instanceId: alert-1 - no alert indices available"`
+            `"Unable to update mute state for rule rule-1 - no alert indices available"`
           );
         });
 
@@ -2738,26 +2734,22 @@ describe('Alerts Service', () => {
           expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
             index: ['.alerts-default'],
             conflicts: 'proceed',
+            wait_for_completion: false,
             refresh: true,
             ignore_unavailable: true,
             query: {
               bool: {
                 must: [
-                  {
-                    bool: {
-                      must: [
-                        { term: { 'kibana.alert.instance.id': 'alert-1' } },
-                        { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
-                      ],
-                    },
-                  },
+                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
                   { term: { 'kibana.alert.status': 'active' } },
+                  { term: { 'kibana.alert.instance.id': 'alert-1' } },
                 ],
               },
             },
             script: {
-              source: `ctx._source['kibana.alert.muted'] = false;`,
+              source: `ctx._source['kibana.alert.muted'] = params.muted;`,
               lang: 'painless',
+              params: { muted: false },
             },
           });
         });
@@ -2804,7 +2796,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to mute all alerts for ruleId: rule-1 - no alert indices available"`
+            `"Unable to update mute state for rule rule-1 - no alert indices available"`
           );
         });
 
@@ -2828,6 +2820,7 @@ describe('Alerts Service', () => {
           expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
             index: ['.alerts-default'],
             conflicts: 'proceed',
+            wait_for_completion: false,
             refresh: true,
             ignore_unavailable: true,
             query: {
@@ -2839,8 +2832,9 @@ describe('Alerts Service', () => {
               },
             },
             script: {
-              source: `ctx._source['kibana.alert.muted'] = true;`,
+              source: `ctx._source['kibana.alert.muted'] = params.muted;`,
               lang: 'painless',
+              params: { muted: true },
             },
           });
         });
@@ -2886,7 +2880,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to unmute all alerts for rule rule-1 - no alert indices available"`
+            `"Unable to update mute state for rule rule-1 - no alert indices available"`
           );
         });
 
@@ -2910,6 +2904,7 @@ describe('Alerts Service', () => {
           expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
             index: ['.alerts-default'],
             conflicts: 'proceed',
+            wait_for_completion: false,
             refresh: true,
             ignore_unavailable: true,
             query: {
@@ -2921,8 +2916,9 @@ describe('Alerts Service', () => {
               },
             },
             script: {
-              source: `ctx._source['kibana.alert.muted'] = false;`,
+              source: `ctx._source['kibana.alert.muted'] = params.muted;`,
               lang: 'painless',
+              params: { muted: false },
             },
           });
         });
