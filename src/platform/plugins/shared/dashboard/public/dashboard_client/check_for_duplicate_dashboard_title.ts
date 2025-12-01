@@ -51,24 +51,21 @@ export async function checkForDuplicateDashboardTitle({
 
   const [baseDashboardName] = extractTitleAndCount(title);
 
-  const { hits } = await dashboardClient.search({
+  const { dashboards } = await dashboardClient.search({
     search: baseDashboardName,
-    size: 20,
-    options: {
-      onlyTitle: true,
-    },
+    per_page: 20,
   });
 
   const duplicate = Boolean(
-    hits.find((hit) => hit.attributes.title.toLowerCase() === title.toLowerCase())
+    dashboards.find(({ data }) => data.title.toLowerCase() === title.toLowerCase())
   );
 
   if (!duplicate) {
     return true;
   }
 
-  const [largestDuplicationId] = hits
-    .map((hit) => extractTitleAndCount(hit.attributes.title)[1])
+  const [largestDuplicationId] = dashboards
+    .map(({ data }) => extractTitleAndCount(data.title)[1])
     .sort((a, b) => b - a);
 
   const speculativeCollisionFreeTitle = `${baseDashboardName} (${largestDuplicationId + 1})`;

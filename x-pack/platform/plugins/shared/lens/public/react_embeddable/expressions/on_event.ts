@@ -8,7 +8,8 @@
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { type AggregateQuery, type Query, isOfAggregateQueryType } from '@kbn/es-query';
-import type { GetStateType, LensApi, LensPublicCallbacks } from '@kbn/lens-common';
+import type { GetStateType, LensPublicCallbacks } from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 import {
   isLensAlertRule,
   isLensBrushEvent,

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -122,14 +122,13 @@
     "@kbn/core-provider-plugin",
     "@kbn/reporting-plugin",
     "@kbn/kibana-usage-collection-plugin",
-    "@kbn/apm-synthtrace",
     "@kbn/aiops-change-point-detection",
     "@kbn/aiops-plugin",
     "@kbn/ml-category-validator",
     "@kbn/response-ops-alerts-filters-form",
     "@kbn/embeddable-alerts-table-plugin",
-    "@kbn/apm-synthtrace-client",
-    "@kbn/apm-synthtrace",
+    "@kbn/synthtrace-client",
+    "@kbn/synthtrace",
     "@kbn/streams-schema",
     "@kbn/streams-plugin",
     "@kbn/content-packs-schema",
@@ -167,13 +166,15 @@
     "@kbn/product-intercept-plugin",
     "@kbn/onechat-common",
     "@kbn/reindex-service-plugin",
-    "@kbn/streamlang",
     "@kbn/onechat-plugin",
     "@kbn/field-formats-common",
     "@kbn/reporting-test-routes",
     "@kbn/alerting-types",
     "@kbn/visualizations-common",
-    "@kbn/es-types",
+    "@kbn/test-subj-selector",
+    "@kbn/onechat-server",
+    "@kbn/setup-node-env",
     "@kbn/connector-schemas",
+    "@kbn/es-types"
   ]
 }

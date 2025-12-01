@@ -7,13 +7,13 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
-  sharedDataViewManagerSlice,
   createDataViewSelectionSlice,
-  initialSharedState,
   initialScopeState,
+  initialSharedState,
+  sharedDataViewManagerSlice,
 } from './slices';
 import { selectDataViewAsync } from './actions';
-import { DataViewManagerScopeName } from '../constants';
+import { PageScope } from '../constants';
 
 describe('slices', () => {
   describe('dataViewSelectionSlice', () => {});
@@ -114,7 +114,7 @@ describe('slices', () => {
   });
 
   describe('createDataViewSelectionSlice', () => {
-    const testScope = DataViewManagerScopeName.default;
+    const testScope = PageScope.default;
     const { reducer, actions } = createDataViewSelectionSlice(testScope);
 
     describe('setSelectedDataView', () => {
@@ -154,7 +154,7 @@ describe('slices', () => {
           initialScopeState,
           selectDataViewAsync({
             id: '1',
-            scope: DataViewManagerScopeName.analyzer,
+            scope: PageScope.analyzer,
           })
         );
 

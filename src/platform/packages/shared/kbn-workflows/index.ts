@@ -17,6 +17,8 @@ export * from './common/privileges';
 export * from './common/elasticsearch_request_builder';
 export * from './common/kibana_request_builder';
 export * from './common/connector_utils';
+export * from './server/constants';
+export * from './server/repositories/workflow_repository';
 
 // Export specific types that are commonly used
 export type { BuiltInStepType, TriggerType } from './spec/schema';

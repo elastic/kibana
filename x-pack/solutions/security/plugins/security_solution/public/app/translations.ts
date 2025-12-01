@@ -116,6 +116,10 @@ export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts',
   defaultMessage: 'Alerts',
 });
 
+export const ATTACKS = i18n.translate('xpack.securitySolution.navigation.attacks', {
+  defaultMessage: 'Attacks',
+});
+
 export const ALERT_SUMMARY = i18n.translate('xpack.securitySolution.navigation.alertSummary', {
   defaultMessage: 'Alert summary',
 });

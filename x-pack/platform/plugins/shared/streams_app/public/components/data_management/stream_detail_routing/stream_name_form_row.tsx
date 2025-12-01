@@ -79,9 +79,13 @@ export function StreamNameFormRow({
   return (
     <EuiFormRow
       fullWidth
-      label={i18n.translate('xpack.streams.streamDetailRouting.name', {
-        defaultMessage: 'Stream name',
-      })}
+      label={
+        <span data-test-subj="streamsAppRoutingStreamNameLabel">
+          {i18n.translate('xpack.streams.streamDetailRouting.name', {
+            defaultMessage: 'Stream name',
+          })}
+        </span>
+      }
       helpText={helpText}
       describedByIds={[descriptionId]}
       isInvalid={isInvalid || isDotPresent || !isLengthValid}
@@ -104,6 +108,7 @@ export function StreamNameFormRow({
               inline-size: min(${prefix.length}ch, ${PREFIX_MAX_VISIBLE_CHARACTERS}ch);
             `}
             id={descriptionId}
+            data-test-subj="streamsAppRoutingStreamNamePrefix"
           >
             <EuiScreenReaderOnly>
               <span>
@@ -112,7 +117,7 @@ export function StreamNameFormRow({
                 })}
               </span>
             </EuiScreenReaderOnly>
-            <EuiTextTruncate text={prefix} truncation="start" />
+            <EuiTextTruncate text={prefix} truncation="start" data-test-subj={`streamNamePrefix`} />
           </EuiFormLabel>,
         ]}
       />

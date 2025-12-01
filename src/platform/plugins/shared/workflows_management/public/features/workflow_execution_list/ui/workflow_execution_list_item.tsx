@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiPanel,
   EuiText,
   EuiToolTip,
@@ -20,6 +21,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { ExecutionStatus } from '@kbn/workflows';
 import { formatDuration } from '../../../shared/lib/format_duration';
@@ -38,13 +40,14 @@ export const getExecutionTitleColor = (
 
 interface WorkflowExecutionListItemProps {
   status: ExecutionStatus;
+  isTestRun: boolean;
   startedAt: Date | null;
   duration: number | null;
   selected?: boolean;
   onClick?: () => void;
 }
 export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemProps>(
-  ({ status, startedAt, duration, selected, onClick }) => {
+  ({ status, isTestRun, startedAt, duration, selected, onClick }) => {
     const { euiTheme } = useEuiTheme();
     const styles = useMemoCss(componentStyles);
     const getFormattedDate = useGetFormattedDateTime();
@@ -105,6 +108,20 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
           {formattedDuration && (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap>
+                {isTestRun && (
+                  <EuiFlexItem>
+                    <EuiIconTip
+                      type="flask"
+                      color={euiTheme.colors.backgroundFilledText}
+                      title={i18n.translate(
+                        'workflows.workflowExecutionListItem.testRunIconTitle',
+                        {
+                          defaultMessage: 'Test Run',
+                        }
+                      )}
+                    />
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiIcon type="clock" color="subdued" />
                 </EuiFlexItem>

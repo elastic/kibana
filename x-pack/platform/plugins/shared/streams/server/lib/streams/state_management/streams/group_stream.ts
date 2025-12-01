@@ -82,6 +82,7 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
             lifecycle: { inherit: {} },
             processing: { steps: [] },
             settings: {},
+            failure_store: { inherit: {} },
           },
         },
       }));

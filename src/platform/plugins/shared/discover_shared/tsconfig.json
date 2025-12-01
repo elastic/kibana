@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -11,6 +11,7 @@
     "@kbn/unified-data-table",
     "@kbn/es-query",
     "@kbn/apm-types",
-    "@kbn/apm-types-shared"
+    "@kbn/apm-types-shared",
+    "@kbn/data-views-plugin"
   ]
 }

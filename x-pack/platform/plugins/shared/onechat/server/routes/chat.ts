@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import type { Observable } from 'rxjs';
@@ -28,6 +29,7 @@ import type { ChatService } from '../services/chat';
 import type { AttachmentServiceStart } from '../services/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
+import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 
 export function registerChatRoutes({
   router,
@@ -194,6 +196,9 @@ export function registerChatRoutes({
       description:
         'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.',
       options: {
+        timeout: {
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
+        },
         tags: ['oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
@@ -248,9 +253,7 @@ export function registerChatRoutes({
         return response.ok<ChatResponse>({
           body: {
             conversation_id: convId,
-            trace_id: round.trace_id,
-            steps: round.steps,
-            response: round.response,
+            ...omit(round, ['id', 'input']),
           },
         });
       })
@@ -391,6 +394,9 @@ export function registerChatRoutes({
         '7. `message_complete`\n' +
         '8. `round_complete`',
       options: {
+        timeout: {
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
+        },
         tags: ['oas-tag:agent builder'],
         availability: {
           stability: 'experimental',

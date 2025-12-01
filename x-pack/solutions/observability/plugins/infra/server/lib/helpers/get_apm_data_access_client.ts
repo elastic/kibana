@@ -23,11 +23,6 @@ export const getApmDataAccessClient = ({
   context: InfraPluginRequestHandlerContext;
   request: KibanaRequest;
 }) => {
-  const hasPrivileges = async () => {
-    const apmDataAccessStart = await libs.plugins.apmDataAccess.start();
-    return apmDataAccessStart.hasPrivileges({ request });
-  };
-
   const getServices = async () => {
     const apmDataAccess = libs.plugins.apmDataAccess.setup;
 
@@ -39,9 +34,13 @@ export const getApmDataAccessClient = ({
     const uiSettingsClient = uiSettings.client;
 
     const [apmIndices, includeFrozen] = await Promise.all([
-      apmDataAccess.getApmIndices(savedObjectsClient),
+      apmDataAccess.getApmIndices(savedObjectsClient).catch(() => undefined),
       uiSettingsClient.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
     ]);
+
+    if (!apmIndices) {
+      return undefined;
+    }
 
     const services = apmDataAccess.getServices({
       apmEventClient: new APMEventClient({
@@ -75,5 +74,5 @@ export const getApmDataAccessClient = ({
     };
   };
 
-  return { hasPrivileges, getServices };
+  return { getServices };
 };

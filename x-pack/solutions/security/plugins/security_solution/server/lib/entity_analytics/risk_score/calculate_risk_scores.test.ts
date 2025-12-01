@@ -60,12 +60,12 @@ describe('buildFiltersForEntityType', () => {
       mockExcludeAlertTags
     );
 
-    // Host filters should exclude the host-specific filter (must_not)
+    // Host filters should include the host-specific filter (must)
     expect(hostFilters).toHaveLength(5);
     expect(hostFilters[4]).toEqual(
       expect.objectContaining({
         bool: expect.objectContaining({
-          must_not: expect.objectContaining({
+          must: expect.objectContaining({
             bool: expect.objectContaining({
               should: expect.arrayContaining([
                 expect.objectContaining({
@@ -80,12 +80,12 @@ describe('buildFiltersForEntityType', () => {
       })
     );
 
-    // User filters should exclude the user-specific filter (must_not)
+    // User filters should include the user-specific filter (must)
     expect(userFilters).toHaveLength(5);
     expect(userFilters[4]).toEqual(
       expect.objectContaining({
         bool: expect.objectContaining({
-          must_not: expect.objectContaining({
+          must: expect.objectContaining({
             bool: expect.objectContaining({
               should: expect.arrayContaining([
                 expect.objectContaining({
@@ -182,7 +182,7 @@ describe('buildFiltersForEntityType', () => {
     expect(filters[4]).toEqual(
       expect.objectContaining({
         bool: expect.objectContaining({
-          must_not: expect.objectContaining({
+          must: expect.objectContaining({
             bool: expect.objectContaining({
               should: expect.arrayContaining([
                 expect.objectContaining({

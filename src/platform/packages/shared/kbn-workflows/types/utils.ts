@@ -58,6 +58,27 @@ export function isDangerousStatus(status: ExecutionStatus) {
   return status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED;
 }
 
+export function isTerminalStatus(status: ExecutionStatus) {
+  const TerminalStatus: readonly ExecutionStatus[] = [
+    ExecutionStatus.COMPLETED,
+    ExecutionStatus.FAILED,
+    ExecutionStatus.CANCELLED,
+    ExecutionStatus.SKIPPED,
+    ExecutionStatus.TIMED_OUT,
+  ];
+  return TerminalStatus.includes(status);
+}
+
+export function isCancelableStatus(status: ExecutionStatus) {
+  const CancelableStatus: readonly ExecutionStatus[] = [
+    ExecutionStatus.RUNNING,
+    ExecutionStatus.WAITING,
+    ExecutionStatus.WAITING_FOR_INPUT,
+    ExecutionStatus.PENDING,
+  ];
+  return CancelableStatus.includes(status);
+}
+
 // Type guards for steps types
 export const isWaitStep = (step: Step): step is WaitStep => step.type === 'wait';
 export const isHttpStep = (step: Step): step is HttpStep => step.type === 'http';

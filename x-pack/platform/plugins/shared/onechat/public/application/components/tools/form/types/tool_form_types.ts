@@ -43,11 +43,14 @@ export interface BuiltinToolFormData extends BaseToolFormData {
 export interface IndexSearchToolFormData extends BaseToolFormData {
   type: ToolType.index_search;
   pattern: string;
+  rowLimit?: number;
+  customInstructions?: string;
 }
 
 export interface WorkflowToolFormData extends BaseToolFormData {
   type: ToolType.workflow;
   workflow_id: string;
+  wait_for_completion: boolean;
 }
 
 export type ToolFormData =

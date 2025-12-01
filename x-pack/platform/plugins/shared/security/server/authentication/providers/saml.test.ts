@@ -1672,6 +1672,61 @@ describe('SAMLAuthenticationProvider', () => {
     });
   });
 
+  describe('`doesSessionNeedToBeCheckedForRequestIds` method', () => {
+    it('returns true when state is undefined', () => {
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(undefined)).toBe(true);
+    });
+
+    it('returns true when state is null', () => {
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(null)).toBe(true);
+    });
+
+    it('returns true when state has no requestIdMap', () => {
+      const state = {
+        accessToken: 'some-token',
+        refreshToken: 'some-refresh-token',
+        realm: 'test-realm',
+      };
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(state)).toBe(true);
+    });
+
+    it('returns true when requestIdMap is empty', () => {
+      const state = {
+        accessToken: 'some-token',
+        refreshToken: 'some-refresh-token',
+        realm: 'test-realm',
+        requestIdMap: {},
+      };
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(state)).toBe(true);
+    });
+
+    it('returns false when requestIdMap has one entry', () => {
+      const state = {
+        accessToken: 'some-token',
+        refreshToken: 'some-refresh-token',
+        realm: 'test-realm',
+        requestIdMap: {
+          'request-id-1': { redirectURL: '/some-path' },
+        },
+      };
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(state)).toBe(false);
+    });
+
+    it('returns false when requestIdMap has multiple entries', () => {
+      const state = {
+        accessToken: 'some-token',
+        refreshToken: 'some-refresh-token',
+        realm: 'test-realm',
+        requestIdMap: {
+          'request-id-1': { redirectURL: '/some-path' },
+          'request-id-2': { redirectURL: '/another-path' },
+          'request-id-3': { redirectURL: '/third-path' },
+        },
+      };
+      expect(provider.shouldInvalidateIntermediateSessionAfterLogin(state)).toBe(false);
+    });
+  });
+
   it('`getHTTPAuthenticationScheme` method', () => {
     expect(provider.getHTTPAuthenticationScheme()).toBe('bearer');
   });

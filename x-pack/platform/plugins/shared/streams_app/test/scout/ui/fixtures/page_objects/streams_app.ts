@@ -7,9 +7,15 @@
 
 /* eslint-disable playwright/no-nth-methods */
 
-import type { ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout';
-import { EuiComboBoxWrapper } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
+import {
+  expect,
+  EuiDataGridWrapper,
+  EuiSuperSelectWrapper,
+  EuiComboBoxWrapper,
+  EuiCodeBlockWrapper,
+  KibanaCodeEditorWrapper,
+} from '@kbn/scout';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
@@ -17,6 +23,11 @@ export class StreamsApp {
   public readonly conditionEditorFieldComboBox;
   public readonly conditionEditorValueComboBox;
   public readonly processorTypeComboBox;
+  public readonly fieldTypeSuperSelect;
+  public readonly previewDataGrid;
+  public readonly schemaDataGrid;
+  public readonly advancedSettingsCodeBlock;
+  public readonly kibanaMonacoEditor;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -35,6 +46,20 @@ export class StreamsApp {
       this.page,
       'streamsAppProcessorTypeSelector'
     );
+    this.fieldTypeSuperSelect = new EuiSuperSelectWrapper(
+      this.page,
+      'streamsAppFieldFormTypeSelect'
+    );
+    // TODO: Make locator more specific when possible
+    this.previewDataGrid = new EuiDataGridWrapper(this.page, { locator: '.euiDataGrid' });
+    this.schemaDataGrid = new EuiDataGridWrapper(
+      this.page,
+      'streamsAppSchemaEditorFieldsTableLoaded'
+    );
+    this.advancedSettingsCodeBlock = new EuiCodeBlockWrapper(this.page, {
+      locator: '.euiCodeBlock',
+    });
+    this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
   }
 
   async goto() {
@@ -78,16 +103,16 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'advanced');
   }
 
-  async clickGoBackToStreams() {
-    await this.page.getByTestId('backToStreamsButton').click();
-  }
-
   async clickStreamNameLink(streamName: string) {
     await this.page.getByTestId(`streamsNameLink-${streamName}`).click();
   }
 
   async clickDataQualityTab() {
     await this.page.getByTestId('dataQualityTab').click();
+  }
+
+  async clickRootBreadcrumb() {
+    await this.page.getByTestId('breadcrumb first').click();
   }
 
   // Streams table utility methods
@@ -217,16 +242,20 @@ export class StreamsApp {
     await this.page.getByTestId(`routingRuleEditButton-${streamName}`).click();
   }
 
+  async switchToColumnsView() {
+    await this.page.getByTestId('columns').click();
+  }
+
   async saveRoutingRule() {
-    await this.page.getByRole('button', { name: 'Save' }).click();
+    await this.page.testSubj.locator('streamsAppStreamDetailRoutingSaveButton').click();
   }
 
   async updateRoutingRule() {
-    await this.page.getByRole('button', { name: 'Update' }).click();
+    await this.page.testSubj.locator('streamsAppStreamDetailRoutingUpdateButton').click();
   }
 
   async cancelRoutingRule() {
-    await this.page.getByRole('button', { name: 'Cancel' }).click();
+    await this.page.testSubj.locator('streamsAppRoutingStreamEntryCancelButton').click();
   }
 
   async removeRoutingRule() {
@@ -357,7 +386,7 @@ export class StreamsApp {
   }
 
   async expectPreviewPanelVisible() {
-    await expect(this.page.getByTestId('routingPreviewPanelWithResults')).toBeVisible();
+    await expect(this.page.getByTestId('streamsAppRoutingPreviewPanelWithResults')).toBeVisible();
   }
 
   async saveRuleOrder() {
@@ -624,6 +653,12 @@ export class StreamsApp {
     return this.page.getByTestId('streamsAppProcessingDataSourcesList');
   }
 
+  async getDataSourcesSelector() {
+    const dataSourcesSelector = this.page.getByTestId('streamsAppProcessingDataSourceSelector');
+    await expect(dataSourcesSelector).toBeVisible();
+    return dataSourcesSelector;
+  }
+
   getDataSourcesListItems() {
     return this.getDataSourcesList().getByTestId('streamsAppProcessingDataSourceListItem');
   }
@@ -652,14 +687,12 @@ export class StreamsApp {
     value: string;
     invertCondition?: boolean;
   }) {
-    const cellContent = this.page.locator(
-      `[data-gridcell-column-id="${columnName}"][data-gridcell-row-index="${rowIndex}"]`
-    );
+    const cellLocator = this.previewDataGrid.getCellLocatorByColId(rowIndex, columnName);
 
     if (invertCondition) {
-      await expect(cellContent).not.toContainText(value);
+      await expect(cellLocator).not.toContainText(value);
     } else {
-      await expect(cellContent).toContainText(value);
+      await expect(cellLocator).toContainText(value);
     }
   }
 
@@ -693,6 +726,10 @@ export class StreamsApp {
 
   async clickFieldStatusFilter() {
     await this.page.getByRole('button', { name: 'Status' }).click();
+  }
+
+  async getFilterOptions() {
+    return this.getModal().getByRole('option');
   }
 
   async selectFilterValue(value: string) {
@@ -748,6 +785,77 @@ export class StreamsApp {
     await expect(this.page.getByTestId('droppable')).not.toHaveAttribute('class', /isDragging/);
   }
 
+  private async clickCellActionButton(testId: string, cell: Locator) {
+    // Get the cell action button scoped to the specific cell
+    // EuiDataGrid renders cell actions for all cells in the DOM, but only the one
+    // for the hovered/clicked cell is visible. We find the button within the cell's actions wrapper.
+    const cellActionsWrapper = cell.locator('.euiDataGridRowCell__actionsWrapper');
+    const button = cellActionsWrapper.getByTestId(testId);
+    await button.scrollIntoViewIfNeeded();
+    await button.click();
+  }
+
+  async clickFilterForButton(cell: Locator) {
+    await this.clickCellActionButton('streamsAppCellActionFilterFor', cell);
+  }
+
+  async clickFilterOutButton(cell: Locator) {
+    await this.clickCellActionButton('streamsAppCellActionFilterOut', cell);
+  }
+
+  /**
+   * AI Suggestions utility methods
+   */
+  async clickSuggestPartitionsButton() {
+    const button = this.page.getByTestId('streamsAppGenerateSuggestionButton');
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  async expectSuggestionsVisible(count?: number) {
+    await expect(this.page.getByText('Review partitioning suggestions')).toBeVisible();
+    if (count !== undefined) {
+      const suggestions = await this.page
+        .locator('[data-test-subj^="suggestionEditButton-"]')
+        .all();
+      expect(suggestions.length).toHaveLength(count);
+    }
+  }
+
+  async previewSuggestion(suggestionName: string) {
+    const previewButton = this.page.getByTestId(`suggestionPreviewButton-${suggestionName}`);
+    await previewButton.click();
+  }
+
+  async editSuggestion(suggestionName: string) {
+    const editButton = this.page.getByTestId(`suggestionEditButton-${suggestionName}`);
+    await editButton.click();
+  }
+
+  async rejectSuggestion(suggestionName: string) {
+    const rejectButton = this.page.getByTestId(`suggestionRejectButton-${suggestionName}`);
+    await rejectButton.click();
+  }
+
+  async acceptSuggestion(suggestionName: string) {
+    const acceptButton = this.page.getByTestId(`suggestionAcceptButton-${suggestionName}`);
+    await acceptButton.click();
+  }
+
+  async regenerateSuggestions() {
+    const regenerateButton = this.page
+      .getByTestId('streamsAppGenerateSuggestionButton')
+      .filter({ hasText: 'Regenerate' });
+    await expect(regenerateButton).toBeVisible();
+    await regenerateButton.click();
+  }
+
+  async expectConfirmationModalVisible() {
+    const modal = this.page.getByTestId('streamsAppCreateStreamConfirmationModal');
+    await expect(modal).toBeVisible();
+    await expect(modal.getByTestId('streamsAppCreateStreamConfirmationModalTitle')).toBeVisible();
+  }
+
   /**
    * Share utility methods
    */
@@ -755,5 +863,9 @@ export class StreamsApp {
   async closeFlyout() {
     await this.page.getByTestId('euiFlyoutCloseButton').click();
     await expect(this.page.getByTestId('euiFlyoutCloseButton')).toBeHidden();
+  }
+
+  async clickProcessorPreviewTab(label: string) {
+    await this.page.getByText(label).click();
   }
 }
