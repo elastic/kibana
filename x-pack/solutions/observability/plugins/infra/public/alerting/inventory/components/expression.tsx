@@ -317,7 +317,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
               )}
             />
           </div>
-          <SupportedDataTooltipLink nodeType={ruleParams.nodeType || 'host'} isAlertUI />
+          <SupportedDataTooltipLink nodeType={ruleParams.nodeType} isAlertUI />
         </EuiFlexGroup>
       </div>
       {ruleParams.nodeType === 'host' && (
