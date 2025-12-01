@@ -218,6 +218,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       password: REPORTING_USER_PASSWORD,
       roles: [REPORTING_ROLE],
       full_name: 'Reporting User',
+      email: 'reportinguser@example.com',
     });
   };
 
