@@ -8,7 +8,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { createIndexWithMappings } from './create_index';
+import { createIndexWithMappings, createOrUpdateIndex } from './create_index';
 import {
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
@@ -24,7 +24,7 @@ interface CreateIndexesOptions {
 export async function createIndexes(options: CreateIndexesOptions): Promise<void> {
   const { esClient, logger } = options;
   await Promise.all([
-    createIndexWithMappings({
+    createOrUpdateIndex({
       esClient,
       indexName: WORKFLOWS_EXECUTIONS_INDEX,
       mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
