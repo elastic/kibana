@@ -45,8 +45,8 @@ export const convertToRawColorMappingsFn = (
         layer.layerType === 'data' &&
         (layer.colorMapping?.assignments || layer.colorMapping?.specialAssignments)
       ) {
-        const accessor = layer.splitAccessor;
-        const columnMeta = accessor ? getColumnMeta?.(layer.layerId, accessor) : null;
+        const accessors = layer.splitAccessors;
+        const columnMeta = accessors ? getColumnMeta?.(layer.layerId, accessors) : null;
 
         return {
           ...layer,

@@ -106,8 +106,8 @@ function getSuggestionForColumns(
     allowMixed,
   };
 
-  if (buckets.length === 1 || buckets.length === 2) {
-    const [xValue, splitBy] = getBucketMappings(table, currentState);
+  if (buckets.length > 1) {
+    const [xValue, ...splitBy] = getBucketMappings(table, currentState);
     return getSuggestionsForLayer({
       ...sharedArgs,
       xValue,
@@ -123,7 +123,7 @@ function getSuggestionForColumns(
       ...sharedArgs,
       xValue,
       yValues,
-      splitBy,
+      splitBy: splitBy ? [splitBy] : undefined,
     });
   }
 }
@@ -162,13 +162,15 @@ function getBucketMappings(table: TableSuggestion, currentState?: XYState) {
     prioritizedBuckets.unshift(x);
   }
 
-  const currentSplitColumnIndex = prioritizedBuckets.findIndex(
-    ({ columnId }) => columnId === currentLayer.splitAccessor
-  );
-  if (currentSplitColumnIndex > -1) {
-    const [splitBy] = prioritizedBuckets.splice(currentSplitColumnIndex, 1);
-    prioritizedBuckets.push(splitBy);
-  }
+  (currentLayer.splitAccessors ?? []).forEach((splitAccessor) => {
+    const currentSplitColumnIndex = prioritizedBuckets.findIndex(
+      ({ columnId }) => columnId === splitAccessor
+    );
+    if (currentSplitColumnIndex > -1) {
+      const [splitBy] = prioritizedBuckets.splice(currentSplitColumnIndex, 1);
+      prioritizedBuckets.push(splitBy);
+    }
+  });
 
   return prioritizedBuckets;
 }
@@ -199,7 +201,7 @@ function getSuggestionsForLayer({
   changeType: TableChangeType;
   xValue?: TableSuggestionColumn;
   yValues: TableSuggestionColumn[];
-  splitBy?: TableSuggestionColumn;
+  splitBy?: TableSuggestionColumn[];
   currentState?: XYState;
   tableLabel?: string;
   keptLayerIds: string[];
@@ -293,7 +295,7 @@ function getSuggestionsForLayer({
   ) {
     const percentageOptions = { ...options };
     if (percentageOptions.xValue?.operation.scale === 'ordinal' && !percentageOptions.splitBy) {
-      percentageOptions.splitBy = percentageOptions.xValue;
+      percentageOptions.splitBy = [percentageOptions.xValue];
       delete percentageOptions.xValue;
     }
     const suggestedSeriesType = asPercentageSeriesType(seriesType);
@@ -494,7 +496,7 @@ function buildSuggestion({
   title: string;
   yValues: TableSuggestionColumn[];
   xValue?: TableSuggestionColumn;
-  splitBy: TableSuggestionColumn | undefined;
+  splitBy?: TableSuggestionColumn[];
   layerId: string;
   changeType: TableChangeType;
   keptLayerIds: string[];
@@ -503,7 +505,7 @@ function buildSuggestion({
   allowMixed?: boolean;
 }) {
   if (seriesType.includes('percentage') && xValue?.operation.scale === 'ordinal' && !splitBy) {
-    splitBy = xValue;
+    splitBy = [xValue];
     xValue = undefined;
   }
   const existingLayer = getExistingLayer(currentState, layerId) || null;
@@ -519,7 +521,7 @@ function buildSuggestion({
     layerId,
     seriesType,
     xAccessor: xValue?.columnId,
-    splitAccessor: splitBy?.columnId,
+    splitAccessors: splitBy ? splitBy.map((s) => s.columnId) : undefined,
     accessors,
     yConfig:
       existingLayer && 'yConfig' in existingLayer && existingLayer.yConfig
@@ -622,7 +624,7 @@ function buildSuggestion({
 
 function getScore(
   yValues: TableSuggestionColumn[],
-  splitBy: TableSuggestionColumn | undefined,
+  splitBy: TableSuggestionColumn[] | undefined,
   changeType: TableChangeType
 ) {
   // Unchanged table suggestions half the score because the underlying data doesn't change

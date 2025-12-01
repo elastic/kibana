@@ -176,6 +176,8 @@ export const getFormattedTable = (
     {}
   );
 
+  // The InvertedRawValueMap is a link between a table columnId and a map
+  // with links between each row formatterValue and its original raw value
   const invertedRawValueMap: InvertedRawValueMap = new Map(
     table.columns.map((c) => [c.id, new Map<string, RawValue>()])
   );
@@ -479,7 +481,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     return getSeriesName(
       d,
       {
-        splitAccessors: layer.splitAccessors || [],
+        splitAccessors: layer.splitAccessors ?? [],
         accessorsCount: singleTable ? allYAccessors.length : layer.accessors.length,
         alreadyFormattedColumns: formattedColumns,
         columns: formattedTable.columns,
@@ -501,9 +503,9 @@ export const getSeriesProps: GetSeriesPropsFn = ({
           isDarkMode,
           {
             type: 'categories',
-            categories: getColorCategories(table.rows, splitColumnIds[0]),
+            categories: getColorCategories(table.rows, splitColumnIds),
           },
-          splitColumnIds[0]
+          splitColumnIds
         )
       : (series) =>
           getColor(

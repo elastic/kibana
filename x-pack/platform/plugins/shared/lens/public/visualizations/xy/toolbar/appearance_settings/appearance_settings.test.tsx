@@ -27,7 +27,7 @@ describe('Appearance settings', () => {
           seriesType: 'bar',
           layerType: LayerTypes.DATA,
           layerId: 'first',
-          splitAccessor: 'baz',
+          splitAccessors: ['baz'],
           xAccessor: 'foo',
           accessors: ['bar'],
         },

@@ -409,8 +409,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         ? {
             type: 'categories',
             categories: colorMapping
-              ? getColorCategories(categoryRows, originalId, [null])
-              : getLegacyColorCategories(categoryRows, originalId, [null]),
+              ? getColorCategories(categoryRows, [originalId], [null])
+              : getLegacyColorCategories(categoryRows, [originalId], [null]),
           }
         : {
             type: 'ranges',

@@ -281,10 +281,10 @@ export const XyStyleSettings: React.FC<Props> = (props) => {
   const filteredBarLayers = dataLayers.filter((layer) => layer.seriesType.includes('bar'));
   const chartHasMoreThanOneBarSeries =
     filteredBarLayers.length > 1 ||
-    filteredBarLayers.some((layer) => layer.accessors.length > 1 || layer.splitAccessor);
+    filteredBarLayers.some((layer) => layer.accessors.length > 1 || layer.splitAccessors);
 
   const isTimeHistogramModeEnabled = dataLayers.some(
-    ({ xAccessor, layerId, seriesType, splitAccessor }) => {
+    ({ xAccessor, layerId, seriesType, splitAccessors: splitAccessor }) => {
       if (!xAccessor) {
         return false;
       }

@@ -418,8 +418,8 @@ export function validateLayersForDimension(
 
   // filter out those layers with no accessors at all
   const filteredLayers = dataLayers.filter(
-    ({ layer: { accessors, xAccessor, splitAccessor } }) =>
-      accessors.length > 0 || xAccessor != null || splitAccessor != null
+    ({ layer: { accessors, xAccessor, splitAccessors = [] } }) =>
+      accessors.length > 0 || xAccessor != null || splitAccessors.length > 0
   );
   // Multiple layers must be consistent:
   // * either a dimension is missing in ALL of them

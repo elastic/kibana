@@ -41,6 +41,7 @@ import type {
   UserMessage,
   AnnotationGroups,
   FormBasedPersistedState,
+  VisualizationInfo,
 } from '@kbn/lens-common';
 import { generateId } from '../../id_generator';
 import {
@@ -457,7 +458,7 @@ export const getXyVisualization = ({
             isDataLayer(l) &&
             l.seriesType === dataLayer.seriesType &&
             Boolean(l.xAccessor) === Boolean(dataLayer.xAccessor) &&
-            Boolean(l.splitAccessor) === Boolean(dataLayer.splitAccessor)
+            Boolean(l.splitAccessors) === Boolean(dataLayer.splitAccessors)
           ) {
             const { left: localLeft, right: localRight } = groupAxesByType([l], frame.activeData);
             // return true only if matching axis are found
@@ -513,17 +514,19 @@ export const getXyVisualization = ({
           groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
             defaultMessage: 'Breakdown',
           }),
-          accessors: dataLayer.splitAccessor
-            ? [
-                {
-                  columnId: dataLayer.splitAccessor,
-                  triggerIconType: dataLayer.collapseFn ? 'aggregate' : 'colorBy',
-                  palette: dataLayer.collapseFn ? undefined : colors,
-                },
-              ]
+          accessors: dataLayer.splitAccessors
+            ? dataLayer.splitAccessors.map((splitAccessor, i) => ({
+                columnId: splitAccessor,
+                triggerIconType: dataLayer.collapseFn
+                  ? 'aggregate'
+                  : i === 0
+                  ? 'colorBy'
+                  : undefined,
+                palette: dataLayer.collapseFn ? undefined : i === 0 ? colors : undefined,
+              }))
             : [],
           filterOperations: isBucketed,
-          supportsMoreColumns: !dataLayer.splitAccessor,
+          supportsMoreColumns: true, // !dataLayer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
           requiredMinDimensionCount:
             dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor ? 1 : 0,
@@ -617,7 +620,11 @@ export const getXyVisualization = ({
       newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
     }
     if (groupId === 'breakdown') {
-      newLayer.splitAccessor = columnId;
+      if (newLayer.splitAccessors) {
+        newLayer.splitAccessors = [...newLayer.splitAccessors, columnId];
+      } else {
+        newLayer.splitAccessors = [columnId];
+      }
     }
     return {
       ...prevState,
@@ -646,10 +653,13 @@ export const getXyVisualization = ({
     if (isDataLayer(newLayer)) {
       if (newLayer.xAccessor === columnId) {
         delete newLayer.xAccessor;
-      } else if (newLayer.splitAccessor === columnId) {
-        delete newLayer.splitAccessor;
-        // as the palette is associated with the break down by dimension, remove it together with the dimension
-        delete newLayer.palette;
+      } else if (newLayer.splitAccessors?.includes(columnId)) {
+        newLayer.splitAccessors = newLayer.splitAccessors.filter((a) => a !== columnId);
+        if (newLayer.splitAccessors.length === 0) {
+          delete newLayer.splitAccessors;
+          // as the palette is associated with the break down by dimension, remove it together with the dimension
+          delete newLayer.palette;
+        }
       }
     }
     if (newLayer.accessors.includes(columnId)) {
@@ -882,7 +892,7 @@ export const getXyVisualization = ({
       const breakDownLayerValidation = validateLayersForDimension(
         'break_down',
         state.layers,
-        ({ splitAccessor, seriesType }) =>
+        ({ splitAccessors: splitAccessor, seriesType }) =>
           seriesType.includes('percentage') && splitAccessor == null // check if no split accessor
       );
       if (!breakDownLayerValidation.valid) {
@@ -1190,7 +1200,7 @@ function getVisualizationInfo(
   frame: Partial<FramePublicAPI> | undefined,
   paletteService: PaletteRegistry,
   fieldFormats: FieldFormatsStart
-) {
+): VisualizationInfo {
   const isHorizontal = isHorizontalChart(state.layers);
   const visualizationLayersInfo = state.layers.map((layer) => {
     const palette = [];
@@ -1236,14 +1246,17 @@ function getVisualizationInfo(
           palette.push(...mappedAccessors.flatMap(({ color }) => color));
         }
       }
-      if (layer.splitAccessor) {
-        dimensions.push({
-          name: i18n.translate('xpack.lens.xyChart.splitSeries', {
-            defaultMessage: 'Breakdown',
-          }),
-          dimensionType: 'breakdown',
-          id: layer.splitAccessor,
+      if (layer.splitAccessors) {
+        layer.splitAccessors.forEach((splitAccessor) => {
+          dimensions.push({
+            name: i18n.translate('xpack.lens.xyChart.splitSeries', {
+              defaultMessage: 'Breakdown',
+            }),
+            dimensionType: 'breakdown',
+            id: splitAccessor,
+          });
         });
+
         if (!layer.collapseFn) {
           palette.push(
             ...paletteService
