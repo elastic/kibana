@@ -82,10 +82,11 @@ export const SchemaEditorFlyout = ({
   }, [applyGeoPointSuggestionProp, geoPointSuggestion, field]);
 
   const [nextField, setNextField] = useReducer(
-    (prev: SchemaField, updated: Partial<SchemaField>) => ({
-      ...prev,
-      ...updated,
-    }),
+    (prev: SchemaField, updated: Partial<SchemaField>) =>
+      ({
+        ...prev,
+        ...updated,
+      }) as SchemaField,
     initialField
   );
 
