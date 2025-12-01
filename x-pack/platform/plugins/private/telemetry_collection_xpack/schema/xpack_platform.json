@@ -481,6 +481,48 @@
               }
             }
           }
+        },
+        "llm_usage": {
+          "properties": {
+            "by_provider": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "provider": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "LLM provider name (e.g., openai, bedrock)"
+                    }
+                  },
+                  "count": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Number of LLM invocations for this provider"
+                    }
+                  }
+                }
+              }
+            },
+            "by_model": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "model": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "LLM model identifier"
+                    }
+                  },
+                  "count": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Number of LLM invocations for this model"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },

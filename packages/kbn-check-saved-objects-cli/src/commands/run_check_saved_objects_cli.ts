@@ -13,6 +13,7 @@ import { startServers, stopServers } from '../util/servers';
 import type { TaskContext } from './types';
 import {
   automatedRollbackTests,
+  checkRemovedTypes,
   getSnapshots,
   validateNewTypes,
   validateUpdatedTypes,
@@ -37,6 +38,8 @@ export function runCheckSavedObjectsCli() {
         gitRev,
         newTypes: [],
         updatedTypes: [],
+        currentRemovedTypes: [],
+        newRemovedTypes: [],
         fixtures: {},
         fix,
       };
@@ -50,6 +53,10 @@ export function runCheckSavedObjectsCli() {
           {
             title: 'Get type registry snapshots',
             task: getSnapshots,
+          },
+          {
+            title: 'Check removed SO types',
+            task: checkRemovedTypes,
           },
           {
             title: 'Validate new SO types',

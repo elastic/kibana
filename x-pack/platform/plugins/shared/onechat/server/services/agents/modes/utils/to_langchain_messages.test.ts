@@ -62,6 +62,32 @@ describe('conversationLangchainMessages', () => {
     },
   });
 
+  const createRound = (
+    parts: Partial<ProcessedConversationRound> = {}
+  ): ProcessedConversationRound => {
+    return {
+      id: 'round-1',
+      input: {
+        message: '',
+        attachments: [],
+      },
+      steps: [],
+      response: {
+        message: 'Response',
+      },
+      started_at: new Date().toISOString(),
+      time_to_first_token: 0,
+      time_to_last_token: 0,
+      model_usage: {
+        connector_id: 'unknown',
+        llm_calls: 1,
+        input_tokens: 12,
+        output_tokens: 42,
+      },
+      ...parts,
+    };
+  };
+
   it('returns only the user message if no previous rounds', () => {
     const nextInput = makeRoundInput('hello');
     const result = conversationToLangchainMessages({
@@ -73,8 +99,8 @@ describe('conversationLangchainMessages', () => {
   });
 
   it('handles a round with only user and assistant messages', () => {
-    const previousRounds: ProcessedConversationRound[] = [
-      {
+    const previousRounds = [
+      createRound({
         id: 'round-1',
         input: makeRoundInput('hi'),
         steps: [],
@@ -82,7 +108,7 @@ describe('conversationLangchainMessages', () => {
         started_at: now,
         time_to_first_token: 42,
         time_to_last_token: 100,
-      },
+      }),
     ];
     const nextInput = makeRoundInput('how are you?');
     const result = conversationToLangchainMessages({
@@ -110,8 +136,8 @@ describe('conversationLangchainMessages', () => {
         },
       },
     ]);
-    const previousRounds: ProcessedConversationRound[] = [
-      {
+    const previousRounds = [
+      createRound({
         id: 'round-1',
         input: makeRoundInput('find foo'),
         steps: [makeToolCallStep(toolCall)],
@@ -119,7 +145,7 @@ describe('conversationLangchainMessages', () => {
         started_at: now,
         time_to_first_token: 42,
         time_to_last_token: 100,
-      },
+      }),
     ];
     const nextInput = makeRoundInput('next');
     const result = conversationToLangchainMessages({
@@ -161,8 +187,8 @@ describe('conversationLangchainMessages', () => {
   });
 
   it('handles multiple rounds', () => {
-    const previousRounds: ProcessedConversationRound[] = [
-      {
+    const previousRounds = [
+      createRound({
         id: 'round-1',
         input: makeRoundInput('hi'),
         steps: [],
@@ -170,8 +196,8 @@ describe('conversationLangchainMessages', () => {
         started_at: now,
         time_to_first_token: 42,
         time_to_last_token: 100,
-      },
-      {
+      }),
+      createRound({
         id: 'round-2',
         input: makeRoundInput('search for bar'),
         steps: [
@@ -185,7 +211,7 @@ describe('conversationLangchainMessages', () => {
         started_at: now,
         time_to_first_token: 42,
         time_to_last_token: 100,
-      },
+      }),
     ];
     const nextInput = makeRoundInput('bye');
     const result = conversationToLangchainMessages({
@@ -235,8 +261,8 @@ describe('conversationLangchainMessages', () => {
         },
       },
     ]);
-    const previousRounds: ProcessedConversationRound[] = [
-      {
+    const previousRounds = [
+      createRound({
         id: 'round-1',
         input: makeRoundInput('find foo'),
         steps: [makeToolCallStep(toolCall)],
@@ -244,7 +270,7 @@ describe('conversationLangchainMessages', () => {
         started_at: now,
         time_to_first_token: 42,
         time_to_last_token: 100,
-      },
+      }),
     ];
     const nextInput = makeRoundInput('next');
     const result = conversationToLangchainMessages({
@@ -322,8 +348,8 @@ describe('conversationLangchainMessages', () => {
         { content: 'previous' },
         'Previous round attachment'
       );
-      const previousRounds: ProcessedConversationRound[] = [
-        {
+      const previousRounds = [
+        createRound({
           id: 'round-1',
           input: makeRoundInput('message with attachment', [attachment]),
           steps: [],
@@ -331,7 +357,7 @@ describe('conversationLangchainMessages', () => {
           started_at: now,
           time_to_first_token: 42,
           time_to_last_token: 100,
-        },
+        }),
       ];
       const nextInput = makeRoundInput('next message');
       const result = conversationToLangchainMessages({

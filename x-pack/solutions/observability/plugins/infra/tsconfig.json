@@ -122,6 +122,8 @@
     "@kbn/licensing-types",
     "@kbn/apm-types",
     "@kbn/react-query",
+    "@kbn/deeplinks-analytics",
+    "@kbn/esql-composer",
   ],
   "exclude": ["target/**/*"]
 }

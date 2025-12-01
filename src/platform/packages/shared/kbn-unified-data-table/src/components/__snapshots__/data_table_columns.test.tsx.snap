@@ -230,6 +230,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -363,6 +364,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -508,6 +510,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -640,6 +643,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -790,6 +794,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -935,6 +940,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -1071,6 +1077,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -1199,6 +1206,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -1332,6 +1340,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -1477,6 +1486,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -1608,6 +1618,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -1741,6 +1752,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -1911,6 +1923,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [
@@ -2059,6 +2072,7 @@ Array [
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
           "isPersisted": [Function],
+          "isTSDBMode": [Function],
           "isTimeBased": [Function],
           "isTimeNanosBased": [Function],
           "metaFields": Array [

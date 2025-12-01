@@ -20,7 +20,7 @@ export class AssetService {
   ) {}
 
   async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<AssetClient> {
-    const [coreStart, pluginsStart] = await this.coreSetup.getStartServices();
+    const [coreStart] = await this.coreSetup.getStartServices();
 
     const adapter = new StorageIndexAdapter<AssetStorageSettings, StoredAssetLink>(
       coreStart.elasticsearch.client.asInternalUser,
@@ -31,7 +31,6 @@ export class AssetService {
     return new AssetClient({
       storageClient: adapter.getClient(),
       soClient: coreStart.savedObjects.getScopedClient(request),
-      rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
     });
   }
 }

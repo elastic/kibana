@@ -34,6 +34,11 @@ export type {
   LLmDescriptionHandlerParams,
   LlmDescriptionHandler,
 } from './tool_provider';
-export type { ModelProvider, ScopedModel } from './model_provider';
+export type {
+  ModelProvider,
+  ScopedModel,
+  ModelProviderStats,
+  ModelCallInfo,
+} from './model_provider';
 export type { ToolResultStore, WritableToolResultStore } from './result_store';
 export type { AttachmentsService } from './attachments_service';

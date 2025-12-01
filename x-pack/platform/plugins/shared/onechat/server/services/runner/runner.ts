@@ -19,6 +19,7 @@ import type {
   RunToolReturn,
   RunAgentReturn,
   WritableToolResultStore,
+  ModelProvider,
 } from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
@@ -35,7 +36,7 @@ export interface CreateScopedRunnerDeps {
   elasticsearch: ElasticsearchServiceStart;
   security: SecurityServiceStart;
   // internal service deps
-  modelProviderFactory: ModelProviderFactoryFn;
+  modelProvider: ModelProvider;
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
   attachmentsService: AttachmentServiceStart;
@@ -50,8 +51,10 @@ export interface CreateScopedRunnerDeps {
 
 export type CreateRunnerDeps = Omit<
   CreateScopedRunnerDeps,
-  'request' | 'defaultConnectorId' | 'resultStore'
->;
+  'request' | 'defaultConnectorId' | 'resultStore' | 'modelProvider'
+> & {
+  modelProviderFactory: ModelProviderFactoryFn;
+};
 
 export class RunnerManager {
   public readonly deps: CreateScopedRunnerDeps;
@@ -103,18 +106,21 @@ export const createScopedRunner = (deps: CreateScopedRunnerDeps): ScopedRunner =
 };
 
 export const createRunner = (deps: CreateRunnerDeps): Runner => {
+  const { modelProviderFactory, ...runnerDeps } = deps;
   return {
     runTool: (runToolParams) => {
       const { request, defaultConnectorId, ...otherParams } = runToolParams;
       const resultStore = createResultStore();
-      const allDeps = { ...deps, request, defaultConnectorId, resultStore };
+      const modelProvider = modelProviderFactory({ request, defaultConnectorId });
+      const allDeps = { ...runnerDeps, modelProvider, request, defaultConnectorId, resultStore };
       const runner = createScopedRunner(allDeps);
       return runner.runTool(otherParams);
     },
     runAgent: (params) => {
       const { request, defaultConnectorId, ...otherParams } = params;
       const resultStore = createResultStore(params.agentParams.conversation?.rounds);
-      const allDeps = { ...deps, request, defaultConnectorId, resultStore };
+      const modelProvider = modelProviderFactory({ request, defaultConnectorId });
+      const allDeps = { ...runnerDeps, modelProvider, request, defaultConnectorId, resultStore };
       const runner = createScopedRunner(allDeps);
       return runner.runAgent(otherParams);
     },

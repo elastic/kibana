@@ -12,6 +12,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { DEFAULT_ALERTS_INDEX, DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { timelineActions, timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
@@ -101,6 +103,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const { timelineFullScreen } = useTimelineFullScreen();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const spaceId = useSpaceId();
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
   const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.timeline);
 
@@ -143,6 +146,15 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     ) {
       return;
     }
+    // TODO: newDataViewPickerEnabled: With the new data view picker, we should not update the selected patterns
+    // on timeline, as that prevents us from guiding the user to duplicate the data view or using the new alerts only dv
+    if (
+      selectedDataViewIdTimeline === `${DEFAULT_DATA_VIEW_ID}-${spaceId}` &&
+      selectedPatternsTimeline.length === 1 &&
+      selectedPatternsTimeline[0].includes(DEFAULT_ALERTS_INDEX)
+    ) {
+      return;
+    }
     dispatch(
       timelineActions.updateDataView({
         dataViewId: selectedDataViewId,
@@ -157,6 +169,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     selectedDataViewIdTimeline,
     selectedPatterns,
     selectedPatternsTimeline,
+    spaceId,
     timelineId,
   ]);
 

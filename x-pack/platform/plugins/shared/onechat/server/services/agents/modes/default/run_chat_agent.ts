@@ -148,7 +148,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   };
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
-    addRoundCompleteEvent({ userInput: processedInput, startTime }),
+    addRoundCompleteEvent({ userInput: processedInput, startTime, modelProvider }),
     shareReplay()
   );
 
