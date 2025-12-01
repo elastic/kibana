@@ -17,12 +17,14 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { ESQLControlsFlyout } from '.';
+import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
   getValuesFromQueryField: jest.fn().mockReturnValue('field'),
 }));
 
+const core = coreMock.createStart();
 const defaultProps = {
   initialVariableType: ESQLVariableType.FIELDS,
   queryString: 'FROM foo | WHERE field ==',
@@ -34,6 +36,7 @@ const defaultProps = {
   esqlVariables: [],
   ariaLabelledBy: 'esqlControlFlyoutTitle',
   telemetryTriggerSource: ControlTriggerSource.QUESTION_MARK,
+  telemetryService: new ESQLEditorTelemetryService(core.analytics),
 };
 
 const services = {

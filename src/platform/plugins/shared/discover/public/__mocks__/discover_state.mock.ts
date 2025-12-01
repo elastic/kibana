@@ -23,7 +23,7 @@ import {
 } from '../application/main/state_management/redux';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
 import {
   getConnectedCustomizationService,
@@ -38,10 +38,8 @@ import { DiscoverSearchSessionManager } from '../application/main/state_manageme
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { omit } from 'lodash';
-import {
-  getCurrentUrlState,
-  getInitialState,
-} from '../application/main/state_management/discover_app_state_container';
+import { getCurrentUrlState } from '../application/main/state_management/utils/cleanup_url_state';
+import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
 
 interface CreateInternalStateStoreMockOptions {
   runtimeStateManager?: RuntimeStateManager;
@@ -62,7 +60,7 @@ function createInternalStateStoreMock({
     useHash: storeInSessionStorage,
     history: services.history,
     useHashQuery: customizationContext.displayMode !== 'embedded',
-    ...(toasts && withNotifyOnErrors(toasts)),
+    ...toasts,
   });
   runtimeStateManager ??= createRuntimeStateManager();
   const tabsStorageManager = createTabsStorageManager({
@@ -191,6 +189,7 @@ export function getDiscoverInternalStateMock({
       const customizationService = await getConnectedCustomizationService({
         stateContainer,
         customizationCallbacks: [],
+        services,
       });
 
       await internalState.dispatch(
@@ -331,7 +330,7 @@ export function getDiscoverStateMock({
   internalState.dispatch(
     internalStateActions.resetAppState({
       tabId: internalState.getState().tabs.unsafeCurrentId,
-      appState: getInitialState({
+      appState: getInitialAppState({
         initialUrlState: getCurrentUrlState(stateStorageContainer, services),
         savedSearch: finalSavedSearch,
         services,

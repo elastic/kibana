@@ -5,50 +5,58 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import { setupEnvironment } from '../../helpers';
-import type { TimelineTestBed } from './timeline.helpers';
-import { setupTimelineTestBed } from './timeline.helpers';
+import { screen } from '@testing-library/react';
+import { setupEnvironment } from '../../helpers/setup_environment';
+import { renderEditPolicy } from '../../helpers/render_edit_policy';
+import { createTogglePhaseAction } from '../../helpers/actions/toggle_phase_action';
 
 describe('<EditPolicy /> timeline', () => {
-  let testBed: TimelineTestBed;
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
     httpRequestsMockHelpers.setDefaultResponses();
 
-    await act(async () => {
-      testBed = await setupTimelineTestBed(httpSetup);
-    });
+    renderEditPolicy(httpSetup);
 
-    const { component } = testBed;
-    component.update();
+    await screen.findByTestId('savePolicyButton');
   });
 
   test('showing all phases on the timeline', async () => {
-    const { actions } = testBed;
+    const togglePhase = createTogglePhaseAction();
+
     // This is how the default policy should look
-    expect(actions.timeline.hasPhase('hot')).toBe(true);
-    expect(actions.timeline.hasPhase('warm')).toBe(false);
-    expect(actions.timeline.hasPhase('cold')).toBe(false);
-    expect(actions.timeline.hasPhase('delete')).toBe(false);
+    expect(screen.getByTestId('ilmTimelinePhase-hot')).toBeInTheDocument();
+    expect(screen.queryByTestId('ilmTimelinePhase-warm')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ilmTimelinePhase-cold')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ilmTimelinePhase-delete')).not.toBeInTheDocument();
 
-    await actions.togglePhase('warm');
-    expect(actions.timeline.hasPhase('hot')).toBe(true);
-    expect(actions.timeline.hasPhase('warm')).toBe(true);
-    expect(actions.timeline.hasPhase('cold')).toBe(false);
-    expect(actions.timeline.hasPhase('delete')).toBe(false);
+    await togglePhase('warm');
+    expect(screen.getByTestId('ilmTimelinePhase-hot')).toBeInTheDocument();
+    expect(screen.getByTestId('ilmTimelinePhase-warm')).toBeInTheDocument();
+    expect(screen.queryByTestId('ilmTimelinePhase-cold')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ilmTimelinePhase-delete')).not.toBeInTheDocument();
 
-    await actions.togglePhase('cold');
-    expect(actions.timeline.hasPhase('hot')).toBe(true);
-    expect(actions.timeline.hasPhase('warm')).toBe(true);
-    expect(actions.timeline.hasPhase('cold')).toBe(true);
-    expect(actions.timeline.hasPhase('delete')).toBe(false);
+    await togglePhase('cold');
+    expect(screen.getByTestId('ilmTimelinePhase-hot')).toBeInTheDocument();
+    expect(screen.getByTestId('ilmTimelinePhase-warm')).toBeInTheDocument();
+    expect(screen.getByTestId('ilmTimelinePhase-cold')).toBeInTheDocument();
+    expect(screen.queryByTestId('ilmTimelinePhase-delete')).not.toBeInTheDocument();
 
-    await actions.togglePhase('delete');
-    expect(actions.timeline.hasPhase('hot')).toBe(true);
-    expect(actions.timeline.hasPhase('warm')).toBe(true);
-    expect(actions.timeline.hasPhase('cold')).toBe(true);
-    expect(actions.timeline.hasPhase('delete')).toBe(true);
+    await togglePhase('delete');
+    expect(screen.getByTestId('ilmTimelinePhase-hot')).toBeInTheDocument();
+    expect(screen.getByTestId('ilmTimelinePhase-warm')).toBeInTheDocument();
+    expect(screen.getByTestId('ilmTimelinePhase-cold')).toBeInTheDocument();
+    expect(screen.getByTestId('ilmTimelinePhase-delete')).toBeInTheDocument();
   });
 });
