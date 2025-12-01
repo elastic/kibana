@@ -84,6 +84,7 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       matchType: 'timezone',
       fullKey: timezonePrefix,
       match: timezoneFieldMatch,
+      // @ts-expect-error upgrade typescript v5.9.3
       valueStartIndex: timezoneFieldMatch.groups?.prefix.length + 1 ?? 0,
     };
   }
