@@ -569,9 +569,7 @@ export class AlertsService implements IAlertsService {
       });
     } catch (error) {
       logger.error(
-        `Error updating muted field to ${muted} for rule ID ${ruleId} and alert instance ID ${alertInstanceId} - ${
-          error.message
-        }`
+        `Error updating muted field to ${muted} for rule ID ${ruleId} and alert instance ID ${alertInstanceId} - ${error.message}`
       );
       throw error;
     }
