@@ -86,7 +86,7 @@ export const SchemaEditorFlyout = ({
       ({
         ...prev,
         ...updated,
-      }) as SchemaField,
+      } as SchemaField),
     initialField
   );
 
