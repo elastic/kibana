@@ -53,7 +53,6 @@ export class McpClient {
 
   /**
    * Connect to the MCP client and return the connected status and capabilities.
-   * @returns {Promise<{ connected: boolean; capabilities?: ServerCapabilities }>} The connected status and capabilities.
    */
   async connect(): Promise<{ connected: boolean; capabilities?: ServerCapabilities }> {
     if (!this.connected) {
@@ -82,7 +81,6 @@ export class McpClient {
 
   /**
    * Disconnect from the MCP client and return the disconnected status.
-   * @returns {Promise<boolean>} The disconnected status.
    */
   async disconnect(): Promise<boolean> {
     if (this.connected) {
@@ -94,7 +92,6 @@ export class McpClient {
 
   /**
    * List the tools available on the MCP client.
-   * @returns {Promise<ListToolsResponse>} The list of tools.
    */
   async listTools(): Promise<ListToolsResponse> {
     if (this.connected) {
@@ -134,7 +131,6 @@ export class McpClient {
   /**
    * Call a tool on the MCP client.
    * @param {CallToolParams} params - The parameters for the tool call.
-   * @returns {Promise<CallToolResponse>} The response from the tool call.
    */
   async callTool(params: CallToolParams): Promise<CallToolResponse> {
     if (!this.connected) {
@@ -143,11 +139,11 @@ export class McpClient {
     const response = await this.client.callTool({
       name: params.name,
       _meta: {},
-      arguments: params.arguments ?? {},
+      arguments: params.arguments,
     });
 
     if (response.isError) {
-      throw new Error(`Error calling tool ${params.name}: ${response.error}`);
+      throw new Error(`Error calling tool ${params.name} with ${params.arguments}: ${response.error}`);
     }
 
     const content = response.content as Array<
