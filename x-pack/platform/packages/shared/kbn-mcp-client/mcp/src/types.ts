@@ -21,7 +21,7 @@ export interface McpClientOptions {
 
 export interface CallToolParams {
   name: string;
-  arguments: Record<string, unknown>;
+  arguments?: Record<string, unknown>;
 }
 
 export interface NonTextPart {
