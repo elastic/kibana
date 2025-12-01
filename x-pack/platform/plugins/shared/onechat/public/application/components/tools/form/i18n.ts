@@ -244,6 +244,25 @@ export const i18nMessages = {
             defaultMessage: 'Workflow',
           }
         ),
+        waitForCompletionLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionLabel',
+          {
+            defaultMessage: 'Workflow execution',
+          }
+        ),
+        waitForCompletionHelpText: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionHelpText',
+          {
+            defaultMessage:
+              'If checked, the tool waits until the workflow completes (up to 120s) and returns the results. If unchecked, the workflow runs in the background and you can ask the agent to check the execution status.',
+          }
+        ),
+        waitForCompletionCheckboxLabel: i18n.translate(
+          'xpack.onechat.tools.newTool.configuration.form.workflow.waitForCompletionCheckboxLabel',
+          {
+            defaultMessage: 'Wait until the workflow completes',
+          }
+        ),
       },
     },
   },

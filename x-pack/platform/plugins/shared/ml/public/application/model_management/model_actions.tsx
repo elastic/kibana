@@ -203,6 +203,7 @@ export function useModelActions({
           await navigateToPath(path, false);
         },
       },
+      // @ts-expect-error type icon or button is correct
       {
         name: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
           defaultMessage: 'Start deployment',
@@ -215,7 +216,6 @@ export function useModelActions({
         ),
         'data-test-subj': 'mlModelsTableRowStartDeploymentAction',
         icon: 'play',
-        // @ts-ignore
         type: isMobileLayout ? 'icon' : 'button',
         isPrimary: true,
         color: 'success',
@@ -367,6 +367,7 @@ export function useModelActions({
           return canStartStopTrainedModels;
         },
       },
+      // @ts-expect-error type icon or button is correct
       {
         name: i18n.translate('xpack.ml.inference.modelsList.testModelActionLabel', {
           defaultMessage: 'Test',
@@ -376,7 +377,6 @@ export function useModelActions({
         }),
         'data-test-subj': 'mlModelsTableRowTestAction',
         icon: 'inputOutput',
-        // @ts-ignore
         type: isMobileLayout ? 'icon' : 'button',
         isPrimary: true,
         available: (item) => isTestable(item, true),
@@ -426,6 +426,7 @@ export function useModelActions({
           await navigateToPath(path, false);
         },
       },
+      // @ts-expect-error type icon or button is correct
       {
         name: (model) => {
           return isModelDownloadItem(model) && model.state === MODEL_STATE.DOWNLOADING ? (
@@ -472,7 +473,6 @@ export function useModelActions({
         },
         'data-test-subj': 'mlModelsTableRowDeleteAction',
         icon: 'trash',
-        // @ts-ignore
         type: isMobileLayout ? 'icon' : 'button',
         color: 'danger',
         isPrimary: false,
