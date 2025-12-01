@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import dedent from 'dedent';
 import type { Observable, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs';
 
@@ -23,6 +22,7 @@ import type {
   FeaturesPluginSetup as FeaturesPluginSetup,
   FeaturesPluginStart as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
+import { i18n as i18nLib } from '@kbn/i18n';
 import {
   Actions,
   privilegesFactory,
@@ -50,6 +50,7 @@ import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { APPLICATION_PREFIX } from '../../common/constants';
 import { canRedirectRequest } from '../authentication';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
+import { createRedirectHtmlPage } from '../lib/html_page_utils';
 import type { SpacesService } from '../plugin';
 
 export { Actions } from '@kbn/security-authorization-core';
@@ -196,17 +197,12 @@ export class AuthorizationService {
             `/security/reset_session?next=${encodeURIComponent(next)}`
           );
 
-          const body = dedent`
-            <html>
-              <head>
-                <title>Elastic</title>
-              </head>
-              <body>
-                <h1>Unauthenticated</h1>
-                <a href="${location}">Click here if you are not redirected automatically</a>
-              </body>
-            </html>
-          `;
+          const body = createRedirectHtmlPage(
+            i18nLib.translate('xpack.security.authorization.unauthenticatedTitle', {
+              defaultMessage: 'Unauthenticated',
+            }),
+            location
+          );
           return toolkit.render({
             body,
             headers: {
