@@ -65,6 +65,7 @@ export default function updateGapAutoFillSchedulerTests({ getService }: FtrProvi
             gap_fill_range: 'now-90d',
             max_backfills: 100,
             num_retries: 1,
+            scope: ['test-scope'],
             rule_types: [{ type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' }],
           };
 
@@ -101,6 +102,7 @@ export default function updateGapAutoFillSchedulerTests({ getService }: FtrProvi
               gap_fill_range: 'now-45d',
               max_backfills: 250,
               num_retries: 3,
+              scope: ['test-scope'],
               rule_types: schedulerBody.rule_types,
             });
 
@@ -134,6 +136,7 @@ export default function updateGapAutoFillSchedulerTests({ getService }: FtrProvi
                 gap_fill_range: 'now-60d',
                 max_backfills: 100,
                 num_retries: 1,
+                scope: ['test-scope'],
                 rule_types: [
                   { type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' },
                 ],
@@ -170,6 +173,7 @@ export default function updateGapAutoFillSchedulerTests({ getService }: FtrProvi
             gap_fill_range: 'now-60d',
             max_backfills: 1000,
             num_retries: 1,
+            scope: ['test-scope'],
             rule_types: [{ type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' }],
           };
 
@@ -223,6 +227,7 @@ export default function updateGapAutoFillSchedulerTests({ getService }: FtrProvi
               max_backfills: schedulerBody.max_backfills,
               num_retries: schedulerBody.num_retries,
               rule_types: schedulerBody.rule_types,
+              scope: schedulerBody.scope,
             })
             .expect(200);
 

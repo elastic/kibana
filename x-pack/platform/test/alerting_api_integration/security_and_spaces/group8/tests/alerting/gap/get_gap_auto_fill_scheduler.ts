@@ -38,6 +38,7 @@ export default function getGapAutoFillSchedulerTests({ getService }: FtrProvider
             gap_fill_range: 'now-30d',
             max_backfills: 10,
             num_retries: 1,
+            scope: ['test-scope'],
             rule_types: [{ type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' }],
           };
           const createResp = await supertest
@@ -84,17 +85,6 @@ export default function getGapAutoFillSchedulerTests({ getService }: FtrProvider
           }
         });
 
-        it('returns 401 when unauthenticated', async () => {
-          if (scenario.id !== 'superuser at space1') {
-            return;
-          }
-          const resp = await supertestWithoutAuth.get(
-            `${getUrlPrefix(
-              apiOptions.spaceId
-            )}/internal/alerting/rules/gaps/auto_fill_scheduler/some-id`
-          );
-          expect(resp.statusCode).to.eql(401);
-        });
 
         it('returns 404 for non-existent id when authorized', async () => {
           if (

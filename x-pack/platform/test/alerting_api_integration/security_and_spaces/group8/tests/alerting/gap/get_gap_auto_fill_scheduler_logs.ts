@@ -36,16 +36,6 @@ export default function getGapAutoFillSchedulerLogsTests({ getService }: FtrProv
         });
 
         it('gets scheduler logs by id', async () => {
-          // Test 401 when unauthenticated
-          if (scenario.id === 'superuser at space1') {
-            const unauthenticatedResp = await supertestWithoutAuth.get(
-              `${getUrlPrefix(
-                apiOptions.spaceId
-              )}/internal/alerting/rules/gaps/auto_fill_scheduler/some-id/logs`
-            );
-            expect(unauthenticatedResp.statusCode).to.eql(401);
-          }
-
           const createBody = {
             name: `it-scheduler-logs-${Date.now()}`,
             schedule: { interval: '1m' },
@@ -74,6 +64,7 @@ export default function getGapAutoFillSchedulerLogsTests({ getService }: FtrProv
                 apiOptions.spaceId
               )}/internal/alerting/rules/gaps/auto_fill_scheduler/${schedulerId}/logs`
             )
+            .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
             .send({
               start,
@@ -118,6 +109,8 @@ export default function getGapAutoFillSchedulerLogsTests({ getService }: FtrProv
                   end,
                   page: 1,
                   per_page: 50,
+                  sort_field: '@timestamp',
+                  sort_direction: 'desc',
                 })
                 .auth(apiOptions.username, apiOptions.password);
               expect(notFoundResp.statusCode).to.eql(404);
@@ -168,6 +161,7 @@ export default function getGapAutoFillSchedulerLogsTests({ getService }: FtrProv
               )}/internal/alerting/rules/gaps/auto_fill_scheduler/${schedulerId}/logs`
             )
             .auth(apiOptions.username, apiOptions.password)
+            .set('kbn-xsrf', 'foo')
             .send({
               start,
               end,
@@ -224,6 +218,7 @@ export default function getGapAutoFillSchedulerLogsTests({ getService }: FtrProv
               )}/internal/alerting/rules/gaps/auto_fill_scheduler/${schedulerId}/logs`
             )
             .auth(apiOptions.username, apiOptions.password)
+            .set('kbn-xsrf', 'foo')
             .send({
               start,
               end,

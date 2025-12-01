@@ -75,6 +75,11 @@ export default function deleteGapAutoFillSchedulerTests({ getService }: FtrProvi
                 rule_types: [
                   { type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' },
                 ],
+                scope: ['test-scope'],
+                max_backfills: 1000,
+                num_retries: 1,
+                gap_fill_range: 'now-60d',
+                enabled: true,
                 schedule: { interval: '1m' },
               });
 
@@ -129,6 +134,7 @@ export default function deleteGapAutoFillSchedulerTests({ getService }: FtrProvi
               gap_fill_range: 'now-60d',
               max_backfills: 1000,
               num_retries: 1,
+              scope: ['test-scope'],
               rule_types: [
                 { type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' },
               ],
