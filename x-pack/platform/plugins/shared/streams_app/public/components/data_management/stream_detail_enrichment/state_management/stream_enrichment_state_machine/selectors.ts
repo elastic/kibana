@@ -8,10 +8,12 @@
 import { createSelector } from 'reselect';
 import { isActionBlock } from '@kbn/streamlang';
 import moment from 'moment';
+import { Streams } from '@kbn/streams-schema';
 import type { StreamEnrichmentContextType } from './types';
 import { isStepUnderEdit } from '../steps_state_machine';
 import { canDataSourceTypeBeOutdated } from './utils';
 import type { DataSourceContext } from '../data_source_state_machine';
+import type { StreamType } from '../../../../../telemetry/types';
 
 /**
  * Selects the processor marked as the draft processor.
@@ -99,5 +101,20 @@ export const selectWhetherThereAreOutdatedDocumentsInSimulation = createSelector
     const streamProcessingTimestamp = new Date(processingUpdatedAt).getTime();
 
     return oldestDocumentTimestamp < streamProcessingTimestamp;
+  }
+);
+
+export const selectStreamTypeForTelemetry = createSelector(
+  [(context: StreamEnrichmentContextType) => context.definition],
+  (definition): StreamType => {
+    if (Streams.WiredStream.GetResponse.is(definition)) {
+      return 'wired';
+    }
+
+    if (Streams.ClassicStream.GetResponse.is(definition)) {
+      return 'classic';
+    }
+
+    return 'unknown';
   }
 );
