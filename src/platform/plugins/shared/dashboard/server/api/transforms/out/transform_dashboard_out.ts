@@ -32,10 +32,10 @@ export function transformDashboardOut(
     timeRestore,
     timeTo,
     title,
-    version,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     project_routing,
   } = attributes;
+
   // Extract tag references
   const tags: string[] = references
     ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
@@ -67,6 +67,5 @@ export function transformDashboardOut(
     ...(tags && tags.length && { tags }),
     ...(timeRange && { timeRange }),
     title: title ?? '',
-    ...(version && { version }),
   };
 }
