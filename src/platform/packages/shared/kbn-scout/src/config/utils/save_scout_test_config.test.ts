@@ -35,6 +35,7 @@ const testServersConfig = {
     password: 'changeme',
   },
   serverless: true,
+  uiam: false,
   projectType: 'oblt' as ServerlessProjectType,
   isCloud: true,
   license: 'trial',
