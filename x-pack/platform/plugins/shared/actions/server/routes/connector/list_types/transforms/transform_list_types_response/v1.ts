@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ConnectorType } from '../../../../../application/connector/types';
 import type { ConnectorTypesResponseV1 } from '../../../../../../common/routes/connector/response';
+import type { ConnectorType } from '../../../../../application/connector/types';
 
 export const transformListTypesResponse = (
   results: ConnectorType[]
@@ -22,6 +22,7 @@ export const transformListTypesResponse = (
       supportedFeatureIds,
       isSystemActionType,
       subFeature,
+      allowMultipleSystemActions,
     }) => ({
       id,
       name,
@@ -32,6 +33,7 @@ export const transformListTypesResponse = (
       supported_feature_ids: supportedFeatureIds,
       is_system_action_type: isSystemActionType,
       sub_feature: subFeature,
+      allow_multiple_system_actions: allowMultipleSystemActions,
     })
   );
 };

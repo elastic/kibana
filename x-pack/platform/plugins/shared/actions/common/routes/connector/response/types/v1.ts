@@ -7,10 +7,10 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type {
-  connectorResponseSchemaV1,
-  connectorTypeResponseSchemaV1,
   allConnectorsResponseSchema,
   connectorExecuteResponseSchema,
+  connectorResponseSchemaV1,
+  connectorTypeResponseSchemaV1,
 } from '..';
 
 type ConnectorResponseSchemaType = TypeOf<typeof connectorResponseSchemaV1>;
@@ -42,6 +42,7 @@ export interface ConnectorTypesResponse {
   supported_feature_ids: ConnectorTypeResponseSchemaType['supported_feature_ids'];
   is_system_action_type: ConnectorTypeResponseSchemaType['is_system_action_type'];
   sub_feature?: ConnectorTypeResponseSchemaType['sub_feature'];
+  allow_multiple_system_actions?: ConnectorTypeResponseSchemaType['allow_multiple_system_actions'];
 }
 
 type ConnectorExecuteResponseSchemaType = TypeOf<typeof connectorExecuteResponseSchema>;

@@ -104,6 +104,14 @@ export const connectorTypeResponseSchema = schema.object({
       },
     })
   ),
+  allow_multiple_system_actions: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Indicates whether multiple instances of the same system action connector can be used in a single rule.',
+      },
+    })
+  ),
 });
 
 export const connectorExecuteResponseSchema = schema.object({

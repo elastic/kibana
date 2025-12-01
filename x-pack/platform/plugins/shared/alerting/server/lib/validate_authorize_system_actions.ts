@@ -40,32 +40,40 @@ export const validateAndAuthorizeSystemActions = async ({
    */
   const actionIds: Set<string> = new Set(systemActions.map((action) => action.id));
 
+  // Check if there are duplicate system action connector IDs
+  if (actionIds.size !== systemActions.length) {
+    // Duplicates detected - validate if they're allowed
+    const actionResults = await actionsClient.getBulk({
+      ids: Array.from(actionIds),
+      throwIfSystemAction: false,
+    });
+
+    const actionsByConnectorId = new Map<string, number>();
+    systemActions.forEach((action) => {
+      actionsByConnectorId.set(action.id, (actionsByConnectorId.get(action.id) || 0) + 1);
+    });
+
+    const actionTypes = await actionsClient.listTypes({ includeSystemActionTypes: true });
+
+    for (const [connectorId, count] of actionsByConnectorId.entries()) {
+      if (count > 1) {
+        const actionResult = actionResults.find((a) => a.id === connectorId);
+        const actionTypeId = actionResult?.actionTypeId;
+
+        // Check if this action type allows multiple instances per rule
+        const actionType = actionTypes.find((type) => type.id === actionTypeId);
+
+        if (!actionType || !actionType.allowMultipleSystemActions) {
+          throw Boom.badRequest('Cannot use the same system action twice');
+        }
+      }
+    }
+  }
+
   const actionResults = await actionsClient.getBulk({
     ids: Array.from(actionIds),
     throwIfSystemAction: false,
   });
-
-  // System action types that allow multiple instances per rule
-  const SYSTEM_ACTIONS_ALLOWING_MULTIPLE_INSTANCES = new Set(['.workflows']);
-
-  // Check for duplicate system action connector IDs
-  // Group actions by their connector ID to detect duplicates
-  const actionsByConnectorId = new Map<string, number>();
-  systemActions.forEach((action) => {
-    actionsByConnectorId.set(action.id, (actionsByConnectorId.get(action.id) || 0) + 1);
-  });
-
-  // Validate that duplicate system actions are only allowed for specific action types
-  for (const [connectorId, count] of actionsByConnectorId.entries()) {
-    if (count > 1) {
-      const actionResult = actionResults.find((a) => a.id === connectorId);
-      const actionTypeId = actionResult?.actionTypeId;
-
-      if (!actionTypeId || !SYSTEM_ACTIONS_ALLOWING_MULTIPLE_INSTANCES.has(actionTypeId)) {
-        throw Boom.badRequest('Cannot use the same system action twice');
-      }
-    }
-  }
 
   const systemActionsWithActionTypeId: RuleSystemAction[] = [];
 
