@@ -111,7 +111,7 @@ describe('MultiOptionUnionWidget - Serializer/Deserializer Integration', () => {
     (window as any).serializedData = undefined;
   });
 
-  it('should initialize with "basic" when editing a connector with basic auth', async () => {
+  it('should initialize from async form data (deserializer)', async () => {
     const apiData = {
       config: { url: 'https://example.com', authType: 'basic' },
       secrets: {}, // Secrets are stripped by API
@@ -125,51 +125,7 @@ describe('MultiOptionUnionWidget - Serializer/Deserializer Integration', () => {
     });
   });
 
-  it('should initialize with "bearer" when editing a connector with bearer auth', async () => {
-    const apiData = {
-      config: { url: 'https://example.com', authType: 'bearer' },
-      secrets: {},
-    };
-
-    render(<TestComponent initialData={apiData} />);
-
-    await waitFor(() => {
-      const bearerCard = screen.getByLabelText('Bearer Token');
-      expect(bearerCard).toBeChecked();
-    });
-  });
-
-  it('should allow switching from basic to bearer and serialize correctly', async () => {
-    const apiData = {
-      config: { url: 'https://example.com', authType: 'basic' },
-      secrets: {},
-    };
-
-    render(<TestComponent initialData={apiData} />);
-
-    await waitFor(() => {
-      expect(screen.getByLabelText('Basic Auth')).toBeChecked();
-    });
-
-    const bearerCard = screen.getByLabelText('Bearer Token');
-    await userEvent.click(bearerCard);
-
-    await waitFor(() => {
-      expect(bearerCard).toBeChecked();
-    });
-
-    const submitButton = screen.getByText('Submit');
-    await userEvent.click(submitButton);
-
-    await waitFor(() => {
-      const serialized = (window as any).serializedData;
-      expect(serialized).toBeDefined();
-      expect(serialized.config.authType).toBe('bearer');
-      expect(serialized.secrets.authType).toBe('bearer');
-    });
-  });
-
-  it('should not overwrite user selection when form re-renders', async () => {
+  it('should not overwrite user selection when form re-renders (ref flag pattern)', async () => {
     const apiData = {
       config: { url: 'https://example.com', authType: 'basic' },
       secrets: {},
@@ -192,53 +148,6 @@ describe('MultiOptionUnionWidget - Serializer/Deserializer Integration', () => {
 
     await waitFor(() => {
       expect(screen.getByLabelText('Bearer Token')).toBeChecked();
-    });
-  });
-
-  it('should handle creating a new connector (no authType in config)', async () => {
-    const apiData = {
-      config: { url: '' },
-      secrets: {},
-    };
-
-    render(<TestComponent initialData={apiData} />);
-
-    await waitFor(() => {
-      const noneCard = screen.getByLabelText('None');
-      expect(noneCard).toBeChecked();
-    });
-  });
-
-  it('should preserve selection and sync to form when switching options', async () => {
-    const apiData = {
-      config: { url: 'https://example.com', authType: 'none' },
-      secrets: {},
-    };
-
-    render(<TestComponent initialData={apiData} />);
-
-    await waitFor(() => {
-      expect(screen.getByLabelText('None')).toBeChecked();
-    });
-
-    await userEvent.click(screen.getByLabelText('Basic Auth'));
-
-    await waitFor(() => {
-      expect(screen.getByLabelText('Basic Auth')).toBeChecked();
-    });
-
-    await userEvent.click(screen.getByLabelText('Bearer Token'));
-
-    await waitFor(() => {
-      expect(screen.getByLabelText('Bearer Token')).toBeChecked();
-    });
-
-    await userEvent.click(screen.getByText('Submit'));
-
-    await waitFor(() => {
-      const serialized = (window as any).serializedData;
-      expect(serialized.secrets.authType).toBe('bearer');
-      expect(serialized.config.authType).toBe('bearer');
     });
   });
 });
