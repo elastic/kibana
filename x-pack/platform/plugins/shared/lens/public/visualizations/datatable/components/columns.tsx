@@ -13,19 +13,105 @@ import type {
   EuiDataGridColumnCellActionProps,
   EuiListGroupItemProps,
 } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import { LENS_ROW_HEIGHT_MODE, DEFAULT_HEADER_ROW_HEIGHT } from '@kbn/lens-common';
 import type { LensCellValueAction, RowHeightMode } from '@kbn/lens-common';
+import { parseTransposeId } from '@kbn/transpose-utils';
 import type { FormatFactory } from '../../../../common/types';
-import type { DatatableColumnConfig } from '../../../../common/expressions';
+import type { DatatableColumnConfig, DatatableColumnArgs } from '../../../../common/expressions';
 import { nonNullable } from '../../../utils';
 import { buildColumnsMetaLookup } from './helpers';
 
 const hasFilterCellAction = (actions: LensCellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
 };
+
+/**
+ * Component for rendering multi-level nested column headers
+ */
+export function NestedColumnHeader({
+  columnId,
+  displayName,
+  columnConfig,
+}: {
+  columnId: string;
+  displayName: string;
+  columnConfig?: DatatableColumnArgs;
+}) {
+  const { euiTheme } = useEuiTheme();
+
+  // Check if this is a transposed column with multiple levels
+  const bucketValues = columnConfig?.bucketValues;
+  const hasNestedLevels = bucketValues && bucketValues.length > 1;
+
+  if (!hasNestedLevels) {
+    // Non-nested column - render normally
+    return <span>{displayName}</span>;
+  }
+
+  // Parse the transpose ID to extract hierarchy information
+  const { values } = parseTransposeId(columnId);
+
+  // Build nested header structure
+  const nestedHeaderStyles = css({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    height: '100%',
+  });
+
+  const headerLevelStyles = (level: number) =>
+    css({
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: euiTheme.size.xs,
+      ...(level === 0 && {
+        fontWeight: euiTheme.font.weight.bold,
+        backgroundColor: euiTheme.colors.lightestShade,
+        borderBottom: euiTheme.border.thin,
+      }),
+      ...(level === 1 && {
+        fontWeight: euiTheme.font.weight.medium,
+        backgroundColor: euiTheme.colors.emptyShade,
+      }),
+    });
+
+  const headerGroupStyles = css({
+    textTransform: 'uppercase',
+    fontSize: euiTheme.size.m,
+    letterSpacing: '0.05em',
+  });
+
+  const headerMetricStyles = css({
+    fontSize: euiTheme.size.m,
+  });
+
+  return (
+    <span css={nestedHeaderStyles}>
+      {bucketValues.map((bucketValue, index) => {
+        const isFirstLevel = index === 0;
+        const isLastLevel = index === bucketValues.length - 1;
+        const value = values[index] || '';
+
+        return (
+          <span
+            key={index}
+            css={headerLevelStyles(index)}
+            data-test-subj={`lnsDataTable-header-${bucketValue.dimension}-${value}`}
+          >
+            {isFirstLevel && <span css={headerGroupStyles}>{value}</span>}
+            {isLastLevel && !isFirstLevel && <span css={headerMetricStyles}>{displayName}</span>}
+            {!isFirstLevel && !isLastLevel && <span>{value}</span>}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
 
 export const createGridColumns = (
   bucketColumns: string[],
@@ -285,11 +371,18 @@ export const createGridColumns = (
         textAlign: currentAlignment,
       });
 
+      // Detect if this is a transposed column needing nested header
+      const isNestedTranspose = columnArgs?.bucketValues && columnArgs.bucketValues.length > 1;
+
       const columnDefinition: EuiDataGridColumn = {
         id: field,
         cellActions,
         visibleCellActions: 5,
-        display: <div css={columnStyle}>{name}</div>,
+        display: isNestedTranspose ? (
+          <NestedColumnHeader columnId={field} displayName={name} columnConfig={columnArgs} />
+        ) : (
+          <div css={columnStyle}>{name}</div>
+        ),
         displayAsText: name,
         schema: field,
         actions: {

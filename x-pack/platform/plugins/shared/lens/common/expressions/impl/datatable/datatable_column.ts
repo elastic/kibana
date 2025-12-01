@@ -40,7 +40,14 @@ export interface ColumnState {
   transposable?: boolean;
   originalColumnId?: string;
   originalName?: string;
-  bucketValues?: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>;
+  bucketValues?: Array<{
+    originalBucketColumn: DatatableColumn;
+    value: unknown;
+    dimension?: 'rows' | 'columns'; // Track which dimension this bucket belongs to
+  }>;
+  // Enhanced transpose tracking
+  transposeDimension?: 'rows' | 'columns'; // Which dimension this transpose belongs to
+  transposeLevel?: number; // Order within dimension (0 = outermost)
   alignment?: 'left' | 'right' | 'center';
   /**
    * @deprecated use `colorMapping` config
@@ -80,6 +87,8 @@ export const datatableColumn: DatatableColumnFn = {
     width: { types: ['number'], help: '' },
     isTransposed: { types: ['boolean'], help: '' },
     transposable: { types: ['boolean'], help: '' },
+    transposeDimension: { types: ['string'], help: '' },
+    transposeLevel: { types: ['number'], help: '' },
     colorMode: { types: ['string'], help: '' },
     palette: {
       types: ['palette'],

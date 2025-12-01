@@ -6,6 +6,8 @@
  */
 
 export { DatatableAppearanceSettings } from './appearance_settings';
+export { PivotSettings } from './pivot_settings';
+export { TableSettings } from './table_settings';
 export { getSimpleColumnType } from './table_actions';
 export { TableDimensionEditorAdditionalSection } from './dimension_editor_addtional_section';
 export { TableDimensionDataExtraEditor, TableDimensionEditor } from './dimension_editor';

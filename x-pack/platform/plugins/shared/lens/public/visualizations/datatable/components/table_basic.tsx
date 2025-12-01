@@ -83,6 +83,16 @@ const DATA_GRID_STYLE_DEFAULT: EuiDataGridStyle = {
 export const DEFAULT_PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
 
+/**
+ * NOTE: Column grouping for visual group headers (like merged cells across columns)
+ * is currently not implemented in EuiDataGrid. The nested header functionality
+ * is instead handled through the NestedColumnHeader component in columns.tsx
+ * which displays hierarchical labels within individual column headers.
+ *
+ * If EUI adds support for column spanning/grouping in the future, the logic
+ * for calculating column groups can be implemented here.
+ */
+
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
@@ -301,6 +311,44 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const headerRowHeight = props.args.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT;
   const headerRowLines = props.args.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES;
 
+  // Custom row height function for subtotal and grand total rows
+  const rowHeightsOptions = useMemo(() => {
+    const baseOptions = {
+      defaultHeight: props.args.fitRowToContent
+        ? RowHeightMode.auto
+        : props.args.rowHeightLines && props.args.rowHeightLines !== 1
+        ? {
+            lineCount: props.args.rowHeightLines,
+          }
+        : undefined,
+    };
+
+    // Add custom row heights for subtotal/grand total rows if they exist
+    const hasSpecialRows = firstLocalTable.rows.some(
+      (row: any) => row.__isSubtotal || row.__isGrandTotal
+    );
+
+    if (hasSpecialRows) {
+      return {
+        ...baseOptions,
+        rowHeights: firstLocalTable.rows.reduce((acc: Record<number, number>, row: any, index) => {
+          if (row.__isGrandTotal) {
+            acc[index] = 48; // Taller for grand total
+          } else if (row.__isSubtotal) {
+            acc[index] = 40; // Taller for subtotals
+          }
+          return acc;
+        }, {}),
+      };
+    }
+
+    return baseOptions;
+  }, [
+    props.args.fitRowToContent,
+    props.args.rowHeightLines,
+    firstLocalTable.rows,
+  ]);
+
   const columns: EuiDataGridColumn[] = useMemo(
     () =>
       createGridColumns(
@@ -438,13 +486,15 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       DataContext,
       isDarkMode,
       getCellColor,
-      props.args.fitRowToContent
+      props.args.fitRowToContent,
+      props.args.emptyCellValue
     );
   }, [
     formatters,
     columnConfig,
     isDarkMode,
     props.args.fitRowToContent,
+    props.args.emptyCellValue,
     props.paletteService,
     palettes,
     firstLocalTable,
@@ -551,15 +601,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         <EuiDataGrid
           aria-label={dataGridAriaLabel}
           data-test-subj="lnsDataTable"
-          rowHeightsOptions={{
-            defaultHeight: props.args.fitRowToContent
-              ? RowHeightMode.auto
-              : props.args.rowHeightLines && props.args.rowHeightLines !== 1
-              ? {
-                  lineCount: props.args.rowHeightLines,
-                }
-              : undefined,
-          }}
+          rowHeightsOptions={rowHeightsOptions}
           inMemory={{ level: 'sorting' }}
           columns={columns}
           columnVisibility={columnVisibility}

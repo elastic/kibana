@@ -28,7 +28,8 @@ export const createGridCell = (
     palette?: PaletteOutput<CustomPaletteState>,
     colorMapping?: string
   ) => CellColorFn,
-  fitRowToContent?: boolean
+  fitRowToContent?: boolean,
+  emptyCellValue?: 'empty' | 'zero' | 'dash' | 'na'
 ) => {
   return ({ rowIndex, columnId, setCellProps, isExpanded }: EuiDataGridCellValueElementProps) => {
     const { table, alignments, handleFilterClick } = useContext(DataContext);
@@ -42,7 +43,30 @@ export const createGridCell = (
       colorMapping,
     } = columnConfig.columns[colIndex] ?? {};
     const filterOnClick = oneClickFilter && handleFilterClick;
-    const content = formatter?.convert(rawValue, filterOnClick ? 'text' : 'html');
+
+    // Handle empty cells in pivot tables
+    const isEmpty = rawValue == null || rawValue === '' || rawValue === undefined;
+    let content: string;
+
+    if (isEmpty && emptyCellValue && emptyCellValue !== 'empty') {
+      // Use the configured empty cell display value
+      switch (emptyCellValue) {
+        case 'zero':
+          content = '0';
+          break;
+        case 'dash':
+          content = '-';
+          break;
+        case 'na':
+          content = 'N/A';
+          break;
+        default:
+          content = formatter?.convert(rawValue, filterOnClick ? 'text' : 'html');
+      }
+    } else {
+      content = formatter?.convert(rawValue, filterOnClick ? 'text' : 'html');
+    }
+
     const currentAlignment = alignments?.get(columnId);
 
     useEffect(() => {
