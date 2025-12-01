@@ -252,6 +252,7 @@ export const getFormStateFromActionStep = (
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
+      where: 'where' in restStep ? restStep.where : ALWAYS_CONDITION,
       ...restStep,
     });
   }
