@@ -384,21 +384,21 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [dispatch, setFieldListUiState]
   );
 
-  const fieldListExistingFieldsInfoMapUiState = useCurrentTabSelector(
-    (state) => state.uiState.fieldListExistingFieldsInfoMap
+  const fieldListExistingFieldsInfoUiState = useCurrentTabSelector(
+    (state) => state.uiState.fieldListExistingFieldsInfo
   );
-  const setFieldListExistingFieldsInfoMapUiState = useCurrentTabAction(
-    internalStateActions.setFieldListExistingFieldsInfoMapUiState
+  const setFieldListExistingFieldsInfoUiState = useCurrentTabAction(
+    internalStateActions.setFieldListExistingFieldsInfoUiState
   );
-  const onInitialExistingFieldsInfoMapChange = useCallback(
-    (newUiState: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfoMap']) => {
+  const onInitialExistingFieldsInfoChange = useCallback(
+    (newUiState: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfo']) => {
       dispatch(
-        setFieldListExistingFieldsInfoMapUiState({
-          fieldListExistingFieldsInfoMap: newUiState,
+        setFieldListExistingFieldsInfoUiState({
+          fieldListExistingFieldsInfo: newUiState,
         })
       );
     },
-    [dispatch, setFieldListExistingFieldsInfoMapUiState]
+    [dispatch, setFieldListExistingFieldsInfoUiState]
   );
 
   return (
@@ -433,8 +433,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             workspaceSelectedFieldNames={columns}
             initialState={fieldListUiState}
             onInitialStateChange={onInitialStateChange}
-            initialExistingFieldsInfoMap={fieldListExistingFieldsInfoMapUiState}
-            onInitialExistingFieldsInfoMapChange={onInitialExistingFieldsInfoMapChange}
+            initialExistingFieldsInfo={fieldListExistingFieldsInfoUiState}
+            onInitialExistingFieldsInfoChange={onInitialExistingFieldsInfoChange}
           />
         ) : null}
       </EuiFlexItem>
