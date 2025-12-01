@@ -42,6 +42,11 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
    * Defaults to `true`.
    */
   mergeAttributes?: boolean;
+  /**
+   * A reason for the current change. Used in conjunction and stored with snapshots.
+   * This is either the user flow where it originated or a comment manually added by the user.
+   */
+  reason?: string;
 }
 
 /**

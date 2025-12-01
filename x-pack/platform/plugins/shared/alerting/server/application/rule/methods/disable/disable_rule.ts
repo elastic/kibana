@@ -114,6 +114,7 @@ async function disableWithOCC(
       {
         version,
         ...(migratedIds.includes(alert.id) ? { references: alert.references } : {}),
+        reason: 'rule disabled',
       }
     );
     const { autoRecoverAlerts: isLifecycleAlert } = context.ruleTypeRegistry.get(

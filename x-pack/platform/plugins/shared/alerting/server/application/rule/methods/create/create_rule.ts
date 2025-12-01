@@ -43,6 +43,7 @@ import { validateScheduleLimit } from '../get_schedule_frequency';
 
 export interface CreateRuleOptions {
   id?: string;
+  reason?: string;
 }
 
 export interface CreateRuleParams<Params extends RuleParams = never> {

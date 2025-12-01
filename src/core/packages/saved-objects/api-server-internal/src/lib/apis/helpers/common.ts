@@ -68,6 +68,34 @@ export class CommonHelper {
   }
 
   /**
+   * Returns snapshotindex specified by the given type
+   *
+   * @param type - the type
+   */
+  public getSnapshotIndexForType(type: string) {
+    return getIndexForType({
+      type,
+      defaultIndex: this.defaultIndex,
+      typeRegistry: this.registry,
+      kibanaVersion: 'snapshots', // TODO: Find another way
+    });
+  }
+
+  /**
+   * Returns snapshotindex specified by the given type
+   *
+   * @param type - the type
+   */
+  public getDiffIndexForType(type: string) {
+    return getIndexForType({
+      type,
+      defaultIndex: this.defaultIndex,
+      typeRegistry: this.registry,
+      kibanaVersion: 'diffs', // TODO: Find another way
+    });
+  }
+
+  /**
    * Returns an array of indices as specified in `this._registry` for each of the
    * given `types`. If any of the types don't have an associated index, the
    * default index `this._index` will be included.

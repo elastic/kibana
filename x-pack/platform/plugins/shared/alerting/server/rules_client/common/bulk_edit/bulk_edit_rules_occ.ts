@@ -183,7 +183,10 @@ async function saveBulkUpdatedRules({
     result = await bulkCreateRulesSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       bulkCreateRuleAttributes: rules as Array<SavedObjectsBulkCreateObject<RawRule>>,
-      savedObjectsBulkCreateOptions: { overwrite: true },
+      savedObjectsBulkCreateOptions: {
+        overwrite: true,
+        reason: 'rule bulk updated',
+      },
     });
   } catch (e) {
     // avoid unused newly generated API keys

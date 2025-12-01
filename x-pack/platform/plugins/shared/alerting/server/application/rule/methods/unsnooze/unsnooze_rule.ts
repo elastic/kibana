@@ -83,7 +83,7 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
 
   await updateRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
-    savedObjectsUpdateOptions: { version },
+    savedObjectsUpdateOptions: { version, reason: 'rule unsnoozed' },
     id,
     updateRuleAttributes: updateMetaAttributes(context, {
       ...newAttrs,

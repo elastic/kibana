@@ -126,6 +126,7 @@ export interface RuleBulkOperationAggregation {
 }
 export interface SavedObjectOptions {
   id?: string;
+  reason?: string;
   migrationVersion?: Record<string, string>;
 }
 

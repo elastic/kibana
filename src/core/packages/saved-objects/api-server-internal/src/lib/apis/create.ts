@@ -16,17 +16,18 @@ import {
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-server';
-import type { CreateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { type IndexRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { CreateRequest, IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { PreflightCheckForCreateResult } from './internals/preflight_check_for_create';
 import { getSavedObjectNamespaces, getCurrentTime, normalizeNamespace, setManaged } from './utils';
 import type { ApiExecutionContext } from './types';
+import { processSingleSnapshot } from './utils/snapshot';
 
 export interface PerformCreateParams<T = unknown> {
   type: string;
   attributes: T;
   options: SavedObjectsCreateOptions;
+  reason: string;
 }
 
 export const performCreate = async <T>(
@@ -169,6 +170,26 @@ export const performCreate = async <T>(
     require_alias: true,
   };
 
+  let diff: IndexRequest | undefined;
+  const registryType = registry.getType(type);
+  if (registryType?.snapshots) {
+    // Are we tracking snapshots?
+    try {
+      diff = await processSingleSnapshot(
+        client,
+        raw,
+        registryType,
+        commonHelper,
+        updatedBy,
+        options.reason ?? 'item created'
+      );
+    } catch (err) {
+      // Error during snapshot creation..
+      // How do we recover?
+      // :/
+    }
+  }
+
   const { body, statusCode, headers } =
     id && overwrite
       ? await client.index(requestParams as IndexRequest, { meta: true })
@@ -177,6 +198,15 @@ export const performCreate = async <T>(
   // throw if we can't verify a 404 response is from Elasticsearch
   if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
+  }
+
+  // Success? Save snapshot diff.
+  if (diff?.id) {
+    try {
+      await client.index(diff, { meta: true });
+    } catch (err) {
+      // How do we recover?
+    }
   }
 
   return encryptionHelper.optionallyDecryptAndRedactSingleResult(

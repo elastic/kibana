@@ -104,7 +104,7 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
 
   const updatedRuleRaw = await updateRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
-    savedObjectsUpdateOptions: { version },
+    savedObjectsUpdateOptions: { version, reason: 'rule snoozed' },
     id,
     updateRuleAttributes: updateMetaAttributes(context, {
       ...newAttrs,

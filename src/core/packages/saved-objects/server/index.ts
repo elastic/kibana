@@ -68,6 +68,7 @@ export {
   SEARCH_SOLUTION_SAVED_OBJECT_INDEX,
 } from './src/saved_objects_index_pattern';
 export type {
+  SavedObjectsSnapshotFilter,
   SavedObjectsType,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from './src/saved_objects_type';
