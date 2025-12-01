@@ -12,11 +12,13 @@
 
 import '@babel/runtime/regenerator';
 // @ts-ignore
-import * as worker from 'monaco-editor/esm/vs/editor/editor.worker';
+// Monaco 0.54.0: Use editor.worker.start directly instead of editor.worker's initialize()
+// wrapper, which no longer supports the SimpleWorkerServer pattern used in 0.44.0
+import * as worker from 'monaco-editor/esm/vs/editor/editor.worker.start';
 import { ConsoleWorker } from './console_worker';
 
 self.onmessage = () => {
-  worker.initialize((ctx: any, createData: any) => {
+  worker.start((ctx: any) => {
     return new ConsoleWorker(ctx);
   });
 };

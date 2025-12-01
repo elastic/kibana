@@ -23,7 +23,15 @@ export class WorkerProxyService<IWorker extends BaseWorkerDefinition> {
   }
 
   public setup(langId: string) {
-    this.worker = monaco.editor.createWebWorker({ label: langId, moduleId: '' });
+    // Monaco 0.54.0: createWebWorker() no longer resolves workers from moduleId.
+    // Instead, manually create the Worker using MonacoEnvironment.getWorkerUrl and pass it in.
+    // This matches the pattern used by Monaco's built-in language workers (JSON, TypeScript, etc.)
+    const workerUrl = globalThis.MonacoEnvironment?.getWorkerUrl?.('workerMain.js', langId);
+    if (!workerUrl) {
+      throw new Error('MonacoEnvironment.getWorkerUrl is not defined');
+    }
+    const worker = Promise.resolve(new Worker(workerUrl, { name: langId, type: 'module' }));
+    this.worker = monaco.editor.createWebWorker({ worker });
   }
 
   public stop() {
