@@ -126,7 +126,7 @@ describe('scripts library client', () => {
       await expect(scriptsClient.create(createBodyMock)).resolves.toEqual({
         createdAt: '2025-11-24T16:04:17.471Z',
         createdBy: 'elastic',
-        downloadUri: '/api/endpoint/action/scripts_library/1-2-3/download',
+        downloadUri: '/api/endpoint/scripts_library/1-2-3/download',
         id: '1-2-3',
         name: 'my script',
         platform: ['macos', 'linux'],
