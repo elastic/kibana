@@ -78,6 +78,9 @@ export const BANNERS_BACKGROUND_COLOR_ID = 'banners:backgroundColor';
 // Data connectors settings
 export const DATA_CONNECTORS_ENABLED_SETTING_ID = 'dataConnectors:enabled';
 
+// CPS settings
+export const CPS_SPACES_PROJECT_ROUTING_ID = 'cps:spacesProjectRouting';
+
 // Discover settings
 export const CONTEXT_DEFAULT_SIZE_ID = 'context:defaultSize';
 export const CONTEXT_STEP_ID = 'context:step';

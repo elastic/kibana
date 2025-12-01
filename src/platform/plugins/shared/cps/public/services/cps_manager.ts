@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
+import type { ApplicationStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { ProjectRouting } from '@kbn/es-query';
-import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, switchMap, Subscription, filter } from 'rxjs';
 import { type ICPSManager, type ProjectsData, PROJECT_ROUTING } from '@kbn/cps-utils';
+import { CPS_SPACES_PROJECT_ROUTING_ID } from '@kbn/management-settings-ids';
 import type { ProjectFetcher } from './project_fetcher';
 
 /**
@@ -31,16 +32,29 @@ export class CPSManager implements ICPSManager {
   private readonly http: HttpSetup;
   private readonly logger: Logger;
   private readonly application: ApplicationStart;
+  private readonly uiSettings: IUiSettingsClient;
   private projectFetcherPromise: Promise<ProjectFetcher> | null = null;
   private readonly projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(
     DEFAULT_PROJECT_ROUTING
   );
   private readonly projectPickerAccess$;
 
-  constructor(deps: { http: HttpSetup; logger: Logger; application: ApplicationStart }) {
+  constructor(deps: {
+    http: HttpSetup;
+    logger: Logger;
+    application: ApplicationStart;
+    uiSettings: IUiSettingsClient;
+  }) {
     this.http = deps.http;
     this.logger = deps.logger.get('cps_manager');
     this.application = deps.application;
+    this.uiSettings = deps.uiSettings;
+
+    // Initialize with current setting value
+    const initialSettingValue = this.uiSettings.get<ProjectRouting>(CPS_SPACES_PROJECT_ROUTING_ID, 'ALL');
+    if (initialSettingValue !== DEFAULT_PROJECT_ROUTING) {
+      this.projectRouting$.next(initialSettingValue);
+    }
 
     this.projectPickerAccess$ = combineLatest([
       this.application.currentAppId$,
@@ -79,9 +93,10 @@ export class CPSManager implements ICPSManager {
   /**
    * Get the default project routing value.
    * This is the fallback value used when no app-specific or saved value exists.
+   * Reads from the spacesProjectRouting advanced setting.
    */
   public getDefaultProjectRouting(): ProjectRouting {
-    return DEFAULT_PROJECT_ROUTING;
+    return this.uiSettings.get<ProjectRouting>(CPS_SPACES_PROJECT_ROUTING_ID, 'ALL');
   }
 
   /**
