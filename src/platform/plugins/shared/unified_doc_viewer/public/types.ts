@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type React from 'react';
-
 export type { JsonCodeEditorProps } from './components';
 export type { EsDocSearchProps } from './hooks';
 export type { UnifiedDocViewerSetup, UnifiedDocViewerStart } from './plugin';
@@ -22,15 +20,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { IToasts } from '@kbn/core/public';
-import type { LensRendererProps } from '@kbn/lens-common';
 import type { UnifiedDocViewerStart } from './plugin';
-
-// Local type definition to avoid circular dependency when importing LensPublicStart:
-// unified_doc_viewer -> lens -> esql_datagrid -> unified_doc_viewer
-// We only need EmbeddableComponent, so we define a minimal interface
-export interface LensService {
-  EmbeddableComponent?: React.ComponentType<LensRendererProps>;
-}
 
 export interface UnifiedDocViewerServices {
   analytics: AnalyticsServiceStart;
@@ -44,5 +34,4 @@ export interface UnifiedDocViewerServices {
   share: SharePluginStart;
   core: CoreStart;
   discoverShared: DiscoverSharedPublicStart;
-  lens: LensService;
 }

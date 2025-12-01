@@ -39,6 +39,18 @@ const mockEmbeddableComponent = jest.fn(({}: any) => (
 
 const mockBuild = jest.fn();
 
+const mockRegistry = {
+  getById: jest.fn((id: string) => {
+    if (id === 'lens-embeddable-component') {
+      return {
+        id: 'lens-embeddable-component',
+        EmbeddableComponent: mockEmbeddableComponent,
+      };
+    }
+    return undefined;
+  }),
+};
+
 setUnifiedDocViewerServices(
   merge(mockUnifiedDocViewerServices, {
     data: {
@@ -53,8 +65,10 @@ setUnifiedDocViewerServices(
         get: jest.fn(),
       },
     },
-    lens: {
-      EmbeddableComponent: mockEmbeddableComponent,
+    discoverShared: {
+      features: {
+        registry: mockRegistry,
+      },
     },
   })
 );

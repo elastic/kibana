@@ -74,11 +74,15 @@ export interface SimilarErrorsOccurrencesChartProps {
 export function SimilarErrorsOccurrencesChart({
   baseEsqlQuery,
 }: SimilarErrorsOccurrencesChartProps) {
-  const { data, lens } = getUnifiedDocViewerServices();
+  const { data, discoverShared } = getUnifiedDocViewerServices();
   const { indexes } = useDataSourcesContext();
   const [lensAttributes, setLensAttributes] = useState<LensAttributes | undefined>(undefined);
   const [hasError, setHasError] = useState<boolean>(false);
-  const EmbeddableComponent = useMemo(() => lens?.EmbeddableComponent, [lens]);
+  const lensFeature = useMemo(
+    () => discoverShared.features.registry.getById('lens-embeddable-component'),
+    [discoverShared]
+  );
+  const EmbeddableComponent = lensFeature?.EmbeddableComponent;
   const timeRange = useMemo(
     () => data.query.timefilter.timefilter.getTime(),
     [data.query.timefilter.timefilter]
