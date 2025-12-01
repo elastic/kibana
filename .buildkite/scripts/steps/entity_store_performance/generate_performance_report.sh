@@ -285,10 +285,10 @@ EOF
   
   # Post comment directly to PR
   echo "Posting performance report to PR"
-  ts-node "$KIBANA_DIR/.buildkite/scripts/lifecycle/comment_on_pr.ts" \
+  (cd "$KIBANA_DIR" && ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
     --message "$(cat "$PR_COMMENT_FILE")" \
     --context "entity-store-performance-job" \
-    --clear-previous
+    --clear-previous)
 
   # Set metadata for PR comment
   buildkite-agent meta-data set "entity_store_performance_duration" "$TEST_DURATION"
