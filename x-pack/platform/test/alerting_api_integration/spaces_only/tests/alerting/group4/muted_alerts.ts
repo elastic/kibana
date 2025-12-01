@@ -117,5 +117,69 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const mutedRule = rules.data.find((rule: { id: string }) => rule.id === createdRule1);
       expect(mutedRule.muted_alert_ids).to.contain(alertFromRule1._source[ALERT_INSTANCE_ID]);
     });
+
+    it('should not mute a nonexistent alert instance id', async () => {
+      const createdRule1 = await createRule();
+
+      const ruleId = encodeURIComponent(createdRule1);
+      const spaceId = getUrlPrefix(Spaces.space1.id);
+
+      await supertest
+        .post(`${spaceId}/api/alerting/rule/${ruleId}/alert/nonexistent-instance-id/_mute`)
+        .set('kbn-xsrf', 'foo')
+        .expect(404); // gets a 404 not found error
+
+      const ruleUuids = [createdRule1];
+
+      const filterNode = nodeBuilder.or(
+        ruleUuids.map((id) => nodeBuilder.is('alert.id', `alert:${id}`))
+      );
+      const { body: rules } = await supertest
+        .post(`${spaceId}/internal/alerting/rules/_find`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          filter: JSON.stringify(filterNode),
+          fields: ['id', 'mutedInstanceIds'],
+          page: 1,
+          per_page: ruleUuids.length,
+        });
+
+      expect(rules.data.length).to.be(1);
+      const mutedRule = rules.data.find((rule: { id: string }) => rule.id === createdRule1);
+      expect(mutedRule.muted_alert_ids).not.to.contain('nonexistent-instance-id');
+    });
+
+    it('should add a nonexistent alert instance id to muted_alert_ids if validation is false', async () => {
+      const createdRule1 = await createRule();
+
+      const ruleId = encodeURIComponent(createdRule1);
+      const spaceId = getUrlPrefix(Spaces.space1.id);
+
+      await supertest
+        .post(
+          `${spaceId}/api/alerting/rule/${ruleId}/alert/nonexistent-instance-id/_mute?validate_alerts_existence=false`
+        )
+        .set('kbn-xsrf', 'foo')
+        .expect(204); // gets a 204 no content response
+
+      const ruleUuids = [createdRule1];
+
+      const filterNode = nodeBuilder.or(
+        ruleUuids.map((id) => nodeBuilder.is('alert.id', `alert:${id}`))
+      );
+      const { body: rules } = await supertest
+        .post(`${spaceId}/internal/alerting/rules/_find`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          filter: JSON.stringify(filterNode),
+          fields: ['id', 'mutedInstanceIds'],
+          page: 1,
+          per_page: ruleUuids.length,
+        });
+
+      expect(rules.data.length).to.be(1);
+      const mutedRule = rules.data.find((rule: { id: string }) => rule.id === createdRule1);
+      expect(mutedRule.muted_alert_ids).to.eql(['nonexistent-instance-id']);
+    });
   });
 }
