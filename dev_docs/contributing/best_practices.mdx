@@ -39,7 +39,7 @@ all of our apps are accessible.
 <DocCallOut title="Internal only">
   ## Accessibility automation in Kibana
 
-  Kibana maintains accessibility quality using a layered, automated approach:
+  Kibana maintains accessibility quality using a layered, hybrid approach:
 
   ### 1. Code‑level checks
   - **Tool:** `@elastic/eslint-plugin-eui` – custom rules for the ESLint library
@@ -47,25 +47,36 @@ all of our apps are accessible.
   - **Action:** Resolve all warnings before committing (treat warnings as blockers)
 
   ### 2. Render‑level checks
-  - **CI tooling:** running `axe-core` check in `FTR` and `Cypress` tests (`Scout` integration pending...)
+  - **CI tooling:** running `axe-core` check in `FTR`, `Scout` and `Cypress` tests.
   - **Enforces:** Semantics, landmarks, contrast, focus order, interaction patterns. 
   - **Note:** All tests are based on the common configuration defined in `src/platform/packages/shared/kbn-axe-config/index.ts`.
 
   - **Usage:**
-    - **FTR a11y tests** (`test/accessibility`):
+    - **FTR a11y tests** (tests must be placed in the `test/accessibility` folder):
       ```ts
+      const a11y = getService('a11y');
+      ...
       it('has no detectable a11y violations on load', async () => {
         await common.navigateToApp('dashboard');
         await a11y.testAppSnapshot();
       });
       ```
-    - **Cypress (only if your product supports that):**
+
+    - **Scout** using `page.checkA11y`. Run an accessibility check on a specific root element:
+      ```ts
+      test('has no detectable a11y violations', async ({ page }) => {
+        const { violations } = await page.checkA11y({ include: ['{CSS selector of root element you are testing}'] });
+        expect(violations).toHaveLength(0);
+      });
+      ```
+
+    - **Cypress** using `cy.checkA11y`. A custom Cypress command is available to run accessibility checks:
       ```ts
       it('has no detectable a11y violations on load', () => {
         cy.checkA11y();
       });
       ```
-  - *Action:** Improve coverage — add or extend tests while developing features.
+  - **Action:** Improve coverage — add or extend tests while developing features.
 
   ### 3. Ready check (execute before commit)
   - Favor EUI components and honor their accessibility playbook
