@@ -111,7 +111,7 @@ export const INTEGRATIONS: Record<
 } as const;
 
 export function SupportedDataTooltipLink({
-  nodeType,
+  nodeType = 'host',
   isAlertUI = false,
 }: {
   nodeType: InventoryItemType;
