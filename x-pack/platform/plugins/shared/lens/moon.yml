@@ -146,6 +146,7 @@ dependsOn:
   - '@kbn/lens-common-2'
   - '@kbn/react-kibana-context-common'
   - '@kbn/unified-tabs'
+  - '@kbn/esql-composer'
 tags:
   - plugin
   - prod
