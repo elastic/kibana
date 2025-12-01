@@ -122,7 +122,7 @@ describe('getLogFieldWithFallback', () => {
 
       expect(result).toEqual({
         field: 'log.level',
-        value: 0,
+        value: '0',
       });
     });
 
@@ -140,7 +140,7 @@ describe('getLogFieldWithFallback', () => {
       });
     });
 
-    it('handles array values', () => {
+    it('handles array values by converting to string', () => {
       const doc: LogDocumentOverview = {
         ...createBaseDoc(),
         'exception.type': ['Error', 'withMessage', 'withStack'] as any,
@@ -150,7 +150,7 @@ describe('getLogFieldWithFallback', () => {
 
       expect(result).toEqual({
         field: 'exception.type',
-        value: ['Error', 'withMessage', 'withStack'],
+        value: 'Error,withMessage,withStack',
       });
     });
   });
@@ -162,7 +162,9 @@ describe('getLogFieldWithFallback', () => {
         message: '{"key": "value", "nested": {"foo": "bar"}}',
       };
 
-      const result = getLogFieldWithFallback(doc, ['message'] as const, true);
+      const result = getLogFieldWithFallback(doc, ['message'] as const, {
+        includeFormattedValue: true,
+      });
 
       expect(result).toEqual({
         field: 'message',
@@ -177,13 +179,15 @@ describe('getLogFieldWithFallback', () => {
         message: '{"key": "value"}',
       };
 
-      const result = getLogFieldWithFallback(doc, ['message'] as const, false);
-
-      expect(result).toEqual({
-        field: 'message',
-        value: '{"key": "value"}',
+      const result = getLogFieldWithFallback(doc, ['message'] as const, {
+        includeFormattedValue: false,
       });
-      expect(result.formattedValue).toBeUndefined();
+
+      expect(result.field).toBe('message');
+      expect(result.value).toBe('{"key": "value"}');
+      if (result.field) {
+        expect(result.formattedValue).toBeUndefined();
+      }
     });
 
     it('does not return formattedValue when value is not valid JSON', () => {
@@ -192,13 +196,15 @@ describe('getLogFieldWithFallback', () => {
         message: 'not a json string',
       };
 
-      const result = getLogFieldWithFallback(doc, ['message'] as const, true);
-
-      expect(result).toEqual({
-        field: 'message',
-        value: 'not a json string',
+      const result = getLogFieldWithFallback(doc, ['message'] as const, {
+        includeFormattedValue: true,
       });
-      expect(result.formattedValue).toBeUndefined();
+
+      expect(result.field).toBe('message');
+      expect(result.value).toBe('not a json string');
+      if (result.field) {
+        expect(result.formattedValue).toBeUndefined();
+      }
     });
   });
 });
