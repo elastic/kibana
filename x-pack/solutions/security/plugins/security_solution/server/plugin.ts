@@ -19,6 +19,7 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { registerAgent } from './agent_builder/agents';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
@@ -241,6 +242,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
     registerAttachments(onechat).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
+    });
+    registerAgent(onechat).catch((error) => {
+      this.logger.error(`Error registering security agent: ${error}`);
     });
   }
 
