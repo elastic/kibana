@@ -54,10 +54,10 @@ export const i18nTexts = {
       defaultMessage:
         'Unable to close the scroll context used for search. Check the Kibana server logs.',
     }),
-  csvMaxRowsWarning: ({ maxRows }: { maxRows: number }) =>
+  csvMaxRowsWarning: ({ maxRows, expected }: { maxRows: number; expected: number }) =>
     i18n.translate('generateCsv.maxRowCount', {
       defaultMessage:
-        'This search has exceeded the recommended row limit ({maxRows}). This limit can be configured in kibana.yml, but increasing it may impact performance.',
-      values: { maxRows },
+        'Your export would have generated {expected} total rows, but was limited to the maximum recommended row limit of {maxRows}. This limit can be configured in kibana.yml, but increasing it may impact performance.',
+      values: { maxRows, expected },
     }),
 };

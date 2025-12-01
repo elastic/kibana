@@ -1606,12 +1606,12 @@ describe('CsvGenerator', () => {
         },
         "user_error": true,
         "warnings": Array [
-          "This search has exceeded the recommended row limit (5). This limit can be configured in kibana.yml, but increasing it may impact performance.",
+          "Your export would have generated 100 total rows, but was limited to the maximum recommended row limit of 5. This limit can be configured in kibana.yml, but increasing it may impact performance.",
         ],
       }
     `);
     expect(warnLogSpy).toHaveBeenCalledWith(
-      'This search has exceeded the recommended row limit (5). This limit can be configured in kibana.yml, but increasing it may impact performance.'
+      'Your requested export includes 100 rows, which has exceeded the recommended row limit (5). This limit can be configured in kibana.yml, but increasing it may impact performance.'
     );
   });
 
