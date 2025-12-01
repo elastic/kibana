@@ -31,7 +31,7 @@ export default function getGapAutoFillSchedulerTests({ getService }: FtrProvider
             .send({});
         });
 
-        it('gets scheduler by id with RBAC enforcement', async () => {
+        it('gets scheduler by id with', async () => {
           const createBody = {
             name: `it-scheduler-get-${Date.now()}`,
             schedule: { interval: '1m' },

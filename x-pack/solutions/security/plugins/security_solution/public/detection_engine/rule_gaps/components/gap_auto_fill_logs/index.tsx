@@ -145,7 +145,13 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
   return (
     <>
       {isOpen && (
-        <EuiFlyout ownFocus onClose={onClose} size="l" aria-labelledby="gapAutoFillLogs">
+        <EuiFlyout
+          ownFocus
+          onClose={onClose}
+          size="l"
+          aria-labelledby="gapAutoFillLogs"
+          data-test-subj="gap-auto-fill-logs"
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2 id="gapAutoFillLogs">{i18n.GAP_AUTO_FILL_LOGS_TITLE}</h2>
@@ -246,6 +252,7 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
                   }
                 }}
                 itemIdToExpandedRowMap={expandedRowMap}
+                data-test-subj="gap-auto-fill-logs-table"
               />
             </EuiPanel>
           </EuiFlyoutBody>

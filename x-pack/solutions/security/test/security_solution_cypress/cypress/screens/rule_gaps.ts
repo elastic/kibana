@@ -10,3 +10,10 @@ export const GAP_AUTO_FILL_STATUS_BADGE = '[data-test-subj="gap-auto-fill-status
 export const RULE_SETTINGS_MODAL = '[data-test-subj="rule-settings-modal"]';
 export const RULE_SETTINGS_ENABLE_SWITCH = '[data-test-subj="rule-settings-enable-switch"]';
 export const RULE_SETTINGS_SAVE_BUTTON = '[data-test-subj="rule-settings-save"]';
+export const GAP_FILL_SCHEDULER_LOGS_LINK = '[data-test-subj="gap-fill-scheduler-logs-link"]';
+export const GAP_AUTO_FILL_LOGS_FLYOUT = '[data-test-subj="gap-auto-fill-logs"]';
+export const GAP_AUTO_FILL_LOGS_STATUS_FILTER =
+  '[data-test-subj="gap-auto-fill-logs-status-filter"]';
+export const GAP_AUTO_FILL_LOGS_STATUS_FILTER_POPOVER_BUTTON =
+  '[data-test-subj="gap-auto-fill-logs-status-filter-popoverButton"]';
+export const GAP_AUTO_FILL_LOGS_TABLE = '[data-test-subj="gap-auto-fill-logs-table"]';

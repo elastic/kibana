@@ -12,6 +12,10 @@ import {
   RULE_SETTINGS_ENABLE_SWITCH,
   RULE_SETTINGS_MODAL,
   RULE_SETTINGS_SAVE_BUTTON,
+  GAP_FILL_SCHEDULER_LOGS_LINK,
+  GAP_AUTO_FILL_LOGS_FLYOUT,
+  GAP_AUTO_FILL_LOGS_STATUS_FILTER_POPOVER_BUTTON,
+  GAP_AUTO_FILL_LOGS_TABLE,
 } from '../../../../screens/rule_gaps';
 import { TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
@@ -24,6 +28,7 @@ import { login } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getCustomQueryRuleParams } from '../../../../objects/rule';
+import { getGapAutoFillLogsTableRows } from '../../../../tasks/rule_details';
 
 const visitMonitoringTab = () => {
   visitRulesManagementTable();
@@ -101,6 +106,57 @@ describe(
             (response) => response.status === 200 && response.body.enabled === false
           )
         );
+      });
+
+      it('View gap fill scheduler logs and filter by status', () => {
+        ensureAutoGapFillEnabledViaUi();
+
+        openRuleSettingsModalViaBadge();
+        cy.get(RULE_SETTINGS_MODAL).should('exist');
+
+        // Click on the logs link to open the flyout
+        cy.get(GAP_FILL_SCHEDULER_LOGS_LINK).click();
+        cy.get(GAP_AUTO_FILL_LOGS_FLYOUT).should('exist');
+
+        // Wait for the table to load
+        cy.get(GAP_AUTO_FILL_LOGS_TABLE).should('be.visible');
+
+        // By default, filter is set to success/error
+        // Check table is displayed
+        cy.get(GAP_AUTO_FILL_LOGS_TABLE).should('exist');
+
+        // Open the status filter popover
+        getGapAutoFillLogsTableRows().then(() => {
+          cy.get(GAP_AUTO_FILL_LOGS_STATUS_FILTER_POPOVER_BUTTON).click();
+
+          // Wait for the popover to be visible and interact with selectable items
+          cy.get('[data-test-subj="gap-auto-fill-logs-status-filter-item"]').should('be.visible');
+
+          // Find and click on "Success" to uncheck it (it's checked by default)
+          cy.get('[data-test-subj="gap-auto-fill-logs-status-filter-item"]')
+            .contains('Success')
+            .click();
+
+          // Find and click on "Error" to uncheck it (it's checked by default)
+          cy.get('[data-test-subj="gap-auto-fill-logs-status-filter-item"]')
+            .contains('Error')
+            .click();
+
+          // Find and click on "Task skipped" to check it
+          cy.get('[data-test-subj="gap-auto-fill-logs-status-filter-item"]')
+            .contains('Task skipped')
+            .click();
+
+          // Close the popover by clicking outside
+          cy.get('body').click(0, 0);
+
+          // Verify the filter was applied - the table should update
+          cy.get(GAP_AUTO_FILL_LOGS_TABLE).should('be.visible');
+
+          // Verify that the table content is visible after filtering
+          // The table may have different row count after filtering
+          getGapAutoFillLogsTableRows().should('exist');
+        });
       });
     });
 

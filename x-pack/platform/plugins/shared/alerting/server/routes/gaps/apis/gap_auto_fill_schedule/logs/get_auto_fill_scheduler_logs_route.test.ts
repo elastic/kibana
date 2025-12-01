@@ -26,6 +26,7 @@ describe('getAutoFillSchedulerLogsRoute', () => {
   const mockGetLogsResponse = {
     data: [
       {
+        id: 'test-log-id',
         timestamp: '2024-01-01T00:00:00.000Z',
         status: 'success',
         message: 'Gap fill auto scheduler logs',
@@ -48,17 +49,18 @@ describe('getAutoFillSchedulerLogsRoute', () => {
     const router = httpServiceMock.createRouter();
     getAutoFillSchedulerLogsRoute(router, licenseState);
     rulesClient.getGapAutoFillSchedulerLogs.mockResolvedValueOnce(mockGetLogsResponse);
-    const [config, handler] = router.get.mock.calls[0];
+    const [config, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {
         params: { id: 'test-scheduler-id' },
-        query: {
+        body: {
           start: '2024-01-01T00:00:00.000Z',
           end: '2024-01-01T00:00:00.000Z',
           page: 1,
           per_page: 10,
-          sort: [{ field: '@timestamp', direction: 'desc' }],
+          sort_field: '@timestamp',
+          sort_direction: 'desc',
           statuses: ['success'],
         },
       },
@@ -72,13 +74,15 @@ describe('getAutoFillSchedulerLogsRoute', () => {
       end: '2024-01-01T00:00:00.000Z',
       page: 1,
       perPage: 10,
-      sort: [{ field: '@timestamp', direction: 'desc' }],
+      sortField: '@timestamp',
+      sortDirection: 'desc',
       statuses: ['success'],
     });
     expect(res.ok).toHaveBeenCalledWith({
       body: {
         data: [
           {
+            id: 'test-log-id',
             timestamp: '2024-01-01T00:00:00.000Z',
             status: 'success',
             message: 'Gap fill auto scheduler logs',
@@ -102,7 +106,7 @@ describe('getAutoFillSchedulerLogsRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     getAutoFillSchedulerLogsRoute(router, licenseState);
-    const [, handler] = router.get.mock.calls[0];
+    const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       { params: { id: 'test-scheduler-id' } }
@@ -115,7 +119,7 @@ describe('getAutoFillSchedulerLogsRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     getAutoFillSchedulerLogsRoute(router, licenseState);
-    const [, handler] = router.get.mock.calls[0];
+    const [, handler] = router.post.mock.calls[0];
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('License check failed');
     });

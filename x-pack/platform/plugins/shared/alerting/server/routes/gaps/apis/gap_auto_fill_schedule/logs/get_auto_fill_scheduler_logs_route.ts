@@ -19,7 +19,7 @@ export const getAutoFillSchedulerLogsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.get(
+  router.post(
     {
       path: `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/{id}/logs`,
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
@@ -28,18 +28,18 @@ export const getAutoFillSchedulerLogsRoute = (
         params: schema.object({
           id: schema.string(),
         }),
-        query: gapAutoFillSchedulerLogsRequestQuerySchema,
+        body: gapAutoFillSchedulerLogsRequestQuerySchema,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         try {
           const { id } = req.params as { id: string };
-          const query = req.query;
+          const body = req.body;
           const alertingContext = await context.alerting;
           const rulesClient = await alertingContext.getRulesClient();
 
-          const params = transformRequestV1(id, query);
+          const params = transformRequestV1(id, body);
 
           const result = await rulesClient.getGapAutoFillSchedulerLogs(params);
 

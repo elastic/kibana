@@ -347,16 +347,16 @@ export const getGapAutoFillSchedulerLogs = async ({
   KibanaServices.get().http.fetch<GapAutoFillSchedulerLogsResponseBodyV1>(
     `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/${id}/logs`,
     {
-      method: 'GET',
+      method: 'POST',
       signal,
-      query: {
+      body: JSON.stringify({
         start,
         end,
         page,
         per_page: perPage,
         sort_field: sortField,
         sort_direction: sortDirection,
-        statuses: [...statuses],
-      },
+        ...(statuses && statuses.length > 0 && { statuses: [...statuses] }),
+      }),
     }
   );
