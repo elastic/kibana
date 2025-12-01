@@ -305,6 +305,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     selectedApiKeyId,
     setSelectedAPIKeyId,
     setSelectedPolicyId,
+    selectedPolicyId,
     refreshAgentPolicies,
     selectionType,
     cloudSecurityIntegration,

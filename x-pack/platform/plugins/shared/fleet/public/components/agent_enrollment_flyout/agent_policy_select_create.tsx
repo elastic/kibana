@@ -33,7 +33,7 @@ interface Props {
 export const SelectCreateAgentPolicy: React.FC<Props> = ({
   agentPolicies,
   excludeFleetServer,
-  setSelectedPolicyId: setSelectedPolicyIdProp,
+  setSelectedPolicyId,
   selectedPolicyId,
   withKeySelection,
   selectedApiKeyId,
@@ -41,8 +41,6 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
   isFleetServerPolicy,
   refreshAgentPolicies,
 }) => {
-  const setSelectedPolicyId = setSelectedPolicyIdProp;
-
   // Track if we've done the initial auto-selection to avoid re-selecting after user clears
   const hasAutoSelectedRef = useRef(false);
 
