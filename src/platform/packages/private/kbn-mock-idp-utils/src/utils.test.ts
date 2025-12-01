@@ -175,7 +175,7 @@ describe('mock-idp-utils', () => {
       const serverlessOptions = {
         ...baseOptions,
         serverless: {
-          organizationId: '1234567890',
+          organizationId: 'org1234567890',
           projectType: 'observability',
           uiamEnabled: true,
         },
@@ -303,7 +303,7 @@ describe('mock-idp-utils', () => {
         const nonUiamOptions = {
           ...baseOptions,
           serverless: {
-            organizationId: '1234567890',
+            organizationId: 'org1234567890',
             projectType: 'observability',
             uiamEnabled: false,
           },
