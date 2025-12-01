@@ -92,6 +92,9 @@ const getEventLogClient = jest.fn();
 const preSaveHook = jest.fn();
 const postSaveHook = jest.fn();
 const postDeleteHook = jest.fn();
+const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
+const getAxiosInstanceWithAuth = jest.fn();
+const isESOCanEncrypt = true;
 
 let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -147,6 +150,9 @@ beforeEach(() => {
     usageCounter: mockUsageCounter,
     connectorTokenClient,
     getEventLogClient,
+    encryptedSavedObjectsClient,
+    isESOCanEncrypt,
+    getAxiosInstanceWithAuth,
   });
   (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
   (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
@@ -564,6 +570,9 @@ describe('create()', () => {
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     const savedObjectCreateResult = {
@@ -647,7 +656,9 @@ describe('create()', () => {
           },
         }),
       ],
-
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
       actionExecutor,
       bulkExecutionEnqueuer,
       request,
@@ -718,6 +729,9 @@ describe('create()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     await expect(
@@ -780,6 +794,9 @@ describe('get()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       await actionsClient.get({ id: 'testPreconfigured' });
@@ -808,6 +825,9 @@ describe('get()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       await expect(actionsClient.get({ id: 'system-connector-.cases' })).rejects.toThrow();
@@ -866,6 +886,9 @@ describe('get()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
@@ -900,6 +923,9 @@ describe('get()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
@@ -1026,6 +1052,9 @@ describe('get()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     const result = await actionsClient.get({ id: 'testPreconfigured' });
@@ -1060,6 +1089,9 @@ describe('get()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     await expect(
@@ -1088,6 +1120,9 @@ describe('get()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     expect(
@@ -1154,6 +1189,9 @@ describe('getBulk()', () => {
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
       return actionsClient.getBulk({ ids: ['1', 'testPreconfigured'] });
     }
@@ -1299,6 +1337,9 @@ describe('getBulk()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     const result = await actionsClient.getBulk({ ids: ['1', 'testPreconfigured'] });
@@ -1378,6 +1419,9 @@ describe('getBulk()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     await expect(
@@ -1444,6 +1488,9 @@ describe('getBulk()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     expect(
@@ -1502,6 +1549,9 @@ describe('getOAuthAccessToken()', () => {
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
     return actionsClient.getOAuthAccessToken(requestBody, configurationUtilities);
   }
@@ -1910,6 +1960,9 @@ describe('delete()', () => {
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     await expect(
@@ -1940,6 +1993,9 @@ describe('delete()', () => {
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     await expect(
@@ -2431,6 +2487,9 @@ describe('update()', () => {
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     await expect(
@@ -2468,6 +2527,9 @@ describe('update()', () => {
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     await expect(
@@ -2550,6 +2612,9 @@ describe('execute()', () => {
         usageCounter: mockUsageCounter,
         connectorTokenClient,
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       actionTypeRegistry.register(
@@ -2606,6 +2671,9 @@ describe('execute()', () => {
         usageCounter: mockUsageCounter,
         connectorTokenClient,
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       actionTypeRegistry.register(
@@ -2658,6 +2726,9 @@ describe('execute()', () => {
         usageCounter: mockUsageCounter,
         connectorTokenClient,
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       actionTypeRegistry.register(
@@ -2942,6 +3013,9 @@ describe('isPreconfigured()', () => {
         logger,
       }),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     expect(actionsClient.isPreconfigured('testPreconfigured')).toEqual(true);
@@ -2984,6 +3058,9 @@ describe('isPreconfigured()', () => {
         logger,
       }),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     expect(actionsClient.isPreconfigured(uuidv4())).toEqual(false);
@@ -3028,6 +3105,9 @@ describe('isSystemAction()', () => {
         logger,
       }),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     expect(actionsClient.isSystemAction('system-connector-.cases')).toEqual(true);
@@ -3070,6 +3150,9 @@ describe('isSystemAction()', () => {
         logger,
       }),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     expect(actionsClient.isSystemAction(uuidv4())).toEqual(false);
