@@ -13,14 +13,14 @@ import { EuiLink } from '@elastic/eui';
 
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana';
-import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
+import type { ArtifactListPageLabels } from '../../../components/artifact_list_page';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { TrustedAppsApiClient } from '../service';
 import { TrustedAppsForm } from './components/form';
 import { SEARCHABLE_FIELDS } from '../constants';
 import { TrustedAppsArtifactsDocsLink } from './components/artifacts_docs_link';
 
-const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
+const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageLabels = {
   pageTitle: i18n.translate('xpack.securitySolution.trustedApps.pageTitle', {
     defaultMessage: 'Trusted applications',
   }),
@@ -41,6 +41,18 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
     'xpack.securitySolution.trustedApps.pageExportButtonTitle',
     {
       defaultMessage: 'Export trusted application list',
+    }
+  ),
+  pageExportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.trustedApps.pageExportSuccessToastTitle',
+    {
+      defaultMessage: 'Trusted application list exported successfully',
+    }
+  ),
+  pageExportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.trustedApps.pageExportErrorToastTitle',
+    {
+      defaultMessage: 'Trusted application list export failed',
     }
   ),
   getShowingCountLabel: (total) =>

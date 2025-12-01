@@ -10,7 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinks } from '@kbn/doc-links';
 import { EuiLink } from '@elastic/eui';
-import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
+import type {
+  ArtifactListPageProps,
+  ArtifactListPageLabels,
+} from '../../../components/artifact_list_page';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { TrustedDevicesApiClient } from '../service/api_client';
 import { TrustedDevicesForm } from './components/form';
@@ -25,7 +28,7 @@ type TrustedDevicesListProps = Omit<
   'apiClient' | 'ArtifactFormComponent' | 'labels' | 'data-test-subj'
 >;
 
-const TRUSTED_DEVICES_PAGE_LABELS: ArtifactListPageProps['labels'] = {
+const TRUSTED_DEVICES_PAGE_LABELS: ArtifactListPageLabels = {
   pageTitle: i18n.translate('xpack.securitySolution.trustedDevices.list.pageTitle', {
     defaultMessage: 'Trusted devices',
   }),
@@ -49,6 +52,18 @@ const TRUSTED_DEVICES_PAGE_LABELS: ArtifactListPageProps['labels'] = {
     'xpack.securitySolution.trustedDevices.list.pageExportButtonTitle',
     {
       defaultMessage: 'Export trusted device list',
+    }
+  ),
+  pageExportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.trustedDevices.list.pageExportSuccessToastTitle',
+    {
+      defaultMessage: 'Trusted device list exported successfully',
+    }
+  ),
+  pageExportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.trustedDevices.list.pageExportErrorToastTitle',
+    {
+      defaultMessage: 'Trusted device list export failed',
     }
   ),
   getShowingCountLabel: (total) =>
