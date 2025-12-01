@@ -18,5 +18,4 @@ export { getAttackDiscoveryFeature } from './src/attack_discovery';
 export { getTimelineFeature } from './src/timeline';
 export { getNotesFeature } from './src/notes';
 export { getSiemMigrationsFeature } from './src/siem_migrations';
-export { getRulesFeature } from './src/rules';
-export { getRulesV2Feature } from './src/v2_rules';
+export { getRulesFeature, getRulesV2Feature } from './src/rules';

@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod';
 import { omit } from 'lodash';
-import datemath from '@elastic/datemath';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
@@ -103,18 +102,12 @@ export function createGetAlertsTool({
     description: `Retrieve Observability alerts and relevant fields for a given time range. Defaults to active alerts (set includeRecovered to true to include recovered alerts).`,
     schema: getAlertsSchema,
     tags: ['observability', 'alerts'],
-    handler: async (
-      { start: startAsDatemath, end: endAsDatemath, kqlFilter, includeRecovered, query },
-      handlerinfo
-    ) => {
+    handler: async ({ start, end, kqlFilter, includeRecovered, query }, handlerinfo) => {
       try {
         const [coreStart, pluginStart] = await core.getStartServices();
         const alertsClient = await pluginStart.ruleRegistry.getRacClientWithRequest(
           handlerinfo.request
         );
-
-        const start = datemath.parse(startAsDatemath)!.valueOf();
-        const end = datemath.parse(endAsDatemath)!.valueOf();
 
         const selectedFields = await getRelevantAlertFields({
           coreStart,

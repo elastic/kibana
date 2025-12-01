@@ -64,6 +64,7 @@ export const EPM_API_ROUTES = {
 // Data stream API routes
 export const DATA_STREAM_API_ROUTES = {
   LIST_PATTERN: `${DATA_STREAM_API_ROOT}`,
+  DEPRECATED_ILM_CHECK_PATTERN: `${INTERNAL_ROOT}/data_streams/deprecated_ilm_check`,
 };
 
 // Package policy API routes
@@ -94,6 +95,7 @@ export const AGENT_POLICY_API_ROUTES = {
   INFO_OUTPUTS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/outputs`,
   AUTO_UPGRADE_AGENTS_STATUS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/auto_upgrade_agents_status`,
   CREATE_WITH_PACKAGE_POLICIES: `${INTERNAL_ROOT}/agent_and_package_policies`,
+  CLEANUP_REVISIONS_PATTERN: `${INTERNAL_ROOT}/agent_policies/_cleanup_revisions`,
 };
 
 // Cloud Connector API routes

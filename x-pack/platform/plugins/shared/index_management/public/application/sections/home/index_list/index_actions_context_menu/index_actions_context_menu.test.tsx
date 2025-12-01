@@ -183,7 +183,7 @@ describe('IndexActionsContextMenu', () => {
         const props = getBaseProps();
         renderWithProviders(<IndexActionsContextMenu {...props} />);
 
-        const button = await screen.findByLabelText(/index options/i);
+        const button = await screen.findByTestId('indexActionsContextMenuButton');
         expect(button).toBeInTheDocument();
         expect(button).toHaveTextContent(/manage index/i);
       });
@@ -244,7 +244,7 @@ describe('IndexActionsContextMenu', () => {
 
         renderWithProviders(<IndexActionsContextMenu {...props} />);
 
-        const button = await screen.findByLabelText(/indices options/i);
+        const button = await screen.findByTestId('indexActionsContextMenuButton');
         expect(button).toHaveTextContent(/manage \d+ indices/i);
       });
     });

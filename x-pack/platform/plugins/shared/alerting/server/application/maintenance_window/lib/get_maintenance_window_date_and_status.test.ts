@@ -51,6 +51,7 @@ describe('getMaintenanceWindowDateAndStatus', () => {
       events: [],
       dateToCompare: new Date(),
       expirationDate: moment().add(1, 'year').toDate(),
+      enabled: true,
     });
 
     expect(result.eventStartTime).toEqual(null);
@@ -64,6 +65,7 @@ describe('getMaintenanceWindowDateAndStatus', () => {
       events,
       dateToCompare: new Date(),
       expirationDate: moment().subtract(1, 'minute').toDate(),
+      enabled: true,
     });
 
     expect(result.eventStartTime).toEqual('2023-03-25T00:00:00.000Z');
@@ -74,6 +76,7 @@ describe('getMaintenanceWindowDateAndStatus', () => {
       events: [],
       dateToCompare: new Date(),
       expirationDate: moment().subtract(1, 'minute').toDate(),
+      enabled: true,
     });
 
     expect(result.eventStartTime).toEqual(null);
@@ -85,6 +88,7 @@ describe('getMaintenanceWindowDateAndStatus', () => {
       events,
       dateToCompare: new Date(),
       expirationDate: moment().subtract(1, 'minute').toDate(),
+      enabled: true,
     });
 
     expect(result.eventStartTime).toEqual('2023-03-28T00:00:00.000Z');
@@ -96,11 +100,39 @@ describe('getMaintenanceWindowDateAndStatus', () => {
       events,
       dateToCompare: new Date(),
       expirationDate: moment().subtract(1, 'minute').toDate(),
+      enabled: true,
     });
 
     expect(result.eventStartTime).toEqual('2023-03-31T00:00:00.000Z');
     expect(result.eventEndTime).toEqual('2023-03-31T01:00:00.000Z');
     expect(result.status).toEqual('archived');
+  });
+
+  it('should return disabled if the mw is disable and no events', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-03-25T00:30:00.000Z'));
+    const result = getMaintenanceWindowDateAndStatus({
+      events: [],
+      dateToCompare: new Date(),
+      expirationDate: moment().add(1, 'year').toDate(),
+      enabled: false,
+    });
+
+    expect(result.eventStartTime).toEqual(null);
+    expect(result.eventEndTime).toEqual(null);
+    expect(result.status).toEqual(MaintenanceWindowStatus.Disabled);
+  });
+
+  it('should return disabled if mw is disabled and the existing events', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-03-25T00:30:00.000Z'));
+    const result = getMaintenanceWindowDateAndStatus({
+      events,
+      dateToCompare: new Date(),
+      expirationDate: moment().add(1, 'year').toDate(),
+      enabled: false,
+    });
+    expect(result.eventStartTime).toEqual('2023-03-25T00:00:00.000Z');
+    expect(result.eventEndTime).toEqual('2023-03-25T01:00:00.000Z');
+    expect(result.status).toEqual(MaintenanceWindowStatus.Disabled);
   });
 });
 

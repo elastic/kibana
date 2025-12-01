@@ -116,10 +116,10 @@ export class WorkflowExecutionState {
     if (!this.stepDocumentsChanges.size) {
       return;
     }
-    await this.workflowStepExecutionRepository.bulkUpsert(
-      Array.from(this.stepDocumentsChanges.values())
-    );
+    const stepDocumentsChanges = Array.from(this.stepDocumentsChanges.values());
+
     this.stepDocumentsChanges.clear();
+    await this.workflowStepExecutionRepository.bulkUpsert(stepDocumentsChanges);
   }
 
   public async flush(): Promise<void> {
@@ -130,9 +130,11 @@ export class WorkflowExecutionState {
     if (!this.workflowDocumentChanges) {
       return;
     }
+    const changes = this.workflowDocumentChanges;
+    this.workflowDocumentChanges = undefined;
 
     await this.workflowExecutionRepository.updateWorkflowExecution({
-      ...this.workflowDocumentChanges,
+      ...changes,
       id: this.workflowExecution.id,
     });
 
@@ -142,8 +144,6 @@ export class WorkflowExecutionState {
         this.workflowExecution.spaceId
       );
     this.workflowExecution = fetchedWorkflowExecution!;
-
-    this.workflowDocumentChanges = undefined;
   }
 
   private createStep(step: Partial<EsWorkflowStepExecution>) {

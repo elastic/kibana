@@ -182,7 +182,7 @@ export const getNavigationTreeDefinition = ({
               children: [
                 {
                   icon: 'launch',
-                  id: 'getting_started',
+                  id: 'search_getting_started',
                   link: 'searchGettingStarted',
                 },
                 {

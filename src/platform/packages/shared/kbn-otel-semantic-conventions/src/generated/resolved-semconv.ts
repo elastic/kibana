@@ -12,14 +12,14 @@
  *
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
- * Registry groups: 136
- * Metric groups: 486
+ * Registry groups: 137
+ * Metric groups: 488
  * Hardcoded fields: 34
- * Total fields: 1177
+ * Total fields: 1178
  *
  * @internal
  *
- * WARNING: This object contains 1177+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1178+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -2962,12 +2962,6 @@ export const semconvFlat = {
     description: 'Tracestate of the linked span.',
     type: 'keyword',
   },
-  'linux.memory.slab.state': {
-    name: 'linux.memory.slab.state',
-    description: 'The Linux Slab memory state',
-    type: 'keyword',
-    example: 'reclaimable',
-  },
   'log.file.name': {
     name: 'log.file.name',
     description: 'The basename of the file.',
@@ -5258,21 +5252,21 @@ export const semconvFlat = {
     description: 'Fraction of filesystem bytes used.',
     type: 'double',
   },
-  'metrics.system.linux.memory.available': {
-    name: 'metrics.system.linux.memory.available',
+  'metrics.system.memory.limit': {
+    name: 'metrics.system.memory.limit',
+    description: 'Total virtual memory available in the system.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.available': {
+    name: 'metrics.system.memory.linux.available',
     description:
       'An estimate of how much memory is available for starting new applications, without causing swapping.',
     type: 'double',
   },
-  'metrics.system.linux.memory.slab.usage': {
-    name: 'metrics.system.linux.memory.slab.usage',
+  'metrics.system.memory.linux.slab.usage': {
+    name: 'metrics.system.memory.linux.slab.usage',
     description:
       'Reports the memory used by the Linux kernel for managing caches of frequently used objects.',
-    type: 'double',
-  },
-  'metrics.system.memory.limit': {
-    name: 'metrics.system.memory.limit',
-    description: 'Total virtual memory available in the system.',
     type: 'double',
   },
   'metrics.system.memory.shared': {
@@ -5674,6 +5668,12 @@ export const semconvFlat = {
     description: 'A name identifying the type of the OpenTelemetry component.',
     type: 'keyword',
     example: 'batching_span_processor',
+  },
+  'otel.event.name': {
+    name: 'otel.event.name',
+    description: 'Identifies the class / type of event.',
+    type: 'keyword',
+    example: 'browser.mouse.click',
   },
   'otel.scope.name': {
     name: 'otel.scope.name',
@@ -6312,6 +6312,12 @@ export const semconvFlat = {
     description: 'The filesystem type',
     type: 'keyword',
     example: 'ext4',
+  },
+  'system.memory.linux.slab.state': {
+    name: 'system.memory.linux.slab.state',
+    description: 'The Linux Slab memory state',
+    type: 'keyword',
+    example: 'reclaimable',
   },
   'system.memory.state': {
     name: 'system.memory.state',

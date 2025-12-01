@@ -510,7 +510,7 @@
         "label": "generateBenchmarkRuleTags",
         "description": [],
         "signature": [
-          "(rule: Readonly<{ references?: string | undefined; impact?: string | undefined; reference?: string | undefined; default_value?: string | undefined; } & { id: string; version: string; name: string; tags: string[]; description: string; section: string; audit: string; benchmark: Readonly<{ posture_type?: \"kspm\" | \"cspm\" | undefined; rule_number?: string | undefined; } & { id: string; version: string; name: string; }>; profile_applicability: string; rationale: string; rego_rule_id: string; remediation: string; }>) => string[]"
+          "(rule: Readonly<{ references?: string | undefined; impact?: string | undefined; reference?: string | undefined; default_value?: string | undefined; } & { id: string; name: string; version: string; tags: string[]; description: string; section: string; audit: string; benchmark: Readonly<{ posture_type?: \"kspm\" | \"cspm\" | undefined; rule_number?: string | undefined; } & { id: string; name: string; version: string; }>; profile_applicability: string; rationale: string; rego_rule_id: string; remediation: string; }>) => string[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/rules/detection_rules.ts",
         "deprecated": false,
@@ -524,7 +524,7 @@
             "label": "rule",
             "description": [],
             "signature": [
-              "Readonly<{ references?: string | undefined; impact?: string | undefined; reference?: string | undefined; default_value?: string | undefined; } & { id: string; version: string; name: string; tags: string[]; description: string; section: string; audit: string; benchmark: Readonly<{ posture_type?: \"kspm\" | \"cspm\" | undefined; rule_number?: string | undefined; } & { id: string; version: string; name: string; }>; profile_applicability: string; rationale: string; rego_rule_id: string; remediation: string; }>"
+              "Readonly<{ references?: string | undefined; impact?: string | undefined; reference?: string | undefined; default_value?: string | undefined; } & { id: string; name: string; version: string; tags: string[]; description: string; section: string; audit: string; benchmark: Readonly<{ posture_type?: \"kspm\" | \"cspm\" | undefined; rule_number?: string | undefined; } & { id: string; name: string; version: string; }>; profile_applicability: string; rationale: string; rego_rule_id: string; remediation: string; }>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/rules/detection_rules.ts",
             "deprecated": false,
@@ -578,7 +578,7 @@
         "label": "getFindingsDetectionRuleSearchTags",
         "description": [],
         "signature": [
-          "(cspBenchmarkRule: Readonly<{ references?: string | undefined; impact?: string | undefined; reference?: string | undefined; default_value?: string | undefined; } & { id: string; version: string; name: string; tags: string[]; description: string; section: string; audit: string; benchmark: Readonly<{ posture_type?: \"kspm\" | \"cspm\" | undefined; rule_number?: string | undefined; } & { id: string; version: string; name: string; }>; profile_applicability: string; rationale: string; rego_rule_id: string; remediation: string; }>) => string[]"
+          "(cspBenchmarkRule: Readonly<{ references?: string | undefined; impact?: string | undefined; reference?: string | undefined; default_value?: string | undefined; } & { id: string; name: string; version: string; tags: string[]; description: string; section: string; audit: string; benchmark: Readonly<{ posture_type?: \"kspm\" | \"cspm\" | undefined; rule_number?: string | undefined; } & { id: string; name: string; version: string; }>; profile_applicability: string; rationale: string; rego_rule_id: string; remediation: string; }>) => string[]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/rules/detection_rules.ts",
         "deprecated": false,
@@ -592,7 +592,7 @@
             "label": "cspBenchmarkRule",
             "description": [],
             "signature": [
-              "Readonly<{ references?: string | undefined; impact?: string | undefined; reference?: string | undefined; default_value?: string | undefined; } & { id: string; version: string; name: string; tags: string[]; description: string; section: string; audit: string; benchmark: Readonly<{ posture_type?: \"kspm\" | \"cspm\" | undefined; rule_number?: string | undefined; } & { id: string; version: string; name: string; }>; profile_applicability: string; rationale: string; rego_rule_id: string; remediation: string; }>"
+              "Readonly<{ references?: string | undefined; impact?: string | undefined; reference?: string | undefined; default_value?: string | undefined; } & { id: string; name: string; version: string; tags: string[]; description: string; section: string; audit: string; benchmark: Readonly<{ posture_type?: \"kspm\" | \"cspm\" | undefined; rule_number?: string | undefined; } & { id: string; name: string; version: string; }>; profile_applicability: string; rationale: string; rego_rule_id: string; remediation: string; }>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/rules/detection_rules.ts",
             "deprecated": false,
@@ -920,7 +920,7 @@
             "label": "rule",
             "description": [],
             "signature": [
-              "{ readonly references?: string | undefined; readonly impact?: string | undefined; readonly reference?: string | undefined; readonly default_value?: string | undefined; readonly id: string; readonly version: string; readonly name: string; readonly tags: string[]; readonly description: string; readonly section: string; readonly audit: string; readonly benchmark: Readonly<{ posture_type?: \"kspm\" | \"cspm\" | undefined; rule_number?: string | undefined; } & { id: string; version: string; name: string; }>; readonly profile_applicability: string; readonly rationale: string; readonly rego_rule_id: string; readonly remediation: string; }"
+              "{ readonly references?: string | undefined; readonly impact?: string | undefined; readonly reference?: string | undefined; readonly default_value?: string | undefined; readonly id: string; readonly name: string; readonly version: string; readonly tags: string[]; readonly description: string; readonly section: string; readonly audit: string; readonly benchmark: Readonly<{ posture_type?: \"kspm\" | \"cspm\" | undefined; rule_number?: string | undefined; } & { id: string; name: string; version: string; }>; readonly profile_applicability: string; readonly rationale: string; readonly rego_rule_id: string; readonly remediation: string; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/types/findings.ts",
             "deprecated": false,

@@ -12,6 +12,7 @@ export const maintenanceWindowsStatusSchema = schema.oneOf([
   schema.literal('finished'),
   schema.literal('upcoming'),
   schema.literal('archived'),
+  schema.literal('disabled'),
 ]);
 
 export const findMaintenanceWindowsParamsSchema = schema.object({

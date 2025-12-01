@@ -765,4 +765,8 @@ export class StreamsApp {
     await this.page.getByTestId('euiFlyoutCloseButton').click();
     await expect(this.page.getByTestId('euiFlyoutCloseButton')).toBeHidden();
   }
+
+  async clickProcessorPreviewTab(label: string) {
+    await this.page.getByText(label).click();
+  }
 }

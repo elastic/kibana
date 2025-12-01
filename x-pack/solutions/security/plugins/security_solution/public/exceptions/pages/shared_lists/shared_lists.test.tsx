@@ -201,8 +201,10 @@ describe('SharedLists', () => {
     });
   });
 
-  it('disables the "endpoint_list" overflow card button when user is restricted to only READ Endpoint Exceptions', async () => {
-    (useEndpointExceptionsCapability as jest.Mock).mockReturnValue(false);
+  it('enables the export "endpoint_list" overflow card button when user is restricted to only READ Endpoint Exceptions', async () => {
+    (useEndpointExceptionsCapability as jest.Mock).mockImplementation((feature: string) =>
+      feature === 'showEndpointExceptions' ? true : false
+    );
 
     const wrapper = render(
       <TestProviders>
@@ -210,7 +212,12 @@ describe('SharedLists', () => {
       </TestProviders>
     );
     const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
-    expect(allMenuActions[0]).toBeDisabled();
+    fireEvent.click(allMenuActions[1]);
+
+    await waitFor(() => {
+      const allExportActions = wrapper.getAllByTestId('sharedListOverflowCardActionItemExport');
+      expect(allExportActions[0]).toBeEnabled();
+    });
   });
 
   it('renders delete option as disabled if list is "endpoint_list"', async () => {
@@ -228,7 +235,7 @@ describe('SharedLists', () => {
     });
   });
 
-  it('renders overflow card button as disabled if user is read only', async () => {
+  it('renders overflow card button as enabled if user is read only', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
@@ -243,6 +250,29 @@ describe('SharedLists', () => {
       </TestProviders>
     );
     const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
-    expect(allMenuActions[1]).toBeDisabled();
+    expect(allMenuActions[1]).toBeEnabled();
+  });
+
+  it('renders overflow card export action as enabled if user is read only', async () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        rules: { read: true, edit: false },
+        exceptions: { read: true, crud: false },
+      },
+    });
+
+    const wrapper = render(
+      <TestProviders>
+        <SharedLists />
+      </TestProviders>
+    );
+    const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
+    fireEvent.click(allMenuActions[0]);
+
+    await waitFor(() => {
+      const allExportActions = wrapper.getAllByTestId('sharedListOverflowCardActionItemExport');
+      expect(allExportActions[0]).toBeEnabled();
+    });
   });
 });

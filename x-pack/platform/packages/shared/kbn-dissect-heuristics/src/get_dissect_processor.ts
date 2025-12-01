@@ -43,7 +43,7 @@ export function getDissectProcessor(
  */
 function countDelimiters(pattern: string): number {
   // Count non-%{} sequences
-  const withoutFields = pattern.replace(/%\{[^}]+\}/g, '');
+  const withoutFields = pattern.replace(/%\{[^}]+?\}/g, '');
   // Count meaningful delimiter sequences (more than just whitespace)
   return withoutFields.split(/\s+/).filter((s) => s.length > 0).length;
 }

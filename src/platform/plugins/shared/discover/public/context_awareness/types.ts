@@ -29,6 +29,7 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type { TabState } from '../application/main/state_management/redux';
 
 /**
  * Supports extending the Discover app menu
@@ -329,6 +330,24 @@ export interface AdditionalCellAction {
    * @param context The current cell action context
    */
   execute: (context: AdditionalCellActionContext) => void | Promise<void>;
+}
+
+/**
+ * Parameters passed to the open in new tab action
+ */
+export interface OpenInNewTabParams {
+  /**
+   * The query to open in the new tab
+   */
+  query?: TabState['appState']['query'];
+  /**
+   * The label of the new tab
+   */
+  tabLabel?: string;
+  /**
+   * The time range to open in the new tab
+   */
+  timeRange?: TabState['globalState']['timeRange'];
 }
 
 /**

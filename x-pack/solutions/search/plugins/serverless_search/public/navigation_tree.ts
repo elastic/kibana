@@ -235,7 +235,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         id: 'search_project_nav_footer',
         children: [
           {
-            id: 'getting_started',
+            id: 'search_getting_started',
             icon: 'launch',
             link: 'searchGettingStarted',
           },

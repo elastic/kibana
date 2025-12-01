@@ -38,17 +38,20 @@ import { editFailureStoreFormSchema } from './schema';
 const PERIOD_TYPE = {
   CUSTOM: 'custom',
   DEFAULT: 'default',
+  DISABLED_LIFECYCLE: 'disabledLifecycle',
 } as const;
 
 export interface FailureStoreFormProps {
   failureStoreEnabled: boolean;
   defaultRetentionPeriod?: string;
   customRetentionPeriod?: string;
+  retentionDisabled?: boolean;
 }
 
-type FailureStoreFormData = { failureStoreEnabled: boolean } & (
+export type FailureStoreFormData = { failureStoreEnabled: boolean } & (
   | { inherit: boolean }
   | { customRetentionPeriod?: string }
+  | { retentionDisabled?: boolean }
 );
 
 interface Props {
@@ -61,14 +64,16 @@ interface Props {
     isCurrentlyInherited: boolean;
   };
   showIlmDescription?: boolean;
+  canShowDisableLifecycle?: boolean;
 }
 
 export const FailureStoreModal: FunctionComponent<Props> = ({
   onCloseModal,
   onSaveModal,
   failureStoreProps,
-  showIlmDescription = false,
+  showIlmDescription = true,
   inheritOptions,
+  canShowDisableLifecycle = false,
 }) => {
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
@@ -90,14 +95,18 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
         return;
       }
 
-      // The new failure store configuration has to include the enabled state and, if the custom retention type is enabled, the retention period.
+      // The failure store configuration has to include the enabled state and, if the custom retention type is enabled, the retention period or disabled flag.
       const newFailureStoreConfig: FailureStoreFormData = {
         failureStoreEnabled: data.failureStore,
+        ...(data.failureStore &&
+          data.periodType === PERIOD_TYPE.DISABLED_LIFECYCLE && {
+            retentionDisabled: true,
+          }),
+        ...(data.failureStore &&
+          data.periodType === PERIOD_TYPE.CUSTOM && {
+            customRetentionPeriod: `${data.retentionPeriodValue}${data.retentionPeriodUnit}`,
+          }),
       };
-
-      if (data.failureStore && data.periodType === PERIOD_TYPE.CUSTOM) {
-        newFailureStoreConfig.customRetentionPeriod = `${data.retentionPeriodValue}${data.retentionPeriodUnit}`;
-      }
 
       await onSaveModal(newFailureStoreConfig);
     } finally {
@@ -129,12 +138,15 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
   const { form } = useForm({
     defaultValue: {
       failureStore: failureStoreProps.failureStoreEnabled ?? false,
-      periodType: failureStoreProps.customRetentionPeriod
+      periodType: failureStoreProps.retentionDisabled
+        ? PERIOD_TYPE.DISABLED_LIFECYCLE
+        : failureStoreProps.customRetentionPeriod
         ? PERIOD_TYPE.CUSTOM
         : PERIOD_TYPE.DEFAULT,
       retentionPeriodValue,
       retentionPeriodUnit,
       inherit: (inheritOptions?.isCurrentlyInherited && inheritOptions.canShowInherit) ?? false,
+      retentionDisabled: failureStoreProps.retentionDisabled ?? false,
     },
     schema: editFailureStoreFormSchema,
     id: 'editFailureStoreForm',
@@ -261,38 +273,46 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
                   defaultMessage: 'Failure store retention',
                 })}
                 euiFieldProps={{
-                  options: failureStorePeriodOptions,
+                  options: canShowDisableLifecycle
+                    ? failureStorePeriodOptions
+                    : failureStorePeriodOptions.filter(
+                        (option) => option.id !== PERIOD_TYPE.DISABLED_LIFECYCLE
+                      ),
                   'data-test-subj': 'selectFailureStorePeriodType',
                   isDisabled: inherit,
                 }}
               />
 
-              <EuiFormRow fullWidth>
-                {isCustomPeriod || defaultRetentionPeriod ? (
-                  <RetentionPeriodField disabled={!isCustomPeriod || inherit} />
-                ) : (
-                  <EuiCallOut
-                    announceOnMount
-                    typeof="info"
-                    size="m"
-                    data-test-subj="defaultRetentionCallout"
-                  >
-                    <FormattedMessage
-                      id="xpack.failureStoreModal.form.defaultRetentionAvailableText"
-                      defaultMessage="This will pull the default value set at the cluster level."
-                    />
-                  </EuiCallOut>
-                )}
-              </EuiFormRow>
-              {!showIlmDescription && (
-                <EuiFormRow fullWidth>
-                  <EuiText size="s" color="subdued">
-                    <FormattedMessage
-                      id="xpack.failureStoreModal.form.retentionPeriodInfoText"
-                      defaultMessage="This retention period stores data in the hot tier for best indexing and search performance."
-                    />
-                  </EuiText>
-                </EuiFormRow>
+              {periodType !== PERIOD_TYPE.DISABLED_LIFECYCLE && (
+                <>
+                  <EuiFormRow fullWidth>
+                    {isCustomPeriod || defaultRetentionPeriod ? (
+                      <RetentionPeriodField disabled={!isCustomPeriod || inherit} />
+                    ) : (
+                      <EuiCallOut
+                        announceOnMount
+                        typeof="info"
+                        size="m"
+                        data-test-subj="defaultRetentionCallout"
+                      >
+                        <FormattedMessage
+                          id="xpack.failureStoreModal.form.defaultRetentionAvailableText"
+                          defaultMessage="This will pull the default value set at the cluster level."
+                        />
+                      </EuiCallOut>
+                    )}
+                  </EuiFormRow>
+                  {showIlmDescription && (
+                    <EuiFormRow fullWidth>
+                      <EuiText size="s" color="subdued">
+                        <FormattedMessage
+                          id="xpack.failureStoreModal.form.retentionPeriodInfoText"
+                          defaultMessage="This retention period stores data in the hot tier for best indexing and search performance."
+                        />
+                      </EuiText>
+                    </EuiFormRow>
+                  )}
+                </>
               )}
             </>
           )}

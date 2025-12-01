@@ -358,7 +358,7 @@
             "ZodTypeAny",
             ", { tags?: string[] | undefined; }, { tags?: string[] | undefined; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { path: { name: string; }; query: { query: string; }; body: { tags?: string[] | undefined; }; }, { path: { name: string; }; query: { query: string; }; body: { tags?: string[] | undefined; }; }>, ",
+            ", { query: { query: string; }; path: { name: string; }; body: { tags?: string[] | undefined; }; }, { query: { query: string; }; path: { name: string; }; body: { tags?: string[] | undefined; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             "SuggestRulesResponse",
@@ -622,7 +622,7 @@
             },
             ">; }, \"strip\", ",
             "ZodTypeAny",
-            ", { filter: ",
+            ", { name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -630,7 +630,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; }, { filter: ",
+            "; }, { name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -638,7 +638,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; }>>; kql: ",
+            "; }>>; kql: ",
             "ZodObject",
             "<{ query: ",
             "ZodString",
@@ -646,7 +646,7 @@
             "ZodTypeAny",
             ", { query: string; }, { query: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { title: string; kql: { query: string; }; feature?: { filter: ",
+            ", { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -654,7 +654,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; } | undefined; }, { title: string; kql: { query: string; }; feature?: { filter: ",
+            "; } | undefined; }, { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -662,9 +662,9 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; } | undefined; }>; }, \"strip\", ",
+            "; } | undefined; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { filter: ",
+            ", { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -672,7 +672,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; } | undefined; }; }, { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { filter: ",
+            "; } | undefined; }; }, { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -680,7 +680,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; } | undefined; }; }>, ",
+            "; } | undefined; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             "UpsertQueryResponse",
@@ -747,88 +747,62 @@
             "<{ feature: ",
             "ZodOptional",
             "<",
-            "ZodObject",
-            "<{ name: ",
-            "ZodEffects",
-            "<",
-            "ZodString",
-            ", string, string>; filter: ",
             "ZodType",
             "<",
             {
-              "pluginId": "@kbn/streamlang",
+              "pluginId": "@kbn/streams-schema",
               "scope": "common",
-              "docId": "kibKbnStreamlangPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.SystemFeature",
+              "text": "SystemFeature"
             },
             ", ",
             "ZodTypeDef",
             ", ",
             {
-              "pluginId": "@kbn/streamlang",
+              "pluginId": "@kbn/streams-schema",
               "scope": "common",
-              "docId": "kibKbnStreamlangPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.SystemFeature",
+              "text": "SystemFeature"
             },
-            ">; description: ",
-            "ZodString",
-            "; }, \"strip\", ",
+            ">>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { filter: ",
+            ", { feature?: ",
             {
-              "pluginId": "@kbn/streamlang",
+              "pluginId": "@kbn/streams-schema",
               "scope": "common",
-              "docId": "kibKbnStreamlangPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.SystemFeature",
+              "text": "SystemFeature"
             },
-            "; name: string; description: string; }, { filter: ",
+            " | undefined; }, { feature?: ",
             {
-              "pluginId": "@kbn/streamlang",
+              "pluginId": "@kbn/streams-schema",
               "scope": "common",
-              "docId": "kibKbnStreamlangPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.SystemFeature",
+              "text": "SystemFeature"
             },
-            "; name: string; description: string; }>>; }, \"strip\", ",
+            " | undefined; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { feature?: { filter: ",
+            ", { query: { connectorId: string; from: Date; to: Date; currentDate?: Date | undefined; }; path: { name: string; }; body: { feature?: ",
             {
-              "pluginId": "@kbn/streamlang",
+              "pluginId": "@kbn/streams-schema",
               "scope": "common",
-              "docId": "kibKbnStreamlangPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.SystemFeature",
+              "text": "SystemFeature"
             },
-            "; name: string; description: string; } | undefined; }, { feature?: { filter: ",
+            " | undefined; }; }, { query: { connectorId: string; from: string; to: string; currentDate?: string | undefined; }; path: { name: string; }; body: { feature?: ",
             {
-              "pluginId": "@kbn/streamlang",
+              "pluginId": "@kbn/streams-schema",
               "scope": "common",
-              "docId": "kibKbnStreamlangPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.SystemFeature",
+              "text": "SystemFeature"
             },
-            "; name: string; description: string; } | undefined; }>; }, \"strip\", ",
-            "ZodTypeAny",
-            ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; currentDate?: Date | undefined; }; body: { feature?: { filter: ",
-            {
-              "pluginId": "@kbn/streamlang",
-              "scope": "common",
-              "docId": "kibKbnStreamlangPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; name: string; description: string; } | undefined; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; currentDate?: string | undefined; }; body: { feature?: { filter: ",
-            {
-              "pluginId": "@kbn/streamlang",
-              "scope": "common",
-              "docId": "kibKbnStreamlangPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; name: string; description: string; } | undefined; }; }>, ",
+            " | undefined; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             {
@@ -877,10 +851,8 @@
             "<",
             "ZodObject",
             "<{ name: ",
-            "ZodEffects",
-            "<",
             "ZodString",
-            ", string, string>; filter: ",
+            "; filter: ",
             "ZodType",
             "<",
             {
@@ -902,7 +874,7 @@
             },
             ">; }, \"strip\", ",
             "ZodTypeAny",
-            ", { filter: ",
+            ", { name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -910,7 +882,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; }, { filter: ",
+            "; }, { name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -918,7 +890,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; }>>; kql: ",
+            "; }>>; kql: ",
             "ZodObject",
             "<{ query: ",
             "ZodString",
@@ -926,7 +898,7 @@
             "ZodTypeAny",
             ", { query: string; }, { query: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { kql: { query: string; }; feature?: { filter: ",
+            ", { kql: { query: string; }; feature?: { name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -934,7 +906,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; } | undefined; }, { kql: { query: string; }; feature?: { filter: ",
+            "; } | undefined; }, { kql: { query: string; }; feature?: { name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -942,9 +914,9 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; } | undefined; }>; }, \"strip\", ",
+            "; } | undefined; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { query: { kql: { query: string; }; feature?: { filter: ",
+            ", { query: { kql: { query: string; }; feature?: { name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -952,7 +924,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; } | undefined; }; }, { query: { kql: { query: string; }; feature?: { filter: ",
+            "; } | undefined; }; }, { query: { kql: { query: string; }; feature?: { name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -960,9 +932,9 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; } | undefined; }; }>; }, \"strip\", ",
+            "; } | undefined; }; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { path: { name: string; }; query: { from: Date; to: Date; bucketSize: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
+            ", { query: { from: Date; to: Date; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -970,7 +942,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; } | undefined; }; }; }, { path: { name: string; }; query: { from: string; to: string; bucketSize: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
+            "; } | undefined; }; }; }, { query: { from: string; to: string; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { name: string; filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -978,7 +950,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; name: string; } | undefined; }; }; }>, ",
+            "; } | undefined; }; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             {
@@ -1020,7 +992,7 @@
             "ZodTypeAny",
             ", { from: Date; to: Date; bucketSize: string; }, { from: string; to: string; bucketSize: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { path: { name: string; }; query: { from: Date; to: Date; bucketSize: string; }; }, { path: { name: string; }; query: { from: string; to: string; bucketSize: string; }; }>, ",
+            ", { query: { from: Date; to: Date; bucketSize: string; }; path: { name: string; }; }, { query: { from: string; to: string; bucketSize: string; }; path: { name: string; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             {
@@ -1216,7 +1188,7 @@
             },
             ">; }, \"strip\", ",
             "ZodTypeAny",
-            ", { version: string; name: string; description: string; include: ",
+            ", { name: string; version: string; description: string; include: ",
             {
               "pluginId": "@kbn/content-packs-schema",
               "scope": "common",
@@ -1224,7 +1196,7 @@
               "section": "def-common.ContentPackIncludedObjects",
               "text": "ContentPackIncludedObjects"
             },
-            "; }, { version: string; name: string; description: string; include: ",
+            "; }, { name: string; version: string; description: string; include: ",
             {
               "pluginId": "@kbn/content-packs-schema",
               "scope": "common",
@@ -1234,7 +1206,7 @@
             },
             "; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { path: { name: string; }; body: { version: string; name: string; description: string; include: ",
+            ", { path: { name: string; }; body: { name: string; version: string; description: string; include: ",
             {
               "pluginId": "@kbn/content-packs-schema",
               "scope": "common",
@@ -1242,7 +1214,7 @@
               "section": "def-common.ContentPackIncludedObjects",
               "text": "ContentPackIncludedObjects"
             },
-            "; }; }, { path: { name: string; }; body: { version: string; name: string; description: string; include: ",
+            "; }; }, { path: { name: string; }; body: { name: string; version: string; description: string; include: ",
             {
               "pluginId": "@kbn/content-packs-schema",
               "scope": "common",
@@ -1810,7 +1782,7 @@
             "ZodTypeAny",
             ", { tags?: string[] | undefined; }, { tags?: string[] | undefined; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { path: { name: string; }; query: { query: string; }; body: { tags?: string[] | undefined; }; }, { path: { name: string; }; query: { query: string; }; body: { tags?: string[] | undefined; }; }>, ",
+            ", { query: { query: string; }; path: { name: string; }; body: { tags?: string[] | undefined; }; }, { query: { query: string; }; path: { name: string; }; body: { tags?: string[] | undefined; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             "SuggestDashboardResponse",
@@ -1950,7 +1922,7 @@
             "ZodTypeAny",
             ", { connectorId: string; from: Date; to: Date; }, { connectorId: string; from: string; to: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
+            ", { query: { connectorId: string; from: Date; to: Date; }; path: { name: string; }; }, { query: { connectorId: string; from: string; to: string; }; path: { name: string; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             "Observable",
@@ -1986,7 +1958,7 @@
             "ZodTypeAny",
             ", { connectorId: string; from: Date; to: Date; }, { connectorId: string; from: string; to: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
+            ", { query: { connectorId: string; from: Date; to: Date; }; path: { name: string; }; }, { query: { connectorId: string; from: string; to: string; }; path: { name: string; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             "Observable",
@@ -1995,8 +1967,8 @@
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
               "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Feature",
-              "text": "Feature"
+              "section": "def-common.SystemFeature",
+              "text": "SystemFeature"
             },
             "[]; } & { type: \"identified_features\"; }>, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
             {
@@ -2031,8 +2003,8 @@
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
               "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Feature",
-              "text": "Feature"
+              "section": "def-common.SystemFeature",
+              "text": "SystemFeature"
             },
             ", ",
             "ZodTypeDef",
@@ -2041,52 +2013,62 @@
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
               "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Feature",
-              "text": "Feature"
+              "section": "def-common.SystemFeature",
+              "text": "SystemFeature"
             },
             ">; }, \"strip\", ",
             "ZodTypeAny",
             ", { feature: ",
+            "BaseFeature",
+            "<\"system\"> & { filter: ",
             {
-              "pluginId": "@kbn/streams-schema",
+              "pluginId": "@kbn/streamlang",
               "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Feature",
-              "text": "Feature"
+              "docId": "kibKbnStreamlangPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
             },
-            "; }, { feature: ",
+            "; }; }, { feature: ",
+            "BaseFeature",
+            "<\"system\"> & { filter: ",
             {
-              "pluginId": "@kbn/streams-schema",
+              "pluginId": "@kbn/streamlang",
               "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Feature",
-              "text": "Feature"
+              "docId": "kibKbnStreamlangPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
             },
-            "; }>; }, \"strip\", ",
+            "; }; }>; }, \"strip\", ",
             "ZodTypeAny",
             ", { index: { feature: ",
+            "BaseFeature",
+            "<\"system\"> & { filter: ",
             {
-              "pluginId": "@kbn/streams-schema",
+              "pluginId": "@kbn/streamlang",
               "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Feature",
-              "text": "Feature"
+              "docId": "kibKbnStreamlangPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
             },
-            "; }; }, { index: { feature: ",
+            "; }; }; }, { index: { feature: ",
+            "BaseFeature",
+            "<\"system\"> & { filter: ",
             {
-              "pluginId": "@kbn/streams-schema",
+              "pluginId": "@kbn/streamlang",
               "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Feature",
-              "text": "Feature"
+              "docId": "kibKbnStreamlangPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
             },
-            "; }; }>, ",
+            "; }; }; }>, ",
             "ZodObject",
             "<{ delete: ",
             "ZodObject",
             "<{ feature: ",
             "ZodObject",
-            "<{ name: ",
+            "<{ type: ",
+            "ZodEnum",
+            "<[\"system\"]>; name: ",
             "ZodEffects",
             "<",
             "ZodEffects",
@@ -2094,47 +2076,55 @@
             "ZodString",
             ", string, string>, string, string>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { name: string; }, { name: string; }>; }, \"strip\", ",
+            ", { type: \"system\"; name: string; }, { type: \"system\"; name: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { feature: { name: string; }; }, { feature: { name: string; }; }>; }, \"strip\", ",
+            ", { feature: { type: \"system\"; name: string; }; }, { feature: { type: \"system\"; name: string; }; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { delete: { feature: { name: string; }; }; }, { delete: { feature: { name: string; }; }; }>]>, \"many\">; }, \"strip\", ",
+            ", { delete: { feature: { type: \"system\"; name: string; }; }; }, { delete: { feature: { type: \"system\"; name: string; }; }; }>]>, \"many\">; }, \"strip\", ",
             "ZodTypeAny",
             ", { operations: ({ index: { feature: ",
+            "BaseFeature",
+            "<\"system\"> & { filter: ",
             {
-              "pluginId": "@kbn/streams-schema",
+              "pluginId": "@kbn/streamlang",
               "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Feature",
-              "text": "Feature"
+              "docId": "kibKbnStreamlangPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
             },
-            "; }; } | { delete: { feature: { name: string; }; }; })[]; }, { operations: ({ index: { feature: ",
+            "; }; }; } | { delete: { feature: { type: \"system\"; name: string; }; }; })[]; }, { operations: ({ index: { feature: ",
+            "BaseFeature",
+            "<\"system\"> & { filter: ",
             {
-              "pluginId": "@kbn/streams-schema",
+              "pluginId": "@kbn/streamlang",
               "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Feature",
-              "text": "Feature"
+              "docId": "kibKbnStreamlangPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
             },
-            "; }; } | { delete: { feature: { name: string; }; }; })[]; }>; }, \"strip\", ",
+            "; }; }; } | { delete: { feature: { type: \"system\"; name: string; }; }; })[]; }>; }, \"strip\", ",
             "ZodTypeAny",
             ", { path: { name: string; }; body: { operations: ({ index: { feature: ",
+            "BaseFeature",
+            "<\"system\"> & { filter: ",
             {
-              "pluginId": "@kbn/streams-schema",
+              "pluginId": "@kbn/streamlang",
               "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Feature",
-              "text": "Feature"
+              "docId": "kibKbnStreamlangPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
             },
-            "; }; } | { delete: { feature: { name: string; }; }; })[]; }; }, { path: { name: string; }; body: { operations: ({ index: { feature: ",
+            "; }; }; } | { delete: { feature: { type: \"system\"; name: string; }; }; })[]; }; }, { path: { name: string; }; body: { operations: ({ index: { feature: ",
+            "BaseFeature",
+            "<\"system\"> & { filter: ",
             {
-              "pluginId": "@kbn/streams-schema",
+              "pluginId": "@kbn/streamlang",
               "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Feature",
-              "text": "Feature"
+              "docId": "kibKbnStreamlangPluginApi",
+              "section": "def-common.Condition",
+              "text": "Condition"
             },
-            "; }; } | { delete: { feature: { name: string; }; }; })[]; }; }>, ",
+            "; }; }; } | { delete: { feature: { type: \"system\"; name: string; }; }; })[]; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             "BulkResponse",
@@ -2163,10 +2153,10 @@
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
               "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Feature",
-              "text": "Feature"
+              "section": "def-common.SystemFeature",
+              "text": "SystemFeature"
             },
-            "[]; }, undefined>; \"PUT /internal/streams/{name}/features/{featureName}\": ",
+            "[]; }, undefined>; \"PUT /internal/streams/{name}/features/{featureType}/{featureName}\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -2174,47 +2164,43 @@
               "section": "def-common.ServerRoute",
               "text": "ServerRoute"
             },
-            "<\"PUT /internal/streams/{name}/features/{featureName}\", ",
+            "<\"PUT /internal/streams/{name}/features/{featureType}/{featureName}\", ",
             "ZodObject",
             "<{ path: ",
             "ZodObject",
             "<{ name: ",
             "ZodString",
-            "; featureName: ",
-            "ZodEffects",
-            "<",
-            "ZodEffects",
-            "<",
+            "; featureType: ",
+            "ZodEnum",
+            "<[\"system\"]>; featureName: ",
             "ZodString",
-            ", string, string>, string, string>; }, \"strip\", ",
+            "; }, \"strip\", ",
             "ZodTypeAny",
-            ", { name: string; featureName: string; }, { name: string; featureName: string; }>; body: ",
-            "ZodObject",
-            "<{ description: ",
-            "ZodString",
-            "; filter: ",
+            ", { name: string; featureType: \"system\"; featureName: string; }, { name: string; featureType: \"system\"; featureName: string; }>; body: ",
             "ZodType",
             "<",
             {
-              "pluginId": "@kbn/streamlang",
+              "pluginId": "@kbn/streams-schema",
               "scope": "common",
-              "docId": "kibKbnStreamlangPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.SystemFeature",
+              "text": "SystemFeature"
             },
             ", ",
             "ZodTypeDef",
             ", ",
             {
-              "pluginId": "@kbn/streamlang",
+              "pluginId": "@kbn/streams-schema",
               "scope": "common",
-              "docId": "kibKbnStreamlangPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.SystemFeature",
+              "text": "SystemFeature"
             },
             ">; }, \"strip\", ",
             "ZodTypeAny",
-            ", { filter: ",
+            ", { path: { name: string; featureType: \"system\"; featureName: string; }; body: ",
+            "BaseFeature",
+            "<\"system\"> & { filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -2222,7 +2208,9 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; description: string; }, { filter: ",
+            "; }; }, { path: { name: string; featureType: \"system\"; featureName: string; }; body: ",
+            "BaseFeature",
+            "<\"system\"> & { filter: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -2230,29 +2218,11 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; description: string; }>; }, \"strip\", ",
-            "ZodTypeAny",
-            ", { path: { name: string; featureName: string; }; body: { filter: ",
-            {
-              "pluginId": "@kbn/streamlang",
-              "scope": "common",
-              "docId": "kibKbnStreamlangPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; description: string; }; }, { path: { name: string; featureName: string; }; body: { filter: ",
-            {
-              "pluginId": "@kbn/streamlang",
-              "scope": "common",
-              "docId": "kibKbnStreamlangPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            "; description: string; }; }>, ",
+            "; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             "WriteResponseBase",
-            ", undefined>; \"DELETE /internal/streams/{name}/features/{featureName}\": ",
+            ", undefined>; \"DELETE /internal/streams/{name}/features/{featureType}/{featureName}\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -2260,11 +2230,13 @@
               "section": "def-common.ServerRoute",
               "text": "ServerRoute"
             },
-            "<\"DELETE /internal/streams/{name}/features/{featureName}\", ",
+            "<\"DELETE /internal/streams/{name}/features/{featureType}/{featureName}\", ",
             "ZodObject",
             "<{ path: ",
             "ZodObject",
             "<{ name: ",
+            "ZodString",
+            "; featureType: ",
             "ZodString",
             "; featureName: ",
             "ZodEffects",
@@ -2274,9 +2246,9 @@
             "ZodString",
             ", string, string>, string, string>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { name: string; featureName: string; }, { name: string; featureName: string; }>; }, \"strip\", ",
+            ", { name: string; featureType: string; featureName: string; }, { name: string; featureType: string; featureName: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { path: { name: string; featureName: string; }; }, { path: { name: string; featureName: string; }; }>, ",
+            ", { path: { name: string; featureType: string; featureName: string; }; }, { path: { name: string; featureType: string; featureName: string; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             {
@@ -2286,7 +2258,7 @@
               "section": "def-server.StorageClientDeleteResponse",
               "text": "StorageClientDeleteResponse"
             },
-            ", undefined>; \"GET /internal/streams/{name}/features/{featureName}\": ",
+            ", undefined>; \"GET /internal/streams/{name}/features/{featureType}/{featureName}\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -2294,13 +2266,15 @@
               "section": "def-common.ServerRoute",
               "text": "ServerRoute"
             },
-            "<\"GET /internal/streams/{name}/features/{featureName}\", ",
+            "<\"GET /internal/streams/{name}/features/{featureType}/{featureName}\", ",
             "ZodObject",
             "<{ path: ",
             "ZodObject",
             "<{ name: ",
             "ZodString",
-            "; featureName: ",
+            "; featureType: ",
+            "ZodEnum",
+            "<[\"system\"]>; featureName: ",
             "ZodEffects",
             "<",
             "ZodEffects",
@@ -2308,19 +2282,19 @@
             "ZodString",
             ", string, string>, string, string>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { name: string; featureName: string; }, { name: string; featureName: string; }>; }, \"strip\", ",
+            ", { name: string; featureType: \"system\"; featureName: string; }, { name: string; featureType: \"system\"; featureName: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { path: { name: string; featureName: string; }; }, { path: { name: string; featureName: string; }; }>, ",
+            ", { path: { name: string; featureType: \"system\"; featureName: string; }; }, { path: { name: string; featureType: \"system\"; featureName: string; }; }>, ",
             "StreamsRouteHandlerResources",
             ", { feature: ",
             {
               "pluginId": "@kbn/streams-schema",
               "scope": "common",
               "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Feature",
-              "text": "Feature"
+              "section": "def-common.SystemFeature",
+              "text": "SystemFeature"
             },
-            "; }, undefined>; \"PUT /internal/streams/{name}/_failure_store\": ",
+            "; }, undefined>; \"GET /internal/streams/{name}/failure_store/default_retention\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -2328,7 +2302,7 @@
               "section": "def-common.ServerRoute",
               "text": "ServerRoute"
             },
-            "<\"PUT /internal/streams/{name}/_failure_store\", ",
+            "<\"GET /internal/streams/{name}/failure_store/default_retention\", ",
             "ZodObject",
             "<{ path: ",
             "ZodObject",
@@ -2336,23 +2310,11 @@
             "ZodString",
             "; }, \"strip\", ",
             "ZodTypeAny",
-            ", { name: string; }, { name: string; }>; body: ",
-            "ZodObject",
-            "<{ failureStoreEnabled: ",
-            "ZodBoolean",
-            "; customRetentionPeriod: ",
-            "ZodOptional",
-            "<",
-            "ZodString",
-            ">; }, \"strip\", ",
+            ", { name: string; }, { name: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { failureStoreEnabled: boolean; customRetentionPeriod?: string | undefined; }, { failureStoreEnabled: boolean; customRetentionPeriod?: string | undefined; }>; }, \"strip\", ",
-            "ZodTypeAny",
-            ", { path: { name: string; }; body: { failureStoreEnabled: boolean; customRetentionPeriod?: string | undefined; }; }, { path: { name: string; }; body: { failureStoreEnabled: boolean; customRetentionPeriod?: string | undefined; }; }>, ",
+            ", { path: { name: string; }; }, { path: { name: string; }; }>, ",
             "StreamsRouteHandlerResources",
-            ", ",
-            "UpdateFailureStoreResponse",
-            ", undefined>; \"GET /internal/streams/{name}/failure_store/stats\": ",
+            ", { default_retention: string | undefined; }, undefined>; \"GET /internal/streams/{name}/failure_store/stats\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -2372,12 +2334,14 @@
             "ZodTypeAny",
             ", { path: { name: string; }; }, { path: { name: string; }; }>, ",
             "StreamsRouteHandlerResources",
-            ", { config: ",
-            "FailureStore",
-            "; stats: null; } | { config: ",
-            "FailureStore",
-            "; stats: ",
-            "FailureStoreStatsResponse",
+            ", { stats: null; } | { stats: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.FailureStoreStatsResponse",
+              "text": "FailureStoreStatsResponse"
+            },
             "; }, undefined>; \"POST /internal/streams/{name}/processing/_suggestions/date\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
@@ -2388,7 +2352,17 @@
             },
             "<\"POST /internal/streams/{name}/processing/_suggestions/date\", any, ",
             "StreamsRouteHandlerResources",
-            ", { formats: string[]; }, undefined>; \"POST /internal/streams/{name}/processing/_suggestions/grok\": ",
+            ", { formats: string[]; }, undefined>; \"POST /internal/streams/{name}/processing/_suggestions/dissect\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /internal/streams/{name}/processing/_suggestions/dissect\", any, ",
+            "StreamsRouteHandlerResources",
+            ", DissectSuggestionResponse, undefined>; \"POST /internal/streams/{name}/processing/_suggestions/grok\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -2736,7 +2710,7 @@
             "ZodTypeAny",
             ", { start: string; end: string; }, { start: string; end: string; }>; }, \"strip\", ",
             "ZodTypeAny",
-            ", { path: { name: string; }; query: { start: string; end: string; }; }, { path: { name: string; }; query: { start: string; end: string; }; }>, ",
+            ", { query: { start: string; end: string; }; path: { name: string; }; }, { query: { start: string; end: string; }; path: { name: string; }; }>, ",
             "StreamsRouteHandlerResources",
             ", ",
             "StreamDetailsResponse",
@@ -3036,7 +3010,7 @@
           "ZodTypeAny",
           ", { tags?: string[] | undefined; }, { tags?: string[] | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { path: { name: string; }; query: { query: string; }; body: { tags?: string[] | undefined; }; }, { path: { name: string; }; query: { query: string; }; body: { tags?: string[] | undefined; }; }>, ",
+          ", { query: { query: string; }; path: { name: string; }; body: { tags?: string[] | undefined; }; }, { query: { query: string; }; path: { name: string; }; body: { tags?: string[] | undefined; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           "SuggestRulesResponse",
@@ -3300,7 +3274,7 @@
           },
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { filter: ",
+          ", { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3308,7 +3282,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; }, { filter: ",
+          "; }, { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3316,7 +3290,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; }>>; kql: ",
+          "; }>>; kql: ",
           "ZodObject",
           "<{ query: ",
           "ZodString",
@@ -3324,7 +3298,7 @@
           "ZodTypeAny",
           ", { query: string; }, { query: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; kql: { query: string; }; feature?: { filter: ",
+          ", { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3332,7 +3306,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; } | undefined; }, { title: string; kql: { query: string; }; feature?: { filter: ",
+          "; } | undefined; }, { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3340,9 +3314,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; } | undefined; }>; }, \"strip\", ",
+          "; } | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { filter: ",
+          ", { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3350,7 +3324,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; } | undefined; }; }, { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { filter: ",
+          "; } | undefined; }; }, { path: { name: string; queryId: string; }; body: { title: string; kql: { query: string; }; feature?: { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3358,7 +3332,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; } | undefined; }; }>, ",
+          "; } | undefined; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           "UpsertQueryResponse",
@@ -3425,88 +3399,62 @@
           "<{ feature: ",
           "ZodOptional",
           "<",
-          "ZodObject",
-          "<{ name: ",
-          "ZodEffects",
-          "<",
-          "ZodString",
-          ", string, string>; filter: ",
           "ZodType",
           "<",
           {
-            "pluginId": "@kbn/streamlang",
+            "pluginId": "@kbn/streams-schema",
             "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.SystemFeature",
+            "text": "SystemFeature"
           },
           ", ",
           "ZodTypeDef",
           ", ",
           {
-            "pluginId": "@kbn/streamlang",
+            "pluginId": "@kbn/streams-schema",
             "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.SystemFeature",
+            "text": "SystemFeature"
           },
-          ">; description: ",
-          "ZodString",
-          "; }, \"strip\", ",
+          ">>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { filter: ",
+          ", { feature?: ",
           {
-            "pluginId": "@kbn/streamlang",
+            "pluginId": "@kbn/streams-schema",
             "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.SystemFeature",
+            "text": "SystemFeature"
           },
-          "; name: string; description: string; }, { filter: ",
+          " | undefined; }, { feature?: ",
           {
-            "pluginId": "@kbn/streamlang",
+            "pluginId": "@kbn/streams-schema",
             "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.SystemFeature",
+            "text": "SystemFeature"
           },
-          "; name: string; description: string; }>>; }, \"strip\", ",
+          " | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { feature?: { filter: ",
+          ", { query: { connectorId: string; from: Date; to: Date; currentDate?: Date | undefined; }; path: { name: string; }; body: { feature?: ",
           {
-            "pluginId": "@kbn/streamlang",
+            "pluginId": "@kbn/streams-schema",
             "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.SystemFeature",
+            "text": "SystemFeature"
           },
-          "; name: string; description: string; } | undefined; }, { feature?: { filter: ",
+          " | undefined; }; }, { query: { connectorId: string; from: string; to: string; currentDate?: string | undefined; }; path: { name: string; }; body: { feature?: ",
           {
-            "pluginId": "@kbn/streamlang",
+            "pluginId": "@kbn/streams-schema",
             "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.SystemFeature",
+            "text": "SystemFeature"
           },
-          "; name: string; description: string; } | undefined; }>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; currentDate?: Date | undefined; }; body: { feature?: { filter: ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; name: string; description: string; } | undefined; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; currentDate?: string | undefined; }; body: { feature?: { filter: ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; name: string; description: string; } | undefined; }; }>, ",
+          " | undefined; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           {
@@ -3555,10 +3503,8 @@
           "<",
           "ZodObject",
           "<{ name: ",
-          "ZodEffects",
-          "<",
           "ZodString",
-          ", string, string>; filter: ",
+          "; filter: ",
           "ZodType",
           "<",
           {
@@ -3580,7 +3526,7 @@
           },
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { filter: ",
+          ", { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3588,7 +3534,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; }, { filter: ",
+          "; }, { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3596,7 +3542,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; }>>; kql: ",
+          "; }>>; kql: ",
           "ZodObject",
           "<{ query: ",
           "ZodString",
@@ -3604,7 +3550,7 @@
           "ZodTypeAny",
           ", { query: string; }, { query: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { kql: { query: string; }; feature?: { filter: ",
+          ", { kql: { query: string; }; feature?: { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3612,7 +3558,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; } | undefined; }, { kql: { query: string; }; feature?: { filter: ",
+          "; } | undefined; }, { kql: { query: string; }; feature?: { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3620,9 +3566,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; } | undefined; }>; }, \"strip\", ",
+          "; } | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { query: { kql: { query: string; }; feature?: { filter: ",
+          ", { query: { kql: { query: string; }; feature?: { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3630,7 +3576,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; } | undefined; }; }, { query: { kql: { query: string; }; feature?: { filter: ",
+          "; } | undefined; }; }, { query: { kql: { query: string; }; feature?: { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3638,9 +3584,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; } | undefined; }; }>; }, \"strip\", ",
+          "; } | undefined; }; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { path: { name: string; }; query: { from: Date; to: Date; bucketSize: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
+          ", { query: { from: Date; to: Date; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3648,7 +3594,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; } | undefined; }; }; }, { path: { name: string; }; query: { from: string; to: string; bucketSize: string; }; body: { query: { kql: { query: string; }; feature?: { filter: ",
+          "; } | undefined; }; }; }, { query: { from: string; to: string; bucketSize: string; }; path: { name: string; }; body: { query: { kql: { query: string; }; feature?: { name: string; filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3656,7 +3602,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; name: string; } | undefined; }; }; }>, ",
+          "; } | undefined; }; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           {
@@ -3698,7 +3644,7 @@
           "ZodTypeAny",
           ", { from: Date; to: Date; bucketSize: string; }, { from: string; to: string; bucketSize: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { path: { name: string; }; query: { from: Date; to: Date; bucketSize: string; }; }, { path: { name: string; }; query: { from: string; to: string; bucketSize: string; }; }>, ",
+          ", { query: { from: Date; to: Date; bucketSize: string; }; path: { name: string; }; }, { query: { from: string; to: string; bucketSize: string; }; path: { name: string; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           {
@@ -3894,7 +3840,7 @@
           },
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { version: string; name: string; description: string; include: ",
+          ", { name: string; version: string; description: string; include: ",
           {
             "pluginId": "@kbn/content-packs-schema",
             "scope": "common",
@@ -3902,7 +3848,7 @@
             "section": "def-common.ContentPackIncludedObjects",
             "text": "ContentPackIncludedObjects"
           },
-          "; }, { version: string; name: string; description: string; include: ",
+          "; }, { name: string; version: string; description: string; include: ",
           {
             "pluginId": "@kbn/content-packs-schema",
             "scope": "common",
@@ -3912,7 +3858,7 @@
           },
           "; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { path: { name: string; }; body: { version: string; name: string; description: string; include: ",
+          ", { path: { name: string; }; body: { name: string; version: string; description: string; include: ",
           {
             "pluginId": "@kbn/content-packs-schema",
             "scope": "common",
@@ -3920,7 +3866,7 @@
             "section": "def-common.ContentPackIncludedObjects",
             "text": "ContentPackIncludedObjects"
           },
-          "; }; }, { path: { name: string; }; body: { version: string; name: string; description: string; include: ",
+          "; }; }, { path: { name: string; }; body: { name: string; version: string; description: string; include: ",
           {
             "pluginId": "@kbn/content-packs-schema",
             "scope": "common",
@@ -4488,7 +4434,7 @@
           "ZodTypeAny",
           ", { tags?: string[] | undefined; }, { tags?: string[] | undefined; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { path: { name: string; }; query: { query: string; }; body: { tags?: string[] | undefined; }; }, { path: { name: string; }; query: { query: string; }; body: { tags?: string[] | undefined; }; }>, ",
+          ", { query: { query: string; }; path: { name: string; }; body: { tags?: string[] | undefined; }; }, { query: { query: string; }; path: { name: string; }; body: { tags?: string[] | undefined; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           "SuggestDashboardResponse",
@@ -4628,7 +4574,7 @@
           "ZodTypeAny",
           ", { connectorId: string; from: Date; to: Date; }, { connectorId: string; from: string; to: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
+          ", { query: { connectorId: string; from: Date; to: Date; }; path: { name: string; }; }, { query: { connectorId: string; from: string; to: string; }; path: { name: string; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           "Observable",
@@ -4664,7 +4610,7 @@
           "ZodTypeAny",
           ", { connectorId: string; from: Date; to: Date; }, { connectorId: string; from: string; to: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { path: { name: string; }; query: { connectorId: string; from: Date; to: Date; }; }, { path: { name: string; }; query: { connectorId: string; from: string; to: string; }; }>, ",
+          ", { query: { connectorId: string; from: Date; to: Date; }; path: { name: string; }; }, { query: { connectorId: string; from: string; to: string; }; path: { name: string; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           "Observable",
@@ -4673,8 +4619,8 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Feature",
-            "text": "Feature"
+            "section": "def-common.SystemFeature",
+            "text": "SystemFeature"
           },
           "[]; } & { type: \"identified_features\"; }>, undefined>; \"POST /internal/streams/{name}/features/_bulk\": ",
           {
@@ -4709,8 +4655,8 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Feature",
-            "text": "Feature"
+            "section": "def-common.SystemFeature",
+            "text": "SystemFeature"
           },
           ", ",
           "ZodTypeDef",
@@ -4719,52 +4665,62 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Feature",
-            "text": "Feature"
+            "section": "def-common.SystemFeature",
+            "text": "SystemFeature"
           },
           ">; }, \"strip\", ",
           "ZodTypeAny",
           ", { feature: ",
+          "BaseFeature",
+          "<\"system\"> & { filter: ",
           {
-            "pluginId": "@kbn/streams-schema",
+            "pluginId": "@kbn/streamlang",
             "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Feature",
-            "text": "Feature"
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
           },
-          "; }, { feature: ",
+          "; }; }, { feature: ",
+          "BaseFeature",
+          "<\"system\"> & { filter: ",
           {
-            "pluginId": "@kbn/streams-schema",
+            "pluginId": "@kbn/streamlang",
             "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Feature",
-            "text": "Feature"
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
           },
-          "; }>; }, \"strip\", ",
+          "; }; }>; }, \"strip\", ",
           "ZodTypeAny",
           ", { index: { feature: ",
+          "BaseFeature",
+          "<\"system\"> & { filter: ",
           {
-            "pluginId": "@kbn/streams-schema",
+            "pluginId": "@kbn/streamlang",
             "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Feature",
-            "text": "Feature"
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
           },
-          "; }; }, { index: { feature: ",
+          "; }; }; }, { index: { feature: ",
+          "BaseFeature",
+          "<\"system\"> & { filter: ",
           {
-            "pluginId": "@kbn/streams-schema",
+            "pluginId": "@kbn/streamlang",
             "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Feature",
-            "text": "Feature"
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
           },
-          "; }; }>, ",
+          "; }; }; }>, ",
           "ZodObject",
           "<{ delete: ",
           "ZodObject",
           "<{ feature: ",
           "ZodObject",
-          "<{ name: ",
+          "<{ type: ",
+          "ZodEnum",
+          "<[\"system\"]>; name: ",
           "ZodEffects",
           "<",
           "ZodEffects",
@@ -4772,47 +4728,55 @@
           "ZodString",
           ", string, string>, string, string>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { name: string; }, { name: string; }>; }, \"strip\", ",
+          ", { type: \"system\"; name: string; }, { type: \"system\"; name: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { feature: { name: string; }; }, { feature: { name: string; }; }>; }, \"strip\", ",
+          ", { feature: { type: \"system\"; name: string; }; }, { feature: { type: \"system\"; name: string; }; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { delete: { feature: { name: string; }; }; }, { delete: { feature: { name: string; }; }; }>]>, \"many\">; }, \"strip\", ",
+          ", { delete: { feature: { type: \"system\"; name: string; }; }; }, { delete: { feature: { type: \"system\"; name: string; }; }; }>]>, \"many\">; }, \"strip\", ",
           "ZodTypeAny",
           ", { operations: ({ index: { feature: ",
+          "BaseFeature",
+          "<\"system\"> & { filter: ",
           {
-            "pluginId": "@kbn/streams-schema",
+            "pluginId": "@kbn/streamlang",
             "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Feature",
-            "text": "Feature"
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
           },
-          "; }; } | { delete: { feature: { name: string; }; }; })[]; }, { operations: ({ index: { feature: ",
+          "; }; }; } | { delete: { feature: { type: \"system\"; name: string; }; }; })[]; }, { operations: ({ index: { feature: ",
+          "BaseFeature",
+          "<\"system\"> & { filter: ",
           {
-            "pluginId": "@kbn/streams-schema",
+            "pluginId": "@kbn/streamlang",
             "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Feature",
-            "text": "Feature"
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
           },
-          "; }; } | { delete: { feature: { name: string; }; }; })[]; }>; }, \"strip\", ",
+          "; }; }; } | { delete: { feature: { type: \"system\"; name: string; }; }; })[]; }>; }, \"strip\", ",
           "ZodTypeAny",
           ", { path: { name: string; }; body: { operations: ({ index: { feature: ",
+          "BaseFeature",
+          "<\"system\"> & { filter: ",
           {
-            "pluginId": "@kbn/streams-schema",
+            "pluginId": "@kbn/streamlang",
             "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Feature",
-            "text": "Feature"
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
           },
-          "; }; } | { delete: { feature: { name: string; }; }; })[]; }; }, { path: { name: string; }; body: { operations: ({ index: { feature: ",
+          "; }; }; } | { delete: { feature: { type: \"system\"; name: string; }; }; })[]; }; }, { path: { name: string; }; body: { operations: ({ index: { feature: ",
+          "BaseFeature",
+          "<\"system\"> & { filter: ",
           {
-            "pluginId": "@kbn/streams-schema",
+            "pluginId": "@kbn/streamlang",
             "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Feature",
-            "text": "Feature"
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
           },
-          "; }; } | { delete: { feature: { name: string; }; }; })[]; }; }>, ",
+          "; }; }; } | { delete: { feature: { type: \"system\"; name: string; }; }; })[]; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           "BulkResponse",
@@ -4841,10 +4805,10 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Feature",
-            "text": "Feature"
+            "section": "def-common.SystemFeature",
+            "text": "SystemFeature"
           },
-          "[]; }, undefined>; \"PUT /internal/streams/{name}/features/{featureName}\": ",
+          "[]; }, undefined>; \"PUT /internal/streams/{name}/features/{featureType}/{featureName}\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -4852,47 +4816,43 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"PUT /internal/streams/{name}/features/{featureName}\", ",
+          "<\"PUT /internal/streams/{name}/features/{featureType}/{featureName}\", ",
           "ZodObject",
           "<{ path: ",
           "ZodObject",
           "<{ name: ",
           "ZodString",
-          "; featureName: ",
-          "ZodEffects",
-          "<",
-          "ZodEffects",
-          "<",
+          "; featureType: ",
+          "ZodEnum",
+          "<[\"system\"]>; featureName: ",
           "ZodString",
-          ", string, string>, string, string>; }, \"strip\", ",
+          "; }, \"strip\", ",
           "ZodTypeAny",
-          ", { name: string; featureName: string; }, { name: string; featureName: string; }>; body: ",
-          "ZodObject",
-          "<{ description: ",
-          "ZodString",
-          "; filter: ",
+          ", { name: string; featureType: \"system\"; featureName: string; }, { name: string; featureType: \"system\"; featureName: string; }>; body: ",
           "ZodType",
           "<",
           {
-            "pluginId": "@kbn/streamlang",
+            "pluginId": "@kbn/streams-schema",
             "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.SystemFeature",
+            "text": "SystemFeature"
           },
           ", ",
           "ZodTypeDef",
           ", ",
           {
-            "pluginId": "@kbn/streamlang",
+            "pluginId": "@kbn/streams-schema",
             "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.SystemFeature",
+            "text": "SystemFeature"
           },
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { filter: ",
+          ", { path: { name: string; featureType: \"system\"; featureName: string; }; body: ",
+          "BaseFeature",
+          "<\"system\"> & { filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -4900,7 +4860,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; description: string; }, { filter: ",
+          "; }; }, { path: { name: string; featureType: \"system\"; featureName: string; }; body: ",
+          "BaseFeature",
+          "<\"system\"> & { filter: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -4908,29 +4870,11 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; description: string; }>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { path: { name: string; featureName: string; }; body: { filter: ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; description: string; }; }, { path: { name: string; featureName: string; }; body: { filter: ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; description: string; }; }>, ",
+          "; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           "WriteResponseBase",
-          ", undefined>; \"DELETE /internal/streams/{name}/features/{featureName}\": ",
+          ", undefined>; \"DELETE /internal/streams/{name}/features/{featureType}/{featureName}\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -4938,11 +4882,13 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"DELETE /internal/streams/{name}/features/{featureName}\", ",
+          "<\"DELETE /internal/streams/{name}/features/{featureType}/{featureName}\", ",
           "ZodObject",
           "<{ path: ",
           "ZodObject",
           "<{ name: ",
+          "ZodString",
+          "; featureType: ",
           "ZodString",
           "; featureName: ",
           "ZodEffects",
@@ -4952,9 +4898,9 @@
           "ZodString",
           ", string, string>, string, string>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { name: string; featureName: string; }, { name: string; featureName: string; }>; }, \"strip\", ",
+          ", { name: string; featureType: string; featureName: string; }, { name: string; featureType: string; featureName: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { path: { name: string; featureName: string; }; }, { path: { name: string; featureName: string; }; }>, ",
+          ", { path: { name: string; featureType: string; featureName: string; }; }, { path: { name: string; featureType: string; featureName: string; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           {
@@ -4964,7 +4910,7 @@
             "section": "def-server.StorageClientDeleteResponse",
             "text": "StorageClientDeleteResponse"
           },
-          ", undefined>; \"GET /internal/streams/{name}/features/{featureName}\": ",
+          ", undefined>; \"GET /internal/streams/{name}/features/{featureType}/{featureName}\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -4972,13 +4918,15 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"GET /internal/streams/{name}/features/{featureName}\", ",
+          "<\"GET /internal/streams/{name}/features/{featureType}/{featureName}\", ",
           "ZodObject",
           "<{ path: ",
           "ZodObject",
           "<{ name: ",
           "ZodString",
-          "; featureName: ",
+          "; featureType: ",
+          "ZodEnum",
+          "<[\"system\"]>; featureName: ",
           "ZodEffects",
           "<",
           "ZodEffects",
@@ -4986,19 +4934,19 @@
           "ZodString",
           ", string, string>, string, string>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { name: string; featureName: string; }, { name: string; featureName: string; }>; }, \"strip\", ",
+          ", { name: string; featureType: \"system\"; featureName: string; }, { name: string; featureType: \"system\"; featureName: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { path: { name: string; featureName: string; }; }, { path: { name: string; featureName: string; }; }>, ",
+          ", { path: { name: string; featureType: \"system\"; featureName: string; }; }, { path: { name: string; featureType: \"system\"; featureName: string; }; }>, ",
           "StreamsRouteHandlerResources",
           ", { feature: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Feature",
-            "text": "Feature"
+            "section": "def-common.SystemFeature",
+            "text": "SystemFeature"
           },
-          "; }, undefined>; \"PUT /internal/streams/{name}/_failure_store\": ",
+          "; }, undefined>; \"GET /internal/streams/{name}/failure_store/default_retention\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -5006,7 +4954,7 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"PUT /internal/streams/{name}/_failure_store\", ",
+          "<\"GET /internal/streams/{name}/failure_store/default_retention\", ",
           "ZodObject",
           "<{ path: ",
           "ZodObject",
@@ -5014,23 +4962,11 @@
           "ZodString",
           "; }, \"strip\", ",
           "ZodTypeAny",
-          ", { name: string; }, { name: string; }>; body: ",
-          "ZodObject",
-          "<{ failureStoreEnabled: ",
-          "ZodBoolean",
-          "; customRetentionPeriod: ",
-          "ZodOptional",
-          "<",
-          "ZodString",
-          ">; }, \"strip\", ",
+          ", { name: string; }, { name: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { failureStoreEnabled: boolean; customRetentionPeriod?: string | undefined; }, { failureStoreEnabled: boolean; customRetentionPeriod?: string | undefined; }>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { path: { name: string; }; body: { failureStoreEnabled: boolean; customRetentionPeriod?: string | undefined; }; }, { path: { name: string; }; body: { failureStoreEnabled: boolean; customRetentionPeriod?: string | undefined; }; }>, ",
+          ", { path: { name: string; }; }, { path: { name: string; }; }>, ",
           "StreamsRouteHandlerResources",
-          ", ",
-          "UpdateFailureStoreResponse",
-          ", undefined>; \"GET /internal/streams/{name}/failure_store/stats\": ",
+          ", { default_retention: string | undefined; }, undefined>; \"GET /internal/streams/{name}/failure_store/stats\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -5050,12 +4986,14 @@
           "ZodTypeAny",
           ", { path: { name: string; }; }, { path: { name: string; }; }>, ",
           "StreamsRouteHandlerResources",
-          ", { config: ",
-          "FailureStore",
-          "; stats: null; } | { config: ",
-          "FailureStore",
-          "; stats: ",
-          "FailureStoreStatsResponse",
+          ", { stats: null; } | { stats: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.FailureStoreStatsResponse",
+            "text": "FailureStoreStatsResponse"
+          },
           "; }, undefined>; \"POST /internal/streams/{name}/processing/_suggestions/date\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -5066,7 +5004,17 @@
           },
           "<\"POST /internal/streams/{name}/processing/_suggestions/date\", any, ",
           "StreamsRouteHandlerResources",
-          ", { formats: string[]; }, undefined>; \"POST /internal/streams/{name}/processing/_suggestions/grok\": ",
+          ", { formats: string[]; }, undefined>; \"POST /internal/streams/{name}/processing/_suggestions/dissect\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/streams/{name}/processing/_suggestions/dissect\", any, ",
+          "StreamsRouteHandlerResources",
+          ", DissectSuggestionResponse, undefined>; \"POST /internal/streams/{name}/processing/_suggestions/grok\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -5414,7 +5362,7 @@
           "ZodTypeAny",
           ", { start: string; end: string; }, { start: string; end: string; }>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { path: { name: string; }; query: { start: string; end: string; }; }, { path: { name: string; }; query: { start: string; end: string; }; }>, ",
+          ", { query: { start: string; end: string; }; path: { name: string; }; }, { query: { start: string; end: string; }; path: { name: string; }; }>, ",
           "StreamsRouteHandlerResources",
           ", ",
           "StreamDetailsResponse",

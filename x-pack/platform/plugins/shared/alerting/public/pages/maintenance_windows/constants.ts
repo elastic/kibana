@@ -13,6 +13,7 @@ export const STATUS_DISPLAY = {
   [MaintenanceWindowStatus.Upcoming]: { color: 'warning', label: i18n.TABLE_STATUS_UPCOMING },
   [MaintenanceWindowStatus.Finished]: { color: 'success', label: i18n.TABLE_STATUS_FINISHED },
   [MaintenanceWindowStatus.Archived]: { color: 'default', label: i18n.TABLE_STATUS_ARCHIVED },
+  [MaintenanceWindowStatus.Disabled]: { color: 'default', label: i18n.TABLE_STATUS_DISABLED },
 };
 
 export const STATUS_SORT = {
@@ -20,6 +21,7 @@ export const STATUS_SORT = {
   [MaintenanceWindowStatus.Upcoming]: 1,
   [MaintenanceWindowStatus.Finished]: 2,
   [MaintenanceWindowStatus.Archived]: 3,
+  [MaintenanceWindowStatus.Disabled]: 4,
 };
 
 export const STATUS_OPTIONS = [
@@ -27,4 +29,5 @@ export const STATUS_OPTIONS = [
   { value: MaintenanceWindowStatus.Upcoming, name: i18n.TABLE_STATUS_UPCOMING },
   { value: MaintenanceWindowStatus.Finished, name: i18n.TABLE_STATUS_FINISHED },
   { value: MaintenanceWindowStatus.Archived, name: i18n.TABLE_STATUS_ARCHIVED },
+  { value: MaintenanceWindowStatus.Disabled, name: i18n.TABLE_STATUS_DISABLED },
 ];

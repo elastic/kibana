@@ -6,9 +6,7 @@
  */
 
 import type { MetricStateESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
-import type { MapAttributes } from '@kbn/maps-plugin/server/content_management/schema/v1/map_attributes_schema/types';
+import type { GaugeStateESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/gauge';
+import type { TagcloudStateESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/tagcloud';
 
-export type VisualizationConfig = MetricStateESQL;
-export type MapConfig = MapAttributes;
-
-export type CombinedVisualizationConfig = VisualizationConfig | MapConfig;
+export type VisualizationConfig = MetricStateESQL | GaugeStateESQL | TagcloudStateESQL;

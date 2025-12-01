@@ -17,4 +17,5 @@ export const maintenanceWindowStatus = {
   FINISHED: 'finished',
   UPCOMING: 'upcoming',
   ARCHIVED: 'archived',
+  DISABLED: 'disabled',
 } as const;

@@ -36,6 +36,7 @@ describe('FindSLODefinitions with Health validation', () => {
     mockGetSLOHealth.execute.mockResolvedValue([
       {
         sloId: slo.id,
+        sloInstanceId: 'irrelevant',
         sloRevision: slo.revision,
         sloName: slo.name,
         health: {
@@ -77,8 +78,6 @@ describe('FindSLODefinitions with Health validation', () => {
           {
             sloId: slo.id,
             sloInstanceId: '*',
-            sloRevision: slo.revision,
-            sloName: slo.name,
           },
         ],
       });
