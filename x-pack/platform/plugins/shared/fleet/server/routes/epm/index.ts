@@ -7,6 +7,8 @@
 
 import type { RouteSecurity } from '@kbn/core-http-server';
 
+import { RollbackAvailableCheckResponseSchema } from '../../../common/types';
+
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthz } from '../../../common';
@@ -70,7 +72,6 @@ import {
   BulkRollbackPackagesRequestSchema,
   BulkRollbackPackagesResponseSchema,
   InstallRuleAssetsRequestSchema,
-  RollbackAvailableCheckResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
