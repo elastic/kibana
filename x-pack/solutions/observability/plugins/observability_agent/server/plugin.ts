@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { registerObservabilityAgent } from './agent/register_observability_agent';
 import { registerTools } from './tools/register_tools';
+import { registerAttachments } from './attachments/register_attachments';
 import { getIsObservabilityAgentEnabled } from './utils/get_is_obs_agent_enabled';
 import { OBSERVABILITY_AGENT_FEATURE_FLAG } from '../common/constants';
 import type {
@@ -51,12 +52,16 @@ export class ObservabilityAgentPlugin
           return;
         }
 
-        registerTools({ core, plugins, logger: this.logger }).catch((error) => {
-          this.logger.error(`Error registering observability agent tools: ${error}`);
-        });
-
         registerObservabilityAgent({ plugins, logger: this.logger }).catch((error) => {
           this.logger.error(`Error registering observability agent: ${error}`);
+        });
+
+        registerTools({ core, plugins, logger: this.logger }).catch((error) => {
+          this.logger.error(`Error registering observability tools: ${error}`);
+        });
+
+        registerAttachments({ plugins }).catch((error) => {
+          this.logger.error(`Error registering observability attachments: ${error}`);
         });
       })
       .catch((error) => {
