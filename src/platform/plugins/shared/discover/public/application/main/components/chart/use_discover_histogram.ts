@@ -34,10 +34,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
-import {
-  type DiscoverAppState,
-  useAppStateSelector,
-} from '../../state_management/discover_app_state_container';
+import { type DiscoverAppState, useAppStateSelector } from '../../state_management/redux';
 import type {
   DataDocumentsMsg,
   DiscoverLatestFetchDetails,
@@ -73,6 +70,8 @@ export const useDiscoverHistogram = (
   } = stateContainer.dataState;
   const savedSearchState = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
+  const dispatch = useInternalStateDispatch();
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const documentsState = useDataState(documents$);
   const isChartLoading = useMemo(() => {
     return isEsqlMode && documentsState?.fetchStatus === FetchStatus.LOADING;
@@ -93,7 +92,7 @@ export const useDiscoverHistogram = (
       unifiedHistogramApi?.state$
     )?.subscribe((changes) => {
       const { lensRequestAdapter, ...stateChanges } = changes;
-      const appState = stateContainer.appState.get();
+      const appState = stateContainer.getCurrentTab().appState;
       const oldState = {
         hideChart: appState.hideChart,
       };
@@ -104,32 +103,30 @@ export const useDiscoverHistogram = (
       }
 
       if (!isEqual(oldState, newState)) {
-        stateContainer.appState.update(newState);
+        dispatch(updateAppState({ appState: newState }));
       }
     });
 
     return () => {
       subscription?.unsubscribe();
     };
-  }, [inspectorAdapters, stateContainer.appState, unifiedHistogramApi?.state$]);
+  }, [dispatch, inspectorAdapters, stateContainer, unifiedHistogramApi?.state$, updateAppState]);
 
   /**
    * Sync URL query params with Unified Histogram
    */
 
   useEffect(() => {
-    const subscription = createAppStateObservable(stateContainer.appState.state$).subscribe(
-      (changes) => {
-        if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
-          unifiedHistogramApi?.setChartHidden(changes.chartHidden);
-        }
+    const subscription = createAppStateObservable(stateContainer.appState$).subscribe((changes) => {
+      if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
+        unifiedHistogramApi?.setChartHidden(changes.chartHidden);
       }
-    );
+    });
 
     return () => {
       subscription?.unsubscribe();
     };
-  }, [stateContainer.appState.state$, unifiedHistogramApi]);
+  }, [stateContainer.appState$, unifiedHistogramApi]);
 
   /**
    * Total hits
@@ -185,14 +182,7 @@ export const useDiscoverHistogram = (
     return () => {
       subscription?.unsubscribe();
     };
-  }, [
-    isEsqlMode,
-    main$,
-    totalHits$,
-    setTotalHitsError,
-    stateContainer.appState,
-    unifiedHistogramApi?.state$,
-  ]);
+  }, [isEsqlMode, main$, totalHits$, setTotalHitsError, unifiedHistogramApi?.state$]);
 
   /**
    * Request params
@@ -331,7 +321,6 @@ export const useDiscoverHistogram = (
   const setOverriddenVisContextAfterInvalidation = useCurrentTabAction(
     internalStateActions.setOverriddenVisContextAfterInvalidation
   );
-  const dispatch = useInternalStateDispatch();
 
   const onVisContextChanged = useCallback(
     (
@@ -387,10 +376,10 @@ export const useDiscoverHistogram = (
   >(
     (nextBreakdownField) => {
       if (nextBreakdownField !== breakdownField) {
-        stateContainer.appState.update({ breakdownField: nextBreakdownField });
+        dispatch(updateAppState({ appState: { breakdownField: nextBreakdownField } }));
       }
     },
-    [breakdownField, stateContainer.appState]
+    [breakdownField, dispatch, updateAppState]
   );
 
   const onTimeIntervalChange = useCallback<
@@ -398,10 +387,10 @@ export const useDiscoverHistogram = (
   >(
     (nextTimeInterval) => {
       if (nextTimeInterval !== timeInterval) {
-        stateContainer.appState.update({ interval: nextTimeInterval });
+        dispatch(updateAppState({ appState: { interval: nextTimeInterval } }));
       }
     },
-    [timeInterval, stateContainer.appState]
+    [timeInterval, dispatch, updateAppState]
   );
 
   return useMemo(
