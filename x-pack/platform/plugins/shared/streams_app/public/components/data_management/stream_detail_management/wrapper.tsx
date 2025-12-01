@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiPageHeader, useEuiTheme, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiPageHeader, useEuiTheme, EuiFlexItem, EuiTourStep } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import useAsync from 'react-use/lib/useAsync';
+import { useStreamsTour, StreamsTourStep, StreamsTourStepProps } from '../../streams_tour';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import { calculateDataQuality } from '../../../util/calculate_data_quality';
 import { useStreamDocCountsFetch } from '../../../hooks/use_streams_doc_counts_fetch';
@@ -35,6 +36,12 @@ export type ManagementTabs = Record<
   }
 >;
 
+const TAB_TO_TOUR_STEP: Record<string, StreamsTourStep | undefined> = {
+  retention: StreamsTourStep.RETENTION,
+  processing: StreamsTourStep.PROCESSING,
+  advanced: StreamsTourStep.ADVANCED,
+};
+
 export function Wrapper({
   tabs,
   streamId,
@@ -49,6 +56,7 @@ export function Wrapper({
   const {
     features: { groupStreams },
   } = useStreamsPrivileges();
+  const { tourStepProps } = useStreamsTour();
 
   const tabMap = Object.fromEntries(
     Object.entries(tabs).map(([tabName, currentTab]) => {
@@ -142,11 +150,26 @@ export function Wrapper({
             <FeedbackButton />
           </EuiFlexGroup>
         }
-        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => ({
-          label,
-          href,
-          isSelected: tab === tabKey,
-        }))}
+        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
+          const tourStep = TAB_TO_TOUR_STEP[tabKey];
+          const stepProps: StreamsTourStepProps | undefined = tourStep
+            ? tourStepProps[tourStep - 1]
+            : undefined;
+
+          const wrappedLabel = stepProps ? (
+            <EuiTourStep {...stepProps}>
+              <span>{label}</span>
+            </EuiTourStep>
+          ) : (
+            label
+          );
+
+          return {
+            label: wrappedLabel,
+            href,
+            isSelected: tab === tabKey,
+          };
+        })}
       />
       <StreamsAppPageTemplate.Body noPadding={tab === 'partitioning' || tab === 'processing'}>
         {tabs[tab]?.content}
