@@ -24,6 +24,26 @@ interface WorkflowExecutionOverviewProps {
   workflowExecutionDuration?: number;
 }
 
+const formatExecutionDate = (date: string) => {
+  const dateObj = new Date(date);
+
+  if (isNaN(dateObj.getTime())) {
+    return '-';
+  }
+
+  const formatted = dateObj.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+  const milliseconds = dateObj.getMilliseconds().toString().padStart(3, '0');
+  return `${formatted.replace(',', ' @')}.${milliseconds}`;
+};
+
 export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewProps>(
   ({ stepExecution, workflowExecutionDuration }) => {
     const { euiTheme } = useEuiTheme();
@@ -34,26 +54,11 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     const executionStarted = stepExecution.startedAt;
     const executionEnded = context?.now as string | undefined;
 
-    const formatExecutionDate = (date: string) => {
-      const dateObj = new Date(date);
-      const formatted = dateObj.toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false,
-      });
-      const milliseconds = dateObj.getMilliseconds().toString().padStart(3, '0');
-      return `${formatted.replace(',', ' @')}.${milliseconds}`;
-    };
-
     return (
       <EuiPanel
         hasShadow={false}
         paddingSize="m"
-        css={{ height: '100%', paddingTop: '13px' /* overrides EuiPanel's paddingTop */ }}
+        css={{ height: '100%', paddingTop: euiTheme.size.m /* overrides EuiPanel's paddingTop */ }}
       >
         <EuiFlexGroup
           direction="column"
@@ -112,9 +117,9 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
           <EuiFlexItem grow={false}>
             <div
               css={css`
-                border-top: 1px solid ${euiTheme.colors.lightShade};
-                border-bottom: 1px solid ${euiTheme.colors.lightShade};
-                padding: 12px 0;
+                border-top: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+                border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+                padding: ${euiTheme.size.m} 0;
               `}
             >
               <EuiFlexGroup gutterSize="s" responsive={false}>
@@ -140,10 +145,10 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                 <EuiFlexItem
                   grow={false}
                   css={css`
-                    width: 1px;
+                    width: ${euiTheme.border.width.thin};
                     background-color: ${euiTheme.colors.lightShade};
                     align-self: stretch;
-                    margin-right: 16px;
+                    margin-right: ${euiTheme.size.base};
                   `}
                 />
 
