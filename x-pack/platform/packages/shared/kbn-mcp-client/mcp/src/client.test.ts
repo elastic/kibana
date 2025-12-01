@@ -14,7 +14,7 @@ import {
 } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
 import type { ClientDetails, CallToolParams } from './types';
-import type { ServerCapabilities } from '@modelcontextprotocol/sdk/types';
+import type { ServerCapabilities } from '@modelcontextprotocol/sdk/types.js';
 
 // Type definitions for SDK responses
 interface MockListToolsResult {
@@ -612,7 +612,7 @@ describe('McpClient', () => {
       expect(mockClient.callTool).toHaveBeenCalledWith({
         name: 'test-tool',
         _meta: {},
-        arguments: {},
+        arguments: undefined,
       });
     });
 
@@ -665,7 +665,7 @@ describe('McpClient', () => {
       });
 
       await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
-        'Error calling tool test-tool: Tool execution failed'
+        'Error calling tool test-tool with [object Object]: Tool execution failed'
       );
     });
 
@@ -678,7 +678,7 @@ describe('McpClient', () => {
       });
 
       await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
-        'Error calling tool test-tool: [object Object]'
+        'Error calling tool test-tool with [object Object]: [object Object]'
       );
     });
 

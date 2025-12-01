@@ -11,7 +11,7 @@ import {
   StreamableHTTPClientTransport,
   StreamableHTTPError,
 } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import type { ServerCapabilities } from '@modelcontextprotocol/sdk/types';
+import type { ServerCapabilities } from '@modelcontextprotocol/sdk/types.js';
 import type {
   ClientDetails,
   CallToolParams,
@@ -57,6 +57,7 @@ export class McpClient {
   async connect(): Promise<{ connected: boolean; capabilities?: ServerCapabilities }> {
     if (!this.connected) {
       try {
+        // connect() performs the initialization handshake with the MCP server as per MCP protocol
         await this.client.connect(this.transport);
         this.connected = true;
       } catch (error) {
@@ -130,6 +131,8 @@ export class McpClient {
 
   /**
    * Call a tool on the MCP client.
+   * This method only returns text content.
+   * It does not support other content types such as images, audio, etc.
    * @param {CallToolParams} params - The parameters for the tool call.
    */
   async callTool(params: CallToolParams): Promise<CallToolResponse> {
@@ -143,7 +146,9 @@ export class McpClient {
     });
 
     if (response.isError) {
-      throw new Error(`Error calling tool ${params.name} with ${params.arguments}: ${response.error}`);
+      throw new Error(
+        `Error calling tool ${params.name} with ${params.arguments}: ${response.error}`
+      );
     }
 
     const content = response.content as Array<

@@ -7351,7 +7351,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/mcp-connector-common@link:x-pack/platform/packages/shared/kbn-mcp-client":
+"@kbn/mcp-client@link:x-pack/platform/packages/shared/kbn-mcp-client":
   version "0.0.0"
   uid ""
 
