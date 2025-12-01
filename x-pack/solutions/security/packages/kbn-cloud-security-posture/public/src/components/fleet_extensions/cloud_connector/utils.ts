@@ -110,11 +110,18 @@ export const getDeploymentIdFromUrl = (url: string | undefined): string | undefi
 export const getKibanaComponentId = (cloudId: string | undefined): string | undefined => {
   if (!cloudId) return undefined;
 
-  const base64Part = cloudId.split(':')[1];
-  const decoded = atob(base64Part);
-  const [, , kibanaComponentId] = decoded.split('$');
+  try {
+    const base64Part = cloudId.split(':')[1];
+    if (!base64Part) return undefined;
 
-  return kibanaComponentId || undefined;
+    const decoded = atob(base64Part);
+    const [, , kibanaComponentId] = decoded.split('$');
+
+    return kibanaComponentId || undefined;
+  } catch (error) {
+    // Return undefined if cloudId is malformed or cannot be decoded
+    return undefined;
+  }
 };
 
 export const getTemplateUrlFromPackageInfo = (

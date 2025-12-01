@@ -13,6 +13,8 @@ import {
   isAwsCloudConnectorVars,
   isAzureCloudConnectorVars,
   getCloudConnectorRemoteRoleTemplate,
+  getKibanaComponentId,
+  getDeploymentIdFromUrl,
 } from './utils';
 import { getMockPolicyAWS, getMockPackageInfoAWS } from './test/mock';
 import type {
@@ -1316,5 +1318,90 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
         expect(result).toBeUndefined();
       });
     });
+  });
+});
+
+describe('getKibanaComponentId', () => {
+  it('should extract kibana component ID from valid cloudId', () => {
+    // cloudId format: name:base64(host$kibana-component-id$es-component-id)
+    const cloudId = 'test:dGVzdC1ob3N0JGtpYmFuYS1jb21wb25lbnQtaWQkZXMtY29tcG9uZW50LWlk';
+    const result = getKibanaComponentId(cloudId);
+    expect(result).toBe('es-component-id');
+  });
+
+  it('should return undefined when cloudId is undefined', () => {
+    const result = getKibanaComponentId(undefined);
+    expect(result).toBeUndefined();
+  });
+
+  it('should return undefined when cloudId has no colon', () => {
+    const cloudId = 'invalid-cloud-id-without-colon';
+    const result = getKibanaComponentId(cloudId);
+    expect(result).toBeUndefined();
+  });
+
+  it('should return undefined when cloudId base64 part is empty', () => {
+    const cloudId = 'test:';
+    const result = getKibanaComponentId(cloudId);
+    expect(result).toBeUndefined();
+  });
+
+  it('should return undefined when base64 decoding fails', () => {
+    const cloudId = 'test:invalid-base64!!!';
+    const result = getKibanaComponentId(cloudId);
+    expect(result).toBeUndefined();
+  });
+
+  it('should return undefined when decoded value does not have expected format', () => {
+    // Base64 encode a string without $ separators
+    const encodedValue = btoa('no-dollar-signs');
+    const cloudId = `test:${encodedValue}`;
+    const result = getKibanaComponentId(cloudId);
+    expect(result).toBeUndefined();
+  });
+
+  it('should handle cloudId with only one $ separator', () => {
+    // Base64 encode a string with only one $ separator
+    const encodedValue = btoa('host$component');
+    const cloudId = `test:${encodedValue}`;
+    const result = getKibanaComponentId(cloudId);
+    expect(result).toBeUndefined();
+  });
+});
+
+describe('getDeploymentIdFromUrl', () => {
+  it('should extract deployment ID from valid deployment URL', () => {
+    const url = 'https://cloud.elastic.co/deployments/deployment-123';
+    const result = getDeploymentIdFromUrl(url);
+    expect(result).toBe('deployment-123');
+  });
+
+  it('should extract deployment ID from URL with query parameters', () => {
+    const url = 'https://cloud.elastic.co/deployments/deployment-456?tab=overview';
+    const result = getDeploymentIdFromUrl(url);
+    expect(result).toBe('deployment-456');
+  });
+
+  it('should extract deployment ID from URL with hash', () => {
+    const url = 'https://cloud.elastic.co/deployments/deployment-789#section';
+    const result = getDeploymentIdFromUrl(url);
+    expect(result).toBe('deployment-789');
+  });
+
+  it('should return undefined when url is undefined', () => {
+    const result = getDeploymentIdFromUrl(undefined);
+    expect(result).toBeUndefined();
+  });
+
+  it('should return undefined when url does not contain deployments path', () => {
+    const url = 'https://cloud.elastic.co/some/other/path';
+    const result = getDeploymentIdFromUrl(url);
+    expect(result).toBeUndefined();
+  });
+
+  it('should handle deployment ID with special characters', () => {
+    const url = 'https://cloud.elastic.co/deployments/deployment-abc-123-xyz';
+    const result = getDeploymentIdFromUrl(url);
+    expect(result).toBe('deployment-abc-123-xyz');
   });
 });
