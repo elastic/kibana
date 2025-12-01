@@ -20,17 +20,11 @@ interface TableSettingsProps {
  * Combined settings component that shows both appearance and pivot settings
  */
 export function TableSettings({ state, setState }: TableSettingsProps) {
-  const isPivotMode = state.columns.some((c) => c.isTransposed || c.transposeDimension === 'columns');
-
   return (
     <div>
       <DatatableAppearanceSettings state={state} setState={setState} />
-      {isPivotMode && (
-        <>
-          <EuiSpacer size="l" />
-          <PivotSettings state={state} setState={setState} />
-        </>
-      )}
+      <EuiSpacer size="l" />
+      <PivotSettings state={state} setState={setState} />
     </div>
   );
 }
