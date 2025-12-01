@@ -90,7 +90,8 @@ const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => css`
   .kbnChromeLayoutApplication {
     background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
     border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
-    ${euiShadow(euiThemeContext, 'xs')};
+    border: ${euiThemeContext.colorMode === 'DARK' ? euiThemeContext.euiTheme.border.thin : 'none'};
+    ${euiShadow(euiThemeContext, 'xs', { border: 'none' })};
   }
 `;
 
