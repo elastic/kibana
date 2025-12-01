@@ -64,6 +64,7 @@ export const getHelpText = (
 };
 
 export const getErrorMessage = (
+  containsUpperCaseChars: boolean,
   isDuplicatedName: boolean,
   rootChildExists: boolean,
   isDotPresent: boolean,
@@ -71,6 +72,11 @@ export const getErrorMessage = (
   rootChild: string,
   router: StatefulStreamsAppRouter
 ): ReactNode | string | undefined => {
+  if (containsUpperCaseChars) {
+    return i18n.translate('xpack.streams.streamDetailRouting.uppercaseCharsError', {
+      defaultMessage: 'Stream name cannot contain uppercase characters',
+    });
+  }
   if (isDuplicatedName) {
     return i18n.translate('xpack.streams.streamDetailRouting.nameConflictError', {
       defaultMessage: 'A stream with this name already exists',
@@ -165,12 +171,14 @@ export const useChildStreamInput = (
   const isStreamNameEmpty = localStreamName.length <= prefix.length;
   const isStreamNameTooLong = localStreamName.length > MAX_STREAM_NAME_LENGTH;
   const isLengthValid = !isStreamNameEmpty && !isStreamNameTooLong;
+  const containsUpperCaseChars = localStreamName !== localStreamName.toLowerCase();
 
   const helpText = getHelpText(isStreamNameEmpty, isStreamNameTooLong, readOnly);
 
   const isDotPresent = !readOnly && partitionName.includes('.');
 
   const errorMessage = getErrorMessage(
+    containsUpperCaseChars,
     isDuplicatedName,
     rootChildExists,
     isDotPresent,
@@ -182,7 +190,8 @@ export const useChildStreamInput = (
   return {
     localStreamName,
     setLocalStreamName,
-    isStreamNameValid: isLengthValid && !isDotPresent && !isDuplicatedName,
+    isStreamNameValid:
+      isLengthValid && !isDotPresent && !isDuplicatedName && !containsUpperCaseChars,
     prefix,
     partitionName,
     helpText,

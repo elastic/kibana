@@ -86,7 +86,6 @@ export function SuggestedStreamPanel({
     return undefined;
   }, [isEditing, currentSuggestion.condition]);
 
-  // Use debounced handler for stream name input to prevent expensive re-renders on each keystroke
   const handleNameChange = (name: string) => {
     if (!isEditing) return;
     changeSuggestionNameDebounced(name);

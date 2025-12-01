@@ -29,7 +29,6 @@ export function NewRoutingStreamEntry() {
     }
   }, []);
 
-  // Use debounced handler for stream name input to prevent expensive re-renders on each keystroke
   const { setLocalStreamName, isStreamNameValid, partitionName, prefix, helpText, errorMessage } =
     useChildStreamInput(currentRule.destination, false);
 

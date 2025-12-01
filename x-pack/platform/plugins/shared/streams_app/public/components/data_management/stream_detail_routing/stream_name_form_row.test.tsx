@@ -124,25 +124,30 @@ describe('StreamNameFormRow', () => {
   });
 
   describe('getErrorMessage', () => {
+    it('should return uppercase chars error message when stream name contains uppercase characters', () => {
+      const result = getErrorMessage(true, false, false, false, 'logs.', 'linux', mockRouter);
+      expect(result).toBe('Stream name cannot contain uppercase characters');
+    });
+
     it('should return name conflict error message when stream name is duplicated', () => {
-      const result = getErrorMessage(true, false, false, 'logs.', 'linux', mockRouter);
+      const result = getErrorMessage(false, true, false, false, 'logs.', 'linux', mockRouter);
       expect(result).toBe('A stream with this name already exists');
     });
 
     it('should return root child does not exist error message when root child stream does not exist', () => {
-      const result = getErrorMessage(false, false, true, 'logs.', 'linux', mockRouter);
+      const result = getErrorMessage(false, false, false, true, 'logs.', 'linux', mockRouter);
       expect(result).toBe('The child stream logs.linux does not exist. Please create it first.');
     });
 
     it('should return name contains dot error message component when stream name contains a dot', () => {
-      const result = getErrorMessage(false, true, true, 'logs.', 'linux', mockRouter);
+      const result = getErrorMessage(false, false, true, true, 'logs.', 'linux', mockRouter);
       render(<I18nProvider>{result}</I18nProvider>);
       expect(screen.getByText(/Stream name cannot contain the "." character/)).toBeInTheDocument();
       expect(screen.getByTestId('streamsAppChildStreamLink')).toHaveTextContent('logs.linux');
     });
 
     it('should return undefined error message when input is valid', () => {
-      const result = getErrorMessage(false, false, false, 'logs.', 'linux', mockRouter);
+      const result = getErrorMessage(false, false, false, false, 'logs.', 'linux', mockRouter);
       expect(result).toBeUndefined();
     });
   });
