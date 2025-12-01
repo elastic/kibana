@@ -19,6 +19,7 @@ project:
     sourceRoot: examples/data_streams_example
 dependsOn:
   - '@kbn/core-data-streams-server'
+  - '@kbn/es-mappings'
   - '@kbn/core'
 tags:
   - plugin
