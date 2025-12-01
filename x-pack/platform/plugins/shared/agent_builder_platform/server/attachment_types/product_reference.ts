@@ -11,7 +11,6 @@ import {
   productReferenceAttachmentDataSchema,
 } from '@kbn/onechat-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 
 /**
  * Creates the definition for the `product_reference` attachment type.
@@ -47,15 +46,8 @@ PRODUCT REFERENCE DATA:
 
 ---
 
-1. Extract the query or topic from the product reference data above.
-
-2. Query PRODUCT DOCUMENTATION for relevant documentation:
-   Tool: ${sanitizeToolId(`platformCoreTools.productDocumentation`)}
-   Parameters: {
-     query: "[extracted query or topic from the product reference]",
-     product: "[optional: 'kibana' | 'elasticsearch' | 'observability' | 'security']",
-     max: 3
-   }`;
+1. Extract the query or topic from the product reference attachment.
+2. Use the appropriate tools to provide a response`;
       return description;
     },
   };

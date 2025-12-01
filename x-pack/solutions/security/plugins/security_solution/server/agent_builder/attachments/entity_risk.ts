@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import type { Attachment } from '@kbn/onechat-common/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
@@ -67,16 +66,8 @@ RISK ENTITY DATA:
 
 ---
 
-1. Extract the identifierType and identifier from the risk entity data above.
-
-2. Query ENTITY RISK SCORE for the entity:
-   Tool: ${sanitizeToolId(SECURITY_ENTITY_RISK_SCORE_TOOL_ID)}
-   Parameters: { identifierType: "[extracted identifierType]", identifier: "[extracted identifier]" }
-
-CRITICAL: You MUST call ${sanitizeToolId(
-        // ^^ we can say MUST here because this attachment is only exposed to the user once risk index has been installed
-        SECURITY_ENTITY_RISK_SCORE_TOOL_ID
-      )} with the extracted identifierType and identifier before responding.`;
+1. Extract the identifierType and identifier from the provided risk entity attachment.
+2. Use the available tools to gather context about the alert and provide a response.`;
       return description;
     },
   };

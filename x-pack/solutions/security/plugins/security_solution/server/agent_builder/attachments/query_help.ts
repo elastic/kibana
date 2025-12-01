@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import type { Attachment } from '@kbn/onechat-common/attachments';
 import { platformCoreTools } from '@kbn/onechat-common';
@@ -64,22 +63,8 @@ QUERY HELP DATA:
 
 ---
 
-1. Check the queryLanguage from the query help data above.
-
-2. If queryLanguage is 'esql', use the generateEsql tool to generate a new working ESQL query:
-   Tool: ${sanitizeToolId(platformCoreTools.generateEsql)}
-   Parameters: { query: "Write ESQL query to [describe what the broken query was trying to do]" }
-
-3. Query PRODUCT DOCUMENTATION for relevant documentation when needed:
-   // TODO use real tool once product_documentation tool is merged
-   Tool: ${sanitizeToolId('platformCoreTools.productDocumentation')}
-   Parameters: {
-     query: "[query about KQL query language, Elasticsearch Query DSL, Lucene]",
-     product: "[optional: 'kibana' | 'elasticsearch' | 'observability' | 'security']",
-     max: 3
-   }
-
-CRITICAL: Only use the generateEsql tool if queryLanguage is 'esql'. Otherwise, use productDocumentationTool to find relevant documentation to help fix the query.`;
+1. Check the queryLanguage from the query attachment provided.
+2. Use the appropriate tools to generate a query.`;
       return description;
     },
   };
