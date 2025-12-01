@@ -63,6 +63,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/connector-schemas'
   - '@kbn/connector-specs'
+  - '@kbn/encrypted-saved-objects-shared'
 tags:
   - plugin
   - prod
