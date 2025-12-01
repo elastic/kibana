@@ -84,6 +84,9 @@ export const suggestionsApi = ({
   } as unknown as DataViewsState;
 
   const initialVisualization = visualizationMap?.[Object.keys(visualizationMap)[0]] || null;
+  const isSubTypeForInitial = preferredChartType
+    ? initialVisualization?.isSubtypeSupported?.(preferredChartType.toLowerCase())
+    : undefined;
 
   // find the active visualizations from the context
   const suggestions = getSuggestions({
@@ -93,29 +96,35 @@ export const suggestionsApi = ({
     activeVisualization: initialVisualization,
     visualizationState: undefined,
     visualizeTriggerFieldContext: context,
+    subVisualizationId: isSubTypeForInitial ? preferredChartType : undefined,
     dataViews,
   });
   if (!suggestions.length) return [];
 
-  const activeVisualization = suggestions[0];
+  const primarySuggestion = suggestions[0];
+  const activeVisualization = visualizationMap[primarySuggestion.visualizationId];
   if (
-    activeVisualization.incomplete ||
-    excludedVisualizations?.includes(activeVisualization.visualizationId)
+    primarySuggestion.incomplete ||
+    excludedVisualizations?.includes(primarySuggestion.visualizationId)
   ) {
     return [];
   }
+  const isSubTypeForActive = preferredChartType
+    ? activeVisualization?.isSubtypeSupported?.(preferredChartType.toLowerCase())
+    : undefined;
   // compute the rest suggestions depending on the active one and filter out the lnsLegacyMetric
   const newSuggestions = getSuggestions({
     datasourceMap,
     datasourceStates: {
       textBased: {
         isLoading: false,
-        state: activeVisualization.datasourceState,
+        state: primarySuggestion.datasourceState,
       },
     },
     visualizationMap,
-    activeVisualization: visualizationMap[activeVisualization.visualizationId],
-    visualizationState: activeVisualization.visualizationState,
+    activeVisualization,
+    subVisualizationId: isSubTypeForActive ? preferredChartType : undefined,
+    visualizationState: primarySuggestion.visualizationState,
     dataViews,
   }).filter(
     (sug) =>
@@ -157,7 +166,7 @@ export const suggestionsApi = ({
 
   // in case the user asks for another type (except from area, line) check if it exists
   // in suggestions and return this instead
-  const suggestionsList = [activeVisualization, ...newSuggestions];
+  const suggestionsList = [primarySuggestion, ...newSuggestions];
 
   // Handle preferred chart type logic
   if (targetChartType) {
