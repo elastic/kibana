@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { Observable } from 'rxjs';
 import { filter } from 'rxjs';
 import { useEffect, useState } from 'react';
@@ -124,34 +125,37 @@ export const useTiDataSources = ({
       const datasets = result?.rawResponse?.aggregations?.dataset?.buckets ?? [];
       const getChildAggregationValue = (aggregation?: Bucket) => aggregation?.buckets?.[0]?.key;
 
-      const integrationMap = datasets.reduce((acc: Record<string, TiDataSources>, dataset) => {
-        const datasetName = getChildAggregationValue(dataset?.name);
-        if (datasetName) {
-          return {
-            ...acc,
-            [dataset.key]: {
-              dataset: dataset?.key,
-              name: datasetName,
-              dashboardId: getChildAggregationValue(dataset?.dashboard),
-              count: dataset?.doc_count,
-            },
-          };
-        } else {
-          const otherTiDatasetKey = OTHER_TI_DATASET_KEY;
-          const otherDatasetCount = acc[otherTiDatasetKey]?.count ?? 0;
-          return {
-            ...acc,
-            [otherTiDatasetKey]: {
-              dataset: otherTiDatasetKey,
-              name: OTHER_DATA_SOURCE_TITLE,
-              count: otherDatasetCount + (dataset?.doc_count ?? 0),
-            },
-          };
-        }
-      }, {});
+      const integrationMap: Record<string, TiDataSources> = datasets.reduce(
+        (acc: Record<string, TiDataSources>, dataset) => {
+          const datasetName = getChildAggregationValue(dataset?.name);
+          if (datasetName) {
+            return {
+              ...acc,
+              [dataset.key]: {
+                dataset: dataset?.key,
+                name: datasetName,
+                dashboardId: getChildAggregationValue(dataset?.dashboard),
+                count: dataset?.doc_count,
+              },
+            };
+          } else {
+            const otherTiDatasetKey = OTHER_TI_DATASET_KEY;
+            const otherDatasetCount = acc[otherTiDatasetKey]?.count ?? 0;
+            return {
+              ...acc,
+              [otherTiDatasetKey]: {
+                dataset: otherTiDatasetKey,
+                name: OTHER_DATA_SOURCE_TITLE,
+                count: otherDatasetCount + (dataset?.doc_count ?? 0),
+              },
+            };
+          }
+        },
+        {}
+      );
 
       if (Array.isArray(allTiDataSources)) {
-        allTiDataSources.forEach((integration) => {
+        allTiDataSources.forEach((integration: TiDataSources) => {
           if (!integrationMap[integration.dataset]) {
             integrationMap[integration.dataset] = {
               ...integration,
