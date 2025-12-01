@@ -246,6 +246,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response).to.have.property('message', 'Child stream logs.nginx already exists');
       });
 
+      it('fails to fork logs when stream name contains uppercase characters', async () => {
+        const body = {
+          stream: {
+            name: 'logs.Nginx',
+          },
+          where: {
+            field: 'log.logger',
+            eq: 'nginx',
+          },
+          status,
+        };
+        const response = await forkStream(apiClient, 'logs', body, 400);
+        expect(response).to.have.property(
+          'message',
+          'Desired stream state is invalid: Stream name cannot contain uppercase characters.'
+        );
+      });
+
       it('fails to fork logs with empty stream name', async () => {
         const body = {
           stream: {
