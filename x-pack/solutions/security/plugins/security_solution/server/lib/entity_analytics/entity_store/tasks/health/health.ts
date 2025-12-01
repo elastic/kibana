@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import {
   type AnalyticsServiceSetup,
-  type ElasticsearchClient,
   type Logger,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
@@ -26,33 +24,24 @@ import {
 } from './state';
 import { SCOPE, TIMEOUT, TYPE, VERSION, MAX_ATTEMPTS, SCHEDULE } from './constants';
 import { entityStoreTaskLogMessageFactory } from '../utils';
-import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { ENTITY_STORE_HEALTH_REPORT_EVENT } from '../../../../telemetry/event_based/events';
-import type {
-  GetEntityStoreStatusRequestQuery,
-  GetEntityStoreStatusResponse,
-} from '../../../../../../common/api/entity_analytics/entity_store/status.gen';
+import type { EntityAnalyticsRoutesDeps } from '../../../types';
+import { getApiKeyManager } from '../../auth/api_key';
 
 function getTaskId(namespace: string): string {
   return `${TYPE}:${namespace}:${VERSION}`;
 }
 
-export type EntityStoreStatusHandler = ({
-  include_components,
-}: GetEntityStoreStatusRequestQuery) => Promise<GetEntityStoreStatusResponse>;
-
 export function registerEntityStoreHealthTask({
+  getStartServices,
   logger,
   telemetry,
   taskManager,
-  getStartServices,
-  entityStoreStatusHandler,
 }: {
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
   taskManager: TaskManagerSetupContract | undefined;
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
-  entityStoreStatusHandler: EntityStoreStatusHandler;
 }): void {
   if (!taskManager) {
     logger.warn(
@@ -61,9 +50,43 @@ export function registerEntityStoreHealthTask({
     return;
   }
 
-  const esClientGetter = async (): Promise<ElasticsearchClient> => {
-    const [coreStart, _] = await getStartServices();
-    return coreStart.elasticsearch.client.asInternalUser;
+  type GetStoreSize = (index: string | string[]) => Promise<number>;
+  const getStoreSize: GetStoreSize = async (index) => {
+    const [coreStart] = await getStartServices();
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+
+    const { count } = await esClient.count({ index });
+    return count;
+  };
+
+  const getEnabledEntityTypesForNamespace = async (namespace: string) => {
+    const [core, { security, encryptedSavedObjects }] = await getStartServices();
+
+    const apiKeyManager = getApiKeyManager({
+      core,
+      logger,
+      security,
+      encryptedSavedObjects,
+      namespace,
+    });
+
+    const apiKey = await apiKeyManager.getApiKey();
+
+    if (!apiKey) {
+      logger.info(
+        `[Entity Store] No API key found, returning all entity types as enabled in ${namespace} namespace`
+      );
+      return getEnabledEntityTypes(true);
+    }
+
+    const { soClient } = await apiKeyManager.getClientFromApiKey(apiKey);
+
+    const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
+    const genericEntityStoreEnabled = await uiSettingsClient.get<boolean>(
+      SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
+    );
+
+    return getEnabledEntityTypes(genericEntityStoreEnabled);
   };
 
   taskManager.registerTaskDefinitions({
@@ -76,12 +99,11 @@ export function registerEntityStoreHealthTask({
       createTaskRunner: (context: RunContext) => {
         return {
           async run() {
-            return runTask({
+            return runHealthTask({
               logger,
               telemetry,
               context,
-              esClientGetter,
-              entityStoreStatusHandler,
+              getStartServices,
             });
           },
           async cancel() {
@@ -96,7 +118,6 @@ export function registerEntityStoreHealthTask({
 export async function startEntityStoreHealthTask({
   logger,
   namespace,
-  entityType,
   taskManager,
 }: {
   logger: Logger;
@@ -118,7 +139,6 @@ export async function startEntityStoreHealthTask({
       params: {
         version: VERSION,
         namespace,
-        entityType,
       },
     });
     logger.info(msg(`scheduled with ${JSON.stringify(task.schedule)}`));
@@ -131,7 +151,6 @@ export async function startEntityStoreHealthTask({
 export async function removeEntityStoreHealthTask({
   logger,
   namespace,
-  entityType,
   taskManager,
 }: {
   logger: Logger;
@@ -152,31 +171,23 @@ export async function removeEntityStoreHealthTask({
   }
 }
 
-export async function runTask({
+export async function runHealthTask({
   logger,
   telemetry,
   context,
-  esClientGetter,
-  entityStoreStatusHandler,
+  getStartServices,
 }: {
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
   context: RunContext;
-  esClientGetter: () => Promise<ElasticsearchClient>;
-  entityStoreStatusHandler: EntityStoreStatusHandler;
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
 }): Promise<{
   state: EntityStoreHealthTaskState;
 }> {
   const state = context.taskInstance.state as EntityStoreHealthTaskState;
   const taskId: string = context.taskInstance.id;
-  const abort: AbortController = context.abortController;
   const msg = entityStoreTaskLogMessageFactory(taskId);
-  const esClient: ElasticsearchClient = await esClientGetter();
-  const namespace = context.taskInstance.params.namespace as string;
-  const taskStartTime = moment().utc();
   try {
-    // TODO
-
     const statusResponse = await entityStoreStatusHandler({ include_components: true });
     statusResponse.engines.forEach((engine) => {
       telemetry.reportEvent(ENTITY_STORE_HEALTH_REPORT_EVENT.eventType, engine);

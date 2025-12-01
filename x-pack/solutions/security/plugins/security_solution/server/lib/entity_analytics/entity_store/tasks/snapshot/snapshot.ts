@@ -75,7 +75,7 @@ export function registerEntityStoreSnapshotTask({
       createTaskRunner: (context: RunContext) => {
         return {
           async run() {
-            return runTask({
+            return runSnapshotTask({
               logger,
               telemetry,
               context,
@@ -200,7 +200,7 @@ const removeAllFieldsAndResetTimestamp: string = minifyPainless(`
     ctx._source = newDoc;
     `);
 
-export async function runTask({
+export async function runSnapshotTask({
   logger,
   telemetry,
   context,
@@ -218,20 +218,20 @@ export async function runTask({
   const abort: AbortController = context.abortController;
   const msg = entityStoreTaskLogMessageFactory(taskId);
   const esClient: ElasticsearchClient = await esClientGetter();
+  const taskStartTime = moment().utc();
+  const snapshotDate = rewindToYesterday(taskStartTime.toDate());
   const event = {
     entityType: '',
     namespace: '',
-    snapshotDate: undefined,
+    snapshotDate,
     snapshotIndex: '',
     entityCount: 0,
     durationMs: 0,
     success: false,
     errorMessage: '',
   };
-  const taskStartTime = moment().utc();
+
   try {
-    const snapshotDate = rewindToYesterday(taskStartTime.toDate());
-    event.snapshotDate = snapshotDate;
     logger.info(msg('running task'));
 
     const entityType = context.taskInstance.params.entityType as EntityType;
@@ -282,7 +282,7 @@ export async function runTask({
     logger.info(
       msg(`reindexed to ${snapshotIndex}: ${prettyReindexResponse(snapshotReindexResponse)}`)
     );
-    event.entityCount = snapshotReindexResponse.created;
+    event.entityCount = snapshotReindexResponse.created ?? 0;
 
     const resetIndex = getEntitiesResetIndexName(entityType, namespace);
     logger.info(msg(`removing old entries from ${resetIndex}`));
