@@ -16,6 +16,8 @@ import type {
 } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
 import assert from 'assert';
+import type { KueryNode } from '@kbn/es-query';
+import * as esKuery from '@kbn/es-query';
 import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
 import {
   ENDPOINT_DEFAULT_PAGE_SIZE,
@@ -135,6 +137,52 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     };
   }
 
+  protected getKueryWithPrefixedSoType(kuerString: string): KueryNode {
+    const prefix = `${SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE}.attributes`;
+    const kueryAst = esKuery.fromKueryExpression(kuerString);
+    const kueryAstList = [kueryAst];
+
+    this.logger.debug(
+      () => `Kuery AST BEFORE prefixing with [${prefix}]: ${stringify(kueryAstList)}`
+    );
+
+    while (kueryAstList.length > 0) {
+      const kueryAstNode = kueryAstList.shift();
+
+      if (kueryAstNode) {
+        switch (kueryAstNode.type) {
+          case 'function':
+            {
+              const functionName = kueryAstNode.function;
+
+              if (['and', 'or', 'not'].includes(functionName)) {
+                kueryAstList.push(...kueryAstNode.arguments);
+                break;
+              }
+
+              if (kueryAstNode.arguments && kueryAstNode.arguments.length > 0) {
+                const firstArg = kueryAstNode.arguments[0];
+
+                if (firstArg.type === 'literal') {
+                  firstArg.value = `${prefix}.${firstArg.value}`;
+                }
+                break;
+              }
+            }
+
+            break;
+
+          // NOTE: this code may not support nested fields. Because the SO type we use for scripts
+          // does not have nested fields, this should not be an issue.
+        }
+      }
+    }
+
+    this.logger.debug(() => `Kuery AST AFTER adding SO type: ${stringify(kueryAst)}`);
+
+    return kueryAst;
+  }
+
   public async create({
     file: _file,
     ...scriptDefinition
@@ -239,9 +287,9 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     sortDirection = 'asc',
     kuery,
   }: ListScriptsRequestQuery = {}): Promise<EndpointScriptListApiResponse> {
-    const filter: SavedObjectsFindOptions['filter'] = kuery;
-
-    // TODO:PT need to convert `kuery` to KueryNode and ensure all property names are prefixed with SO type
+    const filter: SavedObjectsFindOptions['filter'] = kuery
+      ? this.getKueryWithPrefixedSoType(kuery)
+      : undefined;
 
     const soFindResults = await this.soClient
       .find<ScriptsLibrarySavedObjectAttributes>({
