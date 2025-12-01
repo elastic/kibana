@@ -376,6 +376,10 @@ export const streamRoutingMachine = setup({
                       type: 'routingSamples.setDocumentMatchFilter',
                       filter: 'matched',
                     }),
+                    sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.updateCondition',
+                      condition: undefined,
+                    }),
                   ],
                 },
                 'routingRule.change': {
