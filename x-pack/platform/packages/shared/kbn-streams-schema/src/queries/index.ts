@@ -26,6 +26,7 @@ export interface StreamQueryKql extends StreamQueryBase {
   kql: {
     query: string;
   };
+  // from 0 to 100. aligned with anomaly detection scoring
   severity_score?: number;
 }
 
