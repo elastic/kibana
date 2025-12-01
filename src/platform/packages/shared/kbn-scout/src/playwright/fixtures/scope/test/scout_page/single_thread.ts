@@ -59,6 +59,7 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
   const extendedMethods: Partial<Record<keyof Page, Function>> & {
     typeWithDelay?: ScoutPage['testSubj']['typeWithDelay'];
     clearInput?: ScoutPage['testSubj']['clearInput'];
+    dragTo?: ScoutPage['testSubj']['dragTo'];
   } = {};
 
   for (const method of methods) {
@@ -79,6 +80,12 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
     await page.locator(testSubjSelector).fill('');
   };
 
+  // custom method to drag an element to another element
+  extendedMethods.dragTo = async (sourceSelector: string, targetSelector: string) => {
+    const sourceTestSubjSelector = subj(sourceSelector);
+    const targetTestSubjSelector = subj(targetSelector);
+    await page.locator(sourceTestSubjSelector).dragTo(page.locator(targetTestSubjSelector));
+  };
   return extendedMethods as ScoutPage['testSubj'];
 }
 
@@ -113,7 +120,6 @@ export function extendPlaywrightPage({
     typeWithDelay(page, selector, text, options);
   return extendedPage;
 }
-
 /**
  * Extends the 'page' fixture with Kibana-specific functionality
  *
