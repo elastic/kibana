@@ -75,6 +75,7 @@ import { AssetCriticalityMigrationClient } from '../asset_criticality/asset_crit
 import {
   startEntityStoreFieldRetentionEnrichTask,
   startEntityStoreHealthTask,
+  removeEntityStoreHealthTask,
   removeEntityStoreFieldRetentionEnrichTask,
   getEntityStoreFieldRetentionEnrichTaskState as getEntityStoreFieldRetentionEnrichTaskStatus,
   removeEntityStoreDataViewRefreshTask,
@@ -837,6 +838,11 @@ export class EntityStoreDataClient {
           taskManager,
         });
         await removeEntityStoreDataViewRefreshTask({
+          namespace,
+          logger,
+          taskManager,
+        });
+        await removeEntityStoreHealthTask({
           namespace,
           logger,
           taskManager,
