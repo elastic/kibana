@@ -20,9 +20,9 @@ export interface ESQLControlsContext {
 
 export interface ESQLQueryStats {
   /** Duration of the last query in milliseconds */
-  durationInMs: string;
+  durationInMs?: string;
   /** Total number of documents processed in the last query */
-  totalDocumentsProcessed: number;
+  totalDocumentsProcessed?: number;
   /** Timestamp of when the last query was run */
-  lastRunAt: string;
+  lastRunAt?: string;
 }

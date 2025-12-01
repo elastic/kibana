@@ -12,7 +12,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { round } from 'lodash';
 import type { ESQLQueryStats } from '@kbn/esql-types';
 
-function formatTime(isoString: string): string | undefined {
+function formatTime(isoString?: string): string | undefined {
+  if (!isoString) {
+    return undefined;
+  }
   try {
     const date = new Date(isoString);
     return date.toLocaleTimeString([], {
@@ -52,34 +55,38 @@ export function ESQLQueryStats({ queryStats }: { queryStats: ESQLQueryStats }) {
           </EuiText>
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-queryStats-queryDuration">
-          <p>
-            {i18n.translate('esqlEditor.queryStats.queryDuration', {
-              defaultMessage: '({duration} approx)',
-              values: {
-                duration: queryStats.durationInMs,
-              },
-            })}
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText
-          size="xs"
-          color="subdued"
-          data-test-subj="ESQLEditor-queryStats-totalDocumentsProcessed"
-        >
-          <p>
-            {i18n.translate('esqlEditor.queryStats.documentsProcessed', {
-              defaultMessage: '{count} documents processed',
-              values: {
-                count: formatDocumentCount(queryStats.totalDocumentsProcessed),
-              },
-            })}
-          </p>
-        </EuiText>
-      </EuiFlexItem>
+      {queryStats.durationInMs && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued" data-test-subj="ESQLEditor-queryStats-queryDuration">
+            <p>
+              {i18n.translate('esqlEditor.queryStats.queryDuration', {
+                defaultMessage: '({duration} approx)',
+                values: {
+                  duration: queryStats.durationInMs,
+                },
+              })}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      )}
+      {queryStats.totalDocumentsProcessed !== undefined && (
+        <EuiFlexItem grow={false}>
+          <EuiText
+            size="xs"
+            color="subdued"
+            data-test-subj="ESQLEditor-queryStats-totalDocumentsProcessed"
+          >
+            <p>
+              {i18n.translate('esqlEditor.queryStats.documentsProcessed', {
+                defaultMessage: '{count} documents processed',
+                values: {
+                  count: formatDocumentCount(queryStats.totalDocumentsProcessed ?? 0),
+                },
+              })}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }

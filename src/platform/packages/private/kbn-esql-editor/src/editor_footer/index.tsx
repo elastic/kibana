@@ -133,6 +133,21 @@ export const EditorFooter = memo(function EditorFooter({
                 dataErrorsControl={dataErrorsControl}
               />
               {queryStats && <ESQLQueryStats queryStats={queryStats} />}
+              {!queryStats && errors && errors.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    data-test-subj="ESQLEditor-queryStats-failedToFetch"
+                  >
+                    <p>
+                      {i18n.translate('esqlEditor.queryStats.failedLabel', {
+                        defaultMessage: 'Failed',
+                      })}
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

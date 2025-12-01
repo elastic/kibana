@@ -234,6 +234,7 @@ export function StatusIndicator({
   onErrorClick: (error: MonacoMessage) => void;
   dataErrorsControl?: DataErrorsControl;
 }) {
+  const { euiTheme } = useEuiTheme();
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
 
@@ -248,6 +249,10 @@ export function StatusIndicator({
         aria-label={i18n.translate('esqlEditor.query.successIndicatorAriaLabel', {
           defaultMessage: 'Query has no errors or warnings',
         })}
+        css={css`
+          margin-left: ${euiTheme.size.xs};
+          margin-right: ${euiTheme.size.s};
+        `}
       />
     );
   }

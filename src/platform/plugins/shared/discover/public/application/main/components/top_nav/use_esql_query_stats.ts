@@ -36,7 +36,11 @@ export function useESQLQueryStats(
           }
           return currentStats;
         });
+      } else {
+        setQueryStats(undefined);
       }
+    } else {
+      setQueryStats(undefined);
     }
   }, [requestAdapter]);
 
