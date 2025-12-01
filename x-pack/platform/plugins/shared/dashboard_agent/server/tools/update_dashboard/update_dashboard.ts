@@ -53,8 +53,6 @@ This tool will:
     tags: [],
     handler: async ({ id, title, description, panels, ...rest }, { logger, request, esClient }) => {
       try {
-        const dashboardsClient = dashboard.client;
-
         const coreContext = {
           savedObjects: { client: savedObjects.getScopedClient(request) },
         };
@@ -66,7 +64,7 @@ This tool will:
         } as unknown as RequestHandlerContext;
 
         // First, read the existing dashboard to get current values
-        const existingDashboard = await dashboardsClient.read(requestHandlerContext, id);
+        const existingDashboard = await dashboard.client.read(requestHandlerContext, id);
 
         const normalizedPanels =
           panels !== undefined ? normalizePanels(panels as unknown[]) : undefined;
@@ -79,7 +77,7 @@ This tool will:
         };
 
         // Update dashboard using the Dashboard plugin's client
-        const dashboardUpdateResponse = await dashboardsClient.update(requestHandlerContext, id, {
+        const dashboardUpdateResponse = await dashboard.client.update(requestHandlerContext, id, {
           data: updateData,
         });
 
@@ -102,7 +100,7 @@ This tool will:
                 content: {
                   url: dashboardUrl,
                   description: updateData.description ?? '',
-                  panelCount: updateData.panels.length,
+                  panelCount: updateData.panels?.length ?? 0,
                 },
               },
             },

@@ -52,8 +52,6 @@ This tool will:
     tags: [],
     handler: async ({ title, description, panels, ...rest }, { logger, request, esClient }) => {
       try {
-        const dashboardsClient = dashboard.client;
-
         const coreContext = {
           savedObjects: { client: savedObjects.getScopedClient(request) },
         };
@@ -66,7 +64,7 @@ This tool will:
 
         const normalizedPanels = normalizePanels(panels);
 
-        const dashboardCreateResponse = await dashboardsClient.create(requestHandlerContext, {
+        const dashboardCreateResponse = await dashboard.client.create(requestHandlerContext, {
           data: { title, description, panels: normalizedPanels },
         });
 
