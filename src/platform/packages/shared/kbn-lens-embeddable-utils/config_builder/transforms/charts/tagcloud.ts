@@ -96,7 +96,7 @@ function getTagcloudDataset(
 function getTagcloudMetric(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: LensTagCloudState
-): TagcloudState['metric'] | undefined {
+): TagcloudState['metric'] {
   if (visualization.valueAccessor == null) {
     throw new Error('Metric accessor is missing in the visualization state');
   }
@@ -115,7 +115,7 @@ function getTagcloudMetric(
 function getTagcloudTagBy(
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   visualization: LensTagCloudState
-): TagcloudState['tag_by'] | undefined {
+): TagcloudState['tag_by'] {
   if (visualization.tagAccessor == null) {
     throw new Error('Tag accessor is missing in the visualization state');
   }
