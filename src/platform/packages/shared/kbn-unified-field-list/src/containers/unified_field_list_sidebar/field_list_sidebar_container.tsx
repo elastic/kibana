@@ -159,8 +159,8 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
   /**
    * Custom container for existing fields info map
    */
-  initialExistingFieldsInfoMap?: ExistingFieldsFetcherParams['initialExistingFieldsInfoMap'];
-  onInitialExistingFieldsInfoMapChange?: ExistingFieldsFetcherParams['onInitialExistingFieldsInfoMapChange'];
+  initialExistingFieldsInfo?: ExistingFieldsFetcherParams['initialExistingFieldsInfo'];
+  onInitialExistingFieldsInfoChange?: ExistingFieldsFetcherParams['onInitialExistingFieldsInfoChange'];
 };
 
 /**
@@ -184,8 +184,8 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     variant = 'responsive',
     onFieldEdited,
     additionalFilters,
-    initialExistingFieldsInfoMap,
-    onInitialExistingFieldsInfoMapChange,
+    initialExistingFieldsInfo,
+    onInitialExistingFieldsInfoChange,
   } = props;
   const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
     createStateService({ options: getCreationOptions() })
@@ -239,8 +239,8 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     fromDate: querySubscriberResult.fromDate,
     toDate: querySubscriberResult.toDate,
     services,
-    initialExistingFieldsInfoMap,
-    onInitialExistingFieldsInfoMapChange,
+    initialExistingFieldsInfo,
+    onInitialExistingFieldsInfoChange,
   });
 
   const editField = useMemo(

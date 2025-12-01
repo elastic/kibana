@@ -112,7 +112,10 @@ export interface ExistingFieldsInfo {
   hasDataViewRestrictions?: boolean;
 }
 
-export type ExistingFieldsByDataViewMap = Record<string, ExistingFieldsInfo>;
+export interface FetchedExistingFieldsInfo {
+  hash: string;
+  info: ExistingFieldsInfo;
+}
 
 export type TimeRangeUpdatesType = 'search-session' | 'timefilter';
 

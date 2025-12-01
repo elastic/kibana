@@ -148,7 +148,7 @@ export interface TabState extends TabItem {
     esqlEditor?: Partial<ESQLEditorRestorableState>;
     dataGrid?: Partial<UnifiedDataTableRestorableState>;
     fieldList?: Partial<UnifiedFieldListRestorableState>;
-    fieldListExistingFieldsInfoMap?: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfoMap'];
+    fieldListExistingFieldsInfo?: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfo'];
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;

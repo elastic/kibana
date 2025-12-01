@@ -287,14 +287,14 @@ export const internalStateSlice = createSlice({
         tab.uiState.fieldList = action.payload.fieldListUiState;
       }),
 
-    setFieldListExistingFieldsInfoMapUiState: (
+    setFieldListExistingFieldsInfoUiState: (
       state,
       action: TabAction<{
-        fieldListExistingFieldsInfoMap: TabState['uiState']['fieldListExistingFieldsInfoMap'];
+        fieldListExistingFieldsInfo: TabState['uiState']['fieldListExistingFieldsInfo'];
       }>
     ) =>
       withTab(state, action, (tab) => {
-        tab.uiState.fieldListExistingFieldsInfoMap = action.payload.fieldListExistingFieldsInfoMap;
+        tab.uiState.fieldListExistingFieldsInfo = action.payload.fieldListExistingFieldsInfo;
       }),
 
     setLayoutUiState: (
