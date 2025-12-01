@@ -12,7 +12,7 @@ import {
   EuiScreenReaderOnly,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { type Streams, type Feature } from '@kbn/streams-schema';
+import { type Streams, type Feature, isFeatureWithFilter } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { ConditionPanel } from '../../data_management/shared';
 import { FeatureEventsSparkline } from './feature_events_sparkline';
@@ -84,13 +84,14 @@ export function StreamFeaturesTable({
     },
     descriptionColumn,
     {
-      field: 'filter',
       name: i18n.translate('xpack.streams.streamFeatureTable.columns.filter', {
         defaultMessage: 'Filter',
       }),
       width: '25%',
-      render: (filter: Feature['filter']) => {
-        return <ConditionPanel condition={filter} />;
+      render: (feature: Feature) => {
+        if (isFeatureWithFilter(feature)) {
+          return <ConditionPanel condition={feature.filter} />;
+        }
       },
     },
     {
@@ -99,7 +100,9 @@ export function StreamFeaturesTable({
       }),
       width: '20%',
       render: (feature: Feature) => {
-        return <FeatureEventsSparkline feature={feature} definition={definition} />;
+        if (isFeatureWithFilter(feature)) {
+          return <FeatureEventsSparkline feature={feature} definition={definition} />;
+        }
       },
     },
     {
@@ -124,6 +127,7 @@ export function StreamFeaturesTable({
               prev.concat({ ...feature, name: generateCopyName(feature.name, features) })
             );
           },
+          'data-test-subj': 'feature_identification_clone_feature_button',
         },
         {
           name: i18n.translate('xpack.streams.streamFeaturesTable.columns.actions.editActionName', {
@@ -217,6 +221,11 @@ export function StreamFeaturesTable({
                   })
             }
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            data-test-subj={
+              isExpanded
+                ? 'feature_identification_collapse_details_button'
+                : 'feature_identification_expand_details_button'
+            }
           />
         );
       },

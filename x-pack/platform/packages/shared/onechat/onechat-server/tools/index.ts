@@ -23,3 +23,4 @@ export type {
   ToolHandlerResult,
 } from './handler';
 export { getToolResultId, createErrorResult, isToolResultId } from './utils';
+export type { InternalToolDefinition, InternalToolAvailabilityHandler } from './internal';

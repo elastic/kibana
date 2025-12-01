@@ -114,6 +114,26 @@ describe('kibana tool', () => {
     );
   });
 
+  it('forwards authorization header', async () => {
+    const { handler } = registerFunction({
+      headers: {
+        authorization: 'Basic dGVzdA==',
+        'x-forwarded-user': 'should-be-stripped',
+      },
+    });
+
+    await handler({
+      arguments: {
+        method: 'GET',
+        pathname: '/api/status',
+      },
+    });
+
+    const forwardedRequest = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
+    expect(forwardedRequest.headers?.authorization).toBe('Basic dGVzdA==');
+    expect(forwardedRequest.headers).not.toHaveProperty('x-forwarded-user');
+  });
+
   it('throws when server.publicBaseUrl is not configured', async () => {
     const { handler, coreStart } = registerFunction({});
     coreStart.http.basePath.publicBaseUrl = undefined as any;
