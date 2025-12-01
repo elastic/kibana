@@ -487,6 +487,7 @@ export class TaskRunner<
       const {
         params: { alertId: ruleId, spaceId, consumer },
         startedAt,
+        state: { previousStartedAt },
       } = this.taskInstance;
 
       // Initially use consumer as stored inside the task instance
@@ -576,10 +577,9 @@ export class TaskRunner<
       // Set rule monitoring data
       this.ruleMonitoring.setMonitoring(runRuleParams.rule.monitoring);
 
-      // Clear gap range that was persisted in the rule SO
-      if (this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range) {
-        this.ruleMonitoring.getLastRunMetricsSetters().setLastRunMetricsGapRange(null);
-      }
+      // Check for gaps
+      this.ruleMonitoring.checkForGaps(previousStartedAt, startedAt, runRuleParams.rule.schedule);
+
       (async () => {
         try {
           await clearExpiredSnoozes({
@@ -651,9 +651,7 @@ export class TaskRunner<
 
         const gap = this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range;
         if (gap) {
-          this.alertingEventLogger.reportGap({
-            gap,
-          });
+          this.alertingEventLogger.reportGap({ gap });
         }
 
         if (!this.cancelled) {
