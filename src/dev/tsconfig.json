@@ -6,6 +6,8 @@
   "include": [
     "**/*.js",
     "**/*.ts",
+    "**/*.mjs",
+    "**/*.cjs",
     "../../typings/**/*"
   ],
   "exclude": [
@@ -14,7 +16,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    { "path": "../../tsconfig.json" },
     "@kbn/screenshotting-plugin",
     "@kbn/test",
     "@kbn/dev-cli-runner",
@@ -46,5 +47,8 @@
     "@kbn/core-i18n-server-internal",
     "@kbn/code-owners",
     "@kbn/projects-solutions-groups",
+    "@kbn/yarn-lock-validator",
+    "@kbn/sort-package-json",
+    "@kbn/babel-register"
   ]
 }
