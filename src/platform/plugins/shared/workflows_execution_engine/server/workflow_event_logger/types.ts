@@ -8,6 +8,7 @@
  */
 
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { ExecutionError } from '@kbn/workflows';
 import type { LogSearchResult, WorkflowLogEvent } from '../repositories/logs_repository';
 
 /**
@@ -88,7 +89,11 @@ export interface WorkflowEventLoggerOptions {
 export interface IWorkflowEventLogger {
   logEvent(event: WorkflowLogEvent): void;
   logInfo(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
-  logError(message: string, error?: Error, additionalData?: Partial<WorkflowLogEvent>): void;
+  logError(
+    message: string,
+    error?: Error | ExecutionError,
+    additionalData?: Partial<WorkflowLogEvent>
+  ): void;
   logWarn(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
   logDebug(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
   startTiming(event: WorkflowLogEvent): void;
