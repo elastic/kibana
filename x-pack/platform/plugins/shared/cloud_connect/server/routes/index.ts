@@ -19,6 +19,7 @@ export interface RouteOptions {
   logger: Logger;
   getStartServices: StartServicesAccessor<CloudConnectedStartDeps, unknown>;
   hasEncryptedSOEnabled: boolean;
+  cloudApiUrl: string;
 }
 
 export function registerRoutes(options: RouteOptions) {

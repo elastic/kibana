@@ -10,11 +10,17 @@ import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 // Plugin types
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CloudConnectedPluginSetup {}
+export interface CloudConnectedPluginSetup {
+  cloudUrl?: string;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudConnectedPluginStart {}
+
+// Config types
+export interface CloudConnectConfig {
+  cloudUrl: string;
+}
 
 export interface CloudConnectedSetupDeps {
   management: ManagementSetup;
@@ -29,6 +35,7 @@ export interface CloudConnectedAppComponentProps {
   docLinks: CoreStart['docLinks'];
   notifications: CoreStart['notifications'];
   history: AppMountParameters['history'];
+  cloudUrl: string;
 }
 
 // Service types

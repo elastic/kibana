@@ -22,12 +22,14 @@ export interface ClustersRouteOptions {
   logger: Logger;
   getStartServices: StartServicesAccessor<CloudConnectedStartDeps, unknown>;
   hasEncryptedSOEnabled: boolean;
+  cloudApiUrl: string;
 }
 
 export const registerClustersRoute = ({
   router,
   logger,
   getStartServices,
+  cloudApiUrl,
 }: ClustersRouteOptions) => {
   // GET /internal/cloud_connect/cluster_details
   router.get(
@@ -64,7 +66,7 @@ export const registerClustersRoute = ({
         }
 
         // Fetch cluster details from Cloud Connect API
-        const cloudConnectClient = new CloudConnectClient(logger);
+        const cloudConnectClient = new CloudConnectClient(logger, cloudApiUrl);
         const clusterDetails = await cloudConnectClient.getClusterDetails(
           apiKeyData.apiKey,
           apiKeyData.clusterId
@@ -160,7 +162,7 @@ export const registerClustersRoute = ({
         }
 
         // Delete cluster from Cloud Connect API first
-        const cloudConnectClient = new CloudConnectClient(logger);
+        const cloudConnectClient = new CloudConnectClient(logger, cloudApiUrl);
         await cloudConnectClient.deleteCluster(apiKeyData.apiKey, apiKeyData.clusterId);
 
         logger.debug(`Successfully deleted cluster from Cloud API: ${apiKeyData.clusterId}`);
@@ -243,7 +245,7 @@ export const registerClustersRoute = ({
         }
 
         // Update cluster services via Cloud Connect API
-        const cloudConnectClient = new CloudConnectClient(logger);
+        const cloudConnectClient = new CloudConnectClient(logger, cloudApiUrl);
         const updatedCluster = await cloudConnectClient.updateClusterServices(
           apiKeyData.apiKey,
           apiKeyData.clusterId,

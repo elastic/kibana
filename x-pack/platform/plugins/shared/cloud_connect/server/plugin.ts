@@ -24,6 +24,7 @@ import {
   CloudConnectApiKeyType,
   CloudConnectApiKeyEncryptionParams,
 } from './saved_objects/cloud_connect_api_key';
+import type { CloudConnectConfig } from './config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudConnectedPluginSetup {}
@@ -51,9 +52,11 @@ export class CloudConnectedPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly config: CloudConnectConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get<CloudConnectConfig>();
   }
 
   public setup(
@@ -85,6 +88,7 @@ export class CloudConnectedPlugin
       logger: this.logger,
       getStartServices: core.getStartServices,
       hasEncryptedSOEnabled: plugins.encryptedSavedObjects.canEncrypt,
+      cloudApiUrl: `${this.config.cloudUrl}/api/v1`,
     });
 
     return {};

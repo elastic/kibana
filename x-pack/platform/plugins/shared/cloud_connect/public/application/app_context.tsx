@@ -15,6 +15,7 @@ export interface CloudConnectedAppContextValue {
   docLinks: CoreStart['docLinks'];
   notifications: CoreStart['notifications'];
   history: AppMountParameters['history'];
+  cloudUrl: string;
   hasEncryptedSOEnabled?: boolean;
   hasConfigurePermission?: boolean;
 }

@@ -14,16 +14,17 @@ import type {
   OnboardClusterResponse,
   ApiKeyValidationResult,
 } from '../types';
-import { CLOUD_API_BASE_URL } from '../../common/constants';
 
 export class CloudConnectClient {
   private axiosInstance: AxiosInstance;
   private logger: Logger;
+  private cloudApiUrl: string;
 
-  constructor(logger: Logger) {
+  constructor(logger: Logger, cloudApiUrl: string) {
     this.logger = logger;
+    this.cloudApiUrl = cloudApiUrl;
     this.axiosInstance = axios.create({
-      baseURL: CLOUD_API_BASE_URL,
+      baseURL: cloudApiUrl,
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
@@ -40,7 +41,7 @@ export class CloudConnectClient {
       this.logger.debug('Validating API key scope');
 
       const response = await axios.get<CloudConnectUserResponse>(
-        `${CLOUD_API_BASE_URL}/saas/user?show_role_assignments=true`,
+        `${this.cloudApiUrl}/saas/user?show_role_assignments=true`,
         {
           headers: {
             Authorization: `apiKey ${apiKey}`,

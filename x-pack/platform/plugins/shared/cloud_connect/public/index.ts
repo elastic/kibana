@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { CloudConnectedPlugin } from './plugin';
 
-export function plugin() {
-  return new CloudConnectedPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new CloudConnectedPlugin(initializerContext);
 }
 
 export type { CloudConnectedPluginSetup, CloudConnectedPluginStart } from './plugin';

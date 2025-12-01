@@ -20,17 +20,22 @@ const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
   docLinks,
   notifications,
   history,
+  cloudUrl,
 }) => {
   return (
     <CloudConnectedAppContextProvider
-      value={{ chrome, application, http, docLinks, notifications, history }}
+      value={{ chrome, application, http, docLinks, notifications, history, cloudUrl }}
     >
       <CloudConnectedAppMain />
     </CloudConnectedAppContextProvider>
   );
 };
 
-export const CloudConnectedApp = (core: CoreStart, params: AppMountParameters) => {
+export const CloudConnectedApp = (
+  core: CoreStart,
+  params: AppMountParameters,
+  cloudUrl: string
+) => {
   apiService.setup(core.http);
 
   ReactDOM.render(
@@ -42,6 +47,7 @@ export const CloudConnectedApp = (core: CoreStart, params: AppMountParameters) =
         docLinks={core.docLinks}
         notifications={core.notifications}
         history={params.history}
+        cloudUrl={cloudUrl}
       />
     ),
     params.element

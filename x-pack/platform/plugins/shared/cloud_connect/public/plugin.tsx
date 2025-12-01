@@ -6,12 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type {
   CloudConnectedPluginSetup,
   CloudConnectedPluginStart,
   CloudConnectedSetupDeps,
+  CloudConnectConfig,
 } from './types';
 
 export type { CloudConnectedPluginSetup, CloudConnectedPluginStart };
@@ -19,6 +25,12 @@ export type { CloudConnectedPluginSetup, CloudConnectedPluginStart };
 export class CloudConnectedPlugin
   implements Plugin<CloudConnectedPluginSetup, CloudConnectedPluginStart, CloudConnectedSetupDeps>
 {
+  private readonly config: CloudConnectConfig;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<CloudConnectConfig>();
+  }
+
   public setup(core: CoreSetup, plugins: CloudConnectedSetupDeps): CloudConnectedPluginSetup {
     // Skip plugin registration if running on Elastic Cloud.
     // This plugin is only for self-managed clusters connecting to Cloud services
@@ -27,6 +39,7 @@ export class CloudConnectedPlugin
     }
 
     // Register the app in the management section
+    const cloudUrl = this.config.cloudUrl;
     core.application.register({
       id: 'cloud_connect',
       title: i18n.translate('xpack.cloudConnect.appTitle', {
@@ -38,11 +51,13 @@ export class CloudConnectedPlugin
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
         const { CloudConnectedApp } = await import('./application/mount_plugin');
-        return CloudConnectedApp(coreStart, params);
+        return CloudConnectedApp(coreStart, params, cloudUrl);
       },
     });
 
-    return {};
+    return {
+      cloudUrl: this.config.cloudUrl,
+    };
   }
 
   public start() {

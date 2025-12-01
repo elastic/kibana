@@ -28,6 +28,7 @@ export interface AuthenticateRouteOptions {
   logger: Logger;
   getStartServices: StartServicesAccessor<CloudConnectedStartDeps, unknown>;
   hasEncryptedSOEnabled: boolean;
+  cloudApiUrl: string;
 }
 
 export const registerAuthenticateRoute = ({
@@ -35,6 +36,7 @@ export const registerAuthenticateRoute = ({
   logger,
   getStartServices,
   hasEncryptedSOEnabled,
+  cloudApiUrl,
 }: AuthenticateRouteOptions) => {
   // GET /internal/cloud_connect/config
   router.get(
@@ -82,7 +84,7 @@ export const registerAuthenticateRoute = ({
       const { apiKey } = request.body;
 
       try {
-        const cloudConnectClient = new CloudConnectClient(logger);
+        const cloudConnectClient = new CloudConnectClient(logger, cloudApiUrl);
         const coreContext = await context.core;
 
         // Initialize storage service for saving the API key

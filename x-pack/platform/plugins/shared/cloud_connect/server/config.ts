@@ -10,10 +10,14 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  cloudUrl: schema.string({ defaultValue: 'https://cloud.elastic.co' }),
 });
 
 export type CloudConnectConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<CloudConnectConfig> = {
+  exposeToBrowser: {
+    cloudUrl: true,
+  },
   schema: configSchema,
 };
