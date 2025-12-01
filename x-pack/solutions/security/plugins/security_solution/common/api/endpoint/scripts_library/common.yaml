@@ -44,7 +44,7 @@ components:
           type: string
           description: >
             The relative path to the file included in the archive that should be executed once its contents
-            are extracted. Applicable only for scripts uploaded as an archive (ex. zip file).
+            are extracted. Applicable only for scripts uploaded as an archive (.zip file for example).
         createdBy:
           type: string
           example: elastic
