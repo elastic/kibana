@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   EuiModal,
   EuiOverlayMask,
@@ -37,6 +37,7 @@ import {
 } from '../../../common/ui_setting_keys';
 import { AIAssistantType } from '../../../common/ai_assistant_type';
 import { AssistantIcon } from '../../icons/assistant_icon/assistant_icon';
+import { getIsAiAgentsEnabled } from '../../utils/get_is_ai_agents_enabled';
 
 interface AIAssistantHeaderButtonProps {
   coreStart: CoreStart;
@@ -56,9 +57,20 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
 }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [isAiAgentsEnabled, setIsAiAgentsEnabled] = useState(false);
 
   const { getUrlForApp } = coreStart.application;
   const { toasts } = coreStart.notifications;
+
+  // Check feature flag on mount
+  useEffect(() => {
+    getIsAiAgentsEnabled(coreStart)
+      .then(setIsAiAgentsEnabled)
+      .catch(() => {
+        // Default to false if check fails
+        setIsAiAgentsEnabled(false);
+      });
+  }, [coreStart]);
 
   const [selectedType, setSelectedType] = useState<{
     chatExperience: AIChatExperience;
@@ -253,32 +265,36 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                     isDisabled={!isSecurityAIAssistantEnabled}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={1}>
-                  <EuiCard
-                    display="plain"
-                    // TODO: BETA on the top border
-                    hasBorder
-                    selectable={{
-                      isSelected: selectedType.chatExperience === AIChatExperience.Agents,
-                      onClick: () =>
-                        handleSelect({
-                          chatExperience: AIChatExperience.Agents,
-                          assistant: AIAssistantType.Never, // TODO: Change it later, when buttons topic is clarified
-                        }),
-                    }}
-                    title={i18n.translate(
-                      'aiAssistantManagementSelection.headerButton.aiAgentLabel',
-                      {
-                        defaultMessage: 'AI Agent',
+                {isAiAgentsEnabled && (
+                  <EuiFlexItem grow={1}>
+                    <EuiCard
+                      display="plain"
+                      // TODO: BETA on the top border
+                      hasBorder
+                      selectable={{
+                        isSelected: selectedType.chatExperience === AIChatExperience.Agents,
+                        onClick: () =>
+                          handleSelect({
+                            chatExperience: AIChatExperience.Agents,
+                            assistant: AIAssistantType.Never, // TODO: Change it later, when buttons topic is clarified
+                          }),
+                      }}
+                      title={i18n.translate(
+                        'aiAssistantManagementSelection.headerButton.aiAgentLabel',
+                        {
+                          defaultMessage: 'AI Agent',
+                        }
+                      )}
+                      titleSize="xs"
+                      // TODO: change to proper agent icon when available
+                      icon={<RobotIcon size="xxl" />}
+                      data-test-subj="aiAssistantAgentCard"
+                      isDisabled={
+                        !isSecurityAIAssistantEnabled && !isObservabilityAIAssistantEnabled
                       }
-                    )}
-                    titleSize="xs"
-                    // TODO: change to proper agent icon when available
-                    icon={<RobotIcon size="xxl" />}
-                    data-test-subj="aiAssistantAgentCard"
-                    isDisabled={!isSecurityAIAssistantEnabled && !isObservabilityAIAssistantEnabled}
-                  />
-                </EuiFlexItem>
+                    />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiModalBody>
             <EuiModalFooter>

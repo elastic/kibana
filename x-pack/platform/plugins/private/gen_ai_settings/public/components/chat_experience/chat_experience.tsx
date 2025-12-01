@@ -12,15 +12,28 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
+import { getIsAiAgentsEnabled } from '../../utils/get_is_ai_agents_enabled';
 
 export const ChatExperience: React.FC = () => {
   const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();
+  const kibana = useKibana();
   const {
     services: { settings, notifications, docLinks, application },
-  } = useKibana();
+  } = kibana;
 
   const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
   const [hasHandledAgentSelection, setHasHandledAgentSelection] = useState(false);
+  const [isAiAgentsEnabled, setIsAiAgentsEnabled] = useState(false);
+
+  // Check feature flag on mount
+  useEffect(() => {
+    getIsAiAgentsEnabled(kibana.services)
+      .then(setIsAiAgentsEnabled)
+      .catch(() => {
+        // Default to false if check fails
+        setIsAiAgentsEnabled(false);
+      });
+  }, [kibana.services]);
 
   // Show confirmation modal for AI Agents selection
   useEffect(() => {
@@ -50,6 +63,11 @@ export const ChatExperience: React.FC = () => {
     // Clear the unsaved change by passing undefined
     handleFieldChange(AI_ASSISTANT_CHAT_EXPERIENCE_TYPE, undefined);
   }, [handleFieldChange]);
+
+  // Don't render if AI Agents feature is disabled
+  if (!isAiAgentsEnabled) {
+    return null;
+  }
 
   const field = fields[AI_ASSISTANT_CHAT_EXPERIENCE_TYPE];
   if (!field) return null;
