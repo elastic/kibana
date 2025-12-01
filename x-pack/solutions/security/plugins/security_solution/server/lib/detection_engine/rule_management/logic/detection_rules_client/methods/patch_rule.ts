@@ -14,12 +14,10 @@ import type {
 } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { applyRulePatch } from '../mergers/apply_rule_patch';
 import { getIdError } from '../../../utils/utils';
 import { validateNonCustomizablePatchFields } from '../../../utils/validate';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
-import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
-import { ClientError, toggleRuleEnabledOnUpdate, validateMlAuth } from '../utils';
+import { ClientError, validateMlAuth, patchApplicator } from '../utils';
 import { getRuleByIdOrRuleId } from './get_rule_by_id_or_rule_id';
 
 interface PatchRuleOptions {
@@ -39,7 +37,7 @@ export const patchRule = async ({
 }: PatchRuleOptions): Promise<RuleResponse> => {
   const { rule_id: ruleId, id } = rulePatch;
 
-  let existingRule = await getRuleByIdOrRuleId({
+  const existingRule = await getRuleByIdOrRuleId({
     rulesClient,
     ruleId,
     id,
@@ -54,57 +52,12 @@ export const patchRule = async ({
 
   validateNonCustomizablePatchFields(rulePatch, existingRule);
 
-  // Use alerting edit + read auth function
-  // for exceptions, then follow on with
-  // applying patch for other rule properties
-  if (rulePatch.exceptions_list != null) {
-    const ruleExceptionLists = existingRule.exceptions_list;
-    await rulesClient.bulkEditRuleParamsWithReadAuth({
-      ids: [existingRule.id],
-      operations: [
-        {
-          field: 'exceptionsList',
-          operation: 'set',
-          value: [
-            ...ruleExceptionLists,
-            ...rulePatch.exceptions_list.map((exceptionList) => ({
-              id: exceptionList.id,
-              list_id: exceptionList.list_id,
-              type: exceptionList.type,
-              namespace_type: exceptionList.namespace_type,
-            })),
-          ],
-        },
-      ],
-    });
-    // TODO: clean up
-    delete rulePatch.exceptions_list;
-    existingRule = await getRuleByIdOrRuleId({
-      rulesClient,
-      ruleId,
-      id,
-    });
-    // have to follow up the fetch rule with this code
-    // or else typescript complains in other areas we
-    // use existingRule
-    if (existingRule == null) {
-      const error = getIdError({ id, ruleId });
-      throw new ClientError(error.message, error.statusCode);
-    }
-  }
-
-  const patchedRule = await applyRulePatch({
-    prebuiltRuleAssetClient,
-    existingRule,
+  const appliedInternalPatches = await patchApplicator(
+    rulesClient,
+    actionsClient,
     rulePatch,
-  });
-
-  const patchedInternalRule = await rulesClient.update({
-    id: existingRule.id,
-    data: convertRuleResponseToAlertingRule(patchedRule, actionsClient),
-  });
-
-  const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, patchedRule);
-
-  return convertAlertingRuleToRuleResponse({ ...patchedInternalRule, enabled });
+    existingRule,
+    prebuiltRuleAssetClient
+  );
+  return convertAlertingRuleToRuleResponse(appliedInternalPatches);
 };

@@ -18,3 +18,5 @@ export type { GapStatus } from './gap_status';
 export { alertDeleteCategoryIds } from './alert_delete';
 export type { BackfillInitiator } from './backfill';
 export { backfillInitiator } from './backfill';
+export type { ValidReadAuthEditFields } from './valid_fields_with_read_auth';
+export { validFields } from './valid_fields_with_read_auth';

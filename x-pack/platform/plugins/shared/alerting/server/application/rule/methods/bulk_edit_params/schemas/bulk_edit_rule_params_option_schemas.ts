@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { validFields } from '../../../../../../common/constants';
 
-const bulkEditExceptionListField = schema.literal('exceptionsList');
-
+const bulkEditExceptionListField = schema.literal(validFields.EXCEPTIONS_LIST);
 export const bulkEditParamsOperationSchema = schema.object({
   operation: schema.literal('set'),
   field: schema.oneOf([bulkEditExceptionListField]),
