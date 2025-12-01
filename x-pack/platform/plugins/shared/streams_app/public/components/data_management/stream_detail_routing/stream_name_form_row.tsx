@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-plugin/public';
 import type { ReactNode } from 'react';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
@@ -154,17 +154,21 @@ export const useChildStreamInput = (
   );
 
   const router = useStreamsAppRouter();
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const parentStreamName = routingSnapshot.context.definition.stream.name;
+  const parentStreamName = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.definition.stream.name
+  );
+  const routing = useStreamsRoutingSelector((snapshot) => snapshot.context.routing);
 
   const prefix = parentStreamName + '.';
   const partitionName = localStreamName.replace(prefix, '');
   const rootChild = partitionName.split('.')[0];
-  const isDuplicatedName = routingSnapshot.context.routing.some(
-    (r) => r.destination === localStreamName && !r.isNew
+  const isDuplicatedName = useMemo(
+    () => routing.some((r) => r.destination === localStreamName && !r.isNew),
+    [routing, localStreamName]
   );
-  const rootChildExists = routingSnapshot.context.routing.some(
-    (r) => r.destination === prefix + rootChild && !r.isNew
+  const rootChildExists = useMemo(
+    () => routing.some((r) => r.destination === prefix + rootChild && !r.isNew),
+    [routing, prefix, rootChild]
   );
 
   const isStreamNameEmpty = localStreamName.length <= prefix.length;
