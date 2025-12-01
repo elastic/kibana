@@ -31,9 +31,12 @@ import {
 import { useYamlStepsProcessingSummary } from '../state_management/use_yaml_steps_processing_summary';
 import { useSimulationErrors } from '../state_management/use_simulation_errors';
 import { SimulationErrorsList } from '../simulation_errors';
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 
 export const YamlEditorWrapper = () => {
   const dsl = useStreamEnrichmentSelector((state) => state.context.nextStreamlangDSL);
+  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
+  const streamType = getStreamTypeFromDefinition(definition.stream);
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
   const canSimulate = useStreamEnrichmentSelector(
     (state) => state.context.definition.privileges.simulate
@@ -104,6 +107,7 @@ export const YamlEditorWrapper = () => {
             canRunSimulation={canRunSimulation}
             additiveStepIds={additiveStepIds}
             simulationMode={simulationMode}
+            streamType={streamType === 'unknown' ? undefined : streamType}
           />
         </EuiPanel>
       </EuiFlexItem>

@@ -8,6 +8,7 @@
 import type { monaco } from '@kbn/monaco';
 import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import type { StreamlangDSL } from '@kbn/streamlang/types/streamlang';
+import type { StreamType } from '@kbn/streamlang';
 
 export interface StreamlangYamlEditorProps {
   /** Streamlang DSL object (customIdentifiers will be stripped automatically) */
@@ -31,6 +32,8 @@ export interface StreamlangYamlEditorProps {
   additiveStepIds?: string[];
   /** Simulation mode of the active data source */
   simulationMode?: 'partial' | 'complete';
+  /** Stream type to filter available actions (e.g., exclude manual_ingest_pipeline for wired streams) */
+  streamType?: StreamType;
 }
 
 export type ProcessorsMetrics =

@@ -34,6 +34,7 @@ import {
   isStreamlangDSLSchema,
   isWhereBlock,
   type StreamlangDSL,
+  type StreamType,
 } from '../../types/streamlang';
 
 export class StreamlangValidationError extends Error {
@@ -42,8 +43,6 @@ export class StreamlangValidationError extends Error {
     this.name = 'StreamlangValidationError';
   }
 }
-
-type StreamType = 'wired' | 'classic';
 
 export const validateStreamlang = (dsl: StreamlangDSL, streamType?: StreamType): true => {
   // First, a schema check.

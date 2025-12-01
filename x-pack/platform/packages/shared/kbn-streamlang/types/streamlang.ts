@@ -13,6 +13,13 @@ import type { StreamlangProcessorDefinition } from './processors';
 import { streamlangProcessorSchema } from './processors';
 import type { StreamlangStepWithUIAttributes } from './ui';
 
+/**
+ * Stream type for filtering available Streamlang actions and validation rules.
+ * - 'wired': Wired streams (excludes manual_ingest_pipeline)
+ * - 'classic': Classic streams (all actions available)
+ */
+export type StreamType = 'wired' | 'classic';
+
 // Recursive schema for ConditionWithSteps
 export const conditionWithStepsSchema: z.ZodType<ConditionWithSteps> = z.lazy(() =>
   z.intersection(

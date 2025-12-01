@@ -50,6 +50,7 @@ export const StreamlangYamlEditor = ({
   additiveStepIds = [],
   reinitializationDeps = [],
   simulationMode = 'partial',
+  streamType,
 }: StreamlangYamlEditorProps) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoYamlRef = useRef<MonacoYaml | null>(null);
@@ -75,9 +76,9 @@ export const StreamlangYamlEditor = ({
 
   // Configure Monaco YAML schema
   const schemas = useMemo(() => {
-    const schemaConfig = getStreamlangMonacoSchemaConfig();
+    const schemaConfig = getStreamlangMonacoSchemaConfig(streamType);
     return schemaConfig ? [schemaConfig] : [];
-  }, []);
+  }, [streamType]);
 
   const glyphSize = euiTheme.size.m;
   const glyphMarginTop = euiTheme.size.xs;

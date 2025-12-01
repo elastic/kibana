@@ -13,6 +13,7 @@ import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { z } from '@kbn/zod';
 import { ACTION_METADATA_MAP } from '../actions/action_metadata';
+import type { StreamType } from '../../types/streamlang';
 
 /**
  * JSON Schema scaffold produced from the Streamlang Zod schema. The converter
@@ -35,9 +36,13 @@ type StreamlangJsonSchema = JsonSchema7Type & {
  * The raw output of `zod-to-json-schema` contains recursive references that
  * Monaco cannot resolve, and it omits strict `additionalProperties` flags.
  * This helper normalises those quirks before returning the schema artifact.
+ *
+ * @param streamlangSchema - The Zod schema to convert
+ * @param streamType - Optional stream type to filter available actions (e.g., exclude manual_ingest_pipeline for wired streams)
  */
 export function getJsonSchemaFromStreamlangSchema(
-  streamlangSchema: z.ZodType
+  streamlangSchema: z.ZodType,
+  streamType?: StreamType
 ): StreamlangJsonSchema {
   // Generate the json schema from zod schema
   const jsonSchema = zodToJsonSchema(streamlangSchema, {
@@ -46,7 +51,7 @@ export function getJsonSchemaFromStreamlangSchema(
   });
 
   // Apply targeted fixes to make it valid for JSON Schema validators
-  return fixBrokenSchemaReferencesAndEnforceStrictValidation(jsonSchema);
+  return fixBrokenSchemaReferencesAndEnforceStrictValidation(jsonSchema, streamType);
 }
 
 /**
@@ -112,7 +117,10 @@ function fixAdditionalPropertiesInSchema(obj: any, path: string = '', visited = 
   });
 }
 
-function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
+function fixBrokenSchemaReferencesAndEnforceStrictValidation(
+  schema: any,
+  streamType?: StreamType
+): any {
   const schemaString = JSON.stringify(schema);
   let fixedSchemaString = schemaString;
 
@@ -166,7 +174,7 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
     // a mutable object graph again before running the recursive post-processors.
     const fixedSchema = JSON.parse(fixedSchemaString);
     fixAdditionalPropertiesInSchema(fixedSchema);
-    enhanceStreamlangSchemaForEditor(fixedSchema);
+    enhanceStreamlangSchemaForEditor(fixedSchema, streamType);
     return fixedSchema;
   } catch (parseError) {
     throw new Error('Failed to fix additionalProperties in json schema');
@@ -179,9 +187,11 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
  * steps. At the schema level, action steps are represented as a union (anyOf) of
  * different action types, while where blocks have a 'condition' property. We add
  * helpful metadata like titles and aggregated enums to improve the editor experience.
+ *
+ * @param streamType - Optional stream type to filter available actions
  */
 
-function enhanceStreamlangSchemaForEditor(schema: any): void {
+function enhanceStreamlangSchemaForEditor(schema: any, streamType?: StreamType): void {
   const stepsItems = schema?.definitions?.StreamlangSchema?.properties?.steps?.items;
 
   if (!stepsItems || typeof stepsItems !== 'object') {
@@ -221,7 +231,7 @@ function enhanceStreamlangSchemaForEditor(schema: any): void {
 
   // Enhance action steps with metadata and aggregated action enum
   if (typeof actionUnionSchema === 'object' && Array.isArray(actionUnionSchema.anyOf)) {
-    enhanceActionSchema(actionUnionSchema);
+    enhanceActionSchema(actionUnionSchema, streamType);
   }
 
   // Enhance where blocks with metadata and flattened condition property
@@ -232,8 +242,11 @@ function enhanceStreamlangSchemaForEditor(schema: any): void {
 
 /**
  * Add metadata and aggregated action enum to action step schema.
+ * Filters out actions based on stream type (e.g., manual_ingest_pipeline for wired streams).
+ *
+ * @param streamType - Optional stream type to filter available actions
  */
-function enhanceActionSchema(actionUnionSchema: any): void {
+function enhanceActionSchema(actionUnionSchema: any, streamType?: StreamType): void {
   // Supply human-friendly metadata and a shared action enum across all
   // processor variants to help editors surface better suggestions.
   if (!actionUnionSchema.title) {
@@ -242,6 +255,14 @@ function enhanceActionSchema(actionUnionSchema: any): void {
 
   ensureRequiredProperty(actionUnionSchema, 'action');
   ensureObjectType(actionUnionSchema);
+
+  // Filter out manual_ingest_pipeline for wired streams
+  if (streamType === 'wired') {
+    actionUnionSchema.anyOf = actionUnionSchema.anyOf.filter((option: any) => {
+      const actionName = option?.properties?.action?.const as string | undefined;
+      return actionName !== 'manual_ingest_pipeline';
+    });
+  }
 
   const aggregatedActionProperties =
     actionUnionSchema.properties && typeof actionUnionSchema.properties === 'object'
