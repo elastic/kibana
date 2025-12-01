@@ -11,7 +11,8 @@ import React from 'react';
 import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { useStreamsTour, StreamsTourStep, StreamsTourStepProps } from '../../streams_tour';
+import { useStreamsTour } from '../../streams_tour';
+import type { StreamsTourStepId } from '../../streams_tour';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import { calculateDataQuality } from '../../../util/calculate_data_quality';
 import { useStreamDocCountsFetch } from '../../../hooks/use_streams_doc_counts_fetch';
@@ -36,10 +37,11 @@ export type ManagementTabs = Record<
   }
 >;
 
-const TAB_TO_TOUR_STEP: Record<string, StreamsTourStep | undefined> = {
-  retention: StreamsTourStep.RETENTION,
-  processing: StreamsTourStep.PROCESSING,
-  advanced: StreamsTourStep.ADVANCED,
+const TAB_TO_TOUR_STEP_ID: Record<string, StreamsTourStepId | undefined> = {
+  retention: 'retention',
+  processing: 'processing',
+  attachments: 'attachments',
+  advanced: 'advanced',
 };
 
 export function Wrapper({
@@ -56,7 +58,7 @@ export function Wrapper({
   const {
     features: { groupStreams },
   } = useStreamsPrivileges();
-  const { tourStepProps } = useStreamsTour();
+  const { getStepPropsByStepId } = useStreamsTour();
 
   const tabMap = Object.fromEntries(
     Object.entries(tabs).map(([tabName, currentTab]) => {
@@ -151,10 +153,8 @@ export function Wrapper({
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
-          const tourStep = TAB_TO_TOUR_STEP[tabKey];
-          const stepProps: StreamsTourStepProps | undefined = tourStep
-            ? tourStepProps[tourStep - 1]
-            : undefined;
+          const tourStepId = TAB_TO_TOUR_STEP_ID[tabKey];
+          const stepProps = tourStepId ? getStepPropsByStepId(tourStepId) : undefined;
 
           const wrappedLabel = stepProps ? (
             <EuiTourStep {...stepProps}>

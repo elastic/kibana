@@ -23,20 +23,28 @@ import type {
 } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
-import { STREAMS_TOUR_CALLOUT_DISMISSED_KEY, StreamsTourStep, TOUR_STEPS_TOTAL } from './constants';
-import { getTourStepsConfig } from './tour_steps_config';
+import { STREAMS_TOUR_CALLOUT_DISMISSED_KEY, STEP_ID_TO_TAB } from './constants';
+import type { StreamsTourStepId } from './constants';
+import { getTourStepsConfig, TourStepConfig } from './tour_steps_config';
 import { useKibana } from '../../hooks/use_kibana';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
-export type StreamsTourStepProps = Omit<EuiTourStepProps, 'children' | 'anchor'>;
+export type StreamsTourStepProps = Omit<EuiTourStepProps, 'children' | 'anchor'> & {
+  stepId: StreamsTourStepId;
+};
 
 function createEnhancedTourStepProps(
   baseProps: EuiTourStepProps[],
+  stepsConfig: TourStepConfig[],
   actions: EuiTourActions,
   tourState: EuiTourState
 ): StreamsTourStepProps[] {
-  return baseProps.map((stepProps) => {
+  const stepsTotal = stepsConfig.length;
+
+  return baseProps.map((stepProps, index) => {
     const { anchor, children, ...rest } = stepProps as EuiTourStepProps & { anchor?: unknown };
-    const isLastStep = stepProps.step === TOUR_STEPS_TOTAL;
+    const stepConfig = stepsConfig[index];
+    const isLastStep = stepProps.step === stepsTotal;
     const isCurrentStep = stepProps.step === tourState.currentTourStep;
 
     const footerAction = isLastStep ? (
@@ -81,19 +89,13 @@ function createEnhancedTourStepProps(
 
     return {
       ...rest,
+      stepId: stepConfig.stepId,
       isStepOpen: isCurrentStep && tourState.isTourActive,
       onFinish: () => actions.finishTour(),
       footerAction,
     };
   });
 }
-
-const STEP_TO_TAB: Record<number, string | undefined> = {
-  [StreamsTourStep.RETENTION]: 'retention',
-  [StreamsTourStep.PROCESSING]: 'processing',
-  [StreamsTourStep.ADVANCED]: 'advanced',
-};
-
 
 interface StreamsTourContextValue {
   tourStepProps: StreamsTourStepProps[];
@@ -106,10 +108,10 @@ interface StreamsTourContextValue {
   setTourAvailable: (available: boolean) => void;
   tourStreamName: string | null;
   setTourStreamName: (name: string | null) => void;
+  getStepPropsByStepId: (stepId: StreamsTourStepId) => StreamsTourStepProps | undefined;
 }
 
 const StreamsTourContext = createContext<StreamsTourContextValue | null>(null);
-
 
 const INITIAL_TOUR_STATE: EuiTourState = {
   currentTourStep: 1,
@@ -124,7 +126,6 @@ interface StreamsTourProviderProps {
   children: React.ReactNode;
 }
 
-
 export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
   const {
     core: {
@@ -132,18 +133,22 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
     },
   } = useKibana();
 
+  const { features } = useStreamsPrivileges();
+  const attachmentsEnabled = features.attachments?.enabled ?? false;
+
   const [isCalloutDismissed = false, setCalloutDismissed] = useLocalStorage(
     STREAMS_TOUR_CALLOUT_DISMISSED_KEY,
     false
   );
 
   const [isTourAvailable, setTourAvailable] = useState(false);
-
   const [tourStreamName, setTourStreamName] = useState<string | null>(null);
-
   const prevStepRef = useRef<number>(1);
 
-  const stepsConfig = useMemo(() => getTourStepsConfig(), []);
+  const stepsConfig = useMemo(
+    () => getTourStepsConfig({ attachmentsEnabled }),
+    [attachmentsEnabled]
+  );
 
   const [baseTourStepProps, actions, tourState] = useEuiTour(
     stepsConfig as unknown as EuiStatelessTourSteps,
@@ -151,8 +156,15 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
   );
 
   const tourStepProps = useMemo(
-    () => createEnhancedTourStepProps(baseTourStepProps, actions, tourState),
-    [baseTourStepProps, actions, tourState]
+    () => createEnhancedTourStepProps(baseTourStepProps, stepsConfig, actions, tourState),
+    [baseTourStepProps, stepsConfig, actions, tourState]
+  );
+
+  const getStepPropsByStepId = useCallback(
+    (stepId: StreamsTourStepId): StreamsTourStepProps | undefined => {
+      return tourStepProps.find((props) => props.stepId === stepId);
+    },
+    [tourStepProps]
   );
 
   const dismissCallout = useCallback(() => {
@@ -178,9 +190,15 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
       return;
     }
 
-    const tab = STEP_TO_TAB[currentStep];
+    const currentStepConfig = stepsConfig[currentStep - 1];
+    if (!currentStepConfig) {
+      prevStepRef.current = currentStep;
+      return;
+    }
 
-    if (currentStep === StreamsTourStep.STREAMS_LIST) {
+    const tab = STEP_ID_TO_TAB[currentStepConfig.stepId];
+
+    if (currentStepConfig.stepId === 'streams_list') {
       navigateToApp('streams', { path: '/', replace: false });
     } else if (tab) {
       navigateToApp('streams', {
@@ -190,7 +208,7 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
     }
 
     prevStepRef.current = currentStep;
-  }, [tourState.currentTourStep, tourState.isTourActive, tourStreamName, navigateToApp]);
+  }, [tourState.currentTourStep, tourState.isTourActive, tourStreamName, navigateToApp, stepsConfig]);
 
   const value = useMemo<StreamsTourContextValue>(
     () => ({
@@ -204,6 +222,7 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
       setTourAvailable,
       tourStreamName,
       setTourStreamName,
+      getStepPropsByStepId,
     }),
     [
       tourStepProps,
@@ -215,6 +234,7 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
       isTourAvailable,
       setTourAvailable,
       tourStreamName,
+      getStepPropsByStepId,
     ]
   );
 
@@ -228,4 +248,3 @@ export function useStreamsTour(): StreamsTourContextValue {
   }
   return context;
 }
-

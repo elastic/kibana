@@ -19,7 +19,7 @@ import {
   EuiButtonIcon,
   EuiTourStep,
 } from '@elastic/eui';
-import { useStreamsTour, StreamsTourStep } from '../streams_tour';
+import { useStreamsTour } from '../streams_tour';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { Streams } from '@kbn/streams-schema';
@@ -73,7 +73,7 @@ export function StreamsTreeTable({
   const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
-  const { tourStepProps } = useStreamsTour();
+  const { getStepPropsByStepId } = useStreamsTour();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
@@ -218,7 +218,7 @@ export function StreamsTreeTable({
     />
   );
 
-  const step1Props = tourStepProps[StreamsTourStep.STREAMS_LIST - 1];
+  const streamsListStepProps = getStepPropsByStepId('streams_list');
 
   const nameColumnHeader = (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -226,9 +226,13 @@ export function StreamsTreeTable({
         <EuiFlexItem grow={false}>{expandCollapseAllButton}</EuiFlexItem>
       )}
       <EuiFlexItem>
-        <EuiTourStep {...step1Props}>
+        {streamsListStepProps ? (
+          <EuiTourStep {...streamsListStepProps}>
+            <span>{NAME_COLUMN_HEADER}</span>
+          </EuiTourStep>
+        ) : (
           <span>{NAME_COLUMN_HEADER}</span>
-        </EuiTourStep>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
