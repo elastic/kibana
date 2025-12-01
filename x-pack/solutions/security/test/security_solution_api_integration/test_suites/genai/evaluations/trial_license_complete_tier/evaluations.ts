@@ -112,7 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
           timeZone: 'America/Denver',
         },
         size: 100,
-        langSmithApiKey: config.langsmithKey,
+        tracingApiKey: config.langsmithKey,
       };
 
       describe('Security Assistant', () => {
