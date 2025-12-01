@@ -8,7 +8,7 @@
  */
 
 // TODO: Remove eslint exceptions comments and fix the issues
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
+// /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
 
 import type { Client } from '@elastic/elasticsearch';
 import { v4 as generateUuid } from 'uuid';
@@ -126,7 +126,7 @@ export class WorkflowsExecutionEnginePlugin
                 coreStart, // TODO: move to dependencies
                 config,
                 logger,
-                fakeRequest: fakeRequest!,
+                fakeRequest: fakeRequest || ({} as KibanaRequest),
                 dependencies,
               });
             },
@@ -175,7 +175,7 @@ export class WorkflowsExecutionEnginePlugin
                 coreStart,
                 config,
                 logger,
-                fakeRequest: fakeRequest!,
+                fakeRequest: fakeRequest || ({} as KibanaRequest),
                 dependencies,
               });
             },
@@ -260,8 +260,9 @@ export class WorkflowsExecutionEnginePlugin
                 triggeredBy: 'scheduled',
               };
 
+              const workflowExecutionId = generateUuid();
               const workflowExecution: Partial<EsWorkflowExecution> = {
-                id: generateUuid(),
+                id: workflowExecutionId,
                 spaceId,
                 workflowId: workflow.id,
                 isTestRun: false,
@@ -276,8 +277,8 @@ export class WorkflowsExecutionEnginePlugin
               await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
               await runWorkflow({
-                workflowRunId: workflowExecution.id!,
-                spaceId: workflowExecution.spaceId!,
+                workflowRunId: workflowExecutionId,
+                spaceId,
                 workflowExecutionRepository,
                 stepExecutionRepository,
                 logsRepository,
@@ -287,7 +288,7 @@ export class WorkflowsExecutionEnginePlugin
                 taskManager,
                 logger,
                 config,
-                fakeRequest: fakeRequest!,
+                fakeRequest: fakeRequest || ({} as KibanaRequest),
                 dependencies,
               });
 
@@ -319,7 +320,7 @@ export class WorkflowsExecutionEnginePlugin
     // Helper function to create and persist a workflow execution
     const createAndPersistWorkflowExecution = async (
       workflow: WorkflowExecutionEngineModel,
-      context: Record<string, any>,
+      context: Record<string, unknown>,
       defaultTriggeredBy: string
     ): Promise<{
       workflowExecution: Partial<EsWorkflowExecution>;
@@ -331,10 +332,10 @@ export class WorkflowsExecutionEnginePlugin
       const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
-      const triggeredBy = context.triggeredBy || defaultTriggeredBy;
+      const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
-        spaceId: context.spaceId,
+        spaceId: context.spaceId as string | undefined,
         workflowId: workflow.id,
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
@@ -342,7 +343,7 @@ export class WorkflowsExecutionEnginePlugin
         context,
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
-        createdBy: context.createdBy || '',
+        createdBy: (context.createdBy as string | undefined) || '',
         triggeredBy,
       };
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
@@ -372,51 +373,27 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    // Helper function to schedule a task with request validation
-    const scheduleTaskWithRequest = async (
-      taskInstance: ReturnType<typeof createTaskInstance>,
-      workflowExecution: Partial<EsWorkflowExecution>,
-      workflowId: string,
-      request: KibanaRequest | undefined,
-      repository: WorkflowExecutionRepository,
-      errorMessage: string,
-      logMessage?: string
-    ): Promise<void> => {
-      if (request) {
-        this.logger.debug(
-          logMessage ||
-            `Scheduling workflow task with user context for workflow ${workflowId}, execution ${workflowExecution.id}`
-        );
-        await plugins.taskManager.schedule(taskInstance, { request });
-      } else {
-        this.logger.debug(
-          `Workflow with execution id ${workflowExecution.id} does not have a request, aborting`
-        );
-        await repository.updateWorkflowExecution({
-          id: workflowExecution.id,
-          status: ExecutionStatus.FAILED,
-          error: errorMessage,
-        });
-        throw new Error(errorMessage);
-      }
-    };
-
     const executeWorkflow = async (
       workflow: WorkflowExecutionEngineModel,
-      context: Record<string, any>,
-      request?: any
+      context: Record<string, unknown>,
+      request?: KibanaRequest | undefined
     ) => {
+      // AUTO-DETECT: Check if we're already running in a Task Manager context
+      // We can determine this from context and request before creating the execution
+      const isRunningInTaskManager =
+        (context.triggeredBy as string | undefined) === 'scheduled' ||
+        (context.source as string | undefined) === 'task-manager' ||
+        request?.isFakeRequest === true;
+
+      if (!isRunningInTaskManager && !request) {
+        throw new Error('Workflows cannot be executed without the user context');
+      }
+
       const { workflowExecution, repository: workflowExecutionRepository } =
         await createAndPersistWorkflowExecution(workflow, context, 'manual');
 
       const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
       const stepExecutionRepository = new StepExecutionRepository(esClient);
-
-      // AUTO-DETECT: Check if we're already running in a Task Manager context
-      const isRunningInTaskManager =
-        workflowExecution.triggeredBy === 'scheduled' ||
-        context.source === 'task-manager' ||
-        request?.isFakeRequest === true;
 
       if (isRunningInTaskManager) {
         // We're already in a task - execute directly without scheduling another task
@@ -425,8 +402,8 @@ export class WorkflowsExecutionEnginePlugin
         );
 
         await runWorkflow({
-          workflowRunId: workflowExecution.id!,
-          spaceId: workflowExecution.spaceId!,
+          workflowRunId: workflowExecution.id || '',
+          spaceId: workflowExecution.spaceId || 'default',
           workflowExecutionRepository,
           stepExecutionRepository,
           logsRepository,
@@ -436,34 +413,32 @@ export class WorkflowsExecutionEnginePlugin
           taskManager: plugins.taskManager,
           logger: this.logger,
           config: this.config,
-          fakeRequest: request,
+          fakeRequest: request || ({} as KibanaRequest), // In TaskManager context, request may be undefined
           dependencies,
         });
       } else {
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
-        await scheduleTaskWithRequest(
-          taskInstance,
-          workflowExecution,
-          workflow.id,
-          request,
-          workflowExecutionRepository,
-          'Workflows cannot be executed without the user context',
-          `Scheduling workflow task with user context for workflow ${workflow.id}`
+        await plugins.taskManager.schedule(taskInstance, { request: request as KibanaRequest });
+        this.logger.debug(
+          `Scheduling workflow task with user context for workflow ${workflow.id}, execution ${workflowExecution.id}`
         );
       }
 
       return {
-        workflowExecutionId: workflowExecution.id!,
+        workflowExecutionId: workflowExecution.id || '',
       };
     };
 
     const scheduleWorkflow = async (
       workflow: WorkflowExecutionEngineModel,
-      context: Record<string, any>,
+      context: Record<string, unknown>,
       request: KibanaRequest
     ) => {
-      const { workflowExecution, repository: workflowExecutionRepository } =
-        await createAndPersistWorkflowExecution(workflow, context, 'alert');
+      const { workflowExecution } = await createAndPersistWorkflowExecution(
+        workflow,
+        context,
+        'alert'
+      );
 
       // Always schedule a task (never execute directly)
       const taskInstance = createTaskInstance(
@@ -471,37 +446,39 @@ export class WorkflowsExecutionEnginePlugin
         generateExecutionTaskScope(workflowExecution as EsWorkflowExecution)
       );
 
-      await scheduleTaskWithRequest(
-        taskInstance,
-        workflowExecution,
-        workflow.id,
-        request,
-        workflowExecutionRepository,
-        'Workflows cannot be scheduled without the user context'
+      await plugins.taskManager.schedule(taskInstance, { request });
+      this.logger.debug(
+        `Scheduling workflow task with user context for workflow ${workflow.id}, execution ${workflowExecution.id}`
       );
 
       return {
-        workflowExecutionId: workflowExecution.id!,
+        workflowExecutionId: workflowExecution.id || '',
       };
     };
 
     const executeWorkflowStep = async (
       workflow: WorkflowExecutionEngineModel,
       stepId: string,
-      contextOverride: Record<string, any>,
-      request?: any
+      contextOverride: Record<string, unknown>,
+      request?: KibanaRequest | undefined
     ): Promise<ExecuteWorkflowStepResponse> => {
+      // Check if request is required before creating execution
+      // Workflow steps require user context to run with proper permissions
+      if (!request) {
+        throw new Error('Workflow steps cannot be executed without the user context');
+      }
+
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
 
       // Get ES client and create repository for this execution
       const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-      const context: Record<string, any> = {
+      const context: Record<string, unknown> = {
         contextOverride,
       };
 
-      const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
+      const triggeredBy = (context.triggeredBy as string | undefined) || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
         spaceId: workflow.spaceId,
@@ -513,7 +490,7 @@ export class WorkflowsExecutionEnginePlugin
         context,
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
-        createdBy: context.createdBy || '', // TODO: set if available
+        createdBy: (context.createdBy as string | undefined) || '', // TODO: set if available
         triggeredBy, // <-- new field for scheduled workflows
       };
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
@@ -535,24 +512,14 @@ export class WorkflowsExecutionEnginePlugin
 
       // Use Task Manager's first-class API key support by passing the request
       // This ensures the step runs with the user's permissions, not kibana_system
-      if (request) {
-        this.logger.debug(
-          `Scheduling workflow step task with user context for workflow ${workflow.id}, step ${stepId}`
-        );
-        await plugins.taskManager.schedule(taskInstance, { request });
-      } else {
-        this.logger.debug(
-          `Workflow with execution id ${workflowExecution.id} does not have a request, aborting`
-        );
-        await workflowExecutionRepository.updateWorkflowExecution({
-          id: workflowExecution.id,
-          status: ExecutionStatus.FAILED,
-          error: 'Workflow steps cannot be executed without the user context',
-        });
-      }
+      // At this point, request is guaranteed to exist due to the early check above
+      this.logger.debug(
+        `Scheduling workflow step task with user context for workflow ${workflow.id}, step ${stepId}`
+      );
+      await plugins.taskManager.schedule(taskInstance, { request });
 
       return {
-        workflowExecutionId: workflowExecution.id!,
+        workflowExecutionId: workflowExecution.id || '',
       };
     };
 
