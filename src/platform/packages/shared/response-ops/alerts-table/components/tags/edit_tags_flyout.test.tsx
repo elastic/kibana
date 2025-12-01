@@ -15,7 +15,7 @@ import { EditTagsFlyout } from './edit_tags_flyout';
 
 describe('EditTagsFlyout', () => {
   const mockAlert = {
-    id: 'alert-1',
+    _id: 'alert-1',
     version: 'v1',
     _index: 'test-index',
     title: 'Test Alert',
