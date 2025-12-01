@@ -37,8 +37,6 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
       cy.task('esArchiverLoad', { archiveName: 'network' });
       login();
       visitWithTimeRange(ENTITY_ANALYTICS_URL);
-      cy.get(ANOMALIES_TABLE).should('be.visible');
-      waitForAnomaliesToBeLoaded();
     });
 
     after(() => {
@@ -46,25 +44,38 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
     });
 
     it('should enable a job and renders the table with pagination', () => {
-      // Enables the job and perform checks
-      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 })
-        .eq(5)
-        .within(() => {
-          enableJob();
-          cy.get(ANOMALIES_TABLE_ENABLE_JOB_LOADER).should('be.visible');
-          cy.get(ANOMALIES_TABLE_COUNT_COLUMN).should('include.text', '0');
-        });
+      // Skip this test if entityThreatHuntingEnabled feature flag is enabled
+      // When enabled, the page redirects to threat hunting page which doesn't have the anomalies table
+      cy.url().then((url) => {
+        if (url.includes('entity_analytics_threat_hunting')) {
+          cy.log('Skipping test: entityThreatHuntingEnabled feature flag is enabled');
+          return;
+        }
 
-      // Checks pagination
-      cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 }).should('have.length', 10);
+        // Verify we're on the correct page and the anomalies table is visible
+        cy.get(ANOMALIES_TABLE).should('be.visible');
+        waitForAnomaliesToBeLoaded();
 
-      // navigates to next page
-      navigateToNextPage();
-      cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 10);
+        // Enables the job and perform checks
+        cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 })
+          .eq(5)
+          .within(() => {
+            enableJob();
+            cy.get(ANOMALIES_TABLE_ENABLE_JOB_LOADER).should('be.visible');
+            cy.get(ANOMALIES_TABLE_COUNT_COLUMN).should('include.text', '0');
+          });
 
-      // updates rows per page to 25 items
-      setRowsPerPageTo(25);
-      cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 25);
+        // Checks pagination
+        cy.get(ANOMALIES_TABLE_ROWS, { timeout: 120000 }).should('have.length', 10);
+
+        // navigates to next page
+        navigateToNextPage();
+        cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 10);
+
+        // updates rows per page to 25 items
+        setRowsPerPageTo(25);
+        cy.get(ANOMALIES_TABLE_ROWS).should('have.length', 25);
+      });
     });
   });
 });
