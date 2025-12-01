@@ -66,6 +66,10 @@ export const registerCreateScriptRoute = (
           output: 'stream',
           maxBytes: endpointContext.serverConfig.maxEndpointScriptFileSize,
         },
+        availability: {
+          since: '9.4.0',
+          stability: 'stable',
+        },
       },
     })
     .addVersion(

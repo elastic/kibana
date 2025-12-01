@@ -20,7 +20,7 @@ const ScriptsLibraryAttributesSchemaV1 = schema.object({
   description: schema.maybe(schema.string()),
   instructions: schema.maybe(schema.string()),
   example: schema.maybe(schema.string()),
-  executable: schema.maybe(schema.string()),
+  pathToExecutable: schema.maybe(schema.string()),
   created_by: schema.string(),
   updated_by: schema.string(),
 });
@@ -45,13 +45,7 @@ export const scriptsLibrarySavedObjectType: SavedObjectsType = {
       description: { type: 'keyword' },
       instructions: { type: 'keyword' },
       example: { type: 'keyword' },
-      executable: {
-        properties: {
-          linux: { type: 'keyword' },
-          macos: { type: 'keyword' },
-          windows: { type: 'keyword' },
-        },
-      },
+      pathToExecutable: { type: 'keyword' },
       created_by: { type: 'keyword' },
       updated_by: { type: 'keyword' },
       // FYI: the created_at/_by fields are auto populated by the so framework

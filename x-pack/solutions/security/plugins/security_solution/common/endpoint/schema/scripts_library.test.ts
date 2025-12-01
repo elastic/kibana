@@ -65,7 +65,9 @@ describe('Scripts library schemas', () => {
     it('should error if `name` is an empty string', () => {
       reqBody.name = '     ';
 
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
+        '[name]: Value can not be an empty string'
+      );
     });
 
     // ------------------------------------
@@ -91,15 +93,17 @@ describe('Scripts library schemas', () => {
 
     it('should error if `platform` includes invalid values', () => {
       // @ts-expect-error
-      reqBody.platform.push('foo');
+      reqBody.platform = ['foo'];
 
       expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
     });
 
     it('should error if `platform` includes duplicate values', () => {
-      reqBody.platform.push('linux', 'linux');
+      reqBody.platform = ['linux', 'linux'];
 
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
+        '[platform]: Duplicate values are not allowed'
+      );
     });
 
     // ------------------------------------
@@ -152,10 +156,13 @@ describe('Scripts library schemas', () => {
     // Field: `executable`
     // ------------------------------------
     const optionalStringFields: Array<
-      keyof Pick<CreateScriptRequestBody, 'description' | 'instructions' | 'example' | 'executable'>
-    > = ['description', 'instructions', 'example', 'executable'];
+      keyof Pick<
+        CreateScriptRequestBody,
+        'description' | 'instructions' | 'example' | 'pathToExecutable'
+      >
+    > = ['description', 'instructions', 'example', 'pathToExecutable'];
 
-    it.each(optionalStringFields)('should accepts `%s` value', (field) => {
+    it.each(optionalStringFields)('should accept `%s` value', (field) => {
       reqBody[field] = 'some value';
 
       expect(() => CreateScriptRequestSchema.body.validate(reqBody)).not.toThrow();
@@ -177,7 +184,9 @@ describe('Scripts library schemas', () => {
     it.each(optionalStringFields)('should error if `%s` is an empty string', (field) => {
       reqBody[field] = '     ';
 
-      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow();
+      expect(() => CreateScriptRequestSchema.body.validate(reqBody)).toThrow(
+        `[${field}]: Value can not be an empty string`
+      );
     });
   });
 });

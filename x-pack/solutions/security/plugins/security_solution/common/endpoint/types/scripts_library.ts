@@ -23,7 +23,7 @@ export interface EndpointScript {
   instructions?: string;
   example?: string;
   /** If the file is an archive, this property would hold the file path in that archive to be executed */
-  executable?: string;
+  pathToExecutable?: string;
   createdBy: string;
   createdAt: string;
   updatedBy: string;

@@ -113,7 +113,7 @@ export const ACTION_STATE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/state`;
 export const ORPHAN_ACTIONS_SPACE_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/action/_orphan_actions_space`;
 
 /** Scripts Library */
-export const SCRIPTS_LIBRARY_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/scripts_library`;
+export const SCRIPTS_LIBRARY_ROUTE = `${BASE_ENDPOINT_ROUTE}/scripts_library`;
 export const SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE = `${SCRIPTS_LIBRARY_ROUTE}/{script_id}/download`;
 
 /** Endpoint Agent Routes */

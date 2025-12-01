@@ -73,7 +73,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     description,
     instructions,
     requiresInput,
-    executable,
+    pathToExecutable,
   }: Omit<CreateScriptRequestBody, 'file'>): ScriptsLibrarySavedObjectAttributes {
     return {
       id: '',
@@ -84,7 +84,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       description,
       instructions,
       example,
-      executable,
+      pathToExecutable,
       created_by: '',
       updated_by: '',
     };
@@ -102,7 +102,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       description,
       instructions,
       requires_input: requiresInput = false,
-      executable,
+      pathToExecutable,
       created_by: createdBy,
       updated_by: updatedBy,
     },
@@ -118,7 +118,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       description,
       instructions,
       example,
-      executable,
+      pathToExecutable,
       createdBy,
       updatedBy,
       createdAt,
@@ -164,7 +164,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
         error,
       });
 
-      // attempt to delete the file record since we encountered an error during uplaod fo the file
+      // attempt to delete the file record since we encountered an error during upload fo the file
       // Best effort being done here. If it fails, then just log the error since there is nothing else we can do.
       await fileStorage.delete().catch((deleteError) => {
         logger.error(

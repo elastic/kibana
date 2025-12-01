@@ -48,7 +48,7 @@ components:
         createdBy:
           type: string
           example: elastic
-        createAt:
+        createdAt:
           type: string
           format: date-time
         updatedBy:
