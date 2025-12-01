@@ -29,6 +29,7 @@ import {
   type AttachmentFiltersState,
 } from './attachment_filters';
 import { AttachmentsTable } from './attachment_table';
+import { ConfirmAttachmentModal } from './confirm_attachment_modal';
 
 export function AddAttachmentFlyout({
   entityId,
@@ -54,6 +55,7 @@ export function AddAttachmentFlyout({
   const [filters, setFilters] = useState<AttachmentFiltersState>(DEFAULT_ATTACHMENT_FILTERS);
   const [selectedAttachments, setSelectedAttachments] = useState<Attachment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
   const attachmentSuggestionsFetch = useStreamsAppFetch(
     ({ signal }) => {
@@ -154,7 +156,6 @@ export function AddAttachmentFlyout({
             loading={attachmentSuggestionsFetch.loading}
             selectedAttachments={selectedAttachments}
             setSelectedAttachments={setSelectedAttachments}
-            showActions={false}
             dataTestSubj="streamsAppAddAttachmentFlyoutAttachmentsTable"
           />
         </EuiFlexGroup>
@@ -189,14 +190,7 @@ export function AddAttachmentFlyout({
                   isLoading={isLoading}
                   disabled={selectedAttachments.length === 0}
                   data-test-subj="streamsAppAddAttachmentFlyoutAddAttachmentsButton"
-                  onClick={async () => {
-                    setIsLoading(true);
-                    try {
-                      await onAddAttachments(selectedAttachments);
-                    } finally {
-                      setIsLoading(false);
-                    }
-                  }}
+                  onClick={() => setIsConfirmModalVisible(true)}
                 >
                   {i18n.translate('xpack.streams.addAttachmentFlyout.addToStreamButtonLabel', {
                     defaultMessage: 'Add to stream',
@@ -207,6 +201,23 @@ export function AddAttachmentFlyout({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
+      {isConfirmModalVisible && (
+        <ConfirmAttachmentModal
+          attachments={selectedAttachments}
+          action="link"
+          isLoading={isLoading}
+          onCancel={() => setIsConfirmModalVisible(false)}
+          onConfirm={async () => {
+            setIsLoading(true);
+            try {
+              await onAddAttachments(selectedAttachments);
+            } finally {
+              setIsLoading(false);
+              setIsConfirmModalVisible(false);
+            }
+          }}
+        />
+      )}
     </EuiFlyout>
   );
 }

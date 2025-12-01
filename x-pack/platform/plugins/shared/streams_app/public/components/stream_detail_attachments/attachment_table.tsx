@@ -19,10 +19,33 @@ import { ATTACHMENT_TYPE_CONFIG, AttachmentTypeBadge } from './attachment_type_b
 import { getAttachmentUrl } from './get_attachment_url';
 import { useTimefilter } from '../../hooks/use_timefilter';
 
+interface BaseAttachmentsTableProps {
+  entityId?: string;
+  loading: boolean;
+  attachments: Attachment[] | undefined;
+  compact?: boolean;
+  selectedAttachments?: Attachment[];
+  setSelectedAttachments?: (attachments: Attachment[]) => void;
+  onUnlinkAttachment?: (attachment: Attachment) => void;
+  dataTestSubj?: string;
+}
+
+interface WithActionsProps extends BaseAttachmentsTableProps {
+  showActions: true;
+  onViewDetails: (attachment: Attachment) => void;
+}
+
+interface WithoutActionsProps extends BaseAttachmentsTableProps {
+  showActions?: false;
+  onViewDetails?: never;
+}
+
+type AttachmentsTableProps = WithActionsProps | WithoutActionsProps;
+
 export function AttachmentsTable({
   attachments,
   compact = false,
-  showActions = true,
+  showActions = false,
   selectedAttachments,
   setSelectedAttachments,
   onUnlinkAttachment,
@@ -30,18 +53,7 @@ export function AttachmentsTable({
   loading,
   entityId,
   dataTestSubj,
-}: {
-  entityId?: string;
-  loading: boolean;
-  attachments: Attachment[] | undefined;
-  compact?: boolean;
-  showActions?: boolean;
-  selectedAttachments?: Attachment[];
-  setSelectedAttachments?: (attachments: Attachment[]) => void;
-  onUnlinkAttachment?: (attachment: Attachment) => void;
-  onViewDetails: (attachment: Attachment) => void;
-  dataTestSubj?: string;
-}) {
+}: AttachmentsTableProps) {
   const {
     core: { application },
     services: { telemetryClient },
@@ -85,7 +97,7 @@ export function AttachmentsTable({
           aria-label={i18n.translate('xpack.streams.attachmentTable.detailsButtonAriaLabel', {
             defaultMessage: 'View details',
           })}
-          onClick={() => onViewDetails(attachment)}
+          onClick={() => onViewDetails?.(attachment)}
         />
       ),
     };
@@ -104,7 +116,7 @@ export function AttachmentsTable({
           }),
           type: 'icon',
           icon: 'tableDensityExpanded',
-          onClick: (attachment) => onViewDetails(attachment),
+          onClick: (attachment) => onViewDetails?.(attachment),
           'data-test-subj': 'streamsAppAttachmentSeeDetailsAction',
         },
         {

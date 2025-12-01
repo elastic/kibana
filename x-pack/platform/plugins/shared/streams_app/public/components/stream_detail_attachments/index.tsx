@@ -34,6 +34,7 @@ import {
 } from './attachment_filters';
 import { AttachmentsTable } from './attachment_table';
 import { AttachmentsEmptyPrompt } from './attachments_empty_prompt';
+import { ConfirmAttachmentModal } from './confirm_attachment_modal';
 
 export function StreamDetailAttachments({
   definition,
@@ -65,6 +66,7 @@ export function StreamDetailAttachments({
   });
 
   const [isUnlinkLoading, setIsUnlinkLoading] = useState(false);
+  const [attachmentsToUnlink, setAttachmentsToUnlink] = useState<Attachment[]>([]);
   const linkedAttachments = useMemo(() => {
     return attachmentsFetch.value?.attachments ?? [];
   }, [attachmentsFetch.value?.attachments]);
@@ -94,10 +96,10 @@ export function StreamDetailAttachments({
   };
 
   const handleUnlinkAttachments = useCallback(
-    async (attachmentsToUnlink: Attachment[]) => {
+    async (attachments: Attachment[]) => {
       try {
         setIsUnlinkLoading(true);
-        await removeAttachments(attachmentsToUnlink);
+        await removeAttachments(attachments);
         attachmentsFetch.refresh();
         setSelectedAttachments([]);
       } finally {
@@ -200,7 +202,10 @@ export function StreamDetailAttachments({
                           key="unlink"
                           icon="unlink"
                           disabled={isUnlinkLoading}
-                          onClick={() => handleUnlinkAttachments(selectedAttachments)}
+                          onClick={() => {
+                            setAttachmentsToUnlink(selectedAttachments);
+                            setIsSelectionPopoverOpen(false);
+                          }}
                         >
                           {i18n.translate(
                             'xpack.streams.streamDetailAttachments.unlinkAttachmentsLabel',
@@ -240,11 +245,12 @@ export function StreamDetailAttachments({
               setSelectedAttachments={canLinkAttachments ? setSelectedAttachments : undefined}
               onUnlinkAttachment={
                 canLinkAttachments
-                  ? (attachment) => handleUnlinkAttachments([attachment])
+                  ? (attachment) => setAttachmentsToUnlink([attachment])
                   : undefined
               }
               onViewDetails={setDetailsAttachment}
               dataTestSubj="streamsAppStreamDetailAttachmentsTable"
+              showActions={true}
             />
           </EuiFlexItem>
         </>
@@ -271,11 +277,23 @@ export function StreamDetailAttachments({
           onUnlink={
             canLinkAttachments
               ? () => {
-                  handleUnlinkAttachments([detailsAttachment]);
-                  setDetailsAttachment(null);
+                  setAttachmentsToUnlink([detailsAttachment]);
                 }
               : undefined
           }
+        />
+      )}
+      {attachmentsToUnlink.length > 0 && (
+        <ConfirmAttachmentModal
+          attachments={attachmentsToUnlink}
+          action="unlink"
+          isLoading={isUnlinkLoading}
+          onCancel={() => setAttachmentsToUnlink([])}
+          onConfirm={async () => {
+            await handleUnlinkAttachments(attachmentsToUnlink);
+            setAttachmentsToUnlink([]);
+            setDetailsAttachment(null);
+          }}
         />
       )}
     </EuiFlexGroup>
