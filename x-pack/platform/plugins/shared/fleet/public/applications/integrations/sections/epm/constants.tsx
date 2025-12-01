@@ -131,7 +131,7 @@ export const AssetTitleMap: Record<
     defaultMessage: 'Rules',
   }),
   esql_view: i18n.translate('xpack.fleet.epm.assetTitles.esqlViews', {
-    defaultMessage: 'ESQL views',
+    defaultMessage: 'ES|QL views',
   }),
 };
 
