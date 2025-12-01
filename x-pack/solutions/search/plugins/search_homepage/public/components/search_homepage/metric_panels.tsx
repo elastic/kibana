@@ -123,7 +123,7 @@ const MetricPanelEmpty = ({ type }: { type: MetricPanelType }) => {
     synonyms: {
       imageUrl: `${assetBasePath}/search_relevance.svg`,
       metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.synonyms.desc', {
-        defaultMessage: 'Improve the accuravy and comprehensiveness of your search application.',
+        defaultMessage: 'Improve the accuracy and comprehensiveness of your search application.',
       }),
       createText: i18n.translate('xpack.searchHomepage.metricPanels.empty.synonyms.create', {
         defaultMessage: 'Get started',

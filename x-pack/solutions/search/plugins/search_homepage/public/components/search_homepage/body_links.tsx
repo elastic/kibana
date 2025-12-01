@@ -15,7 +15,9 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 interface BodyLink {
   category?: string;
@@ -153,10 +155,11 @@ const BODY_LINKS: BodyLink[] = [
 ];
 
 const BodyLink: React.FC<BodyLink> = ({ title, description, link, category }: BodyLink) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup
       direction="column"
-      css={({ euiTheme }) => ({
+      css={css({
         minHeight: `${euiTheme.base * 12}px`,
       })}
     >
