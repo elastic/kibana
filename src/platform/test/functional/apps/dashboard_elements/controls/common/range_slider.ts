@@ -9,7 +9,6 @@
 
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import expect from '@kbn/expect';
-import { asyncForEach } from '@kbn/std';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
