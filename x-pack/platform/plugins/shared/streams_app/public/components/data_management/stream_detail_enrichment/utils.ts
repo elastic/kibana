@@ -252,7 +252,6 @@ export const getFormStateFromActionStep = (
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
-      where: 'where' in restStep ? restStep.where : ALWAYS_CONDITION,
       ...restStep,
     });
   }
@@ -417,10 +416,7 @@ export const convertFormStateToProcessor = (
           ignore_failure,
           ignore_missing,
           description,
-          where:
-            'where' in formState && !isAlwaysCondition(formState.where)
-              ? formState.where
-              : undefined,
+          where: 'where' in formState ? formState.where : undefined,
         } as ConvertProcessor,
       };
     }
