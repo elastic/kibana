@@ -81,7 +81,7 @@ describe('Slack action params validation', () => {
         subActionParams: { channels: ['general'], text: 'some text' },
       };
 
-      expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
         errors: {
           text: [],
           channels: [],
@@ -95,7 +95,7 @@ describe('Slack action params validation', () => {
         subActionParams: { channels: ['general'], channelIds: ['general'], text: 'some text' },
       };
 
-      expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
         errors: {
           text: [],
           channels: [],
@@ -109,7 +109,7 @@ describe('Slack action params validation', () => {
         subActionParams: { text: 'some text' },
       };
 
-      expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
         errors: {
           text: [],
           channels: ['Channel ID is required.'],
@@ -123,7 +123,7 @@ describe('Slack action params validation', () => {
         subActionParams: { channels: ['general'] },
       };
 
-      expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
         errors: {
           text: ['Message is required.'],
           channels: [],
@@ -137,7 +137,7 @@ describe('Slack action params validation', () => {
         subActionParams: { channels: ['general'], text: '' },
       };
 
-      expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
         errors: {
           text: ['Message is required.'],
           channels: [],
@@ -153,7 +153,7 @@ describe('Slack action params validation', () => {
         subActionParams: { channels: ['general'], text: JSON.stringify(testBlock) },
       };
 
-      expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
         errors: {
           text: [],
           channels: [],
@@ -171,7 +171,7 @@ describe('Slack action params validation', () => {
         },
       };
 
-      expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
         errors: {
           text: [],
           channels: [],
@@ -185,7 +185,7 @@ describe('Slack action params validation', () => {
         subActionParams: { text: JSON.stringify(testBlock) },
       };
 
-      expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
         errors: {
           text: [],
           channels: ['Channel ID is required.'],
@@ -199,7 +199,7 @@ describe('Slack action params validation', () => {
         subActionParams: { channels: ['general'] },
       };
 
-      expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
         errors: {
           text: ['Message is required.'],
           channels: [],
@@ -213,7 +213,7 @@ describe('Slack action params validation', () => {
         subActionParams: { channels: ['general'], text: '' },
       };
 
-      expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
         errors: {
           text: ['Message is required.'],
           channels: [],
@@ -227,7 +227,7 @@ describe('Slack action params validation', () => {
         subActionParams: { channels: ['general'], text: 'abcd' },
       };
 
-      expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
         errors: {
           text: ['Block kit must be valid JSON.'],
           channels: [],
@@ -241,7 +241,7 @@ describe('Slack action params validation', () => {
         subActionParams: { channels: ['general'], text: JSON.stringify({ foo: 'bar' }) },
       };
 
-      expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
         errors: {
           text: ['JSON must contain field "blocks".'],
           channels: [],

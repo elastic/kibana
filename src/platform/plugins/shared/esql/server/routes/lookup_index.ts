@@ -9,6 +9,13 @@
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import {
+  LOOKUP_INDEX_CREATE_ROUTE,
+  LOOKUP_INDEX_PRIVILEGES_ROUTE,
+  LOOKUP_INDEX_RECREATE_ROUTE,
+  LOOKUP_INDEX_UPDATE_ROUTE,
+  LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE,
+} from '@kbn/esql-types';
 
 export const registerLookupIndexRoutes = (
   router: IRouter,
@@ -16,7 +23,7 @@ export const registerLookupIndexRoutes = (
 ) => {
   router.post(
     {
-      path: '/internal/esql/lookup_index/{indexName}/update',
+      path: `${LOOKUP_INDEX_UPDATE_ROUTE}/{indexName}`,
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -59,7 +66,7 @@ export const registerLookupIndexRoutes = (
 
   router.post(
     {
-      path: '/internal/esql/lookup_index/{indexName}',
+      path: `${LOOKUP_INDEX_CREATE_ROUTE}/{indexName}`,
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -99,9 +106,56 @@ export const registerLookupIndexRoutes = (
     }
   );
 
+  router.post(
+    {
+      path: `${LOOKUP_INDEX_RECREATE_ROUTE}/{indexName}`,
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
+      options: {
+        description: 'Recreates an index with lookup mode, used to reset the mapping of the index.',
+      },
+    },
+    async (requestHandlerContext, request, response) => {
+      try {
+        const core = await requestHandlerContext.core;
+        const client = core.elasticsearch.client.asCurrentUser;
+
+        const indexName = request.params.indexName;
+
+        await client.indices.delete({
+          index: indexName,
+          ignore_unavailable: true,
+        });
+
+        const result = await client.indices.create({
+          index: indexName,
+          settings: {
+            mode: 'lookup',
+          },
+        });
+
+        return response.ok({
+          body: result,
+        });
+      } catch (error) {
+        logger.get().debug(error);
+        throw error;
+      }
+    }
+  );
+
   router.get(
     {
-      path: '/internal/esql/lookup_index/privileges',
+      path: LOOKUP_INDEX_PRIVILEGES_ROUTE,
       validate: {
         query: schema.object({ indexName: schema.maybe(schema.string()) }),
       },
@@ -126,7 +180,7 @@ export const registerLookupIndexRoutes = (
           index: [
             {
               names: ['*', ...indices],
-              privileges: ['create_index', 'read', 'write'],
+              privileges: ['create_index', 'read', 'write', 'delete_index'],
             },
           ],
         });
@@ -134,6 +188,43 @@ export const registerLookupIndexRoutes = (
         return res.ok({
           body: indexPrivileges,
         });
+      } catch (error) {
+        logger.get().debug(error);
+        throw error;
+      }
+    }
+  );
+
+  router.put(
+    {
+      path: `${LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE}/{indexName}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          properties: schema.object({}, { unknowns: 'allow' }),
+        }),
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    async (requestHandlerContext, request, response) => {
+      const core = await requestHandlerContext.core;
+      const esClient = core.elasticsearch.client.asCurrentUser;
+
+      const { indexName } = request.params;
+
+      try {
+        const responseBody = await esClient.indices.putMapping({
+          properties: request.body.properties,
+          index: indexName,
+        });
+        return response.ok({ body: responseBody });
       } catch (error) {
         logger.get().debug(error);
         throw error;

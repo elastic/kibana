@@ -1,0 +1,10 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/workplaceai-api-keys-components",
+  "owner": [
+    "@elastic/search-kibana",
+    "@elastic/workchat-eng"
+  ],
+  "group": "workplaceai",
+  "visibility": "private"
+}

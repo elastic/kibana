@@ -28,44 +28,24 @@ export const KnowledgeBaseResponse = z.object({
   success: z.boolean().optional(),
 });
 
-export type CreateKnowledgeBaseRequestQuery = z.infer<typeof CreateKnowledgeBaseRequestQuery>;
-export const CreateKnowledgeBaseRequestQuery = z.object({
+export type KnowledgeBaseResponse400 = z.infer<typeof KnowledgeBaseResponse400>;
+export const KnowledgeBaseResponse400 = z.object({
   /**
-   * ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
+   * The HTTP status code of the error.
    */
-  modelId: z.string().optional(),
+  statusCode: z.number().optional(),
   /**
-   * Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
+   * A short description of the error.
    */
-  ignoreSecurityLabs: BooleanFromString.optional().default(false),
+  error: z.string().optional(),
+  /**
+   * A detailed error message.
+   */
+  message: z.string().optional(),
 });
-export type CreateKnowledgeBaseRequestQueryInput = z.input<typeof CreateKnowledgeBaseRequestQuery>;
 
-export type CreateKnowledgeBaseRequestParams = z.infer<typeof CreateKnowledgeBaseRequestParams>;
-export const CreateKnowledgeBaseRequestParams = z.object({
-  /**
-   * The KnowledgeBase `resource` value.
-   */
-  resource: z.string().optional(),
-});
-export type CreateKnowledgeBaseRequestParamsInput = z.input<
-  typeof CreateKnowledgeBaseRequestParams
->;
-
-export type CreateKnowledgeBaseResponse = z.infer<typeof CreateKnowledgeBaseResponse>;
-export const CreateKnowledgeBaseResponse = KnowledgeBaseResponse;
-
-export type ReadKnowledgeBaseRequestParams = z.infer<typeof ReadKnowledgeBaseRequestParams>;
-export const ReadKnowledgeBaseRequestParams = z.object({
-  /**
-   * The KnowledgeBase `resource` value.
-   */
-  resource: z.string().optional(),
-});
-export type ReadKnowledgeBaseRequestParamsInput = z.input<typeof ReadKnowledgeBaseRequestParams>;
-
-export type ReadKnowledgeBaseResponse = z.infer<typeof ReadKnowledgeBaseResponse>;
-export const ReadKnowledgeBaseResponse = z.object({
+export type KnowledgeBaseReadResponse200 = z.infer<typeof KnowledgeBaseReadResponse200>;
+export const KnowledgeBaseReadResponse200 = z.object({
   /**
    * Indicates if the ELSER model exists for the KnowledgeBase.
    */
@@ -95,3 +75,60 @@ export const ReadKnowledgeBaseResponse = z.object({
    */
   product_documentation_status: z.string().optional(),
 });
+
+export type CreateKnowledgeBaseRequestQuery = z.infer<typeof CreateKnowledgeBaseRequestQuery>;
+export const CreateKnowledgeBaseRequestQuery = z.object({
+  /**
+   * ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
+   */
+  modelId: z.string().optional(),
+  /**
+   * Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
+   */
+  ignoreSecurityLabs: BooleanFromString.optional().default(false),
+});
+export type CreateKnowledgeBaseRequestQueryInput = z.input<typeof CreateKnowledgeBaseRequestQuery>;
+
+export type CreateKnowledgeBaseRequestParams = z.infer<typeof CreateKnowledgeBaseRequestParams>;
+export const CreateKnowledgeBaseRequestParams = z.object({
+  /**
+   * The KnowledgeBase `resource` value.
+   */
+  resource: z.string(),
+});
+export type CreateKnowledgeBaseRequestParamsInput = z.input<
+  typeof CreateKnowledgeBaseRequestParams
+>;
+
+export type CreateKnowledgeBaseResponse = z.infer<typeof CreateKnowledgeBaseResponse>;
+export const CreateKnowledgeBaseResponse = KnowledgeBaseResponse;
+
+export type GetKnowledgeBaseResponse = z.infer<typeof GetKnowledgeBaseResponse>;
+export const GetKnowledgeBaseResponse = KnowledgeBaseReadResponse200;
+export type PostKnowledgeBaseRequestQuery = z.infer<typeof PostKnowledgeBaseRequestQuery>;
+export const PostKnowledgeBaseRequestQuery = z.object({
+  /**
+   * ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
+   */
+  modelId: z.string().optional(),
+  /**
+   * Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
+   */
+  ignoreSecurityLabs: BooleanFromString.optional().default(false),
+});
+export type PostKnowledgeBaseRequestQueryInput = z.input<typeof PostKnowledgeBaseRequestQuery>;
+
+export type PostKnowledgeBaseResponse = z.infer<typeof PostKnowledgeBaseResponse>;
+export const PostKnowledgeBaseResponse = KnowledgeBaseResponse;
+
+export type ReadKnowledgeBaseRequestParams = z.infer<typeof ReadKnowledgeBaseRequestParams>;
+export const ReadKnowledgeBaseRequestParams = z.object({
+  /**
+   * The KnowledgeBase `resource` value.
+   */
+  resource: z.string(),
+});
+export type ReadKnowledgeBaseRequestParamsInput = z.input<typeof ReadKnowledgeBaseRequestParams>;
+
+export type ReadKnowledgeBaseResponse = z.infer<typeof ReadKnowledgeBaseResponse>;
+export const ReadKnowledgeBaseResponse = KnowledgeBaseReadResponse200;

@@ -72,7 +72,6 @@ function ActiveTour({ state, tourManager }: { state: TourState; tourManager: Tou
       stepsTotal={state.steps.length}
       content={currentStep.content}
       anchorPosition={'leftCenter'}
-      zIndex={10000 /* we want tour to be on top of other chrome popover */}
       panelProps={{
         'data-test-subj': `nav-tour-step-${currentStep.id}`,
       }}

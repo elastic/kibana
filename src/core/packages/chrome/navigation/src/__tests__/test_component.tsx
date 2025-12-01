@@ -12,7 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { Navigation } from '../components/navigation';
 import type { MenuItem, NavigationStructure, SecondaryMenuItem, SideNavLogo } from '../../types';
-import { usePreventLinkNavigation } from '../hooks/prevent_link_navigation';
+import { usePreventLinkNavigation } from '../hooks/use_prevent_link_navigation';
 
 interface TestComponentProps {
   isCollapsed?: boolean;

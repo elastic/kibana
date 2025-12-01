@@ -5,13 +5,13 @@
  * 2.0.
  */
 import type { TEcsFields, TMetadataFields, TOtelFields } from '../../../common';
-import { FieldMetadata } from '../../../common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { FieldsMetadataClient } from './fields_metadata_client';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
 import { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
 import { OtelFieldsRepository } from './repositories/otel_fields_repository';
+import { FieldMetadata } from '../../../common/fields_metadata/models/field_metadata';
 
 const ecsFields = {
   '@timestamp': {

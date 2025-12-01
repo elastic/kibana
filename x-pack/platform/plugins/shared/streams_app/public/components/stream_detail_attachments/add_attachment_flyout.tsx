@@ -25,7 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import React, { useMemo, useState, useEffect } from 'react';
-import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
+import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { AttachmentsTable } from './attachment_table';
@@ -37,8 +37,8 @@ export function AddAttachmentFlyout({
   onClose,
 }: {
   entityId: string;
-  onAddAttachments: (attachments: SanitizedDashboardAsset[]) => Promise<void>;
-  linkedAttachments: SanitizedDashboardAsset[];
+  onAddAttachments: (attachments: Attachment[]) => Promise<void>;
+  linkedAttachments: Attachment[];
   onClose: () => void;
 }) {
   const {
@@ -53,7 +53,7 @@ export function AddAttachmentFlyout({
   const [query, setQuery] = useState('');
 
   const [submittedQuery, setSubmittedQuery] = useState(query);
-  const [selectedAttachments, setSelectedAttachments] = useState<SanitizedDashboardAsset[]>([]);
+  const [selectedAttachments, setSelectedAttachments] = useState<Attachment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -62,14 +62,14 @@ export function AddAttachmentFlyout({
     return debounce(setSubmittedQuery, 150);
   }, []);
 
-  const dashboardSuggestionsFetch = useStreamsAppFetch(
+  const attachmentSuggestionsFetch = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient
-        .fetch('POST /internal/streams/{name}/dashboards/_suggestions', {
+        .fetch('POST /internal/streams/{streamName}/attachments/_suggestions', {
           signal,
           params: {
             path: {
-              name: entityId,
+              streamName: entityId,
             },
             query: {
               query: submittedQuery,
@@ -81,9 +81,9 @@ export function AddAttachmentFlyout({
         })
         .then(({ suggestions }) => {
           return {
-            dashboards: suggestions.filter((dashboard) => {
+            attachments: suggestions.filter((attachment) => {
               return !linkedAttachments.find(
-                (linkedAttachment) => linkedAttachment.id === dashboard.id
+                (linkedAttachment) => linkedAttachment.id === attachment.id
               );
             }),
           };
@@ -123,8 +123,8 @@ export function AddAttachmentFlyout({
   }, [linkedAttachments]);
 
   const allAttachments = useMemo(() => {
-    return dashboardSuggestionsFetch.value?.dashboards || [];
-  }, [dashboardSuggestionsFetch.value]);
+    return attachmentSuggestionsFetch.value?.attachments || [];
+  }, [attachmentSuggestionsFetch.value]);
 
   return (
     <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId}>
@@ -209,7 +209,7 @@ export function AddAttachmentFlyout({
           <AttachmentsTable
             entityId={entityId}
             attachments={allAttachments}
-            loading={dashboardSuggestionsFetch.loading}
+            loading={attachmentSuggestionsFetch.loading}
             selectedAttachments={selectedAttachments}
             setSelectedAttachments={setSelectedAttachments}
             dataTestSubj="streamsAppAddAttachmentFlyoutAttachmentsTable"

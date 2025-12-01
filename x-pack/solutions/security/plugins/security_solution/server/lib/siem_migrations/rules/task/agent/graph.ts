@@ -6,11 +6,14 @@
  */
 
 import { END, START, StateGraph } from '@langchain/langgraph';
+import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { getCreateSemanticQueryNode } from './nodes/create_semantic_query';
 import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
 import { migrateRuleConfigSchema, migrateRuleState } from './state';
 import { getTranslateRuleGraph } from './sub_graphs/translate_rule';
 import type { MigrateRuleConfig, MigrateRuleGraphParams, MigrateRuleState } from './types';
+import { getResolveDepsNode } from './nodes/resolve_dependencies_node/resolve_dependencies';
+import { getVendorRouter } from './edges/vendor_edge';
 
 export function getRuleMigrationAgent({
   model,
@@ -18,6 +21,7 @@ export function getRuleMigrationAgent({
   ruleMigrationsRetriever,
   logger,
   telemetryClient,
+  tools,
 }: MigrateRuleGraphParams) {
   const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({
     model,
@@ -26,6 +30,8 @@ export function getRuleMigrationAgent({
     telemetryClient,
   });
 
+  const resolveDepsToolNode = new ToolNode([tools.getRulesByName]);
+
   const translationSubGraph = getTranslateRuleGraph({
     model,
     esqlKnowledgeBase,
@@ -33,15 +39,27 @@ export function getRuleMigrationAgent({
     telemetryClient,
     logger,
   });
+  const resolveDependenciesNode = getResolveDepsNode({ model });
   const createSemanticQueryNode = getCreateSemanticQueryNode({ model });
 
   const siemMigrationAgentGraph = new StateGraph(migrateRuleState, migrateRuleConfigSchema)
     // Nodes
+    .addNode('resolveDependencies', resolveDependenciesNode)
     .addNode('createSemanticQuery', createSemanticQueryNode)
+    .addNode('resolveDepsTools', resolveDepsToolNode)
     .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
     .addNode('translationSubGraph', translationSubGraph)
     // Edges
-    .addEdge(START, 'createSemanticQuery')
+    .addConditionalEdges(START, getVendorRouter('qradar'), {
+      is_qradar: 'resolveDependencies',
+      is_not_qradar: 'createSemanticQuery',
+    })
+    // .addEdge(START, 'createSemanticQuery')
+    .addConditionalEdges('resolveDependencies', toolRouter, {
+      hasToolCalls: 'resolveDepsTools',
+      noToolCalls: 'createSemanticQuery',
+    })
+    .addEdge('resolveDepsTools', 'resolveDependencies')
     .addConditionalEdges('createSemanticQuery', skipPrebuiltRuleConditional, [
       'matchPrebuiltRule',
       'translationSubGraph',
@@ -70,3 +88,9 @@ const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
   }
   return 'translationSubGraph';
 };
+
+export function toolRouter(state: MigrateRuleState): string {
+  const messages = state.messages;
+  const lastMessage = messages.at(-1);
+  return lastMessage?.tool_calls?.length ? 'hasToolCalls' : 'noToolCalls';
+}

@@ -58,7 +58,7 @@ function generateId() {
   return uuidv4();
 }
 
-interface StarredQueryMetadata {
+export interface StarredQueryMetadata {
   queryString: string;
   createdAt: string;
   status: 'success' | 'warning' | 'error';

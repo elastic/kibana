@@ -70,6 +70,10 @@ export interface GenerateEsqlOptions {
    * Defaults to `3`
    * */
   maxRetries?: number;
+  /**
+   * Maximum row limit to use in generated ES|QL queries.
+   */
+  rowLimit?: number;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -81,13 +85,21 @@ export const generateEsql = async ({
   additionalInstructions,
   additionalContext,
   maxRetries = 3,
+  rowLimit,
   model,
   esClient,
   logger,
   events,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
   const docBase = await EsqlDocumentBase.load();
-  const graph = createNlToEsqlGraph({ model, esClient, logger, docBase, events });
+
+  const graph = createNlToEsqlGraph({
+    model,
+    esClient,
+    logger,
+    docBase,
+    events,
+  });
 
   return withActiveInferenceSpan(
     'GenerateEsqlGraph',
@@ -128,6 +140,7 @@ export const generateEsql = async ({
             maxRetries,
             additionalInstructions,
             additionalContext,
+            rowLimit,
           },
           {
             recursionLimit: 25,

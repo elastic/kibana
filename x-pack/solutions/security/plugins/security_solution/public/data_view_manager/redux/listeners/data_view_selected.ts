@@ -12,7 +12,7 @@ import type { RootState } from '../reducer';
 import { scopes } from '../reducer';
 import { selectDataViewAsync } from '../actions';
 import { sharedDataViewManagerSlice } from '../slices';
-import type { DataViewManagerScopeName } from '../../constants';
+import type { PageScope } from '../../constants';
 
 /**
  * Creates a Redux listener for handling data view selection logic in the data view manager.
@@ -31,7 +31,7 @@ import type { DataViewManagerScopeName } from '../../constants';
  * @returns An object with the action creator and effect for Redux middleware.
  */
 export const createDataViewSelectedListener = (dependencies: {
-  scope: DataViewManagerScopeName;
+  scope: PageScope;
   dataViews: DataViewsServicePublic;
 }) => {
   return {

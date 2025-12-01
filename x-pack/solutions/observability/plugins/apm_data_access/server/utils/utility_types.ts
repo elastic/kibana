@@ -44,11 +44,9 @@ export type KnownField = ValuesType<typeof CONCRETE_FIELDS>;
 type KnownSingleValuedField = Exclude<KnownField, KnownMultiValuedField>;
 type KnownMultiValuedField = ValuesType<typeof KNOWN_MULTI_VALUED_FIELDS>;
 
-export const KNOWN_SINGLE_VALUED_FIELDS = [...ALL_FIELDS].filter(
-  (field): field is KnownSingleValuedField => !KNOWN_MULTI_VALUED_FIELDS.includes(field as any)
+export const KNOWN_SINGLE_VALUED_FIELDS_SET = new Set<KnownField>(
+  [...ALL_FIELDS].filter((field) => !KNOWN_MULTI_VALUED_FIELDS.includes(field as any))
 );
-
-export const KNOWN_SINGLE_VALUED_FIELDS_SET = new Set<string>(KNOWN_SINGLE_VALUED_FIELDS);
 
 interface TypeOverrideMap {
   [APM_EVENT_FIELDS_MAP.SPAN_DURATION]: number;
@@ -92,3 +90,19 @@ export type UnflattenedKnownFields<T extends Record<string, any>> = DedotObject<
 export type FlattenedApmEvent = Record<KnownSingleValuedField | KnownMultiValuedField, unknown[]>;
 
 export type UnflattenedApmEvent = UnflattenedKnownFields<FlattenedApmEvent>;
+
+/**
+ * Validates whether the field record object contains all required fields. Throws an error
+ * if it does not.
+ */
+export function ensureRequiredApmFields(fields: Record<string, any>, required: string[]) {
+  const missingRequiredFields = required.filter((key) => {
+    const value = fields[key];
+
+    return value == null || (Array.isArray(value) && value.length === 0);
+  });
+
+  if (missingRequiredFields.length) {
+    throw new Error(`Missing required fields (${missingRequiredFields.join(', ')}) in event`);
+  }
+}

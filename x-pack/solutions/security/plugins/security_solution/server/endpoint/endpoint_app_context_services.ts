@@ -28,6 +28,7 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { installScriptsLibraryIndexTemplates } from './lib/scripts_library';
 import type { ReferenceDataClientInterface } from './lib/reference_data';
 import { ReferenceDataClient } from './lib/reference_data';
 import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
@@ -132,6 +133,17 @@ export class EndpointAppContextService {
 
     this.registerFleetExtensions();
     this.registerListsExtensions();
+
+    // Setup scripts library
+    if (this.startDependencies.experimentalFeatures.responseActionsScriptLibraryManagement) {
+      const scriptsLogger = this.createLogger('scriptsLibrarySetup');
+      installScriptsLibraryIndexTemplates({
+        esClient: this.getInternalEsClient(),
+        logger: scriptsLogger,
+      }).catch((e) => {
+        scriptsLogger.error(e);
+      });
+    }
   }
 
   public stop() {

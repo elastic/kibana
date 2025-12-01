@@ -5,20 +5,17 @@
  * 2.0.
  */
 
+import type { IScopedClusterClient } from '@kbn/core/server';
 import type {
   FindSLODefinitionsParams,
   FindSLODefinitionsResponse,
-  FindSLODefinitionsWithHealthResponse,
   Pagination,
 } from '@kbn/slo-schema';
-import {
-  findSloDefinitionsResponseSchema,
-  findSloDefinitionsWithHealthResponseSchema,
-} from '@kbn/slo-schema';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import { findSloDefinitionsResponseSchema } from '@kbn/slo-schema';
+import { keyBy } from 'lodash';
+import { computeHealth } from '../domain/services';
 import { IllegalArgumentError } from '../errors';
 import type { SLORepository } from './slo_repository';
-import { GetSLOHealth } from './get_slo_health';
 
 const MAX_PER_PAGE = 1000;
 const DEFAULT_PER_PAGE = 100;
@@ -30,41 +27,33 @@ export class FindSLODefinitions {
     private scopedClusterClient: IScopedClusterClient
   ) {}
 
-  public async execute(
-    params: FindSLODefinitionsParams
-  ): Promise<FindSLODefinitionsResponse | FindSLODefinitionsWithHealthResponse> {
-    const requestTags: string[] = params.tags?.split(',') ?? [];
+  public async execute(params: FindSLODefinitionsParams): Promise<FindSLODefinitionsResponse> {
+    const tags: string[] = params.tags?.split(',') ?? [];
 
-    const result = await this.repository.search(params.search ?? '', toPagination(params), {
-      includeOutdatedOnly: !!params.includeOutdatedOnly,
-      tags: requestTags,
-    });
+    const { results: definitions, ...result } = await this.repository.search(
+      params.search ?? '',
+      toPagination(params),
+      { includeOutdatedOnly: !!params.includeOutdatedOnly, tags }
+    );
 
     if (params.includeHealth) {
-      const getSLOHealth = new GetSLOHealth(this.scopedClusterClient);
-
-      const healthResponses = await getSLOHealth.execute({
-        list: result.results.map((item) => ({
-          sloId: item.id,
-          sloInstanceId: '*',
-          sloRevision: item.revision,
-          sloName: item.name,
-        })),
+      const healthResults = await computeHealth(definitions, {
+        scopedClusterClient: this.scopedClusterClient,
       });
 
-      const resultsWithHealth = result.results.map((slo) => {
-        const healthInfo = healthResponses.data.find((health) => health.sloId === slo.id);
+      const healthBySloId = keyBy(healthResults, (health) => health.id);
+      const definitionsWithHealth = definitions.map((definition) => {
         return {
-          ...slo,
-          health: healthInfo?.health,
+          ...definition,
+          health: healthBySloId[definition.id]?.health,
         };
       });
 
-      return findSloDefinitionsWithHealthResponseSchema.encode({
+      return findSloDefinitionsResponseSchema.encode({
         page: result.page,
         perPage: result.perPage,
         total: result.total,
-        results: resultsWithHealth,
+        results: definitionsWithHealth,
       });
     }
 
@@ -72,7 +61,7 @@ export class FindSLODefinitions {
       page: result.page,
       perPage: result.perPage,
       total: result.total,
-      results: result.results,
+      results: definitions,
     });
   }
 }
@@ -87,6 +76,6 @@ function toPagination(params: FindSLODefinitionsParams): Pagination {
 
   return {
     page: !isNaN(page) && page >= 1 ? page : DEFAULT_PAGE,
-    perPage: !isNaN(perPage) && perPage >= 1 ? perPage : DEFAULT_PER_PAGE,
+    perPage: !isNaN(perPage) && perPage >= 0 ? perPage : DEFAULT_PER_PAGE,
   };
 }

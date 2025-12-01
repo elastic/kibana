@@ -65,7 +65,13 @@ export const NoMatch = ({
 
   if (extensionsService.emptyListContent) {
     return extensionsService.emptyListContent.renderContent({
-      createIndexButton: <CreateIndexButton loadIndices={loadIndices} share={share} />,
+      createIndexButton: (
+        <CreateIndexButton
+          loadIndices={loadIndices}
+          share={share}
+          dataTestSubj="createIndexButtonEmptyList"
+        />
+      ),
     });
   }
 
