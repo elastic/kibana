@@ -12,18 +12,20 @@ import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
-const authSchema = z.object({
-  tokenUrl: z.url().meta({ label: i18n.OAUTH_TOKEN_URL_LABEL }),
-  clientId: z
-    .string()
-    .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
-    .meta({ label: i18n.OAUTH_CLIENT_ID_LABEL }),
-  scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
-  clientSecret: z
-    .string()
-    .min(1, { message: i18n.OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE })
-    .meta({ label: i18n.OAUTH_CLIENT_SECRET_LABEL, sensitive: true }),
-});
+const authSchema = z
+  .object({
+    tokenUrl: z.url().meta({ label: i18n.OAUTH_TOKEN_URL_LABEL }),
+    clientId: z
+      .string()
+      .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
+      .meta({ label: i18n.OAUTH_CLIENT_ID_LABEL }),
+    scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
+    clientSecret: z
+      .string()
+      .min(1, { message: i18n.OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE })
+      .meta({ label: i18n.OAUTH_CLIENT_SECRET_LABEL, sensitive: true }),
+  })
+  .meta({ label: i18n.OAUTH_LABEL });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 

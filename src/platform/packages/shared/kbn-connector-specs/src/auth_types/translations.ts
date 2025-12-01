@@ -79,6 +79,10 @@ export const NO_AUTH_LABEL = i18n.translate('connectorSpecs.authType.noAuth.labe
   defaultMessage: 'None',
 });
 
+export const OAUTH_LABEL = i18n.translate('connectorSpecs.oauth.label', {
+  defaultMessage: 'OAuth Client Credentials',
+});
+
 export const OAUTH_TOKEN_URL_LABEL = i18n.translate('connectorSpecs.oauthTokenUrl.label', {
   defaultMessage: 'Token URL',
 });
