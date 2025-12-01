@@ -65,7 +65,8 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
     fieldConstants.ERROR_CULPRIT_FIELD
   );
   const { field: messageField, value: messageValue } = getMessageFieldWithFallbacks(hitFlattened);
-  const { field: typeField, value: typeValue } = getLogExceptionTypeFieldWithFallback(hitFlattened);
+  const { field: typeField, originalValue: typeValue } =
+    getLogExceptionTypeFieldWithFallback(hitFlattened);
 
   const sectionDescription = useMemo(
     () =>

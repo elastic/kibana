@@ -19,5 +19,5 @@ const rankingOrder = [
 export const getLogExceptionTypeFieldWithFallback = (
   doc: Record<string, unknown> | LogDocumentOverview
 ) => {
-  return getLogFieldWithFallback(doc, rankingOrder);
+  return getLogFieldWithFallback(doc, rankingOrder, { includeOriginalValue: true });
 };
