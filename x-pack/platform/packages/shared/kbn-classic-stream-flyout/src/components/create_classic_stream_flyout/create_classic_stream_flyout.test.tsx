@@ -120,15 +120,21 @@ describe('CreateClassicStreamFlyout', () => {
       expect(getByTestId('templateSearch')).toBeInTheDocument();
     });
 
-    it('disables Next button when no template is selected', () => {
+    it('disables next step and Next button when no template is selected', () => {
       const { getByTestId } = renderFlyout();
+
+      const nextStep = getByTestId('createClassicStreamStep-nameAndConfirm');
+      expect(nextStep).toBeDisabled();
 
       const nextButton = getByTestId('nextButton');
       expect(nextButton).toBeDisabled();
     });
 
-    it('enables Next button when a template is selected', () => {
+    it('enables next step and Next button when a template is selected', () => {
       const { getByTestId } = renderFlyout({ selectedTemplate: 'template-1' });
+
+      const nextStep = getByTestId('createClassicStreamStep-nameAndConfirm');
+      expect(nextStep).toBeEnabled();
 
       const nextButton = getByTestId('nextButton');
       expect(nextButton).toBeEnabled();

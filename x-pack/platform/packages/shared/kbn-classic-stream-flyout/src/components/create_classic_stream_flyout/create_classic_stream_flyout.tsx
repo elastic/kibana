@@ -93,11 +93,12 @@ export const CreateClassicStreamFlyout = ({
           defaultMessage: 'Name and confirm',
         }),
         status: isFirstStep ? 'incomplete' : 'current',
+        disabled: !isNextButtonEnabled,
         onClick: goToNextStep,
         'data-test-subj': 'createClassicStreamStep-nameAndConfirm',
       },
     ],
-    [isFirstStep]
+    [isFirstStep, isNextButtonEnabled]
   );
 
   const renderCurrentStepContent = () => {
