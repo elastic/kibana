@@ -201,7 +201,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "{ sidebarWidth?: number | undefined; bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; applicationTopBarHeight?: number | undefined; applicationBottomBarHeight?: number | undefined; }"
+              "{ bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; sidebarWidth?: number | undefined; applicationTopBarHeight?: number | undefined; applicationBottomBarHeight?: number | undefined; }"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
             "deprecated": false,
@@ -254,7 +254,7 @@
           "\nConfiguration for the layout."
         ],
         "signature": [
-          "{ sidebarWidth?: number | undefined; bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; applicationTopBarHeight?: number | undefined; applicationBottomBarHeight?: number | undefined; }"
+          "{ bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; sidebarWidth?: number | undefined; applicationTopBarHeight?: number | undefined; applicationBottomBarHeight?: number | undefined; }"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
         "deprecated": false,

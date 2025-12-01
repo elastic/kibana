@@ -116,7 +116,7 @@ const ESQLEditorInternal = function ESQLEditor({
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
-  const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);
 
   const editorCommandDisposables = useRef(
@@ -205,7 +205,7 @@ const ESQLEditorInternal = function ESQLEditor({
         const abc = new AbortController();
         setAbortController(abc);
 
-        const currentValue = editor1.current?.getValue();
+        const currentValue = editorRef.current?.getValue();
         if (currentValue != null) {
           setCodeStateOnSubmission(currentValue);
         }
@@ -246,7 +246,7 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   const onCommentLine = useCallback(() => {
-    const currentSelection = editor1?.current?.getSelection();
+    const currentSelection = editorRef?.current?.getSelection();
     const startLineNumber = currentSelection?.startLineNumber;
     const endLineNumber = currentSelection?.endLineNumber;
     const edits = [];
@@ -267,7 +267,7 @@ const ESQLEditorInternal = function ESQLEditor({
         });
       }
       // executeEdits allows to keep edit in history
-      editor1.current?.executeEdits('comment', edits);
+      editorRef.current?.executeEdits('comment', edits);
     }
   }, []);
 
@@ -276,7 +276,7 @@ const ESQLEditorInternal = function ESQLEditor({
   }, [isLoading]);
 
   useEffect(() => {
-    if (editor1.current) {
+    if (editorRef.current) {
       if (code !== fixedQuery) {
         setCode(fixedQuery);
       }
@@ -305,16 +305,16 @@ const ESQLEditorInternal = function ESQLEditor({
   const showSuggestionsIfEmptyQuery = useCallback(() => {
     if (editorModel.current?.getValueLength() === 0) {
       setTimeout(() => {
-        editor1.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
+        editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', {});
       }, 0);
     }
   }, []);
 
   const openTimePickerPopover = useCallback(() => {
-    const currentCursorPosition = editor1.current?.getPosition();
-    const editorCoords = editor1.current?.getDomNode()!.getBoundingClientRect();
+    const currentCursorPosition = editorRef.current?.getPosition();
+    const editorCoords = editorRef.current?.getDomNode()!.getBoundingClientRect();
     if (currentCursorPosition && editorCoords) {
-      const editorPosition = editor1.current!.getScrolledVisiblePosition(currentCursorPosition);
+      const editorPosition = editorRef.current!.getScrolledVisiblePosition(currentCursorPosition);
       const editorTop = editorCoords.top;
       const editorLeft = editorCoords.left;
 
@@ -679,7 +679,7 @@ const ESQLEditorInternal = function ESQLEditor({
 
   useEffect(() => {
     const setQueryToTheCache = async () => {
-      if (editor1?.current) {
+      if (editorRef?.current) {
         try {
           const parserMessages = await parseMessages();
           const clientParserStatus = parserMessages.errors?.length
@@ -787,7 +787,7 @@ const ESQLEditorInternal = function ESQLEditor({
   }, [esqlFieldsCache, queryValidation]);
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
-    editor1,
+    editorRef,
     editorModel,
     getJoinIndices,
     query,
@@ -842,26 +842,24 @@ const ESQLEditorInternal = function ESQLEditor({
   }, [esqlCallbacks]);
 
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
-    if (!editor1.current) {
+    if (!editorRef.current) {
       return;
     }
 
-    editor1.current.focus();
-    editor1.current.setPosition({
+    editorRef.current.focus();
+    editorRef.current.setPosition({
       lineNumber: startLineNumber,
       column: startColumn,
     });
-    editor1.current.revealLine(startLineNumber);
+    editorRef.current.revealLine(startLineNumber);
   }, []);
 
   // Clean up the monaco editor and DOM on unmount
   useEffect(() => {
-    const model = editorModel;
-    const editor1ref = editor1;
     const disposablesMap = editorCommandDisposables.current;
     return () => {
       // Cleanup editor command disposables
-      const currentEditor = editor1ref.current;
+      const currentEditor = editorRef.current;
       if (currentEditor) {
         const disposables = disposablesMap.get(currentEditor);
         if (disposables) {
@@ -872,9 +870,10 @@ const ESQLEditorInternal = function ESQLEditor({
         }
       }
 
-      model.current?.dispose();
-      editor1ref.current?.dispose();
+      editorModel.current?.dispose();
+      editorRef.current?.dispose();
       editorModel.current = undefined;
+      editorRef.current = undefined;
     };
   }, []);
 
@@ -1050,7 +1049,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   onFocus={() => setLabelInFocus(true)}
                   onBlur={() => setLabelInFocus(false)}
                   editorDidMount={async (editor) => {
-                    editor1.current = editor;
+                    editorRef.current = editor;
                     const model = editor.getModel();
                     if (model) {
                       editorModel.current = model;
@@ -1062,9 +1061,12 @@ const ESQLEditorInternal = function ESQLEditor({
                       application,
                       uiActions,
                       telemetryService,
-                      editor1: editor1 as React.RefObject<monaco.editor.IStandaloneCodeEditor>,
+                      editorRef: editorRef as React.RefObject<monaco.editor.IStandaloneCodeEditor>,
                       getCurrentQuery: () =>
-                        fixESQLQueryWithVariables(editor1.current?.getValue() || '', esqlVariables),
+                        fixESQLQueryWithVariables(
+                          editorRef.current?.getValue() || '',
+                          esqlVariables
+                        ),
                       esqlVariables,
                       controlsContext,
                       openTimePickerPopover,
@@ -1074,7 +1076,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     addEditorKeyBindings(editor, onQuerySubmit, setIsVisorOpen, isVisorOpen);
 
                     // Store disposables for cleanup
-                    const currentEditor = editor1.current;
+                    const currentEditor = editorRef.current;
                     if (currentEditor) {
                       if (!editorCommandDisposables.current.has(currentEditor)) {
                         editorCommandDisposables.current.set(currentEditor, commandDisposables);
@@ -1234,7 +1236,7 @@ const ESQLEditorInternal = function ESQLEditor({
               }}
               onSelect={(date, event) => {
                 if (date && event) {
-                  const currentCursorPosition = editor1.current?.getPosition();
+                  const currentCursorPosition = editorRef.current?.getPosition();
                   const lineContent = editorModel.current?.getLineContent(
                     currentCursorPosition?.lineNumber ?? 0
                   );
@@ -1244,7 +1246,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   );
 
                   const addition = `"${date.toISOString()}"${contentAfterCursor}`;
-                  editor1.current?.executeEdits('time', [
+                  editorRef.current?.executeEdits('time', [
                     {
                       range: {
                         startLineNumber: currentCursorPosition?.lineNumber ?? 0,
@@ -1262,12 +1264,12 @@ const ESQLEditorInternal = function ESQLEditor({
                   datePickerOpenStatusRef.current = false;
 
                   // move the cursor past the date we just inserted
-                  editor1.current?.setPosition({
+                  editorRef.current?.setPosition({
                     lineNumber: currentCursorPosition?.lineNumber ?? 0,
                     column: (currentCursorPosition?.column ?? 0) + addition.length - 1,
                   });
                   // restore focus to the editor
-                  editor1.current?.focus();
+                  editorRef.current?.focus();
                 }
               }}
               inline

@@ -47,5 +47,6 @@ export const ColorPickerPopover: FC<Props> = (props: Props) => {
 
 ColorPickerPopover.propTypes = {
   ...ColorPicker.propTypes,
+  // @ts-expect-error upgrade typescript v5.9.3
   anchorPosition: PropTypes.string,
 };
