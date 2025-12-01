@@ -57,6 +57,10 @@ export const syntheticsRuleFieldMap: FieldMap = {
     type: 'keyword',
     required: false,
   },
+  'monitor.failed_step_info': {
+    type: 'text',
+    required: false,
+  },
   configId: {
     type: 'keyword',
     required: false,

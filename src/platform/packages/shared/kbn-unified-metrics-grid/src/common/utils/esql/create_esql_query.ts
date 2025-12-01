@@ -9,17 +9,20 @@
 
 import type { QueryOperator } from '@kbn/esql-composer';
 import { drop, evaluate, stats, timeseries, where } from '@kbn/esql-composer';
-import { type MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type {
+  MetricField,
+  Dimension,
+  DimensionFilters,
+} from '@kbn/metrics-experience-plugin/common/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import { DIMENSION_TYPES } from '../../constants';
 import { DIMENSIONS_COLUMN } from './constants';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 
 interface CreateESQLQueryParams {
   metric: MetricField;
-  dimensions?: string[];
-  filters?: Array<{ field: string; value: string }>;
+  dimensions?: Dimension[];
+  filters?: DimensionFilters;
 }
 
 const separator = '\u203A'.normalize('NFC');
@@ -33,7 +36,22 @@ const separator = '\u203A'.normalize('NFC');
  * @returns `true` if the field type needs to be cast to a string, otherwise `false`.
  */
 function needsStringCasting(fieldType: ES_FIELD_TYPES): boolean {
-  return DIMENSION_TYPES.includes(fieldType) && fieldType !== ES_FIELD_TYPES.KEYWORD;
+  return fieldType !== ES_FIELD_TYPES.KEYWORD && fieldType !== ES_FIELD_TYPES.TEXT;
+}
+
+/**
+ * Casts a field name to a string type if needed based on its field type.
+ * This helper ensures consistent type casting for non-keyword fields in CONCAT operations.
+ *
+ * @param fieldName - The field name (should already be sanitized).
+ * @param fieldType - Optional field type to determine if string casting is needed.
+ * @returns The field name with optional string casting applied.
+ */
+function castFieldIfNeeded(fieldName: string, fieldType: string | undefined): string {
+  if (fieldType && needsStringCasting(fieldType as ES_FIELD_TYPES)) {
+    return `${fieldName}::STRING`;
+  }
+  return fieldName;
 }
 
 /**
@@ -44,52 +62,34 @@ function needsStringCasting(fieldType: ES_FIELD_TYPES): boolean {
  *
  * @param metric - The full metric field object, including dimension type information.
  * @param dimensions - An array of selected dimension names.
- * @param filters - An array of filters to apply to the query.
+ * @param filters - A map of field names to arrays of values to filter by.
  * @returns A complete ESQL query string.
  */
-export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQLQueryParams) {
-  const { name: metricField, instrument, index, dimensions: metricDimensions } = metric;
+export function createESQLQuery({ metric, dimensions = [], filters = {} }: CreateESQLQueryParams) {
+  const { name: metricField, instrument, index } = metric;
   const source = timeseries(index);
 
   const whereConditions: QueryOperator[] = [];
-  const valuesByField = new Map<string, Set<string>>();
-  const dimensionTypeMap = new Map(metricDimensions?.map((dim) => [dim.name, dim.type]));
 
-  if (filters && filters.length) {
-    for (const filter of filters) {
-      const currentValues = valuesByField.get(filter.field);
-      if (currentValues) {
-        currentValues.add(filter.value);
-      } else {
-        valuesByField.set(filter.field, new Set([filter.value]));
-      }
-    }
+  Object.entries(filters).forEach(([key, values]) => {
+    const escapedKey = sanitazeESQLInput(key);
 
-    valuesByField.forEach((value, key) => {
-      const dimType = dimensionTypeMap.get(key);
-      const escapedKey = sanitazeESQLInput(key);
-      const castedKey =
-        dimType && needsStringCasting(dimType) ? `${escapedKey}::STRING` : escapedKey;
+    // Always cast to STRING for filtering to handle potential mapping conflicts
+    // where the same field name exists with different types (e.g., both long and keyword)
+    const castedKey = `${escapedKey}::STRING`;
 
-      whereConditions.push(
-        where(`${castedKey} IN (${new Array(value.size).fill('?').join(', ')})`, Array.from(value))
-      );
-    });
-  }
+    whereConditions.push(
+      where(`${castedKey} IN (${new Array(values.length).fill('?').join(', ')})`, values)
+    );
+  });
 
-  const unfilteredDimensions = (dimensions ?? []).filter((dim) => !valuesByField.has(dim));
+  const unfilteredDimensions = (dimensions ?? []).filter((dim) => !(dim.name in filters));
   const queryPipeline = source.pipe(
     ...whereConditions,
     unfilteredDimensions.length > 0
       ? where(
           unfilteredDimensions
-            .map((dim) => {
-              const dimType = dimensionTypeMap.get(dim);
-              const escapedDim = sanitazeESQLInput(dim);
-              const castedDim =
-                dimType && needsStringCasting(dimType) ? `${escapedDim}::STRING` : escapedDim;
-              return `${castedDim} IS NOT NULL`;
-            })
+            .map((dim) => `${sanitazeESQLInput(dim.name)} IS NOT NULL`)
             .join(' AND ')
         )
       : (query) => query,
@@ -99,7 +99,7 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
         placeholderName: 'metricField',
       })} BY ${createTimeBucketAggregation({})}${
         (dimensions ?? []).length > 0
-          ? `, ${dimensions.map((dim) => sanitazeESQLInput(dim)).join(',')}`
+          ? `, ${dimensions.map((dim) => sanitazeESQLInput(dim.name)).join(',')}`
           : ''
       }`,
       {
@@ -113,15 +113,12 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
             evaluate(
               `${DIMENSIONS_COLUMN} = CONCAT(${dimensions
                 .map((dim) => {
-                  const dimType = dimensionTypeMap.get(dim);
-                  const escapedDim = sanitazeESQLInput(dim);
-                  return dimType && needsStringCasting(dimType)
-                    ? `${escapedDim}::STRING`
-                    : escapedDim;
+                  const sanitized = sanitazeESQLInput(dim.name) ?? dim.name;
+                  return castFieldIfNeeded(sanitized, dim.type);
                 })
                 .join(`, " ${separator} ", `)})`
             ),
-            drop(`${dimensions.map((dim) => sanitazeESQLInput(dim)).join(',')}`),
+            drop(`${dimensions.map((dim) => sanitazeESQLInput(dim.name)).join(',')}`),
           ]
       : [])
   );

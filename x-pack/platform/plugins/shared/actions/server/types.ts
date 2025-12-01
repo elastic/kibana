@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import type * as z3 from '@kbn/zod';
+import type * as z4 from '@kbn/zod/v4';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type {
@@ -118,7 +119,7 @@ export type ExecutorType<
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
 
-type Validator<T> = Pick<z.ZodType<T>, 'parse'>;
+type Validator<T> = Pick<z3.ZodType, 'parse'> | Pick<z4.ZodType, 'parse'>;
 export interface ValidatorType<T> {
   schema: Validator<T>;
   customValidator?: (value: T, validatorServices: ValidatorServices) => void;

@@ -12,6 +12,7 @@ import type {
   PluginInitializerContext,
   LoggerFactory,
 } from '@kbn/core/server';
+import { registerWorkplaceAIApiKeysRoutes } from '@kbn/workplaceai-api-keys-server';
 import { registerRoutes } from './routes';
 import { registerFeatures } from './features';
 import type { InternalServices } from './services/types';
@@ -61,6 +62,8 @@ export class WorkplaceAIAppPlugin
         return this.services;
       },
     });
+
+    registerWorkplaceAIApiKeysRoutes(router, this.loggerFactory.get('api-keys'));
 
     registerFeatures({ features: setupDeps.features });
 

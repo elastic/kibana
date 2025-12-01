@@ -63,22 +63,16 @@ const optionalFields = asMutableArray([
 export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
   const groupedErrorsByDocId: Record<string, Array<{ errorDocId: string }>> = {};
 
-  function addError(id: string, errorDocId: string) {
-    if (!groupedErrorsByDocId[id]) {
-      groupedErrorsByDocId[id] = [];
-    }
-    groupedErrorsByDocId[id].push({ errorDocId });
-  }
-
   unifiedTraceErrors.apmErrors.forEach((errorDoc) => {
-    const id = errorDoc.transaction?.id || errorDoc.span?.id;
-    if (id) {
-      addError(id, errorDoc.id);
+    if (errorDoc.spanId) {
+      (groupedErrorsByDocId[errorDoc.spanId] ??= []).push({ errorDocId: errorDoc.id });
     }
   });
-  unifiedTraceErrors.unprocessedOtelErrors.forEach((errorDoc) =>
-    errorDoc.spanId ? addError(errorDoc.spanId, errorDoc.id) : undefined
-  );
+  unifiedTraceErrors.unprocessedOtelErrors.forEach((errorDoc) => {
+    if (errorDoc.spanId) {
+      (groupedErrorsByDocId[errorDoc.spanId] ??= []).push({ errorDocId: errorDoc.id });
+    }
+  });
 
   return groupedErrorsByDocId;
 }
@@ -175,7 +169,7 @@ export async function getUnifiedTraceItems({
   return {
     traceItems: unifiedTraceItems.hits.hits
       .map((hit) => {
-        const event = accessKnownApmEventFields(hit.fields, fields);
+        const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
         const apmDuration = event[SPAN_DURATION] ?? event[TRANSACTION_DURATION];
         const id = event[SPAN_ID] ?? event[TRANSACTION_ID];
         const name = event[SPAN_NAME] ?? event[TRANSACTION_NAME];

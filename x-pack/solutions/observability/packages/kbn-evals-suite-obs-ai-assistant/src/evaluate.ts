@@ -8,7 +8,7 @@
 import { evaluate as base, createDefaultTerminalReporter } from '@kbn/evals';
 import { KnowledgeBaseClient } from './clients/knowledge_base_client';
 import { ConversationsClient } from './clients/conversations_client';
-import { ObservabilityAIAssistantEvaluationChatClient } from './chat_client';
+import { createChatClient, type ChatClient } from './clients/chat';
 import type { EvaluateObservabilityAIAssistantDataset } from './evaluate_dataset';
 import { createEvaluateObservabilityAIAssistantDataset } from './evaluate_dataset';
 import { createScenarioSummaryReporter } from './scenario_summary_reporter';
@@ -18,7 +18,7 @@ export const evaluate = base.extend<
   {
     knowledgeBaseClient: KnowledgeBaseClient;
     conversationsClient: ConversationsClient;
-    chatClient: ObservabilityAIAssistantEvaluationChatClient;
+    chatClient: ChatClient;
     evaluateDataset: EvaluateObservabilityAIAssistantDataset;
   }
 >({
@@ -47,7 +47,7 @@ export const evaluate = base.extend<
       // This guarantees KB is installed even if no spec references knowledgeBaseClient directly.
       await knowledgeBaseClient.ensureInstalled();
 
-      const chatClient = new ObservabilityAIAssistantEvaluationChatClient(fetch, log, connector.id);
+      const chatClient = createChatClient(fetch, log, connector.id);
       await use(chatClient);
     },
     {
@@ -67,13 +67,13 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
   reportModelScore: [
-    async ({}, use) => {
+    async ({ reportDisplayOptions }, use) => {
       const useScenarioReporting = process.env.SCENARIO_REPORTING === 'true';
 
       if (useScenarioReporting) {
-        await use(createScenarioSummaryReporter());
+        await use(createScenarioSummaryReporter({ reportDisplayOptions }));
       } else {
-        await use(createDefaultTerminalReporter());
+        await use(createDefaultTerminalReporter({ reportDisplayOptions }));
       }
     },
     { scope: 'worker' },

@@ -10,7 +10,7 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
-import { searchRequestBody, searchResponseBody } from './schemas';
+import { searchRequestBodySchema, searchResponseBodySchema } from './schemas';
 import { search } from './search';
 
 export function registerSearchRoute(router: VersionedRouter<RequestHandlerContext>) {
@@ -25,11 +25,11 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
       version: INTERNAL_API_VERSION,
       validate: {
         request: {
-          body: searchRequestBody,
+          body: searchRequestBodySchema,
         },
         response: {
           200: {
-            body: () => searchResponseBody,
+            body: () => searchResponseBodySchema,
           },
         },
       },

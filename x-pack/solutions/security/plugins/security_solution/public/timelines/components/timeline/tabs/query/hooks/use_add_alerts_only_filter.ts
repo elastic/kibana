@@ -14,7 +14,7 @@ import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../../../common/constants';
 import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
-import { DataViewManagerScopeName } from '../../../../../../data_view_manager/constants';
+import { PageScope } from '../../../../../../data_view_manager/constants';
 import { timelineActions } from '../../../../../store';
 
 const ALERTS_ONLY_FILTER_ALIAS = i18n.translate(
@@ -46,7 +46,7 @@ export const useAddAlertsOnlyFilter = ({
     application: { capabilities },
   } = useKibana().services;
 
-  const { dataView } = useDataView(DataViewManagerScopeName.timeline);
+  const { dataView } = useDataView(PageScope.timeline);
   const spaceId = useSpaceId();
 
   return useCallback(() => {

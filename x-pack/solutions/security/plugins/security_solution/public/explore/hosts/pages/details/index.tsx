@@ -18,7 +18,7 @@ import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
@@ -76,7 +76,6 @@ import { AlertCountByRuleByStatus } from '../../../../common/components/alert_co
 import { useLicense } from '../../../../common/hooks/use_license';
 import { ResponderActionButton } from '../../../../common/components/endpoint/responder';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../../common/components/page_loader';
@@ -132,8 +131,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView: experimentalDataView, status } = useDataView(DataViewManagerScopeName.explore);
-  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
+  const { dataView: experimentalDataView, status } = useDataView(PageScope.explore);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.explore);
 
   const indicesExist = newDataViewPickerEnabled
     ? !!experimentalDataView.matchedIndices?.length
@@ -295,7 +294,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     hostName={detailName}
                     indexNames={selectedPatterns}
                     jobNameById={jobNameById}
-                    scopeId={SourcererScopeName.explore}
+                    scopeId={PageScope.explore}
                   />
                 )}
               </AnomalyTableProvider>

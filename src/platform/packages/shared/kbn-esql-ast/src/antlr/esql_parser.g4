@@ -23,7 +23,8 @@ options {
 }
 
 import Expression,
-       Join;
+       Join,
+       Promql;
 
 statements
     : setCommand* singleStatement EOF
@@ -71,6 +72,7 @@ processingCommand
     // in development
     | {this.isDevVersion()}? lookupCommand
     | {this.isDevVersion()}? insistCommand
+    | {this.isDevVersion()}? promqlCommand
     ;
 
 whereCommand
@@ -212,6 +214,11 @@ identifierOrParameter
     : identifier
     | parameter
     | doubleParameter
+    ;
+
+stringOrParameter
+    : string
+    | parameter
     ;
 
 limitCommand

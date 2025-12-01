@@ -15,8 +15,12 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   // platform core tools are registered from the agent builder plugin so will trigger a review anyway
   ...Object.values(platformCoreTools),
   // Observability
-  'observability.search_knowledge_base',
   'observability.get_data_sources',
+  'observability.get_anomaly_detection_jobs',
+  'observability.run_log_rate_analysis',
+  'observability.get_alerts',
+  'observability.get_services',
+  'observability.get_downstream_dependencies',
 ];
 
 /**

@@ -17,7 +17,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type {
-  FailureStore,
+  EffectiveFailureStore,
   FailureStoreStatsResponse,
   DataStreamWithFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
@@ -307,7 +307,33 @@ export async function getDefaultRetentionValue({
   return defaultRetention;
 }
 
-export async function getFailureStore({
+export function getFailureStore({
+  dataStream,
+}: {
+  dataStream: DataStreamWithFailureStore | null;
+}): EffectiveFailureStore {
+  if (!dataStream) {
+    return { disabled: {} };
+  }
+
+  if (dataStream.failure_store?.enabled) {
+    const lifecycle = dataStream.failure_store?.lifecycle;
+
+    if (lifecycle?.enabled) {
+      return {
+        lifecycle: { enabled: { data_retention: lifecycle.data_retention } },
+      };
+    }
+
+    return {
+      lifecycle: { disabled: {} },
+    };
+  }
+
+  return { disabled: {} };
+}
+
+export async function getFailureStoreDefaultRetention({
   name,
   scopedClusterClient,
   isServerless,
@@ -315,7 +341,7 @@ export async function getFailureStore({
   name: string;
   scopedClusterClient: IScopedClusterClient;
   isServerless: boolean;
-}): Promise<FailureStore> {
+}): Promise<string | undefined> {
   // TODO: remove DataStreamWithFailureStore here and in streams-schema once failure store is added to the IndicesDataStream type
   const dataStream = (await getDataStream({
     name,
@@ -329,13 +355,7 @@ export async function getFailureStore({
       ? undefined
       : await getDefaultRetentionValue({ scopedClusterClient });
 
-  return {
-    enabled: !!dataStream.failure_store?.enabled,
-    retentionPeriod: {
-      custom: dataStream.failure_store?.lifecycle?.data_retention,
-      default: defaultRetentionPeriod,
-    },
-  };
+  return defaultRetentionPeriod;
 }
 
 export async function getFailureStoreStats({
@@ -440,37 +460,5 @@ export async function getFailureStoreCreationDate({
     } else {
       throw e;
     }
-  }
-}
-
-export async function updateFailureStore({
-  name,
-  enabled,
-  customRetentionPeriod,
-  scopedClusterClient,
-  isServerless,
-}: {
-  name: string;
-  enabled: boolean;
-  customRetentionPeriod?: string;
-  scopedClusterClient: IScopedClusterClient;
-  isServerless: boolean;
-}): Promise<void> {
-  try {
-    await scopedClusterClient.asCurrentUser.indices.putDataStreamOptions(
-      {
-        name,
-        failure_store: {
-          enabled,
-          lifecycle: {
-            data_retention: customRetentionPeriod,
-            ...(isServerless ? {} : { enabled }),
-          },
-        },
-      },
-      { meta: true }
-    );
-  } catch (error) {
-    throw new Error(`Failed to update failure store for stream "${name}": ${error}`);
   }
 }
