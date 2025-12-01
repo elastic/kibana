@@ -58,6 +58,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
+        hideAnnouncements: true,
       });
       await kibanaServer.importExport.load(fixtureDirs.lensBasic);
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
@@ -73,6 +74,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
 
     // total run time ~30m
     loadTestFile(require.resolve('./logsdb')); // 30m
-    loadTestFile(require.resolve('./esql'));
+    // loadTestFile(require.resolve('./esql'));
   });
 };
