@@ -91,7 +91,7 @@ describe('scripts library client', () => {
           created_by: 'elastic',
           description: 'does some stuff',
           example: 'bash -c script_one.sh',
-          executable: undefined,
+          pathToExecutable: undefined,
           hash: 'e5441eb2bb',
           id: scriptId,
           instructions: 'just execute it',

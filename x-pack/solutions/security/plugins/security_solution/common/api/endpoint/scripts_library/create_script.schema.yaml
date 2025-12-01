@@ -72,7 +72,7 @@ components:
         requiresInput:
           type: boolean
           description: Whether the script requires input arguments
-        executable:
+        pathToExecutable:
           type: string
           description: >
             Used only for when the uploaded script is an archive (.zip file for example).

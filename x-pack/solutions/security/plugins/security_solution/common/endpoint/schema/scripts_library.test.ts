@@ -153,7 +153,7 @@ describe('Scripts library schemas', () => {
     // Field: `description`
     // Field: `instructions`
     // Field: `example`
-    // Field: `executable`
+    // Field: `pathToExecutable`
     // ------------------------------------
     const optionalStringFields: Array<
       keyof Pick<

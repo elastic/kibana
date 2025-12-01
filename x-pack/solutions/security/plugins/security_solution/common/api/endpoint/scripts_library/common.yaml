@@ -40,7 +40,7 @@ components:
           description: Instructions for using the script, including details around its supported input arguments
         example:
           type: string
-        executable:
+        pathToExecutable:
           type: string
           description: >
             The relative path to the file included in the archive that should be executed once its contents
