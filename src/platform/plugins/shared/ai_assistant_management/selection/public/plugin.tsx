@@ -194,7 +194,6 @@ export class AIAssistantManagementPlugin
       });
     };
 
-    // TODO: Add check for Agents user access?
     // Check which assistants the user has access to
     const hasObservabilityAssistant =
       coreStart.application.capabilities.observabilityAIAssistant?.show === true;
@@ -255,7 +254,6 @@ export class AIAssistantManagementPlugin
               <NavControlInitiator
                 isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
                 isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
-                // isAgentBuilderEnabled={} // TODO: check if needed
                 coreStart={coreStart}
                 triggerOpenChat={(event: {
                   chatExperience: AIChatExperience;

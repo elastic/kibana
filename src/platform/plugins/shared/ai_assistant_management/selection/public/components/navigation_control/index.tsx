@@ -286,7 +286,6 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                         }
                       )}
                       titleSize="xs"
-                      // TODO: change to proper agent icon when available
                       icon={<RobotIcon size="xxl" />}
                       data-test-subj="aiAssistantAgentCard"
                       isDisabled={
