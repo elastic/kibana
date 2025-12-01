@@ -43,6 +43,14 @@ POST /_some_endpoint
 }
 ```
 
+### Saved Snippets (In Development)
+Console will soon support persistent saved snippets, allowing users to save, organize, and reuse frequently used Elasticsearch queries. This feature will:
+- Save queries as named snippets with descriptions and tags
+- Provide search and filtering capabilities
+- Enable sharing across Kibana spaces
+- Support import/export for backup and sharing
+- Store snippets server-side using Kibana saved objects (replacing localStorage dependency)
+
 ## Architecture
 Console uses Monaco editor that is wrapped with [`kbn-monaco`](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-monaco/index.ts), so that if needed it can easily be replaced with another editor.
 The autocomplete logic is located in [`autocomplete`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/public/lib/autocomplete) folder. Autocomplete rules are computed by classes in `components` sub-folder.
