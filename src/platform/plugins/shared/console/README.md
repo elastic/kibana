@@ -43,13 +43,39 @@ POST /_some_endpoint
 }
 ```
 
-### Saved Snippets (In Development)
-Console will soon support persistent saved snippets, allowing users to save, organize, and reuse frequently used Elasticsearch queries. This feature will:
-- Save queries as named snippets with descriptions and tags
-- Provide search and filtering capabilities
-- Enable sharing across Kibana spaces
-- Support import/export for backup and sharing
-- Store snippets server-side using Kibana saved objects (replacing localStorage dependency)
+### Saved Snippets
+Console supports saving frequently used queries as snippets for reuse. Snippets are stored server-side as saved objects, allowing them to persist across browser sessions and be shared across devices.
+
+#### Saving a Snippet
+1. Write your query in the Console editor
+2. Click "Save as snippet" in the toolbar (or use the snippets sidebar)
+3. Provide a name and optional description
+4. Click Save
+
+#### Loading a Snippet
+1. Click "Load snippet" in the toolbar to open the snippet finder
+2. Search or browse available snippets
+3. Click on a snippet to load it into the editor
+
+#### Managing Snippets
+- Access snippets via the sidebar panel (toggle with the "Snippets" button)
+- Delete unwanted snippets using the delete icon next to each snippet
+- Search by name, description, or tags using the search field
+- Import/export snippets via Saved Objects Management (`Stack Management > Saved Objects`)
+- Share snippets across Kibana spaces (when configured with `namespaceType: 'multiple-isolated'`)
+
+#### Deep Linking
+Snippets can be loaded via URL using the `loadSnippet` query parameter:
+```
+/app/dev_tools#/console?loadSnippet=<snippet-id>
+```
+
+#### Technical Details
+- Snippets are stored as saved objects of type `console-snippet`
+- Each snippet includes: title, description, query content, endpoint, method, and tags
+- Duplicate snippet titles are prevented to maintain uniqueness
+- Snippets are sorted by last update time (most recent first)
+- Pagination is implemented for large snippet collections (20 items per page)
 
 ## Architecture
 Console uses Monaco editor that is wrapped with [`kbn-monaco`](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-monaco/index.ts), so that if needed it can easily be replaced with another editor.

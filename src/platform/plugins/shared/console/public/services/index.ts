@@ -19,5 +19,11 @@ export {
 } from './autocomplete';
 export { EmbeddableConsoleInfo } from './embeddable_console';
 export { httpService } from './http';
+export {
+  createSavedSnippetsService,
+  type SavedSnippetsService,
+  type SavedSnippet,
+  type FindSavedSnippetsResponse,
+} from './saved_snippets_service';
 
 export { convertRequestToLanguage } from './api';

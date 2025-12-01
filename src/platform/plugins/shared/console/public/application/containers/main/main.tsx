@@ -49,6 +49,7 @@ import { useDataInit } from '../../hooks';
 import { getTopNavConfig } from './get_top_nav';
 import { getTourSteps } from './get_tour_steps';
 import { ImportConfirmModal } from './import_confirm_modal';
+import { SnippetsSidebar, SaveSnippetModal } from '../snippets';
 import {
   SHELL_TAB_ID,
   HISTORY_TAB_ID,
@@ -124,6 +125,8 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFullscreenOpen, setIsFullScreen] = useState(false);
   const [isConfirmImportOpen, setIsConfirmImportOpen] = useState<string | null>(null);
+  const [showSnippetsSidebar, setShowSnippetsSidebar] = useState(false);
+  const [showSaveSnippetModal, setShowSaveSnippetModal] = useState(false);
   const styles = useStyles(isEmbeddable);
 
   const {
@@ -311,6 +314,28 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
               </ConsoleTourStep>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate('console.main.snippetsSidebarToggleTooltip', {
+                  defaultMessage: 'Toggle snippets sidebar',
+                })}
+              >
+                <EuiButtonEmpty
+                  iconType="save"
+                  onClick={() => setShowSnippetsSidebar(!showSnippetsSidebar)}
+                  size="xs"
+                  data-test-subj="consoleSnippetsSidebarToggle"
+                  aria-label={i18n.translate('console.main.snippetsSidebarToggleAriaLabel', {
+                    defaultMessage: 'Toggle snippets sidebar',
+                  })}
+                  color={showSnippetsSidebar ? 'primary' : 'text'}
+                >
+                  {i18n.translate('console.main.snippetsButton', {
+                    defaultMessage: 'Snippets',
+                  })}
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <ShortcutsPopover
                 button={shortcutsButton}
                 isOpen={isShortcutsOpen}
@@ -357,12 +382,28 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
           data-test-subj="consolePanel"
         >
           {currentTab === SHELL_TAB_ID && (
-            <Editor
-              loading={!done}
-              inputEditorValue={inputEditorValue}
-              setInputEditorValue={setInputEditorValue}
-              enableSuggestWidgetRepositioning={!isEmbeddable}
-            />
+            <EuiFlexGroup gutterSize="none" responsive={false} style={{ height: '100%' }}>
+              <EuiFlexItem grow={true}>
+                <Editor
+                  loading={!done}
+                  inputEditorValue={inputEditorValue}
+                  setInputEditorValue={setInputEditorValue}
+                  enableSuggestWidgetRepositioning={!isEmbeddable}
+                />
+              </EuiFlexItem>
+              {showSnippetsSidebar && (
+                <EuiFlexItem grow={false} style={{ width: 300, overflow: 'auto' }}>
+                  <SnippetsSidebar
+                    onLoadSnippet={(snippet) => {
+                      setInputEditorValue(snippet.query);
+                    }}
+                    onSaveSnippet={() => {
+                      setShowSaveSnippetModal(true);
+                    }}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           )}
           {currentTab === HISTORY_TAB_ID && <History />}
           {currentTab === CONFIG_TAB_ID && <Config />}
@@ -395,6 +436,13 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
         <ImportConfirmModal
           onClose={() => setIsConfirmImportOpen(null)}
           fileContent={isConfirmImportOpen}
+        />
+      )}
+
+      {showSaveSnippetModal && (
+        <SaveSnippetModal
+          currentQuery={inputEditorValue}
+          onClose={() => setShowSaveSnippetModal(false)}
         />
       )}
     </div>

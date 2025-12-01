@@ -19,3 +19,4 @@ export {
 } from './autocomplete_definitions';
 export { DEFAULT_INPUT_VALUE } from './editor_input';
 export { DEFAULT_LANGUAGE, AVAILABLE_LANGUAGES } from './copy_as';
+export { CONSOLE_SNIPPET_SAVED_OBJECT_TYPE } from './saved_objects';

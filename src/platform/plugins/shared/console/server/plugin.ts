@@ -19,6 +19,7 @@ import { registerRoutes } from './routes';
 
 import type { ESConfigForProxy, ConsoleSetup, ConsoleStart } from './types';
 import { handleEsError } from './shared_imports';
+import { consoleSnippetSavedObjectType } from './saved_objects/console_snippet';
 
 interface PluginsSetup {
   cloud?: CloudSetup;
@@ -34,7 +35,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
     this.log = this.ctx.logger.get();
   }
 
-  setup({ http, capabilities, elasticsearch }: CoreSetup, { cloud }: PluginsSetup) {
+  setup({ http, capabilities, elasticsearch, savedObjects }: CoreSetup, { cloud }: PluginsSetup) {
     capabilities.registerProvider(() => ({
       dev_tools: {
         show: true,
@@ -52,6 +53,9 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
       pathFilters = (config as ConsoleConfig7x).proxyFilter.map((str: string) => new RegExp(str));
       proxyConfigCollection = new ProxyConfigCollection((config as ConsoleConfig7x).proxyConfig);
     }
+
+    // Register saved object type for console snippets
+    savedObjects.registerType(consoleSnippetSavedObjectType);
 
     this.esLegacyConfigService.setup(elasticsearch.legacy.config$, cloud);
 

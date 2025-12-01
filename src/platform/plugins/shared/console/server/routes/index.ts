@@ -20,6 +20,7 @@ import { registerProxyRoute } from './api/console/proxy';
 import { registerSpecDefinitionsRoute } from './api/console/spec_definitions';
 import { registerAutocompleteEntitiesRoute } from './api/console/autocomplete_entities';
 import { registerConvertRequestRoute } from './api/console/convert_request_to_language';
+import { registerSavedSnippetRoutes } from './api/console/saved_snippets';
 
 export interface ProxyDependencies {
   readLegacyESConfig: () => Promise<ESConfigForProxy>;
@@ -47,4 +48,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerSpecDefinitionsRoute(dependencies);
   registerAutocompleteEntitiesRoute(dependencies);
   registerConvertRequestRoute(dependencies);
+  registerSavedSnippetRoutes(dependencies.router);
 };

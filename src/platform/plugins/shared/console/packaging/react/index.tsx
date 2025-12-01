@@ -45,7 +45,13 @@ import { I18nService } from '@kbn/core-i18n-browser-internal';
 import { i18n } from '@kbn/i18n';
 import { type HttpSetup } from '@kbn/core/public';
 import type { NotificationsSetup } from '@kbn/core/public';
-import { createStorage, createHistory, createSettings, setStorage } from '../../public/services';
+import {
+  createStorage,
+  createHistory,
+  createSettings,
+  setStorage,
+  createSavedSnippetsService,
+} from '../../public/services';
 import { loadActiveApi } from '../../public/lib/kb';
 
 import { createPackagingParsedRequestsProvider } from './parser';
@@ -148,6 +154,7 @@ export const OneConsole = ({
     const objectStorageClient = localStorageObjectClient.create(storage);
     const api = createApi({ http });
     const esHostService = createEsHostService({ api });
+    const savedSnippetsService = createSavedSnippetsService(http);
 
     // Initialize autocompleteInfo like in the plugin
     const autocompleteInfo = new AutocompleteInfo();
@@ -167,6 +174,7 @@ export const OneConsole = ({
       objectStorageClient,
       esHostService,
       autocompleteInfo,
+      savedSnippetsService,
     };
   }
 
@@ -181,6 +189,7 @@ export const OneConsole = ({
     objectStorageClient,
     esHostService,
     autocompleteInfo,
+    savedSnippetsService,
   } = servicesRef.current;
 
   // Use the custom notifications provided by the consumer
@@ -246,6 +255,7 @@ export const OneConsole = ({
             data: {} as any,
             licensing: {} as any,
             application: {} as any,
+            savedSnippetsService,
           },
           config: {
             isDevMode: false,

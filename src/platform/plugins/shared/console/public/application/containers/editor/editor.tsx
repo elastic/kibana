@@ -41,6 +41,7 @@ import { MonacoEditor } from './monaco_editor';
 import { MonacoEditorOutput } from './monaco_editor_output';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 import { consoleEditorPanelStyles, useResizerButtonStyles } from '../styles';
+import { SaveSnippetModal, LoadSnippetFlyout } from '../snippets';
 
 const INITIAL_PANEL_SIZE = 50;
 const PANEL_MIN_SIZE = '20%';
@@ -106,6 +107,8 @@ export const Editor = memo(
     const editorDispatch = useEditorActionContext();
 
     const [fetchingAutocompleteEntities, setFetchingAutocompleteEntities] = useState(false);
+    const [showSaveModal, setShowSaveModal] = useState(false);
+    const [showLoadFlyout, setShowLoadFlyout] = useState(false);
 
     useEffect(() => {
       const debouncedSetFechingAutocompleteEntities = debounce(
@@ -219,18 +222,48 @@ export const Editor = memo(
                       color="subdued"
                       css={styles.consoleEditorPanel}
                     >
-                      <EuiButtonEmpty
-                        size="xs"
-                        color="primary"
-                        data-test-subj="clearConsoleInput"
-                        onClick={() => {
-                          setInputEditorValue('');
-                        }}
-                      >
-                        {i18n.translate('console.editor.clearConsoleInputButton', {
-                          defaultMessage: 'Clear this input',
-                        })}
-                      </EuiButtonEmpty>
+                      <EuiFlexGroup gutterSize="s" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            size="xs"
+                            color="primary"
+                            iconType="save"
+                            data-test-subj="consoleSaveSnippetAction"
+                            onClick={() => setShowSaveModal(true)}
+                          >
+                            {i18n.translate('console.editor.saveSnippetButton', {
+                              defaultMessage: 'Save as snippet',
+                            })}
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            size="xs"
+                            color="primary"
+                            iconType="folderOpen"
+                            data-test-subj="consoleLoadSnippetAction"
+                            onClick={() => setShowLoadFlyout(true)}
+                          >
+                            {i18n.translate('console.editor.loadSnippetButton', {
+                              defaultMessage: 'Load snippet',
+                            })}
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            size="xs"
+                            color="primary"
+                            data-test-subj="clearConsoleInput"
+                            onClick={() => {
+                              setInputEditorValue('');
+                            }}
+                          >
+                            {i18n.translate('console.editor.clearConsoleInputButton', {
+                              defaultMessage: 'Clear this input',
+                            })}
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiSplitPanel.Inner>
                   )}
                 </EuiSplitPanel.Outer>
@@ -311,6 +344,23 @@ export const Editor = memo(
             </>
           )}
         </EuiResizableContainer>
+
+        {showSaveModal && (
+          <SaveSnippetModal
+            currentQuery={inputEditorValue}
+            onClose={() => setShowSaveModal(false)}
+          />
+        )}
+
+        {showLoadFlyout && (
+          <LoadSnippetFlyout
+            onClose={() => setShowLoadFlyout(false)}
+            onSelect={(snippet) => {
+              setInputEditorValue(snippet.query);
+              setShowLoadFlyout(false);
+            }}
+          />
+        )}
       </>
     );
   }

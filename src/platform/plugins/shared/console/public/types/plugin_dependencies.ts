@@ -94,4 +94,8 @@ export interface ConsolePluginStart {
    * When registering an alternate view ensure that the content component you register is lazy loaded.
    */
   registerEmbeddedConsoleAlternateView?: (view: EmbeddedConsoleView | null) => void;
+  /**
+   * Service for managing saved Console snippets
+   */
+  savedSnippetsService?: import('../services').SavedSnippetsService;
 }
