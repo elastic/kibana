@@ -81,6 +81,7 @@ generate_performance_report() {
     CLUSTER_HEALTH_LOG=$(find "$LOG_DIR" -name "*cluster-health.log" | head -1)
     TRANSFORM_STATS_LOG=$(find "$LOG_DIR" -name "*transform-stats.log" | head -1)
     NODE_STATS_LOG=$(find "$LOG_DIR" -name "*node-stats.log" | head -1)
+    KIBANA_STATS_LOG=$(find "$LOG_DIR" -name "*kibana-stats.log" | head -1)
 
     # Upload log files as artifacts
     if [ -n "$CLUSTER_HEALTH_LOG" ]; then
@@ -96,6 +97,11 @@ generate_performance_report() {
     if [ -n "$NODE_STATS_LOG" ]; then
       echo "Found node stats log: $NODE_STATS_LOG"
       buildkite-agent artifact upload "$NODE_STATS_LOG"
+    fi
+
+    if [ -n "$KIBANA_STATS_LOG" ]; then
+      echo "Found Kibana stats log: $KIBANA_STATS_LOG"
+      buildkite-agent artifact upload "$KIBANA_STATS_LOG"
     fi
   fi
 
@@ -260,7 +266,7 @@ EOF
 
   # Create formatted PR comment with collapsible section
   echo "--- Create PR Comment"
-  PR_COMMENT_FILE="entity-store-performance-pr-comment.txt"
+  PR_COMMENT_FILE=$(mktemp)
   
   {
     echo "## Entity Store Performance Tests"
@@ -277,8 +283,12 @@ EOF
     echo "</details>"
   } > "$PR_COMMENT_FILE"
   
-  # Upload PR comment file as artifact
-  buildkite-agent artifact upload "$PR_COMMENT_FILE"
+  # Post comment directly to PR
+  echo "Posting performance report to PR"
+  ts-node "$KIBANA_DIR/.buildkite/scripts/lifecycle/comment_on_pr.ts" \
+    --message "$(cat "$PR_COMMENT_FILE")" \
+    --context "entity-store-performance-job" \
+    --clear-previous
 
   # Set metadata for PR comment
   buildkite-agent meta-data set "entity_store_performance_duration" "$TEST_DURATION"

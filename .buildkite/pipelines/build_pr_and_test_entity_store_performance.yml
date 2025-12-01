@@ -4,8 +4,25 @@ env:
   GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-entity-store-performance-from-pr
 
 steps:
+  - group: 'Notify if missing labels'
+    if: "build.env('GITHUB_PR_LABELS') !~ /ci:entity-store-performance/ || build.env('GITHUB_PR_LABELS') !~ /ci:cloud-redeploy/"
+
+    steps:
+      - command: |
+          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+            --message "Entity store performance tests require both \`ci:entity-store-performance\` and \`ci:cloud-redeploy\` labels. Please add both labels and trigger the job through the checkbox again. **Note:** \`ci:cloud-redeploy\` ensures a fresh deployment is created for each test run." \
+            --context "entity-store-performance-job" \
+            --clear-previous
+        label: Comment missing labels
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        timeout_in_minutes: 5
+
   - group: 'Entity Store Performance Tests'
-    if: "build.env('GITHUB_PR_LABELS') =~ /ci:entity-store-performance/"
+    if: "build.env('GITHUB_PR_LABELS') =~ /ci:entity-store-performance/ && build.env('GITHUB_PR_LABELS') =~ /ci:cloud-redeploy/"
 
     steps:
       - command: .buildkite/scripts/lifecycle/pre_build.sh
@@ -98,31 +115,6 @@ steps:
           automatic:
             - exit_status: '-1'
               limit: 1
-
-      - wait: ~
-
-      - command: |
-          # Download PR comment artifact if available
-          if buildkite-agent artifact download "entity-store-performance-pr-comment.txt" . 2>/dev/null; then
-            echo "Posting detailed performance report to PR"
-            ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
-              --message "$(cat entity-store-performance-pr-comment.txt)" \
-              --context "entity-store-performance-job" \
-              --clear-previous
-          else
-            echo "PR comment file not found, posting simple message"
-            ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
-              --message "Entity store performance tests completed, see results at: $BUILDKITE_BUILD_URL" \
-              --context "entity-store-performance-job" \
-              --clear-previous
-          fi
-        label: Comment with results
-        agents:
-          provider: gcp
-          image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
-          machineType: n2-standard-2
-        timeout_in_minutes: 5
 
       - wait: ~
 
