@@ -18,6 +18,8 @@ import type { WorkflowDetailState } from '../../../../../entities/workflows/stor
 import { performComputation } from '../../../../../entities/workflows/store/workflow_detail/utils/computation';
 import { findStepByLine } from '../../../../../entities/workflows/store/workflow_detail/utils/step_finder';
 
+jest.mock('../../../../../../common/schema');
+
 export function getFakeAutocompleteContextParams(
   yamlContent: string,
   customConnectorTypes?: Record<string, ConnectorTypeInfo>

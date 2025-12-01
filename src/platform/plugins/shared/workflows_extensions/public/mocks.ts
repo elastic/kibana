@@ -27,7 +27,7 @@ const createStartMock: () => jest.Mocked<
   return {
     getStepDefinition: jest.fn(),
     hasStepDefinition: jest.fn(),
-    getAllStepDefinitions: jest.fn(),
+    getAllStepDefinitions: jest.fn(() => []),
   };
 };
 

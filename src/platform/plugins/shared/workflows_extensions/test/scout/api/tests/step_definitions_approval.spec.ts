@@ -10,6 +10,7 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { apiTest, expect } from '@kbn/scout';
 import { APPROVED_STEP_DEFINITIONS } from '../fixtures/approved_step_definitions';
+import { COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'Workflows Extensions - Custom Step Definitions Approval',
@@ -26,7 +27,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         const response = await apiClient.get('internal/workflows_extensions/step_definitions', {
           headers: {
-            'kbn-xsrf': 'true',
+            ...COMMON_HEADERS,
             ...adminApiCredentials.apiKeyHeader,
           },
           responseType: 'json',

@@ -18,6 +18,8 @@ import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/se
 import { WorkflowsService } from './workflows_management_service';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
+jest.mock('../../common/schema');
+
 describe('WorkflowsService', () => {
   let service: WorkflowsService;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
