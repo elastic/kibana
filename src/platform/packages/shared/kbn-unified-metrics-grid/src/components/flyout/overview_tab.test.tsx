@@ -9,28 +9,9 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type { Dimension, MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { OverviewTab } from './overview_tab';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-
-jest.mock('./dimension_badges', () => ({
-  DimensionBadges: ({ dimensions }: { dimensions: Dimension[] }) => (
-    <div data-test-subj="dimension-badges">
-      {dimensions.map((dim, index) => (
-        <span key={index} data-test-subj={`dimension-badge-${dim.name}`}>
-          {dim.name}
-        </span>
-      ))}
-    </div>
-  ),
-}));
-
-jest.mock('../../common/utils/dimensions', () => ({
-  categorizeDimensions: jest.fn((dimensions = []) => ({
-    requiredDimensions: dimensions.filter((d: any) => d.required),
-    optionalDimensions: dimensions.filter((d: any) => !d.required),
-  })),
-}));
 
 jest.mock('../../common/utils', () => ({
   getUnitLabel: jest.fn(({ unit }) => {
@@ -137,23 +118,74 @@ describe('Metric Flyout Overview Tab', () => {
       const { queryByTestId } = render(<OverviewTab metric={metric} />);
 
       expect(
-        queryByTestId('metricsExperienceFlyoutOverviewTabRequiredDimensionsLabel')
+        queryByTestId('metricsExperienceFlyoutOverviewTabDimensionsLabel')
       ).not.toBeInTheDocument();
       expect(
-        queryByTestId('metricsExperienceFlyoutOverviewTabAdditionalDimensionsLabel')
+        queryByTestId('metricsExperienceFlyoutOverviewTabDimensionsList')
       ).not.toBeInTheDocument();
     });
 
-    it('renders dimensions when present', () => {
+    it('renders dimensions list when dimensions are present', () => {
       const dimensions = [
-        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
         { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'attributes.state', type: ES_FIELD_TYPES.KEYWORD },
+      ];
+      const metric = createMockMetric({ dimensions });
+      const { getByTestId, getByText } = render(<OverviewTab metric={metric} />);
+
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabDimensionsLabel')).toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabDimensionsList')).toBeInTheDocument();
+
+      // Check dimensions are sorted alphabetically
+      expect(getByText('attributes.state')).toBeInTheDocument();
+      expect(getByText('host.name')).toBeInTheDocument();
+      expect(getByText('service.name')).toBeInTheDocument();
+    });
+
+    it('shows pagination for all dimensions', () => {
+      const dimensions = Array.from({ length: 30 }, (_, i) => ({
+        name: `dimension.${String(i).padStart(2, '0')}`,
+        type: ES_FIELD_TYPES.KEYWORD,
+      }));
+      const metric = createMockMetric({ dimensions });
+      const { getByTestId } = render(<OverviewTab metric={metric} />);
+
+      expect(
+        getByTestId('metricsExperienceFlyoutOverviewTabDimensionsPagination')
+      ).toBeInTheDocument();
+    });
+
+    it('always shows pagination component', () => {
+      const dimensions = [
+        { name: 'dimension.01', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'dimension.02', type: ES_FIELD_TYPES.KEYWORD },
       ];
       const metric = createMockMetric({ dimensions });
       const { getByTestId } = render(<OverviewTab metric={metric} />);
 
-      expect(getByTestId('dimension-badge-host.name')).toBeInTheDocument();
-      expect(getByTestId('dimension-badge-service.name')).toBeInTheDocument();
+      // EuiTablePagination is always shown regardless of item count
+      expect(
+        getByTestId('metricsExperienceFlyoutOverviewTabDimensionsPagination')
+      ).toBeInTheDocument();
+    });
+
+    it('sorts dimensions alphabetically', () => {
+      const dimensions = [
+        { name: 'zebra.field', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'alpha.field', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'beta.field', type: ES_FIELD_TYPES.KEYWORD },
+      ];
+      const metric = createMockMetric({ dimensions });
+      const { container } = render(<OverviewTab metric={metric} />);
+
+      const listItems = container.querySelectorAll('li.euiListGroupItem');
+      expect(listItems).toHaveLength(3);
+
+      // Verify alphabetical order in rendered list
+      expect(listItems[0]).toHaveTextContent('alpha.field');
+      expect(listItems[1]).toHaveTextContent('beta.field');
+      expect(listItems[2]).toHaveTextContent('zebra.field');
     });
   });
 
