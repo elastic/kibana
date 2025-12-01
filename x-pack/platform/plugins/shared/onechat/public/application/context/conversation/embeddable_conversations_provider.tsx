@@ -36,10 +36,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   // Track current props, starting with initial props
   const [currentProps, setCurrentProps] = useState<EmbeddableConversationProps>(contextProps);
 
-  // Merge current props with any updates, preserving flyout-specific props
-  const mergedProps = useMemo(() => {
-    return { ...contextProps, ...currentProps };
-  }, [contextProps, currentProps]);
+  const attachmentMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
 
   // Register callback to receive prop updates from parent.
   const onPropsUpdate = contextProps.onPropsUpdate;
@@ -47,6 +44,10 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     if (onPropsUpdate) {
       onPropsUpdate((newProps) => {
         setCurrentProps(newProps);
+        if (newProps.newConversation) {
+          // If the user starts a new conversation, we need to clear the attachment map
+          attachmentMapRef.current = new Map();
+        }
       });
     }
   }, [onPropsUpdate]);
@@ -65,8 +66,8 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   );
 
   const { persistedConversationId, updatePersistedConversationId } = usePersistedConversationId({
-    sessionTag: mergedProps.sessionTag,
-    agentId: mergedProps.agentId,
+    sessionTag: currentProps.sessionTag,
+    agentId: currentProps.agentId,
   });
 
   const hasInitializedConversationIdRef = useRef(false);
@@ -117,13 +118,13 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   const onConversationCreated = useCallback(
     ({ conversationId: id }: { conversationId: string }) => {
-      if (mergedProps.newConversation) {
+      if (currentProps.newConversation) {
         // if {newConversation} is initially true, we need to clear it after the conversation is created
-        setCurrentProps({ ...mergedProps, newConversation: undefined });
+        setCurrentProps({ ...currentProps, newConversation: undefined });
       }
       setConversationId(id);
     },
-    [mergedProps, setConversationId]
+    [currentProps, setConversationId]
   );
 
   const onDeleteConversation = useCallback(() => {
@@ -132,12 +133,12 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   // Derived conversation ID
   const conversationId = useMemo(() => {
-    if (mergedProps.newConversation) {
+    if (currentProps.newConversation) {
       return undefined;
     }
     // After initialization, always use persisted ID
     return persistedConversationId;
-  }, [mergedProps.newConversation, persistedConversationId]);
+  }, [currentProps.newConversation, persistedConversationId]);
 
   const conversationActions = useConversationActions({
     conversationId,
@@ -147,8 +148,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     onDeleteConversation,
   });
 
-  const attachmentMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
-
   const setAttachmentMap = useCallback((attachments: Map<string, Record<string, unknown>>) => {
     attachmentMapRef.current = attachments;
   }, []);
@@ -156,12 +155,12 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   const handleGetProcessedAttachments = useCallback(
     (_conversation?: Conversation) => {
       return getProcessedAttachments({
-        attachments: mergedProps.attachments ?? [],
+        attachments: currentProps.attachments ?? [],
         getAttachment: (id) => attachmentMapRef.current.get(id),
         setAttachment: (id, content) => attachmentMapRef.current.set(id, content),
       });
     },
-    [mergedProps.attachments]
+    [currentProps.attachments]
   );
 
   const conversationContextValue = useMemo(
@@ -169,23 +168,23 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       conversationId,
       shouldStickToBottom: true,
       isEmbeddedContext: true,
-      sessionTag: mergedProps.sessionTag,
-      agentId: mergedProps.agentId,
-      initialMessage: mergedProps.initialMessage,
-      browserApiTools: mergedProps.browserApiTools,
+      sessionTag: currentProps.sessionTag,
+      agentId: currentProps.agentId,
+      initialMessage: currentProps.initialMessage,
+      browserApiTools: currentProps.browserApiTools,
       setConversationId,
-      attachments: mergedProps.attachments,
+      attachments: currentProps.attachments,
       conversationActions,
       getProcessedAttachments: handleGetProcessedAttachments,
       setAttachmentMap,
     }),
     [
       conversationId,
-      mergedProps.sessionTag,
-      mergedProps.agentId,
-      mergedProps.initialMessage,
-      mergedProps.attachments,
-      mergedProps.browserApiTools,
+      currentProps.sessionTag,
+      currentProps.agentId,
+      currentProps.initialMessage,
+      currentProps.attachments,
+      currentProps.browserApiTools,
       conversationActions,
       handleGetProcessedAttachments,
       setConversationId,
