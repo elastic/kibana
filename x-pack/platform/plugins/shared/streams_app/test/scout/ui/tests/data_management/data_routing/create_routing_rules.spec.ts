@@ -24,8 +24,8 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
 
     // Verify we're in the creating new rule state
     await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
-    await expect(page.getByText('Stream name')).toBeVisible();
-    await expect(page.testSubj.locator('streamNamePrefix')).toHaveText('logs.');
+    await expect(page.getByTestId('streamsAppRoutingStreamNameLabel')).toBeVisible();
+    await expect(page.getByTestId('streamsAppRoutingStreamNamePrefix')).toContainText('logs.');
 
     // Fill in the stream name
     await page.getByTestId('streamsAppRoutingStreamEntryNameField').fill('nginx');
@@ -38,17 +38,20 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     });
 
     // Save the rule (fork stream)
-    await pageObjects.streams.saveRoutingRule();
+    await page.getByTestId('streamsAppStreamDetailRoutingSaveButton').click();
 
     // Verify success
-    const rountingRuleName = 'logs.nginx';
-    const routingRuleLocator = page.testSubj.locator(`streamDetailRoutingItem-${rountingRuleName}`);
-    await expect(page.testSubj.locator('streamsAppStreamDetailRoutingSaveButton')).toBeHidden();
-    await pageObjects.streams.expectRoutingRuleVisible(rountingRuleName);
-    await expect(routingRuleLocator).toBeVisible();
-    await expect(routingRuleLocator.locator('[title="service.name"]')).toBeVisible();
-    await expect(routingRuleLocator.locator('text=equals')).toBeVisible();
-    await expect(routingRuleLocator.locator('[title="nginxlogs"]')).toBeVisible();
+    await pageObjects.streams.expectRoutingRuleVisible('logs.nginx');
+    const routingRule = page.getByTestId('routingRule-logs.nginx');
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText(
+      'service.name'
+    );
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayOperator')).toContainText(
+      'equals'
+    );
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayValue')).toContainText(
+      'nginxlogs'
+    );
   });
 
   test('should cancel creating new routing rule', async ({ page, pageObjects }) => {
@@ -72,10 +75,8 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
 
     await expect(page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton')).toBeDisabled();
 
-    // Cancel the operation
     await pageObjects.streams.cancelRoutingRule();
 
-    // Verify we're back to idle state
     await expect(page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton')).toBeEnabled();
   });
 
@@ -122,5 +123,90 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
 
     const createButton = page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
     await expect(createButton).toBeDisabled();
+  });
+
+  test('should navigate to child stream when clicking on stream name link', async ({
+    page,
+    pageObjects,
+  }) => {
+    // Create a child stream first
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('navigation-test');
+    await pageObjects.streams.fillConditionEditor({
+      field: 'service.name',
+      value: 'test',
+      operator: 'equals',
+    });
+    await pageObjects.streams.saveRoutingRule();
+    await pageObjects.toasts.closeAll();
+
+    const streamLink = page
+      .getByTestId('routingRule-logs.navigation-test')
+      .getByTestId('streamsAppRoutingStreamEntryButton');
+    await expect(streamLink).toBeVisible();
+    await streamLink.click();
+
+    // Verify we navigated to the child stream's partitioning tab
+    await expect(page).toHaveURL(/logs\.navigation-test\/management\/partitioning/);
+  });
+
+  test('should show "Open stream in new tab" button in success toast', async ({
+    page,
+    pageObjects,
+  }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('toast-test');
+    await pageObjects.streams.fillConditionEditor({
+      field: 'service.name',
+      value: 'test',
+      operator: 'equals',
+    });
+    await pageObjects.streams.saveRoutingRule();
+    await pageObjects.toasts.waitFor();
+
+    const openInNewTabButton = page.getByTestId(
+      'streamsAppSaveOrUpdateChildrenOpenStreamInNewTabButton'
+    );
+    await expect(openInNewTabButton).toBeVisible();
+
+    await expect(openInNewTabButton).toHaveAttribute(
+      'href',
+      expect.stringContaining('logs.toast-test')
+    );
+  });
+
+  test('should attempt to create stream with duplicate name and fail', async ({
+    page,
+    pageObjects,
+  }) => {
+    // Create first rule
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('duplicate-test');
+    await pageObjects.streams.fillConditionEditor({
+      field: 'service.name',
+      operator: 'equals',
+      value: 'test',
+    });
+    await pageObjects.streams.saveRoutingRule();
+    await pageObjects.toasts.closeAll();
+
+    // Verify first rule was created
+    await pageObjects.streams.expectRoutingRuleVisible('logs.duplicate-test');
+
+    // Try to create another with same name
+    await pageObjects.streams.clickCreateRoutingRule();
+    await pageObjects.streams.fillRoutingRuleName('duplicate-test');
+    await pageObjects.streams.fillConditionEditor({
+      field: 'service.name',
+      operator: 'equals',
+      value: 'different',
+    });
+    await pageObjects.streams.saveRoutingRule();
+
+    // Should show error toast
+    await pageObjects.toasts.waitFor();
+
+    // Should stay in creating state due to error
+    await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
   });
 });
