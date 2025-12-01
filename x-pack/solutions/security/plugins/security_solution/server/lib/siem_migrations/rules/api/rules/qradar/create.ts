@@ -16,7 +16,7 @@ import { QradarRulesXmlParser } from '../../../../../../../common/siem_migration
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { CreateRuleMigrationRulesInput } from '../../../data/rule_migrations_data_rules_client';
 import { SiemMigrationAuditLogger } from '../../../../common/api/util/audit';
-import { authz } from '../../../../common/api/util/authz';
+import { authz } from '../../util/authz';
 import { withExistingMigration } from '../../../../common/api/util/with_existing_migration_id';
 import { withLicense } from '../../../../common/api/util/with_license';
 import { transformQRadarRuleToOriginalRule } from '../../util/qradar_transform';
