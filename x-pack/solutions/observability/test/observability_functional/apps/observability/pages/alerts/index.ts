@@ -213,6 +213,25 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         });
       });
 
+      describe('Actions Button', () => {
+        after(async () => {
+          await observability.alerts.common.navigateToTimeWithData();
+          // Clear active status
+          await alertControls.clearControlSelections('0');
+          await observability.alerts.common.waitForAlertTableToLoad();
+        });
+
+        it('Opens rule details page when click on "View Rule Details"', async () => {
+          const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
+          await actionsButton.click();
+          await observability.alerts.common.viewRuleDetailsButtonClick();
+
+          expect(
+            await (await find.byCssSelector('[data-test-subj="breadcrumb first"]')).getVisibleText()
+          ).to.eql('Observability');
+        });
+      });
+
       describe('Flyout', () => {
         it('Can be opened', async () => {
           await observability.alerts.common.openAlertsFlyout();
@@ -282,32 +301,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
           it('Displays a View rule details link', async () => {
             await observability.alerts.common.getAlertsFlyoutViewRuleDetailsLinkOrFail();
-          });
-        });
-      });
-
-      describe('Actions Button', () => {
-        it('Opens rule details page when click on "View Rule Details"', async () => {
-          await observability.alerts.common.waitForAlertTableToLoad();
-          await retry.try(async () => {
-            const actionsButtons = await testSubjects.findAll('alertsTableRowActionMore');
-            expect(actionsButtons.length).to.be.greaterThan(0);
-            await actionsButtons[0].click();
-            await testSubjects.existOrFail('alertsTableActionsMenu');
-          });
-
-          await retry.waitForWithTimeout('viewRuleDetails button', 20000, async () => {
-            return await testSubjects.exists('viewRuleDetails');
-          });
-
-          await observability.alerts.common.viewRuleDetailsButtonClick();
-
-          await retry.try(async () => {
-            expect(
-              await (
-                await find.byCssSelector('[data-test-subj="breadcrumb first"]')
-              ).getVisibleText()
-            ).to.eql('Observability');
           });
         });
       });
