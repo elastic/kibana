@@ -25,6 +25,8 @@ export const useStyles = () => {
     const ellipsis: CSSObject = {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      minWidth: 0,
     };
 
     return {

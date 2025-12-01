@@ -247,7 +247,8 @@ export interface ESQLFunctionCallExpression extends ESQLFunction<'variadic-call'
   args: ESQLAstItem[];
 }
 
-export interface ESQLUnaryExpression extends ESQLFunction<'unary-expression'> {
+export interface ESQLUnaryExpression<Name extends string = string>
+  extends ESQLFunction<'unary-expression', Name> {
   subtype: 'unary-expression';
   args: [ESQLAstItem];
 }
@@ -396,6 +397,20 @@ export interface ESQLForkParens extends ESQLParens {
 
 export interface ESQLColumn extends ESQLAstBaseItem {
   type: 'column';
+
+  /**
+   * Optional qualifier for the column, e.g. index name or alias.
+   *
+   * @example
+   *
+   * ```esql
+   * [index].[column]
+   * [index].[nested.column.part]
+   * ```
+   *
+   * `index` is the qualifier.
+   */
+  qualifier?: ESQLIdentifier;
 
   /**
    * A ES|QL column name can be composed of multiple parts,

@@ -10,21 +10,15 @@ import { SecurityGroupName, SecurityPageName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 
-export const createExploreNavigationTree = (
-  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
-    sideNavVersion: 'v1',
-  }
-): NodeDefinition => ({
+export const createExploreNavigationTree = (): NodeDefinition => ({
   id: SecurityGroupName.explore,
   title: SecurityLinkGroup[SecurityGroupName.explore].title,
   renderAs: 'panelOpener',
-  iconV2: 'globe',
-  sideNavVersion,
+  icon: 'globe',
   children: [
     {
       id: SecurityPageName.hosts,
       link: securityLink(SecurityPageName.hosts),
-      renderAs: 'item',
       children: [
         {
           id: SecurityPageName.hostsAll,
@@ -61,7 +55,6 @@ export const createExploreNavigationTree = (
     {
       id: SecurityPageName.network,
       link: securityLink(SecurityPageName.network),
-      renderAs: 'item',
       children: [
         {
           id: SecurityPageName.networkFlows,
@@ -98,7 +91,6 @@ export const createExploreNavigationTree = (
     {
       id: SecurityPageName.users,
       link: securityLink(SecurityPageName.users),
-      renderAs: 'item',
       children: [
         {
           id: SecurityPageName.usersAll,

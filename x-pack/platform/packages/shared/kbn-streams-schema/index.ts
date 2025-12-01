@@ -108,6 +108,15 @@ export {
   type WiredIngestStreamEffectiveSettings,
 } from './src/models/ingest/settings';
 
+export {
+  type FailureStore,
+  type EffectiveFailureStore,
+  type WiredIngestStreamEffectiveFailureStore,
+  type FailureStoreStatsResponse,
+  isEnabledFailureStore,
+  isInheritFailureStore,
+} from './src/models/ingest/failure_store';
+
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,

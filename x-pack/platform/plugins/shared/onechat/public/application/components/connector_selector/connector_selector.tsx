@@ -18,6 +18,16 @@ import { useNavigation } from '../../hooks/use_navigation';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDefaultConnector } from '../../hooks/chat/use_default_connector';
 
+const connectorSelectorButtonAriaLabel = i18n.translate(
+  'xpack.onechat.connectorSelector.selectConnector',
+  {
+    defaultMessage: 'Select connector',
+  }
+);
+const noConnectorLabel = i18n.translate('xpack.onechat.connectorSelector.noConnector', {
+  defaultMessage: 'No connector',
+});
+
 interface ConnectorSelectorProps {
   selectedConnectorId?: string;
   onSelectConnector: (connectorId: string) => void;
@@ -94,23 +104,18 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
 
   const selectedConnectorName = selectedConnector?.name || selectedConnectorId;
 
-  const buttonLabel =
-    selectedConnectorName ||
-    i18n.translate('xpack.onechat.connectorSelector.noConnector', {
-      defaultMessage: 'No connector',
-    });
+  const buttonLabel = selectedConnectorName || noConnectorLabel;
 
   const button = (
     <EuiButtonEmpty
       iconType={isLoading ? undefined : 'arrowDown'}
       iconSide="right"
+      flush="both"
       onClick={togglePopover}
       disabled={isLoading || connectors.length === 0}
       data-test-subj="onechatConnectorSelectorButton"
       aria-haspopup="menu"
-      aria-label={i18n.translate('xpack.onechat.connectorSelector.selectConnector', {
-        defaultMessage: 'Select connector',
-      })}
+      aria-label={connectorSelectorButtonAriaLabel}
     >
       {isLoading ? <EuiLoadingSpinner size="s" /> : buttonLabel}
     </EuiButtonEmpty>
