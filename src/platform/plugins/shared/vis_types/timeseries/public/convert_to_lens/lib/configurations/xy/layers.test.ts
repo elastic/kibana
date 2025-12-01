@@ -397,7 +397,7 @@ describe('getLayers', () => {
           layerType: 'data',
           accessors: ['column-id-1'],
           xAccessor: 'column-id-2',
-          splitAccessor: 'column-id-3',
+          splitAccessors: ['column-id-3'],
           seriesType: 'area',
           layerId: 'test-layer-1',
           yConfig: [
@@ -418,7 +418,7 @@ describe('getLayers', () => {
           layerType: 'data',
           accessors: ['column-id-1'],
           xAccessor: 'column-id-2',
-          splitAccessor: 'column-id-3',
+          splitAccessors: ['column-id-3'],
           seriesType: 'area',
           layerId: 'test-layer-1',
           yConfig: [

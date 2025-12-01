@@ -72,8 +72,8 @@ function convertDataLayerToAPI(
     }
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const breakdown_by = visualization.splitAccessor
-      ? operationFromColumn(visualization.splitAccessor, layer)
+    const breakdown_by = visualization.splitAccessors
+      ? operationFromColumn(visualization.splitAccessors[0], layer) // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
       : undefined;
 
     if (breakdown_by && !isAPIColumnOfBucketType(breakdown_by)) {
@@ -106,9 +106,9 @@ function convertDataLayerToAPI(
         .filter(nonNullable) ?? [];
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const aggregate_first =
-      visualization.splitAccessor &&
+      visualization.splitAccessors &&
       visualization.xAccessor &&
-      layer.columnOrder[0] === visualization.splitAccessor;
+      layer.columnOrder[0] === visualization.splitAccessors[0]; // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
     return {
       ...generateApiLayer(layer),
       ...(x ? { x } : {}),
@@ -130,8 +130,8 @@ function convertDataLayerToAPI(
 
   const x = visualization.xAccessor ? getValueApiColumn(visualization.xAccessor, layer) : undefined;
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const breakdown_by = visualization.splitAccessor
-    ? getValueApiColumn(visualization.splitAccessor, layer)
+  const breakdown_by = visualization.splitAccessors
+    ? getValueApiColumn(visualization.splitAccessors[0], layer) // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
     : undefined;
   const y = visualization.accessors?.map((accessor) => {
     const { color } = yConfigMap.get(accessor) || {};
