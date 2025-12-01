@@ -107,6 +107,7 @@ export async function syncAgentlessDeployments(
               )} Updating agentless policy monitoring settings ${agentPolicy.id}`
             );
             await agentPolicyService.update(spacedScoppedSoClient, esClient, agentPolicy.id, {
+              // Ensure agentless policies keep monitoring alive so http monitoring server continue to work even without monitoring enabled
               keep_monitoring_alive: true,
               monitoring_enabled: [],
             });
