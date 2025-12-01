@@ -29,6 +29,18 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object
       defaultMessage: 'Add host isolation exception',
     }
   ),
+  pageImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.pageImportButtonTitle',
+    {
+      defaultMessage: 'Import host isolation exception list',
+    }
+  ),
+  pageExportButtonTitle: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.pageExportButtonTitle',
+    {
+      defaultMessage: 'Export host isolation exception list',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.hostIsolationExceptions.showingTotal', {
       defaultMessage:

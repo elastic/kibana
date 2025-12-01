@@ -29,6 +29,12 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.blocklist.pageAddButtonTitle', {
     defaultMessage: 'Add blocklist entry',
   }),
+  pageImportButtonTitle: i18n.translate('xpack.securitySolution.blocklist.pageImportButtonTitle', {
+    defaultMessage: 'Import blocklist',
+  }),
+  pageExportButtonTitle: i18n.translate('xpack.securitySolution.blocklist.pageExportButtonTitle', {
+    defaultMessage: 'Export blocklist',
+  }),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.blocklist.showingTotal', {
       defaultMessage:

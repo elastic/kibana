@@ -39,6 +39,18 @@ const TRUSTED_DEVICES_PAGE_LABELS: ArtifactListPageProps['labels'] = {
       defaultMessage: 'Add trusted device',
     }
   ),
+  pageImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.trustedDevices.list.pageImportButtonTitle',
+    {
+      defaultMessage: 'Import trusted device list',
+    }
+  ),
+  pageExportButtonTitle: i18n.translate(
+    'xpack.securitySolution.trustedDevices.list.pageExportButtonTitle',
+    {
+      defaultMessage: 'Export trusted device list',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.trustedDevices.list.showingTotal', {
       defaultMessage:
