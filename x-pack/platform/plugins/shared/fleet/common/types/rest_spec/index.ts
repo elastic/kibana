@@ -13,7 +13,7 @@ export type * from './common';
 export type * from './data_stream';
 export type * from './download_sources';
 export type * from './enrollment_api_key';
-export * from './epm';
+export type * from './epm';
 export type * from './error';
 export type * from './fleet_setup';
 export type * from './output';

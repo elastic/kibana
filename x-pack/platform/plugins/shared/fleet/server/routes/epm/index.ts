@@ -7,7 +7,7 @@
 
 import type { RouteSecurity } from '@kbn/core-http-server';
 
-import { RollbackAvailableCheckResponseSchema } from '../../../common/types';
+import { RollbackAvailableCheckResponseSchema } from '../../../common/types/rest_spec/epm';
 
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { API_VERSIONS } from '../../../common/constants';
