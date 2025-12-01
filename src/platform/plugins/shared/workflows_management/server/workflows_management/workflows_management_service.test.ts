@@ -10,9 +10,11 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient, SecurityServiceStart } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
+import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 import { WorkflowsService } from './workflows_management_service';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
@@ -85,7 +87,6 @@ describe('WorkflowsService', () => {
     mockLogger = loggerMock.create();
     mockLogger.error = jest.fn();
 
-    const mockEsClientPromise = Promise.resolve(mockEsClient);
     const mockGetActionsClient = jest.fn().mockResolvedValue({
       getAll: jest.fn().mockResolvedValue([]),
       execute: jest.fn(),
@@ -96,12 +97,24 @@ describe('WorkflowsService', () => {
       getAll: jest.fn().mockResolvedValue({ data: [] }),
     } as unknown as PublicMethodsOf<ActionsClient>);
 
-    const mockGetActionsStart = jest.fn().mockResolvedValue({
-      getUnsecuredActionsClient: mockGetActionsClient,
-      getActionsClientWithRequest: mockGetActionsClientWithRequest,
+    const getCoreStart = jest.fn().mockResolvedValue({
+      ...coreMock.createStart(),
+      elasticsearch: {
+        client: {
+          asInternalUser: mockEsClient,
+        },
+      },
     });
 
-    service = new WorkflowsService(mockEsClientPromise, mockLogger, false, mockGetActionsStart);
+    const getPluginsStart = jest.fn().mockResolvedValue({
+      workflowsExecutionEngine: workflowsExecutionEngineMock.createStart(),
+      actions: {
+        getUnsecuredActionsClient: mockGetActionsClient,
+        getActionsClientWithRequest: mockGetActionsClientWithRequest,
+      },
+    });
+
+    service = new WorkflowsService(mockLogger, getCoreStart, getPluginsStart);
 
     mockSecurity = {
       authc: {
@@ -1839,14 +1852,24 @@ steps:
         .fn()
         .mockResolvedValue(mockActionsClientWithRequest);
 
-      const mockGetActionsStart = jest.fn().mockResolvedValue({
-        getUnsecuredActionsClient: mockGetActionsClient,
-        getActionsClientWithRequest: mockGetActionsClientWithRequest,
+      // Re-initialize service with new mocks
+      const getCoreStart = jest.fn().mockResolvedValue({
+        ...coreMock.createStart(),
+        elasticsearch: {
+          client: {
+            asInternalUser: mockEsClient,
+          },
+        },
+      });
+      const getPluginsStart = jest.fn().mockResolvedValue({
+        workflowsExecutionEngine: workflowsExecutionEngineMock.createStart(),
+        actions: {
+          getUnsecuredActionsClient: mockGetActionsClient,
+          getActionsClientWithRequest: mockGetActionsClientWithRequest,
+        },
       });
 
-      // Re-initialize service with new mocks
-      const mockEsClientPromise = Promise.resolve(mockEsClient);
-      service = new WorkflowsService(mockEsClientPromise, mockLogger, false, mockGetActionsStart);
+      service = new WorkflowsService(mockLogger, getCoreStart, getPluginsStart);
       service.setSecurityService(mockSecurity);
 
       // Wait for initialization to complete
