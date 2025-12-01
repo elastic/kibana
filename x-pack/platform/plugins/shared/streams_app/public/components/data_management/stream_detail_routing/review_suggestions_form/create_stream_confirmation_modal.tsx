@@ -62,9 +62,16 @@ export function CreateStreamConfirmationModal({
   }, [partition.condition, partition.name, routingSnapshot.context.definition.stream.name]);
 
   return (
-    <EuiModal onClose={() => cancelChanges()} aria-labelledby={modalTitleId}>
+    <EuiModal
+      onClose={() => cancelChanges()}
+      aria-labelledby={modalTitleId}
+      data-test-subj="streamsAppCreateStreamConfirmationModal"
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>
+        <EuiModalHeaderTitle
+          id={modalTitleId}
+          data-test-subj="streamsAppCreateStreamConfirmationModalTitle"
+        >
           {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.confirmTitle', {
             defaultMessage: 'Confirm stream creation',
           })}
@@ -79,7 +86,11 @@ export function CreateStreamConfirmationModal({
             }
           )}
         >
-          <EuiFieldText value={partition.name} readOnly />
+          <EuiFieldText
+            value={partition.name}
+            readOnly
+            data-test-subj="streamsAppCreateStreamConfirmationModalStreamName"
+          />
         </EuiFormRow>
         <EuiSpacer />
         <EuiTitle size="xxxs">
@@ -110,7 +121,11 @@ export function CreateStreamConfirmationModal({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
-              <EuiButtonEmpty onClick={() => cancelChanges()} isDisabled={isForking}>
+              <EuiButtonEmpty
+                onClick={() => cancelChanges()}
+                isDisabled={isForking}
+                data-test-subj="streamsAppCreateStreamConfirmationModalCancelButton"
+              >
                 {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.cancel', {
                   defaultMessage: 'Cancel',
                 })}
@@ -128,6 +143,7 @@ export function CreateStreamConfirmationModal({
                   })
                 }
                 fill
+                data-test-subj="streamsAppCreateStreamConfirmationModalCreateButton"
               >
                 {i18n.translate('xpack.streams.streamDetailRouting.partitionSuggestion.confirm', {
                   defaultMessage: 'Create stream',
