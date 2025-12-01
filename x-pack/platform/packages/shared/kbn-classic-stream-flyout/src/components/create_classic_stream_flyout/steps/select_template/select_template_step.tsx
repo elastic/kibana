@@ -11,19 +11,16 @@ import {
   EuiSelectable,
   type EuiSelectableOption,
   EuiBadge,
-  EuiEmptyPrompt,
-  EuiButton,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCallOut,
   EuiIconTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
-import { css } from '@emotion/react';
+import { ErrorState } from './error_state';
+import { EmptyState } from './empty_state';
 
 const formatDataRetention = (template: TemplateDeserialized): string | undefined => {
   const { lifecycle } = template;
@@ -61,10 +58,6 @@ export const SelectTemplateStep = ({
   onRetryLoadTemplates,
 }: SelectTemplateStepProps) => {
   const { euiTheme } = useEuiTheme();
-
-  const flexGroupStyles = css({
-    padding: euiTheme.size.l,
-  });
 
   const selectableOptions = useMemo(
     () =>
@@ -131,89 +124,11 @@ export const SelectTemplateStep = ({
   );
 
   if (hasErrorLoadingTemplates) {
-    return (
-      <EuiFlexGroup
-        data-test-subj="selectTemplateStep"
-        direction="column"
-        alignItems="center"
-        justifyContent="center"
-        css={flexGroupStyles}
-      >
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.createClassicStreamFlyout.selectTemplateStep.errorState.title',
-            {
-              defaultMessage: "Uh-oh, we weren't able to fetch your index templates",
-            }
-          )}
-          color="warning"
-          iconType="warning"
-          announceOnMount
-          data-test-subj="errorLoadingTemplates"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.createClassicStreamFlyout.selectTemplateStep.errorState.body"
-              defaultMessage="Don't worry, it's not your fault. Something has gone wrong on our end. Give it a moment and then try again to fetch the available index templates."
-            />
-          </p>
-          <EuiButton
-            color="warning"
-            onClick={onRetryLoadTemplates}
-            data-test-subj="retryLoadTemplatesButton"
-          >
-            <FormattedMessage
-              id="xpack.createClassicStreamFlyout.selectTemplateStep.errorState.retryButton"
-              defaultMessage="Retry"
-            />
-          </EuiButton>
-        </EuiCallOut>
-      </EuiFlexGroup>
-    );
+    return <ErrorState onRetryLoadTemplates={onRetryLoadTemplates} />;
   }
 
   if (templates.length === 0) {
-    return (
-      <EuiFlexGroup
-        data-test-subj="selectTemplateStep"
-        direction="column"
-        alignItems="center"
-        justifyContent="center"
-        css={flexGroupStyles}
-      >
-        <EuiEmptyPrompt
-          title={
-            <h2>
-              <FormattedMessage
-                id="xpack.createClassicStreamFlyout.selectTemplateStep.emptyState.title"
-                defaultMessage="No index templates detected"
-              />
-            </h2>
-          }
-          titleSize="s"
-          body={
-            <p>
-              <FormattedMessage
-                id="xpack.createClassicStreamFlyout.selectTemplateStep.emptyState.body"
-                defaultMessage="To create a new classic stream, you must select an index template that will be used to set the initial settings for the new stream. Currently, you don’t have any index templates. Create a new index template first, then return here to create a classic stream."
-              />
-            </p>
-          }
-          actions={
-            <EuiButton
-              color="primary"
-              onClick={onCreateTemplate}
-              data-test-subj="createTemplateButton"
-            >
-              <FormattedMessage
-                id="xpack.createClassicStreamFlyout.selectTemplateStep.emptyState.createButton"
-                defaultMessage="Create index template"
-              />
-            </EuiButton>
-          }
-        />
-      </EuiFlexGroup>
-    );
+    return <EmptyState onCreateTemplate={onCreateTemplate} />;
   }
 
   return (

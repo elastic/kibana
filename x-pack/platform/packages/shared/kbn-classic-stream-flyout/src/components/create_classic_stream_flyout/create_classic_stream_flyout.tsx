@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
 import { css } from '@emotion/react';
-import { SelectTemplateStep } from './select_template_step';
+import { SelectTemplateStep } from './steps';
 
 enum ClassicStreamStep {
   SELECT_TEMPLATE = 'select_template',
