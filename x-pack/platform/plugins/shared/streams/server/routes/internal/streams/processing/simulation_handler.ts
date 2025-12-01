@@ -42,7 +42,10 @@ import { transpileIngestPipeline } from '@kbn/streamlang';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
-import { normalizeGeoPointsInObject } from '../../../../lib/streams/helpers/normalize_geo_points';
+import {
+  normalizeGeoPointsInObject,
+  detectGeoPointPatternsFromDocuments,
+} from '../../../../lib/streams/helpers/normalize_geo_points';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import type { StreamsClient } from '../../../../lib/streams/client';
 
@@ -279,11 +282,13 @@ const prepareSimulationData = (
     ? getRoot(stream.name)
     : stream.name;
 
-  const geoPointFields = new Set(
+  const geoPointFieldsFromDefinition = new Set(
     Object.entries(streamFields)
       .filter(([, def]) => def.type === 'geo_point')
       .map(([name]) => name)
   );
+  const geoPointFieldsFromDocuments = detectGeoPointPatternsFromDocuments(documents);
+  const geoPointFields = new Set([...geoPointFieldsFromDefinition, ...geoPointFieldsFromDocuments]);
 
   return {
     docs: prepareSimulationDocs(documents, targetStreamName, geoPointFields),

@@ -15,12 +15,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
-interface IgnoredFieldsError {
-  type: 'ignored_fields_failure';
-  message: string;
-  ignored_fields: Array<{ field: string }>;
-}
-
 async function simulateProcessingForStream(
   client: StreamsSupertestRepositoryClient,
   name: string,
@@ -566,7 +560,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await esClient.indices.deleteDataStream({ name: CLASSIC_STREAM_NAME });
       });
 
-      it('should handle flattened geo point fields with ignored_fields warning', async () => {
+      it('should correctly handle flattened geo point fields in simulation', async () => {
         const response = await simulateProcessingForStream(apiClient, CLASSIC_STREAM_NAME, {
           processing: {
             steps: [
@@ -595,22 +589,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const { errors, status, value } = response.body.documents[0];
         expect(status).to.be('parsed');
+        expect(errors).to.eql([]);
 
-        // Geo point fields are regrouped internally but cause ignored_fields_failure
-        // because processing tab doesn't support geo_point mapping yet.
-        // Full geo_point support in processing tab is tracked separately.
-        expect(errors).to.have.length(1);
-        expect(errors[0].type).to.be('ignored_fields_failure');
-        expect((errors[0] as IgnoredFieldsError).ignored_fields).to.eql([
-          { field: 'source.geo.location' },
-        ]);
-
-        // Verify the grok processor still worked correctly
+        // Verify simulation succeeded without errors - geo points were regrouped internally
+        // but the response should still show flattened fields
+        expect(value).to.have.property('source.geo.location.lat', 40.7128);
+        expect(value).to.have.property('source.geo.location.lon', -74.006);
         expect(value).to.have.property('other.field', 'value');
         expect(value).to.have.property('parsed_field', 'test');
       });
 
-      it('should handle multiple geo point fields with ignored_fields warning', async () => {
+      it('should handle multiple geo point fields in the same document', async () => {
         const response = await simulateProcessingForStream(apiClient, CLASSIC_STREAM_NAME, {
           processing: {
             steps: [
@@ -640,18 +629,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const { errors, status, value } = response.body.documents[0];
         expect(status).to.be('parsed');
+        expect(errors).to.eql([]);
 
-        // Multiple geo point fields each cause ignored_fields_failure
-        // because processing tab doesn't support geo_point mapping yet.
-        expect(errors).to.have.length(1);
-        expect(errors[0].type).to.be('ignored_fields_failure');
-        expect((errors[0] as IgnoredFieldsError).ignored_fields).to.eql([
-          { field: 'source.geo.location' },
-          { field: 'destination.geo.location' },
-        ]);
-
-        // Verify the grok processor still worked correctly
-        expect(value).to.have.property('parsed_field', 'test');
+        // Verify simulation succeeded - geo points were regrouped internally during processing
+        // but the response still shows them as flattened fields
+        expect(value).to.have.property('source.geo.location.lat', 40.7128);
+        expect(value).to.have.property('source.geo.location.lon', -74.006);
+        expect(value).to.have.property('destination.geo.location.lat', 51.5);
+        expect(value).to.have.property('destination.geo.location.lon', -0.125);
       });
     });
   });

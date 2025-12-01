@@ -76,7 +76,7 @@ export const SchemaEditorFlyout = ({
         type: 'geo_point' as const,
         status: 'mapped' as const,
         parent: field.parent,
-      } as SchemaField;
+      };
     }
     return field;
   }, [applyGeoPointSuggestionProp, geoPointSuggestion, field]);
@@ -86,7 +86,7 @@ export const SchemaEditorFlyout = ({
       ({
         ...prev,
         ...updated,
-      } as SchemaField),
+      }),
     initialField
   );
 

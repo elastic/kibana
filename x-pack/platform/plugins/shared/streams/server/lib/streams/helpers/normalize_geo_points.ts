@@ -16,76 +16,57 @@ export function normalizeGeoPointsInObject(
   obj: Record<string, unknown>,
   geoPointFields: Set<string>
 ): Record<string, unknown> {
-  function normalizeRecursive(current: unknown, path = ''): unknown {
-    if (!isPlainObject(current)) {
-      return current;
-    }
+  const result: Record<string, unknown> = {};
+  const processedKeys = new Set<string>();
 
-    const result: Record<string, unknown> = {};
-    const processedKeys = new Set<string>();
-    const currentObj = current as Record<string, unknown>;
+  for (const [key, value] of Object.entries(obj)) {
+    if (processedKeys.has(key)) continue;
 
-    for (const [key, value] of Object.entries(currentObj)) {
-      if (processedKeys.has(key)) continue;
-
-      const currentPath = path ? `${path}.${key}` : key;
-
-      if (geoPointFields.has(currentPath)) {
-        // If it's already a string (WKT), keep it
-        if (typeof value === 'string') {
-          result[key] = value;
-          processedKeys.add(key);
-          continue;
-        }
-
-        if (
-          isPlainObject(value) &&
-          'lat' in (value as Record<string, unknown>) &&
-          'lon' in (value as Record<string, unknown>)
-        ) {
-          const v = value as GeoPointValue;
-          result[key] = { lat: v.lat, lon: v.lon };
-          processedKeys.add(key);
-          continue;
-        }
-      }
-
-      const match = key.match(/^(.*)\.(lat|lon)$/);
-      if (match) {
-        const baseName = match[1];
-        const suffix = match[2]; // 'lat' or 'lon'
-        const siblingSuffix = suffix === 'lat' ? 'lon' : 'lat';
-        const siblingKey = `${baseName}.${siblingSuffix}`;
-        const basePath = path ? `${path}.${baseName}` : baseName;
-
-        if (geoPointFields.has(basePath) && siblingKey in currentObj) {
-          const siblingVal = currentObj[siblingKey];
-
-          const latVal = suffix === 'lat' ? value : siblingVal;
-          const lonVal = suffix === 'lon' ? value : siblingVal;
-
-          if (latVal !== undefined && lonVal !== undefined) {
-            result[baseName] = { lat: latVal, lon: lonVal };
-            processedKeys.add(key);
-            processedKeys.add(siblingKey);
-            continue;
-          }
-        }
-      }
-
-      if (isPlainObject(value)) {
-        result[key] = normalizeRecursive(value, currentPath);
-      } else {
+    if (geoPointFields.has(key)) {
+      // If it's already a string (WKT), keep it
+      if (typeof value === 'string') {
         result[key] = value;
+        processedKeys.add(key);
+        continue;
       }
 
-      processedKeys.add(key);
+      if (
+        isPlainObject(value) &&
+        'lat' in (value as Record<string, unknown>) &&
+        'lon' in (value as Record<string, unknown>)
+      ) {
+        const v = value as GeoPointValue;
+        result[key] = { lat: v.lat, lon: v.lon };
+        processedKeys.add(key);
+        continue;
+      }
     }
 
-    return result;
+    const match = key.match(/^(.+)\.(lat|lon)$/);
+    if (match) {
+      const baseName = match[1];
+      const suffix = match[2]; // 'lat' or 'lon'
+      const siblingSuffix = suffix === 'lat' ? 'lon' : 'lat';
+      const siblingKey = `${baseName}.${siblingSuffix}`;
+
+      if (geoPointFields.has(baseName) && siblingKey in obj) {
+        const siblingVal = obj[siblingKey];
+        const latVal = suffix === 'lat' ? value : siblingVal;
+        const lonVal = suffix === 'lon' ? value : siblingVal;
+
+        if (latVal !== undefined && lonVal !== undefined) {
+          result[baseName] = { lat: latVal, lon: lonVal };
+          processedKeys.add(key);
+          processedKeys.add(siblingKey);
+          continue;
+        }
+      }
+    }
+    result[key] = value;
+    processedKeys.add(key);
   }
 
-  return normalizeRecursive(obj) as Record<string, unknown>;
+  return result;
 }
 
 export function buildGeoPointExistsQuery(fieldName: string) {
@@ -105,6 +86,44 @@ export function buildGeoPointExistsQuery(fieldName: string) {
       minimum_should_match: 1,
     },
   };
+}
+
+export function detectGeoPointPatternsFromDocuments(
+  documents: Array<Record<string, unknown>>
+): Set<string> {
+  const detectedGeoPoints = new Set<string>();
+
+  for (const doc of documents) {
+    for (const [key, value] of Object.entries(doc)) {
+      if (
+        isPlainObject(value) &&
+        'lat' in (value as Record<string, unknown>) &&
+        'lon' in (value as Record<string, unknown>)
+      ) {
+        detectedGeoPoints.add(key);
+        continue;
+      }
+
+      const latMatch = key.match(/^(.+)\.lat$/);
+      const lonMatch = key.match(/^(.+)\.lon$/);
+
+      if (latMatch) {
+        const baseName = latMatch[1];
+        const siblingKey = `${baseName}.lon`;
+        if (siblingKey in doc) {
+          detectedGeoPoints.add(baseName);
+        }
+      } else if (lonMatch) {
+        const baseName = lonMatch[1];
+        const siblingKey = `${baseName}.lat`;
+        if (siblingKey in doc) {
+          detectedGeoPoints.add(baseName);
+        }
+      }
+    }
+  }
+
+  return detectedGeoPoints;
 }
 
 export function rebuildGeoPointsFromFlattened(
