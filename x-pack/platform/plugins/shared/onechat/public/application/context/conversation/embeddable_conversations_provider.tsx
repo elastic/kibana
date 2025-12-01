@@ -74,11 +74,15 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   const setConversationId = useCallback(
     (id?: string) => {
+      if (currentProps.newConversation && id) {
+        // reset new conversation flag when there is a valid id
+        setCurrentProps({ ...currentProps, newConversation: undefined });
+      }
       if (id !== persistedConversationId) {
         updatePersistedConversationId(id);
       }
     },
-    [persistedConversationId, updatePersistedConversationId]
+    [currentProps, persistedConversationId, updatePersistedConversationId]
   );
 
   const validateAndSetConversationId = useCallback(
@@ -118,13 +122,9 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   const onConversationCreated = useCallback(
     ({ conversationId: id }: { conversationId: string }) => {
-      if (currentProps.newConversation) {
-        // if {newConversation} is initially true, we need to clear it after the conversation is created
-        setCurrentProps({ ...currentProps, newConversation: undefined });
-      }
       setConversationId(id);
     },
-    [currentProps, setConversationId]
+    [setConversationId]
   );
 
   const onDeleteConversation = useCallback(() => {
@@ -138,7 +138,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     }
     // After initialization, always use persisted ID
     return persistedConversationId;
-  }, [currentProps.newConversation, persistedConversationId]);
+  }, [currentProps, persistedConversationId]);
 
   const conversationActions = useConversationActions({
     conversationId,
@@ -163,6 +163,10 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     [currentProps.attachments]
   );
 
+  const resetInitialMessage = useCallback(() => {
+    setCurrentProps({ ...currentProps, initialMessage: undefined });
+  }, [currentProps, setCurrentProps]);
+
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
@@ -171,6 +175,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       sessionTag: currentProps.sessionTag,
       agentId: currentProps.agentId,
       initialMessage: currentProps.initialMessage,
+      resetInitialMessage,
       browserApiTools: currentProps.browserApiTools,
       setConversationId,
       attachments: currentProps.attachments,
@@ -189,6 +194,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       handleGetProcessedAttachments,
       setConversationId,
       setAttachmentMap,
+      resetInitialMessage,
     ]
   );
 
