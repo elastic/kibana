@@ -445,7 +445,7 @@ export function LayerPanel(props: LayerPanelProps) {
                       />
                     </EuiToolTip>
                   </EuiFlexItem>
-                  {supportsMultipleLayers ? (
+                  {supportsMultipleLayers && !isTextBasedLanguage ? (
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
                         content={layerActions.cloneLayerAction.displayName}

@@ -11,8 +11,8 @@ import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import type { Attachment } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
-import { useDashboardsApi } from '../../hooks/use_dashboards_api';
-import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
+import { useAttachmentsApi } from '../../hooks/use_attachments_api';
+import { useAttachmentsFetch } from '../../hooks/use_attachments_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { AddAttachmentFlyout } from './add_attachment_flyout';
 import { AttachmentsTable } from './attachment_table';
@@ -24,23 +24,27 @@ export function StreamDetailAttachments({
 }) {
   const [query, setQuery] = useState('');
 
-  const [isAddDashboardFlyoutOpen, setIsAddDashboardFlyoutOpen] = useState(false);
+  const [isAddAttachmentFlyoutOpen, setIsAddAttachmentFlyoutOpen] = useState(false);
 
-  const dashboardsFetch = useDashboardsFetch(definition.stream.name);
-  const { addDashboards, removeDashboards } = useDashboardsApi(definition.stream.name);
+  const attachmentsFetch = useAttachmentsFetch({
+    name: definition.stream.name,
+  });
+  const { addAttachments, removeAttachments } = useAttachmentsApi({
+    name: definition.stream.name,
+  });
 
   const [isUnlinkLoading, setIsUnlinkLoading] = useState(false);
-  const linkedDashboards = useMemo(() => {
-    return dashboardsFetch.value?.dashboards ?? [];
-  }, [dashboardsFetch.value?.dashboards]);
+  const linkedAttachments = useMemo(() => {
+    return attachmentsFetch.value?.attachments ?? [];
+  }, [attachmentsFetch.value?.attachments]);
 
-  const filteredDashboards = useMemo(() => {
-    return linkedDashboards.filter((dashboard) => {
-      return dashboard.title.toLowerCase().includes(query.toLowerCase());
+  const filteredAttachments = useMemo(() => {
+    return linkedAttachments.filter((attachment) => {
+      return attachment.title.toLowerCase().includes(query.toLowerCase());
     });
-  }, [linkedDashboards, query]);
+  }, [linkedAttachments, query]);
 
-  const [selectedDashboards, setSelectedDashboards] = useState<Attachment[]>([]);
+  const [selectedAttachments, setSelectedAttachments] = useState<Attachment[]>([]);
 
   const {
     core: {
@@ -56,19 +60,19 @@ export function StreamDetailAttachments({
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="row" gutterSize="s">
-          {selectedDashboards.length > 0 && (
+          {selectedAttachments.length > 0 && (
             <EuiButton
-              data-test-subj="streamsAppStreamDetailRemoveDashboardButton"
+              data-test-subj="streamsAppStreamDetailRemoveAttachmentButton"
               iconType="trash"
               isLoading={isUnlinkLoading}
               onClick={async () => {
                 try {
                   setIsUnlinkLoading(true);
 
-                  await removeDashboards(selectedDashboards);
-                  dashboardsFetch.refresh();
+                  await removeAttachments(selectedAttachments);
+                  attachmentsFetch.refresh();
 
-                  setSelectedDashboards([]);
+                  setSelectedAttachments([]);
                 } finally {
                   setIsUnlinkLoading(false);
                 }
@@ -93,11 +97,11 @@ export function StreamDetailAttachments({
             }}
           />
           <EuiButton
-            data-test-subj="streamsAppStreamDetailAddDashboardButton"
+            data-test-subj="streamsAppStreamDetailAddAttachmentButton"
             iconType="plusInCircle"
             disabled={!canLinkAttachments}
             onClick={() => {
-              setIsAddDashboardFlyoutOpen(true);
+              setIsAddAttachmentFlyoutOpen(true);
             }}
           >
             {i18n.translate('xpack.streams.streamDetailAttachmentView.addAnAttachmentButtonLabel', {
@@ -109,23 +113,23 @@ export function StreamDetailAttachments({
       <EuiFlexItem>
         <AttachmentsTable
           entityId={definition?.stream.name}
-          attachments={filteredDashboards}
-          loading={dashboardsFetch.loading}
-          selectedAttachments={selectedDashboards}
-          setSelectedAttachments={canLinkAttachments ? setSelectedDashboards : undefined}
-          dataTestSubj="streamsAppStreamDetailDashboardsTable"
+          attachments={filteredAttachments}
+          loading={attachmentsFetch.loading}
+          selectedAttachments={selectedAttachments}
+          setSelectedAttachments={canLinkAttachments ? setSelectedAttachments : undefined}
+          dataTestSubj="streamsAppStreamDetailAttachmentsTable"
         />
-        {definition && isAddDashboardFlyoutOpen ? (
+        {definition && isAddAttachmentFlyoutOpen ? (
           <AddAttachmentFlyout
-            linkedAttachments={linkedDashboards}
+            linkedAttachments={linkedAttachments}
             entityId={definition.stream.name}
-            onAddAttachments={async (dashboards) => {
-              await addDashboards(dashboards);
-              dashboardsFetch.refresh();
-              setIsAddDashboardFlyoutOpen(false);
+            onAddAttachments={async (attachments) => {
+              await addAttachments(attachments);
+              attachmentsFetch.refresh();
+              setIsAddAttachmentFlyoutOpen(false);
             }}
             onClose={() => {
-              setIsAddDashboardFlyoutOpen(false);
+              setIsAddAttachmentFlyoutOpen(false);
             }}
           />
         ) : null}
