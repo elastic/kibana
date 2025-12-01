@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, combineLatestWith, Subject } from 'rxjs';
 import type * as H from 'history';
@@ -66,6 +67,10 @@ import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachmen
 import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateAttachmentType } from './threat_intelligence/modules/cases/utils/attachments';
 import { defaultDeepLinks } from './app/links/default_deep_links';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaContextProvider } from './common/lib/kibana';
+import { AgentBuilderNavControl } from './agent_builder/components/agent_builder_nav_control';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -257,7 +262,39 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.services.start(core, plugins);
     this.registerFleetExtensions(core, plugins);
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
+
+    // Register agent builder nav control if feature flag is enabled
+    if (this.experimentalFeatures.agentBuilderEnabled && plugins.onechat) {
+      this.registerAgentBuilderNavControl(core, plugins);
+    }
+
     return this.contract.getStartContract(core);
+  }
+
+  private registerAgentBuilderNavControl(core: CoreStart, plugins: StartPlugins) {
+    if (!plugins.onechat) {
+      return;
+    }
+
+    core.chrome.navControls.registerRight({
+      order: 1001,
+      mount: (element) => {
+        ReactDOM.render(
+          <I18nProvider>
+            <KibanaThemeProvider {...core}>
+              <KibanaContextProvider services={{ ...core, ...plugins }}>
+                <AgentBuilderNavControl />
+              </KibanaContextProvider>
+            </KibanaThemeProvider>
+          </I18nProvider>,
+          element
+        );
+
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
+      },
+    });
   }
 
   public stop() {

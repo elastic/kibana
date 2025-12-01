@@ -11,7 +11,6 @@ import React, { Suspense } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AssistantOverlay } from '@kbn/elastic-assistant';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/assistant_nav_link';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type {
@@ -25,6 +24,7 @@ import { licenseService } from './src/hooks/licence/use_licence';
 import { ReactQueryClientProvider } from './src/context/query_client_context/elastic_assistant_query_client_provider';
 import { AssistantSpaceIdProvider } from './src/context/assistant_space_id/assistant_space_id_provider';
 import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
+import { ConditionalAssistantNavLink } from './src/components/conditional_assistant_nav_link/conditional_assistant_nav_link';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
@@ -80,6 +80,8 @@ export class ElasticAssistantPublicPlugin
     coreStart.chrome.navControls.registerRight({
       order: 1001,
       mount: (target) => {
+        // Always mount synchronously - the ConditionalAssistantNavLink component
+        // will handle checking capabilities internally and conditionally rendering
         const startService = startServices();
         return this.mountAIAssistantButton(target, coreStart, startService);
       },
@@ -112,7 +114,7 @@ export class ElasticAssistantPublicPlugin
                     completeOpenChat={completeOpenChat}
                   >
                     <Suspense fallback={null}>
-                      <AssistantNavLink />
+                      <ConditionalAssistantNavLink />
                       <AssistantOverlay />
                     </Suspense>
                   </AssistantProvider>
@@ -124,8 +126,6 @@ export class ElasticAssistantPublicPlugin
       </I18nProvider>,
       targetDomElement
     );
-
-    return () => ReactDOM.unmountComponentAtNode(targetDomElement);
   }
 
   public stop() {

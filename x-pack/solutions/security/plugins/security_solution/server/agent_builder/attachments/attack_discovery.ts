@@ -85,12 +85,14 @@ Complete in order:
    - Look for alert IDs referenced in the attack discovery
    - These may be mentioned in the details or summary sections
 
-4. Query ENTITY RISK SCORE for entities:
+4. IMPORTANT Skip step if ${sanitizeToolId(SECURITY_ENTITY_RISK_SCORE_TOOL_ID)} is unavailable!
+   Query ENTITY RISK SCORE for entities:
    Tool: ${sanitizeToolId(SECURITY_ENTITY_RISK_SCORE_TOOL_ID)}
    Parameters: { identifierType: "host.name", identifier: "[host name]" }
    Repeat for each unique host.name, user.name found
 
-5. Query SECURITY LABS for MITRE tactics/techniques:
+5. IMPORTANT Skip step if ${sanitizeToolId(SECURITY_LABS_SEARCH_TOOL_ID)} is unavailable!
+   Query SECURITY LABS for MITRE tactics/techniques:
    Tool: ${sanitizeToolId(SECURITY_LABS_SEARCH_TOOL_ID)}
    Parameters: { query: "Find Security Labs articles about [MITRE tactic or technique]" }
 
