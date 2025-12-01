@@ -24,15 +24,14 @@ import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { MessageEditor, useMessageEditor } from './message_editor';
 import { InputActions } from './input_actions';
+import { roundedBorderRadiusStyles } from '../conversation.styles';
 
 const INPUT_MIN_HEIGHT = '150px';
-// Non-standard EUI border radius
-const INPUT_BORDER_RADIUS = '6px';
 const useInputBorderStyles = () => {
   const { euiTheme } = useEuiTheme();
   return css`
     border: ${euiTheme.border.thin};
-    border-radius: ${INPUT_BORDER_RADIUS};
+    ${roundedBorderRadiusStyles}
     border-color: ${euiTheme.colors.borderBaseSubdued};
     &:focus-within[aria-disabled='false'] {
       border-color: ${euiTheme.colors.primary};

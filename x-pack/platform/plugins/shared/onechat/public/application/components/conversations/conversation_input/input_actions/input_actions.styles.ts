@@ -7,13 +7,13 @@
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { useConversationBorderRadius } from '../../conversation.styles';
+import { roundedBorderRadiusStyles } from '../../conversation.styles';
 
 export const usePopoverButtonStyles = ({ open }: { open: boolean }) => {
   const { euiTheme } = useEuiTheme();
   const popoverButtonStyles = css`
     border-style: none;
-    ${useConversationBorderRadius('m')}
+    ${roundedBorderRadiusStyles}
   `;
   const openPopoverStyles = css`
     border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.borderStrongText};
