@@ -37,7 +37,7 @@ export const EmptyState = ({ onCreateTemplate }: { onCreateTemplate: () => void 
           <p>
             <FormattedMessage
               id="xpack.createClassicStreamFlyout.selectTemplateStep.emptyState.body"
-              defaultMessage="To create a new classic stream, you must select an index template that will be used to set the initial settings for the new stream. Currently, you don’t have any index templates. Create a new index template first, then return here to create a classic stream."
+              defaultMessage="Classic streams require an index template to set their initial settings, but you don’t have any index templates yet. Create an index template first, then return here to create a classic stream."
             />
           </p>
         }

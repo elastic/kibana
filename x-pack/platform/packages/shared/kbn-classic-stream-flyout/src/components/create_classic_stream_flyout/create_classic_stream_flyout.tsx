@@ -133,7 +133,7 @@ export const CreateClassicStreamFlyout = ({
           <h3 id="create-classic-stream-flyout-title">
             <FormattedMessage
               id="xpack.createClassicStreamFlyout.title"
-              defaultMessage="Create Classic Stream"
+              defaultMessage="Create classic stream"
             />
           </h3>
         </EuiTitle>

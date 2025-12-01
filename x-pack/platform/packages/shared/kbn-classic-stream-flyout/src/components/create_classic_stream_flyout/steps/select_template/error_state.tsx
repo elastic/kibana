@@ -28,7 +28,7 @@ export const ErrorState = ({ onRetryLoadTemplates }: { onRetryLoadTemplates: () 
         title={i18n.translate(
           'xpack.createClassicStreamFlyout.selectTemplateStep.errorState.title',
           {
-            defaultMessage: "Uh-oh, we weren't able to fetch your index templates",
+            defaultMessage: "We couldn't fetch your index templates",
           }
         )}
         color="warning"
@@ -39,7 +39,7 @@ export const ErrorState = ({ onRetryLoadTemplates }: { onRetryLoadTemplates: () 
         <p>
           <FormattedMessage
             id="xpack.createClassicStreamFlyout.selectTemplateStep.errorState.body"
-            defaultMessage="Don't worry, it's not your fault. Something has gone wrong on our end. Give it a moment and then try again to fetch the available index templates."
+            defaultMessage="Something has gone wrong on our end. Give it a moment, then try to fetch the available index templates again."
           />
         </p>
         <EuiButton
@@ -49,7 +49,7 @@ export const ErrorState = ({ onRetryLoadTemplates }: { onRetryLoadTemplates: () 
         >
           <FormattedMessage
             id="xpack.createClassicStreamFlyout.selectTemplateStep.errorState.retryButton"
-            defaultMessage="Retry"
+            defaultMessage="Try again"
           />
         </EuiButton>
       </EuiCallOut>
