@@ -82,8 +82,13 @@ export const getIndicesStats = async (
 
   const [, cloudDefendPluginStartDeps] = await coreServices;
 
-  const { status, latestPackageVersion, installedPackagePolicies, healthyAgents } =
-    await getCloudDefendStatus({
+  let status = 'not_installed';
+  let latestPackageVersion = 'unknown';
+  let installedPackagePolicies = 0;
+  let healthyAgents = 0;
+
+  try {
+    const statusResult = await getCloudDefendStatus({
       logger,
       esClient,
       soClient,
@@ -92,6 +97,14 @@ export const getIndicesStats = async (
       packagePolicyService: cloudDefendPluginStartDeps.fleet.packagePolicyService,
       packageService: cloudDefendPluginStartDeps.fleet.packageService,
     });
+
+    status = statusResult.status;
+    latestPackageVersion = statusResult.latestPackageVersion;
+    installedPackagePolicies = statusResult.installedPackagePolicies;
+    healthyAgents = statusResult.healthyAgents;
+  } catch (error) {
+    logger.warn(`Failed to get cloud defend status: ${error.message}`);
+  }
 
   return {
     alerts,
