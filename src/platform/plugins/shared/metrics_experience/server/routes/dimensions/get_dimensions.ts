@@ -45,36 +45,16 @@ export const getDimensions = async ({
     return [];
   }
 
-  // Build query using the esql composer with .pipe() method
-
-  // query.pipe`WHERE ??dim IS NOT NULL`;
-
-  // Add WHERE command from Discover query if present
-  // Use string pipe syntax to avoid type issues with AST nodes
-  // if (originalQuery) {
-  //   const whereCommand = extractWhereCommand(originalQuery);
-  //   if (whereCommand) {
-  //     query.pipe(BasicPrettyPrinter.print(whereCommand));
-  //   }
-  // }
-
   // New: Build query using the platform @kbn/esql-ast
   const dim = dimensions[0];
-  const query = esql.from(indices).pipe`EVAL ??dim = ??dim::string`.sort(`??dim`).limit(20);
-  // I set it as param so we can use the ??dim template literal in the query
-  query.setParam('dim', dim);
-  
   const whereCommandDiscover = originalQuery ? extractWhereCommand(originalQuery) : undefined;
-  if (whereCommandDiscover) {
-    const whereCommandString = BasicPrettyPrinter.print(whereCommandDiscover);
-    // Remove the "WHERE " prefix from the whereCommandString
-    query.setParam('whereCommand', whereCommandString.substring(6));
-    query.pipe`WHERE ${esql.exp`??whereCommand`} AND ??dim IS NOT NULL`;
-  } else {
-    query.pipe`WHERE ??dim IS NOT NULL`;
+  
+  const query = esql.from(indices).pipe`EVAL ??dim = ??dim::string`.pipe`WHERE ??dim IS NOT NULL`
+  
+  if (whereCommandDiscover) {;
+    query.pipe(BasicPrettyPrinter.print(whereCommandDiscover));
   }
-  query.pipe`STATS BY ??dim`;
-
+  query.pipe`STATS BY ??dim`.sort(`??dim`,).limit(20).setParam('dim', dim);
   console.log('query new',query.inlineParams().print('wrapping'));
   
   // Old: Build query using the esql composer
