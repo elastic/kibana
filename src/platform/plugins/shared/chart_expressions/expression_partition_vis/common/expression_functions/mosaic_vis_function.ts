@@ -179,7 +179,6 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
       value: {
         visData: context,
         visConfig,
-        syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
         visType: ChartTypes.MOSAIC,
         params: {
           listenOnChange: true,

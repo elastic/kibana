@@ -119,7 +119,6 @@ export interface PartitionChartProps {
   visData: Datatable;
   visType: ChartTypes;
   visConfig: PartitionVisParams;
-  syncColors: boolean;
   canNavigateToLens?: boolean;
   overrides?: AllowedPartitionOverrides & AllowedSettingsOverrides & AllowedChartOverrides;
 }

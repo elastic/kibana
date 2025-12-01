@@ -206,7 +206,6 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       value: {
         visData: context,
         visConfig,
-        syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
         visType: args.isDonut ? ChartTypes.DONUT : ChartTypes.PIE,
         canNavigateToLens: Boolean(handlers?.variables?.canNavigateToLens),
         params: {

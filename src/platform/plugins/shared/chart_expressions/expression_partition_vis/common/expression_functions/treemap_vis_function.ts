@@ -185,7 +185,6 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       value: {
         visData: context,
         visConfig,
-        syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
         visType: ChartTypes.TREEMAP,
         params: {
           listenOnChange: true,

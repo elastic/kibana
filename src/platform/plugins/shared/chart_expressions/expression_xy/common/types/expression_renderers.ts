@@ -16,9 +16,6 @@ import type { AllowedXYOverrides, XYProps } from './expression_functions';
 
 export interface XYChartProps {
   args: XYProps;
-  syncTooltips: boolean;
-  syncCursor: boolean;
-  syncColors: boolean;
   canNavigateToLens?: boolean;
   overrides?: AllowedXYOverrides & AllowedSettingsOverrides & AllowedChartOverrides;
 }

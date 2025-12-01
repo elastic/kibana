@@ -101,8 +101,6 @@ export type HeatmapInput = Datatable;
 export interface HeatmapExpressionProps {
   data: Datatable;
   args: HeatmapArguments;
-  syncTooltips: boolean;
-  syncCursor: boolean;
   canNavigateToLens?: boolean;
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 }

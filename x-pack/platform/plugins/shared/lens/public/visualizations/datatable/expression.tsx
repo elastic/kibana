@@ -189,7 +189,7 @@ export const getDatatableRenderer = (dependencies: {
           interactive={isInteractive()}
           theme={dependencies.core.theme}
           renderComplete={renderComplete}
-          syncColors={config.syncColors}
+          syncColors={handlers.isSyncColorsEnabled()}
         />
       </KibanaRenderContextProvider>,
       domNode

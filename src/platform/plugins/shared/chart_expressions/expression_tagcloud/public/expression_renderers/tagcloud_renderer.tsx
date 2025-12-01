@@ -118,7 +118,7 @@ export const tagcloudRenderer: (
                 palettesRegistry={palettesRegistry}
                 renderComplete={renderComplete}
                 fireEvent={handlers.event}
-                syncColors={config.syncColors}
+                syncColors={handlers.isSyncColorsEnabled()}
                 overrides={config.overrides}
                 isDarkMode={useKibanaIsDarkMode()}
               />

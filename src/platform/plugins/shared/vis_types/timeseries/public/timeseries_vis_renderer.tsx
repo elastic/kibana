@@ -64,14 +64,7 @@ export const getTimeseriesVisRenderer: (deps: {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
-    const {
-      visParams: model,
-      visData,
-      syncColors,
-      syncTooltips,
-      syncCursor,
-      canNavigateToLens,
-    } = config;
+    const { visParams: model, visData, canNavigateToLens } = config;
     const showNoResult = !checkIfDataExists(visData, model);
 
     const renderComplete = () => {
@@ -112,9 +105,9 @@ export const getTimeseriesVisRenderer: (deps: {
             handlers={handlers}
             model={model}
             visData={visData as TimeseriesVisData}
-            syncColors={syncColors}
-            syncTooltips={syncTooltips}
-            syncCursor={syncCursor}
+            syncColors={handlers.isSyncColorsEnabled()}
+            syncTooltips={handlers.isSyncTooltipsEnabled()}
+            syncCursor={handlers.isSyncCursorEnabled()}
             uiState={handlers.uiState! as PersistedState}
             initialRender={renderComplete}
           />

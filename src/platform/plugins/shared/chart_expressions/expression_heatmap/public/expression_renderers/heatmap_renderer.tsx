@@ -137,8 +137,8 @@ export const heatmapRenderer: (
             uiState={handlers.uiState as PersistedState}
             interactive={isInteractive()}
             chartsActiveCursorService={plugins.charts.activeCursor}
-            syncTooltips={config.syncTooltips}
-            syncCursor={config.syncCursor}
+            syncTooltips={handlers.isSyncTooltipsEnabled()}
+            syncCursor={handlers.isSyncCursorEnabled()}
             onClickMultiValue={onClickMultiValue}
           />
         </div>

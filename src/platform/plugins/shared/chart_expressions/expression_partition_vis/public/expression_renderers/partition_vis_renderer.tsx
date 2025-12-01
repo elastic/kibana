@@ -90,7 +90,7 @@ export const getPartitionVisRenderer: (
   reuseDomNode: true,
   render: async (
     domNode,
-    { visConfig, visData, visType, syncColors, canNavigateToLens, overrides },
+    { visConfig, visData, visType, canNavigateToLens, overrides },
     handlers
   ) => {
     const performanceTracker = createPerformanceTracker({
@@ -160,7 +160,7 @@ export const getPartitionVisRenderer: (
             interactive={handlers.isInteractive()}
             uiState={handlers.uiState as PersistedState}
             services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}
-            syncColors={syncColors}
+            syncColors={handlers.isSyncColorsEnabled()}
             columnCellValueActions={columnCellValueActions}
             overrides={overrides}
             hasOpenedOnAggBasedEditor={hasOpenedOnAggBasedEditor}

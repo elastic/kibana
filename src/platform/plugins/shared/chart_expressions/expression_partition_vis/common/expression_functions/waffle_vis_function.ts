@@ -180,7 +180,6 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       value: {
         visData: context,
         visConfig,
-        syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
         visType: ChartTypes.WAFFLE,
         params: {
           listenOnChange: true,
