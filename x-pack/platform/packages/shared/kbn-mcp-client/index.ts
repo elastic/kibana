@@ -18,6 +18,3 @@ export type {
   Tool,
   ToolProviderMetadata,
 } from './mcp/src/types';
-
-// Constants
-export { MCP_CONNECTOR_TITLE, MCP_CONNECTOR_TYPE_ID } from './mcp/src/constants';
