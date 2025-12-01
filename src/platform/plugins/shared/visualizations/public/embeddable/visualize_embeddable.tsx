@@ -119,9 +119,20 @@ export const getVisualizeEmbeddableFactory: (deps: {
       expression: '',
     });
     // Track sync settings separately to avoid full expression re-execution
-    const syncColors$ = new BehaviorSubject<boolean | undefined>(undefined);
-    const syncCursor$ = new BehaviorSubject<boolean | undefined>(undefined);
-    const syncTooltips$ = new BehaviorSubject<boolean | undefined>(undefined);
+    // Initialize with current parent API values
+    const initialSyncColors = apiPublishesSettings(parentApi)
+      ? parentApi.settings.syncColors$.getValue()
+      : undefined;
+    const initialSyncCursor = apiPublishesSettings(parentApi)
+      ? parentApi.settings.syncCursor$.getValue()
+      : undefined;
+    const initialSyncTooltips = apiPublishesSettings(parentApi)
+      ? parentApi.settings.syncTooltips$.getValue()
+      : undefined;
+
+    const syncColors$ = new BehaviorSubject<boolean | undefined>(initialSyncColors);
+    const syncCursor$ = new BehaviorSubject<boolean | undefined>(initialSyncCursor);
+    const syncTooltips$ = new BehaviorSubject<boolean | undefined>(initialSyncTooltips);
 
     const expressionAbortController$ = new BehaviorSubject<AbortController>(new AbortController());
     let getExpressionParams: () => ReturnType<typeof getExpressionRendererProps> = async () => ({
