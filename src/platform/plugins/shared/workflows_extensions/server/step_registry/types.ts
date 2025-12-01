@@ -51,12 +51,6 @@ export type ServerStepDefinition<TCommon extends CommonStepDefinition = CommonSt
      * Input and output types are automatically inferred from the schemas.
      */
     handler: StepHandler<InferStepInput<TCommon>, InferStepOutput<TCommon>>;
-
-    /**
-     * Optional timeout for this step type (e.g., '5m', '30s')
-     * If not specified, uses workflow-level or default timeout
-     */
-    timeout?: string;
   };
 
 /**

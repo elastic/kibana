@@ -135,8 +135,6 @@ const myStepHandler: StepHandler = async (context) => {
 export const myStepDefinition: ServerStepDefinition = {
   ...myStepCommonDefinition,
   handler: myStepHandler,
-  // Optional: specify a timeout for this step type
-  timeout: '5m',
 };
 ```
 

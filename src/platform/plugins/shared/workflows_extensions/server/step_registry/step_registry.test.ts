@@ -18,7 +18,6 @@ const defaultDefinition: ServerStepDefinition = {
   inputSchema: z.object({ name: z.string() }),
   outputSchema: z.object({ name: z.string() }),
   handler,
-  timeout: '5m',
 };
 
 describe('ServerStepRegistry', () => {
