@@ -12,6 +12,7 @@ import type {
   LegacyMetricState as LegacyMetricVisualizationState,
   PersistedIndexPatternLayer,
   TextBasedLayer,
+  TypedLensSerializedState,
 } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -132,7 +133,18 @@ function getValueColumns(layer: LegacyMetricStateESQL) {
   return [getValueColumn(ACCESSOR, layer.metric.column, 'number')];
 }
 
-export function fromAPItoLensState(config: LegacyMetricState): LensAttributes {
+type LegacyMetricAttributes = Extract<
+  TypedLensSerializedState['attributes'],
+  { visualizationType: 'lnsLegacyMetric' }
+>;
+
+type LegacyMetricAttributesWithoutFiltersAndQuery = Omit<LegacyMetricAttributes, 'state'> & {
+  state: Omit<LegacyMetricAttributes['state'], 'filters' | 'query'>;
+};
+
+export function fromAPItoLensState(
+  config: LegacyMetricState
+): LegacyMetricAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
     buildFormBasedLayer(cfg as LegacyMetricStateNoESQL);
 
@@ -155,8 +167,6 @@ export function fromAPItoLensState(config: LegacyMetricState): LensAttributes {
     state: {
       datasourceStates: layers,
       internalReferences,
-      filters: [],
-      query: { language: 'kuery', query: '' },
       visualization,
       adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },

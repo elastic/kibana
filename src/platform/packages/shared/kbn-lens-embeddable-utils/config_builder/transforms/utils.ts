@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
   FormBasedLayer,
@@ -22,7 +21,7 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import type { LensAttributes, LensDatatableDataset } from '../types';
-import type { LensApiState, NarrowByType } from '../schema';
+import type { LensApiAllOperations, LensApiState, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
 import { getMetricApiColumnFromLensState } from './columns/metric';
 import type { AnyLensStateColumn } from './columns/types';
@@ -32,10 +31,12 @@ import {
   LENS_SAMPLING_DEFAULT_VALUE,
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from '../schema/constants';
+import type { LayerSettingsSchema } from '../schema/shared';
 import type { LensApiFilterType, UnifiedSearchFilterType } from '../schema/filter';
 import type { DatasetType, DatasetTypeESQL, DatasetTypeNoESQL } from '../schema/dataset';
+import type { LayerTypeESQL } from '../schema/charts/xy';
 
-type DataSourceStateLayer =
+export type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
   | PersistedIndexPatternLayer
   | TextBasedPersistedState['layers'][0];
@@ -56,7 +57,7 @@ export const getDefaultReferences = (
 };
 
 // Need to dance a bit to satisfy TypeScript
-function convertToTypedLayerColumns(layer: FormBasedLayer): {
+function convertToTypedLayerColumns(layer: Omit<FormBasedLayer, 'indexPatternId'>): {
   columns: Record<string, AnyLensStateColumn>;
 } {
   // @TODO move it to satisfies
@@ -69,13 +70,17 @@ function convertToTypedLayerColumns(layer: FormBasedLayer): {
  * @param layer
  * @returns
  */
-export const operationFromColumn = (columnId: string, layer: FormBasedLayer) => {
+export const operationFromColumn = (
+  columnId: string,
+  layer: Omit<FormBasedLayer, 'indexPatternId'>
+): LensApiAllOperations | undefined => {
   const typedLayer = convertToTypedLayerColumns(layer);
   const column = typedLayer.columns[columnId];
   if (!column) return;
 
   // map columns to array of { column, id }
   const columnMap = Object.entries(layer.columns).map(([id, c]) => ({
+    // need to cast here as the GenericIndexPatternColumn type is not compatible with Reference based column types
     column: c as AnyLensStateColumn,
     id,
   }));
@@ -85,10 +90,24 @@ export const operationFromColumn = (columnId: string, layer: FormBasedLayer) => 
   return getMetricApiColumnFromLensState(column, typedLayer.columns);
 };
 
+export function isFormBasedLayer(
+  layer: DataSourceStateLayer
+): layer is Omit<FormBasedLayer, 'indexPatternId'> {
+  return 'columnOrder' in layer;
+}
+
 export function isTextBasedLayer(
-  layer: LensApiState | FormBasedLayer | TextBasedLayer
+  layer: LensApiState | DataSourceStateLayer
 ): layer is TextBasedLayer {
   return 'index' in layer && 'query' in layer;
+}
+
+function generateAdHocDataViewId(dataView: {
+  type: 'adHocDataView';
+  index: string;
+  timeFieldName: string;
+}) {
+  return `${dataView.index}-${dataView.timeFieldName ?? 'no_time_field'}`;
 }
 
 function getAdHocDataViewSpec(dataView: {
@@ -97,7 +116,8 @@ function getAdHocDataViewSpec(dataView: {
   timeFieldName: string;
 }) {
   return {
-    id: uuidv4({}),
+    // Improve id genertation to be more predictable and hit cache more often
+    id: generateAdHocDataViewId(dataView),
     title: dataView.index,
     name: dataView.index,
     timeFieldName: dataView.timeFieldName,
@@ -130,7 +150,10 @@ export const getAdhocDataviews = (
   // dedupe and map multiple layer references to the same ad hoc dataview
   for (const [layerId, dataViewEntry] of adHocDataViewsFiltered) {
     if (!internalReferencesMap.has(dataViewEntry)) {
-      internalReferencesMap.set(dataViewEntry, { layerIds: [], id: uuidv4({}) });
+      internalReferencesMap.set(dataViewEntry, {
+        layerIds: [],
+        id: generateAdHocDataViewId(dataViewEntry),
+      });
     }
     const internalRef = internalReferencesMap.get(dataViewEntry)!;
     internalRef.layerIds.push(layerId);
@@ -138,7 +161,7 @@ export const getAdhocDataviews = (
 
   const adHocDataViews: Record<string, DataViewSpec> = {};
   const internalReferences: SavedObjectReference[] = [];
-  for (const [baseSpec, { layerIds, id }] of internalReferencesMap.entries()) {
+  for (const [baseSpec, { layerIds, id }] of Array.from(internalReferencesMap.entries())) {
     adHocDataViews[id] = getAdHocDataViewSpec(baseSpec);
     for (const layerId of layerIds) {
       internalReferences.push(createDataViewReference(id, layerId));
@@ -155,25 +178,36 @@ export function buildDatasetStateESQL(layer: TextBasedLayer): DatasetTypeESQL {
   };
 }
 
+export function isDataViewSpec(spec: unknown): spec is DataViewSpec {
+  return spec != null && typeof spec === 'object' && 'title' in spec;
+}
+
+function getReferenceCriteria(layerId: string) {
+  return (ref: SavedObjectReference) => ref.name === `${LENS_LAYER_SUFFIX}${layerId}`;
+}
+
 export function buildDatasetStateNoESQL(
-  layer: FormBasedLayer,
+  layer: FormBasedLayer | FormBasedLayer | Omit<FormBasedLayer, 'indexPatternId'>,
   layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[] = []
 ): DatasetTypeNoESQL {
-  const adhocReference = (adhocReferences ?? []).find(
-    (ref) => ref.name === `${LENS_LAYER_SUFFIX}${layerId}`
-  );
+  const referenceCriteria = getReferenceCriteria(layerId);
+  const adhocReference = adhocReferences?.find(referenceCriteria);
+
   if (adhocReference && adHocDataViews?.[adhocReference.id]) {
-    return {
-      type: 'index',
-      index: adHocDataViews[adhocReference.id].title!,
-      time_field: adHocDataViews[adhocReference.id].timeFieldName ?? LENS_DEFAULT_TIME_FIELD,
-    };
+    const dataViewSpec = adHocDataViews[adhocReference.id];
+    if (isDataViewSpec(dataViewSpec)) {
+      return {
+        type: 'index',
+        index: dataViewSpec.title!,
+        time_field: dataViewSpec.timeFieldName ?? LENS_DEFAULT_TIME_FIELD,
+      };
+    }
   }
 
-  const reference = (references ?? []).find((ref) => ref.name === `${LENS_LAYER_SUFFIX}${layerId}`);
+  const reference = references?.find(referenceCriteria);
   if (reference) {
     return {
       type: 'dataView',
@@ -183,7 +217,7 @@ export function buildDatasetStateNoESQL(
 
   return {
     type: 'dataView',
-    id: layer.indexPatternId,
+    id: 'indexPatternId' in layer ? layer.indexPatternId ?? '' : '',
   };
 }
 
@@ -194,7 +228,7 @@ export function buildDatasetStateNoESQL(
  * @returns Lens API Dataset configuration
  */
 export function buildDatasetState(
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: FormBasedLayer | FormBasedLayer | Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
@@ -231,7 +265,7 @@ export function isSingleLayer(
  * @param dataViewsAPI
  * @returns
  */
-export function getDatasetIndex(dataset: LensApiState['dataset']) {
+export function getDatasetIndex(dataset: DatasetType) {
   const timeFieldName: string = LENS_DEFAULT_TIME_FIELD;
   switch (dataset.type) {
     case 'index':
@@ -258,20 +292,20 @@ export function getDatasetIndex(dataset: LensApiState['dataset']) {
 
 // internal function used to build datasource states layer
 function buildDatasourceStatesLayer(
-  layer: LensApiState,
+  layer: unknown,
   i: number,
-  dataset: LensApiState['dataset'],
-  index: { index: string; timeFieldName: string },
-  buildDataLayers: (
+  dataset: DatasetType,
+  datasetIndex: { index: string; timeFieldName: string },
+  buildDataLayer: (
     config: unknown,
     i: number,
     index: { index: string; timeFieldName: string }
   ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
-  getValueColumns: (config: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
+  getValueColumns: (layer: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
 ): ['textBased' | 'formBased', DataSourceStateLayer | undefined] {
   function buildValueLayer(
-    config: LensApiState,
-    ds: NarrowByType<LensApiState['dataset'], 'table'>
+    config: unknown,
+    ds: NarrowByType<DatasetType, 'table'>
   ): TextBasedPersistedState['layers'][0] {
     const table = ds.table as LensDatatableDataset;
     const newLayer = {
@@ -292,13 +326,13 @@ function buildDatasourceStatesLayer(
   }
 
   function buildESQLLayer(
-    config: LensApiState,
-    ds: NarrowByType<LensApiState['dataset'], 'esql'>
+    config: unknown,
+    ds: NarrowByType<DatasetType, 'esql'>
   ): TextBasedPersistedState['layers'][0] {
     const columns = getValueColumns(config, i);
 
     return {
-      index: index.index,
+      index: datasetIndex.index,
       query: { esql: ds.query },
       timeField: LENS_DEFAULT_TIME_FIELD,
       columns,
@@ -311,7 +345,7 @@ function buildDatasourceStatesLayer(
   if (dataset.type === 'table') {
     return ['textBased', buildValueLayer(layer, dataset)];
   }
-  return ['formBased', buildDataLayers(layer, i, index)];
+  return ['formBased', buildDataLayer(layer, i, datasetIndex)];
 }
 
 /**
@@ -327,7 +361,7 @@ function buildDatasourceStatesLayer(
  */
 export const buildDatasourceStates = (
   config: LensApiState,
-  buildFormulaLayers: (
+  buildDataLayers: (
     config: unknown,
     i: number,
     index: { index: string; timeFieldName: string }
@@ -336,18 +370,21 @@ export const buildDatasourceStates = (
 ) => {
   let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 
-  const mainDataset = config.dataset;
+  // XY charts have dataset encoded per layer not at the root level
+  const mainDataset = 'dataset' in config && config.dataset;
   const usedDataviews: Record<
     string,
     | { type: 'dataView'; id: string }
     | { type: 'adHocDataView'; index: string; timeFieldName: string }
   > = {};
   // a few charts types support multiple layers
-  const configLayers = 'layers' in config ? (config.layers as LensApiState[]) : [config];
+  const configLayers = 'layers' in config ? config.layers : [config];
+  // @ts-expect-error upgrade typescript v5.9.3
   for (let i = 0; i < configLayers.length; i++) {
+    // @ts-expect-error upgrade typescript v5.9.3
     const layer = configLayers[i];
-    const layerId = `layer_${i}`;
-    const dataset = layer.dataset || mainDataset;
+    const layerId = `${layer.type ?? 'layer'}_${i}`;
+    const dataset = 'dataset' in layer ? layer.dataset : mainDataset;
 
     if (!dataset) {
       throw Error('dataset must be defined');
@@ -360,7 +397,7 @@ export const buildDatasourceStates = (
       i,
       dataset,
       index!,
-      buildFormulaLayers,
+      buildDataLayers,
       getValueColumns
     );
     if (layerConfig) {
@@ -370,22 +407,26 @@ export const buildDatasourceStates = (
           layers: isSingleLayer(layerConfig)
             ? { ...layers[type]?.layers, [layerId]: layerConfig }
             : // metric chart can return 2 layers (one for the metric and one for the trendline)
-              { ...layerConfig },
+              { ...layers[type]?.layers, ...layerConfig },
         },
       };
-    }
 
-    // keep record of all dataviews used by layers
-    if (index) {
-      Object.keys(layers[type]?.layers ?? []).forEach((id) => {
-        usedDataviews[id] =
-          dataset.type === 'dataView'
-            ? { type: 'dataView', id: dataset.id }
-            : {
-                type: 'adHocDataView',
-                ...index,
-              };
-      });
+      // keep record of all dataviews used by layers
+      if (index) {
+        const newLayerIds =
+          isSingleLayer(layerConfig) || Object.keys(layerConfig).length === 0
+            ? [layerId]
+            : Object.keys(layerConfig);
+        for (const id of newLayerIds) {
+          usedDataviews[id] =
+            dataset.type === 'dataView'
+              ? { type: 'dataView', id: dataset.id }
+              : {
+                  type: 'adHocDataView',
+                  ...index,
+                };
+        }
+      }
     }
   }
 
@@ -430,7 +471,7 @@ export const addLayerColumn = (
  */
 export const generateLayer = (
   id: string,
-  options: LensApiState
+  options: LayerSettingsSchema
 ): Record<string, PersistedIndexPatternLayer> => {
   return {
     [id]: {
@@ -459,11 +500,15 @@ export const generateApiLayer = (options: PersistedIndexPatternLayer | TextBased
 export const filtersToApiFormat = (
   filters: Filter[]
 ): (LensApiFilterType | UnifiedSearchFilterType)[] => {
-  return filters.map((filter) => ({
-    language: filter.query?.language,
-    query: filter.query?.query ?? filter.query,
-    meta: {},
-  }));
+  return filters.map((filter) => {
+    const { $state, meta, ...finalFilter } = filter;
+    return {
+      ...(finalFilter.query?.language ? { language: finalFilter.query?.language } : {}),
+      ...('query' in finalFilter
+        ? { query: finalFilter.query?.query ?? finalFilter.query }
+        : finalFilter),
+    };
+  });
 };
 
 export const queryToApiFormat = (query: Query): LensApiFilterType | undefined => {
@@ -478,15 +523,17 @@ export const queryToApiFormat = (query: Query): LensApiFilterType | undefined =>
 
 export const filtersToLensState = (
   filters: (LensApiFilterType | UnifiedSearchFilterType)[]
-): Filter[] => {
-  return filters.map((filter) => ({
-    query: { query: filter.query, language: filter?.language },
-    meta: {},
-  }));
+): Required<Filter | Filter['query']>[] => {
+  return filters.map((filter) => {
+    return {
+      ...('query' in filter ? { query: filter.query, language: filter?.language } : filter),
+      meta: {},
+    };
+  });
 };
 
 export const queryToLensState = (query: LensApiFilterType): Query => {
-  return query;
+  return { query: query.query, language: query.language as 'kuery' | 'lucene' };
 };
 
 export const filtersAndQueryToApiFormat = (
@@ -503,15 +550,31 @@ export const filtersAndQueryToApiFormat = (
   };
 };
 
+function extraQueryFromAPIState(state: LensApiState): { esql: string } | Query | undefined {
+  if ('dataset' in state && state.dataset.type === 'esql') {
+    return { esql: state.dataset.query };
+  }
+  if ('layers' in state && Array.isArray(state.layers)) {
+    // pick only the first one for now
+    const esqlLayer = state.layers.find(
+      (layer): layer is LayerTypeESQL => layer.dataset?.type === 'esql'
+    );
+    if (esqlLayer && 'query' in esqlLayer.dataset) {
+      return { esql: esqlLayer.dataset.query };
+    }
+  }
+  if ('query' in state && state.query) {
+    return queryToLensState(state.query satisfies LensApiFilterType);
+  }
+  return undefined;
+}
+
 export const filtersAndQueryToLensState = (state: LensApiState) => {
-  const query =
-    state.dataset.type === 'esql'
-      ? { esql: state.dataset.query }
-      : 'query' in state && state.query
-      ? queryToLensState(state.query satisfies LensApiFilterType)
-      : undefined;
+  const query = extraQueryFromAPIState(state);
   return {
-    ...(state.filters ? { filters: filtersToLensState(state.filters) } : {}),
+    filters: [] satisfies Filter[],
+    // @TODO: rework on these with the shared Filter definition by Presentation team
+    ...(state.filters ? { filters: filtersToLensState(state.filters) as Filter[] } : {}),
     ...(query ? { query } : {}),
   };
 };

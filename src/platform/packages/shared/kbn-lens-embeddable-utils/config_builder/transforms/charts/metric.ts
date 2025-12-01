@@ -13,6 +13,7 @@ import type {
   MetricVisualizationState,
   PersistedIndexPatternLayer,
   TextBasedLayer,
+  TypedLensSerializedState,
 } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -25,12 +26,11 @@ import {
   buildReferences,
   generateApiLayer,
   getAdhocDataviews,
-  getDataSourceLayer,
   operationFromColumn,
 } from '../utils';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import type { LensApiState, MetricState } from '../../schema';
+import type { MetricState } from '../../schema';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
 import type { LensApiBucketOperations } from '../../schema/bucket_ops';
@@ -41,6 +41,7 @@ import {
   getSharedChartLensStateToAPI,
   getSharedChartAPIToLensState,
   getMetricAccessor,
+  getDatasourceLayers,
 } from './utils';
 import {
   fromColorByValueAPIToLensState,
@@ -133,10 +134,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
           maxCols: layer.breakdown_by.columns,
         }
       : {}),
-    collapseFn:
-      layer.breakdown_by && layer.breakdown_by.collapse_by
-        ? layer.breakdown_by.collapse_by
-        : undefined,
+    collapseFn: layer.breakdown_by?.collapse_by,
     ...(layer.metric?.background_chart?.type === 'bar'
       ? {
           maxAccessor: getAccessorName('max'),
@@ -190,7 +188,7 @@ function fromCompareLensStateToAPI(
 
 function reverseBuildVisualizationState(
   visualization: MetricVisualizationState,
-  layer: FormBasedLayer | TextBasedLayer,
+  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
@@ -437,7 +435,16 @@ function getValueColumns(layer: MetricStateESQL) {
   ];
 }
 
-export function fromAPItoLensState(config: MetricState): LensAttributes {
+type MetricAttributes = Extract<
+  TypedLensSerializedState['attributes'],
+  { visualizationType: 'lnsMetric' }
+>;
+
+export type MetricAttributesWithoutFiltersAndQuery = Omit<MetricAttributes, 'state'> & {
+  state: Omit<MetricAttributes['state'], 'filters' | 'query'>;
+};
+
+export function fromAPItoLensState(config: MetricState): MetricAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
     buildFormBasedLayer(cfg as MetricStateNoESQL);
 
@@ -460,20 +467,21 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
     state: {
       datasourceStates: layers,
       internalReferences,
-      filters: [],
-      query: { language: 'kuery', query: '' },
       visualization,
       adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },
   };
 }
 
-export function fromLensStateToAPI(
-  config: LensAttributes
-): Extract<LensApiState, { type: 'metric' }> {
+export function fromLensStateToAPI(config: LensAttributes): MetricState {
   const { state } = config;
   const visualization = state.visualization as MetricVisualizationState;
-  const [layerId, layer] = getDataSourceLayer(state);
+  const layers = getDatasourceLayers(state);
+
+  // Layers can be in any order, so make sure to get the main one
+  const [layerId, layer] = Object.entries(layers).find(
+    ([, l]) => !('linkToLayers' in l) || l.linkToLayers == null
+  )!;
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),

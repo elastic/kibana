@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type { MaintenanceWindow } from '../../../../common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 
 import { Frequency } from '@kbn/rrule';
 import { convertFromMaintenanceWindowToForm } from './convert_from_maintenance_window_to_form';
