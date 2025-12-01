@@ -26,12 +26,18 @@ export const createAgentHandler = ({
         browserApiTools,
         structuredOutput,
         outputSchema,
+        configurationOverrides,
       },
       runId,
       abortSignal,
     },
     context
   ) => {
+    const effectiveConfiguration = {
+      ...agent.configuration,
+      ...(configurationOverrides || {}),
+    };
+
     const { round } = await runAgent(
       {
         nextInput,
@@ -40,7 +46,7 @@ export const createAgentHandler = ({
         runId,
         abortSignal,
         agentId: agent.id,
-        agentConfiguration: agent.configuration,
+        agentConfiguration: effectiveConfiguration,
         browserApiTools,
         structuredOutput,
         outputSchema,
