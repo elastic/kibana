@@ -106,13 +106,13 @@ function getSuggestionForColumns(
     allowMixed,
   };
 
-  if (buckets.length > 1) {
+  if (buckets.length >= 1) {
     const [xValue, ...splitBy] = getBucketMappings(table, currentState);
     return getSuggestionsForLayer({
       ...sharedArgs,
       xValue,
       yValues: values,
-      splitBy,
+      splitByColumns: splitBy,
     });
   } else if (buckets.length === 0) {
     const [yValues, [xValue, splitBy]] = partition(
@@ -123,7 +123,7 @@ function getSuggestionForColumns(
       ...sharedArgs,
       xValue,
       yValues,
-      splitBy: splitBy ? [splitBy] : undefined,
+      splitByColumns: splitBy ? [splitBy] : undefined,
     });
   }
 }
@@ -189,7 +189,7 @@ function getSuggestionsForLayer({
   changeType,
   xValue,
   yValues,
-  splitBy,
+  splitByColumns,
   currentState,
   tableLabel,
   keptLayerIds,
@@ -201,7 +201,7 @@ function getSuggestionsForLayer({
   changeType: TableChangeType;
   xValue?: TableSuggestionColumn;
   yValues: TableSuggestionColumn[];
-  splitBy?: TableSuggestionColumn[];
+  splitByColumns?: TableSuggestionColumn[];
   currentState?: XYState;
   tableLabel?: string;
   keptLayerIds: string[];
@@ -213,13 +213,15 @@ function getSuggestionsForLayer({
   const seriesType: SeriesType =
     requestedSeriesType || getSeriesType(currentState, layerId, xValue);
 
+  const splitBy = splitByColumns && splitByColumns.length > 0 ? splitByColumns : undefined;
+
   const options = {
     currentState,
     seriesType,
     layerId,
     title,
     yValues,
-    splitBy,
+    splitByColumns,
     changeType,
     xValue,
     keptLayerIds,
@@ -294,8 +296,11 @@ function getSuggestionsForLayer({
     !seriesType.includes('percentage')
   ) {
     const percentageOptions = { ...options };
-    if (percentageOptions.xValue?.operation.scale === 'ordinal' && !percentageOptions.splitBy) {
-      percentageOptions.splitBy = [percentageOptions.xValue];
+    if (
+      percentageOptions.xValue?.operation.scale === 'ordinal' &&
+      !percentageOptions.splitByColumns
+    ) {
+      percentageOptions.splitByColumns = [percentageOptions.xValue];
       delete percentageOptions.xValue;
     }
     const suggestedSeriesType = asPercentageSeriesType(seriesType);
@@ -304,7 +309,7 @@ function getSuggestionsForLayer({
       buildSuggestion({
         ...options,
         // hide the suggestion if split by is missing
-        hide: !percentageOptions.splitBy,
+        hide: !percentageOptions.splitByColumns,
         seriesType: suggestedSeriesType,
         title: seriesTypeLabels(suggestedSeriesType),
       })
@@ -483,7 +488,7 @@ function buildSuggestion({
   layerId,
   title,
   yValues,
-  splitBy,
+  splitByColumns,
   changeType,
   xValue,
   keptLayerIds,
@@ -496,7 +501,7 @@ function buildSuggestion({
   title: string;
   yValues: TableSuggestionColumn[];
   xValue?: TableSuggestionColumn;
-  splitBy?: TableSuggestionColumn[];
+  splitByColumns?: TableSuggestionColumn[];
   layerId: string;
   changeType: TableChangeType;
   keptLayerIds: string[];
@@ -504,6 +509,8 @@ function buildSuggestion({
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
 }) {
+  let splitBy = splitByColumns && splitByColumns.length > 0 ? splitByColumns : undefined;
+
   if (seriesType.includes('percentage') && xValue?.operation.scale === 'ordinal' && !splitBy) {
     splitBy = [xValue];
     xValue = undefined;
@@ -521,7 +528,7 @@ function buildSuggestion({
     layerId,
     seriesType,
     xAccessor: xValue?.columnId,
-    splitAccessors: splitBy ? splitBy.map((s) => s.columnId) : undefined,
+    splitAccessors: splitBy?.map((s) => s.columnId),
     accessors,
     yConfig:
       existingLayer && 'yConfig' in existingLayer && existingLayer.yConfig
