@@ -18,7 +18,6 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
 import { ruleTemplateMappings } from './rule_template_mappings';
-import { maintenanceWindowMappings } from './maintenance_window_mapping';
 import { getMigrations } from './migrations';
 import { transformRulesForExport } from './transform_rule_for_export';
 import type { RawRule, RawRuleTemplate } from '../types';
@@ -26,23 +25,21 @@ import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import type { RuleTypeRegistry } from '../rule_type_registry';
 export { partiallyUpdateRule, partiallyUpdateRuleWithEs } from './partially_update_rule';
-import {
-  RULES_SETTINGS_SAVED_OBJECT_TYPE,
-  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-} from '../../common';
+import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../../common';
 import {
   adHocRunParamsModelVersions,
   apiKeyPendingInvalidationModelVersions,
-  maintenanceWindowModelVersions,
   ruleModelVersions,
   ruleTemplateModelVersions,
   rulesSettingsModelVersions,
+  gapAutoFillSchedulerModelVersions,
 } from './model_versions';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 export const RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'alerting_rule_template';
 export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';
 export const API_KEY_PENDING_INVALIDATION_TYPE = 'api_key_pending_invalidation';
+export const GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE = 'gap_auto_fill_scheduler';
 
 export const RuleAttributesToEncrypt = ['apiKey'];
 
@@ -156,21 +153,34 @@ export function setupSavedObjects(
   });
 
   savedObjects.registerType({
+    name: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'single',
+    mappings: {
+      dynamic: false,
+      properties: {
+        name: { type: 'keyword' },
+        enabled: { type: 'boolean' },
+        // For searching by exact (type, consumer) pair
+        ruleTypeConsumerPairs: { type: 'keyword' },
+        createdAt: { type: 'date' },
+        updatedAt: { type: 'date' },
+      },
+    },
+    management: {
+      importableAndExportable: false,
+    },
+    modelVersions: gapAutoFillSchedulerModelVersions,
+  });
+
+  savedObjects.registerType({
     name: RULES_SETTINGS_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'single',
     mappings: rulesSettingsMappings,
     modelVersions: rulesSettingsModelVersions,
-  });
-
-  savedObjects.registerType({
-    name: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
-    hidden: true,
-    namespaceType: 'multiple-isolated',
-    mappings: maintenanceWindowMappings,
-    modelVersions: maintenanceWindowModelVersions,
   });
 
   savedObjects.registerType({

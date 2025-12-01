@@ -308,7 +308,7 @@
             "label": "searchGettingStarted",
             "description": [],
             "signature": [
-              "{ readonly visitSearchLabs: string; readonly notebooksExamples: string; }"
+              "{ readonly visitSearchLabs: string; readonly notebooksExamples: string; readonly elasticTraining: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
