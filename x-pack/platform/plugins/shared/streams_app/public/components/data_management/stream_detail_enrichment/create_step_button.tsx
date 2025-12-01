@@ -17,12 +17,11 @@ import {
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { i18n } from '@kbn/i18n';
-import type { StreamType } from '../../../telemetry/types';
 import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
-import { selectStreamTypeForTelemetry } from './state_management/stream_enrichment_state_machine/selectors';
+import { selectStreamType } from './state_management/stream_enrichment_state_machine/selectors';
 
 const createConditionText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.createConditionButtonText',
@@ -69,9 +68,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
     (state) => state.can({ type: 'step.addProcessor' }) || state.can({ type: 'step.addCondition' })
   );
 
-  const streamType: StreamType = useStreamEnrichmentSelector((snapshot) =>
-    selectStreamTypeForTelemetry(snapshot.context)
-  );
+  const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
 
   const [isPopoverOpen, togglePopover] = useToggle(false);
 

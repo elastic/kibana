@@ -15,9 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { StreamType } from '../../../telemetry/types';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
-import { selectStreamTypeForTelemetry } from '../stream_detail_enrichment/state_management/stream_enrichment_state_machine/selectors';
+import { selectStreamType } from '../stream_detail_enrichment/state_management/stream_enrichment_state_machine/selectors';
 import { useStreamEnrichmentSelector } from '../stream_detail_enrichment/state_management/stream_enrichment_state_machine';
 
 interface ManagementBottomBarProps {
@@ -41,9 +40,7 @@ export function ManagementBottomBar({
   onConfirm,
   onViewCodeClick,
 }: ManagementBottomBarProps) {
-  const streamType: StreamType = useStreamEnrichmentSelector((snapshot) =>
-    selectStreamTypeForTelemetry(snapshot.context)
-  );
+  const streamType = useStreamEnrichmentSelector((snapshot) => selectStreamType(snapshot.context));
 
   const handleCancel = useDiscardConfirm(onCancel, {
     title: discardUnsavedChangesTitle,

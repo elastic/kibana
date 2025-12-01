@@ -22,7 +22,6 @@ import type { SubmitHandler } from 'react-hook-form';
 import { useForm, FormProvider, useController } from 'react-hook-form';
 import type { DeepPartial } from 'utility-types';
 import { useSelector } from '@xstate5/react';
-import type { StreamType } from '../../../../../../telemetry/types';
 import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
 import {
   useStreamEnrichmentSelector,
@@ -35,7 +34,7 @@ import {
 } from '../../../utils';
 import { discardChangesPromptOptions, deleteConditionPromptOptions } from './prompt_options';
 import { ProcessorConditionEditorWrapper } from '../../../processor_condition_editor';
-import { selectStreamTypeForTelemetry } from '../../../state_management/stream_enrichment_state_machine/selectors';
+import { selectStreamType } from '../../../state_management/stream_enrichment_state_machine/selectors';
 
 interface WhereBlockConfigurationProps {
   stepRef: StreamEnrichmentContextType['stepRefs'][number];
@@ -51,8 +50,8 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
     const canDelete = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.delete' }));
     const canSave = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.save' }));
 
-    const streamType: StreamType = useStreamEnrichmentSelector((snapshot) =>
-      selectStreamTypeForTelemetry(snapshot.context)
+    const streamType = useStreamEnrichmentSelector((snapshot) =>
+      selectStreamType(snapshot.context)
     );
 
     const [defaultValues] = useState(() =>
