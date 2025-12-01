@@ -19,7 +19,6 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
-import { registerAgent } from './agent_builder/agents';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
@@ -149,17 +148,6 @@ import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_d
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
-import {
-  createAlertAttachmentType,
-  createAttackDiscoveryAttachmentType,
-  createEntityRiskAttachmentType,
-  createQueryHelpAttachmentType,
-} from './agent_builder/attachments';
-import {
-  entityRiskScoreTool,
-  attackDiscoverySearchTool,
-  securityLabsSearchTool,
-} from './agent_builder/tools';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -253,9 +241,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
     registerAttachments(onechat).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
-    });
-    registerAgent(onechat).catch((error) => {
-      this.logger.error(`Error registering security agent: ${error}`);
     });
   }
 
@@ -637,10 +622,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    // Register alert attachment type and alerts tool with onechat
-    // Note: This requires onechat to be added as an optional plugin dependency
-    // Note: The alert attachment type may already be registered by onechat's built-in types.
-    // If so, we'll skip registration and use the built-in version.
     this.registerOnechatAttachmentsAndTools(plugins.onechat, config, core);
 
     return {
@@ -694,7 +675,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
       defendInsightsPolicyResponseFailure:
         config.experimentalFeatures.defendInsightsPolicyResponseFailure,
-      agentBuilderEnabled: config.experimentalFeatures.agentBuilderEnabled,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);

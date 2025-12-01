@@ -86,8 +86,8 @@ const ActionableSummaryComponent: React.FC<Props> = ({
   );
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.attack_discovery,
-    attachmentData: { attackDiscovery: attackDiscoveryWithOriginalValues },
+    attachmentType: SecurityAgentBuilderAttachments.alert,
+    attachmentData: { alert: attackDiscoveryWithOriginalValues },
     attachmentPrompt: ATTACK_DISCOVERY_ATTACHMENT_PROMPT,
   });
 
