@@ -117,11 +117,6 @@ const myStepHandler: StepHandler = async (context) => {
     // Log information
     context.logger.info(`Processing step with message: ${message}`);
 
-    // Store state that can be accessed in subsequent steps
-    context.contextManager.setStepState({
-      processedAt: new Date().toISOString(),
-    });
-
     // Perform your step logic here
     const result = `Processed: ${message}${count ? ` (count: ${count})` : ''}`;
 
@@ -287,9 +282,6 @@ const myStepHandler: StepHandler = async (context) => {
 
   // Log information
   context.logger.info('Processing step');
-
-  // Store state for subsequent steps
-  context.contextManager.setStepState({ key: 'value' });
 
   // Return result or error
   return {
