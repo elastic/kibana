@@ -8,6 +8,7 @@
 import {
   AlertConsumers,
   OBSERVABILITY_RULE_TYPE_IDS,
+  STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
   type ValidFeatureId,
 } from '@kbn/rule-data-utils';
 
@@ -18,6 +19,11 @@ export const APM_ALERTING_CONSUMERS: ValidFeatureId[] = [
   AlertConsumers.OBSERVABILITY,
   AlertConsumers.INFRASTRUCTURE,
   AlertConsumers.ALERTS,
+  AlertConsumers.STACK_ALERTS,
+  AlertConsumers.ML,
 ];
 
-export const APM_ALERTING_RULE_TYPE_IDS: string[] = [...OBSERVABILITY_RULE_TYPE_IDS];
+export const APM_ALERTING_RULE_TYPE_IDS: string[] = [
+  ...OBSERVABILITY_RULE_TYPE_IDS,
+  ...STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
+];
