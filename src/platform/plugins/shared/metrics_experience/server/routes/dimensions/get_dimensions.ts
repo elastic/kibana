@@ -46,7 +46,7 @@ export const getDimensions = async ({
   }
 
   query = query.pipe`STATS BY ??dim`.sort(`??dim`).limit(20).setParam('dim', dim);
-  
+
   try {
     const response = await esClient.esql(
       'get_dimensions',

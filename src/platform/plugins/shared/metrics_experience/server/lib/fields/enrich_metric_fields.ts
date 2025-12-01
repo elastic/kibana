@@ -104,10 +104,10 @@ export function buildEsqlQuery(
   const { name: field, index } = metricField;
 
   // Build base query with metric field filter
-  const baseQuery = esql
-    .from(index)
-    .pipe`WHERE ??metricField IS NOT NULL`
-    .setParam('metricField', field);
+  const baseQuery = esql.from(index).pipe`WHERE ??metricField IS NOT NULL`.setParam(
+    'metricField',
+    field
+  );
 
   // Apply dimension filters using reduce to avoid let reassignment
   const queryWithFilters = Object.entries(dimensionFilters).reduce((q, [dimensionName, values]) => {
@@ -294,4 +294,3 @@ export async function enrichMetricFields({
     };
   });
 }
-
