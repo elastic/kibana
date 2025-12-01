@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiSplitPanel, useEuiTheme } from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiSplitPanel, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -20,8 +20,13 @@ import { updateTabIndices } from '../../utils/update_tab_indices';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { useScroll } from '../../hooks/use_scroll';
 
+export interface SidePanelIds {
+  secondaryNavigationInstructionsId: string;
+}
+
+export type SidePanelChildren = ReactNode | ((ids: SidePanelIds) => ReactNode);
 export interface SideNavPanelProps {
-  children: ReactNode;
+  children: SidePanelChildren;
   footer?: ReactNode;
   openerNode: MenuItem;
 }
@@ -33,6 +38,9 @@ export interface SideNavPanelProps {
 export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useScroll();
+  const secondaryNavigationInstructionsId = useGeneratedHtmlId({
+    prefix: 'secondary-navigation-instructions',
+  });
 
   const wrapperStyles = css`
     // > For instance, only plain or transparent panels can have a border and/or shadow.
@@ -48,45 +56,66 @@ export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps
     ${scrollStyles}
   `;
 
+  const renderChildren = () => {
+    if (typeof children === 'function') {
+      return children({ secondaryNavigationInstructionsId });
+    }
+    return children;
+  };
+
   return (
-    <EuiSplitPanel.Outer
-      aria-label={i18n.translate('core.ui.chrome.sideNavigation.sidePanelAriaLabel', {
-        defaultMessage: `Side panel for {label}`,
-        values: {
-          label: openerNode.label,
-        },
-      })}
-      borderRadius="none"
-      // Used in Storybook to limit the height of the panel
-      className="side-nav-panel"
-      css={wrapperStyles}
-      data-test-subj={`side-navigation-panel side-navigation-panel_${openerNode.id}`}
-      hasShadow={false}
-      role="region"
-    >
-      <EuiSplitPanel.Inner
-        color="subdued"
-        css={navigationPanelStyles}
-        data-test-subj="side-navigation-panel-content"
-        onKeyDown={handleRovingIndex}
-        panelRef={(ref) => {
-          if (ref) {
-            const elements = getFocusableElements(ref);
-            updateTabIndices(elements);
-          }
-        }}
-        paddingSize="none"
+    <>
+      <EuiScreenReaderOnly>
+        <p id={secondaryNavigationInstructionsId}>
+          {i18n.translate('core.ui.chrome.sideNavigation.sidePanelInstructions', {
+            defaultMessage:
+              'You are in the {label} secondary menu side panel. Use Up and Down arrow keys to navigate the menu.',
+            values: {
+              label: openerNode.label,
+            },
+          })}
+        </p>
+      </EuiScreenReaderOnly>
+      <EuiSplitPanel.Outer
+        aria-label={i18n.translate('core.ui.chrome.sideNavigation.sidePanelAriaLabel', {
+          defaultMessage: `Side panel for {label}`,
+          values: {
+            label: openerNode.label,
+          },
+        })}
+        aria-describedby={secondaryNavigationInstructionsId}
+        borderRadius="none"
+        // Used in Storybook to limit the height of the panel
+        className="side-nav-panel"
+        css={wrapperStyles}
+        data-test-subj={`side-navigation-panel side-navigation-panel_${openerNode.id}`}
+        hasShadow={false}
+        role="region"
       >
-        {children}
-      </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner
-        color="subdued"
-        data-test-subj="side-navigation-panel-footer"
-        paddingSize="none"
-        grow={false}
-      >
-        {footer}
-      </EuiSplitPanel.Inner>
-    </EuiSplitPanel.Outer>
+        <EuiSplitPanel.Inner
+          color="subdued"
+          css={navigationPanelStyles}
+          data-test-subj="side-navigation-panel-content"
+          onKeyDown={handleRovingIndex}
+          panelRef={(ref) => {
+            if (ref) {
+              const elements = getFocusableElements(ref);
+              updateTabIndices(elements);
+            }
+          }}
+          paddingSize="none"
+        >
+          {renderChildren()}
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner
+          color="subdued"
+          data-test-subj="side-navigation-panel-footer"
+          paddingSize="none"
+          grow={false}
+        >
+          {footer}
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+    </>
   );
 };
