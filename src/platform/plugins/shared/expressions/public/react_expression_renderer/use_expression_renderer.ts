@@ -58,6 +58,10 @@ export function useExpressionRenderer(
     onRender$,
     reload$,
     abortController,
+    renderMode,
+    syncColors,
+    syncCursor,
+    syncTooltips,
     ...loaderParams
   }: ExpressionRendererParams
 ): ExpressionRendererState {
@@ -69,9 +73,25 @@ export function useExpressionRenderer(
     error: null,
   });
 
-  const memoizedOptions = useShallowMemo({ expression, params: useShallowMemo(loaderParams) });
-  const [{ expression: debouncedExpression, params: debouncedLoaderParams }, isDebounced] =
-    useDebouncedValue(memoizedOptions, debounce);
+  const memoizedOptions = useShallowMemo({
+    expression,
+    renderMode,
+    syncColors,
+    syncCursor,
+    syncTooltips,
+    params: useShallowMemo(loaderParams),
+  });
+  const [
+    {
+      expression: debouncedExpression,
+      renderMode: debouncedRenderMode,
+      syncColors: debouncedSyncColors,
+      syncCursor: debouncedSyncCursor,
+      syncTooltips: debouncedSyncTooltips,
+      params: debouncedLoaderParams,
+    },
+    isDebounced,
+  ] = useDebouncedValue(memoizedOptions, debounce);
 
   const expressionLoaderRef = useRef<ExpressionLoader | null>(null);
 
@@ -95,6 +115,10 @@ export function useExpressionRenderer(
       nodeRef.current &&
       new ExpressionLoader(nodeRef.current, debouncedExpression, {
         ...debouncedLoaderParams,
+        renderMode: debouncedRenderMode,
+        syncColors: debouncedSyncColors,
+        syncCursor: debouncedSyncCursor,
+        syncTooltips: debouncedSyncTooltips,
         // react component wrapper provides different
         // error handling api which is easier to work with from react
         // if custom renderError is not provided then we fallback to default error handling from ExpressionLoader
@@ -121,14 +145,31 @@ export function useExpressionRenderer(
       expressionLoaderRef.current = null;
       errorRenderHandlerRef.current = null;
     };
-  }, [
-    debouncedLoaderParams.onRenderError,
-    debouncedLoaderParams.interactive,
-    debouncedLoaderParams.renderMode,
-    debouncedLoaderParams.syncColors,
-    debouncedLoaderParams.syncTooltips,
-    debouncedLoaderParams.syncCursor,
-  ]);
+  }, [debouncedLoaderParams.onRenderError, debouncedLoaderParams.interactive]);
+
+  // Handle renderMode and sync params changes separately without triggering full update
+  useUpdateEffect(() => {
+    if (expressionLoaderRef.current) {
+      const params: Record<string, unknown> = {};
+
+      if (debouncedRenderMode !== undefined) {
+        params.renderMode = debouncedRenderMode;
+      }
+      if (debouncedSyncColors !== undefined) {
+        params.syncColors = debouncedSyncColors;
+      }
+      if (debouncedSyncCursor !== undefined) {
+        params.syncCursor = debouncedSyncCursor;
+      }
+      if (debouncedSyncTooltips !== undefined) {
+        params.syncTooltips = debouncedSyncTooltips;
+      }
+
+      if (Object.keys(params).length > 0) {
+        expressionLoaderRef.current.updateParams(params);
+      }
+    }
+  }, [debouncedRenderMode, debouncedSyncColors, debouncedSyncCursor, debouncedSyncTooltips]);
 
   useEffect(() => {
     const subscription = onEvent && expressionLoaderRef.current?.events$.subscribe(onEvent);

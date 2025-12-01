@@ -14,7 +14,7 @@ import { defaults } from 'lodash';
 import type { SerializableRecord, UnwrapObservable } from '@kbn/utility-types';
 import type { Adapters } from '@kbn/inspector-plugin/public';
 import type { IExpressionLoaderParams } from './types';
-import type { ExpressionAstExpression } from '../common';
+import type { ExpressionAstExpression, RenderMode } from '../common';
 import type { ExecutionContract } from '../common/execution/execution_contract';
 
 import { ExpressionRenderHandler } from './render';
@@ -78,6 +78,7 @@ export class ExpressionLoader {
     });
 
     this.data$.subscribe(({ result }) => {
+      this.data = result;
       this.render(result);
     });
 
@@ -119,6 +120,19 @@ export class ExpressionLoader {
 
   inspect(): Adapters | undefined {
     return this.execution?.inspect() as Adapters;
+  }
+
+  updateParams(params: {
+    renderMode?: RenderMode;
+    syncColors?: boolean;
+    syncCursor?: boolean;
+    syncTooltips?: boolean;
+  }): void {
+    this.setParams(params);
+    // re-render without executing the expression
+    if (this.data) {
+      this.render(this.data);
+    }
   }
 
   update(expression?: string | ExpressionAstExpression, params?: IExpressionLoaderParams): void {
@@ -187,9 +201,6 @@ export class ExpressionLoader {
     if (params.searchSessionId && this.params) {
       this.params.searchSessionId = params.searchSessionId;
     }
-    this.params.syncColors = params.syncColors;
-    this.params.syncCursor = params.syncCursor;
-    this.params.syncTooltips = params.syncTooltips;
     this.params.debug = Boolean(params.debug);
     this.params.partial = Boolean(params.partial);
     this.params.throttle = Number(params.throttle ?? 1000);
@@ -199,6 +210,33 @@ export class ExpressionLoader {
       this.execution?.inspect()) as Adapters;
 
     this.params.executionContext = params.executionContext;
+
+    const changedParams: {
+      renderMode?: RenderMode;
+      syncColors?: boolean;
+      syncCursor?: boolean;
+      syncTooltips?: boolean;
+    } = {};
+
+    if (params.renderMode && params.renderMode !== this.params.renderMode) {
+      this.params.renderMode = params.renderMode;
+      changedParams.renderMode = params.renderMode;
+    }
+    if (params.syncColors != null && params.syncColors !== this.params.syncColors) {
+      this.params.syncColors = params.syncColors;
+      changedParams.syncColors = params.syncColors;
+    }
+    if (params.syncCursor != null && params.syncCursor !== this.params.syncCursor) {
+      this.params.syncCursor = params.syncCursor;
+      changedParams.syncCursor = params.syncCursor;
+    }
+    if (params.syncTooltips != null && params.syncTooltips !== this.params.syncTooltips) {
+      this.params.syncTooltips = params.syncTooltips;
+      changedParams.syncTooltips = params.syncTooltips;
+    }
+    if (Object.keys(changedParams).length > 0) {
+      this.renderHandler.updateParams(changedParams);
+    }
   }
 }
 

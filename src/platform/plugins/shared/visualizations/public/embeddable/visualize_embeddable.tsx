@@ -37,7 +37,7 @@ import {
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { get, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, map, merge, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, merge, skip, switchMap } from 'rxjs';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
@@ -118,6 +118,10 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const expressionParams$ = new BehaviorSubject<ExpressionRendererParams>({
       expression: '',
     });
+    // Track sync settings separately to avoid full expression re-execution
+    const syncColors$ = new BehaviorSubject<boolean | undefined>(undefined);
+    const syncCursor$ = new BehaviorSubject<boolean | undefined>(undefined);
+    const syncTooltips$ = new BehaviorSubject<boolean | undefined>(undefined);
 
     const expressionAbortController$ = new BehaviorSubject<AbortController>(new AbortController());
     let getExpressionParams: () => ReturnType<typeof getExpressionRendererProps> = async () => ({
@@ -446,10 +450,27 @@ export const getVisualizeEmbeddableFactory: (deps: {
         expressionAbortController$.next(abortController);
       });
 
+    const settingsSubscription = apiPublishesSettings(parentApi)
+      ? combineLatest([
+          parentApi.settings.syncColors$,
+          parentApi.settings.syncCursor$,
+          parentApi.settings.syncTooltips$,
+        ])
+          .pipe(skip(1)) // Skip initial values (handled in fetch$)
+          .subscribe(([syncColors, syncCursor, syncTooltips]) => {
+            syncColors$.next(syncColors);
+            syncCursor$.next(syncCursor);
+            syncTooltips$.next(syncTooltips);
+          })
+      : undefined;
+
     return {
       api,
       Component: () => {
         const expressionParams = useStateFromPublishingSubject(expressionParams$);
+        const syncColors = useStateFromPublishingSubject(syncColors$);
+        const syncCursor = useStateFromPublishingSubject(syncCursor$);
+        const syncTooltips = useStateFromPublishingSubject(syncTooltips$);
         const renderCount = useStateFromPublishingSubject(renderCount$);
         const hasRendered = useStateFromPublishingSubject(hasRendered$);
         const [hideTitle, title, defaultTitle] = useBatchedPublishingSubjects(
@@ -458,7 +479,12 @@ export const getVisualizeEmbeddableFactory: (deps: {
           api.defaultTitle$
         );
         const domNode = useRef<HTMLDivElement>(null);
-        const { error, isLoading } = useExpressionRenderer(domNode, expressionParams);
+        const { error, isLoading } = useExpressionRenderer(domNode, {
+          ...expressionParams,
+          syncColors,
+          syncCursor,
+          syncTooltips,
+        });
         const errorTextStyle = useErrorTextStyle();
 
         const dataTitle = useMemo(() => {
@@ -470,6 +496,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           return () => {
             fetchSubscription.unsubscribe();
             serializedVisSubscription.unsubscribe();
+            settingsSubscription?.unsubscribe();
             maybeStopDynamicActions?.stopDynamicActions();
           };
         }, []);

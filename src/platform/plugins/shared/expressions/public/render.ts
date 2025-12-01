@@ -56,6 +56,10 @@ export class ExpressionRenderHandler {
   private renderSubject: Rx.BehaviorSubject<number | null>;
   private eventsSubject: Rx.Subject<unknown>;
   private updateSubject: Rx.Subject<UpdateValue | null>;
+  private renderMode: RenderMode;
+  private syncColors: boolean;
+  private syncCursor: boolean;
+  private syncTooltips: boolean;
   private handlers: IInterpreterRenderHandlers;
   private onRenderError: RenderErrorHandlerFnType;
 
@@ -86,6 +90,11 @@ export class ExpressionRenderHandler {
     this.updateSubject = new Rx.Subject();
     this.update$ = this.updateSubject.asObservable();
 
+    this.renderMode = renderMode || 'view';
+    this.syncColors = syncColors ?? false;
+    this.syncCursor = syncCursor ?? true;
+    this.syncTooltips = syncTooltips ?? false;
+
     this.handlers = {
       onDestroy: (fn: Function) => {
         this.destroyFn = fn;
@@ -107,16 +116,16 @@ export class ExpressionRenderHandler {
         this.eventsSubject.next(data);
       },
       getRenderMode: () => {
-        return renderMode || 'view';
+        return this.renderMode;
       },
       isSyncColorsEnabled: () => {
-        return syncColors || false;
+        return this.syncColors;
       },
       isSyncTooltipsEnabled: () => {
-        return syncTooltips || false;
+        return this.syncTooltips;
       },
       isSyncCursorEnabled: () => {
-        return syncCursor || true;
+        return this.syncCursor;
       },
       isInteractive: () => {
         return interactive ?? true;
@@ -164,6 +173,37 @@ export class ExpressionRenderHandler {
     this.updateSubject.complete();
     if (this.destroyFn) {
       this.destroyFn();
+    }
+  };
+
+  updateParams = (params: {
+    renderMode?: RenderMode;
+    syncColors?: boolean;
+    syncCursor?: boolean;
+    syncTooltips?: boolean;
+  }) => {
+    const changes: {
+      renderMode?: RenderMode;
+      syncColors?: boolean;
+      syncCursor?: boolean;
+      syncTooltips?: boolean;
+    } = {};
+
+    if (params.renderMode && this.renderMode !== params.renderMode) {
+      this.renderMode = params.renderMode;
+      changes.renderMode = params.renderMode;
+    }
+    if (params.syncColors != null && this.syncColors !== params.syncColors) {
+      this.syncColors = params.syncColors;
+      changes.syncColors = params.syncColors;
+    }
+    if (params.syncCursor != null && this.syncCursor !== params.syncCursor) {
+      this.syncCursor = params.syncCursor;
+      changes.syncCursor = params.syncCursor;
+    }
+    if (params.syncTooltips != null && this.syncTooltips !== params.syncTooltips) {
+      this.syncTooltips = params.syncTooltips;
+      changes.syncTooltips = params.syncTooltips;
     }
   };
 
