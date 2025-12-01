@@ -7,12 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 import type { DiscoverCustomizationService } from './customization_service';
+import type { DiscoverAppState } from '../application/main/state_management/redux';
+
+export interface ExtendedDiscoverStateContainer extends DiscoverStateContainer {
+  /*
+   * Get updated AppState when given a saved search
+   */
+  getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;
+}
 
 export interface CustomizationCallbackContext {
   customizations: DiscoverCustomizationService;
-  stateContainer: DiscoverStateContainer;
+  stateContainer: ExtendedDiscoverStateContainer;
 }
 
 export type CustomizationCallback = (
