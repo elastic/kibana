@@ -195,10 +195,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       disableEmptyRows?: boolean;
     }) {
       await retry.try(async () => {
-        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
+        if (
+          !(await testSubjects.exists('lns-indexPattern-dimensionContainerClose', {
+            timeout: 1000,
+          }))
+        ) {
           await testSubjects.click(opts.dimension);
         }
-        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
+        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose', {
+          timeout: 1000,
+        });
       });
 
       if (opts.operation === 'formula') {
