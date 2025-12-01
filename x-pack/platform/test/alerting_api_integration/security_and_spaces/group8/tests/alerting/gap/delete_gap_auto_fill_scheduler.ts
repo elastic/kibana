@@ -138,7 +138,6 @@ export default function deleteGapAutoFillSchedulerTests({ getService }: FtrProvi
           expect(typeof schedulerId).to.be('string');
 
           // Verify that at least one system backfill exists and has a large schedule
-          let capturedBackfillIds: string[] = [];
           await retry.try(async () => {
             const resp = await supertestWithoutAuth
               .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_find`)
@@ -154,7 +153,6 @@ export default function deleteGapAutoFillSchedulerTests({ getService }: FtrProvi
             const data = resp.body?.data ?? [];
             expect(Array.isArray(data)).to.be(true);
             expect(data.length > 0).to.be(true);
-            capturedBackfillIds = data.map((d: any) => d.id).filter(Boolean);
             const schedules = data[0]?.schedule ?? [];
             expect(schedules.length >= 10).to.be(true);
           });

@@ -42,6 +42,8 @@ describe('updateAutoFillSchedulerRoute', () => {
     gapFillRange: 'now-30d',
     maxBackfills: 50,
     numRetries: 2,
+    scope: ['scope-a'],
+    ruleTypes: [{ type: 'test-rule-type', consumer: 'test-consumer' }],
     createdBy: 'user',
     updatedBy: 'user',
     createdAt: '2024-01-01T00:00:00.000Z',
@@ -161,4 +163,3 @@ describe('updateAutoFillSchedulerRoute', () => {
     }
   });
 });
-
