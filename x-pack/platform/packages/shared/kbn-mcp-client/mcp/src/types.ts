@@ -11,9 +11,22 @@ export interface ClientDetails {
   url: string;
 }
 
+export interface McpClientOptions {
+  headers?: Record<string, string>;
+  maxRetries?: number;
+  reconnectionDelayGrowFactor?: number;
+  initialReconnectionDelay?: number;
+  maxReconnectionDelay?: number;
+}
+
 export interface CallToolParams {
   name: string;
   arguments: Record<string, unknown>;
+}
+
+export interface NonTextPart {
+  type: string;
+  [key: string]: unknown;
 }
 
 export interface TextPart {
@@ -21,7 +34,7 @@ export interface TextPart {
   text: string;
 }
 
-export type ContentPart = TextPart;
+export type ContentPart = TextPart | NonTextPart;
 
 export interface CallToolResponse {
   content: ContentPart[];

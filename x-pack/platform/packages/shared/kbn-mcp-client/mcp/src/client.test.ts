@@ -146,7 +146,7 @@ describe('McpClient', () => {
   describe('constructor', () => {
     it('creates transport with correct URL and headers', () => {
       const customHeaders = { 'X-Custom': 'value' };
-      new McpClient(clientDetails, customHeaders);
+      new McpClient(clientDetails, { headers: customHeaders });
 
       expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
         expect.objectContaining({ href: 'https://example.com/mcp' }),
@@ -489,7 +489,6 @@ describe('McpClient', () => {
 
       expect(mockClient.callTool).toHaveBeenCalledWith({
         name: 'test-tool',
-        _meta: {},
         arguments: { arg1: 'value1' },
       });
       expect(result.content).toEqual([
@@ -590,7 +589,6 @@ describe('McpClient', () => {
 
       expect(mockClient.callTool).toHaveBeenCalledWith({
         name: 'test-tool',
-        _meta: {},
         arguments: {},
       });
       expect(result.content).toEqual([{ type: 'text', text: 'Result' }]);
@@ -611,7 +609,6 @@ describe('McpClient', () => {
 
       expect(mockClient.callTool).toHaveBeenCalledWith({
         name: 'test-tool',
-        _meta: {},
         arguments: undefined,
       });
     });

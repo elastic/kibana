@@ -1,10 +1,10 @@
 # @kbn/mcp-client
 
-Shared types, schemas, and MCP client implementation for the MCP Kibana Stack Connector.
+An transparent MCP client implementation. The primary use case is the MCP Kibana Stack Connector.
 
 ## Overview
 This package contains:
 
-- An MCP client implementation
+- The MCP client implementation
 - Types
-- Schemas
+- Constants

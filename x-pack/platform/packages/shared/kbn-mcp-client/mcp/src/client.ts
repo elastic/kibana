@@ -18,8 +18,24 @@ import type {
   CallToolResponse,
   ContentPart,
   ListToolsResponse,
+  TextPart,
   Tool,
+  McpClientOptions,
 } from './types';
+
+/**
+ * Type guard to check if a content part is a valid text part.
+ * @param part - The content part to check
+ * @returns True if the part is a valid TextPart
+ */
+function isTextPart(part: ContentPart | null | undefined): part is TextPart {
+  return (
+    part !== null &&
+    part !== undefined &&
+    part.type === 'text' &&
+    typeof part.text === 'string'
+  );
+}
 
 /**
  * McpClient is a wrapper around the MCP client SDK.
@@ -32,16 +48,25 @@ export class McpClient {
 
   public connected: boolean = false;
 
-  constructor(clientDetails: ClientDetails, customHeaders?: Record<string, string>) {
+  constructor(
+    clientDetails: ClientDetails,
+    {
+      headers = {},
+      maxRetries = 3,
+      reconnectionDelayGrowFactor = 1.5,
+      initialReconnectionDelay = 1000,
+      maxReconnectionDelay = 10000,
+    }: McpClientOptions = {}
+  ) {
     this.transport = new StreamableHTTPClientTransport(new URL(clientDetails.url), {
       requestInit: {
-        headers: customHeaders ?? {},
+        headers: headers ?? {},
       },
       reconnectionOptions: {
-        maxRetries: 3,
-        reconnectionDelayGrowFactor: 1.5,
-        initialReconnectionDelay: 1000,
-        maxReconnectionDelay: 10000,
+        maxRetries,
+        reconnectionDelayGrowFactor,
+        initialReconnectionDelay,
+        maxReconnectionDelay,
       },
     });
 
@@ -63,6 +88,7 @@ export class McpClient {
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         if (error instanceof StreamableHTTPError) {
+          // The SDK formats the message as "Streamable HTTP error: Connection failed"
           throw new Error(`${message}`);
         } else if (error instanceof UnauthorizedError) {
           throw new Error(`Unauthorized error: ${message}`);
@@ -141,7 +167,6 @@ export class McpClient {
     }
     const response = await this.client.callTool({
       name: params.name,
-      _meta: {},
       arguments: params.arguments,
     });
 
@@ -151,20 +176,8 @@ export class McpClient {
       );
     }
 
-    const content = response.content as Array<
-      { type: string; text?: string; [key: string]: unknown } | null | undefined
-    >;
-    const textParts = content
-      .filter(
-        (part): part is { type: 'text'; text: string } =>
-          part != null && part.type === 'text' && typeof part.text === 'string'
-      )
-      .map(
-        (part): ContentPart => ({
-          type: 'text',
-          text: part.text,
-        })
-      );
+    const content = response.content as Array<ContentPart | null | undefined>;
+    const textParts = content.filter(isTextPart);
 
     return {
       content: textParts,
