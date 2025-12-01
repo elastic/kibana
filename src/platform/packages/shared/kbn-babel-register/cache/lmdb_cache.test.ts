@@ -57,16 +57,19 @@ it('returns undefined until values are set', async () => {
   expect(cache.getSourceMap(key)).toBe(undefined);
 
   await cache.update(key, {
+    path: '/test/file.js',
     code: 'var x = 1',
     map: { foo: 'bar' },
   });
 
   expect(cache.getCode(key)).toBe('var x = 1');
   expect(cache.getSourceMap(key)).toEqual({ foo: 'bar' });
+  expect(cache.getPath(key)).toBe('/test/file.js');
   expect(log.output).toMatchInlineSnapshot(`
     "MISS   [db]   prefix:05a4b8198c4ec215d54d94681ef00ca9ecb45931
     MISS   [db]   prefix:05a4b8198c4ec215d54d94681ef00ca9ecb45931
     PUT   [db]   prefix:05a4b8198c4ec215d54d94681ef00ca9ecb45931
+    HIT   [db]   prefix:05a4b8198c4ec215d54d94681ef00ca9ecb45931
     HIT   [db]   prefix:05a4b8198c4ec215d54d94681ef00ca9ecb45931
     HIT   [db]   prefix:05a4b8198c4ec215d54d94681ef00ca9ecb45931
     "

@@ -15,7 +15,7 @@ import { getProfiler } from './get_profiler';
 import { untilStdinCompletes } from './until_stdin_completes';
 import { runInspectableProcess } from './run_inspectable_process';
 import type { ProfilerCliFlags } from './flags';
-import { DEFAULT_INSPECTOR_PORT, NO_GREP } from './flags';
+import { DEFAULT_INSPECTOR_PORT, NO_GREP, DEFAULT_MAX_PROFILE_SIZE } from './flags';
 
 export async function runProfiler({
   flags,
@@ -83,14 +83,63 @@ export async function runProfiler({
     process.kill(pid, 'SIGUSR1');
   }
 
-  const stop = once(
-    await getProfiler({
-      pid,
-      log,
-      type: flags.heap ? 'heap' : 'cpu',
-      inspectorPort,
-    })
-  );
+  const periodicWrite = flags['periodic-write'] ?? false;
+  const maxProfileSize = flags['max-profile-size']
+    ? Number(flags['max-profile-size'])
+    : DEFAULT_MAX_PROFILE_SIZE;
+  const outputTimestamp = flags['output-timestamp'];
+
+  // Estimate write interval based on size (roughly 1MB per 10 seconds of profiling)
+  const writeIntervalMs = periodicWrite
+    ? Math.max(10000, (maxProfileSize / (1024 * 1024)) * 10000)
+    : 0;
+
+  let stopFn = await getProfiler({
+    pid,
+    log,
+    type: flags.heap ? 'heap' : 'cpu',
+    inspectorPort,
+    outputTimestamp,
+  });
+
+  let profileCount = 0;
+  let periodicWriteInterval: NodeJS.Timeout | null = null;
+
+  if (periodicWrite) {
+    log.info(
+      `Periodic write enabled: will write profile every ${Math.round(writeIntervalMs / 1000)}s`
+    );
+
+    periodicWriteInterval = setInterval(async () => {
+      try {
+        profileCount++;
+        log.info(`Writing periodic profile #${profileCount}...`);
+
+        // Stop current profiling session and write
+        await stopFn();
+
+        // Start a new profiling session
+        stopFn = await getProfiler({
+          pid,
+          log,
+          type: flags.heap ? 'heap' : 'cpu',
+          inspectorPort,
+          outputTimestamp,
+        });
+
+        log.info(`Resumed profiling after writing profile #${profileCount}`);
+      } catch (error) {
+        log.error(`Failed to write periodic profile: ${error}`);
+      }
+    }, writeIntervalMs);
+  }
+
+  const stop = once(async () => {
+    if (periodicWriteInterval) {
+      clearInterval(periodicWriteInterval);
+    }
+    await stopFn();
+  });
 
   addCleanupTask(() => {
     // exit-hook, which is used by addCleanupTask,

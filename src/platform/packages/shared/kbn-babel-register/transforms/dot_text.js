@@ -24,6 +24,7 @@ const dotTextTransform = (path, source, cache) => {
   }).source;
 
   cache.update(key, {
+    path,
     code,
   });
 

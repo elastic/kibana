@@ -17,6 +17,8 @@
     "@kbn/babel-transform",
     "@kbn/peggy",
     "@kbn/dot-text",
+    "@kbn/dev-cli-runner",
+    "@kbn/tooling-log",
   ],
   "exclude": [
     "target/**/*",

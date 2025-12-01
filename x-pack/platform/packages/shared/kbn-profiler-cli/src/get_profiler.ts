@@ -62,11 +62,13 @@ export async function getProfiler({
   type,
   pid,
   inspectorPort,
+  outputTimestamp,
 }: {
   log: ToolingLog;
   type: 'cpu' | 'heap';
   pid: number;
   inspectorPort: number;
+  outputTimestamp?: string;
 }): Promise<() => Promise<void>> {
   const port = await getPort({
     host: '127.0.0.1',
@@ -104,17 +106,38 @@ export async function getProfiler({
 
     log.debug(`Closed connection to remote debugger`);
 
-    // Write the profile data to a file.
-    const tmpDir = await Fs.mkdtemp(Path.join(Os.tmpdir(), 'kbn-profiles'));
+    // Write the profile data to a file in the same directory as kbn-profiler
+    const profileDir = Path.join(Os.tmpdir(), 'kbn-profiler-cli-profiles');
+    await Fs.mkdir(profileDir, { recursive: true });
 
-    const profileFilePath = Path.join(tmpDir, name);
+    // Use provided timestamp or generate one
+    const timestamp =
+      outputTimestamp || new Date().toISOString().replace(/[:.]/g, '-').slice(0, 15);
+
+    // Determine profile type suffix
+    const typeSuffix = outputTimestamp ? '-backend' : '';
+
+    // Generate filename: profile-{timestamp}-backend.cpuprofile or profile-{timestamp}.cpuprofile (legacy)
+    let profileFileName: string;
+    if (outputTimestamp) {
+      const extension = name.match(/\.(cpuprofile|heapsnapshot)$/)?.[1] || 'cpuprofile';
+      profileFileName = `profile-${timestamp}${typeSuffix}.${extension}`;
+    } else {
+      profileFileName = name.replace(/\.(cpuprofile|heapsnapshot)$/, `-${timestamp}.$1`);
+    }
+
+    const profileFilePath = Path.join(profileDir, profileFileName);
 
     await Fs.writeFile(profileFilePath, content, 'utf-8');
 
     log.info(`Wrote profile to ${profileFilePath}`);
 
-    await execa.command(`npx speedscope ${profileFilePath}`);
-
-    log.info(`Opened Speedscope`);
+    // Skip Speedscope if requested (useful for IDE integrations)
+    if (!process.env.SKIP_SPEEDSCOPE) {
+      await execa.command(`npx speedscope ${profileFilePath}`);
+      log.info(`Opened Speedscope`);
+    } else {
+      log.info(`Skipped opening Speedscope (SKIP_SPEEDSCOPE=1)`);
+    }
   };
 }

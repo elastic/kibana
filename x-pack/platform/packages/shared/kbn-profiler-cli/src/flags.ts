@@ -20,8 +20,14 @@ export type ProfilerCliFlags = BaseFlags<{
   t?: string;
   spawn?: boolean;
   heap?: boolean;
+  ['periodic-write']?: boolean;
+  ['max-profile-size']?: string;
+  ['output-timestamp']?: string;
 }>;
 
 export const DEFAULT_INSPECTOR_PORT = 9229;
 
 export const NO_GREP = '__NO_GREP__';
+
+// Default max profile size: 50MB
+export const DEFAULT_MAX_PROFILE_SIZE = 50 * 1024 * 1024;
