@@ -11,6 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPlaceholderColumn } from '../utils';
 import type { KibanaContextExtra } from '../types';
 
@@ -23,16 +24,20 @@ type ErrorCode = keyof typeof errorCodes;
 export const errorMessages: Record<ErrorCode, (columnName: string) => string> = {
   [errorCodes.DUPLICATED_FIELD_ERROR]: (columnName: string) =>
     i18n.translate('indexEditor.addColumn.duplicatedName', {
-      defaultMessage: 'Field name {columnName} already exists',
+      defaultMessage: 'Column name {columnName} already exists',
       values: { columnName },
     }),
 };
 
-export const useAddColumnName = (initialColumnName = '') => {
+export const useAddColumnName = (initialColumnName = '', initialColumnType?: string) => {
   const {
     services: { indexUpdateService },
   } = useKibana<KibanaContextExtra>();
   const columns = useObservable(indexUpdateService.dataTableColumns$, []);
+
+  const [columnType, setColumnType] = useState(
+    initialColumnType !== KBN_FIELD_TYPES.UNKNOWN ? initialColumnType : null
+  );
 
   const initialInputValue = isPlaceholderColumn(initialColumnName) ? '' : initialColumnName;
   const [columnName, setColumnName] = useState(initialInputValue);
@@ -49,21 +54,23 @@ export const useAddColumnName = (initialColumnName = '') => {
   }, [columnName, columns, initialColumnName]);
 
   const saveColumn = useCallback(() => {
-    if (validationError) {
+    if (validationError || !columnType) {
       return;
     }
     if (initialColumnName) {
-      indexUpdateService.editColumn(columnName, initialColumnName);
+      indexUpdateService.editColumn(columnName, initialColumnName, columnType);
     } else {
       indexUpdateService.addNewColumn();
     }
-  }, [columnName, indexUpdateService, initialColumnName, validationError]);
+  }, [columnName, columnType, indexUpdateService, initialColumnName, validationError]);
 
   const resetColumnName = () => {
     setColumnName(initialInputValue);
   };
 
   return {
+    columnType,
+    setColumnType,
     columnName,
     validationError,
     setColumnName,
