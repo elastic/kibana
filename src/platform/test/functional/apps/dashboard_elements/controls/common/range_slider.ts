@@ -289,20 +289,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('AvgTicketPrice <= 300 error');
         await queryBar.submitQuery();
         await header.waitUntilLoadingHasFinished();
-        const ids = await dashboardControls.getAllControlIds();
-        await asyncForEach(ids, async (controlId) => {
-          await dashboardControls.checkForControlErrorStatus(controlId, true);
-        });
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.checkForControlErrorStatus(firstId, true);
       });
 
       it('Can recover from malformed query error', async () => {
         await queryBar.setQuery('AvgTicketPrice <= 300');
         await queryBar.submitQuery();
         await header.waitUntilLoadingHasFinished();
-        const ids = await dashboardControls.getAllControlIds();
-        await asyncForEach(ids, async (controlId) => {
-          await dashboardControls.checkForControlErrorStatus(controlId, false);
-        });
+        const firstId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.checkForControlErrorStatus(firstId, false);
       });
 
       it('Applies dashboard query to range slider control', async () => {

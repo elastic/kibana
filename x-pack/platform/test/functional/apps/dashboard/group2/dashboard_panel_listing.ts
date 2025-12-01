@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect([...panelGroupByOrder.values()]).to.eql([
         'visualizationsGroup',
-        'controls-group',
+        'controlsGroup',
         'annotation-and-navigationGroup',
         'mlGroup',
         'observabilityGroup',
