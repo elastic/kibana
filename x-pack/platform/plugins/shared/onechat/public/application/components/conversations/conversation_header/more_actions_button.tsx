@@ -65,10 +65,10 @@ const fullscreenLabels = {
   tools: i18n.translate('xpack.onechat.conversationActions.tools', {
     defaultMessage: 'View all tools',
   }),
-  rename: i18n.translate('xpack.onechat.conversationTitle.rename', {
+  rename: i18n.translate('xpack.onechat.conversationActions.rename', {
     defaultMessage: 'Rename',
   }),
-  delete: i18n.translate('xpack.onechat.conversationTitle.delete', {
+  delete: i18n.translate('xpack.onechat.conversationActions.delete', {
     defaultMessage: 'Delete',
   }),
   agentBuilderSettings: i18n.translate('xpack.onechat.conversationActions.agentBuilderSettings', {
