@@ -136,6 +136,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     };
 
     const content = (
+      // @ts-expect-error upgrade typescript v5.9.3
       <>
         <>
           {getPrependContent(option)}

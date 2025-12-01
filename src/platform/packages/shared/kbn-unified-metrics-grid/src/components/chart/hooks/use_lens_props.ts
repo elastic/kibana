@@ -14,6 +14,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
 import { useStableCallback } from '@kbn/unified-histogram';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   filter,
   Observable,
@@ -38,6 +39,7 @@ export type LensProps = Pick<
   | 'viewMode'
   | 'timeRange'
   | 'attributes'
+  | 'esqlVariables'
   | 'noPadding'
   | 'searchSessionId'
   | 'executionContext'
@@ -87,11 +89,17 @@ export const useLensProps = ({
       return getLensProps({
         searchSessionId: fetchParams.searchSessionId,
         timeRange: fetchParams.relativeTimeRange, // same as in the time picker
+        esqlVariables: fetchParams.esqlVariables,
         attributes,
-        lastReloadRequestTime: Date.now(),
+        lastReloadRequestTime: fetchParams.lastReloadRequestTime,
       });
     },
-    [fetchParams.searchSessionId, fetchParams.relativeTimeRange]
+    [
+      fetchParams.searchSessionId,
+      fetchParams.relativeTimeRange,
+      fetchParams.lastReloadRequestTime,
+      fetchParams.esqlVariables,
+    ]
   );
 
   const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
@@ -186,9 +194,11 @@ const getLensProps = ({
   timeRange,
   attributes,
   lastReloadRequestTime,
+  esqlVariables,
 }: {
   searchSessionId?: string;
   attributes: LensAttributes;
+  esqlVariables: ESQLControlVariable[] | undefined;
   timeRange: TimeRange;
   lastReloadRequestTime?: number;
 }): LensProps => ({
@@ -197,6 +207,7 @@ const getLensProps = ({
   timeRange,
   attributes,
   noPadding: true,
+  esqlVariables,
   searchSessionId,
   executionContext: {
     description: 'metrics experience chart data',
