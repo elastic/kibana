@@ -8,32 +8,30 @@
  */
 
 import {
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiPopover,
+  EuiIconTip,
   EuiSpacer,
-  EuiSuperSelect,
-  useEuiTheme,
+  EuiSwitch,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { WorkflowSelectorWithProvider } from '@kbn/workflows-ui';
 import type { WorkflowsActionParams } from './types';
 
-const FOR_EACH_ALERT = i18n.translate('xpack.stackConnectors.components.workflows.forEachAlert', {
-  defaultMessage: 'For each alert',
-});
-
-const SUMMARY_OF_ALERTS = i18n.translate(
-  'xpack.stackConnectors.components.workflows.summaryOfAlerts',
+const RUN_PER_ALERT_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.workflows.runPerAlert.label',
   {
-    defaultMessage: 'Summary of alerts',
+    defaultMessage: 'Run per alert',
+  }
+);
+
+const RUN_PER_ALERT_HELP_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.workflows.runPerAlert.helpText',
+  {
+    defaultMessage: 'If enabled, it will be separate workflow for each alert detected',
   }
 );
 
@@ -44,8 +42,6 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   errors,
 }) => {
   const { workflowId, summary = true } = actionParams.subActionParams ?? {};
-  const [summaryMenuOpen, setSummaryMenuOpen] = useState(false);
-  const { euiTheme } = useEuiTheme();
 
   const handleWorkflowChange = useCallback(
     (newWorkflowId: string) => {
@@ -58,14 +54,15 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
     [editAction, index, actionParams.subActionParams]
   );
 
-  const selectSummaryOption = useCallback(
-    (summaryValue: boolean) => {
+  const handleRunPerAlertChange = useCallback(
+    (runPerAlert: boolean) => {
+      // When switch is ON (runPerAlert = true), summary should be false (run per alert)
+      // When switch is OFF (runPerAlert = false), summary should be true (summary mode)
       editAction(
         'subActionParams',
-        { ...actionParams.subActionParams, summary: summaryValue },
+        { ...actionParams.subActionParams, summary: !runPerAlert },
         index
       );
-      setSummaryMenuOpen(false);
     },
     [editAction, index, actionParams.subActionParams]
   );
@@ -87,81 +84,9 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   const errorMessage = Array.isArray(errorMessages) ? errorMessages[0] : errorMessages;
   const validationError = typeof errorMessage === 'string' ? errorMessage : undefined;
 
-  const summaryContextMenuOptionStyles = useMemo(
-    () => css`
-      min-width: 300px;
-      padding: ${euiTheme.size.s};
-    `,
-    [euiTheme]
-  );
-
-  const summaryOptions = useMemo(
-    () => [
-      <EuiContextMenuItem
-        key="summary"
-        onClick={() => selectSummaryOption(true)}
-        icon={summary ? 'check' : 'empty'}
-        id="workflow-execution-mode-option-summary"
-        data-test-subj="workflow-execution-mode-option-summary"
-        className={summaryContextMenuOptionStyles}
-      >
-        {SUMMARY_OF_ALERTS}
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        key="for_each"
-        onClick={() => selectSummaryOption(false)}
-        icon={!summary ? 'check' : 'empty'}
-        id="workflow-execution-mode-option-for_each"
-        data-test-subj="workflow-execution-mode-option-for_each"
-        className={summaryContextMenuOptionStyles}
-      >
-        {FOR_EACH_ALERT}
-      </EuiContextMenuItem>,
-    ],
-    [summary, selectSummaryOption, summaryContextMenuOptionStyles]
-  );
-
-  const PER_RULE_RUN = i18n.translate('xpack.stackConnectors.components.workflows.perRuleRun', {
-    defaultMessage: 'Per rule run',
-  });
-
-  const summaryOrPerRuleSelect = (
-    <EuiPopover
-      data-test-subj="workflow-execution-mode-select"
-      initialFocus={`#workflow-execution-mode-option-${summary ? 'summary' : 'for_each'}`}
-      isOpen={summaryMenuOpen}
-      closePopover={useCallback(() => setSummaryMenuOpen(false), [setSummaryMenuOpen])}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-      aria-label={summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
-      aria-roledescription={i18n.translate(
-        'xpack.stackConnectors.components.workflows.executionMode.roleDescription',
-        { defaultMessage: 'Workflow execution mode select' }
-      )}
-      button={
-        <EuiButtonEmpty
-          size="xs"
-          iconType="arrowDown"
-          iconSide="right"
-          onClick={useCallback(() => setSummaryMenuOpen(!summaryMenuOpen), [summaryMenuOpen])}
-        >
-          {summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
-        </EuiButtonEmpty>
-      }
-    >
-      <EuiContextMenuPanel items={summaryOptions} />
-    </EuiPopover>
-  );
-
-  const perRuleRunOptions = useMemo(
-    () => [
-      {
-        value: 'perRuleRun',
-        inputDisplay: PER_RULE_RUN,
-      },
-    ],
-    [PER_RULE_RUN]
-  );
+  // When summary is false, runPerAlert is true (switch ON)
+  // When summary is true, runPerAlert is false (switch OFF)
+  const runPerAlert = !summary;
 
   return (
     <>
@@ -183,21 +108,25 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
-        label={i18n.translate('xpack.stackConnectors.components.workflows.executionMode.label', {
-          defaultMessage: 'Action frequency',
-        })}
+        label={
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {i18n.translate('xpack.stackConnectors.components.workflows.executionMode.label', {
+                defaultMessage: 'Action frequency',
+              })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip content={RUN_PER_ALERT_HELP_TEXT} position="right" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
       >
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
-            <EuiSuperSelect
-              fullWidth
-              prepend={summaryOrPerRuleSelect}
-              data-test-subj="workflow-per-rule-run-select"
-              options={perRuleRunOptions}
-              valueOfSelected="perRuleRun"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiSwitch
+          label={RUN_PER_ALERT_LABEL}
+          checked={runPerAlert}
+          onChange={(e) => handleRunPerAlertChange(e.target.checked)}
+          data-test-subj="workflow-run-per-alert-switch"
+        />
       </EuiFormRow>
     </>
   );

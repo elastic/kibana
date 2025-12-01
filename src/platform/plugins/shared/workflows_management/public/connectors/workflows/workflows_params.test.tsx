@@ -881,15 +881,15 @@ describe('WorkflowsParamsFields', () => {
   });
 
   describe('Action frequency (summary parameter)', () => {
-    test('should render Action frequency section', async () => {
+    test('should render Action frequency section with switch', async () => {
       await act(async () => {
         renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
       });
 
       await waitFor(() => {
         expect(screen.getByText('Action frequency')).toBeInTheDocument();
-        expect(screen.getByText('Summary of alerts')).toBeInTheDocument();
-        expect(screen.getByText('Per rule run')).toBeInTheDocument();
+        expect(screen.getByText('Run per alert')).toBeInTheDocument();
+        expect(screen.getByTestId('workflow-run-per-alert-switch')).toBeInTheDocument();
       });
     });
 
@@ -940,7 +940,7 @@ describe('WorkflowsParamsFields', () => {
       });
     });
 
-    test('should display "Summary of alerts" when summary is true', async () => {
+    test('should display switch as unchecked when summary is true', async () => {
       const props = {
         ...defaultProps,
         actionParams: {
@@ -957,11 +957,13 @@ describe('WorkflowsParamsFields', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Summary of alerts')).toBeInTheDocument();
+        const switchElement = screen.getByTestId('workflow-run-per-alert-switch');
+        expect(switchElement).toBeInTheDocument();
+        expect(switchElement).not.toBeChecked();
       });
     });
 
-    test('should display "For each alert" when summary is false', async () => {
+    test('should display switch as checked when summary is false', async () => {
       const props = {
         ...defaultProps,
         actionParams: {
@@ -978,11 +980,13 @@ describe('WorkflowsParamsFields', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('For each alert')).toBeInTheDocument();
+        const switchElement = screen.getByTestId('workflow-run-per-alert-switch');
+        expect(switchElement).toBeInTheDocument();
+        expect(switchElement).toBeChecked();
       });
     });
 
-    test('should allow changing from "Summary of alerts" to "For each alert"', async () => {
+    test('should allow changing from summary mode to run per alert', async () => {
       const props = {
         ...defaultProps,
         actionParams: {
@@ -999,27 +1003,15 @@ describe('WorkflowsParamsFields', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Summary of alerts')).toBeInTheDocument();
+        const switchElement = screen.getByTestId('workflow-run-per-alert-switch');
+        expect(switchElement).toBeInTheDocument();
+        expect(switchElement).not.toBeChecked();
       });
 
-      // Find and click the summary button to open the popover
-      const summaryButton = screen.getByTestId('workflow-execution-mode-select');
-      const button = summaryButton.querySelector('button');
-      expect(button).toBeInTheDocument();
-
+      // Click the switch to enable "run per alert"
+      const switchElement = screen.getByTestId('workflow-run-per-alert-switch');
       await act(async () => {
-        fireEvent.click(button!);
-      });
-
-      // Wait for the popover to open and find "For each alert" option
-      await waitFor(() => {
-        expect(screen.getByText('For each alert')).toBeInTheDocument();
-      });
-
-      // Click on "For each alert" option
-      const forEachOption = screen.getByTestId('workflow-execution-mode-option-for_each');
-      await act(async () => {
-        fireEvent.click(forEachOption);
+        fireEvent.click(switchElement);
       });
 
       // Verify that editAction was called with summary: false
@@ -1032,7 +1024,7 @@ describe('WorkflowsParamsFields', () => {
       });
     });
 
-    test('should allow changing from "For each alert" to "Summary of alerts"', async () => {
+    test('should allow changing from run per alert to summary mode', async () => {
       const props = {
         ...defaultProps,
         actionParams: {
@@ -1049,27 +1041,15 @@ describe('WorkflowsParamsFields', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('For each alert')).toBeInTheDocument();
+        const switchElement = screen.getByTestId('workflow-run-per-alert-switch');
+        expect(switchElement).toBeInTheDocument();
+        expect(switchElement).toBeChecked();
       });
 
-      // Find and click the summary button to open the popover
-      const summaryButton = screen.getByTestId('workflow-execution-mode-select');
-      const button = summaryButton.querySelector('button');
-      expect(button).toBeInTheDocument();
-
+      // Click the switch to disable "run per alert" (enable summary mode)
+      const switchElement = screen.getByTestId('workflow-run-per-alert-switch');
       await act(async () => {
-        fireEvent.click(button!);
-      });
-
-      // Wait for the popover to open and find "Summary of alerts" option
-      await waitFor(() => {
-        expect(screen.getByText('Summary of alerts')).toBeInTheDocument();
-      });
-
-      // Click on "Summary of alerts" option
-      const summaryOption = screen.getByTestId('workflow-execution-mode-option-summary');
-      await act(async () => {
-        fireEvent.click(summaryOption);
+        fireEvent.click(switchElement);
       });
 
       // Verify that editAction was called with summary: true
@@ -1082,23 +1062,18 @@ describe('WorkflowsParamsFields', () => {
       });
     });
 
-    test('should render EuiSuperSelect with prepend for Action frequency', async () => {
+    test('should render switch with help text for Action frequency', async () => {
       await act(async () => {
         renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
       });
 
       await waitFor(() => {
-        const superSelect = screen.getByTestId('workflow-per-rule-run-select');
-        expect(superSelect).toBeInTheDocument();
-        expect(screen.getByText('Per rule run')).toBeInTheDocument();
-        // EuiSuperSelect should not have disabled attribute
-        expect(superSelect).not.toHaveAttribute('disabled');
-        // Find the button in the prepend using the test subject
-        const prependButton = screen
-          .getByTestId('workflow-execution-mode-select')
-          .querySelector('button');
-        expect(prependButton).toBeInTheDocument();
-        expect(prependButton).not.toBeDisabled();
+        const switchElement = screen.getByTestId('workflow-run-per-alert-switch');
+        expect(switchElement).toBeInTheDocument();
+        expect(screen.getByText('Run per alert')).toBeInTheDocument();
+        expect(screen.getByText('Action frequency')).toBeInTheDocument();
+        // Verify the switch is rendered and functional
+        expect(switchElement).not.toBeChecked(); // Default is summary mode (false = unchecked)
       });
     });
 
@@ -1119,7 +1094,9 @@ describe('WorkflowsParamsFields', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('For each alert')).toBeInTheDocument();
+        const switchElement = screen.getByTestId('workflow-run-per-alert-switch');
+        expect(switchElement).toBeInTheDocument();
+        expect(switchElement).toBeChecked();
       });
 
       // The summary value should be preserved when workflowId changes
