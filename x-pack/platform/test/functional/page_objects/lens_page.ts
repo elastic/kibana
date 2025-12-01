@@ -1699,10 +1699,23 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async ensureLayerTabIsActive(index: number = 0) {
       const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+
+      // Ensure the requested tab exists
+      expect(tabs.length).to.be.greaterThan(index);
+
       if (tabs[index]) {
-        await tabs[index].click(); // Click to make it active
+        // Check if the tab is already active
+        const isActive = await tabs[index].getAttribute('aria-selected');
+        if (isActive === 'true') {
+          await testSubjects.exists(`lns-layerPanel-${index}`);
+          return;
+        }
+
+        // Click to make it active
+        await tabs[index].click();
+
         // Wait for the layer panel to render
-        await retry.waitFor('layer panel to be visible', async () => {
+        await retry.waitForWithTimeout('layer panel to be visible', 1000, async () => {
           return await testSubjects.exists(`lns-layerPanel-${index}`, { timeout: 1000 });
         });
       }
@@ -1713,9 +1726,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       for (let i = 0; i < tabs.length; i++) {
         const tabText = await tabs[i].getVisibleText();
         if (tabText === name) {
-          await tabs[i].click(); // Click to make it active
+          // Check if the tab is already active
+          const isActive = await tabs[i].getAttribute('aria-selected');
+          if (isActive === 'true') {
+            await testSubjects.exists(`lns-layerPanel-${i}`);
+            return;
+          }
+
+          // Click to make it active
+          await tabs[i].click();
+
           // Wait for the layer panel to render
-          await retry.waitFor('layer panel to be visible', async () => {
+          await retry.waitForWithTimeout('layer panel to be visible', 1000, async () => {
             return await testSubjects.exists(`lns-layerPanel-${i}`, { timeout: 1000 });
           });
           return;
