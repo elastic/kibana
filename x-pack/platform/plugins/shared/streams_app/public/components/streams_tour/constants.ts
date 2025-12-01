@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import type { EuiTourState } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 export const STREAMS_TOUR_CALLOUT_DISMISSED_KEY = 'streams.tour.calloutDismissed';
+export const STREAMS_TOUR_STATE_KEY = 'streams.tour.state';
 
 export type StreamsTourStepId =
   | 'streams_list'
@@ -20,4 +24,13 @@ export const STEP_ID_TO_TAB: Record<StreamsTourStepId, string | undefined> = {
   processing: 'processing',
   attachments: 'attachments',
   advanced: 'advanced',
+};
+
+export const DEFAULT_TOUR_STATE: EuiTourState = {
+  currentTourStep: 1,
+  isTourActive: false,
+  tourPopoverWidth: 360,
+  tourSubtitle: i18n.translate('xpack.streams.tour.subtitle', {
+    defaultMessage: 'Streams',
+  }),
 };

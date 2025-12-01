@@ -14,9 +14,10 @@ import {
   EuiTitle,
   EuiText,
   EuiButton,
-  EuiButtonEmpty,
+  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsTour } from './streams_tour_provider';
 import { AssetImage } from '../asset_image';
@@ -46,35 +47,46 @@ export function WelcomeTourCallout({
   return (
     <>
       <EuiPanel hasBorder paddingSize="m" color="subdued" grow={false} borderRadius="m">
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <AssetImage type="yourPreviewWillAppearHere" size="s" />
+            <AssetImage type="yourPreviewWillAppearHere" size={140} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="xs">
-              <EuiFlexItem>
+            <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
+              <EuiFlexItem
+                css={css`
+                  flex-grow: 0 !important;
+                  margin-bottom: 4px;
+                `}
+              >
                 <EuiTitle size="xs">
                   <h4>
                     {i18n.translate('xpack.streams.welcomeCallout.title', {
-                      defaultMessage: 'Welcome to Streams',
+                      defaultMessage: 'Welcome to Streams, our next-generation model to manage your data in a single place',
                     })}
                   </h4>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued">
                   {i18n.translate('xpack.streams.welcomeCallout.description', {
                     defaultMessage:
-                      'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
+                      'Your existing Elasticsearch data streams appear here as classic streams, simplifying field extraction and retention management.',
+                  })}
+                  <br />
+                  {i18n.translate('xpack.streams.welcomeCallout.descriptionSecondLine', {
+                    defaultMessage:
+                      'To try the full managed hierarchy experience, enable /logs streams when onboarding new data.',
                   })}
                 </EuiText>
               </EuiFlexItem>
+              <EuiSpacer size="m" />
               <EuiFlexItem>
-                <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+                <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiButton color="primary" size="s" onClick={handleStartTour}>
-                      {i18n.translate('xpack.streams.welcomeCallout.takeTourButton', {
-                        defaultMessage: 'Take a tour',
+                      {i18n.translate('xpack.streams.welcomeCallout.startTourButton', {
+                        defaultMessage: 'Start tour',
                       })}
                     </EuiButton>
                   </EuiFlexItem>
@@ -85,25 +97,30 @@ export function WelcomeTourCallout({
                       href={docLinks.links.observability.logsStreams}
                       target="_blank"
                       rel="noopener"
+                      iconType="popout"
+                      iconSide="right"
                     >
                       {i18n.translate('xpack.streams.welcomeCallout.docsButton', {
-                        defaultMessage: 'Go to docs',
+                        defaultMessage: 'View docs',
                       })}
                     </EuiButton>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      color="text"
-                      size="s"
+                  <EuiFlexItem
+                    grow={false}
+                    css={css`
+                      margin-left: 10px;
+                    `}
+                  >
+                    <EuiLink
                       onClick={dismissCallout}
                       aria-label={i18n.translate('xpack.streams.welcomeCallout.dismissAriaLabel', {
                         defaultMessage: 'Dismiss welcome callout',
                       })}
                     >
                       {i18n.translate('xpack.streams.welcomeCallout.dismissButton', {
-                        defaultMessage: 'Hide this',
+                        defaultMessage: "Don't show this again",
                       })}
-                    </EuiButtonEmpty>
+                    </EuiLink>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

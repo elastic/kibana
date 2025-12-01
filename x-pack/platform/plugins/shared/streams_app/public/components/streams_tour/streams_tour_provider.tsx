@@ -23,7 +23,12 @@ import type {
 } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
-import { STREAMS_TOUR_CALLOUT_DISMISSED_KEY, STEP_ID_TO_TAB } from './constants';
+import {
+  STREAMS_TOUR_CALLOUT_DISMISSED_KEY,
+  STREAMS_TOUR_STATE_KEY,
+  STEP_ID_TO_TAB,
+  DEFAULT_TOUR_STATE,
+} from './constants';
 import type { StreamsTourStepId } from './constants';
 import { getTourStepsConfig, TourStepConfig } from './tour_steps_config';
 import { useKibana } from '../../hooks/use_kibana';
@@ -33,11 +38,38 @@ export type StreamsTourStepProps = Omit<EuiTourStepProps, 'children' | 'anchor'>
   stepId: StreamsTourStepId;
 };
 
+export interface StreamsTourProviderProps {
+  children: React.ReactNode;
+}
+
+export interface StreamsTourContextValue {
+  tourStepProps: StreamsTourStepProps[];
+  actions: EuiTourActions;
+  tourState: EuiTourState;
+  isCalloutDismissed: boolean;
+  dismissCallout: () => void;
+  startTour: (streamName?: string) => void;
+  isTourAvailable: boolean;
+  setTourAvailable: (available: boolean) => void;
+  tourStreamName: string | null;
+  setTourStreamName: (name: string | null) => void;
+  getStepPropsByStepId: (stepId: StreamsTourStepId) => StreamsTourStepProps | undefined;
+}
+
+interface PersistedTourState {
+  currentTourStep: number;
+  isTourActive: boolean;
+  tourStreamName?: string | null;
+}
+
+const StreamsTourContext = createContext<StreamsTourContextValue | null>(null);
+
 function createEnhancedTourStepProps(
   baseProps: EuiTourStepProps[],
   stepsConfig: TourStepConfig[],
   actions: EuiTourActions,
-  tourState: EuiTourState
+  tourState: EuiTourState,
+  onCompleteTour: () => void
 ): StreamsTourStepProps[] {
   const stepsTotal = stepsConfig.length;
 
@@ -51,7 +83,10 @@ function createEnhancedTourStepProps(
       <EuiButton
         color="success"
         size="s"
-        onClick={() => actions.finishTour()}
+        onClick={() => {
+          actions.finishTour();
+          onCompleteTour();
+        }}
         data-test-subj="streamsTourStartExploringButton"
       >
         {i18n.translate('xpack.streams.tour.startExploringButton', {
@@ -97,35 +132,6 @@ function createEnhancedTourStepProps(
   });
 }
 
-interface StreamsTourContextValue {
-  tourStepProps: StreamsTourStepProps[];
-  actions: EuiTourActions;
-  tourState: EuiTourState;
-  isCalloutDismissed: boolean;
-  dismissCallout: () => void;
-  startTour: (streamName?: string) => void;
-  isTourAvailable: boolean;
-  setTourAvailable: (available: boolean) => void;
-  tourStreamName: string | null;
-  setTourStreamName: (name: string | null) => void;
-  getStepPropsByStepId: (stepId: StreamsTourStepId) => StreamsTourStepProps | undefined;
-}
-
-const StreamsTourContext = createContext<StreamsTourContextValue | null>(null);
-
-const INITIAL_TOUR_STATE: EuiTourState = {
-  currentTourStep: 1,
-  isTourActive: false,
-  tourPopoverWidth: 360,
-  tourSubtitle: i18n.translate('xpack.streams.tour.subtitle', {
-    defaultMessage: 'Streams',
-  }),
-};
-
-interface StreamsTourProviderProps {
-  children: React.ReactNode;
-}
-
 export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
   const {
     core: {
@@ -141,23 +147,59 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
     false
   );
 
+  const [persistedTourState, setPersistedTourState] = useLocalStorage<PersistedTourState>(
+    STREAMS_TOUR_STATE_KEY
+  );
+
   const [isTourAvailable, setTourAvailable] = useState(false);
-  const [tourStreamName, setTourStreamName] = useState<string | null>(null);
-  const prevStepRef = useRef<number>(1);
+  const [tourStreamName, setTourStreamName] = useState<string | null>(
+    persistedTourState?.tourStreamName ?? null
+  );
+  const prevStepRef = useRef<number>(persistedTourState?.currentTourStep ?? 1);
 
   const stepsConfig = useMemo(
     () => getTourStepsConfig({ attachmentsEnabled }),
     [attachmentsEnabled]
   );
 
-  const [baseTourStepProps, actions, tourState] = useEuiTour(
-    stepsConfig as unknown as EuiStatelessTourSteps,
-    INITIAL_TOUR_STATE
+  const restoredTourState = useMemo<EuiTourState>(
+    () => ({
+      ...DEFAULT_TOUR_STATE,
+      ...(persistedTourState && {
+        currentTourStep: persistedTourState.currentTourStep,
+        isTourActive: persistedTourState.isTourActive,
+      }),
+    }),
+    []
   );
 
+  const [baseTourStepProps, actions, tourState] = useEuiTour(
+    stepsConfig as unknown as EuiStatelessTourSteps,
+    restoredTourState
+  );
+
+  useEffect(() => {
+    const { isTourActive, currentTourStep } = tourState;
+    setPersistedTourState({
+      isTourActive,
+      currentTourStep,
+      tourStreamName,
+    });
+  }, [tourState, tourStreamName, setPersistedTourState]);
+
+  const dismissCallout = useCallback(() => {
+    setCalloutDismissed(true);
+    setPersistedTourState(undefined);
+  }, [setCalloutDismissed, setPersistedTourState]);
+
+  const completeTour = useCallback(() => {
+    setCalloutDismissed(true);
+    setPersistedTourState(undefined);
+  }, [setCalloutDismissed, setPersistedTourState]);
+
   const tourStepProps = useMemo(
-    () => createEnhancedTourStepProps(baseTourStepProps, stepsConfig, actions, tourState),
-    [baseTourStepProps, stepsConfig, actions, tourState]
+    () => createEnhancedTourStepProps(baseTourStepProps, stepsConfig, actions, tourState, completeTour),
+    [baseTourStepProps, stepsConfig, actions, tourState, completeTour]
   );
 
   const getStepPropsByStepId = useCallback(
@@ -166,10 +208,6 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
     },
     [tourStepProps]
   );
-
-  const dismissCallout = useCallback(() => {
-    setCalloutDismissed(true);
-  }, [setCalloutDismissed]);
 
   const startTour = useCallback(
     (streamName?: string) => {

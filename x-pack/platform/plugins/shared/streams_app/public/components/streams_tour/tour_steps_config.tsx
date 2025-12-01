@@ -86,13 +86,13 @@ const ATTACHMENTS_STEP: Omit<TourStepConfig, 'step' | 'stepsTotal'> = {
   stepId: 'attachments',
   subtitle: TOUR_SUBTITLE,
   title: i18n.translate('xpack.streams.tour.attachments.title', {
-    defaultMessage: 'Link dashboards and saved objects',
+    defaultMessage: 'Keep your everything organized by stream',
   }),
   content: (
     <EuiText size="s" css={tightContentCss}>
       {i18n.translate('xpack.streams.tour.attachments.content', {
         defaultMessage:
-          'Attach dashboards, visualizations, and other saved objects to your stream for quick access.',
+          'Attach dashboards, alerts, SLOs, and other assets to this stream for a clear view of everything built on top of its data.',
       })}
     </EuiText>
   ),
