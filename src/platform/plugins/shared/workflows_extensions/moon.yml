@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/config-schema'
   - '@kbn/crypto'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -35,6 +36,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
 tasks:
   jest:
