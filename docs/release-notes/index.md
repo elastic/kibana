@@ -66,6 +66,8 @@ For the Elastic Security 9.2.2 release information, refer to [Elastic Security S
 
 **Kibana platform**:
 * Fixes the production build favicon's CSS specificity [#243351]({{kib-pull}}243351).
+* Fixes an issue on the **Index management** page where screen reader text was different from visible text [#243802]({{kib-pull}}243802).
+* Fixes an issue with keyboard focus getting trapped on pages using document preview [#243791]({{kib-pull}}243791).
 
 **Machine Learning**:
 * Ensures deleted text in AI connector or Inference endpoint forms is not sent as empty strings [#244059]({{kib-pull}}244059).
@@ -73,8 +75,6 @@ For the Elastic Security 9.2.2 release information, refer to [Elastic Security S
 * Fixes import and improves validation for Anomaly Detection and Data Frame Analytics jobs [#242263]({{kib-pull}}242263).
 
 **Search**:
-* Fixes a case on Index management page where screen reader text was different than visible text [#243802]({{kib-pull}}243802).
-* Fixed a case of keyboard focus getting trapped on pages using document preview [#243791]({{kib-pull}}243791).
 * Turns off custom suggestions on embedded console [#241516]({{kib-pull}}241516).
 
 ## 9.2.1 [kibana-9.2.1-release-notes]
