@@ -127,6 +127,7 @@ export const CreateClassicStreamFlyout = ({
       onClose={onClose}
       aria-labelledby="create-classic-stream-flyout-title"
       data-test-subj="create-classic-stream-flyout"
+      size="640px"
     >
       <EuiFlyoutHeader hasBorder data-test-subj="create-classic-stream-flyout-header">
         <EuiTitle size="s">

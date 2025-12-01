@@ -32,7 +32,7 @@ export const EmptyState = ({ onCreateTemplate }: { onCreateTemplate: () => void 
             />
           </h2>
         }
-        titleSize="s"
+        titleSize="xs"
         body={
           <p>
             <FormattedMessage

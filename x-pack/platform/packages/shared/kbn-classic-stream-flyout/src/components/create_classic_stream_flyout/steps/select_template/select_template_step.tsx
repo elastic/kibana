@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiSpacer,
   EuiSelectable,
@@ -131,6 +132,12 @@ export const SelectTemplateStep = ({
     return <EmptyState onCreateTemplate={onCreateTemplate} />;
   }
 
+  const selectableStyles = css`
+    .euiSelectableList {
+      border-radius: 0;
+    }
+  `;
+
   return (
     <EuiFlexGroup data-test-subj="selectTemplateStep" direction="column">
       <EuiSelectable
@@ -142,16 +149,16 @@ export const SelectTemplateStep = ({
           placeholder: i18n.translate(
             'xpack.createClassicStreamFlyout.selectTemplateStep.searchPlaceholder',
             {
-              defaultMessage: 'Search by index template name...',
+              defaultMessage: 'Search by index template name…',
             }
           ),
           'data-test-subj': 'templateSearch',
-          compressed: true,
         }}
         singleSelection={true}
         options={selectableOptions}
         onChange={handleTemplateChange}
         renderOption={renderOption}
+        css={selectableStyles}
         listProps={{
           bordered: true,
           paddingSize: 's',
