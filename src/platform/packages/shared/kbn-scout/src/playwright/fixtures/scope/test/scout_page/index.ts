@@ -9,6 +9,7 @@
 
 import { Page } from '@playwright/test';
 import { PathOptions } from '../../../../../common/services/kibana_url';
+import type { RunA11yScanOptions } from '../../../../utils';
 
 /**
  * Extends the Playwright 'Page' interface with methods specific to Kibana.
