@@ -49,7 +49,7 @@ export async function cleanupEsqlViewsStep(context: InstallContext) {
     const { installed_es: installedEs } = installedPkg.attributes;
 
     logger.debug('Retry transition - clean up ESQL views');
-    await withPackageSpan('Retry transition - clean up ilm transforms', async () => {
+    await withPackageSpan('Retry transition - clean up ESQL views', async () => {
       await cleanupEsqlViews(installedEs, esClient);
     });
   }
