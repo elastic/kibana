@@ -312,7 +312,7 @@ export function ValueControlForm({
               <EuiCallOut
                 announceOnMount
                 title={i18n.translate('esql.flyout.displayNoValuesForControlCallout.title', {
-                  defaultMessage: "Your query didn't return any values, change it and try again.",
+                  defaultMessage: "This query isn't returning any values. Edit it and run it again.",
                 })}
                 color="warning"
                 iconType="warning"
