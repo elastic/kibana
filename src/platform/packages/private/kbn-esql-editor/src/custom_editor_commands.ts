@@ -18,7 +18,7 @@ export interface MonacoCommandDependencies {
   application?: CoreStart['application'];
   uiActions: ESQLEditorDeps['uiActions'];
   telemetryService: ESQLEditorTelemetryService;
-  editor1: React.RefObject<monaco.editor.IStandaloneCodeEditor>;
+  editorRef: React.RefObject<monaco.editor.IStandaloneCodeEditor>;
   getCurrentQuery: () => string;
   esqlVariables?: ESQLControlVariable[];
   controlsContext?: ControlsContext;
@@ -51,7 +51,7 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
     application,
     uiActions,
     telemetryService,
-    editor1,
+    editorRef,
     getCurrentQuery,
     esqlVariables,
     controlsContext,
@@ -121,7 +121,7 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
           triggerSource,
           currentQuery
         );
-        const position = editor1.current?.getPosition();
+        const position = editorRef.current?.getPosition();
         await triggerControl(
           currentQuery,
           variableType,
