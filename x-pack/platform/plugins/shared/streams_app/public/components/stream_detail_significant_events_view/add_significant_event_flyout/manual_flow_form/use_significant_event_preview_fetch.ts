@@ -67,7 +67,10 @@ export function useSignificantEventPreviewFetch({
             body: {
               query: {
                 kql: { query: kqlQuery },
-                feature: effectiveFeature,
+                feature: effectiveFeature && {
+                  name: effectiveFeature.name,
+                  filter: effectiveFeature.filter,
+                },
               },
             },
           },
