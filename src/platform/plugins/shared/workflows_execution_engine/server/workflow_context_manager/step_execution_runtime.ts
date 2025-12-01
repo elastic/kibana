@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowStepExecution, ExecutionError, StackFrame } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
-import { mapError, parseDuration } from '../utils';
+import { ExecutionError, parseDuration } from '../utils';
+
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface StepExecutionRuntimeInit {
@@ -98,7 +99,7 @@ export class StepExecutionRuntime {
     return {
       input: stepExecution.input || {},
       output: stepExecution.output || {},
-      error: stepExecution.error,
+      error: stepExecution.error ? new ExecutionError(stepExecution.error) : undefined,
     };
   }
 
@@ -164,10 +165,11 @@ export class StepExecutionRuntime {
     this.logStepComplete(stepExecutionUpdate);
   }
 
-  public failStep(error: Error | ExecutionError | string): void {
+  public failStep(error: Error): void {
     // if there is a last step execution, fail it
     // if not, create a new step execution with fail
-    const executionError = mapError(error);
+    const executionError = ExecutionError.fromError(error);
+    const serializedError = executionError.toSerializableObject();
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
@@ -175,7 +177,7 @@ export class StepExecutionRuntime {
       scopeStack: this.stackFrames,
       finishedAt: new Date().toISOString(),
       output: null,
-      error: executionError,
+      error: serializedError,
     } as Partial<EsWorkflowStepExecution>;
 
     if (startedStepExecution && startedStepExecution.startedAt) {
@@ -184,7 +186,7 @@ export class StepExecutionRuntime {
         new Date(startedStepExecution.startedAt).getTime();
     }
     this.workflowExecutionState.updateWorkflowExecution({
-      error: executionError,
+      error: serializedError,
     });
     this.workflowExecutionState.upsertStep(stepExecutionUpdate);
     this.logStepFail(executionError);
@@ -284,13 +286,13 @@ export class StepExecutionRuntime {
     });
   }
 
-  private logStepFail(error: ExecutionError): void {
+  private logStepFail(executionError: ExecutionError): void {
     const stepName = this.node.stepId;
     const stepType = this.node.stepType || 'unknown';
 
-    const message = `Step '${stepName}' failed: ${error.message}`;
+    const message = `Step '${stepName}' failed: ${executionError.message}`;
 
-    this.stepLogger?.logError(message, error, {
+    this.stepLogger?.logError(message, executionError, {
       workflow: { step_id: this.node.stepId, step_execution_id: this.stepExecutionId },
       event: { action: 'step-fail', category: ['workflow', 'step'] },
       tags: ['workflow', 'step', 'fail'],

@@ -12,10 +12,11 @@
 
 import axios, { type AxiosError, type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import https from 'https';
-import type { ExecutionError, FetcherConfigSchema } from '@kbn/workflows';
+import type { FetcherConfigSchema } from '@kbn/workflows';
 import type { HttpGraphNode } from '@kbn/workflows/graph';
 import type { z } from '@kbn/zod';
 import type { UrlValidator } from '../../lib/url_validator';
+import { ExecutionError } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -179,15 +180,15 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
     if (axios.isAxiosError(error)) {
       executionError = this.mapAxiosError(error);
     } else if (error instanceof Error) {
-      executionError = {
+      executionError = new ExecutionError({
         type: error.name,
         message: error.message,
-      };
+      });
     } else {
-      executionError = {
+      executionError = new ExecutionError({
         type: 'UnknownError',
         message: String(error),
-      };
+      });
     }
 
     this.workflowLogger.logError(`HTTP request failed: ${executionError.message}`, executionError, {
@@ -206,21 +207,21 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   private mapAxiosError(error: AxiosError): ExecutionError {
     if (error.code === 'ECONNREFUSED') {
       const url = new URL(this.step.with.url);
-      return {
+      return new ExecutionError({
         type: 'ConnectionRefused',
         message: `Connection refused to ${url.origin}`,
-      };
+      });
     }
 
     if (error.code === 'ERR_CANCELED') {
-      return {
+      return new ExecutionError({
         type: 'HttpRequestCancelledError',
         message: 'HTTP request was cancelled',
-      };
+      });
     }
 
     if (error.response) {
-      return {
+      return new ExecutionError({
         type: 'HttpRequestError',
         message: error.message,
         details: {
@@ -229,15 +230,15 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
           statusText: error.response.statusText,
           data: error.response.data,
         },
-      };
+      });
     }
 
-    return {
+    return new ExecutionError({
       type: error.code || 'UnknownHttpRequestError',
       message: error.message,
       details: error.config && {
         config: error.config,
       },
-    };
+    });
   }
 }

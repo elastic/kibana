@@ -591,9 +591,9 @@ export const DynamicStepContextSchema = DynamicWorkflowContextSchema.extend({
 });
 export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;
 
-export const ExecutionErrorSchema = z.object({
+export const BaseExecutionErrorSchema = z.object({
   type: z.string(),
   message: z.string(),
   details: z.any().optional(),
 });
-export type ExecutionError = z.infer<typeof ExecutionErrorSchema>;
+export type BaseExecutionError = z.infer<typeof BaseExecutionErrorSchema>;

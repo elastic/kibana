@@ -24,6 +24,7 @@ export type {
   TestWorkflowResponseDto,
   TestWorkflowCommand,
   StackFrame,
+  SerializedError,
   UpdatedWorkflowResponseDto,
   // dtos
   WorkflowDetailDto,

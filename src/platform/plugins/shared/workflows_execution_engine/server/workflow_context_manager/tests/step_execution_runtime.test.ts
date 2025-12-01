@@ -10,6 +10,7 @@
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import { ExecutionError } from '../../utils';
 import { createMockWorkflowEventLogger } from '../../workflow_event_logger/mocks';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/types';
 import { StepExecutionRuntime } from '../step_execution_runtime';
@@ -138,7 +139,7 @@ describe('StepExecutionRuntime', () => {
       expect(stepResult).toEqual({
         input: {},
         output: { success: true, data: {} },
-        error: { type: 'Error', message: 'Fake error' },
+        error: new ExecutionError({ type: 'Error', message: 'Fake error' }),
       });
     });
   });
@@ -408,13 +409,8 @@ describe('StepExecutionRuntime', () => {
       },
       {
         testName: 'execution error',
-        inputError: { type: 'CustomError', message: 'Custom step error' },
+        inputError: new ExecutionError({ type: 'CustomError', message: 'Custom step error' }),
         expectedError: { type: 'CustomError', message: 'Custom step error' },
-      },
-      {
-        testName: 'string error',
-        inputError: 'String error',
-        expectedError: { type: 'Error', message: 'String error' },
       },
     ])(
       'should mark the step as failed and map "$testName" error to execution error',
@@ -437,10 +433,7 @@ describe('StepExecutionRuntime', () => {
 
       expect(workflowLogger.logError).toHaveBeenCalledWith(
         `Step 'fakeStepId1' failed: Step execution failed`,
-        {
-          type: 'Error',
-          message: 'Step execution failed',
-        },
+        error,
         {
           event: { action: 'step-fail', category: ['workflow', 'step'] },
           tags: ['workflow', 'step', 'fail'],

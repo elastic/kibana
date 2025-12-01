@@ -9,6 +9,7 @@
 
 import type { WorkflowExecutionLoopParams } from './types';
 import type { NodeWithErrorCatching } from '../step/node_implementation';
+import { ExecutionError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
 
@@ -72,7 +73,7 @@ export async function catchError(
     if (failedStepExecutionRuntime.stepExecutionExists()) {
       failedStepExecutionRuntime.failStep(
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        params.workflowExecutionState.getWorkflowExecution().error!
+        new ExecutionError(params.workflowExecutionState.getWorkflowExecution().error!)
       );
     }
 
@@ -124,7 +125,7 @@ export async function catchError(
         if (stepExecutionRuntime.stepExecutionExists()) {
           stepExecutionRuntime.failStep(
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            params.workflowExecutionState.getWorkflowExecution().error!
+            new ExecutionError(params.workflowExecutionState.getWorkflowExecution().error!)
           );
         }
       }

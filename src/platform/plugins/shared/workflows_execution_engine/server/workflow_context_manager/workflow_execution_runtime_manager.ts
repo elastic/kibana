@@ -12,14 +12,14 @@
 
 import agent from 'elastic-apm-node';
 import type { CoreStart } from '@kbn/core/server';
-import type { EsWorkflowExecution, ExecutionError, StackFrame } from '@kbn/workflows';
+import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
-import { mapError } from '../utils';
+import { ExecutionError } from '../utils';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface WorkflowExecutionRuntimeManagerInit {
@@ -202,9 +202,10 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
-  public setWorkflowError(error: Error | ExecutionError | string | undefined): void {
+  public setWorkflowError(error: Error | undefined): void {
+    const executionError = error ? ExecutionError.fromError(error) : undefined;
     this.workflowExecutionState.updateWorkflowExecution({
-      error: error ? mapError(error) : undefined,
+      error: executionError ? executionError.toSerializableObject() : undefined,
     });
   }
 

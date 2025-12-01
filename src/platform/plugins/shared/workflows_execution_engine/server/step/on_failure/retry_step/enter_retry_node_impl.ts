@@ -8,6 +8,8 @@
  */
 
 import type { EnterRetryNode } from '@kbn/workflows/graph';
+import type { SerializedError } from '@kbn/workflows/types/latest';
+import { ExecutionError } from '../../../utils';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
@@ -34,7 +36,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
     const shouldRetry = failedContext.contextManager.evaluateBooleanExpressionInContext(
       this.node.configuration.condition || true,
       {
-        error: failedContext.stepExecution?.error,
+        error: failedContext.getCurrentStepResult()?.error,
       }
     );
 
@@ -60,7 +62,9 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
     }
 
     // fail retry with last error after exceeding max attempts
-    this.stepExecutionRuntime.failStep(failedContext.stepExecution.error);
+    this.stepExecutionRuntime.failStep(
+      new ExecutionError(failedContext.getCurrentStepResult()?.error as SerializedError)
+    );
   }
 
   private initializeRetry(): void {

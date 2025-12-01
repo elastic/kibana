@@ -12,16 +12,16 @@
 
 // Import specific step types as needed from schema
 // import { evaluate } from '@marcbachmann/cel-js'
-import type { ExecutionError } from '@kbn/workflows';
+import type { SerializedError } from '@kbn/workflows';
 import type { ConnectorExecutor } from '../connector_executor';
-import { mapError } from '../utils';
+import { ExecutionError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
 export interface RunStepResult {
   input: any;
   output: any;
-  error: ExecutionError | undefined;
+  error: SerializedError | undefined;
 }
 
 // TODO: To remove it and replace with AtomicGraphNode
@@ -118,7 +118,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       }
 
       if (result.error) {
-        this.stepExecutionRuntime.failStep(result.error);
+        this.stepExecutionRuntime.failStep(new ExecutionError(result.error));
       } else {
         this.stepExecutionRuntime.finishStep(result.output);
       }
@@ -141,7 +141,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     return {
       input,
       output: undefined,
-      error: mapError(error),
+      error: ExecutionError.fromError(error),
     };
   }
 }

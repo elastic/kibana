@@ -9,14 +9,13 @@
 
 import { merge } from 'lodash';
 import type { Logger } from '@kbn/core/server';
-import type { ExecutionError } from '@kbn/workflows';
 import type {
   IWorkflowEventLogger,
   WorkflowEventLoggerContext,
   WorkflowEventLoggerOptions,
 } from './types';
 import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
-import { mapError } from '../utils';
+import { ExecutionError } from '../utils';
 
 export class WorkflowEventLogger implements IWorkflowEventLogger {
   private eventQueue: WorkflowLogEvent[] = [];
@@ -60,13 +59,13 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
 
   public logError(
     message: string,
-    error?: Error | ExecutionError,
+    error?: Error,
     additionalData: Partial<WorkflowLogEvent> = {}
   ): void {
     const errorData: Partial<WorkflowLogEvent> = {};
 
     if (error) {
-      errorData.error = mapError(error);
+      errorData.error = ExecutionError.fromError(error).toSerializableObject();
     }
 
     this.logEvent({

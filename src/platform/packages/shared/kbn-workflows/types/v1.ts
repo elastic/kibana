@@ -9,7 +9,7 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import { z } from '@kbn/zod';
-import type { ExecutionError, WorkflowYaml } from '../spec/schema';
+import type { BaseExecutionError, WorkflowYaml } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
 
 export enum ExecutionStatus {
@@ -60,6 +60,12 @@ export interface StackFrame {
   nestedScopes: ScopeEntry[];
 }
 
+export interface SerializedError {
+  type: string;
+  message: string;
+  details?: Record<string, unknown>;
+}
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
@@ -74,7 +80,7 @@ export interface EsWorkflowExecution {
   stepId?: string;
   scopeStack: StackFrame[];
   createdAt: string;
-  error: ExecutionError | null;
+  error: SerializedError | null;
   createdBy: string;
   startedAt: string;
   finishedAt: string;
@@ -126,7 +132,7 @@ export interface EsWorkflowStepExecution {
    * There might be several instances of the same stepId if it's inside loops, retries, etc.
    */
   stepExecutionIndex: number;
-  error?: ExecutionError;
+  error?: SerializedError;
   output?: JsonValue;
   input?: JsonValue;
 
@@ -159,7 +165,7 @@ export interface WorkflowExecutionDto {
   status: ExecutionStatus;
   isTestRun: boolean;
   startedAt: string;
-  error: ExecutionError | null;
+  error: BaseExecutionError | null;
   finishedAt: string;
   workflowId?: string;
   workflowName?: string;

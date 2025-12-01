@@ -10,14 +10,13 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KQLSyntaxError } from '@kbn/es-query';
-import type { StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
+import type { BaseExecutionError, StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
-import type { RunStepResult } from '../step/node_implementation';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildStepExecutionId, evaluateKql } from '../utils';
 
@@ -318,7 +317,11 @@ export class WorkflowContextManager {
 
   private getStepData(stepId: string):
     | {
-        runStepResult: RunStepResult;
+        runStepResult: {
+          input: unknown;
+          output: unknown;
+          error: BaseExecutionError | undefined;
+        };
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         stepState: Record<string, any> | undefined;
       }

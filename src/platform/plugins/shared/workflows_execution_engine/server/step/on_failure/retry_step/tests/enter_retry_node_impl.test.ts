@@ -6,8 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { EsWorkflowStepExecution, ExecutionError } from '@kbn/workflows';
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import type { EnterRetryNode } from '@kbn/workflows/graph';
+import { ExecutionError } from '../../../../utils';
 import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../../workflow_event_logger';
@@ -36,6 +37,7 @@ describe('EnterRetryNodeImpl', () => {
       getCurrentStepState: jest.fn(),
       startStep: jest.fn(),
       setCurrentStepState: jest.fn(),
+      getCurrentStepResult: jest.fn(),
       failStep: jest.fn(),
       setWaitStep: jest.fn(),
     } as unknown as StepExecutionRuntime;
@@ -66,6 +68,7 @@ describe('EnterRetryNodeImpl', () => {
     fakeFailedContext = {
       stepExecution: fakeStepExecutionDoc,
       contextManager: fakeFailedContextManager,
+      getCurrentStepResult: jest.fn(),
     } as unknown as StepExecutionRuntime;
   });
 
@@ -201,6 +204,12 @@ describe('EnterRetryNodeImpl', () => {
   describe('catchError', () => {
     beforeEach(() => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 2 });
+      (fakeFailedContext.getCurrentStepResult as jest.Mock).mockReturnValue({
+        error: new ExecutionError({
+          type: 'NetworkError',
+          message: 'Failed to connect to server',
+        }),
+      });
     });
 
     describe('when attempts exceed max limit', () => {
@@ -210,10 +219,12 @@ describe('EnterRetryNodeImpl', () => {
 
       it('should fail the step with appropriate error', async () => {
         await underTest.catchError(fakeFailedContext);
-        expect(stepExecutionRuntime.failStep).toHaveBeenCalledWith({
-          type: 'NetworkError',
-          message: 'Failed to connect to server',
-        });
+        expect(stepExecutionRuntime.failStep).toHaveBeenCalledWith(
+          new ExecutionError({
+            type: 'NetworkError',
+            message: 'Failed to connect to server',
+          })
+        );
       });
     });
 
@@ -265,10 +276,10 @@ describe('EnterRetryNodeImpl', () => {
 
         it('should call evaluateBooleanExpressionInContext with correct parameters', async () => {
           await underTest.catchError(fakeFailedContext);
-          const fakeError: ExecutionError = {
+          const fakeError = new ExecutionError({
             type: 'NetworkError',
             message: 'Failed to connect to server',
-          };
+          });
           fakeStepExecutionDoc.error = fakeError;
           expect(fakeFailedContextManager.evaluateBooleanExpressionInContext).toHaveBeenCalledWith(
             node.configuration.condition,
