@@ -20,6 +20,7 @@ import { generateEsqlTool } from './generate_esql';
 import { executeEsqlTool } from './execute_esql';
 import { searchTool } from './search';
 import { createVisualizationTool } from './create_visualization';
+import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
 
 export const registerTools = ({
   coreSetup,
@@ -40,6 +41,12 @@ export const registerTools = ({
     indexExplorerTool(),
     createVisualizationTool(),
   ];
+
+  if (setupDeps.workflowsManagement) {
+    tools.push(
+      getWorkflowExecutionStatusTool({ workflowsManagement: setupDeps.workflowsManagement })
+    );
+  }
 
   tools.forEach((tool) => {
     onechat.tools.register(tool);
