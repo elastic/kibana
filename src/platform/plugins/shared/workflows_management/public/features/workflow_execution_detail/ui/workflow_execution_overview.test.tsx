@@ -236,9 +236,11 @@ describe('WorkflowExecutionOverview', () => {
       renderWithIntl(<WorkflowExecutionOverview stepExecution={stepExecution} />);
 
       expect(screen.getByText('Execution started')).toBeInTheDocument();
-      expect(screen.getByText((content, element) => {
-        return element?.tagName === 'STRONG' && content === '-';
-      })).toBeInTheDocument();
+      expect(
+        screen.getByText((content, element) => {
+          return element?.tagName === 'STRONG' && content === '-';
+        })
+      ).toBeInTheDocument();
     });
 
     it('should handle missing execution ended date gracefully', () => {
@@ -310,4 +312,3 @@ describe('WorkflowExecutionOverview', () => {
     });
   });
 });
-
