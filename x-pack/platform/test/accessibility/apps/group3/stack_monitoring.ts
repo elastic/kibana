@@ -42,10 +42,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Alerts Page', async function () {
-      await testSubjects.click('alerts-modal-remind-later-button');
-    });
-
     it('a11y tests for Kibana Overview', async function () {
       await clusterOverview.clickKibanaOverview();
       expect(await kibanaOverview.isOnOverview()).to.be(true);

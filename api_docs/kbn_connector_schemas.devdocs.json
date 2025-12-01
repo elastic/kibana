@@ -30,9 +30,39 @@
         "label": "CONNECTOR_ID",
         "description": [],
         "signature": [
+          "\".bedrock\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/bedrock/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
           "\".cases-webhook\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/cases_webhook/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".crowdstrike\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/crowdstrike/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -90,6 +120,36 @@
         "label": "CONNECTOR_ID",
         "description": [],
         "signature": [
+          "\".gemini\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/gemini/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".inference\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/inference/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
           "\".jira\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/jira/constants.ts",
@@ -108,6 +168,36 @@
           "\".jira-service-management\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/jira-service-management/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".microsoft_defender_endpoint\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/microsoft_defender_endpoint/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".gen-ai\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/openai/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -153,6 +243,21 @@
           "\".resilient\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/resilient/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".sentinelone\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/sentinelone/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -273,6 +378,21 @@
           "\".teams\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/teams/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
+          "\".thehive\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/thehive/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -25,6 +25,11 @@ import {
   isIlmLifecycle,
 } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
+import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import {
+  isDisabledLifecycleFailureStore,
+  isInheritFailureStore,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { generateLayer } from '../../component_templates/generate_layer';
 import { getComponentTemplateName } from '../../component_templates/name';
 import { isDefinitionNotFoundError } from '../../errors/definition_not_found_error';
@@ -62,6 +67,7 @@ interface WiredStreamChanges extends StreamChanges {
   ownFields: boolean;
   routing: boolean;
   processing: boolean;
+  failure_store: boolean;
   lifecycle: boolean;
   settings: boolean;
 }
@@ -72,6 +78,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     routing: false,
     processing: false,
     lifecycle: false,
+    failure_store: false,
     settings: false,
   };
 
@@ -130,6 +137,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         startingStateStreamDefinition.ingest.wired.routing
       );
 
+    this._changes.failure_store =
+      !startingStateStreamDefinition ||
+      !_.isEqual(
+        this._definition.ingest.failure_store,
+        startingStateStreamDefinition.ingest.failure_store
+      );
+
     this._changes.processing =
       !startingStateStreamDefinition ||
       !_.isEqual(
@@ -167,6 +181,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                 },
               ],
             },
+            failure_store: { inherit: {} },
           },
         },
       });
@@ -192,6 +207,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                   fields: {},
                   routing: [],
                 },
+                failure_store: { inherit: {} },
               },
             },
           });
@@ -434,8 +450,18 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     validateSystemFields(this._definition);
     validateBracketsInFieldNames(this._definition);
 
-    if (this.dependencies.isServerless && isIlmLifecycle(this.getLifecycle())) {
-      return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
+    const effectiveFailureStore = this.getInheritedFailureStoreFromAncestors(ancestors);
+
+    if (this.dependencies.isServerless) {
+      if (isIlmLifecycle(this.getLifecycle())) {
+        return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
+      }
+      if (isDisabledLifecycleFailureStore(effectiveFailureStore)) {
+        return {
+          isValid: false,
+          errors: [new Error('Disabling failure store lifecycle is not supported in Serverless')],
+        };
+      }
     }
 
     validateSettings(this._definition, this.dependencies.isServerless);
@@ -524,9 +550,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     const ancestors = getAncestorsAndSelf(this._definition.name).map(
       (id) => desiredState.get(id)!.definition as Streams.WiredStream.Definition
     );
-    const lifecycle = findInheritedLifecycle(this._definition, ancestors);
+    const { from: _lifecycleOrigin, ...lifecycle } = findInheritedLifecycle(
+      this._definition,
+      ancestors
+    );
     const { existsAsManagedDataStream } = await this.getMatchingDataStream();
     const settings = getInheritedSettings(ancestors);
+    const failureStore = this.getInheritedFailureStoreFromAncestors(ancestors);
 
     return [
       {
@@ -581,6 +611,14 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         },
       },
       {
+        type: 'update_failure_store',
+        request: {
+          name: this._definition.name,
+          failure_store: failureStore,
+          definition: this._definition,
+        },
+      },
+      {
         type: 'upsert_dot_streams_document',
         request: this._definition,
       },
@@ -595,12 +633,40 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     return this._changes.lifecycle;
   }
 
+  public hasChangedFailureStore(): boolean {
+    return this._changes.failure_store;
+  }
+
   public hasChangedSettings(): boolean {
     return this._changes.settings;
   }
 
   public getLifecycle(): IngestStreamLifecycle {
     return this._definition.ingest.lifecycle;
+  }
+
+  public getFailureStore(): FailureStore {
+    return this._definition.ingest.failure_store;
+  }
+
+  private getInheritedFailureStoreFromAncestors(
+    ancestors: Streams.WiredStream.Definition[]
+  ): FailureStore {
+    const ancestorsAndSelf = [...ancestors, this._definition].reverse();
+
+    for (const ancestor of ancestorsAndSelf) {
+      if (!ancestor) {
+        throw new Error(`Failed to resolve failure store for stream ${this._definition.name}`);
+      }
+
+      const ancestorFailureStore = ancestor.ingest.failure_store;
+      if (!isInheritFailureStore(ancestorFailureStore)) {
+        return ancestorFailureStore;
+      }
+    }
+    throw new Error(
+      `Failed to resolve failure store for stream ${this._definition.name}: all ancestors have inherit configuration`
+    );
   }
 
   protected async doDetermineUpdateActions(
@@ -649,28 +715,65 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       });
     }
     const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).reverse();
-    let hasAncestorWithChangedLifecycle = false;
-    for (const ancestor of ancestorsAndSelf) {
-      const ancestorStream = desiredState.get(ancestor)! as WiredStream;
-      // as soon as at least one ancestor has an updated lifecycle, we need to update the lifecycle of the stream
-      // once we find the ancestor actually defining the lifecycle
-      if (ancestorStream.hasChangedLifecycle()) {
-        hasAncestorWithChangedLifecycle = true;
-      }
-      // look for the first non-inherit lifecycle, that's the one defining the effective lifecycle
-      if (!isInheritLifecycle(ancestorStream.getLifecycle())) {
-        if (hasAncestorWithChangedLifecycle) {
-          actions.push({
-            type: 'update_lifecycle',
-            request: {
-              name: this._definition.name,
-              lifecycle: ancestorStream.getLifecycle(),
-            },
-          });
+
+    const checkAncestorChangesAndUpdate = <T>({
+      hasChanged,
+      getValue,
+      isInherit,
+      createAction,
+    }: {
+      hasChanged: (stream: WiredStream) => boolean;
+      getValue: (stream: WiredStream) => T;
+      isInherit: (value: T) => boolean;
+      createAction: (value: T) => ElasticsearchAction;
+    }) => {
+      let hasAncestorChanged = false;
+      for (const ancestor of ancestorsAndSelf) {
+        const ancestorStream = desiredState.get(ancestor)! as WiredStream;
+        // as soon as at least one ancestor has an updated setting, we need to update the lifecycle of the stream
+        // once we find the ancestor actually defining the setting
+        if (hasChanged(ancestorStream)) {
+          hasAncestorChanged = true;
         }
-        break;
+        const value = getValue(ancestorStream);
+        // look for the first non-inherit value, that's the one defining the effective setting
+        if (!isInherit(value)) {
+          if (hasAncestorChanged) {
+            actions.push(createAction(value));
+          }
+          break;
+        }
       }
-    }
+    };
+
+    // Lifecycle
+    checkAncestorChangesAndUpdate({
+      hasChanged: (stream: WiredStream) => stream.hasChangedLifecycle(),
+      getValue: (stream: WiredStream) => stream.getLifecycle(),
+      isInherit: isInheritLifecycle,
+      createAction: (lifecycle: IngestStreamLifecycle) => ({
+        type: 'update_lifecycle',
+        request: {
+          name: this._definition.name,
+          lifecycle,
+        },
+      }),
+    });
+
+    // Failure store
+    checkAncestorChangesAndUpdate({
+      hasChanged: (stream: WiredStream) => stream.hasChangedFailureStore(),
+      getValue: (stream: WiredStream) => stream.getFailureStore(),
+      isInherit: isInheritFailureStore,
+      createAction: (failureStore: FailureStore) => ({
+        type: 'update_failure_store',
+        request: {
+          name: this._definition.name,
+          failure_store: failureStore,
+          definition: this._definition,
+        },
+      }),
+    });
 
     const ancestors = getAncestorsAndSelf(this._definition.name).map(
       (id) => desiredState.get(id)!

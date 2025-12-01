@@ -9,12 +9,13 @@
 
 import React, { useCallback } from 'react';
 import { createContext } from 'react';
+import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
 import { type MetricsExperienceRestorableState, useRestorableState } from '../../restorable_state';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 
 export interface MetricsExperienceStateContextValue extends MetricsExperienceRestorableState {
   onPageChange: (value: number) => void;
-  onDimensionsChange: (value: string[]) => void;
+  onDimensionsChange: (value: Dimension[]) => void;
   onValuesChange: (value: string[]) => void;
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
@@ -31,15 +32,16 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
 
   const onDimensionsChange = useCallback(
-    (nextDimensions: string[]) => {
+    (nextDimensions: Dimension[]) => {
       setCurrentPage(0);
       setDimensions(nextDimensions);
       setValueFilters((prevValueFilters) => {
         if (nextDimensions.length === 0) {
           return [];
         }
+        const dimensionNames = new Set(nextDimensions.map((d) => d.name));
         return prevValueFilters.filter((v) =>
-          nextDimensions.includes(v.split(FIELD_VALUE_SEPARATOR)[0])
+          dimensionNames.has(v.split(FIELD_VALUE_SEPARATOR)[0])
         );
       });
     },
@@ -48,10 +50,9 @@ export function MetricsExperienceStateProvider({ children }: { children: React.R
 
   const onValuesChange = useCallback(
     (values: string[]) => {
-      setCurrentPage(0);
       setValueFilters(values);
     },
-    [setValueFilters, setCurrentPage]
+    [setValueFilters]
   );
 
   const onPageChange = useCallback((page: number) => setCurrentPage(page), [setCurrentPage]);

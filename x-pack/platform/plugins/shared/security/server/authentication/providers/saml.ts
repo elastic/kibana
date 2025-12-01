@@ -136,6 +136,30 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
+   * Determines whether the intermediate session state should be invalidated after a successful login.
+   *
+   * For SAML authentication, multiple login attempts can occur concurrently (e.g., when a user opens
+   * multiple tabs and each initiates a SAML handshake). Each login attempt generates a unique requestId
+   * that is stored in the `requestIdMap` within the provider state. When a SAML response is received
+   * and successfully processed, the corresponding requestId is removed from the map.
+   *
+   * If there are remaining requestIds in the state after a successful login, it indicates that other
+   * pending SAML login attempts are still in progress. In this case, the intermediate session should
+   * NOT be invalidated, as it needs to persist to handle the responses for those outstanding requests.
+   *
+   * Only when all requestIds have been processed and removed from the map (i.e., the map is empty or
+   * doesn't exist) should the intermediate session be invalidated.
+   *
+   * @param state Optional state object associated with the provider.
+   * @returns `true` if the intermediate session should be invalidated (no pending requests remain),
+   *          `false` if there are remaining requestIds and the session must be preserved.
+   */
+  public shouldInvalidateIntermediateSessionAfterLogin(state?: unknown) {
+    const samlState = state as ProviderState | undefined;
+    return !(samlState?.requestIdMap && Object.keys(samlState.requestIdMap).length > 0);
+  }
+
+  /**
    * Performs initial login request using SAMLResponse payload.
    * @param request Request instance.
    * @param attempt Login attempt description.

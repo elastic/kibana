@@ -142,7 +142,7 @@ export const AutocompleteSelector = ({
           singleSelection={{ asPlainText: true }}
           isInvalid={isInvalid}
           isDisabled={disabled}
-          compressed={compressed}
+          compressed={true}
           isClearable
           fullWidth={fullWidth}
           customOptionText={i18n.translate('xpack.streams.fieldSelector.customOptionText', {

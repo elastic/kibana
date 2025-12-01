@@ -7,17 +7,13 @@
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { usePhaseColors } from '../../../../lib';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
   const ilmTimelineBarHeight = euiTheme.size.s;
 
-  const timelineIconColors = {
-    hot: euiTheme.colors.vis.euiColorVis6,
-    warm: euiTheme.colors.vis.euiColorVis9,
-    cold: euiTheme.colors.vis.euiColorVis2,
-    frozen: euiTheme.colors.vis.euiColorVis4,
-  };
+  const timelineIconColors = usePhaseColors();
 
   return {
     container: css`
@@ -61,8 +57,8 @@ export const useStyles = () => {
     deleteIconContainer: css`
       padding: ${euiTheme.size.m};
       margin-left: ${euiTheme.size.m};
-      background-color: ${euiTheme.colors.lightestShade};
-      color: ${euiTheme.colors.darkShade};
+      background-color: ${timelineIconColors.delete};
+      color: ${euiTheme.colors.backgroundFilledText};
       border-radius: 50%;
     `,
     colorBar: css`

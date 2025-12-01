@@ -121,3 +121,19 @@ export const MetadataFields = {
       'https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-tier-field.html',
   },
 };
+
+/**
+ * Statically type the metadata field names instead of using Object.keys(MetadataFields) because it reduces the exported bundle size.
+ */
+export const MetadataFieldNames = [
+  '_index',
+  '_id',
+  '_source',
+  '_size',
+  '_doc_count',
+  '_field_names',
+  '_ignored',
+  '_routing',
+  '_meta',
+  '_tier',
+];
