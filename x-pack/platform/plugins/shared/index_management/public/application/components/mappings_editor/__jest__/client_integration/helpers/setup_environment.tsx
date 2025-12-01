@@ -14,51 +14,29 @@ import { docLinksServiceMock, uiSettingsServiceMock } from '@kbn/core/public/moc
 import { MAJOR_VERSION } from '../../../../../../../common';
 import { MappingsEditorProvider } from '../../../mappings_editor_context';
 import { createKibanaReactContext } from '../../../shared_imports';
-import { AppContextProvider } from '../../../../../app_context';
+import { AppContextProvider, type AppDependencies } from '../../../../../app_context';
 import type { Props as MappingsEditorProps } from '../../../mappings_editor';
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-
-  return {
-    ...original,
-    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
-    // which does not produce a valid component wrapper
-    EuiComboBox: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockComboBox'}
-        data-currentvalue={props.selectedOptions}
-        onChange={async (syntheticEvent: any) => {
-          props.onChange([syntheticEvent['0']]);
-        }}
-      />
-    ),
-    // Mocking EuiSuperSelect to be able to easily change its value
-    // with a `myWrapper.simulate('change', { target: { value: 'someValue' } })`
-    EuiSuperSelect: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
-        value={props.valueOfSelected}
-        onChange={(e) => {
-          props.onChange(e.target.value);
-        }}
-      />
-    ),
-  };
-});
-
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
 
-  const CodeEditorMock = (props: any) => (
+  const CodeEditorMock = ({
+    value,
+    onChange,
+    'data-test-subj': testSubj,
+  }: {
+    value?: string;
+    onChange?: (value: string | null) => void;
+    'data-test-subj'?: string;
+  }) => (
     <input
-      data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-      data-currentvalue={props.value}
-      value={props.value}
+      data-test-subj={testSubj || 'mockCodeEditor'}
+      data-currentvalue={value}
+      value={value}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-        props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
+        onChange?.(e.currentTarget.getAttribute('data-currentvalue'));
       }}
     />
   );
@@ -85,11 +63,14 @@ const defaultProps: MappingsEditorProps = {
 };
 
 export const WithAppDependencies =
-  (Comp: MemoExoticComponent<ComponentType<MappingsEditorProps>>, appDependencies?: any) =>
+  (
+    Comp: MemoExoticComponent<ComponentType<MappingsEditorProps>>,
+    appDependencies?: Partial<AppDependencies>
+  ) =>
   (props: Partial<MappingsEditorProps>) =>
     (
       <KibanaReactContextProvider>
-        <AppContextProvider value={appDependencies}>
+        <AppContextProvider value={appDependencies as AppDependencies}>
           <MappingsEditorProvider>
             <GlobalFlyoutProvider>
               <Comp {...defaultProps} {...props} />

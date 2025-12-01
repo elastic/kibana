@@ -5,34 +5,39 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import React from 'react';
+import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 
-import type { MappingsEditorTestBed } from './helpers';
-import { componentHelpers } from './helpers';
-import { defaultTextParameters, defaultShapeParameters } from './datatypes';
-const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
+import { MappingsEditor } from '../../mappings_editor';
+import { WithAppDependencies } from './helpers/setup_environment';
+import { defaultTextParameters } from './datatypes/fixtures';
+import { defaultDateRangeParameters } from './datatypes/fixtures';
+
+const onChangeHandler = jest.fn();
+
+beforeAll(() => {
+  jest.useFakeTimers();
+});
+
+afterAll(() => {
+  jest.useRealTimers();
+});
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('Mappings editor: edit field', () => {
-  /**
-   * Variable to store the mappings data forwarded to the consumer component
-   */
-  let data: any;
-  let onChangeHandler: jest.Mock = jest.fn();
-  let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
-  let testBed: MappingsEditorTestBed;
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
-  beforeEach(() => {
-    onChangeHandler = jest.fn();
-    getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
-  });
+  const setup = (props: any) => {
+    const Component = WithAppDependencies(MappingsEditor, {});
+    return render(
+      <I18nProvider>
+        <Component {...props} />
+      </I18nProvider>
+    );
+  };
 
   test('should open a flyout with the correct field to edit', async () => {
     const defaultMappings = {
@@ -51,28 +56,60 @@ describe('Mappings editor: edit field', () => {
       },
     };
 
-    await act(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+    setup({ value: defaultMappings, onChange: onChangeHandler, indexSettings: {} });
+
+    await screen.findByTestId('mappingsEditor');
+
+    // Wait for fields to render
+    await screen.findByTestId('fieldsList');
+
+    // Find all field list items
+    const allFields = screen.getAllByTestId(/fieldsListItem/);
+
+    // The user field should be the first root-level field
+    const userField = allFields.find((el) => el.textContent?.includes('user'));
+    expect(userField).toBeDefined();
+
+    // Expand user field
+    const userExpandButton = within(userField!).getByTestId('toggleExpandButton');
+    fireEvent.click(userExpandButton);
+
+    // Wait for address field to appear
+    const addressField = await screen.findByText('address', {
+      selector: '[data-test-subj*="fieldName"]',
     });
-    testBed.component.update();
+    const addressListItem = addressField.closest(
+      '[data-test-subj*="fieldsListItem"]'
+    ) as HTMLElement;
 
-    await testBed.actions.expandAllFieldsAndReturnMetadata();
+    // Expand address field
+    const addressExpandButton = within(addressListItem).getByTestId('toggleExpandButton');
+    fireEvent.click(addressExpandButton);
 
-    const {
-      find,
-      actions: { startEditField },
-    } = testBed;
-    // Open the flyout to edit the field
-    await startEditField('user.address.street');
+    // Wait for street field to appear
+    const streetField = await screen.findByText('street', {
+      selector: '[data-test-subj*="fieldName"]',
+    });
+    const streetListItem = streetField.closest('[data-test-subj*="fieldsListItem"]') as HTMLElement;
+
+    // Click edit button for street field
+    const streetEditButton = within(streetListItem).getByTestId('editFieldButton');
+    fireEvent.click(streetEditButton);
+
+    // Wait for flyout to open
+    const flyout = await screen.findByTestId('mappingsEditorFieldEdit');
 
     // It should have the correct title
-    expect(find('mappingsEditorFieldEdit.flyoutTitle').text()).toEqual(`Edit field 'street'`);
+    const flyoutTitle = within(flyout).getByTestId('flyoutTitle');
+    expect(flyoutTitle.textContent).toEqual(`Edit field 'street'`);
 
     // It should have the correct field path
-    expect(find('mappingsEditorFieldEdit.fieldPath').text()).toEqual('user > address > street');
+    const fieldPath = within(flyout).getByTestId('fieldPath');
+    expect(fieldPath.textContent).toEqual('user > address > street');
 
     // The advanced settings should be hidden initially
-    expect(find('mappingsEditorFieldEdit.advancedSettings').props().style.display).toEqual('none');
+    const advancedSettings = within(flyout).getByTestId('advancedSettings');
+    expect(advancedSettings.style.display).toEqual('none');
   });
 
   test('should update form parameters when changing the field datatype', async () => {
@@ -84,43 +121,58 @@ describe('Mappings editor: edit field', () => {
       },
     };
 
-    await act(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+    setup({ value: defaultMappings, onChange: onChangeHandler, indexSettings: {} });
+
+    await screen.findByTestId('mappingsEditor');
+
+    // Wait for fields to render
+    await screen.findByTestId('fieldsList');
+
+    // Find the userName field by text
+    const userNameFieldText = await screen.findByText('userName', {
+      selector: '[data-test-subj*="fieldName"]',
     });
-    testBed.component.update();
+    const userNameListItem = userNameFieldText.closest(
+      '[data-test-subj*="fieldsListItem"]'
+    ) as HTMLElement;
+    expect(userNameListItem).toBeInTheDocument();
 
-    const {
-      find,
-      exists,
-      component,
-      actions: { startEditField, updateFieldAndCloseFlyout },
-    } = testBed;
+    // Open the flyout to edit the field
+    const editButton = within(userNameListItem).getByTestId('editFieldButton');
+    fireEvent.click(editButton);
 
-    expect(exists('userNameField' as any)).toBe(true);
-    // Open the flyout, change the field type and save it
-    await startEditField('userName');
+    const flyout = await screen.findByTestId('mappingsEditorFieldEdit');
 
-    // Change the field type
-    await act(async () => {
-      find('mappingsEditorFieldEdit.fieldType').simulate('change', [
-        { label: 'Shape', value: defaultShapeParameters.type },
-      ]);
+    // Change field type to Range using EuiComboBox harness
+    const fieldTypeComboBox = new EuiComboBoxTestHarness('fieldType');
+    fieldTypeComboBox.selectOption('range');
+
+    // Wait for SubTypeParameter to appear (range type has subTypes)
+    await within(flyout).findByTestId('fieldSubType');
+
+    // Save and close flyout
+    const updateButton = within(flyout).getByTestId('editFieldUpdateButton');
+    await waitFor(() => {
+      expect(updateButton).not.toBeDisabled();
     });
+    fireEvent.click(updateButton);
 
-    await updateFieldAndCloseFlyout();
+    await waitFor(() => {
+      const lastCall = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1][0];
+      const data = lastCall.getData(lastCall.isValid ?? true);
 
-    ({ data } = await getMappingsEditorData(component));
-
-    const updatedMappings = {
-      ...defaultMappings,
-      properties: {
-        userName: {
-          ...defaultShapeParameters,
+      const updatedMappings = {
+        ...defaultMappings,
+        properties: {
+          userName: {
+            ...defaultDateRangeParameters,
+          },
         },
-      },
-    };
+      };
 
-    expect(data).toEqual(updatedMappings);
+      // Serialized as subType 'date_range', not main type 'range'
+      expect(data).toEqual(updatedMappings);
+    });
   });
 
   test('should have Update button enabled only when changes are made', async () => {
@@ -132,20 +184,36 @@ describe('Mappings editor: edit field', () => {
       },
     };
 
-    await act(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+    setup({ value: defaultMappings, onChange: onChangeHandler, indexSettings: {} });
+
+    await screen.findByTestId('mappingsEditor');
+
+    // Wait for fields to render
+    await screen.findByTestId('fieldsList');
+
+    // Find the myField field by text
+    const myFieldText = await screen.findByText('myField', {
+      selector: '[data-test-subj*="fieldName"]',
     });
-    testBed.component.update();
+    const myFieldListItem = myFieldText.closest(
+      '[data-test-subj*="fieldsListItem"]'
+    ) as HTMLElement;
 
-    await testBed.actions.expandAllFieldsAndReturnMetadata();
-
-    const {
-      actions: { startEditField, isUpdateButtonDisabled, updateFieldName },
-    } = testBed;
     // Open the flyout to edit the field
-    await startEditField('myField');
-    expect(isUpdateButtonDisabled()).toBe(true);
-    await updateFieldName('updatedField');
-    expect(isUpdateButtonDisabled()).toBe(false);
+    const editButton = within(myFieldListItem).getByTestId('editFieldButton');
+    fireEvent.click(editButton);
+
+    const flyout = await screen.findByTestId('mappingsEditorFieldEdit');
+
+    // Update button should be disabled initially (no changes)
+    const updateButton = within(flyout).getByTestId('editFieldUpdateButton');
+    expect(updateButton).toBeDisabled();
+
+    // Change the field name
+    const nameInput = within(flyout).getByTestId('nameParameterInput');
+    fireEvent.change(nameInput, { target: { value: 'updatedField' } });
+
+    // Update button should now be enabled
+    expect(updateButton).not.toBeDisabled();
   });
 });

@@ -74,6 +74,5 @@ export const WithAppDependencies =
             </GlobalFlyoutProvider>
           </ComponentTemplatesProvider>
         </MappingsEditorProvider>
-        /
       </AppContextProvider>
     );

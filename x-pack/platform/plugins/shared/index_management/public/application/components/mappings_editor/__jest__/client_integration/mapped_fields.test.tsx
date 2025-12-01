@@ -5,30 +5,38 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import React from 'react';
+import { render, screen, within, fireEvent, act } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { MappingsEditor } from '../../mappings_editor';
+import { WithAppDependencies } from './helpers/setup_environment';
 
-import type { MappingsEditorTestBed, DomFields } from './helpers';
-import { componentHelpers } from './helpers';
-
-const { setup } = componentHelpers.mappingsEditor;
 const onChangeHandler = jest.fn();
 
+beforeAll(() => {
+  jest.useFakeTimers();
+});
+
+afterAll(() => {
+  jest.useRealTimers();
+});
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('Mappings editor: mapped fields', () => {
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
-  afterEach(() => {
-    onChangeHandler.mockReset();
-  });
+  const setup = (props: any) => {
+    const Component = WithAppDependencies(MappingsEditor, {});
+    return render(
+      <I18nProvider>
+        <Component {...props} />
+      </I18nProvider>
+    );
+  };
 
   describe('<DocumentFieldsTreeEditor />', () => {
-    let testBed: MappingsEditorTestBed;
-    let defaultMappings = {
+    const defaultMappings = {
       properties: {
         myField: {
           type: 'text',
@@ -61,22 +69,74 @@ describe('Mappings editor: mapped fields', () => {
     };
 
     test('should correctly represent the fields in the DOM tree', async () => {
-      testBed = setup({
+      setup({
         value: defaultMappings,
         onChange: onChangeHandler,
+        indexSettings: {},
       });
 
-      const {
-        actions: { expandAllFieldsAndReturnMetadata },
-      } = testBed;
+      await screen.findByTestId('mappingsEditor');
+      await screen.findByTestId('fieldsList');
 
-      const domTreeMetadata = await expandAllFieldsAndReturnMetadata();
+      // Find top-level fields
+      const myFieldText = await screen.findByText('myField', {
+        selector: '[data-test-subj*="fieldName"]',
+      });
+      expect(myFieldText).toBeInTheDocument();
 
-      expect(domTreeMetadata).toEqual(defaultMappings.properties);
+      const myObjectText = await screen.findByText('myObject', {
+        selector: '[data-test-subj*="fieldName"]',
+      });
+      expect(myObjectText).toBeInTheDocument();
+
+      // Expand myField to see its multi-fields
+      const myFieldListItem = myFieldText.closest(
+        '[data-test-subj*="fieldsListItem"]'
+      ) as HTMLElement;
+      const myFieldExpandButton = within(myFieldListItem).getByTestId('toggleExpandButton');
+      fireEvent.click(myFieldExpandButton);
+
+      // Verify multi-fields appear
+      const rawField = await screen.findByText('raw', {
+        selector: '[data-test-subj*="fieldName"]',
+      });
+      expect(rawField).toBeInTheDocument();
+
+      const simpleAnalyzerField = await screen.findByText('simpleAnalyzer', {
+        selector: '[data-test-subj*="fieldName"]',
+      });
+      expect(simpleAnalyzerField).toBeInTheDocument();
+
+      // Expand myObject to see nested properties
+      const myObjectListItem = myObjectText.closest(
+        '[data-test-subj*="fieldsListItem"]'
+      ) as HTMLElement;
+      const myObjectExpandButton = within(myObjectListItem).getByTestId('toggleExpandButton');
+      fireEvent.click(myObjectExpandButton);
+
+      // Verify nested field appears
+      const deeplyNestedField = await screen.findByText('deeplyNested', {
+        selector: '[data-test-subj*="fieldName"]',
+      });
+      expect(deeplyNestedField).toBeInTheDocument();
+
+      // Expand deeplyNested
+      const deeplyNestedListItem = deeplyNestedField.closest(
+        '[data-test-subj*="fieldsListItem"]'
+      ) as HTMLElement;
+      const deeplyNestedExpandButton =
+        within(deeplyNestedListItem).getByTestId('toggleExpandButton');
+      fireEvent.click(deeplyNestedExpandButton);
+
+      // Verify deeply nested title field
+      const titleField = await screen.findByText('title', {
+        selector: '[data-test-subj*="fieldName"]',
+      });
+      expect(titleField).toBeInTheDocument();
     });
 
     test('should indicate when a field is shadowed by a runtime field', async () => {
-      defaultMappings = {
+      const shadowedMappings = {
         properties: {
           // myField is shadowed by runtime field with same name
           myField: {
@@ -106,43 +166,91 @@ describe('Mappings editor: mapped fields', () => {
             },
           },
         },
-      } as any;
+      };
 
-      const { actions, find } = setup({
-        value: defaultMappings,
+      setup({
+        value: shadowedMappings,
         onChange: onChangeHandler,
+        indexSettings: {},
       });
 
-      await actions.expandAllFieldsAndReturnMetadata();
+      await screen.findByTestId('mappingsEditor');
+      await screen.findByTestId('fieldsList');
 
-      expect(find('fieldsListItem').length).toBe(4); // 2 for text and 2 for object
-      expect(find('fieldsListItem.isShadowedIndicator').length).toBe(1); // only root level text field
+      // Find the root myField
+      const myFieldTexts = screen.getAllByText('myField', {
+        selector: '[data-test-subj*="fieldName"]',
+      });
+
+      // The first myField at root level should have shadowed indicator
+      const rootMyFieldListItem = myFieldTexts[0].closest(
+        '[data-test-subj*="fieldsListItem"]'
+      ) as HTMLElement;
+
+      // Look for the shadowed indicator badge
+      const shadowedIndicator = within(rootMyFieldListItem).queryByTestId('isShadowedIndicator');
+      expect(shadowedIndicator).toBeInTheDocument();
+
+      // Expand myField to verify nested myField is not shadowed
+      const expandButton = within(rootMyFieldListItem).getByTestId('toggleExpandButton');
+      fireEvent.click(expandButton);
+
+      // Get all field list items (now includes expanded children)
+      // Wait a bit for expansion animation
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+
+      const allFieldItems = screen.getAllByTestId(/fieldsListItem/);
+
+      // Count shadowed indicators - should be exactly 1 (only root myField)
+      const shadowedIndicators = allFieldItems.filter((item) =>
+        within(item).queryByTestId('isShadowedIndicator')
+      );
+      expect(shadowedIndicators).toHaveLength(1);
     });
 
     test('should allow to be controlled by parent component and update on prop change', async () => {
-      testBed = setup({
+      const { rerender } = setup({
         value: defaultMappings,
         onChange: onChangeHandler,
+        indexSettings: {},
       });
 
-      const {
-        component,
-        setProps,
-        actions: { expandAllFieldsAndReturnMetadata },
-      } = testBed;
+      await screen.findByTestId('mappingsEditor');
+      await screen.findByTestId('fieldsList');
 
+      // Verify initial fields
+      expect(
+        screen.getByText('myField', { selector: '[data-test-subj*="fieldName"]' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('myObject', { selector: '[data-test-subj*="fieldName"]' })
+      ).toBeInTheDocument();
+
+      // Update props with new mappings
       const newMappings = { properties: { hello: { type: 'text' } } };
-      let domTreeMetadata: DomFields = {};
+      const Component = WithAppDependencies(MappingsEditor, {});
 
-      await act(async () => {
-        // Change the `value` prop of our <MappingsEditor />
-        setProps({ value: newMappings });
+      rerender(
+        <I18nProvider>
+          <Component value={newMappings} onChange={onChangeHandler} indexSettings={{}} />
+        </I18nProvider>
+      );
+
+      // Wait for new field to appear
+      const helloField = await screen.findByText('hello', {
+        selector: '[data-test-subj*="fieldName"]',
       });
-      component.update();
+      expect(helloField).toBeInTheDocument();
 
-      domTreeMetadata = await expandAllFieldsAndReturnMetadata();
-
-      expect(domTreeMetadata).toEqual(newMappings.properties);
+      // Old fields should be gone
+      expect(
+        screen.queryByText('myField', { selector: '[data-test-subj*="fieldName"]' })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('myObject', { selector: '[data-test-subj*="fieldName"]' })
+      ).not.toBeInTheDocument();
     });
   });
 });

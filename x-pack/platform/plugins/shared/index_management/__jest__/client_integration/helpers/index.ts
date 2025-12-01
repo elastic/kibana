@@ -7,13 +7,19 @@
 
 import './mocks';
 
-export type { TestBed } from '@kbn/test-jest-helpers';
+// NOTE: Per RTL migration guidelines (Pattern 27), import from specific files, not this index.
+// This file is kept for backward compatibility during migration.
+// New tests should import directly:
+//   import { setupEnvironment, WithAppDependencies } from './setup_environment';
+//   import { indexSettings, indexMappings } from './fixtures';
+
+// Re-export utilities needed for backward compatibility
 export { getRandomString, findTestSubject } from '@kbn/test-jest-helpers';
 
 export {
   setupEnvironment,
   WithAppDependencies,
-  services,
+  createServices,
   kibanaVersion,
 } from './setup_environment';
 
