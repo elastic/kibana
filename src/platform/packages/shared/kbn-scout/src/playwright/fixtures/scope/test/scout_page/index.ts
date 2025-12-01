@@ -43,6 +43,7 @@ export type ScoutPage = Page & {
   checkA11y: (options?: RunA11yScanOptions) => Promise<{
     violations: string[];
   }>;
+   /**
    * Types text into an input field character by character with a specified delay between each character.
    * @param selector - The css selector for the input element.
    * @param text - The text to type into the input field.
