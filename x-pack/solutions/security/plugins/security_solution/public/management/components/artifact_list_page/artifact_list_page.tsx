@@ -8,10 +8,11 @@
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { useLocation } from 'react-router-dom';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
 import type { ServerApiError } from '../../../common/types';
 import { AdministrationListPage } from '../administration_list_page';
 
@@ -45,6 +46,7 @@ import { useToasts } from '../../../common/lib/kibana';
 import { useMemoizedRouteState } from '../../common/hooks';
 import { BackToExternalAppSecondaryButton } from '../back_to_external_app_secondary_button';
 import { BackToExternalAppButton } from '../back_to_external_app_button';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -101,6 +103,9 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const {
       urlParams: { filter, includedPolicies },
     } = useUrlParams<ArtifactListPageUrlParams>();
+    const isExportImportFFEnabled = useIsExperimentalFeatureEnabled(
+      'endpointArtifactsExportImportEnabled'
+    );
 
     const {
       isPageInitializing,
@@ -266,17 +271,42 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         title={labels.pageTitle}
         subtitle={description}
         actions={
-          allowCardCreateAction && (
-            <EuiButton
-              fill
-              iconType="plusInCircle"
-              isDisabled={isFlyoutOpened}
-              onClick={handleOpenCreateFlyoutClick}
-              data-test-subj={getTestId('pageAddButton')}
-            >
-              {labels.pageAddButtonTitle}
-            </EuiButton>
-          )
+          <EuiFlexGroup alignItems="center">
+            {allowCardCreateAction && (
+              <EuiButton
+                fill
+                iconType="plusInCircle"
+                isDisabled={isFlyoutOpened}
+                onClick={handleOpenCreateFlyoutClick}
+                data-test-subj={getTestId('pageAddButton')}
+              >
+                {labels.pageAddButtonTitle}
+              </EuiButton>
+            )}
+
+            {isExportImportFFEnabled && (
+              <HeaderMenu
+                iconType="boxesHorizontal"
+                dataTestSubj={getTestId('exportImportMenu')}
+                actions={[
+                  {
+                    key: '1',
+                    icon: 'exportAction',
+                    label: labels.pageExportButtonTitle,
+                    onClick: () => {},
+                  },
+                  {
+                    key: '2',
+                    icon: 'importAction',
+                    label: labels.pageImportButtonTitle,
+                    onClick: () => {},
+                    disabled: !allowCardCreateAction,
+                  },
+                ]}
+                disableActions={isLoading}
+              />
+            )}
+          </EuiFlexGroup>
         }
         data-test-subj={getTestId('container')}
       >

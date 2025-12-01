@@ -25,6 +25,18 @@ export const ENDPOINT_EXCEPTIONS_PAGE_LABELS: ArtifactListPageLabels = {
     'xpack.securitySolution.endpointExceptions.pageAddButtonTitle',
     { defaultMessage: 'Add endpoint exception' }
   ),
+  pageImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.pageImportButtonTitle',
+    {
+      defaultMessage: 'Import endpoint exception list',
+    }
+  ),
+  pageExportButtonTitle: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.pageExportButtonTitle',
+    {
+      defaultMessage: 'Export endpoint exception list',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.endpointExceptions.showingTotal', {
       defaultMessage:
