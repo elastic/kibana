@@ -169,9 +169,9 @@ pageLoadAssetSize:
   snapshotRestore: 22068
   spaces: 30665
   stackAlerts: 31499
-  stackConnectors: 80788
+  stackConnectors: 81148
   streams: 10000
-  streamsApp: 19225
+  streamsApp: 23974
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
