@@ -18,7 +18,7 @@ import type {
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { type BehaviorSubject } from 'rxjs';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
+import type { DataVisualizerTableState } from '@kbn/data-visualizer-plugin/common/types';
 
 export interface RandomSamplingOption {
   mode: 'random_sampling';
@@ -154,10 +154,6 @@ export interface FieldStatisticsTableProps {
    */
   filters?: Filter[];
   /**
-   * State container with persisted settings
-   */
-  stateContainer?: DiscoverStateContainer;
-  /**
    * Callback to add a filter to filter bar
    */
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
@@ -179,4 +175,20 @@ export interface FieldStatisticsTableProps {
    * Time range
    */
   timeRange?: TimeRange;
+  /**
+   * Force refresh the table
+   */
+  lastReloadRequestTime?: number;
+  /**
+   * Whether to hide the preview/mini distribution chart in the table
+   */
+  hideAggregatedPreview?: boolean;
+  /**
+   * The total number of hits from the last fetch
+   */
+  totalHits?: number;
+  /**
+   * Callback to handle state updates
+   */
+  updateState?: (changes: Partial<DataVisualizerTableState>) => void;
 }
