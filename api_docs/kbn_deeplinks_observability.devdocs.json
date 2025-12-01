@@ -369,6 +369,414 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.RuleDetailsLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleDetailsLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.RuleDetailsLocatorParams",
+            "text": "RuleDetailsLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.RuleDetailsLocatorParams.ruleId",
+            "type": "string",
+            "tags": [],
+            "label": "ruleId",
+            "description": [],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.RuleDetailsLocatorParams.tabId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "tabId",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/deeplinks-observability",
+                "scope": "common",
+                "docId": "kibKbnDeeplinksObservabilityPluginApi",
+                "section": "def-common.RuleDetailsTabId",
+                "text": "RuleDetailsTabId"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.RuleDetailsLocatorParams.rangeFrom",
+            "type": "string",
+            "tags": [],
+            "label": "rangeFrom",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.RuleDetailsLocatorParams.rangeTo",
+            "type": "string",
+            "tags": [],
+            "label": "rangeTo",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.RuleDetailsLocatorParams.kuery",
+            "type": "string",
+            "tags": [],
+            "label": "kuery",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.RuleDetailsLocatorParams.controlConfigs",
+            "type": "Array",
+            "tags": [],
+            "label": "controlConfigs",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.RulesLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "RulesLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.RulesLocatorParams",
+            "text": "RulesLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.RulesLocatorParams.lastResponse",
+            "type": "Array",
+            "tags": [],
+            "label": "lastResponse",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.RulesLocatorParams.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Record<string, string | number> | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.RulesLocatorParams.search",
+            "type": "string",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.RulesLocatorParams.status",
+            "type": "Array",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/deeplinks-observability",
+                "scope": "common",
+                "docId": "kibKbnDeeplinksObservabilityPluginApi",
+                "section": "def-common.RuleStatus",
+                "text": "RuleStatus"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.RulesLocatorParams.type",
+            "type": "Array",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.SloDetailsHistoryLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "SloDetailsHistoryLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.SloDetailsHistoryLocatorParams",
+            "text": "SloDetailsHistoryLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.SloDetailsHistoryLocatorParams.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.SloDetailsHistoryLocatorParams.instanceId",
+            "type": "string",
+            "tags": [],
+            "label": "instanceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.SloDetailsHistoryLocatorParams.encodedAppState",
+            "type": "string",
+            "tags": [],
+            "label": "encodedAppState",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.SloDetailsLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "SloDetailsLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.SloDetailsLocatorParams",
+            "text": "SloDetailsLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.SloDetailsLocatorParams.sloId",
+            "type": "string",
+            "tags": [],
+            "label": "sloId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.SloDetailsLocatorParams.instanceId",
+            "type": "string",
+            "tags": [],
+            "label": "instanceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.SloListLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "SloListLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.SloListLocatorParams",
+            "text": "SloListLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.SloListLocatorParams.kqlQuery",
+            "type": "string",
+            "tags": [],
+            "label": "kqlQuery",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
         "id": "def-common.TransactionDetailsByNameParams",
         "type": "Interface",
         "tags": [],
@@ -923,6 +1331,126 @@
           "\"observability-overview\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.ruleDetailsLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "ruleDetailsLocatorID",
+        "description": [],
+        "signature": [
+          "\"RULE_DETAILS_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.RuleDetailsTabId",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleDetailsTabId",
+        "description": [],
+        "signature": [
+          "\"alerts\" | \"execution\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.rulesLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "rulesLocatorID",
+        "description": [],
+        "signature": [
+          "\"RULES_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.RuleStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleStatus",
+        "description": [],
+        "signature": [
+          "\"enabled\" | \"disabled\" | \"snoozed\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.sloDetailsHistoryLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "sloDetailsHistoryLocatorID",
+        "description": [],
+        "signature": [
+          "\"SLO_DETAILS_HISTORY_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.sloDetailsLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "sloDetailsLocatorID",
+        "description": [],
+        "signature": [
+          "\"SLO_DETAILS_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.sloEditLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "sloEditLocatorID",
+        "description": [],
+        "signature": [
+          "\"SLO_EDIT_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.sloListLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "sloListLocatorID",
+        "description": [],
+        "signature": [
+          "\"SLO_LIST_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

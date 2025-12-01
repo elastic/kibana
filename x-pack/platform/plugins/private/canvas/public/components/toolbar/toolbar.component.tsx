@@ -152,6 +152,7 @@ export const Toolbar: FC<Props> = ({
 
 Toolbar.propTypes = {
   isWriteable: PropTypes.bool.isRequired,
+  // @ts-expect-error upgrade typescript v5.9.3
   selectedElement: PropTypes.object,
   selectedPageNumber: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
