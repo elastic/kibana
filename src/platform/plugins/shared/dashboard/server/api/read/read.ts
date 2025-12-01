@@ -18,17 +18,25 @@ export async function read(
   id: string
 ): Promise<DashboardReadResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
-  const { saved_object: savedObject, outcome } =
-    await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
-      DASHBOARD_SAVED_OBJECT_TYPE,
-      id
-    );
+  const {
+    saved_object: savedObject,
+    outcome,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    alias_purpose,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    alias_target_id,
+  } = await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
+    DASHBOARD_SAVED_OBJECT_TYPE,
+    id
+  );
 
   const response = getDashboardCRUResponseBody(savedObject, 'read');
   return {
     ...response,
     meta: {
       ...response.meta,
+      alias_target_id,
+      alias_purpose,
       outcome,
     },
   };

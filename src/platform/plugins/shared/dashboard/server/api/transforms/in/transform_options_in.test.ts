@@ -30,16 +30,17 @@ describe('transformOptionsIn', () => {
   it('should translate all options', () => {
     const apiOptions = {
       hide_panel_titles: true,
-      use_margins: true,
+      use_margins: false,
       sync_colors: true,
       sync_cursor: true,
       sync_tooltips: true,
     };
     const result = transformOptionsIn(apiOptions);
-    expect(result.indexOf('hidePanelTitles')).not.toBe(-1);
-    expect(result.indexOf('useMargins')).not.toBe(-1);
-    expect(result.indexOf('syncColors')).not.toBe(-1);
-    expect(result.indexOf('syncCursor')).not.toBe(-1);
-    expect(result.indexOf('syncTooltips')).not.toBe(-1);
+    const parsedResult = JSON.parse(result);
+    expect(parsedResult.hidePanelTitles).toBe(true);
+    expect(parsedResult.syncColors).toBe(true);
+    expect(parsedResult.syncCursor).toBe(true);
+    expect(parsedResult.syncTooltips).toBe(true);
+    expect(parsedResult.useMargins).toBe(false);
   });
 });
