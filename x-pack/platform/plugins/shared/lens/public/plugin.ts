@@ -46,6 +46,7 @@ import {
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { SharePluginSetup, ExportShare, SharePluginStart } from '@kbn/share-plugin/public';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
@@ -184,6 +185,7 @@ export interface LensPluginStartDependencies {
   licensing?: LicensingPluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
+  discoverShared?: DiscoverSharedPublicStart;
 }
 
 export interface LensPublicSetup {
@@ -748,6 +750,13 @@ export class LensPlugin {
           );
         }
       );
+    }
+
+    if (startDependencies.discoverShared) {
+      startDependencies.discoverShared.features.registry.register({
+        id: 'lens-embeddable-component',
+        EmbeddableComponent: LensRenderer,
+      });
     }
 
     return {
