@@ -22,6 +22,8 @@ import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/c
 import { AuthType } from '@kbn/stack-connectors-plugin/common/auth/constants';
 import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import moment from 'moment';
+import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
+import { getGapsByRuleId } from '@kbn/detections-response-ftr-services/rules/get_gaps_by_rule_id';
 import {
   binaryToString,
   getSimpleMlRule,
@@ -34,13 +36,11 @@ import {
   removeServerGeneratedProperties,
   updateUsername,
 } from '../../../utils';
-import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { deleteAllGaps } from '../../../utils/event_log/delete_all_gaps';
 import { GapEvent, generateGapsForRule } from '../../../utils/event_log/generate_gaps_for_rule';
-import { getGapsByRuleId } from '../../../../../config/services/detections_response/rules/get_gaps_by_rule_id';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

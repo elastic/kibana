@@ -38,7 +38,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     expect(fetchedResponse.status).toBe(200);
   });
 
-  apiTest(`should update case with 'cases.update'`, async ({ apiServices, log }) => {
+  apiTest(`should update case with 'cases.update'`, async ({ apiServices }) => {
     // First get the case to obtain its current version
     const currentCase = await apiServices.cases.get(caseId);
 
@@ -50,7 +50,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
       },
     ]);
     expect(updatedResponse.status).toBe(200);
-    expect(updatedResponse.data.length).toBe(1);
+    expect(updatedResponse.data).toHaveLength(1);
     expect(updatedResponse.data[0].severity).toBe('medium');
   });
 });
