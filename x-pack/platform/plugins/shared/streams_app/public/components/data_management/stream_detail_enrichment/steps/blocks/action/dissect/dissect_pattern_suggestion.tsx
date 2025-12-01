@@ -182,7 +182,14 @@ export function DissectPatternSuggestion({
           </EuiBadgeGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="check" onClick={onAccept} color="primary" size="s" fill>
+          <EuiButton
+            iconType="check"
+            onClick={onAccept}
+            color="primary"
+            size="s"
+            fill
+            data-test-subj="streamsAppDissectSuggestionAcceptButton"
+          >
             {i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.dissectPatternSuggestion.acceptButton',
               {
