@@ -115,7 +115,7 @@ export const getRulesBaseKibanaFeature = (
       },
       alerting: {
         rule: { read: alertingFeatures },
-        alert: { read: alertingFeatures },
+        alert: { all: alertingFeatures },
       },
       management: {
         insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
