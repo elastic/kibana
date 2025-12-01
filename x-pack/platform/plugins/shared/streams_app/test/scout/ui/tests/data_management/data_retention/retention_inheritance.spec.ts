@@ -22,6 +22,15 @@ test.describe('Stream data retention - inheritance', { tag: ['@ess', '@svlOblt']
   test.beforeEach(async ({ apiServices, browserAuth }) => {
     await browserAuth.loginAsAdmin();
     await apiServices.streams.clearStreamChildren('logs');
+
+    // Reset parent 'logs' stream to default indefinite retention (DSL with no data_retention)
+    const logsDefinition = await apiServices.streams.getStreamDefinition('logs');
+    await apiServices.streams.updateStream('logs', {
+      ingest: {
+        ...logsDefinition.stream.ingest,
+        lifecycle: { dsl: {} },
+      },
+    });
   });
 
   test.afterEach(async ({ apiServices, page }) => {

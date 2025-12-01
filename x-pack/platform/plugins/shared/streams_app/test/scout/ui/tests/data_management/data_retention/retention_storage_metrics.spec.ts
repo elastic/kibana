@@ -23,6 +23,16 @@ test.describe(
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await apiServices.streams.clearStreamChildren('logs');
+
+      // Reset parent 'logs' stream to default indefinite retention (DSL with no data_retention)
+      const logsDefinition = await apiServices.streams.getStreamDefinition('logs');
+      await apiServices.streams.updateStream('logs', {
+        ingest: {
+          ...logsDefinition.stream.ingest,
+          lifecycle: { dsl: {} },
+        },
+      });
+
       await apiServices.streams.forkStream('logs', 'logs.nginx', {
         field: 'service.name',
         eq: 'nginx',
