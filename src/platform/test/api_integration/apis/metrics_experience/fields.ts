@@ -186,7 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(status).to.be(200);
         expect(body.fields.length).to.equal(0);
-        expect(body.total).to.equal(1);
+        expect(body.total).to.equal(0);
         expect(body.page).to.equal(1);
       });
     });

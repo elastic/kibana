@@ -19,8 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/204082
-  describe.skip('space solution tour', () => {
+  describe('space solution tour', () => {
     let version: string | undefined;
 
     const getGlobalSettings = async () => {
@@ -138,6 +137,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await browser.refresh();
 
         await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
+
+        await retry.waitFor('global setting to indicate tour was shown', async () => {
+          const globalSettings = await getGlobalSettings();
+          log.debug(`Global settings: ${JSON.stringify(globalSettings)}`);
+          return globalSettings?.showSpaceSolutionTour === false;
+        });
 
         await spacesService.delete('foo-space');
         await browser.refresh();

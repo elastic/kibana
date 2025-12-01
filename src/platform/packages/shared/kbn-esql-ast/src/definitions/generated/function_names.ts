@@ -66,6 +66,7 @@ export const esqlFunctionNames = [
   'DAY_NAME',
   'DECAY',
   'DELTA',
+  'DERIV',
   'E',
   'ENDS_WITH',
   'EXP',
