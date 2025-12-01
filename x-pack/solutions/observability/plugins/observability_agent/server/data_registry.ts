@@ -11,12 +11,12 @@ interface ObservabilityAgentDataRegistryTypes {
   apmErrors: unknown;
 }
 
-interface ObservabilityAgentDataProviderContext {
+interface ObservabilityAgentDataProviderDependencies {
   request: KibanaRequest;
 }
 
 type ObservabilityAgentDataProvider<K extends keyof ObservabilityAgentDataRegistryTypes> = (
-  context: ObservabilityAgentDataProviderContext
+  context: ObservabilityAgentDataProviderDependencies
 ) => Promise<ObservabilityAgentDataRegistryTypes[K]>;
 
 export class ObservabilityAgentDataRegistry {
@@ -42,7 +42,7 @@ export class ObservabilityAgentDataRegistry {
 
   public async getData<K extends keyof ObservabilityAgentDataRegistryTypes>(
     id: K,
-    context: ObservabilityAgentDataProviderContext
+    context: ObservabilityAgentDataProviderDependencies
   ): Promise<ObservabilityAgentDataRegistryTypes[K]> {
     const provider = this.providers.get(id);
 
