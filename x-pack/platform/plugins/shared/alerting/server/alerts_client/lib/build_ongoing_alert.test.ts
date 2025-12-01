@@ -69,7 +69,8 @@ for (const flattened of [true, false]) {
         [ALERT_FLAPPING_HISTORY]: [],
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
-        // @ts-ignore
+        // @ts-ignore - ALERT_MUTED appears both here and in the flattened conditional below
+        // The duplicate is intentional - the second occurrence overwrites the first for flattened alerts.
         [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
