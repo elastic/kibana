@@ -46,13 +46,15 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
 
   const requireOverride =
     staleDuration < (settings?.staleThresholdInHours ?? DEFAULT_STALE_SLO_THRESHOLD_HOURS);
+  const isFormValid =
+    Number.isInteger(staleDuration) && staleDuration > 0 && (!requireOverride || override);
 
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
       titleProps={{ id: modalTitleId }}
       buttonColor="danger"
-      confirmButtonDisabled={(requireOverride && !override) || staleDuration <= 0}
+      confirmButtonDisabled={!isFormValid}
       data-test-subj="purgeInstancesConfirmationModal"
       title={i18n.translate('xpack.slo.purgeInstancesConfirmationModal.title', {
         defaultMessage: 'Purge stale instances?',
@@ -78,7 +80,7 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
         <EuiText>
           {i18n.translate('xpack.slo.purgeInstancesConfirmationModal.descriptionText', {
             defaultMessage:
-              'This action will permanently delete all stale SLO instances as defined in your settings. You can override the stale duration threshold below.',
+              'This action will permanently delete all stale SLO instances based on the stale duration threshold defined in your settings. You can override this threshold below.',
           })}
         </EuiText>
 
@@ -90,11 +92,13 @@ export function PurgeInstancesConfirmationModal({ items, onCancel, onConfirm }: 
             { defaultMessage: 'Stale duration' }
           )}
           helpText="In hours"
+          isInvalid={!Number.isInteger(staleDuration) || staleDuration <= 0}
         >
           <EuiFieldNumber
             data-test-subj="sloPurgeInstancesConfirmationModalFieldNumber"
             min={1}
             step={1}
+            isInvalid={!Number.isInteger(staleDuration) || staleDuration <= 0}
             defaultValue={DEFAULT_STALE_SLO_THRESHOLD_HOURS}
             value={String(staleDuration)}
             onChange={(e) => setStaleDuration(Number(e.target.value))}
