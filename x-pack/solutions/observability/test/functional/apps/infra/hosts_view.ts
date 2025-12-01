@@ -11,7 +11,7 @@ import type {
   ApmSynthtraceEsClient,
   InfraSynthtraceEsClient,
   LogsSynthtraceEsClient,
-} from '@kbn/apm-synthtrace';
+} from '@kbn/synthtrace';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';

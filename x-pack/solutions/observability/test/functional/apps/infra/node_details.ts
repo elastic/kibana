@@ -8,7 +8,7 @@
 import moment from 'moment';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
-import type { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { InfraSynthtraceEsClient } from '@kbn/synthtrace';
 import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
