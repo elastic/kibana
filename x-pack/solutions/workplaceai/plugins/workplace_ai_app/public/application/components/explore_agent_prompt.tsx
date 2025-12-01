@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +21,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { useKibana } from '../hooks/use_kibana';
+import { useAgents } from '../hooks/use_agents';
+import { AgentSelector } from './agent_selector/agent_selector';
 
 const INPUT_MIN_HEIGHT = '150px';
 
@@ -48,7 +50,16 @@ export const ExploreAgentPrompt: React.FC = () => {
     services: { application },
   } = useKibana();
   const { euiTheme } = useEuiTheme();
+  const { data: agents = [] } = useAgents();
   const [chatInput, setChatInput] = useState('');
+  const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
+
+  // Set default agent when agents are loaded
+  useEffect(() => {
+    if (agents.length > 0 && !selectedAgentId) {
+      setSelectedAgentId(agents[0].id);
+    }
+  }, [agents, selectedAgentId]);
 
   const titleContainerStyles = css`
     width: 100%;
@@ -85,11 +96,12 @@ export const ExploreAgentPrompt: React.FC = () => {
       return;
     }
 
-    // Navigate to Agent Builder with the message in location state
+    // Navigate to Agent Builder with the message and agent ID in location state
     application.navigateToApp(AGENT_BUILDER_APP_ID, {
       path: '/conversations/new',
       state: {
         initialMessage: chatInput.trim(),
+        agentId: selectedAgentId,
       },
     });
   };
@@ -164,22 +176,10 @@ export const ExploreAgentPrompt: React.FC = () => {
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      iconSide="right"
-                      flush="both"
-                      iconType="arrowDown"
-                      data-test-subj="workplaceAIAgentSelector"
-                      aria-label={i18n.translate(
-                        'xpack.workplaceai.exploreAgentPrompt.agentSelectorAriaLabel',
-                        {
-                          defaultMessage: 'Select agent',
-                        }
-                      )}
-                    >
-                      {i18n.translate('xpack.workplaceai.exploreAgentPrompt.elasticAIAgent', {
-                        defaultMessage: 'Elastic AI Agent',
-                      })}
-                    </EuiButtonEmpty>
+                    <AgentSelector
+                      selectedAgentId={selectedAgentId}
+                      onAgentChange={setSelectedAgentId}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon
