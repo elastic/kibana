@@ -87,6 +87,30 @@ export function initRoutes(router: IRouter) {
     }
   );
 
+  router.post(
+    {
+      path: '/api/oidc_provider/token_endpoint_2',
+      security: { authz: { enabled: false, reason: '' } },
+      validate: { body: (value) => ({ value }) },
+      // Token endpoint needs authentication (with the client credentials) but we don't attempt to
+      // validate this OIDC behavior here
+      options: { authRequired: false, xsrfRequired: false },
+    },
+    (context, request, response) => {
+      const userId = request.body.code.substring(4);
+      const { accessToken, idToken } = createTokens(userId, nonce, 'https://test-op-2.elastic.co');
+      return response.ok({
+        body: {
+          access_token: accessToken,
+          token_type: 'Bearer',
+          refresh_token: `valid-refresh-token${userId}`,
+          expires_in: 3600,
+          id_token: idToken,
+        },
+      });
+    }
+  );
+
   router.get(
     {
       path: '/api/oidc_provider/userinfo_endpoint',

@@ -65,6 +65,7 @@ describe('OIDCAuthenticationProvider', () => {
       mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
         state: 'statevalue',
         nonce: 'noncevalue',
+        realm: 'oidc1',
         redirect:
           'https://op-host/path/login?response_type=code' +
           '&scope=openid%20profile%20email' +
@@ -113,6 +114,7 @@ describe('OIDCAuthenticationProvider', () => {
       mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
         state: 'statevalue',
         nonce: 'noncevalue',
+        realm: 'oidc1',
         redirect:
           'https://op-host/path/login?response_type=code' +
           '&scope=openid%20profile%20email' +
@@ -456,6 +458,7 @@ describe('OIDCAuthenticationProvider', () => {
       mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
         state: 'statevalue',
         nonce: 'noncevalue',
+        realm: 'oidc1',
         redirect:
           'https://op-host/path/login?response_type=code' +
           '&scope=openid%20profile%20email' +
