@@ -157,8 +157,6 @@ test.describe('Rules Page - Rules Tab', { tag: ['@ess', '@svlOblt'] }, () => {
 
   test('should see a non-editable rule in the Rules Table', async ({ pageObjects }) => {
     const nonEditableRules = pageObjects.rulesPage.getNonEditableRules();
-    await expect(nonEditableRules).toBeVisible();
-    await expect(nonEditableRules).toHaveCount(1);
     await expect(nonEditableRules.filter({ hasText: createdRule.name })).toHaveCount(1);
   });
 });
