@@ -23,7 +23,6 @@ import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable as ResponseOpsAlertsTable } from '@kbn/response-ops-alerts-table';
-import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useAlertsContext } from './alerts_context';
@@ -452,13 +451,6 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   const shouldRenderAdditionalToolbarControls =
     disableAdditionalToolbarControls || tableType === TableId.alertsOnCasePage;
 
-  const ruleTypeIds = useMemo(() => {
-    if (pageScope === PageScope.attacks) {
-      return [...SECURITY_SOLUTION_RULE_TYPE_IDS, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID];
-    }
-    return SECURITY_SOLUTION_RULE_TYPE_IDS;
-  }, [pageScope]);
-
   if (isLoading) {
     return null;
   }
@@ -472,7 +464,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
               ref={alertsTableRef}
               // Stores separate configuration based on the view of the table
               id={id ?? `detection-engine-alert-table-${tableType}-${tableView}`}
-              ruleTypeIds={ruleTypeIds}
+              ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
               consumers={ALERT_TABLE_CONSUMERS}
               query={finalBoolQuery}
               sort={sort}
