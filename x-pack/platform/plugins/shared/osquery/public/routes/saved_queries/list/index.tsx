@@ -297,7 +297,6 @@ const SavedQueriesPageComponent = () => {
           pagination={pagination}
           sorting={sorting}
           onChange={onTableChange}
-          rowHeader="id"
         />
       )}
     </WithHeaderLayout>

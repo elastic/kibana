@@ -231,6 +231,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                   setQueryToEdit(undefined);
                 }}
                 iconType="plus"
+                data-test-subj="significant_events_existing_queries_open_flyout_button"
               >
                 {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
                   defaultMessage: 'Significant events',
