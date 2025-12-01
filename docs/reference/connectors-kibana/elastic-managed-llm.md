@@ -20,7 +20,7 @@ serverless: ga
 ```
 
 A high-performance, general-purpose language model suitable for the widest range of use cases.
-Model details are available in the [model card]().
+Model details are available in the [model card](https://raw.githubusercontent.com/elastic/kibana/refs/heads/main/docs/reference/resources/General_Purpose_LLM_v2_model_card.pdf).
 
 ## General Purpose LLM v1
 ```{applies_to}
